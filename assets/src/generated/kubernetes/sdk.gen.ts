@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { HandleCreateImagePullSecretData, HandleCreateImagePullSecretResponses, HandleCreateNamespaceData, HandleCreateNamespaceResponses, HandleDaemonSetRestartData, HandleDaemonSetRestartResponses, HandleDeleteResource2Data, HandleDeleteResource2Responses, HandleDeleteResourceData, HandleDeleteResourceResponses, HandleDeployData, HandleDeployFromFileData, HandleDeployFromFileResponses, HandleDeploymentPauseData, HandleDeploymentPauseResponses, HandleDeploymentRestartData, HandleDeploymentRestartResponses, HandleDeploymentResumeData, HandleDeploymentResumeResponses, HandleDeploymentRollbackData, HandleDeploymentRollbackResponses, HandleDeployResponses, HandleExecShellData, HandleExecShellResponses, HandleGetAvailableProtocolsData, HandleGetAvailableProtocolsResponses, HandleGetClusterRoleBindingDetailData, HandleGetClusterRoleBindingDetailResponses, HandleGetClusterRoleBindingListData, HandleGetClusterRoleBindingListResponses, HandleGetClusterRoleDetailData, HandleGetClusterRoleDetailResponses, HandleGetClusterRoleListData, HandleGetClusterRoleListResponses, HandleGetConfigMapDetailData, HandleGetConfigMapDetailResponses, HandleGetConfigMapList2Data, HandleGetConfigMapList2Responses, HandleGetConfigMapListData, HandleGetConfigMapListResponses, HandleGetCronJobDetailData, HandleGetCronJobDetailResponses, HandleGetCronJobEventsData, HandleGetCronJobEventsResponses, HandleGetCronJobJobsData, HandleGetCronJobJobsResponses, HandleGetCronJobList2Data, HandleGetCronJobList2Responses, HandleGetCronJobListData, HandleGetCronJobListResponses, HandleGetCsrfTokenData, HandleGetCsrfTokenResponses, HandleGetCustomResourceDefinitionDetailData, HandleGetCustomResourceDefinitionDetailResponses, HandleGetCustomResourceDefinitionListData, HandleGetCustomResourceDefinitionListResponses, HandleGetCustomResourceObjectDetailData, HandleGetCustomResourceObjectDetailResponses, HandleGetCustomResourceObjectEventsData, HandleGetCustomResourceObjectEventsResponses, HandleGetCustomResourceObjectListData, HandleGetCustomResourceObjectListResponses, HandleGetDaemonSetDetailData, HandleGetDaemonSetDetailResponses, HandleGetDaemonSetEventsData, HandleGetDaemonSetEventsResponses, HandleGetDaemonSetList2Data, HandleGetDaemonSetList2Responses, HandleGetDaemonSetListData, HandleGetDaemonSetListResponses, HandleGetDaemonSetPodsData, HandleGetDaemonSetPodsResponses, HandleGetDaemonSetServicesData, HandleGetDaemonSetServicesResponses, HandleGetDeploymentDetailData, HandleGetDeploymentDetailResponses, HandleGetDeploymentEventsData, HandleGetDeploymentEventsResponses, HandleGetDeploymentNewReplicaSetData, HandleGetDeploymentNewReplicaSetResponses, HandleGetDeploymentOldReplicaSetsData, HandleGetDeploymentOldReplicaSetsResponses, HandleGetDeployments2Data, HandleGetDeployments2Responses, HandleGetDeploymentsData, HandleGetDeploymentsResponses, HandleGetEventList2Data, HandleGetEventList2Responses, HandleGetEventListData, HandleGetEventListResponses, HandleGetHorizontalPodAutoscalerDetailData, HandleGetHorizontalPodAutoscalerDetailResponses, HandleGetHorizontalPodAutoscalerList2Data, HandleGetHorizontalPodAutoscalerList2Responses, HandleGetHorizontalPodAutoscalerListData, HandleGetHorizontalPodAutoscalerListForResourceData, HandleGetHorizontalPodAutoscalerListForResourceResponses, HandleGetHorizontalPodAutoscalerListResponses, HandleGetIngressClassData, HandleGetIngressClassListData, HandleGetIngressClassListResponses, HandleGetIngressClassResponses, HandleGetIngressDetailData, HandleGetIngressDetailResponses, HandleGetIngressEventData, HandleGetIngressEventResponses, HandleGetIngressList2Data, HandleGetIngressList2Responses, HandleGetIngressListData, HandleGetIngressListResponses, HandleGetJobDetailData, HandleGetJobDetailResponses, HandleGetJobEventsData, HandleGetJobEventsResponses, HandleGetJobList2Data, HandleGetJobList2Responses, HandleGetJobListData, HandleGetJobListResponses, HandleGetJobPodsData, HandleGetJobPodsResponses, HandleGetNamespaceDetailData, HandleGetNamespaceDetailResponses, HandleGetNamespaceEventsData, HandleGetNamespaceEventsResponses, HandleGetNamespacesData, HandleGetNamespacesResponses, HandleGetNetworkPolicyDetailData, HandleGetNetworkPolicyDetailResponses, HandleGetNetworkPolicyList2Data, HandleGetNetworkPolicyList2Responses, HandleGetNetworkPolicyListData, HandleGetNetworkPolicyListResponses, HandleGetNodeDetailData, HandleGetNodeDetailResponses, HandleGetNodeEventsData, HandleGetNodeEventsResponses, HandleGetNodeListData, HandleGetNodeListResponses, HandleGetNodePodsData, HandleGetNodePodsResponses, HandleGetPersistentVolumeClaimDetailData, HandleGetPersistentVolumeClaimDetailResponses, HandleGetPersistentVolumeClaimList2Data, HandleGetPersistentVolumeClaimList2Responses, HandleGetPersistentVolumeClaimListData, HandleGetPersistentVolumeClaimListResponses, HandleGetPersistentVolumeDetail2Data, HandleGetPersistentVolumeDetail2Responses, HandleGetPersistentVolumeDetailData, HandleGetPersistentVolumeDetailResponses, HandleGetPersistentVolumeListData, HandleGetPersistentVolumeListResponses, HandleGetPodContainersData, HandleGetPodContainersResponses, HandleGetPodDetailData, HandleGetPodDetailResponses, HandleGetPodDisruptionBudgetDetailData, HandleGetPodDisruptionBudgetDetailResponses, HandleGetPodDisruptionBudgetList2Data, HandleGetPodDisruptionBudgetList2Responses, HandleGetPodDisruptionBudgetListData, HandleGetPodDisruptionBudgetListResponses, HandleGetPodEventsData, HandleGetPodEventsResponses, HandleGetPodPersistentVolumeClaimsData, HandleGetPodPersistentVolumeClaimsResponses, HandleGetPods2Data, HandleGetPods2Responses, HandleGetPodsData, HandleGetPodsResponses, HandleGetReplicaCount2Data, HandleGetReplicaCount2Responses, HandleGetReplicaCountData, HandleGetReplicaCountResponses, HandleGetReplicaSetDetailData, HandleGetReplicaSetDetailResponses, HandleGetReplicaSetEventsData, HandleGetReplicaSetEventsResponses, HandleGetReplicaSetPodsData, HandleGetReplicaSetPodsResponses, HandleGetReplicaSets2Data, HandleGetReplicaSets2Responses, HandleGetReplicaSetsData, HandleGetReplicaSetServicesData, HandleGetReplicaSetServicesResponses, HandleGetReplicaSetsResponses, HandleGetReplicationControllerDetailData, HandleGetReplicationControllerDetailResponses, HandleGetReplicationControllerEventsData, HandleGetReplicationControllerEventsResponses, HandleGetReplicationControllerList2Data, HandleGetReplicationControllerList2Responses, HandleGetReplicationControllerListData, HandleGetReplicationControllerListResponses, HandleGetReplicationControllerPodsData, HandleGetReplicationControllerPodsResponses, HandleGetReplicationControllerServicesData, HandleGetReplicationControllerServicesResponses, HandleGetResource2Data, HandleGetResource2Responses, HandleGetResourceData, HandleGetResourceResponses, HandleGetRoleBindingDetailData, HandleGetRoleBindingDetailResponses, HandleGetRoleBindingList2Data, HandleGetRoleBindingList2Responses, HandleGetRoleBindingListData, HandleGetRoleBindingListResponses, HandleGetRoleDetailData, HandleGetRoleDetailResponses, HandleGetRoleList2Data, HandleGetRoleList2Responses, HandleGetRoleListData, HandleGetRoleListResponses, HandleGetSecretDetailData, HandleGetSecretDetailResponses, HandleGetSecretList2Data, HandleGetSecretList2Responses, HandleGetSecretListData, HandleGetSecretListResponses, HandleGetServiceAccountDetailData, HandleGetServiceAccountDetailResponses, HandleGetServiceAccountImagePullSecretsData, HandleGetServiceAccountImagePullSecretsResponses, HandleGetServiceAccountList2Data, HandleGetServiceAccountList2Responses, HandleGetServiceAccountListData, HandleGetServiceAccountListResponses, HandleGetServiceAccountSecretsData, HandleGetServiceAccountSecretsResponses, HandleGetServiceDetailData, HandleGetServiceDetailResponses, HandleGetServiceEventData, HandleGetServiceEventResponses, HandleGetServiceIngressListData, HandleGetServiceIngressListResponses, HandleGetServiceList2Data, HandleGetServiceList2Responses, HandleGetServiceListData, HandleGetServiceListResponses, HandleGetServicePodsData, HandleGetServicePodsResponses, HandleGetStateData, HandleGetStatefulSetDetailData, HandleGetStatefulSetDetailResponses, HandleGetStatefulSetEventsData, HandleGetStatefulSetEventsResponses, HandleGetStatefulSetList2Data, HandleGetStatefulSetList2Responses, HandleGetStatefulSetListData, HandleGetStatefulSetListResponses, HandleGetStatefulSetPodsData, HandleGetStatefulSetPodsResponses, HandleGetStateResponses, HandleGetStorageClassData, HandleGetStorageClassListData, HandleGetStorageClassListResponses, HandleGetStorageClassPersistentVolumesData, HandleGetStorageClassPersistentVolumesResponses, HandleGetStorageClassResponses, HandleImageReferenceValidityData, HandleImageReferenceValidityResponses, HandleLogFileData, HandleLogFileResponses, HandleLogs2Data, HandleLogs2Responses, HandleLogsData, HandleLogSourceData, HandleLogSourceResponses, HandleLogsResponses, HandleNameValidityData, HandleNameValidityResponses, HandleNodeDrainData, HandleNodeDrainResponses, HandleProtocolValidityData, HandleProtocolValidityResponses, HandlePutResource2Data, HandlePutResource2Responses, HandlePutResourceData, HandlePutResourceResponses, HandleScaleResource2Data, HandleScaleResource2Responses, HandleScaleResourceData, HandleScaleResourceResponses, HandleStatefulSetRestartData, HandleStatefulSetRestartResponses, HandleTriggerCronJobData, HandleTriggerCronJobResponses, HandleUpdateReplicasCountData, HandleUpdateReplicasCountResponses } from './types.gen';
+import type { CreateAppDeploymentData, CreateAppDeploymentFromFileData, CreateAppDeploymentFromFileResponses, CreateAppDeploymentResponses, CreateImagePullSecretData, CreateImagePullSecretResponses, CreateNamespaceData, CreateNamespaceResponses, DeleteNamespacedResourceData, DeleteNamespacedResourceResponses, DeleteResourceData, DeleteResourceResponses, DrainNodeData, DrainNodeResponses, ExecShellData, ExecShellResponses, GetAllConfigMapsData, GetAllConfigMapsResponses, GetAllCronJobsData, GetAllCronJobsResponses, GetAllDaemonSetsData, GetAllDaemonSetsResponses, GetAllDeploymentsData, GetAllDeploymentsResponses, GetAllEventsData, GetAllEventsResponses, GetAllHorizontalPodAutoscalersData, GetAllHorizontalPodAutoscalersResponses, GetAllIngressesData, GetAllIngressesResponses, GetAllJobsData, GetAllJobsResponses, GetAllNetworkPoliciesData, GetAllNetworkPoliciesResponses, GetAllPersistentVolumeClaimsData, GetAllPersistentVolumeClaimsResponses, GetAllPodDisruptionBudgetsData, GetAllPodDisruptionBudgetsResponses, GetAllPodsData, GetAllPodsResponses, GetAllReplicaSetsData, GetAllReplicaSetsResponses, GetAllReplicationControllersData, GetAllReplicationControllersResponses, GetAllRoleBindingsData, GetAllRoleBindingsResponses, GetAllRolesData, GetAllRolesResponses, GetAllSecretsData, GetAllSecretsResponses, GetAllServiceAccountsData, GetAllServiceAccountsResponses, GetAllServicesData, GetAllServicesResponses, GetAllStatefulSetsData, GetAllStatefulSetsResponses, GetAvailableProtocolsData, GetAvailableProtocolsResponses, GetClusterRoleBindingData, GetClusterRoleBindingResponses, GetClusterRoleBindingsData, GetClusterRoleBindingsResponses, GetClusterRoleData, GetClusterRoleResponses, GetClusterRolesData, GetClusterRolesResponses, GetConfigMapData, GetConfigMapResponses, GetConfigMapsData, GetConfigMapsResponses, GetContainerLogsData, GetContainerLogsResponses, GetCronJobData, GetCronJobEventsData, GetCronJobEventsResponses, GetCronJobJobsData, GetCronJobJobsResponses, GetCronJobResponses, GetCronJobsData, GetCronJobsResponses, GetCsrfTokenData, GetCsrfTokenResponses, GetCustomResourceDefinitionData, GetCustomResourceDefinitionResponses, GetCustomResourceDefinitionsData, GetCustomResourceDefinitionsResponses, GetCustomResourceObjectData, GetCustomResourceObjectEventsData, GetCustomResourceObjectEventsResponses, GetCustomResourceObjectResponses, GetCustomResourceObjectsData, GetCustomResourceObjectsResponses, GetDaemonSetData, GetDaemonSetEventsData, GetDaemonSetEventsResponses, GetDaemonSetPodsData, GetDaemonSetPodsResponses, GetDaemonSetResponses, GetDaemonSetsData, GetDaemonSetServicesData, GetDaemonSetServicesResponses, GetDaemonSetsResponses, GetDeploymentData, GetDeploymentEventsData, GetDeploymentEventsResponses, GetDeploymentNewReplicaSetData, GetDeploymentNewReplicaSetResponses, GetDeploymentOldReplicaSetsData, GetDeploymentOldReplicaSetsResponses, GetDeploymentResponses, GetDeploymentsData, GetDeploymentsResponses, GetEventsData, GetEventsResponses, GetHorizontalPodAutoscalerData, GetHorizontalPodAutoscalerResponses, GetHorizontalPodAutoscalersData, GetHorizontalPodAutoscalersForResourceData, GetHorizontalPodAutoscalersForResourceResponses, GetHorizontalPodAutoscalersResponses, GetIngressClassData, GetIngressClassesData, GetIngressClassesResponses, GetIngressClassResponses, GetIngressData, GetIngressesData, GetIngressesResponses, GetIngressEventsData, GetIngressEventsResponses, GetIngressResponses, GetJobData, GetJobEventsData, GetJobEventsResponses, GetJobPodsData, GetJobPodsResponses, GetJobResponses, GetJobsData, GetJobsResponses, GetLogFileData, GetLogFileResponses, GetLogSourceData, GetLogSourceResponses, GetNamespaceData, GetNamespacedResourceData, GetNamespacedResourceReplicasData, GetNamespacedResourceReplicasResponses, GetNamespacedResourceResponses, GetNamespaceEventsData, GetNamespaceEventsResponses, GetNamespaceResponses, GetNamespacesData, GetNamespacesResponses, GetNetworkPoliciesData, GetNetworkPoliciesResponses, GetNetworkPolicyData, GetNetworkPolicyResponses, GetNodeData, GetNodeEventsData, GetNodeEventsResponses, GetNodePodsData, GetNodePodsResponses, GetNodeResponses, GetNodesData, GetNodesResponses, GetPersistentVolumeClaimData, GetPersistentVolumeClaimResponses, GetPersistentVolumeClaimsData, GetPersistentVolumeClaimsResponses, GetPersistentVolumeData, GetPersistentVolumeResponses, GetPersistentVolumesData, GetPersistentVolumesResponses, GetPersistentVolumeWithNamespaceData, GetPersistentVolumeWithNamespaceResponses, GetPodContainersData, GetPodContainersResponses, GetPodData, GetPodDisruptionBudgetData, GetPodDisruptionBudgetResponses, GetPodDisruptionBudgetsData, GetPodDisruptionBudgetsResponses, GetPodEventsData, GetPodEventsResponses, GetPodLogsData, GetPodLogsResponses, GetPodPersistentVolumeClaimsData, GetPodPersistentVolumeClaimsResponses, GetPodResponses, GetPodsData, GetPodsResponses, GetReplicaSetData, GetReplicaSetEventsData, GetReplicaSetEventsResponses, GetReplicaSetPodsData, GetReplicaSetPodsResponses, GetReplicaSetResponses, GetReplicaSetsData, GetReplicaSetServicesData, GetReplicaSetServicesResponses, GetReplicaSetsResponses, GetReplicationControllerData, GetReplicationControllerEventsData, GetReplicationControllerEventsResponses, GetReplicationControllerPodsData, GetReplicationControllerPodsResponses, GetReplicationControllerResponses, GetReplicationControllersData, GetReplicationControllerServicesData, GetReplicationControllerServicesResponses, GetReplicationControllersResponses, GetResourceData, GetResourceReplicasData, GetResourceReplicasResponses, GetResourceResponses, GetRoleBindingData, GetRoleBindingResponses, GetRoleBindingsData, GetRoleBindingsResponses, GetRoleData, GetRoleResponses, GetRolesData, GetRolesResponses, GetSecretData, GetSecretResponses, GetSecretsData, GetSecretsResponses, GetServiceAccountData, GetServiceAccountImagePullSecretsData, GetServiceAccountImagePullSecretsResponses, GetServiceAccountResponses, GetServiceAccountsData, GetServiceAccountSecretsData, GetServiceAccountSecretsResponses, GetServiceAccountsResponses, GetServiceData, GetServiceEventsData, GetServiceEventsResponses, GetServiceIngressesData, GetServiceIngressesResponses, GetServicePodsData, GetServicePodsResponses, GetServiceResponses, GetServicesData, GetServicesResponses, GetStatefulSetData, GetStatefulSetEventsData, GetStatefulSetEventsResponses, GetStatefulSetPodsData, GetStatefulSetPodsResponses, GetStatefulSetResponses, GetStatefulSetsData, GetStatefulSetsResponses, GetStorageClassData, GetStorageClassesData, GetStorageClassesResponses, GetStorageClassPersistentVolumesData, GetStorageClassPersistentVolumesResponses, GetStorageClassResponses, HandleGetStateData, HandleGetStateResponses, PauseDeploymentData, PauseDeploymentResponses, RestartDaemonSetData, RestartDaemonSetResponses, RestartDeploymentData, RestartDeploymentResponses, RestartStatefulSetData, RestartStatefulSetResponses, ResumeDeploymentData, ResumeDeploymentResponses, RollbackDeploymentData, RollbackDeploymentResponses, ScaleNamespacedResourceData, ScaleNamespacedResourceResponses, ScaleResourceData, ScaleResourceResponses, TriggerCronJobData, TriggerCronJobResponses, UpdateNamespacedResourceData, UpdateNamespacedResourceResponses, UpdateReplicationControllerReplicasData, UpdateReplicationControllerReplicasResponses, UpdateResourceData, UpdateResourceResponses, ValidateAppNameData, ValidateAppNameResponses, ValidateImageReferenceData, ValidateImageReferenceResponses, ValidateProtocolData, ValidateProtocolResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -21,7 +21,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 /**
  * deletes a non-namespaced resource
  */
-export const handleDeleteResource = <ThrowOnError extends boolean = false>(options: Options<HandleDeleteResourceData, ThrowOnError>) => (options.client ?? client).delete<HandleDeleteResourceResponses, unknown, ThrowOnError>({
+export const deleteResource = <ThrowOnError extends boolean = false>(options: Options<DeleteResourceData, ThrowOnError>) => (options.client ?? client).delete<DeleteResourceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/_raw/{kind}/name/{name}',
     ...options
@@ -30,7 +30,7 @@ export const handleDeleteResource = <ThrowOnError extends boolean = false>(optio
 /**
  * returns a non-namespaced resource
  */
-export const handleGetResource = <ThrowOnError extends boolean = false>(options: Options<HandleGetResourceData, ThrowOnError>) => (options.client ?? client).get<HandleGetResourceResponses, unknown, ThrowOnError>({
+export const getResource = <ThrowOnError extends boolean = false>(options: Options<GetResourceData, ThrowOnError>) => (options.client ?? client).get<GetResourceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/_raw/{kind}/name/{name}',
     ...options
@@ -39,7 +39,7 @@ export const handleGetResource = <ThrowOnError extends boolean = false>(options:
 /**
  * creates or updates a non-namespaced resource
  */
-export const handlePutResource = <ThrowOnError extends boolean = false>(options: Options<HandlePutResourceData, ThrowOnError>) => (options.client ?? client).put<HandlePutResourceResponses, unknown, ThrowOnError>({
+export const updateResource = <ThrowOnError extends boolean = false>(options: Options<UpdateResourceData, ThrowOnError>) => (options.client ?? client).put<UpdateResourceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/_raw/{kind}/name/{name}',
     ...options,
@@ -52,7 +52,7 @@ export const handlePutResource = <ThrowOnError extends boolean = false>(options:
 /**
  * deletes a resource from a namespace
  */
-export const handleDeleteResource2 = <ThrowOnError extends boolean = false>(options: Options<HandleDeleteResource2Data, ThrowOnError>) => (options.client ?? client).delete<HandleDeleteResource2Responses, unknown, ThrowOnError>({
+export const deleteNamespacedResource = <ThrowOnError extends boolean = false>(options: Options<DeleteNamespacedResourceData, ThrowOnError>) => (options.client ?? client).delete<DeleteNamespacedResourceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/_raw/{kind}/namespace/{namespace}/name/{name}',
     ...options
@@ -61,7 +61,7 @@ export const handleDeleteResource2 = <ThrowOnError extends boolean = false>(opti
 /**
  * returns unstructured resource from a namespace
  */
-export const handleGetResource2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetResource2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetResource2Responses, unknown, ThrowOnError>({
+export const getNamespacedResource = <ThrowOnError extends boolean = false>(options: Options<GetNamespacedResourceData, ThrowOnError>) => (options.client ?? client).get<GetNamespacedResourceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/_raw/{kind}/namespace/{namespace}/name/{name}',
     ...options
@@ -70,7 +70,7 @@ export const handleGetResource2 = <ThrowOnError extends boolean = false>(options
 /**
  * creates or updates a resource in a namespace
  */
-export const handlePutResource2 = <ThrowOnError extends boolean = false>(options: Options<HandlePutResource2Data, ThrowOnError>) => (options.client ?? client).put<HandlePutResource2Responses, unknown, ThrowOnError>({
+export const updateNamespacedResource = <ThrowOnError extends boolean = false>(options: Options<UpdateNamespacedResourceData, ThrowOnError>) => (options.client ?? client).put<UpdateNamespacedResourceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/_raw/{kind}/namespace/{namespace}/name/{name}',
     ...options,
@@ -83,7 +83,7 @@ export const handlePutResource2 = <ThrowOnError extends boolean = false>(options
 /**
  * creates an application based on provided deployment.AppDeploymentSpec
  */
-export const handleDeploy = <ThrowOnError extends boolean = false>(options: Options<HandleDeployData, ThrowOnError>) => (options.client ?? client).post<HandleDeployResponses, unknown, ThrowOnError>({
+export const createAppDeployment = <ThrowOnError extends boolean = false>(options: Options<CreateAppDeploymentData, ThrowOnError>) => (options.client ?? client).post<CreateAppDeploymentResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/appdeployment',
     ...options,
@@ -96,7 +96,7 @@ export const handleDeploy = <ThrowOnError extends boolean = false>(options: Opti
 /**
  * returns a list of available protocols for the service
  */
-export const handleGetAvailableProtocols = <ThrowOnError extends boolean = false>(options?: Options<HandleGetAvailableProtocolsData, ThrowOnError>) => (options?.client ?? client).get<HandleGetAvailableProtocolsResponses, unknown, ThrowOnError>({
+export const getAvailableProtocols = <ThrowOnError extends boolean = false>(options?: Options<GetAvailableProtocolsData, ThrowOnError>) => (options?.client ?? client).get<GetAvailableProtocolsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/appdeployment/protocols',
     ...options
@@ -105,7 +105,7 @@ export const handleGetAvailableProtocols = <ThrowOnError extends boolean = false
 /**
  * checks if provided image is valid
  */
-export const handleImageReferenceValidity = <ThrowOnError extends boolean = false>(options: Options<HandleImageReferenceValidityData, ThrowOnError>) => (options.client ?? client).post<HandleImageReferenceValidityResponses, unknown, ThrowOnError>({
+export const validateImageReference = <ThrowOnError extends boolean = false>(options: Options<ValidateImageReferenceData, ThrowOnError>) => (options.client ?? client).post<ValidateImageReferenceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/appdeployment/validate/imagereference',
     ...options,
@@ -118,7 +118,7 @@ export const handleImageReferenceValidity = <ThrowOnError extends boolean = fals
 /**
  * checks if provided name is valid
  */
-export const handleNameValidity = <ThrowOnError extends boolean = false>(options: Options<HandleNameValidityData, ThrowOnError>) => (options.client ?? client).post<HandleNameValidityResponses, unknown, ThrowOnError>({
+export const validateAppName = <ThrowOnError extends boolean = false>(options: Options<ValidateAppNameData, ThrowOnError>) => (options.client ?? client).post<ValidateAppNameResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/appdeployment/validate/name',
     ...options,
@@ -131,7 +131,7 @@ export const handleNameValidity = <ThrowOnError extends boolean = false>(options
 /**
  * checks if provided service protocol is valid
  */
-export const handleProtocolValidity = <ThrowOnError extends boolean = false>(options: Options<HandleProtocolValidityData, ThrowOnError>) => (options.client ?? client).post<HandleProtocolValidityResponses, unknown, ThrowOnError>({
+export const validateProtocol = <ThrowOnError extends boolean = false>(options: Options<ValidateProtocolData, ThrowOnError>) => (options.client ?? client).post<ValidateProtocolResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/appdeployment/validate/protocol',
     ...options,
@@ -144,7 +144,7 @@ export const handleProtocolValidity = <ThrowOnError extends boolean = false>(opt
 /**
  * create an application from file
  */
-export const handleDeployFromFile = <ThrowOnError extends boolean = false>(options: Options<HandleDeployFromFileData, ThrowOnError>) => (options.client ?? client).post<HandleDeployFromFileResponses, unknown, ThrowOnError>({
+export const createAppDeploymentFromFile = <ThrowOnError extends boolean = false>(options: Options<CreateAppDeploymentFromFileData, ThrowOnError>) => (options.client ?? client).post<CreateAppDeploymentFromFileResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/appdeploymentfromfile',
     ...options,
@@ -157,7 +157,7 @@ export const handleDeployFromFile = <ThrowOnError extends boolean = false>(optio
 /**
  * returns a list of ClusterRoles
  */
-export const handleGetClusterRoleList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetClusterRoleListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetClusterRoleListResponses, unknown, ThrowOnError>({
+export const getClusterRoles = <ThrowOnError extends boolean = false>(options?: Options<GetClusterRolesData, ThrowOnError>) => (options?.client ?? client).get<GetClusterRolesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/clusterrole',
     ...options
@@ -166,7 +166,7 @@ export const handleGetClusterRoleList = <ThrowOnError extends boolean = false>(o
 /**
  * returns detailed information about ClusterRole
  */
-export const handleGetClusterRoleDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetClusterRoleDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetClusterRoleDetailResponses, unknown, ThrowOnError>({
+export const getClusterRole = <ThrowOnError extends boolean = false>(options: Options<GetClusterRoleData, ThrowOnError>) => (options.client ?? client).get<GetClusterRoleResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/clusterrole/{name}',
     ...options
@@ -175,7 +175,7 @@ export const handleGetClusterRoleDetail = <ThrowOnError extends boolean = false>
 /**
  * returns a list of ClusterRoleBindings
  */
-export const handleGetClusterRoleBindingList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetClusterRoleBindingListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetClusterRoleBindingListResponses, unknown, ThrowOnError>({
+export const getClusterRoleBindings = <ThrowOnError extends boolean = false>(options?: Options<GetClusterRoleBindingsData, ThrowOnError>) => (options?.client ?? client).get<GetClusterRoleBindingsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/clusterrolebinding',
     ...options
@@ -184,7 +184,7 @@ export const handleGetClusterRoleBindingList = <ThrowOnError extends boolean = f
 /**
  * returns detailed information about ClusterRoleBinding
  */
-export const handleGetClusterRoleBindingDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetClusterRoleBindingDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetClusterRoleBindingDetailResponses, unknown, ThrowOnError>({
+export const getClusterRoleBinding = <ThrowOnError extends boolean = false>(options: Options<GetClusterRoleBindingData, ThrowOnError>) => (options.client ?? client).get<GetClusterRoleBindingResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/clusterrolebinding/{name}',
     ...options
@@ -193,7 +193,7 @@ export const handleGetClusterRoleBindingDetail = <ThrowOnError extends boolean =
 /**
  * returns a list of ConfigMaps from all namespaces
  */
-export const handleGetConfigMapList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetConfigMapListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetConfigMapListResponses, unknown, ThrowOnError>({
+export const getAllConfigMaps = <ThrowOnError extends boolean = false>(options?: Options<GetAllConfigMapsData, ThrowOnError>) => (options?.client ?? client).get<GetAllConfigMapsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/configmap',
     ...options
@@ -202,7 +202,7 @@ export const handleGetConfigMapList = <ThrowOnError extends boolean = false>(opt
 /**
  * returns a list of ConfigMaps in a namespaces
  */
-export const handleGetConfigMapList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetConfigMapList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetConfigMapList2Responses, unknown, ThrowOnError>({
+export const getConfigMaps = <ThrowOnError extends boolean = false>(options: Options<GetConfigMapsData, ThrowOnError>) => (options.client ?? client).get<GetConfigMapsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/configmap/{namespace}',
     ...options
@@ -211,7 +211,7 @@ export const handleGetConfigMapList2 = <ThrowOnError extends boolean = false>(op
 /**
  * returns detailed information about ConfigMap
  */
-export const handleGetConfigMapDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetConfigMapDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetConfigMapDetailResponses, unknown, ThrowOnError>({
+export const getConfigMap = <ThrowOnError extends boolean = false>(options: Options<GetConfigMapData, ThrowOnError>) => (options.client ?? client).get<GetConfigMapResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/configmap/{namespace}/{configmap}',
     ...options
@@ -220,7 +220,7 @@ export const handleGetConfigMapDetail = <ThrowOnError extends boolean = false>(o
 /**
  * returns a list of CustomResourceDefinition
  */
-export const handleGetCustomResourceDefinitionList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetCustomResourceDefinitionListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetCustomResourceDefinitionListResponses, unknown, ThrowOnError>({
+export const getCustomResourceDefinitions = <ThrowOnError extends boolean = false>(options?: Options<GetCustomResourceDefinitionsData, ThrowOnError>) => (options?.client ?? client).get<GetCustomResourceDefinitionsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/crd',
     ...options
@@ -229,7 +229,7 @@ export const handleGetCustomResourceDefinitionList = <ThrowOnError extends boole
 /**
  * returns detailed information about CustomResourceDefinition
  */
-export const handleGetCustomResourceDefinitionDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetCustomResourceDefinitionDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetCustomResourceDefinitionDetailResponses, unknown, ThrowOnError>({
+export const getCustomResourceDefinition = <ThrowOnError extends boolean = false>(options: Options<GetCustomResourceDefinitionData, ThrowOnError>) => (options.client ?? client).get<GetCustomResourceDefinitionResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/crd/{crd}',
     ...options
@@ -238,7 +238,7 @@ export const handleGetCustomResourceDefinitionDetail = <ThrowOnError extends boo
 /**
  * returns a list of objects of CustomResourceDefinition
  */
-export const handleGetCustomResourceObjectList = <ThrowOnError extends boolean = false>(options: Options<HandleGetCustomResourceObjectListData, ThrowOnError>) => (options.client ?? client).get<HandleGetCustomResourceObjectListResponses, unknown, ThrowOnError>({
+export const getCustomResourceObjects = <ThrowOnError extends boolean = false>(options: Options<GetCustomResourceObjectsData, ThrowOnError>) => (options.client ?? client).get<GetCustomResourceObjectsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/crd/{namespace}/{crd}/object',
     ...options
@@ -247,7 +247,7 @@ export const handleGetCustomResourceObjectList = <ThrowOnError extends boolean =
 /**
  * returns detailed information about custom resource object
  */
-export const handleGetCustomResourceObjectDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetCustomResourceObjectDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetCustomResourceObjectDetailResponses, unknown, ThrowOnError>({
+export const getCustomResourceObject = <ThrowOnError extends boolean = false>(options: Options<GetCustomResourceObjectData, ThrowOnError>) => (options.client ?? client).get<GetCustomResourceObjectResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/crd/{namespace}/{crd}/{object}',
     ...options
@@ -256,7 +256,7 @@ export const handleGetCustomResourceObjectDetail = <ThrowOnError extends boolean
 /**
  * returns Events for custom resource object
  */
-export const handleGetCustomResourceObjectEvents = <ThrowOnError extends boolean = false>(options: Options<HandleGetCustomResourceObjectEventsData, ThrowOnError>) => (options.client ?? client).get<HandleGetCustomResourceObjectEventsResponses, unknown, ThrowOnError>({
+export const getCustomResourceObjectEvents = <ThrowOnError extends boolean = false>(options: Options<GetCustomResourceObjectEventsData, ThrowOnError>) => (options.client ?? client).get<GetCustomResourceObjectEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/crd/{namespace}/{crd}/{object}/event',
     ...options
@@ -265,7 +265,7 @@ export const handleGetCustomResourceObjectEvents = <ThrowOnError extends boolean
 /**
  * returns a list of CronJobs from all namespaces
  */
-export const handleGetCronJobList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetCronJobListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetCronJobListResponses, unknown, ThrowOnError>({
+export const getAllCronJobs = <ThrowOnError extends boolean = false>(options?: Options<GetAllCronJobsData, ThrowOnError>) => (options?.client ?? client).get<GetAllCronJobsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/cronjob',
     ...options
@@ -274,7 +274,7 @@ export const handleGetCronJobList = <ThrowOnError extends boolean = false>(optio
 /**
  * returns a list of CronJobs in a namespaces
  */
-export const handleGetCronJobList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetCronJobList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetCronJobList2Responses, unknown, ThrowOnError>({
+export const getCronJobs = <ThrowOnError extends boolean = false>(options: Options<GetCronJobsData, ThrowOnError>) => (options.client ?? client).get<GetCronJobsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/cronjob/{namespace}',
     ...options
@@ -283,7 +283,7 @@ export const handleGetCronJobList2 = <ThrowOnError extends boolean = false>(opti
 /**
  * returns detailed information about CronJob
  */
-export const handleGetCronJobDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetCronJobDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetCronJobDetailResponses, unknown, ThrowOnError>({
+export const getCronJob = <ThrowOnError extends boolean = false>(options: Options<GetCronJobData, ThrowOnError>) => (options.client ?? client).get<GetCronJobResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/cronjob/{namespace}/{name}',
     ...options
@@ -292,7 +292,7 @@ export const handleGetCronJobDetail = <ThrowOnError extends boolean = false>(opt
 /**
  * returns a list of Events for CronJob
  */
-export const handleGetCronJobEvents = <ThrowOnError extends boolean = false>(options: Options<HandleGetCronJobEventsData, ThrowOnError>) => (options.client ?? client).get<HandleGetCronJobEventsResponses, unknown, ThrowOnError>({
+export const getCronJobEvents = <ThrowOnError extends boolean = false>(options: Options<GetCronJobEventsData, ThrowOnError>) => (options.client ?? client).get<GetCronJobEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/cronjob/{namespace}/{name}/event',
     ...options
@@ -301,7 +301,7 @@ export const handleGetCronJobEvents = <ThrowOnError extends boolean = false>(opt
 /**
  * returns a list of Jobs for CronJob
  */
-export const handleGetCronJobJobs = <ThrowOnError extends boolean = false>(options: Options<HandleGetCronJobJobsData, ThrowOnError>) => (options.client ?? client).get<HandleGetCronJobJobsResponses, unknown, ThrowOnError>({
+export const getCronJobJobs = <ThrowOnError extends boolean = false>(options: Options<GetCronJobJobsData, ThrowOnError>) => (options.client ?? client).get<GetCronJobJobsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/cronjob/{namespace}/{name}/job',
     ...options
@@ -310,7 +310,7 @@ export const handleGetCronJobJobs = <ThrowOnError extends boolean = false>(optio
 /**
  * triggers a Job based on CronJob
  */
-export const handleTriggerCronJob = <ThrowOnError extends boolean = false>(options: Options<HandleTriggerCronJobData, ThrowOnError>) => (options.client ?? client).put<HandleTriggerCronJobResponses, unknown, ThrowOnError>({
+export const triggerCronJob = <ThrowOnError extends boolean = false>(options: Options<TriggerCronJobData, ThrowOnError>) => (options.client ?? client).put<TriggerCronJobResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/cronjob/{namespace}/{name}/trigger',
     ...options
@@ -319,7 +319,7 @@ export const handleTriggerCronJob = <ThrowOnError extends boolean = false>(optio
 /**
  * generates a one-time CSRF token that can be used by POST request
  */
-export const handleGetCsrfToken = <ThrowOnError extends boolean = false>(options: Options<HandleGetCsrfTokenData, ThrowOnError>) => (options.client ?? client).get<HandleGetCsrfTokenResponses, unknown, ThrowOnError>({
+export const getCsrfToken = <ThrowOnError extends boolean = false>(options: Options<GetCsrfTokenData, ThrowOnError>) => (options.client ?? client).get<GetCsrfTokenResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/csrftoken/{action}',
     ...options
@@ -328,7 +328,7 @@ export const handleGetCsrfToken = <ThrowOnError extends boolean = false>(options
 /**
  * returns a list of DaemonSets from all namespaces
  */
-export const handleGetDaemonSetList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetDaemonSetListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetDaemonSetListResponses, unknown, ThrowOnError>({
+export const getAllDaemonSets = <ThrowOnError extends boolean = false>(options?: Options<GetAllDaemonSetsData, ThrowOnError>) => (options?.client ?? client).get<GetAllDaemonSetsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/daemonset',
     ...options
@@ -337,7 +337,7 @@ export const handleGetDaemonSetList = <ThrowOnError extends boolean = false>(opt
 /**
  * returns a list of DaemonSets in a namespaces
  */
-export const handleGetDaemonSetList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetDaemonSetList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetDaemonSetList2Responses, unknown, ThrowOnError>({
+export const getDaemonSets = <ThrowOnError extends boolean = false>(options: Options<GetDaemonSetsData, ThrowOnError>) => (options.client ?? client).get<GetDaemonSetsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/daemonset/{namespace}',
     ...options
@@ -346,7 +346,7 @@ export const handleGetDaemonSetList2 = <ThrowOnError extends boolean = false>(op
 /**
  * returns detailed information about DaemonSet
  */
-export const handleGetDaemonSetDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetDaemonSetDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetDaemonSetDetailResponses, unknown, ThrowOnError>({
+export const getDaemonSet = <ThrowOnError extends boolean = false>(options: Options<GetDaemonSetData, ThrowOnError>) => (options.client ?? client).get<GetDaemonSetResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/daemonset/{namespace}/{daemonSet}',
     ...options
@@ -355,7 +355,7 @@ export const handleGetDaemonSetDetail = <ThrowOnError extends boolean = false>(o
 /**
  * returns a list of Events for DaemonSet
  */
-export const handleGetDaemonSetEvents = <ThrowOnError extends boolean = false>(options: Options<HandleGetDaemonSetEventsData, ThrowOnError>) => (options.client ?? client).get<HandleGetDaemonSetEventsResponses, unknown, ThrowOnError>({
+export const getDaemonSetEvents = <ThrowOnError extends boolean = false>(options: Options<GetDaemonSetEventsData, ThrowOnError>) => (options.client ?? client).get<GetDaemonSetEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/daemonset/{namespace}/{daemonSet}/event',
     ...options
@@ -364,7 +364,7 @@ export const handleGetDaemonSetEvents = <ThrowOnError extends boolean = false>(o
 /**
  * returns a list of Pods for DaemonSet
  */
-export const handleGetDaemonSetPods = <ThrowOnError extends boolean = false>(options: Options<HandleGetDaemonSetPodsData, ThrowOnError>) => (options.client ?? client).get<HandleGetDaemonSetPodsResponses, unknown, ThrowOnError>({
+export const getDaemonSetPods = <ThrowOnError extends boolean = false>(options: Options<GetDaemonSetPodsData, ThrowOnError>) => (options.client ?? client).get<GetDaemonSetPodsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/daemonset/{namespace}/{daemonSet}/pod',
     ...options
@@ -373,7 +373,7 @@ export const handleGetDaemonSetPods = <ThrowOnError extends boolean = false>(opt
 /**
  * rollout restart of the Daemon Set
  */
-export const handleDaemonSetRestart = <ThrowOnError extends boolean = false>(options: Options<HandleDaemonSetRestartData, ThrowOnError>) => (options.client ?? client).put<HandleDaemonSetRestartResponses, unknown, ThrowOnError>({
+export const restartDaemonSet = <ThrowOnError extends boolean = false>(options: Options<RestartDaemonSetData, ThrowOnError>) => (options.client ?? client).put<RestartDaemonSetResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/daemonset/{namespace}/{daemonSet}/restart',
     ...options
@@ -382,7 +382,7 @@ export const handleDaemonSetRestart = <ThrowOnError extends boolean = false>(opt
 /**
  * returns a list of Services for DaemonSet
  */
-export const handleGetDaemonSetServices = <ThrowOnError extends boolean = false>(options: Options<HandleGetDaemonSetServicesData, ThrowOnError>) => (options.client ?? client).get<HandleGetDaemonSetServicesResponses, unknown, ThrowOnError>({
+export const getDaemonSetServices = <ThrowOnError extends boolean = false>(options: Options<GetDaemonSetServicesData, ThrowOnError>) => (options.client ?? client).get<GetDaemonSetServicesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/daemonset/{namespace}/{daemonSet}/service',
     ...options
@@ -391,7 +391,7 @@ export const handleGetDaemonSetServices = <ThrowOnError extends boolean = false>
 /**
  * returns a list of Deployments from all namespaces
  */
-export const handleGetDeployments = <ThrowOnError extends boolean = false>(options?: Options<HandleGetDeploymentsData, ThrowOnError>) => (options?.client ?? client).get<HandleGetDeploymentsResponses, unknown, ThrowOnError>({
+export const getAllDeployments = <ThrowOnError extends boolean = false>(options?: Options<GetAllDeploymentsData, ThrowOnError>) => (options?.client ?? client).get<GetAllDeploymentsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/deployment',
     ...options
@@ -400,7 +400,7 @@ export const handleGetDeployments = <ThrowOnError extends boolean = false>(optio
 /**
  * returns a list of Deployments in a namespaces
  */
-export const handleGetDeployments2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetDeployments2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetDeployments2Responses, unknown, ThrowOnError>({
+export const getDeployments = <ThrowOnError extends boolean = false>(options: Options<GetDeploymentsData, ThrowOnError>) => (options.client ?? client).get<GetDeploymentsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/deployment/{namespace}',
     ...options
@@ -409,7 +409,7 @@ export const handleGetDeployments2 = <ThrowOnError extends boolean = false>(opti
 /**
  * returns detailed information about Deployment
  */
-export const handleGetDeploymentDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetDeploymentDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetDeploymentDetailResponses, unknown, ThrowOnError>({
+export const getDeployment = <ThrowOnError extends boolean = false>(options: Options<GetDeploymentData, ThrowOnError>) => (options.client ?? client).get<GetDeploymentResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/deployment/{namespace}/{deployment}',
     ...options
@@ -418,7 +418,7 @@ export const handleGetDeploymentDetail = <ThrowOnError extends boolean = false>(
 /**
  * returns a list of Events for Deployment
  */
-export const handleGetDeploymentEvents = <ThrowOnError extends boolean = false>(options: Options<HandleGetDeploymentEventsData, ThrowOnError>) => (options.client ?? client).get<HandleGetDeploymentEventsResponses, unknown, ThrowOnError>({
+export const getDeploymentEvents = <ThrowOnError extends boolean = false>(options: Options<GetDeploymentEventsData, ThrowOnError>) => (options.client ?? client).get<GetDeploymentEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/deployment/{namespace}/{deployment}/event',
     ...options
@@ -427,7 +427,7 @@ export const handleGetDeploymentEvents = <ThrowOnError extends boolean = false>(
 /**
  * returns a list of new ReplicaSets for Deployment
  */
-export const handleGetDeploymentNewReplicaSet = <ThrowOnError extends boolean = false>(options: Options<HandleGetDeploymentNewReplicaSetData, ThrowOnError>) => (options.client ?? client).get<HandleGetDeploymentNewReplicaSetResponses, unknown, ThrowOnError>({
+export const getDeploymentNewReplicaSet = <ThrowOnError extends boolean = false>(options: Options<GetDeploymentNewReplicaSetData, ThrowOnError>) => (options.client ?? client).get<GetDeploymentNewReplicaSetResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/deployment/{namespace}/{deployment}/newreplicaset',
     ...options
@@ -436,7 +436,7 @@ export const handleGetDeploymentNewReplicaSet = <ThrowOnError extends boolean = 
 /**
  * returns a list of old ReplicaSets for Deployment
  */
-export const handleGetDeploymentOldReplicaSets = <ThrowOnError extends boolean = false>(options: Options<HandleGetDeploymentOldReplicaSetsData, ThrowOnError>) => (options.client ?? client).get<HandleGetDeploymentOldReplicaSetsResponses, unknown, ThrowOnError>({
+export const getDeploymentOldReplicaSets = <ThrowOnError extends boolean = false>(options: Options<GetDeploymentOldReplicaSetsData, ThrowOnError>) => (options.client ?? client).get<GetDeploymentOldReplicaSetsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/deployment/{namespace}/{deployment}/oldreplicaset',
     ...options
@@ -445,7 +445,7 @@ export const handleGetDeploymentOldReplicaSets = <ThrowOnError extends boolean =
 /**
  * pauses the Deployment
  */
-export const handleDeploymentPause = <ThrowOnError extends boolean = false>(options: Options<HandleDeploymentPauseData, ThrowOnError>) => (options.client ?? client).put<HandleDeploymentPauseResponses, unknown, ThrowOnError>({
+export const pauseDeployment = <ThrowOnError extends boolean = false>(options: Options<PauseDeploymentData, ThrowOnError>) => (options.client ?? client).put<PauseDeploymentResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/deployment/{namespace}/{deployment}/pause',
     ...options
@@ -454,7 +454,7 @@ export const handleDeploymentPause = <ThrowOnError extends boolean = false>(opti
 /**
  * rollout restart of the Deployment
  */
-export const handleDeploymentRestart = <ThrowOnError extends boolean = false>(options: Options<HandleDeploymentRestartData, ThrowOnError>) => (options.client ?? client).put<HandleDeploymentRestartResponses, unknown, ThrowOnError>({
+export const restartDeployment = <ThrowOnError extends boolean = false>(options: Options<RestartDeploymentData, ThrowOnError>) => (options.client ?? client).put<RestartDeploymentResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/deployment/{namespace}/{deployment}/restart',
     ...options
@@ -463,7 +463,7 @@ export const handleDeploymentRestart = <ThrowOnError extends boolean = false>(op
 /**
  * resumes the Deployment
  */
-export const handleDeploymentResume = <ThrowOnError extends boolean = false>(options: Options<HandleDeploymentResumeData, ThrowOnError>) => (options.client ?? client).put<HandleDeploymentResumeResponses, unknown, ThrowOnError>({
+export const resumeDeployment = <ThrowOnError extends boolean = false>(options: Options<ResumeDeploymentData, ThrowOnError>) => (options.client ?? client).put<ResumeDeploymentResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/deployment/{namespace}/{deployment}/resume',
     ...options
@@ -472,7 +472,7 @@ export const handleDeploymentResume = <ThrowOnError extends boolean = false>(opt
 /**
  * rolls back the Deployment to the target revision
  */
-export const handleDeploymentRollback = <ThrowOnError extends boolean = false>(options: Options<HandleDeploymentRollbackData, ThrowOnError>) => (options.client ?? client).put<HandleDeploymentRollbackResponses, unknown, ThrowOnError>({
+export const rollbackDeployment = <ThrowOnError extends boolean = false>(options: Options<RollbackDeploymentData, ThrowOnError>) => (options.client ?? client).put<RollbackDeploymentResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/deployment/{namespace}/{deployment}/rollback',
     ...options,
@@ -485,7 +485,7 @@ export const handleDeploymentRollback = <ThrowOnError extends boolean = false>(o
 /**
  * returns a list of Events from all namespaces
  */
-export const handleGetEventList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetEventListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetEventListResponses, unknown, ThrowOnError>({
+export const getAllEvents = <ThrowOnError extends boolean = false>(options?: Options<GetAllEventsData, ThrowOnError>) => (options?.client ?? client).get<GetAllEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/event',
     ...options
@@ -494,7 +494,7 @@ export const handleGetEventList = <ThrowOnError extends boolean = false>(options
 /**
  * returns a list of Events in a namespace
  */
-export const handleGetEventList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetEventList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetEventList2Responses, unknown, ThrowOnError>({
+export const getEvents = <ThrowOnError extends boolean = false>(options: Options<GetEventsData, ThrowOnError>) => (options.client ?? client).get<GetEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/event/{namespace}',
     ...options
@@ -503,7 +503,7 @@ export const handleGetEventList2 = <ThrowOnError extends boolean = false>(option
 /**
  * returns a list of HorizontalPodAutoscalers from all namespaces
  */
-export const handleGetHorizontalPodAutoscalerList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetHorizontalPodAutoscalerListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetHorizontalPodAutoscalerListResponses, unknown, ThrowOnError>({
+export const getAllHorizontalPodAutoscalers = <ThrowOnError extends boolean = false>(options?: Options<GetAllHorizontalPodAutoscalersData, ThrowOnError>) => (options?.client ?? client).get<GetAllHorizontalPodAutoscalersResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/horizontalpodautoscaler',
     ...options
@@ -512,7 +512,7 @@ export const handleGetHorizontalPodAutoscalerList = <ThrowOnError extends boolea
 /**
  * returns a list of HorizontalPodAutoscalers in a namespaces
  */
-export const handleGetHorizontalPodAutoscalerList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetHorizontalPodAutoscalerList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetHorizontalPodAutoscalerList2Responses, unknown, ThrowOnError>({
+export const getHorizontalPodAutoscalers = <ThrowOnError extends boolean = false>(options: Options<GetHorizontalPodAutoscalersData, ThrowOnError>) => (options.client ?? client).get<GetHorizontalPodAutoscalersResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/horizontalpodautoscaler/{namespace}',
     ...options
@@ -521,7 +521,7 @@ export const handleGetHorizontalPodAutoscalerList2 = <ThrowOnError extends boole
 /**
  * returns detailed information about HorizontalPodAutoscaler
  */
-export const handleGetHorizontalPodAutoscalerDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetHorizontalPodAutoscalerDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetHorizontalPodAutoscalerDetailResponses, unknown, ThrowOnError>({
+export const getHorizontalPodAutoscaler = <ThrowOnError extends boolean = false>(options: Options<GetHorizontalPodAutoscalerData, ThrowOnError>) => (options.client ?? client).get<GetHorizontalPodAutoscalerResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/horizontalpodautoscaler/{namespace}/{horizontalpodautoscaler}',
     ...options
@@ -530,7 +530,7 @@ export const handleGetHorizontalPodAutoscalerDetail = <ThrowOnError extends bool
 /**
  * returns a list of Ingresses from all namespaces
  */
-export const handleGetIngressList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetIngressListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetIngressListResponses, unknown, ThrowOnError>({
+export const getAllIngresses = <ThrowOnError extends boolean = false>(options?: Options<GetAllIngressesData, ThrowOnError>) => (options?.client ?? client).get<GetAllIngressesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/ingress',
     ...options
@@ -539,7 +539,7 @@ export const handleGetIngressList = <ThrowOnError extends boolean = false>(optio
 /**
  * returns a list of Ingresses in a namespaces
  */
-export const handleGetIngressList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetIngressList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetIngressList2Responses, unknown, ThrowOnError>({
+export const getIngresses = <ThrowOnError extends boolean = false>(options: Options<GetIngressesData, ThrowOnError>) => (options.client ?? client).get<GetIngressesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/ingress/{namespace}',
     ...options
@@ -548,7 +548,7 @@ export const handleGetIngressList2 = <ThrowOnError extends boolean = false>(opti
 /**
  * returns a list of Events for Ingress
  */
-export const handleGetIngressEvent = <ThrowOnError extends boolean = false>(options: Options<HandleGetIngressEventData, ThrowOnError>) => (options.client ?? client).get<HandleGetIngressEventResponses, unknown, ThrowOnError>({
+export const getIngressEvents = <ThrowOnError extends boolean = false>(options: Options<GetIngressEventsData, ThrowOnError>) => (options.client ?? client).get<GetIngressEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/ingress/{namespace}/{ingress}/event',
     ...options
@@ -557,7 +557,7 @@ export const handleGetIngressEvent = <ThrowOnError extends boolean = false>(opti
 /**
  * returns detailed information about Ingress
  */
-export const handleGetIngressDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetIngressDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetIngressDetailResponses, unknown, ThrowOnError>({
+export const getIngress = <ThrowOnError extends boolean = false>(options: Options<GetIngressData, ThrowOnError>) => (options.client ?? client).get<GetIngressResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/ingress/{namespace}/{name}',
     ...options
@@ -566,7 +566,7 @@ export const handleGetIngressDetail = <ThrowOnError extends boolean = false>(opt
 /**
  * returns a list of IngressClasses
  */
-export const handleGetIngressClassList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetIngressClassListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetIngressClassListResponses, unknown, ThrowOnError>({
+export const getIngressClasses = <ThrowOnError extends boolean = false>(options?: Options<GetIngressClassesData, ThrowOnError>) => (options?.client ?? client).get<GetIngressClassesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/ingressclass',
     ...options
@@ -575,7 +575,7 @@ export const handleGetIngressClassList = <ThrowOnError extends boolean = false>(
 /**
  * returns detailed information about IngressClass
  */
-export const handleGetIngressClass = <ThrowOnError extends boolean = false>(options: Options<HandleGetIngressClassData, ThrowOnError>) => (options.client ?? client).get<HandleGetIngressClassResponses, unknown, ThrowOnError>({
+export const getIngressClass = <ThrowOnError extends boolean = false>(options: Options<GetIngressClassData, ThrowOnError>) => (options.client ?? client).get<GetIngressClassResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/ingressclass/{ingressclass}',
     ...options
@@ -590,7 +590,7 @@ export const handleGetState = <ThrowOnError extends boolean = false>(options?: O
 /**
  * returns a list of Jobs from all namespaces
  */
-export const handleGetJobList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetJobListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetJobListResponses, unknown, ThrowOnError>({
+export const getAllJobs = <ThrowOnError extends boolean = false>(options?: Options<GetAllJobsData, ThrowOnError>) => (options?.client ?? client).get<GetAllJobsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/job',
     ...options
@@ -599,7 +599,7 @@ export const handleGetJobList = <ThrowOnError extends boolean = false>(options?:
 /**
  * returns a list of Jobs in a namespaces
  */
-export const handleGetJobList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetJobList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetJobList2Responses, unknown, ThrowOnError>({
+export const getJobs = <ThrowOnError extends boolean = false>(options: Options<GetJobsData, ThrowOnError>) => (options.client ?? client).get<GetJobsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/job/{namespace}',
     ...options
@@ -608,7 +608,7 @@ export const handleGetJobList2 = <ThrowOnError extends boolean = false>(options:
 /**
  * returns detailed information about Job
  */
-export const handleGetJobDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetJobDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetJobDetailResponses, unknown, ThrowOnError>({
+export const getJob = <ThrowOnError extends boolean = false>(options: Options<GetJobData, ThrowOnError>) => (options.client ?? client).get<GetJobResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/job/{namespace}/{name}',
     ...options
@@ -617,7 +617,7 @@ export const handleGetJobDetail = <ThrowOnError extends boolean = false>(options
 /**
  * returns a list of Events for Job
  */
-export const handleGetJobEvents = <ThrowOnError extends boolean = false>(options: Options<HandleGetJobEventsData, ThrowOnError>) => (options.client ?? client).get<HandleGetJobEventsResponses, unknown, ThrowOnError>({
+export const getJobEvents = <ThrowOnError extends boolean = false>(options: Options<GetJobEventsData, ThrowOnError>) => (options.client ?? client).get<GetJobEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/job/{namespace}/{name}/event',
     ...options
@@ -626,7 +626,7 @@ export const handleGetJobEvents = <ThrowOnError extends boolean = false>(options
 /**
  * returns a list of Pods for Job
  */
-export const handleGetJobPods = <ThrowOnError extends boolean = false>(options: Options<HandleGetJobPodsData, ThrowOnError>) => (options.client ?? client).get<HandleGetJobPodsResponses, unknown, ThrowOnError>({
+export const getJobPods = <ThrowOnError extends boolean = false>(options: Options<GetJobPodsData, ThrowOnError>) => (options.client ?? client).get<GetJobPodsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/job/{namespace}/{name}/pod',
     ...options
@@ -635,7 +635,7 @@ export const handleGetJobPods = <ThrowOnError extends boolean = false>(options: 
 /**
  * returns a text file with logs from a Container
  */
-export const handleLogFile = <ThrowOnError extends boolean = false>(options: Options<HandleLogFileData, ThrowOnError>) => (options.client ?? client).get<HandleLogFileResponses, unknown, ThrowOnError>({
+export const getLogFile = <ThrowOnError extends boolean = false>(options: Options<GetLogFileData, ThrowOnError>) => (options.client ?? client).get<GetLogFileResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/log/file/{namespace}/{pod}/{container}',
     ...options
@@ -644,7 +644,7 @@ export const handleLogFile = <ThrowOnError extends boolean = false>(options: Opt
 /**
  * returns log sources for a resource
  */
-export const handleLogSource = <ThrowOnError extends boolean = false>(options: Options<HandleLogSourceData, ThrowOnError>) => (options.client ?? client).get<HandleLogSourceResponses, unknown, ThrowOnError>({
+export const getLogSource = <ThrowOnError extends boolean = false>(options: Options<GetLogSourceData, ThrowOnError>) => (options.client ?? client).get<GetLogSourceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/log/source/{namespace}/{resourceName}/{resourceType}',
     ...options
@@ -653,7 +653,7 @@ export const handleLogSource = <ThrowOnError extends boolean = false>(options: O
 /**
  * returns logs from a Pod
  */
-export const handleLogs = <ThrowOnError extends boolean = false>(options: Options<HandleLogsData, ThrowOnError>) => (options.client ?? client).get<HandleLogsResponses, unknown, ThrowOnError>({
+export const getPodLogs = <ThrowOnError extends boolean = false>(options: Options<GetPodLogsData, ThrowOnError>) => (options.client ?? client).get<GetPodLogsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/log/{namespace}/{pod}',
     ...options
@@ -662,7 +662,7 @@ export const handleLogs = <ThrowOnError extends boolean = false>(options: Option
 /**
  * returns logs from a Container
  */
-export const handleLogs2 = <ThrowOnError extends boolean = false>(options: Options<HandleLogs2Data, ThrowOnError>) => (options.client ?? client).get<HandleLogs2Responses, unknown, ThrowOnError>({
+export const getContainerLogs = <ThrowOnError extends boolean = false>(options: Options<GetContainerLogsData, ThrowOnError>) => (options.client ?? client).get<GetContainerLogsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/log/{namespace}/{pod}/{container}',
     ...options
@@ -671,7 +671,7 @@ export const handleLogs2 = <ThrowOnError extends boolean = false>(options: Optio
 /**
  * returns a list of Namespaces
  */
-export const handleGetNamespaces = <ThrowOnError extends boolean = false>(options?: Options<HandleGetNamespacesData, ThrowOnError>) => (options?.client ?? client).get<HandleGetNamespacesResponses, unknown, ThrowOnError>({
+export const getNamespaces = <ThrowOnError extends boolean = false>(options?: Options<GetNamespacesData, ThrowOnError>) => (options?.client ?? client).get<GetNamespacesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/namespace',
     ...options
@@ -680,7 +680,7 @@ export const handleGetNamespaces = <ThrowOnError extends boolean = false>(option
 /**
  * create a Namespace
  */
-export const handleCreateNamespace = <ThrowOnError extends boolean = false>(options: Options<HandleCreateNamespaceData, ThrowOnError>) => (options.client ?? client).post<HandleCreateNamespaceResponses, unknown, ThrowOnError>({
+export const createNamespace = <ThrowOnError extends boolean = false>(options: Options<CreateNamespaceData, ThrowOnError>) => (options.client ?? client).post<CreateNamespaceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/namespace',
     ...options,
@@ -693,7 +693,7 @@ export const handleCreateNamespace = <ThrowOnError extends boolean = false>(opti
 /**
  * returns detailed information about Namespace
  */
-export const handleGetNamespaceDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetNamespaceDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetNamespaceDetailResponses, unknown, ThrowOnError>({
+export const getNamespace = <ThrowOnError extends boolean = false>(options: Options<GetNamespaceData, ThrowOnError>) => (options.client ?? client).get<GetNamespaceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/namespace/{name}',
     ...options
@@ -702,7 +702,7 @@ export const handleGetNamespaceDetail = <ThrowOnError extends boolean = false>(o
 /**
  * returns a list of Events for Namespace
  */
-export const handleGetNamespaceEvents = <ThrowOnError extends boolean = false>(options: Options<HandleGetNamespaceEventsData, ThrowOnError>) => (options.client ?? client).get<HandleGetNamespaceEventsResponses, unknown, ThrowOnError>({
+export const getNamespaceEvents = <ThrowOnError extends boolean = false>(options: Options<GetNamespaceEventsData, ThrowOnError>) => (options.client ?? client).get<GetNamespaceEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/namespace/{name}/event',
     ...options
@@ -711,7 +711,7 @@ export const handleGetNamespaceEvents = <ThrowOnError extends boolean = false>(o
 /**
  * returns a list of NetworkPolicies from all namespaces
  */
-export const handleGetNetworkPolicyList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetNetworkPolicyListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetNetworkPolicyListResponses, unknown, ThrowOnError>({
+export const getAllNetworkPolicies = <ThrowOnError extends boolean = false>(options?: Options<GetAllNetworkPoliciesData, ThrowOnError>) => (options?.client ?? client).get<GetAllNetworkPoliciesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/networkpolicy',
     ...options
@@ -720,7 +720,7 @@ export const handleGetNetworkPolicyList = <ThrowOnError extends boolean = false>
 /**
  * returns a list of NetworkPolicies in a namespaces
  */
-export const handleGetNetworkPolicyList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetNetworkPolicyList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetNetworkPolicyList2Responses, unknown, ThrowOnError>({
+export const getNetworkPolicies = <ThrowOnError extends boolean = false>(options: Options<GetNetworkPoliciesData, ThrowOnError>) => (options.client ?? client).get<GetNetworkPoliciesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/networkpolicy/{namespace}',
     ...options
@@ -729,7 +729,7 @@ export const handleGetNetworkPolicyList2 = <ThrowOnError extends boolean = false
 /**
  * returns detailed information about NetworkPolicy
  */
-export const handleGetNetworkPolicyDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetNetworkPolicyDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetNetworkPolicyDetailResponses, unknown, ThrowOnError>({
+export const getNetworkPolicy = <ThrowOnError extends boolean = false>(options: Options<GetNetworkPolicyData, ThrowOnError>) => (options.client ?? client).get<GetNetworkPolicyResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/networkpolicy/{namespace}/{networkpolicy}',
     ...options
@@ -738,7 +738,7 @@ export const handleGetNetworkPolicyDetail = <ThrowOnError extends boolean = fals
 /**
  * returns a list of Nodes
  */
-export const handleGetNodeList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetNodeListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetNodeListResponses, unknown, ThrowOnError>({
+export const getNodes = <ThrowOnError extends boolean = false>(options?: Options<GetNodesData, ThrowOnError>) => (options?.client ?? client).get<GetNodesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/node',
     ...options
@@ -747,7 +747,7 @@ export const handleGetNodeList = <ThrowOnError extends boolean = false>(options?
 /**
  * returns detailed information about Node
  */
-export const handleGetNodeDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetNodeDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetNodeDetailResponses, unknown, ThrowOnError>({
+export const getNode = <ThrowOnError extends boolean = false>(options: Options<GetNodeData, ThrowOnError>) => (options.client ?? client).get<GetNodeResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/node/{name}',
     ...options
@@ -756,7 +756,7 @@ export const handleGetNodeDetail = <ThrowOnError extends boolean = false>(option
 /**
  * drains Node
  */
-export const handleNodeDrain = <ThrowOnError extends boolean = false>(options: Options<HandleNodeDrainData, ThrowOnError>) => (options.client ?? client).put<HandleNodeDrainResponses, unknown, ThrowOnError>({
+export const drainNode = <ThrowOnError extends boolean = false>(options: Options<DrainNodeData, ThrowOnError>) => (options.client ?? client).put<DrainNodeResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/node/{name}/drain',
     ...options,
@@ -769,7 +769,7 @@ export const handleNodeDrain = <ThrowOnError extends boolean = false>(options: O
 /**
  * returns a list of Events for Node
  */
-export const handleGetNodeEvents = <ThrowOnError extends boolean = false>(options: Options<HandleGetNodeEventsData, ThrowOnError>) => (options.client ?? client).get<HandleGetNodeEventsResponses, unknown, ThrowOnError>({
+export const getNodeEvents = <ThrowOnError extends boolean = false>(options: Options<GetNodeEventsData, ThrowOnError>) => (options.client ?? client).get<GetNodeEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/node/{name}/event',
     ...options
@@ -778,7 +778,7 @@ export const handleGetNodeEvents = <ThrowOnError extends boolean = false>(option
 /**
  * returns a list of Pods for Node
  */
-export const handleGetNodePods = <ThrowOnError extends boolean = false>(options: Options<HandleGetNodePodsData, ThrowOnError>) => (options.client ?? client).get<HandleGetNodePodsResponses, unknown, ThrowOnError>({
+export const getNodePods = <ThrowOnError extends boolean = false>(options: Options<GetNodePodsData, ThrowOnError>) => (options.client ?? client).get<GetNodePodsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/node/{name}/pod',
     ...options
@@ -787,7 +787,7 @@ export const handleGetNodePods = <ThrowOnError extends boolean = false>(options:
 /**
  * returns a list of PersistentVolumes from all namespaces
  */
-export const handleGetPersistentVolumeList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetPersistentVolumeListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetPersistentVolumeListResponses, unknown, ThrowOnError>({
+export const getPersistentVolumes = <ThrowOnError extends boolean = false>(options?: Options<GetPersistentVolumesData, ThrowOnError>) => (options?.client ?? client).get<GetPersistentVolumesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/persistentvolume',
     ...options
@@ -796,7 +796,7 @@ export const handleGetPersistentVolumeList = <ThrowOnError extends boolean = fal
 /**
  * returns detailed information about PersistentVolume
  */
-export const handleGetPersistentVolumeDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetPersistentVolumeDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetPersistentVolumeDetailResponses, unknown, ThrowOnError>({
+export const getPersistentVolumeWithNamespace = <ThrowOnError extends boolean = false>(options: Options<GetPersistentVolumeWithNamespaceData, ThrowOnError>) => (options.client ?? client).get<GetPersistentVolumeWithNamespaceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/persistentvolume/namespace/{namespace}/name/{persistentvolume}',
     ...options
@@ -805,7 +805,7 @@ export const handleGetPersistentVolumeDetail = <ThrowOnError extends boolean = f
 /**
  * returns detailed information about PersistentVolume
  */
-export const handleGetPersistentVolumeDetail2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetPersistentVolumeDetail2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetPersistentVolumeDetail2Responses, unknown, ThrowOnError>({
+export const getPersistentVolume = <ThrowOnError extends boolean = false>(options: Options<GetPersistentVolumeData, ThrowOnError>) => (options.client ?? client).get<GetPersistentVolumeResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/persistentvolume/{persistentvolume}',
     ...options
@@ -814,7 +814,7 @@ export const handleGetPersistentVolumeDetail2 = <ThrowOnError extends boolean = 
 /**
  * returns a list of PersistentVolumeClaim
  */
-export const handleGetPersistentVolumeClaimList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetPersistentVolumeClaimListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetPersistentVolumeClaimListResponses, unknown, ThrowOnError>({
+export const getAllPersistentVolumeClaims = <ThrowOnError extends boolean = false>(options?: Options<GetAllPersistentVolumeClaimsData, ThrowOnError>) => (options?.client ?? client).get<GetAllPersistentVolumeClaimsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/persistentvolumeclaim',
     ...options
@@ -823,7 +823,7 @@ export const handleGetPersistentVolumeClaimList = <ThrowOnError extends boolean 
 /**
  * returns a list of PersistentVolumeClaim from specified namespace
  */
-export const handleGetPersistentVolumeClaimList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetPersistentVolumeClaimList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetPersistentVolumeClaimList2Responses, unknown, ThrowOnError>({
+export const getPersistentVolumeClaims = <ThrowOnError extends boolean = false>(options: Options<GetPersistentVolumeClaimsData, ThrowOnError>) => (options.client ?? client).get<GetPersistentVolumeClaimsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/persistentvolumeclaim/{namespace}',
     ...options
@@ -832,7 +832,7 @@ export const handleGetPersistentVolumeClaimList2 = <ThrowOnError extends boolean
 /**
  * returns detailed information about PersistentVolumeClaim
  */
-export const handleGetPersistentVolumeClaimDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetPersistentVolumeClaimDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetPersistentVolumeClaimDetailResponses, unknown, ThrowOnError>({
+export const getPersistentVolumeClaim = <ThrowOnError extends boolean = false>(options: Options<GetPersistentVolumeClaimData, ThrowOnError>) => (options.client ?? client).get<GetPersistentVolumeClaimResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/persistentvolumeclaim/{namespace}/{name}',
     ...options
@@ -841,7 +841,7 @@ export const handleGetPersistentVolumeClaimDetail = <ThrowOnError extends boolea
 /**
  * returns a list of Pods from all namespaces
  */
-export const handleGetPods = <ThrowOnError extends boolean = false>(options?: Options<HandleGetPodsData, ThrowOnError>) => (options?.client ?? client).get<HandleGetPodsResponses, unknown, ThrowOnError>({
+export const getAllPods = <ThrowOnError extends boolean = false>(options?: Options<GetAllPodsData, ThrowOnError>) => (options?.client ?? client).get<GetAllPodsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/pod',
     ...options
@@ -850,7 +850,7 @@ export const handleGetPods = <ThrowOnError extends boolean = false>(options?: Op
 /**
  * returns a list of Pods in a namespaces
  */
-export const handleGetPods2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetPods2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetPods2Responses, unknown, ThrowOnError>({
+export const getPods = <ThrowOnError extends boolean = false>(options: Options<GetPodsData, ThrowOnError>) => (options.client ?? client).get<GetPodsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/pod/{namespace}',
     ...options
@@ -859,7 +859,7 @@ export const handleGetPods2 = <ThrowOnError extends boolean = false>(options: Op
 /**
  * returns detailed information about Pod
  */
-export const handleGetPodDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetPodDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetPodDetailResponses, unknown, ThrowOnError>({
+export const getPod = <ThrowOnError extends boolean = false>(options: Options<GetPodData, ThrowOnError>) => (options.client ?? client).get<GetPodResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/pod/{namespace}/{pod}',
     ...options
@@ -868,7 +868,7 @@ export const handleGetPodDetail = <ThrowOnError extends boolean = false>(options
 /**
  * returns a list of containers for Pod
  */
-export const handleGetPodContainers = <ThrowOnError extends boolean = false>(options: Options<HandleGetPodContainersData, ThrowOnError>) => (options.client ?? client).get<HandleGetPodContainersResponses, unknown, ThrowOnError>({
+export const getPodContainers = <ThrowOnError extends boolean = false>(options: Options<GetPodContainersData, ThrowOnError>) => (options.client ?? client).get<GetPodContainersResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/pod/{namespace}/{pod}/container',
     ...options
@@ -877,7 +877,7 @@ export const handleGetPodContainers = <ThrowOnError extends boolean = false>(opt
 /**
  * returns a list of Events for Pod
  */
-export const handleGetPodEvents = <ThrowOnError extends boolean = false>(options: Options<HandleGetPodEventsData, ThrowOnError>) => (options.client ?? client).get<HandleGetPodEventsResponses, unknown, ThrowOnError>({
+export const getPodEvents = <ThrowOnError extends boolean = false>(options: Options<GetPodEventsData, ThrowOnError>) => (options.client ?? client).get<GetPodEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/pod/{namespace}/{pod}/event',
     ...options
@@ -886,7 +886,7 @@ export const handleGetPodEvents = <ThrowOnError extends boolean = false>(options
 /**
  * returns a list of containers for Pod
  */
-export const handleGetPodPersistentVolumeClaims = <ThrowOnError extends boolean = false>(options: Options<HandleGetPodPersistentVolumeClaimsData, ThrowOnError>) => (options.client ?? client).get<HandleGetPodPersistentVolumeClaimsResponses, unknown, ThrowOnError>({
+export const getPodPersistentVolumeClaims = <ThrowOnError extends boolean = false>(options: Options<GetPodPersistentVolumeClaimsData, ThrowOnError>) => (options.client ?? client).get<GetPodPersistentVolumeClaimsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/pod/{namespace}/{pod}/persistentvolumeclaim',
     ...options
@@ -895,7 +895,7 @@ export const handleGetPodPersistentVolumeClaims = <ThrowOnError extends boolean 
 /**
  * handles exec into pod
  */
-export const handleExecShell = <ThrowOnError extends boolean = false>(options: Options<HandleExecShellData, ThrowOnError>) => (options.client ?? client).get<HandleExecShellResponses, unknown, ThrowOnError>({
+export const execShell = <ThrowOnError extends boolean = false>(options: Options<ExecShellData, ThrowOnError>) => (options.client ?? client).get<ExecShellResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/pod/{namespace}/{pod}/shell/{container}',
     ...options
@@ -904,7 +904,7 @@ export const handleExecShell = <ThrowOnError extends boolean = false>(options: O
 /**
  * returns a list of PodDisruptionBudget
  */
-export const handleGetPodDisruptionBudgetList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetPodDisruptionBudgetListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetPodDisruptionBudgetListResponses, unknown, ThrowOnError>({
+export const getAllPodDisruptionBudgets = <ThrowOnError extends boolean = false>(options?: Options<GetAllPodDisruptionBudgetsData, ThrowOnError>) => (options?.client ?? client).get<GetAllPodDisruptionBudgetsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/poddisruptionbudget',
     ...options
@@ -913,7 +913,7 @@ export const handleGetPodDisruptionBudgetList = <ThrowOnError extends boolean = 
 /**
  * returns a list of PodDisruptionBudget from specified namespace
  */
-export const handleGetPodDisruptionBudgetList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetPodDisruptionBudgetList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetPodDisruptionBudgetList2Responses, unknown, ThrowOnError>({
+export const getPodDisruptionBudgets = <ThrowOnError extends boolean = false>(options: Options<GetPodDisruptionBudgetsData, ThrowOnError>) => (options.client ?? client).get<GetPodDisruptionBudgetsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/poddisruptionbudget/{namespace}',
     ...options
@@ -922,7 +922,7 @@ export const handleGetPodDisruptionBudgetList2 = <ThrowOnError extends boolean =
 /**
  * returns detailed information about PodDisruptionBudget
  */
-export const handleGetPodDisruptionBudgetDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetPodDisruptionBudgetDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetPodDisruptionBudgetDetailResponses, unknown, ThrowOnError>({
+export const getPodDisruptionBudget = <ThrowOnError extends boolean = false>(options: Options<GetPodDisruptionBudgetData, ThrowOnError>) => (options.client ?? client).get<GetPodDisruptionBudgetResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/poddisruptionbudget/{namespace}/{name}',
     ...options
@@ -931,7 +931,7 @@ export const handleGetPodDisruptionBudgetDetail = <ThrowOnError extends boolean 
 /**
  * returns a list of ReplicaSets from all namespaces
  */
-export const handleGetReplicaSets = <ThrowOnError extends boolean = false>(options?: Options<HandleGetReplicaSetsData, ThrowOnError>) => (options?.client ?? client).get<HandleGetReplicaSetsResponses, unknown, ThrowOnError>({
+export const getAllReplicaSets = <ThrowOnError extends boolean = false>(options?: Options<GetAllReplicaSetsData, ThrowOnError>) => (options?.client ?? client).get<GetAllReplicaSetsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicaset',
     ...options
@@ -940,7 +940,7 @@ export const handleGetReplicaSets = <ThrowOnError extends boolean = false>(optio
 /**
  * returns a list of ReplicaSets in a namespace
  */
-export const handleGetReplicaSets2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetReplicaSets2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetReplicaSets2Responses, unknown, ThrowOnError>({
+export const getReplicaSets = <ThrowOnError extends boolean = false>(options: Options<GetReplicaSetsData, ThrowOnError>) => (options.client ?? client).get<GetReplicaSetsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicaset/{namespace}',
     ...options
@@ -949,7 +949,7 @@ export const handleGetReplicaSets2 = <ThrowOnError extends boolean = false>(opti
 /**
  * returns detailed information about ReplicaSet
  */
-export const handleGetReplicaSetDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetReplicaSetDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetReplicaSetDetailResponses, unknown, ThrowOnError>({
+export const getReplicaSet = <ThrowOnError extends boolean = false>(options: Options<GetReplicaSetData, ThrowOnError>) => (options.client ?? client).get<GetReplicaSetResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicaset/{namespace}/{replicaSet}',
     ...options
@@ -958,7 +958,7 @@ export const handleGetReplicaSetDetail = <ThrowOnError extends boolean = false>(
 /**
  * returns a list of Events for ReplicaSet
  */
-export const handleGetReplicaSetEvents = <ThrowOnError extends boolean = false>(options: Options<HandleGetReplicaSetEventsData, ThrowOnError>) => (options.client ?? client).get<HandleGetReplicaSetEventsResponses, unknown, ThrowOnError>({
+export const getReplicaSetEvents = <ThrowOnError extends boolean = false>(options: Options<GetReplicaSetEventsData, ThrowOnError>) => (options.client ?? client).get<GetReplicaSetEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicaset/{namespace}/{replicaSet}/event',
     ...options
@@ -967,7 +967,7 @@ export const handleGetReplicaSetEvents = <ThrowOnError extends boolean = false>(
 /**
  * returns a list of Pods for ReplicaSet
  */
-export const handleGetReplicaSetPods = <ThrowOnError extends boolean = false>(options: Options<HandleGetReplicaSetPodsData, ThrowOnError>) => (options.client ?? client).get<HandleGetReplicaSetPodsResponses, unknown, ThrowOnError>({
+export const getReplicaSetPods = <ThrowOnError extends boolean = false>(options: Options<GetReplicaSetPodsData, ThrowOnError>) => (options.client ?? client).get<GetReplicaSetPodsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicaset/{namespace}/{replicaSet}/pod',
     ...options
@@ -976,7 +976,7 @@ export const handleGetReplicaSetPods = <ThrowOnError extends boolean = false>(op
 /**
  * returns a list of Services for ReplicaSet
  */
-export const handleGetReplicaSetServices = <ThrowOnError extends boolean = false>(options: Options<HandleGetReplicaSetServicesData, ThrowOnError>) => (options.client ?? client).get<HandleGetReplicaSetServicesResponses, unknown, ThrowOnError>({
+export const getReplicaSetServices = <ThrowOnError extends boolean = false>(options: Options<GetReplicaSetServicesData, ThrowOnError>) => (options.client ?? client).get<GetReplicaSetServicesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicaset/{namespace}/{replicaSet}/service',
     ...options
@@ -985,7 +985,7 @@ export const handleGetReplicaSetServices = <ThrowOnError extends boolean = false
 /**
  * returns a list of ReplicationControllers from all namespaces
  */
-export const handleGetReplicationControllerList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetReplicationControllerListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetReplicationControllerListResponses, unknown, ThrowOnError>({
+export const getAllReplicationControllers = <ThrowOnError extends boolean = false>(options?: Options<GetAllReplicationControllersData, ThrowOnError>) => (options?.client ?? client).get<GetAllReplicationControllersResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicationcontroller',
     ...options
@@ -994,7 +994,7 @@ export const handleGetReplicationControllerList = <ThrowOnError extends boolean 
 /**
  * returns a list of ReplicationController in a namespace
  */
-export const handleGetReplicationControllerList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetReplicationControllerList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetReplicationControllerList2Responses, unknown, ThrowOnError>({
+export const getReplicationControllers = <ThrowOnError extends boolean = false>(options: Options<GetReplicationControllersData, ThrowOnError>) => (options.client ?? client).get<GetReplicationControllersResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicationcontroller/{namespace}',
     ...options
@@ -1003,7 +1003,7 @@ export const handleGetReplicationControllerList2 = <ThrowOnError extends boolean
 /**
  * returns detailed information about ReplicationController
  */
-export const handleGetReplicationControllerDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetReplicationControllerDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetReplicationControllerDetailResponses, unknown, ThrowOnError>({
+export const getReplicationController = <ThrowOnError extends boolean = false>(options: Options<GetReplicationControllerData, ThrowOnError>) => (options.client ?? client).get<GetReplicationControllerResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicationcontroller/{namespace}/{replicationController}',
     ...options
@@ -1012,7 +1012,7 @@ export const handleGetReplicationControllerDetail = <ThrowOnError extends boolea
 /**
  * returns a list of Events for ReplicationController
  */
-export const handleGetReplicationControllerEvents = <ThrowOnError extends boolean = false>(options: Options<HandleGetReplicationControllerEventsData, ThrowOnError>) => (options.client ?? client).get<HandleGetReplicationControllerEventsResponses, unknown, ThrowOnError>({
+export const getReplicationControllerEvents = <ThrowOnError extends boolean = false>(options: Options<GetReplicationControllerEventsData, ThrowOnError>) => (options.client ?? client).get<GetReplicationControllerEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicationcontroller/{namespace}/{replicationController}/event',
     ...options
@@ -1021,7 +1021,7 @@ export const handleGetReplicationControllerEvents = <ThrowOnError extends boolea
 /**
  * returns a list of Pods for ReplicationController
  */
-export const handleGetReplicationControllerPods = <ThrowOnError extends boolean = false>(options: Options<HandleGetReplicationControllerPodsData, ThrowOnError>) => (options.client ?? client).get<HandleGetReplicationControllerPodsResponses, unknown, ThrowOnError>({
+export const getReplicationControllerPods = <ThrowOnError extends boolean = false>(options: Options<GetReplicationControllerPodsData, ThrowOnError>) => (options.client ?? client).get<GetReplicationControllerPodsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicationcontroller/{namespace}/{replicationController}/pod',
     ...options
@@ -1030,7 +1030,7 @@ export const handleGetReplicationControllerPods = <ThrowOnError extends boolean 
 /**
  * returns a list of Services for ReplicationController
  */
-export const handleGetReplicationControllerServices = <ThrowOnError extends boolean = false>(options: Options<HandleGetReplicationControllerServicesData, ThrowOnError>) => (options.client ?? client).get<HandleGetReplicationControllerServicesResponses, unknown, ThrowOnError>({
+export const getReplicationControllerServices = <ThrowOnError extends boolean = false>(options: Options<GetReplicationControllerServicesData, ThrowOnError>) => (options.client ?? client).get<GetReplicationControllerServicesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicationcontroller/{namespace}/{replicationController}/service',
     ...options
@@ -1039,7 +1039,7 @@ export const handleGetReplicationControllerServices = <ThrowOnError extends bool
 /**
  * scales ReplicationController to a number of replicas
  */
-export const handleUpdateReplicasCount = <ThrowOnError extends boolean = false>(options: Options<HandleUpdateReplicasCountData, ThrowOnError>) => (options.client ?? client).post<HandleUpdateReplicasCountResponses, unknown, ThrowOnError>({
+export const updateReplicationControllerReplicas = <ThrowOnError extends boolean = false>(options: Options<UpdateReplicationControllerReplicasData, ThrowOnError>) => (options.client ?? client).post<UpdateReplicationControllerReplicasResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/replicationcontroller/{namespace}/{replicationController}/update/pod',
     ...options,
@@ -1052,7 +1052,7 @@ export const handleUpdateReplicasCount = <ThrowOnError extends boolean = false>(
 /**
  * returns a list of Roles from all namespace
  */
-export const handleGetRoleList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetRoleListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetRoleListResponses, unknown, ThrowOnError>({
+export const getAllRoles = <ThrowOnError extends boolean = false>(options?: Options<GetAllRolesData, ThrowOnError>) => (options?.client ?? client).get<GetAllRolesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/role',
     ...options
@@ -1061,7 +1061,7 @@ export const handleGetRoleList = <ThrowOnError extends boolean = false>(options?
 /**
  * returns a list of Roles in a namespace
  */
-export const handleGetRoleList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetRoleList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetRoleList2Responses, unknown, ThrowOnError>({
+export const getRoles = <ThrowOnError extends boolean = false>(options: Options<GetRolesData, ThrowOnError>) => (options.client ?? client).get<GetRolesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/role/{namespace}',
     ...options
@@ -1070,7 +1070,7 @@ export const handleGetRoleList2 = <ThrowOnError extends boolean = false>(options
 /**
  * returns detailed information about Role
  */
-export const handleGetRoleDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetRoleDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetRoleDetailResponses, unknown, ThrowOnError>({
+export const getRole = <ThrowOnError extends boolean = false>(options: Options<GetRoleData, ThrowOnError>) => (options.client ?? client).get<GetRoleResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/role/{namespace}/{name}',
     ...options
@@ -1079,7 +1079,7 @@ export const handleGetRoleDetail = <ThrowOnError extends boolean = false>(option
 /**
  * returns a list of RoleBindings from all namespace
  */
-export const handleGetRoleBindingList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetRoleBindingListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetRoleBindingListResponses, unknown, ThrowOnError>({
+export const getAllRoleBindings = <ThrowOnError extends boolean = false>(options?: Options<GetAllRoleBindingsData, ThrowOnError>) => (options?.client ?? client).get<GetAllRoleBindingsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/rolebinding',
     ...options
@@ -1088,7 +1088,7 @@ export const handleGetRoleBindingList = <ThrowOnError extends boolean = false>(o
 /**
  * returns a list of RoleBindings in a namespace
  */
-export const handleGetRoleBindingList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetRoleBindingList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetRoleBindingList2Responses, unknown, ThrowOnError>({
+export const getRoleBindings = <ThrowOnError extends boolean = false>(options: Options<GetRoleBindingsData, ThrowOnError>) => (options.client ?? client).get<GetRoleBindingsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/rolebinding/{namespace}',
     ...options
@@ -1097,7 +1097,7 @@ export const handleGetRoleBindingList2 = <ThrowOnError extends boolean = false>(
 /**
  * returns detailed information about RoleBinding
  */
-export const handleGetRoleBindingDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetRoleBindingDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetRoleBindingDetailResponses, unknown, ThrowOnError>({
+export const getRoleBinding = <ThrowOnError extends boolean = false>(options: Options<GetRoleBindingData, ThrowOnError>) => (options.client ?? client).get<GetRoleBindingResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/rolebinding/{namespace}/{name}',
     ...options
@@ -1106,7 +1106,7 @@ export const handleGetRoleBindingDetail = <ThrowOnError extends boolean = false>
 /**
  * returns a number of replicas of namespaced resource
  */
-export const handleGetReplicaCount = <ThrowOnError extends boolean = false>(options: Options<HandleGetReplicaCountData, ThrowOnError>) => (options.client ?? client).get<HandleGetReplicaCountResponses, unknown, ThrowOnError>({
+export const getNamespacedResourceReplicas = <ThrowOnError extends boolean = false>(options: Options<GetNamespacedResourceReplicasData, ThrowOnError>) => (options.client ?? client).get<GetNamespacedResourceReplicasResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/scale/{kind}/{namespace}/{name}',
     ...options
@@ -1115,7 +1115,7 @@ export const handleGetReplicaCount = <ThrowOnError extends boolean = false>(opti
 /**
  * scales a namespaced resource
  */
-export const handleScaleResource = <ThrowOnError extends boolean = false>(options: Options<HandleScaleResourceData, ThrowOnError>) => (options.client ?? client).put<HandleScaleResourceResponses, unknown, ThrowOnError>({
+export const scaleNamespacedResource = <ThrowOnError extends boolean = false>(options: Options<ScaleNamespacedResourceData, ThrowOnError>) => (options.client ?? client).put<ScaleNamespacedResourceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/scale/{kind}/{namespace}/{name}',
     ...options
@@ -1124,7 +1124,7 @@ export const handleScaleResource = <ThrowOnError extends boolean = false>(option
 /**
  * returns a number of replicas of non-namespaced resource
  */
-export const handleGetReplicaCount2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetReplicaCount2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetReplicaCount2Responses, unknown, ThrowOnError>({
+export const getResourceReplicas = <ThrowOnError extends boolean = false>(options: Options<GetResourceReplicasData, ThrowOnError>) => (options.client ?? client).get<GetResourceReplicasResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/scale/{kind}/{name}',
     ...options
@@ -1133,7 +1133,7 @@ export const handleGetReplicaCount2 = <ThrowOnError extends boolean = false>(opt
 /**
  * scales a non-namespaced resource
  */
-export const handleScaleResource2 = <ThrowOnError extends boolean = false>(options: Options<HandleScaleResource2Data, ThrowOnError>) => (options.client ?? client).put<HandleScaleResource2Responses, unknown, ThrowOnError>({
+export const scaleResource = <ThrowOnError extends boolean = false>(options: Options<ScaleResourceData, ThrowOnError>) => (options.client ?? client).put<ScaleResourceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/scale/{kind}/{name}',
     ...options
@@ -1142,7 +1142,7 @@ export const handleScaleResource2 = <ThrowOnError extends boolean = false>(optio
 /**
  * returns a list of Secrets from all namespaces
  */
-export const handleGetSecretList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetSecretListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetSecretListResponses, unknown, ThrowOnError>({
+export const getAllSecrets = <ThrowOnError extends boolean = false>(options?: Options<GetAllSecretsData, ThrowOnError>) => (options?.client ?? client).get<GetAllSecretsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/secret',
     ...options
@@ -1151,7 +1151,7 @@ export const handleGetSecretList = <ThrowOnError extends boolean = false>(option
 /**
  * stores ImagePullSecret in a Kubernetes Secret
  */
-export const handleCreateImagePullSecret = <ThrowOnError extends boolean = false>(options: Options<HandleCreateImagePullSecretData, ThrowOnError>) => (options.client ?? client).post<HandleCreateImagePullSecretResponses, unknown, ThrowOnError>({
+export const createImagePullSecret = <ThrowOnError extends boolean = false>(options: Options<CreateImagePullSecretData, ThrowOnError>) => (options.client ?? client).post<CreateImagePullSecretResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/secret',
     ...options,
@@ -1164,7 +1164,7 @@ export const handleCreateImagePullSecret = <ThrowOnError extends boolean = false
 /**
  * returns a list of Secrets in a namespace
  */
-export const handleGetSecretList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetSecretList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetSecretList2Responses, unknown, ThrowOnError>({
+export const getSecrets = <ThrowOnError extends boolean = false>(options: Options<GetSecretsData, ThrowOnError>) => (options.client ?? client).get<GetSecretsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/secret/{namespace}',
     ...options
@@ -1173,7 +1173,7 @@ export const handleGetSecretList2 = <ThrowOnError extends boolean = false>(optio
 /**
  * returns detailed information about Secret
  */
-export const handleGetSecretDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetSecretDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetSecretDetailResponses, unknown, ThrowOnError>({
+export const getSecret = <ThrowOnError extends boolean = false>(options: Options<GetSecretData, ThrowOnError>) => (options.client ?? client).get<GetSecretResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/secret/{namespace}/{name}',
     ...options
@@ -1182,7 +1182,7 @@ export const handleGetSecretDetail = <ThrowOnError extends boolean = false>(opti
 /**
  * returns a list of Services from all namespaces
  */
-export const handleGetServiceList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetServiceListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetServiceListResponses, unknown, ThrowOnError>({
+export const getAllServices = <ThrowOnError extends boolean = false>(options?: Options<GetAllServicesData, ThrowOnError>) => (options?.client ?? client).get<GetAllServicesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/service',
     ...options
@@ -1191,7 +1191,7 @@ export const handleGetServiceList = <ThrowOnError extends boolean = false>(optio
 /**
  * returns a list of Services in a namespace
  */
-export const handleGetServiceList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetServiceList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetServiceList2Responses, unknown, ThrowOnError>({
+export const getServices = <ThrowOnError extends boolean = false>(options: Options<GetServicesData, ThrowOnError>) => (options.client ?? client).get<GetServicesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/service/{namespace}',
     ...options
@@ -1200,7 +1200,7 @@ export const handleGetServiceList2 = <ThrowOnError extends boolean = false>(opti
 /**
  * returns detailed information about Service
  */
-export const handleGetServiceDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetServiceDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetServiceDetailResponses, unknown, ThrowOnError>({
+export const getService = <ThrowOnError extends boolean = false>(options: Options<GetServiceData, ThrowOnError>) => (options.client ?? client).get<GetServiceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/service/{namespace}/{service}',
     ...options
@@ -1209,7 +1209,7 @@ export const handleGetServiceDetail = <ThrowOnError extends boolean = false>(opt
 /**
  * returns a list of Events for Service
  */
-export const handleGetServiceEvent = <ThrowOnError extends boolean = false>(options: Options<HandleGetServiceEventData, ThrowOnError>) => (options.client ?? client).get<HandleGetServiceEventResponses, unknown, ThrowOnError>({
+export const getServiceEvents = <ThrowOnError extends boolean = false>(options: Options<GetServiceEventsData, ThrowOnError>) => (options.client ?? client).get<GetServiceEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/service/{namespace}/{service}/event',
     ...options
@@ -1218,7 +1218,7 @@ export const handleGetServiceEvent = <ThrowOnError extends boolean = false>(opti
 /**
  * returns a list of Ingresses for Service
  */
-export const handleGetServiceIngressList = <ThrowOnError extends boolean = false>(options: Options<HandleGetServiceIngressListData, ThrowOnError>) => (options.client ?? client).get<HandleGetServiceIngressListResponses, unknown, ThrowOnError>({
+export const getServiceIngresses = <ThrowOnError extends boolean = false>(options: Options<GetServiceIngressesData, ThrowOnError>) => (options.client ?? client).get<GetServiceIngressesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/service/{namespace}/{service}/ingress',
     ...options
@@ -1227,7 +1227,7 @@ export const handleGetServiceIngressList = <ThrowOnError extends boolean = false
 /**
  * returns a list of Pods for Service
  */
-export const handleGetServicePods = <ThrowOnError extends boolean = false>(options: Options<HandleGetServicePodsData, ThrowOnError>) => (options.client ?? client).get<HandleGetServicePodsResponses, unknown, ThrowOnError>({
+export const getServicePods = <ThrowOnError extends boolean = false>(options: Options<GetServicePodsData, ThrowOnError>) => (options.client ?? client).get<GetServicePodsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/service/{namespace}/{service}/pod',
     ...options
@@ -1236,7 +1236,7 @@ export const handleGetServicePods = <ThrowOnError extends boolean = false>(optio
 /**
  * returns a list of ServiceAccounts from all namespaces
  */
-export const handleGetServiceAccountList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetServiceAccountListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetServiceAccountListResponses, unknown, ThrowOnError>({
+export const getAllServiceAccounts = <ThrowOnError extends boolean = false>(options?: Options<GetAllServiceAccountsData, ThrowOnError>) => (options?.client ?? client).get<GetAllServiceAccountsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/serviceaccount',
     ...options
@@ -1245,7 +1245,7 @@ export const handleGetServiceAccountList = <ThrowOnError extends boolean = false
 /**
  * returns a list of ServiceAccounts in a namespaces
  */
-export const handleGetServiceAccountList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetServiceAccountList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetServiceAccountList2Responses, unknown, ThrowOnError>({
+export const getServiceAccounts = <ThrowOnError extends boolean = false>(options: Options<GetServiceAccountsData, ThrowOnError>) => (options.client ?? client).get<GetServiceAccountsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/serviceaccount/{namespace}',
     ...options
@@ -1254,7 +1254,7 @@ export const handleGetServiceAccountList2 = <ThrowOnError extends boolean = fals
 /**
  * returns detailed information about ServiceAccount
  */
-export const handleGetServiceAccountDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetServiceAccountDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetServiceAccountDetailResponses, unknown, ThrowOnError>({
+export const getServiceAccount = <ThrowOnError extends boolean = false>(options: Options<GetServiceAccountData, ThrowOnError>) => (options.client ?? client).get<GetServiceAccountResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/serviceaccount/{namespace}/{serviceaccount}',
     ...options
@@ -1263,7 +1263,7 @@ export const handleGetServiceAccountDetail = <ThrowOnError extends boolean = fal
 /**
  * returns a list of ImagePullSecret Secrets for ServiceAccount
  */
-export const handleGetServiceAccountImagePullSecrets = <ThrowOnError extends boolean = false>(options: Options<HandleGetServiceAccountImagePullSecretsData, ThrowOnError>) => (options.client ?? client).get<HandleGetServiceAccountImagePullSecretsResponses, unknown, ThrowOnError>({
+export const getServiceAccountImagePullSecrets = <ThrowOnError extends boolean = false>(options: Options<GetServiceAccountImagePullSecretsData, ThrowOnError>) => (options.client ?? client).get<GetServiceAccountImagePullSecretsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/serviceaccount/{namespace}/{serviceaccount}/imagepullsecret',
     ...options
@@ -1272,7 +1272,7 @@ export const handleGetServiceAccountImagePullSecrets = <ThrowOnError extends boo
 /**
  * returns a list of Secrets for ServiceAccount
  */
-export const handleGetServiceAccountSecrets = <ThrowOnError extends boolean = false>(options: Options<HandleGetServiceAccountSecretsData, ThrowOnError>) => (options.client ?? client).get<HandleGetServiceAccountSecretsResponses, unknown, ThrowOnError>({
+export const getServiceAccountSecrets = <ThrowOnError extends boolean = false>(options: Options<GetServiceAccountSecretsData, ThrowOnError>) => (options.client ?? client).get<GetServiceAccountSecretsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/serviceaccount/{namespace}/{serviceaccount}/secret',
     ...options
@@ -1281,7 +1281,7 @@ export const handleGetServiceAccountSecrets = <ThrowOnError extends boolean = fa
 /**
  * returns a list of StatefulSets from all namespaces
  */
-export const handleGetStatefulSetList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetStatefulSetListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetStatefulSetListResponses, unknown, ThrowOnError>({
+export const getAllStatefulSets = <ThrowOnError extends boolean = false>(options?: Options<GetAllStatefulSetsData, ThrowOnError>) => (options?.client ?? client).get<GetAllStatefulSetsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/statefulset',
     ...options
@@ -1290,7 +1290,7 @@ export const handleGetStatefulSetList = <ThrowOnError extends boolean = false>(o
 /**
  * returns a list of StatefulSets in a namespaces
  */
-export const handleGetStatefulSetList2 = <ThrowOnError extends boolean = false>(options: Options<HandleGetStatefulSetList2Data, ThrowOnError>) => (options.client ?? client).get<HandleGetStatefulSetList2Responses, unknown, ThrowOnError>({
+export const getStatefulSets = <ThrowOnError extends boolean = false>(options: Options<GetStatefulSetsData, ThrowOnError>) => (options.client ?? client).get<GetStatefulSetsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/statefulset/{namespace}',
     ...options
@@ -1299,7 +1299,7 @@ export const handleGetStatefulSetList2 = <ThrowOnError extends boolean = false>(
 /**
  * returns detailed information about StatefulSets
  */
-export const handleGetStatefulSetDetail = <ThrowOnError extends boolean = false>(options: Options<HandleGetStatefulSetDetailData, ThrowOnError>) => (options.client ?? client).get<HandleGetStatefulSetDetailResponses, unknown, ThrowOnError>({
+export const getStatefulSet = <ThrowOnError extends boolean = false>(options: Options<GetStatefulSetData, ThrowOnError>) => (options.client ?? client).get<GetStatefulSetResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/statefulset/{namespace}/{statefulset}',
     ...options
@@ -1308,7 +1308,7 @@ export const handleGetStatefulSetDetail = <ThrowOnError extends boolean = false>
 /**
  * returns a list of Events for StatefulSets
  */
-export const handleGetStatefulSetEvents = <ThrowOnError extends boolean = false>(options: Options<HandleGetStatefulSetEventsData, ThrowOnError>) => (options.client ?? client).get<HandleGetStatefulSetEventsResponses, unknown, ThrowOnError>({
+export const getStatefulSetEvents = <ThrowOnError extends boolean = false>(options: Options<GetStatefulSetEventsData, ThrowOnError>) => (options.client ?? client).get<GetStatefulSetEventsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/statefulset/{namespace}/{statefulset}/event',
     ...options
@@ -1317,7 +1317,7 @@ export const handleGetStatefulSetEvents = <ThrowOnError extends boolean = false>
 /**
  * returns  a list of Pods for StatefulSets
  */
-export const handleGetStatefulSetPods = <ThrowOnError extends boolean = false>(options: Options<HandleGetStatefulSetPodsData, ThrowOnError>) => (options.client ?? client).get<HandleGetStatefulSetPodsResponses, unknown, ThrowOnError>({
+export const getStatefulSetPods = <ThrowOnError extends boolean = false>(options: Options<GetStatefulSetPodsData, ThrowOnError>) => (options.client ?? client).get<GetStatefulSetPodsResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/statefulset/{namespace}/{statefulset}/pod',
     ...options
@@ -1326,7 +1326,7 @@ export const handleGetStatefulSetPods = <ThrowOnError extends boolean = false>(o
 /**
  * rollout restart of the Daemon Set
  */
-export const handleStatefulSetRestart = <ThrowOnError extends boolean = false>(options: Options<HandleStatefulSetRestartData, ThrowOnError>) => (options.client ?? client).put<HandleStatefulSetRestartResponses, unknown, ThrowOnError>({
+export const restartStatefulSet = <ThrowOnError extends boolean = false>(options: Options<RestartStatefulSetData, ThrowOnError>) => (options.client ?? client).put<RestartStatefulSetResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/statefulset/{namespace}/{statefulset}/restart',
     ...options
@@ -1335,7 +1335,7 @@ export const handleStatefulSetRestart = <ThrowOnError extends boolean = false>(o
 /**
  * returns a list of StorageClasses
  */
-export const handleGetStorageClassList = <ThrowOnError extends boolean = false>(options?: Options<HandleGetStorageClassListData, ThrowOnError>) => (options?.client ?? client).get<HandleGetStorageClassListResponses, unknown, ThrowOnError>({
+export const getStorageClasses = <ThrowOnError extends boolean = false>(options?: Options<GetStorageClassesData, ThrowOnError>) => (options?.client ?? client).get<GetStorageClassesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/storageclass',
     ...options
@@ -1344,7 +1344,7 @@ export const handleGetStorageClassList = <ThrowOnError extends boolean = false>(
 /**
  * returns detailed information about StorageClass
  */
-export const handleGetStorageClass = <ThrowOnError extends boolean = false>(options: Options<HandleGetStorageClassData, ThrowOnError>) => (options.client ?? client).get<HandleGetStorageClassResponses, unknown, ThrowOnError>({
+export const getStorageClass = <ThrowOnError extends boolean = false>(options: Options<GetStorageClassData, ThrowOnError>) => (options.client ?? client).get<GetStorageClassResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/storageclass/{storageclass}',
     ...options
@@ -1353,7 +1353,7 @@ export const handleGetStorageClass = <ThrowOnError extends boolean = false>(opti
 /**
  * returns a list of PersistentVolumes assigned to StorageClass
  */
-export const handleGetStorageClassPersistentVolumes = <ThrowOnError extends boolean = false>(options: Options<HandleGetStorageClassPersistentVolumesData, ThrowOnError>) => (options.client ?? client).get<HandleGetStorageClassPersistentVolumesResponses, unknown, ThrowOnError>({
+export const getStorageClassPersistentVolumes = <ThrowOnError extends boolean = false>(options: Options<GetStorageClassPersistentVolumesData, ThrowOnError>) => (options.client ?? client).get<GetStorageClassPersistentVolumesResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/storageclass/{storageclass}/persistentvolume',
     ...options
@@ -1362,7 +1362,7 @@ export const handleGetStorageClassPersistentVolumes = <ThrowOnError extends bool
 /**
  * returns a list of HorizontalPodAutoscalers for resource
  */
-export const handleGetHorizontalPodAutoscalerListForResource = <ThrowOnError extends boolean = false>(options: Options<HandleGetHorizontalPodAutoscalerListForResourceData, ThrowOnError>) => (options.client ?? client).get<HandleGetHorizontalPodAutoscalerListForResourceResponses, unknown, ThrowOnError>({
+export const getHorizontalPodAutoscalersForResource = <ThrowOnError extends boolean = false>(options: Options<GetHorizontalPodAutoscalersForResourceData, ThrowOnError>) => (options.client ?? client).get<GetHorizontalPodAutoscalersForResourceResponses, unknown, ThrowOnError>({
     responseType: 'json',
     url: '/api/v1/{kind}/{namespace}/{name}/horizontalpodautoscaler',
     ...options

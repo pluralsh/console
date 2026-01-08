@@ -3828,7 +3828,7 @@ export type ValidationProtocolValiditySpec = {
     protocol: string;
 };
 
-export type HandleDeleteResourceData = {
+export type DeleteResourceData = {
     body?: never;
     path: {
         /**
@@ -3877,11 +3877,11 @@ export type HandleDeleteResourceData = {
     url: '/api/v1/_raw/{kind}/name/{name}';
 };
 
-export type HandleDeleteResourceResponses = {
+export type DeleteResourceResponses = {
     204: unknown;
 };
 
-export type HandleGetResourceData = {
+export type GetResourceData = {
     body?: never;
     path: {
         /**
@@ -3922,16 +3922,16 @@ export type HandleGetResourceData = {
     url: '/api/v1/_raw/{kind}/name/{name}';
 };
 
-export type HandleGetResourceResponses = {
+export type GetResourceResponses = {
     /**
      * OK
      */
     200: UnstructuredUnstructured;
 };
 
-export type HandleGetResourceResponse = HandleGetResourceResponses[keyof HandleGetResourceResponses];
+export type GetResourceResponse = GetResourceResponses[keyof GetResourceResponses];
 
-export type HandlePutResourceData = {
+export type UpdateResourceData = {
     body: HandlerJson;
     path: {
         /**
@@ -3972,11 +3972,11 @@ export type HandlePutResourceData = {
     url: '/api/v1/_raw/{kind}/name/{name}';
 };
 
-export type HandlePutResourceResponses = {
+export type UpdateResourceResponses = {
     204: unknown;
 };
 
-export type HandleDeleteResource2Data = {
+export type DeleteNamespacedResourceData = {
     body?: never;
     path: {
         /**
@@ -4029,11 +4029,11 @@ export type HandleDeleteResource2Data = {
     url: '/api/v1/_raw/{kind}/namespace/{namespace}/name/{name}';
 };
 
-export type HandleDeleteResource2Responses = {
+export type DeleteNamespacedResourceResponses = {
     204: unknown;
 };
 
-export type HandleGetResource2Data = {
+export type GetNamespacedResourceData = {
     body?: never;
     path: {
         /**
@@ -4078,16 +4078,16 @@ export type HandleGetResource2Data = {
     url: '/api/v1/_raw/{kind}/namespace/{namespace}/name/{name}';
 };
 
-export type HandleGetResource2Responses = {
+export type GetNamespacedResourceResponses = {
     /**
      * OK
      */
     200: UnstructuredUnstructured;
 };
 
-export type HandleGetResource2Response = HandleGetResource2Responses[keyof HandleGetResource2Responses];
+export type GetNamespacedResourceResponse = GetNamespacedResourceResponses[keyof GetNamespacedResourceResponses];
 
-export type HandlePutResource2Data = {
+export type UpdateNamespacedResourceData = {
     body: HandlerJson;
     path: {
         /**
@@ -4132,11 +4132,11 @@ export type HandlePutResource2Data = {
     url: '/api/v1/_raw/{kind}/namespace/{namespace}/name/{name}';
 };
 
-export type HandlePutResource2Responses = {
+export type UpdateNamespacedResourceResponses = {
     204: unknown;
 };
 
-export type HandleDeployData = {
+export type CreateAppDeploymentData = {
     body: DeploymentAppDeploymentSpec;
     path?: never;
     query?: {
@@ -4168,16 +4168,16 @@ export type HandleDeployData = {
     url: '/api/v1/appdeployment';
 };
 
-export type HandleDeployResponses = {
+export type CreateAppDeploymentResponses = {
     /**
      * OK
      */
     200: DeploymentAppDeploymentSpec;
 };
 
-export type HandleDeployResponse = HandleDeployResponses[keyof HandleDeployResponses];
+export type CreateAppDeploymentResponse = CreateAppDeploymentResponses[keyof CreateAppDeploymentResponses];
 
-export type HandleGetAvailableProtocolsData = {
+export type GetAvailableProtocolsData = {
     body?: never;
     path?: never;
     query?: {
@@ -4209,16 +4209,16 @@ export type HandleGetAvailableProtocolsData = {
     url: '/api/v1/appdeployment/protocols';
 };
 
-export type HandleGetAvailableProtocolsResponses = {
+export type GetAvailableProtocolsResponses = {
     /**
      * OK
      */
     200: DeploymentProtocols;
 };
 
-export type HandleGetAvailableProtocolsResponse = HandleGetAvailableProtocolsResponses[keyof HandleGetAvailableProtocolsResponses];
+export type GetAvailableProtocolsResponse = GetAvailableProtocolsResponses[keyof GetAvailableProtocolsResponses];
 
-export type HandleImageReferenceValidityData = {
+export type ValidateImageReferenceData = {
     body: ValidationImageReferenceValiditySpec;
     path?: never;
     query?: {
@@ -4250,16 +4250,16 @@ export type HandleImageReferenceValidityData = {
     url: '/api/v1/appdeployment/validate/imagereference';
 };
 
-export type HandleImageReferenceValidityResponses = {
+export type ValidateImageReferenceResponses = {
     /**
      * OK
      */
     200: ValidationImageReferenceValidity;
 };
 
-export type HandleImageReferenceValidityResponse = HandleImageReferenceValidityResponses[keyof HandleImageReferenceValidityResponses];
+export type ValidateImageReferenceResponse = ValidateImageReferenceResponses[keyof ValidateImageReferenceResponses];
 
-export type HandleNameValidityData = {
+export type ValidateAppNameData = {
     body: ValidationAppNameValiditySpec;
     path?: never;
     query?: {
@@ -4291,16 +4291,16 @@ export type HandleNameValidityData = {
     url: '/api/v1/appdeployment/validate/name';
 };
 
-export type HandleNameValidityResponses = {
+export type ValidateAppNameResponses = {
     /**
      * OK
      */
     200: ValidationAppNameValidity;
 };
 
-export type HandleNameValidityResponse = HandleNameValidityResponses[keyof HandleNameValidityResponses];
+export type ValidateAppNameResponse = ValidateAppNameResponses[keyof ValidateAppNameResponses];
 
-export type HandleProtocolValidityData = {
+export type ValidateProtocolData = {
     body: ValidationProtocolValiditySpec;
     path?: never;
     query?: {
@@ -4332,16 +4332,16 @@ export type HandleProtocolValidityData = {
     url: '/api/v1/appdeployment/validate/protocol';
 };
 
-export type HandleProtocolValidityResponses = {
+export type ValidateProtocolResponses = {
     /**
      * OK
      */
     200: ValidationProtocolValidity;
 };
 
-export type HandleProtocolValidityResponse = HandleProtocolValidityResponses[keyof HandleProtocolValidityResponses];
+export type ValidateProtocolResponse = ValidateProtocolResponses[keyof ValidateProtocolResponses];
 
-export type HandleDeployFromFileData = {
+export type CreateAppDeploymentFromFileData = {
     body: DeploymentAppDeploymentFromFileSpec;
     path?: never;
     query?: {
@@ -4373,16 +4373,16 @@ export type HandleDeployFromFileData = {
     url: '/api/v1/appdeploymentfromfile';
 };
 
-export type HandleDeployFromFileResponses = {
+export type CreateAppDeploymentFromFileResponses = {
     /**
      * OK
      */
     200: DeploymentAppDeploymentFromFileResponse;
 };
 
-export type HandleDeployFromFileResponse = HandleDeployFromFileResponses[keyof HandleDeployFromFileResponses];
+export type CreateAppDeploymentFromFileResponse = CreateAppDeploymentFromFileResponses[keyof CreateAppDeploymentFromFileResponses];
 
-export type HandleGetClusterRoleListData = {
+export type GetClusterRolesData = {
     body?: never;
     path?: never;
     query?: {
@@ -4414,16 +4414,16 @@ export type HandleGetClusterRoleListData = {
     url: '/api/v1/clusterrole';
 };
 
-export type HandleGetClusterRoleListResponses = {
+export type GetClusterRolesResponses = {
     /**
      * OK
      */
     200: ClusterroleClusterRoleList;
 };
 
-export type HandleGetClusterRoleListResponse = HandleGetClusterRoleListResponses[keyof HandleGetClusterRoleListResponses];
+export type GetClusterRolesResponse = GetClusterRolesResponses[keyof GetClusterRolesResponses];
 
-export type HandleGetClusterRoleDetailData = {
+export type GetClusterRoleData = {
     body?: never;
     path: {
         /**
@@ -4460,16 +4460,16 @@ export type HandleGetClusterRoleDetailData = {
     url: '/api/v1/clusterrole/{name}';
 };
 
-export type HandleGetClusterRoleDetailResponses = {
+export type GetClusterRoleResponses = {
     /**
      * OK
      */
     200: ClusterroleClusterRoleDetail;
 };
 
-export type HandleGetClusterRoleDetailResponse = HandleGetClusterRoleDetailResponses[keyof HandleGetClusterRoleDetailResponses];
+export type GetClusterRoleResponse = GetClusterRoleResponses[keyof GetClusterRoleResponses];
 
-export type HandleGetClusterRoleBindingListData = {
+export type GetClusterRoleBindingsData = {
     body?: never;
     path?: never;
     query?: {
@@ -4501,16 +4501,16 @@ export type HandleGetClusterRoleBindingListData = {
     url: '/api/v1/clusterrolebinding';
 };
 
-export type HandleGetClusterRoleBindingListResponses = {
+export type GetClusterRoleBindingsResponses = {
     /**
      * OK
      */
     200: ClusterrolebindingClusterRoleBindingList;
 };
 
-export type HandleGetClusterRoleBindingListResponse = HandleGetClusterRoleBindingListResponses[keyof HandleGetClusterRoleBindingListResponses];
+export type GetClusterRoleBindingsResponse = GetClusterRoleBindingsResponses[keyof GetClusterRoleBindingsResponses];
 
-export type HandleGetClusterRoleBindingDetailData = {
+export type GetClusterRoleBindingData = {
     body?: never;
     path: {
         /**
@@ -4547,16 +4547,16 @@ export type HandleGetClusterRoleBindingDetailData = {
     url: '/api/v1/clusterrolebinding/{name}';
 };
 
-export type HandleGetClusterRoleBindingDetailResponses = {
+export type GetClusterRoleBindingResponses = {
     /**
      * OK
      */
     200: ClusterrolebindingClusterRoleBindingDetail;
 };
 
-export type HandleGetClusterRoleBindingDetailResponse = HandleGetClusterRoleBindingDetailResponses[keyof HandleGetClusterRoleBindingDetailResponses];
+export type GetClusterRoleBindingResponse = GetClusterRoleBindingResponses[keyof GetClusterRoleBindingResponses];
 
-export type HandleGetConfigMapListData = {
+export type GetAllConfigMapsData = {
     body?: never;
     path?: never;
     query?: {
@@ -4588,16 +4588,16 @@ export type HandleGetConfigMapListData = {
     url: '/api/v1/configmap';
 };
 
-export type HandleGetConfigMapListResponses = {
+export type GetAllConfigMapsResponses = {
     /**
      * OK
      */
     200: ConfigmapConfigMapList;
 };
 
-export type HandleGetConfigMapListResponse = HandleGetConfigMapListResponses[keyof HandleGetConfigMapListResponses];
+export type GetAllConfigMapsResponse = GetAllConfigMapsResponses[keyof GetAllConfigMapsResponses];
 
-export type HandleGetConfigMapList2Data = {
+export type GetConfigMapsData = {
     body?: never;
     path: {
         /**
@@ -4634,16 +4634,16 @@ export type HandleGetConfigMapList2Data = {
     url: '/api/v1/configmap/{namespace}';
 };
 
-export type HandleGetConfigMapList2Responses = {
+export type GetConfigMapsResponses = {
     /**
      * OK
      */
     200: ConfigmapConfigMapList;
 };
 
-export type HandleGetConfigMapList2Response = HandleGetConfigMapList2Responses[keyof HandleGetConfigMapList2Responses];
+export type GetConfigMapsResponse = GetConfigMapsResponses[keyof GetConfigMapsResponses];
 
-export type HandleGetConfigMapDetailData = {
+export type GetConfigMapData = {
     body?: never;
     path: {
         /**
@@ -4684,16 +4684,16 @@ export type HandleGetConfigMapDetailData = {
     url: '/api/v1/configmap/{namespace}/{configmap}';
 };
 
-export type HandleGetConfigMapDetailResponses = {
+export type GetConfigMapResponses = {
     /**
      * OK
      */
     200: ConfigmapConfigMapDetail;
 };
 
-export type HandleGetConfigMapDetailResponse = HandleGetConfigMapDetailResponses[keyof HandleGetConfigMapDetailResponses];
+export type GetConfigMapResponse = GetConfigMapResponses[keyof GetConfigMapResponses];
 
-export type HandleGetCustomResourceDefinitionListData = {
+export type GetCustomResourceDefinitionsData = {
     body?: never;
     path?: never;
     query?: {
@@ -4725,16 +4725,16 @@ export type HandleGetCustomResourceDefinitionListData = {
     url: '/api/v1/crd';
 };
 
-export type HandleGetCustomResourceDefinitionListResponses = {
+export type GetCustomResourceDefinitionsResponses = {
     /**
      * OK
      */
     200: TypesCustomResourceDefinitionList;
 };
 
-export type HandleGetCustomResourceDefinitionListResponse = HandleGetCustomResourceDefinitionListResponses[keyof HandleGetCustomResourceDefinitionListResponses];
+export type GetCustomResourceDefinitionsResponse = GetCustomResourceDefinitionsResponses[keyof GetCustomResourceDefinitionsResponses];
 
-export type HandleGetCustomResourceDefinitionDetailData = {
+export type GetCustomResourceDefinitionData = {
     body?: never;
     path: {
         /**
@@ -4771,16 +4771,16 @@ export type HandleGetCustomResourceDefinitionDetailData = {
     url: '/api/v1/crd/{crd}';
 };
 
-export type HandleGetCustomResourceDefinitionDetailResponses = {
+export type GetCustomResourceDefinitionResponses = {
     /**
      * OK
      */
     200: TypesCustomResourceDefinitionDetail;
 };
 
-export type HandleGetCustomResourceDefinitionDetailResponse = HandleGetCustomResourceDefinitionDetailResponses[keyof HandleGetCustomResourceDefinitionDetailResponses];
+export type GetCustomResourceDefinitionResponse = GetCustomResourceDefinitionResponses[keyof GetCustomResourceDefinitionResponses];
 
-export type HandleGetCustomResourceObjectListData = {
+export type GetCustomResourceObjectsData = {
     body?: never;
     path: {
         /**
@@ -4821,16 +4821,16 @@ export type HandleGetCustomResourceObjectListData = {
     url: '/api/v1/crd/{namespace}/{crd}/object';
 };
 
-export type HandleGetCustomResourceObjectListResponses = {
+export type GetCustomResourceObjectsResponses = {
     /**
      * OK
      */
     200: TypesCustomResourceObjectList;
 };
 
-export type HandleGetCustomResourceObjectListResponse = HandleGetCustomResourceObjectListResponses[keyof HandleGetCustomResourceObjectListResponses];
+export type GetCustomResourceObjectsResponse = GetCustomResourceObjectsResponses[keyof GetCustomResourceObjectsResponses];
 
-export type HandleGetCustomResourceObjectDetailData = {
+export type GetCustomResourceObjectData = {
     body?: never;
     path: {
         /**
@@ -4875,16 +4875,16 @@ export type HandleGetCustomResourceObjectDetailData = {
     url: '/api/v1/crd/{namespace}/{crd}/{object}';
 };
 
-export type HandleGetCustomResourceObjectDetailResponses = {
+export type GetCustomResourceObjectResponses = {
     /**
      * OK
      */
     200: TypesCustomResourceObjectDetail;
 };
 
-export type HandleGetCustomResourceObjectDetailResponse = HandleGetCustomResourceObjectDetailResponses[keyof HandleGetCustomResourceObjectDetailResponses];
+export type GetCustomResourceObjectResponse = GetCustomResourceObjectResponses[keyof GetCustomResourceObjectResponses];
 
-export type HandleGetCustomResourceObjectEventsData = {
+export type GetCustomResourceObjectEventsData = {
     body?: never;
     path: {
         /**
@@ -4929,16 +4929,16 @@ export type HandleGetCustomResourceObjectEventsData = {
     url: '/api/v1/crd/{namespace}/{crd}/{object}/event';
 };
 
-export type HandleGetCustomResourceObjectEventsResponses = {
+export type GetCustomResourceObjectEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetCustomResourceObjectEventsResponse = HandleGetCustomResourceObjectEventsResponses[keyof HandleGetCustomResourceObjectEventsResponses];
+export type GetCustomResourceObjectEventsResponse = GetCustomResourceObjectEventsResponses[keyof GetCustomResourceObjectEventsResponses];
 
-export type HandleGetCronJobListData = {
+export type GetAllCronJobsData = {
     body?: never;
     path?: never;
     query?: {
@@ -4970,16 +4970,16 @@ export type HandleGetCronJobListData = {
     url: '/api/v1/cronjob';
 };
 
-export type HandleGetCronJobListResponses = {
+export type GetAllCronJobsResponses = {
     /**
      * OK
      */
     200: CronjobCronJobList;
 };
 
-export type HandleGetCronJobListResponse = HandleGetCronJobListResponses[keyof HandleGetCronJobListResponses];
+export type GetAllCronJobsResponse = GetAllCronJobsResponses[keyof GetAllCronJobsResponses];
 
-export type HandleGetCronJobList2Data = {
+export type GetCronJobsData = {
     body?: never;
     path: {
         /**
@@ -5016,16 +5016,16 @@ export type HandleGetCronJobList2Data = {
     url: '/api/v1/cronjob/{namespace}';
 };
 
-export type HandleGetCronJobList2Responses = {
+export type GetCronJobsResponses = {
     /**
      * OK
      */
     200: CronjobCronJobList;
 };
 
-export type HandleGetCronJobList2Response = HandleGetCronJobList2Responses[keyof HandleGetCronJobList2Responses];
+export type GetCronJobsResponse = GetCronJobsResponses[keyof GetCronJobsResponses];
 
-export type HandleGetCronJobDetailData = {
+export type GetCronJobData = {
     body?: never;
     path: {
         /**
@@ -5066,16 +5066,16 @@ export type HandleGetCronJobDetailData = {
     url: '/api/v1/cronjob/{namespace}/{name}';
 };
 
-export type HandleGetCronJobDetailResponses = {
+export type GetCronJobResponses = {
     /**
      * OK
      */
     200: CronjobCronJobDetail;
 };
 
-export type HandleGetCronJobDetailResponse = HandleGetCronJobDetailResponses[keyof HandleGetCronJobDetailResponses];
+export type GetCronJobResponse = GetCronJobResponses[keyof GetCronJobResponses];
 
-export type HandleGetCronJobEventsData = {
+export type GetCronJobEventsData = {
     body?: never;
     path: {
         /**
@@ -5116,16 +5116,16 @@ export type HandleGetCronJobEventsData = {
     url: '/api/v1/cronjob/{namespace}/{name}/event';
 };
 
-export type HandleGetCronJobEventsResponses = {
+export type GetCronJobEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetCronJobEventsResponse = HandleGetCronJobEventsResponses[keyof HandleGetCronJobEventsResponses];
+export type GetCronJobEventsResponse = GetCronJobEventsResponses[keyof GetCronJobEventsResponses];
 
-export type HandleGetCronJobJobsData = {
+export type GetCronJobJobsData = {
     body?: never;
     path: {
         /**
@@ -5170,16 +5170,16 @@ export type HandleGetCronJobJobsData = {
     url: '/api/v1/cronjob/{namespace}/{name}/job';
 };
 
-export type HandleGetCronJobJobsResponses = {
+export type GetCronJobJobsResponses = {
     /**
      * OK
      */
     200: JobJobList;
 };
 
-export type HandleGetCronJobJobsResponse = HandleGetCronJobJobsResponses[keyof HandleGetCronJobJobsResponses];
+export type GetCronJobJobsResponse = GetCronJobJobsResponses[keyof GetCronJobJobsResponses];
 
-export type HandleTriggerCronJobData = {
+export type TriggerCronJobData = {
     body?: never;
     path: {
         /**
@@ -5220,14 +5220,14 @@ export type HandleTriggerCronJobData = {
     url: '/api/v1/cronjob/{namespace}/{name}/trigger';
 };
 
-export type HandleTriggerCronJobResponses = {
+export type TriggerCronJobResponses = {
     /**
      * OK
      */
     200: unknown;
 };
 
-export type HandleGetCsrfTokenData = {
+export type GetCsrfTokenData = {
     body?: never;
     path: {
         /**
@@ -5264,16 +5264,16 @@ export type HandleGetCsrfTokenData = {
     url: '/api/v1/csrftoken/{action}';
 };
 
-export type HandleGetCsrfTokenResponses = {
+export type GetCsrfTokenResponses = {
     /**
      * OK
      */
     200: CsrfResponse;
 };
 
-export type HandleGetCsrfTokenResponse = HandleGetCsrfTokenResponses[keyof HandleGetCsrfTokenResponses];
+export type GetCsrfTokenResponse = GetCsrfTokenResponses[keyof GetCsrfTokenResponses];
 
-export type HandleGetDaemonSetListData = {
+export type GetAllDaemonSetsData = {
     body?: never;
     path?: never;
     query?: {
@@ -5305,16 +5305,16 @@ export type HandleGetDaemonSetListData = {
     url: '/api/v1/daemonset';
 };
 
-export type HandleGetDaemonSetListResponses = {
+export type GetAllDaemonSetsResponses = {
     /**
      * OK
      */
     200: DaemonsetDaemonSetList;
 };
 
-export type HandleGetDaemonSetListResponse = HandleGetDaemonSetListResponses[keyof HandleGetDaemonSetListResponses];
+export type GetAllDaemonSetsResponse = GetAllDaemonSetsResponses[keyof GetAllDaemonSetsResponses];
 
-export type HandleGetDaemonSetList2Data = {
+export type GetDaemonSetsData = {
     body?: never;
     path: {
         /**
@@ -5351,16 +5351,16 @@ export type HandleGetDaemonSetList2Data = {
     url: '/api/v1/daemonset/{namespace}';
 };
 
-export type HandleGetDaemonSetList2Responses = {
+export type GetDaemonSetsResponses = {
     /**
      * OK
      */
     200: DaemonsetDaemonSetList;
 };
 
-export type HandleGetDaemonSetList2Response = HandleGetDaemonSetList2Responses[keyof HandleGetDaemonSetList2Responses];
+export type GetDaemonSetsResponse = GetDaemonSetsResponses[keyof GetDaemonSetsResponses];
 
-export type HandleGetDaemonSetDetailData = {
+export type GetDaemonSetData = {
     body?: never;
     path: {
         /**
@@ -5401,16 +5401,16 @@ export type HandleGetDaemonSetDetailData = {
     url: '/api/v1/daemonset/{namespace}/{daemonSet}';
 };
 
-export type HandleGetDaemonSetDetailResponses = {
+export type GetDaemonSetResponses = {
     /**
      * OK
      */
     200: DaemonsetDaemonSetDetail;
 };
 
-export type HandleGetDaemonSetDetailResponse = HandleGetDaemonSetDetailResponses[keyof HandleGetDaemonSetDetailResponses];
+export type GetDaemonSetResponse = GetDaemonSetResponses[keyof GetDaemonSetResponses];
 
-export type HandleGetDaemonSetEventsData = {
+export type GetDaemonSetEventsData = {
     body?: never;
     path: {
         /**
@@ -5451,16 +5451,16 @@ export type HandleGetDaemonSetEventsData = {
     url: '/api/v1/daemonset/{namespace}/{daemonSet}/event';
 };
 
-export type HandleGetDaemonSetEventsResponses = {
+export type GetDaemonSetEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetDaemonSetEventsResponse = HandleGetDaemonSetEventsResponses[keyof HandleGetDaemonSetEventsResponses];
+export type GetDaemonSetEventsResponse = GetDaemonSetEventsResponses[keyof GetDaemonSetEventsResponses];
 
-export type HandleGetDaemonSetPodsData = {
+export type GetDaemonSetPodsData = {
     body?: never;
     path: {
         /**
@@ -5501,16 +5501,16 @@ export type HandleGetDaemonSetPodsData = {
     url: '/api/v1/daemonset/{namespace}/{daemonSet}/pod';
 };
 
-export type HandleGetDaemonSetPodsResponses = {
+export type GetDaemonSetPodsResponses = {
     /**
      * OK
      */
     200: PodPodList;
 };
 
-export type HandleGetDaemonSetPodsResponse = HandleGetDaemonSetPodsResponses[keyof HandleGetDaemonSetPodsResponses];
+export type GetDaemonSetPodsResponse = GetDaemonSetPodsResponses[keyof GetDaemonSetPodsResponses];
 
-export type HandleDaemonSetRestartData = {
+export type RestartDaemonSetData = {
     body?: never;
     path: {
         /**
@@ -5551,16 +5551,16 @@ export type HandleDaemonSetRestartData = {
     url: '/api/v1/daemonset/{namespace}/{daemonSet}/restart';
 };
 
-export type HandleDaemonSetRestartResponses = {
+export type RestartDaemonSetResponses = {
     /**
      * OK
      */
     200: DaemonsetDaemonSetDetail;
 };
 
-export type HandleDaemonSetRestartResponse = HandleDaemonSetRestartResponses[keyof HandleDaemonSetRestartResponses];
+export type RestartDaemonSetResponse = RestartDaemonSetResponses[keyof RestartDaemonSetResponses];
 
-export type HandleGetDaemonSetServicesData = {
+export type GetDaemonSetServicesData = {
     body?: never;
     path: {
         /**
@@ -5601,16 +5601,16 @@ export type HandleGetDaemonSetServicesData = {
     url: '/api/v1/daemonset/{namespace}/{daemonSet}/service';
 };
 
-export type HandleGetDaemonSetServicesResponses = {
+export type GetDaemonSetServicesResponses = {
     /**
      * OK
      */
     200: ServiceServiceList;
 };
 
-export type HandleGetDaemonSetServicesResponse = HandleGetDaemonSetServicesResponses[keyof HandleGetDaemonSetServicesResponses];
+export type GetDaemonSetServicesResponse = GetDaemonSetServicesResponses[keyof GetDaemonSetServicesResponses];
 
-export type HandleGetDeploymentsData = {
+export type GetAllDeploymentsData = {
     body?: never;
     path?: never;
     query?: {
@@ -5642,16 +5642,16 @@ export type HandleGetDeploymentsData = {
     url: '/api/v1/deployment';
 };
 
-export type HandleGetDeploymentsResponses = {
+export type GetAllDeploymentsResponses = {
     /**
      * OK
      */
     200: DeploymentDeploymentList;
 };
 
-export type HandleGetDeploymentsResponse = HandleGetDeploymentsResponses[keyof HandleGetDeploymentsResponses];
+export type GetAllDeploymentsResponse = GetAllDeploymentsResponses[keyof GetAllDeploymentsResponses];
 
-export type HandleGetDeployments2Data = {
+export type GetDeploymentsData = {
     body?: never;
     path: {
         /**
@@ -5688,16 +5688,16 @@ export type HandleGetDeployments2Data = {
     url: '/api/v1/deployment/{namespace}';
 };
 
-export type HandleGetDeployments2Responses = {
+export type GetDeploymentsResponses = {
     /**
      * OK
      */
     200: DeploymentDeploymentList;
 };
 
-export type HandleGetDeployments2Response = HandleGetDeployments2Responses[keyof HandleGetDeployments2Responses];
+export type GetDeploymentsResponse = GetDeploymentsResponses[keyof GetDeploymentsResponses];
 
-export type HandleGetDeploymentDetailData = {
+export type GetDeploymentData = {
     body?: never;
     path: {
         /**
@@ -5738,16 +5738,16 @@ export type HandleGetDeploymentDetailData = {
     url: '/api/v1/deployment/{namespace}/{deployment}';
 };
 
-export type HandleGetDeploymentDetailResponses = {
+export type GetDeploymentResponses = {
     /**
      * OK
      */
     200: DeploymentDeploymentDetail;
 };
 
-export type HandleGetDeploymentDetailResponse = HandleGetDeploymentDetailResponses[keyof HandleGetDeploymentDetailResponses];
+export type GetDeploymentResponse = GetDeploymentResponses[keyof GetDeploymentResponses];
 
-export type HandleGetDeploymentEventsData = {
+export type GetDeploymentEventsData = {
     body?: never;
     path: {
         /**
@@ -5788,16 +5788,16 @@ export type HandleGetDeploymentEventsData = {
     url: '/api/v1/deployment/{namespace}/{deployment}/event';
 };
 
-export type HandleGetDeploymentEventsResponses = {
+export type GetDeploymentEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetDeploymentEventsResponse = HandleGetDeploymentEventsResponses[keyof HandleGetDeploymentEventsResponses];
+export type GetDeploymentEventsResponse = GetDeploymentEventsResponses[keyof GetDeploymentEventsResponses];
 
-export type HandleGetDeploymentNewReplicaSetData = {
+export type GetDeploymentNewReplicaSetData = {
     body?: never;
     path: {
         /**
@@ -5838,16 +5838,16 @@ export type HandleGetDeploymentNewReplicaSetData = {
     url: '/api/v1/deployment/{namespace}/{deployment}/newreplicaset';
 };
 
-export type HandleGetDeploymentNewReplicaSetResponses = {
+export type GetDeploymentNewReplicaSetResponses = {
     /**
      * OK
      */
     200: ReplicasetReplicaSet;
 };
 
-export type HandleGetDeploymentNewReplicaSetResponse = HandleGetDeploymentNewReplicaSetResponses[keyof HandleGetDeploymentNewReplicaSetResponses];
+export type GetDeploymentNewReplicaSetResponse = GetDeploymentNewReplicaSetResponses[keyof GetDeploymentNewReplicaSetResponses];
 
-export type HandleGetDeploymentOldReplicaSetsData = {
+export type GetDeploymentOldReplicaSetsData = {
     body?: never;
     path: {
         /**
@@ -5888,16 +5888,16 @@ export type HandleGetDeploymentOldReplicaSetsData = {
     url: '/api/v1/deployment/{namespace}/{deployment}/oldreplicaset';
 };
 
-export type HandleGetDeploymentOldReplicaSetsResponses = {
+export type GetDeploymentOldReplicaSetsResponses = {
     /**
      * OK
      */
     200: ReplicasetReplicaSetList;
 };
 
-export type HandleGetDeploymentOldReplicaSetsResponse = HandleGetDeploymentOldReplicaSetsResponses[keyof HandleGetDeploymentOldReplicaSetsResponses];
+export type GetDeploymentOldReplicaSetsResponse = GetDeploymentOldReplicaSetsResponses[keyof GetDeploymentOldReplicaSetsResponses];
 
-export type HandleDeploymentPauseData = {
+export type PauseDeploymentData = {
     body?: never;
     path: {
         /**
@@ -5938,16 +5938,16 @@ export type HandleDeploymentPauseData = {
     url: '/api/v1/deployment/{namespace}/{deployment}/pause';
 };
 
-export type HandleDeploymentPauseResponses = {
+export type PauseDeploymentResponses = {
     /**
      * OK
      */
     200: DeploymentDeploymentDetail;
 };
 
-export type HandleDeploymentPauseResponse = HandleDeploymentPauseResponses[keyof HandleDeploymentPauseResponses];
+export type PauseDeploymentResponse = PauseDeploymentResponses[keyof PauseDeploymentResponses];
 
-export type HandleDeploymentRestartData = {
+export type RestartDeploymentData = {
     body?: never;
     path: {
         /**
@@ -5988,16 +5988,16 @@ export type HandleDeploymentRestartData = {
     url: '/api/v1/deployment/{namespace}/{deployment}/restart';
 };
 
-export type HandleDeploymentRestartResponses = {
+export type RestartDeploymentResponses = {
     /**
      * OK
      */
     200: DeploymentRolloutSpec;
 };
 
-export type HandleDeploymentRestartResponse = HandleDeploymentRestartResponses[keyof HandleDeploymentRestartResponses];
+export type RestartDeploymentResponse = RestartDeploymentResponses[keyof RestartDeploymentResponses];
 
-export type HandleDeploymentResumeData = {
+export type ResumeDeploymentData = {
     body?: never;
     path: {
         /**
@@ -6038,16 +6038,16 @@ export type HandleDeploymentResumeData = {
     url: '/api/v1/deployment/{namespace}/{deployment}/resume';
 };
 
-export type HandleDeploymentResumeResponses = {
+export type ResumeDeploymentResponses = {
     /**
      * OK
      */
     200: DeploymentDeploymentDetail;
 };
 
-export type HandleDeploymentResumeResponse = HandleDeploymentResumeResponses[keyof HandleDeploymentResumeResponses];
+export type ResumeDeploymentResponse = ResumeDeploymentResponses[keyof ResumeDeploymentResponses];
 
-export type HandleDeploymentRollbackData = {
+export type RollbackDeploymentData = {
     body: DeploymentRolloutSpec;
     path: {
         /**
@@ -6088,16 +6088,16 @@ export type HandleDeploymentRollbackData = {
     url: '/api/v1/deployment/{namespace}/{deployment}/rollback';
 };
 
-export type HandleDeploymentRollbackResponses = {
+export type RollbackDeploymentResponses = {
     /**
      * OK
      */
     200: DeploymentRolloutSpec;
 };
 
-export type HandleDeploymentRollbackResponse = HandleDeploymentRollbackResponses[keyof HandleDeploymentRollbackResponses];
+export type RollbackDeploymentResponse = RollbackDeploymentResponses[keyof RollbackDeploymentResponses];
 
-export type HandleGetEventListData = {
+export type GetAllEventsData = {
     body?: never;
     path?: never;
     query?: {
@@ -6129,16 +6129,16 @@ export type HandleGetEventListData = {
     url: '/api/v1/event';
 };
 
-export type HandleGetEventListResponses = {
+export type GetAllEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetEventListResponse = HandleGetEventListResponses[keyof HandleGetEventListResponses];
+export type GetAllEventsResponse = GetAllEventsResponses[keyof GetAllEventsResponses];
 
-export type HandleGetEventList2Data = {
+export type GetEventsData = {
     body?: never;
     path: {
         /**
@@ -6175,16 +6175,16 @@ export type HandleGetEventList2Data = {
     url: '/api/v1/event/{namespace}';
 };
 
-export type HandleGetEventList2Responses = {
+export type GetEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetEventList2Response = HandleGetEventList2Responses[keyof HandleGetEventList2Responses];
+export type GetEventsResponse = GetEventsResponses[keyof GetEventsResponses];
 
-export type HandleGetHorizontalPodAutoscalerListData = {
+export type GetAllHorizontalPodAutoscalersData = {
     body?: never;
     path?: never;
     query?: {
@@ -6216,16 +6216,16 @@ export type HandleGetHorizontalPodAutoscalerListData = {
     url: '/api/v1/horizontalpodautoscaler';
 };
 
-export type HandleGetHorizontalPodAutoscalerListResponses = {
+export type GetAllHorizontalPodAutoscalersResponses = {
     /**
      * OK
      */
     200: HorizontalpodautoscalerHorizontalPodAutoscalerList;
 };
 
-export type HandleGetHorizontalPodAutoscalerListResponse = HandleGetHorizontalPodAutoscalerListResponses[keyof HandleGetHorizontalPodAutoscalerListResponses];
+export type GetAllHorizontalPodAutoscalersResponse = GetAllHorizontalPodAutoscalersResponses[keyof GetAllHorizontalPodAutoscalersResponses];
 
-export type HandleGetHorizontalPodAutoscalerList2Data = {
+export type GetHorizontalPodAutoscalersData = {
     body?: never;
     path: {
         /**
@@ -6262,16 +6262,16 @@ export type HandleGetHorizontalPodAutoscalerList2Data = {
     url: '/api/v1/horizontalpodautoscaler/{namespace}';
 };
 
-export type HandleGetHorizontalPodAutoscalerList2Responses = {
+export type GetHorizontalPodAutoscalersResponses = {
     /**
      * OK
      */
     200: HorizontalpodautoscalerHorizontalPodAutoscalerList;
 };
 
-export type HandleGetHorizontalPodAutoscalerList2Response = HandleGetHorizontalPodAutoscalerList2Responses[keyof HandleGetHorizontalPodAutoscalerList2Responses];
+export type GetHorizontalPodAutoscalersResponse = GetHorizontalPodAutoscalersResponses[keyof GetHorizontalPodAutoscalersResponses];
 
-export type HandleGetHorizontalPodAutoscalerDetailData = {
+export type GetHorizontalPodAutoscalerData = {
     body?: never;
     path: {
         /**
@@ -6312,16 +6312,16 @@ export type HandleGetHorizontalPodAutoscalerDetailData = {
     url: '/api/v1/horizontalpodautoscaler/{namespace}/{horizontalpodautoscaler}';
 };
 
-export type HandleGetHorizontalPodAutoscalerDetailResponses = {
+export type GetHorizontalPodAutoscalerResponses = {
     /**
      * OK
      */
     200: HorizontalpodautoscalerHorizontalPodAutoscalerDetail;
 };
 
-export type HandleGetHorizontalPodAutoscalerDetailResponse = HandleGetHorizontalPodAutoscalerDetailResponses[keyof HandleGetHorizontalPodAutoscalerDetailResponses];
+export type GetHorizontalPodAutoscalerResponse = GetHorizontalPodAutoscalerResponses[keyof GetHorizontalPodAutoscalerResponses];
 
-export type HandleGetIngressListData = {
+export type GetAllIngressesData = {
     body?: never;
     path?: never;
     query?: {
@@ -6353,16 +6353,16 @@ export type HandleGetIngressListData = {
     url: '/api/v1/ingress';
 };
 
-export type HandleGetIngressListResponses = {
+export type GetAllIngressesResponses = {
     /**
      * OK
      */
     200: IngressIngressList;
 };
 
-export type HandleGetIngressListResponse = HandleGetIngressListResponses[keyof HandleGetIngressListResponses];
+export type GetAllIngressesResponse = GetAllIngressesResponses[keyof GetAllIngressesResponses];
 
-export type HandleGetIngressList2Data = {
+export type GetIngressesData = {
     body?: never;
     path: {
         /**
@@ -6399,16 +6399,16 @@ export type HandleGetIngressList2Data = {
     url: '/api/v1/ingress/{namespace}';
 };
 
-export type HandleGetIngressList2Responses = {
+export type GetIngressesResponses = {
     /**
      * OK
      */
     200: IngressIngressList;
 };
 
-export type HandleGetIngressList2Response = HandleGetIngressList2Responses[keyof HandleGetIngressList2Responses];
+export type GetIngressesResponse = GetIngressesResponses[keyof GetIngressesResponses];
 
-export type HandleGetIngressEventData = {
+export type GetIngressEventsData = {
     body?: never;
     path: {
         /**
@@ -6449,16 +6449,16 @@ export type HandleGetIngressEventData = {
     url: '/api/v1/ingress/{namespace}/{ingress}/event';
 };
 
-export type HandleGetIngressEventResponses = {
+export type GetIngressEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetIngressEventResponse = HandleGetIngressEventResponses[keyof HandleGetIngressEventResponses];
+export type GetIngressEventsResponse = GetIngressEventsResponses[keyof GetIngressEventsResponses];
 
-export type HandleGetIngressDetailData = {
+export type GetIngressData = {
     body?: never;
     path: {
         /**
@@ -6499,16 +6499,16 @@ export type HandleGetIngressDetailData = {
     url: '/api/v1/ingress/{namespace}/{name}';
 };
 
-export type HandleGetIngressDetailResponses = {
+export type GetIngressResponses = {
     /**
      * OK
      */
     200: IngressIngressDetail;
 };
 
-export type HandleGetIngressDetailResponse = HandleGetIngressDetailResponses[keyof HandleGetIngressDetailResponses];
+export type GetIngressResponse = GetIngressResponses[keyof GetIngressResponses];
 
-export type HandleGetIngressClassListData = {
+export type GetIngressClassesData = {
     body?: never;
     path?: never;
     query?: {
@@ -6540,16 +6540,16 @@ export type HandleGetIngressClassListData = {
     url: '/api/v1/ingressclass';
 };
 
-export type HandleGetIngressClassListResponses = {
+export type GetIngressClassesResponses = {
     /**
      * OK
      */
     200: IngressclassIngressClassList;
 };
 
-export type HandleGetIngressClassListResponse = HandleGetIngressClassListResponses[keyof HandleGetIngressClassListResponses];
+export type GetIngressClassesResponse = GetIngressClassesResponses[keyof GetIngressClassesResponses];
 
-export type HandleGetIngressClassData = {
+export type GetIngressClassData = {
     body?: never;
     path: {
         /**
@@ -6586,14 +6586,14 @@ export type HandleGetIngressClassData = {
     url: '/api/v1/ingressclass/{ingressclass}';
 };
 
-export type HandleGetIngressClassResponses = {
+export type GetIngressClassResponses = {
     /**
      * OK
      */
     200: IngressclassIngressClass;
 };
 
-export type HandleGetIngressClassResponse = HandleGetIngressClassResponses[keyof HandleGetIngressClassResponses];
+export type GetIngressClassResponse = GetIngressClassResponses[keyof GetIngressClassResponses];
 
 export type HandleGetStateData = {
     body?: never;
@@ -6634,7 +6634,7 @@ export type HandleGetStateResponses = {
     200: unknown;
 };
 
-export type HandleGetJobListData = {
+export type GetAllJobsData = {
     body?: never;
     path?: never;
     query?: {
@@ -6666,16 +6666,16 @@ export type HandleGetJobListData = {
     url: '/api/v1/job';
 };
 
-export type HandleGetJobListResponses = {
+export type GetAllJobsResponses = {
     /**
      * OK
      */
     200: JobJobList;
 };
 
-export type HandleGetJobListResponse = HandleGetJobListResponses[keyof HandleGetJobListResponses];
+export type GetAllJobsResponse = GetAllJobsResponses[keyof GetAllJobsResponses];
 
-export type HandleGetJobList2Data = {
+export type GetJobsData = {
     body?: never;
     path: {
         /**
@@ -6712,16 +6712,16 @@ export type HandleGetJobList2Data = {
     url: '/api/v1/job/{namespace}';
 };
 
-export type HandleGetJobList2Responses = {
+export type GetJobsResponses = {
     /**
      * OK
      */
     200: JobJobList;
 };
 
-export type HandleGetJobList2Response = HandleGetJobList2Responses[keyof HandleGetJobList2Responses];
+export type GetJobsResponse = GetJobsResponses[keyof GetJobsResponses];
 
-export type HandleGetJobDetailData = {
+export type GetJobData = {
     body?: never;
     path: {
         /**
@@ -6762,16 +6762,16 @@ export type HandleGetJobDetailData = {
     url: '/api/v1/job/{namespace}/{name}';
 };
 
-export type HandleGetJobDetailResponses = {
+export type GetJobResponses = {
     /**
      * OK
      */
     200: JobJobDetail;
 };
 
-export type HandleGetJobDetailResponse = HandleGetJobDetailResponses[keyof HandleGetJobDetailResponses];
+export type GetJobResponse = GetJobResponses[keyof GetJobResponses];
 
-export type HandleGetJobEventsData = {
+export type GetJobEventsData = {
     body?: never;
     path: {
         /**
@@ -6812,16 +6812,16 @@ export type HandleGetJobEventsData = {
     url: '/api/v1/job/{namespace}/{name}/event';
 };
 
-export type HandleGetJobEventsResponses = {
+export type GetJobEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetJobEventsResponse = HandleGetJobEventsResponses[keyof HandleGetJobEventsResponses];
+export type GetJobEventsResponse = GetJobEventsResponses[keyof GetJobEventsResponses];
 
-export type HandleGetJobPodsData = {
+export type GetJobPodsData = {
     body?: never;
     path: {
         /**
@@ -6862,16 +6862,16 @@ export type HandleGetJobPodsData = {
     url: '/api/v1/job/{namespace}/{name}/pod';
 };
 
-export type HandleGetJobPodsResponses = {
+export type GetJobPodsResponses = {
     /**
      * OK
      */
     200: PodPodList;
 };
 
-export type HandleGetJobPodsResponse = HandleGetJobPodsResponses[keyof HandleGetJobPodsResponses];
+export type GetJobPodsResponse = GetJobPodsResponses[keyof GetJobPodsResponses];
 
-export type HandleLogFileData = {
+export type GetLogFileData = {
     body?: never;
     path: {
         /**
@@ -6916,16 +6916,16 @@ export type HandleLogFileData = {
     url: '/api/v1/log/file/{namespace}/{pod}/{container}';
 };
 
-export type HandleLogFileResponses = {
+export type GetLogFileResponses = {
     /**
      * OK
      */
     200: Array<number>;
 };
 
-export type HandleLogFileResponse = HandleLogFileResponses[keyof HandleLogFileResponses];
+export type GetLogFileResponse = GetLogFileResponses[keyof GetLogFileResponses];
 
-export type HandleLogSourceData = {
+export type GetLogSourceData = {
     body?: never;
     path: {
         /**
@@ -6970,16 +6970,16 @@ export type HandleLogSourceData = {
     url: '/api/v1/log/source/{namespace}/{resourceName}/{resourceType}';
 };
 
-export type HandleLogSourceResponses = {
+export type GetLogSourceResponses = {
     /**
      * OK
      */
     200: ControllerLogSources;
 };
 
-export type HandleLogSourceResponse = HandleLogSourceResponses[keyof HandleLogSourceResponses];
+export type GetLogSourceResponse = GetLogSourceResponses[keyof GetLogSourceResponses];
 
-export type HandleLogsData = {
+export type GetPodLogsData = {
     body?: never;
     path: {
         /**
@@ -7020,16 +7020,16 @@ export type HandleLogsData = {
     url: '/api/v1/log/{namespace}/{pod}';
 };
 
-export type HandleLogsResponses = {
+export type GetPodLogsResponses = {
     /**
      * OK
      */
     200: LogsLogDetails;
 };
 
-export type HandleLogsResponse = HandleLogsResponses[keyof HandleLogsResponses];
+export type GetPodLogsResponse = GetPodLogsResponses[keyof GetPodLogsResponses];
 
-export type HandleLogs2Data = {
+export type GetContainerLogsData = {
     body?: never;
     path: {
         /**
@@ -7074,16 +7074,16 @@ export type HandleLogs2Data = {
     url: '/api/v1/log/{namespace}/{pod}/{container}';
 };
 
-export type HandleLogs2Responses = {
+export type GetContainerLogsResponses = {
     /**
      * OK
      */
     200: LogsLogDetails;
 };
 
-export type HandleLogs2Response = HandleLogs2Responses[keyof HandleLogs2Responses];
+export type GetContainerLogsResponse = GetContainerLogsResponses[keyof GetContainerLogsResponses];
 
-export type HandleGetNamespacesData = {
+export type GetNamespacesData = {
     body?: never;
     path?: never;
     query?: {
@@ -7115,16 +7115,16 @@ export type HandleGetNamespacesData = {
     url: '/api/v1/namespace';
 };
 
-export type HandleGetNamespacesResponses = {
+export type GetNamespacesResponses = {
     /**
      * OK
      */
     200: NamespaceNamespaceList;
 };
 
-export type HandleGetNamespacesResponse = HandleGetNamespacesResponses[keyof HandleGetNamespacesResponses];
+export type GetNamespacesResponse = GetNamespacesResponses[keyof GetNamespacesResponses];
 
-export type HandleCreateNamespaceData = {
+export type CreateNamespaceData = {
     body: NamespaceNamespaceSpec;
     path?: never;
     query?: {
@@ -7156,16 +7156,16 @@ export type HandleCreateNamespaceData = {
     url: '/api/v1/namespace';
 };
 
-export type HandleCreateNamespaceResponses = {
+export type CreateNamespaceResponses = {
     /**
      * OK
      */
     200: NamespaceNamespaceSpec;
 };
 
-export type HandleCreateNamespaceResponse = HandleCreateNamespaceResponses[keyof HandleCreateNamespaceResponses];
+export type CreateNamespaceResponse = CreateNamespaceResponses[keyof CreateNamespaceResponses];
 
-export type HandleGetNamespaceDetailData = {
+export type GetNamespaceData = {
     body?: never;
     path: {
         /**
@@ -7202,16 +7202,16 @@ export type HandleGetNamespaceDetailData = {
     url: '/api/v1/namespace/{name}';
 };
 
-export type HandleGetNamespaceDetailResponses = {
+export type GetNamespaceResponses = {
     /**
      * OK
      */
     200: NamespaceNamespaceDetail;
 };
 
-export type HandleGetNamespaceDetailResponse = HandleGetNamespaceDetailResponses[keyof HandleGetNamespaceDetailResponses];
+export type GetNamespaceResponse = GetNamespaceResponses[keyof GetNamespaceResponses];
 
-export type HandleGetNamespaceEventsData = {
+export type GetNamespaceEventsData = {
     body?: never;
     path: {
         /**
@@ -7248,16 +7248,16 @@ export type HandleGetNamespaceEventsData = {
     url: '/api/v1/namespace/{name}/event';
 };
 
-export type HandleGetNamespaceEventsResponses = {
+export type GetNamespaceEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetNamespaceEventsResponse = HandleGetNamespaceEventsResponses[keyof HandleGetNamespaceEventsResponses];
+export type GetNamespaceEventsResponse = GetNamespaceEventsResponses[keyof GetNamespaceEventsResponses];
 
-export type HandleGetNetworkPolicyListData = {
+export type GetAllNetworkPoliciesData = {
     body?: never;
     path?: never;
     query?: {
@@ -7289,16 +7289,16 @@ export type HandleGetNetworkPolicyListData = {
     url: '/api/v1/networkpolicy';
 };
 
-export type HandleGetNetworkPolicyListResponses = {
+export type GetAllNetworkPoliciesResponses = {
     /**
      * OK
      */
     200: NetworkpolicyNetworkPolicyList;
 };
 
-export type HandleGetNetworkPolicyListResponse = HandleGetNetworkPolicyListResponses[keyof HandleGetNetworkPolicyListResponses];
+export type GetAllNetworkPoliciesResponse = GetAllNetworkPoliciesResponses[keyof GetAllNetworkPoliciesResponses];
 
-export type HandleGetNetworkPolicyList2Data = {
+export type GetNetworkPoliciesData = {
     body?: never;
     path: {
         /**
@@ -7335,16 +7335,16 @@ export type HandleGetNetworkPolicyList2Data = {
     url: '/api/v1/networkpolicy/{namespace}';
 };
 
-export type HandleGetNetworkPolicyList2Responses = {
+export type GetNetworkPoliciesResponses = {
     /**
      * OK
      */
     200: NetworkpolicyNetworkPolicyList;
 };
 
-export type HandleGetNetworkPolicyList2Response = HandleGetNetworkPolicyList2Responses[keyof HandleGetNetworkPolicyList2Responses];
+export type GetNetworkPoliciesResponse = GetNetworkPoliciesResponses[keyof GetNetworkPoliciesResponses];
 
-export type HandleGetNetworkPolicyDetailData = {
+export type GetNetworkPolicyData = {
     body?: never;
     path: {
         /**
@@ -7385,16 +7385,16 @@ export type HandleGetNetworkPolicyDetailData = {
     url: '/api/v1/networkpolicy/{namespace}/{networkpolicy}';
 };
 
-export type HandleGetNetworkPolicyDetailResponses = {
+export type GetNetworkPolicyResponses = {
     /**
      * OK
      */
     200: NetworkpolicyNetworkPolicyDetail;
 };
 
-export type HandleGetNetworkPolicyDetailResponse = HandleGetNetworkPolicyDetailResponses[keyof HandleGetNetworkPolicyDetailResponses];
+export type GetNetworkPolicyResponse = GetNetworkPolicyResponses[keyof GetNetworkPolicyResponses];
 
-export type HandleGetNodeListData = {
+export type GetNodesData = {
     body?: never;
     path?: never;
     query?: {
@@ -7426,16 +7426,16 @@ export type HandleGetNodeListData = {
     url: '/api/v1/node';
 };
 
-export type HandleGetNodeListResponses = {
+export type GetNodesResponses = {
     /**
      * OK
      */
     200: NodeNodeList;
 };
 
-export type HandleGetNodeListResponse = HandleGetNodeListResponses[keyof HandleGetNodeListResponses];
+export type GetNodesResponse = GetNodesResponses[keyof GetNodesResponses];
 
-export type HandleGetNodeDetailData = {
+export type GetNodeData = {
     body?: never;
     path: {
         /**
@@ -7472,16 +7472,16 @@ export type HandleGetNodeDetailData = {
     url: '/api/v1/node/{name}';
 };
 
-export type HandleGetNodeDetailResponses = {
+export type GetNodeResponses = {
     /**
      * OK
      */
     200: NodeNodeDetail;
 };
 
-export type HandleGetNodeDetailResponse = HandleGetNodeDetailResponses[keyof HandleGetNodeDetailResponses];
+export type GetNodeResponse = GetNodeResponses[keyof GetNodeResponses];
 
-export type HandleNodeDrainData = {
+export type DrainNodeData = {
     body: NodeNodeDrainSpec;
     path: {
         /**
@@ -7518,14 +7518,14 @@ export type HandleNodeDrainData = {
     url: '/api/v1/node/{name}/drain';
 };
 
-export type HandleNodeDrainResponses = {
+export type DrainNodeResponses = {
     /**
      * OK
      */
     200: unknown;
 };
 
-export type HandleGetNodeEventsData = {
+export type GetNodeEventsData = {
     body?: never;
     path: {
         /**
@@ -7562,16 +7562,16 @@ export type HandleGetNodeEventsData = {
     url: '/api/v1/node/{name}/event';
 };
 
-export type HandleGetNodeEventsResponses = {
+export type GetNodeEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetNodeEventsResponse = HandleGetNodeEventsResponses[keyof HandleGetNodeEventsResponses];
+export type GetNodeEventsResponse = GetNodeEventsResponses[keyof GetNodeEventsResponses];
 
-export type HandleGetNodePodsData = {
+export type GetNodePodsData = {
     body?: never;
     path: {
         /**
@@ -7608,16 +7608,16 @@ export type HandleGetNodePodsData = {
     url: '/api/v1/node/{name}/pod';
 };
 
-export type HandleGetNodePodsResponses = {
+export type GetNodePodsResponses = {
     /**
      * OK
      */
     200: PodPodList;
 };
 
-export type HandleGetNodePodsResponse = HandleGetNodePodsResponses[keyof HandleGetNodePodsResponses];
+export type GetNodePodsResponse = GetNodePodsResponses[keyof GetNodePodsResponses];
 
-export type HandleGetPersistentVolumeListData = {
+export type GetPersistentVolumesData = {
     body?: never;
     path?: never;
     query?: {
@@ -7649,16 +7649,16 @@ export type HandleGetPersistentVolumeListData = {
     url: '/api/v1/persistentvolume';
 };
 
-export type HandleGetPersistentVolumeListResponses = {
+export type GetPersistentVolumesResponses = {
     /**
      * OK
      */
     200: PersistentvolumePersistentVolumeList;
 };
 
-export type HandleGetPersistentVolumeListResponse = HandleGetPersistentVolumeListResponses[keyof HandleGetPersistentVolumeListResponses];
+export type GetPersistentVolumesResponse = GetPersistentVolumesResponses[keyof GetPersistentVolumesResponses];
 
-export type HandleGetPersistentVolumeDetailData = {
+export type GetPersistentVolumeWithNamespaceData = {
     body?: never;
     path: {
         /**
@@ -7695,16 +7695,16 @@ export type HandleGetPersistentVolumeDetailData = {
     url: '/api/v1/persistentvolume/namespace/{namespace}/name/{persistentvolume}';
 };
 
-export type HandleGetPersistentVolumeDetailResponses = {
+export type GetPersistentVolumeWithNamespaceResponses = {
     /**
      * OK
      */
     200: PersistentvolumePersistentVolumeDetail;
 };
 
-export type HandleGetPersistentVolumeDetailResponse = HandleGetPersistentVolumeDetailResponses[keyof HandleGetPersistentVolumeDetailResponses];
+export type GetPersistentVolumeWithNamespaceResponse = GetPersistentVolumeWithNamespaceResponses[keyof GetPersistentVolumeWithNamespaceResponses];
 
-export type HandleGetPersistentVolumeDetail2Data = {
+export type GetPersistentVolumeData = {
     body?: never;
     path: {
         /**
@@ -7741,16 +7741,16 @@ export type HandleGetPersistentVolumeDetail2Data = {
     url: '/api/v1/persistentvolume/{persistentvolume}';
 };
 
-export type HandleGetPersistentVolumeDetail2Responses = {
+export type GetPersistentVolumeResponses = {
     /**
      * OK
      */
     200: PersistentvolumePersistentVolumeDetail;
 };
 
-export type HandleGetPersistentVolumeDetail2Response = HandleGetPersistentVolumeDetail2Responses[keyof HandleGetPersistentVolumeDetail2Responses];
+export type GetPersistentVolumeResponse = GetPersistentVolumeResponses[keyof GetPersistentVolumeResponses];
 
-export type HandleGetPersistentVolumeClaimListData = {
+export type GetAllPersistentVolumeClaimsData = {
     body?: never;
     path?: never;
     query?: {
@@ -7782,16 +7782,16 @@ export type HandleGetPersistentVolumeClaimListData = {
     url: '/api/v1/persistentvolumeclaim';
 };
 
-export type HandleGetPersistentVolumeClaimListResponses = {
+export type GetAllPersistentVolumeClaimsResponses = {
     /**
      * OK
      */
     200: PersistentvolumeclaimPersistentVolumeClaimList;
 };
 
-export type HandleGetPersistentVolumeClaimListResponse = HandleGetPersistentVolumeClaimListResponses[keyof HandleGetPersistentVolumeClaimListResponses];
+export type GetAllPersistentVolumeClaimsResponse = GetAllPersistentVolumeClaimsResponses[keyof GetAllPersistentVolumeClaimsResponses];
 
-export type HandleGetPersistentVolumeClaimList2Data = {
+export type GetPersistentVolumeClaimsData = {
     body?: never;
     path: {
         /**
@@ -7828,16 +7828,16 @@ export type HandleGetPersistentVolumeClaimList2Data = {
     url: '/api/v1/persistentvolumeclaim/{namespace}';
 };
 
-export type HandleGetPersistentVolumeClaimList2Responses = {
+export type GetPersistentVolumeClaimsResponses = {
     /**
      * OK
      */
     200: PersistentvolumeclaimPersistentVolumeClaimList;
 };
 
-export type HandleGetPersistentVolumeClaimList2Response = HandleGetPersistentVolumeClaimList2Responses[keyof HandleGetPersistentVolumeClaimList2Responses];
+export type GetPersistentVolumeClaimsResponse = GetPersistentVolumeClaimsResponses[keyof GetPersistentVolumeClaimsResponses];
 
-export type HandleGetPersistentVolumeClaimDetailData = {
+export type GetPersistentVolumeClaimData = {
     body?: never;
     path: {
         /**
@@ -7878,16 +7878,16 @@ export type HandleGetPersistentVolumeClaimDetailData = {
     url: '/api/v1/persistentvolumeclaim/{namespace}/{name}';
 };
 
-export type HandleGetPersistentVolumeClaimDetailResponses = {
+export type GetPersistentVolumeClaimResponses = {
     /**
      * OK
      */
     200: PersistentvolumeclaimPersistentVolumeClaimDetail;
 };
 
-export type HandleGetPersistentVolumeClaimDetailResponse = HandleGetPersistentVolumeClaimDetailResponses[keyof HandleGetPersistentVolumeClaimDetailResponses];
+export type GetPersistentVolumeClaimResponse = GetPersistentVolumeClaimResponses[keyof GetPersistentVolumeClaimResponses];
 
-export type HandleGetPodsData = {
+export type GetAllPodsData = {
     body?: never;
     path?: never;
     query?: {
@@ -7919,16 +7919,16 @@ export type HandleGetPodsData = {
     url: '/api/v1/pod';
 };
 
-export type HandleGetPodsResponses = {
+export type GetAllPodsResponses = {
     /**
      * OK
      */
     200: PodPodList;
 };
 
-export type HandleGetPodsResponse = HandleGetPodsResponses[keyof HandleGetPodsResponses];
+export type GetAllPodsResponse = GetAllPodsResponses[keyof GetAllPodsResponses];
 
-export type HandleGetPods2Data = {
+export type GetPodsData = {
     body?: never;
     path: {
         /**
@@ -7965,16 +7965,16 @@ export type HandleGetPods2Data = {
     url: '/api/v1/pod/{namespace}';
 };
 
-export type HandleGetPods2Responses = {
+export type GetPodsResponses = {
     /**
      * OK
      */
     200: PodPodList;
 };
 
-export type HandleGetPods2Response = HandleGetPods2Responses[keyof HandleGetPods2Responses];
+export type GetPodsResponse = GetPodsResponses[keyof GetPodsResponses];
 
-export type HandleGetPodDetailData = {
+export type GetPodData = {
     body?: never;
     path: {
         /**
@@ -8015,16 +8015,16 @@ export type HandleGetPodDetailData = {
     url: '/api/v1/pod/{namespace}/{pod}';
 };
 
-export type HandleGetPodDetailResponses = {
+export type GetPodResponses = {
     /**
      * OK
      */
     200: PodPodDetail;
 };
 
-export type HandleGetPodDetailResponse = HandleGetPodDetailResponses[keyof HandleGetPodDetailResponses];
+export type GetPodResponse = GetPodResponses[keyof GetPodResponses];
 
-export type HandleGetPodContainersData = {
+export type GetPodContainersData = {
     body?: never;
     path: {
         /**
@@ -8065,16 +8065,16 @@ export type HandleGetPodContainersData = {
     url: '/api/v1/pod/{namespace}/{pod}/container';
 };
 
-export type HandleGetPodContainersResponses = {
+export type GetPodContainersResponses = {
     /**
      * OK
      */
     200: PodPodDetail;
 };
 
-export type HandleGetPodContainersResponse = HandleGetPodContainersResponses[keyof HandleGetPodContainersResponses];
+export type GetPodContainersResponse = GetPodContainersResponses[keyof GetPodContainersResponses];
 
-export type HandleGetPodEventsData = {
+export type GetPodEventsData = {
     body?: never;
     path: {
         /**
@@ -8115,16 +8115,16 @@ export type HandleGetPodEventsData = {
     url: '/api/v1/pod/{namespace}/{pod}/event';
 };
 
-export type HandleGetPodEventsResponses = {
+export type GetPodEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetPodEventsResponse = HandleGetPodEventsResponses[keyof HandleGetPodEventsResponses];
+export type GetPodEventsResponse = GetPodEventsResponses[keyof GetPodEventsResponses];
 
-export type HandleGetPodPersistentVolumeClaimsData = {
+export type GetPodPersistentVolumeClaimsData = {
     body?: never;
     path: {
         /**
@@ -8165,16 +8165,16 @@ export type HandleGetPodPersistentVolumeClaimsData = {
     url: '/api/v1/pod/{namespace}/{pod}/persistentvolumeclaim';
 };
 
-export type HandleGetPodPersistentVolumeClaimsResponses = {
+export type GetPodPersistentVolumeClaimsResponses = {
     /**
      * OK
      */
     200: PersistentvolumeclaimPersistentVolumeClaimList;
 };
 
-export type HandleGetPodPersistentVolumeClaimsResponse = HandleGetPodPersistentVolumeClaimsResponses[keyof HandleGetPodPersistentVolumeClaimsResponses];
+export type GetPodPersistentVolumeClaimsResponse = GetPodPersistentVolumeClaimsResponses[keyof GetPodPersistentVolumeClaimsResponses];
 
-export type HandleExecShellData = {
+export type ExecShellData = {
     body?: never;
     path: {
         /**
@@ -8219,16 +8219,16 @@ export type HandleExecShellData = {
     url: '/api/v1/pod/{namespace}/{pod}/shell/{container}';
 };
 
-export type HandleExecShellResponses = {
+export type ExecShellResponses = {
     /**
      * OK
      */
     200: HandlerTerminalResponse;
 };
 
-export type HandleExecShellResponse = HandleExecShellResponses[keyof HandleExecShellResponses];
+export type ExecShellResponse = ExecShellResponses[keyof ExecShellResponses];
 
-export type HandleGetPodDisruptionBudgetListData = {
+export type GetAllPodDisruptionBudgetsData = {
     body?: never;
     path?: never;
     query?: {
@@ -8260,16 +8260,16 @@ export type HandleGetPodDisruptionBudgetListData = {
     url: '/api/v1/poddisruptionbudget';
 };
 
-export type HandleGetPodDisruptionBudgetListResponses = {
+export type GetAllPodDisruptionBudgetsResponses = {
     /**
      * OK
      */
     200: PoddisruptionbudgetPodDisruptionBudgetList;
 };
 
-export type HandleGetPodDisruptionBudgetListResponse = HandleGetPodDisruptionBudgetListResponses[keyof HandleGetPodDisruptionBudgetListResponses];
+export type GetAllPodDisruptionBudgetsResponse = GetAllPodDisruptionBudgetsResponses[keyof GetAllPodDisruptionBudgetsResponses];
 
-export type HandleGetPodDisruptionBudgetList2Data = {
+export type GetPodDisruptionBudgetsData = {
     body?: never;
     path: {
         /**
@@ -8306,16 +8306,16 @@ export type HandleGetPodDisruptionBudgetList2Data = {
     url: '/api/v1/poddisruptionbudget/{namespace}';
 };
 
-export type HandleGetPodDisruptionBudgetList2Responses = {
+export type GetPodDisruptionBudgetsResponses = {
     /**
      * OK
      */
     200: PoddisruptionbudgetPodDisruptionBudgetList;
 };
 
-export type HandleGetPodDisruptionBudgetList2Response = HandleGetPodDisruptionBudgetList2Responses[keyof HandleGetPodDisruptionBudgetList2Responses];
+export type GetPodDisruptionBudgetsResponse = GetPodDisruptionBudgetsResponses[keyof GetPodDisruptionBudgetsResponses];
 
-export type HandleGetPodDisruptionBudgetDetailData = {
+export type GetPodDisruptionBudgetData = {
     body?: never;
     path: {
         /**
@@ -8356,16 +8356,16 @@ export type HandleGetPodDisruptionBudgetDetailData = {
     url: '/api/v1/poddisruptionbudget/{namespace}/{name}';
 };
 
-export type HandleGetPodDisruptionBudgetDetailResponses = {
+export type GetPodDisruptionBudgetResponses = {
     /**
      * OK
      */
     200: PoddisruptionbudgetPodDisruptionBudgetDetail;
 };
 
-export type HandleGetPodDisruptionBudgetDetailResponse = HandleGetPodDisruptionBudgetDetailResponses[keyof HandleGetPodDisruptionBudgetDetailResponses];
+export type GetPodDisruptionBudgetResponse = GetPodDisruptionBudgetResponses[keyof GetPodDisruptionBudgetResponses];
 
-export type HandleGetReplicaSetsData = {
+export type GetAllReplicaSetsData = {
     body?: never;
     path?: never;
     query?: {
@@ -8397,16 +8397,16 @@ export type HandleGetReplicaSetsData = {
     url: '/api/v1/replicaset';
 };
 
-export type HandleGetReplicaSetsResponses = {
+export type GetAllReplicaSetsResponses = {
     /**
      * OK
      */
     200: ReplicasetReplicaSetList;
 };
 
-export type HandleGetReplicaSetsResponse = HandleGetReplicaSetsResponses[keyof HandleGetReplicaSetsResponses];
+export type GetAllReplicaSetsResponse = GetAllReplicaSetsResponses[keyof GetAllReplicaSetsResponses];
 
-export type HandleGetReplicaSets2Data = {
+export type GetReplicaSetsData = {
     body?: never;
     path: {
         /**
@@ -8443,16 +8443,16 @@ export type HandleGetReplicaSets2Data = {
     url: '/api/v1/replicaset/{namespace}';
 };
 
-export type HandleGetReplicaSets2Responses = {
+export type GetReplicaSetsResponses = {
     /**
      * OK
      */
     200: ReplicasetReplicaSetList;
 };
 
-export type HandleGetReplicaSets2Response = HandleGetReplicaSets2Responses[keyof HandleGetReplicaSets2Responses];
+export type GetReplicaSetsResponse = GetReplicaSetsResponses[keyof GetReplicaSetsResponses];
 
-export type HandleGetReplicaSetDetailData = {
+export type GetReplicaSetData = {
     body?: never;
     path: {
         /**
@@ -8493,16 +8493,16 @@ export type HandleGetReplicaSetDetailData = {
     url: '/api/v1/replicaset/{namespace}/{replicaSet}';
 };
 
-export type HandleGetReplicaSetDetailResponses = {
+export type GetReplicaSetResponses = {
     /**
      * OK
      */
     200: ReplicasetReplicaSetDetail;
 };
 
-export type HandleGetReplicaSetDetailResponse = HandleGetReplicaSetDetailResponses[keyof HandleGetReplicaSetDetailResponses];
+export type GetReplicaSetResponse = GetReplicaSetResponses[keyof GetReplicaSetResponses];
 
-export type HandleGetReplicaSetEventsData = {
+export type GetReplicaSetEventsData = {
     body?: never;
     path: {
         /**
@@ -8543,16 +8543,16 @@ export type HandleGetReplicaSetEventsData = {
     url: '/api/v1/replicaset/{namespace}/{replicaSet}/event';
 };
 
-export type HandleGetReplicaSetEventsResponses = {
+export type GetReplicaSetEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetReplicaSetEventsResponse = HandleGetReplicaSetEventsResponses[keyof HandleGetReplicaSetEventsResponses];
+export type GetReplicaSetEventsResponse = GetReplicaSetEventsResponses[keyof GetReplicaSetEventsResponses];
 
-export type HandleGetReplicaSetPodsData = {
+export type GetReplicaSetPodsData = {
     body?: never;
     path: {
         /**
@@ -8593,16 +8593,16 @@ export type HandleGetReplicaSetPodsData = {
     url: '/api/v1/replicaset/{namespace}/{replicaSet}/pod';
 };
 
-export type HandleGetReplicaSetPodsResponses = {
+export type GetReplicaSetPodsResponses = {
     /**
      * OK
      */
     200: PodPodList;
 };
 
-export type HandleGetReplicaSetPodsResponse = HandleGetReplicaSetPodsResponses[keyof HandleGetReplicaSetPodsResponses];
+export type GetReplicaSetPodsResponse = GetReplicaSetPodsResponses[keyof GetReplicaSetPodsResponses];
 
-export type HandleGetReplicaSetServicesData = {
+export type GetReplicaSetServicesData = {
     body?: never;
     path: {
         /**
@@ -8643,16 +8643,16 @@ export type HandleGetReplicaSetServicesData = {
     url: '/api/v1/replicaset/{namespace}/{replicaSet}/service';
 };
 
-export type HandleGetReplicaSetServicesResponses = {
+export type GetReplicaSetServicesResponses = {
     /**
      * OK
      */
     200: ServiceServiceList;
 };
 
-export type HandleGetReplicaSetServicesResponse = HandleGetReplicaSetServicesResponses[keyof HandleGetReplicaSetServicesResponses];
+export type GetReplicaSetServicesResponse = GetReplicaSetServicesResponses[keyof GetReplicaSetServicesResponses];
 
-export type HandleGetReplicationControllerListData = {
+export type GetAllReplicationControllersData = {
     body?: never;
     path?: never;
     query?: {
@@ -8684,16 +8684,16 @@ export type HandleGetReplicationControllerListData = {
     url: '/api/v1/replicationcontroller';
 };
 
-export type HandleGetReplicationControllerListResponses = {
+export type GetAllReplicationControllersResponses = {
     /**
      * OK
      */
     200: ReplicationcontrollerReplicationControllerList;
 };
 
-export type HandleGetReplicationControllerListResponse = HandleGetReplicationControllerListResponses[keyof HandleGetReplicationControllerListResponses];
+export type GetAllReplicationControllersResponse = GetAllReplicationControllersResponses[keyof GetAllReplicationControllersResponses];
 
-export type HandleGetReplicationControllerList2Data = {
+export type GetReplicationControllersData = {
     body?: never;
     path: {
         /**
@@ -8730,16 +8730,16 @@ export type HandleGetReplicationControllerList2Data = {
     url: '/api/v1/replicationcontroller/{namespace}';
 };
 
-export type HandleGetReplicationControllerList2Responses = {
+export type GetReplicationControllersResponses = {
     /**
      * OK
      */
     200: ReplicationcontrollerReplicationControllerList;
 };
 
-export type HandleGetReplicationControllerList2Response = HandleGetReplicationControllerList2Responses[keyof HandleGetReplicationControllerList2Responses];
+export type GetReplicationControllersResponse = GetReplicationControllersResponses[keyof GetReplicationControllersResponses];
 
-export type HandleGetReplicationControllerDetailData = {
+export type GetReplicationControllerData = {
     body?: never;
     path: {
         /**
@@ -8780,16 +8780,16 @@ export type HandleGetReplicationControllerDetailData = {
     url: '/api/v1/replicationcontroller/{namespace}/{replicationController}';
 };
 
-export type HandleGetReplicationControllerDetailResponses = {
+export type GetReplicationControllerResponses = {
     /**
      * OK
      */
     200: ReplicationcontrollerReplicationControllerDetail;
 };
 
-export type HandleGetReplicationControllerDetailResponse = HandleGetReplicationControllerDetailResponses[keyof HandleGetReplicationControllerDetailResponses];
+export type GetReplicationControllerResponse = GetReplicationControllerResponses[keyof GetReplicationControllerResponses];
 
-export type HandleGetReplicationControllerEventsData = {
+export type GetReplicationControllerEventsData = {
     body?: never;
     path: {
         /**
@@ -8830,16 +8830,16 @@ export type HandleGetReplicationControllerEventsData = {
     url: '/api/v1/replicationcontroller/{namespace}/{replicationController}/event';
 };
 
-export type HandleGetReplicationControllerEventsResponses = {
+export type GetReplicationControllerEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetReplicationControllerEventsResponse = HandleGetReplicationControllerEventsResponses[keyof HandleGetReplicationControllerEventsResponses];
+export type GetReplicationControllerEventsResponse = GetReplicationControllerEventsResponses[keyof GetReplicationControllerEventsResponses];
 
-export type HandleGetReplicationControllerPodsData = {
+export type GetReplicationControllerPodsData = {
     body?: never;
     path: {
         /**
@@ -8880,16 +8880,16 @@ export type HandleGetReplicationControllerPodsData = {
     url: '/api/v1/replicationcontroller/{namespace}/{replicationController}/pod';
 };
 
-export type HandleGetReplicationControllerPodsResponses = {
+export type GetReplicationControllerPodsResponses = {
     /**
      * OK
      */
     200: PodPodList;
 };
 
-export type HandleGetReplicationControllerPodsResponse = HandleGetReplicationControllerPodsResponses[keyof HandleGetReplicationControllerPodsResponses];
+export type GetReplicationControllerPodsResponse = GetReplicationControllerPodsResponses[keyof GetReplicationControllerPodsResponses];
 
-export type HandleGetReplicationControllerServicesData = {
+export type GetReplicationControllerServicesData = {
     body?: never;
     path: {
         /**
@@ -8930,16 +8930,16 @@ export type HandleGetReplicationControllerServicesData = {
     url: '/api/v1/replicationcontroller/{namespace}/{replicationController}/service';
 };
 
-export type HandleGetReplicationControllerServicesResponses = {
+export type GetReplicationControllerServicesResponses = {
     /**
      * OK
      */
     200: ServiceServiceList;
 };
 
-export type HandleGetReplicationControllerServicesResponse = HandleGetReplicationControllerServicesResponses[keyof HandleGetReplicationControllerServicesResponses];
+export type GetReplicationControllerServicesResponse = GetReplicationControllerServicesResponses[keyof GetReplicationControllerServicesResponses];
 
-export type HandleUpdateReplicasCountData = {
+export type UpdateReplicationControllerReplicasData = {
     body: ReplicationcontrollerReplicationControllerSpec;
     path: {
         /**
@@ -8980,14 +8980,14 @@ export type HandleUpdateReplicasCountData = {
     url: '/api/v1/replicationcontroller/{namespace}/{replicationController}/update/pod';
 };
 
-export type HandleUpdateReplicasCountResponses = {
+export type UpdateReplicationControllerReplicasResponses = {
     /**
      * OK
      */
     200: unknown;
 };
 
-export type HandleGetRoleListData = {
+export type GetAllRolesData = {
     body?: never;
     path?: never;
     query?: {
@@ -9019,16 +9019,16 @@ export type HandleGetRoleListData = {
     url: '/api/v1/role';
 };
 
-export type HandleGetRoleListResponses = {
+export type GetAllRolesResponses = {
     /**
      * OK
      */
     200: RoleRoleList;
 };
 
-export type HandleGetRoleListResponse = HandleGetRoleListResponses[keyof HandleGetRoleListResponses];
+export type GetAllRolesResponse = GetAllRolesResponses[keyof GetAllRolesResponses];
 
-export type HandleGetRoleList2Data = {
+export type GetRolesData = {
     body?: never;
     path: {
         /**
@@ -9065,16 +9065,16 @@ export type HandleGetRoleList2Data = {
     url: '/api/v1/role/{namespace}';
 };
 
-export type HandleGetRoleList2Responses = {
+export type GetRolesResponses = {
     /**
      * OK
      */
     200: RoleRoleList;
 };
 
-export type HandleGetRoleList2Response = HandleGetRoleList2Responses[keyof HandleGetRoleList2Responses];
+export type GetRolesResponse = GetRolesResponses[keyof GetRolesResponses];
 
-export type HandleGetRoleDetailData = {
+export type GetRoleData = {
     body?: never;
     path: {
         /**
@@ -9115,16 +9115,16 @@ export type HandleGetRoleDetailData = {
     url: '/api/v1/role/{namespace}/{name}';
 };
 
-export type HandleGetRoleDetailResponses = {
+export type GetRoleResponses = {
     /**
      * OK
      */
     200: RoleRoleDetail;
 };
 
-export type HandleGetRoleDetailResponse = HandleGetRoleDetailResponses[keyof HandleGetRoleDetailResponses];
+export type GetRoleResponse = GetRoleResponses[keyof GetRoleResponses];
 
-export type HandleGetRoleBindingListData = {
+export type GetAllRoleBindingsData = {
     body?: never;
     path?: never;
     query?: {
@@ -9156,16 +9156,16 @@ export type HandleGetRoleBindingListData = {
     url: '/api/v1/rolebinding';
 };
 
-export type HandleGetRoleBindingListResponses = {
+export type GetAllRoleBindingsResponses = {
     /**
      * OK
      */
     200: RolebindingRoleBindingList;
 };
 
-export type HandleGetRoleBindingListResponse = HandleGetRoleBindingListResponses[keyof HandleGetRoleBindingListResponses];
+export type GetAllRoleBindingsResponse = GetAllRoleBindingsResponses[keyof GetAllRoleBindingsResponses];
 
-export type HandleGetRoleBindingList2Data = {
+export type GetRoleBindingsData = {
     body?: never;
     path: {
         /**
@@ -9202,16 +9202,16 @@ export type HandleGetRoleBindingList2Data = {
     url: '/api/v1/rolebinding/{namespace}';
 };
 
-export type HandleGetRoleBindingList2Responses = {
+export type GetRoleBindingsResponses = {
     /**
      * OK
      */
     200: RolebindingRoleBindingList;
 };
 
-export type HandleGetRoleBindingList2Response = HandleGetRoleBindingList2Responses[keyof HandleGetRoleBindingList2Responses];
+export type GetRoleBindingsResponse = GetRoleBindingsResponses[keyof GetRoleBindingsResponses];
 
-export type HandleGetRoleBindingDetailData = {
+export type GetRoleBindingData = {
     body?: never;
     path: {
         /**
@@ -9252,16 +9252,16 @@ export type HandleGetRoleBindingDetailData = {
     url: '/api/v1/rolebinding/{namespace}/{name}';
 };
 
-export type HandleGetRoleBindingDetailResponses = {
+export type GetRoleBindingResponses = {
     /**
      * OK
      */
     200: RolebindingRoleBindingDetail;
 };
 
-export type HandleGetRoleBindingDetailResponse = HandleGetRoleBindingDetailResponses[keyof HandleGetRoleBindingDetailResponses];
+export type GetRoleBindingResponse = GetRoleBindingResponses[keyof GetRoleBindingResponses];
 
-export type HandleGetReplicaCountData = {
+export type GetNamespacedResourceReplicasData = {
     body?: never;
     path: {
         /**
@@ -9306,16 +9306,16 @@ export type HandleGetReplicaCountData = {
     url: '/api/v1/scale/{kind}/{namespace}/{name}';
 };
 
-export type HandleGetReplicaCountResponses = {
+export type GetNamespacedResourceReplicasResponses = {
     /**
      * OK
      */
     200: ScalingReplicaCounts;
 };
 
-export type HandleGetReplicaCountResponse = HandleGetReplicaCountResponses[keyof HandleGetReplicaCountResponses];
+export type GetNamespacedResourceReplicasResponse = GetNamespacedResourceReplicasResponses[keyof GetNamespacedResourceReplicasResponses];
 
-export type HandleScaleResourceData = {
+export type ScaleNamespacedResourceData = {
     body?: never;
     path: {
         /**
@@ -9364,16 +9364,16 @@ export type HandleScaleResourceData = {
     url: '/api/v1/scale/{kind}/{namespace}/{name}';
 };
 
-export type HandleScaleResourceResponses = {
+export type ScaleNamespacedResourceResponses = {
     /**
      * OK
      */
     200: ScalingReplicaCounts;
 };
 
-export type HandleScaleResourceResponse = HandleScaleResourceResponses[keyof HandleScaleResourceResponses];
+export type ScaleNamespacedResourceResponse = ScaleNamespacedResourceResponses[keyof ScaleNamespacedResourceResponses];
 
-export type HandleGetReplicaCount2Data = {
+export type GetResourceReplicasData = {
     body?: never;
     path: {
         /**
@@ -9414,16 +9414,16 @@ export type HandleGetReplicaCount2Data = {
     url: '/api/v1/scale/{kind}/{name}';
 };
 
-export type HandleGetReplicaCount2Responses = {
+export type GetResourceReplicasResponses = {
     /**
      * OK
      */
     200: ScalingReplicaCounts;
 };
 
-export type HandleGetReplicaCount2Response = HandleGetReplicaCount2Responses[keyof HandleGetReplicaCount2Responses];
+export type GetResourceReplicasResponse = GetResourceReplicasResponses[keyof GetResourceReplicasResponses];
 
-export type HandleScaleResource2Data = {
+export type ScaleResourceData = {
     body?: never;
     path: {
         /**
@@ -9468,16 +9468,16 @@ export type HandleScaleResource2Data = {
     url: '/api/v1/scale/{kind}/{name}';
 };
 
-export type HandleScaleResource2Responses = {
+export type ScaleResourceResponses = {
     /**
      * OK
      */
     200: ScalingReplicaCounts;
 };
 
-export type HandleScaleResource2Response = HandleScaleResource2Responses[keyof HandleScaleResource2Responses];
+export type ScaleResourceResponse = ScaleResourceResponses[keyof ScaleResourceResponses];
 
-export type HandleGetSecretListData = {
+export type GetAllSecretsData = {
     body?: never;
     path?: never;
     query?: {
@@ -9509,16 +9509,16 @@ export type HandleGetSecretListData = {
     url: '/api/v1/secret';
 };
 
-export type HandleGetSecretListResponses = {
+export type GetAllSecretsResponses = {
     /**
      * OK
      */
     200: SecretSecretList;
 };
 
-export type HandleGetSecretListResponse = HandleGetSecretListResponses[keyof HandleGetSecretListResponses];
+export type GetAllSecretsResponse = GetAllSecretsResponses[keyof GetAllSecretsResponses];
 
-export type HandleCreateImagePullSecretData = {
+export type CreateImagePullSecretData = {
     body: SecretImagePullSecretSpec;
     path?: never;
     query?: {
@@ -9550,16 +9550,16 @@ export type HandleCreateImagePullSecretData = {
     url: '/api/v1/secret';
 };
 
-export type HandleCreateImagePullSecretResponses = {
+export type CreateImagePullSecretResponses = {
     /**
      * OK
      */
     200: SecretSecret;
 };
 
-export type HandleCreateImagePullSecretResponse = HandleCreateImagePullSecretResponses[keyof HandleCreateImagePullSecretResponses];
+export type CreateImagePullSecretResponse = CreateImagePullSecretResponses[keyof CreateImagePullSecretResponses];
 
-export type HandleGetSecretList2Data = {
+export type GetSecretsData = {
     body?: never;
     path: {
         /**
@@ -9596,16 +9596,16 @@ export type HandleGetSecretList2Data = {
     url: '/api/v1/secret/{namespace}';
 };
 
-export type HandleGetSecretList2Responses = {
+export type GetSecretsResponses = {
     /**
      * OK
      */
     200: SecretSecretList;
 };
 
-export type HandleGetSecretList2Response = HandleGetSecretList2Responses[keyof HandleGetSecretList2Responses];
+export type GetSecretsResponse = GetSecretsResponses[keyof GetSecretsResponses];
 
-export type HandleGetSecretDetailData = {
+export type GetSecretData = {
     body?: never;
     path: {
         /**
@@ -9646,16 +9646,16 @@ export type HandleGetSecretDetailData = {
     url: '/api/v1/secret/{namespace}/{name}';
 };
 
-export type HandleGetSecretDetailResponses = {
+export type GetSecretResponses = {
     /**
      * OK
      */
     200: SecretSecretDetail;
 };
 
-export type HandleGetSecretDetailResponse = HandleGetSecretDetailResponses[keyof HandleGetSecretDetailResponses];
+export type GetSecretResponse = GetSecretResponses[keyof GetSecretResponses];
 
-export type HandleGetServiceListData = {
+export type GetAllServicesData = {
     body?: never;
     path?: never;
     query?: {
@@ -9687,16 +9687,16 @@ export type HandleGetServiceListData = {
     url: '/api/v1/service';
 };
 
-export type HandleGetServiceListResponses = {
+export type GetAllServicesResponses = {
     /**
      * OK
      */
     200: ServiceServiceList;
 };
 
-export type HandleGetServiceListResponse = HandleGetServiceListResponses[keyof HandleGetServiceListResponses];
+export type GetAllServicesResponse = GetAllServicesResponses[keyof GetAllServicesResponses];
 
-export type HandleGetServiceList2Data = {
+export type GetServicesData = {
     body?: never;
     path: {
         /**
@@ -9733,16 +9733,16 @@ export type HandleGetServiceList2Data = {
     url: '/api/v1/service/{namespace}';
 };
 
-export type HandleGetServiceList2Responses = {
+export type GetServicesResponses = {
     /**
      * OK
      */
     200: ServiceServiceList;
 };
 
-export type HandleGetServiceList2Response = HandleGetServiceList2Responses[keyof HandleGetServiceList2Responses];
+export type GetServicesResponse = GetServicesResponses[keyof GetServicesResponses];
 
-export type HandleGetServiceDetailData = {
+export type GetServiceData = {
     body?: never;
     path: {
         /**
@@ -9783,16 +9783,16 @@ export type HandleGetServiceDetailData = {
     url: '/api/v1/service/{namespace}/{service}';
 };
 
-export type HandleGetServiceDetailResponses = {
+export type GetServiceResponses = {
     /**
      * OK
      */
     200: ServiceServiceDetail;
 };
 
-export type HandleGetServiceDetailResponse = HandleGetServiceDetailResponses[keyof HandleGetServiceDetailResponses];
+export type GetServiceResponse = GetServiceResponses[keyof GetServiceResponses];
 
-export type HandleGetServiceEventData = {
+export type GetServiceEventsData = {
     body?: never;
     path: {
         /**
@@ -9833,16 +9833,16 @@ export type HandleGetServiceEventData = {
     url: '/api/v1/service/{namespace}/{service}/event';
 };
 
-export type HandleGetServiceEventResponses = {
+export type GetServiceEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetServiceEventResponse = HandleGetServiceEventResponses[keyof HandleGetServiceEventResponses];
+export type GetServiceEventsResponse = GetServiceEventsResponses[keyof GetServiceEventsResponses];
 
-export type HandleGetServiceIngressListData = {
+export type GetServiceIngressesData = {
     body?: never;
     path: {
         /**
@@ -9883,16 +9883,16 @@ export type HandleGetServiceIngressListData = {
     url: '/api/v1/service/{namespace}/{service}/ingress';
 };
 
-export type HandleGetServiceIngressListResponses = {
+export type GetServiceIngressesResponses = {
     /**
      * OK
      */
     200: IngressIngressList;
 };
 
-export type HandleGetServiceIngressListResponse = HandleGetServiceIngressListResponses[keyof HandleGetServiceIngressListResponses];
+export type GetServiceIngressesResponse = GetServiceIngressesResponses[keyof GetServiceIngressesResponses];
 
-export type HandleGetServicePodsData = {
+export type GetServicePodsData = {
     body?: never;
     path: {
         /**
@@ -9933,16 +9933,16 @@ export type HandleGetServicePodsData = {
     url: '/api/v1/service/{namespace}/{service}/pod';
 };
 
-export type HandleGetServicePodsResponses = {
+export type GetServicePodsResponses = {
     /**
      * OK
      */
     200: PodPodList;
 };
 
-export type HandleGetServicePodsResponse = HandleGetServicePodsResponses[keyof HandleGetServicePodsResponses];
+export type GetServicePodsResponse = GetServicePodsResponses[keyof GetServicePodsResponses];
 
-export type HandleGetServiceAccountListData = {
+export type GetAllServiceAccountsData = {
     body?: never;
     path?: never;
     query?: {
@@ -9974,16 +9974,16 @@ export type HandleGetServiceAccountListData = {
     url: '/api/v1/serviceaccount';
 };
 
-export type HandleGetServiceAccountListResponses = {
+export type GetAllServiceAccountsResponses = {
     /**
      * OK
      */
     200: ServiceaccountServiceAccountList;
 };
 
-export type HandleGetServiceAccountListResponse = HandleGetServiceAccountListResponses[keyof HandleGetServiceAccountListResponses];
+export type GetAllServiceAccountsResponse = GetAllServiceAccountsResponses[keyof GetAllServiceAccountsResponses];
 
-export type HandleGetServiceAccountList2Data = {
+export type GetServiceAccountsData = {
     body?: never;
     path: {
         /**
@@ -10020,16 +10020,16 @@ export type HandleGetServiceAccountList2Data = {
     url: '/api/v1/serviceaccount/{namespace}';
 };
 
-export type HandleGetServiceAccountList2Responses = {
+export type GetServiceAccountsResponses = {
     /**
      * OK
      */
     200: ServiceaccountServiceAccountList;
 };
 
-export type HandleGetServiceAccountList2Response = HandleGetServiceAccountList2Responses[keyof HandleGetServiceAccountList2Responses];
+export type GetServiceAccountsResponse = GetServiceAccountsResponses[keyof GetServiceAccountsResponses];
 
-export type HandleGetServiceAccountDetailData = {
+export type GetServiceAccountData = {
     body?: never;
     path: {
         /**
@@ -10070,16 +10070,16 @@ export type HandleGetServiceAccountDetailData = {
     url: '/api/v1/serviceaccount/{namespace}/{serviceaccount}';
 };
 
-export type HandleGetServiceAccountDetailResponses = {
+export type GetServiceAccountResponses = {
     /**
      * OK
      */
     200: ServiceaccountServiceAccountDetail;
 };
 
-export type HandleGetServiceAccountDetailResponse = HandleGetServiceAccountDetailResponses[keyof HandleGetServiceAccountDetailResponses];
+export type GetServiceAccountResponse = GetServiceAccountResponses[keyof GetServiceAccountResponses];
 
-export type HandleGetServiceAccountImagePullSecretsData = {
+export type GetServiceAccountImagePullSecretsData = {
     body?: never;
     path: {
         /**
@@ -10120,16 +10120,16 @@ export type HandleGetServiceAccountImagePullSecretsData = {
     url: '/api/v1/serviceaccount/{namespace}/{serviceaccount}/imagepullsecret';
 };
 
-export type HandleGetServiceAccountImagePullSecretsResponses = {
+export type GetServiceAccountImagePullSecretsResponses = {
     /**
      * OK
      */
     200: SecretSecretList;
 };
 
-export type HandleGetServiceAccountImagePullSecretsResponse = HandleGetServiceAccountImagePullSecretsResponses[keyof HandleGetServiceAccountImagePullSecretsResponses];
+export type GetServiceAccountImagePullSecretsResponse = GetServiceAccountImagePullSecretsResponses[keyof GetServiceAccountImagePullSecretsResponses];
 
-export type HandleGetServiceAccountSecretsData = {
+export type GetServiceAccountSecretsData = {
     body?: never;
     path: {
         /**
@@ -10170,16 +10170,16 @@ export type HandleGetServiceAccountSecretsData = {
     url: '/api/v1/serviceaccount/{namespace}/{serviceaccount}/secret';
 };
 
-export type HandleGetServiceAccountSecretsResponses = {
+export type GetServiceAccountSecretsResponses = {
     /**
      * OK
      */
     200: SecretSecretList;
 };
 
-export type HandleGetServiceAccountSecretsResponse = HandleGetServiceAccountSecretsResponses[keyof HandleGetServiceAccountSecretsResponses];
+export type GetServiceAccountSecretsResponse = GetServiceAccountSecretsResponses[keyof GetServiceAccountSecretsResponses];
 
-export type HandleGetStatefulSetListData = {
+export type GetAllStatefulSetsData = {
     body?: never;
     path?: never;
     query?: {
@@ -10211,16 +10211,16 @@ export type HandleGetStatefulSetListData = {
     url: '/api/v1/statefulset';
 };
 
-export type HandleGetStatefulSetListResponses = {
+export type GetAllStatefulSetsResponses = {
     /**
      * OK
      */
     200: StatefulsetStatefulSetList;
 };
 
-export type HandleGetStatefulSetListResponse = HandleGetStatefulSetListResponses[keyof HandleGetStatefulSetListResponses];
+export type GetAllStatefulSetsResponse = GetAllStatefulSetsResponses[keyof GetAllStatefulSetsResponses];
 
-export type HandleGetStatefulSetList2Data = {
+export type GetStatefulSetsData = {
     body?: never;
     path: {
         /**
@@ -10257,16 +10257,16 @@ export type HandleGetStatefulSetList2Data = {
     url: '/api/v1/statefulset/{namespace}';
 };
 
-export type HandleGetStatefulSetList2Responses = {
+export type GetStatefulSetsResponses = {
     /**
      * OK
      */
     200: StatefulsetStatefulSetList;
 };
 
-export type HandleGetStatefulSetList2Response = HandleGetStatefulSetList2Responses[keyof HandleGetStatefulSetList2Responses];
+export type GetStatefulSetsResponse = GetStatefulSetsResponses[keyof GetStatefulSetsResponses];
 
-export type HandleGetStatefulSetDetailData = {
+export type GetStatefulSetData = {
     body?: never;
     path: {
         /**
@@ -10307,16 +10307,16 @@ export type HandleGetStatefulSetDetailData = {
     url: '/api/v1/statefulset/{namespace}/{statefulset}';
 };
 
-export type HandleGetStatefulSetDetailResponses = {
+export type GetStatefulSetResponses = {
     /**
      * OK
      */
     200: StatefulsetStatefulSetDetail;
 };
 
-export type HandleGetStatefulSetDetailResponse = HandleGetStatefulSetDetailResponses[keyof HandleGetStatefulSetDetailResponses];
+export type GetStatefulSetResponse = GetStatefulSetResponses[keyof GetStatefulSetResponses];
 
-export type HandleGetStatefulSetEventsData = {
+export type GetStatefulSetEventsData = {
     body?: never;
     path: {
         /**
@@ -10357,16 +10357,16 @@ export type HandleGetStatefulSetEventsData = {
     url: '/api/v1/statefulset/{namespace}/{statefulset}/event';
 };
 
-export type HandleGetStatefulSetEventsResponses = {
+export type GetStatefulSetEventsResponses = {
     /**
      * OK
      */
     200: CommonEventList;
 };
 
-export type HandleGetStatefulSetEventsResponse = HandleGetStatefulSetEventsResponses[keyof HandleGetStatefulSetEventsResponses];
+export type GetStatefulSetEventsResponse = GetStatefulSetEventsResponses[keyof GetStatefulSetEventsResponses];
 
-export type HandleGetStatefulSetPodsData = {
+export type GetStatefulSetPodsData = {
     body?: never;
     path: {
         /**
@@ -10407,16 +10407,16 @@ export type HandleGetStatefulSetPodsData = {
     url: '/api/v1/statefulset/{namespace}/{statefulset}/pod';
 };
 
-export type HandleGetStatefulSetPodsResponses = {
+export type GetStatefulSetPodsResponses = {
     /**
      * OK
      */
     200: PodPodList;
 };
 
-export type HandleGetStatefulSetPodsResponse = HandleGetStatefulSetPodsResponses[keyof HandleGetStatefulSetPodsResponses];
+export type GetStatefulSetPodsResponse = GetStatefulSetPodsResponses[keyof GetStatefulSetPodsResponses];
 
-export type HandleStatefulSetRestartData = {
+export type RestartStatefulSetData = {
     body?: never;
     path: {
         /**
@@ -10457,16 +10457,16 @@ export type HandleStatefulSetRestartData = {
     url: '/api/v1/statefulset/{namespace}/{statefulset}/restart';
 };
 
-export type HandleStatefulSetRestartResponses = {
+export type RestartStatefulSetResponses = {
     /**
      * OK
      */
     200: StatefulsetStatefulSetDetail;
 };
 
-export type HandleStatefulSetRestartResponse = HandleStatefulSetRestartResponses[keyof HandleStatefulSetRestartResponses];
+export type RestartStatefulSetResponse = RestartStatefulSetResponses[keyof RestartStatefulSetResponses];
 
-export type HandleGetStorageClassListData = {
+export type GetStorageClassesData = {
     body?: never;
     path?: never;
     query?: {
@@ -10498,16 +10498,16 @@ export type HandleGetStorageClassListData = {
     url: '/api/v1/storageclass';
 };
 
-export type HandleGetStorageClassListResponses = {
+export type GetStorageClassesResponses = {
     /**
      * OK
      */
     200: StorageclassStorageClassList;
 };
 
-export type HandleGetStorageClassListResponse = HandleGetStorageClassListResponses[keyof HandleGetStorageClassListResponses];
+export type GetStorageClassesResponse = GetStorageClassesResponses[keyof GetStorageClassesResponses];
 
-export type HandleGetStorageClassData = {
+export type GetStorageClassData = {
     body?: never;
     path: {
         /**
@@ -10544,16 +10544,16 @@ export type HandleGetStorageClassData = {
     url: '/api/v1/storageclass/{storageclass}';
 };
 
-export type HandleGetStorageClassResponses = {
+export type GetStorageClassResponses = {
     /**
      * OK
      */
     200: StorageclassStorageClass;
 };
 
-export type HandleGetStorageClassResponse = HandleGetStorageClassResponses[keyof HandleGetStorageClassResponses];
+export type GetStorageClassResponse = GetStorageClassResponses[keyof GetStorageClassResponses];
 
-export type HandleGetStorageClassPersistentVolumesData = {
+export type GetStorageClassPersistentVolumesData = {
     body?: never;
     path: {
         /**
@@ -10590,16 +10590,16 @@ export type HandleGetStorageClassPersistentVolumesData = {
     url: '/api/v1/storageclass/{storageclass}/persistentvolume';
 };
 
-export type HandleGetStorageClassPersistentVolumesResponses = {
+export type GetStorageClassPersistentVolumesResponses = {
     /**
      * OK
      */
     200: PersistentvolumePersistentVolumeList;
 };
 
-export type HandleGetStorageClassPersistentVolumesResponse = HandleGetStorageClassPersistentVolumesResponses[keyof HandleGetStorageClassPersistentVolumesResponses];
+export type GetStorageClassPersistentVolumesResponse = GetStorageClassPersistentVolumesResponses[keyof GetStorageClassPersistentVolumesResponses];
 
-export type HandleGetHorizontalPodAutoscalerListForResourceData = {
+export type GetHorizontalPodAutoscalersForResourceData = {
     body?: never;
     path: {
         /**
@@ -10644,11 +10644,11 @@ export type HandleGetHorizontalPodAutoscalerListForResourceData = {
     url: '/api/v1/{kind}/{namespace}/{name}/horizontalpodautoscaler';
 };
 
-export type HandleGetHorizontalPodAutoscalerListForResourceResponses = {
+export type GetHorizontalPodAutoscalersForResourceResponses = {
     /**
      * OK
      */
     200: HorizontalpodautoscalerHorizontalPodAutoscalerList;
 };
 
-export type HandleGetHorizontalPodAutoscalerListForResourceResponse = HandleGetHorizontalPodAutoscalerListForResourceResponses[keyof HandleGetHorizontalPodAutoscalerListForResourceResponses];
+export type GetHorizontalPodAutoscalersForResourceResponse = GetHorizontalPodAutoscalersForResourceResponses[keyof GetHorizontalPodAutoscalersForResourceResponses];

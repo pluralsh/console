@@ -4,16 +4,16 @@ import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOption
 import type { AxiosError } from 'axios';
 
 import { client } from '../client.gen';
-import { handleCreateImagePullSecret, handleCreateNamespace, handleDaemonSetRestart, handleDeleteResource, handleDeleteResource2, handleDeploy, handleDeployFromFile, handleDeploymentPause, handleDeploymentRestart, handleDeploymentResume, handleDeploymentRollback, handleExecShell, handleGetAvailableProtocols, handleGetClusterRoleBindingDetail, handleGetClusterRoleBindingList, handleGetClusterRoleDetail, handleGetClusterRoleList, handleGetConfigMapDetail, handleGetConfigMapList, handleGetConfigMapList2, handleGetCronJobDetail, handleGetCronJobEvents, handleGetCronJobJobs, handleGetCronJobList, handleGetCronJobList2, handleGetCsrfToken, handleGetCustomResourceDefinitionDetail, handleGetCustomResourceDefinitionList, handleGetCustomResourceObjectDetail, handleGetCustomResourceObjectEvents, handleGetCustomResourceObjectList, handleGetDaemonSetDetail, handleGetDaemonSetEvents, handleGetDaemonSetList, handleGetDaemonSetList2, handleGetDaemonSetPods, handleGetDaemonSetServices, handleGetDeploymentDetail, handleGetDeploymentEvents, handleGetDeploymentNewReplicaSet, handleGetDeploymentOldReplicaSets, handleGetDeployments, handleGetDeployments2, handleGetEventList, handleGetEventList2, handleGetHorizontalPodAutoscalerDetail, handleGetHorizontalPodAutoscalerList, handleGetHorizontalPodAutoscalerList2, handleGetHorizontalPodAutoscalerListForResource, handleGetIngressClass, handleGetIngressClassList, handleGetIngressDetail, handleGetIngressEvent, handleGetIngressList, handleGetIngressList2, handleGetJobDetail, handleGetJobEvents, handleGetJobList, handleGetJobList2, handleGetJobPods, handleGetNamespaceDetail, handleGetNamespaceEvents, handleGetNamespaces, handleGetNetworkPolicyDetail, handleGetNetworkPolicyList, handleGetNetworkPolicyList2, handleGetNodeDetail, handleGetNodeEvents, handleGetNodeList, handleGetNodePods, handleGetPersistentVolumeClaimDetail, handleGetPersistentVolumeClaimList, handleGetPersistentVolumeClaimList2, handleGetPersistentVolumeDetail, handleGetPersistentVolumeDetail2, handleGetPersistentVolumeList, handleGetPodContainers, handleGetPodDetail, handleGetPodDisruptionBudgetDetail, handleGetPodDisruptionBudgetList, handleGetPodDisruptionBudgetList2, handleGetPodEvents, handleGetPodPersistentVolumeClaims, handleGetPods, handleGetPods2, handleGetReplicaCount, handleGetReplicaCount2, handleGetReplicaSetDetail, handleGetReplicaSetEvents, handleGetReplicaSetPods, handleGetReplicaSets, handleGetReplicaSets2, handleGetReplicaSetServices, handleGetReplicationControllerDetail, handleGetReplicationControllerEvents, handleGetReplicationControllerList, handleGetReplicationControllerList2, handleGetReplicationControllerPods, handleGetReplicationControllerServices, handleGetResource, handleGetResource2, handleGetRoleBindingDetail, handleGetRoleBindingList, handleGetRoleBindingList2, handleGetRoleDetail, handleGetRoleList, handleGetRoleList2, handleGetSecretDetail, handleGetSecretList, handleGetSecretList2, handleGetServiceAccountDetail, handleGetServiceAccountImagePullSecrets, handleGetServiceAccountList, handleGetServiceAccountList2, handleGetServiceAccountSecrets, handleGetServiceDetail, handleGetServiceEvent, handleGetServiceIngressList, handleGetServiceList, handleGetServiceList2, handleGetServicePods, handleGetState, handleGetStatefulSetDetail, handleGetStatefulSetEvents, handleGetStatefulSetList, handleGetStatefulSetList2, handleGetStatefulSetPods, handleGetStorageClass, handleGetStorageClassList, handleGetStorageClassPersistentVolumes, handleImageReferenceValidity, handleLogFile, handleLogs, handleLogs2, handleLogSource, handleNameValidity, handleNodeDrain, handleProtocolValidity, handlePutResource, handlePutResource2, handleScaleResource, handleScaleResource2, handleStatefulSetRestart, handleTriggerCronJob, handleUpdateReplicasCount, type Options } from '../sdk.gen';
-import type { HandleCreateImagePullSecretData, HandleCreateImagePullSecretResponse, HandleCreateNamespaceData, HandleCreateNamespaceResponse, HandleDaemonSetRestartData, HandleDaemonSetRestartResponse, HandleDeleteResource2Data, HandleDeleteResourceData, HandleDeployData, HandleDeployFromFileData, HandleDeployFromFileResponse, HandleDeploymentPauseData, HandleDeploymentPauseResponse, HandleDeploymentRestartData, HandleDeploymentRestartResponse, HandleDeploymentResumeData, HandleDeploymentResumeResponse, HandleDeploymentRollbackData, HandleDeploymentRollbackResponse, HandleDeployResponse, HandleExecShellData, HandleExecShellResponse, HandleGetAvailableProtocolsData, HandleGetAvailableProtocolsResponse, HandleGetClusterRoleBindingDetailData, HandleGetClusterRoleBindingDetailResponse, HandleGetClusterRoleBindingListData, HandleGetClusterRoleBindingListResponse, HandleGetClusterRoleDetailData, HandleGetClusterRoleDetailResponse, HandleGetClusterRoleListData, HandleGetClusterRoleListResponse, HandleGetConfigMapDetailData, HandleGetConfigMapDetailResponse, HandleGetConfigMapList2Data, HandleGetConfigMapList2Response, HandleGetConfigMapListData, HandleGetConfigMapListResponse, HandleGetCronJobDetailData, HandleGetCronJobDetailResponse, HandleGetCronJobEventsData, HandleGetCronJobEventsResponse, HandleGetCronJobJobsData, HandleGetCronJobJobsResponse, HandleGetCronJobList2Data, HandleGetCronJobList2Response, HandleGetCronJobListData, HandleGetCronJobListResponse, HandleGetCsrfTokenData, HandleGetCsrfTokenResponse, HandleGetCustomResourceDefinitionDetailData, HandleGetCustomResourceDefinitionDetailResponse, HandleGetCustomResourceDefinitionListData, HandleGetCustomResourceDefinitionListResponse, HandleGetCustomResourceObjectDetailData, HandleGetCustomResourceObjectDetailResponse, HandleGetCustomResourceObjectEventsData, HandleGetCustomResourceObjectEventsResponse, HandleGetCustomResourceObjectListData, HandleGetCustomResourceObjectListResponse, HandleGetDaemonSetDetailData, HandleGetDaemonSetDetailResponse, HandleGetDaemonSetEventsData, HandleGetDaemonSetEventsResponse, HandleGetDaemonSetList2Data, HandleGetDaemonSetList2Response, HandleGetDaemonSetListData, HandleGetDaemonSetListResponse, HandleGetDaemonSetPodsData, HandleGetDaemonSetPodsResponse, HandleGetDaemonSetServicesData, HandleGetDaemonSetServicesResponse, HandleGetDeploymentDetailData, HandleGetDeploymentDetailResponse, HandleGetDeploymentEventsData, HandleGetDeploymentEventsResponse, HandleGetDeploymentNewReplicaSetData, HandleGetDeploymentNewReplicaSetResponse, HandleGetDeploymentOldReplicaSetsData, HandleGetDeploymentOldReplicaSetsResponse, HandleGetDeployments2Data, HandleGetDeployments2Response, HandleGetDeploymentsData, HandleGetDeploymentsResponse, HandleGetEventList2Data, HandleGetEventList2Response, HandleGetEventListData, HandleGetEventListResponse, HandleGetHorizontalPodAutoscalerDetailData, HandleGetHorizontalPodAutoscalerDetailResponse, HandleGetHorizontalPodAutoscalerList2Data, HandleGetHorizontalPodAutoscalerList2Response, HandleGetHorizontalPodAutoscalerListData, HandleGetHorizontalPodAutoscalerListForResourceData, HandleGetHorizontalPodAutoscalerListForResourceResponse, HandleGetHorizontalPodAutoscalerListResponse, HandleGetIngressClassData, HandleGetIngressClassListData, HandleGetIngressClassListResponse, HandleGetIngressClassResponse, HandleGetIngressDetailData, HandleGetIngressDetailResponse, HandleGetIngressEventData, HandleGetIngressEventResponse, HandleGetIngressList2Data, HandleGetIngressList2Response, HandleGetIngressListData, HandleGetIngressListResponse, HandleGetJobDetailData, HandleGetJobDetailResponse, HandleGetJobEventsData, HandleGetJobEventsResponse, HandleGetJobList2Data, HandleGetJobList2Response, HandleGetJobListData, HandleGetJobListResponse, HandleGetJobPodsData, HandleGetJobPodsResponse, HandleGetNamespaceDetailData, HandleGetNamespaceDetailResponse, HandleGetNamespaceEventsData, HandleGetNamespaceEventsResponse, HandleGetNamespacesData, HandleGetNamespacesResponse, HandleGetNetworkPolicyDetailData, HandleGetNetworkPolicyDetailResponse, HandleGetNetworkPolicyList2Data, HandleGetNetworkPolicyList2Response, HandleGetNetworkPolicyListData, HandleGetNetworkPolicyListResponse, HandleGetNodeDetailData, HandleGetNodeDetailResponse, HandleGetNodeEventsData, HandleGetNodeEventsResponse, HandleGetNodeListData, HandleGetNodeListResponse, HandleGetNodePodsData, HandleGetNodePodsResponse, HandleGetPersistentVolumeClaimDetailData, HandleGetPersistentVolumeClaimDetailResponse, HandleGetPersistentVolumeClaimList2Data, HandleGetPersistentVolumeClaimList2Response, HandleGetPersistentVolumeClaimListData, HandleGetPersistentVolumeClaimListResponse, HandleGetPersistentVolumeDetail2Data, HandleGetPersistentVolumeDetail2Response, HandleGetPersistentVolumeDetailData, HandleGetPersistentVolumeDetailResponse, HandleGetPersistentVolumeListData, HandleGetPersistentVolumeListResponse, HandleGetPodContainersData, HandleGetPodContainersResponse, HandleGetPodDetailData, HandleGetPodDetailResponse, HandleGetPodDisruptionBudgetDetailData, HandleGetPodDisruptionBudgetDetailResponse, HandleGetPodDisruptionBudgetList2Data, HandleGetPodDisruptionBudgetList2Response, HandleGetPodDisruptionBudgetListData, HandleGetPodDisruptionBudgetListResponse, HandleGetPodEventsData, HandleGetPodEventsResponse, HandleGetPodPersistentVolumeClaimsData, HandleGetPodPersistentVolumeClaimsResponse, HandleGetPods2Data, HandleGetPods2Response, HandleGetPodsData, HandleGetPodsResponse, HandleGetReplicaCount2Data, HandleGetReplicaCount2Response, HandleGetReplicaCountData, HandleGetReplicaCountResponse, HandleGetReplicaSetDetailData, HandleGetReplicaSetDetailResponse, HandleGetReplicaSetEventsData, HandleGetReplicaSetEventsResponse, HandleGetReplicaSetPodsData, HandleGetReplicaSetPodsResponse, HandleGetReplicaSets2Data, HandleGetReplicaSets2Response, HandleGetReplicaSetsData, HandleGetReplicaSetServicesData, HandleGetReplicaSetServicesResponse, HandleGetReplicaSetsResponse, HandleGetReplicationControllerDetailData, HandleGetReplicationControllerDetailResponse, HandleGetReplicationControllerEventsData, HandleGetReplicationControllerEventsResponse, HandleGetReplicationControllerList2Data, HandleGetReplicationControllerList2Response, HandleGetReplicationControllerListData, HandleGetReplicationControllerListResponse, HandleGetReplicationControllerPodsData, HandleGetReplicationControllerPodsResponse, HandleGetReplicationControllerServicesData, HandleGetReplicationControllerServicesResponse, HandleGetResource2Data, HandleGetResource2Response, HandleGetResourceData, HandleGetResourceResponse, HandleGetRoleBindingDetailData, HandleGetRoleBindingDetailResponse, HandleGetRoleBindingList2Data, HandleGetRoleBindingList2Response, HandleGetRoleBindingListData, HandleGetRoleBindingListResponse, HandleGetRoleDetailData, HandleGetRoleDetailResponse, HandleGetRoleList2Data, HandleGetRoleList2Response, HandleGetRoleListData, HandleGetRoleListResponse, HandleGetSecretDetailData, HandleGetSecretDetailResponse, HandleGetSecretList2Data, HandleGetSecretList2Response, HandleGetSecretListData, HandleGetSecretListResponse, HandleGetServiceAccountDetailData, HandleGetServiceAccountDetailResponse, HandleGetServiceAccountImagePullSecretsData, HandleGetServiceAccountImagePullSecretsResponse, HandleGetServiceAccountList2Data, HandleGetServiceAccountList2Response, HandleGetServiceAccountListData, HandleGetServiceAccountListResponse, HandleGetServiceAccountSecretsData, HandleGetServiceAccountSecretsResponse, HandleGetServiceDetailData, HandleGetServiceDetailResponse, HandleGetServiceEventData, HandleGetServiceEventResponse, HandleGetServiceIngressListData, HandleGetServiceIngressListResponse, HandleGetServiceList2Data, HandleGetServiceList2Response, HandleGetServiceListData, HandleGetServiceListResponse, HandleGetServicePodsData, HandleGetServicePodsResponse, HandleGetStateData, HandleGetStatefulSetDetailData, HandleGetStatefulSetDetailResponse, HandleGetStatefulSetEventsData, HandleGetStatefulSetEventsResponse, HandleGetStatefulSetList2Data, HandleGetStatefulSetList2Response, HandleGetStatefulSetListData, HandleGetStatefulSetListResponse, HandleGetStatefulSetPodsData, HandleGetStatefulSetPodsResponse, HandleGetStorageClassData, HandleGetStorageClassListData, HandleGetStorageClassListResponse, HandleGetStorageClassPersistentVolumesData, HandleGetStorageClassPersistentVolumesResponse, HandleGetStorageClassResponse, HandleImageReferenceValidityData, HandleImageReferenceValidityResponse, HandleLogFileData, HandleLogFileResponse, HandleLogs2Data, HandleLogs2Response, HandleLogsData, HandleLogSourceData, HandleLogSourceResponse, HandleLogsResponse, HandleNameValidityData, HandleNameValidityResponse, HandleNodeDrainData, HandleProtocolValidityData, HandleProtocolValidityResponse, HandlePutResource2Data, HandlePutResourceData, HandleScaleResource2Data, HandleScaleResource2Response, HandleScaleResourceData, HandleScaleResourceResponse, HandleStatefulSetRestartData, HandleStatefulSetRestartResponse, HandleTriggerCronJobData, HandleUpdateReplicasCountData } from '../types.gen';
+import { createAppDeployment, createAppDeploymentFromFile, createImagePullSecret, createNamespace, deleteNamespacedResource, deleteResource, drainNode, execShell, getAllConfigMaps, getAllCronJobs, getAllDaemonSets, getAllDeployments, getAllEvents, getAllHorizontalPodAutoscalers, getAllIngresses, getAllJobs, getAllNetworkPolicies, getAllPersistentVolumeClaims, getAllPodDisruptionBudgets, getAllPods, getAllReplicaSets, getAllReplicationControllers, getAllRoleBindings, getAllRoles, getAllSecrets, getAllServiceAccounts, getAllServices, getAllStatefulSets, getAvailableProtocols, getClusterRole, getClusterRoleBinding, getClusterRoleBindings, getClusterRoles, getConfigMap, getConfigMaps, getContainerLogs, getCronJob, getCronJobEvents, getCronJobJobs, getCronJobs, getCsrfToken, getCustomResourceDefinition, getCustomResourceDefinitions, getCustomResourceObject, getCustomResourceObjectEvents, getCustomResourceObjects, getDaemonSet, getDaemonSetEvents, getDaemonSetPods, getDaemonSets, getDaemonSetServices, getDeployment, getDeploymentEvents, getDeploymentNewReplicaSet, getDeploymentOldReplicaSets, getDeployments, getEvents, getHorizontalPodAutoscaler, getHorizontalPodAutoscalers, getHorizontalPodAutoscalersForResource, getIngress, getIngressClass, getIngressClasses, getIngresses, getIngressEvents, getJob, getJobEvents, getJobPods, getJobs, getLogFile, getLogSource, getNamespace, getNamespacedResource, getNamespacedResourceReplicas, getNamespaceEvents, getNamespaces, getNetworkPolicies, getNetworkPolicy, getNode, getNodeEvents, getNodePods, getNodes, getPersistentVolume, getPersistentVolumeClaim, getPersistentVolumeClaims, getPersistentVolumes, getPersistentVolumeWithNamespace, getPod, getPodContainers, getPodDisruptionBudget, getPodDisruptionBudgets, getPodEvents, getPodLogs, getPodPersistentVolumeClaims, getPods, getReplicaSet, getReplicaSetEvents, getReplicaSetPods, getReplicaSets, getReplicaSetServices, getReplicationController, getReplicationControllerEvents, getReplicationControllerPods, getReplicationControllers, getReplicationControllerServices, getResource, getResourceReplicas, getRole, getRoleBinding, getRoleBindings, getRoles, getSecret, getSecrets, getService, getServiceAccount, getServiceAccountImagePullSecrets, getServiceAccounts, getServiceAccountSecrets, getServiceEvents, getServiceIngresses, getServicePods, getServices, getStatefulSet, getStatefulSetEvents, getStatefulSetPods, getStatefulSets, getStorageClass, getStorageClasses, getStorageClassPersistentVolumes, handleGetState, type Options, pauseDeployment, restartDaemonSet, restartDeployment, restartStatefulSet, resumeDeployment, rollbackDeployment, scaleNamespacedResource, scaleResource, triggerCronJob, updateNamespacedResource, updateReplicationControllerReplicas, updateResource, validateAppName, validateImageReference, validateProtocol } from '../sdk.gen';
+import type { CreateAppDeploymentData, CreateAppDeploymentFromFileData, CreateAppDeploymentFromFileResponse, CreateAppDeploymentResponse, CreateImagePullSecretData, CreateImagePullSecretResponse, CreateNamespaceData, CreateNamespaceResponse, DeleteNamespacedResourceData, DeleteResourceData, DrainNodeData, ExecShellData, ExecShellResponse, GetAllConfigMapsData, GetAllConfigMapsResponse, GetAllCronJobsData, GetAllCronJobsResponse, GetAllDaemonSetsData, GetAllDaemonSetsResponse, GetAllDeploymentsData, GetAllDeploymentsResponse, GetAllEventsData, GetAllEventsResponse, GetAllHorizontalPodAutoscalersData, GetAllHorizontalPodAutoscalersResponse, GetAllIngressesData, GetAllIngressesResponse, GetAllJobsData, GetAllJobsResponse, GetAllNetworkPoliciesData, GetAllNetworkPoliciesResponse, GetAllPersistentVolumeClaimsData, GetAllPersistentVolumeClaimsResponse, GetAllPodDisruptionBudgetsData, GetAllPodDisruptionBudgetsResponse, GetAllPodsData, GetAllPodsResponse, GetAllReplicaSetsData, GetAllReplicaSetsResponse, GetAllReplicationControllersData, GetAllReplicationControllersResponse, GetAllRoleBindingsData, GetAllRoleBindingsResponse, GetAllRolesData, GetAllRolesResponse, GetAllSecretsData, GetAllSecretsResponse, GetAllServiceAccountsData, GetAllServiceAccountsResponse, GetAllServicesData, GetAllServicesResponse, GetAllStatefulSetsData, GetAllStatefulSetsResponse, GetAvailableProtocolsData, GetAvailableProtocolsResponse, GetClusterRoleBindingData, GetClusterRoleBindingResponse, GetClusterRoleBindingsData, GetClusterRoleBindingsResponse, GetClusterRoleData, GetClusterRoleResponse, GetClusterRolesData, GetClusterRolesResponse, GetConfigMapData, GetConfigMapResponse, GetConfigMapsData, GetConfigMapsResponse, GetContainerLogsData, GetContainerLogsResponse, GetCronJobData, GetCronJobEventsData, GetCronJobEventsResponse, GetCronJobJobsData, GetCronJobJobsResponse, GetCronJobResponse, GetCronJobsData, GetCronJobsResponse, GetCsrfTokenData, GetCsrfTokenResponse, GetCustomResourceDefinitionData, GetCustomResourceDefinitionResponse, GetCustomResourceDefinitionsData, GetCustomResourceDefinitionsResponse, GetCustomResourceObjectData, GetCustomResourceObjectEventsData, GetCustomResourceObjectEventsResponse, GetCustomResourceObjectResponse, GetCustomResourceObjectsData, GetCustomResourceObjectsResponse, GetDaemonSetData, GetDaemonSetEventsData, GetDaemonSetEventsResponse, GetDaemonSetPodsData, GetDaemonSetPodsResponse, GetDaemonSetResponse, GetDaemonSetsData, GetDaemonSetServicesData, GetDaemonSetServicesResponse, GetDaemonSetsResponse, GetDeploymentData, GetDeploymentEventsData, GetDeploymentEventsResponse, GetDeploymentNewReplicaSetData, GetDeploymentNewReplicaSetResponse, GetDeploymentOldReplicaSetsData, GetDeploymentOldReplicaSetsResponse, GetDeploymentResponse, GetDeploymentsData, GetDeploymentsResponse, GetEventsData, GetEventsResponse, GetHorizontalPodAutoscalerData, GetHorizontalPodAutoscalerResponse, GetHorizontalPodAutoscalersData, GetHorizontalPodAutoscalersForResourceData, GetHorizontalPodAutoscalersForResourceResponse, GetHorizontalPodAutoscalersResponse, GetIngressClassData, GetIngressClassesData, GetIngressClassesResponse, GetIngressClassResponse, GetIngressData, GetIngressesData, GetIngressesResponse, GetIngressEventsData, GetIngressEventsResponse, GetIngressResponse, GetJobData, GetJobEventsData, GetJobEventsResponse, GetJobPodsData, GetJobPodsResponse, GetJobResponse, GetJobsData, GetJobsResponse, GetLogFileData, GetLogFileResponse, GetLogSourceData, GetLogSourceResponse, GetNamespaceData, GetNamespacedResourceData, GetNamespacedResourceReplicasData, GetNamespacedResourceReplicasResponse, GetNamespacedResourceResponse, GetNamespaceEventsData, GetNamespaceEventsResponse, GetNamespaceResponse, GetNamespacesData, GetNamespacesResponse, GetNetworkPoliciesData, GetNetworkPoliciesResponse, GetNetworkPolicyData, GetNetworkPolicyResponse, GetNodeData, GetNodeEventsData, GetNodeEventsResponse, GetNodePodsData, GetNodePodsResponse, GetNodeResponse, GetNodesData, GetNodesResponse, GetPersistentVolumeClaimData, GetPersistentVolumeClaimResponse, GetPersistentVolumeClaimsData, GetPersistentVolumeClaimsResponse, GetPersistentVolumeData, GetPersistentVolumeResponse, GetPersistentVolumesData, GetPersistentVolumesResponse, GetPersistentVolumeWithNamespaceData, GetPersistentVolumeWithNamespaceResponse, GetPodContainersData, GetPodContainersResponse, GetPodData, GetPodDisruptionBudgetData, GetPodDisruptionBudgetResponse, GetPodDisruptionBudgetsData, GetPodDisruptionBudgetsResponse, GetPodEventsData, GetPodEventsResponse, GetPodLogsData, GetPodLogsResponse, GetPodPersistentVolumeClaimsData, GetPodPersistentVolumeClaimsResponse, GetPodResponse, GetPodsData, GetPodsResponse, GetReplicaSetData, GetReplicaSetEventsData, GetReplicaSetEventsResponse, GetReplicaSetPodsData, GetReplicaSetPodsResponse, GetReplicaSetResponse, GetReplicaSetsData, GetReplicaSetServicesData, GetReplicaSetServicesResponse, GetReplicaSetsResponse, GetReplicationControllerData, GetReplicationControllerEventsData, GetReplicationControllerEventsResponse, GetReplicationControllerPodsData, GetReplicationControllerPodsResponse, GetReplicationControllerResponse, GetReplicationControllersData, GetReplicationControllerServicesData, GetReplicationControllerServicesResponse, GetReplicationControllersResponse, GetResourceData, GetResourceReplicasData, GetResourceReplicasResponse, GetResourceResponse, GetRoleBindingData, GetRoleBindingResponse, GetRoleBindingsData, GetRoleBindingsResponse, GetRoleData, GetRoleResponse, GetRolesData, GetRolesResponse, GetSecretData, GetSecretResponse, GetSecretsData, GetSecretsResponse, GetServiceAccountData, GetServiceAccountImagePullSecretsData, GetServiceAccountImagePullSecretsResponse, GetServiceAccountResponse, GetServiceAccountsData, GetServiceAccountSecretsData, GetServiceAccountSecretsResponse, GetServiceAccountsResponse, GetServiceData, GetServiceEventsData, GetServiceEventsResponse, GetServiceIngressesData, GetServiceIngressesResponse, GetServicePodsData, GetServicePodsResponse, GetServiceResponse, GetServicesData, GetServicesResponse, GetStatefulSetData, GetStatefulSetEventsData, GetStatefulSetEventsResponse, GetStatefulSetPodsData, GetStatefulSetPodsResponse, GetStatefulSetResponse, GetStatefulSetsData, GetStatefulSetsResponse, GetStorageClassData, GetStorageClassesData, GetStorageClassesResponse, GetStorageClassPersistentVolumesData, GetStorageClassPersistentVolumesResponse, GetStorageClassResponse, HandleGetStateData, PauseDeploymentData, PauseDeploymentResponse, RestartDaemonSetData, RestartDaemonSetResponse, RestartDeploymentData, RestartDeploymentResponse, RestartStatefulSetData, RestartStatefulSetResponse, ResumeDeploymentData, ResumeDeploymentResponse, RollbackDeploymentData, RollbackDeploymentResponse, ScaleNamespacedResourceData, ScaleNamespacedResourceResponse, ScaleResourceData, ScaleResourceResponse, TriggerCronJobData, UpdateNamespacedResourceData, UpdateReplicationControllerReplicasData, UpdateResourceData, ValidateAppNameData, ValidateAppNameResponse, ValidateImageReferenceData, ValidateImageReferenceResponse, ValidateProtocolData, ValidateProtocolResponse } from '../types.gen';
 
 /**
  * deletes a non-namespaced resource
  */
-export const handleDeleteResourceMutation = (options?: Partial<Options<HandleDeleteResourceData>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandleDeleteResourceData>> => {
-    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandleDeleteResourceData>> = {
+export const deleteResourceMutation = (options?: Partial<Options<DeleteResourceData>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<DeleteResourceData>> => {
+    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<DeleteResourceData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleDeleteResource({
+            const { data } = await deleteResource({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -57,14 +57,14 @@ const createQueryKey = <TOptions extends Options>(id: string, options?: TOptions
     return [params];
 };
 
-export const handleGetResourceQueryKey = (options: Options<HandleGetResourceData>) => createQueryKey('handleGetResource', options);
+export const getResourceQueryKey = (options: Options<GetResourceData>) => createQueryKey('getResource', options);
 
 /**
  * returns a non-namespaced resource
  */
-export const handleGetResourceOptions = (options: Options<HandleGetResourceData>) => queryOptions<HandleGetResourceResponse, AxiosError<DefaultError>, HandleGetResourceResponse, ReturnType<typeof handleGetResourceQueryKey>>({
+export const getResourceOptions = (options: Options<GetResourceData>) => queryOptions<GetResourceResponse, AxiosError<DefaultError>, GetResourceResponse, ReturnType<typeof getResourceQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetResource({
+        const { data } = await getResource({
             ...options,
             ...queryKey[0],
             signal,
@@ -72,7 +72,7 @@ export const handleGetResourceOptions = (options: Options<HandleGetResourceData>
         });
         return data;
     },
-    queryKey: handleGetResourceQueryKey(options)
+    queryKey: getResourceQueryKey(options)
 });
 
 const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'headers' | 'path' | 'query'>>(queryKey: QueryKey<Options>, page: K) => {
@@ -104,23 +104,23 @@ const createInfiniteParams = <K extends Pick<QueryKey<Options>[0], 'body' | 'hea
     return params as unknown as typeof page;
 };
 
-export const handleGetResourceInfiniteQueryKey = (options: Options<HandleGetResourceData>): QueryKey<Options<HandleGetResourceData>> => createQueryKey('handleGetResource', options, true);
+export const getResourceInfiniteQueryKey = (options: Options<GetResourceData>): QueryKey<Options<GetResourceData>> => createQueryKey('getResource', options, true);
 
 /**
  * returns a non-namespaced resource
  */
-export const handleGetResourceInfiniteOptions = (options: Options<HandleGetResourceData>) => infiniteQueryOptions<HandleGetResourceResponse, AxiosError<DefaultError>, InfiniteData<HandleGetResourceResponse>, QueryKey<Options<HandleGetResourceData>>, string | Pick<QueryKey<Options<HandleGetResourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getResourceInfiniteOptions = (options: Options<GetResourceData>) => infiniteQueryOptions<GetResourceResponse, AxiosError<DefaultError>, InfiniteData<GetResourceResponse>, QueryKey<Options<GetResourceData>>, string | Pick<QueryKey<Options<GetResourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetResourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetResourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetResource({
+        const { data } = await getResource({
             ...options,
             ...params,
             signal,
@@ -128,16 +128,16 @@ export const handleGetResourceInfiniteOptions = (options: Options<HandleGetResou
         });
         return data;
     },
-    queryKey: handleGetResourceInfiniteQueryKey(options)
+    queryKey: getResourceInfiniteQueryKey(options)
 });
 
 /**
  * creates or updates a non-namespaced resource
  */
-export const handlePutResourceMutation = (options?: Partial<Options<HandlePutResourceData>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandlePutResourceData>> => {
-    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandlePutResourceData>> = {
+export const updateResourceMutation = (options?: Partial<Options<UpdateResourceData>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<UpdateResourceData>> => {
+    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<UpdateResourceData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handlePutResource({
+            const { data } = await updateResource({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -151,10 +151,10 @@ export const handlePutResourceMutation = (options?: Partial<Options<HandlePutRes
 /**
  * deletes a resource from a namespace
  */
-export const handleDeleteResource2Mutation = (options?: Partial<Options<HandleDeleteResource2Data>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandleDeleteResource2Data>> => {
-    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandleDeleteResource2Data>> = {
+export const deleteNamespacedResourceMutation = (options?: Partial<Options<DeleteNamespacedResourceData>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<DeleteNamespacedResourceData>> => {
+    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<DeleteNamespacedResourceData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleDeleteResource2({
+            const { data } = await deleteNamespacedResource({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -165,14 +165,14 @@ export const handleDeleteResource2Mutation = (options?: Partial<Options<HandleDe
     return mutationOptions;
 };
 
-export const handleGetResource2QueryKey = (options: Options<HandleGetResource2Data>) => createQueryKey('handleGetResource2', options);
+export const getNamespacedResourceQueryKey = (options: Options<GetNamespacedResourceData>) => createQueryKey('getNamespacedResource', options);
 
 /**
  * returns unstructured resource from a namespace
  */
-export const handleGetResource2Options = (options: Options<HandleGetResource2Data>) => queryOptions<HandleGetResource2Response, AxiosError<DefaultError>, HandleGetResource2Response, ReturnType<typeof handleGetResource2QueryKey>>({
+export const getNamespacedResourceOptions = (options: Options<GetNamespacedResourceData>) => queryOptions<GetNamespacedResourceResponse, AxiosError<DefaultError>, GetNamespacedResourceResponse, ReturnType<typeof getNamespacedResourceQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetResource2({
+        const { data } = await getNamespacedResource({
             ...options,
             ...queryKey[0],
             signal,
@@ -180,26 +180,26 @@ export const handleGetResource2Options = (options: Options<HandleGetResource2Dat
         });
         return data;
     },
-    queryKey: handleGetResource2QueryKey(options)
+    queryKey: getNamespacedResourceQueryKey(options)
 });
 
-export const handleGetResource2InfiniteQueryKey = (options: Options<HandleGetResource2Data>): QueryKey<Options<HandleGetResource2Data>> => createQueryKey('handleGetResource2', options, true);
+export const getNamespacedResourceInfiniteQueryKey = (options: Options<GetNamespacedResourceData>): QueryKey<Options<GetNamespacedResourceData>> => createQueryKey('getNamespacedResource', options, true);
 
 /**
  * returns unstructured resource from a namespace
  */
-export const handleGetResource2InfiniteOptions = (options: Options<HandleGetResource2Data>) => infiniteQueryOptions<HandleGetResource2Response, AxiosError<DefaultError>, InfiniteData<HandleGetResource2Response>, QueryKey<Options<HandleGetResource2Data>>, string | Pick<QueryKey<Options<HandleGetResource2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getNamespacedResourceInfiniteOptions = (options: Options<GetNamespacedResourceData>) => infiniteQueryOptions<GetNamespacedResourceResponse, AxiosError<DefaultError>, InfiniteData<GetNamespacedResourceResponse>, QueryKey<Options<GetNamespacedResourceData>>, string | Pick<QueryKey<Options<GetNamespacedResourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetResource2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetNamespacedResourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetResource2({
+        const { data } = await getNamespacedResource({
             ...options,
             ...params,
             signal,
@@ -207,16 +207,16 @@ export const handleGetResource2InfiniteOptions = (options: Options<HandleGetReso
         });
         return data;
     },
-    queryKey: handleGetResource2InfiniteQueryKey(options)
+    queryKey: getNamespacedResourceInfiniteQueryKey(options)
 });
 
 /**
  * creates or updates a resource in a namespace
  */
-export const handlePutResource2Mutation = (options?: Partial<Options<HandlePutResource2Data>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandlePutResource2Data>> => {
-    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandlePutResource2Data>> = {
+export const updateNamespacedResourceMutation = (options?: Partial<Options<UpdateNamespacedResourceData>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<UpdateNamespacedResourceData>> => {
+    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<UpdateNamespacedResourceData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handlePutResource2({
+            const { data } = await updateNamespacedResource({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -230,10 +230,10 @@ export const handlePutResource2Mutation = (options?: Partial<Options<HandlePutRe
 /**
  * creates an application based on provided deployment.AppDeploymentSpec
  */
-export const handleDeployMutation = (options?: Partial<Options<HandleDeployData>>): UseMutationOptions<HandleDeployResponse, AxiosError<DefaultError>, Options<HandleDeployData>> => {
-    const mutationOptions: UseMutationOptions<HandleDeployResponse, AxiosError<DefaultError>, Options<HandleDeployData>> = {
+export const createAppDeploymentMutation = (options?: Partial<Options<CreateAppDeploymentData>>): UseMutationOptions<CreateAppDeploymentResponse, AxiosError<DefaultError>, Options<CreateAppDeploymentData>> => {
+    const mutationOptions: UseMutationOptions<CreateAppDeploymentResponse, AxiosError<DefaultError>, Options<CreateAppDeploymentData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleDeploy({
+            const { data } = await createAppDeployment({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -244,14 +244,14 @@ export const handleDeployMutation = (options?: Partial<Options<HandleDeployData>
     return mutationOptions;
 };
 
-export const handleGetAvailableProtocolsQueryKey = (options?: Options<HandleGetAvailableProtocolsData>) => createQueryKey('handleGetAvailableProtocols', options);
+export const getAvailableProtocolsQueryKey = (options?: Options<GetAvailableProtocolsData>) => createQueryKey('getAvailableProtocols', options);
 
 /**
  * returns a list of available protocols for the service
  */
-export const handleGetAvailableProtocolsOptions = (options?: Options<HandleGetAvailableProtocolsData>) => queryOptions<HandleGetAvailableProtocolsResponse, AxiosError<DefaultError>, HandleGetAvailableProtocolsResponse, ReturnType<typeof handleGetAvailableProtocolsQueryKey>>({
+export const getAvailableProtocolsOptions = (options?: Options<GetAvailableProtocolsData>) => queryOptions<GetAvailableProtocolsResponse, AxiosError<DefaultError>, GetAvailableProtocolsResponse, ReturnType<typeof getAvailableProtocolsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetAvailableProtocols({
+        const { data } = await getAvailableProtocols({
             ...options,
             ...queryKey[0],
             signal,
@@ -259,26 +259,26 @@ export const handleGetAvailableProtocolsOptions = (options?: Options<HandleGetAv
         });
         return data;
     },
-    queryKey: handleGetAvailableProtocolsQueryKey(options)
+    queryKey: getAvailableProtocolsQueryKey(options)
 });
 
-export const handleGetAvailableProtocolsInfiniteQueryKey = (options?: Options<HandleGetAvailableProtocolsData>): QueryKey<Options<HandleGetAvailableProtocolsData>> => createQueryKey('handleGetAvailableProtocols', options, true);
+export const getAvailableProtocolsInfiniteQueryKey = (options?: Options<GetAvailableProtocolsData>): QueryKey<Options<GetAvailableProtocolsData>> => createQueryKey('getAvailableProtocols', options, true);
 
 /**
  * returns a list of available protocols for the service
  */
-export const handleGetAvailableProtocolsInfiniteOptions = (options?: Options<HandleGetAvailableProtocolsData>) => infiniteQueryOptions<HandleGetAvailableProtocolsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetAvailableProtocolsResponse>, QueryKey<Options<HandleGetAvailableProtocolsData>>, string | Pick<QueryKey<Options<HandleGetAvailableProtocolsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAvailableProtocolsInfiniteOptions = (options?: Options<GetAvailableProtocolsData>) => infiniteQueryOptions<GetAvailableProtocolsResponse, AxiosError<DefaultError>, InfiniteData<GetAvailableProtocolsResponse>, QueryKey<Options<GetAvailableProtocolsData>>, string | Pick<QueryKey<Options<GetAvailableProtocolsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetAvailableProtocolsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAvailableProtocolsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetAvailableProtocols({
+        const { data } = await getAvailableProtocols({
             ...options,
             ...params,
             signal,
@@ -286,16 +286,16 @@ export const handleGetAvailableProtocolsInfiniteOptions = (options?: Options<Han
         });
         return data;
     },
-    queryKey: handleGetAvailableProtocolsInfiniteQueryKey(options)
+    queryKey: getAvailableProtocolsInfiniteQueryKey(options)
 });
 
 /**
  * checks if provided image is valid
  */
-export const handleImageReferenceValidityMutation = (options?: Partial<Options<HandleImageReferenceValidityData>>): UseMutationOptions<HandleImageReferenceValidityResponse, AxiosError<DefaultError>, Options<HandleImageReferenceValidityData>> => {
-    const mutationOptions: UseMutationOptions<HandleImageReferenceValidityResponse, AxiosError<DefaultError>, Options<HandleImageReferenceValidityData>> = {
+export const validateImageReferenceMutation = (options?: Partial<Options<ValidateImageReferenceData>>): UseMutationOptions<ValidateImageReferenceResponse, AxiosError<DefaultError>, Options<ValidateImageReferenceData>> => {
+    const mutationOptions: UseMutationOptions<ValidateImageReferenceResponse, AxiosError<DefaultError>, Options<ValidateImageReferenceData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleImageReferenceValidity({
+            const { data } = await validateImageReference({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -309,10 +309,10 @@ export const handleImageReferenceValidityMutation = (options?: Partial<Options<H
 /**
  * checks if provided name is valid
  */
-export const handleNameValidityMutation = (options?: Partial<Options<HandleNameValidityData>>): UseMutationOptions<HandleNameValidityResponse, AxiosError<DefaultError>, Options<HandleNameValidityData>> => {
-    const mutationOptions: UseMutationOptions<HandleNameValidityResponse, AxiosError<DefaultError>, Options<HandleNameValidityData>> = {
+export const validateAppNameMutation = (options?: Partial<Options<ValidateAppNameData>>): UseMutationOptions<ValidateAppNameResponse, AxiosError<DefaultError>, Options<ValidateAppNameData>> => {
+    const mutationOptions: UseMutationOptions<ValidateAppNameResponse, AxiosError<DefaultError>, Options<ValidateAppNameData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleNameValidity({
+            const { data } = await validateAppName({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -326,10 +326,10 @@ export const handleNameValidityMutation = (options?: Partial<Options<HandleNameV
 /**
  * checks if provided service protocol is valid
  */
-export const handleProtocolValidityMutation = (options?: Partial<Options<HandleProtocolValidityData>>): UseMutationOptions<HandleProtocolValidityResponse, AxiosError<DefaultError>, Options<HandleProtocolValidityData>> => {
-    const mutationOptions: UseMutationOptions<HandleProtocolValidityResponse, AxiosError<DefaultError>, Options<HandleProtocolValidityData>> = {
+export const validateProtocolMutation = (options?: Partial<Options<ValidateProtocolData>>): UseMutationOptions<ValidateProtocolResponse, AxiosError<DefaultError>, Options<ValidateProtocolData>> => {
+    const mutationOptions: UseMutationOptions<ValidateProtocolResponse, AxiosError<DefaultError>, Options<ValidateProtocolData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleProtocolValidity({
+            const { data } = await validateProtocol({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -343,10 +343,10 @@ export const handleProtocolValidityMutation = (options?: Partial<Options<HandleP
 /**
  * create an application from file
  */
-export const handleDeployFromFileMutation = (options?: Partial<Options<HandleDeployFromFileData>>): UseMutationOptions<HandleDeployFromFileResponse, AxiosError<DefaultError>, Options<HandleDeployFromFileData>> => {
-    const mutationOptions: UseMutationOptions<HandleDeployFromFileResponse, AxiosError<DefaultError>, Options<HandleDeployFromFileData>> = {
+export const createAppDeploymentFromFileMutation = (options?: Partial<Options<CreateAppDeploymentFromFileData>>): UseMutationOptions<CreateAppDeploymentFromFileResponse, AxiosError<DefaultError>, Options<CreateAppDeploymentFromFileData>> => {
+    const mutationOptions: UseMutationOptions<CreateAppDeploymentFromFileResponse, AxiosError<DefaultError>, Options<CreateAppDeploymentFromFileData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleDeployFromFile({
+            const { data } = await createAppDeploymentFromFile({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -357,14 +357,14 @@ export const handleDeployFromFileMutation = (options?: Partial<Options<HandleDep
     return mutationOptions;
 };
 
-export const handleGetClusterRoleListQueryKey = (options?: Options<HandleGetClusterRoleListData>) => createQueryKey('handleGetClusterRoleList', options);
+export const getClusterRolesQueryKey = (options?: Options<GetClusterRolesData>) => createQueryKey('getClusterRoles', options);
 
 /**
  * returns a list of ClusterRoles
  */
-export const handleGetClusterRoleListOptions = (options?: Options<HandleGetClusterRoleListData>) => queryOptions<HandleGetClusterRoleListResponse, AxiosError<DefaultError>, HandleGetClusterRoleListResponse, ReturnType<typeof handleGetClusterRoleListQueryKey>>({
+export const getClusterRolesOptions = (options?: Options<GetClusterRolesData>) => queryOptions<GetClusterRolesResponse, AxiosError<DefaultError>, GetClusterRolesResponse, ReturnType<typeof getClusterRolesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetClusterRoleList({
+        const { data } = await getClusterRoles({
             ...options,
             ...queryKey[0],
             signal,
@@ -372,26 +372,26 @@ export const handleGetClusterRoleListOptions = (options?: Options<HandleGetClust
         });
         return data;
     },
-    queryKey: handleGetClusterRoleListQueryKey(options)
+    queryKey: getClusterRolesQueryKey(options)
 });
 
-export const handleGetClusterRoleListInfiniteQueryKey = (options?: Options<HandleGetClusterRoleListData>): QueryKey<Options<HandleGetClusterRoleListData>> => createQueryKey('handleGetClusterRoleList', options, true);
+export const getClusterRolesInfiniteQueryKey = (options?: Options<GetClusterRolesData>): QueryKey<Options<GetClusterRolesData>> => createQueryKey('getClusterRoles', options, true);
 
 /**
  * returns a list of ClusterRoles
  */
-export const handleGetClusterRoleListInfiniteOptions = (options?: Options<HandleGetClusterRoleListData>) => infiniteQueryOptions<HandleGetClusterRoleListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetClusterRoleListResponse>, QueryKey<Options<HandleGetClusterRoleListData>>, string | Pick<QueryKey<Options<HandleGetClusterRoleListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getClusterRolesInfiniteOptions = (options?: Options<GetClusterRolesData>) => infiniteQueryOptions<GetClusterRolesResponse, AxiosError<DefaultError>, InfiniteData<GetClusterRolesResponse>, QueryKey<Options<GetClusterRolesData>>, string | Pick<QueryKey<Options<GetClusterRolesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetClusterRoleListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetClusterRolesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetClusterRoleList({
+        const { data } = await getClusterRoles({
             ...options,
             ...params,
             signal,
@@ -399,17 +399,17 @@ export const handleGetClusterRoleListInfiniteOptions = (options?: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetClusterRoleListInfiniteQueryKey(options)
+    queryKey: getClusterRolesInfiniteQueryKey(options)
 });
 
-export const handleGetClusterRoleDetailQueryKey = (options: Options<HandleGetClusterRoleDetailData>) => createQueryKey('handleGetClusterRoleDetail', options);
+export const getClusterRoleQueryKey = (options: Options<GetClusterRoleData>) => createQueryKey('getClusterRole', options);
 
 /**
  * returns detailed information about ClusterRole
  */
-export const handleGetClusterRoleDetailOptions = (options: Options<HandleGetClusterRoleDetailData>) => queryOptions<HandleGetClusterRoleDetailResponse, AxiosError<DefaultError>, HandleGetClusterRoleDetailResponse, ReturnType<typeof handleGetClusterRoleDetailQueryKey>>({
+export const getClusterRoleOptions = (options: Options<GetClusterRoleData>) => queryOptions<GetClusterRoleResponse, AxiosError<DefaultError>, GetClusterRoleResponse, ReturnType<typeof getClusterRoleQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetClusterRoleDetail({
+        const { data } = await getClusterRole({
             ...options,
             ...queryKey[0],
             signal,
@@ -417,26 +417,26 @@ export const handleGetClusterRoleDetailOptions = (options: Options<HandleGetClus
         });
         return data;
     },
-    queryKey: handleGetClusterRoleDetailQueryKey(options)
+    queryKey: getClusterRoleQueryKey(options)
 });
 
-export const handleGetClusterRoleDetailInfiniteQueryKey = (options: Options<HandleGetClusterRoleDetailData>): QueryKey<Options<HandleGetClusterRoleDetailData>> => createQueryKey('handleGetClusterRoleDetail', options, true);
+export const getClusterRoleInfiniteQueryKey = (options: Options<GetClusterRoleData>): QueryKey<Options<GetClusterRoleData>> => createQueryKey('getClusterRole', options, true);
 
 /**
  * returns detailed information about ClusterRole
  */
-export const handleGetClusterRoleDetailInfiniteOptions = (options: Options<HandleGetClusterRoleDetailData>) => infiniteQueryOptions<HandleGetClusterRoleDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetClusterRoleDetailResponse>, QueryKey<Options<HandleGetClusterRoleDetailData>>, string | Pick<QueryKey<Options<HandleGetClusterRoleDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getClusterRoleInfiniteOptions = (options: Options<GetClusterRoleData>) => infiniteQueryOptions<GetClusterRoleResponse, AxiosError<DefaultError>, InfiniteData<GetClusterRoleResponse>, QueryKey<Options<GetClusterRoleData>>, string | Pick<QueryKey<Options<GetClusterRoleData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetClusterRoleDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetClusterRoleData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetClusterRoleDetail({
+        const { data } = await getClusterRole({
             ...options,
             ...params,
             signal,
@@ -444,17 +444,17 @@ export const handleGetClusterRoleDetailInfiniteOptions = (options: Options<Handl
         });
         return data;
     },
-    queryKey: handleGetClusterRoleDetailInfiniteQueryKey(options)
+    queryKey: getClusterRoleInfiniteQueryKey(options)
 });
 
-export const handleGetClusterRoleBindingListQueryKey = (options?: Options<HandleGetClusterRoleBindingListData>) => createQueryKey('handleGetClusterRoleBindingList', options);
+export const getClusterRoleBindingsQueryKey = (options?: Options<GetClusterRoleBindingsData>) => createQueryKey('getClusterRoleBindings', options);
 
 /**
  * returns a list of ClusterRoleBindings
  */
-export const handleGetClusterRoleBindingListOptions = (options?: Options<HandleGetClusterRoleBindingListData>) => queryOptions<HandleGetClusterRoleBindingListResponse, AxiosError<DefaultError>, HandleGetClusterRoleBindingListResponse, ReturnType<typeof handleGetClusterRoleBindingListQueryKey>>({
+export const getClusterRoleBindingsOptions = (options?: Options<GetClusterRoleBindingsData>) => queryOptions<GetClusterRoleBindingsResponse, AxiosError<DefaultError>, GetClusterRoleBindingsResponse, ReturnType<typeof getClusterRoleBindingsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetClusterRoleBindingList({
+        const { data } = await getClusterRoleBindings({
             ...options,
             ...queryKey[0],
             signal,
@@ -462,26 +462,26 @@ export const handleGetClusterRoleBindingListOptions = (options?: Options<HandleG
         });
         return data;
     },
-    queryKey: handleGetClusterRoleBindingListQueryKey(options)
+    queryKey: getClusterRoleBindingsQueryKey(options)
 });
 
-export const handleGetClusterRoleBindingListInfiniteQueryKey = (options?: Options<HandleGetClusterRoleBindingListData>): QueryKey<Options<HandleGetClusterRoleBindingListData>> => createQueryKey('handleGetClusterRoleBindingList', options, true);
+export const getClusterRoleBindingsInfiniteQueryKey = (options?: Options<GetClusterRoleBindingsData>): QueryKey<Options<GetClusterRoleBindingsData>> => createQueryKey('getClusterRoleBindings', options, true);
 
 /**
  * returns a list of ClusterRoleBindings
  */
-export const handleGetClusterRoleBindingListInfiniteOptions = (options?: Options<HandleGetClusterRoleBindingListData>) => infiniteQueryOptions<HandleGetClusterRoleBindingListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetClusterRoleBindingListResponse>, QueryKey<Options<HandleGetClusterRoleBindingListData>>, string | Pick<QueryKey<Options<HandleGetClusterRoleBindingListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getClusterRoleBindingsInfiniteOptions = (options?: Options<GetClusterRoleBindingsData>) => infiniteQueryOptions<GetClusterRoleBindingsResponse, AxiosError<DefaultError>, InfiniteData<GetClusterRoleBindingsResponse>, QueryKey<Options<GetClusterRoleBindingsData>>, string | Pick<QueryKey<Options<GetClusterRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetClusterRoleBindingListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetClusterRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetClusterRoleBindingList({
+        const { data } = await getClusterRoleBindings({
             ...options,
             ...params,
             signal,
@@ -489,17 +489,17 @@ export const handleGetClusterRoleBindingListInfiniteOptions = (options?: Options
         });
         return data;
     },
-    queryKey: handleGetClusterRoleBindingListInfiniteQueryKey(options)
+    queryKey: getClusterRoleBindingsInfiniteQueryKey(options)
 });
 
-export const handleGetClusterRoleBindingDetailQueryKey = (options: Options<HandleGetClusterRoleBindingDetailData>) => createQueryKey('handleGetClusterRoleBindingDetail', options);
+export const getClusterRoleBindingQueryKey = (options: Options<GetClusterRoleBindingData>) => createQueryKey('getClusterRoleBinding', options);
 
 /**
  * returns detailed information about ClusterRoleBinding
  */
-export const handleGetClusterRoleBindingDetailOptions = (options: Options<HandleGetClusterRoleBindingDetailData>) => queryOptions<HandleGetClusterRoleBindingDetailResponse, AxiosError<DefaultError>, HandleGetClusterRoleBindingDetailResponse, ReturnType<typeof handleGetClusterRoleBindingDetailQueryKey>>({
+export const getClusterRoleBindingOptions = (options: Options<GetClusterRoleBindingData>) => queryOptions<GetClusterRoleBindingResponse, AxiosError<DefaultError>, GetClusterRoleBindingResponse, ReturnType<typeof getClusterRoleBindingQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetClusterRoleBindingDetail({
+        const { data } = await getClusterRoleBinding({
             ...options,
             ...queryKey[0],
             signal,
@@ -507,26 +507,26 @@ export const handleGetClusterRoleBindingDetailOptions = (options: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetClusterRoleBindingDetailQueryKey(options)
+    queryKey: getClusterRoleBindingQueryKey(options)
 });
 
-export const handleGetClusterRoleBindingDetailInfiniteQueryKey = (options: Options<HandleGetClusterRoleBindingDetailData>): QueryKey<Options<HandleGetClusterRoleBindingDetailData>> => createQueryKey('handleGetClusterRoleBindingDetail', options, true);
+export const getClusterRoleBindingInfiniteQueryKey = (options: Options<GetClusterRoleBindingData>): QueryKey<Options<GetClusterRoleBindingData>> => createQueryKey('getClusterRoleBinding', options, true);
 
 /**
  * returns detailed information about ClusterRoleBinding
  */
-export const handleGetClusterRoleBindingDetailInfiniteOptions = (options: Options<HandleGetClusterRoleBindingDetailData>) => infiniteQueryOptions<HandleGetClusterRoleBindingDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetClusterRoleBindingDetailResponse>, QueryKey<Options<HandleGetClusterRoleBindingDetailData>>, string | Pick<QueryKey<Options<HandleGetClusterRoleBindingDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getClusterRoleBindingInfiniteOptions = (options: Options<GetClusterRoleBindingData>) => infiniteQueryOptions<GetClusterRoleBindingResponse, AxiosError<DefaultError>, InfiniteData<GetClusterRoleBindingResponse>, QueryKey<Options<GetClusterRoleBindingData>>, string | Pick<QueryKey<Options<GetClusterRoleBindingData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetClusterRoleBindingDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetClusterRoleBindingData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetClusterRoleBindingDetail({
+        const { data } = await getClusterRoleBinding({
             ...options,
             ...params,
             signal,
@@ -534,17 +534,17 @@ export const handleGetClusterRoleBindingDetailInfiniteOptions = (options: Option
         });
         return data;
     },
-    queryKey: handleGetClusterRoleBindingDetailInfiniteQueryKey(options)
+    queryKey: getClusterRoleBindingInfiniteQueryKey(options)
 });
 
-export const handleGetConfigMapListQueryKey = (options?: Options<HandleGetConfigMapListData>) => createQueryKey('handleGetConfigMapList', options);
+export const getAllConfigMapsQueryKey = (options?: Options<GetAllConfigMapsData>) => createQueryKey('getAllConfigMaps', options);
 
 /**
  * returns a list of ConfigMaps from all namespaces
  */
-export const handleGetConfigMapListOptions = (options?: Options<HandleGetConfigMapListData>) => queryOptions<HandleGetConfigMapListResponse, AxiosError<DefaultError>, HandleGetConfigMapListResponse, ReturnType<typeof handleGetConfigMapListQueryKey>>({
+export const getAllConfigMapsOptions = (options?: Options<GetAllConfigMapsData>) => queryOptions<GetAllConfigMapsResponse, AxiosError<DefaultError>, GetAllConfigMapsResponse, ReturnType<typeof getAllConfigMapsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetConfigMapList({
+        const { data } = await getAllConfigMaps({
             ...options,
             ...queryKey[0],
             signal,
@@ -552,26 +552,26 @@ export const handleGetConfigMapListOptions = (options?: Options<HandleGetConfigM
         });
         return data;
     },
-    queryKey: handleGetConfigMapListQueryKey(options)
+    queryKey: getAllConfigMapsQueryKey(options)
 });
 
-export const handleGetConfigMapListInfiniteQueryKey = (options?: Options<HandleGetConfigMapListData>): QueryKey<Options<HandleGetConfigMapListData>> => createQueryKey('handleGetConfigMapList', options, true);
+export const getAllConfigMapsInfiniteQueryKey = (options?: Options<GetAllConfigMapsData>): QueryKey<Options<GetAllConfigMapsData>> => createQueryKey('getAllConfigMaps', options, true);
 
 /**
  * returns a list of ConfigMaps from all namespaces
  */
-export const handleGetConfigMapListInfiniteOptions = (options?: Options<HandleGetConfigMapListData>) => infiniteQueryOptions<HandleGetConfigMapListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetConfigMapListResponse>, QueryKey<Options<HandleGetConfigMapListData>>, string | Pick<QueryKey<Options<HandleGetConfigMapListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllConfigMapsInfiniteOptions = (options?: Options<GetAllConfigMapsData>) => infiniteQueryOptions<GetAllConfigMapsResponse, AxiosError<DefaultError>, InfiniteData<GetAllConfigMapsResponse>, QueryKey<Options<GetAllConfigMapsData>>, string | Pick<QueryKey<Options<GetAllConfigMapsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetConfigMapListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllConfigMapsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetConfigMapList({
+        const { data } = await getAllConfigMaps({
             ...options,
             ...params,
             signal,
@@ -579,17 +579,17 @@ export const handleGetConfigMapListInfiniteOptions = (options?: Options<HandleGe
         });
         return data;
     },
-    queryKey: handleGetConfigMapListInfiniteQueryKey(options)
+    queryKey: getAllConfigMapsInfiniteQueryKey(options)
 });
 
-export const handleGetConfigMapList2QueryKey = (options: Options<HandleGetConfigMapList2Data>) => createQueryKey('handleGetConfigMapList2', options);
+export const getConfigMapsQueryKey = (options: Options<GetConfigMapsData>) => createQueryKey('getConfigMaps', options);
 
 /**
  * returns a list of ConfigMaps in a namespaces
  */
-export const handleGetConfigMapList2Options = (options: Options<HandleGetConfigMapList2Data>) => queryOptions<HandleGetConfigMapList2Response, AxiosError<DefaultError>, HandleGetConfigMapList2Response, ReturnType<typeof handleGetConfigMapList2QueryKey>>({
+export const getConfigMapsOptions = (options: Options<GetConfigMapsData>) => queryOptions<GetConfigMapsResponse, AxiosError<DefaultError>, GetConfigMapsResponse, ReturnType<typeof getConfigMapsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetConfigMapList2({
+        const { data } = await getConfigMaps({
             ...options,
             ...queryKey[0],
             signal,
@@ -597,26 +597,26 @@ export const handleGetConfigMapList2Options = (options: Options<HandleGetConfigM
         });
         return data;
     },
-    queryKey: handleGetConfigMapList2QueryKey(options)
+    queryKey: getConfigMapsQueryKey(options)
 });
 
-export const handleGetConfigMapList2InfiniteQueryKey = (options: Options<HandleGetConfigMapList2Data>): QueryKey<Options<HandleGetConfigMapList2Data>> => createQueryKey('handleGetConfigMapList2', options, true);
+export const getConfigMapsInfiniteQueryKey = (options: Options<GetConfigMapsData>): QueryKey<Options<GetConfigMapsData>> => createQueryKey('getConfigMaps', options, true);
 
 /**
  * returns a list of ConfigMaps in a namespaces
  */
-export const handleGetConfigMapList2InfiniteOptions = (options: Options<HandleGetConfigMapList2Data>) => infiniteQueryOptions<HandleGetConfigMapList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetConfigMapList2Response>, QueryKey<Options<HandleGetConfigMapList2Data>>, string | Pick<QueryKey<Options<HandleGetConfigMapList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getConfigMapsInfiniteOptions = (options: Options<GetConfigMapsData>) => infiniteQueryOptions<GetConfigMapsResponse, AxiosError<DefaultError>, InfiniteData<GetConfigMapsResponse>, QueryKey<Options<GetConfigMapsData>>, string | Pick<QueryKey<Options<GetConfigMapsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetConfigMapList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetConfigMapsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetConfigMapList2({
+        const { data } = await getConfigMaps({
             ...options,
             ...params,
             signal,
@@ -624,17 +624,17 @@ export const handleGetConfigMapList2InfiniteOptions = (options: Options<HandleGe
         });
         return data;
     },
-    queryKey: handleGetConfigMapList2InfiniteQueryKey(options)
+    queryKey: getConfigMapsInfiniteQueryKey(options)
 });
 
-export const handleGetConfigMapDetailQueryKey = (options: Options<HandleGetConfigMapDetailData>) => createQueryKey('handleGetConfigMapDetail', options);
+export const getConfigMapQueryKey = (options: Options<GetConfigMapData>) => createQueryKey('getConfigMap', options);
 
 /**
  * returns detailed information about ConfigMap
  */
-export const handleGetConfigMapDetailOptions = (options: Options<HandleGetConfigMapDetailData>) => queryOptions<HandleGetConfigMapDetailResponse, AxiosError<DefaultError>, HandleGetConfigMapDetailResponse, ReturnType<typeof handleGetConfigMapDetailQueryKey>>({
+export const getConfigMapOptions = (options: Options<GetConfigMapData>) => queryOptions<GetConfigMapResponse, AxiosError<DefaultError>, GetConfigMapResponse, ReturnType<typeof getConfigMapQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetConfigMapDetail({
+        const { data } = await getConfigMap({
             ...options,
             ...queryKey[0],
             signal,
@@ -642,26 +642,26 @@ export const handleGetConfigMapDetailOptions = (options: Options<HandleGetConfig
         });
         return data;
     },
-    queryKey: handleGetConfigMapDetailQueryKey(options)
+    queryKey: getConfigMapQueryKey(options)
 });
 
-export const handleGetConfigMapDetailInfiniteQueryKey = (options: Options<HandleGetConfigMapDetailData>): QueryKey<Options<HandleGetConfigMapDetailData>> => createQueryKey('handleGetConfigMapDetail', options, true);
+export const getConfigMapInfiniteQueryKey = (options: Options<GetConfigMapData>): QueryKey<Options<GetConfigMapData>> => createQueryKey('getConfigMap', options, true);
 
 /**
  * returns detailed information about ConfigMap
  */
-export const handleGetConfigMapDetailInfiniteOptions = (options: Options<HandleGetConfigMapDetailData>) => infiniteQueryOptions<HandleGetConfigMapDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetConfigMapDetailResponse>, QueryKey<Options<HandleGetConfigMapDetailData>>, string | Pick<QueryKey<Options<HandleGetConfigMapDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getConfigMapInfiniteOptions = (options: Options<GetConfigMapData>) => infiniteQueryOptions<GetConfigMapResponse, AxiosError<DefaultError>, InfiniteData<GetConfigMapResponse>, QueryKey<Options<GetConfigMapData>>, string | Pick<QueryKey<Options<GetConfigMapData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetConfigMapDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetConfigMapData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetConfigMapDetail({
+        const { data } = await getConfigMap({
             ...options,
             ...params,
             signal,
@@ -669,17 +669,17 @@ export const handleGetConfigMapDetailInfiniteOptions = (options: Options<HandleG
         });
         return data;
     },
-    queryKey: handleGetConfigMapDetailInfiniteQueryKey(options)
+    queryKey: getConfigMapInfiniteQueryKey(options)
 });
 
-export const handleGetCustomResourceDefinitionListQueryKey = (options?: Options<HandleGetCustomResourceDefinitionListData>) => createQueryKey('handleGetCustomResourceDefinitionList', options);
+export const getCustomResourceDefinitionsQueryKey = (options?: Options<GetCustomResourceDefinitionsData>) => createQueryKey('getCustomResourceDefinitions', options);
 
 /**
  * returns a list of CustomResourceDefinition
  */
-export const handleGetCustomResourceDefinitionListOptions = (options?: Options<HandleGetCustomResourceDefinitionListData>) => queryOptions<HandleGetCustomResourceDefinitionListResponse, AxiosError<DefaultError>, HandleGetCustomResourceDefinitionListResponse, ReturnType<typeof handleGetCustomResourceDefinitionListQueryKey>>({
+export const getCustomResourceDefinitionsOptions = (options?: Options<GetCustomResourceDefinitionsData>) => queryOptions<GetCustomResourceDefinitionsResponse, AxiosError<DefaultError>, GetCustomResourceDefinitionsResponse, ReturnType<typeof getCustomResourceDefinitionsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetCustomResourceDefinitionList({
+        const { data } = await getCustomResourceDefinitions({
             ...options,
             ...queryKey[0],
             signal,
@@ -687,26 +687,26 @@ export const handleGetCustomResourceDefinitionListOptions = (options?: Options<H
         });
         return data;
     },
-    queryKey: handleGetCustomResourceDefinitionListQueryKey(options)
+    queryKey: getCustomResourceDefinitionsQueryKey(options)
 });
 
-export const handleGetCustomResourceDefinitionListInfiniteQueryKey = (options?: Options<HandleGetCustomResourceDefinitionListData>): QueryKey<Options<HandleGetCustomResourceDefinitionListData>> => createQueryKey('handleGetCustomResourceDefinitionList', options, true);
+export const getCustomResourceDefinitionsInfiniteQueryKey = (options?: Options<GetCustomResourceDefinitionsData>): QueryKey<Options<GetCustomResourceDefinitionsData>> => createQueryKey('getCustomResourceDefinitions', options, true);
 
 /**
  * returns a list of CustomResourceDefinition
  */
-export const handleGetCustomResourceDefinitionListInfiniteOptions = (options?: Options<HandleGetCustomResourceDefinitionListData>) => infiniteQueryOptions<HandleGetCustomResourceDefinitionListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetCustomResourceDefinitionListResponse>, QueryKey<Options<HandleGetCustomResourceDefinitionListData>>, string | Pick<QueryKey<Options<HandleGetCustomResourceDefinitionListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getCustomResourceDefinitionsInfiniteOptions = (options?: Options<GetCustomResourceDefinitionsData>) => infiniteQueryOptions<GetCustomResourceDefinitionsResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceDefinitionsResponse>, QueryKey<Options<GetCustomResourceDefinitionsData>>, string | Pick<QueryKey<Options<GetCustomResourceDefinitionsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetCustomResourceDefinitionListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetCustomResourceDefinitionsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetCustomResourceDefinitionList({
+        const { data } = await getCustomResourceDefinitions({
             ...options,
             ...params,
             signal,
@@ -714,17 +714,17 @@ export const handleGetCustomResourceDefinitionListInfiniteOptions = (options?: O
         });
         return data;
     },
-    queryKey: handleGetCustomResourceDefinitionListInfiniteQueryKey(options)
+    queryKey: getCustomResourceDefinitionsInfiniteQueryKey(options)
 });
 
-export const handleGetCustomResourceDefinitionDetailQueryKey = (options: Options<HandleGetCustomResourceDefinitionDetailData>) => createQueryKey('handleGetCustomResourceDefinitionDetail', options);
+export const getCustomResourceDefinitionQueryKey = (options: Options<GetCustomResourceDefinitionData>) => createQueryKey('getCustomResourceDefinition', options);
 
 /**
  * returns detailed information about CustomResourceDefinition
  */
-export const handleGetCustomResourceDefinitionDetailOptions = (options: Options<HandleGetCustomResourceDefinitionDetailData>) => queryOptions<HandleGetCustomResourceDefinitionDetailResponse, AxiosError<DefaultError>, HandleGetCustomResourceDefinitionDetailResponse, ReturnType<typeof handleGetCustomResourceDefinitionDetailQueryKey>>({
+export const getCustomResourceDefinitionOptions = (options: Options<GetCustomResourceDefinitionData>) => queryOptions<GetCustomResourceDefinitionResponse, AxiosError<DefaultError>, GetCustomResourceDefinitionResponse, ReturnType<typeof getCustomResourceDefinitionQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetCustomResourceDefinitionDetail({
+        const { data } = await getCustomResourceDefinition({
             ...options,
             ...queryKey[0],
             signal,
@@ -732,26 +732,26 @@ export const handleGetCustomResourceDefinitionDetailOptions = (options: Options<
         });
         return data;
     },
-    queryKey: handleGetCustomResourceDefinitionDetailQueryKey(options)
+    queryKey: getCustomResourceDefinitionQueryKey(options)
 });
 
-export const handleGetCustomResourceDefinitionDetailInfiniteQueryKey = (options: Options<HandleGetCustomResourceDefinitionDetailData>): QueryKey<Options<HandleGetCustomResourceDefinitionDetailData>> => createQueryKey('handleGetCustomResourceDefinitionDetail', options, true);
+export const getCustomResourceDefinitionInfiniteQueryKey = (options: Options<GetCustomResourceDefinitionData>): QueryKey<Options<GetCustomResourceDefinitionData>> => createQueryKey('getCustomResourceDefinition', options, true);
 
 /**
  * returns detailed information about CustomResourceDefinition
  */
-export const handleGetCustomResourceDefinitionDetailInfiniteOptions = (options: Options<HandleGetCustomResourceDefinitionDetailData>) => infiniteQueryOptions<HandleGetCustomResourceDefinitionDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetCustomResourceDefinitionDetailResponse>, QueryKey<Options<HandleGetCustomResourceDefinitionDetailData>>, string | Pick<QueryKey<Options<HandleGetCustomResourceDefinitionDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getCustomResourceDefinitionInfiniteOptions = (options: Options<GetCustomResourceDefinitionData>) => infiniteQueryOptions<GetCustomResourceDefinitionResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceDefinitionResponse>, QueryKey<Options<GetCustomResourceDefinitionData>>, string | Pick<QueryKey<Options<GetCustomResourceDefinitionData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetCustomResourceDefinitionDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetCustomResourceDefinitionData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetCustomResourceDefinitionDetail({
+        const { data } = await getCustomResourceDefinition({
             ...options,
             ...params,
             signal,
@@ -759,17 +759,17 @@ export const handleGetCustomResourceDefinitionDetailInfiniteOptions = (options: 
         });
         return data;
     },
-    queryKey: handleGetCustomResourceDefinitionDetailInfiniteQueryKey(options)
+    queryKey: getCustomResourceDefinitionInfiniteQueryKey(options)
 });
 
-export const handleGetCustomResourceObjectListQueryKey = (options: Options<HandleGetCustomResourceObjectListData>) => createQueryKey('handleGetCustomResourceObjectList', options);
+export const getCustomResourceObjectsQueryKey = (options: Options<GetCustomResourceObjectsData>) => createQueryKey('getCustomResourceObjects', options);
 
 /**
  * returns a list of objects of CustomResourceDefinition
  */
-export const handleGetCustomResourceObjectListOptions = (options: Options<HandleGetCustomResourceObjectListData>) => queryOptions<HandleGetCustomResourceObjectListResponse, AxiosError<DefaultError>, HandleGetCustomResourceObjectListResponse, ReturnType<typeof handleGetCustomResourceObjectListQueryKey>>({
+export const getCustomResourceObjectsOptions = (options: Options<GetCustomResourceObjectsData>) => queryOptions<GetCustomResourceObjectsResponse, AxiosError<DefaultError>, GetCustomResourceObjectsResponse, ReturnType<typeof getCustomResourceObjectsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetCustomResourceObjectList({
+        const { data } = await getCustomResourceObjects({
             ...options,
             ...queryKey[0],
             signal,
@@ -777,26 +777,26 @@ export const handleGetCustomResourceObjectListOptions = (options: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetCustomResourceObjectListQueryKey(options)
+    queryKey: getCustomResourceObjectsQueryKey(options)
 });
 
-export const handleGetCustomResourceObjectListInfiniteQueryKey = (options: Options<HandleGetCustomResourceObjectListData>): QueryKey<Options<HandleGetCustomResourceObjectListData>> => createQueryKey('handleGetCustomResourceObjectList', options, true);
+export const getCustomResourceObjectsInfiniteQueryKey = (options: Options<GetCustomResourceObjectsData>): QueryKey<Options<GetCustomResourceObjectsData>> => createQueryKey('getCustomResourceObjects', options, true);
 
 /**
  * returns a list of objects of CustomResourceDefinition
  */
-export const handleGetCustomResourceObjectListInfiniteOptions = (options: Options<HandleGetCustomResourceObjectListData>) => infiniteQueryOptions<HandleGetCustomResourceObjectListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetCustomResourceObjectListResponse>, QueryKey<Options<HandleGetCustomResourceObjectListData>>, string | Pick<QueryKey<Options<HandleGetCustomResourceObjectListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getCustomResourceObjectsInfiniteOptions = (options: Options<GetCustomResourceObjectsData>) => infiniteQueryOptions<GetCustomResourceObjectsResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceObjectsResponse>, QueryKey<Options<GetCustomResourceObjectsData>>, string | Pick<QueryKey<Options<GetCustomResourceObjectsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetCustomResourceObjectListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetCustomResourceObjectsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetCustomResourceObjectList({
+        const { data } = await getCustomResourceObjects({
             ...options,
             ...params,
             signal,
@@ -804,17 +804,17 @@ export const handleGetCustomResourceObjectListInfiniteOptions = (options: Option
         });
         return data;
     },
-    queryKey: handleGetCustomResourceObjectListInfiniteQueryKey(options)
+    queryKey: getCustomResourceObjectsInfiniteQueryKey(options)
 });
 
-export const handleGetCustomResourceObjectDetailQueryKey = (options: Options<HandleGetCustomResourceObjectDetailData>) => createQueryKey('handleGetCustomResourceObjectDetail', options);
+export const getCustomResourceObjectQueryKey = (options: Options<GetCustomResourceObjectData>) => createQueryKey('getCustomResourceObject', options);
 
 /**
  * returns detailed information about custom resource object
  */
-export const handleGetCustomResourceObjectDetailOptions = (options: Options<HandleGetCustomResourceObjectDetailData>) => queryOptions<HandleGetCustomResourceObjectDetailResponse, AxiosError<DefaultError>, HandleGetCustomResourceObjectDetailResponse, ReturnType<typeof handleGetCustomResourceObjectDetailQueryKey>>({
+export const getCustomResourceObjectOptions = (options: Options<GetCustomResourceObjectData>) => queryOptions<GetCustomResourceObjectResponse, AxiosError<DefaultError>, GetCustomResourceObjectResponse, ReturnType<typeof getCustomResourceObjectQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetCustomResourceObjectDetail({
+        const { data } = await getCustomResourceObject({
             ...options,
             ...queryKey[0],
             signal,
@@ -822,26 +822,26 @@ export const handleGetCustomResourceObjectDetailOptions = (options: Options<Hand
         });
         return data;
     },
-    queryKey: handleGetCustomResourceObjectDetailQueryKey(options)
+    queryKey: getCustomResourceObjectQueryKey(options)
 });
 
-export const handleGetCustomResourceObjectDetailInfiniteQueryKey = (options: Options<HandleGetCustomResourceObjectDetailData>): QueryKey<Options<HandleGetCustomResourceObjectDetailData>> => createQueryKey('handleGetCustomResourceObjectDetail', options, true);
+export const getCustomResourceObjectInfiniteQueryKey = (options: Options<GetCustomResourceObjectData>): QueryKey<Options<GetCustomResourceObjectData>> => createQueryKey('getCustomResourceObject', options, true);
 
 /**
  * returns detailed information about custom resource object
  */
-export const handleGetCustomResourceObjectDetailInfiniteOptions = (options: Options<HandleGetCustomResourceObjectDetailData>) => infiniteQueryOptions<HandleGetCustomResourceObjectDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetCustomResourceObjectDetailResponse>, QueryKey<Options<HandleGetCustomResourceObjectDetailData>>, string | Pick<QueryKey<Options<HandleGetCustomResourceObjectDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getCustomResourceObjectInfiniteOptions = (options: Options<GetCustomResourceObjectData>) => infiniteQueryOptions<GetCustomResourceObjectResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceObjectResponse>, QueryKey<Options<GetCustomResourceObjectData>>, string | Pick<QueryKey<Options<GetCustomResourceObjectData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetCustomResourceObjectDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetCustomResourceObjectData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetCustomResourceObjectDetail({
+        const { data } = await getCustomResourceObject({
             ...options,
             ...params,
             signal,
@@ -849,17 +849,17 @@ export const handleGetCustomResourceObjectDetailInfiniteOptions = (options: Opti
         });
         return data;
     },
-    queryKey: handleGetCustomResourceObjectDetailInfiniteQueryKey(options)
+    queryKey: getCustomResourceObjectInfiniteQueryKey(options)
 });
 
-export const handleGetCustomResourceObjectEventsQueryKey = (options: Options<HandleGetCustomResourceObjectEventsData>) => createQueryKey('handleGetCustomResourceObjectEvents', options);
+export const getCustomResourceObjectEventsQueryKey = (options: Options<GetCustomResourceObjectEventsData>) => createQueryKey('getCustomResourceObjectEvents', options);
 
 /**
  * returns Events for custom resource object
  */
-export const handleGetCustomResourceObjectEventsOptions = (options: Options<HandleGetCustomResourceObjectEventsData>) => queryOptions<HandleGetCustomResourceObjectEventsResponse, AxiosError<DefaultError>, HandleGetCustomResourceObjectEventsResponse, ReturnType<typeof handleGetCustomResourceObjectEventsQueryKey>>({
+export const getCustomResourceObjectEventsOptions = (options: Options<GetCustomResourceObjectEventsData>) => queryOptions<GetCustomResourceObjectEventsResponse, AxiosError<DefaultError>, GetCustomResourceObjectEventsResponse, ReturnType<typeof getCustomResourceObjectEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetCustomResourceObjectEvents({
+        const { data } = await getCustomResourceObjectEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -867,26 +867,26 @@ export const handleGetCustomResourceObjectEventsOptions = (options: Options<Hand
         });
         return data;
     },
-    queryKey: handleGetCustomResourceObjectEventsQueryKey(options)
+    queryKey: getCustomResourceObjectEventsQueryKey(options)
 });
 
-export const handleGetCustomResourceObjectEventsInfiniteQueryKey = (options: Options<HandleGetCustomResourceObjectEventsData>): QueryKey<Options<HandleGetCustomResourceObjectEventsData>> => createQueryKey('handleGetCustomResourceObjectEvents', options, true);
+export const getCustomResourceObjectEventsInfiniteQueryKey = (options: Options<GetCustomResourceObjectEventsData>): QueryKey<Options<GetCustomResourceObjectEventsData>> => createQueryKey('getCustomResourceObjectEvents', options, true);
 
 /**
  * returns Events for custom resource object
  */
-export const handleGetCustomResourceObjectEventsInfiniteOptions = (options: Options<HandleGetCustomResourceObjectEventsData>) => infiniteQueryOptions<HandleGetCustomResourceObjectEventsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetCustomResourceObjectEventsResponse>, QueryKey<Options<HandleGetCustomResourceObjectEventsData>>, string | Pick<QueryKey<Options<HandleGetCustomResourceObjectEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getCustomResourceObjectEventsInfiniteOptions = (options: Options<GetCustomResourceObjectEventsData>) => infiniteQueryOptions<GetCustomResourceObjectEventsResponse, AxiosError<DefaultError>, InfiniteData<GetCustomResourceObjectEventsResponse>, QueryKey<Options<GetCustomResourceObjectEventsData>>, string | Pick<QueryKey<Options<GetCustomResourceObjectEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetCustomResourceObjectEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetCustomResourceObjectEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetCustomResourceObjectEvents({
+        const { data } = await getCustomResourceObjectEvents({
             ...options,
             ...params,
             signal,
@@ -894,17 +894,17 @@ export const handleGetCustomResourceObjectEventsInfiniteOptions = (options: Opti
         });
         return data;
     },
-    queryKey: handleGetCustomResourceObjectEventsInfiniteQueryKey(options)
+    queryKey: getCustomResourceObjectEventsInfiniteQueryKey(options)
 });
 
-export const handleGetCronJobListQueryKey = (options?: Options<HandleGetCronJobListData>) => createQueryKey('handleGetCronJobList', options);
+export const getAllCronJobsQueryKey = (options?: Options<GetAllCronJobsData>) => createQueryKey('getAllCronJobs', options);
 
 /**
  * returns a list of CronJobs from all namespaces
  */
-export const handleGetCronJobListOptions = (options?: Options<HandleGetCronJobListData>) => queryOptions<HandleGetCronJobListResponse, AxiosError<DefaultError>, HandleGetCronJobListResponse, ReturnType<typeof handleGetCronJobListQueryKey>>({
+export const getAllCronJobsOptions = (options?: Options<GetAllCronJobsData>) => queryOptions<GetAllCronJobsResponse, AxiosError<DefaultError>, GetAllCronJobsResponse, ReturnType<typeof getAllCronJobsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetCronJobList({
+        const { data } = await getAllCronJobs({
             ...options,
             ...queryKey[0],
             signal,
@@ -912,26 +912,26 @@ export const handleGetCronJobListOptions = (options?: Options<HandleGetCronJobLi
         });
         return data;
     },
-    queryKey: handleGetCronJobListQueryKey(options)
+    queryKey: getAllCronJobsQueryKey(options)
 });
 
-export const handleGetCronJobListInfiniteQueryKey = (options?: Options<HandleGetCronJobListData>): QueryKey<Options<HandleGetCronJobListData>> => createQueryKey('handleGetCronJobList', options, true);
+export const getAllCronJobsInfiniteQueryKey = (options?: Options<GetAllCronJobsData>): QueryKey<Options<GetAllCronJobsData>> => createQueryKey('getAllCronJobs', options, true);
 
 /**
  * returns a list of CronJobs from all namespaces
  */
-export const handleGetCronJobListInfiniteOptions = (options?: Options<HandleGetCronJobListData>) => infiniteQueryOptions<HandleGetCronJobListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetCronJobListResponse>, QueryKey<Options<HandleGetCronJobListData>>, string | Pick<QueryKey<Options<HandleGetCronJobListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllCronJobsInfiniteOptions = (options?: Options<GetAllCronJobsData>) => infiniteQueryOptions<GetAllCronJobsResponse, AxiosError<DefaultError>, InfiniteData<GetAllCronJobsResponse>, QueryKey<Options<GetAllCronJobsData>>, string | Pick<QueryKey<Options<GetAllCronJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetCronJobListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllCronJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetCronJobList({
+        const { data } = await getAllCronJobs({
             ...options,
             ...params,
             signal,
@@ -939,17 +939,17 @@ export const handleGetCronJobListInfiniteOptions = (options?: Options<HandleGetC
         });
         return data;
     },
-    queryKey: handleGetCronJobListInfiniteQueryKey(options)
+    queryKey: getAllCronJobsInfiniteQueryKey(options)
 });
 
-export const handleGetCronJobList2QueryKey = (options: Options<HandleGetCronJobList2Data>) => createQueryKey('handleGetCronJobList2', options);
+export const getCronJobsQueryKey = (options: Options<GetCronJobsData>) => createQueryKey('getCronJobs', options);
 
 /**
  * returns a list of CronJobs in a namespaces
  */
-export const handleGetCronJobList2Options = (options: Options<HandleGetCronJobList2Data>) => queryOptions<HandleGetCronJobList2Response, AxiosError<DefaultError>, HandleGetCronJobList2Response, ReturnType<typeof handleGetCronJobList2QueryKey>>({
+export const getCronJobsOptions = (options: Options<GetCronJobsData>) => queryOptions<GetCronJobsResponse, AxiosError<DefaultError>, GetCronJobsResponse, ReturnType<typeof getCronJobsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetCronJobList2({
+        const { data } = await getCronJobs({
             ...options,
             ...queryKey[0],
             signal,
@@ -957,26 +957,26 @@ export const handleGetCronJobList2Options = (options: Options<HandleGetCronJobLi
         });
         return data;
     },
-    queryKey: handleGetCronJobList2QueryKey(options)
+    queryKey: getCronJobsQueryKey(options)
 });
 
-export const handleGetCronJobList2InfiniteQueryKey = (options: Options<HandleGetCronJobList2Data>): QueryKey<Options<HandleGetCronJobList2Data>> => createQueryKey('handleGetCronJobList2', options, true);
+export const getCronJobsInfiniteQueryKey = (options: Options<GetCronJobsData>): QueryKey<Options<GetCronJobsData>> => createQueryKey('getCronJobs', options, true);
 
 /**
  * returns a list of CronJobs in a namespaces
  */
-export const handleGetCronJobList2InfiniteOptions = (options: Options<HandleGetCronJobList2Data>) => infiniteQueryOptions<HandleGetCronJobList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetCronJobList2Response>, QueryKey<Options<HandleGetCronJobList2Data>>, string | Pick<QueryKey<Options<HandleGetCronJobList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getCronJobsInfiniteOptions = (options: Options<GetCronJobsData>) => infiniteQueryOptions<GetCronJobsResponse, AxiosError<DefaultError>, InfiniteData<GetCronJobsResponse>, QueryKey<Options<GetCronJobsData>>, string | Pick<QueryKey<Options<GetCronJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetCronJobList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetCronJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetCronJobList2({
+        const { data } = await getCronJobs({
             ...options,
             ...params,
             signal,
@@ -984,17 +984,17 @@ export const handleGetCronJobList2InfiniteOptions = (options: Options<HandleGetC
         });
         return data;
     },
-    queryKey: handleGetCronJobList2InfiniteQueryKey(options)
+    queryKey: getCronJobsInfiniteQueryKey(options)
 });
 
-export const handleGetCronJobDetailQueryKey = (options: Options<HandleGetCronJobDetailData>) => createQueryKey('handleGetCronJobDetail', options);
+export const getCronJobQueryKey = (options: Options<GetCronJobData>) => createQueryKey('getCronJob', options);
 
 /**
  * returns detailed information about CronJob
  */
-export const handleGetCronJobDetailOptions = (options: Options<HandleGetCronJobDetailData>) => queryOptions<HandleGetCronJobDetailResponse, AxiosError<DefaultError>, HandleGetCronJobDetailResponse, ReturnType<typeof handleGetCronJobDetailQueryKey>>({
+export const getCronJobOptions = (options: Options<GetCronJobData>) => queryOptions<GetCronJobResponse, AxiosError<DefaultError>, GetCronJobResponse, ReturnType<typeof getCronJobQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetCronJobDetail({
+        const { data } = await getCronJob({
             ...options,
             ...queryKey[0],
             signal,
@@ -1002,26 +1002,26 @@ export const handleGetCronJobDetailOptions = (options: Options<HandleGetCronJobD
         });
         return data;
     },
-    queryKey: handleGetCronJobDetailQueryKey(options)
+    queryKey: getCronJobQueryKey(options)
 });
 
-export const handleGetCronJobDetailInfiniteQueryKey = (options: Options<HandleGetCronJobDetailData>): QueryKey<Options<HandleGetCronJobDetailData>> => createQueryKey('handleGetCronJobDetail', options, true);
+export const getCronJobInfiniteQueryKey = (options: Options<GetCronJobData>): QueryKey<Options<GetCronJobData>> => createQueryKey('getCronJob', options, true);
 
 /**
  * returns detailed information about CronJob
  */
-export const handleGetCronJobDetailInfiniteOptions = (options: Options<HandleGetCronJobDetailData>) => infiniteQueryOptions<HandleGetCronJobDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetCronJobDetailResponse>, QueryKey<Options<HandleGetCronJobDetailData>>, string | Pick<QueryKey<Options<HandleGetCronJobDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getCronJobInfiniteOptions = (options: Options<GetCronJobData>) => infiniteQueryOptions<GetCronJobResponse, AxiosError<DefaultError>, InfiniteData<GetCronJobResponse>, QueryKey<Options<GetCronJobData>>, string | Pick<QueryKey<Options<GetCronJobData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetCronJobDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetCronJobData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetCronJobDetail({
+        const { data } = await getCronJob({
             ...options,
             ...params,
             signal,
@@ -1029,17 +1029,17 @@ export const handleGetCronJobDetailInfiniteOptions = (options: Options<HandleGet
         });
         return data;
     },
-    queryKey: handleGetCronJobDetailInfiniteQueryKey(options)
+    queryKey: getCronJobInfiniteQueryKey(options)
 });
 
-export const handleGetCronJobEventsQueryKey = (options: Options<HandleGetCronJobEventsData>) => createQueryKey('handleGetCronJobEvents', options);
+export const getCronJobEventsQueryKey = (options: Options<GetCronJobEventsData>) => createQueryKey('getCronJobEvents', options);
 
 /**
  * returns a list of Events for CronJob
  */
-export const handleGetCronJobEventsOptions = (options: Options<HandleGetCronJobEventsData>) => queryOptions<HandleGetCronJobEventsResponse, AxiosError<DefaultError>, HandleGetCronJobEventsResponse, ReturnType<typeof handleGetCronJobEventsQueryKey>>({
+export const getCronJobEventsOptions = (options: Options<GetCronJobEventsData>) => queryOptions<GetCronJobEventsResponse, AxiosError<DefaultError>, GetCronJobEventsResponse, ReturnType<typeof getCronJobEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetCronJobEvents({
+        const { data } = await getCronJobEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -1047,26 +1047,26 @@ export const handleGetCronJobEventsOptions = (options: Options<HandleGetCronJobE
         });
         return data;
     },
-    queryKey: handleGetCronJobEventsQueryKey(options)
+    queryKey: getCronJobEventsQueryKey(options)
 });
 
-export const handleGetCronJobEventsInfiniteQueryKey = (options: Options<HandleGetCronJobEventsData>): QueryKey<Options<HandleGetCronJobEventsData>> => createQueryKey('handleGetCronJobEvents', options, true);
+export const getCronJobEventsInfiniteQueryKey = (options: Options<GetCronJobEventsData>): QueryKey<Options<GetCronJobEventsData>> => createQueryKey('getCronJobEvents', options, true);
 
 /**
  * returns a list of Events for CronJob
  */
-export const handleGetCronJobEventsInfiniteOptions = (options: Options<HandleGetCronJobEventsData>) => infiniteQueryOptions<HandleGetCronJobEventsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetCronJobEventsResponse>, QueryKey<Options<HandleGetCronJobEventsData>>, string | Pick<QueryKey<Options<HandleGetCronJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getCronJobEventsInfiniteOptions = (options: Options<GetCronJobEventsData>) => infiniteQueryOptions<GetCronJobEventsResponse, AxiosError<DefaultError>, InfiniteData<GetCronJobEventsResponse>, QueryKey<Options<GetCronJobEventsData>>, string | Pick<QueryKey<Options<GetCronJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetCronJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetCronJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetCronJobEvents({
+        const { data } = await getCronJobEvents({
             ...options,
             ...params,
             signal,
@@ -1074,17 +1074,17 @@ export const handleGetCronJobEventsInfiniteOptions = (options: Options<HandleGet
         });
         return data;
     },
-    queryKey: handleGetCronJobEventsInfiniteQueryKey(options)
+    queryKey: getCronJobEventsInfiniteQueryKey(options)
 });
 
-export const handleGetCronJobJobsQueryKey = (options: Options<HandleGetCronJobJobsData>) => createQueryKey('handleGetCronJobJobs', options);
+export const getCronJobJobsQueryKey = (options: Options<GetCronJobJobsData>) => createQueryKey('getCronJobJobs', options);
 
 /**
  * returns a list of Jobs for CronJob
  */
-export const handleGetCronJobJobsOptions = (options: Options<HandleGetCronJobJobsData>) => queryOptions<HandleGetCronJobJobsResponse, AxiosError<DefaultError>, HandleGetCronJobJobsResponse, ReturnType<typeof handleGetCronJobJobsQueryKey>>({
+export const getCronJobJobsOptions = (options: Options<GetCronJobJobsData>) => queryOptions<GetCronJobJobsResponse, AxiosError<DefaultError>, GetCronJobJobsResponse, ReturnType<typeof getCronJobJobsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetCronJobJobs({
+        const { data } = await getCronJobJobs({
             ...options,
             ...queryKey[0],
             signal,
@@ -1092,26 +1092,26 @@ export const handleGetCronJobJobsOptions = (options: Options<HandleGetCronJobJob
         });
         return data;
     },
-    queryKey: handleGetCronJobJobsQueryKey(options)
+    queryKey: getCronJobJobsQueryKey(options)
 });
 
-export const handleGetCronJobJobsInfiniteQueryKey = (options: Options<HandleGetCronJobJobsData>): QueryKey<Options<HandleGetCronJobJobsData>> => createQueryKey('handleGetCronJobJobs', options, true);
+export const getCronJobJobsInfiniteQueryKey = (options: Options<GetCronJobJobsData>): QueryKey<Options<GetCronJobJobsData>> => createQueryKey('getCronJobJobs', options, true);
 
 /**
  * returns a list of Jobs for CronJob
  */
-export const handleGetCronJobJobsInfiniteOptions = (options: Options<HandleGetCronJobJobsData>) => infiniteQueryOptions<HandleGetCronJobJobsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetCronJobJobsResponse>, QueryKey<Options<HandleGetCronJobJobsData>>, string | Pick<QueryKey<Options<HandleGetCronJobJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getCronJobJobsInfiniteOptions = (options: Options<GetCronJobJobsData>) => infiniteQueryOptions<GetCronJobJobsResponse, AxiosError<DefaultError>, InfiniteData<GetCronJobJobsResponse>, QueryKey<Options<GetCronJobJobsData>>, string | Pick<QueryKey<Options<GetCronJobJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetCronJobJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetCronJobJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetCronJobJobs({
+        const { data } = await getCronJobJobs({
             ...options,
             ...params,
             signal,
@@ -1119,16 +1119,16 @@ export const handleGetCronJobJobsInfiniteOptions = (options: Options<HandleGetCr
         });
         return data;
     },
-    queryKey: handleGetCronJobJobsInfiniteQueryKey(options)
+    queryKey: getCronJobJobsInfiniteQueryKey(options)
 });
 
 /**
  * triggers a Job based on CronJob
  */
-export const handleTriggerCronJobMutation = (options?: Partial<Options<HandleTriggerCronJobData>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandleTriggerCronJobData>> => {
-    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandleTriggerCronJobData>> = {
+export const triggerCronJobMutation = (options?: Partial<Options<TriggerCronJobData>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<TriggerCronJobData>> => {
+    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<TriggerCronJobData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleTriggerCronJob({
+            const { data } = await triggerCronJob({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -1139,14 +1139,14 @@ export const handleTriggerCronJobMutation = (options?: Partial<Options<HandleTri
     return mutationOptions;
 };
 
-export const handleGetCsrfTokenQueryKey = (options: Options<HandleGetCsrfTokenData>) => createQueryKey('handleGetCsrfToken', options);
+export const getCsrfTokenQueryKey = (options: Options<GetCsrfTokenData>) => createQueryKey('getCsrfToken', options);
 
 /**
  * generates a one-time CSRF token that can be used by POST request
  */
-export const handleGetCsrfTokenOptions = (options: Options<HandleGetCsrfTokenData>) => queryOptions<HandleGetCsrfTokenResponse, AxiosError<DefaultError>, HandleGetCsrfTokenResponse, ReturnType<typeof handleGetCsrfTokenQueryKey>>({
+export const getCsrfTokenOptions = (options: Options<GetCsrfTokenData>) => queryOptions<GetCsrfTokenResponse, AxiosError<DefaultError>, GetCsrfTokenResponse, ReturnType<typeof getCsrfTokenQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetCsrfToken({
+        const { data } = await getCsrfToken({
             ...options,
             ...queryKey[0],
             signal,
@@ -1154,26 +1154,26 @@ export const handleGetCsrfTokenOptions = (options: Options<HandleGetCsrfTokenDat
         });
         return data;
     },
-    queryKey: handleGetCsrfTokenQueryKey(options)
+    queryKey: getCsrfTokenQueryKey(options)
 });
 
-export const handleGetCsrfTokenInfiniteQueryKey = (options: Options<HandleGetCsrfTokenData>): QueryKey<Options<HandleGetCsrfTokenData>> => createQueryKey('handleGetCsrfToken', options, true);
+export const getCsrfTokenInfiniteQueryKey = (options: Options<GetCsrfTokenData>): QueryKey<Options<GetCsrfTokenData>> => createQueryKey('getCsrfToken', options, true);
 
 /**
  * generates a one-time CSRF token that can be used by POST request
  */
-export const handleGetCsrfTokenInfiniteOptions = (options: Options<HandleGetCsrfTokenData>) => infiniteQueryOptions<HandleGetCsrfTokenResponse, AxiosError<DefaultError>, InfiniteData<HandleGetCsrfTokenResponse>, QueryKey<Options<HandleGetCsrfTokenData>>, string | Pick<QueryKey<Options<HandleGetCsrfTokenData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getCsrfTokenInfiniteOptions = (options: Options<GetCsrfTokenData>) => infiniteQueryOptions<GetCsrfTokenResponse, AxiosError<DefaultError>, InfiniteData<GetCsrfTokenResponse>, QueryKey<Options<GetCsrfTokenData>>, string | Pick<QueryKey<Options<GetCsrfTokenData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetCsrfTokenData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetCsrfTokenData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetCsrfToken({
+        const { data } = await getCsrfToken({
             ...options,
             ...params,
             signal,
@@ -1181,17 +1181,17 @@ export const handleGetCsrfTokenInfiniteOptions = (options: Options<HandleGetCsrf
         });
         return data;
     },
-    queryKey: handleGetCsrfTokenInfiniteQueryKey(options)
+    queryKey: getCsrfTokenInfiniteQueryKey(options)
 });
 
-export const handleGetDaemonSetListQueryKey = (options?: Options<HandleGetDaemonSetListData>) => createQueryKey('handleGetDaemonSetList', options);
+export const getAllDaemonSetsQueryKey = (options?: Options<GetAllDaemonSetsData>) => createQueryKey('getAllDaemonSets', options);
 
 /**
  * returns a list of DaemonSets from all namespaces
  */
-export const handleGetDaemonSetListOptions = (options?: Options<HandleGetDaemonSetListData>) => queryOptions<HandleGetDaemonSetListResponse, AxiosError<DefaultError>, HandleGetDaemonSetListResponse, ReturnType<typeof handleGetDaemonSetListQueryKey>>({
+export const getAllDaemonSetsOptions = (options?: Options<GetAllDaemonSetsData>) => queryOptions<GetAllDaemonSetsResponse, AxiosError<DefaultError>, GetAllDaemonSetsResponse, ReturnType<typeof getAllDaemonSetsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetDaemonSetList({
+        const { data } = await getAllDaemonSets({
             ...options,
             ...queryKey[0],
             signal,
@@ -1199,26 +1199,26 @@ export const handleGetDaemonSetListOptions = (options?: Options<HandleGetDaemonS
         });
         return data;
     },
-    queryKey: handleGetDaemonSetListQueryKey(options)
+    queryKey: getAllDaemonSetsQueryKey(options)
 });
 
-export const handleGetDaemonSetListInfiniteQueryKey = (options?: Options<HandleGetDaemonSetListData>): QueryKey<Options<HandleGetDaemonSetListData>> => createQueryKey('handleGetDaemonSetList', options, true);
+export const getAllDaemonSetsInfiniteQueryKey = (options?: Options<GetAllDaemonSetsData>): QueryKey<Options<GetAllDaemonSetsData>> => createQueryKey('getAllDaemonSets', options, true);
 
 /**
  * returns a list of DaemonSets from all namespaces
  */
-export const handleGetDaemonSetListInfiniteOptions = (options?: Options<HandleGetDaemonSetListData>) => infiniteQueryOptions<HandleGetDaemonSetListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetDaemonSetListResponse>, QueryKey<Options<HandleGetDaemonSetListData>>, string | Pick<QueryKey<Options<HandleGetDaemonSetListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllDaemonSetsInfiniteOptions = (options?: Options<GetAllDaemonSetsData>) => infiniteQueryOptions<GetAllDaemonSetsResponse, AxiosError<DefaultError>, InfiniteData<GetAllDaemonSetsResponse>, QueryKey<Options<GetAllDaemonSetsData>>, string | Pick<QueryKey<Options<GetAllDaemonSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetDaemonSetListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllDaemonSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetDaemonSetList({
+        const { data } = await getAllDaemonSets({
             ...options,
             ...params,
             signal,
@@ -1226,17 +1226,17 @@ export const handleGetDaemonSetListInfiniteOptions = (options?: Options<HandleGe
         });
         return data;
     },
-    queryKey: handleGetDaemonSetListInfiniteQueryKey(options)
+    queryKey: getAllDaemonSetsInfiniteQueryKey(options)
 });
 
-export const handleGetDaemonSetList2QueryKey = (options: Options<HandleGetDaemonSetList2Data>) => createQueryKey('handleGetDaemonSetList2', options);
+export const getDaemonSetsQueryKey = (options: Options<GetDaemonSetsData>) => createQueryKey('getDaemonSets', options);
 
 /**
  * returns a list of DaemonSets in a namespaces
  */
-export const handleGetDaemonSetList2Options = (options: Options<HandleGetDaemonSetList2Data>) => queryOptions<HandleGetDaemonSetList2Response, AxiosError<DefaultError>, HandleGetDaemonSetList2Response, ReturnType<typeof handleGetDaemonSetList2QueryKey>>({
+export const getDaemonSetsOptions = (options: Options<GetDaemonSetsData>) => queryOptions<GetDaemonSetsResponse, AxiosError<DefaultError>, GetDaemonSetsResponse, ReturnType<typeof getDaemonSetsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetDaemonSetList2({
+        const { data } = await getDaemonSets({
             ...options,
             ...queryKey[0],
             signal,
@@ -1244,26 +1244,26 @@ export const handleGetDaemonSetList2Options = (options: Options<HandleGetDaemonS
         });
         return data;
     },
-    queryKey: handleGetDaemonSetList2QueryKey(options)
+    queryKey: getDaemonSetsQueryKey(options)
 });
 
-export const handleGetDaemonSetList2InfiniteQueryKey = (options: Options<HandleGetDaemonSetList2Data>): QueryKey<Options<HandleGetDaemonSetList2Data>> => createQueryKey('handleGetDaemonSetList2', options, true);
+export const getDaemonSetsInfiniteQueryKey = (options: Options<GetDaemonSetsData>): QueryKey<Options<GetDaemonSetsData>> => createQueryKey('getDaemonSets', options, true);
 
 /**
  * returns a list of DaemonSets in a namespaces
  */
-export const handleGetDaemonSetList2InfiniteOptions = (options: Options<HandleGetDaemonSetList2Data>) => infiniteQueryOptions<HandleGetDaemonSetList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetDaemonSetList2Response>, QueryKey<Options<HandleGetDaemonSetList2Data>>, string | Pick<QueryKey<Options<HandleGetDaemonSetList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getDaemonSetsInfiniteOptions = (options: Options<GetDaemonSetsData>) => infiniteQueryOptions<GetDaemonSetsResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetsResponse>, QueryKey<Options<GetDaemonSetsData>>, string | Pick<QueryKey<Options<GetDaemonSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetDaemonSetList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetDaemonSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetDaemonSetList2({
+        const { data } = await getDaemonSets({
             ...options,
             ...params,
             signal,
@@ -1271,17 +1271,17 @@ export const handleGetDaemonSetList2InfiniteOptions = (options: Options<HandleGe
         });
         return data;
     },
-    queryKey: handleGetDaemonSetList2InfiniteQueryKey(options)
+    queryKey: getDaemonSetsInfiniteQueryKey(options)
 });
 
-export const handleGetDaemonSetDetailQueryKey = (options: Options<HandleGetDaemonSetDetailData>) => createQueryKey('handleGetDaemonSetDetail', options);
+export const getDaemonSetQueryKey = (options: Options<GetDaemonSetData>) => createQueryKey('getDaemonSet', options);
 
 /**
  * returns detailed information about DaemonSet
  */
-export const handleGetDaemonSetDetailOptions = (options: Options<HandleGetDaemonSetDetailData>) => queryOptions<HandleGetDaemonSetDetailResponse, AxiosError<DefaultError>, HandleGetDaemonSetDetailResponse, ReturnType<typeof handleGetDaemonSetDetailQueryKey>>({
+export const getDaemonSetOptions = (options: Options<GetDaemonSetData>) => queryOptions<GetDaemonSetResponse, AxiosError<DefaultError>, GetDaemonSetResponse, ReturnType<typeof getDaemonSetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetDaemonSetDetail({
+        const { data } = await getDaemonSet({
             ...options,
             ...queryKey[0],
             signal,
@@ -1289,26 +1289,26 @@ export const handleGetDaemonSetDetailOptions = (options: Options<HandleGetDaemon
         });
         return data;
     },
-    queryKey: handleGetDaemonSetDetailQueryKey(options)
+    queryKey: getDaemonSetQueryKey(options)
 });
 
-export const handleGetDaemonSetDetailInfiniteQueryKey = (options: Options<HandleGetDaemonSetDetailData>): QueryKey<Options<HandleGetDaemonSetDetailData>> => createQueryKey('handleGetDaemonSetDetail', options, true);
+export const getDaemonSetInfiniteQueryKey = (options: Options<GetDaemonSetData>): QueryKey<Options<GetDaemonSetData>> => createQueryKey('getDaemonSet', options, true);
 
 /**
  * returns detailed information about DaemonSet
  */
-export const handleGetDaemonSetDetailInfiniteOptions = (options: Options<HandleGetDaemonSetDetailData>) => infiniteQueryOptions<HandleGetDaemonSetDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetDaemonSetDetailResponse>, QueryKey<Options<HandleGetDaemonSetDetailData>>, string | Pick<QueryKey<Options<HandleGetDaemonSetDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getDaemonSetInfiniteOptions = (options: Options<GetDaemonSetData>) => infiniteQueryOptions<GetDaemonSetResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetResponse>, QueryKey<Options<GetDaemonSetData>>, string | Pick<QueryKey<Options<GetDaemonSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetDaemonSetDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetDaemonSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetDaemonSetDetail({
+        const { data } = await getDaemonSet({
             ...options,
             ...params,
             signal,
@@ -1316,17 +1316,17 @@ export const handleGetDaemonSetDetailInfiniteOptions = (options: Options<HandleG
         });
         return data;
     },
-    queryKey: handleGetDaemonSetDetailInfiniteQueryKey(options)
+    queryKey: getDaemonSetInfiniteQueryKey(options)
 });
 
-export const handleGetDaemonSetEventsQueryKey = (options: Options<HandleGetDaemonSetEventsData>) => createQueryKey('handleGetDaemonSetEvents', options);
+export const getDaemonSetEventsQueryKey = (options: Options<GetDaemonSetEventsData>) => createQueryKey('getDaemonSetEvents', options);
 
 /**
  * returns a list of Events for DaemonSet
  */
-export const handleGetDaemonSetEventsOptions = (options: Options<HandleGetDaemonSetEventsData>) => queryOptions<HandleGetDaemonSetEventsResponse, AxiosError<DefaultError>, HandleGetDaemonSetEventsResponse, ReturnType<typeof handleGetDaemonSetEventsQueryKey>>({
+export const getDaemonSetEventsOptions = (options: Options<GetDaemonSetEventsData>) => queryOptions<GetDaemonSetEventsResponse, AxiosError<DefaultError>, GetDaemonSetEventsResponse, ReturnType<typeof getDaemonSetEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetDaemonSetEvents({
+        const { data } = await getDaemonSetEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -1334,26 +1334,26 @@ export const handleGetDaemonSetEventsOptions = (options: Options<HandleGetDaemon
         });
         return data;
     },
-    queryKey: handleGetDaemonSetEventsQueryKey(options)
+    queryKey: getDaemonSetEventsQueryKey(options)
 });
 
-export const handleGetDaemonSetEventsInfiniteQueryKey = (options: Options<HandleGetDaemonSetEventsData>): QueryKey<Options<HandleGetDaemonSetEventsData>> => createQueryKey('handleGetDaemonSetEvents', options, true);
+export const getDaemonSetEventsInfiniteQueryKey = (options: Options<GetDaemonSetEventsData>): QueryKey<Options<GetDaemonSetEventsData>> => createQueryKey('getDaemonSetEvents', options, true);
 
 /**
  * returns a list of Events for DaemonSet
  */
-export const handleGetDaemonSetEventsInfiniteOptions = (options: Options<HandleGetDaemonSetEventsData>) => infiniteQueryOptions<HandleGetDaemonSetEventsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetDaemonSetEventsResponse>, QueryKey<Options<HandleGetDaemonSetEventsData>>, string | Pick<QueryKey<Options<HandleGetDaemonSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getDaemonSetEventsInfiniteOptions = (options: Options<GetDaemonSetEventsData>) => infiniteQueryOptions<GetDaemonSetEventsResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetEventsResponse>, QueryKey<Options<GetDaemonSetEventsData>>, string | Pick<QueryKey<Options<GetDaemonSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetDaemonSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetDaemonSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetDaemonSetEvents({
+        const { data } = await getDaemonSetEvents({
             ...options,
             ...params,
             signal,
@@ -1361,17 +1361,17 @@ export const handleGetDaemonSetEventsInfiniteOptions = (options: Options<HandleG
         });
         return data;
     },
-    queryKey: handleGetDaemonSetEventsInfiniteQueryKey(options)
+    queryKey: getDaemonSetEventsInfiniteQueryKey(options)
 });
 
-export const handleGetDaemonSetPodsQueryKey = (options: Options<HandleGetDaemonSetPodsData>) => createQueryKey('handleGetDaemonSetPods', options);
+export const getDaemonSetPodsQueryKey = (options: Options<GetDaemonSetPodsData>) => createQueryKey('getDaemonSetPods', options);
 
 /**
  * returns a list of Pods for DaemonSet
  */
-export const handleGetDaemonSetPodsOptions = (options: Options<HandleGetDaemonSetPodsData>) => queryOptions<HandleGetDaemonSetPodsResponse, AxiosError<DefaultError>, HandleGetDaemonSetPodsResponse, ReturnType<typeof handleGetDaemonSetPodsQueryKey>>({
+export const getDaemonSetPodsOptions = (options: Options<GetDaemonSetPodsData>) => queryOptions<GetDaemonSetPodsResponse, AxiosError<DefaultError>, GetDaemonSetPodsResponse, ReturnType<typeof getDaemonSetPodsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetDaemonSetPods({
+        const { data } = await getDaemonSetPods({
             ...options,
             ...queryKey[0],
             signal,
@@ -1379,26 +1379,26 @@ export const handleGetDaemonSetPodsOptions = (options: Options<HandleGetDaemonSe
         });
         return data;
     },
-    queryKey: handleGetDaemonSetPodsQueryKey(options)
+    queryKey: getDaemonSetPodsQueryKey(options)
 });
 
-export const handleGetDaemonSetPodsInfiniteQueryKey = (options: Options<HandleGetDaemonSetPodsData>): QueryKey<Options<HandleGetDaemonSetPodsData>> => createQueryKey('handleGetDaemonSetPods', options, true);
+export const getDaemonSetPodsInfiniteQueryKey = (options: Options<GetDaemonSetPodsData>): QueryKey<Options<GetDaemonSetPodsData>> => createQueryKey('getDaemonSetPods', options, true);
 
 /**
  * returns a list of Pods for DaemonSet
  */
-export const handleGetDaemonSetPodsInfiniteOptions = (options: Options<HandleGetDaemonSetPodsData>) => infiniteQueryOptions<HandleGetDaemonSetPodsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetDaemonSetPodsResponse>, QueryKey<Options<HandleGetDaemonSetPodsData>>, string | Pick<QueryKey<Options<HandleGetDaemonSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getDaemonSetPodsInfiniteOptions = (options: Options<GetDaemonSetPodsData>) => infiniteQueryOptions<GetDaemonSetPodsResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetPodsResponse>, QueryKey<Options<GetDaemonSetPodsData>>, string | Pick<QueryKey<Options<GetDaemonSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetDaemonSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetDaemonSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetDaemonSetPods({
+        const { data } = await getDaemonSetPods({
             ...options,
             ...params,
             signal,
@@ -1406,16 +1406,16 @@ export const handleGetDaemonSetPodsInfiniteOptions = (options: Options<HandleGet
         });
         return data;
     },
-    queryKey: handleGetDaemonSetPodsInfiniteQueryKey(options)
+    queryKey: getDaemonSetPodsInfiniteQueryKey(options)
 });
 
 /**
  * rollout restart of the Daemon Set
  */
-export const handleDaemonSetRestartMutation = (options?: Partial<Options<HandleDaemonSetRestartData>>): UseMutationOptions<HandleDaemonSetRestartResponse, AxiosError<DefaultError>, Options<HandleDaemonSetRestartData>> => {
-    const mutationOptions: UseMutationOptions<HandleDaemonSetRestartResponse, AxiosError<DefaultError>, Options<HandleDaemonSetRestartData>> = {
+export const restartDaemonSetMutation = (options?: Partial<Options<RestartDaemonSetData>>): UseMutationOptions<RestartDaemonSetResponse, AxiosError<DefaultError>, Options<RestartDaemonSetData>> => {
+    const mutationOptions: UseMutationOptions<RestartDaemonSetResponse, AxiosError<DefaultError>, Options<RestartDaemonSetData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleDaemonSetRestart({
+            const { data } = await restartDaemonSet({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -1426,14 +1426,14 @@ export const handleDaemonSetRestartMutation = (options?: Partial<Options<HandleD
     return mutationOptions;
 };
 
-export const handleGetDaemonSetServicesQueryKey = (options: Options<HandleGetDaemonSetServicesData>) => createQueryKey('handleGetDaemonSetServices', options);
+export const getDaemonSetServicesQueryKey = (options: Options<GetDaemonSetServicesData>) => createQueryKey('getDaemonSetServices', options);
 
 /**
  * returns a list of Services for DaemonSet
  */
-export const handleGetDaemonSetServicesOptions = (options: Options<HandleGetDaemonSetServicesData>) => queryOptions<HandleGetDaemonSetServicesResponse, AxiosError<DefaultError>, HandleGetDaemonSetServicesResponse, ReturnType<typeof handleGetDaemonSetServicesQueryKey>>({
+export const getDaemonSetServicesOptions = (options: Options<GetDaemonSetServicesData>) => queryOptions<GetDaemonSetServicesResponse, AxiosError<DefaultError>, GetDaemonSetServicesResponse, ReturnType<typeof getDaemonSetServicesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetDaemonSetServices({
+        const { data } = await getDaemonSetServices({
             ...options,
             ...queryKey[0],
             signal,
@@ -1441,26 +1441,26 @@ export const handleGetDaemonSetServicesOptions = (options: Options<HandleGetDaem
         });
         return data;
     },
-    queryKey: handleGetDaemonSetServicesQueryKey(options)
+    queryKey: getDaemonSetServicesQueryKey(options)
 });
 
-export const handleGetDaemonSetServicesInfiniteQueryKey = (options: Options<HandleGetDaemonSetServicesData>): QueryKey<Options<HandleGetDaemonSetServicesData>> => createQueryKey('handleGetDaemonSetServices', options, true);
+export const getDaemonSetServicesInfiniteQueryKey = (options: Options<GetDaemonSetServicesData>): QueryKey<Options<GetDaemonSetServicesData>> => createQueryKey('getDaemonSetServices', options, true);
 
 /**
  * returns a list of Services for DaemonSet
  */
-export const handleGetDaemonSetServicesInfiniteOptions = (options: Options<HandleGetDaemonSetServicesData>) => infiniteQueryOptions<HandleGetDaemonSetServicesResponse, AxiosError<DefaultError>, InfiniteData<HandleGetDaemonSetServicesResponse>, QueryKey<Options<HandleGetDaemonSetServicesData>>, string | Pick<QueryKey<Options<HandleGetDaemonSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getDaemonSetServicesInfiniteOptions = (options: Options<GetDaemonSetServicesData>) => infiniteQueryOptions<GetDaemonSetServicesResponse, AxiosError<DefaultError>, InfiniteData<GetDaemonSetServicesResponse>, QueryKey<Options<GetDaemonSetServicesData>>, string | Pick<QueryKey<Options<GetDaemonSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetDaemonSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetDaemonSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetDaemonSetServices({
+        const { data } = await getDaemonSetServices({
             ...options,
             ...params,
             signal,
@@ -1468,17 +1468,17 @@ export const handleGetDaemonSetServicesInfiniteOptions = (options: Options<Handl
         });
         return data;
     },
-    queryKey: handleGetDaemonSetServicesInfiniteQueryKey(options)
+    queryKey: getDaemonSetServicesInfiniteQueryKey(options)
 });
 
-export const handleGetDeploymentsQueryKey = (options?: Options<HandleGetDeploymentsData>) => createQueryKey('handleGetDeployments', options);
+export const getAllDeploymentsQueryKey = (options?: Options<GetAllDeploymentsData>) => createQueryKey('getAllDeployments', options);
 
 /**
  * returns a list of Deployments from all namespaces
  */
-export const handleGetDeploymentsOptions = (options?: Options<HandleGetDeploymentsData>) => queryOptions<HandleGetDeploymentsResponse, AxiosError<DefaultError>, HandleGetDeploymentsResponse, ReturnType<typeof handleGetDeploymentsQueryKey>>({
+export const getAllDeploymentsOptions = (options?: Options<GetAllDeploymentsData>) => queryOptions<GetAllDeploymentsResponse, AxiosError<DefaultError>, GetAllDeploymentsResponse, ReturnType<typeof getAllDeploymentsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetDeployments({
+        const { data } = await getAllDeployments({
             ...options,
             ...queryKey[0],
             signal,
@@ -1486,26 +1486,26 @@ export const handleGetDeploymentsOptions = (options?: Options<HandleGetDeploymen
         });
         return data;
     },
-    queryKey: handleGetDeploymentsQueryKey(options)
+    queryKey: getAllDeploymentsQueryKey(options)
 });
 
-export const handleGetDeploymentsInfiniteQueryKey = (options?: Options<HandleGetDeploymentsData>): QueryKey<Options<HandleGetDeploymentsData>> => createQueryKey('handleGetDeployments', options, true);
+export const getAllDeploymentsInfiniteQueryKey = (options?: Options<GetAllDeploymentsData>): QueryKey<Options<GetAllDeploymentsData>> => createQueryKey('getAllDeployments', options, true);
 
 /**
  * returns a list of Deployments from all namespaces
  */
-export const handleGetDeploymentsInfiniteOptions = (options?: Options<HandleGetDeploymentsData>) => infiniteQueryOptions<HandleGetDeploymentsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetDeploymentsResponse>, QueryKey<Options<HandleGetDeploymentsData>>, string | Pick<QueryKey<Options<HandleGetDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllDeploymentsInfiniteOptions = (options?: Options<GetAllDeploymentsData>) => infiniteQueryOptions<GetAllDeploymentsResponse, AxiosError<DefaultError>, InfiniteData<GetAllDeploymentsResponse>, QueryKey<Options<GetAllDeploymentsData>>, string | Pick<QueryKey<Options<GetAllDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetDeployments({
+        const { data } = await getAllDeployments({
             ...options,
             ...params,
             signal,
@@ -1513,17 +1513,17 @@ export const handleGetDeploymentsInfiniteOptions = (options?: Options<HandleGetD
         });
         return data;
     },
-    queryKey: handleGetDeploymentsInfiniteQueryKey(options)
+    queryKey: getAllDeploymentsInfiniteQueryKey(options)
 });
 
-export const handleGetDeployments2QueryKey = (options: Options<HandleGetDeployments2Data>) => createQueryKey('handleGetDeployments2', options);
+export const getDeploymentsQueryKey = (options: Options<GetDeploymentsData>) => createQueryKey('getDeployments', options);
 
 /**
  * returns a list of Deployments in a namespaces
  */
-export const handleGetDeployments2Options = (options: Options<HandleGetDeployments2Data>) => queryOptions<HandleGetDeployments2Response, AxiosError<DefaultError>, HandleGetDeployments2Response, ReturnType<typeof handleGetDeployments2QueryKey>>({
+export const getDeploymentsOptions = (options: Options<GetDeploymentsData>) => queryOptions<GetDeploymentsResponse, AxiosError<DefaultError>, GetDeploymentsResponse, ReturnType<typeof getDeploymentsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetDeployments2({
+        const { data } = await getDeployments({
             ...options,
             ...queryKey[0],
             signal,
@@ -1531,26 +1531,26 @@ export const handleGetDeployments2Options = (options: Options<HandleGetDeploymen
         });
         return data;
     },
-    queryKey: handleGetDeployments2QueryKey(options)
+    queryKey: getDeploymentsQueryKey(options)
 });
 
-export const handleGetDeployments2InfiniteQueryKey = (options: Options<HandleGetDeployments2Data>): QueryKey<Options<HandleGetDeployments2Data>> => createQueryKey('handleGetDeployments2', options, true);
+export const getDeploymentsInfiniteQueryKey = (options: Options<GetDeploymentsData>): QueryKey<Options<GetDeploymentsData>> => createQueryKey('getDeployments', options, true);
 
 /**
  * returns a list of Deployments in a namespaces
  */
-export const handleGetDeployments2InfiniteOptions = (options: Options<HandleGetDeployments2Data>) => infiniteQueryOptions<HandleGetDeployments2Response, AxiosError<DefaultError>, InfiniteData<HandleGetDeployments2Response>, QueryKey<Options<HandleGetDeployments2Data>>, string | Pick<QueryKey<Options<HandleGetDeployments2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getDeploymentsInfiniteOptions = (options: Options<GetDeploymentsData>) => infiniteQueryOptions<GetDeploymentsResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentsResponse>, QueryKey<Options<GetDeploymentsData>>, string | Pick<QueryKey<Options<GetDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetDeployments2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetDeploymentsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetDeployments2({
+        const { data } = await getDeployments({
             ...options,
             ...params,
             signal,
@@ -1558,17 +1558,17 @@ export const handleGetDeployments2InfiniteOptions = (options: Options<HandleGetD
         });
         return data;
     },
-    queryKey: handleGetDeployments2InfiniteQueryKey(options)
+    queryKey: getDeploymentsInfiniteQueryKey(options)
 });
 
-export const handleGetDeploymentDetailQueryKey = (options: Options<HandleGetDeploymentDetailData>) => createQueryKey('handleGetDeploymentDetail', options);
+export const getDeploymentQueryKey = (options: Options<GetDeploymentData>) => createQueryKey('getDeployment', options);
 
 /**
  * returns detailed information about Deployment
  */
-export const handleGetDeploymentDetailOptions = (options: Options<HandleGetDeploymentDetailData>) => queryOptions<HandleGetDeploymentDetailResponse, AxiosError<DefaultError>, HandleGetDeploymentDetailResponse, ReturnType<typeof handleGetDeploymentDetailQueryKey>>({
+export const getDeploymentOptions = (options: Options<GetDeploymentData>) => queryOptions<GetDeploymentResponse, AxiosError<DefaultError>, GetDeploymentResponse, ReturnType<typeof getDeploymentQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetDeploymentDetail({
+        const { data } = await getDeployment({
             ...options,
             ...queryKey[0],
             signal,
@@ -1576,26 +1576,26 @@ export const handleGetDeploymentDetailOptions = (options: Options<HandleGetDeplo
         });
         return data;
     },
-    queryKey: handleGetDeploymentDetailQueryKey(options)
+    queryKey: getDeploymentQueryKey(options)
 });
 
-export const handleGetDeploymentDetailInfiniteQueryKey = (options: Options<HandleGetDeploymentDetailData>): QueryKey<Options<HandleGetDeploymentDetailData>> => createQueryKey('handleGetDeploymentDetail', options, true);
+export const getDeploymentInfiniteQueryKey = (options: Options<GetDeploymentData>): QueryKey<Options<GetDeploymentData>> => createQueryKey('getDeployment', options, true);
 
 /**
  * returns detailed information about Deployment
  */
-export const handleGetDeploymentDetailInfiniteOptions = (options: Options<HandleGetDeploymentDetailData>) => infiniteQueryOptions<HandleGetDeploymentDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetDeploymentDetailResponse>, QueryKey<Options<HandleGetDeploymentDetailData>>, string | Pick<QueryKey<Options<HandleGetDeploymentDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getDeploymentInfiniteOptions = (options: Options<GetDeploymentData>) => infiniteQueryOptions<GetDeploymentResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentResponse>, QueryKey<Options<GetDeploymentData>>, string | Pick<QueryKey<Options<GetDeploymentData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetDeploymentDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetDeploymentData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetDeploymentDetail({
+        const { data } = await getDeployment({
             ...options,
             ...params,
             signal,
@@ -1603,17 +1603,17 @@ export const handleGetDeploymentDetailInfiniteOptions = (options: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetDeploymentDetailInfiniteQueryKey(options)
+    queryKey: getDeploymentInfiniteQueryKey(options)
 });
 
-export const handleGetDeploymentEventsQueryKey = (options: Options<HandleGetDeploymentEventsData>) => createQueryKey('handleGetDeploymentEvents', options);
+export const getDeploymentEventsQueryKey = (options: Options<GetDeploymentEventsData>) => createQueryKey('getDeploymentEvents', options);
 
 /**
  * returns a list of Events for Deployment
  */
-export const handleGetDeploymentEventsOptions = (options: Options<HandleGetDeploymentEventsData>) => queryOptions<HandleGetDeploymentEventsResponse, AxiosError<DefaultError>, HandleGetDeploymentEventsResponse, ReturnType<typeof handleGetDeploymentEventsQueryKey>>({
+export const getDeploymentEventsOptions = (options: Options<GetDeploymentEventsData>) => queryOptions<GetDeploymentEventsResponse, AxiosError<DefaultError>, GetDeploymentEventsResponse, ReturnType<typeof getDeploymentEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetDeploymentEvents({
+        const { data } = await getDeploymentEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -1621,26 +1621,26 @@ export const handleGetDeploymentEventsOptions = (options: Options<HandleGetDeplo
         });
         return data;
     },
-    queryKey: handleGetDeploymentEventsQueryKey(options)
+    queryKey: getDeploymentEventsQueryKey(options)
 });
 
-export const handleGetDeploymentEventsInfiniteQueryKey = (options: Options<HandleGetDeploymentEventsData>): QueryKey<Options<HandleGetDeploymentEventsData>> => createQueryKey('handleGetDeploymentEvents', options, true);
+export const getDeploymentEventsInfiniteQueryKey = (options: Options<GetDeploymentEventsData>): QueryKey<Options<GetDeploymentEventsData>> => createQueryKey('getDeploymentEvents', options, true);
 
 /**
  * returns a list of Events for Deployment
  */
-export const handleGetDeploymentEventsInfiniteOptions = (options: Options<HandleGetDeploymentEventsData>) => infiniteQueryOptions<HandleGetDeploymentEventsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetDeploymentEventsResponse>, QueryKey<Options<HandleGetDeploymentEventsData>>, string | Pick<QueryKey<Options<HandleGetDeploymentEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getDeploymentEventsInfiniteOptions = (options: Options<GetDeploymentEventsData>) => infiniteQueryOptions<GetDeploymentEventsResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentEventsResponse>, QueryKey<Options<GetDeploymentEventsData>>, string | Pick<QueryKey<Options<GetDeploymentEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetDeploymentEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetDeploymentEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetDeploymentEvents({
+        const { data } = await getDeploymentEvents({
             ...options,
             ...params,
             signal,
@@ -1648,17 +1648,17 @@ export const handleGetDeploymentEventsInfiniteOptions = (options: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetDeploymentEventsInfiniteQueryKey(options)
+    queryKey: getDeploymentEventsInfiniteQueryKey(options)
 });
 
-export const handleGetDeploymentNewReplicaSetQueryKey = (options: Options<HandleGetDeploymentNewReplicaSetData>) => createQueryKey('handleGetDeploymentNewReplicaSet', options);
+export const getDeploymentNewReplicaSetQueryKey = (options: Options<GetDeploymentNewReplicaSetData>) => createQueryKey('getDeploymentNewReplicaSet', options);
 
 /**
  * returns a list of new ReplicaSets for Deployment
  */
-export const handleGetDeploymentNewReplicaSetOptions = (options: Options<HandleGetDeploymentNewReplicaSetData>) => queryOptions<HandleGetDeploymentNewReplicaSetResponse, AxiosError<DefaultError>, HandleGetDeploymentNewReplicaSetResponse, ReturnType<typeof handleGetDeploymentNewReplicaSetQueryKey>>({
+export const getDeploymentNewReplicaSetOptions = (options: Options<GetDeploymentNewReplicaSetData>) => queryOptions<GetDeploymentNewReplicaSetResponse, AxiosError<DefaultError>, GetDeploymentNewReplicaSetResponse, ReturnType<typeof getDeploymentNewReplicaSetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetDeploymentNewReplicaSet({
+        const { data } = await getDeploymentNewReplicaSet({
             ...options,
             ...queryKey[0],
             signal,
@@ -1666,26 +1666,26 @@ export const handleGetDeploymentNewReplicaSetOptions = (options: Options<HandleG
         });
         return data;
     },
-    queryKey: handleGetDeploymentNewReplicaSetQueryKey(options)
+    queryKey: getDeploymentNewReplicaSetQueryKey(options)
 });
 
-export const handleGetDeploymentNewReplicaSetInfiniteQueryKey = (options: Options<HandleGetDeploymentNewReplicaSetData>): QueryKey<Options<HandleGetDeploymentNewReplicaSetData>> => createQueryKey('handleGetDeploymentNewReplicaSet', options, true);
+export const getDeploymentNewReplicaSetInfiniteQueryKey = (options: Options<GetDeploymentNewReplicaSetData>): QueryKey<Options<GetDeploymentNewReplicaSetData>> => createQueryKey('getDeploymentNewReplicaSet', options, true);
 
 /**
  * returns a list of new ReplicaSets for Deployment
  */
-export const handleGetDeploymentNewReplicaSetInfiniteOptions = (options: Options<HandleGetDeploymentNewReplicaSetData>) => infiniteQueryOptions<HandleGetDeploymentNewReplicaSetResponse, AxiosError<DefaultError>, InfiniteData<HandleGetDeploymentNewReplicaSetResponse>, QueryKey<Options<HandleGetDeploymentNewReplicaSetData>>, string | Pick<QueryKey<Options<HandleGetDeploymentNewReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getDeploymentNewReplicaSetInfiniteOptions = (options: Options<GetDeploymentNewReplicaSetData>) => infiniteQueryOptions<GetDeploymentNewReplicaSetResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentNewReplicaSetResponse>, QueryKey<Options<GetDeploymentNewReplicaSetData>>, string | Pick<QueryKey<Options<GetDeploymentNewReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetDeploymentNewReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetDeploymentNewReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetDeploymentNewReplicaSet({
+        const { data } = await getDeploymentNewReplicaSet({
             ...options,
             ...params,
             signal,
@@ -1693,17 +1693,17 @@ export const handleGetDeploymentNewReplicaSetInfiniteOptions = (options: Options
         });
         return data;
     },
-    queryKey: handleGetDeploymentNewReplicaSetInfiniteQueryKey(options)
+    queryKey: getDeploymentNewReplicaSetInfiniteQueryKey(options)
 });
 
-export const handleGetDeploymentOldReplicaSetsQueryKey = (options: Options<HandleGetDeploymentOldReplicaSetsData>) => createQueryKey('handleGetDeploymentOldReplicaSets', options);
+export const getDeploymentOldReplicaSetsQueryKey = (options: Options<GetDeploymentOldReplicaSetsData>) => createQueryKey('getDeploymentOldReplicaSets', options);
 
 /**
  * returns a list of old ReplicaSets for Deployment
  */
-export const handleGetDeploymentOldReplicaSetsOptions = (options: Options<HandleGetDeploymentOldReplicaSetsData>) => queryOptions<HandleGetDeploymentOldReplicaSetsResponse, AxiosError<DefaultError>, HandleGetDeploymentOldReplicaSetsResponse, ReturnType<typeof handleGetDeploymentOldReplicaSetsQueryKey>>({
+export const getDeploymentOldReplicaSetsOptions = (options: Options<GetDeploymentOldReplicaSetsData>) => queryOptions<GetDeploymentOldReplicaSetsResponse, AxiosError<DefaultError>, GetDeploymentOldReplicaSetsResponse, ReturnType<typeof getDeploymentOldReplicaSetsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetDeploymentOldReplicaSets({
+        const { data } = await getDeploymentOldReplicaSets({
             ...options,
             ...queryKey[0],
             signal,
@@ -1711,26 +1711,26 @@ export const handleGetDeploymentOldReplicaSetsOptions = (options: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetDeploymentOldReplicaSetsQueryKey(options)
+    queryKey: getDeploymentOldReplicaSetsQueryKey(options)
 });
 
-export const handleGetDeploymentOldReplicaSetsInfiniteQueryKey = (options: Options<HandleGetDeploymentOldReplicaSetsData>): QueryKey<Options<HandleGetDeploymentOldReplicaSetsData>> => createQueryKey('handleGetDeploymentOldReplicaSets', options, true);
+export const getDeploymentOldReplicaSetsInfiniteQueryKey = (options: Options<GetDeploymentOldReplicaSetsData>): QueryKey<Options<GetDeploymentOldReplicaSetsData>> => createQueryKey('getDeploymentOldReplicaSets', options, true);
 
 /**
  * returns a list of old ReplicaSets for Deployment
  */
-export const handleGetDeploymentOldReplicaSetsInfiniteOptions = (options: Options<HandleGetDeploymentOldReplicaSetsData>) => infiniteQueryOptions<HandleGetDeploymentOldReplicaSetsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetDeploymentOldReplicaSetsResponse>, QueryKey<Options<HandleGetDeploymentOldReplicaSetsData>>, string | Pick<QueryKey<Options<HandleGetDeploymentOldReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getDeploymentOldReplicaSetsInfiniteOptions = (options: Options<GetDeploymentOldReplicaSetsData>) => infiniteQueryOptions<GetDeploymentOldReplicaSetsResponse, AxiosError<DefaultError>, InfiniteData<GetDeploymentOldReplicaSetsResponse>, QueryKey<Options<GetDeploymentOldReplicaSetsData>>, string | Pick<QueryKey<Options<GetDeploymentOldReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetDeploymentOldReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetDeploymentOldReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetDeploymentOldReplicaSets({
+        const { data } = await getDeploymentOldReplicaSets({
             ...options,
             ...params,
             signal,
@@ -1738,16 +1738,16 @@ export const handleGetDeploymentOldReplicaSetsInfiniteOptions = (options: Option
         });
         return data;
     },
-    queryKey: handleGetDeploymentOldReplicaSetsInfiniteQueryKey(options)
+    queryKey: getDeploymentOldReplicaSetsInfiniteQueryKey(options)
 });
 
 /**
  * pauses the Deployment
  */
-export const handleDeploymentPauseMutation = (options?: Partial<Options<HandleDeploymentPauseData>>): UseMutationOptions<HandleDeploymentPauseResponse, AxiosError<DefaultError>, Options<HandleDeploymentPauseData>> => {
-    const mutationOptions: UseMutationOptions<HandleDeploymentPauseResponse, AxiosError<DefaultError>, Options<HandleDeploymentPauseData>> = {
+export const pauseDeploymentMutation = (options?: Partial<Options<PauseDeploymentData>>): UseMutationOptions<PauseDeploymentResponse, AxiosError<DefaultError>, Options<PauseDeploymentData>> => {
+    const mutationOptions: UseMutationOptions<PauseDeploymentResponse, AxiosError<DefaultError>, Options<PauseDeploymentData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleDeploymentPause({
+            const { data } = await pauseDeployment({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -1761,10 +1761,10 @@ export const handleDeploymentPauseMutation = (options?: Partial<Options<HandleDe
 /**
  * rollout restart of the Deployment
  */
-export const handleDeploymentRestartMutation = (options?: Partial<Options<HandleDeploymentRestartData>>): UseMutationOptions<HandleDeploymentRestartResponse, AxiosError<DefaultError>, Options<HandleDeploymentRestartData>> => {
-    const mutationOptions: UseMutationOptions<HandleDeploymentRestartResponse, AxiosError<DefaultError>, Options<HandleDeploymentRestartData>> = {
+export const restartDeploymentMutation = (options?: Partial<Options<RestartDeploymentData>>): UseMutationOptions<RestartDeploymentResponse, AxiosError<DefaultError>, Options<RestartDeploymentData>> => {
+    const mutationOptions: UseMutationOptions<RestartDeploymentResponse, AxiosError<DefaultError>, Options<RestartDeploymentData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleDeploymentRestart({
+            const { data } = await restartDeployment({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -1778,10 +1778,10 @@ export const handleDeploymentRestartMutation = (options?: Partial<Options<Handle
 /**
  * resumes the Deployment
  */
-export const handleDeploymentResumeMutation = (options?: Partial<Options<HandleDeploymentResumeData>>): UseMutationOptions<HandleDeploymentResumeResponse, AxiosError<DefaultError>, Options<HandleDeploymentResumeData>> => {
-    const mutationOptions: UseMutationOptions<HandleDeploymentResumeResponse, AxiosError<DefaultError>, Options<HandleDeploymentResumeData>> = {
+export const resumeDeploymentMutation = (options?: Partial<Options<ResumeDeploymentData>>): UseMutationOptions<ResumeDeploymentResponse, AxiosError<DefaultError>, Options<ResumeDeploymentData>> => {
+    const mutationOptions: UseMutationOptions<ResumeDeploymentResponse, AxiosError<DefaultError>, Options<ResumeDeploymentData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleDeploymentResume({
+            const { data } = await resumeDeployment({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -1795,10 +1795,10 @@ export const handleDeploymentResumeMutation = (options?: Partial<Options<HandleD
 /**
  * rolls back the Deployment to the target revision
  */
-export const handleDeploymentRollbackMutation = (options?: Partial<Options<HandleDeploymentRollbackData>>): UseMutationOptions<HandleDeploymentRollbackResponse, AxiosError<DefaultError>, Options<HandleDeploymentRollbackData>> => {
-    const mutationOptions: UseMutationOptions<HandleDeploymentRollbackResponse, AxiosError<DefaultError>, Options<HandleDeploymentRollbackData>> = {
+export const rollbackDeploymentMutation = (options?: Partial<Options<RollbackDeploymentData>>): UseMutationOptions<RollbackDeploymentResponse, AxiosError<DefaultError>, Options<RollbackDeploymentData>> => {
+    const mutationOptions: UseMutationOptions<RollbackDeploymentResponse, AxiosError<DefaultError>, Options<RollbackDeploymentData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleDeploymentRollback({
+            const { data } = await rollbackDeployment({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -1809,14 +1809,14 @@ export const handleDeploymentRollbackMutation = (options?: Partial<Options<Handl
     return mutationOptions;
 };
 
-export const handleGetEventListQueryKey = (options?: Options<HandleGetEventListData>) => createQueryKey('handleGetEventList', options);
+export const getAllEventsQueryKey = (options?: Options<GetAllEventsData>) => createQueryKey('getAllEvents', options);
 
 /**
  * returns a list of Events from all namespaces
  */
-export const handleGetEventListOptions = (options?: Options<HandleGetEventListData>) => queryOptions<HandleGetEventListResponse, AxiosError<DefaultError>, HandleGetEventListResponse, ReturnType<typeof handleGetEventListQueryKey>>({
+export const getAllEventsOptions = (options?: Options<GetAllEventsData>) => queryOptions<GetAllEventsResponse, AxiosError<DefaultError>, GetAllEventsResponse, ReturnType<typeof getAllEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetEventList({
+        const { data } = await getAllEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -1824,26 +1824,26 @@ export const handleGetEventListOptions = (options?: Options<HandleGetEventListDa
         });
         return data;
     },
-    queryKey: handleGetEventListQueryKey(options)
+    queryKey: getAllEventsQueryKey(options)
 });
 
-export const handleGetEventListInfiniteQueryKey = (options?: Options<HandleGetEventListData>): QueryKey<Options<HandleGetEventListData>> => createQueryKey('handleGetEventList', options, true);
+export const getAllEventsInfiniteQueryKey = (options?: Options<GetAllEventsData>): QueryKey<Options<GetAllEventsData>> => createQueryKey('getAllEvents', options, true);
 
 /**
  * returns a list of Events from all namespaces
  */
-export const handleGetEventListInfiniteOptions = (options?: Options<HandleGetEventListData>) => infiniteQueryOptions<HandleGetEventListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetEventListResponse>, QueryKey<Options<HandleGetEventListData>>, string | Pick<QueryKey<Options<HandleGetEventListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllEventsInfiniteOptions = (options?: Options<GetAllEventsData>) => infiniteQueryOptions<GetAllEventsResponse, AxiosError<DefaultError>, InfiniteData<GetAllEventsResponse>, QueryKey<Options<GetAllEventsData>>, string | Pick<QueryKey<Options<GetAllEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetEventListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetEventList({
+        const { data } = await getAllEvents({
             ...options,
             ...params,
             signal,
@@ -1851,17 +1851,17 @@ export const handleGetEventListInfiniteOptions = (options?: Options<HandleGetEve
         });
         return data;
     },
-    queryKey: handleGetEventListInfiniteQueryKey(options)
+    queryKey: getAllEventsInfiniteQueryKey(options)
 });
 
-export const handleGetEventList2QueryKey = (options: Options<HandleGetEventList2Data>) => createQueryKey('handleGetEventList2', options);
+export const getEventsQueryKey = (options: Options<GetEventsData>) => createQueryKey('getEvents', options);
 
 /**
  * returns a list of Events in a namespace
  */
-export const handleGetEventList2Options = (options: Options<HandleGetEventList2Data>) => queryOptions<HandleGetEventList2Response, AxiosError<DefaultError>, HandleGetEventList2Response, ReturnType<typeof handleGetEventList2QueryKey>>({
+export const getEventsOptions = (options: Options<GetEventsData>) => queryOptions<GetEventsResponse, AxiosError<DefaultError>, GetEventsResponse, ReturnType<typeof getEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetEventList2({
+        const { data } = await getEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -1869,26 +1869,26 @@ export const handleGetEventList2Options = (options: Options<HandleGetEventList2D
         });
         return data;
     },
-    queryKey: handleGetEventList2QueryKey(options)
+    queryKey: getEventsQueryKey(options)
 });
 
-export const handleGetEventList2InfiniteQueryKey = (options: Options<HandleGetEventList2Data>): QueryKey<Options<HandleGetEventList2Data>> => createQueryKey('handleGetEventList2', options, true);
+export const getEventsInfiniteQueryKey = (options: Options<GetEventsData>): QueryKey<Options<GetEventsData>> => createQueryKey('getEvents', options, true);
 
 /**
  * returns a list of Events in a namespace
  */
-export const handleGetEventList2InfiniteOptions = (options: Options<HandleGetEventList2Data>) => infiniteQueryOptions<HandleGetEventList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetEventList2Response>, QueryKey<Options<HandleGetEventList2Data>>, string | Pick<QueryKey<Options<HandleGetEventList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getEventsInfiniteOptions = (options: Options<GetEventsData>) => infiniteQueryOptions<GetEventsResponse, AxiosError<DefaultError>, InfiniteData<GetEventsResponse>, QueryKey<Options<GetEventsData>>, string | Pick<QueryKey<Options<GetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetEventList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetEventList2({
+        const { data } = await getEvents({
             ...options,
             ...params,
             signal,
@@ -1896,17 +1896,17 @@ export const handleGetEventList2InfiniteOptions = (options: Options<HandleGetEve
         });
         return data;
     },
-    queryKey: handleGetEventList2InfiniteQueryKey(options)
+    queryKey: getEventsInfiniteQueryKey(options)
 });
 
-export const handleGetHorizontalPodAutoscalerListQueryKey = (options?: Options<HandleGetHorizontalPodAutoscalerListData>) => createQueryKey('handleGetHorizontalPodAutoscalerList', options);
+export const getAllHorizontalPodAutoscalersQueryKey = (options?: Options<GetAllHorizontalPodAutoscalersData>) => createQueryKey('getAllHorizontalPodAutoscalers', options);
 
 /**
  * returns a list of HorizontalPodAutoscalers from all namespaces
  */
-export const handleGetHorizontalPodAutoscalerListOptions = (options?: Options<HandleGetHorizontalPodAutoscalerListData>) => queryOptions<HandleGetHorizontalPodAutoscalerListResponse, AxiosError<DefaultError>, HandleGetHorizontalPodAutoscalerListResponse, ReturnType<typeof handleGetHorizontalPodAutoscalerListQueryKey>>({
+export const getAllHorizontalPodAutoscalersOptions = (options?: Options<GetAllHorizontalPodAutoscalersData>) => queryOptions<GetAllHorizontalPodAutoscalersResponse, AxiosError<DefaultError>, GetAllHorizontalPodAutoscalersResponse, ReturnType<typeof getAllHorizontalPodAutoscalersQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetHorizontalPodAutoscalerList({
+        const { data } = await getAllHorizontalPodAutoscalers({
             ...options,
             ...queryKey[0],
             signal,
@@ -1914,26 +1914,26 @@ export const handleGetHorizontalPodAutoscalerListOptions = (options?: Options<Ha
         });
         return data;
     },
-    queryKey: handleGetHorizontalPodAutoscalerListQueryKey(options)
+    queryKey: getAllHorizontalPodAutoscalersQueryKey(options)
 });
 
-export const handleGetHorizontalPodAutoscalerListInfiniteQueryKey = (options?: Options<HandleGetHorizontalPodAutoscalerListData>): QueryKey<Options<HandleGetHorizontalPodAutoscalerListData>> => createQueryKey('handleGetHorizontalPodAutoscalerList', options, true);
+export const getAllHorizontalPodAutoscalersInfiniteQueryKey = (options?: Options<GetAllHorizontalPodAutoscalersData>): QueryKey<Options<GetAllHorizontalPodAutoscalersData>> => createQueryKey('getAllHorizontalPodAutoscalers', options, true);
 
 /**
  * returns a list of HorizontalPodAutoscalers from all namespaces
  */
-export const handleGetHorizontalPodAutoscalerListInfiniteOptions = (options?: Options<HandleGetHorizontalPodAutoscalerListData>) => infiniteQueryOptions<HandleGetHorizontalPodAutoscalerListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetHorizontalPodAutoscalerListResponse>, QueryKey<Options<HandleGetHorizontalPodAutoscalerListData>>, string | Pick<QueryKey<Options<HandleGetHorizontalPodAutoscalerListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllHorizontalPodAutoscalersInfiniteOptions = (options?: Options<GetAllHorizontalPodAutoscalersData>) => infiniteQueryOptions<GetAllHorizontalPodAutoscalersResponse, AxiosError<DefaultError>, InfiniteData<GetAllHorizontalPodAutoscalersResponse>, QueryKey<Options<GetAllHorizontalPodAutoscalersData>>, string | Pick<QueryKey<Options<GetAllHorizontalPodAutoscalersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetHorizontalPodAutoscalerListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllHorizontalPodAutoscalersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetHorizontalPodAutoscalerList({
+        const { data } = await getAllHorizontalPodAutoscalers({
             ...options,
             ...params,
             signal,
@@ -1941,17 +1941,17 @@ export const handleGetHorizontalPodAutoscalerListInfiniteOptions = (options?: Op
         });
         return data;
     },
-    queryKey: handleGetHorizontalPodAutoscalerListInfiniteQueryKey(options)
+    queryKey: getAllHorizontalPodAutoscalersInfiniteQueryKey(options)
 });
 
-export const handleGetHorizontalPodAutoscalerList2QueryKey = (options: Options<HandleGetHorizontalPodAutoscalerList2Data>) => createQueryKey('handleGetHorizontalPodAutoscalerList2', options);
+export const getHorizontalPodAutoscalersQueryKey = (options: Options<GetHorizontalPodAutoscalersData>) => createQueryKey('getHorizontalPodAutoscalers', options);
 
 /**
  * returns a list of HorizontalPodAutoscalers in a namespaces
  */
-export const handleGetHorizontalPodAutoscalerList2Options = (options: Options<HandleGetHorizontalPodAutoscalerList2Data>) => queryOptions<HandleGetHorizontalPodAutoscalerList2Response, AxiosError<DefaultError>, HandleGetHorizontalPodAutoscalerList2Response, ReturnType<typeof handleGetHorizontalPodAutoscalerList2QueryKey>>({
+export const getHorizontalPodAutoscalersOptions = (options: Options<GetHorizontalPodAutoscalersData>) => queryOptions<GetHorizontalPodAutoscalersResponse, AxiosError<DefaultError>, GetHorizontalPodAutoscalersResponse, ReturnType<typeof getHorizontalPodAutoscalersQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetHorizontalPodAutoscalerList2({
+        const { data } = await getHorizontalPodAutoscalers({
             ...options,
             ...queryKey[0],
             signal,
@@ -1959,26 +1959,26 @@ export const handleGetHorizontalPodAutoscalerList2Options = (options: Options<Ha
         });
         return data;
     },
-    queryKey: handleGetHorizontalPodAutoscalerList2QueryKey(options)
+    queryKey: getHorizontalPodAutoscalersQueryKey(options)
 });
 
-export const handleGetHorizontalPodAutoscalerList2InfiniteQueryKey = (options: Options<HandleGetHorizontalPodAutoscalerList2Data>): QueryKey<Options<HandleGetHorizontalPodAutoscalerList2Data>> => createQueryKey('handleGetHorizontalPodAutoscalerList2', options, true);
+export const getHorizontalPodAutoscalersInfiniteQueryKey = (options: Options<GetHorizontalPodAutoscalersData>): QueryKey<Options<GetHorizontalPodAutoscalersData>> => createQueryKey('getHorizontalPodAutoscalers', options, true);
 
 /**
  * returns a list of HorizontalPodAutoscalers in a namespaces
  */
-export const handleGetHorizontalPodAutoscalerList2InfiniteOptions = (options: Options<HandleGetHorizontalPodAutoscalerList2Data>) => infiniteQueryOptions<HandleGetHorizontalPodAutoscalerList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetHorizontalPodAutoscalerList2Response>, QueryKey<Options<HandleGetHorizontalPodAutoscalerList2Data>>, string | Pick<QueryKey<Options<HandleGetHorizontalPodAutoscalerList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getHorizontalPodAutoscalersInfiniteOptions = (options: Options<GetHorizontalPodAutoscalersData>) => infiniteQueryOptions<GetHorizontalPodAutoscalersResponse, AxiosError<DefaultError>, InfiniteData<GetHorizontalPodAutoscalersResponse>, QueryKey<Options<GetHorizontalPodAutoscalersData>>, string | Pick<QueryKey<Options<GetHorizontalPodAutoscalersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetHorizontalPodAutoscalerList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetHorizontalPodAutoscalersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetHorizontalPodAutoscalerList2({
+        const { data } = await getHorizontalPodAutoscalers({
             ...options,
             ...params,
             signal,
@@ -1986,17 +1986,17 @@ export const handleGetHorizontalPodAutoscalerList2InfiniteOptions = (options: Op
         });
         return data;
     },
-    queryKey: handleGetHorizontalPodAutoscalerList2InfiniteQueryKey(options)
+    queryKey: getHorizontalPodAutoscalersInfiniteQueryKey(options)
 });
 
-export const handleGetHorizontalPodAutoscalerDetailQueryKey = (options: Options<HandleGetHorizontalPodAutoscalerDetailData>) => createQueryKey('handleGetHorizontalPodAutoscalerDetail', options);
+export const getHorizontalPodAutoscalerQueryKey = (options: Options<GetHorizontalPodAutoscalerData>) => createQueryKey('getHorizontalPodAutoscaler', options);
 
 /**
  * returns detailed information about HorizontalPodAutoscaler
  */
-export const handleGetHorizontalPodAutoscalerDetailOptions = (options: Options<HandleGetHorizontalPodAutoscalerDetailData>) => queryOptions<HandleGetHorizontalPodAutoscalerDetailResponse, AxiosError<DefaultError>, HandleGetHorizontalPodAutoscalerDetailResponse, ReturnType<typeof handleGetHorizontalPodAutoscalerDetailQueryKey>>({
+export const getHorizontalPodAutoscalerOptions = (options: Options<GetHorizontalPodAutoscalerData>) => queryOptions<GetHorizontalPodAutoscalerResponse, AxiosError<DefaultError>, GetHorizontalPodAutoscalerResponse, ReturnType<typeof getHorizontalPodAutoscalerQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetHorizontalPodAutoscalerDetail({
+        const { data } = await getHorizontalPodAutoscaler({
             ...options,
             ...queryKey[0],
             signal,
@@ -2004,26 +2004,26 @@ export const handleGetHorizontalPodAutoscalerDetailOptions = (options: Options<H
         });
         return data;
     },
-    queryKey: handleGetHorizontalPodAutoscalerDetailQueryKey(options)
+    queryKey: getHorizontalPodAutoscalerQueryKey(options)
 });
 
-export const handleGetHorizontalPodAutoscalerDetailInfiniteQueryKey = (options: Options<HandleGetHorizontalPodAutoscalerDetailData>): QueryKey<Options<HandleGetHorizontalPodAutoscalerDetailData>> => createQueryKey('handleGetHorizontalPodAutoscalerDetail', options, true);
+export const getHorizontalPodAutoscalerInfiniteQueryKey = (options: Options<GetHorizontalPodAutoscalerData>): QueryKey<Options<GetHorizontalPodAutoscalerData>> => createQueryKey('getHorizontalPodAutoscaler', options, true);
 
 /**
  * returns detailed information about HorizontalPodAutoscaler
  */
-export const handleGetHorizontalPodAutoscalerDetailInfiniteOptions = (options: Options<HandleGetHorizontalPodAutoscalerDetailData>) => infiniteQueryOptions<HandleGetHorizontalPodAutoscalerDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetHorizontalPodAutoscalerDetailResponse>, QueryKey<Options<HandleGetHorizontalPodAutoscalerDetailData>>, string | Pick<QueryKey<Options<HandleGetHorizontalPodAutoscalerDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getHorizontalPodAutoscalerInfiniteOptions = (options: Options<GetHorizontalPodAutoscalerData>) => infiniteQueryOptions<GetHorizontalPodAutoscalerResponse, AxiosError<DefaultError>, InfiniteData<GetHorizontalPodAutoscalerResponse>, QueryKey<Options<GetHorizontalPodAutoscalerData>>, string | Pick<QueryKey<Options<GetHorizontalPodAutoscalerData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetHorizontalPodAutoscalerDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetHorizontalPodAutoscalerData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetHorizontalPodAutoscalerDetail({
+        const { data } = await getHorizontalPodAutoscaler({
             ...options,
             ...params,
             signal,
@@ -2031,17 +2031,17 @@ export const handleGetHorizontalPodAutoscalerDetailInfiniteOptions = (options: O
         });
         return data;
     },
-    queryKey: handleGetHorizontalPodAutoscalerDetailInfiniteQueryKey(options)
+    queryKey: getHorizontalPodAutoscalerInfiniteQueryKey(options)
 });
 
-export const handleGetIngressListQueryKey = (options?: Options<HandleGetIngressListData>) => createQueryKey('handleGetIngressList', options);
+export const getAllIngressesQueryKey = (options?: Options<GetAllIngressesData>) => createQueryKey('getAllIngresses', options);
 
 /**
  * returns a list of Ingresses from all namespaces
  */
-export const handleGetIngressListOptions = (options?: Options<HandleGetIngressListData>) => queryOptions<HandleGetIngressListResponse, AxiosError<DefaultError>, HandleGetIngressListResponse, ReturnType<typeof handleGetIngressListQueryKey>>({
+export const getAllIngressesOptions = (options?: Options<GetAllIngressesData>) => queryOptions<GetAllIngressesResponse, AxiosError<DefaultError>, GetAllIngressesResponse, ReturnType<typeof getAllIngressesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetIngressList({
+        const { data } = await getAllIngresses({
             ...options,
             ...queryKey[0],
             signal,
@@ -2049,26 +2049,26 @@ export const handleGetIngressListOptions = (options?: Options<HandleGetIngressLi
         });
         return data;
     },
-    queryKey: handleGetIngressListQueryKey(options)
+    queryKey: getAllIngressesQueryKey(options)
 });
 
-export const handleGetIngressListInfiniteQueryKey = (options?: Options<HandleGetIngressListData>): QueryKey<Options<HandleGetIngressListData>> => createQueryKey('handleGetIngressList', options, true);
+export const getAllIngressesInfiniteQueryKey = (options?: Options<GetAllIngressesData>): QueryKey<Options<GetAllIngressesData>> => createQueryKey('getAllIngresses', options, true);
 
 /**
  * returns a list of Ingresses from all namespaces
  */
-export const handleGetIngressListInfiniteOptions = (options?: Options<HandleGetIngressListData>) => infiniteQueryOptions<HandleGetIngressListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetIngressListResponse>, QueryKey<Options<HandleGetIngressListData>>, string | Pick<QueryKey<Options<HandleGetIngressListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllIngressesInfiniteOptions = (options?: Options<GetAllIngressesData>) => infiniteQueryOptions<GetAllIngressesResponse, AxiosError<DefaultError>, InfiniteData<GetAllIngressesResponse>, QueryKey<Options<GetAllIngressesData>>, string | Pick<QueryKey<Options<GetAllIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetIngressListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetIngressList({
+        const { data } = await getAllIngresses({
             ...options,
             ...params,
             signal,
@@ -2076,17 +2076,17 @@ export const handleGetIngressListInfiniteOptions = (options?: Options<HandleGetI
         });
         return data;
     },
-    queryKey: handleGetIngressListInfiniteQueryKey(options)
+    queryKey: getAllIngressesInfiniteQueryKey(options)
 });
 
-export const handleGetIngressList2QueryKey = (options: Options<HandleGetIngressList2Data>) => createQueryKey('handleGetIngressList2', options);
+export const getIngressesQueryKey = (options: Options<GetIngressesData>) => createQueryKey('getIngresses', options);
 
 /**
  * returns a list of Ingresses in a namespaces
  */
-export const handleGetIngressList2Options = (options: Options<HandleGetIngressList2Data>) => queryOptions<HandleGetIngressList2Response, AxiosError<DefaultError>, HandleGetIngressList2Response, ReturnType<typeof handleGetIngressList2QueryKey>>({
+export const getIngressesOptions = (options: Options<GetIngressesData>) => queryOptions<GetIngressesResponse, AxiosError<DefaultError>, GetIngressesResponse, ReturnType<typeof getIngressesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetIngressList2({
+        const { data } = await getIngresses({
             ...options,
             ...queryKey[0],
             signal,
@@ -2094,26 +2094,26 @@ export const handleGetIngressList2Options = (options: Options<HandleGetIngressLi
         });
         return data;
     },
-    queryKey: handleGetIngressList2QueryKey(options)
+    queryKey: getIngressesQueryKey(options)
 });
 
-export const handleGetIngressList2InfiniteQueryKey = (options: Options<HandleGetIngressList2Data>): QueryKey<Options<HandleGetIngressList2Data>> => createQueryKey('handleGetIngressList2', options, true);
+export const getIngressesInfiniteQueryKey = (options: Options<GetIngressesData>): QueryKey<Options<GetIngressesData>> => createQueryKey('getIngresses', options, true);
 
 /**
  * returns a list of Ingresses in a namespaces
  */
-export const handleGetIngressList2InfiniteOptions = (options: Options<HandleGetIngressList2Data>) => infiniteQueryOptions<HandleGetIngressList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetIngressList2Response>, QueryKey<Options<HandleGetIngressList2Data>>, string | Pick<QueryKey<Options<HandleGetIngressList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getIngressesInfiniteOptions = (options: Options<GetIngressesData>) => infiniteQueryOptions<GetIngressesResponse, AxiosError<DefaultError>, InfiniteData<GetIngressesResponse>, QueryKey<Options<GetIngressesData>>, string | Pick<QueryKey<Options<GetIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetIngressList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetIngressList2({
+        const { data } = await getIngresses({
             ...options,
             ...params,
             signal,
@@ -2121,17 +2121,17 @@ export const handleGetIngressList2InfiniteOptions = (options: Options<HandleGetI
         });
         return data;
     },
-    queryKey: handleGetIngressList2InfiniteQueryKey(options)
+    queryKey: getIngressesInfiniteQueryKey(options)
 });
 
-export const handleGetIngressEventQueryKey = (options: Options<HandleGetIngressEventData>) => createQueryKey('handleGetIngressEvent', options);
+export const getIngressEventsQueryKey = (options: Options<GetIngressEventsData>) => createQueryKey('getIngressEvents', options);
 
 /**
  * returns a list of Events for Ingress
  */
-export const handleGetIngressEventOptions = (options: Options<HandleGetIngressEventData>) => queryOptions<HandleGetIngressEventResponse, AxiosError<DefaultError>, HandleGetIngressEventResponse, ReturnType<typeof handleGetIngressEventQueryKey>>({
+export const getIngressEventsOptions = (options: Options<GetIngressEventsData>) => queryOptions<GetIngressEventsResponse, AxiosError<DefaultError>, GetIngressEventsResponse, ReturnType<typeof getIngressEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetIngressEvent({
+        const { data } = await getIngressEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -2139,26 +2139,26 @@ export const handleGetIngressEventOptions = (options: Options<HandleGetIngressEv
         });
         return data;
     },
-    queryKey: handleGetIngressEventQueryKey(options)
+    queryKey: getIngressEventsQueryKey(options)
 });
 
-export const handleGetIngressEventInfiniteQueryKey = (options: Options<HandleGetIngressEventData>): QueryKey<Options<HandleGetIngressEventData>> => createQueryKey('handleGetIngressEvent', options, true);
+export const getIngressEventsInfiniteQueryKey = (options: Options<GetIngressEventsData>): QueryKey<Options<GetIngressEventsData>> => createQueryKey('getIngressEvents', options, true);
 
 /**
  * returns a list of Events for Ingress
  */
-export const handleGetIngressEventInfiniteOptions = (options: Options<HandleGetIngressEventData>) => infiniteQueryOptions<HandleGetIngressEventResponse, AxiosError<DefaultError>, InfiniteData<HandleGetIngressEventResponse>, QueryKey<Options<HandleGetIngressEventData>>, string | Pick<QueryKey<Options<HandleGetIngressEventData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getIngressEventsInfiniteOptions = (options: Options<GetIngressEventsData>) => infiniteQueryOptions<GetIngressEventsResponse, AxiosError<DefaultError>, InfiniteData<GetIngressEventsResponse>, QueryKey<Options<GetIngressEventsData>>, string | Pick<QueryKey<Options<GetIngressEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetIngressEventData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetIngressEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetIngressEvent({
+        const { data } = await getIngressEvents({
             ...options,
             ...params,
             signal,
@@ -2166,17 +2166,17 @@ export const handleGetIngressEventInfiniteOptions = (options: Options<HandleGetI
         });
         return data;
     },
-    queryKey: handleGetIngressEventInfiniteQueryKey(options)
+    queryKey: getIngressEventsInfiniteQueryKey(options)
 });
 
-export const handleGetIngressDetailQueryKey = (options: Options<HandleGetIngressDetailData>) => createQueryKey('handleGetIngressDetail', options);
+export const getIngressQueryKey = (options: Options<GetIngressData>) => createQueryKey('getIngress', options);
 
 /**
  * returns detailed information about Ingress
  */
-export const handleGetIngressDetailOptions = (options: Options<HandleGetIngressDetailData>) => queryOptions<HandleGetIngressDetailResponse, AxiosError<DefaultError>, HandleGetIngressDetailResponse, ReturnType<typeof handleGetIngressDetailQueryKey>>({
+export const getIngressOptions = (options: Options<GetIngressData>) => queryOptions<GetIngressResponse, AxiosError<DefaultError>, GetIngressResponse, ReturnType<typeof getIngressQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetIngressDetail({
+        const { data } = await getIngress({
             ...options,
             ...queryKey[0],
             signal,
@@ -2184,26 +2184,26 @@ export const handleGetIngressDetailOptions = (options: Options<HandleGetIngressD
         });
         return data;
     },
-    queryKey: handleGetIngressDetailQueryKey(options)
+    queryKey: getIngressQueryKey(options)
 });
 
-export const handleGetIngressDetailInfiniteQueryKey = (options: Options<HandleGetIngressDetailData>): QueryKey<Options<HandleGetIngressDetailData>> => createQueryKey('handleGetIngressDetail', options, true);
+export const getIngressInfiniteQueryKey = (options: Options<GetIngressData>): QueryKey<Options<GetIngressData>> => createQueryKey('getIngress', options, true);
 
 /**
  * returns detailed information about Ingress
  */
-export const handleGetIngressDetailInfiniteOptions = (options: Options<HandleGetIngressDetailData>) => infiniteQueryOptions<HandleGetIngressDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetIngressDetailResponse>, QueryKey<Options<HandleGetIngressDetailData>>, string | Pick<QueryKey<Options<HandleGetIngressDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getIngressInfiniteOptions = (options: Options<GetIngressData>) => infiniteQueryOptions<GetIngressResponse, AxiosError<DefaultError>, InfiniteData<GetIngressResponse>, QueryKey<Options<GetIngressData>>, string | Pick<QueryKey<Options<GetIngressData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetIngressDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetIngressData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetIngressDetail({
+        const { data } = await getIngress({
             ...options,
             ...params,
             signal,
@@ -2211,17 +2211,17 @@ export const handleGetIngressDetailInfiniteOptions = (options: Options<HandleGet
         });
         return data;
     },
-    queryKey: handleGetIngressDetailInfiniteQueryKey(options)
+    queryKey: getIngressInfiniteQueryKey(options)
 });
 
-export const handleGetIngressClassListQueryKey = (options?: Options<HandleGetIngressClassListData>) => createQueryKey('handleGetIngressClassList', options);
+export const getIngressClassesQueryKey = (options?: Options<GetIngressClassesData>) => createQueryKey('getIngressClasses', options);
 
 /**
  * returns a list of IngressClasses
  */
-export const handleGetIngressClassListOptions = (options?: Options<HandleGetIngressClassListData>) => queryOptions<HandleGetIngressClassListResponse, AxiosError<DefaultError>, HandleGetIngressClassListResponse, ReturnType<typeof handleGetIngressClassListQueryKey>>({
+export const getIngressClassesOptions = (options?: Options<GetIngressClassesData>) => queryOptions<GetIngressClassesResponse, AxiosError<DefaultError>, GetIngressClassesResponse, ReturnType<typeof getIngressClassesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetIngressClassList({
+        const { data } = await getIngressClasses({
             ...options,
             ...queryKey[0],
             signal,
@@ -2229,26 +2229,26 @@ export const handleGetIngressClassListOptions = (options?: Options<HandleGetIngr
         });
         return data;
     },
-    queryKey: handleGetIngressClassListQueryKey(options)
+    queryKey: getIngressClassesQueryKey(options)
 });
 
-export const handleGetIngressClassListInfiniteQueryKey = (options?: Options<HandleGetIngressClassListData>): QueryKey<Options<HandleGetIngressClassListData>> => createQueryKey('handleGetIngressClassList', options, true);
+export const getIngressClassesInfiniteQueryKey = (options?: Options<GetIngressClassesData>): QueryKey<Options<GetIngressClassesData>> => createQueryKey('getIngressClasses', options, true);
 
 /**
  * returns a list of IngressClasses
  */
-export const handleGetIngressClassListInfiniteOptions = (options?: Options<HandleGetIngressClassListData>) => infiniteQueryOptions<HandleGetIngressClassListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetIngressClassListResponse>, QueryKey<Options<HandleGetIngressClassListData>>, string | Pick<QueryKey<Options<HandleGetIngressClassListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getIngressClassesInfiniteOptions = (options?: Options<GetIngressClassesData>) => infiniteQueryOptions<GetIngressClassesResponse, AxiosError<DefaultError>, InfiniteData<GetIngressClassesResponse>, QueryKey<Options<GetIngressClassesData>>, string | Pick<QueryKey<Options<GetIngressClassesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetIngressClassListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetIngressClassesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetIngressClassList({
+        const { data } = await getIngressClasses({
             ...options,
             ...params,
             signal,
@@ -2256,17 +2256,17 @@ export const handleGetIngressClassListInfiniteOptions = (options?: Options<Handl
         });
         return data;
     },
-    queryKey: handleGetIngressClassListInfiniteQueryKey(options)
+    queryKey: getIngressClassesInfiniteQueryKey(options)
 });
 
-export const handleGetIngressClassQueryKey = (options: Options<HandleGetIngressClassData>) => createQueryKey('handleGetIngressClass', options);
+export const getIngressClassQueryKey = (options: Options<GetIngressClassData>) => createQueryKey('getIngressClass', options);
 
 /**
  * returns detailed information about IngressClass
  */
-export const handleGetIngressClassOptions = (options: Options<HandleGetIngressClassData>) => queryOptions<HandleGetIngressClassResponse, AxiosError<DefaultError>, HandleGetIngressClassResponse, ReturnType<typeof handleGetIngressClassQueryKey>>({
+export const getIngressClassOptions = (options: Options<GetIngressClassData>) => queryOptions<GetIngressClassResponse, AxiosError<DefaultError>, GetIngressClassResponse, ReturnType<typeof getIngressClassQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetIngressClass({
+        const { data } = await getIngressClass({
             ...options,
             ...queryKey[0],
             signal,
@@ -2274,26 +2274,26 @@ export const handleGetIngressClassOptions = (options: Options<HandleGetIngressCl
         });
         return data;
     },
-    queryKey: handleGetIngressClassQueryKey(options)
+    queryKey: getIngressClassQueryKey(options)
 });
 
-export const handleGetIngressClassInfiniteQueryKey = (options: Options<HandleGetIngressClassData>): QueryKey<Options<HandleGetIngressClassData>> => createQueryKey('handleGetIngressClass', options, true);
+export const getIngressClassInfiniteQueryKey = (options: Options<GetIngressClassData>): QueryKey<Options<GetIngressClassData>> => createQueryKey('getIngressClass', options, true);
 
 /**
  * returns detailed information about IngressClass
  */
-export const handleGetIngressClassInfiniteOptions = (options: Options<HandleGetIngressClassData>) => infiniteQueryOptions<HandleGetIngressClassResponse, AxiosError<DefaultError>, InfiniteData<HandleGetIngressClassResponse>, QueryKey<Options<HandleGetIngressClassData>>, string | Pick<QueryKey<Options<HandleGetIngressClassData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getIngressClassInfiniteOptions = (options: Options<GetIngressClassData>) => infiniteQueryOptions<GetIngressClassResponse, AxiosError<DefaultError>, InfiniteData<GetIngressClassResponse>, QueryKey<Options<GetIngressClassData>>, string | Pick<QueryKey<Options<GetIngressClassData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetIngressClassData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetIngressClassData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetIngressClass({
+        const { data } = await getIngressClass({
             ...options,
             ...params,
             signal,
@@ -2301,7 +2301,7 @@ export const handleGetIngressClassInfiniteOptions = (options: Options<HandleGetI
         });
         return data;
     },
-    queryKey: handleGetIngressClassInfiniteQueryKey(options)
+    queryKey: getIngressClassInfiniteQueryKey(options)
 });
 
 export const handleGetStateQueryKey = (options?: Options<HandleGetStateData>) => createQueryKey('handleGetState', options);
@@ -2343,14 +2343,14 @@ export const handleGetStateInfiniteOptions = (options?: Options<HandleGetStateDa
     queryKey: handleGetStateInfiniteQueryKey(options)
 });
 
-export const handleGetJobListQueryKey = (options?: Options<HandleGetJobListData>) => createQueryKey('handleGetJobList', options);
+export const getAllJobsQueryKey = (options?: Options<GetAllJobsData>) => createQueryKey('getAllJobs', options);
 
 /**
  * returns a list of Jobs from all namespaces
  */
-export const handleGetJobListOptions = (options?: Options<HandleGetJobListData>) => queryOptions<HandleGetJobListResponse, AxiosError<DefaultError>, HandleGetJobListResponse, ReturnType<typeof handleGetJobListQueryKey>>({
+export const getAllJobsOptions = (options?: Options<GetAllJobsData>) => queryOptions<GetAllJobsResponse, AxiosError<DefaultError>, GetAllJobsResponse, ReturnType<typeof getAllJobsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetJobList({
+        const { data } = await getAllJobs({
             ...options,
             ...queryKey[0],
             signal,
@@ -2358,26 +2358,26 @@ export const handleGetJobListOptions = (options?: Options<HandleGetJobListData>)
         });
         return data;
     },
-    queryKey: handleGetJobListQueryKey(options)
+    queryKey: getAllJobsQueryKey(options)
 });
 
-export const handleGetJobListInfiniteQueryKey = (options?: Options<HandleGetJobListData>): QueryKey<Options<HandleGetJobListData>> => createQueryKey('handleGetJobList', options, true);
+export const getAllJobsInfiniteQueryKey = (options?: Options<GetAllJobsData>): QueryKey<Options<GetAllJobsData>> => createQueryKey('getAllJobs', options, true);
 
 /**
  * returns a list of Jobs from all namespaces
  */
-export const handleGetJobListInfiniteOptions = (options?: Options<HandleGetJobListData>) => infiniteQueryOptions<HandleGetJobListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetJobListResponse>, QueryKey<Options<HandleGetJobListData>>, string | Pick<QueryKey<Options<HandleGetJobListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllJobsInfiniteOptions = (options?: Options<GetAllJobsData>) => infiniteQueryOptions<GetAllJobsResponse, AxiosError<DefaultError>, InfiniteData<GetAllJobsResponse>, QueryKey<Options<GetAllJobsData>>, string | Pick<QueryKey<Options<GetAllJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetJobListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetJobList({
+        const { data } = await getAllJobs({
             ...options,
             ...params,
             signal,
@@ -2385,17 +2385,17 @@ export const handleGetJobListInfiniteOptions = (options?: Options<HandleGetJobLi
         });
         return data;
     },
-    queryKey: handleGetJobListInfiniteQueryKey(options)
+    queryKey: getAllJobsInfiniteQueryKey(options)
 });
 
-export const handleGetJobList2QueryKey = (options: Options<HandleGetJobList2Data>) => createQueryKey('handleGetJobList2', options);
+export const getJobsQueryKey = (options: Options<GetJobsData>) => createQueryKey('getJobs', options);
 
 /**
  * returns a list of Jobs in a namespaces
  */
-export const handleGetJobList2Options = (options: Options<HandleGetJobList2Data>) => queryOptions<HandleGetJobList2Response, AxiosError<DefaultError>, HandleGetJobList2Response, ReturnType<typeof handleGetJobList2QueryKey>>({
+export const getJobsOptions = (options: Options<GetJobsData>) => queryOptions<GetJobsResponse, AxiosError<DefaultError>, GetJobsResponse, ReturnType<typeof getJobsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetJobList2({
+        const { data } = await getJobs({
             ...options,
             ...queryKey[0],
             signal,
@@ -2403,26 +2403,26 @@ export const handleGetJobList2Options = (options: Options<HandleGetJobList2Data>
         });
         return data;
     },
-    queryKey: handleGetJobList2QueryKey(options)
+    queryKey: getJobsQueryKey(options)
 });
 
-export const handleGetJobList2InfiniteQueryKey = (options: Options<HandleGetJobList2Data>): QueryKey<Options<HandleGetJobList2Data>> => createQueryKey('handleGetJobList2', options, true);
+export const getJobsInfiniteQueryKey = (options: Options<GetJobsData>): QueryKey<Options<GetJobsData>> => createQueryKey('getJobs', options, true);
 
 /**
  * returns a list of Jobs in a namespaces
  */
-export const handleGetJobList2InfiniteOptions = (options: Options<HandleGetJobList2Data>) => infiniteQueryOptions<HandleGetJobList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetJobList2Response>, QueryKey<Options<HandleGetJobList2Data>>, string | Pick<QueryKey<Options<HandleGetJobList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getJobsInfiniteOptions = (options: Options<GetJobsData>) => infiniteQueryOptions<GetJobsResponse, AxiosError<DefaultError>, InfiniteData<GetJobsResponse>, QueryKey<Options<GetJobsData>>, string | Pick<QueryKey<Options<GetJobsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetJobList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetJobsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetJobList2({
+        const { data } = await getJobs({
             ...options,
             ...params,
             signal,
@@ -2430,17 +2430,17 @@ export const handleGetJobList2InfiniteOptions = (options: Options<HandleGetJobLi
         });
         return data;
     },
-    queryKey: handleGetJobList2InfiniteQueryKey(options)
+    queryKey: getJobsInfiniteQueryKey(options)
 });
 
-export const handleGetJobDetailQueryKey = (options: Options<HandleGetJobDetailData>) => createQueryKey('handleGetJobDetail', options);
+export const getJobQueryKey = (options: Options<GetJobData>) => createQueryKey('getJob', options);
 
 /**
  * returns detailed information about Job
  */
-export const handleGetJobDetailOptions = (options: Options<HandleGetJobDetailData>) => queryOptions<HandleGetJobDetailResponse, AxiosError<DefaultError>, HandleGetJobDetailResponse, ReturnType<typeof handleGetJobDetailQueryKey>>({
+export const getJobOptions = (options: Options<GetJobData>) => queryOptions<GetJobResponse, AxiosError<DefaultError>, GetJobResponse, ReturnType<typeof getJobQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetJobDetail({
+        const { data } = await getJob({
             ...options,
             ...queryKey[0],
             signal,
@@ -2448,26 +2448,26 @@ export const handleGetJobDetailOptions = (options: Options<HandleGetJobDetailDat
         });
         return data;
     },
-    queryKey: handleGetJobDetailQueryKey(options)
+    queryKey: getJobQueryKey(options)
 });
 
-export const handleGetJobDetailInfiniteQueryKey = (options: Options<HandleGetJobDetailData>): QueryKey<Options<HandleGetJobDetailData>> => createQueryKey('handleGetJobDetail', options, true);
+export const getJobInfiniteQueryKey = (options: Options<GetJobData>): QueryKey<Options<GetJobData>> => createQueryKey('getJob', options, true);
 
 /**
  * returns detailed information about Job
  */
-export const handleGetJobDetailInfiniteOptions = (options: Options<HandleGetJobDetailData>) => infiniteQueryOptions<HandleGetJobDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetJobDetailResponse>, QueryKey<Options<HandleGetJobDetailData>>, string | Pick<QueryKey<Options<HandleGetJobDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getJobInfiniteOptions = (options: Options<GetJobData>) => infiniteQueryOptions<GetJobResponse, AxiosError<DefaultError>, InfiniteData<GetJobResponse>, QueryKey<Options<GetJobData>>, string | Pick<QueryKey<Options<GetJobData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetJobDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetJobData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetJobDetail({
+        const { data } = await getJob({
             ...options,
             ...params,
             signal,
@@ -2475,17 +2475,17 @@ export const handleGetJobDetailInfiniteOptions = (options: Options<HandleGetJobD
         });
         return data;
     },
-    queryKey: handleGetJobDetailInfiniteQueryKey(options)
+    queryKey: getJobInfiniteQueryKey(options)
 });
 
-export const handleGetJobEventsQueryKey = (options: Options<HandleGetJobEventsData>) => createQueryKey('handleGetJobEvents', options);
+export const getJobEventsQueryKey = (options: Options<GetJobEventsData>) => createQueryKey('getJobEvents', options);
 
 /**
  * returns a list of Events for Job
  */
-export const handleGetJobEventsOptions = (options: Options<HandleGetJobEventsData>) => queryOptions<HandleGetJobEventsResponse, AxiosError<DefaultError>, HandleGetJobEventsResponse, ReturnType<typeof handleGetJobEventsQueryKey>>({
+export const getJobEventsOptions = (options: Options<GetJobEventsData>) => queryOptions<GetJobEventsResponse, AxiosError<DefaultError>, GetJobEventsResponse, ReturnType<typeof getJobEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetJobEvents({
+        const { data } = await getJobEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -2493,26 +2493,26 @@ export const handleGetJobEventsOptions = (options: Options<HandleGetJobEventsDat
         });
         return data;
     },
-    queryKey: handleGetJobEventsQueryKey(options)
+    queryKey: getJobEventsQueryKey(options)
 });
 
-export const handleGetJobEventsInfiniteQueryKey = (options: Options<HandleGetJobEventsData>): QueryKey<Options<HandleGetJobEventsData>> => createQueryKey('handleGetJobEvents', options, true);
+export const getJobEventsInfiniteQueryKey = (options: Options<GetJobEventsData>): QueryKey<Options<GetJobEventsData>> => createQueryKey('getJobEvents', options, true);
 
 /**
  * returns a list of Events for Job
  */
-export const handleGetJobEventsInfiniteOptions = (options: Options<HandleGetJobEventsData>) => infiniteQueryOptions<HandleGetJobEventsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetJobEventsResponse>, QueryKey<Options<HandleGetJobEventsData>>, string | Pick<QueryKey<Options<HandleGetJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getJobEventsInfiniteOptions = (options: Options<GetJobEventsData>) => infiniteQueryOptions<GetJobEventsResponse, AxiosError<DefaultError>, InfiniteData<GetJobEventsResponse>, QueryKey<Options<GetJobEventsData>>, string | Pick<QueryKey<Options<GetJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetJobEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetJobEvents({
+        const { data } = await getJobEvents({
             ...options,
             ...params,
             signal,
@@ -2520,17 +2520,17 @@ export const handleGetJobEventsInfiniteOptions = (options: Options<HandleGetJobE
         });
         return data;
     },
-    queryKey: handleGetJobEventsInfiniteQueryKey(options)
+    queryKey: getJobEventsInfiniteQueryKey(options)
 });
 
-export const handleGetJobPodsQueryKey = (options: Options<HandleGetJobPodsData>) => createQueryKey('handleGetJobPods', options);
+export const getJobPodsQueryKey = (options: Options<GetJobPodsData>) => createQueryKey('getJobPods', options);
 
 /**
  * returns a list of Pods for Job
  */
-export const handleGetJobPodsOptions = (options: Options<HandleGetJobPodsData>) => queryOptions<HandleGetJobPodsResponse, AxiosError<DefaultError>, HandleGetJobPodsResponse, ReturnType<typeof handleGetJobPodsQueryKey>>({
+export const getJobPodsOptions = (options: Options<GetJobPodsData>) => queryOptions<GetJobPodsResponse, AxiosError<DefaultError>, GetJobPodsResponse, ReturnType<typeof getJobPodsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetJobPods({
+        const { data } = await getJobPods({
             ...options,
             ...queryKey[0],
             signal,
@@ -2538,26 +2538,26 @@ export const handleGetJobPodsOptions = (options: Options<HandleGetJobPodsData>) 
         });
         return data;
     },
-    queryKey: handleGetJobPodsQueryKey(options)
+    queryKey: getJobPodsQueryKey(options)
 });
 
-export const handleGetJobPodsInfiniteQueryKey = (options: Options<HandleGetJobPodsData>): QueryKey<Options<HandleGetJobPodsData>> => createQueryKey('handleGetJobPods', options, true);
+export const getJobPodsInfiniteQueryKey = (options: Options<GetJobPodsData>): QueryKey<Options<GetJobPodsData>> => createQueryKey('getJobPods', options, true);
 
 /**
  * returns a list of Pods for Job
  */
-export const handleGetJobPodsInfiniteOptions = (options: Options<HandleGetJobPodsData>) => infiniteQueryOptions<HandleGetJobPodsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetJobPodsResponse>, QueryKey<Options<HandleGetJobPodsData>>, string | Pick<QueryKey<Options<HandleGetJobPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getJobPodsInfiniteOptions = (options: Options<GetJobPodsData>) => infiniteQueryOptions<GetJobPodsResponse, AxiosError<DefaultError>, InfiniteData<GetJobPodsResponse>, QueryKey<Options<GetJobPodsData>>, string | Pick<QueryKey<Options<GetJobPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetJobPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetJobPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetJobPods({
+        const { data } = await getJobPods({
             ...options,
             ...params,
             signal,
@@ -2565,17 +2565,17 @@ export const handleGetJobPodsInfiniteOptions = (options: Options<HandleGetJobPod
         });
         return data;
     },
-    queryKey: handleGetJobPodsInfiniteQueryKey(options)
+    queryKey: getJobPodsInfiniteQueryKey(options)
 });
 
-export const handleLogFileQueryKey = (options: Options<HandleLogFileData>) => createQueryKey('handleLogFile', options);
+export const getLogFileQueryKey = (options: Options<GetLogFileData>) => createQueryKey('getLogFile', options);
 
 /**
  * returns a text file with logs from a Container
  */
-export const handleLogFileOptions = (options: Options<HandleLogFileData>) => queryOptions<HandleLogFileResponse, AxiosError<DefaultError>, HandleLogFileResponse, ReturnType<typeof handleLogFileQueryKey>>({
+export const getLogFileOptions = (options: Options<GetLogFileData>) => queryOptions<GetLogFileResponse, AxiosError<DefaultError>, GetLogFileResponse, ReturnType<typeof getLogFileQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleLogFile({
+        const { data } = await getLogFile({
             ...options,
             ...queryKey[0],
             signal,
@@ -2583,26 +2583,26 @@ export const handleLogFileOptions = (options: Options<HandleLogFileData>) => que
         });
         return data;
     },
-    queryKey: handleLogFileQueryKey(options)
+    queryKey: getLogFileQueryKey(options)
 });
 
-export const handleLogFileInfiniteQueryKey = (options: Options<HandleLogFileData>): QueryKey<Options<HandleLogFileData>> => createQueryKey('handleLogFile', options, true);
+export const getLogFileInfiniteQueryKey = (options: Options<GetLogFileData>): QueryKey<Options<GetLogFileData>> => createQueryKey('getLogFile', options, true);
 
 /**
  * returns a text file with logs from a Container
  */
-export const handleLogFileInfiniteOptions = (options: Options<HandleLogFileData>) => infiniteQueryOptions<HandleLogFileResponse, AxiosError<DefaultError>, InfiniteData<HandleLogFileResponse>, QueryKey<Options<HandleLogFileData>>, string | Pick<QueryKey<Options<HandleLogFileData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getLogFileInfiniteOptions = (options: Options<GetLogFileData>) => infiniteQueryOptions<GetLogFileResponse, AxiosError<DefaultError>, InfiniteData<GetLogFileResponse>, QueryKey<Options<GetLogFileData>>, string | Pick<QueryKey<Options<GetLogFileData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleLogFileData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetLogFileData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleLogFile({
+        const { data } = await getLogFile({
             ...options,
             ...params,
             signal,
@@ -2610,17 +2610,17 @@ export const handleLogFileInfiniteOptions = (options: Options<HandleLogFileData>
         });
         return data;
     },
-    queryKey: handleLogFileInfiniteQueryKey(options)
+    queryKey: getLogFileInfiniteQueryKey(options)
 });
 
-export const handleLogSourceQueryKey = (options: Options<HandleLogSourceData>) => createQueryKey('handleLogSource', options);
+export const getLogSourceQueryKey = (options: Options<GetLogSourceData>) => createQueryKey('getLogSource', options);
 
 /**
  * returns log sources for a resource
  */
-export const handleLogSourceOptions = (options: Options<HandleLogSourceData>) => queryOptions<HandleLogSourceResponse, AxiosError<DefaultError>, HandleLogSourceResponse, ReturnType<typeof handleLogSourceQueryKey>>({
+export const getLogSourceOptions = (options: Options<GetLogSourceData>) => queryOptions<GetLogSourceResponse, AxiosError<DefaultError>, GetLogSourceResponse, ReturnType<typeof getLogSourceQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleLogSource({
+        const { data } = await getLogSource({
             ...options,
             ...queryKey[0],
             signal,
@@ -2628,26 +2628,26 @@ export const handleLogSourceOptions = (options: Options<HandleLogSourceData>) =>
         });
         return data;
     },
-    queryKey: handleLogSourceQueryKey(options)
+    queryKey: getLogSourceQueryKey(options)
 });
 
-export const handleLogSourceInfiniteQueryKey = (options: Options<HandleLogSourceData>): QueryKey<Options<HandleLogSourceData>> => createQueryKey('handleLogSource', options, true);
+export const getLogSourceInfiniteQueryKey = (options: Options<GetLogSourceData>): QueryKey<Options<GetLogSourceData>> => createQueryKey('getLogSource', options, true);
 
 /**
  * returns log sources for a resource
  */
-export const handleLogSourceInfiniteOptions = (options: Options<HandleLogSourceData>) => infiniteQueryOptions<HandleLogSourceResponse, AxiosError<DefaultError>, InfiniteData<HandleLogSourceResponse>, QueryKey<Options<HandleLogSourceData>>, string | Pick<QueryKey<Options<HandleLogSourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getLogSourceInfiniteOptions = (options: Options<GetLogSourceData>) => infiniteQueryOptions<GetLogSourceResponse, AxiosError<DefaultError>, InfiniteData<GetLogSourceResponse>, QueryKey<Options<GetLogSourceData>>, string | Pick<QueryKey<Options<GetLogSourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleLogSourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetLogSourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleLogSource({
+        const { data } = await getLogSource({
             ...options,
             ...params,
             signal,
@@ -2655,17 +2655,17 @@ export const handleLogSourceInfiniteOptions = (options: Options<HandleLogSourceD
         });
         return data;
     },
-    queryKey: handleLogSourceInfiniteQueryKey(options)
+    queryKey: getLogSourceInfiniteQueryKey(options)
 });
 
-export const handleLogsQueryKey = (options: Options<HandleLogsData>) => createQueryKey('handleLogs', options);
+export const getPodLogsQueryKey = (options: Options<GetPodLogsData>) => createQueryKey('getPodLogs', options);
 
 /**
  * returns logs from a Pod
  */
-export const handleLogsOptions = (options: Options<HandleLogsData>) => queryOptions<HandleLogsResponse, AxiosError<DefaultError>, HandleLogsResponse, ReturnType<typeof handleLogsQueryKey>>({
+export const getPodLogsOptions = (options: Options<GetPodLogsData>) => queryOptions<GetPodLogsResponse, AxiosError<DefaultError>, GetPodLogsResponse, ReturnType<typeof getPodLogsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleLogs({
+        const { data } = await getPodLogs({
             ...options,
             ...queryKey[0],
             signal,
@@ -2673,26 +2673,26 @@ export const handleLogsOptions = (options: Options<HandleLogsData>) => queryOpti
         });
         return data;
     },
-    queryKey: handleLogsQueryKey(options)
+    queryKey: getPodLogsQueryKey(options)
 });
 
-export const handleLogsInfiniteQueryKey = (options: Options<HandleLogsData>): QueryKey<Options<HandleLogsData>> => createQueryKey('handleLogs', options, true);
+export const getPodLogsInfiniteQueryKey = (options: Options<GetPodLogsData>): QueryKey<Options<GetPodLogsData>> => createQueryKey('getPodLogs', options, true);
 
 /**
  * returns logs from a Pod
  */
-export const handleLogsInfiniteOptions = (options: Options<HandleLogsData>) => infiniteQueryOptions<HandleLogsResponse, AxiosError<DefaultError>, InfiniteData<HandleLogsResponse>, QueryKey<Options<HandleLogsData>>, string | Pick<QueryKey<Options<HandleLogsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPodLogsInfiniteOptions = (options: Options<GetPodLogsData>) => infiniteQueryOptions<GetPodLogsResponse, AxiosError<DefaultError>, InfiniteData<GetPodLogsResponse>, QueryKey<Options<GetPodLogsData>>, string | Pick<QueryKey<Options<GetPodLogsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleLogsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPodLogsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleLogs({
+        const { data } = await getPodLogs({
             ...options,
             ...params,
             signal,
@@ -2700,17 +2700,17 @@ export const handleLogsInfiniteOptions = (options: Options<HandleLogsData>) => i
         });
         return data;
     },
-    queryKey: handleLogsInfiniteQueryKey(options)
+    queryKey: getPodLogsInfiniteQueryKey(options)
 });
 
-export const handleLogs2QueryKey = (options: Options<HandleLogs2Data>) => createQueryKey('handleLogs2', options);
+export const getContainerLogsQueryKey = (options: Options<GetContainerLogsData>) => createQueryKey('getContainerLogs', options);
 
 /**
  * returns logs from a Container
  */
-export const handleLogs2Options = (options: Options<HandleLogs2Data>) => queryOptions<HandleLogs2Response, AxiosError<DefaultError>, HandleLogs2Response, ReturnType<typeof handleLogs2QueryKey>>({
+export const getContainerLogsOptions = (options: Options<GetContainerLogsData>) => queryOptions<GetContainerLogsResponse, AxiosError<DefaultError>, GetContainerLogsResponse, ReturnType<typeof getContainerLogsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleLogs2({
+        const { data } = await getContainerLogs({
             ...options,
             ...queryKey[0],
             signal,
@@ -2718,26 +2718,26 @@ export const handleLogs2Options = (options: Options<HandleLogs2Data>) => queryOp
         });
         return data;
     },
-    queryKey: handleLogs2QueryKey(options)
+    queryKey: getContainerLogsQueryKey(options)
 });
 
-export const handleLogs2InfiniteQueryKey = (options: Options<HandleLogs2Data>): QueryKey<Options<HandleLogs2Data>> => createQueryKey('handleLogs2', options, true);
+export const getContainerLogsInfiniteQueryKey = (options: Options<GetContainerLogsData>): QueryKey<Options<GetContainerLogsData>> => createQueryKey('getContainerLogs', options, true);
 
 /**
  * returns logs from a Container
  */
-export const handleLogs2InfiniteOptions = (options: Options<HandleLogs2Data>) => infiniteQueryOptions<HandleLogs2Response, AxiosError<DefaultError>, InfiniteData<HandleLogs2Response>, QueryKey<Options<HandleLogs2Data>>, string | Pick<QueryKey<Options<HandleLogs2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getContainerLogsInfiniteOptions = (options: Options<GetContainerLogsData>) => infiniteQueryOptions<GetContainerLogsResponse, AxiosError<DefaultError>, InfiniteData<GetContainerLogsResponse>, QueryKey<Options<GetContainerLogsData>>, string | Pick<QueryKey<Options<GetContainerLogsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleLogs2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetContainerLogsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleLogs2({
+        const { data } = await getContainerLogs({
             ...options,
             ...params,
             signal,
@@ -2745,17 +2745,17 @@ export const handleLogs2InfiniteOptions = (options: Options<HandleLogs2Data>) =>
         });
         return data;
     },
-    queryKey: handleLogs2InfiniteQueryKey(options)
+    queryKey: getContainerLogsInfiniteQueryKey(options)
 });
 
-export const handleGetNamespacesQueryKey = (options?: Options<HandleGetNamespacesData>) => createQueryKey('handleGetNamespaces', options);
+export const getNamespacesQueryKey = (options?: Options<GetNamespacesData>) => createQueryKey('getNamespaces', options);
 
 /**
  * returns a list of Namespaces
  */
-export const handleGetNamespacesOptions = (options?: Options<HandleGetNamespacesData>) => queryOptions<HandleGetNamespacesResponse, AxiosError<DefaultError>, HandleGetNamespacesResponse, ReturnType<typeof handleGetNamespacesQueryKey>>({
+export const getNamespacesOptions = (options?: Options<GetNamespacesData>) => queryOptions<GetNamespacesResponse, AxiosError<DefaultError>, GetNamespacesResponse, ReturnType<typeof getNamespacesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetNamespaces({
+        const { data } = await getNamespaces({
             ...options,
             ...queryKey[0],
             signal,
@@ -2763,26 +2763,26 @@ export const handleGetNamespacesOptions = (options?: Options<HandleGetNamespaces
         });
         return data;
     },
-    queryKey: handleGetNamespacesQueryKey(options)
+    queryKey: getNamespacesQueryKey(options)
 });
 
-export const handleGetNamespacesInfiniteQueryKey = (options?: Options<HandleGetNamespacesData>): QueryKey<Options<HandleGetNamespacesData>> => createQueryKey('handleGetNamespaces', options, true);
+export const getNamespacesInfiniteQueryKey = (options?: Options<GetNamespacesData>): QueryKey<Options<GetNamespacesData>> => createQueryKey('getNamespaces', options, true);
 
 /**
  * returns a list of Namespaces
  */
-export const handleGetNamespacesInfiniteOptions = (options?: Options<HandleGetNamespacesData>) => infiniteQueryOptions<HandleGetNamespacesResponse, AxiosError<DefaultError>, InfiniteData<HandleGetNamespacesResponse>, QueryKey<Options<HandleGetNamespacesData>>, string | Pick<QueryKey<Options<HandleGetNamespacesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getNamespacesInfiniteOptions = (options?: Options<GetNamespacesData>) => infiniteQueryOptions<GetNamespacesResponse, AxiosError<DefaultError>, InfiniteData<GetNamespacesResponse>, QueryKey<Options<GetNamespacesData>>, string | Pick<QueryKey<Options<GetNamespacesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetNamespacesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetNamespacesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetNamespaces({
+        const { data } = await getNamespaces({
             ...options,
             ...params,
             signal,
@@ -2790,16 +2790,16 @@ export const handleGetNamespacesInfiniteOptions = (options?: Options<HandleGetNa
         });
         return data;
     },
-    queryKey: handleGetNamespacesInfiniteQueryKey(options)
+    queryKey: getNamespacesInfiniteQueryKey(options)
 });
 
 /**
  * create a Namespace
  */
-export const handleCreateNamespaceMutation = (options?: Partial<Options<HandleCreateNamespaceData>>): UseMutationOptions<HandleCreateNamespaceResponse, AxiosError<DefaultError>, Options<HandleCreateNamespaceData>> => {
-    const mutationOptions: UseMutationOptions<HandleCreateNamespaceResponse, AxiosError<DefaultError>, Options<HandleCreateNamespaceData>> = {
+export const createNamespaceMutation = (options?: Partial<Options<CreateNamespaceData>>): UseMutationOptions<CreateNamespaceResponse, AxiosError<DefaultError>, Options<CreateNamespaceData>> => {
+    const mutationOptions: UseMutationOptions<CreateNamespaceResponse, AxiosError<DefaultError>, Options<CreateNamespaceData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleCreateNamespace({
+            const { data } = await createNamespace({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -2810,14 +2810,14 @@ export const handleCreateNamespaceMutation = (options?: Partial<Options<HandleCr
     return mutationOptions;
 };
 
-export const handleGetNamespaceDetailQueryKey = (options: Options<HandleGetNamespaceDetailData>) => createQueryKey('handleGetNamespaceDetail', options);
+export const getNamespaceQueryKey = (options: Options<GetNamespaceData>) => createQueryKey('getNamespace', options);
 
 /**
  * returns detailed information about Namespace
  */
-export const handleGetNamespaceDetailOptions = (options: Options<HandleGetNamespaceDetailData>) => queryOptions<HandleGetNamespaceDetailResponse, AxiosError<DefaultError>, HandleGetNamespaceDetailResponse, ReturnType<typeof handleGetNamespaceDetailQueryKey>>({
+export const getNamespaceOptions = (options: Options<GetNamespaceData>) => queryOptions<GetNamespaceResponse, AxiosError<DefaultError>, GetNamespaceResponse, ReturnType<typeof getNamespaceQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetNamespaceDetail({
+        const { data } = await getNamespace({
             ...options,
             ...queryKey[0],
             signal,
@@ -2825,26 +2825,26 @@ export const handleGetNamespaceDetailOptions = (options: Options<HandleGetNamesp
         });
         return data;
     },
-    queryKey: handleGetNamespaceDetailQueryKey(options)
+    queryKey: getNamespaceQueryKey(options)
 });
 
-export const handleGetNamespaceDetailInfiniteQueryKey = (options: Options<HandleGetNamespaceDetailData>): QueryKey<Options<HandleGetNamespaceDetailData>> => createQueryKey('handleGetNamespaceDetail', options, true);
+export const getNamespaceInfiniteQueryKey = (options: Options<GetNamespaceData>): QueryKey<Options<GetNamespaceData>> => createQueryKey('getNamespace', options, true);
 
 /**
  * returns detailed information about Namespace
  */
-export const handleGetNamespaceDetailInfiniteOptions = (options: Options<HandleGetNamespaceDetailData>) => infiniteQueryOptions<HandleGetNamespaceDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetNamespaceDetailResponse>, QueryKey<Options<HandleGetNamespaceDetailData>>, string | Pick<QueryKey<Options<HandleGetNamespaceDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getNamespaceInfiniteOptions = (options: Options<GetNamespaceData>) => infiniteQueryOptions<GetNamespaceResponse, AxiosError<DefaultError>, InfiniteData<GetNamespaceResponse>, QueryKey<Options<GetNamespaceData>>, string | Pick<QueryKey<Options<GetNamespaceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetNamespaceDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetNamespaceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetNamespaceDetail({
+        const { data } = await getNamespace({
             ...options,
             ...params,
             signal,
@@ -2852,17 +2852,17 @@ export const handleGetNamespaceDetailInfiniteOptions = (options: Options<HandleG
         });
         return data;
     },
-    queryKey: handleGetNamespaceDetailInfiniteQueryKey(options)
+    queryKey: getNamespaceInfiniteQueryKey(options)
 });
 
-export const handleGetNamespaceEventsQueryKey = (options: Options<HandleGetNamespaceEventsData>) => createQueryKey('handleGetNamespaceEvents', options);
+export const getNamespaceEventsQueryKey = (options: Options<GetNamespaceEventsData>) => createQueryKey('getNamespaceEvents', options);
 
 /**
  * returns a list of Events for Namespace
  */
-export const handleGetNamespaceEventsOptions = (options: Options<HandleGetNamespaceEventsData>) => queryOptions<HandleGetNamespaceEventsResponse, AxiosError<DefaultError>, HandleGetNamespaceEventsResponse, ReturnType<typeof handleGetNamespaceEventsQueryKey>>({
+export const getNamespaceEventsOptions = (options: Options<GetNamespaceEventsData>) => queryOptions<GetNamespaceEventsResponse, AxiosError<DefaultError>, GetNamespaceEventsResponse, ReturnType<typeof getNamespaceEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetNamespaceEvents({
+        const { data } = await getNamespaceEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -2870,26 +2870,26 @@ export const handleGetNamespaceEventsOptions = (options: Options<HandleGetNamesp
         });
         return data;
     },
-    queryKey: handleGetNamespaceEventsQueryKey(options)
+    queryKey: getNamespaceEventsQueryKey(options)
 });
 
-export const handleGetNamespaceEventsInfiniteQueryKey = (options: Options<HandleGetNamespaceEventsData>): QueryKey<Options<HandleGetNamespaceEventsData>> => createQueryKey('handleGetNamespaceEvents', options, true);
+export const getNamespaceEventsInfiniteQueryKey = (options: Options<GetNamespaceEventsData>): QueryKey<Options<GetNamespaceEventsData>> => createQueryKey('getNamespaceEvents', options, true);
 
 /**
  * returns a list of Events for Namespace
  */
-export const handleGetNamespaceEventsInfiniteOptions = (options: Options<HandleGetNamespaceEventsData>) => infiniteQueryOptions<HandleGetNamespaceEventsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetNamespaceEventsResponse>, QueryKey<Options<HandleGetNamespaceEventsData>>, string | Pick<QueryKey<Options<HandleGetNamespaceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getNamespaceEventsInfiniteOptions = (options: Options<GetNamespaceEventsData>) => infiniteQueryOptions<GetNamespaceEventsResponse, AxiosError<DefaultError>, InfiniteData<GetNamespaceEventsResponse>, QueryKey<Options<GetNamespaceEventsData>>, string | Pick<QueryKey<Options<GetNamespaceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetNamespaceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetNamespaceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetNamespaceEvents({
+        const { data } = await getNamespaceEvents({
             ...options,
             ...params,
             signal,
@@ -2897,17 +2897,17 @@ export const handleGetNamespaceEventsInfiniteOptions = (options: Options<HandleG
         });
         return data;
     },
-    queryKey: handleGetNamespaceEventsInfiniteQueryKey(options)
+    queryKey: getNamespaceEventsInfiniteQueryKey(options)
 });
 
-export const handleGetNetworkPolicyListQueryKey = (options?: Options<HandleGetNetworkPolicyListData>) => createQueryKey('handleGetNetworkPolicyList', options);
+export const getAllNetworkPoliciesQueryKey = (options?: Options<GetAllNetworkPoliciesData>) => createQueryKey('getAllNetworkPolicies', options);
 
 /**
  * returns a list of NetworkPolicies from all namespaces
  */
-export const handleGetNetworkPolicyListOptions = (options?: Options<HandleGetNetworkPolicyListData>) => queryOptions<HandleGetNetworkPolicyListResponse, AxiosError<DefaultError>, HandleGetNetworkPolicyListResponse, ReturnType<typeof handleGetNetworkPolicyListQueryKey>>({
+export const getAllNetworkPoliciesOptions = (options?: Options<GetAllNetworkPoliciesData>) => queryOptions<GetAllNetworkPoliciesResponse, AxiosError<DefaultError>, GetAllNetworkPoliciesResponse, ReturnType<typeof getAllNetworkPoliciesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetNetworkPolicyList({
+        const { data } = await getAllNetworkPolicies({
             ...options,
             ...queryKey[0],
             signal,
@@ -2915,26 +2915,26 @@ export const handleGetNetworkPolicyListOptions = (options?: Options<HandleGetNet
         });
         return data;
     },
-    queryKey: handleGetNetworkPolicyListQueryKey(options)
+    queryKey: getAllNetworkPoliciesQueryKey(options)
 });
 
-export const handleGetNetworkPolicyListInfiniteQueryKey = (options?: Options<HandleGetNetworkPolicyListData>): QueryKey<Options<HandleGetNetworkPolicyListData>> => createQueryKey('handleGetNetworkPolicyList', options, true);
+export const getAllNetworkPoliciesInfiniteQueryKey = (options?: Options<GetAllNetworkPoliciesData>): QueryKey<Options<GetAllNetworkPoliciesData>> => createQueryKey('getAllNetworkPolicies', options, true);
 
 /**
  * returns a list of NetworkPolicies from all namespaces
  */
-export const handleGetNetworkPolicyListInfiniteOptions = (options?: Options<HandleGetNetworkPolicyListData>) => infiniteQueryOptions<HandleGetNetworkPolicyListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetNetworkPolicyListResponse>, QueryKey<Options<HandleGetNetworkPolicyListData>>, string | Pick<QueryKey<Options<HandleGetNetworkPolicyListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllNetworkPoliciesInfiniteOptions = (options?: Options<GetAllNetworkPoliciesData>) => infiniteQueryOptions<GetAllNetworkPoliciesResponse, AxiosError<DefaultError>, InfiniteData<GetAllNetworkPoliciesResponse>, QueryKey<Options<GetAllNetworkPoliciesData>>, string | Pick<QueryKey<Options<GetAllNetworkPoliciesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetNetworkPolicyListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllNetworkPoliciesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetNetworkPolicyList({
+        const { data } = await getAllNetworkPolicies({
             ...options,
             ...params,
             signal,
@@ -2942,17 +2942,17 @@ export const handleGetNetworkPolicyListInfiniteOptions = (options?: Options<Hand
         });
         return data;
     },
-    queryKey: handleGetNetworkPolicyListInfiniteQueryKey(options)
+    queryKey: getAllNetworkPoliciesInfiniteQueryKey(options)
 });
 
-export const handleGetNetworkPolicyList2QueryKey = (options: Options<HandleGetNetworkPolicyList2Data>) => createQueryKey('handleGetNetworkPolicyList2', options);
+export const getNetworkPoliciesQueryKey = (options: Options<GetNetworkPoliciesData>) => createQueryKey('getNetworkPolicies', options);
 
 /**
  * returns a list of NetworkPolicies in a namespaces
  */
-export const handleGetNetworkPolicyList2Options = (options: Options<HandleGetNetworkPolicyList2Data>) => queryOptions<HandleGetNetworkPolicyList2Response, AxiosError<DefaultError>, HandleGetNetworkPolicyList2Response, ReturnType<typeof handleGetNetworkPolicyList2QueryKey>>({
+export const getNetworkPoliciesOptions = (options: Options<GetNetworkPoliciesData>) => queryOptions<GetNetworkPoliciesResponse, AxiosError<DefaultError>, GetNetworkPoliciesResponse, ReturnType<typeof getNetworkPoliciesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetNetworkPolicyList2({
+        const { data } = await getNetworkPolicies({
             ...options,
             ...queryKey[0],
             signal,
@@ -2960,26 +2960,26 @@ export const handleGetNetworkPolicyList2Options = (options: Options<HandleGetNet
         });
         return data;
     },
-    queryKey: handleGetNetworkPolicyList2QueryKey(options)
+    queryKey: getNetworkPoliciesQueryKey(options)
 });
 
-export const handleGetNetworkPolicyList2InfiniteQueryKey = (options: Options<HandleGetNetworkPolicyList2Data>): QueryKey<Options<HandleGetNetworkPolicyList2Data>> => createQueryKey('handleGetNetworkPolicyList2', options, true);
+export const getNetworkPoliciesInfiniteQueryKey = (options: Options<GetNetworkPoliciesData>): QueryKey<Options<GetNetworkPoliciesData>> => createQueryKey('getNetworkPolicies', options, true);
 
 /**
  * returns a list of NetworkPolicies in a namespaces
  */
-export const handleGetNetworkPolicyList2InfiniteOptions = (options: Options<HandleGetNetworkPolicyList2Data>) => infiniteQueryOptions<HandleGetNetworkPolicyList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetNetworkPolicyList2Response>, QueryKey<Options<HandleGetNetworkPolicyList2Data>>, string | Pick<QueryKey<Options<HandleGetNetworkPolicyList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getNetworkPoliciesInfiniteOptions = (options: Options<GetNetworkPoliciesData>) => infiniteQueryOptions<GetNetworkPoliciesResponse, AxiosError<DefaultError>, InfiniteData<GetNetworkPoliciesResponse>, QueryKey<Options<GetNetworkPoliciesData>>, string | Pick<QueryKey<Options<GetNetworkPoliciesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetNetworkPolicyList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetNetworkPoliciesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetNetworkPolicyList2({
+        const { data } = await getNetworkPolicies({
             ...options,
             ...params,
             signal,
@@ -2987,17 +2987,17 @@ export const handleGetNetworkPolicyList2InfiniteOptions = (options: Options<Hand
         });
         return data;
     },
-    queryKey: handleGetNetworkPolicyList2InfiniteQueryKey(options)
+    queryKey: getNetworkPoliciesInfiniteQueryKey(options)
 });
 
-export const handleGetNetworkPolicyDetailQueryKey = (options: Options<HandleGetNetworkPolicyDetailData>) => createQueryKey('handleGetNetworkPolicyDetail', options);
+export const getNetworkPolicyQueryKey = (options: Options<GetNetworkPolicyData>) => createQueryKey('getNetworkPolicy', options);
 
 /**
  * returns detailed information about NetworkPolicy
  */
-export const handleGetNetworkPolicyDetailOptions = (options: Options<HandleGetNetworkPolicyDetailData>) => queryOptions<HandleGetNetworkPolicyDetailResponse, AxiosError<DefaultError>, HandleGetNetworkPolicyDetailResponse, ReturnType<typeof handleGetNetworkPolicyDetailQueryKey>>({
+export const getNetworkPolicyOptions = (options: Options<GetNetworkPolicyData>) => queryOptions<GetNetworkPolicyResponse, AxiosError<DefaultError>, GetNetworkPolicyResponse, ReturnType<typeof getNetworkPolicyQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetNetworkPolicyDetail({
+        const { data } = await getNetworkPolicy({
             ...options,
             ...queryKey[0],
             signal,
@@ -3005,26 +3005,26 @@ export const handleGetNetworkPolicyDetailOptions = (options: Options<HandleGetNe
         });
         return data;
     },
-    queryKey: handleGetNetworkPolicyDetailQueryKey(options)
+    queryKey: getNetworkPolicyQueryKey(options)
 });
 
-export const handleGetNetworkPolicyDetailInfiniteQueryKey = (options: Options<HandleGetNetworkPolicyDetailData>): QueryKey<Options<HandleGetNetworkPolicyDetailData>> => createQueryKey('handleGetNetworkPolicyDetail', options, true);
+export const getNetworkPolicyInfiniteQueryKey = (options: Options<GetNetworkPolicyData>): QueryKey<Options<GetNetworkPolicyData>> => createQueryKey('getNetworkPolicy', options, true);
 
 /**
  * returns detailed information about NetworkPolicy
  */
-export const handleGetNetworkPolicyDetailInfiniteOptions = (options: Options<HandleGetNetworkPolicyDetailData>) => infiniteQueryOptions<HandleGetNetworkPolicyDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetNetworkPolicyDetailResponse>, QueryKey<Options<HandleGetNetworkPolicyDetailData>>, string | Pick<QueryKey<Options<HandleGetNetworkPolicyDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getNetworkPolicyInfiniteOptions = (options: Options<GetNetworkPolicyData>) => infiniteQueryOptions<GetNetworkPolicyResponse, AxiosError<DefaultError>, InfiniteData<GetNetworkPolicyResponse>, QueryKey<Options<GetNetworkPolicyData>>, string | Pick<QueryKey<Options<GetNetworkPolicyData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetNetworkPolicyDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetNetworkPolicyData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetNetworkPolicyDetail({
+        const { data } = await getNetworkPolicy({
             ...options,
             ...params,
             signal,
@@ -3032,17 +3032,17 @@ export const handleGetNetworkPolicyDetailInfiniteOptions = (options: Options<Han
         });
         return data;
     },
-    queryKey: handleGetNetworkPolicyDetailInfiniteQueryKey(options)
+    queryKey: getNetworkPolicyInfiniteQueryKey(options)
 });
 
-export const handleGetNodeListQueryKey = (options?: Options<HandleGetNodeListData>) => createQueryKey('handleGetNodeList', options);
+export const getNodesQueryKey = (options?: Options<GetNodesData>) => createQueryKey('getNodes', options);
 
 /**
  * returns a list of Nodes
  */
-export const handleGetNodeListOptions = (options?: Options<HandleGetNodeListData>) => queryOptions<HandleGetNodeListResponse, AxiosError<DefaultError>, HandleGetNodeListResponse, ReturnType<typeof handleGetNodeListQueryKey>>({
+export const getNodesOptions = (options?: Options<GetNodesData>) => queryOptions<GetNodesResponse, AxiosError<DefaultError>, GetNodesResponse, ReturnType<typeof getNodesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetNodeList({
+        const { data } = await getNodes({
             ...options,
             ...queryKey[0],
             signal,
@@ -3050,26 +3050,26 @@ export const handleGetNodeListOptions = (options?: Options<HandleGetNodeListData
         });
         return data;
     },
-    queryKey: handleGetNodeListQueryKey(options)
+    queryKey: getNodesQueryKey(options)
 });
 
-export const handleGetNodeListInfiniteQueryKey = (options?: Options<HandleGetNodeListData>): QueryKey<Options<HandleGetNodeListData>> => createQueryKey('handleGetNodeList', options, true);
+export const getNodesInfiniteQueryKey = (options?: Options<GetNodesData>): QueryKey<Options<GetNodesData>> => createQueryKey('getNodes', options, true);
 
 /**
  * returns a list of Nodes
  */
-export const handleGetNodeListInfiniteOptions = (options?: Options<HandleGetNodeListData>) => infiniteQueryOptions<HandleGetNodeListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetNodeListResponse>, QueryKey<Options<HandleGetNodeListData>>, string | Pick<QueryKey<Options<HandleGetNodeListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getNodesInfiniteOptions = (options?: Options<GetNodesData>) => infiniteQueryOptions<GetNodesResponse, AxiosError<DefaultError>, InfiniteData<GetNodesResponse>, QueryKey<Options<GetNodesData>>, string | Pick<QueryKey<Options<GetNodesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetNodeListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetNodesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetNodeList({
+        const { data } = await getNodes({
             ...options,
             ...params,
             signal,
@@ -3077,17 +3077,17 @@ export const handleGetNodeListInfiniteOptions = (options?: Options<HandleGetNode
         });
         return data;
     },
-    queryKey: handleGetNodeListInfiniteQueryKey(options)
+    queryKey: getNodesInfiniteQueryKey(options)
 });
 
-export const handleGetNodeDetailQueryKey = (options: Options<HandleGetNodeDetailData>) => createQueryKey('handleGetNodeDetail', options);
+export const getNodeQueryKey = (options: Options<GetNodeData>) => createQueryKey('getNode', options);
 
 /**
  * returns detailed information about Node
  */
-export const handleGetNodeDetailOptions = (options: Options<HandleGetNodeDetailData>) => queryOptions<HandleGetNodeDetailResponse, AxiosError<DefaultError>, HandleGetNodeDetailResponse, ReturnType<typeof handleGetNodeDetailQueryKey>>({
+export const getNodeOptions = (options: Options<GetNodeData>) => queryOptions<GetNodeResponse, AxiosError<DefaultError>, GetNodeResponse, ReturnType<typeof getNodeQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetNodeDetail({
+        const { data } = await getNode({
             ...options,
             ...queryKey[0],
             signal,
@@ -3095,26 +3095,26 @@ export const handleGetNodeDetailOptions = (options: Options<HandleGetNodeDetailD
         });
         return data;
     },
-    queryKey: handleGetNodeDetailQueryKey(options)
+    queryKey: getNodeQueryKey(options)
 });
 
-export const handleGetNodeDetailInfiniteQueryKey = (options: Options<HandleGetNodeDetailData>): QueryKey<Options<HandleGetNodeDetailData>> => createQueryKey('handleGetNodeDetail', options, true);
+export const getNodeInfiniteQueryKey = (options: Options<GetNodeData>): QueryKey<Options<GetNodeData>> => createQueryKey('getNode', options, true);
 
 /**
  * returns detailed information about Node
  */
-export const handleGetNodeDetailInfiniteOptions = (options: Options<HandleGetNodeDetailData>) => infiniteQueryOptions<HandleGetNodeDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetNodeDetailResponse>, QueryKey<Options<HandleGetNodeDetailData>>, string | Pick<QueryKey<Options<HandleGetNodeDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getNodeInfiniteOptions = (options: Options<GetNodeData>) => infiniteQueryOptions<GetNodeResponse, AxiosError<DefaultError>, InfiniteData<GetNodeResponse>, QueryKey<Options<GetNodeData>>, string | Pick<QueryKey<Options<GetNodeData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetNodeDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetNodeData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetNodeDetail({
+        const { data } = await getNode({
             ...options,
             ...params,
             signal,
@@ -3122,16 +3122,16 @@ export const handleGetNodeDetailInfiniteOptions = (options: Options<HandleGetNod
         });
         return data;
     },
-    queryKey: handleGetNodeDetailInfiniteQueryKey(options)
+    queryKey: getNodeInfiniteQueryKey(options)
 });
 
 /**
  * drains Node
  */
-export const handleNodeDrainMutation = (options?: Partial<Options<HandleNodeDrainData>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandleNodeDrainData>> => {
-    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandleNodeDrainData>> = {
+export const drainNodeMutation = (options?: Partial<Options<DrainNodeData>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<DrainNodeData>> => {
+    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<DrainNodeData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleNodeDrain({
+            const { data } = await drainNode({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -3142,14 +3142,14 @@ export const handleNodeDrainMutation = (options?: Partial<Options<HandleNodeDrai
     return mutationOptions;
 };
 
-export const handleGetNodeEventsQueryKey = (options: Options<HandleGetNodeEventsData>) => createQueryKey('handleGetNodeEvents', options);
+export const getNodeEventsQueryKey = (options: Options<GetNodeEventsData>) => createQueryKey('getNodeEvents', options);
 
 /**
  * returns a list of Events for Node
  */
-export const handleGetNodeEventsOptions = (options: Options<HandleGetNodeEventsData>) => queryOptions<HandleGetNodeEventsResponse, AxiosError<DefaultError>, HandleGetNodeEventsResponse, ReturnType<typeof handleGetNodeEventsQueryKey>>({
+export const getNodeEventsOptions = (options: Options<GetNodeEventsData>) => queryOptions<GetNodeEventsResponse, AxiosError<DefaultError>, GetNodeEventsResponse, ReturnType<typeof getNodeEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetNodeEvents({
+        const { data } = await getNodeEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -3157,26 +3157,26 @@ export const handleGetNodeEventsOptions = (options: Options<HandleGetNodeEventsD
         });
         return data;
     },
-    queryKey: handleGetNodeEventsQueryKey(options)
+    queryKey: getNodeEventsQueryKey(options)
 });
 
-export const handleGetNodeEventsInfiniteQueryKey = (options: Options<HandleGetNodeEventsData>): QueryKey<Options<HandleGetNodeEventsData>> => createQueryKey('handleGetNodeEvents', options, true);
+export const getNodeEventsInfiniteQueryKey = (options: Options<GetNodeEventsData>): QueryKey<Options<GetNodeEventsData>> => createQueryKey('getNodeEvents', options, true);
 
 /**
  * returns a list of Events for Node
  */
-export const handleGetNodeEventsInfiniteOptions = (options: Options<HandleGetNodeEventsData>) => infiniteQueryOptions<HandleGetNodeEventsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetNodeEventsResponse>, QueryKey<Options<HandleGetNodeEventsData>>, string | Pick<QueryKey<Options<HandleGetNodeEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getNodeEventsInfiniteOptions = (options: Options<GetNodeEventsData>) => infiniteQueryOptions<GetNodeEventsResponse, AxiosError<DefaultError>, InfiniteData<GetNodeEventsResponse>, QueryKey<Options<GetNodeEventsData>>, string | Pick<QueryKey<Options<GetNodeEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetNodeEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetNodeEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetNodeEvents({
+        const { data } = await getNodeEvents({
             ...options,
             ...params,
             signal,
@@ -3184,17 +3184,17 @@ export const handleGetNodeEventsInfiniteOptions = (options: Options<HandleGetNod
         });
         return data;
     },
-    queryKey: handleGetNodeEventsInfiniteQueryKey(options)
+    queryKey: getNodeEventsInfiniteQueryKey(options)
 });
 
-export const handleGetNodePodsQueryKey = (options: Options<HandleGetNodePodsData>) => createQueryKey('handleGetNodePods', options);
+export const getNodePodsQueryKey = (options: Options<GetNodePodsData>) => createQueryKey('getNodePods', options);
 
 /**
  * returns a list of Pods for Node
  */
-export const handleGetNodePodsOptions = (options: Options<HandleGetNodePodsData>) => queryOptions<HandleGetNodePodsResponse, AxiosError<DefaultError>, HandleGetNodePodsResponse, ReturnType<typeof handleGetNodePodsQueryKey>>({
+export const getNodePodsOptions = (options: Options<GetNodePodsData>) => queryOptions<GetNodePodsResponse, AxiosError<DefaultError>, GetNodePodsResponse, ReturnType<typeof getNodePodsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetNodePods({
+        const { data } = await getNodePods({
             ...options,
             ...queryKey[0],
             signal,
@@ -3202,26 +3202,26 @@ export const handleGetNodePodsOptions = (options: Options<HandleGetNodePodsData>
         });
         return data;
     },
-    queryKey: handleGetNodePodsQueryKey(options)
+    queryKey: getNodePodsQueryKey(options)
 });
 
-export const handleGetNodePodsInfiniteQueryKey = (options: Options<HandleGetNodePodsData>): QueryKey<Options<HandleGetNodePodsData>> => createQueryKey('handleGetNodePods', options, true);
+export const getNodePodsInfiniteQueryKey = (options: Options<GetNodePodsData>): QueryKey<Options<GetNodePodsData>> => createQueryKey('getNodePods', options, true);
 
 /**
  * returns a list of Pods for Node
  */
-export const handleGetNodePodsInfiniteOptions = (options: Options<HandleGetNodePodsData>) => infiniteQueryOptions<HandleGetNodePodsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetNodePodsResponse>, QueryKey<Options<HandleGetNodePodsData>>, string | Pick<QueryKey<Options<HandleGetNodePodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getNodePodsInfiniteOptions = (options: Options<GetNodePodsData>) => infiniteQueryOptions<GetNodePodsResponse, AxiosError<DefaultError>, InfiniteData<GetNodePodsResponse>, QueryKey<Options<GetNodePodsData>>, string | Pick<QueryKey<Options<GetNodePodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetNodePodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetNodePodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetNodePods({
+        const { data } = await getNodePods({
             ...options,
             ...params,
             signal,
@@ -3229,17 +3229,17 @@ export const handleGetNodePodsInfiniteOptions = (options: Options<HandleGetNodeP
         });
         return data;
     },
-    queryKey: handleGetNodePodsInfiniteQueryKey(options)
+    queryKey: getNodePodsInfiniteQueryKey(options)
 });
 
-export const handleGetPersistentVolumeListQueryKey = (options?: Options<HandleGetPersistentVolumeListData>) => createQueryKey('handleGetPersistentVolumeList', options);
+export const getPersistentVolumesQueryKey = (options?: Options<GetPersistentVolumesData>) => createQueryKey('getPersistentVolumes', options);
 
 /**
  * returns a list of PersistentVolumes from all namespaces
  */
-export const handleGetPersistentVolumeListOptions = (options?: Options<HandleGetPersistentVolumeListData>) => queryOptions<HandleGetPersistentVolumeListResponse, AxiosError<DefaultError>, HandleGetPersistentVolumeListResponse, ReturnType<typeof handleGetPersistentVolumeListQueryKey>>({
+export const getPersistentVolumesOptions = (options?: Options<GetPersistentVolumesData>) => queryOptions<GetPersistentVolumesResponse, AxiosError<DefaultError>, GetPersistentVolumesResponse, ReturnType<typeof getPersistentVolumesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPersistentVolumeList({
+        const { data } = await getPersistentVolumes({
             ...options,
             ...queryKey[0],
             signal,
@@ -3247,26 +3247,26 @@ export const handleGetPersistentVolumeListOptions = (options?: Options<HandleGet
         });
         return data;
     },
-    queryKey: handleGetPersistentVolumeListQueryKey(options)
+    queryKey: getPersistentVolumesQueryKey(options)
 });
 
-export const handleGetPersistentVolumeListInfiniteQueryKey = (options?: Options<HandleGetPersistentVolumeListData>): QueryKey<Options<HandleGetPersistentVolumeListData>> => createQueryKey('handleGetPersistentVolumeList', options, true);
+export const getPersistentVolumesInfiniteQueryKey = (options?: Options<GetPersistentVolumesData>): QueryKey<Options<GetPersistentVolumesData>> => createQueryKey('getPersistentVolumes', options, true);
 
 /**
  * returns a list of PersistentVolumes from all namespaces
  */
-export const handleGetPersistentVolumeListInfiniteOptions = (options?: Options<HandleGetPersistentVolumeListData>) => infiniteQueryOptions<HandleGetPersistentVolumeListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetPersistentVolumeListResponse>, QueryKey<Options<HandleGetPersistentVolumeListData>>, string | Pick<QueryKey<Options<HandleGetPersistentVolumeListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPersistentVolumesInfiniteOptions = (options?: Options<GetPersistentVolumesData>) => infiniteQueryOptions<GetPersistentVolumesResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumesResponse>, QueryKey<Options<GetPersistentVolumesData>>, string | Pick<QueryKey<Options<GetPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPersistentVolumeListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPersistentVolumeList({
+        const { data } = await getPersistentVolumes({
             ...options,
             ...params,
             signal,
@@ -3274,17 +3274,17 @@ export const handleGetPersistentVolumeListInfiniteOptions = (options?: Options<H
         });
         return data;
     },
-    queryKey: handleGetPersistentVolumeListInfiniteQueryKey(options)
+    queryKey: getPersistentVolumesInfiniteQueryKey(options)
 });
 
-export const handleGetPersistentVolumeDetailQueryKey = (options: Options<HandleGetPersistentVolumeDetailData>) => createQueryKey('handleGetPersistentVolumeDetail', options);
+export const getPersistentVolumeWithNamespaceQueryKey = (options: Options<GetPersistentVolumeWithNamespaceData>) => createQueryKey('getPersistentVolumeWithNamespace', options);
 
 /**
  * returns detailed information about PersistentVolume
  */
-export const handleGetPersistentVolumeDetailOptions = (options: Options<HandleGetPersistentVolumeDetailData>) => queryOptions<HandleGetPersistentVolumeDetailResponse, AxiosError<DefaultError>, HandleGetPersistentVolumeDetailResponse, ReturnType<typeof handleGetPersistentVolumeDetailQueryKey>>({
+export const getPersistentVolumeWithNamespaceOptions = (options: Options<GetPersistentVolumeWithNamespaceData>) => queryOptions<GetPersistentVolumeWithNamespaceResponse, AxiosError<DefaultError>, GetPersistentVolumeWithNamespaceResponse, ReturnType<typeof getPersistentVolumeWithNamespaceQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPersistentVolumeDetail({
+        const { data } = await getPersistentVolumeWithNamespace({
             ...options,
             ...queryKey[0],
             signal,
@@ -3292,26 +3292,26 @@ export const handleGetPersistentVolumeDetailOptions = (options: Options<HandleGe
         });
         return data;
     },
-    queryKey: handleGetPersistentVolumeDetailQueryKey(options)
+    queryKey: getPersistentVolumeWithNamespaceQueryKey(options)
 });
 
-export const handleGetPersistentVolumeDetailInfiniteQueryKey = (options: Options<HandleGetPersistentVolumeDetailData>): QueryKey<Options<HandleGetPersistentVolumeDetailData>> => createQueryKey('handleGetPersistentVolumeDetail', options, true);
+export const getPersistentVolumeWithNamespaceInfiniteQueryKey = (options: Options<GetPersistentVolumeWithNamespaceData>): QueryKey<Options<GetPersistentVolumeWithNamespaceData>> => createQueryKey('getPersistentVolumeWithNamespace', options, true);
 
 /**
  * returns detailed information about PersistentVolume
  */
-export const handleGetPersistentVolumeDetailInfiniteOptions = (options: Options<HandleGetPersistentVolumeDetailData>) => infiniteQueryOptions<HandleGetPersistentVolumeDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetPersistentVolumeDetailResponse>, QueryKey<Options<HandleGetPersistentVolumeDetailData>>, string | Pick<QueryKey<Options<HandleGetPersistentVolumeDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPersistentVolumeWithNamespaceInfiniteOptions = (options: Options<GetPersistentVolumeWithNamespaceData>) => infiniteQueryOptions<GetPersistentVolumeWithNamespaceResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumeWithNamespaceResponse>, QueryKey<Options<GetPersistentVolumeWithNamespaceData>>, string | Pick<QueryKey<Options<GetPersistentVolumeWithNamespaceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPersistentVolumeDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPersistentVolumeWithNamespaceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPersistentVolumeDetail({
+        const { data } = await getPersistentVolumeWithNamespace({
             ...options,
             ...params,
             signal,
@@ -3319,17 +3319,17 @@ export const handleGetPersistentVolumeDetailInfiniteOptions = (options: Options<
         });
         return data;
     },
-    queryKey: handleGetPersistentVolumeDetailInfiniteQueryKey(options)
+    queryKey: getPersistentVolumeWithNamespaceInfiniteQueryKey(options)
 });
 
-export const handleGetPersistentVolumeDetail2QueryKey = (options: Options<HandleGetPersistentVolumeDetail2Data>) => createQueryKey('handleGetPersistentVolumeDetail2', options);
+export const getPersistentVolumeQueryKey = (options: Options<GetPersistentVolumeData>) => createQueryKey('getPersistentVolume', options);
 
 /**
  * returns detailed information about PersistentVolume
  */
-export const handleGetPersistentVolumeDetail2Options = (options: Options<HandleGetPersistentVolumeDetail2Data>) => queryOptions<HandleGetPersistentVolumeDetail2Response, AxiosError<DefaultError>, HandleGetPersistentVolumeDetail2Response, ReturnType<typeof handleGetPersistentVolumeDetail2QueryKey>>({
+export const getPersistentVolumeOptions = (options: Options<GetPersistentVolumeData>) => queryOptions<GetPersistentVolumeResponse, AxiosError<DefaultError>, GetPersistentVolumeResponse, ReturnType<typeof getPersistentVolumeQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPersistentVolumeDetail2({
+        const { data } = await getPersistentVolume({
             ...options,
             ...queryKey[0],
             signal,
@@ -3337,26 +3337,26 @@ export const handleGetPersistentVolumeDetail2Options = (options: Options<HandleG
         });
         return data;
     },
-    queryKey: handleGetPersistentVolumeDetail2QueryKey(options)
+    queryKey: getPersistentVolumeQueryKey(options)
 });
 
-export const handleGetPersistentVolumeDetail2InfiniteQueryKey = (options: Options<HandleGetPersistentVolumeDetail2Data>): QueryKey<Options<HandleGetPersistentVolumeDetail2Data>> => createQueryKey('handleGetPersistentVolumeDetail2', options, true);
+export const getPersistentVolumeInfiniteQueryKey = (options: Options<GetPersistentVolumeData>): QueryKey<Options<GetPersistentVolumeData>> => createQueryKey('getPersistentVolume', options, true);
 
 /**
  * returns detailed information about PersistentVolume
  */
-export const handleGetPersistentVolumeDetail2InfiniteOptions = (options: Options<HandleGetPersistentVolumeDetail2Data>) => infiniteQueryOptions<HandleGetPersistentVolumeDetail2Response, AxiosError<DefaultError>, InfiniteData<HandleGetPersistentVolumeDetail2Response>, QueryKey<Options<HandleGetPersistentVolumeDetail2Data>>, string | Pick<QueryKey<Options<HandleGetPersistentVolumeDetail2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPersistentVolumeInfiniteOptions = (options: Options<GetPersistentVolumeData>) => infiniteQueryOptions<GetPersistentVolumeResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumeResponse>, QueryKey<Options<GetPersistentVolumeData>>, string | Pick<QueryKey<Options<GetPersistentVolumeData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPersistentVolumeDetail2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPersistentVolumeData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPersistentVolumeDetail2({
+        const { data } = await getPersistentVolume({
             ...options,
             ...params,
             signal,
@@ -3364,17 +3364,17 @@ export const handleGetPersistentVolumeDetail2InfiniteOptions = (options: Options
         });
         return data;
     },
-    queryKey: handleGetPersistentVolumeDetail2InfiniteQueryKey(options)
+    queryKey: getPersistentVolumeInfiniteQueryKey(options)
 });
 
-export const handleGetPersistentVolumeClaimListQueryKey = (options?: Options<HandleGetPersistentVolumeClaimListData>) => createQueryKey('handleGetPersistentVolumeClaimList', options);
+export const getAllPersistentVolumeClaimsQueryKey = (options?: Options<GetAllPersistentVolumeClaimsData>) => createQueryKey('getAllPersistentVolumeClaims', options);
 
 /**
  * returns a list of PersistentVolumeClaim
  */
-export const handleGetPersistentVolumeClaimListOptions = (options?: Options<HandleGetPersistentVolumeClaimListData>) => queryOptions<HandleGetPersistentVolumeClaimListResponse, AxiosError<DefaultError>, HandleGetPersistentVolumeClaimListResponse, ReturnType<typeof handleGetPersistentVolumeClaimListQueryKey>>({
+export const getAllPersistentVolumeClaimsOptions = (options?: Options<GetAllPersistentVolumeClaimsData>) => queryOptions<GetAllPersistentVolumeClaimsResponse, AxiosError<DefaultError>, GetAllPersistentVolumeClaimsResponse, ReturnType<typeof getAllPersistentVolumeClaimsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPersistentVolumeClaimList({
+        const { data } = await getAllPersistentVolumeClaims({
             ...options,
             ...queryKey[0],
             signal,
@@ -3382,26 +3382,26 @@ export const handleGetPersistentVolumeClaimListOptions = (options?: Options<Hand
         });
         return data;
     },
-    queryKey: handleGetPersistentVolumeClaimListQueryKey(options)
+    queryKey: getAllPersistentVolumeClaimsQueryKey(options)
 });
 
-export const handleGetPersistentVolumeClaimListInfiniteQueryKey = (options?: Options<HandleGetPersistentVolumeClaimListData>): QueryKey<Options<HandleGetPersistentVolumeClaimListData>> => createQueryKey('handleGetPersistentVolumeClaimList', options, true);
+export const getAllPersistentVolumeClaimsInfiniteQueryKey = (options?: Options<GetAllPersistentVolumeClaimsData>): QueryKey<Options<GetAllPersistentVolumeClaimsData>> => createQueryKey('getAllPersistentVolumeClaims', options, true);
 
 /**
  * returns a list of PersistentVolumeClaim
  */
-export const handleGetPersistentVolumeClaimListInfiniteOptions = (options?: Options<HandleGetPersistentVolumeClaimListData>) => infiniteQueryOptions<HandleGetPersistentVolumeClaimListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetPersistentVolumeClaimListResponse>, QueryKey<Options<HandleGetPersistentVolumeClaimListData>>, string | Pick<QueryKey<Options<HandleGetPersistentVolumeClaimListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllPersistentVolumeClaimsInfiniteOptions = (options?: Options<GetAllPersistentVolumeClaimsData>) => infiniteQueryOptions<GetAllPersistentVolumeClaimsResponse, AxiosError<DefaultError>, InfiniteData<GetAllPersistentVolumeClaimsResponse>, QueryKey<Options<GetAllPersistentVolumeClaimsData>>, string | Pick<QueryKey<Options<GetAllPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPersistentVolumeClaimListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPersistentVolumeClaimList({
+        const { data } = await getAllPersistentVolumeClaims({
             ...options,
             ...params,
             signal,
@@ -3409,17 +3409,17 @@ export const handleGetPersistentVolumeClaimListInfiniteOptions = (options?: Opti
         });
         return data;
     },
-    queryKey: handleGetPersistentVolumeClaimListInfiniteQueryKey(options)
+    queryKey: getAllPersistentVolumeClaimsInfiniteQueryKey(options)
 });
 
-export const handleGetPersistentVolumeClaimList2QueryKey = (options: Options<HandleGetPersistentVolumeClaimList2Data>) => createQueryKey('handleGetPersistentVolumeClaimList2', options);
+export const getPersistentVolumeClaimsQueryKey = (options: Options<GetPersistentVolumeClaimsData>) => createQueryKey('getPersistentVolumeClaims', options);
 
 /**
  * returns a list of PersistentVolumeClaim from specified namespace
  */
-export const handleGetPersistentVolumeClaimList2Options = (options: Options<HandleGetPersistentVolumeClaimList2Data>) => queryOptions<HandleGetPersistentVolumeClaimList2Response, AxiosError<DefaultError>, HandleGetPersistentVolumeClaimList2Response, ReturnType<typeof handleGetPersistentVolumeClaimList2QueryKey>>({
+export const getPersistentVolumeClaimsOptions = (options: Options<GetPersistentVolumeClaimsData>) => queryOptions<GetPersistentVolumeClaimsResponse, AxiosError<DefaultError>, GetPersistentVolumeClaimsResponse, ReturnType<typeof getPersistentVolumeClaimsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPersistentVolumeClaimList2({
+        const { data } = await getPersistentVolumeClaims({
             ...options,
             ...queryKey[0],
             signal,
@@ -3427,26 +3427,26 @@ export const handleGetPersistentVolumeClaimList2Options = (options: Options<Hand
         });
         return data;
     },
-    queryKey: handleGetPersistentVolumeClaimList2QueryKey(options)
+    queryKey: getPersistentVolumeClaimsQueryKey(options)
 });
 
-export const handleGetPersistentVolumeClaimList2InfiniteQueryKey = (options: Options<HandleGetPersistentVolumeClaimList2Data>): QueryKey<Options<HandleGetPersistentVolumeClaimList2Data>> => createQueryKey('handleGetPersistentVolumeClaimList2', options, true);
+export const getPersistentVolumeClaimsInfiniteQueryKey = (options: Options<GetPersistentVolumeClaimsData>): QueryKey<Options<GetPersistentVolumeClaimsData>> => createQueryKey('getPersistentVolumeClaims', options, true);
 
 /**
  * returns a list of PersistentVolumeClaim from specified namespace
  */
-export const handleGetPersistentVolumeClaimList2InfiniteOptions = (options: Options<HandleGetPersistentVolumeClaimList2Data>) => infiniteQueryOptions<HandleGetPersistentVolumeClaimList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetPersistentVolumeClaimList2Response>, QueryKey<Options<HandleGetPersistentVolumeClaimList2Data>>, string | Pick<QueryKey<Options<HandleGetPersistentVolumeClaimList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPersistentVolumeClaimsInfiniteOptions = (options: Options<GetPersistentVolumeClaimsData>) => infiniteQueryOptions<GetPersistentVolumeClaimsResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumeClaimsResponse>, QueryKey<Options<GetPersistentVolumeClaimsData>>, string | Pick<QueryKey<Options<GetPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPersistentVolumeClaimList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPersistentVolumeClaimList2({
+        const { data } = await getPersistentVolumeClaims({
             ...options,
             ...params,
             signal,
@@ -3454,17 +3454,17 @@ export const handleGetPersistentVolumeClaimList2InfiniteOptions = (options: Opti
         });
         return data;
     },
-    queryKey: handleGetPersistentVolumeClaimList2InfiniteQueryKey(options)
+    queryKey: getPersistentVolumeClaimsInfiniteQueryKey(options)
 });
 
-export const handleGetPersistentVolumeClaimDetailQueryKey = (options: Options<HandleGetPersistentVolumeClaimDetailData>) => createQueryKey('handleGetPersistentVolumeClaimDetail', options);
+export const getPersistentVolumeClaimQueryKey = (options: Options<GetPersistentVolumeClaimData>) => createQueryKey('getPersistentVolumeClaim', options);
 
 /**
  * returns detailed information about PersistentVolumeClaim
  */
-export const handleGetPersistentVolumeClaimDetailOptions = (options: Options<HandleGetPersistentVolumeClaimDetailData>) => queryOptions<HandleGetPersistentVolumeClaimDetailResponse, AxiosError<DefaultError>, HandleGetPersistentVolumeClaimDetailResponse, ReturnType<typeof handleGetPersistentVolumeClaimDetailQueryKey>>({
+export const getPersistentVolumeClaimOptions = (options: Options<GetPersistentVolumeClaimData>) => queryOptions<GetPersistentVolumeClaimResponse, AxiosError<DefaultError>, GetPersistentVolumeClaimResponse, ReturnType<typeof getPersistentVolumeClaimQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPersistentVolumeClaimDetail({
+        const { data } = await getPersistentVolumeClaim({
             ...options,
             ...queryKey[0],
             signal,
@@ -3472,26 +3472,26 @@ export const handleGetPersistentVolumeClaimDetailOptions = (options: Options<Han
         });
         return data;
     },
-    queryKey: handleGetPersistentVolumeClaimDetailQueryKey(options)
+    queryKey: getPersistentVolumeClaimQueryKey(options)
 });
 
-export const handleGetPersistentVolumeClaimDetailInfiniteQueryKey = (options: Options<HandleGetPersistentVolumeClaimDetailData>): QueryKey<Options<HandleGetPersistentVolumeClaimDetailData>> => createQueryKey('handleGetPersistentVolumeClaimDetail', options, true);
+export const getPersistentVolumeClaimInfiniteQueryKey = (options: Options<GetPersistentVolumeClaimData>): QueryKey<Options<GetPersistentVolumeClaimData>> => createQueryKey('getPersistentVolumeClaim', options, true);
 
 /**
  * returns detailed information about PersistentVolumeClaim
  */
-export const handleGetPersistentVolumeClaimDetailInfiniteOptions = (options: Options<HandleGetPersistentVolumeClaimDetailData>) => infiniteQueryOptions<HandleGetPersistentVolumeClaimDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetPersistentVolumeClaimDetailResponse>, QueryKey<Options<HandleGetPersistentVolumeClaimDetailData>>, string | Pick<QueryKey<Options<HandleGetPersistentVolumeClaimDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPersistentVolumeClaimInfiniteOptions = (options: Options<GetPersistentVolumeClaimData>) => infiniteQueryOptions<GetPersistentVolumeClaimResponse, AxiosError<DefaultError>, InfiniteData<GetPersistentVolumeClaimResponse>, QueryKey<Options<GetPersistentVolumeClaimData>>, string | Pick<QueryKey<Options<GetPersistentVolumeClaimData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPersistentVolumeClaimDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPersistentVolumeClaimData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPersistentVolumeClaimDetail({
+        const { data } = await getPersistentVolumeClaim({
             ...options,
             ...params,
             signal,
@@ -3499,17 +3499,17 @@ export const handleGetPersistentVolumeClaimDetailInfiniteOptions = (options: Opt
         });
         return data;
     },
-    queryKey: handleGetPersistentVolumeClaimDetailInfiniteQueryKey(options)
+    queryKey: getPersistentVolumeClaimInfiniteQueryKey(options)
 });
 
-export const handleGetPodsQueryKey = (options?: Options<HandleGetPodsData>) => createQueryKey('handleGetPods', options);
+export const getAllPodsQueryKey = (options?: Options<GetAllPodsData>) => createQueryKey('getAllPods', options);
 
 /**
  * returns a list of Pods from all namespaces
  */
-export const handleGetPodsOptions = (options?: Options<HandleGetPodsData>) => queryOptions<HandleGetPodsResponse, AxiosError<DefaultError>, HandleGetPodsResponse, ReturnType<typeof handleGetPodsQueryKey>>({
+export const getAllPodsOptions = (options?: Options<GetAllPodsData>) => queryOptions<GetAllPodsResponse, AxiosError<DefaultError>, GetAllPodsResponse, ReturnType<typeof getAllPodsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPods({
+        const { data } = await getAllPods({
             ...options,
             ...queryKey[0],
             signal,
@@ -3517,26 +3517,26 @@ export const handleGetPodsOptions = (options?: Options<HandleGetPodsData>) => qu
         });
         return data;
     },
-    queryKey: handleGetPodsQueryKey(options)
+    queryKey: getAllPodsQueryKey(options)
 });
 
-export const handleGetPodsInfiniteQueryKey = (options?: Options<HandleGetPodsData>): QueryKey<Options<HandleGetPodsData>> => createQueryKey('handleGetPods', options, true);
+export const getAllPodsInfiniteQueryKey = (options?: Options<GetAllPodsData>): QueryKey<Options<GetAllPodsData>> => createQueryKey('getAllPods', options, true);
 
 /**
  * returns a list of Pods from all namespaces
  */
-export const handleGetPodsInfiniteOptions = (options?: Options<HandleGetPodsData>) => infiniteQueryOptions<HandleGetPodsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetPodsResponse>, QueryKey<Options<HandleGetPodsData>>, string | Pick<QueryKey<Options<HandleGetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllPodsInfiniteOptions = (options?: Options<GetAllPodsData>) => infiniteQueryOptions<GetAllPodsResponse, AxiosError<DefaultError>, InfiniteData<GetAllPodsResponse>, QueryKey<Options<GetAllPodsData>>, string | Pick<QueryKey<Options<GetAllPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPods({
+        const { data } = await getAllPods({
             ...options,
             ...params,
             signal,
@@ -3544,17 +3544,17 @@ export const handleGetPodsInfiniteOptions = (options?: Options<HandleGetPodsData
         });
         return data;
     },
-    queryKey: handleGetPodsInfiniteQueryKey(options)
+    queryKey: getAllPodsInfiniteQueryKey(options)
 });
 
-export const handleGetPods2QueryKey = (options: Options<HandleGetPods2Data>) => createQueryKey('handleGetPods2', options);
+export const getPodsQueryKey = (options: Options<GetPodsData>) => createQueryKey('getPods', options);
 
 /**
  * returns a list of Pods in a namespaces
  */
-export const handleGetPods2Options = (options: Options<HandleGetPods2Data>) => queryOptions<HandleGetPods2Response, AxiosError<DefaultError>, HandleGetPods2Response, ReturnType<typeof handleGetPods2QueryKey>>({
+export const getPodsOptions = (options: Options<GetPodsData>) => queryOptions<GetPodsResponse, AxiosError<DefaultError>, GetPodsResponse, ReturnType<typeof getPodsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPods2({
+        const { data } = await getPods({
             ...options,
             ...queryKey[0],
             signal,
@@ -3562,26 +3562,26 @@ export const handleGetPods2Options = (options: Options<HandleGetPods2Data>) => q
         });
         return data;
     },
-    queryKey: handleGetPods2QueryKey(options)
+    queryKey: getPodsQueryKey(options)
 });
 
-export const handleGetPods2InfiniteQueryKey = (options: Options<HandleGetPods2Data>): QueryKey<Options<HandleGetPods2Data>> => createQueryKey('handleGetPods2', options, true);
+export const getPodsInfiniteQueryKey = (options: Options<GetPodsData>): QueryKey<Options<GetPodsData>> => createQueryKey('getPods', options, true);
 
 /**
  * returns a list of Pods in a namespaces
  */
-export const handleGetPods2InfiniteOptions = (options: Options<HandleGetPods2Data>) => infiniteQueryOptions<HandleGetPods2Response, AxiosError<DefaultError>, InfiniteData<HandleGetPods2Response>, QueryKey<Options<HandleGetPods2Data>>, string | Pick<QueryKey<Options<HandleGetPods2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPodsInfiniteOptions = (options: Options<GetPodsData>) => infiniteQueryOptions<GetPodsResponse, AxiosError<DefaultError>, InfiniteData<GetPodsResponse>, QueryKey<Options<GetPodsData>>, string | Pick<QueryKey<Options<GetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPods2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPods2({
+        const { data } = await getPods({
             ...options,
             ...params,
             signal,
@@ -3589,17 +3589,17 @@ export const handleGetPods2InfiniteOptions = (options: Options<HandleGetPods2Dat
         });
         return data;
     },
-    queryKey: handleGetPods2InfiniteQueryKey(options)
+    queryKey: getPodsInfiniteQueryKey(options)
 });
 
-export const handleGetPodDetailQueryKey = (options: Options<HandleGetPodDetailData>) => createQueryKey('handleGetPodDetail', options);
+export const getPodQueryKey = (options: Options<GetPodData>) => createQueryKey('getPod', options);
 
 /**
  * returns detailed information about Pod
  */
-export const handleGetPodDetailOptions = (options: Options<HandleGetPodDetailData>) => queryOptions<HandleGetPodDetailResponse, AxiosError<DefaultError>, HandleGetPodDetailResponse, ReturnType<typeof handleGetPodDetailQueryKey>>({
+export const getPodOptions = (options: Options<GetPodData>) => queryOptions<GetPodResponse, AxiosError<DefaultError>, GetPodResponse, ReturnType<typeof getPodQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPodDetail({
+        const { data } = await getPod({
             ...options,
             ...queryKey[0],
             signal,
@@ -3607,26 +3607,26 @@ export const handleGetPodDetailOptions = (options: Options<HandleGetPodDetailDat
         });
         return data;
     },
-    queryKey: handleGetPodDetailQueryKey(options)
+    queryKey: getPodQueryKey(options)
 });
 
-export const handleGetPodDetailInfiniteQueryKey = (options: Options<HandleGetPodDetailData>): QueryKey<Options<HandleGetPodDetailData>> => createQueryKey('handleGetPodDetail', options, true);
+export const getPodInfiniteQueryKey = (options: Options<GetPodData>): QueryKey<Options<GetPodData>> => createQueryKey('getPod', options, true);
 
 /**
  * returns detailed information about Pod
  */
-export const handleGetPodDetailInfiniteOptions = (options: Options<HandleGetPodDetailData>) => infiniteQueryOptions<HandleGetPodDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetPodDetailResponse>, QueryKey<Options<HandleGetPodDetailData>>, string | Pick<QueryKey<Options<HandleGetPodDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPodInfiniteOptions = (options: Options<GetPodData>) => infiniteQueryOptions<GetPodResponse, AxiosError<DefaultError>, InfiniteData<GetPodResponse>, QueryKey<Options<GetPodData>>, string | Pick<QueryKey<Options<GetPodData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPodDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPodData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPodDetail({
+        const { data } = await getPod({
             ...options,
             ...params,
             signal,
@@ -3634,17 +3634,17 @@ export const handleGetPodDetailInfiniteOptions = (options: Options<HandleGetPodD
         });
         return data;
     },
-    queryKey: handleGetPodDetailInfiniteQueryKey(options)
+    queryKey: getPodInfiniteQueryKey(options)
 });
 
-export const handleGetPodContainersQueryKey = (options: Options<HandleGetPodContainersData>) => createQueryKey('handleGetPodContainers', options);
+export const getPodContainersQueryKey = (options: Options<GetPodContainersData>) => createQueryKey('getPodContainers', options);
 
 /**
  * returns a list of containers for Pod
  */
-export const handleGetPodContainersOptions = (options: Options<HandleGetPodContainersData>) => queryOptions<HandleGetPodContainersResponse, AxiosError<DefaultError>, HandleGetPodContainersResponse, ReturnType<typeof handleGetPodContainersQueryKey>>({
+export const getPodContainersOptions = (options: Options<GetPodContainersData>) => queryOptions<GetPodContainersResponse, AxiosError<DefaultError>, GetPodContainersResponse, ReturnType<typeof getPodContainersQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPodContainers({
+        const { data } = await getPodContainers({
             ...options,
             ...queryKey[0],
             signal,
@@ -3652,26 +3652,26 @@ export const handleGetPodContainersOptions = (options: Options<HandleGetPodConta
         });
         return data;
     },
-    queryKey: handleGetPodContainersQueryKey(options)
+    queryKey: getPodContainersQueryKey(options)
 });
 
-export const handleGetPodContainersInfiniteQueryKey = (options: Options<HandleGetPodContainersData>): QueryKey<Options<HandleGetPodContainersData>> => createQueryKey('handleGetPodContainers', options, true);
+export const getPodContainersInfiniteQueryKey = (options: Options<GetPodContainersData>): QueryKey<Options<GetPodContainersData>> => createQueryKey('getPodContainers', options, true);
 
 /**
  * returns a list of containers for Pod
  */
-export const handleGetPodContainersInfiniteOptions = (options: Options<HandleGetPodContainersData>) => infiniteQueryOptions<HandleGetPodContainersResponse, AxiosError<DefaultError>, InfiniteData<HandleGetPodContainersResponse>, QueryKey<Options<HandleGetPodContainersData>>, string | Pick<QueryKey<Options<HandleGetPodContainersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPodContainersInfiniteOptions = (options: Options<GetPodContainersData>) => infiniteQueryOptions<GetPodContainersResponse, AxiosError<DefaultError>, InfiniteData<GetPodContainersResponse>, QueryKey<Options<GetPodContainersData>>, string | Pick<QueryKey<Options<GetPodContainersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPodContainersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPodContainersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPodContainers({
+        const { data } = await getPodContainers({
             ...options,
             ...params,
             signal,
@@ -3679,17 +3679,17 @@ export const handleGetPodContainersInfiniteOptions = (options: Options<HandleGet
         });
         return data;
     },
-    queryKey: handleGetPodContainersInfiniteQueryKey(options)
+    queryKey: getPodContainersInfiniteQueryKey(options)
 });
 
-export const handleGetPodEventsQueryKey = (options: Options<HandleGetPodEventsData>) => createQueryKey('handleGetPodEvents', options);
+export const getPodEventsQueryKey = (options: Options<GetPodEventsData>) => createQueryKey('getPodEvents', options);
 
 /**
  * returns a list of Events for Pod
  */
-export const handleGetPodEventsOptions = (options: Options<HandleGetPodEventsData>) => queryOptions<HandleGetPodEventsResponse, AxiosError<DefaultError>, HandleGetPodEventsResponse, ReturnType<typeof handleGetPodEventsQueryKey>>({
+export const getPodEventsOptions = (options: Options<GetPodEventsData>) => queryOptions<GetPodEventsResponse, AxiosError<DefaultError>, GetPodEventsResponse, ReturnType<typeof getPodEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPodEvents({
+        const { data } = await getPodEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -3697,26 +3697,26 @@ export const handleGetPodEventsOptions = (options: Options<HandleGetPodEventsDat
         });
         return data;
     },
-    queryKey: handleGetPodEventsQueryKey(options)
+    queryKey: getPodEventsQueryKey(options)
 });
 
-export const handleGetPodEventsInfiniteQueryKey = (options: Options<HandleGetPodEventsData>): QueryKey<Options<HandleGetPodEventsData>> => createQueryKey('handleGetPodEvents', options, true);
+export const getPodEventsInfiniteQueryKey = (options: Options<GetPodEventsData>): QueryKey<Options<GetPodEventsData>> => createQueryKey('getPodEvents', options, true);
 
 /**
  * returns a list of Events for Pod
  */
-export const handleGetPodEventsInfiniteOptions = (options: Options<HandleGetPodEventsData>) => infiniteQueryOptions<HandleGetPodEventsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetPodEventsResponse>, QueryKey<Options<HandleGetPodEventsData>>, string | Pick<QueryKey<Options<HandleGetPodEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPodEventsInfiniteOptions = (options: Options<GetPodEventsData>) => infiniteQueryOptions<GetPodEventsResponse, AxiosError<DefaultError>, InfiniteData<GetPodEventsResponse>, QueryKey<Options<GetPodEventsData>>, string | Pick<QueryKey<Options<GetPodEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPodEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPodEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPodEvents({
+        const { data } = await getPodEvents({
             ...options,
             ...params,
             signal,
@@ -3724,17 +3724,17 @@ export const handleGetPodEventsInfiniteOptions = (options: Options<HandleGetPodE
         });
         return data;
     },
-    queryKey: handleGetPodEventsInfiniteQueryKey(options)
+    queryKey: getPodEventsInfiniteQueryKey(options)
 });
 
-export const handleGetPodPersistentVolumeClaimsQueryKey = (options: Options<HandleGetPodPersistentVolumeClaimsData>) => createQueryKey('handleGetPodPersistentVolumeClaims', options);
+export const getPodPersistentVolumeClaimsQueryKey = (options: Options<GetPodPersistentVolumeClaimsData>) => createQueryKey('getPodPersistentVolumeClaims', options);
 
 /**
  * returns a list of containers for Pod
  */
-export const handleGetPodPersistentVolumeClaimsOptions = (options: Options<HandleGetPodPersistentVolumeClaimsData>) => queryOptions<HandleGetPodPersistentVolumeClaimsResponse, AxiosError<DefaultError>, HandleGetPodPersistentVolumeClaimsResponse, ReturnType<typeof handleGetPodPersistentVolumeClaimsQueryKey>>({
+export const getPodPersistentVolumeClaimsOptions = (options: Options<GetPodPersistentVolumeClaimsData>) => queryOptions<GetPodPersistentVolumeClaimsResponse, AxiosError<DefaultError>, GetPodPersistentVolumeClaimsResponse, ReturnType<typeof getPodPersistentVolumeClaimsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPodPersistentVolumeClaims({
+        const { data } = await getPodPersistentVolumeClaims({
             ...options,
             ...queryKey[0],
             signal,
@@ -3742,26 +3742,26 @@ export const handleGetPodPersistentVolumeClaimsOptions = (options: Options<Handl
         });
         return data;
     },
-    queryKey: handleGetPodPersistentVolumeClaimsQueryKey(options)
+    queryKey: getPodPersistentVolumeClaimsQueryKey(options)
 });
 
-export const handleGetPodPersistentVolumeClaimsInfiniteQueryKey = (options: Options<HandleGetPodPersistentVolumeClaimsData>): QueryKey<Options<HandleGetPodPersistentVolumeClaimsData>> => createQueryKey('handleGetPodPersistentVolumeClaims', options, true);
+export const getPodPersistentVolumeClaimsInfiniteQueryKey = (options: Options<GetPodPersistentVolumeClaimsData>): QueryKey<Options<GetPodPersistentVolumeClaimsData>> => createQueryKey('getPodPersistentVolumeClaims', options, true);
 
 /**
  * returns a list of containers for Pod
  */
-export const handleGetPodPersistentVolumeClaimsInfiniteOptions = (options: Options<HandleGetPodPersistentVolumeClaimsData>) => infiniteQueryOptions<HandleGetPodPersistentVolumeClaimsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetPodPersistentVolumeClaimsResponse>, QueryKey<Options<HandleGetPodPersistentVolumeClaimsData>>, string | Pick<QueryKey<Options<HandleGetPodPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPodPersistentVolumeClaimsInfiniteOptions = (options: Options<GetPodPersistentVolumeClaimsData>) => infiniteQueryOptions<GetPodPersistentVolumeClaimsResponse, AxiosError<DefaultError>, InfiniteData<GetPodPersistentVolumeClaimsResponse>, QueryKey<Options<GetPodPersistentVolumeClaimsData>>, string | Pick<QueryKey<Options<GetPodPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPodPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPodPersistentVolumeClaimsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPodPersistentVolumeClaims({
+        const { data } = await getPodPersistentVolumeClaims({
             ...options,
             ...params,
             signal,
@@ -3769,17 +3769,17 @@ export const handleGetPodPersistentVolumeClaimsInfiniteOptions = (options: Optio
         });
         return data;
     },
-    queryKey: handleGetPodPersistentVolumeClaimsInfiniteQueryKey(options)
+    queryKey: getPodPersistentVolumeClaimsInfiniteQueryKey(options)
 });
 
-export const handleExecShellQueryKey = (options: Options<HandleExecShellData>) => createQueryKey('handleExecShell', options);
+export const execShellQueryKey = (options: Options<ExecShellData>) => createQueryKey('execShell', options);
 
 /**
  * handles exec into pod
  */
-export const handleExecShellOptions = (options: Options<HandleExecShellData>) => queryOptions<HandleExecShellResponse, AxiosError<DefaultError>, HandleExecShellResponse, ReturnType<typeof handleExecShellQueryKey>>({
+export const execShellOptions = (options: Options<ExecShellData>) => queryOptions<ExecShellResponse, AxiosError<DefaultError>, ExecShellResponse, ReturnType<typeof execShellQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleExecShell({
+        const { data } = await execShell({
             ...options,
             ...queryKey[0],
             signal,
@@ -3787,26 +3787,26 @@ export const handleExecShellOptions = (options: Options<HandleExecShellData>) =>
         });
         return data;
     },
-    queryKey: handleExecShellQueryKey(options)
+    queryKey: execShellQueryKey(options)
 });
 
-export const handleExecShellInfiniteQueryKey = (options: Options<HandleExecShellData>): QueryKey<Options<HandleExecShellData>> => createQueryKey('handleExecShell', options, true);
+export const execShellInfiniteQueryKey = (options: Options<ExecShellData>): QueryKey<Options<ExecShellData>> => createQueryKey('execShell', options, true);
 
 /**
  * handles exec into pod
  */
-export const handleExecShellInfiniteOptions = (options: Options<HandleExecShellData>) => infiniteQueryOptions<HandleExecShellResponse, AxiosError<DefaultError>, InfiniteData<HandleExecShellResponse>, QueryKey<Options<HandleExecShellData>>, string | Pick<QueryKey<Options<HandleExecShellData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const execShellInfiniteOptions = (options: Options<ExecShellData>) => infiniteQueryOptions<ExecShellResponse, AxiosError<DefaultError>, InfiniteData<ExecShellResponse>, QueryKey<Options<ExecShellData>>, string | Pick<QueryKey<Options<ExecShellData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleExecShellData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<ExecShellData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleExecShell({
+        const { data } = await execShell({
             ...options,
             ...params,
             signal,
@@ -3814,17 +3814,17 @@ export const handleExecShellInfiniteOptions = (options: Options<HandleExecShellD
         });
         return data;
     },
-    queryKey: handleExecShellInfiniteQueryKey(options)
+    queryKey: execShellInfiniteQueryKey(options)
 });
 
-export const handleGetPodDisruptionBudgetListQueryKey = (options?: Options<HandleGetPodDisruptionBudgetListData>) => createQueryKey('handleGetPodDisruptionBudgetList', options);
+export const getAllPodDisruptionBudgetsQueryKey = (options?: Options<GetAllPodDisruptionBudgetsData>) => createQueryKey('getAllPodDisruptionBudgets', options);
 
 /**
  * returns a list of PodDisruptionBudget
  */
-export const handleGetPodDisruptionBudgetListOptions = (options?: Options<HandleGetPodDisruptionBudgetListData>) => queryOptions<HandleGetPodDisruptionBudgetListResponse, AxiosError<DefaultError>, HandleGetPodDisruptionBudgetListResponse, ReturnType<typeof handleGetPodDisruptionBudgetListQueryKey>>({
+export const getAllPodDisruptionBudgetsOptions = (options?: Options<GetAllPodDisruptionBudgetsData>) => queryOptions<GetAllPodDisruptionBudgetsResponse, AxiosError<DefaultError>, GetAllPodDisruptionBudgetsResponse, ReturnType<typeof getAllPodDisruptionBudgetsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPodDisruptionBudgetList({
+        const { data } = await getAllPodDisruptionBudgets({
             ...options,
             ...queryKey[0],
             signal,
@@ -3832,26 +3832,26 @@ export const handleGetPodDisruptionBudgetListOptions = (options?: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetPodDisruptionBudgetListQueryKey(options)
+    queryKey: getAllPodDisruptionBudgetsQueryKey(options)
 });
 
-export const handleGetPodDisruptionBudgetListInfiniteQueryKey = (options?: Options<HandleGetPodDisruptionBudgetListData>): QueryKey<Options<HandleGetPodDisruptionBudgetListData>> => createQueryKey('handleGetPodDisruptionBudgetList', options, true);
+export const getAllPodDisruptionBudgetsInfiniteQueryKey = (options?: Options<GetAllPodDisruptionBudgetsData>): QueryKey<Options<GetAllPodDisruptionBudgetsData>> => createQueryKey('getAllPodDisruptionBudgets', options, true);
 
 /**
  * returns a list of PodDisruptionBudget
  */
-export const handleGetPodDisruptionBudgetListInfiniteOptions = (options?: Options<HandleGetPodDisruptionBudgetListData>) => infiniteQueryOptions<HandleGetPodDisruptionBudgetListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetPodDisruptionBudgetListResponse>, QueryKey<Options<HandleGetPodDisruptionBudgetListData>>, string | Pick<QueryKey<Options<HandleGetPodDisruptionBudgetListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllPodDisruptionBudgetsInfiniteOptions = (options?: Options<GetAllPodDisruptionBudgetsData>) => infiniteQueryOptions<GetAllPodDisruptionBudgetsResponse, AxiosError<DefaultError>, InfiniteData<GetAllPodDisruptionBudgetsResponse>, QueryKey<Options<GetAllPodDisruptionBudgetsData>>, string | Pick<QueryKey<Options<GetAllPodDisruptionBudgetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPodDisruptionBudgetListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllPodDisruptionBudgetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPodDisruptionBudgetList({
+        const { data } = await getAllPodDisruptionBudgets({
             ...options,
             ...params,
             signal,
@@ -3859,17 +3859,17 @@ export const handleGetPodDisruptionBudgetListInfiniteOptions = (options?: Option
         });
         return data;
     },
-    queryKey: handleGetPodDisruptionBudgetListInfiniteQueryKey(options)
+    queryKey: getAllPodDisruptionBudgetsInfiniteQueryKey(options)
 });
 
-export const handleGetPodDisruptionBudgetList2QueryKey = (options: Options<HandleGetPodDisruptionBudgetList2Data>) => createQueryKey('handleGetPodDisruptionBudgetList2', options);
+export const getPodDisruptionBudgetsQueryKey = (options: Options<GetPodDisruptionBudgetsData>) => createQueryKey('getPodDisruptionBudgets', options);
 
 /**
  * returns a list of PodDisruptionBudget from specified namespace
  */
-export const handleGetPodDisruptionBudgetList2Options = (options: Options<HandleGetPodDisruptionBudgetList2Data>) => queryOptions<HandleGetPodDisruptionBudgetList2Response, AxiosError<DefaultError>, HandleGetPodDisruptionBudgetList2Response, ReturnType<typeof handleGetPodDisruptionBudgetList2QueryKey>>({
+export const getPodDisruptionBudgetsOptions = (options: Options<GetPodDisruptionBudgetsData>) => queryOptions<GetPodDisruptionBudgetsResponse, AxiosError<DefaultError>, GetPodDisruptionBudgetsResponse, ReturnType<typeof getPodDisruptionBudgetsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPodDisruptionBudgetList2({
+        const { data } = await getPodDisruptionBudgets({
             ...options,
             ...queryKey[0],
             signal,
@@ -3877,26 +3877,26 @@ export const handleGetPodDisruptionBudgetList2Options = (options: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetPodDisruptionBudgetList2QueryKey(options)
+    queryKey: getPodDisruptionBudgetsQueryKey(options)
 });
 
-export const handleGetPodDisruptionBudgetList2InfiniteQueryKey = (options: Options<HandleGetPodDisruptionBudgetList2Data>): QueryKey<Options<HandleGetPodDisruptionBudgetList2Data>> => createQueryKey('handleGetPodDisruptionBudgetList2', options, true);
+export const getPodDisruptionBudgetsInfiniteQueryKey = (options: Options<GetPodDisruptionBudgetsData>): QueryKey<Options<GetPodDisruptionBudgetsData>> => createQueryKey('getPodDisruptionBudgets', options, true);
 
 /**
  * returns a list of PodDisruptionBudget from specified namespace
  */
-export const handleGetPodDisruptionBudgetList2InfiniteOptions = (options: Options<HandleGetPodDisruptionBudgetList2Data>) => infiniteQueryOptions<HandleGetPodDisruptionBudgetList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetPodDisruptionBudgetList2Response>, QueryKey<Options<HandleGetPodDisruptionBudgetList2Data>>, string | Pick<QueryKey<Options<HandleGetPodDisruptionBudgetList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPodDisruptionBudgetsInfiniteOptions = (options: Options<GetPodDisruptionBudgetsData>) => infiniteQueryOptions<GetPodDisruptionBudgetsResponse, AxiosError<DefaultError>, InfiniteData<GetPodDisruptionBudgetsResponse>, QueryKey<Options<GetPodDisruptionBudgetsData>>, string | Pick<QueryKey<Options<GetPodDisruptionBudgetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPodDisruptionBudgetList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPodDisruptionBudgetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPodDisruptionBudgetList2({
+        const { data } = await getPodDisruptionBudgets({
             ...options,
             ...params,
             signal,
@@ -3904,17 +3904,17 @@ export const handleGetPodDisruptionBudgetList2InfiniteOptions = (options: Option
         });
         return data;
     },
-    queryKey: handleGetPodDisruptionBudgetList2InfiniteQueryKey(options)
+    queryKey: getPodDisruptionBudgetsInfiniteQueryKey(options)
 });
 
-export const handleGetPodDisruptionBudgetDetailQueryKey = (options: Options<HandleGetPodDisruptionBudgetDetailData>) => createQueryKey('handleGetPodDisruptionBudgetDetail', options);
+export const getPodDisruptionBudgetQueryKey = (options: Options<GetPodDisruptionBudgetData>) => createQueryKey('getPodDisruptionBudget', options);
 
 /**
  * returns detailed information about PodDisruptionBudget
  */
-export const handleGetPodDisruptionBudgetDetailOptions = (options: Options<HandleGetPodDisruptionBudgetDetailData>) => queryOptions<HandleGetPodDisruptionBudgetDetailResponse, AxiosError<DefaultError>, HandleGetPodDisruptionBudgetDetailResponse, ReturnType<typeof handleGetPodDisruptionBudgetDetailQueryKey>>({
+export const getPodDisruptionBudgetOptions = (options: Options<GetPodDisruptionBudgetData>) => queryOptions<GetPodDisruptionBudgetResponse, AxiosError<DefaultError>, GetPodDisruptionBudgetResponse, ReturnType<typeof getPodDisruptionBudgetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetPodDisruptionBudgetDetail({
+        const { data } = await getPodDisruptionBudget({
             ...options,
             ...queryKey[0],
             signal,
@@ -3922,26 +3922,26 @@ export const handleGetPodDisruptionBudgetDetailOptions = (options: Options<Handl
         });
         return data;
     },
-    queryKey: handleGetPodDisruptionBudgetDetailQueryKey(options)
+    queryKey: getPodDisruptionBudgetQueryKey(options)
 });
 
-export const handleGetPodDisruptionBudgetDetailInfiniteQueryKey = (options: Options<HandleGetPodDisruptionBudgetDetailData>): QueryKey<Options<HandleGetPodDisruptionBudgetDetailData>> => createQueryKey('handleGetPodDisruptionBudgetDetail', options, true);
+export const getPodDisruptionBudgetInfiniteQueryKey = (options: Options<GetPodDisruptionBudgetData>): QueryKey<Options<GetPodDisruptionBudgetData>> => createQueryKey('getPodDisruptionBudget', options, true);
 
 /**
  * returns detailed information about PodDisruptionBudget
  */
-export const handleGetPodDisruptionBudgetDetailInfiniteOptions = (options: Options<HandleGetPodDisruptionBudgetDetailData>) => infiniteQueryOptions<HandleGetPodDisruptionBudgetDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetPodDisruptionBudgetDetailResponse>, QueryKey<Options<HandleGetPodDisruptionBudgetDetailData>>, string | Pick<QueryKey<Options<HandleGetPodDisruptionBudgetDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getPodDisruptionBudgetInfiniteOptions = (options: Options<GetPodDisruptionBudgetData>) => infiniteQueryOptions<GetPodDisruptionBudgetResponse, AxiosError<DefaultError>, InfiniteData<GetPodDisruptionBudgetResponse>, QueryKey<Options<GetPodDisruptionBudgetData>>, string | Pick<QueryKey<Options<GetPodDisruptionBudgetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetPodDisruptionBudgetDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetPodDisruptionBudgetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetPodDisruptionBudgetDetail({
+        const { data } = await getPodDisruptionBudget({
             ...options,
             ...params,
             signal,
@@ -3949,17 +3949,17 @@ export const handleGetPodDisruptionBudgetDetailInfiniteOptions = (options: Optio
         });
         return data;
     },
-    queryKey: handleGetPodDisruptionBudgetDetailInfiniteQueryKey(options)
+    queryKey: getPodDisruptionBudgetInfiniteQueryKey(options)
 });
 
-export const handleGetReplicaSetsQueryKey = (options?: Options<HandleGetReplicaSetsData>) => createQueryKey('handleGetReplicaSets', options);
+export const getAllReplicaSetsQueryKey = (options?: Options<GetAllReplicaSetsData>) => createQueryKey('getAllReplicaSets', options);
 
 /**
  * returns a list of ReplicaSets from all namespaces
  */
-export const handleGetReplicaSetsOptions = (options?: Options<HandleGetReplicaSetsData>) => queryOptions<HandleGetReplicaSetsResponse, AxiosError<DefaultError>, HandleGetReplicaSetsResponse, ReturnType<typeof handleGetReplicaSetsQueryKey>>({
+export const getAllReplicaSetsOptions = (options?: Options<GetAllReplicaSetsData>) => queryOptions<GetAllReplicaSetsResponse, AxiosError<DefaultError>, GetAllReplicaSetsResponse, ReturnType<typeof getAllReplicaSetsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicaSets({
+        const { data } = await getAllReplicaSets({
             ...options,
             ...queryKey[0],
             signal,
@@ -3967,26 +3967,26 @@ export const handleGetReplicaSetsOptions = (options?: Options<HandleGetReplicaSe
         });
         return data;
     },
-    queryKey: handleGetReplicaSetsQueryKey(options)
+    queryKey: getAllReplicaSetsQueryKey(options)
 });
 
-export const handleGetReplicaSetsInfiniteQueryKey = (options?: Options<HandleGetReplicaSetsData>): QueryKey<Options<HandleGetReplicaSetsData>> => createQueryKey('handleGetReplicaSets', options, true);
+export const getAllReplicaSetsInfiniteQueryKey = (options?: Options<GetAllReplicaSetsData>): QueryKey<Options<GetAllReplicaSetsData>> => createQueryKey('getAllReplicaSets', options, true);
 
 /**
  * returns a list of ReplicaSets from all namespaces
  */
-export const handleGetReplicaSetsInfiniteOptions = (options?: Options<HandleGetReplicaSetsData>) => infiniteQueryOptions<HandleGetReplicaSetsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetReplicaSetsResponse>, QueryKey<Options<HandleGetReplicaSetsData>>, string | Pick<QueryKey<Options<HandleGetReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllReplicaSetsInfiniteOptions = (options?: Options<GetAllReplicaSetsData>) => infiniteQueryOptions<GetAllReplicaSetsResponse, AxiosError<DefaultError>, InfiniteData<GetAllReplicaSetsResponse>, QueryKey<Options<GetAllReplicaSetsData>>, string | Pick<QueryKey<Options<GetAllReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicaSets({
+        const { data } = await getAllReplicaSets({
             ...options,
             ...params,
             signal,
@@ -3994,17 +3994,17 @@ export const handleGetReplicaSetsInfiniteOptions = (options?: Options<HandleGetR
         });
         return data;
     },
-    queryKey: handleGetReplicaSetsInfiniteQueryKey(options)
+    queryKey: getAllReplicaSetsInfiniteQueryKey(options)
 });
 
-export const handleGetReplicaSets2QueryKey = (options: Options<HandleGetReplicaSets2Data>) => createQueryKey('handleGetReplicaSets2', options);
+export const getReplicaSetsQueryKey = (options: Options<GetReplicaSetsData>) => createQueryKey('getReplicaSets', options);
 
 /**
  * returns a list of ReplicaSets in a namespace
  */
-export const handleGetReplicaSets2Options = (options: Options<HandleGetReplicaSets2Data>) => queryOptions<HandleGetReplicaSets2Response, AxiosError<DefaultError>, HandleGetReplicaSets2Response, ReturnType<typeof handleGetReplicaSets2QueryKey>>({
+export const getReplicaSetsOptions = (options: Options<GetReplicaSetsData>) => queryOptions<GetReplicaSetsResponse, AxiosError<DefaultError>, GetReplicaSetsResponse, ReturnType<typeof getReplicaSetsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicaSets2({
+        const { data } = await getReplicaSets({
             ...options,
             ...queryKey[0],
             signal,
@@ -4012,26 +4012,26 @@ export const handleGetReplicaSets2Options = (options: Options<HandleGetReplicaSe
         });
         return data;
     },
-    queryKey: handleGetReplicaSets2QueryKey(options)
+    queryKey: getReplicaSetsQueryKey(options)
 });
 
-export const handleGetReplicaSets2InfiniteQueryKey = (options: Options<HandleGetReplicaSets2Data>): QueryKey<Options<HandleGetReplicaSets2Data>> => createQueryKey('handleGetReplicaSets2', options, true);
+export const getReplicaSetsInfiniteQueryKey = (options: Options<GetReplicaSetsData>): QueryKey<Options<GetReplicaSetsData>> => createQueryKey('getReplicaSets', options, true);
 
 /**
  * returns a list of ReplicaSets in a namespace
  */
-export const handleGetReplicaSets2InfiniteOptions = (options: Options<HandleGetReplicaSets2Data>) => infiniteQueryOptions<HandleGetReplicaSets2Response, AxiosError<DefaultError>, InfiniteData<HandleGetReplicaSets2Response>, QueryKey<Options<HandleGetReplicaSets2Data>>, string | Pick<QueryKey<Options<HandleGetReplicaSets2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getReplicaSetsInfiniteOptions = (options: Options<GetReplicaSetsData>) => infiniteQueryOptions<GetReplicaSetsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetsResponse>, QueryKey<Options<GetReplicaSetsData>>, string | Pick<QueryKey<Options<GetReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicaSets2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetReplicaSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicaSets2({
+        const { data } = await getReplicaSets({
             ...options,
             ...params,
             signal,
@@ -4039,17 +4039,17 @@ export const handleGetReplicaSets2InfiniteOptions = (options: Options<HandleGetR
         });
         return data;
     },
-    queryKey: handleGetReplicaSets2InfiniteQueryKey(options)
+    queryKey: getReplicaSetsInfiniteQueryKey(options)
 });
 
-export const handleGetReplicaSetDetailQueryKey = (options: Options<HandleGetReplicaSetDetailData>) => createQueryKey('handleGetReplicaSetDetail', options);
+export const getReplicaSetQueryKey = (options: Options<GetReplicaSetData>) => createQueryKey('getReplicaSet', options);
 
 /**
  * returns detailed information about ReplicaSet
  */
-export const handleGetReplicaSetDetailOptions = (options: Options<HandleGetReplicaSetDetailData>) => queryOptions<HandleGetReplicaSetDetailResponse, AxiosError<DefaultError>, HandleGetReplicaSetDetailResponse, ReturnType<typeof handleGetReplicaSetDetailQueryKey>>({
+export const getReplicaSetOptions = (options: Options<GetReplicaSetData>) => queryOptions<GetReplicaSetResponse, AxiosError<DefaultError>, GetReplicaSetResponse, ReturnType<typeof getReplicaSetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicaSetDetail({
+        const { data } = await getReplicaSet({
             ...options,
             ...queryKey[0],
             signal,
@@ -4057,26 +4057,26 @@ export const handleGetReplicaSetDetailOptions = (options: Options<HandleGetRepli
         });
         return data;
     },
-    queryKey: handleGetReplicaSetDetailQueryKey(options)
+    queryKey: getReplicaSetQueryKey(options)
 });
 
-export const handleGetReplicaSetDetailInfiniteQueryKey = (options: Options<HandleGetReplicaSetDetailData>): QueryKey<Options<HandleGetReplicaSetDetailData>> => createQueryKey('handleGetReplicaSetDetail', options, true);
+export const getReplicaSetInfiniteQueryKey = (options: Options<GetReplicaSetData>): QueryKey<Options<GetReplicaSetData>> => createQueryKey('getReplicaSet', options, true);
 
 /**
  * returns detailed information about ReplicaSet
  */
-export const handleGetReplicaSetDetailInfiniteOptions = (options: Options<HandleGetReplicaSetDetailData>) => infiniteQueryOptions<HandleGetReplicaSetDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetReplicaSetDetailResponse>, QueryKey<Options<HandleGetReplicaSetDetailData>>, string | Pick<QueryKey<Options<HandleGetReplicaSetDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getReplicaSetInfiniteOptions = (options: Options<GetReplicaSetData>) => infiniteQueryOptions<GetReplicaSetResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetResponse>, QueryKey<Options<GetReplicaSetData>>, string | Pick<QueryKey<Options<GetReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicaSetDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetReplicaSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicaSetDetail({
+        const { data } = await getReplicaSet({
             ...options,
             ...params,
             signal,
@@ -4084,17 +4084,17 @@ export const handleGetReplicaSetDetailInfiniteOptions = (options: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetReplicaSetDetailInfiniteQueryKey(options)
+    queryKey: getReplicaSetInfiniteQueryKey(options)
 });
 
-export const handleGetReplicaSetEventsQueryKey = (options: Options<HandleGetReplicaSetEventsData>) => createQueryKey('handleGetReplicaSetEvents', options);
+export const getReplicaSetEventsQueryKey = (options: Options<GetReplicaSetEventsData>) => createQueryKey('getReplicaSetEvents', options);
 
 /**
  * returns a list of Events for ReplicaSet
  */
-export const handleGetReplicaSetEventsOptions = (options: Options<HandleGetReplicaSetEventsData>) => queryOptions<HandleGetReplicaSetEventsResponse, AxiosError<DefaultError>, HandleGetReplicaSetEventsResponse, ReturnType<typeof handleGetReplicaSetEventsQueryKey>>({
+export const getReplicaSetEventsOptions = (options: Options<GetReplicaSetEventsData>) => queryOptions<GetReplicaSetEventsResponse, AxiosError<DefaultError>, GetReplicaSetEventsResponse, ReturnType<typeof getReplicaSetEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicaSetEvents({
+        const { data } = await getReplicaSetEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -4102,26 +4102,26 @@ export const handleGetReplicaSetEventsOptions = (options: Options<HandleGetRepli
         });
         return data;
     },
-    queryKey: handleGetReplicaSetEventsQueryKey(options)
+    queryKey: getReplicaSetEventsQueryKey(options)
 });
 
-export const handleGetReplicaSetEventsInfiniteQueryKey = (options: Options<HandleGetReplicaSetEventsData>): QueryKey<Options<HandleGetReplicaSetEventsData>> => createQueryKey('handleGetReplicaSetEvents', options, true);
+export const getReplicaSetEventsInfiniteQueryKey = (options: Options<GetReplicaSetEventsData>): QueryKey<Options<GetReplicaSetEventsData>> => createQueryKey('getReplicaSetEvents', options, true);
 
 /**
  * returns a list of Events for ReplicaSet
  */
-export const handleGetReplicaSetEventsInfiniteOptions = (options: Options<HandleGetReplicaSetEventsData>) => infiniteQueryOptions<HandleGetReplicaSetEventsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetReplicaSetEventsResponse>, QueryKey<Options<HandleGetReplicaSetEventsData>>, string | Pick<QueryKey<Options<HandleGetReplicaSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getReplicaSetEventsInfiniteOptions = (options: Options<GetReplicaSetEventsData>) => infiniteQueryOptions<GetReplicaSetEventsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetEventsResponse>, QueryKey<Options<GetReplicaSetEventsData>>, string | Pick<QueryKey<Options<GetReplicaSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicaSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetReplicaSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicaSetEvents({
+        const { data } = await getReplicaSetEvents({
             ...options,
             ...params,
             signal,
@@ -4129,17 +4129,17 @@ export const handleGetReplicaSetEventsInfiniteOptions = (options: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetReplicaSetEventsInfiniteQueryKey(options)
+    queryKey: getReplicaSetEventsInfiniteQueryKey(options)
 });
 
-export const handleGetReplicaSetPodsQueryKey = (options: Options<HandleGetReplicaSetPodsData>) => createQueryKey('handleGetReplicaSetPods', options);
+export const getReplicaSetPodsQueryKey = (options: Options<GetReplicaSetPodsData>) => createQueryKey('getReplicaSetPods', options);
 
 /**
  * returns a list of Pods for ReplicaSet
  */
-export const handleGetReplicaSetPodsOptions = (options: Options<HandleGetReplicaSetPodsData>) => queryOptions<HandleGetReplicaSetPodsResponse, AxiosError<DefaultError>, HandleGetReplicaSetPodsResponse, ReturnType<typeof handleGetReplicaSetPodsQueryKey>>({
+export const getReplicaSetPodsOptions = (options: Options<GetReplicaSetPodsData>) => queryOptions<GetReplicaSetPodsResponse, AxiosError<DefaultError>, GetReplicaSetPodsResponse, ReturnType<typeof getReplicaSetPodsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicaSetPods({
+        const { data } = await getReplicaSetPods({
             ...options,
             ...queryKey[0],
             signal,
@@ -4147,26 +4147,26 @@ export const handleGetReplicaSetPodsOptions = (options: Options<HandleGetReplica
         });
         return data;
     },
-    queryKey: handleGetReplicaSetPodsQueryKey(options)
+    queryKey: getReplicaSetPodsQueryKey(options)
 });
 
-export const handleGetReplicaSetPodsInfiniteQueryKey = (options: Options<HandleGetReplicaSetPodsData>): QueryKey<Options<HandleGetReplicaSetPodsData>> => createQueryKey('handleGetReplicaSetPods', options, true);
+export const getReplicaSetPodsInfiniteQueryKey = (options: Options<GetReplicaSetPodsData>): QueryKey<Options<GetReplicaSetPodsData>> => createQueryKey('getReplicaSetPods', options, true);
 
 /**
  * returns a list of Pods for ReplicaSet
  */
-export const handleGetReplicaSetPodsInfiniteOptions = (options: Options<HandleGetReplicaSetPodsData>) => infiniteQueryOptions<HandleGetReplicaSetPodsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetReplicaSetPodsResponse>, QueryKey<Options<HandleGetReplicaSetPodsData>>, string | Pick<QueryKey<Options<HandleGetReplicaSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getReplicaSetPodsInfiniteOptions = (options: Options<GetReplicaSetPodsData>) => infiniteQueryOptions<GetReplicaSetPodsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetPodsResponse>, QueryKey<Options<GetReplicaSetPodsData>>, string | Pick<QueryKey<Options<GetReplicaSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicaSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetReplicaSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicaSetPods({
+        const { data } = await getReplicaSetPods({
             ...options,
             ...params,
             signal,
@@ -4174,17 +4174,17 @@ export const handleGetReplicaSetPodsInfiniteOptions = (options: Options<HandleGe
         });
         return data;
     },
-    queryKey: handleGetReplicaSetPodsInfiniteQueryKey(options)
+    queryKey: getReplicaSetPodsInfiniteQueryKey(options)
 });
 
-export const handleGetReplicaSetServicesQueryKey = (options: Options<HandleGetReplicaSetServicesData>) => createQueryKey('handleGetReplicaSetServices', options);
+export const getReplicaSetServicesQueryKey = (options: Options<GetReplicaSetServicesData>) => createQueryKey('getReplicaSetServices', options);
 
 /**
  * returns a list of Services for ReplicaSet
  */
-export const handleGetReplicaSetServicesOptions = (options: Options<HandleGetReplicaSetServicesData>) => queryOptions<HandleGetReplicaSetServicesResponse, AxiosError<DefaultError>, HandleGetReplicaSetServicesResponse, ReturnType<typeof handleGetReplicaSetServicesQueryKey>>({
+export const getReplicaSetServicesOptions = (options: Options<GetReplicaSetServicesData>) => queryOptions<GetReplicaSetServicesResponse, AxiosError<DefaultError>, GetReplicaSetServicesResponse, ReturnType<typeof getReplicaSetServicesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicaSetServices({
+        const { data } = await getReplicaSetServices({
             ...options,
             ...queryKey[0],
             signal,
@@ -4192,26 +4192,26 @@ export const handleGetReplicaSetServicesOptions = (options: Options<HandleGetRep
         });
         return data;
     },
-    queryKey: handleGetReplicaSetServicesQueryKey(options)
+    queryKey: getReplicaSetServicesQueryKey(options)
 });
 
-export const handleGetReplicaSetServicesInfiniteQueryKey = (options: Options<HandleGetReplicaSetServicesData>): QueryKey<Options<HandleGetReplicaSetServicesData>> => createQueryKey('handleGetReplicaSetServices', options, true);
+export const getReplicaSetServicesInfiniteQueryKey = (options: Options<GetReplicaSetServicesData>): QueryKey<Options<GetReplicaSetServicesData>> => createQueryKey('getReplicaSetServices', options, true);
 
 /**
  * returns a list of Services for ReplicaSet
  */
-export const handleGetReplicaSetServicesInfiniteOptions = (options: Options<HandleGetReplicaSetServicesData>) => infiniteQueryOptions<HandleGetReplicaSetServicesResponse, AxiosError<DefaultError>, InfiniteData<HandleGetReplicaSetServicesResponse>, QueryKey<Options<HandleGetReplicaSetServicesData>>, string | Pick<QueryKey<Options<HandleGetReplicaSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getReplicaSetServicesInfiniteOptions = (options: Options<GetReplicaSetServicesData>) => infiniteQueryOptions<GetReplicaSetServicesResponse, AxiosError<DefaultError>, InfiniteData<GetReplicaSetServicesResponse>, QueryKey<Options<GetReplicaSetServicesData>>, string | Pick<QueryKey<Options<GetReplicaSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicaSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetReplicaSetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicaSetServices({
+        const { data } = await getReplicaSetServices({
             ...options,
             ...params,
             signal,
@@ -4219,17 +4219,17 @@ export const handleGetReplicaSetServicesInfiniteOptions = (options: Options<Hand
         });
         return data;
     },
-    queryKey: handleGetReplicaSetServicesInfiniteQueryKey(options)
+    queryKey: getReplicaSetServicesInfiniteQueryKey(options)
 });
 
-export const handleGetReplicationControllerListQueryKey = (options?: Options<HandleGetReplicationControllerListData>) => createQueryKey('handleGetReplicationControllerList', options);
+export const getAllReplicationControllersQueryKey = (options?: Options<GetAllReplicationControllersData>) => createQueryKey('getAllReplicationControllers', options);
 
 /**
  * returns a list of ReplicationControllers from all namespaces
  */
-export const handleGetReplicationControllerListOptions = (options?: Options<HandleGetReplicationControllerListData>) => queryOptions<HandleGetReplicationControllerListResponse, AxiosError<DefaultError>, HandleGetReplicationControllerListResponse, ReturnType<typeof handleGetReplicationControllerListQueryKey>>({
+export const getAllReplicationControllersOptions = (options?: Options<GetAllReplicationControllersData>) => queryOptions<GetAllReplicationControllersResponse, AxiosError<DefaultError>, GetAllReplicationControllersResponse, ReturnType<typeof getAllReplicationControllersQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicationControllerList({
+        const { data } = await getAllReplicationControllers({
             ...options,
             ...queryKey[0],
             signal,
@@ -4237,26 +4237,26 @@ export const handleGetReplicationControllerListOptions = (options?: Options<Hand
         });
         return data;
     },
-    queryKey: handleGetReplicationControllerListQueryKey(options)
+    queryKey: getAllReplicationControllersQueryKey(options)
 });
 
-export const handleGetReplicationControllerListInfiniteQueryKey = (options?: Options<HandleGetReplicationControllerListData>): QueryKey<Options<HandleGetReplicationControllerListData>> => createQueryKey('handleGetReplicationControllerList', options, true);
+export const getAllReplicationControllersInfiniteQueryKey = (options?: Options<GetAllReplicationControllersData>): QueryKey<Options<GetAllReplicationControllersData>> => createQueryKey('getAllReplicationControllers', options, true);
 
 /**
  * returns a list of ReplicationControllers from all namespaces
  */
-export const handleGetReplicationControllerListInfiniteOptions = (options?: Options<HandleGetReplicationControllerListData>) => infiniteQueryOptions<HandleGetReplicationControllerListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetReplicationControllerListResponse>, QueryKey<Options<HandleGetReplicationControllerListData>>, string | Pick<QueryKey<Options<HandleGetReplicationControllerListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllReplicationControllersInfiniteOptions = (options?: Options<GetAllReplicationControllersData>) => infiniteQueryOptions<GetAllReplicationControllersResponse, AxiosError<DefaultError>, InfiniteData<GetAllReplicationControllersResponse>, QueryKey<Options<GetAllReplicationControllersData>>, string | Pick<QueryKey<Options<GetAllReplicationControllersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicationControllerListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllReplicationControllersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicationControllerList({
+        const { data } = await getAllReplicationControllers({
             ...options,
             ...params,
             signal,
@@ -4264,17 +4264,17 @@ export const handleGetReplicationControllerListInfiniteOptions = (options?: Opti
         });
         return data;
     },
-    queryKey: handleGetReplicationControllerListInfiniteQueryKey(options)
+    queryKey: getAllReplicationControllersInfiniteQueryKey(options)
 });
 
-export const handleGetReplicationControllerList2QueryKey = (options: Options<HandleGetReplicationControllerList2Data>) => createQueryKey('handleGetReplicationControllerList2', options);
+export const getReplicationControllersQueryKey = (options: Options<GetReplicationControllersData>) => createQueryKey('getReplicationControllers', options);
 
 /**
  * returns a list of ReplicationController in a namespace
  */
-export const handleGetReplicationControllerList2Options = (options: Options<HandleGetReplicationControllerList2Data>) => queryOptions<HandleGetReplicationControllerList2Response, AxiosError<DefaultError>, HandleGetReplicationControllerList2Response, ReturnType<typeof handleGetReplicationControllerList2QueryKey>>({
+export const getReplicationControllersOptions = (options: Options<GetReplicationControllersData>) => queryOptions<GetReplicationControllersResponse, AxiosError<DefaultError>, GetReplicationControllersResponse, ReturnType<typeof getReplicationControllersQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicationControllerList2({
+        const { data } = await getReplicationControllers({
             ...options,
             ...queryKey[0],
             signal,
@@ -4282,26 +4282,26 @@ export const handleGetReplicationControllerList2Options = (options: Options<Hand
         });
         return data;
     },
-    queryKey: handleGetReplicationControllerList2QueryKey(options)
+    queryKey: getReplicationControllersQueryKey(options)
 });
 
-export const handleGetReplicationControllerList2InfiniteQueryKey = (options: Options<HandleGetReplicationControllerList2Data>): QueryKey<Options<HandleGetReplicationControllerList2Data>> => createQueryKey('handleGetReplicationControllerList2', options, true);
+export const getReplicationControllersInfiniteQueryKey = (options: Options<GetReplicationControllersData>): QueryKey<Options<GetReplicationControllersData>> => createQueryKey('getReplicationControllers', options, true);
 
 /**
  * returns a list of ReplicationController in a namespace
  */
-export const handleGetReplicationControllerList2InfiniteOptions = (options: Options<HandleGetReplicationControllerList2Data>) => infiniteQueryOptions<HandleGetReplicationControllerList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetReplicationControllerList2Response>, QueryKey<Options<HandleGetReplicationControllerList2Data>>, string | Pick<QueryKey<Options<HandleGetReplicationControllerList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getReplicationControllersInfiniteOptions = (options: Options<GetReplicationControllersData>) => infiniteQueryOptions<GetReplicationControllersResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllersResponse>, QueryKey<Options<GetReplicationControllersData>>, string | Pick<QueryKey<Options<GetReplicationControllersData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicationControllerList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetReplicationControllersData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicationControllerList2({
+        const { data } = await getReplicationControllers({
             ...options,
             ...params,
             signal,
@@ -4309,17 +4309,17 @@ export const handleGetReplicationControllerList2InfiniteOptions = (options: Opti
         });
         return data;
     },
-    queryKey: handleGetReplicationControllerList2InfiniteQueryKey(options)
+    queryKey: getReplicationControllersInfiniteQueryKey(options)
 });
 
-export const handleGetReplicationControllerDetailQueryKey = (options: Options<HandleGetReplicationControllerDetailData>) => createQueryKey('handleGetReplicationControllerDetail', options);
+export const getReplicationControllerQueryKey = (options: Options<GetReplicationControllerData>) => createQueryKey('getReplicationController', options);
 
 /**
  * returns detailed information about ReplicationController
  */
-export const handleGetReplicationControllerDetailOptions = (options: Options<HandleGetReplicationControllerDetailData>) => queryOptions<HandleGetReplicationControllerDetailResponse, AxiosError<DefaultError>, HandleGetReplicationControllerDetailResponse, ReturnType<typeof handleGetReplicationControllerDetailQueryKey>>({
+export const getReplicationControllerOptions = (options: Options<GetReplicationControllerData>) => queryOptions<GetReplicationControllerResponse, AxiosError<DefaultError>, GetReplicationControllerResponse, ReturnType<typeof getReplicationControllerQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicationControllerDetail({
+        const { data } = await getReplicationController({
             ...options,
             ...queryKey[0],
             signal,
@@ -4327,26 +4327,26 @@ export const handleGetReplicationControllerDetailOptions = (options: Options<Han
         });
         return data;
     },
-    queryKey: handleGetReplicationControllerDetailQueryKey(options)
+    queryKey: getReplicationControllerQueryKey(options)
 });
 
-export const handleGetReplicationControllerDetailInfiniteQueryKey = (options: Options<HandleGetReplicationControllerDetailData>): QueryKey<Options<HandleGetReplicationControllerDetailData>> => createQueryKey('handleGetReplicationControllerDetail', options, true);
+export const getReplicationControllerInfiniteQueryKey = (options: Options<GetReplicationControllerData>): QueryKey<Options<GetReplicationControllerData>> => createQueryKey('getReplicationController', options, true);
 
 /**
  * returns detailed information about ReplicationController
  */
-export const handleGetReplicationControllerDetailInfiniteOptions = (options: Options<HandleGetReplicationControllerDetailData>) => infiniteQueryOptions<HandleGetReplicationControllerDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetReplicationControllerDetailResponse>, QueryKey<Options<HandleGetReplicationControllerDetailData>>, string | Pick<QueryKey<Options<HandleGetReplicationControllerDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getReplicationControllerInfiniteOptions = (options: Options<GetReplicationControllerData>) => infiniteQueryOptions<GetReplicationControllerResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllerResponse>, QueryKey<Options<GetReplicationControllerData>>, string | Pick<QueryKey<Options<GetReplicationControllerData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicationControllerDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetReplicationControllerData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicationControllerDetail({
+        const { data } = await getReplicationController({
             ...options,
             ...params,
             signal,
@@ -4354,17 +4354,17 @@ export const handleGetReplicationControllerDetailInfiniteOptions = (options: Opt
         });
         return data;
     },
-    queryKey: handleGetReplicationControllerDetailInfiniteQueryKey(options)
+    queryKey: getReplicationControllerInfiniteQueryKey(options)
 });
 
-export const handleGetReplicationControllerEventsQueryKey = (options: Options<HandleGetReplicationControllerEventsData>) => createQueryKey('handleGetReplicationControllerEvents', options);
+export const getReplicationControllerEventsQueryKey = (options: Options<GetReplicationControllerEventsData>) => createQueryKey('getReplicationControllerEvents', options);
 
 /**
  * returns a list of Events for ReplicationController
  */
-export const handleGetReplicationControllerEventsOptions = (options: Options<HandleGetReplicationControllerEventsData>) => queryOptions<HandleGetReplicationControllerEventsResponse, AxiosError<DefaultError>, HandleGetReplicationControllerEventsResponse, ReturnType<typeof handleGetReplicationControllerEventsQueryKey>>({
+export const getReplicationControllerEventsOptions = (options: Options<GetReplicationControllerEventsData>) => queryOptions<GetReplicationControllerEventsResponse, AxiosError<DefaultError>, GetReplicationControllerEventsResponse, ReturnType<typeof getReplicationControllerEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicationControllerEvents({
+        const { data } = await getReplicationControllerEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -4372,26 +4372,26 @@ export const handleGetReplicationControllerEventsOptions = (options: Options<Han
         });
         return data;
     },
-    queryKey: handleGetReplicationControllerEventsQueryKey(options)
+    queryKey: getReplicationControllerEventsQueryKey(options)
 });
 
-export const handleGetReplicationControllerEventsInfiniteQueryKey = (options: Options<HandleGetReplicationControllerEventsData>): QueryKey<Options<HandleGetReplicationControllerEventsData>> => createQueryKey('handleGetReplicationControllerEvents', options, true);
+export const getReplicationControllerEventsInfiniteQueryKey = (options: Options<GetReplicationControllerEventsData>): QueryKey<Options<GetReplicationControllerEventsData>> => createQueryKey('getReplicationControllerEvents', options, true);
 
 /**
  * returns a list of Events for ReplicationController
  */
-export const handleGetReplicationControllerEventsInfiniteOptions = (options: Options<HandleGetReplicationControllerEventsData>) => infiniteQueryOptions<HandleGetReplicationControllerEventsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetReplicationControllerEventsResponse>, QueryKey<Options<HandleGetReplicationControllerEventsData>>, string | Pick<QueryKey<Options<HandleGetReplicationControllerEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getReplicationControllerEventsInfiniteOptions = (options: Options<GetReplicationControllerEventsData>) => infiniteQueryOptions<GetReplicationControllerEventsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllerEventsResponse>, QueryKey<Options<GetReplicationControllerEventsData>>, string | Pick<QueryKey<Options<GetReplicationControllerEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicationControllerEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetReplicationControllerEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicationControllerEvents({
+        const { data } = await getReplicationControllerEvents({
             ...options,
             ...params,
             signal,
@@ -4399,17 +4399,17 @@ export const handleGetReplicationControllerEventsInfiniteOptions = (options: Opt
         });
         return data;
     },
-    queryKey: handleGetReplicationControllerEventsInfiniteQueryKey(options)
+    queryKey: getReplicationControllerEventsInfiniteQueryKey(options)
 });
 
-export const handleGetReplicationControllerPodsQueryKey = (options: Options<HandleGetReplicationControllerPodsData>) => createQueryKey('handleGetReplicationControllerPods', options);
+export const getReplicationControllerPodsQueryKey = (options: Options<GetReplicationControllerPodsData>) => createQueryKey('getReplicationControllerPods', options);
 
 /**
  * returns a list of Pods for ReplicationController
  */
-export const handleGetReplicationControllerPodsOptions = (options: Options<HandleGetReplicationControllerPodsData>) => queryOptions<HandleGetReplicationControllerPodsResponse, AxiosError<DefaultError>, HandleGetReplicationControllerPodsResponse, ReturnType<typeof handleGetReplicationControllerPodsQueryKey>>({
+export const getReplicationControllerPodsOptions = (options: Options<GetReplicationControllerPodsData>) => queryOptions<GetReplicationControllerPodsResponse, AxiosError<DefaultError>, GetReplicationControllerPodsResponse, ReturnType<typeof getReplicationControllerPodsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicationControllerPods({
+        const { data } = await getReplicationControllerPods({
             ...options,
             ...queryKey[0],
             signal,
@@ -4417,26 +4417,26 @@ export const handleGetReplicationControllerPodsOptions = (options: Options<Handl
         });
         return data;
     },
-    queryKey: handleGetReplicationControllerPodsQueryKey(options)
+    queryKey: getReplicationControllerPodsQueryKey(options)
 });
 
-export const handleGetReplicationControllerPodsInfiniteQueryKey = (options: Options<HandleGetReplicationControllerPodsData>): QueryKey<Options<HandleGetReplicationControllerPodsData>> => createQueryKey('handleGetReplicationControllerPods', options, true);
+export const getReplicationControllerPodsInfiniteQueryKey = (options: Options<GetReplicationControllerPodsData>): QueryKey<Options<GetReplicationControllerPodsData>> => createQueryKey('getReplicationControllerPods', options, true);
 
 /**
  * returns a list of Pods for ReplicationController
  */
-export const handleGetReplicationControllerPodsInfiniteOptions = (options: Options<HandleGetReplicationControllerPodsData>) => infiniteQueryOptions<HandleGetReplicationControllerPodsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetReplicationControllerPodsResponse>, QueryKey<Options<HandleGetReplicationControllerPodsData>>, string | Pick<QueryKey<Options<HandleGetReplicationControllerPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getReplicationControllerPodsInfiniteOptions = (options: Options<GetReplicationControllerPodsData>) => infiniteQueryOptions<GetReplicationControllerPodsResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllerPodsResponse>, QueryKey<Options<GetReplicationControllerPodsData>>, string | Pick<QueryKey<Options<GetReplicationControllerPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicationControllerPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetReplicationControllerPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicationControllerPods({
+        const { data } = await getReplicationControllerPods({
             ...options,
             ...params,
             signal,
@@ -4444,17 +4444,17 @@ export const handleGetReplicationControllerPodsInfiniteOptions = (options: Optio
         });
         return data;
     },
-    queryKey: handleGetReplicationControllerPodsInfiniteQueryKey(options)
+    queryKey: getReplicationControllerPodsInfiniteQueryKey(options)
 });
 
-export const handleGetReplicationControllerServicesQueryKey = (options: Options<HandleGetReplicationControllerServicesData>) => createQueryKey('handleGetReplicationControllerServices', options);
+export const getReplicationControllerServicesQueryKey = (options: Options<GetReplicationControllerServicesData>) => createQueryKey('getReplicationControllerServices', options);
 
 /**
  * returns a list of Services for ReplicationController
  */
-export const handleGetReplicationControllerServicesOptions = (options: Options<HandleGetReplicationControllerServicesData>) => queryOptions<HandleGetReplicationControllerServicesResponse, AxiosError<DefaultError>, HandleGetReplicationControllerServicesResponse, ReturnType<typeof handleGetReplicationControllerServicesQueryKey>>({
+export const getReplicationControllerServicesOptions = (options: Options<GetReplicationControllerServicesData>) => queryOptions<GetReplicationControllerServicesResponse, AxiosError<DefaultError>, GetReplicationControllerServicesResponse, ReturnType<typeof getReplicationControllerServicesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicationControllerServices({
+        const { data } = await getReplicationControllerServices({
             ...options,
             ...queryKey[0],
             signal,
@@ -4462,26 +4462,26 @@ export const handleGetReplicationControllerServicesOptions = (options: Options<H
         });
         return data;
     },
-    queryKey: handleGetReplicationControllerServicesQueryKey(options)
+    queryKey: getReplicationControllerServicesQueryKey(options)
 });
 
-export const handleGetReplicationControllerServicesInfiniteQueryKey = (options: Options<HandleGetReplicationControllerServicesData>): QueryKey<Options<HandleGetReplicationControllerServicesData>> => createQueryKey('handleGetReplicationControllerServices', options, true);
+export const getReplicationControllerServicesInfiniteQueryKey = (options: Options<GetReplicationControllerServicesData>): QueryKey<Options<GetReplicationControllerServicesData>> => createQueryKey('getReplicationControllerServices', options, true);
 
 /**
  * returns a list of Services for ReplicationController
  */
-export const handleGetReplicationControllerServicesInfiniteOptions = (options: Options<HandleGetReplicationControllerServicesData>) => infiniteQueryOptions<HandleGetReplicationControllerServicesResponse, AxiosError<DefaultError>, InfiniteData<HandleGetReplicationControllerServicesResponse>, QueryKey<Options<HandleGetReplicationControllerServicesData>>, string | Pick<QueryKey<Options<HandleGetReplicationControllerServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getReplicationControllerServicesInfiniteOptions = (options: Options<GetReplicationControllerServicesData>) => infiniteQueryOptions<GetReplicationControllerServicesResponse, AxiosError<DefaultError>, InfiniteData<GetReplicationControllerServicesResponse>, QueryKey<Options<GetReplicationControllerServicesData>>, string | Pick<QueryKey<Options<GetReplicationControllerServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicationControllerServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetReplicationControllerServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicationControllerServices({
+        const { data } = await getReplicationControllerServices({
             ...options,
             ...params,
             signal,
@@ -4489,16 +4489,16 @@ export const handleGetReplicationControllerServicesInfiniteOptions = (options: O
         });
         return data;
     },
-    queryKey: handleGetReplicationControllerServicesInfiniteQueryKey(options)
+    queryKey: getReplicationControllerServicesInfiniteQueryKey(options)
 });
 
 /**
  * scales ReplicationController to a number of replicas
  */
-export const handleUpdateReplicasCountMutation = (options?: Partial<Options<HandleUpdateReplicasCountData>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandleUpdateReplicasCountData>> => {
-    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<HandleUpdateReplicasCountData>> = {
+export const updateReplicationControllerReplicasMutation = (options?: Partial<Options<UpdateReplicationControllerReplicasData>>): UseMutationOptions<unknown, AxiosError<DefaultError>, Options<UpdateReplicationControllerReplicasData>> => {
+    const mutationOptions: UseMutationOptions<unknown, AxiosError<DefaultError>, Options<UpdateReplicationControllerReplicasData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleUpdateReplicasCount({
+            const { data } = await updateReplicationControllerReplicas({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -4509,14 +4509,14 @@ export const handleUpdateReplicasCountMutation = (options?: Partial<Options<Hand
     return mutationOptions;
 };
 
-export const handleGetRoleListQueryKey = (options?: Options<HandleGetRoleListData>) => createQueryKey('handleGetRoleList', options);
+export const getAllRolesQueryKey = (options?: Options<GetAllRolesData>) => createQueryKey('getAllRoles', options);
 
 /**
  * returns a list of Roles from all namespace
  */
-export const handleGetRoleListOptions = (options?: Options<HandleGetRoleListData>) => queryOptions<HandleGetRoleListResponse, AxiosError<DefaultError>, HandleGetRoleListResponse, ReturnType<typeof handleGetRoleListQueryKey>>({
+export const getAllRolesOptions = (options?: Options<GetAllRolesData>) => queryOptions<GetAllRolesResponse, AxiosError<DefaultError>, GetAllRolesResponse, ReturnType<typeof getAllRolesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetRoleList({
+        const { data } = await getAllRoles({
             ...options,
             ...queryKey[0],
             signal,
@@ -4524,26 +4524,26 @@ export const handleGetRoleListOptions = (options?: Options<HandleGetRoleListData
         });
         return data;
     },
-    queryKey: handleGetRoleListQueryKey(options)
+    queryKey: getAllRolesQueryKey(options)
 });
 
-export const handleGetRoleListInfiniteQueryKey = (options?: Options<HandleGetRoleListData>): QueryKey<Options<HandleGetRoleListData>> => createQueryKey('handleGetRoleList', options, true);
+export const getAllRolesInfiniteQueryKey = (options?: Options<GetAllRolesData>): QueryKey<Options<GetAllRolesData>> => createQueryKey('getAllRoles', options, true);
 
 /**
  * returns a list of Roles from all namespace
  */
-export const handleGetRoleListInfiniteOptions = (options?: Options<HandleGetRoleListData>) => infiniteQueryOptions<HandleGetRoleListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetRoleListResponse>, QueryKey<Options<HandleGetRoleListData>>, string | Pick<QueryKey<Options<HandleGetRoleListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllRolesInfiniteOptions = (options?: Options<GetAllRolesData>) => infiniteQueryOptions<GetAllRolesResponse, AxiosError<DefaultError>, InfiniteData<GetAllRolesResponse>, QueryKey<Options<GetAllRolesData>>, string | Pick<QueryKey<Options<GetAllRolesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetRoleListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllRolesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetRoleList({
+        const { data } = await getAllRoles({
             ...options,
             ...params,
             signal,
@@ -4551,17 +4551,17 @@ export const handleGetRoleListInfiniteOptions = (options?: Options<HandleGetRole
         });
         return data;
     },
-    queryKey: handleGetRoleListInfiniteQueryKey(options)
+    queryKey: getAllRolesInfiniteQueryKey(options)
 });
 
-export const handleGetRoleList2QueryKey = (options: Options<HandleGetRoleList2Data>) => createQueryKey('handleGetRoleList2', options);
+export const getRolesQueryKey = (options: Options<GetRolesData>) => createQueryKey('getRoles', options);
 
 /**
  * returns a list of Roles in a namespace
  */
-export const handleGetRoleList2Options = (options: Options<HandleGetRoleList2Data>) => queryOptions<HandleGetRoleList2Response, AxiosError<DefaultError>, HandleGetRoleList2Response, ReturnType<typeof handleGetRoleList2QueryKey>>({
+export const getRolesOptions = (options: Options<GetRolesData>) => queryOptions<GetRolesResponse, AxiosError<DefaultError>, GetRolesResponse, ReturnType<typeof getRolesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetRoleList2({
+        const { data } = await getRoles({
             ...options,
             ...queryKey[0],
             signal,
@@ -4569,26 +4569,26 @@ export const handleGetRoleList2Options = (options: Options<HandleGetRoleList2Dat
         });
         return data;
     },
-    queryKey: handleGetRoleList2QueryKey(options)
+    queryKey: getRolesQueryKey(options)
 });
 
-export const handleGetRoleList2InfiniteQueryKey = (options: Options<HandleGetRoleList2Data>): QueryKey<Options<HandleGetRoleList2Data>> => createQueryKey('handleGetRoleList2', options, true);
+export const getRolesInfiniteQueryKey = (options: Options<GetRolesData>): QueryKey<Options<GetRolesData>> => createQueryKey('getRoles', options, true);
 
 /**
  * returns a list of Roles in a namespace
  */
-export const handleGetRoleList2InfiniteOptions = (options: Options<HandleGetRoleList2Data>) => infiniteQueryOptions<HandleGetRoleList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetRoleList2Response>, QueryKey<Options<HandleGetRoleList2Data>>, string | Pick<QueryKey<Options<HandleGetRoleList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getRolesInfiniteOptions = (options: Options<GetRolesData>) => infiniteQueryOptions<GetRolesResponse, AxiosError<DefaultError>, InfiniteData<GetRolesResponse>, QueryKey<Options<GetRolesData>>, string | Pick<QueryKey<Options<GetRolesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetRoleList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetRolesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetRoleList2({
+        const { data } = await getRoles({
             ...options,
             ...params,
             signal,
@@ -4596,17 +4596,17 @@ export const handleGetRoleList2InfiniteOptions = (options: Options<HandleGetRole
         });
         return data;
     },
-    queryKey: handleGetRoleList2InfiniteQueryKey(options)
+    queryKey: getRolesInfiniteQueryKey(options)
 });
 
-export const handleGetRoleDetailQueryKey = (options: Options<HandleGetRoleDetailData>) => createQueryKey('handleGetRoleDetail', options);
+export const getRoleQueryKey = (options: Options<GetRoleData>) => createQueryKey('getRole', options);
 
 /**
  * returns detailed information about Role
  */
-export const handleGetRoleDetailOptions = (options: Options<HandleGetRoleDetailData>) => queryOptions<HandleGetRoleDetailResponse, AxiosError<DefaultError>, HandleGetRoleDetailResponse, ReturnType<typeof handleGetRoleDetailQueryKey>>({
+export const getRoleOptions = (options: Options<GetRoleData>) => queryOptions<GetRoleResponse, AxiosError<DefaultError>, GetRoleResponse, ReturnType<typeof getRoleQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetRoleDetail({
+        const { data } = await getRole({
             ...options,
             ...queryKey[0],
             signal,
@@ -4614,26 +4614,26 @@ export const handleGetRoleDetailOptions = (options: Options<HandleGetRoleDetailD
         });
         return data;
     },
-    queryKey: handleGetRoleDetailQueryKey(options)
+    queryKey: getRoleQueryKey(options)
 });
 
-export const handleGetRoleDetailInfiniteQueryKey = (options: Options<HandleGetRoleDetailData>): QueryKey<Options<HandleGetRoleDetailData>> => createQueryKey('handleGetRoleDetail', options, true);
+export const getRoleInfiniteQueryKey = (options: Options<GetRoleData>): QueryKey<Options<GetRoleData>> => createQueryKey('getRole', options, true);
 
 /**
  * returns detailed information about Role
  */
-export const handleGetRoleDetailInfiniteOptions = (options: Options<HandleGetRoleDetailData>) => infiniteQueryOptions<HandleGetRoleDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetRoleDetailResponse>, QueryKey<Options<HandleGetRoleDetailData>>, string | Pick<QueryKey<Options<HandleGetRoleDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getRoleInfiniteOptions = (options: Options<GetRoleData>) => infiniteQueryOptions<GetRoleResponse, AxiosError<DefaultError>, InfiniteData<GetRoleResponse>, QueryKey<Options<GetRoleData>>, string | Pick<QueryKey<Options<GetRoleData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetRoleDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetRoleData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetRoleDetail({
+        const { data } = await getRole({
             ...options,
             ...params,
             signal,
@@ -4641,17 +4641,17 @@ export const handleGetRoleDetailInfiniteOptions = (options: Options<HandleGetRol
         });
         return data;
     },
-    queryKey: handleGetRoleDetailInfiniteQueryKey(options)
+    queryKey: getRoleInfiniteQueryKey(options)
 });
 
-export const handleGetRoleBindingListQueryKey = (options?: Options<HandleGetRoleBindingListData>) => createQueryKey('handleGetRoleBindingList', options);
+export const getAllRoleBindingsQueryKey = (options?: Options<GetAllRoleBindingsData>) => createQueryKey('getAllRoleBindings', options);
 
 /**
  * returns a list of RoleBindings from all namespace
  */
-export const handleGetRoleBindingListOptions = (options?: Options<HandleGetRoleBindingListData>) => queryOptions<HandleGetRoleBindingListResponse, AxiosError<DefaultError>, HandleGetRoleBindingListResponse, ReturnType<typeof handleGetRoleBindingListQueryKey>>({
+export const getAllRoleBindingsOptions = (options?: Options<GetAllRoleBindingsData>) => queryOptions<GetAllRoleBindingsResponse, AxiosError<DefaultError>, GetAllRoleBindingsResponse, ReturnType<typeof getAllRoleBindingsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetRoleBindingList({
+        const { data } = await getAllRoleBindings({
             ...options,
             ...queryKey[0],
             signal,
@@ -4659,26 +4659,26 @@ export const handleGetRoleBindingListOptions = (options?: Options<HandleGetRoleB
         });
         return data;
     },
-    queryKey: handleGetRoleBindingListQueryKey(options)
+    queryKey: getAllRoleBindingsQueryKey(options)
 });
 
-export const handleGetRoleBindingListInfiniteQueryKey = (options?: Options<HandleGetRoleBindingListData>): QueryKey<Options<HandleGetRoleBindingListData>> => createQueryKey('handleGetRoleBindingList', options, true);
+export const getAllRoleBindingsInfiniteQueryKey = (options?: Options<GetAllRoleBindingsData>): QueryKey<Options<GetAllRoleBindingsData>> => createQueryKey('getAllRoleBindings', options, true);
 
 /**
  * returns a list of RoleBindings from all namespace
  */
-export const handleGetRoleBindingListInfiniteOptions = (options?: Options<HandleGetRoleBindingListData>) => infiniteQueryOptions<HandleGetRoleBindingListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetRoleBindingListResponse>, QueryKey<Options<HandleGetRoleBindingListData>>, string | Pick<QueryKey<Options<HandleGetRoleBindingListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllRoleBindingsInfiniteOptions = (options?: Options<GetAllRoleBindingsData>) => infiniteQueryOptions<GetAllRoleBindingsResponse, AxiosError<DefaultError>, InfiniteData<GetAllRoleBindingsResponse>, QueryKey<Options<GetAllRoleBindingsData>>, string | Pick<QueryKey<Options<GetAllRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetRoleBindingListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetRoleBindingList({
+        const { data } = await getAllRoleBindings({
             ...options,
             ...params,
             signal,
@@ -4686,17 +4686,17 @@ export const handleGetRoleBindingListInfiniteOptions = (options?: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetRoleBindingListInfiniteQueryKey(options)
+    queryKey: getAllRoleBindingsInfiniteQueryKey(options)
 });
 
-export const handleGetRoleBindingList2QueryKey = (options: Options<HandleGetRoleBindingList2Data>) => createQueryKey('handleGetRoleBindingList2', options);
+export const getRoleBindingsQueryKey = (options: Options<GetRoleBindingsData>) => createQueryKey('getRoleBindings', options);
 
 /**
  * returns a list of RoleBindings in a namespace
  */
-export const handleGetRoleBindingList2Options = (options: Options<HandleGetRoleBindingList2Data>) => queryOptions<HandleGetRoleBindingList2Response, AxiosError<DefaultError>, HandleGetRoleBindingList2Response, ReturnType<typeof handleGetRoleBindingList2QueryKey>>({
+export const getRoleBindingsOptions = (options: Options<GetRoleBindingsData>) => queryOptions<GetRoleBindingsResponse, AxiosError<DefaultError>, GetRoleBindingsResponse, ReturnType<typeof getRoleBindingsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetRoleBindingList2({
+        const { data } = await getRoleBindings({
             ...options,
             ...queryKey[0],
             signal,
@@ -4704,26 +4704,26 @@ export const handleGetRoleBindingList2Options = (options: Options<HandleGetRoleB
         });
         return data;
     },
-    queryKey: handleGetRoleBindingList2QueryKey(options)
+    queryKey: getRoleBindingsQueryKey(options)
 });
 
-export const handleGetRoleBindingList2InfiniteQueryKey = (options: Options<HandleGetRoleBindingList2Data>): QueryKey<Options<HandleGetRoleBindingList2Data>> => createQueryKey('handleGetRoleBindingList2', options, true);
+export const getRoleBindingsInfiniteQueryKey = (options: Options<GetRoleBindingsData>): QueryKey<Options<GetRoleBindingsData>> => createQueryKey('getRoleBindings', options, true);
 
 /**
  * returns a list of RoleBindings in a namespace
  */
-export const handleGetRoleBindingList2InfiniteOptions = (options: Options<HandleGetRoleBindingList2Data>) => infiniteQueryOptions<HandleGetRoleBindingList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetRoleBindingList2Response>, QueryKey<Options<HandleGetRoleBindingList2Data>>, string | Pick<QueryKey<Options<HandleGetRoleBindingList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getRoleBindingsInfiniteOptions = (options: Options<GetRoleBindingsData>) => infiniteQueryOptions<GetRoleBindingsResponse, AxiosError<DefaultError>, InfiniteData<GetRoleBindingsResponse>, QueryKey<Options<GetRoleBindingsData>>, string | Pick<QueryKey<Options<GetRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetRoleBindingList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetRoleBindingsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetRoleBindingList2({
+        const { data } = await getRoleBindings({
             ...options,
             ...params,
             signal,
@@ -4731,17 +4731,17 @@ export const handleGetRoleBindingList2InfiniteOptions = (options: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetRoleBindingList2InfiniteQueryKey(options)
+    queryKey: getRoleBindingsInfiniteQueryKey(options)
 });
 
-export const handleGetRoleBindingDetailQueryKey = (options: Options<HandleGetRoleBindingDetailData>) => createQueryKey('handleGetRoleBindingDetail', options);
+export const getRoleBindingQueryKey = (options: Options<GetRoleBindingData>) => createQueryKey('getRoleBinding', options);
 
 /**
  * returns detailed information about RoleBinding
  */
-export const handleGetRoleBindingDetailOptions = (options: Options<HandleGetRoleBindingDetailData>) => queryOptions<HandleGetRoleBindingDetailResponse, AxiosError<DefaultError>, HandleGetRoleBindingDetailResponse, ReturnType<typeof handleGetRoleBindingDetailQueryKey>>({
+export const getRoleBindingOptions = (options: Options<GetRoleBindingData>) => queryOptions<GetRoleBindingResponse, AxiosError<DefaultError>, GetRoleBindingResponse, ReturnType<typeof getRoleBindingQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetRoleBindingDetail({
+        const { data } = await getRoleBinding({
             ...options,
             ...queryKey[0],
             signal,
@@ -4749,26 +4749,26 @@ export const handleGetRoleBindingDetailOptions = (options: Options<HandleGetRole
         });
         return data;
     },
-    queryKey: handleGetRoleBindingDetailQueryKey(options)
+    queryKey: getRoleBindingQueryKey(options)
 });
 
-export const handleGetRoleBindingDetailInfiniteQueryKey = (options: Options<HandleGetRoleBindingDetailData>): QueryKey<Options<HandleGetRoleBindingDetailData>> => createQueryKey('handleGetRoleBindingDetail', options, true);
+export const getRoleBindingInfiniteQueryKey = (options: Options<GetRoleBindingData>): QueryKey<Options<GetRoleBindingData>> => createQueryKey('getRoleBinding', options, true);
 
 /**
  * returns detailed information about RoleBinding
  */
-export const handleGetRoleBindingDetailInfiniteOptions = (options: Options<HandleGetRoleBindingDetailData>) => infiniteQueryOptions<HandleGetRoleBindingDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetRoleBindingDetailResponse>, QueryKey<Options<HandleGetRoleBindingDetailData>>, string | Pick<QueryKey<Options<HandleGetRoleBindingDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getRoleBindingInfiniteOptions = (options: Options<GetRoleBindingData>) => infiniteQueryOptions<GetRoleBindingResponse, AxiosError<DefaultError>, InfiniteData<GetRoleBindingResponse>, QueryKey<Options<GetRoleBindingData>>, string | Pick<QueryKey<Options<GetRoleBindingData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetRoleBindingDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetRoleBindingData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetRoleBindingDetail({
+        const { data } = await getRoleBinding({
             ...options,
             ...params,
             signal,
@@ -4776,17 +4776,17 @@ export const handleGetRoleBindingDetailInfiniteOptions = (options: Options<Handl
         });
         return data;
     },
-    queryKey: handleGetRoleBindingDetailInfiniteQueryKey(options)
+    queryKey: getRoleBindingInfiniteQueryKey(options)
 });
 
-export const handleGetReplicaCountQueryKey = (options: Options<HandleGetReplicaCountData>) => createQueryKey('handleGetReplicaCount', options);
+export const getNamespacedResourceReplicasQueryKey = (options: Options<GetNamespacedResourceReplicasData>) => createQueryKey('getNamespacedResourceReplicas', options);
 
 /**
  * returns a number of replicas of namespaced resource
  */
-export const handleGetReplicaCountOptions = (options: Options<HandleGetReplicaCountData>) => queryOptions<HandleGetReplicaCountResponse, AxiosError<DefaultError>, HandleGetReplicaCountResponse, ReturnType<typeof handleGetReplicaCountQueryKey>>({
+export const getNamespacedResourceReplicasOptions = (options: Options<GetNamespacedResourceReplicasData>) => queryOptions<GetNamespacedResourceReplicasResponse, AxiosError<DefaultError>, GetNamespacedResourceReplicasResponse, ReturnType<typeof getNamespacedResourceReplicasQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicaCount({
+        const { data } = await getNamespacedResourceReplicas({
             ...options,
             ...queryKey[0],
             signal,
@@ -4794,26 +4794,26 @@ export const handleGetReplicaCountOptions = (options: Options<HandleGetReplicaCo
         });
         return data;
     },
-    queryKey: handleGetReplicaCountQueryKey(options)
+    queryKey: getNamespacedResourceReplicasQueryKey(options)
 });
 
-export const handleGetReplicaCountInfiniteQueryKey = (options: Options<HandleGetReplicaCountData>): QueryKey<Options<HandleGetReplicaCountData>> => createQueryKey('handleGetReplicaCount', options, true);
+export const getNamespacedResourceReplicasInfiniteQueryKey = (options: Options<GetNamespacedResourceReplicasData>): QueryKey<Options<GetNamespacedResourceReplicasData>> => createQueryKey('getNamespacedResourceReplicas', options, true);
 
 /**
  * returns a number of replicas of namespaced resource
  */
-export const handleGetReplicaCountInfiniteOptions = (options: Options<HandleGetReplicaCountData>) => infiniteQueryOptions<HandleGetReplicaCountResponse, AxiosError<DefaultError>, InfiniteData<HandleGetReplicaCountResponse>, QueryKey<Options<HandleGetReplicaCountData>>, string | Pick<QueryKey<Options<HandleGetReplicaCountData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getNamespacedResourceReplicasInfiniteOptions = (options: Options<GetNamespacedResourceReplicasData>) => infiniteQueryOptions<GetNamespacedResourceReplicasResponse, AxiosError<DefaultError>, InfiniteData<GetNamespacedResourceReplicasResponse>, QueryKey<Options<GetNamespacedResourceReplicasData>>, string | Pick<QueryKey<Options<GetNamespacedResourceReplicasData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicaCountData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetNamespacedResourceReplicasData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicaCount({
+        const { data } = await getNamespacedResourceReplicas({
             ...options,
             ...params,
             signal,
@@ -4821,16 +4821,16 @@ export const handleGetReplicaCountInfiniteOptions = (options: Options<HandleGetR
         });
         return data;
     },
-    queryKey: handleGetReplicaCountInfiniteQueryKey(options)
+    queryKey: getNamespacedResourceReplicasInfiniteQueryKey(options)
 });
 
 /**
  * scales a namespaced resource
  */
-export const handleScaleResourceMutation = (options?: Partial<Options<HandleScaleResourceData>>): UseMutationOptions<HandleScaleResourceResponse, AxiosError<DefaultError>, Options<HandleScaleResourceData>> => {
-    const mutationOptions: UseMutationOptions<HandleScaleResourceResponse, AxiosError<DefaultError>, Options<HandleScaleResourceData>> = {
+export const scaleNamespacedResourceMutation = (options?: Partial<Options<ScaleNamespacedResourceData>>): UseMutationOptions<ScaleNamespacedResourceResponse, AxiosError<DefaultError>, Options<ScaleNamespacedResourceData>> => {
+    const mutationOptions: UseMutationOptions<ScaleNamespacedResourceResponse, AxiosError<DefaultError>, Options<ScaleNamespacedResourceData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleScaleResource({
+            const { data } = await scaleNamespacedResource({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -4841,14 +4841,14 @@ export const handleScaleResourceMutation = (options?: Partial<Options<HandleScal
     return mutationOptions;
 };
 
-export const handleGetReplicaCount2QueryKey = (options: Options<HandleGetReplicaCount2Data>) => createQueryKey('handleGetReplicaCount2', options);
+export const getResourceReplicasQueryKey = (options: Options<GetResourceReplicasData>) => createQueryKey('getResourceReplicas', options);
 
 /**
  * returns a number of replicas of non-namespaced resource
  */
-export const handleGetReplicaCount2Options = (options: Options<HandleGetReplicaCount2Data>) => queryOptions<HandleGetReplicaCount2Response, AxiosError<DefaultError>, HandleGetReplicaCount2Response, ReturnType<typeof handleGetReplicaCount2QueryKey>>({
+export const getResourceReplicasOptions = (options: Options<GetResourceReplicasData>) => queryOptions<GetResourceReplicasResponse, AxiosError<DefaultError>, GetResourceReplicasResponse, ReturnType<typeof getResourceReplicasQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetReplicaCount2({
+        const { data } = await getResourceReplicas({
             ...options,
             ...queryKey[0],
             signal,
@@ -4856,26 +4856,26 @@ export const handleGetReplicaCount2Options = (options: Options<HandleGetReplicaC
         });
         return data;
     },
-    queryKey: handleGetReplicaCount2QueryKey(options)
+    queryKey: getResourceReplicasQueryKey(options)
 });
 
-export const handleGetReplicaCount2InfiniteQueryKey = (options: Options<HandleGetReplicaCount2Data>): QueryKey<Options<HandleGetReplicaCount2Data>> => createQueryKey('handleGetReplicaCount2', options, true);
+export const getResourceReplicasInfiniteQueryKey = (options: Options<GetResourceReplicasData>): QueryKey<Options<GetResourceReplicasData>> => createQueryKey('getResourceReplicas', options, true);
 
 /**
  * returns a number of replicas of non-namespaced resource
  */
-export const handleGetReplicaCount2InfiniteOptions = (options: Options<HandleGetReplicaCount2Data>) => infiniteQueryOptions<HandleGetReplicaCount2Response, AxiosError<DefaultError>, InfiniteData<HandleGetReplicaCount2Response>, QueryKey<Options<HandleGetReplicaCount2Data>>, string | Pick<QueryKey<Options<HandleGetReplicaCount2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getResourceReplicasInfiniteOptions = (options: Options<GetResourceReplicasData>) => infiniteQueryOptions<GetResourceReplicasResponse, AxiosError<DefaultError>, InfiniteData<GetResourceReplicasResponse>, QueryKey<Options<GetResourceReplicasData>>, string | Pick<QueryKey<Options<GetResourceReplicasData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetReplicaCount2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetResourceReplicasData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetReplicaCount2({
+        const { data } = await getResourceReplicas({
             ...options,
             ...params,
             signal,
@@ -4883,16 +4883,16 @@ export const handleGetReplicaCount2InfiniteOptions = (options: Options<HandleGet
         });
         return data;
     },
-    queryKey: handleGetReplicaCount2InfiniteQueryKey(options)
+    queryKey: getResourceReplicasInfiniteQueryKey(options)
 });
 
 /**
  * scales a non-namespaced resource
  */
-export const handleScaleResource2Mutation = (options?: Partial<Options<HandleScaleResource2Data>>): UseMutationOptions<HandleScaleResource2Response, AxiosError<DefaultError>, Options<HandleScaleResource2Data>> => {
-    const mutationOptions: UseMutationOptions<HandleScaleResource2Response, AxiosError<DefaultError>, Options<HandleScaleResource2Data>> = {
+export const scaleResourceMutation = (options?: Partial<Options<ScaleResourceData>>): UseMutationOptions<ScaleResourceResponse, AxiosError<DefaultError>, Options<ScaleResourceData>> => {
+    const mutationOptions: UseMutationOptions<ScaleResourceResponse, AxiosError<DefaultError>, Options<ScaleResourceData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleScaleResource2({
+            const { data } = await scaleResource({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -4903,14 +4903,14 @@ export const handleScaleResource2Mutation = (options?: Partial<Options<HandleSca
     return mutationOptions;
 };
 
-export const handleGetSecretListQueryKey = (options?: Options<HandleGetSecretListData>) => createQueryKey('handleGetSecretList', options);
+export const getAllSecretsQueryKey = (options?: Options<GetAllSecretsData>) => createQueryKey('getAllSecrets', options);
 
 /**
  * returns a list of Secrets from all namespaces
  */
-export const handleGetSecretListOptions = (options?: Options<HandleGetSecretListData>) => queryOptions<HandleGetSecretListResponse, AxiosError<DefaultError>, HandleGetSecretListResponse, ReturnType<typeof handleGetSecretListQueryKey>>({
+export const getAllSecretsOptions = (options?: Options<GetAllSecretsData>) => queryOptions<GetAllSecretsResponse, AxiosError<DefaultError>, GetAllSecretsResponse, ReturnType<typeof getAllSecretsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetSecretList({
+        const { data } = await getAllSecrets({
             ...options,
             ...queryKey[0],
             signal,
@@ -4918,26 +4918,26 @@ export const handleGetSecretListOptions = (options?: Options<HandleGetSecretList
         });
         return data;
     },
-    queryKey: handleGetSecretListQueryKey(options)
+    queryKey: getAllSecretsQueryKey(options)
 });
 
-export const handleGetSecretListInfiniteQueryKey = (options?: Options<HandleGetSecretListData>): QueryKey<Options<HandleGetSecretListData>> => createQueryKey('handleGetSecretList', options, true);
+export const getAllSecretsInfiniteQueryKey = (options?: Options<GetAllSecretsData>): QueryKey<Options<GetAllSecretsData>> => createQueryKey('getAllSecrets', options, true);
 
 /**
  * returns a list of Secrets from all namespaces
  */
-export const handleGetSecretListInfiniteOptions = (options?: Options<HandleGetSecretListData>) => infiniteQueryOptions<HandleGetSecretListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetSecretListResponse>, QueryKey<Options<HandleGetSecretListData>>, string | Pick<QueryKey<Options<HandleGetSecretListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllSecretsInfiniteOptions = (options?: Options<GetAllSecretsData>) => infiniteQueryOptions<GetAllSecretsResponse, AxiosError<DefaultError>, InfiniteData<GetAllSecretsResponse>, QueryKey<Options<GetAllSecretsData>>, string | Pick<QueryKey<Options<GetAllSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetSecretListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetSecretList({
+        const { data } = await getAllSecrets({
             ...options,
             ...params,
             signal,
@@ -4945,16 +4945,16 @@ export const handleGetSecretListInfiniteOptions = (options?: Options<HandleGetSe
         });
         return data;
     },
-    queryKey: handleGetSecretListInfiniteQueryKey(options)
+    queryKey: getAllSecretsInfiniteQueryKey(options)
 });
 
 /**
  * stores ImagePullSecret in a Kubernetes Secret
  */
-export const handleCreateImagePullSecretMutation = (options?: Partial<Options<HandleCreateImagePullSecretData>>): UseMutationOptions<HandleCreateImagePullSecretResponse, AxiosError<DefaultError>, Options<HandleCreateImagePullSecretData>> => {
-    const mutationOptions: UseMutationOptions<HandleCreateImagePullSecretResponse, AxiosError<DefaultError>, Options<HandleCreateImagePullSecretData>> = {
+export const createImagePullSecretMutation = (options?: Partial<Options<CreateImagePullSecretData>>): UseMutationOptions<CreateImagePullSecretResponse, AxiosError<DefaultError>, Options<CreateImagePullSecretData>> => {
+    const mutationOptions: UseMutationOptions<CreateImagePullSecretResponse, AxiosError<DefaultError>, Options<CreateImagePullSecretData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleCreateImagePullSecret({
+            const { data } = await createImagePullSecret({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -4965,14 +4965,14 @@ export const handleCreateImagePullSecretMutation = (options?: Partial<Options<Ha
     return mutationOptions;
 };
 
-export const handleGetSecretList2QueryKey = (options: Options<HandleGetSecretList2Data>) => createQueryKey('handleGetSecretList2', options);
+export const getSecretsQueryKey = (options: Options<GetSecretsData>) => createQueryKey('getSecrets', options);
 
 /**
  * returns a list of Secrets in a namespace
  */
-export const handleGetSecretList2Options = (options: Options<HandleGetSecretList2Data>) => queryOptions<HandleGetSecretList2Response, AxiosError<DefaultError>, HandleGetSecretList2Response, ReturnType<typeof handleGetSecretList2QueryKey>>({
+export const getSecretsOptions = (options: Options<GetSecretsData>) => queryOptions<GetSecretsResponse, AxiosError<DefaultError>, GetSecretsResponse, ReturnType<typeof getSecretsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetSecretList2({
+        const { data } = await getSecrets({
             ...options,
             ...queryKey[0],
             signal,
@@ -4980,26 +4980,26 @@ export const handleGetSecretList2Options = (options: Options<HandleGetSecretList
         });
         return data;
     },
-    queryKey: handleGetSecretList2QueryKey(options)
+    queryKey: getSecretsQueryKey(options)
 });
 
-export const handleGetSecretList2InfiniteQueryKey = (options: Options<HandleGetSecretList2Data>): QueryKey<Options<HandleGetSecretList2Data>> => createQueryKey('handleGetSecretList2', options, true);
+export const getSecretsInfiniteQueryKey = (options: Options<GetSecretsData>): QueryKey<Options<GetSecretsData>> => createQueryKey('getSecrets', options, true);
 
 /**
  * returns a list of Secrets in a namespace
  */
-export const handleGetSecretList2InfiniteOptions = (options: Options<HandleGetSecretList2Data>) => infiniteQueryOptions<HandleGetSecretList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetSecretList2Response>, QueryKey<Options<HandleGetSecretList2Data>>, string | Pick<QueryKey<Options<HandleGetSecretList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getSecretsInfiniteOptions = (options: Options<GetSecretsData>) => infiniteQueryOptions<GetSecretsResponse, AxiosError<DefaultError>, InfiniteData<GetSecretsResponse>, QueryKey<Options<GetSecretsData>>, string | Pick<QueryKey<Options<GetSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetSecretList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetSecretList2({
+        const { data } = await getSecrets({
             ...options,
             ...params,
             signal,
@@ -5007,17 +5007,17 @@ export const handleGetSecretList2InfiniteOptions = (options: Options<HandleGetSe
         });
         return data;
     },
-    queryKey: handleGetSecretList2InfiniteQueryKey(options)
+    queryKey: getSecretsInfiniteQueryKey(options)
 });
 
-export const handleGetSecretDetailQueryKey = (options: Options<HandleGetSecretDetailData>) => createQueryKey('handleGetSecretDetail', options);
+export const getSecretQueryKey = (options: Options<GetSecretData>) => createQueryKey('getSecret', options);
 
 /**
  * returns detailed information about Secret
  */
-export const handleGetSecretDetailOptions = (options: Options<HandleGetSecretDetailData>) => queryOptions<HandleGetSecretDetailResponse, AxiosError<DefaultError>, HandleGetSecretDetailResponse, ReturnType<typeof handleGetSecretDetailQueryKey>>({
+export const getSecretOptions = (options: Options<GetSecretData>) => queryOptions<GetSecretResponse, AxiosError<DefaultError>, GetSecretResponse, ReturnType<typeof getSecretQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetSecretDetail({
+        const { data } = await getSecret({
             ...options,
             ...queryKey[0],
             signal,
@@ -5025,26 +5025,26 @@ export const handleGetSecretDetailOptions = (options: Options<HandleGetSecretDet
         });
         return data;
     },
-    queryKey: handleGetSecretDetailQueryKey(options)
+    queryKey: getSecretQueryKey(options)
 });
 
-export const handleGetSecretDetailInfiniteQueryKey = (options: Options<HandleGetSecretDetailData>): QueryKey<Options<HandleGetSecretDetailData>> => createQueryKey('handleGetSecretDetail', options, true);
+export const getSecretInfiniteQueryKey = (options: Options<GetSecretData>): QueryKey<Options<GetSecretData>> => createQueryKey('getSecret', options, true);
 
 /**
  * returns detailed information about Secret
  */
-export const handleGetSecretDetailInfiniteOptions = (options: Options<HandleGetSecretDetailData>) => infiniteQueryOptions<HandleGetSecretDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetSecretDetailResponse>, QueryKey<Options<HandleGetSecretDetailData>>, string | Pick<QueryKey<Options<HandleGetSecretDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getSecretInfiniteOptions = (options: Options<GetSecretData>) => infiniteQueryOptions<GetSecretResponse, AxiosError<DefaultError>, InfiniteData<GetSecretResponse>, QueryKey<Options<GetSecretData>>, string | Pick<QueryKey<Options<GetSecretData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetSecretDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetSecretData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetSecretDetail({
+        const { data } = await getSecret({
             ...options,
             ...params,
             signal,
@@ -5052,17 +5052,17 @@ export const handleGetSecretDetailInfiniteOptions = (options: Options<HandleGetS
         });
         return data;
     },
-    queryKey: handleGetSecretDetailInfiniteQueryKey(options)
+    queryKey: getSecretInfiniteQueryKey(options)
 });
 
-export const handleGetServiceListQueryKey = (options?: Options<HandleGetServiceListData>) => createQueryKey('handleGetServiceList', options);
+export const getAllServicesQueryKey = (options?: Options<GetAllServicesData>) => createQueryKey('getAllServices', options);
 
 /**
  * returns a list of Services from all namespaces
  */
-export const handleGetServiceListOptions = (options?: Options<HandleGetServiceListData>) => queryOptions<HandleGetServiceListResponse, AxiosError<DefaultError>, HandleGetServiceListResponse, ReturnType<typeof handleGetServiceListQueryKey>>({
+export const getAllServicesOptions = (options?: Options<GetAllServicesData>) => queryOptions<GetAllServicesResponse, AxiosError<DefaultError>, GetAllServicesResponse, ReturnType<typeof getAllServicesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetServiceList({
+        const { data } = await getAllServices({
             ...options,
             ...queryKey[0],
             signal,
@@ -5070,26 +5070,26 @@ export const handleGetServiceListOptions = (options?: Options<HandleGetServiceLi
         });
         return data;
     },
-    queryKey: handleGetServiceListQueryKey(options)
+    queryKey: getAllServicesQueryKey(options)
 });
 
-export const handleGetServiceListInfiniteQueryKey = (options?: Options<HandleGetServiceListData>): QueryKey<Options<HandleGetServiceListData>> => createQueryKey('handleGetServiceList', options, true);
+export const getAllServicesInfiniteQueryKey = (options?: Options<GetAllServicesData>): QueryKey<Options<GetAllServicesData>> => createQueryKey('getAllServices', options, true);
 
 /**
  * returns a list of Services from all namespaces
  */
-export const handleGetServiceListInfiniteOptions = (options?: Options<HandleGetServiceListData>) => infiniteQueryOptions<HandleGetServiceListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetServiceListResponse>, QueryKey<Options<HandleGetServiceListData>>, string | Pick<QueryKey<Options<HandleGetServiceListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllServicesInfiniteOptions = (options?: Options<GetAllServicesData>) => infiniteQueryOptions<GetAllServicesResponse, AxiosError<DefaultError>, InfiniteData<GetAllServicesResponse>, QueryKey<Options<GetAllServicesData>>, string | Pick<QueryKey<Options<GetAllServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetServiceListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetServiceList({
+        const { data } = await getAllServices({
             ...options,
             ...params,
             signal,
@@ -5097,17 +5097,17 @@ export const handleGetServiceListInfiniteOptions = (options?: Options<HandleGetS
         });
         return data;
     },
-    queryKey: handleGetServiceListInfiniteQueryKey(options)
+    queryKey: getAllServicesInfiniteQueryKey(options)
 });
 
-export const handleGetServiceList2QueryKey = (options: Options<HandleGetServiceList2Data>) => createQueryKey('handleGetServiceList2', options);
+export const getServicesQueryKey = (options: Options<GetServicesData>) => createQueryKey('getServices', options);
 
 /**
  * returns a list of Services in a namespace
  */
-export const handleGetServiceList2Options = (options: Options<HandleGetServiceList2Data>) => queryOptions<HandleGetServiceList2Response, AxiosError<DefaultError>, HandleGetServiceList2Response, ReturnType<typeof handleGetServiceList2QueryKey>>({
+export const getServicesOptions = (options: Options<GetServicesData>) => queryOptions<GetServicesResponse, AxiosError<DefaultError>, GetServicesResponse, ReturnType<typeof getServicesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetServiceList2({
+        const { data } = await getServices({
             ...options,
             ...queryKey[0],
             signal,
@@ -5115,26 +5115,26 @@ export const handleGetServiceList2Options = (options: Options<HandleGetServiceLi
         });
         return data;
     },
-    queryKey: handleGetServiceList2QueryKey(options)
+    queryKey: getServicesQueryKey(options)
 });
 
-export const handleGetServiceList2InfiniteQueryKey = (options: Options<HandleGetServiceList2Data>): QueryKey<Options<HandleGetServiceList2Data>> => createQueryKey('handleGetServiceList2', options, true);
+export const getServicesInfiniteQueryKey = (options: Options<GetServicesData>): QueryKey<Options<GetServicesData>> => createQueryKey('getServices', options, true);
 
 /**
  * returns a list of Services in a namespace
  */
-export const handleGetServiceList2InfiniteOptions = (options: Options<HandleGetServiceList2Data>) => infiniteQueryOptions<HandleGetServiceList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetServiceList2Response>, QueryKey<Options<HandleGetServiceList2Data>>, string | Pick<QueryKey<Options<HandleGetServiceList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getServicesInfiniteOptions = (options: Options<GetServicesData>) => infiniteQueryOptions<GetServicesResponse, AxiosError<DefaultError>, InfiniteData<GetServicesResponse>, QueryKey<Options<GetServicesData>>, string | Pick<QueryKey<Options<GetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetServiceList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetServicesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetServiceList2({
+        const { data } = await getServices({
             ...options,
             ...params,
             signal,
@@ -5142,17 +5142,17 @@ export const handleGetServiceList2InfiniteOptions = (options: Options<HandleGetS
         });
         return data;
     },
-    queryKey: handleGetServiceList2InfiniteQueryKey(options)
+    queryKey: getServicesInfiniteQueryKey(options)
 });
 
-export const handleGetServiceDetailQueryKey = (options: Options<HandleGetServiceDetailData>) => createQueryKey('handleGetServiceDetail', options);
+export const getServiceQueryKey = (options: Options<GetServiceData>) => createQueryKey('getService', options);
 
 /**
  * returns detailed information about Service
  */
-export const handleGetServiceDetailOptions = (options: Options<HandleGetServiceDetailData>) => queryOptions<HandleGetServiceDetailResponse, AxiosError<DefaultError>, HandleGetServiceDetailResponse, ReturnType<typeof handleGetServiceDetailQueryKey>>({
+export const getServiceOptions = (options: Options<GetServiceData>) => queryOptions<GetServiceResponse, AxiosError<DefaultError>, GetServiceResponse, ReturnType<typeof getServiceQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetServiceDetail({
+        const { data } = await getService({
             ...options,
             ...queryKey[0],
             signal,
@@ -5160,26 +5160,26 @@ export const handleGetServiceDetailOptions = (options: Options<HandleGetServiceD
         });
         return data;
     },
-    queryKey: handleGetServiceDetailQueryKey(options)
+    queryKey: getServiceQueryKey(options)
 });
 
-export const handleGetServiceDetailInfiniteQueryKey = (options: Options<HandleGetServiceDetailData>): QueryKey<Options<HandleGetServiceDetailData>> => createQueryKey('handleGetServiceDetail', options, true);
+export const getServiceInfiniteQueryKey = (options: Options<GetServiceData>): QueryKey<Options<GetServiceData>> => createQueryKey('getService', options, true);
 
 /**
  * returns detailed information about Service
  */
-export const handleGetServiceDetailInfiniteOptions = (options: Options<HandleGetServiceDetailData>) => infiniteQueryOptions<HandleGetServiceDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetServiceDetailResponse>, QueryKey<Options<HandleGetServiceDetailData>>, string | Pick<QueryKey<Options<HandleGetServiceDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getServiceInfiniteOptions = (options: Options<GetServiceData>) => infiniteQueryOptions<GetServiceResponse, AxiosError<DefaultError>, InfiniteData<GetServiceResponse>, QueryKey<Options<GetServiceData>>, string | Pick<QueryKey<Options<GetServiceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetServiceDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetServiceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetServiceDetail({
+        const { data } = await getService({
             ...options,
             ...params,
             signal,
@@ -5187,17 +5187,17 @@ export const handleGetServiceDetailInfiniteOptions = (options: Options<HandleGet
         });
         return data;
     },
-    queryKey: handleGetServiceDetailInfiniteQueryKey(options)
+    queryKey: getServiceInfiniteQueryKey(options)
 });
 
-export const handleGetServiceEventQueryKey = (options: Options<HandleGetServiceEventData>) => createQueryKey('handleGetServiceEvent', options);
+export const getServiceEventsQueryKey = (options: Options<GetServiceEventsData>) => createQueryKey('getServiceEvents', options);
 
 /**
  * returns a list of Events for Service
  */
-export const handleGetServiceEventOptions = (options: Options<HandleGetServiceEventData>) => queryOptions<HandleGetServiceEventResponse, AxiosError<DefaultError>, HandleGetServiceEventResponse, ReturnType<typeof handleGetServiceEventQueryKey>>({
+export const getServiceEventsOptions = (options: Options<GetServiceEventsData>) => queryOptions<GetServiceEventsResponse, AxiosError<DefaultError>, GetServiceEventsResponse, ReturnType<typeof getServiceEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetServiceEvent({
+        const { data } = await getServiceEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -5205,26 +5205,26 @@ export const handleGetServiceEventOptions = (options: Options<HandleGetServiceEv
         });
         return data;
     },
-    queryKey: handleGetServiceEventQueryKey(options)
+    queryKey: getServiceEventsQueryKey(options)
 });
 
-export const handleGetServiceEventInfiniteQueryKey = (options: Options<HandleGetServiceEventData>): QueryKey<Options<HandleGetServiceEventData>> => createQueryKey('handleGetServiceEvent', options, true);
+export const getServiceEventsInfiniteQueryKey = (options: Options<GetServiceEventsData>): QueryKey<Options<GetServiceEventsData>> => createQueryKey('getServiceEvents', options, true);
 
 /**
  * returns a list of Events for Service
  */
-export const handleGetServiceEventInfiniteOptions = (options: Options<HandleGetServiceEventData>) => infiniteQueryOptions<HandleGetServiceEventResponse, AxiosError<DefaultError>, InfiniteData<HandleGetServiceEventResponse>, QueryKey<Options<HandleGetServiceEventData>>, string | Pick<QueryKey<Options<HandleGetServiceEventData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getServiceEventsInfiniteOptions = (options: Options<GetServiceEventsData>) => infiniteQueryOptions<GetServiceEventsResponse, AxiosError<DefaultError>, InfiniteData<GetServiceEventsResponse>, QueryKey<Options<GetServiceEventsData>>, string | Pick<QueryKey<Options<GetServiceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetServiceEventData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetServiceEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetServiceEvent({
+        const { data } = await getServiceEvents({
             ...options,
             ...params,
             signal,
@@ -5232,17 +5232,17 @@ export const handleGetServiceEventInfiniteOptions = (options: Options<HandleGetS
         });
         return data;
     },
-    queryKey: handleGetServiceEventInfiniteQueryKey(options)
+    queryKey: getServiceEventsInfiniteQueryKey(options)
 });
 
-export const handleGetServiceIngressListQueryKey = (options: Options<HandleGetServiceIngressListData>) => createQueryKey('handleGetServiceIngressList', options);
+export const getServiceIngressesQueryKey = (options: Options<GetServiceIngressesData>) => createQueryKey('getServiceIngresses', options);
 
 /**
  * returns a list of Ingresses for Service
  */
-export const handleGetServiceIngressListOptions = (options: Options<HandleGetServiceIngressListData>) => queryOptions<HandleGetServiceIngressListResponse, AxiosError<DefaultError>, HandleGetServiceIngressListResponse, ReturnType<typeof handleGetServiceIngressListQueryKey>>({
+export const getServiceIngressesOptions = (options: Options<GetServiceIngressesData>) => queryOptions<GetServiceIngressesResponse, AxiosError<DefaultError>, GetServiceIngressesResponse, ReturnType<typeof getServiceIngressesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetServiceIngressList({
+        const { data } = await getServiceIngresses({
             ...options,
             ...queryKey[0],
             signal,
@@ -5250,26 +5250,26 @@ export const handleGetServiceIngressListOptions = (options: Options<HandleGetSer
         });
         return data;
     },
-    queryKey: handleGetServiceIngressListQueryKey(options)
+    queryKey: getServiceIngressesQueryKey(options)
 });
 
-export const handleGetServiceIngressListInfiniteQueryKey = (options: Options<HandleGetServiceIngressListData>): QueryKey<Options<HandleGetServiceIngressListData>> => createQueryKey('handleGetServiceIngressList', options, true);
+export const getServiceIngressesInfiniteQueryKey = (options: Options<GetServiceIngressesData>): QueryKey<Options<GetServiceIngressesData>> => createQueryKey('getServiceIngresses', options, true);
 
 /**
  * returns a list of Ingresses for Service
  */
-export const handleGetServiceIngressListInfiniteOptions = (options: Options<HandleGetServiceIngressListData>) => infiniteQueryOptions<HandleGetServiceIngressListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetServiceIngressListResponse>, QueryKey<Options<HandleGetServiceIngressListData>>, string | Pick<QueryKey<Options<HandleGetServiceIngressListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getServiceIngressesInfiniteOptions = (options: Options<GetServiceIngressesData>) => infiniteQueryOptions<GetServiceIngressesResponse, AxiosError<DefaultError>, InfiniteData<GetServiceIngressesResponse>, QueryKey<Options<GetServiceIngressesData>>, string | Pick<QueryKey<Options<GetServiceIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetServiceIngressListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetServiceIngressesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetServiceIngressList({
+        const { data } = await getServiceIngresses({
             ...options,
             ...params,
             signal,
@@ -5277,17 +5277,17 @@ export const handleGetServiceIngressListInfiniteOptions = (options: Options<Hand
         });
         return data;
     },
-    queryKey: handleGetServiceIngressListInfiniteQueryKey(options)
+    queryKey: getServiceIngressesInfiniteQueryKey(options)
 });
 
-export const handleGetServicePodsQueryKey = (options: Options<HandleGetServicePodsData>) => createQueryKey('handleGetServicePods', options);
+export const getServicePodsQueryKey = (options: Options<GetServicePodsData>) => createQueryKey('getServicePods', options);
 
 /**
  * returns a list of Pods for Service
  */
-export const handleGetServicePodsOptions = (options: Options<HandleGetServicePodsData>) => queryOptions<HandleGetServicePodsResponse, AxiosError<DefaultError>, HandleGetServicePodsResponse, ReturnType<typeof handleGetServicePodsQueryKey>>({
+export const getServicePodsOptions = (options: Options<GetServicePodsData>) => queryOptions<GetServicePodsResponse, AxiosError<DefaultError>, GetServicePodsResponse, ReturnType<typeof getServicePodsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetServicePods({
+        const { data } = await getServicePods({
             ...options,
             ...queryKey[0],
             signal,
@@ -5295,26 +5295,26 @@ export const handleGetServicePodsOptions = (options: Options<HandleGetServicePod
         });
         return data;
     },
-    queryKey: handleGetServicePodsQueryKey(options)
+    queryKey: getServicePodsQueryKey(options)
 });
 
-export const handleGetServicePodsInfiniteQueryKey = (options: Options<HandleGetServicePodsData>): QueryKey<Options<HandleGetServicePodsData>> => createQueryKey('handleGetServicePods', options, true);
+export const getServicePodsInfiniteQueryKey = (options: Options<GetServicePodsData>): QueryKey<Options<GetServicePodsData>> => createQueryKey('getServicePods', options, true);
 
 /**
  * returns a list of Pods for Service
  */
-export const handleGetServicePodsInfiniteOptions = (options: Options<HandleGetServicePodsData>) => infiniteQueryOptions<HandleGetServicePodsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetServicePodsResponse>, QueryKey<Options<HandleGetServicePodsData>>, string | Pick<QueryKey<Options<HandleGetServicePodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getServicePodsInfiniteOptions = (options: Options<GetServicePodsData>) => infiniteQueryOptions<GetServicePodsResponse, AxiosError<DefaultError>, InfiniteData<GetServicePodsResponse>, QueryKey<Options<GetServicePodsData>>, string | Pick<QueryKey<Options<GetServicePodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetServicePodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetServicePodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetServicePods({
+        const { data } = await getServicePods({
             ...options,
             ...params,
             signal,
@@ -5322,17 +5322,17 @@ export const handleGetServicePodsInfiniteOptions = (options: Options<HandleGetSe
         });
         return data;
     },
-    queryKey: handleGetServicePodsInfiniteQueryKey(options)
+    queryKey: getServicePodsInfiniteQueryKey(options)
 });
 
-export const handleGetServiceAccountListQueryKey = (options?: Options<HandleGetServiceAccountListData>) => createQueryKey('handleGetServiceAccountList', options);
+export const getAllServiceAccountsQueryKey = (options?: Options<GetAllServiceAccountsData>) => createQueryKey('getAllServiceAccounts', options);
 
 /**
  * returns a list of ServiceAccounts from all namespaces
  */
-export const handleGetServiceAccountListOptions = (options?: Options<HandleGetServiceAccountListData>) => queryOptions<HandleGetServiceAccountListResponse, AxiosError<DefaultError>, HandleGetServiceAccountListResponse, ReturnType<typeof handleGetServiceAccountListQueryKey>>({
+export const getAllServiceAccountsOptions = (options?: Options<GetAllServiceAccountsData>) => queryOptions<GetAllServiceAccountsResponse, AxiosError<DefaultError>, GetAllServiceAccountsResponse, ReturnType<typeof getAllServiceAccountsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetServiceAccountList({
+        const { data } = await getAllServiceAccounts({
             ...options,
             ...queryKey[0],
             signal,
@@ -5340,26 +5340,26 @@ export const handleGetServiceAccountListOptions = (options?: Options<HandleGetSe
         });
         return data;
     },
-    queryKey: handleGetServiceAccountListQueryKey(options)
+    queryKey: getAllServiceAccountsQueryKey(options)
 });
 
-export const handleGetServiceAccountListInfiniteQueryKey = (options?: Options<HandleGetServiceAccountListData>): QueryKey<Options<HandleGetServiceAccountListData>> => createQueryKey('handleGetServiceAccountList', options, true);
+export const getAllServiceAccountsInfiniteQueryKey = (options?: Options<GetAllServiceAccountsData>): QueryKey<Options<GetAllServiceAccountsData>> => createQueryKey('getAllServiceAccounts', options, true);
 
 /**
  * returns a list of ServiceAccounts from all namespaces
  */
-export const handleGetServiceAccountListInfiniteOptions = (options?: Options<HandleGetServiceAccountListData>) => infiniteQueryOptions<HandleGetServiceAccountListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetServiceAccountListResponse>, QueryKey<Options<HandleGetServiceAccountListData>>, string | Pick<QueryKey<Options<HandleGetServiceAccountListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllServiceAccountsInfiniteOptions = (options?: Options<GetAllServiceAccountsData>) => infiniteQueryOptions<GetAllServiceAccountsResponse, AxiosError<DefaultError>, InfiniteData<GetAllServiceAccountsResponse>, QueryKey<Options<GetAllServiceAccountsData>>, string | Pick<QueryKey<Options<GetAllServiceAccountsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetServiceAccountListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllServiceAccountsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetServiceAccountList({
+        const { data } = await getAllServiceAccounts({
             ...options,
             ...params,
             signal,
@@ -5367,17 +5367,17 @@ export const handleGetServiceAccountListInfiniteOptions = (options?: Options<Han
         });
         return data;
     },
-    queryKey: handleGetServiceAccountListInfiniteQueryKey(options)
+    queryKey: getAllServiceAccountsInfiniteQueryKey(options)
 });
 
-export const handleGetServiceAccountList2QueryKey = (options: Options<HandleGetServiceAccountList2Data>) => createQueryKey('handleGetServiceAccountList2', options);
+export const getServiceAccountsQueryKey = (options: Options<GetServiceAccountsData>) => createQueryKey('getServiceAccounts', options);
 
 /**
  * returns a list of ServiceAccounts in a namespaces
  */
-export const handleGetServiceAccountList2Options = (options: Options<HandleGetServiceAccountList2Data>) => queryOptions<HandleGetServiceAccountList2Response, AxiosError<DefaultError>, HandleGetServiceAccountList2Response, ReturnType<typeof handleGetServiceAccountList2QueryKey>>({
+export const getServiceAccountsOptions = (options: Options<GetServiceAccountsData>) => queryOptions<GetServiceAccountsResponse, AxiosError<DefaultError>, GetServiceAccountsResponse, ReturnType<typeof getServiceAccountsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetServiceAccountList2({
+        const { data } = await getServiceAccounts({
             ...options,
             ...queryKey[0],
             signal,
@@ -5385,26 +5385,26 @@ export const handleGetServiceAccountList2Options = (options: Options<HandleGetSe
         });
         return data;
     },
-    queryKey: handleGetServiceAccountList2QueryKey(options)
+    queryKey: getServiceAccountsQueryKey(options)
 });
 
-export const handleGetServiceAccountList2InfiniteQueryKey = (options: Options<HandleGetServiceAccountList2Data>): QueryKey<Options<HandleGetServiceAccountList2Data>> => createQueryKey('handleGetServiceAccountList2', options, true);
+export const getServiceAccountsInfiniteQueryKey = (options: Options<GetServiceAccountsData>): QueryKey<Options<GetServiceAccountsData>> => createQueryKey('getServiceAccounts', options, true);
 
 /**
  * returns a list of ServiceAccounts in a namespaces
  */
-export const handleGetServiceAccountList2InfiniteOptions = (options: Options<HandleGetServiceAccountList2Data>) => infiniteQueryOptions<HandleGetServiceAccountList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetServiceAccountList2Response>, QueryKey<Options<HandleGetServiceAccountList2Data>>, string | Pick<QueryKey<Options<HandleGetServiceAccountList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getServiceAccountsInfiniteOptions = (options: Options<GetServiceAccountsData>) => infiniteQueryOptions<GetServiceAccountsResponse, AxiosError<DefaultError>, InfiniteData<GetServiceAccountsResponse>, QueryKey<Options<GetServiceAccountsData>>, string | Pick<QueryKey<Options<GetServiceAccountsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetServiceAccountList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetServiceAccountsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetServiceAccountList2({
+        const { data } = await getServiceAccounts({
             ...options,
             ...params,
             signal,
@@ -5412,17 +5412,17 @@ export const handleGetServiceAccountList2InfiniteOptions = (options: Options<Han
         });
         return data;
     },
-    queryKey: handleGetServiceAccountList2InfiniteQueryKey(options)
+    queryKey: getServiceAccountsInfiniteQueryKey(options)
 });
 
-export const handleGetServiceAccountDetailQueryKey = (options: Options<HandleGetServiceAccountDetailData>) => createQueryKey('handleGetServiceAccountDetail', options);
+export const getServiceAccountQueryKey = (options: Options<GetServiceAccountData>) => createQueryKey('getServiceAccount', options);
 
 /**
  * returns detailed information about ServiceAccount
  */
-export const handleGetServiceAccountDetailOptions = (options: Options<HandleGetServiceAccountDetailData>) => queryOptions<HandleGetServiceAccountDetailResponse, AxiosError<DefaultError>, HandleGetServiceAccountDetailResponse, ReturnType<typeof handleGetServiceAccountDetailQueryKey>>({
+export const getServiceAccountOptions = (options: Options<GetServiceAccountData>) => queryOptions<GetServiceAccountResponse, AxiosError<DefaultError>, GetServiceAccountResponse, ReturnType<typeof getServiceAccountQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetServiceAccountDetail({
+        const { data } = await getServiceAccount({
             ...options,
             ...queryKey[0],
             signal,
@@ -5430,26 +5430,26 @@ export const handleGetServiceAccountDetailOptions = (options: Options<HandleGetS
         });
         return data;
     },
-    queryKey: handleGetServiceAccountDetailQueryKey(options)
+    queryKey: getServiceAccountQueryKey(options)
 });
 
-export const handleGetServiceAccountDetailInfiniteQueryKey = (options: Options<HandleGetServiceAccountDetailData>): QueryKey<Options<HandleGetServiceAccountDetailData>> => createQueryKey('handleGetServiceAccountDetail', options, true);
+export const getServiceAccountInfiniteQueryKey = (options: Options<GetServiceAccountData>): QueryKey<Options<GetServiceAccountData>> => createQueryKey('getServiceAccount', options, true);
 
 /**
  * returns detailed information about ServiceAccount
  */
-export const handleGetServiceAccountDetailInfiniteOptions = (options: Options<HandleGetServiceAccountDetailData>) => infiniteQueryOptions<HandleGetServiceAccountDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetServiceAccountDetailResponse>, QueryKey<Options<HandleGetServiceAccountDetailData>>, string | Pick<QueryKey<Options<HandleGetServiceAccountDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getServiceAccountInfiniteOptions = (options: Options<GetServiceAccountData>) => infiniteQueryOptions<GetServiceAccountResponse, AxiosError<DefaultError>, InfiniteData<GetServiceAccountResponse>, QueryKey<Options<GetServiceAccountData>>, string | Pick<QueryKey<Options<GetServiceAccountData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetServiceAccountDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetServiceAccountData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetServiceAccountDetail({
+        const { data } = await getServiceAccount({
             ...options,
             ...params,
             signal,
@@ -5457,17 +5457,17 @@ export const handleGetServiceAccountDetailInfiniteOptions = (options: Options<Ha
         });
         return data;
     },
-    queryKey: handleGetServiceAccountDetailInfiniteQueryKey(options)
+    queryKey: getServiceAccountInfiniteQueryKey(options)
 });
 
-export const handleGetServiceAccountImagePullSecretsQueryKey = (options: Options<HandleGetServiceAccountImagePullSecretsData>) => createQueryKey('handleGetServiceAccountImagePullSecrets', options);
+export const getServiceAccountImagePullSecretsQueryKey = (options: Options<GetServiceAccountImagePullSecretsData>) => createQueryKey('getServiceAccountImagePullSecrets', options);
 
 /**
  * returns a list of ImagePullSecret Secrets for ServiceAccount
  */
-export const handleGetServiceAccountImagePullSecretsOptions = (options: Options<HandleGetServiceAccountImagePullSecretsData>) => queryOptions<HandleGetServiceAccountImagePullSecretsResponse, AxiosError<DefaultError>, HandleGetServiceAccountImagePullSecretsResponse, ReturnType<typeof handleGetServiceAccountImagePullSecretsQueryKey>>({
+export const getServiceAccountImagePullSecretsOptions = (options: Options<GetServiceAccountImagePullSecretsData>) => queryOptions<GetServiceAccountImagePullSecretsResponse, AxiosError<DefaultError>, GetServiceAccountImagePullSecretsResponse, ReturnType<typeof getServiceAccountImagePullSecretsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetServiceAccountImagePullSecrets({
+        const { data } = await getServiceAccountImagePullSecrets({
             ...options,
             ...queryKey[0],
             signal,
@@ -5475,26 +5475,26 @@ export const handleGetServiceAccountImagePullSecretsOptions = (options: Options<
         });
         return data;
     },
-    queryKey: handleGetServiceAccountImagePullSecretsQueryKey(options)
+    queryKey: getServiceAccountImagePullSecretsQueryKey(options)
 });
 
-export const handleGetServiceAccountImagePullSecretsInfiniteQueryKey = (options: Options<HandleGetServiceAccountImagePullSecretsData>): QueryKey<Options<HandleGetServiceAccountImagePullSecretsData>> => createQueryKey('handleGetServiceAccountImagePullSecrets', options, true);
+export const getServiceAccountImagePullSecretsInfiniteQueryKey = (options: Options<GetServiceAccountImagePullSecretsData>): QueryKey<Options<GetServiceAccountImagePullSecretsData>> => createQueryKey('getServiceAccountImagePullSecrets', options, true);
 
 /**
  * returns a list of ImagePullSecret Secrets for ServiceAccount
  */
-export const handleGetServiceAccountImagePullSecretsInfiniteOptions = (options: Options<HandleGetServiceAccountImagePullSecretsData>) => infiniteQueryOptions<HandleGetServiceAccountImagePullSecretsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetServiceAccountImagePullSecretsResponse>, QueryKey<Options<HandleGetServiceAccountImagePullSecretsData>>, string | Pick<QueryKey<Options<HandleGetServiceAccountImagePullSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getServiceAccountImagePullSecretsInfiniteOptions = (options: Options<GetServiceAccountImagePullSecretsData>) => infiniteQueryOptions<GetServiceAccountImagePullSecretsResponse, AxiosError<DefaultError>, InfiniteData<GetServiceAccountImagePullSecretsResponse>, QueryKey<Options<GetServiceAccountImagePullSecretsData>>, string | Pick<QueryKey<Options<GetServiceAccountImagePullSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetServiceAccountImagePullSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetServiceAccountImagePullSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetServiceAccountImagePullSecrets({
+        const { data } = await getServiceAccountImagePullSecrets({
             ...options,
             ...params,
             signal,
@@ -5502,17 +5502,17 @@ export const handleGetServiceAccountImagePullSecretsInfiniteOptions = (options: 
         });
         return data;
     },
-    queryKey: handleGetServiceAccountImagePullSecretsInfiniteQueryKey(options)
+    queryKey: getServiceAccountImagePullSecretsInfiniteQueryKey(options)
 });
 
-export const handleGetServiceAccountSecretsQueryKey = (options: Options<HandleGetServiceAccountSecretsData>) => createQueryKey('handleGetServiceAccountSecrets', options);
+export const getServiceAccountSecretsQueryKey = (options: Options<GetServiceAccountSecretsData>) => createQueryKey('getServiceAccountSecrets', options);
 
 /**
  * returns a list of Secrets for ServiceAccount
  */
-export const handleGetServiceAccountSecretsOptions = (options: Options<HandleGetServiceAccountSecretsData>) => queryOptions<HandleGetServiceAccountSecretsResponse, AxiosError<DefaultError>, HandleGetServiceAccountSecretsResponse, ReturnType<typeof handleGetServiceAccountSecretsQueryKey>>({
+export const getServiceAccountSecretsOptions = (options: Options<GetServiceAccountSecretsData>) => queryOptions<GetServiceAccountSecretsResponse, AxiosError<DefaultError>, GetServiceAccountSecretsResponse, ReturnType<typeof getServiceAccountSecretsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetServiceAccountSecrets({
+        const { data } = await getServiceAccountSecrets({
             ...options,
             ...queryKey[0],
             signal,
@@ -5520,26 +5520,26 @@ export const handleGetServiceAccountSecretsOptions = (options: Options<HandleGet
         });
         return data;
     },
-    queryKey: handleGetServiceAccountSecretsQueryKey(options)
+    queryKey: getServiceAccountSecretsQueryKey(options)
 });
 
-export const handleGetServiceAccountSecretsInfiniteQueryKey = (options: Options<HandleGetServiceAccountSecretsData>): QueryKey<Options<HandleGetServiceAccountSecretsData>> => createQueryKey('handleGetServiceAccountSecrets', options, true);
+export const getServiceAccountSecretsInfiniteQueryKey = (options: Options<GetServiceAccountSecretsData>): QueryKey<Options<GetServiceAccountSecretsData>> => createQueryKey('getServiceAccountSecrets', options, true);
 
 /**
  * returns a list of Secrets for ServiceAccount
  */
-export const handleGetServiceAccountSecretsInfiniteOptions = (options: Options<HandleGetServiceAccountSecretsData>) => infiniteQueryOptions<HandleGetServiceAccountSecretsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetServiceAccountSecretsResponse>, QueryKey<Options<HandleGetServiceAccountSecretsData>>, string | Pick<QueryKey<Options<HandleGetServiceAccountSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getServiceAccountSecretsInfiniteOptions = (options: Options<GetServiceAccountSecretsData>) => infiniteQueryOptions<GetServiceAccountSecretsResponse, AxiosError<DefaultError>, InfiniteData<GetServiceAccountSecretsResponse>, QueryKey<Options<GetServiceAccountSecretsData>>, string | Pick<QueryKey<Options<GetServiceAccountSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetServiceAccountSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetServiceAccountSecretsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetServiceAccountSecrets({
+        const { data } = await getServiceAccountSecrets({
             ...options,
             ...params,
             signal,
@@ -5547,17 +5547,17 @@ export const handleGetServiceAccountSecretsInfiniteOptions = (options: Options<H
         });
         return data;
     },
-    queryKey: handleGetServiceAccountSecretsInfiniteQueryKey(options)
+    queryKey: getServiceAccountSecretsInfiniteQueryKey(options)
 });
 
-export const handleGetStatefulSetListQueryKey = (options?: Options<HandleGetStatefulSetListData>) => createQueryKey('handleGetStatefulSetList', options);
+export const getAllStatefulSetsQueryKey = (options?: Options<GetAllStatefulSetsData>) => createQueryKey('getAllStatefulSets', options);
 
 /**
  * returns a list of StatefulSets from all namespaces
  */
-export const handleGetStatefulSetListOptions = (options?: Options<HandleGetStatefulSetListData>) => queryOptions<HandleGetStatefulSetListResponse, AxiosError<DefaultError>, HandleGetStatefulSetListResponse, ReturnType<typeof handleGetStatefulSetListQueryKey>>({
+export const getAllStatefulSetsOptions = (options?: Options<GetAllStatefulSetsData>) => queryOptions<GetAllStatefulSetsResponse, AxiosError<DefaultError>, GetAllStatefulSetsResponse, ReturnType<typeof getAllStatefulSetsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetStatefulSetList({
+        const { data } = await getAllStatefulSets({
             ...options,
             ...queryKey[0],
             signal,
@@ -5565,26 +5565,26 @@ export const handleGetStatefulSetListOptions = (options?: Options<HandleGetState
         });
         return data;
     },
-    queryKey: handleGetStatefulSetListQueryKey(options)
+    queryKey: getAllStatefulSetsQueryKey(options)
 });
 
-export const handleGetStatefulSetListInfiniteQueryKey = (options?: Options<HandleGetStatefulSetListData>): QueryKey<Options<HandleGetStatefulSetListData>> => createQueryKey('handleGetStatefulSetList', options, true);
+export const getAllStatefulSetsInfiniteQueryKey = (options?: Options<GetAllStatefulSetsData>): QueryKey<Options<GetAllStatefulSetsData>> => createQueryKey('getAllStatefulSets', options, true);
 
 /**
  * returns a list of StatefulSets from all namespaces
  */
-export const handleGetStatefulSetListInfiniteOptions = (options?: Options<HandleGetStatefulSetListData>) => infiniteQueryOptions<HandleGetStatefulSetListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetStatefulSetListResponse>, QueryKey<Options<HandleGetStatefulSetListData>>, string | Pick<QueryKey<Options<HandleGetStatefulSetListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getAllStatefulSetsInfiniteOptions = (options?: Options<GetAllStatefulSetsData>) => infiniteQueryOptions<GetAllStatefulSetsResponse, AxiosError<DefaultError>, InfiniteData<GetAllStatefulSetsResponse>, QueryKey<Options<GetAllStatefulSetsData>>, string | Pick<QueryKey<Options<GetAllStatefulSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetStatefulSetListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetAllStatefulSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetStatefulSetList({
+        const { data } = await getAllStatefulSets({
             ...options,
             ...params,
             signal,
@@ -5592,17 +5592,17 @@ export const handleGetStatefulSetListInfiniteOptions = (options?: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetStatefulSetListInfiniteQueryKey(options)
+    queryKey: getAllStatefulSetsInfiniteQueryKey(options)
 });
 
-export const handleGetStatefulSetList2QueryKey = (options: Options<HandleGetStatefulSetList2Data>) => createQueryKey('handleGetStatefulSetList2', options);
+export const getStatefulSetsQueryKey = (options: Options<GetStatefulSetsData>) => createQueryKey('getStatefulSets', options);
 
 /**
  * returns a list of StatefulSets in a namespaces
  */
-export const handleGetStatefulSetList2Options = (options: Options<HandleGetStatefulSetList2Data>) => queryOptions<HandleGetStatefulSetList2Response, AxiosError<DefaultError>, HandleGetStatefulSetList2Response, ReturnType<typeof handleGetStatefulSetList2QueryKey>>({
+export const getStatefulSetsOptions = (options: Options<GetStatefulSetsData>) => queryOptions<GetStatefulSetsResponse, AxiosError<DefaultError>, GetStatefulSetsResponse, ReturnType<typeof getStatefulSetsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetStatefulSetList2({
+        const { data } = await getStatefulSets({
             ...options,
             ...queryKey[0],
             signal,
@@ -5610,26 +5610,26 @@ export const handleGetStatefulSetList2Options = (options: Options<HandleGetState
         });
         return data;
     },
-    queryKey: handleGetStatefulSetList2QueryKey(options)
+    queryKey: getStatefulSetsQueryKey(options)
 });
 
-export const handleGetStatefulSetList2InfiniteQueryKey = (options: Options<HandleGetStatefulSetList2Data>): QueryKey<Options<HandleGetStatefulSetList2Data>> => createQueryKey('handleGetStatefulSetList2', options, true);
+export const getStatefulSetsInfiniteQueryKey = (options: Options<GetStatefulSetsData>): QueryKey<Options<GetStatefulSetsData>> => createQueryKey('getStatefulSets', options, true);
 
 /**
  * returns a list of StatefulSets in a namespaces
  */
-export const handleGetStatefulSetList2InfiniteOptions = (options: Options<HandleGetStatefulSetList2Data>) => infiniteQueryOptions<HandleGetStatefulSetList2Response, AxiosError<DefaultError>, InfiniteData<HandleGetStatefulSetList2Response>, QueryKey<Options<HandleGetStatefulSetList2Data>>, string | Pick<QueryKey<Options<HandleGetStatefulSetList2Data>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getStatefulSetsInfiniteOptions = (options: Options<GetStatefulSetsData>) => infiniteQueryOptions<GetStatefulSetsResponse, AxiosError<DefaultError>, InfiniteData<GetStatefulSetsResponse>, QueryKey<Options<GetStatefulSetsData>>, string | Pick<QueryKey<Options<GetStatefulSetsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetStatefulSetList2Data>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetStatefulSetsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetStatefulSetList2({
+        const { data } = await getStatefulSets({
             ...options,
             ...params,
             signal,
@@ -5637,17 +5637,17 @@ export const handleGetStatefulSetList2InfiniteOptions = (options: Options<Handle
         });
         return data;
     },
-    queryKey: handleGetStatefulSetList2InfiniteQueryKey(options)
+    queryKey: getStatefulSetsInfiniteQueryKey(options)
 });
 
-export const handleGetStatefulSetDetailQueryKey = (options: Options<HandleGetStatefulSetDetailData>) => createQueryKey('handleGetStatefulSetDetail', options);
+export const getStatefulSetQueryKey = (options: Options<GetStatefulSetData>) => createQueryKey('getStatefulSet', options);
 
 /**
  * returns detailed information about StatefulSets
  */
-export const handleGetStatefulSetDetailOptions = (options: Options<HandleGetStatefulSetDetailData>) => queryOptions<HandleGetStatefulSetDetailResponse, AxiosError<DefaultError>, HandleGetStatefulSetDetailResponse, ReturnType<typeof handleGetStatefulSetDetailQueryKey>>({
+export const getStatefulSetOptions = (options: Options<GetStatefulSetData>) => queryOptions<GetStatefulSetResponse, AxiosError<DefaultError>, GetStatefulSetResponse, ReturnType<typeof getStatefulSetQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetStatefulSetDetail({
+        const { data } = await getStatefulSet({
             ...options,
             ...queryKey[0],
             signal,
@@ -5655,26 +5655,26 @@ export const handleGetStatefulSetDetailOptions = (options: Options<HandleGetStat
         });
         return data;
     },
-    queryKey: handleGetStatefulSetDetailQueryKey(options)
+    queryKey: getStatefulSetQueryKey(options)
 });
 
-export const handleGetStatefulSetDetailInfiniteQueryKey = (options: Options<HandleGetStatefulSetDetailData>): QueryKey<Options<HandleGetStatefulSetDetailData>> => createQueryKey('handleGetStatefulSetDetail', options, true);
+export const getStatefulSetInfiniteQueryKey = (options: Options<GetStatefulSetData>): QueryKey<Options<GetStatefulSetData>> => createQueryKey('getStatefulSet', options, true);
 
 /**
  * returns detailed information about StatefulSets
  */
-export const handleGetStatefulSetDetailInfiniteOptions = (options: Options<HandleGetStatefulSetDetailData>) => infiniteQueryOptions<HandleGetStatefulSetDetailResponse, AxiosError<DefaultError>, InfiniteData<HandleGetStatefulSetDetailResponse>, QueryKey<Options<HandleGetStatefulSetDetailData>>, string | Pick<QueryKey<Options<HandleGetStatefulSetDetailData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getStatefulSetInfiniteOptions = (options: Options<GetStatefulSetData>) => infiniteQueryOptions<GetStatefulSetResponse, AxiosError<DefaultError>, InfiniteData<GetStatefulSetResponse>, QueryKey<Options<GetStatefulSetData>>, string | Pick<QueryKey<Options<GetStatefulSetData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetStatefulSetDetailData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetStatefulSetData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetStatefulSetDetail({
+        const { data } = await getStatefulSet({
             ...options,
             ...params,
             signal,
@@ -5682,17 +5682,17 @@ export const handleGetStatefulSetDetailInfiniteOptions = (options: Options<Handl
         });
         return data;
     },
-    queryKey: handleGetStatefulSetDetailInfiniteQueryKey(options)
+    queryKey: getStatefulSetInfiniteQueryKey(options)
 });
 
-export const handleGetStatefulSetEventsQueryKey = (options: Options<HandleGetStatefulSetEventsData>) => createQueryKey('handleGetStatefulSetEvents', options);
+export const getStatefulSetEventsQueryKey = (options: Options<GetStatefulSetEventsData>) => createQueryKey('getStatefulSetEvents', options);
 
 /**
  * returns a list of Events for StatefulSets
  */
-export const handleGetStatefulSetEventsOptions = (options: Options<HandleGetStatefulSetEventsData>) => queryOptions<HandleGetStatefulSetEventsResponse, AxiosError<DefaultError>, HandleGetStatefulSetEventsResponse, ReturnType<typeof handleGetStatefulSetEventsQueryKey>>({
+export const getStatefulSetEventsOptions = (options: Options<GetStatefulSetEventsData>) => queryOptions<GetStatefulSetEventsResponse, AxiosError<DefaultError>, GetStatefulSetEventsResponse, ReturnType<typeof getStatefulSetEventsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetStatefulSetEvents({
+        const { data } = await getStatefulSetEvents({
             ...options,
             ...queryKey[0],
             signal,
@@ -5700,26 +5700,26 @@ export const handleGetStatefulSetEventsOptions = (options: Options<HandleGetStat
         });
         return data;
     },
-    queryKey: handleGetStatefulSetEventsQueryKey(options)
+    queryKey: getStatefulSetEventsQueryKey(options)
 });
 
-export const handleGetStatefulSetEventsInfiniteQueryKey = (options: Options<HandleGetStatefulSetEventsData>): QueryKey<Options<HandleGetStatefulSetEventsData>> => createQueryKey('handleGetStatefulSetEvents', options, true);
+export const getStatefulSetEventsInfiniteQueryKey = (options: Options<GetStatefulSetEventsData>): QueryKey<Options<GetStatefulSetEventsData>> => createQueryKey('getStatefulSetEvents', options, true);
 
 /**
  * returns a list of Events for StatefulSets
  */
-export const handleGetStatefulSetEventsInfiniteOptions = (options: Options<HandleGetStatefulSetEventsData>) => infiniteQueryOptions<HandleGetStatefulSetEventsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetStatefulSetEventsResponse>, QueryKey<Options<HandleGetStatefulSetEventsData>>, string | Pick<QueryKey<Options<HandleGetStatefulSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getStatefulSetEventsInfiniteOptions = (options: Options<GetStatefulSetEventsData>) => infiniteQueryOptions<GetStatefulSetEventsResponse, AxiosError<DefaultError>, InfiniteData<GetStatefulSetEventsResponse>, QueryKey<Options<GetStatefulSetEventsData>>, string | Pick<QueryKey<Options<GetStatefulSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetStatefulSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetStatefulSetEventsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetStatefulSetEvents({
+        const { data } = await getStatefulSetEvents({
             ...options,
             ...params,
             signal,
@@ -5727,17 +5727,17 @@ export const handleGetStatefulSetEventsInfiniteOptions = (options: Options<Handl
         });
         return data;
     },
-    queryKey: handleGetStatefulSetEventsInfiniteQueryKey(options)
+    queryKey: getStatefulSetEventsInfiniteQueryKey(options)
 });
 
-export const handleGetStatefulSetPodsQueryKey = (options: Options<HandleGetStatefulSetPodsData>) => createQueryKey('handleGetStatefulSetPods', options);
+export const getStatefulSetPodsQueryKey = (options: Options<GetStatefulSetPodsData>) => createQueryKey('getStatefulSetPods', options);
 
 /**
  * returns  a list of Pods for StatefulSets
  */
-export const handleGetStatefulSetPodsOptions = (options: Options<HandleGetStatefulSetPodsData>) => queryOptions<HandleGetStatefulSetPodsResponse, AxiosError<DefaultError>, HandleGetStatefulSetPodsResponse, ReturnType<typeof handleGetStatefulSetPodsQueryKey>>({
+export const getStatefulSetPodsOptions = (options: Options<GetStatefulSetPodsData>) => queryOptions<GetStatefulSetPodsResponse, AxiosError<DefaultError>, GetStatefulSetPodsResponse, ReturnType<typeof getStatefulSetPodsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetStatefulSetPods({
+        const { data } = await getStatefulSetPods({
             ...options,
             ...queryKey[0],
             signal,
@@ -5745,26 +5745,26 @@ export const handleGetStatefulSetPodsOptions = (options: Options<HandleGetStatef
         });
         return data;
     },
-    queryKey: handleGetStatefulSetPodsQueryKey(options)
+    queryKey: getStatefulSetPodsQueryKey(options)
 });
 
-export const handleGetStatefulSetPodsInfiniteQueryKey = (options: Options<HandleGetStatefulSetPodsData>): QueryKey<Options<HandleGetStatefulSetPodsData>> => createQueryKey('handleGetStatefulSetPods', options, true);
+export const getStatefulSetPodsInfiniteQueryKey = (options: Options<GetStatefulSetPodsData>): QueryKey<Options<GetStatefulSetPodsData>> => createQueryKey('getStatefulSetPods', options, true);
 
 /**
  * returns  a list of Pods for StatefulSets
  */
-export const handleGetStatefulSetPodsInfiniteOptions = (options: Options<HandleGetStatefulSetPodsData>) => infiniteQueryOptions<HandleGetStatefulSetPodsResponse, AxiosError<DefaultError>, InfiniteData<HandleGetStatefulSetPodsResponse>, QueryKey<Options<HandleGetStatefulSetPodsData>>, string | Pick<QueryKey<Options<HandleGetStatefulSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getStatefulSetPodsInfiniteOptions = (options: Options<GetStatefulSetPodsData>) => infiniteQueryOptions<GetStatefulSetPodsResponse, AxiosError<DefaultError>, InfiniteData<GetStatefulSetPodsResponse>, QueryKey<Options<GetStatefulSetPodsData>>, string | Pick<QueryKey<Options<GetStatefulSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetStatefulSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetStatefulSetPodsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetStatefulSetPods({
+        const { data } = await getStatefulSetPods({
             ...options,
             ...params,
             signal,
@@ -5772,16 +5772,16 @@ export const handleGetStatefulSetPodsInfiniteOptions = (options: Options<HandleG
         });
         return data;
     },
-    queryKey: handleGetStatefulSetPodsInfiniteQueryKey(options)
+    queryKey: getStatefulSetPodsInfiniteQueryKey(options)
 });
 
 /**
  * rollout restart of the Daemon Set
  */
-export const handleStatefulSetRestartMutation = (options?: Partial<Options<HandleStatefulSetRestartData>>): UseMutationOptions<HandleStatefulSetRestartResponse, AxiosError<DefaultError>, Options<HandleStatefulSetRestartData>> => {
-    const mutationOptions: UseMutationOptions<HandleStatefulSetRestartResponse, AxiosError<DefaultError>, Options<HandleStatefulSetRestartData>> = {
+export const restartStatefulSetMutation = (options?: Partial<Options<RestartStatefulSetData>>): UseMutationOptions<RestartStatefulSetResponse, AxiosError<DefaultError>, Options<RestartStatefulSetData>> => {
+    const mutationOptions: UseMutationOptions<RestartStatefulSetResponse, AxiosError<DefaultError>, Options<RestartStatefulSetData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await handleStatefulSetRestart({
+            const { data } = await restartStatefulSet({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -5792,14 +5792,14 @@ export const handleStatefulSetRestartMutation = (options?: Partial<Options<Handl
     return mutationOptions;
 };
 
-export const handleGetStorageClassListQueryKey = (options?: Options<HandleGetStorageClassListData>) => createQueryKey('handleGetStorageClassList', options);
+export const getStorageClassesQueryKey = (options?: Options<GetStorageClassesData>) => createQueryKey('getStorageClasses', options);
 
 /**
  * returns a list of StorageClasses
  */
-export const handleGetStorageClassListOptions = (options?: Options<HandleGetStorageClassListData>) => queryOptions<HandleGetStorageClassListResponse, AxiosError<DefaultError>, HandleGetStorageClassListResponse, ReturnType<typeof handleGetStorageClassListQueryKey>>({
+export const getStorageClassesOptions = (options?: Options<GetStorageClassesData>) => queryOptions<GetStorageClassesResponse, AxiosError<DefaultError>, GetStorageClassesResponse, ReturnType<typeof getStorageClassesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetStorageClassList({
+        const { data } = await getStorageClasses({
             ...options,
             ...queryKey[0],
             signal,
@@ -5807,26 +5807,26 @@ export const handleGetStorageClassListOptions = (options?: Options<HandleGetStor
         });
         return data;
     },
-    queryKey: handleGetStorageClassListQueryKey(options)
+    queryKey: getStorageClassesQueryKey(options)
 });
 
-export const handleGetStorageClassListInfiniteQueryKey = (options?: Options<HandleGetStorageClassListData>): QueryKey<Options<HandleGetStorageClassListData>> => createQueryKey('handleGetStorageClassList', options, true);
+export const getStorageClassesInfiniteQueryKey = (options?: Options<GetStorageClassesData>): QueryKey<Options<GetStorageClassesData>> => createQueryKey('getStorageClasses', options, true);
 
 /**
  * returns a list of StorageClasses
  */
-export const handleGetStorageClassListInfiniteOptions = (options?: Options<HandleGetStorageClassListData>) => infiniteQueryOptions<HandleGetStorageClassListResponse, AxiosError<DefaultError>, InfiniteData<HandleGetStorageClassListResponse>, QueryKey<Options<HandleGetStorageClassListData>>, string | Pick<QueryKey<Options<HandleGetStorageClassListData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getStorageClassesInfiniteOptions = (options?: Options<GetStorageClassesData>) => infiniteQueryOptions<GetStorageClassesResponse, AxiosError<DefaultError>, InfiniteData<GetStorageClassesResponse>, QueryKey<Options<GetStorageClassesData>>, string | Pick<QueryKey<Options<GetStorageClassesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetStorageClassListData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetStorageClassesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetStorageClassList({
+        const { data } = await getStorageClasses({
             ...options,
             ...params,
             signal,
@@ -5834,17 +5834,17 @@ export const handleGetStorageClassListInfiniteOptions = (options?: Options<Handl
         });
         return data;
     },
-    queryKey: handleGetStorageClassListInfiniteQueryKey(options)
+    queryKey: getStorageClassesInfiniteQueryKey(options)
 });
 
-export const handleGetStorageClassQueryKey = (options: Options<HandleGetStorageClassData>) => createQueryKey('handleGetStorageClass', options);
+export const getStorageClassQueryKey = (options: Options<GetStorageClassData>) => createQueryKey('getStorageClass', options);
 
 /**
  * returns detailed information about StorageClass
  */
-export const handleGetStorageClassOptions = (options: Options<HandleGetStorageClassData>) => queryOptions<HandleGetStorageClassResponse, AxiosError<DefaultError>, HandleGetStorageClassResponse, ReturnType<typeof handleGetStorageClassQueryKey>>({
+export const getStorageClassOptions = (options: Options<GetStorageClassData>) => queryOptions<GetStorageClassResponse, AxiosError<DefaultError>, GetStorageClassResponse, ReturnType<typeof getStorageClassQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetStorageClass({
+        const { data } = await getStorageClass({
             ...options,
             ...queryKey[0],
             signal,
@@ -5852,26 +5852,26 @@ export const handleGetStorageClassOptions = (options: Options<HandleGetStorageCl
         });
         return data;
     },
-    queryKey: handleGetStorageClassQueryKey(options)
+    queryKey: getStorageClassQueryKey(options)
 });
 
-export const handleGetStorageClassInfiniteQueryKey = (options: Options<HandleGetStorageClassData>): QueryKey<Options<HandleGetStorageClassData>> => createQueryKey('handleGetStorageClass', options, true);
+export const getStorageClassInfiniteQueryKey = (options: Options<GetStorageClassData>): QueryKey<Options<GetStorageClassData>> => createQueryKey('getStorageClass', options, true);
 
 /**
  * returns detailed information about StorageClass
  */
-export const handleGetStorageClassInfiniteOptions = (options: Options<HandleGetStorageClassData>) => infiniteQueryOptions<HandleGetStorageClassResponse, AxiosError<DefaultError>, InfiniteData<HandleGetStorageClassResponse>, QueryKey<Options<HandleGetStorageClassData>>, string | Pick<QueryKey<Options<HandleGetStorageClassData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getStorageClassInfiniteOptions = (options: Options<GetStorageClassData>) => infiniteQueryOptions<GetStorageClassResponse, AxiosError<DefaultError>, InfiniteData<GetStorageClassResponse>, QueryKey<Options<GetStorageClassData>>, string | Pick<QueryKey<Options<GetStorageClassData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetStorageClassData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetStorageClassData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetStorageClass({
+        const { data } = await getStorageClass({
             ...options,
             ...params,
             signal,
@@ -5879,17 +5879,17 @@ export const handleGetStorageClassInfiniteOptions = (options: Options<HandleGetS
         });
         return data;
     },
-    queryKey: handleGetStorageClassInfiniteQueryKey(options)
+    queryKey: getStorageClassInfiniteQueryKey(options)
 });
 
-export const handleGetStorageClassPersistentVolumesQueryKey = (options: Options<HandleGetStorageClassPersistentVolumesData>) => createQueryKey('handleGetStorageClassPersistentVolumes', options);
+export const getStorageClassPersistentVolumesQueryKey = (options: Options<GetStorageClassPersistentVolumesData>) => createQueryKey('getStorageClassPersistentVolumes', options);
 
 /**
  * returns a list of PersistentVolumes assigned to StorageClass
  */
-export const handleGetStorageClassPersistentVolumesOptions = (options: Options<HandleGetStorageClassPersistentVolumesData>) => queryOptions<HandleGetStorageClassPersistentVolumesResponse, AxiosError<DefaultError>, HandleGetStorageClassPersistentVolumesResponse, ReturnType<typeof handleGetStorageClassPersistentVolumesQueryKey>>({
+export const getStorageClassPersistentVolumesOptions = (options: Options<GetStorageClassPersistentVolumesData>) => queryOptions<GetStorageClassPersistentVolumesResponse, AxiosError<DefaultError>, GetStorageClassPersistentVolumesResponse, ReturnType<typeof getStorageClassPersistentVolumesQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetStorageClassPersistentVolumes({
+        const { data } = await getStorageClassPersistentVolumes({
             ...options,
             ...queryKey[0],
             signal,
@@ -5897,26 +5897,26 @@ export const handleGetStorageClassPersistentVolumesOptions = (options: Options<H
         });
         return data;
     },
-    queryKey: handleGetStorageClassPersistentVolumesQueryKey(options)
+    queryKey: getStorageClassPersistentVolumesQueryKey(options)
 });
 
-export const handleGetStorageClassPersistentVolumesInfiniteQueryKey = (options: Options<HandleGetStorageClassPersistentVolumesData>): QueryKey<Options<HandleGetStorageClassPersistentVolumesData>> => createQueryKey('handleGetStorageClassPersistentVolumes', options, true);
+export const getStorageClassPersistentVolumesInfiniteQueryKey = (options: Options<GetStorageClassPersistentVolumesData>): QueryKey<Options<GetStorageClassPersistentVolumesData>> => createQueryKey('getStorageClassPersistentVolumes', options, true);
 
 /**
  * returns a list of PersistentVolumes assigned to StorageClass
  */
-export const handleGetStorageClassPersistentVolumesInfiniteOptions = (options: Options<HandleGetStorageClassPersistentVolumesData>) => infiniteQueryOptions<HandleGetStorageClassPersistentVolumesResponse, AxiosError<DefaultError>, InfiniteData<HandleGetStorageClassPersistentVolumesResponse>, QueryKey<Options<HandleGetStorageClassPersistentVolumesData>>, string | Pick<QueryKey<Options<HandleGetStorageClassPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getStorageClassPersistentVolumesInfiniteOptions = (options: Options<GetStorageClassPersistentVolumesData>) => infiniteQueryOptions<GetStorageClassPersistentVolumesResponse, AxiosError<DefaultError>, InfiniteData<GetStorageClassPersistentVolumesResponse>, QueryKey<Options<GetStorageClassPersistentVolumesData>>, string | Pick<QueryKey<Options<GetStorageClassPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetStorageClassPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetStorageClassPersistentVolumesData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetStorageClassPersistentVolumes({
+        const { data } = await getStorageClassPersistentVolumes({
             ...options,
             ...params,
             signal,
@@ -5924,17 +5924,17 @@ export const handleGetStorageClassPersistentVolumesInfiniteOptions = (options: O
         });
         return data;
     },
-    queryKey: handleGetStorageClassPersistentVolumesInfiniteQueryKey(options)
+    queryKey: getStorageClassPersistentVolumesInfiniteQueryKey(options)
 });
 
-export const handleGetHorizontalPodAutoscalerListForResourceQueryKey = (options: Options<HandleGetHorizontalPodAutoscalerListForResourceData>) => createQueryKey('handleGetHorizontalPodAutoscalerListForResource', options);
+export const getHorizontalPodAutoscalersForResourceQueryKey = (options: Options<GetHorizontalPodAutoscalersForResourceData>) => createQueryKey('getHorizontalPodAutoscalersForResource', options);
 
 /**
  * returns a list of HorizontalPodAutoscalers for resource
  */
-export const handleGetHorizontalPodAutoscalerListForResourceOptions = (options: Options<HandleGetHorizontalPodAutoscalerListForResourceData>) => queryOptions<HandleGetHorizontalPodAutoscalerListForResourceResponse, AxiosError<DefaultError>, HandleGetHorizontalPodAutoscalerListForResourceResponse, ReturnType<typeof handleGetHorizontalPodAutoscalerListForResourceQueryKey>>({
+export const getHorizontalPodAutoscalersForResourceOptions = (options: Options<GetHorizontalPodAutoscalersForResourceData>) => queryOptions<GetHorizontalPodAutoscalersForResourceResponse, AxiosError<DefaultError>, GetHorizontalPodAutoscalersForResourceResponse, ReturnType<typeof getHorizontalPodAutoscalersForResourceQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
-        const { data } = await handleGetHorizontalPodAutoscalerListForResource({
+        const { data } = await getHorizontalPodAutoscalersForResource({
             ...options,
             ...queryKey[0],
             signal,
@@ -5942,26 +5942,26 @@ export const handleGetHorizontalPodAutoscalerListForResourceOptions = (options: 
         });
         return data;
     },
-    queryKey: handleGetHorizontalPodAutoscalerListForResourceQueryKey(options)
+    queryKey: getHorizontalPodAutoscalersForResourceQueryKey(options)
 });
 
-export const handleGetHorizontalPodAutoscalerListForResourceInfiniteQueryKey = (options: Options<HandleGetHorizontalPodAutoscalerListForResourceData>): QueryKey<Options<HandleGetHorizontalPodAutoscalerListForResourceData>> => createQueryKey('handleGetHorizontalPodAutoscalerListForResource', options, true);
+export const getHorizontalPodAutoscalersForResourceInfiniteQueryKey = (options: Options<GetHorizontalPodAutoscalersForResourceData>): QueryKey<Options<GetHorizontalPodAutoscalersForResourceData>> => createQueryKey('getHorizontalPodAutoscalersForResource', options, true);
 
 /**
  * returns a list of HorizontalPodAutoscalers for resource
  */
-export const handleGetHorizontalPodAutoscalerListForResourceInfiniteOptions = (options: Options<HandleGetHorizontalPodAutoscalerListForResourceData>) => infiniteQueryOptions<HandleGetHorizontalPodAutoscalerListForResourceResponse, AxiosError<DefaultError>, InfiniteData<HandleGetHorizontalPodAutoscalerListForResourceResponse>, QueryKey<Options<HandleGetHorizontalPodAutoscalerListForResourceData>>, string | Pick<QueryKey<Options<HandleGetHorizontalPodAutoscalerListForResourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+export const getHorizontalPodAutoscalersForResourceInfiniteOptions = (options: Options<GetHorizontalPodAutoscalersForResourceData>) => infiniteQueryOptions<GetHorizontalPodAutoscalersForResourceResponse, AxiosError<DefaultError>, InfiniteData<GetHorizontalPodAutoscalersForResourceResponse>, QueryKey<Options<GetHorizontalPodAutoscalersForResourceData>>, string | Pick<QueryKey<Options<GetHorizontalPodAutoscalersForResourceData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
 {
     queryFn: async ({ pageParam, queryKey, signal }) => {
         // @ts-ignore
-        const page: Pick<QueryKey<Options<HandleGetHorizontalPodAutoscalerListForResourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+        const page: Pick<QueryKey<Options<GetHorizontalPodAutoscalersForResourceData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
             query: {
                 page: pageParam
             }
         };
         const params = createInfiniteParams(queryKey, page);
-        const { data } = await handleGetHorizontalPodAutoscalerListForResource({
+        const { data } = await getHorizontalPodAutoscalersForResource({
             ...options,
             ...params,
             signal,
@@ -5969,5 +5969,5 @@ export const handleGetHorizontalPodAutoscalerListForResourceInfiniteOptions = (o
         });
         return data;
     },
-    queryKey: handleGetHorizontalPodAutoscalerListForResourceInfiniteQueryKey(options)
+    queryKey: getHorizontalPodAutoscalersForResourceInfiniteQueryKey(options)
 });
