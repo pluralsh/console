@@ -3909,6 +3909,62 @@ func (_c *ConsoleClientMock_GetGroup_Call) RunAndReturn(run func(string) (*clien
 	return _c
 }
 
+// GetGroupId provides a mock function with given fields: name
+func (_m *ConsoleClientMock) GetGroupId(name string) (string, error) {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetGroupId")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
+		return rf(name)
+	}
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(name)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetGroupId_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetGroupId'
+type ConsoleClientMock_GetGroupId_Call struct {
+	*mock.Call
+}
+
+// GetGroupId is a helper method to define mock.On call
+//   - name string
+func (_e *ConsoleClientMock_Expecter) GetGroupId(name interface{}) *ConsoleClientMock_GetGroupId_Call {
+	return &ConsoleClientMock_GetGroupId_Call{Call: _e.mock.On("GetGroupId", name)}
+}
+
+func (_c *ConsoleClientMock_GetGroupId_Call) Run(run func(name string)) *ConsoleClientMock_GetGroupId_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetGroupId_Call) Return(_a0 string, _a1 error) *ConsoleClientMock_GetGroupId_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetGroupId_Call) RunAndReturn(run func(string) (string, error)) *ConsoleClientMock_GetGroupId_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetGroupTiny provides a mock function with given fields: name
 func (_m *ConsoleClientMock) GetGroupTiny(name string) (*client.GetGroupTiny_Group, error) {
 	ret := _m.Called(name)
@@ -5905,6 +5961,62 @@ func (_c *ConsoleClientMock_GetUser_Call) Return(_a0 *client.UserFragment, _a1 e
 }
 
 func (_c *ConsoleClientMock_GetUser_Call) RunAndReturn(run func(string) (*client.UserFragment, error)) *ConsoleClientMock_GetUser_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetUserId provides a mock function with given fields: email
+func (_m *ConsoleClientMock) GetUserId(email string) (string, error) {
+	ret := _m.Called(email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserId")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
+		return rf(email)
+	}
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(email)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetUserId_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserId'
+type ConsoleClientMock_GetUserId_Call struct {
+	*mock.Call
+}
+
+// GetUserId is a helper method to define mock.On call
+//   - email string
+func (_e *ConsoleClientMock_Expecter) GetUserId(email interface{}) *ConsoleClientMock_GetUserId_Call {
+	return &ConsoleClientMock_GetUserId_Call{Call: _e.mock.On("GetUserId", email)}
+}
+
+func (_c *ConsoleClientMock_GetUserId_Call) Run(run func(email string)) *ConsoleClientMock_GetUserId_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetUserId_Call) Return(_a0 string, _a1 error) *ConsoleClientMock_GetUserId_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetUserId_Call) RunAndReturn(run func(string) (string, error)) *ConsoleClientMock_GetUserId_Call {
 	_c.Call.Return(run)
 	return _c
 }
