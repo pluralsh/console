@@ -10,7 +10,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a non-namespaced resource",
-        "operationId": "handleGetResource",
+        "operationId": "GetResource",
         "parameters": [
           {
             "type": "string",
@@ -76,7 +76,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "creates or updates a non-namespaced resource",
-        "operationId": "handlePutResource",
+        "operationId": "UpdateResource",
         "parameters": [
           {
             "type": "string",
@@ -147,7 +147,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "deletes a non-namespaced resource",
-        "operationId": "handleDeleteResource",
+        "operationId": "DeleteResource",
         "parameters": [
           {
             "type": "string",
@@ -224,7 +224,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns unstructured resource from a namespace",
-        "operationId": "handleGetResource",
+        "operationId": "GetNamespacedResource",
         "parameters": [
           {
             "type": "string",
@@ -297,7 +297,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "creates or updates a resource in a namespace",
-        "operationId": "handlePutResource",
+        "operationId": "UpdateNamespacedResource",
         "parameters": [
           {
             "type": "string",
@@ -375,7 +375,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "deletes a resource from a namespace",
-        "operationId": "handleDeleteResource",
+        "operationId": "DeleteNamespacedResource",
         "parameters": [
           {
             "type": "string",
@@ -459,7 +459,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "creates an application based on provided deployment.AppDeploymentSpec",
-        "operationId": "handleDeploy",
+        "operationId": "CreateAppDeployment",
         "parameters": [
           {
             "type": "string",
@@ -521,7 +521,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of available protocols for the service",
-        "operationId": "handleGetAvailableProtocols",
+        "operationId": "GetAvailableProtocols",
         "parameters": [
           {
             "type": "string",
@@ -575,7 +575,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "checks if provided image is valid",
-        "operationId": "handleImageReferenceValidity",
+        "operationId": "ValidateImageReference",
         "parameters": [
           {
             "type": "string",
@@ -637,7 +637,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "checks if provided name is valid",
-        "operationId": "handleNameValidity",
+        "operationId": "ValidateAppName",
         "parameters": [
           {
             "type": "string",
@@ -699,7 +699,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "checks if provided service protocol is valid",
-        "operationId": "handleProtocolValidity",
+        "operationId": "ValidateProtocol",
         "parameters": [
           {
             "type": "string",
@@ -761,7 +761,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "create an application from file",
-        "operationId": "handleDeployFromFile",
+        "operationId": "CreateAppDeploymentFromFile",
         "parameters": [
           {
             "type": "string",
@@ -823,7 +823,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of ClusterRoles",
-        "operationId": "handleGetClusterRoleList",
+        "operationId": "GetClusterRoles",
         "parameters": [
           {
             "type": "string",
@@ -877,7 +877,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about ClusterRole",
-        "operationId": "handleGetClusterRoleDetail",
+        "operationId": "GetClusterRole",
         "parameters": [
           {
             "type": "string",
@@ -938,7 +938,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of ClusterRoleBindings",
-        "operationId": "handleGetClusterRoleBindingList",
+        "operationId": "GetClusterRoleBindings",
         "parameters": [
           {
             "type": "string",
@@ -992,7 +992,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about ClusterRoleBinding",
-        "operationId": "handleGetClusterRoleBindingDetail",
+        "operationId": "GetClusterRoleBinding",
         "parameters": [
           {
             "type": "string",
@@ -1053,7 +1053,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of ConfigMaps from all namespaces",
-        "operationId": "handleGetConfigMapList",
+        "operationId": "GetAllConfigMaps",
         "parameters": [
           {
             "type": "string",
@@ -1107,7 +1107,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of ConfigMaps in a namespaces",
-        "operationId": "handleGetConfigMapList",
+        "operationId": "GetConfigMaps",
         "parameters": [
           {
             "type": "string",
@@ -1168,7 +1168,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about ConfigMap",
-        "operationId": "handleGetConfigMapDetail",
+        "operationId": "GetConfigMap",
         "parameters": [
           {
             "type": "string",
@@ -1236,7 +1236,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of CustomResourceDefinition",
-        "operationId": "handleGetCustomResourceDefinitionList",
+        "operationId": "GetCustomResourceDefinitions",
         "parameters": [
           {
             "type": "string",
@@ -1290,7 +1290,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about CustomResourceDefinition",
-        "operationId": "handleGetCustomResourceDefinitionDetail",
+        "operationId": "GetCustomResourceDefinition",
         "parameters": [
           {
             "type": "string",
@@ -1351,7 +1351,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of objects of CustomResourceDefinition",
-        "operationId": "handleGetCustomResourceObjectList",
+        "operationId": "GetCustomResourceObjects",
         "parameters": [
           {
             "type": "string",
@@ -1419,7 +1419,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about custom resource object",
-        "operationId": "handleGetCustomResourceObjectDetail",
+        "operationId": "GetCustomResourceObject",
         "parameters": [
           {
             "type": "string",
@@ -1494,7 +1494,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns Events for custom resource object",
-        "operationId": "handleGetCustomResourceObjectEvents",
+        "operationId": "GetCustomResourceObjectEvents",
         "parameters": [
           {
             "type": "string",
@@ -1569,7 +1569,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of CronJobs from all namespaces",
-        "operationId": "handleGetCronJobList",
+        "operationId": "GetAllCronJobs",
         "parameters": [
           {
             "type": "string",
@@ -1623,7 +1623,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of CronJobs in a namespaces",
-        "operationId": "handleGetCronJobList",
+        "operationId": "GetCronJobs",
         "parameters": [
           {
             "type": "string",
@@ -1684,7 +1684,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about CronJob",
-        "operationId": "handleGetCronJobDetail",
+        "operationId": "GetCronJob",
         "parameters": [
           {
             "type": "string",
@@ -1752,7 +1752,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events for CronJob",
-        "operationId": "handleGetCronJobEvents",
+        "operationId": "GetCronJobEvents",
         "parameters": [
           {
             "type": "string",
@@ -1820,7 +1820,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Jobs for CronJob",
-        "operationId": "handleGetCronJobJobs",
+        "operationId": "GetCronJobJobs",
         "parameters": [
           {
             "type": "string",
@@ -1894,7 +1894,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "triggers a Job based on CronJob",
-        "operationId": "handleTriggerCronJob",
+        "operationId": "TriggerCronJob",
         "parameters": [
           {
             "type": "string",
@@ -1959,7 +1959,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "generates a one-time CSRF token that can be used by POST request",
-        "operationId": "handleGetCsrfToken",
+        "operationId": "GetCSRFToken",
         "parameters": [
           {
             "type": "string",
@@ -2020,7 +2020,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of DaemonSets from all namespaces",
-        "operationId": "handleGetDaemonSetList",
+        "operationId": "GetAllDaemonSets",
         "parameters": [
           {
             "type": "string",
@@ -2074,7 +2074,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of DaemonSets in a namespaces",
-        "operationId": "handleGetDaemonSetList",
+        "operationId": "GetDaemonSets",
         "parameters": [
           {
             "type": "string",
@@ -2135,7 +2135,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about DaemonSet",
-        "operationId": "handleGetDaemonSetDetail",
+        "operationId": "GetDaemonSet",
         "parameters": [
           {
             "type": "string",
@@ -2203,7 +2203,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events for DaemonSet",
-        "operationId": "handleGetDaemonSetEvents",
+        "operationId": "GetDaemonSetEvents",
         "parameters": [
           {
             "type": "string",
@@ -2271,7 +2271,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Pods for DaemonSet",
-        "operationId": "handleGetDaemonSetPods",
+        "operationId": "GetDaemonSetPods",
         "parameters": [
           {
             "type": "string",
@@ -2339,7 +2339,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "rollout restart of the Daemon Set",
-        "operationId": "handleDaemonSetRestart",
+        "operationId": "RestartDaemonSet",
         "parameters": [
           {
             "type": "string",
@@ -2407,7 +2407,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Services for DaemonSet",
-        "operationId": "handleGetDaemonSetServices",
+        "operationId": "GetDaemonSetServices",
         "parameters": [
           {
             "type": "string",
@@ -2475,7 +2475,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Deployments from all namespaces",
-        "operationId": "handleGetDeployments",
+        "operationId": "GetAllDeployments",
         "parameters": [
           {
             "type": "string",
@@ -2529,7 +2529,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Deployments in a namespaces",
-        "operationId": "handleGetDeployments",
+        "operationId": "GetDeployments",
         "parameters": [
           {
             "type": "string",
@@ -2590,7 +2590,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about Deployment",
-        "operationId": "handleGetDeploymentDetail",
+        "operationId": "GetDeployment",
         "parameters": [
           {
             "type": "string",
@@ -2658,7 +2658,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events for Deployment",
-        "operationId": "handleGetDeploymentEvents",
+        "operationId": "GetDeploymentEvents",
         "parameters": [
           {
             "type": "string",
@@ -2726,7 +2726,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of new ReplicaSets for Deployment",
-        "operationId": "handleGetDeploymentNewReplicaSet",
+        "operationId": "GetDeploymentNewReplicaSet",
         "parameters": [
           {
             "type": "string",
@@ -2794,7 +2794,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of old ReplicaSets for Deployment",
-        "operationId": "handleGetDeploymentOldReplicaSets",
+        "operationId": "GetDeploymentOldReplicaSets",
         "parameters": [
           {
             "type": "string",
@@ -2862,7 +2862,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "pauses the Deployment",
-        "operationId": "handleDeploymentPause",
+        "operationId": "PauseDeployment",
         "parameters": [
           {
             "type": "string",
@@ -2930,7 +2930,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "rollout restart of the Deployment",
-        "operationId": "handleDeploymentRestart",
+        "operationId": "RestartDeployment",
         "parameters": [
           {
             "type": "string",
@@ -2998,7 +2998,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "resumes the Deployment",
-        "operationId": "handleDeploymentResume",
+        "operationId": "ResumeDeployment",
         "parameters": [
           {
             "type": "string",
@@ -3066,7 +3066,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "rolls back the Deployment to the target revision",
-        "operationId": "handleDeploymentRollback",
+        "operationId": "RollbackDeployment",
         "parameters": [
           {
             "type": "string",
@@ -3142,7 +3142,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events from all namespaces",
-        "operationId": "handleGetEventList",
+        "operationId": "GetAllEvents",
         "parameters": [
           {
             "type": "string",
@@ -3196,7 +3196,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events in a namespace",
-        "operationId": "handleGetEventList",
+        "operationId": "GetEvents",
         "parameters": [
           {
             "type": "string",
@@ -3257,7 +3257,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of HorizontalPodAutoscalers from all namespaces",
-        "operationId": "handleGetHorizontalPodAutoscalerList",
+        "operationId": "GetAllHorizontalPodAutoscalers",
         "parameters": [
           {
             "type": "string",
@@ -3311,7 +3311,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of HorizontalPodAutoscalers in a namespaces",
-        "operationId": "handleGetHorizontalPodAutoscalerList",
+        "operationId": "GetHorizontalPodAutoscalers",
         "parameters": [
           {
             "type": "string",
@@ -3372,7 +3372,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about HorizontalPodAutoscaler",
-        "operationId": "handleGetHorizontalPodAutoscalerDetail",
+        "operationId": "GetHorizontalPodAutoscaler",
         "parameters": [
           {
             "type": "string",
@@ -3440,7 +3440,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Ingresses from all namespaces",
-        "operationId": "handleGetIngressList",
+        "operationId": "GetAllIngresses",
         "parameters": [
           {
             "type": "string",
@@ -3494,7 +3494,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Ingresses in a namespaces",
-        "operationId": "handleGetIngressList",
+        "operationId": "GetIngresses",
         "parameters": [
           {
             "type": "string",
@@ -3555,7 +3555,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events for Ingress",
-        "operationId": "handleGetIngressEvent",
+        "operationId": "GetIngressEvents",
         "parameters": [
           {
             "type": "string",
@@ -3623,7 +3623,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about Ingress",
-        "operationId": "handleGetIngressDetail",
+        "operationId": "GetIngress",
         "parameters": [
           {
             "type": "string",
@@ -3691,7 +3691,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of IngressClasses",
-        "operationId": "handleGetIngressClassList",
+        "operationId": "GetIngressClasses",
         "parameters": [
           {
             "type": "string",
@@ -3745,7 +3745,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about IngressClass",
-        "operationId": "handleGetIngressClass",
+        "operationId": "GetIngressClass",
         "parameters": [
           {
             "type": "string",
@@ -3856,7 +3856,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Jobs from all namespaces",
-        "operationId": "handleGetJobList",
+        "operationId": "GetAllJobs",
         "parameters": [
           {
             "type": "string",
@@ -3910,7 +3910,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Jobs in a namespaces",
-        "operationId": "handleGetJobList",
+        "operationId": "GetJobs",
         "parameters": [
           {
             "type": "string",
@@ -3971,7 +3971,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about Job",
-        "operationId": "handleGetJobDetail",
+        "operationId": "GetJob",
         "parameters": [
           {
             "type": "string",
@@ -4039,7 +4039,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events for Job",
-        "operationId": "handleGetJobEvents",
+        "operationId": "GetJobEvents",
         "parameters": [
           {
             "type": "string",
@@ -4107,7 +4107,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Pods for Job",
-        "operationId": "handleGetJobPods",
+        "operationId": "GetJobPods",
         "parameters": [
           {
             "type": "string",
@@ -4175,7 +4175,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a text file with logs from a Container",
-        "operationId": "handleLogFile",
+        "operationId": "GetLogFile",
         "parameters": [
           {
             "type": "string",
@@ -4253,7 +4253,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns log sources for a resource",
-        "operationId": "handleLogSource",
+        "operationId": "GetLogSource",
         "parameters": [
           {
             "type": "string",
@@ -4328,7 +4328,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns logs from a Pod",
-        "operationId": "handleLogs",
+        "operationId": "GetPodLogs",
         "parameters": [
           {
             "type": "string",
@@ -4396,7 +4396,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns logs from a Container",
-        "operationId": "handleLogs",
+        "operationId": "GetContainerLogs",
         "parameters": [
           {
             "type": "string",
@@ -4471,7 +4471,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Namespaces",
-        "operationId": "handleGetNamespaces",
+        "operationId": "GetNamespaces",
         "parameters": [
           {
             "type": "string",
@@ -4523,7 +4523,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "create a Namespace",
-        "operationId": "handleCreateNamespace",
+        "operationId": "CreateNamespace",
         "parameters": [
           {
             "type": "string",
@@ -4585,7 +4585,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about Namespace",
-        "operationId": "handleGetNamespaceDetail",
+        "operationId": "GetNamespace",
         "parameters": [
           {
             "type": "string",
@@ -4646,7 +4646,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events for Namespace",
-        "operationId": "handleGetNamespaceEvents",
+        "operationId": "GetNamespaceEvents",
         "parameters": [
           {
             "type": "string",
@@ -4707,7 +4707,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of NetworkPolicies from all namespaces",
-        "operationId": "handleGetNetworkPolicyList",
+        "operationId": "GetAllNetworkPolicies",
         "parameters": [
           {
             "type": "string",
@@ -4761,7 +4761,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of NetworkPolicies in a namespaces",
-        "operationId": "handleGetNetworkPolicyList",
+        "operationId": "GetNetworkPolicies",
         "parameters": [
           {
             "type": "string",
@@ -4822,7 +4822,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about NetworkPolicy",
-        "operationId": "handleGetNetworkPolicyDetail",
+        "operationId": "GetNetworkPolicy",
         "parameters": [
           {
             "type": "string",
@@ -4890,7 +4890,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Nodes",
-        "operationId": "handleGetNodeList",
+        "operationId": "GetNodes",
         "parameters": [
           {
             "type": "string",
@@ -4944,7 +4944,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about Node",
-        "operationId": "handleGetNodeDetail",
+        "operationId": "GetNode",
         "parameters": [
           {
             "type": "string",
@@ -5005,7 +5005,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "drains Node",
-        "operationId": "handleNodeDrain",
+        "operationId": "DrainNode",
         "parameters": [
           {
             "type": "string",
@@ -5071,7 +5071,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events for Node",
-        "operationId": "handleGetNodeEvents",
+        "operationId": "GetNodeEvents",
         "parameters": [
           {
             "type": "string",
@@ -5132,7 +5132,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Pods for Node",
-        "operationId": "handleGetNodePods",
+        "operationId": "GetNodePods",
         "parameters": [
           {
             "type": "string",
@@ -5193,7 +5193,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of PersistentVolumes from all namespaces",
-        "operationId": "handleGetPersistentVolumeList",
+        "operationId": "GetPersistentVolumes",
         "parameters": [
           {
             "type": "string",
@@ -5247,7 +5247,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about PersistentVolume",
-        "operationId": "handleGetPersistentVolumeDetail",
+        "operationId": "GetPersistentVolumeWithNamespace",
         "parameters": [
           {
             "type": "string",
@@ -5308,7 +5308,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about PersistentVolume",
-        "operationId": "handleGetPersistentVolumeDetail",
+        "operationId": "GetPersistentVolume",
         "parameters": [
           {
             "type": "string",
@@ -5369,7 +5369,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of PersistentVolumeClaim",
-        "operationId": "handleGetPersistentVolumeClaimList",
+        "operationId": "GetAllPersistentVolumeClaims",
         "parameters": [
           {
             "type": "string",
@@ -5423,7 +5423,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of PersistentVolumeClaim from specified namespace",
-        "operationId": "handleGetPersistentVolumeClaimList",
+        "operationId": "GetPersistentVolumeClaims",
         "parameters": [
           {
             "type": "string",
@@ -5484,7 +5484,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about PersistentVolumeClaim",
-        "operationId": "handleGetPersistentVolumeClaimDetail",
+        "operationId": "GetPersistentVolumeClaim",
         "parameters": [
           {
             "type": "string",
@@ -5552,7 +5552,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Pods from all namespaces",
-        "operationId": "handleGetPods",
+        "operationId": "GetAllPods",
         "parameters": [
           {
             "type": "string",
@@ -5606,7 +5606,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Pods in a namespaces",
-        "operationId": "handleGetPods",
+        "operationId": "GetPods",
         "parameters": [
           {
             "type": "string",
@@ -5667,7 +5667,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about Pod",
-        "operationId": "handleGetPodDetail",
+        "operationId": "GetPod",
         "parameters": [
           {
             "type": "string",
@@ -5735,7 +5735,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of containers for Pod",
-        "operationId": "handleGetPodContainers",
+        "operationId": "GetPodContainers",
         "parameters": [
           {
             "type": "string",
@@ -5803,7 +5803,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events for Pod",
-        "operationId": "handleGetPodEvents",
+        "operationId": "GetPodEvents",
         "parameters": [
           {
             "type": "string",
@@ -5871,7 +5871,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of containers for Pod",
-        "operationId": "handleGetPodPersistentVolumeClaims",
+        "operationId": "GetPodPersistentVolumeClaims",
         "parameters": [
           {
             "type": "string",
@@ -5939,7 +5939,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "handles exec into pod",
-        "operationId": "handleExecShell",
+        "operationId": "ExecShell",
         "parameters": [
           {
             "type": "string",
@@ -6014,7 +6014,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of PodDisruptionBudget",
-        "operationId": "handleGetPodDisruptionBudgetList",
+        "operationId": "GetAllPodDisruptionBudgets",
         "parameters": [
           {
             "type": "string",
@@ -6068,7 +6068,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of PodDisruptionBudget from specified namespace",
-        "operationId": "handleGetPodDisruptionBudgetList",
+        "operationId": "GetPodDisruptionBudgets",
         "parameters": [
           {
             "type": "string",
@@ -6129,7 +6129,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about PodDisruptionBudget",
-        "operationId": "handleGetPodDisruptionBudgetDetail",
+        "operationId": "GetPodDisruptionBudget",
         "parameters": [
           {
             "type": "string",
@@ -6197,7 +6197,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of ReplicaSets from all namespaces",
-        "operationId": "handleGetReplicaSets",
+        "operationId": "GetAllReplicaSets",
         "parameters": [
           {
             "type": "string",
@@ -6251,7 +6251,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of ReplicaSets in a namespace",
-        "operationId": "handleGetReplicaSets",
+        "operationId": "GetReplicaSets",
         "parameters": [
           {
             "type": "string",
@@ -6312,7 +6312,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about ReplicaSet",
-        "operationId": "handleGetReplicaSetDetail",
+        "operationId": "GetReplicaSet",
         "parameters": [
           {
             "type": "string",
@@ -6380,7 +6380,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events for ReplicaSet",
-        "operationId": "handleGetReplicaSetEvents",
+        "operationId": "GetReplicaSetEvents",
         "parameters": [
           {
             "type": "string",
@@ -6448,7 +6448,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Pods for ReplicaSet",
-        "operationId": "handleGetReplicaSetPods",
+        "operationId": "GetReplicaSetPods",
         "parameters": [
           {
             "type": "string",
@@ -6516,7 +6516,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Services for ReplicaSet",
-        "operationId": "handleGetReplicaSetServices",
+        "operationId": "GetReplicaSetServices",
         "parameters": [
           {
             "type": "string",
@@ -6584,7 +6584,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of ReplicationControllers from all namespaces",
-        "operationId": "handleGetReplicationControllerList",
+        "operationId": "GetAllReplicationControllers",
         "parameters": [
           {
             "type": "string",
@@ -6638,7 +6638,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of ReplicationController in a namespace",
-        "operationId": "handleGetReplicationControllerList",
+        "operationId": "GetReplicationControllers",
         "parameters": [
           {
             "type": "string",
@@ -6699,7 +6699,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about ReplicationController",
-        "operationId": "handleGetReplicationControllerDetail",
+        "operationId": "GetReplicationController",
         "parameters": [
           {
             "type": "string",
@@ -6767,7 +6767,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events for ReplicationController",
-        "operationId": "handleGetReplicationControllerEvents",
+        "operationId": "GetReplicationControllerEvents",
         "parameters": [
           {
             "type": "string",
@@ -6835,7 +6835,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Pods for ReplicationController",
-        "operationId": "handleGetReplicationControllerPods",
+        "operationId": "GetReplicationControllerPods",
         "parameters": [
           {
             "type": "string",
@@ -6903,7 +6903,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Services for ReplicationController",
-        "operationId": "handleGetReplicationControllerServices",
+        "operationId": "GetReplicationControllerServices",
         "parameters": [
           {
             "type": "string",
@@ -6971,7 +6971,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "scales ReplicationController to a number of replicas",
-        "operationId": "handleUpdateReplicasCount",
+        "operationId": "UpdateReplicationControllerReplicas",
         "parameters": [
           {
             "type": "string",
@@ -7044,7 +7044,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Roles from all namespace",
-        "operationId": "handleGetRoleList",
+        "operationId": "GetAllRoles",
         "parameters": [
           {
             "type": "string",
@@ -7098,7 +7098,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Roles in a namespace",
-        "operationId": "handleGetRoleList",
+        "operationId": "GetRoles",
         "parameters": [
           {
             "type": "string",
@@ -7159,7 +7159,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about Role",
-        "operationId": "handleGetRoleDetail",
+        "operationId": "GetRole",
         "parameters": [
           {
             "type": "string",
@@ -7227,7 +7227,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of RoleBindings from all namespace",
-        "operationId": "handleGetRoleBindingList",
+        "operationId": "GetAllRoleBindings",
         "parameters": [
           {
             "type": "string",
@@ -7281,7 +7281,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of RoleBindings in a namespace",
-        "operationId": "handleGetRoleBindingList",
+        "operationId": "GetRoleBindings",
         "parameters": [
           {
             "type": "string",
@@ -7342,7 +7342,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about RoleBinding",
-        "operationId": "handleGetRoleBindingDetail",
+        "operationId": "GetRoleBinding",
         "parameters": [
           {
             "type": "string",
@@ -7410,7 +7410,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a number of replicas of namespaced resource",
-        "operationId": "handleGetReplicaCount",
+        "operationId": "GetNamespacedResourceReplicas",
         "parameters": [
           {
             "type": "string",
@@ -7483,7 +7483,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "scales a namespaced resource",
-        "operationId": "handleScaleResource",
+        "operationId": "ScaleNamespacedResource",
         "parameters": [
           {
             "type": "string",
@@ -7564,7 +7564,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a number of replicas of non-namespaced resource",
-        "operationId": "handleGetReplicaCount",
+        "operationId": "GetResourceReplicas",
         "parameters": [
           {
             "type": "string",
@@ -7630,7 +7630,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "scales a non-namespaced resource",
-        "operationId": "handleScaleResource",
+        "operationId": "ScaleResource",
         "parameters": [
           {
             "type": "string",
@@ -7704,7 +7704,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Secrets from all namespaces",
-        "operationId": "handleGetSecretList",
+        "operationId": "GetAllSecrets",
         "parameters": [
           {
             "type": "string",
@@ -7756,7 +7756,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "stores ImagePullSecret in a Kubernetes Secret",
-        "operationId": "handleCreateImagePullSecret",
+        "operationId": "CreateImagePullSecret",
         "parameters": [
           {
             "type": "string",
@@ -7818,7 +7818,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Secrets in a namespace",
-        "operationId": "handleGetSecretList",
+        "operationId": "GetSecrets",
         "parameters": [
           {
             "type": "string",
@@ -7879,7 +7879,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about Secret",
-        "operationId": "handleGetSecretDetail",
+        "operationId": "GetSecret",
         "parameters": [
           {
             "type": "string",
@@ -7947,7 +7947,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Services from all namespaces",
-        "operationId": "handleGetServiceList",
+        "operationId": "GetAllServices",
         "parameters": [
           {
             "type": "string",
@@ -8001,7 +8001,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Services in a namespace",
-        "operationId": "handleGetServiceList",
+        "operationId": "GetServices",
         "parameters": [
           {
             "type": "string",
@@ -8062,7 +8062,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about Service",
-        "operationId": "handleGetServiceDetail",
+        "operationId": "GetService",
         "parameters": [
           {
             "type": "string",
@@ -8130,7 +8130,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events for Service",
-        "operationId": "handleGetServiceEvent",
+        "operationId": "GetServiceEvents",
         "parameters": [
           {
             "type": "string",
@@ -8198,7 +8198,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Ingresses for Service",
-        "operationId": "handleGetServiceIngressList",
+        "operationId": "GetServiceIngresses",
         "parameters": [
           {
             "type": "string",
@@ -8266,7 +8266,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Pods for Service",
-        "operationId": "handleGetServicePods",
+        "operationId": "GetServicePods",
         "parameters": [
           {
             "type": "string",
@@ -8334,7 +8334,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of ServiceAccounts from all namespaces",
-        "operationId": "handleGetServiceAccountList",
+        "operationId": "GetAllServiceAccounts",
         "parameters": [
           {
             "type": "string",
@@ -8388,7 +8388,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of ServiceAccounts in a namespaces",
-        "operationId": "handleGetServiceAccountList",
+        "operationId": "GetServiceAccounts",
         "parameters": [
           {
             "type": "string",
@@ -8449,7 +8449,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about ServiceAccount",
-        "operationId": "handleGetServiceAccountDetail",
+        "operationId": "GetServiceAccount",
         "parameters": [
           {
             "type": "string",
@@ -8517,7 +8517,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of ImagePullSecret Secrets for ServiceAccount",
-        "operationId": "handleGetServiceAccountImagePullSecrets",
+        "operationId": "GetServiceAccountImagePullSecrets",
         "parameters": [
           {
             "type": "string",
@@ -8585,7 +8585,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Secrets for ServiceAccount",
-        "operationId": "handleGetServiceAccountSecrets",
+        "operationId": "GetServiceAccountSecrets",
         "parameters": [
           {
             "type": "string",
@@ -8653,7 +8653,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of StatefulSets from all namespaces",
-        "operationId": "handleGetStatefulSetList",
+        "operationId": "GetAllStatefulSets",
         "parameters": [
           {
             "type": "string",
@@ -8707,7 +8707,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of StatefulSets in a namespaces",
-        "operationId": "handleGetStatefulSetList",
+        "operationId": "GetStatefulSets",
         "parameters": [
           {
             "type": "string",
@@ -8768,7 +8768,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about StatefulSets",
-        "operationId": "handleGetStatefulSetDetail",
+        "operationId": "GetStatefulSet",
         "parameters": [
           {
             "type": "string",
@@ -8836,7 +8836,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of Events for StatefulSets",
-        "operationId": "handleGetStatefulSetEvents",
+        "operationId": "GetStatefulSetEvents",
         "parameters": [
           {
             "type": "string",
@@ -8904,7 +8904,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns  a list of Pods for StatefulSets",
-        "operationId": "handleGetStatefulSetPods",
+        "operationId": "GetStatefulSetPods",
         "parameters": [
           {
             "type": "string",
@@ -8972,7 +8972,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "rollout restart of the Daemon Set",
-        "operationId": "handleStatefulSetRestart",
+        "operationId": "RestartStatefulSet",
         "parameters": [
           {
             "type": "string",
@@ -9040,7 +9040,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of StorageClasses",
-        "operationId": "handleGetStorageClassList",
+        "operationId": "GetStorageClasses",
         "parameters": [
           {
             "type": "string",
@@ -9094,7 +9094,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns detailed information about StorageClass",
-        "operationId": "handleGetStorageClass",
+        "operationId": "GetStorageClass",
         "parameters": [
           {
             "type": "string",
@@ -9155,7 +9155,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of PersistentVolumes assigned to StorageClass",
-        "operationId": "handleGetStorageClassPersistentVolumes",
+        "operationId": "GetStorageClassPersistentVolumes",
         "parameters": [
           {
             "type": "string",
@@ -9216,7 +9216,7 @@
         "consumes": ["application/json"],
         "produces": ["application/json"],
         "summary": "returns a list of HorizontalPodAutoscalers for resource",
-        "operationId": "handleGetHorizontalPodAutoscalerListForResource",
+        "operationId": "GetHorizontalPodAutoscalersForResource",
         "parameters": [
           {
             "type": "string",
@@ -9827,13 +9827,13 @@
     },
     "cronjob.CronJobDetail": {
       "required": [
-        "suspend",
-        "active",
         "lastSchedule",
         "containerImages",
         "objectMeta",
         "typeMeta",
         "schedule",
+        "suspend",
+        "active",
         "concurrencyPolicy",
         "startingDeadlineSeconds",
         "errors"
@@ -10160,11 +10160,11 @@
     },
     "deployment.DeploymentDetail": {
       "required": [
+        "initContainerImages",
         "objectMeta",
         "typeMeta",
         "pods",
         "containerImages",
-        "initContainerImages",
         "selector",
         "statusInfo",
         "conditions",
@@ -10455,13 +10455,13 @@
     },
     "horizontalpodautoscaler.HorizontalPodAutoscalerDetail": {
       "required": [
+        "minReplicas",
+        "maxReplicas",
+        "currentCPUUtilizationPercentage",
         "targetCPUUtilizationPercentage",
         "objectMeta",
         "typeMeta",
         "scaleTargetRef",
-        "minReplicas",
-        "maxReplicas",
-        "currentCPUUtilizationPercentage",
         "currentReplicas",
         "desiredReplicas",
         "lastScaleTime"
@@ -10573,10 +10573,10 @@
     },
     "ingress.IngressDetail": {
       "required": [
+        "objectMeta",
         "typeMeta",
         "endpoints",
         "hosts",
-        "objectMeta",
         "spec",
         "status",
         "errors"
@@ -10727,13 +10727,13 @@
     },
     "job.JobDetail": {
       "required": [
-        "podInfo",
-        "containerImages",
-        "initContainerImages",
         "parallelism",
         "jobStatus",
         "objectMeta",
         "typeMeta",
+        "podInfo",
+        "containerImages",
+        "initContainerImages",
         "completions",
         "errors"
       ],
@@ -11189,11 +11189,11 @@
     },
     "node.NodeDetail": {
       "required": [
+        "objectMeta",
         "typeMeta",
         "ready",
         "allocatedResources",
         "nodeInfo",
-        "objectMeta",
         "phase",
         "podCIDR",
         "providerID",
@@ -11381,16 +11381,16 @@
     },
     "persistentvolume.PersistentVolumeDetail": {
       "required": [
-        "reason",
         "objectMeta",
-        "accessModes",
-        "storageClass",
-        "mountOptions",
-        "status",
         "typeMeta",
         "capacity",
-        "reclaimPolicy",
+        "accessModes",
+        "status",
         "claim",
+        "reason",
+        "reclaimPolicy",
+        "storageClass",
+        "mountOptions",
         "message",
         "persistentVolumeSource"
       ],
@@ -11504,13 +11504,13 @@
     },
     "persistentvolumeclaim.PersistentVolumeClaimDetail": {
       "required": [
+        "objectMeta",
+        "typeMeta",
+        "status",
         "volume",
         "capacity",
         "accessModes",
-        "storageClass",
-        "objectMeta",
-        "typeMeta",
-        "status"
+        "storageClass"
       ],
       "properties": {
         "accessModes": {
@@ -11966,15 +11966,15 @@
     },
     "poddisruptionbudget.PodDisruptionBudgetDetail": {
       "required": [
-        "expectedPods",
-        "typeMeta",
-        "unhealthyPodEvictionPolicy",
-        "disruptionsAllowed",
-        "objectMeta",
         "minAvailable",
         "maxUnavailable",
+        "unhealthyPodEvictionPolicy",
+        "disruptionsAllowed",
+        "typeMeta",
         "currentHealthy",
         "desiredHealthy",
+        "expectedPods",
+        "objectMeta",
         "disruptedPods"
       ],
       "properties": {
@@ -12188,11 +12188,11 @@
     },
     "replicationcontroller.ReplicationControllerDetail": {
       "required": [
-        "containerImages",
-        "initContainerImages",
         "objectMeta",
         "typeMeta",
         "podInfo",
+        "containerImages",
+        "initContainerImages",
         "labelSelector",
         "errors"
       ],
@@ -12514,7 +12514,7 @@
       }
     },
     "secret.SecretDetail": {
-      "required": ["typeMeta", "type", "objectMeta", "data"],
+      "required": ["type", "objectMeta", "typeMeta", "data"],
       "properties": {
         "data": {
           "type": "object",
@@ -12595,13 +12595,13 @@
     },
     "service.ServiceDetail": {
       "required": [
+        "type",
+        "clusterIP",
         "objectMeta",
         "typeMeta",
         "internalEndpoint",
         "externalEndpoints",
         "selector",
-        "type",
-        "clusterIP",
         "endpointList",
         "sessionAffinity",
         "errors"
@@ -12750,11 +12750,11 @@
     },
     "statefulset.StatefulSetDetail": {
       "required": [
-        "objectMeta",
-        "typeMeta",
         "podInfo",
         "containerImages",
         "initContainerImages",
+        "objectMeta",
+        "typeMeta",
         "errors"
       ],
       "properties": {
@@ -12897,12 +12897,12 @@
     },
     "types.CustomResourceDefinitionDetail": {
       "required": [
+        "typeMeta",
+        "group",
         "scope",
         "names",
         "established",
         "objectMeta",
-        "typeMeta",
-        "group",
         "conditions",
         "objects",
         "subresources",
