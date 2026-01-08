@@ -21,3 +21,18 @@ func (c *client) GetUser(email string) (*console.UserFragment, error) {
 
 	return response.User, nil
 }
+
+func (c *client) GetUserId(email string) (string, error) {
+	response, err := c.consoleClient.GetUserTiny(c.ctx, email)
+	if internalerror.IsNotFound(err) {
+		return "", errors.NewNotFound(schema.GroupResource{Resource: "user"}, email)
+	}
+	if err == nil && (response == nil || response.User == nil) {
+		return "", errors.NewNotFound(schema.GroupResource{Resource: "user"}, email)
+	}
+	if response == nil {
+		return "", err
+	}
+
+	return response.User.ID, nil
+}

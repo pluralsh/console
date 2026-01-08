@@ -10,6 +10,21 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
+func (c *client) GetGroupId(name string) (string, error) {
+	response, err := c.consoleClient.GetGroupTiny(c.ctx, name)
+	if internalerror.IsNotFound(err) {
+		return "", errors.NewNotFound(schema.GroupResource{Resource: "group"}, name)
+	}
+	if err == nil && (response == nil || response.Group == nil) {
+		return "", errors.NewNotFound(schema.GroupResource{Resource: "group"}, name)
+	}
+	if response == nil {
+		return "", err
+	}
+
+	return response.Group.ID, nil
+}
+
 func (c *client) GetGroup(name string) (*console.GroupFragment, error) {
 	response, err := c.consoleClient.GetGroup(c.ctx, name)
 	if internalerror.IsNotFound(err) {

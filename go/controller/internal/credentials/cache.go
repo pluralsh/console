@@ -5,12 +5,15 @@ import (
 	"fmt"
 
 	cmap "github.com/orcaman/concurrent-map/v2"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 )
@@ -107,7 +110,12 @@ func (in *namespaceCredentialsCache) getNamespaceCredentialsToken(nc *v1alpha1.N
 		return "", fmt.Errorf("failed to get secret: %s", err)
 	}
 
-	if err := tryAddOwnerRef(in.ctx, in.client, nc, secret, in.scheme); err != nil {
+	// Remove existing owner references from configuration secrets.
+	// It's for the backward compatibility.
+	if err := controllerutil.RemoveOwnerReference(nc, secret, in.scheme); err != nil {
+		log.FromContext(in.ctx).V(5).Info(err.Error())
+	}
+	if err := utils.AddOwnerRefAnnotation(in.ctx, in.client, nc, secret); err != nil {
 		return "", err
 	}
 

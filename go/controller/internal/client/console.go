@@ -52,6 +52,8 @@ type ConsoleClient interface {
 	IsPipelineExisting(id string) (bool, error)
 	GetUser(email string) (*console.UserFragment, error)
 	GetGroup(name string) (*console.GroupFragment, error)
+	GetUserId(email string) (string, error)
+	GetGroupId(name string) (string, error)
 	GetGroupTiny(name string) (*console.GetGroupTiny_Group, error)
 	IsGroupExists(id string) (bool, error)
 	CreateGroup(ctx context.Context, attr console.GroupAttributes) (*console.GroupFragment, error)

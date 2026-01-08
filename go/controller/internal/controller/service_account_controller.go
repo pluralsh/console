@@ -72,7 +72,7 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
-	if exists {
+	if exists && !sa.Spec.Reconciliation.DriftDetect() {
 		logger.V(9).Info("ServiceAccount already exists in the API, running in read-only mode")
 		utils.MarkReadOnly(sa)
 		return r.handleExistingServiceAccount(ctx, sa)
