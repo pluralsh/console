@@ -7,7 +7,6 @@ import {
 import { Row, SortingState, TableOptions } from '@tanstack/react-table'
 import { ReactElement, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Options } from '../../../generated/kubernetes'
 import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
@@ -34,7 +33,7 @@ interface ResourceListProps<TResourceList> {
   columns: Array<object>
   initialSort?: SortingState
   queryOptions: (
-    options: Options<any>
+    options: any
   ) => UseInfiniteQueryOptions<
     TResourceList,
     Error,
@@ -64,7 +63,7 @@ export function UpdatedResourceList<
 }: ResourceListProps<TResourceList>): ReactElement<any> {
   const navigate = useNavigate()
   const cluster = useCluster()
-  const { setNamespaced, filter } = useDataSelect()
+  const { filter, namespace, setNamespaced } = useDataSelect()
   const { sortBy, reactTableOptions } = useSortedTableOptions(initialSort, {
     meta: { cluster, ...tableOptions },
   })
@@ -73,6 +72,7 @@ export function UpdatedResourceList<
     useInfiniteQuery<TResourceList>({
       ...queryOptions({
         client: AxiosInstance(cluster?.id ?? ''),
+        path: namespaced ? { namespace } : undefined,
         query: {
           filterBy: `name,${filter}`,
           sortBy: sortBy,
