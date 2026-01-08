@@ -1,14 +1,19 @@
 import {
   AiSparkleFilledIcon,
   Button,
+  ButtonProps,
   Chip,
   ChipSeverity,
   Divider,
   EmptyState,
   Flex,
+  ReloadIcon,
   SpinnerAlt,
+  Tooltip,
   useSetBreadcrumbs,
+  WrapWithIf,
 } from '@pluralsh/design-system'
+import { useChatbot } from 'components/ai/AIContext'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
@@ -19,12 +24,13 @@ import { Body1P, Body2BoldP } from 'components/utils/typography/Text'
 import {
   InfraResearchFragment,
   InfraResearchStatus,
+  useCreateInfraResearchMutation,
   useFixResearchDiagramMutation,
   useInfraResearchQuery,
 } from 'generated/graphql'
-import { capitalize, truncate } from 'lodash'
-import { useMemo, useState } from 'react'
-import { useMatch } from 'react-router-dom'
+import { capitalize, isEmpty, truncate } from 'lodash'
+import { ReactNode, useMemo, useState } from 'react'
+import { useMatch, useNavigate } from 'react-router-dom'
 import {
   AI_INFRA_RESEARCH_ABS_PATH,
   AI_INFRA_RESEARCH_PARAM_ID,
@@ -34,8 +40,8 @@ import styled, { useTheme } from 'styled-components'
 import { getInfraResearchesBreadcrumbs } from '../InfraResearches'
 import { InfraResearchAnalysis } from './InfraResearchAnalysis'
 import { InfraResearchDiagram } from './InfraResearchDiagram'
+import { InfraResearchShareMenu } from './InfraResearchShareMenu'
 import { InfraResearchSidecar } from './InfraResearchSidecar'
-import { useChatbot } from 'components/ai/AIContext'
 
 function getBreadcrumbs(infraResearch: Nullable<InfraResearchFragment>) {
   return [
@@ -48,23 +54,40 @@ function getBreadcrumbs(infraResearch: Nullable<InfraResearchFragment>) {
 }
 
 export function InfraResearch() {
+  const navigate = useNavigate()
   const { spacing } = useTheme()
-  const { createNewThread, mutationLoading: createThreadLoading } = useChatbot()
-  const { researchId = '' } =
+  const { researchId: id = '' } =
     useMatch(`${AI_INFRA_RESEARCH_ABS_PATH}/:${AI_INFRA_RESEARCH_PARAM_ID}/*`)
       ?.params ?? {}
+  const {
+    isChatbotOpen,
+    createNewThread,
+    mutationLoading: createThreadLoading,
+  } = useChatbot()
 
   const [parseError, setParseError] = useState<Nullable<Error>>(null)
-
-  const [fixResearchDiagram, { loading: fixLoading, error: fixError }] =
-    useFixResearchDiagramMutation()
+  const [parseFixAttempts, setParseFixAttempts] = useState(0)
 
   const { data, loading, error } = useInfraResearchQuery({
-    variables: { id: researchId },
+    variables: { id },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
   const infraResearch = data?.infraResearch
+
+  const [fixResearchDiagram, { loading: fixLoading, error: fixError }] =
+    useFixResearchDiagramMutation({
+      onCompleted: () => setParseFixAttempts((prev) => prev + 1),
+    })
+  const recreateMutation = useCreateInfraResearchMutation({
+    variables: { attributes: { prompt: infraResearch?.prompt || '' } },
+    onCompleted: ({ createInfraResearch }) => {
+      if (createInfraResearch?.id)
+        navigate(
+          getInfraResearchAbsPath({ infraResearchId: createInfraResearch.id })
+        )
+    },
+  })
 
   useSetBreadcrumbs(
     useMemo(() => getBreadcrumbs(infraResearch), [infraResearch])
@@ -81,8 +104,39 @@ export function InfraResearch() {
   if (!(infraResearch || loading))
     return <EmptyState message="Infra research not found." />
 
-  const { id, status, analysis, diagram } = infraResearch ?? {}
+  const { status, analysis, diagram } = infraResearch ?? {}
   const isRunning = status === InfraResearchStatus.Running
+
+  const headerButtons =
+    status === InfraResearchStatus.Completed ? (
+      <Flex gap="small">
+        <RegenerateButton
+          secondary
+          mutation={recreateMutation}
+          tooltip={
+            <span>
+              Creates a new research with same prompt
+              <br />
+              Useful if you want to try it again fresh
+            </span>
+          }
+        />
+
+        <Button
+          small
+          secondary
+          loading={createThreadLoading}
+          onClick={() =>
+            createNewThread({
+              researchId: id,
+              summary: `Further discussion about "${truncate(infraResearch?.prompt ?? '', { length: 30 })}"`,
+            })
+          }
+        >
+          Analyze further with Plural AI
+        </Button>
+      </Flex>
+    ) : null
 
   return (
     <WrapperSC>
@@ -106,12 +160,12 @@ export function InfraResearch() {
           <Flex gap="small">
             {status && (
               <Chip
-                clickable
+                clickable={!isEmpty(infraResearch?.threads)}
                 onClick={() => {
                   // TODO: open new chat panel
                 }}
                 size="large"
-                fillLevel={2}
+                fillLevel={isRunning ? 2 : 1}
                 severity={statusToSeverity[status]}
               >
                 {isRunning ? (
@@ -127,83 +181,100 @@ export function InfraResearch() {
                 )}
               </Chip>
             )}
-            {status === InfraResearchStatus.Completed && id && (
-              <Button
-                small
-                secondary
-                loading={createThreadLoading}
-                onClick={() =>
-                  createNewThread({
-                    summary: `Further discussion about "${truncate(infraResearch?.prompt ?? '', { length: 30 })}"`,
-                    researchId: id,
-                  })
-                }
-              >
-                Analyze further with Plural AI
-              </Button>
+            {!isChatbotOpen && headerButtons}
+            {status !== InfraResearchStatus.Failed && (
+              <InfraResearchShareMenu infraResearch={infraResearch} />
             )}
           </Flex>
         </StretchedFlex>
+        {isChatbotOpen && headerButtons}
         <Divider backgroundColor="border" />
+        {recreateMutation[1].error && (
+          <GqlError error={recreateMutation[1].error} />
+        )}
         {fixError && <GqlError error={fixError} />}
         {parseError && (
           <GqlError
             error={parseError}
             action={
-              <Button
-                small
-                loading={fixLoading}
-                startIcon={<AiSparkleFilledIcon />}
-                onClick={() =>
-                  fixResearchDiagram({
-                    variables: { id: id ?? '', error: parseError.message },
-                  })
-                }
-              >
-                Fix parse errors
-              </Button>
+              parseFixAttempts < 2 ? (
+                <Tooltip
+                  placement="top"
+                  label={
+                    <span>
+                      Attempts to fix Mermaid syntax errors automatically-
+                      success may vary
+                    </span>
+                  }
+                  css={{ maxWidth: 275 }}
+                >
+                  <Button
+                    small
+                    loading={fixLoading}
+                    startIcon={<AiSparkleFilledIcon />}
+                    onClick={() =>
+                      fixResearchDiagram({
+                        variables: { id, error: parseError.message },
+                      })
+                    }
+                  >
+                    Fix parse errors
+                  </Button>
+                </Tooltip>
+              ) : (
+                <RegenerateButton mutation={recreateMutation} />
+              )
             }
           />
         )}
-        <Body2BoldP $color="text">Diagram</Body2BoldP>
-        <Flex
-          direction="column"
-          gap="medium"
-        >
-          {isRunning && (
-            <Body1P $shimmer>
-              Generating your diagram. This may take a few minutes. Feel free to
-              leave the page while the agent runs in the background.
-            </Body1P>
-          )}
-          {isRunning || loading ? (
-            <RectangleSkeleton
-              $width="100%"
-              $height={300}
-            />
-          ) : (
-            <InfraResearchDiagram
-              diagram={diagram}
-              setParseError={setParseError}
-            />
-          )}
-        </Flex>
-        <Body2BoldP $color="text">Analysis</Body2BoldP>
-        {isRunning || loading ? (
-          <Flex
-            direction="column"
-            gap="medium"
-          >
-            {Array.from({ length: 4 }).map((_, index) => (
-              <RectangleSkeleton
-                key={index}
-                $width={`${100 - [12, 0, 5, 3][index % 4]}%`}
-                $height="medium"
-              />
-            ))}
-          </Flex>
+        {status === InfraResearchStatus.Failed ? (
+          <GqlError
+            error="An error occurred while generating this research. Try running it again with the button below."
+            action={<RegenerateButton mutation={recreateMutation} />}
+          />
         ) : (
-          <InfraResearchAnalysis analysis={analysis} />
+          <>
+            <Body2BoldP $color="text">Diagram</Body2BoldP>
+            <Flex
+              direction="column"
+              gap="medium"
+            >
+              {isRunning && (
+                <Body1P $shimmer>
+                  Generating your diagram. This may take a few minutes. Feel
+                  free to leave the page while the agent runs in the background.
+                </Body1P>
+              )}
+              {isRunning || loading ? (
+                <RectangleSkeleton
+                  $width="100%"
+                  $height={300}
+                />
+              ) : (
+                <InfraResearchDiagram
+                  diagram={diagram}
+                  setParseError={setParseError}
+                />
+              )}
+            </Flex>
+            <Body2BoldP $color="text">Analysis</Body2BoldP>
+            {isRunning || loading ? (
+              <Flex
+                direction="column"
+                gap="medium"
+              >
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <RectangleSkeleton
+                    key={index}
+                    $width={`${100 - [12, 0, 5, 3][index % 4]}%`}
+                    $height="medium"
+                  />
+                ))}
+              </Flex>
+            ) : (
+              <InfraResearchAnalysis analysis={analysis} />
+            )}
+          </>
         )}
       </Flex>
       <ResponsiveLayoutSidecarContainer $breakpointWidth={768}>
@@ -213,6 +284,38 @@ export function InfraResearch() {
         />
       </ResponsiveLayoutSidecarContainer>
     </WrapperSC>
+  )
+}
+
+function RegenerateButton({
+  mutation,
+  tooltip,
+  ...props
+}: {
+  mutation: ReturnType<typeof useCreateInfraResearchMutation>
+  tooltip?: ReactNode
+} & ButtonProps) {
+  const [regenerate, { loading }] = mutation
+  return (
+    <WrapWithIf
+      condition={!!tooltip}
+      wrapper={
+        <Tooltip
+          placement="top"
+          label={tooltip}
+        />
+      }
+    >
+      <Button
+        small
+        loading={loading}
+        onClick={() => regenerate()}
+        startIcon={<ReloadIcon />}
+        {...props}
+      >
+        Regenerate
+      </Button>
+    </WrapWithIf>
   )
 }
 

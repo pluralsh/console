@@ -39,11 +39,12 @@ export function InfraResearches() {
       queryHook: useInfraResearchesQuery,
       keyPath: ['infraResearches'],
     })
-
   const infraResearches = useMemo(
     () => mapExistingNodes(data?.infraResearches),
     [data?.infraResearches]
   )
+  const isLoading = !data && loading
+  const noExistingData = isEmpty(infraResearches) && !(isLoading || error)
 
   useSetBreadcrumbs(useMemo(() => getInfraResearchesBreadcrumbs(), []))
 
@@ -76,7 +77,7 @@ export function InfraResearches() {
           gap="xsmall"
         />
         <Divider backgroundColor="border" />
-        {isEmpty(infraResearches) && (
+        {noExistingData && (
           <Title2H1>What is your investigation question?</Title2H1>
         )}
         <InfraResearchInput />
@@ -93,7 +94,7 @@ export function InfraResearches() {
           ))}
         </Flex>
       </PromptSectionSC>
-      {!isEmpty(infraResearches) && !error && (
+      {!noExistingData && (
         <Flex
           direction="column"
           gap="small"
@@ -106,6 +107,7 @@ export function InfraResearches() {
             second="Previous prompts and questions"
             secondPartialType="body2"
             secondColor="text-light"
+            loading={isLoading}
           />
           {error ? (
             <GqlError error={error} />
@@ -115,7 +117,7 @@ export function InfraResearches() {
               fullHeightWrap
               virtualizeRows
               rowBg="raised"
-              loading={!data && loading}
+              loading={isLoading}
               data={infraResearches}
               columns={columns}
               hasNextPage={pageInfo?.hasNextPage}

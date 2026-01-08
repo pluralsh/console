@@ -16,6 +16,7 @@ import { TRUNCATE } from 'components/utils/truncate'
 import { BadgeLabelP, OverlineH3 } from 'components/utils/typography/Text'
 import {
   InfraResearchFragment,
+  InfraResearchStatus,
   ServiceDeploymentTinyFragment,
   StackMinimalFragment,
   StackStatus,
@@ -48,7 +49,8 @@ export function InfraResearchSidecar({
   const hasAssociations = !(isEmpty(stacks) && isEmpty(services))
 
   if (loading) return <SidecarSkeleton />
-  if (!hasAssociations) return null
+  if (!hasAssociations && infraResearch?.status !== InfraResearchStatus.Running)
+    return null
 
   return (
     <Sidecar
