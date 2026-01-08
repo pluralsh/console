@@ -1,5 +1,6 @@
 import { Table } from '@pluralsh/design-system'
 import {
+  InfiniteData,
   useInfiniteQuery,
   UseInfiniteQueryOptions,
 } from '@tanstack/react-query'
@@ -34,7 +35,11 @@ interface ResourceListProps<TResourceList> {
   initialSort?: SortingState
   queryOptions: (
     options: Options<any>
-  ) => UseInfiniteQueryOptions<TResourceList>
+  ) => UseInfiniteQueryOptions<
+    TResourceList,
+    Error,
+    InfiniteData<TResourceList>
+  >
   itemsKey?: ResourceListItemsKey<TResourceList>
   namespaced?: boolean
   customResource?: boolean
@@ -67,7 +72,7 @@ export function UpdatedResourceList<
   const { data, isFetching, hasNextPage, fetchNextPage } =
     useInfiniteQuery<TResourceList>({
       ...queryOptions({
-        client: getAxiosInstance(cluster?.id),
+        client: getAxiosInstance(cluster?.id ?? ''),
         query: {
           filterBy: `name,${filter}`,
           sortBy: sortBy,
@@ -88,8 +93,9 @@ export function UpdatedResourceList<
 
   const items = useMemo(
     () =>
-      data?.pages.flatMap((value) => value?.[itemsKey] as Array<TResource>) ??
-      [],
+      data?.pages.flatMap((value) =>
+        itemsKey ? (value?.[itemsKey] as Array<TResource>) : []
+      ) ?? [],
     [data?.pages, itemsKey]
   )
 
