@@ -77,7 +77,6 @@ export function UpdatedResourceList<
           filterBy: `name,${filter}`,
           sortBy: sortBy,
           ...DEFAULT_DATA_SELECT,
-          // ...(namespaced ? { namespace } : {}),
         },
       }),
       initialPageParam: DEFAULT_DATA_SELECT.page,
@@ -98,23 +97,6 @@ export function UpdatedResourceList<
       ) ?? [],
     [data?.pages, itemsKey]
   )
-
-  // const resourceList = data as TResourceList
-  // const items = useMemo(
-  //   () => (resourceList?.[itemsKey] as Array<TResource>) ?? [],
-  //   [itemsKey, resourceList]
-  // )
-  // const { hasNextPage } = usePageInfo(items, resourceList?.listMeta)
-
-  // useEffect(() => {
-  //   // Reset page when filters change
-  //   setPage(0)
-  // }, [filter, sortBy, namespace])
-  //
-  // const fetchNextPage = useCallback(() => {
-  //   if (!hasNextPage) return
-  //   setPage((p) => p + 1)
-  // }, [hasNextPage])
 
   useEffect(() => setNamespaced(namespaced), [namespaced, setNamespaced])
 
