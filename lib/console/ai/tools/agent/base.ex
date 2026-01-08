@@ -78,13 +78,15 @@ defmodule Console.AI.Tools.Agent.Base do
   def to_pb(%Configuration.Aws{} = aws) do
     %AwsCredentials{
       access_key_id:     aws.access_key_id,
-      secret_access_key: aws.secret_access_key
+      secret_access_key: aws.secret_access_key,
+      region:            aws.region
     }
   end
 
   def to_pb(%Configuration.Gcp{} = gcp) do
     %GcpCredentials{
       service_account_json_b64: Base.encode64(gcp.service_account_key),
+      project:                  gcp.project_id
     }
   end
 

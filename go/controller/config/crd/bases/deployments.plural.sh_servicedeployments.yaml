@@ -770,8 +770,6 @@ spec:
               version:
                 description: Version specifies the semantic version of this ServiceDeployment.
                 type: string
-            required:
-            - clusterRef
             type: object
           status:
             properties:

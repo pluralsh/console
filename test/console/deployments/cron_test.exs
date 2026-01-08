@@ -325,4 +325,28 @@ defmodule Console.Deployments.CronTest do
       refute refetch(repo2)
     end
   end
+
+  describe "#prune_agent_run_repositories" do
+    test "it will prune dangling agent run repositories" do
+      repo = insert(:agent_run_repository, last_used_at: Timex.now() |> Timex.shift(days: -15))
+      keep = insert(:agent_run_repository, last_used_at: Timex.now() |> Timex.shift(days: -1))
+
+      {1, _} = Cron.prune_agent_run_repositories()
+
+      refute refetch(repo)
+      assert refetch(keep)
+    end
+  end
+
+  describe "#prune_access_tokens" do
+    test "it will prune dangling access tokens" do
+      token = insert(:access_token, expires_at: Timex.now() |> Timex.shift(days: -15))
+      keep = insert(:access_token, expires_at: Timex.now() |> Timex.shift(days: 1))
+
+      {1, _} = Cron.prune_access_tokens()
+
+      refute refetch(token)
+      assert refetch(keep)
+    end
+  end
 end

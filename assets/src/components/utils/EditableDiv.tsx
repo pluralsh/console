@@ -17,12 +17,14 @@ export function EditableDiv({
   onEnter,
   onKeyDown: onKeyDownProp,
   placeholder,
+  disabled,
   ...props
 }: {
   initialValue?: string
   setValue: (value: string) => void
   onEnter?: () => void
   placeholder?: string
+  disabled?: boolean
 } & ComponentPropsWithRef<'div'>) {
   const internalRef = useRef<HTMLDivElement>(null)
   const isFirstRender = useRef(true)
@@ -80,26 +82,31 @@ export function EditableDiv({
   return (
     <ContentEditableDivSC
       ref={(node) => applyNodeToRefs([internalRef, ref], node)}
-      contentEditable
+      contentEditable={!disabled}
       data-placeholder={placeholder}
       onInput={onInput}
       onPaste={onPaste}
       onKeyDown={onKeyDown}
+      $disabled={disabled}
       {...props}
     />
   )
 }
 
-const ContentEditableDivSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.body2,
-  flex: 1,
-  border: 'none',
-  outline: 'none',
-  overflowY: 'auto',
-  whiteSpace: 'pre-wrap',
-  '&:empty:before': {
-    content: 'attr(data-placeholder)',
-    color: theme.colors['text-xlight'],
-    pointerEvents: 'none',
-  },
-}))
+const ContentEditableDivSC = styled.div<{ $disabled?: boolean }>(
+  ({ theme, $disabled }) => ({
+    ...theme.partials.text.body2,
+    flex: 1,
+    border: 'none',
+    outline: 'none',
+    overflowY: 'auto',
+    whiteSpace: 'pre-wrap',
+    opacity: $disabled ? 0.5 : 1,
+    cursor: $disabled ? 'not-allowed' : 'text',
+    '&:empty:before': {
+      content: 'attr(data-placeholder)',
+      color: theme.colors['text-xlight'],
+      pointerEvents: 'none',
+    },
+  })
+)

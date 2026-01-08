@@ -17,8 +17,21 @@ defmodule Console.Schema.DeprecatedCustomResource do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, q) do
+    search_field = "%#{q}%  "
+    from(d in query, where: ilike(d.group, ^search_field)
+      or ilike(d.kind, ^search_field)
+      or (not is_nil(d.namespace) and ilike(d.namespace, ^search_field))
+      or ilike(d.name, ^search_field)
+    )
+  end
+
   def for_cluster(query \\ __MODULE__, cluster_id) do
     from(d in query, where: d.cluster_id == ^cluster_id)
+  end
+
+  def ordered(query \\ __MODULE__) do
+    from(d in query, order_by: [asc: :group, asc: :version, asc: :kind, asc: :namespace, asc: :name])
   end
 
   @valid ~w(group version kind namespace name next_version cluster_id)a

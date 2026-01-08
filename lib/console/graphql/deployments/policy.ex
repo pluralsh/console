@@ -46,13 +46,17 @@ defmodule Console.GraphQl.Deployments.Policy do
   end
 
   input_object :vulnerability_report_attributes do
-    field :artifact_url,    :string
-    field :os,              :vuln_os_attributes
-    field :summary,         :vuln_summary_attributes
-    field :artifact,        :vuln_artifact_attributes
-    field :vulnerabilities, list_of(:vulnerability_attributes)
-    field :services,        list_of(:service_vuln_attributes)
-    field :namespaces,      list_of(:namespace_vuln_attributes)
+    field :artifact_url,      :string
+    field :artifact_repo_url, :string, description: "the Git URL of the codebase defining this artifact"
+    field :artifact_language, :agent_run_language, description: "the language the artifact is written in"
+    field :artifact_language_version,  :string, description: "the language version of the artifact, if applicable"
+    field :agent_runtime,     :string, description: "the agent runtime to use with this vulnerability report"
+    field :os,                :vuln_os_attributes
+    field :summary,           :vuln_summary_attributes
+    field :artifact,          :vuln_artifact_attributes
+    field :vulnerabilities,   list_of(:vulnerability_attributes)
+    field :services,          list_of(:service_vuln_attributes)
+    field :namespaces,        list_of(:namespace_vuln_attributes)
   end
 
   input_object :vuln_os_attributes do
@@ -85,6 +89,7 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :severity,          :vuln_severity
     field :score,             :float
     field :repository_url,    :string
+    field :agent_runtime,     :string
 
     field :title,             :string
     field :description,       :string
@@ -186,12 +191,16 @@ defmodule Console.GraphQl.Deployments.Policy do
   end
 
   object :vulnerability_report do
-    field :id,           non_null(:id)
-    field :artifact_url, :string
-    field :os,           :vuln_os
-    field :summary,      :vuln_summary
-    field :artifact,     :vuln_artifact
-    field :grade,        :vuln_report_grade
+    field :id,                         non_null(:id)
+    field :artifact_url,               :string, description: "the URL of the artifact"
+    field :artifact_repo_url,          :string, description: "the Git URL of the codebase defining this artifact"
+    field :artifact_language,          :agent_run_language, description: "the language the artifact is written in"
+    field :artifact_language_version,  :string, description: "the language version of the artifact, if applicable"
+    field :agent_runtime,              :string, description: "the agent runtime to use with this vulnerability report"
+    field :os,                         :vuln_os
+    field :summary,                    :vuln_summary
+    field :artifact,                   :vuln_artifact
+    field :grade,                      :vuln_report_grade, description: "the grade of the vulnerability report"
 
     field :vulnerabilities, list_of(:vulnerability), resolve: dataloader(Deployments)
     field :services,        list_of(:service_vuln), resolve: dataloader(Deployments)
@@ -237,6 +246,7 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :fixed_version,     :string
     field :installed_version, :string
     field :severity,          :vuln_severity
+    field :agent_runtime,     :string
     field :score,             :float
 
     field :title,            :string

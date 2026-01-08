@@ -241,7 +241,7 @@ type ConsoleClient interface {
 	ServiceAccounts(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ServiceAccounts, error)
 	CreateServiceAccount(ctx context.Context, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccount, error)
 	UpdateServiceAccount(ctx context.Context, id string, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceAccount, error)
-	CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error)
+	CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, expiry *string, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error)
 	ShareSecret(ctx context.Context, attributes SharedSecretAttributes, interceptors ...clientv2.RequestInterceptor) (*ShareSecret, error)
 	ListClusterStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStacks, error)
 	ListClusterStackIds(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStackIds, error)
@@ -9158,8 +9158,9 @@ func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpe
 }
 
 type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -9173,6 +9174,12 @@ func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Config
 		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -9266,8 +9273,9 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_I
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -9281,6 +9289,12 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_I
 		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9320,8 +9334,9 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -9335,6 +9350,12 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configu
 		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9374,8 +9395,9 @@ func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpe
 }
 
 type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -9389,6 +9411,12 @@ func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_
 		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9428,8 +9456,9 @@ func (t *InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_Containe
 }
 
 type InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -9443,6 +9472,12 @@ func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Te
 		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type StackRunFragment_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -9536,8 +9571,9 @@ func (t *StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment
 }
 
 type StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -9551,6 +9587,12 @@ func (t *StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment
 		t = &StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9590,8 +9632,9 @@ func (t *StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Container
 }
 
 type StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -9605,6 +9648,12 @@ func (t *StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationF
 		t = &StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9644,8 +9693,9 @@ func (t *StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpe
 }
 
 type StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -9659,6 +9709,12 @@ func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraf
 		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type StackRunBaseFragment_StateUrls_Terraform struct {
@@ -9752,8 +9808,9 @@ func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecF
 }
 
 type StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -9767,6 +9824,12 @@ func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_St
 		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9806,8 +9869,9 @@ func (t *StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFr
 }
 
 type StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -9822,10 +9886,17 @@ func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform
 	}
 	return t.Refresh
 }
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 
 type StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -9839,6 +9910,12 @@ func (t *StackConfigurationFragment_Terraform) GetRefresh() *bool {
 		t = &StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type CustomStackRunFragment_Stack struct {
@@ -19543,8 +19620,9 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 }
 
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -19558,6 +19636,12 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -19597,8 +19681,9 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 }
 
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -19612,6 +19697,12 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type ListClusterStacks_ClusterStackRuns struct {
@@ -19687,8 +19778,9 @@ func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFrag
 }
 
 type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -19702,6 +19794,12 @@ func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFrag
 		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type ListClusterMinimalStacks_ClusterStackRuns struct {
@@ -19759,8 +19857,9 @@ func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStack
 }
 
 type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -19774,6 +19873,12 @@ func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStack
 		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type ListInfrastructureStacks_InfrastructureStacks struct {
@@ -19831,8 +19936,9 @@ func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFrag
 }
 
 type GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -19846,6 +19952,12 @@ func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_Stack
 		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -19939,8 +20051,9 @@ func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_Infras
 }
 
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -19954,6 +20067,12 @@ func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_Infras
 		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -19993,8 +20112,9 @@ func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_JobSpec_JobS
 }
 
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -20008,6 +20128,12 @@ func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuratio
 		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -20101,8 +20227,9 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStack
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -20116,6 +20243,12 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStack
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20155,8 +20288,9 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_C
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -20170,6 +20304,12 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfig
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -20263,8 +20403,9 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_Infrastructure
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -20278,6 +20419,12 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_Infrastructure
 		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20317,8 +20464,9 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragm
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -20332,6 +20480,12 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackC
 		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20371,8 +20525,9 @@ func (t *CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFrag
 }
 
 type CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -20386,6 +20541,12 @@ func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_Stack
 		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20425,8 +20586,9 @@ func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFrag
 }
 
 type UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -20440,6 +20602,12 @@ func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_Stack
 		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20479,8 +20647,9 @@ func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_
 }
 
 type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -20494,6 +20663,12 @@ func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_
 		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type AddStackRunLogs_AddRunLogs struct {
@@ -20642,8 +20817,9 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -20657,6 +20833,12 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20696,8 +20878,9 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -20711,6 +20894,12 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges struct {
@@ -20844,8 +21033,9 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFra
 }
 
 type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -20859,6 +21049,12 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFra
 		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20898,8 +21094,9 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Cont
 }
 
 type TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
-	Parallelism *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh     *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
 func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
@@ -20913,6 +21110,12 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigura
 		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
 }
 
 type GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
@@ -40647,8 +40850,8 @@ func (c *Client) UpdateServiceAccount(ctx context.Context, id string, attributes
 	return &res, nil
 }
 
-const CreateServiceAccountTokenDocument = `mutation CreateServiceAccountToken ($id: ID!, $scopes: [ScopeAttributes]) {
-	createServiceAccountToken(id: $id, scopes: $scopes) {
+const CreateServiceAccountTokenDocument = `mutation CreateServiceAccountToken ($id: ID!, $scopes: [ScopeAttributes], $expiry: String) {
+	createServiceAccountToken(id: $id, scopes: $scopes, expiry: $expiry) {
 		... AccessTokenFragment
 	}
 }
@@ -40658,10 +40861,11 @@ fragment AccessTokenFragment on AccessToken {
 }
 `
 
-func (c *Client) CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error) {
+func (c *Client) CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, expiry *string, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error) {
 	vars := map[string]any{
 		"id":     id,
 		"scopes": scopes,
+		"expiry": expiry,
 	}
 
 	var res CreateServiceAccountToken
@@ -40899,6 +41103,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 	terraform {
 		parallelism
 		refresh
+		approveEmpty
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -41166,6 +41371,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 	terraform {
 		parallelism
 		refresh
+		approveEmpty
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -41314,6 +41520,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 	terraform {
 		parallelism
 		refresh
+		approveEmpty
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -41486,6 +41693,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 	terraform {
 		parallelism
 		refresh
+		approveEmpty
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -41693,6 +41901,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 	terraform {
 		parallelism
 		refresh
+		approveEmpty
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -42006,6 +42215,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 	terraform {
 		parallelism
 		refresh
+		approveEmpty
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -42319,6 +42529,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 	terraform {
 		parallelism
 		refresh
+		approveEmpty
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -42590,6 +42801,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 	terraform {
 		parallelism
 		refresh
+		approveEmpty
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -42796,6 +43008,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 	terraform {
 		parallelism
 		refresh
+		approveEmpty
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -43057,6 +43270,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 	terraform {
 		parallelism
 		refresh
+		approveEmpty
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -43738,6 +43952,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 	terraform {
 		parallelism
 		refresh
+		approveEmpty
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -44055,6 +44270,7 @@ fragment StackConfigurationFragment on StackConfiguration {
 	terraform {
 		parallelism
 		refresh
+		approveEmpty
 	}
 }
 fragment StackHookFragment on StackHook {

@@ -9,6 +9,7 @@ names:
 - cilium
 - contour
 - coredns
+- cloudnative-pg
 - external-dns
 - flux
 - ingress-nginx
@@ -19,6 +20,7 @@ names:
 - kube-prometheus-stack
 - kyverno
 - linkerd
+- longhorn
 - opentelemetry-operator
 - rook
 - strimzi-kafka
@@ -29,3 +31,7 @@ names:
 - tigera-operator
 - argo-cd
 - vector
+- victoria-metrics-operator
+- gpu-operator
+- elastic-agent
+- rabbitmq-cluster-operator

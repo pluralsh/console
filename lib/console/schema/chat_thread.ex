@@ -28,6 +28,7 @@ defmodule Console.Schema.ChatThread do
     belongs_to :insight,  AiInsight
     belongs_to :flow,     Flow
     belongs_to :research, InfraResearch
+    belongs_to :service,  Service
 
     has_one :session, AgentSession,
       on_replace: :update,
@@ -106,7 +107,7 @@ defmodule Console.Schema.ChatThread do
     from(t in query, order_by: ^order)
   end
 
-  @valid ~w(summary last_message_at summarized default user_id flow_id insight_id research_id)a
+  @valid ~w(summary last_message_at summarized default service_id user_id flow_id insight_id research_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -117,6 +118,7 @@ defmodule Console.Schema.ChatThread do
     |> foreign_key_constraint(:insight_id)
     |> foreign_key_constraint(:flow_id)
     |> foreign_key_constraint(:research_id)
+    |> foreign_key_constraint(:service_id)
     |> unique_constraint(:user_id, name: :chat_threads_user_id_uniq_index)
     |> validate_required([:user_id])
   end

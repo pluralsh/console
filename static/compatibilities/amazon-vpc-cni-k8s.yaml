@@ -3,71 +3,146 @@ git_url: https://github.com/aws/amazon-vpc-cni-k8s
 release_url: https://github.com/aws/amazon-vpc-cni-k8s/releases/tag/v{vsn}
 helm_repository_url: https://aws.github.io/eks-charts
 versions:
-- version: 1.20.5
+- version: 1.21.1
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary: null
+  chart_version: 1.21.1
+- version: 1.21.0
+  kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.21.0
 - version: 1.20.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.20.0
 - version: 1.19.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.19.0
 - version: 1.18.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.18.0
 - version: 1.17.1
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.17.1
 - version: 1.16.2
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.16.2
 - version: 1.16.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.16.0
 - version: 1.15.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['`aws-node` DaemonSet continues to include the additional `aws-eks-nodeagent`
+        container introduced in 1.14.x for Kubernetes NetworkPolicy support; image
+        bump to `amazon/aws-network-policy-agent:v1.0.2` in 1.15.0.', 'RBAC/manifest
+        content changed in 1.15.0: the `aws-node` `ClusterRole` is modified (remove
+        `update` on `nodes`; add `get, list, patch` on `CNINode`). Upgrade must apply
+        the full manifest/chart so the new RBAC is present.', 'Security Groups for
+        Pods integration now uses the `CNINode` CRD in 1.15.0, deprecating reliance
+        on the `vpc.amazonaws.com/has-trunk-attached` node label.']
+    features: ["Support for VPC Resource Controller\u2019s `CNINode` (used by Security\
+        \ Groups for Pods) was added/reintroduced.", New `DISABLE_CONTAINER_V6` env
+        var allows disabling IPv6 networking inside container network namespaces.,
+      New `IP_COOLDOWN_PERIOD` env var allows configuring the IP cooldown period.]
+    breaking_changes: [RBAC change in 1.15.0 requires updating the entire manifest/chart
+        (including `aws-node` `ClusterRole`) during upgrade/downgrade; partial applies
+        can prevent the CNI containers from starting., Security Groups for Pods now
+        relies on the `CNINode` CRD and deprecates the `vpc.amazonaws.com/has-trunk-attached`
+        label; any tooling/automation depending on that label should be updated.]
   chart_version: 1.15.0
   images: []
 - version: 1.14.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['`aws-node` DaemonSet now runs an additional container `aws-eks-nodeagent`
+        (AWS Network Policy Agent) alongside the existing CNI containers.', 'Verification
+        output/images now include `amazon/aws-network-policy-agent:v1.0.1` in addition
+        to `amazon-k8s-cni-init` and `amazon-k8s-cni`.', 'If deploying via raw manifests,
+        use the v1.14.0 YAMLs (and region-specific variants for gov/cloud-cn), as
+        the DaemonSet spec changed to include the new container.']
+    features: [Adds Kubernetes NetworkPolicy enforcement support via an in-pod Network
+        Policy Agent (`aws-eks-nodeagent`).]
+    breaking_changes: ["`aws-eks-nodeagent` exposes metrics on host-network port 8080\
+        \ by default; this can conflict with other hostNetwork workloads binding to\
+        \ 8080. Change the agent\u2019s metrics port via the `metrics-bind-addr` container\
+        \ argument if needed."]
   chart_version: 1.14.0
   images: []
 - version: 1.13.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm / values changes to review\n- **New env var(s) to consider**\
+      \ (set via chart values that template env):\n  - `ENABLE_V6_EGRESS` (new in\
+      \ v1.13.0): enables IPv6 egress from pods in an **IPv4** cluster.\n  - `DISABLE_LEAKED_ENI_CLEANUP`\
+      \ (new): disables the leaked ENI cleanup background task (only set if you have\
+      \ a specific reason).\n  - `AWS_EC2_ENDPOINT` (new): override the EC2 API endpoint\
+      \ (useful for custom/VPC endpoints).\n- **Chart templating change**: image template\
+      \ logic was refactored for \u201Cendpoint flexibility\u201D. If you override\
+      \ image registry/repository/tag today, diff your rendered manifests (`helm template`)\
+      \ to ensure images still resolve correctly.\n- **Tolerations YAML fix**: v1.13.0\
+      \ includes a chart fix for tolerations rendering. If you had custom tolerations,\
+      \ re-validate output for any formatting differences.\n- **Env var case-insensitivity**:\
+      \ all AWS VPC CNI env vars are now treated case-insensitively; standardize to\
+      \ canonical uppercase to avoid confusion.\n"
+    chart_updates: ['CNI chart: fix tolerations templating to produce valid YAML.',
+      'CNI chart: refactor image template logic to better support flexible endpoints/registries.',
+      'Init container behavior: install all core CNI plugins via init container (manifest
+        content/containers may change).', 'EKS add-on manifest: add resource limits
+        on init container (may affect custom overrides).']
+    features: ['`ENABLE_V6_EGRESS`: allows pods in an IPv4 cluster to reach IPv6 endpoints
+        (IPv6 egress capability).', '`DISABLE_LEAKED_ENI_CLEANUP`: lets operators
+        disable the leaked ENI cleanup task if it conflicts with their operational
+        model.', '`AWS_EC2_ENDPOINT`: supports using a custom EC2 API endpoint (e.g.,
+        private endpoints or special partitions).']
+    breaking_changes: []
   chart_version: 1.13.0
   images: []
 - version: 1.12.5
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.2.7
   images: []
 - version: 1.11.5
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 1.10.3
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 1.1.15
   images: []

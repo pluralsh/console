@@ -101,6 +101,10 @@ type ServiceAccountSpec struct {
 	// +kubebuilder:validation:Optional
 	Scopes []ServiceAccountScope `json:"scopes,omitempty"`
 
+	// TokenExpiry is the TTL of the access token, e.g. 1h, 1d, 1w
+	// +kubebuilder:validation:Optional
+	TokenExpiry *string `json:"tokenExpiry,omitempty"`
+
 	// TokenSecretRef references a Kubernetes secret that should contain the
 	// authentication token for this service account. This enables secure storage
 	// and management of credentials within the cluster.

@@ -1,0 +1,564 @@
+icon: https://avatars.githubusercontent.com/u/51335366?s=48&v=4
+git_url: https://github.com/longhorn/longhorn
+release_url: https://github.com/longhorn/longhorn/releases/tag/v{vsn}
+helm_repository_url: https://charts.longhorn.io
+versions:
+- version: 1.10.1
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '### Helm values / upgrade notes
+
+      - **Use the Longhorn Manager hotfix image when targeting v1.10.1:** set the
+      manager image tag to `v1.10.1-hotfix-2` (the plain `v1.10.1` manager image has
+      known crash/regression issues).
+
+      - **Temporarily disable the upgrade version check if needed:** set `upgradeVersionCheck:
+      false` (or `preUpgradeChecker.upgradeVersionCheck: false` depending on your
+      chart values) to allow applying the hotfix image and/or performing certain recovery/downgrade
+      scenarios.
+
+      - **If upgrading from any v1.9.x to v1.10.x and your cluster may contain `v1beta1`
+      stored CRs:** perform the **manual CRD storage version migration** to `v1beta2`
+      *before* the Helm upgrade.
+
+      '
+    chart_updates: ['Helm chart behavior improvement: `defaultSettings` handling supports
+        automatic quoting and multiple types (reduces YAML/JSON typing pitfalls when
+        setting Longhorn global settings via Helm).']
+    features: ['V2 Data Engine: interrupt mode now supports **NVMe disks** starting
+        in v1.10.1 (v1.10.0 supported AIO disks only).', 'Improved scheduling visibility:
+        `CSIStorageCapacity` objects show schedulable/allocatable capacity (helps
+        capacity-aware scheduling with `WaitForFirstConsumer`).', Adds/extends installation
+        variant usage metrics (observability/telemetry improvement).]
+    breaking_changes: ['Longhorn v1.10.0 removes the `longhorn.io/v1beta1` API and
+        removes the deprecated `replica.status.evictionRequested` field. If any CRs
+        are still stored as `v1beta1`, upgrades to v1.10.x can fail until you migrate
+        CRD storedVersions to `v1beta2`.', 'Kubernetes requirement: v1.10.x requires
+        **Kubernetes v1.25+**; upgrading on older clusters is unsupported.']
+  chart_version: 1.10.1
+  images: ['longhornio/longhorn-manager:v1.10.1', 'longhornio/longhorn-share-manager:v1.10.1',
+    'longhornio/longhorn-ui:v1.10.1']
+- version: 1.10.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm / values changes to plan for\n\n- **Set `upgradeVersionCheck:\
+      \ false` during the upgrade if you must pin a hotfix manager image** (the release\
+      \ notes recommend disabling the upgrade version check when swapping `longhorn-manager`\
+      \ to a hotfix tag).\n- **If you rely on private registries or image pull secrets:**\
+      \ v1.10 introduces a *standardized* way to override container image registry\
+      \ and specify image pull secrets (release notes: Issues **#11064** and **#11062**).\
+      \ Review your current `values.yaml` overrides for images/registry/secrets and\
+      \ adjust to the new/standard pattern.\n- **No explicit mandatory Helm value\
+      \ renames were listed in these notes**, but v1.10 changes the *format* of several\
+      \ Longhorn **Settings** (not Helm values) to support per\u2013data-engine JSON\
+      \ values; if you currently set these via Helm `defaultSettings`, validate they\
+      \ still apply as intended (see \u201CConsolidated Global Settings\u201D below).\n"
+    chart_updates: ['Hotfix guidance: v1.10.0 chart should deploy `longhorn-manager:v1.10.0-hotfix-1`
+        instead of `v1.10.0` to avoid a share-manager backoff regression (manager
+        crash loop / inability to deploy new share-manager pods).', 'Pre-upgrade requirement:
+        ensure Longhorn CRDs no longer store `v1beta1` objects in `status.storedVersions`
+        before upgrading to v1.10 (manual storage-version migration may be required).',
+      'API removal: `longhorn.io/v1beta1` is removed in v1.10; clusters with leftover
+        `v1beta1` stored objects can fail CRD patching during upgrade.', 'Field removal:
+        deprecated `replica.status.evictionRequested` removed in v1.10.']
+    features: ['V2 Data Engine: interrupt mode (AIO disks only) to reduce CPU usage
+        on idle/low I/O workloads.', 'V2 Data Engine: volume & snapshot cloning (full-copy
+        clone and fast linked/smart clone).', 'V2 Data Engine: replica rebuild QoS
+        / bandwidth limiting (global or per volume) to reduce rebuild impact.', 'V2
+        Data Engine: volume expansion supported (PVC resize/UI).', 'V2 Data Engine:
+        can run without hugepages (more flexible on low-spec nodes; possible performance
+        tradeoff).', 'V1 Data Engine: single-stack IPv6 support (dual-stack and V2
+        IPv6 not supported in this release).', 'Kubernetes scheduling: CSIStorageCapacity
+        support for better placement with `WaitForFirstConsumer` StorageClasses.',
+      'Backups: configurable backup block size at volume creation time.', 'UX/observability:
+        consolidated settings model allowing per-engine values via JSON; UI shows
+        volume attachment ticket summaries.']
+    breaking_changes: ['`longhorn.io/v1beta1` API is removed in v1.10; upgrades will
+        fail if any CRDs still have `v1beta1` as a stored version or any objects persisted
+        in `v1beta1`. Manual CRD storage-version migration is strongly advised before
+        upgrading from v1.9 to v1.10, especially for clusters originally installed
+        < v1.3.0 or after etcd/CRD restores.', Deprecated `replica.status.evictionRequested`
+        field is removed; any tooling that reads/writes it must be updated., "Settings\
+        \ consolidation: several global settings now support per\u2013data-engine\
+        \ values via JSON (`{\"v1\":..., \"v2\":...}`); existing automation that assumes\
+        \ simple string values may need updates.", 'Known regression: `longhorn-manager:v1.10.0`
+        can crash due to share-manager backoff logic; plan to use `v1.10.0-hotfix-1`
+        during upgrade to avoid instability.']
+  chart_version: 1.10.0
+  images: ['longhornio/longhorn-manager:v1.10.0', 'longhornio/longhorn-share-manager:v1.10.0',
+    'longhornio/longhorn-ui:v1.10.0']
+- version: 1.9.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **Work around v1.9.0 recurring job regression (recommended):**\n\
+      \  - Set `upgradeVersionCheck: false` to allow the upgrade while using the hotfixed\
+      \ manager image.\n  - Override the Longhorn Manager image tag from `v1.9.0`\
+      \ to `v1.9.0-hotfix-1` (values key varies by chart; ensure the manager image\
+      \ tag is explicitly set).\n\n- **New Helm option:**\n  - `volumeBindingMode`\
+      \ can now be configured via Helm values (useful if you want `Immediate` vs `WaitForFirstConsumer`).\n\
+      \n- **Chart templating additions/bugfixes:**\n  - Support for `extraObjects`\
+      \ (or similarly named field) to inject additional Kubernetes objects.\n  - Fix:\
+      \ `persistence.backupTargetName` was not referenced in the StorageClass template\
+      \ (verify your StorageClass rendering if you relied on this).\n"
+    chart_updates: [v1.9.0 removes the deprecated `environment_check.sh` script from
+        the release artifacts (use `longhornctl` for preflight checks instead)., "CRDs:\
+        \ deprecated fields removed from `longhorn.io/v1beta2` CRDs; ensure CRs/manifests\
+        \ don\u2019t rely on removed fields.", 'Settings migration: `orphan-auto-deletion`
+        is replaced by `orphan-resource-auto-deletion` and is auto-migrated during
+        upgrade.']
+    features: [Recurring **system backups** can now be scheduled via recurring jobs
+        (new operational safety net)., '**Offline replica rebuilding** (v1 and v2)
+        can automatically rebuild replicas while volumes are detached (disabled by
+        default).', '**Orphaned instance cleanup** can track and delete leftover engine/replica
+        runtime resources (disabled by default).', 'Improved **observability/metrics**:
+        new Prometheus metrics for replica/engine CR identity and rebuild status.',
+      'V2 Data Engine enhancements: **UBLK frontend** support and **storage network**
+        support (still experimental).']
+    breaking_changes: [Kubernetes **v1.25+ is required** for Longhorn v1.9.x upgrades/installs
+        (blocker if cluster is older)., V2 **backing images are incompatible** with
+        earlier versions due to xattr naming conflicts; you must delete/recreate V2
+        backing images during upgrade and restore any dependent volumes from backups.,
+      '`longhorn.io/v1beta1` API is now unserved/unsupported in v1.9.0 and will be
+        removed in v1.10.0; any tooling using v1beta1 must move to v1beta2.', 'Setting
+        rename: `orphan-auto-deletion` replaced by `orphan-resource-auto-deletion`
+        (auto-migrated, but automation/scripts must be updated).']
+  chart_version: 1.9.0
+  images: ['longhornio/longhorn-manager:v1.9.0', 'longhornio/longhorn-share-manager:v1.9.0',
+    'longhornio/longhorn-ui:v1.9.0']
+- version: 1.8.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm / deployment manifest notes for 1.7.0 \u279C 1.8.0\n\n\
+      - **Kubernetes minimum version increases to v1.25+** in Longhorn **v1.8.0**\
+      \ (driven by CSI external-snapshotter upgrade to **v8.2.0**). Ensure the cluster\
+      \ is upgraded first.\n- **Image tag pitfall (only if using the *main* longhorn/longhorn\
+      \ repo YAML or chart sources):** v1.8.0 repo manifests/charts mistakenly referenced\
+      \ `v1.8.x-head`. Fix by setting images to **`v1.8.0`** before install/upgrade,\
+      \ and if you already upgraded with `v1.8.x-head`, re-upgrade with `v1.8.0` and\
+      \ update engine images for any volumes using `v1.8.x-head`.\n  - Not applicable\
+      \ if you install from the **official Longhorn Helm repo** (`https://charts.longhorn.io`).\n\
+      - **Environment check script removal path:** the `environment_check.sh` script\
+      \ was **deprecated in 1.7.0** and is **scheduled for removal in 1.8.0**. Prefer\
+      \ using **Longhorn CLI (`longhornctl`)** for preflight/environment validation\
+      \ going forward.\n- **V2 (SPDK) block-type disk default block size changes 4096\
+      \ \u279C 512 bytes:**\n  - This impacts **V2 volumes on block-type disks**.\
+      \ If you have existing V2 volumes on 4k-block disks, the release notes prescribe\
+      \ a **backup \u279C delete V2 volumes \u279C remove disk from `node.spec.disks`\
+      \ \u279C wipe disk \u279C re-add with new config \u279C restore** workflow.\n\
+      - **Backup target model changes:** v1.8.0 introduces **multiple backupstores**\
+      \ and creates a **default backup target named `default`** during install/upgrade.\
+      \ Volumes without an explicit backup target will use `default` (also used for\
+      \ system backups). Review any automation that assumes a single/global backup\
+      \ target.\n- **RWX expansion behavior:** v1.8.0 supports **automatic online\
+      \ RWX volume expansion** when **manager, share-manager, and CSI plugin are all\
+      \ at v1.8.0** (so avoid mixed-version states longer than necessary).\n"
+    chart_updates: ["Longhorn v1.8.0 includes the standard chart/app refresh plus:\
+        \ (1) updated CSI external-snapshotter (v8.2.0), which drives the Kubernetes\
+        \ v1.25+ requirement; (2) support for installation/upgrade via the built-in\
+        \ Helm Controller for K3s/RKE2 using a HelmChart CRD; (3) a warning that the\
+        \ longhorn/longhorn repo\u2019s v1.8.0 manifest and chart had an incorrect\
+        \ image tag (`v1.8.x-head`), so ensure your chart source is correct (prefer\
+        \ charts.longhorn.io or fix the tag before applying)."]
+    features: ['Multiple backupstores support, including creation of a default backup
+        target named `default` used for system backups and volumes without a specified
+        target.', Automatic online RWX volume expansion (no workload scale-down/manual
+        resize steps) when all Longhorn components are on v1.8.0., 'V2 Data Engine
+        enhancements: configurable CPU cores, DR volumes, auto-salvage, live migration,
+        volume encryption, delta replica rebuild using snapshot checksums, and backing
+        image update/download.', Support installing/upgrading Longhorn on K3s/RKE2
+        via the built-in Helm Controller (HelmChart CRD workflow)., V2 Data Engine
+        support for Talos Linux (assuming prerequisites are met).]
+    breaking_changes: [Kubernetes minimum version is now **v1.25+** for Longhorn v1.8.0
+        due to CSI external-snapshotter v8.2.0; clusters below v1.25 must upgrade
+        Kubernetes before upgrading Longhorn., V2 block-type disk default block size
+        changed from **4096** to **512** bytes; existing V2 volumes on 4k-block disks
+        require a disruptive migrate/restore procedure to align with the new default
+        and avoid incompatibilities with V1-generated backing images., 'If you upgraded
+        using the *main* longhorn/longhorn repo chart/manifest without fixing the
+        image tag, you may have deployed `v1.8.x-head` images; you must correct to
+        `v1.8.0` and update engine images for affected volumes.']
+  chart_version: 1.8.0
+  images: ['longhornio/longhorn-manager:v1.8.0', 'longhornio/longhorn-share-manager:v1.8.0',
+    'longhornio/longhorn-ui:v1.8.0']
+- version: 1.7.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Helm chart values.yaml was simplified/cleaned up (less churn,
+        but expect some keys to have moved/been renamed).', Helm chart added support
+        for Gateway API and improved Ingress options., 'Chart includes updated defaults/behavior
+        aligned with Longhorn v1.7.0 features (e.g., RWX storage network support,
+        monitoring knobs).']
+    features: ['V2 Data Engine (still preview) gained online replica rebuild, filesystem
+        trim, broader SPDK block-disk driver support (AIO/NVMe/VirtIO), and live data-plane
+        upgrade for V2 volumes (spdk_tgt) with no downtime.', High availability improvements
+        include HA backing images and experimental RWX fast failover (faster Share
+        Manager failure detection/response)., Data protection now supports periodic
+        and on-demand full backups to reduce corruption risk and improve reliability.,
+      Scheduling enhancements improve replica auto-balancing under disk pressure and
+        speed up rebuilds via local file copying when possible., Storage network can
+        now be used with RWX volumes for traffic segregation., Introduced an official
+        Longhorn CLI (longhornctl) for install/ops/troubleshooting via CRs and in-cluster
+        pod execution., 'Improved platform coverage, including support for Container-Optimized
+        OS (COS).']
+    breaking_changes: [Longhorn v1.7.0 requires Kubernetes v1.21+ for install/upgrade
+        from 1.6.x., "environment_check.sh is deprecated in v1.7.0 (overlaps with\
+        \ the new Longhorn CLI) and scheduled for removal in v1.8.0\u2014don\u2019\
+        t build automation around the script going forward.", 'There is a critical
+        known issue in v1.7.0 affecting volume attachment for clusters with legacy
+        engine resource names (pre v1.5.2/v1.4.4 pattern); if present, you must hold
+        the upgrade until v1.7.1.']
+  chart_version: 1.7.0
+  images: ['longhornio/longhorn-manager:v1.7.0', 'longhornio/longhorn-share-manager:v1.7.0',
+    'longhornio/longhorn-ui:v1.7.0']
+- version: 1.6.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / chart behavior to review before upgrading to v1.6.0\n\
+      \n- **GitOps/Argo CD compatibility:** v1.6.0 removes or changes the **Helm pre-upgrade\
+      \ hook** to better support Argo CD ([#6415]). If you previously relied on that\
+      \ hook behavior, re-test your GitOps pipeline.\n- **StorageClass mount options\
+      \ via Helm:** You can now set **StorageClass mount options** via `values.yaml`\
+      \ ([#7351]). Review whether you want to manage mount options centrally in Helm\
+      \ rather than editing StorageClasses manually.\n- **Component log level configurable\
+      \ via Helm:** Chart adds the ability to configure **log level** through Helm\
+      \ values ([#3655]). Consider setting this explicitly for troubleshooting vs\
+      \ noise.\n- **ServiceMonitor support:** Helm chart can now deploy a **Prometheus\
+      \ ServiceMonitor** ([#7041]) if you use Prometheus Operator.\n- **Node reserved\
+      \ storage percentage exposed in chart:** Adds a Helm value for a **node reserved\
+      \ storage percentage** setting ([#5958]). If you previously set this only in\
+      \ the UI/settings CR, you may want to standardize it in Helm.\n- **New/updated\
+      \ settings surfaced in chart:** Ensure settings exist in your values/ConfigMap\
+      \ for **usage metrics collection** (`allow-collecting-longhorn-usage-metrics`)\
+      \ ([#7050]) and any new snapshot/maintenance-related settings you plan to use.\n\
+      \n> Note: The release notes provided don\u2019t list a full values.yaml diff;\
+      \ do a `helm diff upgrade` between your current chart and the v1.6.0 chart to\
+      \ catch renamed/added/removed values."
+    chart_updates: ['Improved GitOps friendliness: validated with Flux/Argo CD/Fleet;
+        chart adjusted (notably pre-upgrade hook changes) to work better with Argo
+        CD.', Adds optional Prometheus Operator integration by allowing deployment
+        of a ServiceMonitor., Adds chart support for configuring StorageClass mount
+        options and component log level via values.yaml., 'General dependency bumps
+        and manifest refactors noted in release notes (e.g., CSI component upgrades,
+        Kubernetes version support updates).']
+    features: ['Snapshot space management: define max snapshot count and max total
+        snapshot size globally or per-volume to control space usage.', 'V2 Data Engine
+        (preview) gains snapshot/revert and backup/restore, including backup/restore
+        interoperability between v1 and v2 engines.', 'Platform support broadened:
+        Talos support and OKD (OpenShift Origin) support added; v2 engine support
+        on ARM64.', 'Node maintenance enhancements: new node drain policy options
+        to proactively evict/relocate replicas during planned maintenance.', 'Data
+        protection: encryption support for `volumeMode: Block` volumes.', 'Backing
+        image improvements: ability to back up and restore backing images across clusters.']
+    breaking_changes: [Potential behavior change for GitOps installs/upgrades due
+        to removal/change of the Helm pre-upgrade hook (re-test Argo CD/Flux pipelines).,
+      "V1/V2 data plane separation and selective v2 activation introduce new operational\
+        \ modes; ensure you don\u2019t accidentally enable v2 in production unless\
+        \ you intend to (v2 remains preview)."]
+  chart_version: 1.6.0
+  images: ['longhornio/longhorn-manager:v1.6.0', 'longhornio/longhorn-ui:v1.6.0']
+- version: 1.5.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["Upgrade path is enforced: v1.5.0 supports upgrades only from\
+        \ Longhorn 1.4.x (you\u2019re currently on 1.4.0, so you\u2019re in the supported\
+        \ path).", 'Instance Manager architecture change: engine+replica instance
+        managers are consolidated into a single instance-manager, which affects pod
+        count/resources during/after upgrade.', Admission webhook and recovery-backend
+        services are merged into longhorn-manager (fewer standalone components/services).,
+      'New CRD introduced: Longhorn VolumeAttachment (used for exclusive attachment
+        and headless operations like cloning/recurring jobs/backing image export).',
+      'New/expanded backup stores and backup behaviors: CIFS and Azure backup stores;
+        backup compression options (lz4/gzip/none).', 'New/expanded trim and recurring
+        job capabilities: automatic filesystem trim via recurring job; RWX volume
+        trim; new recurring job types for snapshot cleanup and delete.', 'New node
+        maintenance behavior: Kubernetes Upgrade Node Drain Policy and use of PDBs
+        to protect Longhorn components during drains.', 'Preview feature added: v2/SPDK
+        data engine (disabled by default; not for production).', "Deprecations/removals\
+        \ called out in 1.5 notes: remove global setting mkfs-ext4-parameters; remove\
+        \ system-managed component image settings; remove deprecated volume spec recurringJobs\
+        \ fields; remove deprecated allow-node-drain-with-last-healthy-replica; remove\
+        \ disable-replica-rebuild feature; remove several \u201CGuaranteed * CPU\u201D\
+        \ settings; default backup/restore concurrent limits reduced."]
+    features: ['SPDK-based v2 data engine (preview, disabled by default) for an alternative
+        datapath with new lifecycle and replica management capabilities.', 'New VolumeAttachment
+        CRD to ensure exclusive attachment and enable safe headless operations (clones,
+        recurring jobs, backing image export).', Cluster Autoscaler support is GA
+        (no longer experimental)., Consolidated instance managers reduce resource
+        usage during normal operation and upgrades., 'Backup improvements: new compression
+        methods (lz4/gzip/none) and additional backup stores (CIFS and Azure).', 'Operations
+        improvements: automatic trim via recurring job, RWX volume trim, and new recurring
+        jobs for snapshot cleanup/delete.', 'Node maintenance protection: node drain
+        policy and PDB usage to improve safety during Kubernetes upgrades/maintenance.']
+    breaking_changes: ['Upgrade path enforcement & downgrade prevention: you cannot
+        downgrade after upgrading, and upgrades are only supported from 1.4.x to 1.5.0.',
+      "Removed/changed settings and deprecated fields may break existing Helm values\
+        \ or automation if you rely on them (e.g., mkfs-ext4-parameters, system-managed\
+        \ component image settings, deprecated recurringJobs fields, allow-node-drain-with-last-healthy-replica,\
+        \ disable-replica-rebuild, \u201CGuaranteed * CPU\u201D settings)."]
+  chart_version: 1.5.0
+  images: ['longhornio/longhorn-manager:v1.5.0', 'longhornio/longhorn-ui:v1.5.0']
+- version: 1.4.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "## Helm / upgrade-impacting notes\n- **Kubernetes version requirement\
+      \ changes:**\n  - Your current Longhorn **v1.3.2** supports **Kubernetes >=1.18\
+      \ and <=1.24**.\n  - Longhorn **v1.4.0 requires Kubernetes >=1.21**.\n- **Kubernetes\
+      \ 1.25 / PSP change:**\n  - In Kubernetes **1.25**, **PodSecurityPolicy (PSP)\
+      \ is removed** and replaced by **Pod Security Admission (PSA)**.\n  - Longhorn\
+      \ **v1.4.0 supports opt-in PSP enablement**, meaning PSP is **no longer assumed\
+      \ by default**. If you previously relied on PSP, you must explicitly enable/keep\
+      \ PSP support; otherwise plan to use PSA.\n- **CSI snapshot API deprecation:**\n\
+      \  - Longhorn\u2019s bundled CSI snapshotter sidecar is upgraded to **v5.0.1**.\n\
+      \  - **v1beta1 VolumeSnapshot CRDs are deprecated (still supported)**; you should\
+      \ migrate to **snapshot.storage.k8s.io/v1** before a future snapshotter upgrade\
+      \ removes v1beta1 support.\n"
+    chart_updates: [Kubernetes 1.25 compatibility work (removal of deprecated API
+        usage such as PodSecurityPolicy by default; PSP becomes opt-in)., Helm chart
+        docs/readme updates mentioned in release notes (#4175/#4745)., 'Adds/updates
+        chart-level knobs for scaling certain components (e.g., configurable replica
+        counts for webhook and RWX recovery-backend) (#5087).', Adds/changes UI deployment
+        affinity options in the chart (#4987).]
+    features: [Kubernetes 1.25 support via PSA/optional PSP handling., ARM64 support
+        promoted to General Availability (GA)., RWX (NFS) support promoted to GA with
+        recovery backend to improve failover behavior., Snapshot checksum + periodic
+        verification to detect corruption and support data integrity workflows., Bit-rot
+        detection and repair for snapshots when snapshot checksum is enabled., Replica
+        rebuild speed-ups (notably leveraging snapshot checksums/metadata to reduce
+        unnecessary replication)., Volume trim (UNMAP) support to reclaim space on
+        block volumes., Online volume expansion support via engine + CSI node driver
+        filesystem resize., Strict data locality mode to keep a local replica and
+        use local socket for improved performance., System Backup & Restore for backing
+        up Longhorn system resources/metadata and restoring in-place or to a new cluster.,
+      Enhanced support bundle collection via rancher/support-bundle-kit integration.,
+      New tunable engine-to-replica timeout setting for low-spec/latent environments.]
+    breaking_changes: ['Kubernetes support window shifts: upgrading to v1.4.0 requires
+        Kubernetes **>=1.21** (and v1.4.0 is intended for newer clusters, including
+        1.25).', "PodSecurityPolicy is no longer assumed; on Kubernetes 1.25 you must\
+        \ use PSA, and if you still need PSP you must explicitly enable Longhorn\u2019\
+        s opt-in PSP support.", VolumeSnapshot v1beta1 API is deprecated (still works
+        now) and will be removed in a future CSI snapshotter upgrade; plan migration
+        to v1.]
+  chart_version: 1.4.0
+  images: ['longhornio/longhorn-manager:v1.4.0', 'longhornio/longhorn-ui:v1.4.0']
+- version: 1.3.2
+  kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["Upgrade target is within the Longhorn 1.3 minor line (v1.3.0\
+        \ \u2192 v1.3.2); most changes are bugfixes and operational improvements rather\
+        \ than new features.", 'v1.3.2 adds an explicit Kubernetes version upper bound
+        for <1.4 charts: supported Kubernetes is >=1.18 and <=1.24 (<1.25).', 'v1.3.2
+        cleans up Helm chart packaging inconsistencies (e.g., values.yaml containing
+        unused values; questions.yaml had outdated CSI image tags).', 'CRD/manifest
+        maintenance: updates around preserveUnknownFields and CRD patch generation/reorg;
+        relevant if you manage CRDs outside Helm.']
+    features: [Data alignment correction for existing volumes when filesystem block
+        size is <4096 to prevent rare potential data corruption during replica rebuilds.,
+      'Use a specific filesystem block size to reduce unnecessary read-modify-write
+        between volume head and snapshots, improving write performance.', Support
+        cleanup of failed/obsolete orphaned backups (backup hygiene improvements).]
+    breaking_changes: ['Kubernetes compatibility constraint tightened/clarified for
+        v1.3.2: cluster must be Kubernetes >=1.18 and <=1.24 (i.e., not 1.25+). Upgrading
+        on newer clusters may be unsupported and should be avoided/validated before
+        proceeding.']
+  chart_version: 1.3.2
+  images: []
+- version: 1.3.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Longhorn now requires Kubernetes >= 1.18 for install/upgrade (still
+        upgrading only supported from 1.2.x to 1.3.0)., CRDs move to `longhorn.io/v1beta2`
+        as the default; a conversion webhook is introduced to keep `v1beta1` access
+        working post-upgrade., New/updated admission webhooks (mutating + validating)
+        are added and the manager now waits for the webhook server to be ready., Communication
+        between longhorn-manager and engine/replica processes is changed to be proxied
+        through instance-manager (enables storage network segregation)., 'Optional
+        security hardening additions: NetworkPolicies and optional mTLS between manager
+        and instance-manager.', Snapshot-related API surface expands with a new Snapshot
+        CRD; CSI snapshot support is extended to Longhorn snapshots., Orphaned replica
+        detection/cleanup feature added (including opt-in automatic cleanup)., Instance-manager
+        lifecycle management changes; optional dynamic PDB management to work with
+        Cluster Autoscaler (experimental)., 'Multiple operational/UX improvements:
+        snapshot purge/prune improvement, backing image download support, metrics
+        improvements, non-root default user for images, etc.']
+    features: [Storage network / multi-network cluster support with control-plane/data-plane
+        segregation via Multus (opt-in)., Managed Kubernetes compatibility improvements
+        (EKS/GKE/AKS operations like upgrades and node pool replacement)., New v1beta2
+        CRDs with structural schema validation and a conversion webhook (v1beta2 becomes
+        default)., New Snapshot CRD and extended CSI snapshot integration to create/restore
+        Longhorn snapshots via CSI workflows., Orphaned replica detection with optional
+        automatic cleanup to reduce manual maintenance., Snapshot prune capability
+        to delete snapshots directly behind the head to reclaim duplicated space.,
+      Optional mTLS between longhorn-manager and instance-manager for tighter control-plane
+        security., Experimental support for Cluster Autoscaler via dynamic PDB handling
+        for instance-manager pods.]
+    breaking_changes: ['CRD API versioning shifts to `longhorn.io/v1beta2` as default;
+        while a conversion webhook keeps `v1beta1` workable, any tooling that hard-codes
+        v1beta1 manifests or relies on direct etcd objects should be validated against
+        the new schemas/webhooks.', 'Networking/engine invocation path changes (manager->instance-manager
+        proxy) could affect environments with strict NetworkPolicies/firewalls; if
+        you run hardened clusters, ensure webhook/manager/instance-manager connectivity
+        is allowed and consider the new provided NetworkPolicies.']
+  chart_version: 1.3.0
+  images: ['longhornio/longhorn-manager:v1.3.0', 'longhornio/longhorn-ui:v1.3.0']
+- version: 1.2.6
+  kube: ['1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Longhorn v1.2.x remains within the same major/minor line; upgrade
+        is primarily a patch-level move to v1.2.6., v1.2.0 introduced new CRDs/controllers
+        for backups (BackupTarget/BackupVolume/Backup CRs) and for Recurring Jobs;
+        upgrading to 1.2.0 triggers migration of per-volume recurring job settings
+        to the new RecurringJob resources., v1.2.6 includes data-path correctness/performance
+        fixes around filesystem block size alignment during rebuild and using a specific
+        filesystem block size to avoid unnecessary RMW operations., 'v1.2.6 also contains
+        fixes around replica auto-balance/rebuild loops and some helm chart hygiene
+        (removing unused values, updating outdated CSI image tags in questions.yaml).']
+    features: [(Introduced in 1.2.0) Encrypted volumes and backups using Kubernetes
+        Secrets for key storage., (Introduced in 1.2.0) CSI volume cloning support.,
+      (Introduced in 1.2.0) Automatic replica rebalancing based on node/zone soft
+        anti-affinity., (Introduced in 1.2.0) Asynchronous backup operations via new
+        backup CRDs/controllers and improved scheduling via recurring job/groups.,
+      (Patch focus in 1.2.6) Data alignment correction and filesystem block size handling
+        to reduce risk of rare rebuild-related corruption and improve write performance.]
+    breaking_changes: [Kubernetes minimum supported version becomes v1.18 in Longhorn
+        v1.2.0 (and v1.2.6 supports Kubernetes <= v1.24)., 'After upgrading to v1.2.0,
+        volume recurring job settings are migrated to new RecurringJob resources and
+        the `RecurringJobs` field in Volume spec is deprecated.', 'Known issue in
+        v1.2.0: StorageClasses using the longhorn CSI driver without specifying `fsType`
+        can hit an `fsGroup`-ineffective issue for new filesystem volumes (resolved
+        in 1.2.1 per notes).']
+  chart_version: 1.2.6
+  images: []
+- version: 1.2.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Longhorn v1.2.0 updates supported Kubernetes versions: minimum
+        supported Kubernetes is now v1.18; adds compatibility up to Kubernetes v1.22
+        by migrating deprecated resources and updating CSI sidecars.', 'CSI components
+        are updated; known issue in v1.2.0: if a StorageClass using the `driver.longhorn.io`
+        provisioner does not specify `fsType`, `fsGroup` may be ineffective for newly
+        created filesystem volumes due to an external-provisioner default change.
+        Workaround: explicitly set `parameters.fsType` (e.g., `ext4` or `xfs`) in
+        the StorageClass; fixed in v1.2.1.', 'Recurring jobs are migrated: per-volume
+        `spec.RecurringJobs` is deprecated and volume recurring job settings are migrated
+        into new RecurringJob CRDs/resources during upgrade.', 'Backup subsystem refactor:
+        introduces BackupTarget/BackupVolume/Backup CRDs and controllers enabling
+        asynchronous backups; behavior and UI/observability around backups changes
+        accordingly.']
+    features: ['Kubernetes support updates: minimum K8s version becomes v1.18 and
+        Longhorn supports K8s v1.22 with updated CSI sidecars.', Volume encryption
+        and backup encryption using kernel crypto + Kubernetes Secrets; encrypted
+        volumes are encrypted in transit and at rest and their backups are encrypted
+        too., CSI volume cloning support to clone PVCs/volumes via CSI primitives.,
+      Automatic replica rebalancing based on (soft) node/zone anti-affinity when nodes
+        go up/down., 'Backing image enhancements: upload backing images from local
+        and create backing images from existing volumes.', Asynchronous backup operations
+        via new backup-related CRDs/controllers to improve backup performance and
+        reduce blocking operations., Recurring job and recurring job groups via new
+        CRD/controller for reusable scheduled snapshots/backups; includes default
+        recurring backup policy concept.]
+    breaking_changes: ['Kubernetes version compatibility change: you must be running
+        Kubernetes v1.18+ before upgrading to Longhorn v1.2.0.', 'Recurring job model
+        change: volume-level `RecurringJobs` in the Volume spec is deprecated and
+        settings are migrated to new RecurringJob resources; automation that edits
+        Volume specs directly must be updated.', 'Potential post-upgrade workload
+        behavior change (known issue): StorageClasses without `fsType` may experience
+        ineffective `fsGroup` on new filesystem volumes in v1.2.0; mitigate by setting
+        `fsType` explicitly or upgrade to v1.2.1+.']
+  chart_version: 1.2.0
+  images: ['longhornio/longhorn-manager:v1.2.0', 'longhornio/longhorn-ui:v1.2.0']
+- version: 1.1.3
+  kube: ['1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Includes security fixes for CVE-2021-36779 (host operations allowed
+        in privileged Longhorn-managed pods) and CVE-2021-36780 (unauthorized data
+        access from replicas via vulnerable instance manager pods)., 'Improves data-plane
+        behavior in low-performance environments (e.g., spinning disks, 1Gbps networks,
+        low CPU).', 'Updates default advertised CSI version to CSI 1.2, improving
+        compatibility with CSI consumers.']
+    breaking_changes: []
+  chart_version: 1.1.3
+  images: []
+- version: 1.1.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Native RWX (ReadWriteMany) support via NFS provisioner is introduced
+        as an experimental feature; validate with non-production workloads first.,
+      Experimental ARM64 support is added so Longhorn can be deployed on ARM64 clusters
+        without special modifications., CSI Snapshotter support is added (requires
+        Kubernetes >=1.17) enabling kubectl-managed VolumeSnapshots that map to Longhorn
+        backups/restores., Prometheus metrics endpoints and a sample Grafana dashboard
+        are added to integrate Longhorn into existing monitoring/alerting stacks.,
+      'Improved node failure and volume failure recovery, including automatic StatefulSet
+        recovery behavior and rebuild from existing replicas after temporary node
+        disconnects.', 'Expanded node maintenance operations (supports drain, replica
+        eviction, pausing rebuilds, auto-removal of deleted K8s nodes, and disk recognition
+        when reattached/moved).', Data Locality option is added to prefer keeping
+        one replica local to the engine/workload to improve resilience during network
+        interruptions., New setting to allow volume creation with degraded availability
+        (default true; recommended false for production) for small clusters or constrained
+        capacity environments., Experimental performance improvement by removing the
+        revision counter is introduced.]
+    breaking_changes: [Kubernetes minimum version increases to v1.16 for Longhorn
+        v1.1.0; clusters below this must be upgraded before Longhorn., 'CSI Snapshotter
+        feature requires Kubernetes v1.17+ and installation of the external CSI Snapshot
+        Controller; without it, CSI snapshots will not work.']
+  chart_version: 1.1.0
+  images: ['longhornio/longhorn-manager:v1.1.0', 'longhornio/longhorn-ui:v1.1.0']
+- version: 1.0.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16',
+    '1.15', '1.14']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.0
+  images: ['longhornio/longhorn-manager:v1.0.0', 'longhornio/longhorn-ui:v1.0.0']

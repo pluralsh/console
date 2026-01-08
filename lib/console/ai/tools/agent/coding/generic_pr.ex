@@ -4,7 +4,9 @@ defmodule Console.AI.Tools.Agent.Coding.GenericPr do
   alias Console.Schema.{
     PrAutomation,
     ScmConnection,
-    AgentSession
+    AgentSession,
+    ChatThread,
+    AiInsight
   }
   alias Console.AI.{Tool, File.Editor}
   alias Console.Deployments.Pr.Dispatcher
@@ -107,7 +109,11 @@ defmodule Console.AI.Tools.Agent.Coding.GenericPr do
   defp session_attrs(%AgentSession{} = session) do
     Map.take(session, ~w(stack_id service_id)a)
     |> Map.put(:session_id, session.id)
+    |> then(&Map.merge(insight_attrs(Tool.thread()), &1))
   end
+
+  defp insight_attrs(%ChatThread{insight: %AiInsight{} = insight}), do: Map.take(insight, ~w(stack_id service_id)a)
+  defp insight_attrs(_), do: %{}
 
   def apply_fs_changes(pr, dir) do
     with :ok <- file_updates(pr, dir),

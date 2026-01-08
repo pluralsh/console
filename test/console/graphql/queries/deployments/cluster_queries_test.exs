@@ -598,6 +598,23 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
 
       assert trunc(edge["statistics"]["bytes"]) == 13324
     end
+
+    test "it can list deprecated custom resources for a cluster" do
+      cluster = insert(:cluster)
+      crds = insert_list(3, :deprecated_custom_resource, cluster: cluster)
+      insert_list(3, :deprecated_custom_resource)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query Cluster($id: ID!) {
+          cluster(id: $id) {
+            deprecatedCrds(first: 5) { edges { node { id } } }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert from_connection(found["deprecatedCrds"])
+             |> ids_equal(crds)
+    end
   end
 
   describe "kubernetesVersionInfo" do
@@ -1069,6 +1086,35 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
           }
         }
       """, %{}, %{current_user: insert(:user)})
+    end
+  end
+
+
+  describe "kubernetesChangelog" do
+    test "it can fetch the changelog for a given kubernetes version" do
+      {:ok, %{data: %{"kubernetesChangelog" => found}}} = run_query("""
+        query {
+          kubernetesChangelog(version: "1.34") {
+            version
+            majorChanges
+            breakingChanges
+            deprecations
+            removals
+            features
+            bugFixes
+            apiUpdates
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert found["version"] == "1.34"
+      refute Enum.empty?(found["majorChanges"])
+      refute Enum.empty?(found["breakingChanges"])
+      refute Enum.empty?(found["deprecations"])
+      refute Enum.empty?(found["removals"])
+      refute Enum.empty?(found["features"])
+      refute Enum.empty?(found["bugFixes"])
+      refute found["apiUpdates"]
     end
   end
 

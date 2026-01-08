@@ -204,7 +204,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 		return nil
 	}
 
-	token, err := r.ConsoleClient.CreateServiceAccountToken(ctx, *sa.Status.ID, sa.Spec.ScopeAttributes())
+	token, err := r.ConsoleClient.CreateServiceAccountToken(ctx, *sa.Status.ID, sa.Spec.ScopeAttributes(), sa.Spec.TokenExpiry)
 	if err != nil {
 		return fmt.Errorf("failed to create service account token: %s", err.Error())
 	}

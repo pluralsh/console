@@ -273,7 +273,7 @@ type ServiceSpec struct {
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef"`
 
 	// ClusterRef references the target Cluster where this service will be deployed. Leave it as an empty struct to use the cluster field instead.
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 	ClusterRef corev1.ObjectReference `json:"clusterRef"`
 
 	// Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead.

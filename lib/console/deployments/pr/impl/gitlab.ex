@@ -6,7 +6,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
 
   @behaviour Console.Deployments.Pr.Dispatcher
 
-  @gitlab_api_url "https://gitlab.com/api/v4"
+  @gitlab_api_url "https://gitlab.com"
 
   defmodule Connection do
     defstruct [:host, :token]
@@ -129,12 +129,14 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   defp mr_content(mr), do: "#{mr["branch"]}\n#{mr["title"]}\n#{mr["description"]}"
 
   defp post(conn, url, body) do
-    HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
+    api_url(conn, url)
+    |> HTTPoison.post(Jason.encode!(body), Connection.headers(conn))
     |> handle_response()
   end
 
   defp get(conn, url) do
-    HTTPoison.get("#{conn.host}#{url}", Connection.headers(conn))
+    api_url(conn, url)
+    |> HTTPoison.get(Connection.headers(conn))
     |> handle_response()
   end
 
@@ -171,7 +173,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
 
   def get_mr_info(conn, group, repo, mr_iid) do
     encoded_project_id = URI.encode_www_form("#{group}/#{repo}")
-    get(conn, "/projects/#{encoded_project_id}/merge_requests/#{mr_iid}/changes")
+    get(conn, "/api/v4/projects/#{encoded_project_id}/merge_requests/#{mr_iid}/changes")
   end
 
   # Add this helper function to get repo URL (similar to GitHub's to_repo_url)
@@ -185,10 +187,15 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   defp get_file_contents_from_commit(conn, group, repo, file_path, sha) do
     encoded_project_id = URI.encode_www_form("#{group}/#{repo}")
     encoded_file_path = URI.encode_www_form(file_path)
-    case get(conn, "/projects/#{encoded_project_id}/repository/files/#{encoded_file_path}?ref=#{sha}") do
+    case get(conn, "/api/v4/projects/#{encoded_project_id}/repository/files/#{encoded_file_path}?ref=#{sha}") do
       {:ok, %{"content" => content}} ->
         content
       _err -> nil
     end
+  end
+
+  defp api_url(%Connection{host: host}, url) do
+    String.trim_trailing(host, "/api/v4")
+    |> Path.join(url)
   end
 end

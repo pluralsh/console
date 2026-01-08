@@ -7,104 +7,858 @@ versions:
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / chart behavior changes (1.14.0 \u2192 1.14.1)\n\
+      No Helm values changes are called out in the provided notes for **controller-v1.14.1**.\n\
+      \n> Reminder: **v1.14.0** introduced a chart change: `controller.extraInitContainers`\
+      \ became **templatable**. If you set `controller.extraInitContainers`, verify\
+      \ your values still render correctly (they may now support templating functions/`tpl`).\n"
+    chart_updates: [No chart-specific updates are mentioned for controller-v1.14.1
+        in the provided release notes; changes are primarily image/dependency/CI updates.,
+      (Context from v1.14.0) Chart added `controller.metrics.serviceMonitor.scrapeTimeout`
+        and made `controller.extraInitContainers` templatable; ensure your values
+        file accounts for these if you use ServiceMonitor or extra init containers.]
+    features: ['Custom error pages: fix to avoid writing the status code too early
+        (improves correctness of custom error responses).', 'Controller: improved
+        host/path overlap detection when multiple rules are present (reduces incorrect
+        overlap warnings/behavior in complex Ingresses).']
+    breaking_changes: [No explicit breaking changes are documented for controller-v1.14.1
+        in the provided notes. (Most changes are image and dependency bumps.)]
   chart_version: 4.14.1
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.14.1@sha256:f95a79b85fb93ac3de752c71a5c27d5ceae10a18b61904dec224c1c6a4581e47',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.5@sha256:03a00eb0e255e8a25fa49926c24cde0f7e12e8d072c445cdf5136ec78b546285']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.14.1, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, RuntimeDefault, Service, ServiceAccount, SingleStack, TCP, UPDATE,
+    ValidatingWebhookConfiguration, admission-webhook, admissionregistration.k8s.io,
+    admissionregistration.k8s.io/v1, apps/v1, batch/v1, configmaps, controller, coordination.k8s.io,
+    create, default, discovery.k8s.io, endpoints, endpointslices, events, get, http,
+    https, https-webhook, ingress-nginx, ingress-nginx-4.14.1, ingressclasses, ingresses,
+    ingresses/status, k8s.io/ingress-nginx, leases, linux, list, metadata.name, metadata.namespace,
+    namespaces, networking.k8s.io, networking.k8s.io/v1, nginx, nodes, patch, pods,
+    rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.14.1@sha256:f95a79b85fb93ac3de752c71a5c27d5ceae10a18b61904dec224c1c6a4581e47',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.5@sha256:03a00eb0e255e8a25fa49926c24cde0f7e12e8d072c445cdf5136ec78b546285',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.14.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm chart values / behavior changes to review\nFrom the notes\
+      \ you provided, these are the chart-facing additions/changes between the controller\
+      \ versions you\u2019re upgrading across (1.13.0 \u2192 1.14.0):\n\n- **`controller.metrics.serviceMonitor.scrapeTimeout`\
+      \ (new)**\n  - If you use Prometheus Operator `ServiceMonitor`, you can now\
+      \ explicitly set `scrapeTimeout`.\n  - Action: decide whether to set this (leave\
+      \ unset to keep default behavior).\n\n- **`controller.service.trafficDistribution`\
+      \ (new earlier in 1.13.x line)**\n  - Adds chart support to configure Kubernetes\
+      \ Service traffic distribution.\n  - Action: only relevant if you want zone-aware/alternative\
+      \ traffic distribution; otherwise leave default.\n\n- **`controller.service.external.labels`\
+      \ and `controller.service.internal.labels` (new earlier in 1.13.x line)**\n\
+      \  - Lets you add labels directly onto the created Services.\n  - Action: if\
+      \ you previously patched labels post-install, consider moving them into values.\n\
+      \n- **`controller.admissionWebhooks.certManager.*.revisionHistoryLimit` (new\
+      \ earlier in 1.13.x line)**\n  - Action: review if you run cert-manager-based\
+      \ webhook cert management and want to control rollout history.\n\n- **`runtimeClassName`\
+      \ support (new earlier in 1.13.x line)**\n  - Action: if you use gVisor/Kata\
+      \ or custom runtime classes, you can now set it via values.\n\n- **`activeDeadlineSeconds`\
+      \ (new earlier in 1.13.x line)**\n  - Applies to Jobs (notably webhook patch/certgen\
+      \ jobs).\n  - Action: set if you have strict job execution time policies.\n\n\
+      - **Extra init containers templatable (1.14.0)**\n  - Chart now templates extra\
+      \ init containers rather than treating them as static snippets.\n  - Action:\
+      \ if you use `extraInitContainers`, re-render manifests (`helm template`) and\
+      \ ensure output matches expectations.\n\n- **Resize policy added (1.14.0)**\n\
+      \  - Chart includes container resize policy support.\n  - Action: verify this\
+      \ does not conflict with cluster policy/PSA/OPA rules.\n\n- **Webhook patch\
+      \ job volumes added (1.14.0)**\n  - Chart adds volumes for the admission webhook\
+      \ patch job.\n  - Action: ensure your cluster policies allow these volumes;\
+      \ check restricted environments.\n\n- **Chart pushes to OCI registry (1.14.0)**\n\
+      \  - Distribution change: charts are available via OCI.\n  - Action: if you\
+      \ pin chart sources, update your retrieval method (e.g., `helm pull oci://...`).\n\
+      \n> Note: Your pasted notes are *controller* release notes, which include some\
+      \ \u201CChart:\u201D entries. They do **not** include the full Helm chart changelog\
+      \ for the chart version you\u2019ll actually upgrade to (e.g., v4.13.x \u2192\
+      \ v4.14.x). Before executing the upgrade, also review the **chart release notes**\
+      \ for the exact chart versions in use."
+    chart_updates: ['Controller image updated to v1.14.0 (and chroot variant), including
+        NGINX base bumps to v2.2.x and Alpine base bumps (3.22.x).', 'Status handling
+        improved: supports multiple Node IP addresses when publishing ingress status.',
+      'Admission/webhook and chart plumbing updated: extra init containers are templatable;
+        webhook patch job gains volumes; new ServiceMonitor scrapeTimeout knob; resize
+        policy support; chart distribution via OCI.', 'Security and robustness improvements:
+        panic handling in service deletion handler; hardened socket creation; path
+        validation nil-pointer fix; stronger cipher preference ordering.']
+    features: ['SSL Proxy now supports **PROXY protocol v2**, enabling richer client
+        connection metadata when running behind compatible load balancers/proxies.',
+      'Ingress status reporting can now handle **multiple node IPs**, improving correctness
+        on multi-NIC / multi-address nodes.', 'Ingress path validation now allows
+        a `.` character in `Exact` and `Prefix` paths, expanding valid routing patterns.',
+      Chart adds optional `ServiceMonitor` `scrapeTimeout` configuration for Prometheus
+        Operator users.]
+    breaking_changes: ['Removal of a default value: `proxy-busy-buffers-size` default
+        was removed (and related fixes followed). If you relied on the old implicit
+        default, set it explicitly in the ConfigMap/values to preserve behavior.',
+      "\u201CBye bye, v1.11.\u201D indicates end-of-support for older Kubernetes/legacy\
+        \ compatibility paths (exact minimum supported Kubernetes not stated in your\
+        \ paste). Validate your cluster version meets the supported matrix for controller\
+        \ v1.14.0 before upgrading."]
   chart_version: 4.14.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.14.0@sha256:e4127065d0317bd11dc64c4dd38dcf7fb1c3d72e468110b4086e636dbaac943d',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.4@sha256:bcfc926ed57831edf102d62c5c0e259572591df4796ef1420b87f9cf6092497f']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.14.0, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, RuntimeDefault, Service, ServiceAccount, SingleStack, TCP, UPDATE,
+    ValidatingWebhookConfiguration, admission-webhook, admissionregistration.k8s.io,
+    admissionregistration.k8s.io/v1, apps/v1, batch/v1, configmaps, controller, coordination.k8s.io,
+    create, default, discovery.k8s.io, endpoints, endpointslices, events, get, http,
+    https, https-webhook, ingress-nginx, ingress-nginx-4.14.0, ingressclasses, ingresses,
+    ingresses/status, k8s.io/ingress-nginx, leases, linux, list, metadata.name, metadata.namespace,
+    namespaces, networking.k8s.io, networking.k8s.io/v1, nginx, nodes, patch, pods,
+    rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.14.0@sha256:e4127065d0317bd11dc64c4dd38dcf7fb1c3d72e468110b4086e636dbaac943d',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.4@sha256:bcfc926ed57831edf102d62c5c0e259572591df4796ef1420b87f9cf6092497f',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.13.0
   kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm/chart values you likely need to review\n\n### 1) Metrics\
+      \ are **disabled by default** (important)\nFrom the 1.12 line, the controller\
+      \ changed its default CLI flags:\n- `--enable-metrics` is now **disabled by\
+      \ default**.\n\n**Impact:** If you rely on Prometheus scraping, ServiceMonitor,\
+      \ dashboards, or alerts, you must explicitly re-enable metrics.\n\n**What to\
+      \ do (Helm):** set the chart values that enable metrics for your deployment\
+      \ (commonly under `controller.metrics.*`). In 1.12, the chart also introduced\
+      \ `controller.metrics.service.enabled` \u2014 confirm it is `true` if you want\
+      \ the metrics Service.\n\n### 2) ServiceMonitor / Prometheus integration changed\
+      \ in chart\nThe 1.12 line includes chart work:\n- \u201CChart: Rework ServiceMonitor\u201D\
+      \n- New `controller.metrics.prometheusRule.annotations`\n\n**Impact:** If you\
+      \ use Prometheus Operator, re-check your existing `ServiceMonitor`/`PrometheusRule`\
+      \ values and labels/selectors after upgrade.\n\n### 3) New/changed chart knobs\
+      \ introduced between 1.12 and 1.13\nFrom the 1.13 line, notable chart values\
+      \ include:\n- `controller.service.trafficDistribution` (ties to the new traffic\
+      \ distribution feature)\n- `controller.service.external.labels` and `controller.service.internal.labels`\n\
+      - `controller.admissionWebhooks.certManager.*.revisionHistoryLimit`\n- `runtimeClassName`\n\
+      - `activeDeadlineSeconds`\n\n**Impact:** Mostly additive (not required), but\
+      \ if you need these behaviors you can now configure them via values. Also, \u201C\
+      Remove validation for removed API\u201D suggests older API checks were dropped;\
+      \ if you had custom validation expectations, re-test.\n\n### 4) PodSecurityPolicy\
+      \ removed from the chart (already in 1.12)\n- \u201C\u26A0\uFE0F Chart: Remove\
+      \ Pod Security Policy\u201D\n\n**Impact:** If you were relying on PSP objects\
+      \ from the chart (older clusters), they won\u2019t be installed anymore. Ensure\
+      \ you have PSA (Pod Security Admission) or alternative policies in place.\n\n\
+      ### 5) OpenTelemetry init container removed (chart/app packaging)\n- \u201C\u26A0\
+      \uFE0F Images: Remove OpenTelemetry\u201D (init container/image removed; module\
+      \ is built into controller image since v1.10)\n\n**Impact:** If you previously\
+      \ enabled the chart\u2019s OTel init container/image, that path is gone; validate\
+      \ your OTel configuration still works with the built-in module approach.\n\n\
+      ## Recommended upgrade checks (values-focused)\n- Confirm `controller.metrics.enabled`\
+      \ (or equivalent in your values) is explicitly set the way you want.\n- If using\
+      \ Prometheus Operator, validate `ServiceMonitor`/`PrometheusRule` values after\
+      \ the ServiceMonitor rework.\n- If you used PSP, remove PSP-related values/resources\
+      \ and ensure PSA policies allow the controller to run.\n- If you used OTel via\
+      \ init container/image, migrate to built-in module configuration.\n"
+    chart_updates: [Controller image updated from v1.12.0 to v1.13.0 (new controller
+        and chroot images)., NGINX/OpenResty base updated (OpenResty bumped to v1.27.1.x;
+        NGINX base and related images bumped through 2.x series)., 'Chart additions:
+        `controller.service.trafficDistribution`, service labels for external/internal
+        services, `runtimeClassName`, `activeDeadlineSeconds`, and cert-manager admission
+        webhook revisionHistoryLimit settings.', 'Chart maintenance: removed validation
+        for an already-removed API; multiple bumps of kube-webhook-certgen and test
+        runner images.', Ongoing security and dependency updates (Go toolchain bumped
+        to 1.24.x in v1.13.0 line; controller includes several security fixes in 1.12.x).]
+    features: [Traffic distribution support added to the controller (and exposed via
+        chart value `controller.service.trafficDistribution`)., NGINX now adds an
+        `X-Original-Forwarded-Host` header to preserve the original forwarded host.,
+      Improved client IP determination in NGINX for more accurate real client address
+        handling., NJS (NGINX JavaScript) support added to the NGINX build used by
+        ingress-nginx., 'Annotations/security hardening: deny newlines in annotations;
+        reload on custom header changes (improves correctness when headers are updated).']
+    breaking_changes: ['Metrics are disabled by default (`--enable-metrics` now defaults
+        to false). If you scrape controller metrics, you must explicitly re-enable
+        them via Helm values/args.', 'Security defaults were tightened in the 1.12
+        line: annotation validation enabled by default, cross-namespace resources
+        disallowed by default, stricter path type validation enabled. This can break
+        previously-working but unsafe configurations.', Global rate limit feature
+        was removed (config keys and related annotations no longer exist). Any Ingress
+        using those annotations will stop working as intended., 'Third-party Lua plugin
+        support was removed (`plugins` config and `/etc/nginx/lua/plugins` loading).
+        If you relied on custom Lua plugins, they will no longer be executed.', PodSecurityPolicy
+        resources were removed from the Helm chart; clusters depending on PSP must
+        migrate to PSA/other policy mechanisms., OpenTelemetry init container/image
+        was removed from the deployment packaging; OTel must be configured using the
+        built-in module approach.]
   chart_version: 4.13.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.13.0@sha256:dc75a7baec7a3b827a5d7ab0acd10ab507904c7dad692365b3e3b596eca1afd2',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.0@sha256:c9f76a75fd00e975416ea1b73300efd413116de0de8570346ed90766c5b5cefb']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.13.0, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, RuntimeDefault, Service, ServiceAccount, SingleStack, TCP, UPDATE,
+    ValidatingWebhookConfiguration, admission-webhook, admissionregistration.k8s.io,
+    admissionregistration.k8s.io/v1, apps/v1, batch/v1, configmaps, controller, coordination.k8s.io,
+    create, default, discovery.k8s.io, endpoints, endpointslices, events, get, http,
+    https, https-webhook, ingress-nginx, ingress-nginx-4.13.0, ingressclasses, ingresses,
+    ingresses/status, k8s.io/ingress-nginx, leases, linux, list, metadata.name, metadata.namespace,
+    namespaces, networking.k8s.io, networking.k8s.io/v1, nginx, nodes, patch, pods,
+    rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.13.0@sha256:dc75a7baec7a3b827a5d7ab0acd10ab507904c7dad692365b3e3b596eca1afd2',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.0@sha256:c9f76a75fd00e975416ea1b73300efd413116de0de8570346ed90766c5b5cefb',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.12.0
   kube: ['1.32', '1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm chart / values changes to review (1.11.0 \u279C 1.12.0)\n\
+      \n### 1) Metrics are **disabled by default** (breaking)\nThe controller CLI\
+      \ flag default changed:\n- `--enable-metrics` is now **disabled by default**.\n\
+      \n**Action:** if you scrape Prometheus metrics today, explicitly enable them\
+      \ in Helm values.\n- Look for a value such as `controller.metrics.enabled: true`\
+      \ (or `controller.extraArgs.enable-metrics: \"true\"` depending on your current\
+      \ values/chart).\n\n### 2) New chart knob for metrics Service\n- New value:\
+      \ `controller.metrics.service.enabled`\n\n**Action:** if you rely on a Service\
+      \ for scraping, ensure it\u2019s enabled and matches your scrape method (ServiceMonitor\
+      \ vs annotations).\n\n### 3) ServiceMonitor changes (may require values updates)\n\
+      - Chart: **Rework ServiceMonitor**.\n\n**Action:** if you use Prometheus Operator,\
+      \ re-check your `controller.metrics.serviceMonitor.*` values (labels/namespace/selector)\
+      \ and run a `helm template` diff to confirm the generated ServiceMonitor still\
+      \ matches your Prometheus selectors.\n\n### 4) Pod Security Policy resources\
+      \ removed (breaking for PSP users)\n- Chart: **Remove Pod Security Policy**.\n\
+      \n**Action:** if your cluster still uses PSP admission (older clusters), you\
+      \ must replace PSP with Pod Security Admission (PSA) / alternative controls\
+      \ before upgrade.\n\n### 5) OpenTelemetry init container removed (chart behavior\
+      \ change)\n- Chart/Images: **Remove OpenTelemetry (init container/image)**;\
+      \ OTel module is already built into the controller image since v1.10.\n\n**Action:**\
+      \ if you previously enabled an OTel initContainer via chart values, remove/disable\
+      \ that configuration and validate your OTel config still works without the init\
+      \ step.\n\n### 6) Global image registry option added\n- New value: `global.image.registry`\n\
+      \n**Action:** if you mirror images to a private registry, you can now set this\
+      \ once globally instead of overriding per-image fields.\n\n### 7) New/changed\
+      \ miscellaneous chart knobs\n- `controller.progressDeadlineSeconds`\n- `controller.admissionWebhooks.service.servicePort`\n\
+      - `controller.admissionWebhooks.service.servicePort`\n- `unhealthyPodEvictionPolicy`\
+      \ support\n- Default backend PDB alignment and knobs:\n  - `defaultBackend.maxUnavailable`\n\
+      \n**Action:** optional; only set if you need custom rollout/deadline or disruption\
+      \ behavior.\n\n### 8) Chart cleanup\n- Chart: Remove `isControllerTagValid`\
+      \ (internal chart validation).\n\n**Action:** if you had automation relying\
+      \ on that value, remove it from your values file.\n"
+    chart_updates: [Metrics now disabled by default (controller flag default change).,
+      Controller image updated to v1.12.0; underlying base images bumped (notably
+        Alpine 3.21) and Go toolchain updates., 'Chart includes several operational
+        enhancements: ServiceMonitor rework, more unit tests, topology spread guidance,
+        PDB alignment, and rollout deadline option.', 'Security posture changes ship
+        with 1.12.0 (annotation validation on by default, stricter defaults).']
+    features: [Native histogram support for histogram metrics (improves Prometheus
+        histogram handling when enabled)., New `--metrics-per-undefined-host` option
+        to control metrics cardinality for undefined hosts., CORS origins now allow
+        any protocol (more flexible CORS configuration)., 'New docs/guides added (e.g.,
+        maintenance page, Pod Security Admission, AWS health check annotations).']
+    breaking_changes: [Metrics are disabled by default (`--enable-metrics` now defaults
+        to false); you must explicitly enable if you scrape metrics., "Security defaults\
+        \ tightened: annotation validation enabled by default; `allow-cross-namespace-resources`\
+        \ disabled by default; `strict-validate-path-type` enabled by default; default\
+        \ `annotations-risk-level` lowered to High\u2014this can cause previously-accepted\
+        \ Ingresses/annotations to be rejected.", Global rate limit feature removed
+        (config keys and related annotations removed); remove any usage before upgrading.,
+      3rd-party Lua plugin support removed (the `plugins` config option and `/etc/nginx/lua/plugins`
+        user plugin mechanism no longer works)., PodSecurityPolicy resources removed
+        from the Helm chart; clusters depending on PSP must migrate to PSA/other controls.,
+      s390x image support dropped; cannot run controller on s390x nodes., Metric `ingress_upstream_latency_seconds`
+        removed; dashboards/alerts must be updated if they reference it., 'OpenTelemetry
+        init container/image removed from the chart; if you relied on it, update your
+        values and validate OTel configuration.']
   chart_version: 4.12.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.12.0@sha256:e6b8de175acda6ca913891f0f727bca4527e797d52688cbe9fec9040d6f6b6fa',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.0@sha256:aaafd456bda110628b2d4ca6296f38731a3aaf0bf7581efae824a41c770a8fc4']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.12.0, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, RuntimeDefault, Service, ServiceAccount, SingleStack, TCP, UPDATE,
+    ValidatingWebhookConfiguration, admission-webhook, admissionregistration.k8s.io,
+    admissionregistration.k8s.io/v1, apps/v1, batch/v1, configmaps, controller, coordination.k8s.io,
+    create, default, discovery.k8s.io, endpoints, endpointslices, events, get, http,
+    https, https-webhook, ingress-nginx, ingress-nginx-4.12.0, ingressclasses, ingresses,
+    ingresses/status, k8s.io/ingress-nginx, leases, linux, list, metadata.name, metadata.namespace,
+    namespaces, networking.k8s.io, networking.k8s.io/v1, nginx, nodes, patch, pods,
+    rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.12.0@sha256:e6b8de175acda6ca913891f0f727bca4527e797d52688cbe9fec9040d6f6b6fa',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.0@sha256:aaafd456bda110628b2d4ca6296f38731a3aaf0bf7581efae824a41c770a8fc4',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.11.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm / values changes to review\n- **Removed value:** `controller.enableWorkerSerialReloads`\
+      \ was removed in the chart (`Chart: Remove controller.enableWorkerSerialReloads`).\
+      \ If you set it previously, **delete it** from your values; decide if there\
+      \ is a replacement value in newer chart docs for worker reload behavior.\n-\
+      \ **Templating changes (may affect custom values):**\n  - `controller.config`\
+      \ is now templatable. If you were using literal strings that look like templates\
+      \ (`{{ }}`), they may now render; validate rendered ConfigMap output.\n  - `controller.podAffinity`\
+      \ (pod affinity) is now templatable. Same caveat as above; check rendered pod\
+      \ spec.\n- **Admission webhook patch job RBAC is configurable.** If you have\
+      \ restricted clusters, review the new RBAC-related values and ensure your security\
+      \ posture matches expectations.\n- **IngressClass related chart changes:**\n\
+      \  - Fixed `IngressClass` annotations.\n  - Accept user-defined annotations\
+      \ in `IngressClass`.\n  - Added **IngressClass aliases**.\n  - `controller.ingressClassResource.parameters`\
+      \ is rendered natively (may change YAML output vs string templating). Re-render\
+      \ and compare manifests if you set this.\n- **KEDA/HPA behavior:**\n  - Align\
+      \ HPA & KEDA conditions and deploy `PodDisruptionBudget` with KEDA. If you use\
+      \ KEDA, verify PDB and scaling objects after upgrade.\n- **Default backend:**\
+      \ topologySpreadConstraints support and related unit tests. If you run the default\
+      \ backend, confirm scheduling behavior matches expectations."
+    chart_updates: ['Chart: Remove `controller.enableWorkerSerialReloads`.', 'Chart:
+        Make `controller.config` templatable.', 'Chart: Make pod affinity templatable.',
+      'Chart: Fix `IngressClass` annotations.', 'Chart: Make admission webhook patch
+        job RBAC configurable.', 'Chart: Accept user-defined annotations in IngressClass;
+        add IngressClass aliases.', 'Chart: Render `controller.ingressClassResource.parameters`
+        natively.', 'Chart: Align HPA & KEDA conditions; deploy PDB with KEDA.', 'Default
+        backend: add topologySpreadConstraints support and sort HPA metrics.']
+    features: [NGINX bumped to 1.25.5 and HTTP/3 module added (new capability; requires
+        QUIC/UDP 443 exposure and client support)., 'New annotations for gRPC timeouts,
+        plus ConfigMap support for gRPC buffer size.', New annotation allowing custom
+        response headers to be added., GeoIP2 auto_reload configuration support.,
+      'Leader election improvements: TTL configurable and option/flag to disable leader
+        election.']
+    breaking_changes: ['Do **not** use controller v1.11.0 with **OCSP stapling enabled**
+        due to a known serious issue; use a patched 1.11.x release containing the
+        fix (referenced PR #11594) instead.', Chart value `controller.enableWorkerSerialReloads`
+        was removed; upgrades will fail lint/templating if your values still reference
+        it., 'TLS hardening change: TLSv1 and TLSv1.1 were removed; clients requiring
+        those protocols will no longer connect.', Minimum Kubernetes version requirement
+        is stated as 1.21; clusters older than that are unsupported.]
   chart_version: 4.11.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.11.0@sha256:a886e56d532d1388c77c8340261149d974370edca1093af4c97a96fb1467cb39',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.1@sha256:36d05b4077fb8e3d13663702fa337f124675ba8667cbd949c03a8e8ea6fa4366']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.11.0, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, RuntimeDefault, Service, ServiceAccount, SingleStack, TCP, UPDATE,
+    ValidatingWebhookConfiguration, admission-webhook, admissionregistration.k8s.io,
+    admissionregistration.k8s.io/v1, apps/v1, batch/v1, configmaps, controller, coordination.k8s.io,
+    create, default, discovery.k8s.io, endpoints, endpointslices, events, 'false',
+    get, http, https, https-webhook, ingress-nginx, ingress-nginx-4.11.0, ingressclasses,
+    ingresses, ingresses/status, k8s.io/ingress-nginx, leases, linux, list, metadata.name,
+    metadata.namespace, namespaces, networking.k8s.io, networking.k8s.io/v1, nginx,
+    nodes, patch, pods, rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.11.0@sha256:a886e56d532d1388c77c8340261149d974370edca1093af4c97a96fb1467cb39',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.1@sha256:36d05b4077fb8e3d13663702fa337f124675ba8667cbd949c03a8e8ea6fa4366',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.10.1
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm / values changes to watch\n- **IngressClass parameters\
+      \ rendering changed:** `controller.ingressClassResource.parameters` is now rendered\
+      \ *natively* by the chart. If you were templating/quoting this field in values\
+      \ to work around earlier behavior, re-check the resulting `IngressClass` manifest\
+      \ after upgrade.\n- **Metrics flag behavior:** chart sets `--enable-metrics`\
+      \ based on `controller.metrics.enabled`. Ensure your values align with your\
+      \ expectations (especially if you previously set args manually).\n- **Autoscaling\
+      \ objects alignment:** HPA and KEDA conditions were aligned; if you use KEDA\
+      \ autoscaling, validate generated resources and conditions.\n- **PDB with KEDA:**\
+      \ chart now deploys a `PodDisruptionBudget` when KEDA is enabled; confirm this\
+      \ doesn\u2019t conflict with any existing PDBs you manage.\n- No explicit required\
+      \ values changes were called out for 1.10.1 specifically; most 1.10.1 chart\
+      \ items are tests/docs/CI."
+    chart_updates: ['Chart: Render `controller.ingressClassResource.parameters` natively.',
+      'Chart: Align HPA & KEDA conditions.', 'Chart: Deploy `PodDisruptionBudget`
+        with KEDA enabled.', 'Chart: Improve IngressClass documentation.', 'Chart:
+        Add unit tests for default backend & topology spread constraints; sort default
+        backend HPA metrics (no functional change expected).']
+    features: ['Reintroduced/available **chroot controller image** in v1.10.1 (`controller-chroot:v1.10.1`),
+        addressing the 1.10.0 note that chroot was not supported.', Improved admission
+        controller logging to include `admissionTime` and `testedConfigurationSize`
+        for better troubleshooting.]
+    breaking_changes: ['From **v1.10.0** (still relevant when upgrading to 1.10.1):
+        chroot image was not supported in 1.10.0 (fixed in 1.10.1).', 'From **v1.10.0**:
+        Opentracing and Zipkin modules were removed; only OpenTelemetry is supported.',
+      'From **v1.10.0**: PodSecurityPolicy support was dropped.', 'From **v1.10.0**:
+        Legacy GeoIP was dropped; only GeoIP2 is supported.']
   chart_version: 4.10.1
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.10.1@sha256:e24f39d3eed6bcc239a56f20098878845f62baa34b9f2be2fd2c38ce9fb0f29e',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.1@sha256:36d05b4077fb8e3d13663702fa337f124675ba8667cbd949c03a8e8ea6fa4366']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.10.1, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, RuntimeDefault, Service, ServiceAccount, SingleStack, TCP, UPDATE,
+    ValidatingWebhookConfiguration, admission-webhook, admissionregistration.k8s.io,
+    admissionregistration.k8s.io/v1, apps/v1, batch/v1, configmaps, controller, coordination.k8s.io,
+    create, default, discovery.k8s.io, endpoints, endpointslices, events, 'false',
+    get, http, https, https-webhook, ingress-nginx, ingress-nginx-4.10.1, ingressclasses,
+    ingresses, ingresses/status, k8s.io/ingress-nginx, leases, linux, list, metadata.name,
+    metadata.namespace, namespaces, networking.k8s.io, networking.k8s.io/v1, nginx,
+    nodes, patch, pods, rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.10.1@sha256:e24f39d3eed6bcc239a56f20098878845f62baa34b9f2be2fd2c38ce9fb0f29e',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.1@sha256:36d05b4077fb8e3d13663702fa337f124675ba8667cbd949c03a8e8ea6fa4366',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.10.0
   kube: ['1.29', '1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['**Chart behavior change (metrics flag):** The Helm chart now
+        sets the controller argument `--enable-metrics` based on `controller.metrics.enabled`
+        (instead of always/never or requiring manual extraArgs). This came in via
+        PR #10959.', '**kube-webhook image tag fix:** Chart/release fixes the `kube-webhook-certgen`
+        image tag handling (PR #11033/#11034).', '**PrometheusRule manifest updated:**
+        `controller-prometheusrules.yaml` updated (PR #8902), which can change the
+        resulting PrometheusRule resources if you enable them.']
+    features: ['**NGINX upgraded to 1.25:** Controller now ships with NGINX 1.25,
+        bringing the upstream NGINX changes/perf/security updates with it.', '**OCSP
+        responder improvements:** Proper support for a TLS-wrapped OCSP responder,
+        improving TLS/OCSP stapling edge cases.', '**Annotation completeness:** Adds
+        a missing `backend-protocol` annotation option, improving compatibility with
+        certain backend protocols/configs.', '**Dashboard/monitoring fixes:** Grafana
+        dashboard datasource/exported namespace variable fixes and updated Prometheus
+        rules improve observability out of the box.']
+    breaking_changes: ['**No chroot image in 1.10.0:** The `controller-chroot` image
+        is not supported in this release (promised to return in a later minor patch).',
+      '**Tracing modules removed:** OpenTracing and Zipkin NGINX modules were dropped;
+        only OpenTelemetry is supported moving forward.', '**PodSecurityPolicy removed:**
+        PSP support is dropped; clusters relying on PSP manifests/values must migrate
+        to alternatives (e.g., PSA + RBAC).', '**Legacy GeoIP removed:** GeoIP (legacy)
+        support is dropped; only GeoIP2 is supported.']
   chart_version: 4.10.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.10.0@sha256:42b3f0e5d0846876b1791cd3afeb5f1cbbe4259d6f35651dcc1b5c980925379c',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.0@sha256:44d1d0e9f19c63f58b380c5fddaca7cf22c7cee564adeff365225a5df5ef3334']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.10.0, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, RuntimeDefault, Service, ServiceAccount, SingleStack, TCP, UPDATE,
+    ValidatingWebhookConfiguration, admission-webhook, admissionregistration.k8s.io,
+    admissionregistration.k8s.io/v1, apps/v1, batch/v1, configmaps, controller, coordination.k8s.io,
+    create, default, discovery.k8s.io, endpoints, endpointslices, events, 'false',
+    get, http, https, https-webhook, ingress-nginx, ingress-nginx-4.10.0, ingressclasses,
+    ingresses, ingresses/status, k8s.io/ingress-nginx, leases, linux, list, metadata.name,
+    metadata.namespace, namespaces, networking.k8s.io, networking.k8s.io/v1, nginx,
+    nodes, patch, pods, rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.10.0@sha256:42b3f0e5d0846876b1791cd3afeb5f1cbbe4259d6f35651dcc1b5c980925379c',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.4.0@sha256:44d1d0e9f19c63f58b380c5fddaca7cf22c7cee564adeff365225a5df5ef3334',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.9.6
   kube: ['1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Controller image changed from v1.9.0 to v1.9.6 (and corresponding
+        chroot image digest)., Admission webhook cert generator updated to a newer
+        release (v20231226-1a7112e06)., 'Annotation validation tightened: regex validation
+        added for the common-name annotation; SSL cipher list validation expanded
+        to include SECLEVEL and STRENGTH.', ModSecurity library version updated to
+        3.0.11., "Dependency bump: runc 1.1.10 \u2192 1.1.11.", 'From 1.9.0 baseline:
+        user snippets are disabled by default; controller base image no longer includes
+        curl; annotation validation framework introduced. These are the main behavior-impacting
+        changes to be aware of when moving off 1.9.0.']
+    features: ['Stricter and more complete validation for annotations (including regex
+        checks and SSL cipher list fields), reducing risk of invalid config reaching
+        NGINX.', 'Updated admission webhook cert generation tooling, improving compatibility
+        and maintenance.', Updated ModSecurity library version (3.0.11) for security/stability
+        fixes.]
+    breaking_changes: [User-provided NGINX snippets are disabled by default starting
+        in 1.9.0; any Ingress relying on snippet annotations will stop working unless
+        you explicitly re-enable snippets via controller configuration/values., 'The
+        controller image no longer includes curl (since 1.9.0); any custom scripts,
+        sidecars, or debug workflows that exec into the controller pod expecting curl
+        will fail.']
   chart_version: 4.9.1
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.9.6@sha256:1405cc613bd95b2c6edd8b2a152510ae91c7e62aea4698500d23b2145960ab9c',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231226-1a7112e06@sha256:25d6a5f11211cc5c3f9f2bf552b585374af287b4debf693cacbe2da47daa5084']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.9.6, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, RuntimeDefault, Service, ServiceAccount, SingleStack, TCP, UPDATE,
+    ValidatingWebhookConfiguration, admission-webhook, admissionregistration.k8s.io,
+    admissionregistration.k8s.io/v1, apps/v1, batch/v1, configmaps, controller, coordination.k8s.io,
+    create, default, discovery.k8s.io, endpoints, endpointslices, events, 'false',
+    get, http, https, https-webhook, ingress-nginx, ingress-nginx-4.9.1, ingressclasses,
+    ingresses, ingresses/status, k8s.io/ingress-nginx, leases, linux, list, metadata.name,
+    metadata.namespace, namespaces, networking.k8s.io, networking.k8s.io/v1, nginx,
+    nodes, patch, pods, rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.9.6@sha256:1405cc613bd95b2c6edd8b2a152510ae91c7e62aea4698500d23b2145960ab9c',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231226-1a7112e06@sha256:25d6a5f11211cc5c3f9f2bf552b585374af287b4debf693cacbe2da47daa5084',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.9.0
   kube: ['1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **ServiceMonitor namespace default**: Helm chart now defaults\
+      \ `ServiceMonitor.metadata.namespace` to `.Release.Namespace` (previously it\
+      \ may have defaulted elsewhere). If you rely on scraping from a different namespace,\
+      \ set the chart value explicitly.\n- **DaemonSet/Deployment templating fixes**:\
+      \ There were chart template fixes around Deployment/DaemonSet values and rendering;\
+      \ re-check any overridden values you pass for these objects.\n- **New Helm capabilities**:\n\
+      \  - `controller.hostAliases` can now be configured via values.\n  - Service\
+      \ annotations are now passed through the Helm `tpl` engine (templated strings).\n\
+      \  - `topologySpreadConstraints` is templated for Deployment/DaemonSet; if you\
+      \ set this, validate it renders as expected.\n- **KEDA interaction**: If you\
+      \ enable KEDA, the chart will ignore the Deployment template `replicas` field\
+      \ (replicas controlled by KEDA)."
+    chart_updates: ['Controller image updated from `registry.k8s.io/ingress-nginx/controller:v1.8.4`
+        to `v1.9.0` (and chroot variant accordingly).', Base container image changed
+        to remove `curl` (impacts any custom scripts/exec probes relying on curl inside
+        the controller container)., AJP support was deprecated/removed in the 1.9.0
+        line (do not rely on AJP module)., 'OpenTelemetry libs updated (OTel 1.11.0,
+        gRPC updates) and Go bumped to 1.21.1 (mostly build/runtime dependency changes).']
+    features: ['User snippets are now **disabled by default**, improving security;
+        they must be explicitly enabled if you use snippet annotations.', Ingress
+        annotation validation was implemented; invalid annotations may now be rejected
+        or warned about instead of being silently accepted., "Optional auth access\
+        \ logs support (can reduce log volume if you don\u2019t need auth subrequest\
+        \ logs).", New controller flag to enable/disable `aio_write` (advanced NGINX
+        performance tuning)., 'Helm chart improvements: configurable `hostAliases`,
+        templated service annotations via `tpl`, and support for `topologySpreadConstraints`
+        in Deployment/DaemonSet.']
+    breaking_changes: ['**User snippets disabled by default**: if you use `nginx.ingress.kubernetes.io/*-snippet`
+        annotations, behavior will change until you explicitly re-enable snippets
+        in config.', '**`curl` removed from the controller image**: any in-container
+        debugging, init scripts, or exec probes that call `curl` will fail unless
+        you add your own tooling.', '**AJP support removed**: if you relied on AJP,
+        you must migrate to HTTP/HTTPS (or another supported protocol) before upgrading.',
+      Annotation validation may cause previously-working but non-conformant annotations
+        to be rejected or ignored; test your Ingress manifests against the new validation
+        behavior.]
   chart_version: 4.8.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.9.0@sha256:c15d1a617858d90fb8f8a2dd60b0676f2bb85c54e3ed11511794b86ec30c8c60',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20230407@sha256:543c40fd093964bc9ab509d3e791f9989963021f1e9e4c9c7b6700b02bfb227b']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.9.0, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, Service, ServiceAccount, SingleStack, TCP, UPDATE, ValidatingWebhookConfiguration,
+    admission-webhook, admissionregistration.k8s.io, admissionregistration.k8s.io/v1,
+    apps/v1, batch/v1, configmaps, controller, coordination.k8s.io, create, default,
+    discovery.k8s.io, endpoints, endpointslices, events, 'false', get, http, https,
+    https-webhook, ingress-nginx, ingress-nginx-4.8.0, ingressclasses, ingresses,
+    ingresses/status, k8s.io/ingress-nginx, leases, linux, list, metadata.name, metadata.namespace,
+    namespaces, networking.k8s.io, networking.k8s.io/v1, nginx, nodes, patch, pods,
+    rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.9.0@sha256:c15d1a617858d90fb8f8a2dd60b0676f2bb85c54e3ed11511794b86ec30c8c60',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20230407@sha256:543c40fd093964bc9ab509d3e791f9989963021f1e9e4c9c7b6700b02bfb227b',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.8.4
   kube: ['1.27', '1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Controller image updated from v1.7.1 to v1.8.4 (and chroot variant),
+        including intermediary 1.8.x patch releases.', Go toolchain updated in the
+        1.8.x line (notably to Go 1.21.1)., Auth access logging made optional (newer
+        controller behavior/config surface)., ModSecurity internal processing disabled
+        in a way intended to improve handling of large Ingress objects., OpenTelemetry
+        init image promoted to distroless; image tagging/metadata process updated.,
+      AJP module re-added as a dynamic module (affects those using AJP)., 'Dependency
+        bumps (e.g., golang.org/x/net) and assorted image bumps.']
+    features: ["Optional auth access logs, allowing you to reduce log volume/cost\
+        \ if you don\u2019t need per-request auth logging.", Improved behavior for
+        large Ingress resources by changing how ModSecurity is handled internally.,
+      'Distroless OpenTelemetry init image promotion, which can improve security posture
+        and reduce image surface area.', AJP support available again via a dynamic
+        module for environments that still rely on AJP upstreams.]
+    breaking_changes: ['No explicit breaking changes are called out in the provided
+        notes; however, expect behavioral differences due to ModSecurity handling
+        changes and auth log defaults if you relied on previous implicit behavior.']
   chart_version: 4.7.3
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.8.4@sha256:8d8ddf32b83ca3e74bd5f66369fa60d85353e18ff55fa7691b321aa4716f5ba9',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231011-8b53cabe0@sha256:a7943503b45d552785aa3b5e457f169a5661fb94d82b8a3373bcd9ebaf9aac80']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.8.4, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, Service, ServiceAccount, SingleStack, TCP, UPDATE, ValidatingWebhookConfiguration,
+    admission-webhook, admissionregistration.k8s.io, admissionregistration.k8s.io/v1,
+    apps/v1, batch/v1, configmaps, controller, coordination.k8s.io, create, default,
+    discovery.k8s.io, endpoints, endpointslices, events, get, http, https, https-webhook,
+    ingress-nginx, ingress-nginx-4.7.3, ingressclasses, ingresses, ingresses/status,
+    k8s.io/ingress-nginx, leases, linux, list, metadata.name, metadata.namespace,
+    namespaces, networking.k8s.io, networking.k8s.io/v1, nginx, nodes, patch, pods,
+    rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.8.4@sha256:8d8ddf32b83ca3e74bd5f66369fa60d85353e18ff55fa7691b321aa4716f5ba9',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20231011-8b53cabe0@sha256:a7943503b45d552785aa3b5e457f169a5661fb94d82b8a3373bcd9ebaf9aac80',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, 'true', update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.7.1
   kube: ['1.27', '1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm/values changes to check\n- **HPA values fix (Terraform\
+      \ compatibility):** Default HPA template now includes an explicit `resource`\
+      \ type in the metric spec (PR #9803). If you override `controller.autoscaling.*`,\
+      \ re-run `helm template` and validate the rendered `HorizontalPodAutoscaler`\
+      \ matches your cluster\u2019s supported API/version.\n- **Custom ports for internal\
+      \ service:** Chart adds support to configure **custom port(s)** for the controller\
+      \ **internal service** (PR #9846). If you rely on the internal service for webhook/health/metrics\
+      \ traffic, review the new values and ensure they don\u2019t conflict with your\
+      \ existing `controller.service.*` or NetworkPolicies.\n\n_No other explicit\
+      \ values renames/removals were called out in the provided notes, but you should\
+      \ diff your current `values.yaml` against the target chart\u2019s `values.yaml`\
+      \ for new defaults around metrics, admission, and service configuration._"
+    chart_updates: ['Add support for custom port configuration for the controller
+        internal service (PR #9846).', 'Adjust default HPA configuration to include
+        explicit resource type to avoid issues with Terraform Helm usage (PR #9803).',
+      'FastCGI ConfigMap is expected to be in the same namespace as the ingress controller
+        (PR #9863).', Docs/README updates and formatting fixes (multiple PRs).]
+    features: ['Support a new `--container` flag for the controller, improving flexibility
+        in container/runtime-related scenarios.', "Helm chart can now customize ports\
+        \ on the controller\u2019s internal Service, enabling non-default port mappings\
+        \ when needed.", HPA defaults were made more explicit to improve compatibility
+        with Terraform-managed Helm deployments.]
+    breaking_changes: ["InfluxDB support was deprecated and removed; if you were exporting\
+        \ metrics to InfluxDB via built-in support, you\u2019ll need an alternative\
+        \ integration.", The deprecated `secure-upstream` annotation was removed;
+        any Ingresses using it must be updated to supported annotations/configuration.]
   chart_version: 4.6.1
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.7.1@sha256:7244b95ea47bddcb8267c1e625fb163fc183ef55448855e3ac52a7b260a60407',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20230312-helm-chart-4.5.2-28-g66a760794@sha256:01d181618f270f2a96c04006f33b2699ad3ccb02da48d0f89b22abce084b292f']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.7.1, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, Service, ServiceAccount, SingleStack, TCP, UPDATE, ValidatingWebhookConfiguration,
+    admission-webhook, admissionregistration.k8s.io, admissionregistration.k8s.io/v1,
+    apps/v1, batch/v1, configmaps, controller, coordination.k8s.io, create, default,
+    discovery.k8s.io, endpoints, endpointslices, events, get, http, https, https-webhook,
+    ingress-nginx, ingress-nginx-4.6.1, ingressclasses, ingresses, ingresses/status,
+    k8s.io/ingress-nginx, leases, linux, list, metadata.name, metadata.namespace,
+    namespaces, networking.k8s.io, networking.k8s.io/v1, nginx, nodes, patch, pods,
+    rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.7.1@sha256:7244b95ea47bddcb8267c1e625fb163fc183ef55448855e3ac52a7b260a60407',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20230312-helm-chart-4.5.2-28-g66a760794@sha256:01d181618f270f2a96c04006f33b2699ad3ccb02da48d0f89b22abce084b292f',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, 'true', update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.6.4
   kube: ['1.26', '1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- No full Helm chart changelog was provided in the notes you pasted,\
+      \ so treat Helm-side changes below as **\u201Cverify in chart changelog for\
+      \ v4.5.x\u201D**.\n- From the provided notes, the following **values/schema\
+      \ additions** are likely relevant when upgrading the Helm release (review your\
+      \ `values.yaml` for collisions with defaults):\n  - `controller.metrics.service.labels`\
+      \ was added (you may want to set it if you rely on service discovery labels).\n\
+      \  - `controller.autoscaling.annotations` was added (if you use HPA and need\
+      \ annotations).\n  - PDB gained `maxUnavailable` support.\n  - defaultBackend\
+      \ got `updateStrategy` and `minReadySeconds` knobs.\n  - `controller.ingressClass`\
+      \ value was added/fixed (ensure you set this if you rely on a non-default class).\n\
+      \  - Helm can **optionally use cert-manager** instead of the admission patch\
+      \ job for webhook certs (new option; choose one approach).\n  - Admission webhook\
+      \ job got `NetworkPolicy` support; admission webhook job securityContext became\
+      \ configurable.\n  - There was work around pathType validation toggles; check\
+      \ whether the chart exposes a value to disable/enable strict validation in your\
+      \ version.\n"
+    chart_updates: ['Controller image update to `registry.k8s.io/ingress-nginx/controller:v1.6.4`
+        (and chroot variant) from `v1.5.1`.', CI/release pipeline and chart linting
+        were added/adjusted (no runtime impact but indicates chart packaging changes).,
+      Grafana dashboard templates were adjusted to remove hardcoded namespaces/datasources
+        (may affect how you import/use dashboards)., HPA API version was bumped to
+        `autoscaling/v2` (cluster must support it; Kubernetes 1.23+ generally OK).,
+      RBAC was tightened by removing some ConfigMap-related permissions (may matter
+        if you had custom workflows expecting those permissions).]
+    features: [Support for Kubernetes topology-aware hints (can improve client-side
+        load distribution when using services that honor hints)., New Prometheus metric
+        for orphaned Ingress objects (`orphan_ingress`) to help detect stale/unused
+        Ingress resources., ConfigMap option exposed to disable gzip (`gzip-disable`)
+        for easier response compression control., New `ipdenylist` annotation to deny
+        traffic from specified IP ranges at the Ingress level., Ability to disable
+        creation of sync events (reduces event noise in large clusters)., Stream module
+        gained `buildResolvers` (helps with DNS resolution behavior for TCP/UDP stream
+        configs)., Profiler address became configurable (helps with debugging/performance
+        profiling when needed).]
+    breaking_changes: ['If you are on an older Kubernetes version, HPA switching to
+        `autoscaling/v2` can break installs/updates (verify your cluster supports
+        it).', 'Stricter/changed behavior around Ingress `pathType` validation was
+        introduced and then partially reverted/toggled; if you relied on invalid/missing
+        `pathType` or regex path edge-cases, re-test your Ingress rules after upgrade.',
+      RBAC reduction (removal of some ConfigMap permissions) can break custom automation
+        that expected the controller service account to have broader access.]
   chart_version: 4.5.2
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.6.4@sha256:15be4666c53052484dd2992efacf2f50ea77a78ae8aa21ccd91af6baaa7ea22f',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.6.4, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, Service, ServiceAccount, SingleStack, TCP, UPDATE, ValidatingWebhookConfiguration,
+    admission-webhook, admissionregistration.k8s.io, admissionregistration.k8s.io/v1,
+    apps/v1, batch/v1, configmaps, controller, coordination.k8s.io, create, default,
+    discovery.k8s.io, endpoints, endpointslices, events, get, http, https, https-webhook,
+    ingress-nginx, ingress-nginx-4.5.2, ingressclasses, ingresses, ingresses/status,
+    k8s.io/ingress-nginx, leases, linux, list, metadata.name, metadata.namespace,
+    namespaces, networking.k8s.io, networking.k8s.io/v1, nginx, nodes, patch, pods,
+    rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.6.4@sha256:15be4666c53052484dd2992efacf2f50ea77a78ae8aa21ccd91af6baaa7ea22f',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, 'true', update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.5.1
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **Kubernetes version support**: v1.21.x is noted as no longer\
+      \ supported (the release notes already mention 1.20\u20131.21 deprecated in\
+      \ v1.4.0; v1.5.1 includes an explicit chart changelog note removing 1.21.x support).\
+      \ Ensure your clusters are **>= 1.22** (practically: v1.23+ is explicitly supported\
+      \ in these notes).\n- **Probes can be disabled (new Helm values)**: Helm chart\
+      \ gained the ability to disable controller liveness/readiness probes (PR #9238).\
+      \ If you have environments where probes are managed externally or cause issues,\
+      \ you can now set the corresponding Helm values to disable them (review the\
+      \ chart values for the exact keys in your chart version).\n- **Admission webhooks\
+      \ securityContext configurable (new Helm values)**: You can now set a `securityContext`\
+      \ for admission-webhook components via Helm values (PR #9186). This matters\
+      \ for hardened clusters/PSA where you need explicit settings.\n"
+    chart_updates: [Controller switched to using **EndpointSlices** (introduced in
+        v1.4.0); verify your cluster has the EndpointSlice API enabled (default in
+        modern Kubernetes) and that any RBAC/network policies accommodate it., '**Prometheus
+        metric names changed** (v1.4.0): new/updated histogram & counter names, some
+        deprecated/removed metrics. Update dashboards/alerts/scrape queries accordingly.',
+      'Controller image registry is **registry.k8s.io** (noted around v1.4.0 timeframe);
+        ensure image allowlists, proxies, and mirroring are updated.', 'Upgrades in
+        dependencies/runtime: **NGINX 1.21.6** and **Go 1.19.2** by v1.5.1.', 'Bugfix:
+        **Service name length** issue fixed (v1.5.1, PR #9245).', 'Security: includes
+        fixes for **CVE-2022-32149**, **CVE-2022-27664**, **CVE-2022-1996** (v1.5.1).']
+    features: [EndpointSlice support (instead of Endpoints) to align with modern Kubernetes
+        service discovery and scalability (v1.4.0)., New controller timing metrics
+        split into request/connect/header/response duration histograms to improve
+        latency visibility (v1.4.0)., Helm chart can now disable liveness/readiness
+        probes for the controller (v1.5.1)., Helm chart can now set a securityContext
+        for admission-webhook resources to support restricted/hardened clusters (v1.5.1).]
+    breaking_changes: [Prometheus metrics rename/removal in v1.4.0 can break existing
+        Grafana dashboards and alert rules; you must update metric names and types
+        (some summaries removed/deprecated)., "Kubernetes version support drops older\
+        \ clusters: 1.20\u20131.21 deprecated in v1.4.0 and explicitly marked as no\
+        \ longer supported by the chart by v1.5.1; upgrading on 1.21 may fail or be\
+        \ unsupported."]
   chart_version: 4.4.2
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.5.1@sha256:4ba73c697770664c1e00e9f968de14e08f606ff961c76e5d7033a4a9c593c629',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.5.1, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, Service, ServiceAccount, SingleStack, TCP, UPDATE, ValidatingWebhookConfiguration,
+    admission-webhook, admissionregistration.k8s.io, admissionregistration.k8s.io/v1,
+    apps/v1, batch/v1, configmaps, controller, coordination.k8s.io, create, default,
+    discovery.k8s.io, endpoints, endpointslices, events, get, http, https, https-webhook,
+    ingress-nginx, ingress-nginx-4.4.2, ingressclasses, ingresses, ingresses/status,
+    k8s.io/ingress-nginx, leases, linux, list, metadata.name, metadata.namespace,
+    namespaces, networking.k8s.io, networking.k8s.io/v1, nginx, nodes, patch, pods,
+    rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.5.1@sha256:4ba73c697770664c1e00e9f968de14e08f606ff961c76e5d7033a4a9c593c629',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    release-name-ingress-nginx-leader, secrets, services, 'true', update, v1, validate.nginx.ingress.kubernetes.io,
+    validatingwebhookconfigurations, watch, webhook, webhook-cert]
 - version: 1.4.0
   kube: ['1.25', '1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Controller now uses EndpointSlices instead of Endpoints to discover
+        backends., Leader election in 1.3.1 is Lease-only (no ConfigMaps); 1.3.0 was
+        the transition release., 'Prometheus metrics have been renamed/reshaped; several
+        histograms added/updated, some summaries/histograms deprecated/removed.',
+      "Kubernetes version support updated: 1.20\u20131.21 deprecated; 1.25 supported;\
+        \ supported set called out as 1.23\u20131.25.", Images moved/standardized
+        to registry.k8s.io (note broader k8s.gcr.io -> registry.k8s.io migration notice).,
+      Go toolchain bumped (1.19 in 1.3.1; 1.19.1 in 1.4.0); base image updates (Alpine
+        3.16.2 in 1.3.1)., New annotation added for sticky cookie domain., PSP-related
+        job patch logic avoided on Kubernetes 1.25+., Metrics port name can be parameterized
+        (relevant if you scrape by port name).]
+    features: ['Backend discovery uses EndpointSlices, improving scalability on clusters
+        with many endpoints.', New/updated Prometheus histograms for request/connect/header/response
+        timings and request/response sizes., New annotation to set the sticky session
+        cookie domain.]
+    breaking_changes: ['Prometheus metric names changed; some metrics were deprecated/removed
+        (e.g., ingress_upstream_header_seconds summary removed), so dashboards/alerts
+        and scrape rules may break until updated.', "Clusters on Kubernetes 1.20\u2013\
+        1.21 are now deprecated for this controller line; plan to run on 1.23+ (and\
+        \ 1.25 supported) before/with the upgrade.", 'Leader election behavior changed
+        in 1.3.1 to Lease-only; if you ever skipped 1.3.0 during the earlier migration
+        window, validate no legacy ConfigMap lock assumptions remain.']
   chart_version: 4.3.0
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.4.0@sha256:34ee929b111ffc7aa426ffd409af44da48e5a0eea1eb2207994d9e0c0882d143',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.4.0, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, Service, ServiceAccount, SingleStack, TCP, UPDATE, ValidatingWebhookConfiguration,
+    admission-webhook, admissionregistration.k8s.io, admissionregistration.k8s.io/v1,
+    apps/v1, batch/v1, configmaps, controller, coordination.k8s.io, create, default,
+    discovery.k8s.io, endpoints, endpointslices, events, get, http, https, https-webhook,
+    ingress-controller-leader, ingress-nginx, ingress-nginx-4.3.0, ingressclasses,
+    ingresses, ingresses/status, k8s.io/ingress-nginx, leases, linux, list, metadata.name,
+    metadata.namespace, namespaces, networking.k8s.io, networking.k8s.io/v1, nginx,
+    nodes, patch, pods, rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.4.0@sha256:34ee929b111ffc7aa426ffd409af44da48e5a0eea1eb2207994d9e0c0882d143',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20220916-gd32f8c343@sha256:39c5b2e3310dc4264d638ad28d9d1d96c4cbb2b2dcfb52368fe4e3c63f61e10f',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    secrets, services, 'true', update, v1, validate.nginx.ingress.kubernetes.io, validatingwebhookconfigurations,
+    watch, webhook, webhook-cert]
 - version: 1.3.1
   kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 4.2.5
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.3.1@sha256:54f7fe2c6c5a9db9a0ebf1131797109bb7a4d91f56b9b362bde2abd237dd1974',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.3.0@sha256:549e71a6ca248c5abd51cdb73dbc3083df62cf92ed5e6147c780e30f7e007a47']
+  images: [/healthz, /networking/v1/ingresses, /nginx-ingress-controller, /usr/local/certificates/,
+    /usr/local/lib/libmimalloc.so, /wait-shutdown, 1.3.1, 100m, 90Mi, ALL, CREATE,
+    ClusterFirst, ClusterIP, ClusterRole, ClusterRoleBinding, ConfigMap, Deployment,
+    Equivalent, Fail, HTTP, Helm, IPv4, IfNotPresent, IngressClass, Job, LD_PRELOAD,
+    LoadBalancer, NET_BIND_SERVICE, None, OnFailure, POD_NAME, POD_NAMESPACE, Role,
+    RoleBinding, Service, ServiceAccount, SingleStack, TCP, UPDATE, ValidatingWebhookConfiguration,
+    admission-webhook, admissionregistration.k8s.io, admissionregistration.k8s.io/v1,
+    apps/v1, batch/v1, configmaps, controller, coordination.k8s.io, create, default,
+    endpoints, events, get, http, https, https-webhook, ingress-controller-leader,
+    ingress-nginx, ingress-nginx-4.2.5, ingressclasses, ingresses, ingresses/status,
+    k8s.io/ingress-nginx, leases, linux, list, metadata.name, metadata.namespace,
+    namespaces, networking.k8s.io, networking.k8s.io/v1, nginx, nodes, patch, pods,
+    rbac.authorization.k8s.io, rbac.authorization.k8s.io/v1, 'registry.k8s.io/ingress-nginx/controller:v1.3.1@sha256:54f7fe2c6c5a9db9a0ebf1131797109bb7a4d91f56b9b362bde2abd237dd1974',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.3.0@sha256:549e71a6ca248c5abd51cdb73dbc3083df62cf92ed5e6147c780e30f7e007a47',
+    release-name, release-name-ingress-nginx, release-name-ingress-nginx-admission,
+    release-name-ingress-nginx-admission-create, release-name-ingress-nginx-admission-patch,
+    release-name-ingress-nginx-controller, release-name-ingress-nginx-controller-admission,
+    secrets, services, 'true', update, v1, validate.nginx.ingress.kubernetes.io, validatingwebhookconfigurations,
+    watch, webhook, webhook-cert]

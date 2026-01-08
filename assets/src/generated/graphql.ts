@@ -143,6 +143,8 @@ export type AddonVersion = {
   releaseUrl?: Maybe<Scalars['String']['output']>;
   /** any other add-ons this might require */
   requirements?: Maybe<Array<Maybe<VersionReference>>>;
+  /** a summary of what changed in this version of the addon */
+  summary?: Maybe<AddonVersionSummary>;
   /** add-on version, semver formatted */
   version?: Maybe<Scalars['String']['output']>;
 };
@@ -157,6 +159,18 @@ export type AddonVersionBlockingArgs = {
 /** the specification of a runtime service at a specific version */
 export type AddonVersionReleaseUrlArgs = {
   version?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type AddonVersionSummary = {
+  __typename?: 'AddonVersionSummary';
+  /** a summary of any application-level breaking changes in this version */
+  breakingChanges?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a summary of any chart updates involved in updating to this version */
+  chartUpdates?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a summary of any features added in this version */
+  features?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a summary of any helm changes required for this version */
+  helmChanges?: Maybe<Scalars['String']['output']>;
 };
 
 export type AgentAnalysis = {
@@ -482,6 +496,30 @@ export enum AgentRunMode {
   Analyze = 'ANALYZE',
   Write = 'WRITE'
 }
+
+/** A repository that has been used by an agent run in the past, useful for typeaheads and dropdowns */
+export type AgentRunRepository = {
+  __typename?: 'AgentRunRepository';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the last time the repository was used */
+  lastUsedAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the url of the repository */
+  url: Scalars['String']['output'];
+};
+
+export type AgentRunRepositoryConnection = {
+  __typename?: 'AgentRunRepositoryConnection';
+  edges?: Maybe<Array<Maybe<AgentRunRepositoryEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AgentRunRepositoryEdge = {
+  __typename?: 'AgentRunRepositoryEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AgentRunRepository>;
+};
 
 export enum AgentRunStatus {
   Cancelled = 'CANCELLED',
@@ -1606,6 +1644,8 @@ export type ChatThread = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   insight?: Maybe<AiInsight>;
   lastMessageAt?: Maybe<Scalars['DateTime']['output']>;
+  research?: Maybe<InfraResearch>;
+  service?: Maybe<ServiceDeployment>;
   session?: Maybe<AgentSession>;
   settings?: Maybe<ChatThreadSettings>;
   summary: Scalars['String']['output'];
@@ -1633,6 +1673,10 @@ export type ChatThreadAttributes = {
   insightId?: InputMaybe<Scalars['ID']['input']>;
   /** a list of messages to add initially when creating this thread */
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  /** the research this thread was created for */
+  researchId?: InputMaybe<Scalars['ID']['input']>;
+  /** the service this thread was created for */
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
   /** the session to use for this thread */
   session?: InputMaybe<AgentSessionAttributes>;
   /** the settings for this thread */
@@ -1840,6 +1884,8 @@ export type Cluster = {
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   /** a auth token to be used by the deploy operator, only readable on create */
   deployToken?: Maybe<Scalars['String']['output']>;
+  /** lists all deprecated custom resources for this cluster with optional filtering */
+  deprecatedCrds?: Maybe<DeprecatedCustomResourceConnection>;
   /** fetches the discovered custom resources with new versions to be used */
   deprecatedCustomResources?: Maybe<Array<Maybe<DeprecatedCustomResource>>>;
   /** the distribution of kubernetes this cluster is running */
@@ -1995,6 +2041,16 @@ export type ClusterClusterNodeMetricsArgs = {
   start?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterDeprecatedCrdsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -3489,6 +3545,18 @@ export type DeprecatedCustomResourceAttributes = {
   version: Scalars['String']['input'];
 };
 
+export type DeprecatedCustomResourceConnection = {
+  __typename?: 'DeprecatedCustomResourceConnection';
+  edges?: Maybe<Array<Maybe<DeprecatedCustomResourceEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type DeprecatedCustomResourceEdge = {
+  __typename?: 'DeprecatedCustomResourceEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<DeprecatedCustomResource>;
+};
+
 /** Allows you to control whether a specific set of fields in a kubernetes object is drift detected */
 export type DiffNormalizer = {
   __typename?: 'DiffNormalizer';
@@ -4306,12 +4374,14 @@ export type HttpIngressRule = {
 
 /** Configuration for http proxy usage in connections to Git or SCM providers */
 export type HttpProxyAttributes = {
+  noproxy?: InputMaybe<Scalars['String']['input']>;
   url: Scalars['String']['input'];
 };
 
 /** Configuration for http proxy usage in connections to Git or SCM providers */
 export type HttpProxyConfiguration = {
   __typename?: 'HttpProxyConfiguration';
+  noproxy?: Maybe<Scalars['String']['output']>;
   url: Scalars['String']['output'];
 };
 
@@ -4683,6 +4753,27 @@ export type KnowledgeEvidence = {
 
 export type KubeconfigAttributes = {
   raw?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** the changelog for a given kubernetes version */
+export type KubernetesChangelog = {
+  __typename?: 'KubernetesChangelog';
+  /** the api updates in this version */
+  apiUpdates?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the breaking changes in this version */
+  breakingChanges?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the bug fixes in this version */
+  bugFixes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the deprecations in this version */
+  deprecations?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the features in this version */
+  features?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the major changes in this version */
+  majorChanges?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the removals in this version */
+  removals?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the kubernetes version */
+  version?: Maybe<Scalars['String']['output']>;
 };
 
 export type KubernetesUnstructured = {
@@ -6690,6 +6781,8 @@ export type PrAutomation = {
   name: Scalars['String']['output'];
   /** the project this automation lives w/in */
   project?: Maybe<Project>;
+  /** a proxy to use for git requests */
+  proxy?: Maybe<HttpProxyConfiguration>;
   /** the git repository to use for sourcing external templates */
   repository?: Maybe<GitRepository>;
   /** An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster */
@@ -6746,6 +6839,8 @@ export type PrAutomationAttributes = {
   patch?: InputMaybe<Scalars['Boolean']['input']>;
   /** the project this automation lives in */
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  /** a proxy to use for external vendoring */
+  proxy?: InputMaybe<HttpProxyAttributes>;
   /** a git repository to use for create mode prs */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   role?: InputMaybe<PrRole>;
@@ -7970,6 +8065,7 @@ export type RootMutationTypeConsumeSecretArgs = {
 
 
 export type RootMutationTypeCreateAccessTokenArgs = {
+  expiry?: InputMaybe<Scalars['String']['input']>;
   scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
 };
 
@@ -8183,6 +8279,7 @@ export type RootMutationTypeCreateServiceAccountArgs = {
 
 
 export type RootMutationTypeCreateServiceAccountTokenArgs = {
+  expiry?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
   scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
 };
@@ -9077,6 +9174,7 @@ export type RootQueryType = {
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
   agentRun?: Maybe<AgentRun>;
+  agentRunRepositories?: Maybe<AgentRunRepositoryConnection>;
   agentRuns?: Maybe<AgentRunConnection>;
   agentRuntime?: Maybe<AgentRuntime>;
   agentRuntimes?: Maybe<AgentRuntimeConnection>;
@@ -9175,6 +9273,7 @@ export type RootQueryType = {
   ingress?: Maybe<Ingress>;
   invite?: Maybe<Invite>;
   job?: Maybe<Job>;
+  kubernetesChangelog?: Maybe<KubernetesChangelog>;
   kubernetesVersionInfo?: Maybe<Array<Maybe<KubernetesVersionInfo>>>;
   logAggregation?: Maybe<Array<Maybe<LogLine>>>;
   logAggregationBuckets?: Maybe<Array<Maybe<LogAggregationBucket>>>;
@@ -9258,6 +9357,7 @@ export type RootQueryType = {
   serviceDeployment?: Maybe<ServiceDeployment>;
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
   serviceStatuses?: Maybe<Array<Maybe<ServiceStatusCount>>>;
+  serviceTarball?: Maybe<Array<Maybe<ServiceFile>>>;
   /** Renders a filtered list of services and all their descendents returned as a paginated connection */
   serviceTree?: Maybe<ServiceDeploymentConnection>;
   sharedAgentRun?: Maybe<AgentRun>;
@@ -9301,6 +9401,15 @@ export type RootQueryTypeAccessTokensArgs = {
 
 export type RootQueryTypeAgentRunArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeAgentRunRepositoriesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -9859,6 +9968,11 @@ export type RootQueryTypeJobArgs = {
 };
 
 
+export type RootQueryTypeKubernetesChangelogArgs = {
+  version: Scalars['String']['input'];
+};
+
+
 export type RootQueryTypeKubernetesVersionInfoArgs = {
   distro?: InputMaybe<ClusterDistro>;
 };
@@ -10411,6 +10525,11 @@ export type RootQueryTypeServiceStatusesArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<ServiceDeploymentStatus>;
+};
+
+
+export type RootQueryTypeServiceTarballArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -11050,6 +11169,8 @@ export type SentinelRun = {
   checks?: Maybe<Array<Maybe<SentinelCheck>>>;
   /** the time the run completed */
   completedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the errors of the run */
+  errors?: Maybe<Array<Maybe<ServiceError>>>;
   /** the id of the run */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -11530,6 +11651,13 @@ export type ServiceErrorAttributes = {
   message: Scalars['String']['input'];
   source: Scalars['String']['input'];
   warning?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** a file in a service's fully realized gitops tarball */
+export type ServiceFile = {
+  __typename?: 'ServiceFile';
+  content: Scalars['String']['output'];
+  path: Scalars['String']['output'];
 };
 
 /** Import of stack data into a service's context */
@@ -12419,6 +12547,8 @@ export type TerminatedState = {
 
 export type TerraformConfiguration = {
   __typename?: 'TerraformConfiguration';
+  /** whether to auto-approve a plan if there are no changes, preventing a stack from being blocked */
+  approveEmpty?: Maybe<Scalars['Boolean']['output']>;
   /** equivalent to the -parallelism flag in terraform */
   parallelism?: Maybe<Scalars['Int']['output']>;
   /** equivalent to the -refresh flag in terraform */
@@ -12426,6 +12556,8 @@ export type TerraformConfiguration = {
 };
 
 export type TerraformConfigurationAttributes = {
+  /** whether to auto-approve a plan if there are no changes, preventing a stack from being blocked */
+  approveEmpty?: InputMaybe<Scalars['Boolean']['input']>;
   /** equivalent to the -parallelism flag in terraform */
   parallelism?: InputMaybe<Scalars['Int']['input']>;
   /** equivalent to the -refresh flag in terraform */
@@ -12848,6 +12980,7 @@ export enum VulnUserInteraction {
 
 export type Vulnerability = {
   __typename?: 'Vulnerability';
+  agentRuntime?: Maybe<Scalars['String']['output']>;
   class?: Maybe<Scalars['String']['output']>;
   cvss?: Maybe<CvssBundle>;
   cvssSource?: Maybe<Scalars['String']['output']>;
@@ -12872,6 +13005,7 @@ export type Vulnerability = {
 };
 
 export type VulnerabilityAttributes = {
+  agentRuntime?: InputMaybe<Scalars['String']['input']>;
   class?: InputMaybe<Scalars['String']['input']>;
   cvss?: InputMaybe<CvssBundleAttributes>;
   cvssSource?: InputMaybe<Scalars['String']['input']>;
@@ -12895,8 +13029,18 @@ export type VulnerabilityAttributes = {
 
 export type VulnerabilityReport = {
   __typename?: 'VulnerabilityReport';
+  /** the agent runtime to use with this vulnerability report */
+  agentRuntime?: Maybe<Scalars['String']['output']>;
   artifact?: Maybe<VulnArtifact>;
+  /** the language the artifact is written in */
+  artifactLanguage?: Maybe<AgentRunLanguage>;
+  /** the language version of the artifact, if applicable */
+  artifactLanguageVersion?: Maybe<Scalars['String']['output']>;
+  /** the Git URL of the codebase defining this artifact */
+  artifactRepoUrl?: Maybe<Scalars['String']['output']>;
+  /** the URL of the artifact */
   artifactUrl?: Maybe<Scalars['String']['output']>;
+  /** the grade of the vulnerability report */
   grade?: Maybe<VulnReportGrade>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -12909,7 +13053,15 @@ export type VulnerabilityReport = {
 };
 
 export type VulnerabilityReportAttributes = {
+  /** the agent runtime to use with this vulnerability report */
+  agentRuntime?: InputMaybe<Scalars['String']['input']>;
   artifact?: InputMaybe<VulnArtifactAttributes>;
+  /** the language the artifact is written in */
+  artifactLanguage?: InputMaybe<AgentRunLanguage>;
+  /** the language version of the artifact, if applicable */
+  artifactLanguageVersion?: InputMaybe<Scalars['String']['input']>;
+  /** the Git URL of the codebase defining this artifact */
+  artifactRepoUrl?: InputMaybe<Scalars['String']['input']>;
   artifactUrl?: InputMaybe<Scalars['String']['input']>;
   namespaces?: InputMaybe<Array<InputMaybe<NamespaceVulnAttributes>>>;
   os?: InputMaybe<VulnOsAttributes>;
@@ -12965,9 +13117,9 @@ export type YamlOverlayAttributes = {
   yaml: Scalars['String']['input'];
 };
 
-export type AgentRunTinyFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null };
+export type AgentRunTinyFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null };
 
-export type AgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null };
+export type AgentRunFragment = { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null };
 
 export type AgentRuntimeFragment = { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
@@ -12986,14 +13138,14 @@ export type AgentRunsQueryVariables = Exact<{
 }>;
 
 
-export type AgentRunsQuery = { __typename?: 'RootQueryType', agentRuns?: { __typename?: 'AgentRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AgentRunEdge', node?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null } | null> | null } | null };
+export type AgentRunsQuery = { __typename?: 'RootQueryType', agentRuns?: { __typename?: 'AgentRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AgentRunEdge', node?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null } | null> | null } | null };
 
 export type AgentRunQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type AgentRunQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null };
+export type AgentRunQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null };
 
 export type AgentRunPodQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -13023,7 +13175,7 @@ export type CreateAgentRunMutationVariables = Exact<{
 }>;
 
 
-export type CreateAgentRunMutation = { __typename?: 'RootMutationType', createAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null };
+export type CreateAgentRunMutation = { __typename?: 'RootMutationType', createAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null };
 
 export type UpsertAgentRuntimeMutationVariables = Exact<{
   attributes: AgentRuntimeAttributes;
@@ -13044,7 +13196,7 @@ export type AgentRunDeltaSubscriptionVariables = Exact<{
 }>;
 
 
-export type AgentRunDeltaSubscription = { __typename?: 'RootSubscriptionType', agentRunDelta?: { __typename?: 'AgentRunDelta', delta?: Delta | null, payload?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null } | null };
+export type AgentRunDeltaSubscription = { __typename?: 'RootSubscriptionType', agentRunDelta?: { __typename?: 'AgentRunDelta', delta?: Delta | null, payload?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null } | null };
 
 export type AgentRunPodLogsQueryVariables = Exact<{
   runId: Scalars['ID']['input'];
@@ -13376,15 +13528,15 @@ export type DeleteMcpServerMutationVariables = Exact<{
 
 export type DeleteMcpServerMutation = { __typename?: 'RootMutationType', deleteMcpServer?: { __typename?: 'McpServer', id: string } | null };
 
-export type SentinelFragment = { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null };
+export type SentinelFragment = { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null };
 
-export type SentinelCheckFragment = { __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null };
+export type SentinelCheckFragment = { __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null };
 
-export type SentinelCheckConfigurationFragment = { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null };
+export type SentinelCheckConfigurationFragment = { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null };
 
 export type SentinelRunTinyFragment = { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null };
 
-export type SentinelRunFragment = { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null } | null> | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null, sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null } | null } | null };
+export type SentinelRunFragment = { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null } | null> | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null, sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null } | null } | null };
 
 export type SentinelRunResultFragment = { __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null };
 
@@ -13402,7 +13554,7 @@ export type SentinelsQueryVariables = Exact<{
 }>;
 
 
-export type SentinelsQuery = { __typename?: 'RootQueryType', sentinels?: { __typename?: 'SentinelConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'SentinelEdge', node?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null } | null } | null> | null } | null };
+export type SentinelsQuery = { __typename?: 'RootQueryType', sentinels?: { __typename?: 'SentinelConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'SentinelEdge', node?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null } | null } | null> | null } | null };
 
 export type SentinelQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -13410,7 +13562,7 @@ export type SentinelQueryVariables = Exact<{
 }>;
 
 
-export type SentinelQuery = { __typename?: 'RootQueryType', sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null } | null };
+export type SentinelQuery = { __typename?: 'RootQueryType', sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, status?: SentinelRunStatus | null, lastRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null } | null };
 
 export type SentinelRunsQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -13427,7 +13579,7 @@ export type SentinelRunQueryVariables = Exact<{
 }>;
 
 
-export type SentinelRunQuery = { __typename?: 'RootQueryType', sentinelRun?: { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null } | null> | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null, sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null } | null } | null } | null };
+export type SentinelRunQuery = { __typename?: 'RootQueryType', sentinelRun?: { __typename?: 'SentinelRun', id: string, status: SentinelRunStatus, insertedAt?: string | null, completedAt?: string | null, results?: Array<{ __typename?: 'SentinelRunResult', name?: string | null, reason?: string | null, status: SentinelRunStatus, successfulCount?: number | null, failedCount?: number | null, jobCount?: number | null } | null> | null, checks?: Array<{ __typename?: 'SentinelCheck', name: string, type: SentinelCheckType, ruleFile?: string | null, configuration?: { __typename?: 'SentinelCheckConfiguration', log?: { __typename?: 'SentinelCheckLogConfiguration', namespaces?: Array<string | null> | null, query: string, clusterId?: string | null, duration: string, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null, kubernetes?: { __typename?: 'SentinelCheckKubernetesConfiguration', group?: string | null, version: string, kind: string, name: string, namespace?: string | null } | null, integrationTest?: { __typename?: 'SentinelCheckIntegrationTestConfiguration', distro?: ClusterDistro | null, format: SentinelRunJobFormat, tags?: Record<string, unknown> | null, job?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null } | null } | null } | null> | null, sentinel?: { __typename?: 'Sentinel', id: string, name: string, description?: string | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null } | null } | null } | null };
 
 export type SentinelStatisticsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -16295,6 +16447,7 @@ export const AgentRunTinyFragmentDoc = gql`
   runtime {
     id
     name
+    type
   }
   repository
   branch
@@ -17166,6 +17319,7 @@ export const SentinelCheckConfigurationFragmentDoc = gql`
     namespaces
     query
     clusterId
+    duration
     facets {
       ...LogFacet
     }

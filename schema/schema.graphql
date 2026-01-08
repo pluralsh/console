@@ -229,6 +229,8 @@ type RootQueryType {
 
   kubernetesVersionInfo(distro: ClusterDistro): [KubernetesVersionInfo]
 
+  kubernetesChangelog(version: String!): KubernetesChangelog
+
   serviceDeployments(
     after: String
 
@@ -293,6 +295,8 @@ type RootQueryType {
 
   "Fetches the manifests from cache once the agent has given us them, will be null otherwise"
   fetchManifests(id: ID!): [String]
+
+  serviceTarball(id: ID!): [ServiceFile]
 
   pipelines(after: String, first: Int, before: String, last: Int, q: String, projectId: ID): PipelineConnection
 
@@ -448,6 +452,8 @@ type RootQueryType {
 
   agentRuns(after: String, first: Int, before: String, last: Int, runtimeId: ID): AgentRunConnection
 
+  agentRunRepositories(after: String, first: Int, before: String, last: Int, q: String): AgentRunRepositoryConnection
+
   agentRuntime(id: ID, name: String): AgentRuntime
 
   agentRun(id: ID!): AgentRun
@@ -579,9 +585,21 @@ type RootMutationType {
 
   deleteRole(id: ID!): Role
 
-  createAccessToken(scopes: [ScopeAttributes]): AccessToken
+  createAccessToken(
+    scopes: [ScopeAttributes]
 
-  createServiceAccountToken(id: ID!, scopes: [ScopeAttributes]): AccessToken
+    "the ttl of the access token, e.g. 1h, 1d, 1w"
+    expiry: String
+  ): AccessToken
+
+  createServiceAccountToken(
+    id: ID!
+
+    scopes: [ScopeAttributes]
+
+    "the ttl of the access token, e.g. 1h, 1d, 1w"
+    expiry: String
+  ): AccessToken
 
   deleteAccessToken(id: ID, token: String): AccessToken
 
@@ -1687,6 +1705,21 @@ type AgentMessageTool {
   output: String
 }
 
+"A repository that has been used by an agent run in the past, useful for typeaheads and dropdowns"
+type AgentRunRepository {
+  id: ID!
+
+  "the url of the repository"
+  url: String!
+
+  "the last time the repository was used"
+  lastUsedAt: DateTime
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type AgentRuntimeConnection {
   pageInfo: PageInfo!
   edges: [AgentRuntimeEdge]
@@ -1695,6 +1728,11 @@ type AgentRuntimeConnection {
 type AgentRunConnection {
   pageInfo: PageInfo!
   edges: [AgentRunEdge]
+}
+
+type AgentRunRepositoryConnection {
+  pageInfo: PageInfo!
+  edges: [AgentRunRepositoryEdge]
 }
 
 type AgentMessageDelta {
@@ -1999,6 +2037,9 @@ type SentinelRun {
 
   "the results of the run"
   results: [SentinelRunResult]
+
+  "the errors of the run"
+  errors: [ServiceError]
 
   "the checks that were run"
   checks: [SentinelCheck]
@@ -3435,6 +3476,9 @@ input TerraformConfigurationAttributes {
 
   "equivalent to the -refresh flag in terraform"
   refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
 }
 
 input AnsibleConfigurationAttributes {
@@ -3833,6 +3877,9 @@ type TerraformConfiguration {
 
   "equivalent to the -refresh flag in terraform"
   refresh: Boolean
+
+  "whether to auto-approve a plan if there are no changes, preventing a stack from being blocked"
+  approveEmpty: Boolean
 }
 
 type AnsibleConfiguration {
@@ -4544,11 +4591,29 @@ input ViolationAttributes {
 
 input VulnerabilityReportAttributes {
   artifactUrl: String
+
+  "the Git URL of the codebase defining this artifact"
+  artifactRepoUrl: String
+
+  "the language the artifact is written in"
+  artifactLanguage: AgentRunLanguage
+
+  "the language version of the artifact, if applicable"
+  artifactLanguageVersion: String
+
+  "the agent runtime to use with this vulnerability report"
+  agentRuntime: String
+
   os: VulnOsAttributes
+
   summary: VulnSummaryAttributes
+
   artifact: VulnArtifactAttributes
+
   vulnerabilities: [VulnerabilityAttributes]
+
   services: [ServiceVulnAttributes]
+
   namespaces: [NamespaceVulnAttributes]
 }
 
@@ -4582,6 +4647,7 @@ input VulnerabilityAttributes {
   severity: VulnSeverity
   score: Float
   repositoryUrl: String
+  agentRuntime: String
   title: String
   description: String
   cvssSource: String
@@ -4699,15 +4765,39 @@ type Violation {
 
 type VulnerabilityReport {
   id: ID!
+
+  "the URL of the artifact"
   artifactUrl: String
+
+  "the Git URL of the codebase defining this artifact"
+  artifactRepoUrl: String
+
+  "the language the artifact is written in"
+  artifactLanguage: AgentRunLanguage
+
+  "the language version of the artifact, if applicable"
+  artifactLanguageVersion: String
+
+  "the agent runtime to use with this vulnerability report"
+  agentRuntime: String
+
   os: VulnOs
+
   summary: VulnSummary
+
   artifact: VulnArtifact
+
+  "the grade of the vulnerability report"
   grade: VulnReportGrade
+
   vulnerabilities: [Vulnerability]
+
   services: [ServiceVuln]
+
   namespaces: [NamespaceVuln]
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
@@ -4740,6 +4830,7 @@ type Vulnerability {
   fixedVersion: String
   installedVersion: String
   severity: VulnSeverity
+  agentRuntime: String
   score: Float
   title: String
   description: String
@@ -6559,6 +6650,12 @@ type ResourceEdge {
   to: String!
 }
 
+"a file in a service's fully realized gitops tarball"
+type ServiceFile {
+  path: String!
+  content: String!
+}
+
 type ServiceDeploymentConnection {
   pageInfo: PageInfo!
   edges: [ServiceDeploymentEdge]
@@ -7435,6 +7532,20 @@ type Cluster {
 
   auditLogs(after: String, first: Int, before: String, last: Int): ClusterAuditLogConnection
 
+  "lists all deprecated custom resources for this cluster with optional filtering"
+  deprecatedCrds(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "a search query to filter on group, kind, namespace or name"
+    q: String
+  ): DeprecatedCustomResourceConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -7748,11 +7859,28 @@ type AddonVersion {
   "the version of the helm chart to install for this version"
   chartVersion: String
 
+  "a summary of what changed in this version of the addon"
+  summary: AddonVersionSummary
+
   "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
   releaseUrl(version: String): String
 
   "checks if this is blocking a specific kubernetes upgrade"
   blocking(kubeVersion: String!): Boolean
+}
+
+type AddonVersionSummary {
+  "a summary of any helm changes required for this version"
+  helmChanges: String
+
+  "a summary of any chart updates involved in updating to this version"
+  chartUpdates: [String]
+
+  "a summary of any features added in this version"
+  features: [String]
+
+  "a summary of any application-level breaking changes in this version"
+  breakingChanges: [String]
 }
 
 type UpgradePlanSummary {
@@ -8182,6 +8310,33 @@ type KubernetesVersionInfo {
   extended: Boolean
 }
 
+"the changelog for a given kubernetes version"
+type KubernetesChangelog {
+  "the kubernetes version"
+  version: String
+
+  "the major changes in this version"
+  majorChanges: [String]
+
+  "the breaking changes in this version"
+  breakingChanges: [String]
+
+  "the deprecations in this version"
+  deprecations: [String]
+
+  "the removals in this version"
+  removals: [String]
+
+  "the features in this version"
+  features: [String]
+
+  "the bug fixes in this version"
+  bugFixes: [String]
+
+  "the api updates in this version"
+  apiUpdates: [String]
+}
+
 type ClusterConnection {
   pageInfo: PageInfo!
   edges: [ClusterEdge]
@@ -8240,6 +8395,11 @@ type ClusterIsoImageConnection {
 type ProjectUsageHistoryConnection {
   pageInfo: PageInfo!
   edges: [ProjectUsageHistoryEdge]
+}
+
+type DeprecatedCustomResourceConnection {
+  pageInfo: PageInfo!
+  edges: [DeprecatedCustomResourceEdge]
 }
 
 enum AuthMethod {
@@ -8484,6 +8644,7 @@ input ScmConnectionAttributes {
 "Configuration for http proxy usage in connections to Git or SCM providers"
 input HttpProxyAttributes {
   url: String!
+  noproxy: String
 }
 
 "Requirements to perform Github App authentication"
@@ -8531,6 +8692,9 @@ input PrAutomationAttributes {
   patch: Boolean
 
   branchPrefix: String
+
+  "a proxy to use for external vendoring"
+  proxy: HttpProxyAttributes
 
   updates: PrAutomationUpdateSpecAttributes
 
@@ -9110,6 +9274,9 @@ type PrAutomation {
 
   deletes: PrDeleteSpec
 
+  "a proxy to use for git requests"
+  proxy: HttpProxyConfiguration
+
   "software vendoring logic to perform in this PR"
   vendor: PrVendorSpec
 
@@ -9520,6 +9687,7 @@ type ObserverPipelineAction {
 "Configuration for http proxy usage in connections to Git or SCM providers"
 type HttpProxyConfiguration {
   url: String!
+  noproxy: String
 }
 
 "A catalog is an organized collection of PR Automations used for permissioning and discovery"
@@ -9741,6 +9909,12 @@ input ChatThreadAttributes {
   "the flow this thread was created in"
   flowId: ID
 
+  "the service this thread was created for"
+  serviceId: ID
+
+  "the research this thread was created for"
+  researchId: ID
+
   "the settings for this thread"
   settings: ChatThreadSettingsAttributes
 
@@ -9857,11 +10031,15 @@ type ChatThread {
 
   flow: Flow
 
+  service: ServiceDeployment
+
   user: User
 
   insight: AiInsight
 
   session: AgentSession
+
+  research: InfraResearch
 
   "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
   tools: [McpServerTool]
@@ -11658,6 +11836,11 @@ type GitRepositoryEdge {
   cursor: String
 }
 
+type DeprecatedCustomResourceEdge {
+  node: DeprecatedCustomResource
+  cursor: String
+}
+
 type ProjectUsageHistoryEdge {
   node: ProjectUsageHistory
   cursor: String
@@ -11895,6 +12078,11 @@ type SentinelRunEdge {
 
 type SentinelEdge {
   node: Sentinel
+  cursor: String
+}
+
+type AgentRunRepositoryEdge {
+  node: AgentRunRepository
   cursor: String
 }
 

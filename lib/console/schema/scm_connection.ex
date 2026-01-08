@@ -36,7 +36,8 @@ defmodule Console.Schema.ScmConnection do
     end
 
     embeds_one :proxy, Proxy, on_replace: :update do
-      field :url, :string
+      field :url,     :string
+      field :noproxy, :string
     end
 
     field :signing_private_key, EncryptedString
@@ -81,7 +82,7 @@ defmodule Console.Schema.ScmConnection do
 
   def proxy_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url)a)
+    |> cast(attrs, ~w(url noproxy)a)
     |> validate_required(:url)
   end
 

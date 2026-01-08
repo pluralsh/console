@@ -253,7 +253,9 @@ _Appears in:_
 | `toolModelId` _string_ | ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
 | `region` _string_ | Region is the AWS region the model is hosted in |  | Required: \{\} <br /> |
-| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Optional: \{\} <br /> |
+| `awsAccessKeyId` _string_ | AWS Access Key ID to use for authentication |  | Optional: \{\} <br /> |
+| `awsSecretAccessKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | AWS Secret Access Key to use for authentication |  | Optional: \{\} <br /> |
 
 
 #### Binding
@@ -1890,11 +1892,13 @@ _Appears in:_
 
 
 _Appears in:_
+- [PrAutomationSpec](#prautomationspec)
 - [ScmConnectionSpec](#scmconnectionspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `url` _string_ | The url of your HTTP proxy. |  | Required: \{\} <br /> |
+| `noproxy` _string_ | The comma-separated list of hosts that should not be proxied, will behave equivalently to a NOPROXY env var. |  | Optional: \{\} <br /> |
 
 
 #### InfrastructureStack
@@ -2235,7 +2239,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name specifies the name for this notification router.<br />If not provided, the name from the resource metadata will be used. |  | Optional: \{\} <br /> |
-| `events` _string array_ | Events define the list of event types this router should subscribe to.<br />Use "*" to subscribe to all events, or specify specific event names to filter<br />for particular types of notifications. Common events include deployment updates,<br />service health changes, pipeline status changes, and security alerts. |  | Optional: \{\} <br /> |
+| `events` _string array_ | Events define the list of event types this router should subscribe to.<br />Use "*" to subscribe to all events, or specify specific event names to filter<br />for particular types of notifications.<br />Event names are: alert.fired, alert.resolved, service.update, stack.run, stack.pending, pipeline.update, pr.close, service.insight, cluster.insight, stack.insight, cluster.insight, service.insight, stack.insight, alert.insight |  | Optional: \{\} <br /> |
 | `filters` _[RouterFilters](#routerfilters) array_ | Filters define criteria for selectively routing events.<br />These filters control which events trigger notifications, allowing teams<br />to focus on relevant events. Multiple filters can be combined. |  | Optional: \{\} <br /> |
 | `sinks` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Sinks specify the notification destinations where filtered events should be delivered.<br />Each sink represents a configured notification channel such as Slack webhooks,<br />Microsoft Teams channels, or in-app notification systems. Events matching the<br />router's criteria will be formatted and sent to all configured sinks.<br />It is a reference to the NotificationSink resource. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
@@ -3395,6 +3399,7 @@ _Appears in:_
 | `lua` _[PrAutomationLuaConfiguration](#prautomationluaconfiguration)_ | Lua specification to source lua scripts to preprocess the PR automation. |  | Optional: \{\} <br /> |
 | `vendor` _[PrAutomationVendorConfiguration](#prautomationvendorconfiguration)_ | Software vendoring logic to perform in this PR |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
+| `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Configures usage of an HTTP proxy for all requests involving this PR automation, usually needed for the vendoring to external repositories. |  | Optional: \{\} <br /> |
 | `labels` _string array_ | Labels to apply to all created PRs from this pr automation |  | Optional: \{\} <br /> |
 
 
@@ -4087,6 +4092,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `email` _string_ | Email address that will be bound to this service account for identification<br />and authentication purposes. This email serves as the unique identifier<br />for the service account within the Console API. |  | Required: \{\} <br />Type: string <br /> |
 | `scopes` _[ServiceAccountScope](#serviceaccountscope) array_ | Scopes define the access boundaries for this service account, controlling<br />which Console APIs and resources it can interact with. Each scope can restrict<br />access to specific API endpoints and resource identifiers, enabling fine-grained<br />permission control for automated processes. |  | Optional: \{\} <br /> |
+| `tokenExpiry` _string_ | TokenExpiry is the TTL of the access token, e.g. 1h, 1d, 1w |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | TokenSecretRef references a Kubernetes secret that should contain the<br />authentication token for this service account. This enables secure storage<br />and management of credentials within the cluster. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
@@ -4295,7 +4301,7 @@ _Appears in:_
 | `helm` _[ServiceHelm](#servicehelm)_ | Helm configuration for deploying Helm charts, including values and repository settings. |  | Optional: \{\} <br /> |
 | `syncConfig` _[SyncConfigAttributes](#syncconfigattributes)_ | SyncConfig contains advanced configuration for how manifests are synchronized to the cluster. |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository CRD containing the service source code. |  | Optional: \{\} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this service will be deployed. Leave it as an empty struct to use the cluster field instead. |  | Required: \{\} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this service will be deployed. Leave it as an empty struct to use the cluster field instead. |  | Optional: \{\} <br /> |
 | `cluster` _string_ | Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead. |  | Optional: \{\} <br /> |
 | `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef is a secret reference containing service configuration for templating. |  | Optional: \{\} <br /> |
 | `flowRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | FlowRef provides contextual linkage to a broader application Flow this service belongs within. |  | Optional: \{\} <br /> |
@@ -4708,6 +4714,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `parallelism` _integer_ | Parallelism is the number of concurrent operations to run,<br />equivalent to the -parallelism flag in Terraform. |  | Optional: \{\} <br /> |
 | `refresh` _boolean_ | Refresh is whether to refresh the state of the stack,<br />equivalent to the -refresh flag in Terraform. |  | Optional: \{\} <br /> |
+| `approveEmpty` _boolean_ | ApproveEmpty is whether to auto-approve a plan if there are no changes, preventing a stack from being blocked. |  | Optional: \{\} <br /> |
 
 
 #### Tools

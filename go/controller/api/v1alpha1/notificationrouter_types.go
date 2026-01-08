@@ -91,8 +91,9 @@ type NotificationRouterSpec struct {
 
 	// Events define the list of event types this router should subscribe to.
 	// Use "*" to subscribe to all events, or specify specific event names to filter
-	// for particular types of notifications. Common events include deployment updates,
-	// service health changes, pipeline status changes, and security alerts.
+	// for particular types of notifications.
+	//
+	// Event names are: alert.fired, alert.resolved, service.update, stack.run, stack.pending, pipeline.update, pr.close, service.insight, cluster.insight, stack.insight, cluster.insight, service.insight, stack.insight, alert.insight
 	// +kubebuilder:validation:Optional
 	Events []string `json:"events,omitempty"`
 

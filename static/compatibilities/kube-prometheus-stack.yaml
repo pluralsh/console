@@ -3,11 +3,175 @@ git_url: https://github.com/prometheus-community/helm-charts
 release_url: https://github.com/prometheus-community/helm-charts/releases/tag/kube-prometheus-stack-{vsn}
 readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/README.md
 helm_repository_url: https://prometheus-community.github.io/helm-charts
+chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 80.10.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Updated etcd image digest to `65b1be4` (chart maintenance/renovate-driven
+        change)., Updated kube-prometheus-stack chart dependencies (non-major updates)
+        via Renovate.]
+    features: []
+    breaking_changes: []
+  chart_version: 80.10.0
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
+- version: 80.9.2
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Grafana Operator YAML dashboards: add `folderRef` and `folderUID`
+        fields (80.8.0).', Dependency bumps / non-major dependency updates via Renovate
+        (80.9.2).]
+    features: ['Grafana Operator dashboard manifests now support `folderRef`/`folderUID`,
+        enabling dashboards to be organized into specific Grafana folders when using
+        the Grafana Operator.']
+    breaking_changes: []
+  chart_version: 80.9.2
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
+- version: 80.8.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Grafana Operator YAML dashboards now include `folderRef` and
+        `folderUID` fields (PR #6428).', "No other chart template/value changes are\
+        \ mentioned in the 80.7.0\u219280.8.0 release notes; 80.7.0 was primarily\
+        \ CI/dependency non-major updates."]
+    features: ['Grafana Operator dashboard resources can now set/retain the target
+        folder via `folderRef`/`folderUID`, improving organization and reducing reliance
+        on default folder placement.']
+    breaking_changes: []
+  chart_version: 80.8.0
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
+    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
+- version: 80.7.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Dependency updates only (non-major) for kube-prometheus-stack
+        in 80.7.0 (PR #6437).', 'CI-only change: super-linter action bumped to v8.3.2
+        (PR #6436); no runtime impact.']
+    features: []
+    breaking_changes: []
+  chart_version: 80.7.0
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
+    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
+- version: 80.6.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Chart release 80.6.0 only includes non-major dependency updates
+        via Renovate (PR #6426).']
+    features: [No user-facing features called out in the release notes; this is a
+        dependency refresh.]
+    breaking_changes: [No breaking changes mentioned in the provided release notes.]
+  chart_version: 80.6.0
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
+    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
+- version: 80.5.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["Bumps the kube-prometheus-stack chart\u2019s dependencies with\
+        \ non-major updates (Renovate PR #6425). No chart template/logic changes called\
+        \ out in the release notes beyond dependency updates."]
+    features: [No new end-user features are mentioned in the 80.5.0 chart release
+        notes; this appears to be a dependency refresh.]
+    breaking_changes: [No breaking changes are mentioned in the 80.5.0 chart release
+        notes.]
+  chart_version: 80.5.0
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
+    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
+- version: 80.4.2
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- No Helm values changes are called out for the **80.4.1 \u2192\
+      \ 80.4.2** patch upgrade.\n- (Context only) If you are upgrading from much older\
+      \ versions into the 80.x line, ensure you followed the 79\u219280 notes: Prometheus\
+      \ Operator is **v0.87.0** in 80.x and CRDs must be upgraded (either via `crds.upgradeJob.enabled`\
+      \ or manual `kubectl apply --server-side` of the CRDs)."
+    chart_updates: ['**80.4.1**: Allow unsetting the Prometheus service reloader port
+        (chart template change).', '**80.4.2**: Dependency non-major updates for kube-prometheus-stack
+        (renovate-driven).', "**80.4.2**: CI-only change (super-linter action bump)\
+        \ \u2014 no runtime impact."]
+    features: ["Prometheus Service: you can now unset/omit the config-reloader port\
+        \ on the Prometheus Service (useful if you don\u2019t want that port exposed/allocated)."]
+    breaking_changes: ["None mentioned for 80.4.1 \u2192 80.4.2; this is a patch-level\
+        \ release with CI and dependency non-major updates."]
+  chart_version: 80.4.2
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
+    'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.30.0', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.8.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 80.4.1
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "### Helm values / upgrade actions (80.2.0 \u2192 80.4.1)\n\n- **No\
+      \ explicit value renames/deprecations called out** in the provided changelog\
+      \ entries for 80.2.0\u201380.4.1.\n- **CRDs/Operator note (applies to all 80.x\
+      \ upgrades):** 80.x upgrades Prometheus Operator to **v0.87.0**. Helm does not\
+      \ upgrade CRDs automatically, so you must either:\n  - enable the chart\u2019\
+      s CRD upgrade job: `crds.upgradeJob.enabled=true`, **or**\n  - manually apply\
+      \ the CRDs *before* `helm upgrade` using the upstream manifests (v0.87.0):\n\
+      \n```bash\nkubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml\n\
+      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml\n\
+      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml\n\
+      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml\n\
+      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml\n\
+      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml\n\
+      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml\n\
+      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml\n\
+      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml\n\
+      kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml\n\
+      ```\n"
+    chart_updates: [80.x line uses Prometheus Operator v0.87.0 (drives the CRD update
+        requirement)., '80.2.0: kube-state-metrics Helm subchart updated to major
+        version v7 (review if you override kube-state-metrics values heavily).', '80.4.1:
+        allows unsetting the **prometheus service reloader port** (minor chart behavior/templating
+        change).']
+    features: [kube-state-metrics subchart bumped to v7 (potentially newer kube-state-metrics
+        behavior and defaults)., "Option to unset the reloader port on the Prometheus\
+        \ Service (helps when you don\u2019t want that port exposed/created)."]
+    breaking_changes: ["No breaking changes were explicitly listed for 80.2.0\u2013\
+        80.4.1 in the provided notes. The main operational risk is **CRD mismatch**\
+        \ if you upgrade the operator to v0.87.0 without upgrading the CRDs first."]
   chart_version: 80.4.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.3',
     'quay.io/kiwigrid/k8s-sidecar:2.1.2', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
@@ -17,15 +181,54 @@ versions:
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "## Helm values / upgrade actions (79.12.0 \u2192 80.2.0)\n\n- **Prometheus\
+      \ Operator CRDs must be upgraded to v0.87.0 before the Helm upgrade** (Helm\
+      \ does not upgrade CRDs automatically).\n  - Option A (recommended if you want\
+      \ the chart to handle it): enable the CRD upgrade job:\n    ```yaml\n    crds:\n\
+      \      upgradeJob:\n        enabled: true\n    ```\n  - Option B (traditional/manual):\
+      \ apply the v0.87.0 CRDs server-side before `helm upgrade`:\n    ```bash\n \
+      \   kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagerconfigs.yaml\n\
+      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_alertmanagers.yaml\n\
+      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_podmonitors.yaml\n\
+      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_probes.yaml\n\
+      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusagents.yaml\n\
+      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheuses.yaml\n\
+      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_prometheusrules.yaml\n\
+      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_scrapeconfigs.yaml\n\
+      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml\n\
+      \    kubectl apply --server-side -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.87.0/example/prometheus-operator-crd/monitoring.coreos.com_thanosrulers.yaml\n\
+      \    ```\n\n- **No other values changes are called out in the provided 79.x\
+      \ \u2192 80.x upgrade notes.**\n"
+    chart_updates: [Prometheus Operator bumped to **v0.87.0** in the 80.x line (from
+        the 79.x line)., 'Subchart dependency update in 80.2.0: **kube-state-metrics
+        Helm release bumped to v7**.']
+    features: [Optional **CRD upgrade job** (`crds.upgradeJob.enabled`) remains available
+        as an alternative to manually applying CRDs during upgrades., Updated bundled
+        components via dependency bumps (notably kube-state-metrics chart v7 in 80.2.0).]
+    breaking_changes: ['**CRD version change with Prometheus Operator v0.87.0**: you
+        must upgrade the `monitoring.coreos.com` CRDs before upgrading the chart,
+        otherwise the operator may not start or reconcile resources correctly.', "Potential\
+        \ behavior changes from **kube-state-metrics chart v7** (dependency bump);\
+        \ if you have custom kube-state-metrics values, review that subchart\u2019\
+        s changelog for any renamed/removed settings."]
   chart_version: 80.2.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'quay.io/kiwigrid/k8s-sidecar:2.1.2',
     'quay.io/prometheus-operator/prometheus-operator:v0.87.0', 'quay.io/prometheus/alertmanager:v0.29.0',
     'quay.io/prometheus/node-exporter:v1.10.2', 'quay.io/prometheus/prometheus:v3.8.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.5', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 79.12.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['kube-prometheus-stack: updated etcd image digest to `cf5a571`
+        (PR #6381).', 'kube-prometheus-stack 79.8.2: bumped `prometheus-node-exporter`
+        chart dependency to `v4.49.2` (PR #6358).']
+    features: []
+    breaking_changes: []
   chart_version: 79.12.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'quay.io/kiwigrid/k8s-sidecar:2.1.2',
     'quay.io/prometheus-operator/prometheus-operator:v0.86.2', 'quay.io/prometheus/alertmanager:v0.29.0',
@@ -35,6 +238,7 @@ versions:
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 79.8.2
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.10',
     'quay.io/prometheus-operator/prometheus-operator:v0.86.2', 'quay.io/prometheus/alertmanager:v0.29.0',
@@ -44,65 +248,144 @@ versions:
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  summary: null
 - version: 78.5.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["No chart-specific changes are called out in the provided release\
+        \ notes for either endpoint version; both releases are described only as \u201C\
+        Update kube-prometheus-stack dependency non-major updates\u201D.", Plan for
+        routine dependency bumps across subcharts/images/dashboards/rules; validate
+        rendered manifests diff and run a canary upgrade in a non-prod cluster.]
+    features: [No explicit new features are listed in the provided notes; changes
+        appear to be dependency non-major updates only.]
+    breaking_changes: [No breaking changes are mentioned in the provided notes; treat
+        as low-risk but still verify CRDs and component compatibility after dependency
+        bumps.]
   chart_version: 78.5.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.2.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.10',
     'quay.io/prometheus-operator/prometheus-operator:v0.86.1', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.7.2',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 77.14.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["Both 76.5.1 and 77.14.0 release notes only mention \u201CUpdate\
+        \ kube-prometheus-stack dependency non-major updates\u201D via Renovate; no\
+        \ explicit chart template/resource changes are called out in the provided\
+        \ notes."]
+    features: [No new user-facing features are described in the provided release notes;
+        changes are limited to non-major dependency updates.]
+    breaking_changes: [No breaking changes are mentioned in the provided release notes.]
   chart_version: 77.14.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.1.1', 'quay.io/kiwigrid/k8s-sidecar:1.30.10',
     'quay.io/prometheus-operator/prometheus-operator:v0.85.0', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.6.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 76.5.1
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['75.18.1: Fixes the `prometheus.additionalScrapeConfigs` example
+        in chart documentation/templates (no functional behavior change unless you
+        were copying the broken example).', "76.5.1: Updates kube-prometheus-stack\
+        \ chart dependencies with non-major version bumps (via Renovate). This can\
+        \ change the rendered manifests due to upstream chart changes even if this\
+        \ chart\u2019s own values schema is unchanged."]
+    features: []
+    breaking_changes: []
   chart_version: 76.5.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.1.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.3',
     'quay.io/prometheus-operator/prometheus-operator:v0.84.1', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.5.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
 - version: 75.18.1
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 75.18.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.1.0', 'quay.io/kiwigrid/k8s-sidecar:1.30.3',
     'quay.io/prometheus-operator/prometheus-operator:v0.83.0', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.5.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
 - version: 74.2.2
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Chart includes maintenance-level updates: updated etcd image
+        digest; refreshed kube-prometheus-stack dependency versions (non-major updates);
+        CI/packaging change to bump Chart.yaml when only subdirectories change.',
+      'From 73.2.3: changed default behavior to ignore EROFS (read-only filesystem)
+        errors by default (likely affects node-exporter/collector error handling).']
+    features: [Improved robustness by ignoring EROFS errors by default (reduces noisy
+        scrape/collector errors on read-only filesystems).]
+    breaking_changes: []
   chart_version: 74.2.2
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.0.1', 'quay.io/kiwigrid/k8s-sidecar:1.30.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.83.0', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.4.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
 - version: 73.2.3
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **Admission webhook match conditions**: Chart now supports setting\
+      \ `matchConditions` for `admissionWebhooks` objects (added in 72.9.1). If you\
+      \ need fine-grained webhook matching, add the corresponding values under the\
+      \ chart\u2019s `admissionWebhooks` configuration.\n- **Node-exporter filesystem\
+      \ collector tweak**: Chart now **ignores `erofs` by default** (73.2.3). If you\
+      \ previously relied on `erofs` metrics, you may need to override the node-exporter\
+      \ filesystem ignore/mount filtering values to re-include it.\n"
+    chart_updates: [Added ability to specify `matchConditions` for admission webhooks
+        objects., Adjusted node-exporter defaults to ignore `erofs` filesystem type
+        by default (bugfix/defaults change).]
+    features: ['Configurable `matchConditions` for admission webhooks, enabling more
+        precise selection of which API requests the webhook should evaluate.']
+    breaking_changes: ['Potential behavior change: node-exporter will no longer report
+        filesystem metrics for `erofs` by default; environments using EROFS (e.g.,
+        some container/image setups) may see those metrics disappear unless you override
+        the ignore settings.']
   chart_version: 73.2.3
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.0.1', 'quay.io/kiwigrid/k8s-sidecar:1.30.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.82.2', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.4.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
 - version: 72.9.1
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **New optional value for webhooks:** You can now specify `matchConditions`\
+      \ for `admissionWebhooks` objects (added in chart **72.9.1**). If you customize\
+      \ the chart\u2019s admission webhooks, review/extend your values to include\
+      \ this field where needed.\n\n_No other Helm values changes are called out in\
+      \ the provided notes._"
+    chart_updates: ['Chart **72.9.1**: adds support for configuring `matchConditions`
+        on admission webhook objects.', 'Chart **71.2.0**: CI tooling change (GitHub
+        action version bump) and routine non-major dependency updates (no functional
+        chart behavior called out).']
+    features: ['Ability to set `matchConditions` for admission webhooks, allowing
+        more granular control over when the webhook is invoked.']
+    breaking_changes: []
   chart_version: 72.9.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.0.0-security-01',
     'quay.io/kiwigrid/k8s-sidecar:1.30.0', 'quay.io/prometheus-operator/prometheus-operator:v0.82.2',
@@ -110,50 +393,93 @@ versions:
     'quay.io/prometheus/prometheus:v3.4.1', 'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.3',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
 - version: 71.2.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["The 70.10.0 \u2192 71.2.0 chart bump is primarily dependency\
+        \ refreshes (non\u2011major) and CI workflow updates; no functional chart\
+        \ template changes are called out in the provided release snippets."]
+    features: [No user-facing features are described in the provided 70.10.0 and 71.2.0
+        release notes; changes are dependency/automation related.]
+    breaking_changes: [No breaking changes are mentioned in the provided release notes.]
   chart_version: 71.2.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.6.1', 'quay.io/kiwigrid/k8s-sidecar:1.30.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.82.0', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.3.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
 - version: 70.10.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [No chart template/value changes called out in the provided release
+        notes for this version jump., 70.10.0 notes indicate CI maintenance (actions/setup-python
+        bump) and routine dependency non-major updates via Renovate., 69.8.2 notes
+        indicate an Alertmanager image/version bump to 0.28.1.]
+    features: [Alertmanager version updated to 0.28.1 (from the 69.8.2 notes in your
+        snippets)., Ongoing dependency refreshes in 70.10.0 (non-major) which may
+        include patch/minor updates of subcharts/images.]
+    breaking_changes: []
   chart_version: 70.10.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.6.1', 'quay.io/kiwigrid/k8s-sidecar:1.30.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.81.0', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.1', 'quay.io/prometheus/prometheus:v3.3.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.2', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
 - version: 69.8.2
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Regenerated kube-prometheus mixins as part of the chart content
+        (dashboards/rules) to fix the mixin update script and ensure generated artifacts
+        are up to date (68.5.0)., Bumped bundled Alertmanager version to v0.28.1 (69.8.2).]
+    features: [Alertmanager updated to v0.28.1 as shipped with the chart (may include
+        upstream bugfixes and minor improvements from Alertmanager).]
+    breaking_changes: []
   chart_version: 69.8.2
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.5.2', 'quay.io/kiwigrid/k8s-sidecar:1.30.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.80.1', 'quay.io/prometheus/alertmanager:v0.28.1',
     'quay.io/prometheus/node-exporter:v1.9.0', 'quay.io/prometheus/prometheus:v3.2.1',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
 - version: 68.5.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['68.5.0: Fix the mixin update/regeneration script and regenerate
+        mixins (dashboards/rules artifacts).', '67.11.0: Add a configurable kubelet
+        scrape flag (new chart option affecting kubelet scraping configuration).']
+    features: [New kubelet scrape flag option added (lets you control how/if kubelet
+        is scraped).]
+    breaking_changes: []
   chart_version: 68.5.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.4.1', 'quay.io/kiwigrid/k8s-sidecar:1.28.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.79.2', 'quay.io/prometheus/alertmanager:v0.28.0',
     'quay.io/prometheus/node-exporter:v1.8.2', 'quay.io/prometheus/prometheus:v3.1.0',
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.5.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0']
 - version: 67.11.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['66.7.1: Chore/maintenance change to the kubelet ServiceMonitor
+        (PR #5061) to improve it (e.g., scraping/labels/endpoints behavior may be
+        adjusted).', '67.11.0: Add a configurable kubelet scrape flag (PR #5136),
+        enabling/disabling kubelet scraping via values without needing to patch templates.']
+    features: [New kubelet scrape flag/option so you can explicitly enable or disable
+        kubelet scraping from the chart values.]
+    breaking_changes: []
   chart_version: 67.11.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.4.0', 'quay.io/kiwigrid/k8s-sidecar:1.28.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.79.2', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -161,10 +487,18 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0']
 - version: 66.7.1
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['65.8.1: Adds more information to the selector fields for `additionalPodMonitors`
+        and `additionalServiceMonitors` (PR #4974).', '66.7.1: Chore/change to improve
+        the kubelet `ServiceMonitor` (PR #5061).']
+    features: ['Richer selector metadata/fields for `additionalPodMonitors` and `additionalServiceMonitors`,
+        which can make targeting and debugging custom monitors clearer.']
+    breaking_changes: []
   chart_version: 66.7.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.4.0', 'quay.io/kiwigrid/k8s-sidecar:1.28.0',
     'quay.io/prometheus-operator/prometheus-operator:v0.79.0', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -172,17 +506,33 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.14.0']
 - version: 65.8.1
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 65.8.1
   images: []
 - version: 64.0.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ["Reverted the prior change that added \u201Cdownward compatibility\u201D\
+        \ for Prometheus CRDs (PR #4883 reverting PR #4818). This means the chart\
+        \ is no longer attempting to accommodate older/newer Prometheus Operator CRD\
+        \ schemas automatically; you must ensure your cluster CRDs match the operator/chart\
+        \ expectations before/when upgrading."]
+    features: ['(From 63.1.0) Added support for configuring `alertmanager.cluster.label`
+        via the chart, enabling better labeling/identification of Alertmanager clusters
+        in HA setups.']
+    breaking_changes: ['Potential CRD compatibility impact due to reverting the Prometheus
+        CRD downward-compatibility logic; if you relied on that behavior for smoother
+        upgrades/downgrades across CRD versions, you may need to manage CRD upgrades
+        explicitly and validate Prometheus Operator/CRD versions during this chart
+        upgrade.']
   chart_version: 64.0.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.2.1', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
     'quay.io/prometheus-operator/prometheus-operator:v0.76.1', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -190,10 +540,26 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
 - version: 63.1.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- No explicit Helm values changes were called out in the provided\
+      \ release notes for 62.7.0 or 63.1.0.\n- New/updated values to consider based\
+      \ on features:\n  - **Prometheus Operator ServiceAccount annotations**: ensure\
+      \ you set/retain `prometheusOperator.serviceAccount.annotations` if you need\
+      \ cloud IAM/workload-identity style bindings.\n  - **Alertmanager cluster label\
+      \ support**: review any new value(s) related to enabling/configuring an Alertmanager\
+      \ `cluster.label` (exact key not shown in the provided notes; confirm against\
+      \ the chart\u2019s `values.yaml` or PR #4877 if you plan to use it)."
+    chart_updates: ['62.7.0: Added the ability to set ServiceAccount annotations for
+        the Prometheus Operator (PR #4820).', '63.1.0: Added support for Alertmanager
+        `cluster.label` (PR #4877).']
+    features: [Ability to add annotations to the Prometheus Operator ServiceAccount
+        (useful for workload identity/IAM bindings)., Support for configuring an Alertmanager
+        `cluster.label` to label cluster identity in Alertmanager setups.]
+    breaking_changes: []
   chart_version: 63.1.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.2.0', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
     'quay.io/prometheus-operator/prometheus-operator:v0.76.1', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -201,10 +567,25 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
 - version: 62.7.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: "- **New option:** You can now set annotations on the Prometheus\
+      \ Operator service account.\n  - Look for/enable a value similar to: `prometheusOperator.serviceAccount.annotations`\
+      \ (name inferred from the release note; verify exact key in `values.yaml` for\
+      \ 62.7.0).\n- **Grafana dependency bump (already present at 61.9.0):** 61.9.0\
+      \ notes mention bumping Grafana chart dependencies to `8.4.*`. If your cluster\
+      \ pins/overrides Grafana chart versions, re-check that your overrides still\
+      \ apply cleanly after upgrading."
+    chart_updates: ['Added ability to set ServiceAccount annotations for the Prometheus
+        Operator (PR #4820).', Grafana chart dependency bumped to 8.4.* (noted in
+        61.9.0).]
+    features: ['Can configure annotations on the Prometheus Operator ServiceAccount
+        (useful for IAM roles for service accounts, workload identity, custom auditing
+        labels, etc.).']
+    breaking_changes: []
   chart_version: 62.7.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.2.0', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
     'quay.io/prometheus-operator/prometheus-operator:v0.76.1', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -212,10 +593,19 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
 - version: 61.9.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Grafana dependency chart bumped to the 8.4.* series (as pulled
+        in by kube-prometheus-stack chart)., Grafana subchart/templates updated to
+        support dual-stack clusters (IPv4/IPv6) in Grafana-related resources.]
+    features: [Grafana components now support dual-stack Kubernetes clusters (IPv4/IPv6)
+        via updated chart handling., 'Grafana dependency updated to 8.4.*, bringing
+        in upstream fixes and improvements from the Grafana Helm chart.']
+    breaking_changes: []
   chart_version: 61.9.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.1.3', 'quay.io/kiwigrid/k8s-sidecar:1.27.4',
     'quay.io/prometheus-operator/prometheus-operator:v0.75.2', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -223,10 +613,29 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.13.0']
 - version: 60.5.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- **New value added:** Prometheus Operator now supports configuring
+      **PVC claim retention** via a new field exposed by the chart (from PR #4570).
+      If you manage Prometheus/Alertmanager volumes, review your values for the new
+      retention/cleanup behavior and set it explicitly to match your desired lifecycle.
+
+      - **Grafana in dual-stack clusters:** Chart adds support for **dual-stack (IPv4/IPv6)
+      clusters** in Grafana-related configuration (PR #4638). If you run dual-stack,
+      validate/adjust Grafana service/network settings accordingly; otherwise no values
+      change is typically required.'
+    chart_updates: [Prometheus Operator integration updated to expose a PVC claim
+        retention configuration option (adds corresponding chart templating/values
+        wiring)., Grafana templates updated to better support dual-stack Kubernetes
+        clusters.]
+    features: [Ability to configure PVC claim retention behavior through Prometheus
+        Operator settings (more control over whether PVCs are retained or deleted
+        on resource removal)., Improved Grafana support for dual-stack Kubernetes
+        clusters (better compatibility in IPv4/IPv6 environments).]
+    breaking_changes: []
   chart_version: 60.5.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:11.0.0', 'quay.io/kiwigrid/k8s-sidecar:1.26.1',
     'quay.io/prometheus-operator/prometheus-operator:v0.74.0', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -234,10 +643,19 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
 - version: 59.1.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Adds support for setting the Prometheus Operator PVC claim retention
+        field via chart values (new option exposed by the chart)., Fixes chart templating
+        so `alertmanager.alertmanagerSpec.version` is set correctly from values.]
+    features: ['Prometheus Operator: chart now exposes a PVC claim retention setting
+        so you can control how Prometheus persistent volume claims are retained during
+        scale-down/deletion scenarios.']
+    breaking_changes: []
   chart_version: 59.1.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.4.1', 'quay.io/kiwigrid/k8s-sidecar:1.26.1',
     'quay.io/prometheus-operator/prometheus-operator:v0.74.0', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -245,10 +663,17 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
 - version: 58.7.2
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['57.2.1: Fixes an issue when using kube-state-metrics 2.11.0 (chart
+        change to restore compatibility).', '58.7.2: Fixes Alertmanager version wiring
+        by correctly setting `alertManagerSpec.version`.']
+    features: []
+    breaking_changes: []
   chart_version: 58.7.2
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.4.1', 'quay.io/kiwigrid/k8s-sidecar:1.26.1',
     'quay.io/prometheus-operator/prometheus-operator:v0.73.2', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -256,10 +681,15 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
 - version: 57.2.1
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Fix issue with kube-state-metrics 2.11.0 (PR #4419).']
+    features: []
+    breaking_changes: []
   chart_version: 57.2.1
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.4.0', 'quay.io/kiwigrid/k8s-sidecar:1.26.1',
     'quay.io/prometheus-operator/prometheus-operator:v0.72.0', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -267,10 +697,26 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.12.0']
 - version: 56.21.4
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: '- No Helm values changes were called out in the provided release
+      notes for the target version (56.21.4) or the starting version (55.11.0).
+
+      - Based on the snippets you provided, this upgrade looks safe to run as a standard
+      `helm upgrade` with your existing values, but you should still run `helm diff
+      upgrade` to detect any indirect changes coming from dependency bumps.
+
+      '
+    chart_updates: ['55.11.0: Bumped the Grafana subchart to the 7.2.x series.', '56.21.4:
+        Fixed the CoreDNS Grafana dashboard variables (removed circular label filtering;
+        refresh values on time range change).']
+    features: [Grafana dependency updated to 7.2.x (via the kube-prometheus-stack
+        chart)., 'Improved CoreDNS Grafana dashboard behavior: variables no longer
+        have circular label filtering and refresh when the time range changes.']
+    breaking_changes: []
   chart_version: 56.21.4
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.3.3', 'quay.io/kiwigrid/k8s-sidecar:1.25.2',
     'quay.io/prometheus-operator/prometheus-operator:v0.71.2', 'quay.io/prometheus/alertmanager:v0.27.0',
@@ -278,10 +724,17 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.1']
 - version: 55.11.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Bumped the Grafana subchart dependency to the 7.2.x series (kube-prometheus-stack
+        55.11.0).]
+    features: [Grafana subchart updated to 7.2.x (new Grafana chart defaults/features
+        may apply).]
+    breaking_changes: []
   chart_version: 55.11.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.2.3', 'quay.io/kiwigrid/k8s-sidecar:1.25.2',
     'quay.io/prometheus-operator/prometheus-operator:v0.70.0', 'quay.io/prometheus/alertmanager:v0.26.0',
@@ -289,10 +742,11 @@ versions:
     'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v20221220-controller-v1.5.1-58-g787ea74b6',
     'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.10.1']
 - version: 54.2.2
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25',
-    '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
+  summary: null
   chart_version: 54.2.2
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:10.1.5', 'quay.io/kiwigrid/k8s-sidecar:1.25.2',
     'quay.io/prometheus-operator/prometheus-operator:v0.69.1', 'quay.io/prometheus/alertmanager:v0.26.0',

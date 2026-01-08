@@ -49,10 +49,10 @@ import {
 import { getPodDetailsRoutes } from './cdRoutes.tsx'
 import { jobRoutes } from './jobRoutes.tsx'
 import { InfraResearches } from 'components/ai/infra-research/InfraResearches.tsx'
-import { InfraResearch } from 'components/ai/infra-research/InfraResearch.tsx'
-import { InfraResearchAnalysis } from 'components/ai/infra-research/InfraResearchAnalysis.tsx'
-import { InfraResearchDiagram } from 'components/ai/infra-research/InfraResearchDiagram.tsx'
-import { InfraResearchThreads } from 'components/ai/infra-research/InfraResearchThreads.tsx'
+import { InfraResearch } from 'components/ai/infra-research/details/InfraResearch.tsx'
+import { InfraResearchAnalysis } from 'components/ai/infra-research/details/InfraResearchAnalysis.tsx'
+import { InfraResearchDiagram } from 'components/ai/infra-research/details/InfraResearchDiagram.tsx'
+import { InfraResearchThreads } from 'components/ai/infra-research/details/InfraResearchThreads.tsx'
 
 export const aiRoutes = [
   <Route

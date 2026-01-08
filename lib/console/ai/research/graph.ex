@@ -11,6 +11,8 @@ defmodule Console.AI.Research.Graph do
     defstruct [:from, :to, :type, :description]
   end
 
+  alias Console.Schema.InfraResearch
+
   @derive JSON.Encoder
   @derive Jason.Encoder
   defstruct [vertices: %{}, edges: %{}, notes: [], service_ids: [], stack_ids: []]
@@ -26,7 +28,7 @@ defmodule Console.AI.Research.Graph do
   def encode!(g \\ fetch()), do: JSON.encode!(graph_data(g))
   def encode(g \\ fetch()), do: Jason.encode(graph_data(g))
 
-  defp graph_data(%__MODULE__{} = g) do
+  def graph_data(%__MODULE__{} = g) do
     %{
       vertices: Map.values(g.vertices),
       edges: Map.values(g.edges),
@@ -36,8 +38,39 @@ defmodule Console.AI.Research.Graph do
     }
   end
 
-  def update(%__MODULE__{vertices: vertices, edges: edges, notes: notes} = graph) do
-    fetch()
+  def convert(%InfraResearch{
+    analysis: %InfraResearch.Analysis{
+      notes: notes,
+      graph: %InfraResearch.Analysis.Graph{vertices: vertices, edges: edges}
+    }
+  }) do
+    %__MODULE__{
+      vertices: Map.new(vertices, fn %{identifier: id} = v -> {id, convert(v)} end),
+      edges: Map.new(edges, fn %{from: f, to: t} = e -> {"#{f}.#{t}", convert(e)} end),
+      notes: notes,
+      service_ids: [],
+      stack_ids: []
+    }
+  end
+  def convert(%InfraResearch.Analysis.Graph.Vertex{
+    identifier: id,
+    type: type,
+    description: description,
+    annotations: annotations
+  }) do
+    %Vertex{identifier: id, type: type, description: description, annotations: annotations}
+  end
+  def convert(%InfraResearch.Analysis.Graph.Edge{
+    from: f,
+    to: t,
+    type: type,
+    description: description
+  }) do
+    %Edge{from: f, to: t, type: type, description: description}
+  end
+
+  def update(%__MODULE__{vertices: vertices, edges: edges, notes: notes} = graph, base \\ fetch()) do
+    base
     |> add_edges(edges)
     |> add_vertices(vertices)
     |> then(fn g ->

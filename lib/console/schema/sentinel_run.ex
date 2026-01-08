@@ -3,7 +3,8 @@ defmodule Console.Schema.SentinelRun do
   alias Console.Schema.{
     Sentinel,
     SentinelRunJob,
-    PipelineGate
+    PipelineGate,
+    ServiceError
   }
 
   defenum Status, pending: 0, success: 1, failed: 2
@@ -27,6 +28,7 @@ defmodule Console.Schema.SentinelRun do
 
     belongs_to :sentinel, Sentinel
     has_many :jobs, SentinelRunJob, on_delete: :delete_all
+    has_many :errors, ServiceError, on_delete: :delete_all
     has_one :gate, PipelineGate
 
     timestamps()
@@ -61,6 +63,7 @@ defmodule Console.Schema.SentinelRun do
     |> cast(attrs, @valid)
     |> cast_embed(:results, with: &result_changeset/2)
     |> cast_embed(:checks, with: &Sentinel.check_changeset/2)
+    |> cast_assoc(:errors)
     |> validate_required(~w(status)a)
     |> add_completed_at()
   end

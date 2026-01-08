@@ -621,6 +621,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve &Deployments.list_cluster_audits/3
     end
 
+    @desc "lists all deprecated custom resources for this cluster with optional filtering"
+    connection field :deprecated_crds, node_type: :deprecated_custom_resource do
+      arg :q, :string, description: "a search query to filter on group, kind, namespace or name"
+      resolve &Deployments.list_deprecated_crds/3
+    end
+
     timestamps()
   end
 
@@ -836,6 +842,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :incompatibilities, list_of(:version_reference), description: "any add-ons this might break"
     field :images,            list_of(:string), description: "the images used by this add-on's helm chart"
     field :chart_version,     :string, description: "the version of the helm chart to install for this version"
+    field :summary,           :addon_version_summary, description: "a summary of what changed in this version of the addon"
 
     @desc "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
     field :release_url, :string do
@@ -854,6 +861,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
         {:ok, Compatibilities.Version.blocking?(vsn, kube)}
       end
     end
+  end
+
+  object :addon_version_summary do
+    field :helm_changes,     :string, description: "a summary of any helm changes required for this version"
+    field :chart_updates,    list_of(:string), description: "a summary of any chart updates involved in updating to this version"
+    field :features,         list_of(:string), description: "a summary of any features added in this version"
+    field :breaking_changes, list_of(:string), description: "a summary of any application-level breaking changes in this version"
   end
 
   object :upgrade_plan_summary do
@@ -1194,6 +1208,18 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :extended, :boolean, description: "whether this version is on extended support"
   end
 
+  @desc "the changelog for a given kubernetes version"
+  object :kubernetes_changelog do
+    field :version,  :string, description: "the kubernetes version"
+    field :major_changes, list_of(:string), description: "the major changes in this version"
+    field :breaking_changes, list_of(:string), description: "the breaking changes in this version"
+    field :deprecations, list_of(:string), description: "the deprecations in this version"
+    field :removals, list_of(:string), description: "the removals in this version"
+    field :features, list_of(:string), description: "the features in this version"
+    field :bug_fixes, list_of(:string), description: "the bug fixes in this version"
+    field :api_updates, list_of(:string), description: "the api updates in this version"
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -1206,6 +1232,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   connection node_type: :cluster_registration
   connection node_type: :cluster_iso_image
   connection node_type: :project_usage_history
+  connection node_type: :deprecated_custom_resource
   delta :cluster
   delta :cluster_provider
 
@@ -1459,6 +1486,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :distro, :cluster_distro
 
       resolve &Deployments.kubernetes_version_info/2
+    end
+
+    field :kubernetes_changelog, :kubernetes_changelog do
+      middleware Authenticated
+      arg :version, non_null(:string)
+
+      resolve &Deployments.kubernetes_changelog/2
     end
   end
 

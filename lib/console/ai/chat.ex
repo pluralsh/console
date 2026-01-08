@@ -309,7 +309,7 @@ defmodule Console.AI.Chat do
     end
   end
 
-  @thread_preloads [session: [:connection, :cluster], user: :groups, flow: :servers, insight: [:cluster, :service, :stack]]
+  @thread_preloads [:service, :research, session: [:connection, :cluster], user: :groups, flow: :servers, insight: [:cluster, :service, :stack]]
 
   @doc """
   Generates a context map for a PR associated with a chat thread
@@ -335,7 +335,10 @@ defmodule Console.AI.Chat do
       user: user,
       flow: thread.flow,
       insight: thread.insight,
-      session: thread.session
+      session: thread.session,
+      thread: thread,
+      service: thread.service,
+      research: thread.research
     })
 
     start_transaction()

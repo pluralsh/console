@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Deprecations.Table do
   use GenServer
+  import Console.Deployments.Compatibilities.Utils, only: [proxy_config: 0]
   alias Console.Schema.ServiceComponent
   alias Console.Deployments.Static
   alias ETS.KeyValueSet
@@ -56,7 +57,7 @@ defmodule Console.Deployments.Deprecations.Table do
   end
 
   defp fetch_and_parse(url) do
-    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url),
+    with {:ok, %HTTPoison.Response{status_code: 200, body: body}} <- HTTPoison.get(url, [], proxy_config()),
          {:ok, %{"deprecated-versions" => deprecated}} <- YamlElixir.read_from_string(body) do
       Enum.map(deprecated, &to_entry/1)
     end

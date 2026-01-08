@@ -16,7 +16,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     ClusterAuditLog,
     ClusterRegistration,
     ClusterISOImage,
-    DeploymentSettings
+    DeploymentSettings,
+    DeprecatedCustomResource
   }
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
@@ -171,6 +172,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> paginate(args)
   end
 
+  def list_deprecated_crds(%Cluster{id: id}, args, _) do
+    DeprecatedCustomResource.for_cluster(id)
+    |> maybe_search(DeprecatedCustomResource, args)
+    |> DeprecatedCustomResource.ordered()
+    |> paginate(args)
+  end
+
   def agent_helm_values_for_cluster(_, _, _) do
     case Settings.cached() do
       %DeploymentSettings{agent_helm_values: vals} when is_binary(vals) ->
@@ -221,6 +229,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   end
 
   def kubernetes_version_info(%{distro: distro}, _), do: {:ok, KubeVersions.Table.fetch(distro)}
+
+  def kubernetes_changelog(%{version: version}, _), do: {:ok, KubeVersions.Table.changelog(version)}
 
   defp cores(val) when is_integer(val), do: val / 1000
   defp cores(_), do: nil

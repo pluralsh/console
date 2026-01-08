@@ -16,6 +16,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
 import { CreateAgentRunButton } from './CreateAgentRun'
+import { AgentRuntimeIconFrame } from '../agent-runtimes/AiAgentRuntimeIcon.tsx'
 
 export function AIAgentRuns() {
   const navigate = useNavigate()
@@ -75,6 +76,20 @@ const runsTableCols = [
   columnHelper.accessor((run) => run.runtime?.name ?? '', {
     id: 'runtime',
     header: 'Runtime',
+    cell: ({
+      row: {
+        original: { runtime },
+      },
+    }) =>
+      runtime ? (
+        <Flex
+          align="center"
+          gap="xsmall"
+        >
+          <AgentRuntimeIconFrame type={runtime.type} />
+          <span>{truncate(runtime.name, { length: 60 })}</span>
+        </Flex>
+      ) : undefined,
   }),
   columnHelper.accessor((run) => run.status, {
     id: 'status',

@@ -413,11 +413,14 @@ defmodule Console.Services.UsersTest do
       user = insert(:user)
 
       {:ok, token} = Users.create_access_token(%{
-        scopes: [%{api: "updateServiceDeployment", identifier: Ecto.UUID.generate()}]
+        scopes: [%{api: "updateServiceDeployment", identifier: Ecto.UUID.generate()}],
+        expiry: "1h"
       }, user)
 
       assert token.token
       assert token.user_id == user.id
+      assert token.expires_at
+
       [scope] = token.scopes
       assert scope.api == "updateServiceDeployment"
     end

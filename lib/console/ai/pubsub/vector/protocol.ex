@@ -117,6 +117,29 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ServiceComponentsUpd
   def resource(_), do: :ok
 end
 
+defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ClusterPinged do
+  alias Console.Schema.Cluster
+  alias Console.AI.PubSub.Vector.Indexable
+  alias Console.Deployments.Clusters
+
+  def resource(%@for{item: %Cluster{} = cluster}) do
+    # Preload cloud_addons and fetch runtime services with addon info hydrated
+    cluster = Console.Repo.preload(cluster, [:cloud_addons])
+    runtime_services = Clusters.runtime_services(cluster)
+
+    # Attach runtime services to the cluster struct for Mini.new/1
+    cluster_with_data = Map.put(cluster, :runtime_services, runtime_services)
+
+    Console.debounce({:vectorizer, :cluster, cluster.id}, fn ->
+      [
+        %Indexable{delete: true, force: true, filters: [cluster_id: cluster.id, datatype: {:raw, :cluster}]},
+        %Indexable{data: Cluster.Mini.new(cluster_with_data), filters: [cluster_id: cluster.id], force: true}
+      ]
+    end)
+  end
+  def resource(_), do: :ok
+end
+
 defimpl Console.AI.PubSub.Vectorizable, for: [Console.PubSub.PrAutomationCreated, Console.PubSub.PrAutomationUpdated] do
   alias Console.Schema.PrAutomation
   alias Console.AI.PubSub.Vector.Indexable

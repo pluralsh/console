@@ -2,6 +2,7 @@ import styled from 'styled-components'
 
 import { tableCellColor, tableCellHoverColor } from './colors'
 import { type TableFillLevel } from './tableUtils'
+import { SemanticColorKey } from 'src/theme/colors'
 
 export const Tr = styled.tr<{
   $fillLevel: TableFillLevel
@@ -10,6 +11,7 @@ export const Tr = styled.tr<{
   $selectable?: boolean
   $clickable?: boolean
   $raised?: boolean
+  $expandedBgColor?: SemanticColorKey
 }>(
   ({
     theme,
@@ -19,6 +21,7 @@ export const Tr = styled.tr<{
     $selected: selected = false,
     $highlighted: highlighted = false,
     $fillLevel: fillLevel,
+    $expandedBgColor: expandedBgColor,
   }) => ({
     display: 'contents',
     backgroundColor:
@@ -27,7 +30,10 @@ export const Tr = styled.tr<{
       ],
     '&[data-expander-row]': {
       backgroundColor:
-        theme.colors[tableCellHoverColor(fillLevel, selectable, selected)],
+        theme.colors[
+          expandedBgColor ??
+            tableCellHoverColor(fillLevel, selectable, selected)
+        ],
     },
 
     ...(clickable && {

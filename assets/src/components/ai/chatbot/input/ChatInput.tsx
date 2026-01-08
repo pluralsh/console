@@ -1,12 +1,15 @@
 import {
   AiSparkleFilledIcon,
+  ArrowUpIcon,
   Button,
   Chip,
   Flex,
   PlusIcon,
   RobotIcon,
+  SemanticColorKey,
   SendMessageIcon,
   ServersIcon,
+  SpinnerAlt,
 } from '@pluralsh/design-system'
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
@@ -26,7 +29,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { useChatbot } from '../../AIContext.tsx'
 import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputCloudSelect } from './ChatInputCloudSelect.tsx'
@@ -134,7 +137,10 @@ export function ChatInput({
           </ChipListSC>
         </Flex>
       )}
-      <EditableContentWrapperSC $agent={!!selectedAgent}>
+      <EditableContentWrapperSC
+        $agent={!!selectedAgent}
+        $bgColor="fill-zero"
+      >
         {contextError && <GqlError error={contextError} />}
         <EditableDiv
           placeholder={placeholder}
@@ -201,6 +207,66 @@ export function ChatInput({
   )
 }
 
+export function ChatInputSimple({
+  onSubmit,
+  allowSubmit = true,
+  loading = false,
+  disabled = false,
+  bgColor = 'fill-zero-selected',
+  ...props
+}: {
+  onSubmit: () => void
+  allowSubmit?: boolean
+  loading?: boolean
+  bgColor?: SemanticColorKey
+} & Omit<ComponentPropsWithRef<typeof EditableDiv>, 'onEnter'>) {
+  const { spacing } = useTheme()
+
+  const handleSubmit = () => allowSubmit && onSubmit()
+
+  return (
+    <EditableContentWrapperSC
+      $agent={false}
+      $bgColor={bgColor}
+      css={{ position: 'relative', minHeight: 130 }}
+    >
+      <EditableDiv
+        {...props}
+        onEnter={handleSubmit}
+        disabled={loading || disabled}
+      />
+      <ChatSubmitButton
+        loading={loading}
+        loadingIndicator={<SpinnerAlt color="icon-xlight" />}
+        disabled={!allowSubmit || loading || disabled}
+        onClick={handleSubmit}
+        css={{
+          position: 'absolute',
+          bottom: spacing.small,
+          right: spacing.small,
+        }}
+      />
+    </EditableContentWrapperSC>
+  )
+}
+
+export function ChatSubmitButton({
+  bgColor = 'fill-primary',
+  ...props
+}: { bgColor?: SemanticColorKey } & Omit<
+  ComponentPropsWithRef<typeof ChatSubmitButtonSC>,
+  'children' | '$bgColor'
+>) {
+  return (
+    <ChatSubmitButtonSC
+      $bgColor={bgColor}
+      {...props}
+    >
+      <ArrowUpIcon />
+    </ChatSubmitButtonSC>
+  )
+}
+
 const SendMessageFormSC = styled.form(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -209,27 +275,43 @@ const SendMessageFormSC = styled.form(({ theme }) => ({
   padding: theme.spacing.medium,
 }))
 
-const EditableContentWrapperSC = styled.div<{ $agent: boolean }>(
-  ({ theme, $agent: agent }) => ({
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.small,
-    padding: theme.spacing.small,
-    borderRadius: theme.borderRadiuses.large,
-    backgroundColor: theme.colors['fill-zero'],
-    border: theme.borders.input,
-    outline: '1px solid transparent',
+const EditableContentWrapperSC = styled.div<{
+  $agent: boolean
+  $bgColor: SemanticColorKey
+}>(({ theme, $agent: agent, $bgColor }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  padding: theme.spacing.small,
+  borderRadius: theme.borderRadiuses.large,
+  backgroundColor: theme.colors[$bgColor],
+  border: theme.borders.input,
+  outline: '1px solid transparent',
 
-    '&:has(div:focus)': {
-      backgroundColor: theme.colors['fill-zero-selected'],
-      transition: 'box-shadow 0.16s ease-in-out, outline 0.16s ease-in-out',
-      boxShadow: agent
-        ? `0 0 0 3px rgba(116, 122, 246, 0.20), 0 0 0 7px rgba(116, 122, 246, 0.20)`
-        : undefined,
-      outline: agent
-        ? `${theme.borderWidths.default}px ${theme.borderStyles.default} ${theme.colors['border-primary']}`
-        : theme.borders['outline-focused'],
-    },
+  '&:has(div:focus)': {
+    backgroundColor: theme.colors['fill-zero-selected'],
+    transition: 'box-shadow 0.16s ease-in-out, border 0.16s ease-in-out',
+    boxShadow: agent
+      ? `0 0 0 3px rgba(116, 122, 246, 0.20), 0 0 0 7px rgba(116, 122, 246, 0.20)`
+      : undefined,
+    border: agent
+      ? `${theme.borderWidths.default}px ${theme.borderStyles.default} ${theme.colors['border-primary']}`
+      : theme.borders['outline-focused'],
+  },
+}))
+
+const ChatSubmitButtonSC = styled(Button)<{ $bgColor: SemanticColorKey }>(
+  ({ theme, $bgColor }) => ({
+    ...theme.partials.reset.button,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 28,
+    width: 28,
+    minHeight: 0,
+    borderRadius: 25,
+    background: theme.colors[$bgColor],
+    color: theme.colors['icon-light'],
   })
 )
 

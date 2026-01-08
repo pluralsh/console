@@ -512,6 +512,37 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       assert_receive {:event, %PubSub.PipelineGateUpdated{item: %{id: ^gate_id}}}
     end
   end
+
+  describe "AgentRunUpdated" do
+    test "it will record the repository for an agent run" do
+      run = insert(:agent_run, status: :successful, repository: "https://github.com/pluralsh/console.git")
+
+      event = %PubSub.AgentRunUpdated{item: run}
+      {:ok, updated} = Recurse.handle_event(event)
+
+      assert updated.url == "https://github.com/pluralsh/console.git"
+      assert updated.last_used_at
+    end
+
+    test "it can update existing runs" do
+      repo = insert(:agent_run_repository, url: "https://github.com/pluralsh/console.git")
+      run = insert(:agent_run, status: :successful, repository: "https://github.com/pluralsh/console.git")
+
+      event = %PubSub.AgentRunUpdated{item: run}
+      {:ok, updated} = Recurse.handle_event(event)
+
+      assert updated.id == repo.id
+      assert updated.url == "https://github.com/pluralsh/console.git"
+      assert updated.last_used_at != repo.last_used_at
+    end
+
+    test "it will ignore non-successful runs" do
+      run = insert(:agent_run, status: :failed, repository: "https://github.com/pluralsh/console.git")
+
+      event = %PubSub.AgentRunUpdated{item: run}
+      {:error, _} = Recurse.handle_event(event)
+    end
+  end
 end
 
 

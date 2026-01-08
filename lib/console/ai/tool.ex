@@ -7,7 +7,9 @@ defmodule Console.AI.Tool do
     Stack,
     Cluster,
     AiInsight,
-    AgentSession
+    AgentSession,
+    ChatThread,
+    InfraResearch
   }
   alias Console.AI.Chat.Knowledge
   alias Console.Deployments.{Git, Settings}
@@ -15,7 +17,7 @@ defmodule Console.AI.Tool do
   @type t :: %__MODULE__{}
 
   defmodule Context do
-    alias Console.Schema.{AgentSession, Flow, User, AiInsight, Stack, Cluster, Service}
+    alias Console.Schema.{AgentSession, Flow, User, AiInsight, Stack, Cluster, Service, InfraResearch}
     @type t :: %__MODULE__{
       flow: Flow.t,
       user: User.t,
@@ -23,10 +25,12 @@ defmodule Console.AI.Tool do
       stack: Stack.t,
       cluster: Cluster.t,
       service: Service.t,
-      session: AgentSession.t
+      session: AgentSession.t,
+      thread: ChatThread.t,
+      research: InfraResearch.t
     }
 
-    defstruct [:flow, :user, :insight, :stack, :cluster, :service, :session]
+    defstruct [:flow, :user, :insight, :stack, :cluster, :service, :session, :thread, :research]
 
     def new(args), do: struct(__MODULE__, args)
   end
@@ -47,7 +51,7 @@ defmodule Console.AI.Tool do
 
   def upsert(attrs) do
     case Process.get(@ctx) do
-      %Context{} = ctx -> Process.put(@ctx, Map.merge(ctx, attrs))
+      %Context{} = ctx -> Process.put(@ctx, Map.merge(ctx, Map.new(attrs)))
       _ -> context(attrs)
     end
   end
@@ -62,14 +66,15 @@ defmodule Console.AI.Tool do
   @spec parent() :: Knowledge.parent | nil
   def parent() do
     case Process.get(@ctx) do
-      %Context{flow:    %Flow{} = flow} -> flow
-      %Context{service: %Service{flow: %Flow{} = flow}} -> flow
-      %Context{service: %Service{} = svc} -> svc
-      %Context{stack:   %Stack{} = stack} -> stack
-      %Context{cluster: %Cluster{} = cluster} -> cluster
-      %Context{insight: %AiInsight{service: %Service{} = svc}} -> svc
-      %Context{insight: %AiInsight{stack: %Stack{} = stack}} -> stack
-      %Context{insight: %AiInsight{cluster: %Cluster{} = cluster}} -> cluster
+      %Context{flow:     %Flow{} = flow} -> flow
+      %Context{service:  %Service{flow: %Flow{} = flow}} -> flow
+      %Context{service:  %Service{} = svc} -> svc
+      %Context{research: %InfraResearch{} = research} -> research
+      %Context{stack:    %Stack{} = stack} -> stack
+      %Context{cluster:  %Cluster{} = cluster} -> cluster
+      %Context{insight:  %AiInsight{service: %Service{} = svc}} -> svc
+      %Context{insight:  %AiInsight{stack: %Stack{} = stack}} -> stack
+      %Context{insight:  %AiInsight{cluster: %Cluster{} = cluster}} -> cluster
       _ -> nil
     end
   end
@@ -91,6 +96,13 @@ defmodule Console.AI.Tool do
   def insight() do
     case Process.get(@ctx) do
       %Context{insight: %AiInsight{} = insight} -> insight
+      _ -> nil
+    end
+  end
+
+  def thread() do
+    case Process.get(@ctx) do
+      %Context{thread: %ChatThread{} = thread} -> thread
       _ -> nil
     end
   end
