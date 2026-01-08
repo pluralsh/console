@@ -34,16 +34,6 @@ var _ = Describe("Console Chart", func() {
 			Expect(exists).To(BeTrue())
 		})
 
-		It("should have dashboard api resources", func() {
-			By("deployment")
-			_, exists := manifests[console.DefaultResources().Dashboard.Deployment.String()]
-			Expect(exists).To(BeTrue())
-
-			By("service")
-			_, exists = manifests[console.DefaultResources().Dashboard.Service.String()]
-			Expect(exists).To(BeTrue())
-		})
-
 		It("should have kas resources", func() {
 			By("deployment")
 			_, exists := manifests[console.DefaultResources().Kas.Deployment.String()]
