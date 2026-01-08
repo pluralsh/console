@@ -1,25 +1,3 @@
-query DaemonSets(
-  $namespace: String!
-  $filterBy: String
-  $sortBy: String
-  $itemsPerPage: String
-  $page: String
-) {
-  handleGetDaemonSetList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  )
-    @rest(
-      type: "daemonset_DaemonSetList"
-      path: "daemonset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-    ) {
-    ...DaemonSetList
-  }
-}
-
 query DaemonSet($namespace: String!, $name: String!) {
   handleGetDaemonSetDetail(namespace: $namespace, daemonSet: $name)
     @rest(

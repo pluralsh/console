@@ -1,25 +1,3 @@
-query Deployments(
-  $namespace: String!
-  $filterBy: String
-  $sortBy: String
-  $itemsPerPage: String
-  $page: String
-) {
-  handleGetDeployments(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  )
-    @rest(
-      type: "deployment_DeploymentList"
-      path: "deployment/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-    ) {
-    ...DeploymentList
-  }
-}
-
 query Deployment($namespace: String!, $name: String!) {
   handleGetDeploymentDetail(namespace: $namespace, deployment: $name)
     @rest(

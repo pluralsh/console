@@ -1,27 +1,3 @@
-fragment DeploymentList on deployment_DeploymentList {
-  errors
-  listMeta @type(name: "types_ListMeta") {
-    ...ListMeta
-  }
-  deployments @type(name: "deployment_Deployment") {
-    ...Deployment
-  }
-}
-
-fragment Deployment on deployment_Deployment {
-  typeMeta @type(name: "types_TypeMeta") {
-    ...TypeMeta
-  }
-  objectMeta @type(name: "types_ObjectMeta") {
-    ...ObjectMeta
-  }
-  pods @type(name: "common_PodInfo") {
-    ...PodInfo
-  }
-  initContainerImages
-  containerImages
-}
-
 fragment DeploymentDetail on deployment_DeploymentDetail {
   typeMeta @type(name: "types_TypeMeta") {
     ...TypeMeta

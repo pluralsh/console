@@ -1,25 +1,3 @@
-query CronJobs(
-  $namespace: String!
-  $filterBy: String
-  $sortBy: String
-  $itemsPerPage: String
-  $page: String
-) {
-  handleGetCronJobList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  )
-    @rest(
-      type: "cronjob_CronJobList"
-      path: "cronjob/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-    ) {
-    ...CronJobList
-  }
-}
-
 query CronJob($namespace: String!, $name: String!) {
   handleGetCronJobDetail(namespace: $namespace, name: $name)
     @rest(
