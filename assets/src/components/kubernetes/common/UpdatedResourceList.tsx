@@ -4,7 +4,7 @@ import {
   UseInfiniteQueryOptions,
 } from '@tanstack/react-query'
 import { Row, SortingState, TableOptions } from '@tanstack/react-table'
-import { ReactElement, useEffect, useState } from 'react'
+import { ReactElement, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Options } from '../../../generated/kubernetes'
 import { getAxiosInstance } from '../../../helpers/axios.ts'
@@ -64,8 +64,6 @@ export function UpdatedResourceList<
     meta: { cluster, ...tableOptions },
   })
 
-  const [page, setPage] = useState(0)
-
   const { data, isFetching, hasNextPage, fetchNextPage } =
     useInfiniteQuery<TResourceList>({
       ...queryOptions({
@@ -73,8 +71,8 @@ export function UpdatedResourceList<
         query: {
           filterBy: `name,${filter}`,
           sortBy: sortBy,
-          itemsPerPage: DEFAULT_DATA_SELECT.itemsPerPage,
-          page: DEFAULT_DATA_SELECT.page,
+          ...DEFAULT_DATA_SELECT,
+          // ...(namespaced ? { namespace } : {}),
         },
       }),
       initialPageParam: DEFAULT_DATA_SELECT.page,
@@ -85,30 +83,15 @@ export function UpdatedResourceList<
         return pages < totalPages ? pages + 1 : undefined
       },
     })
-  // {
-  //   queryKey: queryKey(
-  //   ),
-  //   queryFn: queryHook,
-  //   getNextPageParam: (lastPage, allPages) => {
-  //     const pages = allPages.length
-  //     const totalItems = lastPage.listMeta?.totalItems ?? 0
-  //     const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
-  //     return pages < totalPages ? pages + 1 : undefined
-  //   },
-  // filterBy: `name,${filter}`,
-  // sortBy,
-  // ...(namespaced ? { namespace } : {}),
-  // ...DEFAULT_DATA_SELECT,
-  // page: String(page + 1),
-  // }
-  // {
-  //   placeholderData: keepPreviousData,
-  // }
-  // )
 
   console.log(data)
-  const items =
-    data?.pages.flatMap((value) => value?.[itemsKey] as Array<TResource>) ?? []
+
+  const items = useMemo(
+    () =>
+      data?.pages.flatMap((value) => value?.[itemsKey] as Array<TResource>) ??
+      [],
+    [data?.pages, itemsKey]
+  )
 
   // const resourceList = data as TResourceList
   // const items = useMemo(
@@ -116,11 +99,6 @@ export function UpdatedResourceList<
   //   [itemsKey, resourceList]
   // )
   // const { hasNextPage } = usePageInfo(items, resourceList?.listMeta)
-
-  // console.log(items)
-  // console.log(resourceList?.listMeta)
-  // console.log(page)
-  // console.log(hasNextPage)
 
   // useEffect(() => {
   //   // Reset page when filters change
@@ -132,9 +110,7 @@ export function UpdatedResourceList<
   //   setPage((p) => p + 1)
   // }, [hasNextPage])
 
-  useEffect(() => {
-    setNamespaced(namespaced)
-  }, [namespaced, setNamespaced])
+  useEffect(() => setNamespaced(namespaced), [namespaced, setNamespaced])
 
   return (
     <>
@@ -143,7 +119,7 @@ export function UpdatedResourceList<
         fullHeightWrap
         data={items}
         columns={columns}
-        loading={isFetching && page === 0 && items.length === 0}
+        loading={isFetching && items.length === 0}
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={isFetching}
