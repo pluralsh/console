@@ -98,7 +98,7 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		utils.MarkCondition(sink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
-	if ro {
+	if ro && !sink.Spec.Reconciliation.DriftDetect() {
 		logger.V(9).Info("Notification Sink already exists in the API, running in read-only mode")
 		utils.MarkReadOnly(sink)
 		return r.handleExisting(ctx, sink)

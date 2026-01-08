@@ -68,6 +68,9 @@ var _ = Describe("Repository Controller", Ordered, func() {
 					},
 					Spec: v1alpha1.GitRepositorySpec{
 						Url: repoUrl,
+						Reconciliation: &v1alpha1.Reconciliation{
+							DriftDetection: lo.ToPtr(false),
+						},
 					},
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())

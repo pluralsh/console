@@ -134,7 +134,7 @@ var _ = Describe("Flow Controller", Ordered, func() {
 			})).To(Succeed())
 
 			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			cacheConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "user@example.com"))
+			cacheConsoleClient.On("GetUserId", mock.Anything).Return("", errors.NewNotFound(schema.GroupResource{}, "user@example.com"))
 			identity.ResetCache(cacheConsoleClient)
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)

@@ -95,7 +95,7 @@ func (r *NamespaceCredentialsReconciler) SetupWithManager(mgr ctrl.Manager) erro
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "namespacecredentials_reconciler")
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
+		Watches(&corev1.Secret{}, OnSecretChange(r.Client, new(v1alpha1.NamespaceCredentials))).
 		For(&v1alpha1.NamespaceCredentials{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }
