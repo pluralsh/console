@@ -28,6 +28,7 @@ import {
   ITEMS_PER_PAGE,
   useSortedTableOptions,
 } from './utils'
+import { ErrorToast } from './errors.tsx'
 
 interface ResourceListProps<TResourceList> {
   columns: Array<object>
@@ -90,11 +91,14 @@ export function UpdatedResourceList<
 
   console.log(data)
 
-  const items = useMemo(
-    () =>
-      data?.pages.flatMap((value) =>
-        itemsKey ? (value?.[itemsKey] as Array<TResource>) : []
-      ) ?? [],
+  const { items, errors } = useMemo(
+    () => ({
+      items:
+        data?.pages.flatMap((value) =>
+          itemsKey ? (value?.[itemsKey] as Array<TResource>) : []
+        ) ?? [],
+      errors: data?.pages.flatMap((value) => value?.errors ?? []) ?? [],
+    }),
     [data?.pages, itemsKey]
   )
 
@@ -102,7 +106,7 @@ export function UpdatedResourceList<
 
   return (
     <>
-      {/*<ErrorToast errors={resourceList?.errors as any} />*/}
+      <ErrorToast errors={errors} />
       <Table
         fullHeightWrap
         data={items}
