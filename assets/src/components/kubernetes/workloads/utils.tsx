@@ -137,15 +137,15 @@ export function WorkloadImages({ images }: { images: Maybe<string>[] }) {
   )
 }
 
-export function toReadiness(state: ContainerState): ReadinessT {
+export function toReadiness(state: string): ReadinessT {
   switch (state) {
-    case ContainerState.Running:
+    case 'Running':
       return Readiness.Running
-    case ContainerState.Waiting:
+    case 'Waiting':
       return Readiness.InProgress
-    case ContainerState.Failed:
+    case 'Failed':
       return Readiness.Failed
-    case ContainerState.Terminated:
+    case 'Terminated':
       return Readiness.Complete
   }
 
