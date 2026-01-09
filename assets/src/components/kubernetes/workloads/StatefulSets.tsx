@@ -6,10 +6,6 @@ import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   Maybe,
   Statefulset_StatefulSet as StatefulSetT,
-  Statefulset_StatefulSetList as StatefulSetListT,
-  StatefulSetsDocument,
-  StatefulSetsQuery,
-  StatefulSetsQueryVariables,
 } from '../../../generated/graphql-kubernetes'
 import {
   getWorkloadsAbsPath,
@@ -17,11 +13,20 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { UsageText } from '../../cluster/TableElements'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
+import {
+  StatefulsetStatefulSet,
+  StatefulsetStatefulSetList,
+} from '../../../generated/kubernetes'
+import {
+  getAllStatefulSetsInfiniteOptions,
+  getStatefulSetsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
+import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
+import { useDataSelect } from '../common/DataSelect.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -69,6 +74,7 @@ const colStatus = columnHelper.accessor((ss) => ss.podInfo, {
 
 export default function StatefulSets() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -89,16 +95,14 @@ export default function StatefulSets() {
   )
 
   return (
-    <ResourceList<
-      StatefulSetListT,
-      StatefulSetT,
-      StatefulSetsQuery,
-      StatefulSetsQueryVariables
-    >
+    <UpdatedResourceList<StatefulsetStatefulSetList, StatefulsetStatefulSet>
       namespaced
       columns={columns}
-      queryDocument={StatefulSetsDocument}
-      queryName="handleGetStatefulSetList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getStatefulSetsInfiniteOptions
+          : getAllStatefulSetsInfiniteOptions
+      }
       itemsKey="statefulSets"
     />
   )

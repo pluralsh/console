@@ -3,25 +3,27 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
-import {
-  Maybe,
-  Replicationcontroller_ReplicationController as ReplicationControllerT,
-  Replicationcontroller_ReplicationControllerList as ReplicationControllerListT,
-  ReplicationControllersDocument,
-  ReplicationControllersQuery,
-  ReplicationControllersQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+import { Maybe } from '../../../generated/graphql-kubernetes'
 import {
   getWorkloadsAbsPath,
   REPLICATION_CONTROLLERS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { UsageText } from '../../cluster/TableElements'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
+import {
+  ReplicationcontrollerReplicationController,
+  ReplicationcontrollerReplicationControllerList,
+} from '../../../generated/kubernetes'
+import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
+import {
+  getAllReplicationControllersInfiniteOptions,
+  getReplicationControllersInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
+import { useDataSelect } from '../common/DataSelect.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -33,7 +35,8 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<ReplicationControllerT>()
+const columnHelper =
+  createColumnHelper<ReplicationcontrollerReplicationController>()
 
 const colImages = columnHelper.accessor((rc) => rc, {
   id: 'images',
@@ -71,6 +74,7 @@ const colStatus = columnHelper.accessor((rc) => rc.podInfo, {
 
 export default function ReplicationControllers() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -91,16 +95,17 @@ export default function ReplicationControllers() {
   )
 
   return (
-    <ResourceList<
-      ReplicationControllerListT,
-      ReplicationControllerT,
-      ReplicationControllersQuery,
-      ReplicationControllersQueryVariables
+    <UpdatedResourceList<
+      ReplicationcontrollerReplicationControllerList,
+      ReplicationcontrollerReplicationController
     >
       namespaced
       columns={columns}
-      queryDocument={ReplicationControllersDocument}
-      queryName="handleGetReplicationControllerList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getReplicationControllersInfiniteOptions
+          : getAllReplicationControllersInfiniteOptions
+      }
       itemsKey="replicationControllers"
     />
   )

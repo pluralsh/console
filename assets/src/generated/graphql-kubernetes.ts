@@ -5230,17 +5230,6 @@ export type NamespacedResourceDeleteMutationVariables = Exact<{
 
 export type NamespacedResourceDeleteMutation = { __typename?: 'Mutation', handleDeleteResource?: any | null };
 
-export type ConfigMapsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type ConfigMapsQuery = { __typename?: 'Query', handleGetConfigMapList?: { __typename?: 'configmap_ConfigMapList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'configmap_ConfigMap', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
 export type ConfigMapQueryVariables = Exact<{
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -5841,10 +5830,6 @@ export type ReplicationControllerServicesQueryVariables = Exact<{
 
 
 export type ReplicationControllerServicesQuery = { __typename?: 'Query', handleGetReplicationControllerServices?: { __typename?: 'service_ServiceList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
-
-export type ReplicationControllerListFragment = { __typename?: 'replicationcontroller_ReplicationControllerList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicationControllers: Array<{ __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
-
-export type ReplicationControllerFragment = { __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
 
 export type ReplicationControllerDetailFragment = { __typename?: 'replicationcontroller_ReplicationControllerDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, labelSelector: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
 
@@ -6650,35 +6635,6 @@ ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}
 ${SelectorFragmentDoc}
 ${HorizontalPodAutoscalerListFragmentDoc}`;
-export const ReplicationControllerFragmentDoc = gql`
-    fragment ReplicationController on replicationcontroller_ReplicationController {
-  typeMeta @type(name: "types_TypeMeta") {
-    ...TypeMeta
-  }
-  objectMeta @type(name: "types_ObjectMeta") {
-    ...ObjectMeta
-  }
-  podInfo @type(name: "common_PodInfo") {
-    ...PodInfo
-  }
-  initContainerImages
-  containerImages
-}
-    ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}`;
-export const ReplicationControllerListFragmentDoc = gql`
-    fragment ReplicationControllerList on replicationcontroller_ReplicationControllerList {
-  errors
-  listMeta @type(name: "types_ListMeta") {
-    ...ListMeta
-  }
-  replicationControllers @type(name: "replicationcontroller_ReplicationController") {
-    ...ReplicationController
-  }
-}
-    ${ListMetaFragmentDoc}
-${ReplicationControllerFragmentDoc}`;
 export const ReplicationControllerDetailFragmentDoc = gql`
     fragment ReplicationControllerDetail on replicationcontroller_ReplicationControllerDetail {
   typeMeta @type(name: "types_TypeMeta") {
@@ -8316,69 +8272,6 @@ export function useNamespacedResourceDeleteMutation(baseOptions?: Apollo.Mutatio
 export type NamespacedResourceDeleteMutationHookResult = ReturnType<typeof useNamespacedResourceDeleteMutation>;
 export type NamespacedResourceDeleteMutationResult = Apollo.MutationResult<NamespacedResourceDeleteMutation>;
 export type NamespacedResourceDeleteMutationOptions = Apollo.BaseMutationOptions<NamespacedResourceDeleteMutation, NamespacedResourceDeleteMutationVariables>;
-export const ConfigMapsDocument = gql`
-    query ConfigMaps($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetConfigMapList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "configmap/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useConfigMapsQuery__
- *
- * To run a query within a React component, call `useConfigMapsQuery` and pass it any options that fit your needs.
- * When your component renders, `useConfigMapsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useConfigMapsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useConfigMapsQuery(baseOptions: Apollo.QueryHookOptions<ConfigMapsQuery, ConfigMapsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ConfigMapsQuery, ConfigMapsQueryVariables>(ConfigMapsDocument, options);
-      }
-export function useConfigMapsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ConfigMapsQuery, ConfigMapsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ConfigMapsQuery, ConfigMapsQueryVariables>(ConfigMapsDocument, options);
-        }
-export function useConfigMapsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ConfigMapsQuery, ConfigMapsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ConfigMapsQuery, ConfigMapsQueryVariables>(ConfigMapsDocument, options);
-        }
-export type ConfigMapsQueryHookResult = ReturnType<typeof useConfigMapsQuery>;
-export type ConfigMapsLazyQueryHookResult = ReturnType<typeof useConfigMapsLazyQuery>;
-export type ConfigMapsSuspenseQueryHookResult = ReturnType<typeof useConfigMapsSuspenseQuery>;
-export type ConfigMapsQueryResult = Apollo.QueryResult<ConfigMapsQuery, ConfigMapsQueryVariables>;
 export const ConfigMapDocument = gql`
     query ConfigMap($name: String!, $namespace: String!) {
   handleGetConfigMapDetail(namespace: $namespace, configmap: $name) @rest(path: "configmap/{args.namespace}/{args.configmap}") {
