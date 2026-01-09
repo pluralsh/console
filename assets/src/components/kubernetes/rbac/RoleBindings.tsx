@@ -2,23 +2,24 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { Maybe } from '../../../generated/graphql-kubernetes'
 
 import {
-  Maybe,
-  Rolebinding_RoleBinding as RoleBindingT,
-  Rolebinding_RoleBindingList as RoleBindingListT,
-  RoleBindingsDocument,
-  RoleBindingsQuery,
-  RoleBindingsQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+  RolebindingRoleBinding,
+  RolebindingRoleBindingList,
+} from '../../../generated/kubernetes'
 import {
-  getRbacAbsPath,
+  getAllRoleBindingsInfiniteOptions,
+  getRoleBindingsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
+import {
   ROLE_BINDINGS_REL_PATH,
+  getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
+import { useDataSelect } from '../common/DataSelect'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { useDefaultColumns } from '../common/utils'
-
 import { getRbacBreadcrumbs } from './Rbac'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
@@ -29,10 +30,11 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<RoleBindingT>()
+const columnHelper = createColumnHelper<RolebindingRoleBinding>()
 
 export default function RoleBindings() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -44,16 +46,14 @@ export default function RoleBindings() {
   )
 
   return (
-    <ResourceList<
-      RoleBindingListT,
-      RoleBindingT,
-      RoleBindingsQuery,
-      RoleBindingsQueryVariables
-    >
+    <UpdatedResourceList<RolebindingRoleBindingList, RolebindingRoleBinding>
       namespaced
       columns={columns}
-      queryDocument={RoleBindingsDocument}
-      queryName="handleGetRoleBindingList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getRoleBindingsInfiniteOptions
+          : getAllRoleBindingsInfiniteOptions
+      }
       itemsKey="items"
     />
   )
