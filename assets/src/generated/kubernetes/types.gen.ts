@@ -707,6 +707,11 @@ export type PodEnvVar = {
     valueFrom: V1EnvVarSource;
 };
 
+export type PodGpuAllocation = {
+    quantity: number;
+    type: string;
+};
+
 export type PodPod = {
     allocatedResources: PodPodAllocatedResources;
     containerImages: Array<string>;
@@ -723,6 +728,8 @@ export type PodPod = {
 export type PodPodAllocatedResources = {
     cpuLimits: number;
     cpuRequests: number;
+    gpuLimits: Array<PodGpuAllocation>;
+    gpuRequests: Array<PodGpuAllocation>;
     memoryLimits: number;
     memoryRequests: number;
 };
