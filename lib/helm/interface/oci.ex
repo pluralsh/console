@@ -17,7 +17,7 @@ end
 
 defimpl Console.Helm.Interface, for: Console.Helm.Interface.OCI do
   alias Console.OCI.{Client, Manifest, Layer}
-  import Console.Helm.Utils, only: [match_version: 2]
+  import Console.Helm.Utils, only: [match_version: 2, has_wildcard?: 1]
   alias Console.Helm.{Index, Chart, Interface.OCI}
 
   def index(_), do: {:ok, %Index{}}
@@ -25,15 +25,12 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.OCI do
   def chart(oci, %Index{}, chart, vsn) do
     with {:auth, {:ok, %{client: client} = oci}} <- {:auth, OCI.authenticate(oci)},
          client = Client.append_repo(client, chart),
-         {:charts, {:ok, charts}} <- {:charts, get_charts(client, chart)},
-         {:version, %Chart{} = chart} <- {:version, match_version(charts, vsn)},
+         {:charts, {:ok, %Chart{} = chart}} <- {:charts, get_chart(client, chart, vsn)},
          {:pull, {:ok, digest}} <- {:pull, get_digest(client, chart.version)} do
       {:ok, oci, {chart.name, digest}, digest}
     else
       {:auth, {:error, err}} -> {:error, {:auth, "failed to authenticate to oci: #{inspect(err)}"}}
       {:charts, {:error, err}} -> {:error, {:auth, "error fetching chart #{chart}: #{err}"}}
-      {:charts, _} -> {:error, "could not find chart #{chart}"}
-      {:version, _} -> {:error, "could not find version #{vsn}"}
       {:pull, {:error, err}} -> {:error, "error pulling chart content: #{err}"}
     end
   end
@@ -58,6 +55,18 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.OCI do
     else
       {:layer, _} -> {:error, "could not find valid helm layer from manifest"}
       _ -> {:error, "could not fetch valid OCI manifest for #{vsn}"}
+    end
+  end
+
+  defp get_chart(client, chart, vsn) do
+    with true <- has_wildcard?(vsn),
+         {:charts, {:ok, charts}} <- {:charts, get_charts(client, chart)},
+         {:version, %Chart{} = chart} <- {:version, match_version(charts, vsn)} do
+      {:ok, chart}
+    else
+      false -> {:ok, %Chart{name: chart, version: vsn}}
+      {:charts, _} -> {:error, "could not find chart #{chart}"}
+      {:version, _} -> {:error, "could not find version #{vsn}"}
     end
   end
 

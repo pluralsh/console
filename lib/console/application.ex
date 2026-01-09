@@ -22,6 +22,7 @@ defmodule Console.Application do
       Console.MultilevelCache,
       Console.TestCache,
       Console.LocalCache,
+      {Task.Supervisor, name: Console.AI.TaskSupervisor},
       {Registry, [keys: :unique, name: Console.Buffer.Base.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Pipelines.Supervisor.registry()]},
