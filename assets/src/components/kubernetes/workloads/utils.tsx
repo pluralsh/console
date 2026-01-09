@@ -70,7 +70,7 @@ export function PodStatusChip({
 }
 
 function podInfoStatus(
-  podInfo: CommonPodInfo
+  podInfo?: CommonPodInfo
 ): [string, ComponentProps<typeof Chip>['severity']] {
   if (!podInfo) return ['Unknown', 'neutral']
   const { desired, succeeded, running, pending, failed, warnings } = podInfo
@@ -90,12 +90,12 @@ function podInfoStatus(
   return ['Unknown', 'neutral']
 }
 
-export function WorkloadStatusChip({ podInfo }: { podInfo: CommonPodInfo }) {
+export function WorkloadStatusChip({ podInfo }: { podInfo?: CommonPodInfo }) {
   const [status, severity] = podInfoStatus(podInfo)
 
   return (
     <WrapWithIf
-      condition={podInfo?.warnings?.length > 0}
+      condition={(podInfo?.warnings?.length ?? 0) > 0}
       wrapper={
         <Tooltip
           label={podInfo?.warnings?.map((ev) => ev?.message)?.join(', ')}
