@@ -114,7 +114,6 @@ export default function StackActions({
             width="max-content"
           />
           <MoreMenu
-            defaultSelectedKey={MenuItemKey.Resync}
             width={350}
             triggerButton={
               <IconFrame
