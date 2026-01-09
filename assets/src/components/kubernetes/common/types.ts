@@ -1,5 +1,6 @@
 // import type { OperationVariables } from '@apollo/client/core'
 
+import { TypesObjectMeta, TypesTypeMeta } from 'generated/kubernetes'
 import {
   Types_ListMeta as ListMetaT,
   Types_ObjectMeta as ObjectMetaT,
@@ -35,8 +36,8 @@ interface ResourceList {
 }
 
 interface Resource {
-  objectMeta: ObjectMetaT
-  typeMeta: TypeMetaT
+  objectMeta: TypesObjectMeta
+  typeMeta: TypesTypeMeta
 }
 
 type QueryName<TQuery> = Exclude<Extract<keyof TQuery, string>, '__typename'>
