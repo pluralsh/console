@@ -13,9 +13,10 @@ import ResourceInfoCard, {
   ResourceInfoCardEntry,
   ResourceInfoCardSection,
 } from './ResourceInfoCard'
+import { PodContainer, V1Probe } from 'generated/kubernetes'
 
 interface ContainersProps {
-  containers: Array<Maybe<ContainerT>>
+  containers: Array<PodContainer>
 }
 
 export default function Containers({ containers }: ContainersProps) {
@@ -39,7 +40,7 @@ export default function Containers({ containers }: ContainersProps) {
 }
 
 interface ContainerProps {
-  container: ContainerT
+  container: PodContainer
 }
 
 function Container({ container }: ContainerProps) {
@@ -244,7 +245,7 @@ function Container({ container }: ContainerProps) {
   )
 }
 
-function Probe({ heading, probe }: { heading: string; probe: ProbeT }) {
+function Probe({ heading, probe }: { heading: string; probe: V1Probe }) {
   return (
     <ResourceInfoCardSection heading={heading}>
       <ResourceInfoCardEntry heading="Failure threshold">

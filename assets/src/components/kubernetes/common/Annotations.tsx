@@ -4,7 +4,7 @@ import { ReactElement, useCallback, useState } from 'react'
 import { dump } from 'js-yaml'
 
 interface AnnotationsProps {
-  annotations: object
+  annotations: { [key: string]: string } | undefined
 }
 
 const HIDDEN_ANNOTATIONS = ['last-applied-configuration']

@@ -3,13 +3,11 @@ import { dump } from 'js-yaml'
 import { isEmpty } from 'lodash'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
-import {
-  ConfigMapQueryVariables,
-  Configmap_ConfigMapDetail as ConfigMapT,
-  useConfigMapQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { ConfigmapConfigMapDetail } from '../../../generated/kubernetes'
+import { getConfigMapOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   CONFIG_MAPS_REL_PATH,
   getConfigurationAbsPath,
@@ -34,18 +32,13 @@ const directory: Array<TabEntry> = [
 
 export default function ConfigMap(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
-  const { data, loading } = useConfigMapQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as ConfigMapQueryVariables,
-  })
-
-  const cm = data?.handleGetConfigMapDetail
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const { data: cm, isLoading: loading } = useQuery(
+    getConfigMapOptions({
+      client: AxiosInstance(clusterId),
+      path: { configmap: name, namespace },
+    })
+  )
 
   useSetBreadcrumbs(
     useMemo(
@@ -84,7 +77,7 @@ export default function ConfigMap(): ReactElement<any> {
 }
 
 export function ConfigMapData(): ReactElement<any> {
-  const cm = useOutletContext() as ConfigMapT
+  const cm = useOutletContext() as ConfigmapConfigMapDetail
   const tabs = useMemo(
     () => [
       {

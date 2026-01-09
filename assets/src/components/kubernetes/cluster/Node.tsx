@@ -20,18 +20,14 @@ import { useTheme } from 'styled-components'
 import {
   Common_EventList as EventListT,
   Common_Event as EventT,
-  NodeEventsDocument,
   NodeEventsQuery,
   NodeEventsQueryVariables,
-  NodePodsDocument,
   NodePodsQuery,
   NodePodsQueryVariables,
   Node_NodeDetail as NodeT,
   Pod_PodList as PodListT,
   Pod_Pod as PodT,
-  useNodeQuery,
 } from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
 
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { GaugeWrap } from '../../cluster/Gauges'
@@ -54,6 +50,9 @@ import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
 import { usePodsColumns } from '../workloads/Pods'
 import { useEventsColumns } from './Events'
 import { getBreadcrumbs } from './Nodes'
+import { getNodeOptions } from 'generated/kubernetes/@tanstack/react-query.gen.ts'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from 'helpers/axios.ts'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -67,17 +66,19 @@ const directory: Array<TabEntry> = [
 export default function Node() {
   const { spacing } = useTheme()
   const cluster = useCluster()
-  const { clusterId, name = '' } = useParams()
+  const { clusterId = '', name = '' } = useParams()
   const [open, setOpen] = useState(false)
 
-  const { data, loading, error } = useNodeQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: { name },
-  })
-
-  const node = data?.handleGetNodeDetail
+  const {
+    data: node,
+    isLoading: loading,
+    error,
+  } = useQuery(
+    getNodeOptions({
+      client: AxiosInstance(clusterId),
+      path: { name },
+    })
+  )
 
   useSetBreadcrumbs(
     useMemo(

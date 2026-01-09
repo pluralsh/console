@@ -1,25 +1,3 @@
-query Jobs(
-  $namespace: String!
-  $filterBy: String
-  $sortBy: String
-  $itemsPerPage: String
-  $page: String
-) {
-  handleGetJobList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  )
-    @rest(
-      type: "job_JobList"
-      path: "job/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-    ) {
-    ...JobList
-  }
-}
-
 query Job($namespace: String!, $name: String!) {
   handleGetJobDetail(namespace: $namespace, name: $name)
     @rest(type: "job_JobDetail", path: "job/{args.namespace}/{args.name}") {

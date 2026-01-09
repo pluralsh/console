@@ -1,10 +1,9 @@
+import { EmptyState } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 import { createContext, useContext, useEffect, useMemo } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { useTheme } from 'styled-components'
-
-import { EmptyState } from '@pluralsh/design-system'
 
 import {
   KubernetesClusterFragment,
@@ -18,9 +17,9 @@ import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { GqlError } from '../utils/Alert'
 import LoadingIndicator from '../utils/LoadingIndicator'
+import { DataSelectProvider } from './common/DataSelect'
 
 import { LAST_SELECTED_CLUSTER_KEY } from './Navigation'
-import { DataSelectProvider } from './common/DataSelect'
 
 type ClusterContextT = {
   clusters: KubernetesClusterFragment[]

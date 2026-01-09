@@ -2,22 +2,24 @@ import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { Maybe } from '../../../generated/graphql-kubernetes'
 
 import {
-  Maybe,
-  Persistentvolumeclaim_PersistentVolumeClaim as PersistentVolumeClaimT,
-  Persistentvolumeclaim_PersistentVolumeClaimList as PersistentVolumeClaimListT,
-  PersistentVolumeClaimsDocument,
-  PersistentVolumeClaimsQuery,
-  PersistentVolumeClaimsQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+  PersistentvolumeclaimPersistentVolumeClaim,
+  PersistentvolumeclaimPersistentVolumeClaimList,
+} from '../../../generated/kubernetes'
 import {
-  getStorageAbsPath,
+  getAllPersistentVolumeClaimsInfiniteOptions,
+  getPersistentVolumeClaimsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
+import {
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
+  getStorageAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
+import { useDataSelect } from '../common/DataSelect'
 import ResourceLink from '../common/ResourceLink'
-import { ResourceList } from '../common/ResourceList'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { Kind } from '../common/types'
 import { useDefaultColumns } from '../common/utils'
 import { getStorageBreadcrumbs } from './Storage'
@@ -34,7 +36,8 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<PersistentVolumeClaimT>()
+const columnHelper =
+  createColumnHelper<PersistentvolumeclaimPersistentVolumeClaim>()
 
 export const colCapacity = columnHelper.accessor((pvc) => pvc.capacity, {
   id: 'capacity',
@@ -113,21 +116,23 @@ export const usePersistentVolumeClaimListColumns = () => {
 
 export default function PersistentVolumeClaims() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
   const columns = usePersistentVolumeClaimListColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <ResourceList<
-      PersistentVolumeClaimListT,
-      PersistentVolumeClaimT,
-      PersistentVolumeClaimsQuery,
-      PersistentVolumeClaimsQueryVariables
+    <UpdatedResourceList<
+      PersistentvolumeclaimPersistentVolumeClaimList,
+      PersistentvolumeclaimPersistentVolumeClaim
     >
       namespaced
       columns={columns}
-      queryDocument={PersistentVolumeClaimsDocument}
-      queryName="handleGetPersistentVolumeClaimList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getPersistentVolumeClaimsInfiniteOptions
+          : getAllPersistentVolumeClaimsInfiniteOptions
+      }
       itemsKey="items"
     />
   )

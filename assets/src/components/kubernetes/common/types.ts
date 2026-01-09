@@ -1,5 +1,6 @@
-import type { OperationVariables } from '@apollo/client/core'
+// import type { OperationVariables } from '@apollo/client/core'
 
+import { TypesObjectMeta, TypesTypeMeta } from 'generated/kubernetes'
 import {
   Types_ListMeta as ListMetaT,
   Types_ObjectMeta as ObjectMetaT,
@@ -17,11 +18,12 @@ interface Error {
   ErrStatus: ErrorStatus
 }
 
-interface DataSelectVariables extends OperationVariables {
+interface DataSelectVariables {
   filterBy?: Nullable<string>
   sortBy?: Nullable<string>
   itemsPerPage?: Nullable<string>
   page?: Nullable<string>
+  [key: string]: any
 }
 
 interface ResourceVariables extends DataSelectVariables {
@@ -34,8 +36,8 @@ interface ResourceList {
 }
 
 interface Resource {
-  objectMeta: ObjectMetaT
-  typeMeta: TypeMetaT
+  objectMeta: TypesObjectMeta
+  typeMeta: TypesTypeMeta
 }
 
 type QueryName<TQuery> = Exclude<Extract<keyof TQuery, string>, '__typename'>

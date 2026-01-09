@@ -1,24 +1,22 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo, useState } from 'react'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
+
+import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
+import { SecretSecret, SecretSecretList } from '../../../generated/kubernetes'
 import {
-  Maybe,
-  Secret_Secret as SecretT,
-  Secret_SecretList as SecretListT,
-  SecretsDocument,
-  SecretsQuery,
-  SecretsQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+  getAllSecretsInfiniteOptions,
+  getSecretsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   getConfigurationAbsPath,
   SECRETS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useSetPageHeaderAction } from '../../cd/ContinuousDeployment.tsx'
 import { useCluster } from '../Cluster'
+import { useDataSelect } from '../common/DataSelect'
 import { CreateSecretButton } from '../common/create/secret/SecretButton.tsx'
-import { ResourceList } from '../common/ResourceList'
-
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { useDefaultColumns } from '../common/utils'
 
 import { getConfigurationBreadcrumbs } from './Configuration'
@@ -31,7 +29,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<SecretT>()
+const columnHelper = createColumnHelper<SecretSecret>()
 
 const colType = columnHelper.accessor((secret) => secret.type, {
   id: 'type',
@@ -41,13 +39,14 @@ const colType = columnHelper.accessor((secret) => secret.type, {
 
 export default function Secrets() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
   const [refetch, setRefetch] = useState<any>()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
   useSetPageHeaderAction(
     <CreateSecretButton
       text="Create secret"
-      refetch={refetch!}
+      refetch={refetch}
     />
   )
 
@@ -66,11 +65,14 @@ export default function Secrets() {
   )
 
   return (
-    <ResourceList<SecretListT, SecretT, SecretsQuery, SecretsQueryVariables>
+    <UpdatedResourceList<SecretSecretList, SecretSecret>
       namespaced
       columns={columns}
-      queryDocument={SecretsDocument}
-      queryName="handleGetSecretList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getSecretsInfiniteOptions
+          : getAllSecretsInfiniteOptions
+      }
       itemsKey="secrets"
       setRefetch={setRefetch}
     />

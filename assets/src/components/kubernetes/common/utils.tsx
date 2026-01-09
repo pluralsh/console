@@ -14,8 +14,8 @@ import { formatLocalizedDateTime } from 'utils/datetime'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  Types_ListMeta as ListMetaT,
   Maybe,
+  Types_ListMeta as ListMetaT,
   Types_ObjectMeta as ObjectMetaT,
   Types_TypeMeta as TypeMetaT,
 } from '../../../generated/graphql-kubernetes'
@@ -26,18 +26,19 @@ import Annotations from './Annotations'
 import DeleteResourceButton from './DeleteResource'
 import ResourceLink from './ResourceLink'
 import { Kind, Resource } from './types'
+import { TypesObjectMeta, TypesTypeMeta } from 'generated/kubernetes'
 
 export const ITEMS_PER_PAGE = 25
 
 export const DEFAULT_DATA_SELECT = {
-  itemsPerPage: `${ITEMS_PER_PAGE}`,
+  itemsPerPage: ITEMS_PER_PAGE,
   page: '1',
 }
 
 export function useDefaultColumns<
-  T extends { objectMeta: ObjectMetaT; typeMeta: TypeMetaT } = {
-    objectMeta: ObjectMetaT
-    typeMeta: TypeMetaT
+  T extends { objectMeta: TypesObjectMeta; typeMeta: TypesTypeMeta } = {
+    objectMeta: TypesObjectMeta
+    typeMeta: TypesTypeMeta
   },
 >(columnHelper: ColumnHelper<T>) {
   return useMemo(
@@ -73,7 +74,7 @@ export function useDefaultColumns<
         },
       }),
       colCreationTimestamp: columnHelper.accessor(
-        (r) => r?.objectMeta.creationTimestamp,
+        (r) => r?.objectMeta.creationTimestamp?.Time,
         {
           id: 'creationTimestamp',
           header: 'Creation',
@@ -248,7 +249,7 @@ export function MetadataSidecar({
           )}
           <SidecarItem heading="UID">{objectMeta.uid}</SidecarItem>
           <SidecarItem heading="Creation date">
-            {formatLocalizedDateTime(objectMeta.creationTimestamp)}
+            {formatLocalizedDateTime(objectMeta.creationTimestamp?.Time)}
           </SidecarItem>
           <SidecarItem heading="Labels">
             <ChipList

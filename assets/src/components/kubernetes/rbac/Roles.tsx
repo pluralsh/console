@@ -2,23 +2,21 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { Maybe } from '../../../generated/graphql-kubernetes'
 
+import { RoleRole, RoleRoleList } from '../../../generated/kubernetes'
 import {
-  Maybe,
-  Role_Role as RoleT,
-  Role_RoleList as RoleListT,
-  RolesDocument,
-  RolesQuery,
-  RolesQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+  getAllRolesInfiniteOptions,
+  getRolesInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
-  getRbacAbsPath,
   ROLES_REL_PATH,
+  getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
+import { useDataSelect } from '../common/DataSelect'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { useDefaultColumns } from '../common/utils'
-
 import { getRbacBreadcrumbs } from './Rbac'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
@@ -29,10 +27,11 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<RoleT>()
+const columnHelper = createColumnHelper<RoleRole>()
 
 export default function Roles() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -44,11 +43,14 @@ export default function Roles() {
   )
 
   return (
-    <ResourceList<RoleListT, RoleT, RolesQuery, RolesQueryVariables>
+    <UpdatedResourceList<RoleRoleList, RoleRole>
       namespaced
       columns={columns}
-      queryDocument={RolesDocument}
-      queryName="handleGetRoleList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getRolesInfiniteOptions
+          : getAllRolesInfiniteOptions
+      }
       itemsKey="items"
     />
   )

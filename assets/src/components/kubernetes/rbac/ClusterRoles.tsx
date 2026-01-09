@@ -2,21 +2,19 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { Maybe } from '../../../generated/graphql-kubernetes'
 
 import {
-  Clusterrole_ClusterRole as ClusterRoleT,
-  Clusterrole_ClusterRoleList as ClusterRoleListT,
-  ClusterRolesDocument,
-  ClusterRolesQuery,
-  ClusterRolesQueryVariables,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+  ClusterroleClusterRole,
+  ClusterroleClusterRoleList,
+} from '../../../generated/kubernetes'
+import { getClusterRolesInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   CLUSTER_ROLES_REL_PATH,
   getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { useDefaultColumns } from '../common/utils'
 
 import { getRbacBreadcrumbs } from './Rbac'
@@ -29,7 +27,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<ClusterRoleT>()
+const columnHelper = createColumnHelper<ClusterroleClusterRole>()
 
 export default function ClusterRoles() {
   const cluster = useCluster()
@@ -44,15 +42,9 @@ export default function ClusterRoles() {
   )
 
   return (
-    <ResourceList<
-      ClusterRoleListT,
-      ClusterRoleT,
-      ClusterRolesQuery,
-      ClusterRolesQueryVariables
-    >
+    <UpdatedResourceList<ClusterroleClusterRoleList, ClusterroleClusterRole>
       columns={columns}
-      queryDocument={ClusterRolesDocument}
-      queryName="handleGetClusterRoleList"
+      queryOptions={getClusterRolesInfiniteOptions}
       itemsKey="items"
     />
   )

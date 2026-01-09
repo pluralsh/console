@@ -2,26 +2,24 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
-
 import {
-  Ingressclass_IngressClass as IngressClassT,
-  Ingressclass_IngressClassList as IngressClassListT,
-  IngressClassesDocument,
-  IngressClassesQuery,
-  IngressClassesQueryVariables,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+  IngressclassIngressClass,
+  IngressclassIngressClassList,
+} from '../../../generated/kubernetes'
+import { getIngressClassesInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen'
 import {
   getNetworkAbsPath,
   INGRESS_CLASSES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { useDefaultColumns } from '../common/utils'
 
 import { getNetworkBreadcrumbs } from './Network'
 
-export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+export const getBreadcrumbs = (
+  cluster?: KubernetesClusterFragment | null | undefined
+) => [
   ...getNetworkBreadcrumbs(cluster),
   {
     label: 'ingress classes',
@@ -29,7 +27,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<IngressClassT>()
+const columnHelper = createColumnHelper<IngressclassIngressClass>()
 
 const colController = columnHelper.accessor(
   (ingressClass) => ingressClass.controller,
@@ -49,19 +47,13 @@ export default function IngressClasses() {
     useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [colName, colController, colLabels, colCreationTimestamp, colAction],
-    [colName, colLabels, colCreationTimestamp, colAction]
+    [colName, colController, colLabels, colCreationTimestamp, colAction]
   )
 
   return (
-    <ResourceList<
-      IngressClassListT,
-      IngressClassT,
-      IngressClassesQuery,
-      IngressClassesQueryVariables
-    >
+    <UpdatedResourceList<IngressclassIngressClassList, IngressclassIngressClass>
       columns={columns}
-      queryDocument={IngressClassesDocument}
-      queryName="handleGetIngressClassList"
+      queryOptions={getIngressClassesInfiniteOptions}
       itemsKey="items"
     />
   )

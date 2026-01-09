@@ -1,25 +1,3 @@
-query ReplicaSets(
-  $namespace: String!
-  $filterBy: String
-  $sortBy: String
-  $itemsPerPage: String
-  $page: String
-) {
-  handleGetReplicaSets(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  )
-    @rest(
-      type: "replicaset_ReplicaSetList"
-      path: "replicaset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
-    ) {
-    ...ReplicaSetList
-  }
-}
-
 query ReplicaSet($namespace: String!, $name: String!) {
   handleGetReplicaSetDetail(namespace: $namespace, replicaSet: $name)
     @rest(

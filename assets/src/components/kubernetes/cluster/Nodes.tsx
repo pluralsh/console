@@ -8,14 +8,7 @@ import { filesize } from 'filesize'
 import { useMemo, useState } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
-import {
-  Maybe,
-  Node_Node as NodeT,
-  Node_NodeList as NodeListT,
-  NodesDocument,
-  NodesQuery,
-  NodesQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+import { Maybe } from '../../../generated/graphql-kubernetes'
 import {
   getClusterAbsPath,
   NODES_REL_PATH,
@@ -24,10 +17,12 @@ import { Usage } from '../../cluster/TableElements'
 import { UsageBar } from '../../utils/UsageBar.tsx'
 import { useCluster } from '../Cluster'
 import { DrainNodeModal } from '../common/DrainNodeModal.tsx'
-import { ResourceList } from '../common/ResourceList'
 import { ResourceReadyChip, useDefaultColumns } from '../common/utils'
 
 import { getClusterBreadcrumbs } from './Cluster'
+import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
+import { NodeNode, NodeNodeList } from '../../../generated/kubernetes'
+import { getNodesInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getClusterBreadcrumbs(cluster),
@@ -37,7 +32,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<NodeT>()
+const columnHelper = createColumnHelper<NodeNode>()
 
 const colReady = columnHelper.accessor((node) => node?.ready, {
   id: 'ready',
@@ -167,10 +162,9 @@ export default function Nodes() {
   )
 
   return (
-    <ResourceList<NodeListT, NodeT, NodesQuery, NodesQueryVariables>
+    <UpdatedResourceList<NodeNodeList, NodeNode>
       columns={columns}
-      queryDocument={NodesDocument}
-      queryName="handleGetNodeList"
+      queryOptions={getNodesInfiniteOptions}
       itemsKey="nodes"
     />
   )

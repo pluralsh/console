@@ -4887,17 +4887,6 @@ export type Validation_ProtocolValiditySpec_Input = {
   protocol: Scalars['String']['input'];
 };
 
-export type ClusterRolesQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type ClusterRolesQuery = { __typename?: 'Query', handleGetClusterRoleList?: { __typename?: 'clusterrole_ClusterRoleList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'clusterrole_ClusterRole', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
 export type ClusterRoleQueryVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
@@ -4905,34 +4894,12 @@ export type ClusterRoleQueryVariables = Exact<{
 
 export type ClusterRoleQuery = { __typename?: 'Query', handleGetClusterRoleDetail?: { __typename?: 'clusterrole_ClusterRoleDetail', errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, rules: Array<{ __typename?: 'v1_PolicyRule', apiGroups?: Array<string | null> | null, nonResourceURLs?: Array<string | null> | null, resourceNames?: Array<string | null> | null, verbs: Array<string | null>, resources?: Array<string | null> | null } | null> } | null };
 
-export type ClusterRoleBindingsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type ClusterRoleBindingsQuery = { __typename?: 'Query', handleGetClusterRoleBindingList?: { __typename?: 'clusterrolebinding_ClusterRoleBindingList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'clusterrolebinding_ClusterRoleBinding', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
 export type ClusterRoleBindingQueryVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
 
 
 export type ClusterRoleBindingQuery = { __typename?: 'Query', handleGetClusterRoleBindingDetail?: { __typename?: 'clusterrolebinding_ClusterRoleBindingDetail', errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, subjects?: Array<{ __typename?: 'v1_Subject', apiGroup?: string | null, kind: string, name: string, namespace?: string | null } | null> | null, roleRef: { __typename?: 'v1_RoleRef', name: string, kind: string, apiGroup: string } } | null };
-
-export type RolesQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type RolesQuery = { __typename?: 'Query', handleGetRoleList?: { __typename?: 'role_RoleList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'role_Role', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type RoleQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4942,17 +4909,6 @@ export type RoleQueryVariables = Exact<{
 
 export type RoleQuery = { __typename?: 'Query', handleGetRoleDetail?: { __typename?: 'role_RoleDetail', errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, rules: Array<{ __typename?: 'v1_PolicyRule', apiGroups?: Array<string | null> | null, nonResourceURLs?: Array<string | null> | null, resourceNames?: Array<string | null> | null, verbs: Array<string | null>, resources?: Array<string | null> | null } | null> } | null };
 
-export type RoleBindingsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type RoleBindingsQuery = { __typename?: 'Query', handleGetRoleBindingList?: { __typename?: 'rolebinding_RoleBindingList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'rolebinding_RoleBinding', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
 export type RoleBindingQueryVariables = Exact<{
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -4960,17 +4916,6 @@ export type RoleBindingQueryVariables = Exact<{
 
 
 export type RoleBindingQuery = { __typename?: 'Query', handleGetRoleBindingDetail?: { __typename?: 'rolebinding_RoleBindingDetail', errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, subjects?: Array<{ __typename?: 'v1_Subject', apiGroup?: string | null, kind: string, name: string, namespace?: string | null } | null> | null, roleRef: { __typename?: 'v1_RoleRef', name: string, kind: string, apiGroup: string } } | null };
-
-export type ServiceAccountsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type ServiceAccountsQuery = { __typename?: 'Query', handleGetServiceAccountList?: { __typename?: 'serviceaccount_ServiceAccountList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'serviceaccount_ServiceAccount', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ServiceAccountQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5049,24 +4994,6 @@ export type NamespaceEventsQueryVariables = Exact<{
 
 
 export type NamespaceEventsQuery = { __typename?: 'Query', handleGetNamespaceEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
-export type NodesQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type NodesQuery = { __typename?: 'Query', handleGetNodeList?: { __typename?: 'node_NodeList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, nodes: Array<{ __typename?: 'node_Node', ready: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuLimits: any, cpuLimitsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryLimits: any, memoryLimitsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any }, nodeInfo: { __typename?: 'v1_NodeSystemInfo', kubeletVersion: string } } | null> } | null };
-
-export type NodeQueryVariables = Exact<{
-  name: Scalars['String']['input'];
-}>;
-
-
-export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typename?: 'node_NodeDetail', providerID: string, containerImages: Array<string | null>, podCIDR: string, phase: string, unschedulable: boolean, ready: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuLimits: any, cpuLimitsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryLimits: any, memoryLimitsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any }, nodeInfo: { __typename?: 'v1_NodeSystemInfo', architecture: string, bootID: string, containerRuntimeVersion: string, kernelVersion: string, kubeletVersion: string, kubeProxyVersion: string, machineID: string, operatingSystem: string, osImage: string, systemUUID: string }, addresses?: Array<{ __typename?: 'v1_NodeAddress', type: string, address: string } | null> | null, taints?: Array<{ __typename?: 'v1_Taint', key: string, value?: string | null, effect: string } | null> | null } | null };
 
 export type NodePodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5230,17 +5157,6 @@ export type NamespacedResourceDeleteMutationVariables = Exact<{
 
 export type NamespacedResourceDeleteMutation = { __typename?: 'Mutation', handleDeleteResource?: any | null };
 
-export type ConfigMapsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type ConfigMapsQuery = { __typename?: 'Query', handleGetConfigMapList?: { __typename?: 'configmap_ConfigMapList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'configmap_ConfigMap', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
 export type ConfigMapQueryVariables = Exact<{
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -5248,17 +5164,6 @@ export type ConfigMapQueryVariables = Exact<{
 
 
 export type ConfigMapQuery = { __typename?: 'Query', handleGetConfigMapDetail?: { __typename?: 'configmap_ConfigMapDetail', data?: any | null, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
-
-export type SecretsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type SecretsQuery = { __typename?: 'Query', handleGetSecretList?: { __typename?: 'secret_SecretList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, secrets: Array<{ __typename?: 'secret_Secret', type: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type SecretQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5352,33 +5257,12 @@ export type IngressEventsQuery = { __typename?: 'Query', handleGetIngressEvent?:
 
 export type IngressListFragment = { __typename?: 'ingress_IngressList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> };
 
-export type IngressClassesQueryVariables = Exact<{
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type IngressClassesQuery = { __typename?: 'Query', handleGetIngressClassList?: { __typename?: 'ingressclass_IngressClassList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingressclass_IngressClass', controller: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
 export type IngressClassQueryVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
 
 
 export type IngressClassQuery = { __typename?: 'Query', handleGetIngressClass?: { __typename?: 'ingressclass_IngressClass', controller: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
-
-export type NetworkPoliciesQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type NetworkPoliciesQuery = { __typename?: 'Query', handleGetNetworkPolicyList?: { __typename?: 'networkpolicy_NetworkPolicyList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'networkpolicy_NetworkPolicy', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type NetworkPolicyQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5445,33 +5329,12 @@ export type ServiceIngressesQuery = { __typename?: 'Query', handleGetServiceIngr
 
 export type ServiceListFragment = { __typename?: 'service_ServiceList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> };
 
-export type PersistentVolumesQueryVariables = Exact<{
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type PersistentVolumesQuery = { __typename?: 'Query', handleGetPersistentVolumeList?: { __typename?: 'persistentvolume_PersistentVolumeList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolume_PersistentVolume', status: string, claim: string, storageClass: string, reason: string, reclaimPolicy: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
 export type PersistentVolumeQueryVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
 
 
 export type PersistentVolumeQuery = { __typename?: 'Query', handleGetPersistentVolumeDetail?: { __typename?: 'persistentvolume_PersistentVolumeDetail', status: string, capacity: any, claim: string, storageClass: string, reason: string, message: string, mountOptions: Array<string | null>, reclaimPolicy: string, accessModes: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, persistentVolumeSource: { __typename?: 'v1_PersistentVolumeSource', portworxVolume?: { __typename?: 'v1_PortworxVolumeSource', fsType?: string | null, readOnly?: boolean | null, volumeID: string } | null, awsElasticBlockStore?: { __typename?: 'v1_AWSElasticBlockStoreVolumeSource', volumeID: string, readOnly?: boolean | null, fsType?: string | null, partition?: number | null } | null, azureDisk?: { __typename?: 'v1_AzureDiskVolumeSource', fsType?: string | null, readOnly?: boolean | null, kind?: string | null, cachingMode?: string | null, diskName: string, diskURI: string } | null, azureFile?: { __typename?: 'v1_AzureFilePersistentVolumeSource', readOnly?: boolean | null, secretName: string, secretNamespace: string, shareName: string } | null, cephfs?: { __typename?: 'v1_CephFSPersistentVolumeSource', readOnly?: boolean | null, path?: string | null, monitors: Array<string | null>, secretFile?: string | null, user?: string | null, secretRef?: { __typename?: 'v1_SecretReference', name?: string | null, namespace?: string | null } | null } | null, cinder?: { __typename?: 'v1_CinderPersistentVolumeSource', readOnly?: boolean | null, fsType?: string | null, volumeID: string, secretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null } | null, csi?: { __typename?: 'v1_CSIPersistentVolumeSource', fsType?: string | null, readOnly?: boolean | null, driver: string, volumeAttributes?: any | null, volumeHandle: string, controllerExpandSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null, controllerPublishSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null, nodeExpandSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null, nodePublishSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null, nodeStageSecretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null } | null, fc?: { __typename?: 'v1_FCVolumeSource', readOnly?: boolean | null, fsType?: string | null, lun?: number | null, targetWWNs?: Array<string | null> | null, wwids?: Array<string | null> | null } | null, flexVolume?: { __typename?: 'v1_FlexPersistentVolumeSource', fsType?: string | null, readOnly?: boolean | null, driver: string, options?: any | null, secretRef?: { __typename?: 'v1_SecretReference', name?: string | null, namespace?: string | null } | null } | null, flocker?: { __typename?: 'v1_FlockerVolumeSource', datasetName?: string | null, datasetUUID?: string | null } | null, gcePersistentDisk?: { __typename?: 'v1_GCEPersistentDiskVolumeSource', readOnly?: boolean | null, fsType?: string | null, partition?: number | null, pdName: string } | null, glusterfs?: { __typename?: 'v1_GlusterfsPersistentVolumeSource', readOnly?: boolean | null, path: string, endpoints: string, endpointsNamespace?: string | null } | null, hostPath?: { __typename?: 'v1_HostPathVolumeSource', path: string, type?: string | null } | null, iscsi?: { __typename?: 'v1_ISCSIPersistentVolumeSource', readOnly?: boolean | null, fsType?: string | null, lun: number, chapAuthDiscovery?: boolean | null, chapAuthSession?: boolean | null, initiatorName?: string | null, iqn: string, iscsiInterface?: string | null, portals?: Array<string | null> | null, targetPortal: string, secretRef?: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } | null } | null, local?: { __typename?: 'v1_LocalVolumeSource', fsType?: string | null, path: string } | null, nfs?: { __typename?: 'v1_NFSVolumeSource', path: string, readOnly?: boolean | null, server: string } | null, photonPersistentDisk?: { __typename?: 'v1_PhotonPersistentDiskVolumeSource', fsType?: string | null, pdID: string } | null, quobyte?: { __typename?: 'v1_QuobyteVolumeSource', readOnly?: boolean | null, user?: string | null, volume: string, registry: string, group?: string | null, tenant?: string | null } | null, rbd?: { __typename?: 'v1_RBDPersistentVolumeSource', user?: string | null, readOnly?: boolean | null, fsType?: string | null, monitors: Array<string | null>, image: string, keyring?: string | null, pool?: string | null, secretRef?: { __typename?: 'v1_SecretReference', name?: string | null, namespace?: string | null } | null } | null, scaleIO?: { __typename?: 'v1_ScaleIOPersistentVolumeSource', fsType?: string | null, readOnly?: boolean | null, gateway: string, protectionDomain?: string | null, sslEnabled?: boolean | null, storageMode?: string | null, storagePool?: string | null, system: string, volumeName?: string | null, secretRef: { __typename?: 'v1_SecretReference', namespace?: string | null, name?: string | null } } | null, storageos?: { __typename?: 'v1_StorageOSPersistentVolumeSource', volumeName?: string | null, volumeNamespace?: string | null, fsType?: string | null, readOnly?: boolean | null, secretRef?: { __typename?: 'v1_ObjectReference', name?: string | null, namespace?: string | null, kind?: string | null, uid?: string | null, apiVersion?: string | null, fieldPath?: string | null, resourceVersion?: string | null } | null } | null, vsphereVolume?: { __typename?: 'v1_VsphereVirtualDiskVolumeSource', fsType?: string | null, storagePolicyID?: string | null, storagePolicyName?: string | null, volumePath: string } | null } } | null };
-
-export type PersistentVolumeClaimsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type PersistentVolumeClaimsQuery = { __typename?: 'Query', handleGetPersistentVolumeClaimList?: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type PersistentVolumeClaimQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5486,16 +5349,6 @@ export type PersistentVolumeClaimFragment = { __typename?: 'persistentvolumeclai
 export type PersistentVolumeClaimDetailFragment = { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimDetail', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } };
 
 export type PersistentVolumeClaimListFragment = { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
-
-export type StorageClassesQueryVariables = Exact<{
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type StorageClassesQuery = { __typename?: 'Query', handleGetStorageClassList?: { __typename?: 'storageclass_StorageClassList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'storageclass_StorageClass', parameters: any, provisioner: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type StorageClassQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5514,17 +5367,6 @@ export type StorageClassPersistentVolumesQueryVariables = Exact<{
 
 
 export type StorageClassPersistentVolumesQuery = { __typename?: 'Query', handleGetStorageClassPersistentVolumes?: { __typename?: 'persistentvolume_PersistentVolumeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolume_PersistentVolume', status: string, claim: string, reason: string, reclaimPolicy: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
-export type CronJobsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type CronJobsQuery = { __typename?: 'Query', handleGetCronJobList?: { __typename?: 'cronjob_CronJobList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type CronJobQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5567,22 +5409,7 @@ export type CronJobTriggerMutationVariables = Exact<{
 
 export type CronJobTriggerMutation = { __typename?: 'Mutation', handleTriggerCronJob?: any | null };
 
-export type CronJobListFragment = { __typename?: 'cronjob_CronJobList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
-
-export type CronJobFragment = { __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } };
-
 export type CronJobDetailFragment = { __typename?: 'cronjob_CronJobDetail', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, concurrencyPolicy: string, startingDeadlineSeconds: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } };
-
-export type DaemonSetsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type DaemonSetsQuery = { __typename?: 'Query', handleGetDaemonSetList?: { __typename?: 'daemonset_DaemonSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, daemonSets: Array<{ __typename?: 'daemonset_DaemonSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
 
 export type DaemonSetQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5628,22 +5455,7 @@ export type DaemonSetServicesQueryVariables = Exact<{
 
 export type DaemonSetServicesQuery = { __typename?: 'Query', handleGetDaemonSetServices?: { __typename?: 'service_ServiceList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
 
-export type DaemonSetListFragment = { __typename?: 'daemonset_DaemonSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, daemonSets: Array<{ __typename?: 'daemonset_DaemonSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
-
-export type DaemonSetFragment = { __typename?: 'daemonset_DaemonSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
-
 export type DaemonSetDetailFragment = { __typename?: 'daemonset_DaemonSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, labelSelector?: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null } | null };
-
-export type DeploymentsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type DeploymentsQuery = { __typename?: 'Query', handleGetDeployments?: { __typename?: 'deployment_DeploymentList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, deployments: Array<{ __typename?: 'deployment_Deployment', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
 
 export type DeploymentQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5689,26 +5501,11 @@ export type DeploymentOldReplicaSetsQueryVariables = Exact<{
 
 export type DeploymentOldReplicaSetsQuery = { __typename?: 'Query', handleGetDeploymentOldReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
 
-export type DeploymentListFragment = { __typename?: 'deployment_DeploymentList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, deployments: Array<{ __typename?: 'deployment_Deployment', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
-
-export type DeploymentFragment = { __typename?: 'deployment_Deployment', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
-
 export type DeploymentDetailFragment = { __typename?: 'deployment_DeploymentDetail', selector: any, initContainerImages: Array<string | null>, containerImages: Array<string | null>, minReadySeconds: number, revisionHistoryLimit: number, strategy: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, rollingUpdateStrategy?: { __typename?: 'deployment_RollingUpdateStrategy', maxSurge: string, maxUnavailable: string } | null, statusInfo: { __typename?: 'deployment_StatusInfo', available: number, replicas: number, unavailable: number, updated: number } };
 
 export type RollingUpdateStrategyFragment = { __typename?: 'deployment_RollingUpdateStrategy', maxSurge: string, maxUnavailable: string };
 
 export type StatusInfoFragment = { __typename?: 'deployment_StatusInfo', available: number, replicas: number, unavailable: number, updated: number };
-
-export type JobsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type JobsQuery = { __typename?: 'Query', handleGetJobList?: { __typename?: 'job_JobList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> } | null };
 
 export type JobQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5804,17 +5601,6 @@ export type PodListFragment = { __typename?: 'pod_PodList', errors: Array<any | 
 
 export type LogDetailsFragment = { __typename?: 'logs_LogDetails', info: { __typename?: 'logs_LogInfo', podName: string, containerName: string, initContainerName: string, fromDate: string, toDate: string }, logs: Array<{ __typename?: 'logs_LogLine', timestamp: string, content: string } | null> };
 
-export type ReplicaSetsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type ReplicaSetsQuery = { __typename?: 'Query', handleGetReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
-
 export type ReplicaSetQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
@@ -5865,17 +5651,6 @@ export type ReplicaSetFragment = { __typename?: 'replicaset_ReplicaSet', initCon
 
 export type ReplicaSetDetailFragment = { __typename?: 'replicaset_ReplicaSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, selector: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null }, horizontalPodAutoscalerList: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } };
 
-export type ReplicationControllersQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type ReplicationControllersQuery = { __typename?: 'Query', handleGetReplicationControllerList?: { __typename?: 'replicationcontroller_ReplicationControllerList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicationControllers: Array<{ __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
-
 export type ReplicationControllerQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
@@ -5920,22 +5695,7 @@ export type ReplicationControllerServicesQueryVariables = Exact<{
 
 export type ReplicationControllerServicesQuery = { __typename?: 'Query', handleGetReplicationControllerServices?: { __typename?: 'service_ServiceList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
 
-export type ReplicationControllerListFragment = { __typename?: 'replicationcontroller_ReplicationControllerList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicationControllers: Array<{ __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
-
-export type ReplicationControllerFragment = { __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
-
 export type ReplicationControllerDetailFragment = { __typename?: 'replicationcontroller_ReplicationControllerDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, labelSelector: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
-
-export type StatefulSetsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type StatefulSetsQuery = { __typename?: 'Query', handleGetStatefulSetList?: { __typename?: 'statefulset_StatefulSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
 
 export type StatefulSetQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5968,10 +5728,6 @@ export type StatefulSetPodsQueryVariables = Exact<{
 
 
 export type StatefulSetPodsQuery = { __typename?: 'Query', handleGetStatefulSetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null>, allocatedResources: { __typename?: 'pod_PodAllocatedResources', cpuLimits: any, cpuRequests: any, memoryLimits: any, memoryRequests: any, gpuLimits: Array<{ __typename?: 'pod_GPUAllocation', quantity: any, type: string } | null>, gpuRequests: Array<{ __typename?: 'pod_GPUAllocation', quantity: any, type: string } | null> } } | null> } | null };
-
-export type StatefulSetListFragment = { __typename?: 'statefulset_StatefulSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
-
-export type StatefulSetFragment = { __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
 
 export type StatefulSetDetailFragment = { __typename?: 'statefulset_StatefulSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
 
@@ -6278,34 +6034,6 @@ export const PersistentVolumeClaimListFragmentDoc = gql`
 }
     ${ListMetaFragmentDoc}
 ${PersistentVolumeClaimFragmentDoc}`;
-export const CronJobFragmentDoc = gql`
-    fragment CronJob on cronjob_CronJob {
-  typeMeta @type(name: "types_TypeMeta") {
-    ...TypeMeta
-  }
-  objectMeta @type(name: "types_ObjectMeta") {
-    ...ObjectMeta
-  }
-  containerImages
-  schedule
-  suspend
-  active
-  lastSchedule
-}
-    ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-export const CronJobListFragmentDoc = gql`
-    fragment CronJobList on cronjob_CronJobList {
-  errors
-  listMeta @type(name: "types_ListMeta") {
-    ...ListMeta
-  }
-  items @type(name: "cronjob_CronJob") {
-    ...CronJob
-  }
-}
-    ${ListMetaFragmentDoc}
-${CronJobFragmentDoc}`;
 export const CronJobDetailFragmentDoc = gql`
     fragment CronJobDetail on cronjob_CronJobDetail {
   typeMeta @type(name: "types_TypeMeta") {
@@ -6324,35 +6052,6 @@ export const CronJobDetailFragmentDoc = gql`
 }
     ${TypeMetaFragmentDoc}
 ${ObjectMetaFragmentDoc}`;
-export const DaemonSetFragmentDoc = gql`
-    fragment DaemonSet on daemonset_DaemonSet {
-  typeMeta @type(name: "types_TypeMeta") {
-    ...TypeMeta
-  }
-  objectMeta @type(name: "types_ObjectMeta") {
-    ...ObjectMeta
-  }
-  podInfo @type(name: "common_PodInfo") {
-    ...PodInfo
-  }
-  initContainerImages
-  containerImages
-}
-    ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}`;
-export const DaemonSetListFragmentDoc = gql`
-    fragment DaemonSetList on daemonset_DaemonSetList {
-  errors
-  listMeta @type(name: "types_ListMeta") {
-    ...ListMeta
-  }
-  daemonSets @type(name: "daemonset_DaemonSet") {
-    ...DaemonSet
-  }
-}
-    ${ListMetaFragmentDoc}
-${DaemonSetFragmentDoc}`;
 export const DaemonSetDetailFragmentDoc = gql`
     fragment DaemonSetDetail on daemonset_DaemonSetDetail {
   typeMeta @type(name: "types_TypeMeta") {
@@ -6374,35 +6073,6 @@ export const DaemonSetDetailFragmentDoc = gql`
 ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}
 ${SelectorFragmentDoc}`;
-export const DeploymentFragmentDoc = gql`
-    fragment Deployment on deployment_Deployment {
-  typeMeta @type(name: "types_TypeMeta") {
-    ...TypeMeta
-  }
-  objectMeta @type(name: "types_ObjectMeta") {
-    ...ObjectMeta
-  }
-  pods @type(name: "common_PodInfo") {
-    ...PodInfo
-  }
-  initContainerImages
-  containerImages
-}
-    ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}`;
-export const DeploymentListFragmentDoc = gql`
-    fragment DeploymentList on deployment_DeploymentList {
-  errors
-  listMeta @type(name: "types_ListMeta") {
-    ...ListMeta
-  }
-  deployments @type(name: "deployment_Deployment") {
-    ...Deployment
-  }
-}
-    ${ListMetaFragmentDoc}
-${DeploymentFragmentDoc}`;
 export const ConditionFragmentDoc = gql`
     fragment Condition on common_Condition {
   message
@@ -6829,35 +6499,6 @@ ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}
 ${SelectorFragmentDoc}
 ${HorizontalPodAutoscalerListFragmentDoc}`;
-export const ReplicationControllerFragmentDoc = gql`
-    fragment ReplicationController on replicationcontroller_ReplicationController {
-  typeMeta @type(name: "types_TypeMeta") {
-    ...TypeMeta
-  }
-  objectMeta @type(name: "types_ObjectMeta") {
-    ...ObjectMeta
-  }
-  podInfo @type(name: "common_PodInfo") {
-    ...PodInfo
-  }
-  initContainerImages
-  containerImages
-}
-    ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}`;
-export const ReplicationControllerListFragmentDoc = gql`
-    fragment ReplicationControllerList on replicationcontroller_ReplicationControllerList {
-  errors
-  listMeta @type(name: "types_ListMeta") {
-    ...ListMeta
-  }
-  replicationControllers @type(name: "replicationcontroller_ReplicationController") {
-    ...ReplicationController
-  }
-}
-    ${ListMetaFragmentDoc}
-${ReplicationControllerFragmentDoc}`;
 export const ReplicationControllerDetailFragmentDoc = gql`
     fragment ReplicationControllerDetail on replicationcontroller_ReplicationControllerDetail {
   typeMeta @type(name: "types_TypeMeta") {
@@ -6876,35 +6517,6 @@ export const ReplicationControllerDetailFragmentDoc = gql`
     ${TypeMetaFragmentDoc}
 ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}`;
-export const StatefulSetFragmentDoc = gql`
-    fragment StatefulSet on statefulset_StatefulSet {
-  typeMeta @type(name: "types_TypeMeta") {
-    ...TypeMeta
-  }
-  objectMeta @type(name: "types_ObjectMeta") {
-    ...ObjectMeta
-  }
-  podInfo @type(name: "common_PodInfo") {
-    ...PodInfo
-  }
-  initContainerImages
-  containerImages
-}
-    ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${PodInfoFragmentDoc}`;
-export const StatefulSetListFragmentDoc = gql`
-    fragment StatefulSetList on statefulset_StatefulSetList {
-  errors
-  listMeta @type(name: "types_ListMeta") {
-    ...ListMeta
-  }
-  statefulSets @type(name: "statefulset_StatefulSet") {
-    ...StatefulSet
-  }
-}
-    ${ListMetaFragmentDoc}
-${StatefulSetFragmentDoc}`;
 export const StatefulSetDetailFragmentDoc = gql`
     fragment StatefulSetDetail on statefulset_StatefulSetDetail {
   typeMeta @type(name: "types_TypeMeta") {
@@ -6922,68 +6534,6 @@ export const StatefulSetDetailFragmentDoc = gql`
     ${TypeMetaFragmentDoc}
 ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}`;
-export const ClusterRolesDocument = gql`
-    query ClusterRoles($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetClusterRoleList(
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "clusterrole?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useClusterRolesQuery__
- *
- * To run a query within a React component, call `useClusterRolesQuery` and pass it any options that fit your needs.
- * When your component renders, `useClusterRolesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useClusterRolesQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useClusterRolesQuery(baseOptions: Apollo.QueryHookOptions<ClusterRolesQuery, ClusterRolesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ClusterRolesQuery, ClusterRolesQueryVariables>(ClusterRolesDocument, options);
-      }
-export function useClusterRolesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterRolesQuery, ClusterRolesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ClusterRolesQuery, ClusterRolesQueryVariables>(ClusterRolesDocument, options);
-        }
-export function useClusterRolesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterRolesQuery, ClusterRolesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ClusterRolesQuery, ClusterRolesQueryVariables>(ClusterRolesDocument, options);
-        }
-export type ClusterRolesQueryHookResult = ReturnType<typeof useClusterRolesQuery>;
-export type ClusterRolesLazyQueryHookResult = ReturnType<typeof useClusterRolesLazyQuery>;
-export type ClusterRolesSuspenseQueryHookResult = ReturnType<typeof useClusterRolesSuspenseQuery>;
-export type ClusterRolesQueryResult = Apollo.QueryResult<ClusterRolesQuery, ClusterRolesQueryVariables>;
 export const ClusterRoleDocument = gql`
     query ClusterRole($name: String!) {
   handleGetClusterRoleDetail(name: $name) @rest(path: "clusterrole/{args.name}") {
@@ -7035,68 +6585,6 @@ export type ClusterRoleQueryHookResult = ReturnType<typeof useClusterRoleQuery>;
 export type ClusterRoleLazyQueryHookResult = ReturnType<typeof useClusterRoleLazyQuery>;
 export type ClusterRoleSuspenseQueryHookResult = ReturnType<typeof useClusterRoleSuspenseQuery>;
 export type ClusterRoleQueryResult = Apollo.QueryResult<ClusterRoleQuery, ClusterRoleQueryVariables>;
-export const ClusterRoleBindingsDocument = gql`
-    query ClusterRoleBindings($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetClusterRoleBindingList(
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "clusterrolebinding?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useClusterRoleBindingsQuery__
- *
- * To run a query within a React component, call `useClusterRoleBindingsQuery` and pass it any options that fit your needs.
- * When your component renders, `useClusterRoleBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useClusterRoleBindingsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useClusterRoleBindingsQuery(baseOptions: Apollo.QueryHookOptions<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>(ClusterRoleBindingsDocument, options);
-      }
-export function useClusterRoleBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>(ClusterRoleBindingsDocument, options);
-        }
-export function useClusterRoleBindingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>(ClusterRoleBindingsDocument, options);
-        }
-export type ClusterRoleBindingsQueryHookResult = ReturnType<typeof useClusterRoleBindingsQuery>;
-export type ClusterRoleBindingsLazyQueryHookResult = ReturnType<typeof useClusterRoleBindingsLazyQuery>;
-export type ClusterRoleBindingsSuspenseQueryHookResult = ReturnType<typeof useClusterRoleBindingsSuspenseQuery>;
-export type ClusterRoleBindingsQueryResult = Apollo.QueryResult<ClusterRoleBindingsQuery, ClusterRoleBindingsQueryVariables>;
 export const ClusterRoleBindingDocument = gql`
     query ClusterRoleBinding($name: String!) {
   handleGetClusterRoleBindingDetail(name: $name) @rest(path: "clusterrolebinding/{args.name}") {
@@ -7153,69 +6641,6 @@ export type ClusterRoleBindingQueryHookResult = ReturnType<typeof useClusterRole
 export type ClusterRoleBindingLazyQueryHookResult = ReturnType<typeof useClusterRoleBindingLazyQuery>;
 export type ClusterRoleBindingSuspenseQueryHookResult = ReturnType<typeof useClusterRoleBindingSuspenseQuery>;
 export type ClusterRoleBindingQueryResult = Apollo.QueryResult<ClusterRoleBindingQuery, ClusterRoleBindingQueryVariables>;
-export const RolesDocument = gql`
-    query Roles($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetRoleList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(type: "role_RoleList", path: "role/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useRolesQuery__
- *
- * To run a query within a React component, call `useRolesQuery` and pass it any options that fit your needs.
- * When your component renders, `useRolesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useRolesQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useRolesQuery(baseOptions: Apollo.QueryHookOptions<RolesQuery, RolesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RolesQuery, RolesQueryVariables>(RolesDocument, options);
-      }
-export function useRolesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RolesQuery, RolesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RolesQuery, RolesQueryVariables>(RolesDocument, options);
-        }
-export function useRolesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RolesQuery, RolesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<RolesQuery, RolesQueryVariables>(RolesDocument, options);
-        }
-export type RolesQueryHookResult = ReturnType<typeof useRolesQuery>;
-export type RolesLazyQueryHookResult = ReturnType<typeof useRolesLazyQuery>;
-export type RolesSuspenseQueryHookResult = ReturnType<typeof useRolesSuspenseQuery>;
-export type RolesQueryResult = Apollo.QueryResult<RolesQuery, RolesQueryVariables>;
 export const RoleDocument = gql`
     query Role($name: String!, $namespace: String!) {
   handleGetRoleDetail(namespace: $namespace, name: $name) @rest(path: "role/{args.namespace}/{args.name}") {
@@ -7268,69 +6693,6 @@ export type RoleQueryHookResult = ReturnType<typeof useRoleQuery>;
 export type RoleLazyQueryHookResult = ReturnType<typeof useRoleLazyQuery>;
 export type RoleSuspenseQueryHookResult = ReturnType<typeof useRoleSuspenseQuery>;
 export type RoleQueryResult = Apollo.QueryResult<RoleQuery, RoleQueryVariables>;
-export const RoleBindingsDocument = gql`
-    query RoleBindings($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetRoleBindingList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "rolebinding/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useRoleBindingsQuery__
- *
- * To run a query within a React component, call `useRoleBindingsQuery` and pass it any options that fit your needs.
- * When your component renders, `useRoleBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useRoleBindingsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useRoleBindingsQuery(baseOptions: Apollo.QueryHookOptions<RoleBindingsQuery, RoleBindingsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<RoleBindingsQuery, RoleBindingsQueryVariables>(RoleBindingsDocument, options);
-      }
-export function useRoleBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RoleBindingsQuery, RoleBindingsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<RoleBindingsQuery, RoleBindingsQueryVariables>(RoleBindingsDocument, options);
-        }
-export function useRoleBindingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<RoleBindingsQuery, RoleBindingsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<RoleBindingsQuery, RoleBindingsQueryVariables>(RoleBindingsDocument, options);
-        }
-export type RoleBindingsQueryHookResult = ReturnType<typeof useRoleBindingsQuery>;
-export type RoleBindingsLazyQueryHookResult = ReturnType<typeof useRoleBindingsLazyQuery>;
-export type RoleBindingsSuspenseQueryHookResult = ReturnType<typeof useRoleBindingsSuspenseQuery>;
-export type RoleBindingsQueryResult = Apollo.QueryResult<RoleBindingsQuery, RoleBindingsQueryVariables>;
 export const RoleBindingDocument = gql`
     query RoleBinding($name: String!, $namespace: String!) {
   handleGetRoleBindingDetail(namespace: $namespace, name: $name) @rest(path: "rolebinding/{args.namespace}/{args.name}") {
@@ -7388,69 +6750,6 @@ export type RoleBindingQueryHookResult = ReturnType<typeof useRoleBindingQuery>;
 export type RoleBindingLazyQueryHookResult = ReturnType<typeof useRoleBindingLazyQuery>;
 export type RoleBindingSuspenseQueryHookResult = ReturnType<typeof useRoleBindingSuspenseQuery>;
 export type RoleBindingQueryResult = Apollo.QueryResult<RoleBindingQuery, RoleBindingQueryVariables>;
-export const ServiceAccountsDocument = gql`
-    query ServiceAccounts($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetServiceAccountList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(type: "serviceaccount_ServiceAccountList", path: "serviceaccount/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useServiceAccountsQuery__
- *
- * To run a query within a React component, call `useServiceAccountsQuery` and pass it any options that fit your needs.
- * When your component renders, `useServiceAccountsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useServiceAccountsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useServiceAccountsQuery(baseOptions: Apollo.QueryHookOptions<ServiceAccountsQuery, ServiceAccountsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ServiceAccountsQuery, ServiceAccountsQueryVariables>(ServiceAccountsDocument, options);
-      }
-export function useServiceAccountsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceAccountsQuery, ServiceAccountsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ServiceAccountsQuery, ServiceAccountsQueryVariables>(ServiceAccountsDocument, options);
-        }
-export function useServiceAccountsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceAccountsQuery, ServiceAccountsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ServiceAccountsQuery, ServiceAccountsQueryVariables>(ServiceAccountsDocument, options);
-        }
-export type ServiceAccountsQueryHookResult = ReturnType<typeof useServiceAccountsQuery>;
-export type ServiceAccountsLazyQueryHookResult = ReturnType<typeof useServiceAccountsLazyQuery>;
-export type ServiceAccountsSuspenseQueryHookResult = ReturnType<typeof useServiceAccountsSuspenseQuery>;
-export type ServiceAccountsQueryResult = Apollo.QueryResult<ServiceAccountsQuery, ServiceAccountsQueryVariables>;
 export const ServiceAccountDocument = gql`
     query ServiceAccount($namespace: String!, $name: String!) {
   handleGetServiceAccountDetail(namespace: $namespace, serviceaccount: $name) @rest(type: "serviceaccount_ServiceAccountDetail", path: "serviceaccount/{args.namespace}/{args.serviceaccount}") {
@@ -7836,158 +7135,6 @@ export type NamespaceEventsQueryHookResult = ReturnType<typeof useNamespaceEvent
 export type NamespaceEventsLazyQueryHookResult = ReturnType<typeof useNamespaceEventsLazyQuery>;
 export type NamespaceEventsSuspenseQueryHookResult = ReturnType<typeof useNamespaceEventsSuspenseQuery>;
 export type NamespaceEventsQueryResult = Apollo.QueryResult<NamespaceEventsQuery, NamespaceEventsQueryVariables>;
-export const NodesDocument = gql`
-    query Nodes($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetNodeList(
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "node?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    nodes {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      allocatedResources @type(name: "node_NodeAllocatedResources") {
-        ...NodeAllocatedResources
-      }
-      ready
-      nodeInfo {
-        kubeletVersion
-      }
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${NodeAllocatedResourcesFragmentDoc}`;
-
-/**
- * __useNodesQuery__
- *
- * To run a query within a React component, call `useNodesQuery` and pass it any options that fit your needs.
- * When your component renders, `useNodesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useNodesQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useNodesQuery(baseOptions: Apollo.QueryHookOptions<NodesQuery, NodesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<NodesQuery, NodesQueryVariables>(NodesDocument, options);
-      }
-export function useNodesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NodesQuery, NodesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<NodesQuery, NodesQueryVariables>(NodesDocument, options);
-        }
-export function useNodesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NodesQuery, NodesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<NodesQuery, NodesQueryVariables>(NodesDocument, options);
-        }
-export type NodesQueryHookResult = ReturnType<typeof useNodesQuery>;
-export type NodesLazyQueryHookResult = ReturnType<typeof useNodesLazyQuery>;
-export type NodesSuspenseQueryHookResult = ReturnType<typeof useNodesSuspenseQuery>;
-export type NodesQueryResult = Apollo.QueryResult<NodesQuery, NodesQueryVariables>;
-export const NodeDocument = gql`
-    query Node($name: String!) {
-  handleGetNodeDetail(name: $name) @rest(path: "node/{args.name}") {
-    typeMeta @type(name: "types_TypeMeta") {
-      ...TypeMeta
-    }
-    objectMeta @type(name: "types_ObjectMeta") {
-      ...ObjectMeta
-    }
-    conditions @type(name: "common_Condition") {
-      ...Condition
-    }
-    allocatedResources @type(name: "node_NodeAllocatedResources") {
-      ...NodeAllocatedResources
-    }
-    nodeInfo {
-      architecture
-      bootID
-      containerRuntimeVersion
-      kernelVersion
-      kubeletVersion
-      kubeProxyVersion
-      machineID
-      operatingSystem
-      osImage
-      systemUUID
-    }
-    addresses {
-      type
-      address
-    }
-    taints {
-      key
-      value
-      effect
-    }
-    providerID
-    containerImages
-    podCIDR
-    phase
-    unschedulable
-    ready
-    errors
-  }
-}
-    ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}
-${ConditionFragmentDoc}
-${NodeAllocatedResourcesFragmentDoc}`;
-
-/**
- * __useNodeQuery__
- *
- * To run a query within a React component, call `useNodeQuery` and pass it any options that fit your needs.
- * When your component renders, `useNodeQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useNodeQuery({
- *   variables: {
- *      name: // value for 'name'
- *   },
- * });
- */
-export function useNodeQuery(baseOptions: Apollo.QueryHookOptions<NodeQuery, NodeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<NodeQuery, NodeQueryVariables>(NodeDocument, options);
-      }
-export function useNodeLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NodeQuery, NodeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<NodeQuery, NodeQueryVariables>(NodeDocument, options);
-        }
-export function useNodeSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NodeQuery, NodeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<NodeQuery, NodeQueryVariables>(NodeDocument, options);
-        }
-export type NodeQueryHookResult = ReturnType<typeof useNodeQuery>;
-export type NodeLazyQueryHookResult = ReturnType<typeof useNodeLazyQuery>;
-export type NodeSuspenseQueryHookResult = ReturnType<typeof useNodeSuspenseQuery>;
-export type NodeQueryResult = Apollo.QueryResult<NodeQuery, NodeQueryVariables>;
 export const NodePodsDocument = gql`
     query NodePods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetNodePods(
@@ -8524,69 +7671,6 @@ export function useNamespacedResourceDeleteMutation(baseOptions?: Apollo.Mutatio
 export type NamespacedResourceDeleteMutationHookResult = ReturnType<typeof useNamespacedResourceDeleteMutation>;
 export type NamespacedResourceDeleteMutationResult = Apollo.MutationResult<NamespacedResourceDeleteMutation>;
 export type NamespacedResourceDeleteMutationOptions = Apollo.BaseMutationOptions<NamespacedResourceDeleteMutation, NamespacedResourceDeleteMutationVariables>;
-export const ConfigMapsDocument = gql`
-    query ConfigMaps($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetConfigMapList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "configmap/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useConfigMapsQuery__
- *
- * To run a query within a React component, call `useConfigMapsQuery` and pass it any options that fit your needs.
- * When your component renders, `useConfigMapsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useConfigMapsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useConfigMapsQuery(baseOptions: Apollo.QueryHookOptions<ConfigMapsQuery, ConfigMapsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ConfigMapsQuery, ConfigMapsQueryVariables>(ConfigMapsDocument, options);
-      }
-export function useConfigMapsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ConfigMapsQuery, ConfigMapsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ConfigMapsQuery, ConfigMapsQueryVariables>(ConfigMapsDocument, options);
-        }
-export function useConfigMapsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ConfigMapsQuery, ConfigMapsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ConfigMapsQuery, ConfigMapsQueryVariables>(ConfigMapsDocument, options);
-        }
-export type ConfigMapsQueryHookResult = ReturnType<typeof useConfigMapsQuery>;
-export type ConfigMapsLazyQueryHookResult = ReturnType<typeof useConfigMapsLazyQuery>;
-export type ConfigMapsSuspenseQueryHookResult = ReturnType<typeof useConfigMapsSuspenseQuery>;
-export type ConfigMapsQueryResult = Apollo.QueryResult<ConfigMapsQuery, ConfigMapsQueryVariables>;
 export const ConfigMapDocument = gql`
     query ConfigMap($name: String!, $namespace: String!) {
   handleGetConfigMapDetail(namespace: $namespace, configmap: $name) @rest(path: "configmap/{args.namespace}/{args.configmap}") {
@@ -8635,70 +7719,6 @@ export type ConfigMapQueryHookResult = ReturnType<typeof useConfigMapQuery>;
 export type ConfigMapLazyQueryHookResult = ReturnType<typeof useConfigMapLazyQuery>;
 export type ConfigMapSuspenseQueryHookResult = ReturnType<typeof useConfigMapSuspenseQuery>;
 export type ConfigMapQueryResult = Apollo.QueryResult<ConfigMapQuery, ConfigMapQueryVariables>;
-export const SecretsDocument = gql`
-    query Secrets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetSecretList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "secret/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    secrets {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      type
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useSecretsQuery__
- *
- * To run a query within a React component, call `useSecretsQuery` and pass it any options that fit your needs.
- * When your component renders, `useSecretsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useSecretsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useSecretsQuery(baseOptions: Apollo.QueryHookOptions<SecretsQuery, SecretsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SecretsQuery, SecretsQueryVariables>(SecretsDocument, options);
-      }
-export function useSecretsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SecretsQuery, SecretsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SecretsQuery, SecretsQueryVariables>(SecretsDocument, options);
-        }
-export function useSecretsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SecretsQuery, SecretsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SecretsQuery, SecretsQueryVariables>(SecretsDocument, options);
-        }
-export type SecretsQueryHookResult = ReturnType<typeof useSecretsQuery>;
-export type SecretsLazyQueryHookResult = ReturnType<typeof useSecretsLazyQuery>;
-export type SecretsSuspenseQueryHookResult = ReturnType<typeof useSecretsSuspenseQuery>;
-export type SecretsQueryResult = Apollo.QueryResult<SecretsQuery, SecretsQueryVariables>;
 export const SecretDocument = gql`
     query Secret($name: String!, $namespace: String!) {
   handleGetSecretDetail(namespace: $namespace, name: $name) @rest(path: "secret/{args.namespace}/{args.name}") {
@@ -9271,68 +8291,6 @@ export type IngressEventsQueryHookResult = ReturnType<typeof useIngressEventsQue
 export type IngressEventsLazyQueryHookResult = ReturnType<typeof useIngressEventsLazyQuery>;
 export type IngressEventsSuspenseQueryHookResult = ReturnType<typeof useIngressEventsSuspenseQuery>;
 export type IngressEventsQueryResult = Apollo.QueryResult<IngressEventsQuery, IngressEventsQueryVariables>;
-export const IngressClassesDocument = gql`
-    query IngressClasses($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetIngressClassList(
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "ingressclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      controller
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useIngressClassesQuery__
- *
- * To run a query within a React component, call `useIngressClassesQuery` and pass it any options that fit your needs.
- * When your component renders, `useIngressClassesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useIngressClassesQuery({
- *   variables: {
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useIngressClassesQuery(baseOptions?: Apollo.QueryHookOptions<IngressClassesQuery, IngressClassesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<IngressClassesQuery, IngressClassesQueryVariables>(IngressClassesDocument, options);
-      }
-export function useIngressClassesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IngressClassesQuery, IngressClassesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<IngressClassesQuery, IngressClassesQueryVariables>(IngressClassesDocument, options);
-        }
-export function useIngressClassesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IngressClassesQuery, IngressClassesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<IngressClassesQuery, IngressClassesQueryVariables>(IngressClassesDocument, options);
-        }
-export type IngressClassesQueryHookResult = ReturnType<typeof useIngressClassesQuery>;
-export type IngressClassesLazyQueryHookResult = ReturnType<typeof useIngressClassesLazyQuery>;
-export type IngressClassesSuspenseQueryHookResult = ReturnType<typeof useIngressClassesSuspenseQuery>;
-export type IngressClassesQueryResult = Apollo.QueryResult<IngressClassesQuery, IngressClassesQueryVariables>;
 export const IngressClassDocument = gql`
     query IngressClass($name: String!) {
   handleGetIngressClass(ingressclass: $name) @rest(path: "ingressclass/{args.ingressclass}") {
@@ -9380,69 +8338,6 @@ export type IngressClassQueryHookResult = ReturnType<typeof useIngressClassQuery
 export type IngressClassLazyQueryHookResult = ReturnType<typeof useIngressClassLazyQuery>;
 export type IngressClassSuspenseQueryHookResult = ReturnType<typeof useIngressClassSuspenseQuery>;
 export type IngressClassQueryResult = Apollo.QueryResult<IngressClassQuery, IngressClassQueryVariables>;
-export const NetworkPoliciesDocument = gql`
-    query NetworkPolicies($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetNetworkPolicyList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "networkpolicy/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useNetworkPoliciesQuery__
- *
- * To run a query within a React component, call `useNetworkPoliciesQuery` and pass it any options that fit your needs.
- * When your component renders, `useNetworkPoliciesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useNetworkPoliciesQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useNetworkPoliciesQuery(baseOptions: Apollo.QueryHookOptions<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>(NetworkPoliciesDocument, options);
-      }
-export function useNetworkPoliciesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>(NetworkPoliciesDocument, options);
-        }
-export function useNetworkPoliciesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>(NetworkPoliciesDocument, options);
-        }
-export type NetworkPoliciesQueryHookResult = ReturnType<typeof useNetworkPoliciesQuery>;
-export type NetworkPoliciesLazyQueryHookResult = ReturnType<typeof useNetworkPoliciesLazyQuery>;
-export type NetworkPoliciesSuspenseQueryHookResult = ReturnType<typeof useNetworkPoliciesSuspenseQuery>;
-export type NetworkPoliciesQueryResult = Apollo.QueryResult<NetworkPoliciesQuery, NetworkPoliciesQueryVariables>;
 export const NetworkPolicyDocument = gql`
     query NetworkPolicy($name: String!, $namespace: String!) {
   handleGetNetworkPolicyDetail(namespace: $namespace, networkpolicy: $name) @rest(path: "networkpolicy/{args.namespace}/{args.networkpolicy}") {
@@ -9814,74 +8709,6 @@ export type ServiceIngressesQueryHookResult = ReturnType<typeof useServiceIngres
 export type ServiceIngressesLazyQueryHookResult = ReturnType<typeof useServiceIngressesLazyQuery>;
 export type ServiceIngressesSuspenseQueryHookResult = ReturnType<typeof useServiceIngressesSuspenseQuery>;
 export type ServiceIngressesQueryResult = Apollo.QueryResult<ServiceIngressesQuery, ServiceIngressesQueryVariables>;
-export const PersistentVolumesDocument = gql`
-    query PersistentVolumes($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetPersistentVolumeList(
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "persistentvolume?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      status
-      claim
-      storageClass
-      reason
-      reclaimPolicy
-      accessModes
-      capacity
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __usePersistentVolumesQuery__
- *
- * To run a query within a React component, call `usePersistentVolumesQuery` and pass it any options that fit your needs.
- * When your component renders, `usePersistentVolumesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePersistentVolumesQuery({
- *   variables: {
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function usePersistentVolumesQuery(baseOptions?: Apollo.QueryHookOptions<PersistentVolumesQuery, PersistentVolumesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PersistentVolumesQuery, PersistentVolumesQueryVariables>(PersistentVolumesDocument, options);
-      }
-export function usePersistentVolumesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PersistentVolumesQuery, PersistentVolumesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PersistentVolumesQuery, PersistentVolumesQueryVariables>(PersistentVolumesDocument, options);
-        }
-export function usePersistentVolumesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PersistentVolumesQuery, PersistentVolumesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PersistentVolumesQuery, PersistentVolumesQueryVariables>(PersistentVolumesDocument, options);
-        }
-export type PersistentVolumesQueryHookResult = ReturnType<typeof usePersistentVolumesQuery>;
-export type PersistentVolumesLazyQueryHookResult = ReturnType<typeof usePersistentVolumesLazyQuery>;
-export type PersistentVolumesSuspenseQueryHookResult = ReturnType<typeof usePersistentVolumesSuspenseQuery>;
-export type PersistentVolumesQueryResult = Apollo.QueryResult<PersistentVolumesQuery, PersistentVolumesQueryVariables>;
 export const PersistentVolumeDocument = gql`
     query PersistentVolume($name: String!) {
   handleGetPersistentVolumeDetail(persistentvolume: $name) @rest(path: "persistentvolume/{args.persistentvolume}") {
@@ -10135,56 +8962,6 @@ export type PersistentVolumeQueryHookResult = ReturnType<typeof usePersistentVol
 export type PersistentVolumeLazyQueryHookResult = ReturnType<typeof usePersistentVolumeLazyQuery>;
 export type PersistentVolumeSuspenseQueryHookResult = ReturnType<typeof usePersistentVolumeSuspenseQuery>;
 export type PersistentVolumeQueryResult = Apollo.QueryResult<PersistentVolumeQuery, PersistentVolumeQueryVariables>;
-export const PersistentVolumeClaimsDocument = gql`
-    query PersistentVolumeClaims($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetPersistentVolumeClaimList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(type: "persistentvolumeclaim_PersistentVolumeClaimList", path: "persistentvolumeclaim/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    ...PersistentVolumeClaimList
-  }
-}
-    ${PersistentVolumeClaimListFragmentDoc}`;
-
-/**
- * __usePersistentVolumeClaimsQuery__
- *
- * To run a query within a React component, call `usePersistentVolumeClaimsQuery` and pass it any options that fit your needs.
- * When your component renders, `usePersistentVolumeClaimsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePersistentVolumeClaimsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function usePersistentVolumeClaimsQuery(baseOptions: Apollo.QueryHookOptions<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>(PersistentVolumeClaimsDocument, options);
-      }
-export function usePersistentVolumeClaimsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>(PersistentVolumeClaimsDocument, options);
-        }
-export function usePersistentVolumeClaimsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>(PersistentVolumeClaimsDocument, options);
-        }
-export type PersistentVolumeClaimsQueryHookResult = ReturnType<typeof usePersistentVolumeClaimsQuery>;
-export type PersistentVolumeClaimsLazyQueryHookResult = ReturnType<typeof usePersistentVolumeClaimsLazyQuery>;
-export type PersistentVolumeClaimsSuspenseQueryHookResult = ReturnType<typeof usePersistentVolumeClaimsSuspenseQuery>;
-export type PersistentVolumeClaimsQueryResult = Apollo.QueryResult<PersistentVolumeClaimsQuery, PersistentVolumeClaimsQueryVariables>;
 export const PersistentVolumeClaimDocument = gql`
     query PersistentVolumeClaim($name: String!, $namespace: String!) {
   handleGetPersistentVolumeClaimDetail(namespace: $namespace, name: $name) @rest(type: "persistentvolumeclaim_PersistentVolumeClaimDetail", path: "persistentvolumeclaim/{args.namespace}/{args.name}") {
@@ -10226,69 +9003,6 @@ export type PersistentVolumeClaimQueryHookResult = ReturnType<typeof usePersiste
 export type PersistentVolumeClaimLazyQueryHookResult = ReturnType<typeof usePersistentVolumeClaimLazyQuery>;
 export type PersistentVolumeClaimSuspenseQueryHookResult = ReturnType<typeof usePersistentVolumeClaimSuspenseQuery>;
 export type PersistentVolumeClaimQueryResult = Apollo.QueryResult<PersistentVolumeClaimQuery, PersistentVolumeClaimQueryVariables>;
-export const StorageClassesDocument = gql`
-    query StorageClasses($filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetStorageClassList(
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "storageclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    items {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      parameters
-      provisioner
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useStorageClassesQuery__
- *
- * To run a query within a React component, call `useStorageClassesQuery` and pass it any options that fit your needs.
- * When your component renders, `useStorageClassesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useStorageClassesQuery({
- *   variables: {
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useStorageClassesQuery(baseOptions?: Apollo.QueryHookOptions<StorageClassesQuery, StorageClassesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<StorageClassesQuery, StorageClassesQueryVariables>(StorageClassesDocument, options);
-      }
-export function useStorageClassesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StorageClassesQuery, StorageClassesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<StorageClassesQuery, StorageClassesQueryVariables>(StorageClassesDocument, options);
-        }
-export function useStorageClassesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StorageClassesQuery, StorageClassesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<StorageClassesQuery, StorageClassesQueryVariables>(StorageClassesDocument, options);
-        }
-export type StorageClassesQueryHookResult = ReturnType<typeof useStorageClassesQuery>;
-export type StorageClassesLazyQueryHookResult = ReturnType<typeof useStorageClassesLazyQuery>;
-export type StorageClassesSuspenseQueryHookResult = ReturnType<typeof useStorageClassesSuspenseQuery>;
-export type StorageClassesQueryResult = Apollo.QueryResult<StorageClassesQuery, StorageClassesQueryVariables>;
 export const StorageClassDocument = gql`
     query StorageClass($name: String!) {
   handleGetStorageClass(storageclass: $name) @rest(path: "storageclass/{args.storageclass}") {
@@ -10405,56 +9119,6 @@ export type StorageClassPersistentVolumesQueryHookResult = ReturnType<typeof use
 export type StorageClassPersistentVolumesLazyQueryHookResult = ReturnType<typeof useStorageClassPersistentVolumesLazyQuery>;
 export type StorageClassPersistentVolumesSuspenseQueryHookResult = ReturnType<typeof useStorageClassPersistentVolumesSuspenseQuery>;
 export type StorageClassPersistentVolumesQueryResult = Apollo.QueryResult<StorageClassPersistentVolumesQuery, StorageClassPersistentVolumesQueryVariables>;
-export const CronJobsDocument = gql`
-    query CronJobs($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetCronJobList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(type: "cronjob_CronJobList", path: "cronjob/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    ...CronJobList
-  }
-}
-    ${CronJobListFragmentDoc}`;
-
-/**
- * __useCronJobsQuery__
- *
- * To run a query within a React component, call `useCronJobsQuery` and pass it any options that fit your needs.
- * When your component renders, `useCronJobsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCronJobsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useCronJobsQuery(baseOptions: Apollo.QueryHookOptions<CronJobsQuery, CronJobsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CronJobsQuery, CronJobsQueryVariables>(CronJobsDocument, options);
-      }
-export function useCronJobsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CronJobsQuery, CronJobsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CronJobsQuery, CronJobsQueryVariables>(CronJobsDocument, options);
-        }
-export function useCronJobsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CronJobsQuery, CronJobsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CronJobsQuery, CronJobsQueryVariables>(CronJobsDocument, options);
-        }
-export type CronJobsQueryHookResult = ReturnType<typeof useCronJobsQuery>;
-export type CronJobsLazyQueryHookResult = ReturnType<typeof useCronJobsLazyQuery>;
-export type CronJobsSuspenseQueryHookResult = ReturnType<typeof useCronJobsSuspenseQuery>;
-export type CronJobsQueryResult = Apollo.QueryResult<CronJobsQuery, CronJobsQueryVariables>;
 export const CronJobDocument = gql`
     query CronJob($namespace: String!, $name: String!) {
   handleGetCronJobDetail(namespace: $namespace, name: $name) @rest(type: "cronjob_CronJobDetail", path: "cronjob/{args.namespace}/{args.name}") {
@@ -10634,56 +9298,6 @@ export function useCronJobTriggerMutation(baseOptions?: Apollo.MutationHookOptio
 export type CronJobTriggerMutationHookResult = ReturnType<typeof useCronJobTriggerMutation>;
 export type CronJobTriggerMutationResult = Apollo.MutationResult<CronJobTriggerMutation>;
 export type CronJobTriggerMutationOptions = Apollo.BaseMutationOptions<CronJobTriggerMutation, CronJobTriggerMutationVariables>;
-export const DaemonSetsDocument = gql`
-    query DaemonSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetDaemonSetList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(type: "daemonset_DaemonSetList", path: "daemonset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    ...DaemonSetList
-  }
-}
-    ${DaemonSetListFragmentDoc}`;
-
-/**
- * __useDaemonSetsQuery__
- *
- * To run a query within a React component, call `useDaemonSetsQuery` and pass it any options that fit your needs.
- * When your component renders, `useDaemonSetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useDaemonSetsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useDaemonSetsQuery(baseOptions: Apollo.QueryHookOptions<DaemonSetsQuery, DaemonSetsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<DaemonSetsQuery, DaemonSetsQueryVariables>(DaemonSetsDocument, options);
-      }
-export function useDaemonSetsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DaemonSetsQuery, DaemonSetsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<DaemonSetsQuery, DaemonSetsQueryVariables>(DaemonSetsDocument, options);
-        }
-export function useDaemonSetsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DaemonSetsQuery, DaemonSetsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<DaemonSetsQuery, DaemonSetsQueryVariables>(DaemonSetsDocument, options);
-        }
-export type DaemonSetsQueryHookResult = ReturnType<typeof useDaemonSetsQuery>;
-export type DaemonSetsLazyQueryHookResult = ReturnType<typeof useDaemonSetsLazyQuery>;
-export type DaemonSetsSuspenseQueryHookResult = ReturnType<typeof useDaemonSetsSuspenseQuery>;
-export type DaemonSetsQueryResult = Apollo.QueryResult<DaemonSetsQuery, DaemonSetsQueryVariables>;
 export const DaemonSetDocument = gql`
     query DaemonSet($namespace: String!, $name: String!) {
   handleGetDaemonSetDetail(namespace: $namespace, daemonSet: $name) @rest(type: "daemonset_DaemonSetDetail", path: "daemonset/{args.namespace}/{args.daemonSet}") {
@@ -10881,56 +9495,6 @@ export type DaemonSetServicesQueryHookResult = ReturnType<typeof useDaemonSetSer
 export type DaemonSetServicesLazyQueryHookResult = ReturnType<typeof useDaemonSetServicesLazyQuery>;
 export type DaemonSetServicesSuspenseQueryHookResult = ReturnType<typeof useDaemonSetServicesSuspenseQuery>;
 export type DaemonSetServicesQueryResult = Apollo.QueryResult<DaemonSetServicesQuery, DaemonSetServicesQueryVariables>;
-export const DeploymentsDocument = gql`
-    query Deployments($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetDeployments(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(type: "deployment_DeploymentList", path: "deployment/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    ...DeploymentList
-  }
-}
-    ${DeploymentListFragmentDoc}`;
-
-/**
- * __useDeploymentsQuery__
- *
- * To run a query within a React component, call `useDeploymentsQuery` and pass it any options that fit your needs.
- * When your component renders, `useDeploymentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useDeploymentsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useDeploymentsQuery(baseOptions: Apollo.QueryHookOptions<DeploymentsQuery, DeploymentsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<DeploymentsQuery, DeploymentsQueryVariables>(DeploymentsDocument, options);
-      }
-export function useDeploymentsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<DeploymentsQuery, DeploymentsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<DeploymentsQuery, DeploymentsQueryVariables>(DeploymentsDocument, options);
-        }
-export function useDeploymentsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<DeploymentsQuery, DeploymentsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<DeploymentsQuery, DeploymentsQueryVariables>(DeploymentsDocument, options);
-        }
-export type DeploymentsQueryHookResult = ReturnType<typeof useDeploymentsQuery>;
-export type DeploymentsLazyQueryHookResult = ReturnType<typeof useDeploymentsLazyQuery>;
-export type DeploymentsSuspenseQueryHookResult = ReturnType<typeof useDeploymentsSuspenseQuery>;
-export type DeploymentsQueryResult = Apollo.QueryResult<DeploymentsQuery, DeploymentsQueryVariables>;
 export const DeploymentDocument = gql`
     query Deployment($namespace: String!, $name: String!) {
   handleGetDeploymentDetail(namespace: $namespace, deployment: $name) @rest(type: "deployment_DeploymentDetail", path: "deployment/{args.namespace}/{args.deployment}") {
@@ -11128,56 +9692,6 @@ export type DeploymentOldReplicaSetsQueryHookResult = ReturnType<typeof useDeplo
 export type DeploymentOldReplicaSetsLazyQueryHookResult = ReturnType<typeof useDeploymentOldReplicaSetsLazyQuery>;
 export type DeploymentOldReplicaSetsSuspenseQueryHookResult = ReturnType<typeof useDeploymentOldReplicaSetsSuspenseQuery>;
 export type DeploymentOldReplicaSetsQueryResult = Apollo.QueryResult<DeploymentOldReplicaSetsQuery, DeploymentOldReplicaSetsQueryVariables>;
-export const JobsDocument = gql`
-    query Jobs($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetJobList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(type: "job_JobList", path: "job/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    ...JobList
-  }
-}
-    ${JobListFragmentDoc}`;
-
-/**
- * __useJobsQuery__
- *
- * To run a query within a React component, call `useJobsQuery` and pass it any options that fit your needs.
- * When your component renders, `useJobsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useJobsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useJobsQuery(baseOptions: Apollo.QueryHookOptions<JobsQuery, JobsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<JobsQuery, JobsQueryVariables>(JobsDocument, options);
-      }
-export function useJobsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<JobsQuery, JobsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<JobsQuery, JobsQueryVariables>(JobsDocument, options);
-        }
-export function useJobsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<JobsQuery, JobsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<JobsQuery, JobsQueryVariables>(JobsDocument, options);
-        }
-export type JobsQueryHookResult = ReturnType<typeof useJobsQuery>;
-export type JobsLazyQueryHookResult = ReturnType<typeof useJobsLazyQuery>;
-export type JobsSuspenseQueryHookResult = ReturnType<typeof useJobsSuspenseQuery>;
-export type JobsQueryResult = Apollo.QueryResult<JobsQuery, JobsQueryVariables>;
 export const JobDocument = gql`
     query Job($namespace: String!, $name: String!) {
   handleGetJobDetail(namespace: $namespace, name: $name) @rest(type: "job_JobDetail", path: "job/{args.namespace}/{args.name}") {
@@ -11554,56 +10068,6 @@ export type PodLogsQueryHookResult = ReturnType<typeof usePodLogsQuery>;
 export type PodLogsLazyQueryHookResult = ReturnType<typeof usePodLogsLazyQuery>;
 export type PodLogsSuspenseQueryHookResult = ReturnType<typeof usePodLogsSuspenseQuery>;
 export type PodLogsQueryResult = Apollo.QueryResult<PodLogsQuery, PodLogsQueryVariables>;
-export const ReplicaSetsDocument = gql`
-    query ReplicaSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetReplicaSets(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(type: "replicaset_ReplicaSetList", path: "replicaset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    ...ReplicaSetList
-  }
-}
-    ${ReplicaSetListFragmentDoc}`;
-
-/**
- * __useReplicaSetsQuery__
- *
- * To run a query within a React component, call `useReplicaSetsQuery` and pass it any options that fit your needs.
- * When your component renders, `useReplicaSetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useReplicaSetsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useReplicaSetsQuery(baseOptions: Apollo.QueryHookOptions<ReplicaSetsQuery, ReplicaSetsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ReplicaSetsQuery, ReplicaSetsQueryVariables>(ReplicaSetsDocument, options);
-      }
-export function useReplicaSetsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicaSetsQuery, ReplicaSetsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ReplicaSetsQuery, ReplicaSetsQueryVariables>(ReplicaSetsDocument, options);
-        }
-export function useReplicaSetsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicaSetsQuery, ReplicaSetsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ReplicaSetsQuery, ReplicaSetsQueryVariables>(ReplicaSetsDocument, options);
-        }
-export type ReplicaSetsQueryHookResult = ReturnType<typeof useReplicaSetsQuery>;
-export type ReplicaSetsLazyQueryHookResult = ReturnType<typeof useReplicaSetsLazyQuery>;
-export type ReplicaSetsSuspenseQueryHookResult = ReturnType<typeof useReplicaSetsSuspenseQuery>;
-export type ReplicaSetsQueryResult = Apollo.QueryResult<ReplicaSetsQuery, ReplicaSetsQueryVariables>;
 export const ReplicaSetDocument = gql`
     query ReplicaSet($namespace: String!, $name: String!) {
   handleGetReplicaSetDetail(namespace: $namespace, replicaSet: $name) @rest(type: "replicaset_ReplicaSetDetail", path: "replicaset/{args.namespace}/{args.replicaSet}") {
@@ -11801,56 +10265,6 @@ export type ReplicaSetServicesQueryHookResult = ReturnType<typeof useReplicaSetS
 export type ReplicaSetServicesLazyQueryHookResult = ReturnType<typeof useReplicaSetServicesLazyQuery>;
 export type ReplicaSetServicesSuspenseQueryHookResult = ReturnType<typeof useReplicaSetServicesSuspenseQuery>;
 export type ReplicaSetServicesQueryResult = Apollo.QueryResult<ReplicaSetServicesQuery, ReplicaSetServicesQueryVariables>;
-export const ReplicationControllersDocument = gql`
-    query ReplicationControllers($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetReplicationControllerList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(type: "replicationcontroller_ReplicationControllerList", path: "replicationcontroller/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    ...ReplicationControllerList
-  }
-}
-    ${ReplicationControllerListFragmentDoc}`;
-
-/**
- * __useReplicationControllersQuery__
- *
- * To run a query within a React component, call `useReplicationControllersQuery` and pass it any options that fit your needs.
- * When your component renders, `useReplicationControllersQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useReplicationControllersQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useReplicationControllersQuery(baseOptions: Apollo.QueryHookOptions<ReplicationControllersQuery, ReplicationControllersQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ReplicationControllersQuery, ReplicationControllersQueryVariables>(ReplicationControllersDocument, options);
-      }
-export function useReplicationControllersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ReplicationControllersQuery, ReplicationControllersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ReplicationControllersQuery, ReplicationControllersQueryVariables>(ReplicationControllersDocument, options);
-        }
-export function useReplicationControllersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ReplicationControllersQuery, ReplicationControllersQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ReplicationControllersQuery, ReplicationControllersQueryVariables>(ReplicationControllersDocument, options);
-        }
-export type ReplicationControllersQueryHookResult = ReturnType<typeof useReplicationControllersQuery>;
-export type ReplicationControllersLazyQueryHookResult = ReturnType<typeof useReplicationControllersLazyQuery>;
-export type ReplicationControllersSuspenseQueryHookResult = ReturnType<typeof useReplicationControllersSuspenseQuery>;
-export type ReplicationControllersQueryResult = Apollo.QueryResult<ReplicationControllersQuery, ReplicationControllersQueryVariables>;
 export const ReplicationControllerDocument = gql`
     query ReplicationController($namespace: String!, $name: String!) {
   handleGetReplicationControllerDetail(
@@ -12051,56 +10465,6 @@ export type ReplicationControllerServicesQueryHookResult = ReturnType<typeof use
 export type ReplicationControllerServicesLazyQueryHookResult = ReturnType<typeof useReplicationControllerServicesLazyQuery>;
 export type ReplicationControllerServicesSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerServicesSuspenseQuery>;
 export type ReplicationControllerServicesQueryResult = Apollo.QueryResult<ReplicationControllerServicesQuery, ReplicationControllerServicesQueryVariables>;
-export const StatefulSetsDocument = gql`
-    query StatefulSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetStatefulSetList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(type: "statefulset_StatefulSetList", path: "statefulset/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    ...StatefulSetList
-  }
-}
-    ${StatefulSetListFragmentDoc}`;
-
-/**
- * __useStatefulSetsQuery__
- *
- * To run a query within a React component, call `useStatefulSetsQuery` and pass it any options that fit your needs.
- * When your component renders, `useStatefulSetsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useStatefulSetsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useStatefulSetsQuery(baseOptions: Apollo.QueryHookOptions<StatefulSetsQuery, StatefulSetsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<StatefulSetsQuery, StatefulSetsQueryVariables>(StatefulSetsDocument, options);
-      }
-export function useStatefulSetsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StatefulSetsQuery, StatefulSetsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<StatefulSetsQuery, StatefulSetsQueryVariables>(StatefulSetsDocument, options);
-        }
-export function useStatefulSetsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StatefulSetsQuery, StatefulSetsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<StatefulSetsQuery, StatefulSetsQueryVariables>(StatefulSetsDocument, options);
-        }
-export type StatefulSetsQueryHookResult = ReturnType<typeof useStatefulSetsQuery>;
-export type StatefulSetsLazyQueryHookResult = ReturnType<typeof useStatefulSetsLazyQuery>;
-export type StatefulSetsSuspenseQueryHookResult = ReturnType<typeof useStatefulSetsSuspenseQuery>;
-export type StatefulSetsQueryResult = Apollo.QueryResult<StatefulSetsQuery, StatefulSetsQueryVariables>;
 export const StatefulSetDocument = gql`
     query StatefulSet($namespace: String!, $name: String!) {
   handleGetStatefulSetDetail(namespace: $namespace, statefulset: $name) @rest(type: "statefulset_StatefulSetDetail", path: "statefulset/{args.namespace}/{args.statefulset}") {

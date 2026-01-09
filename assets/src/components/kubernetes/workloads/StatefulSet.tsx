@@ -5,23 +5,20 @@ import {
 } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
-  Common_Event as EventT,
-  Common_EventList as EventListT,
-  DeploymentQueryVariables,
-  Pod_Pod as PodT,
-  Pod_PodList as PodListT,
-  Statefulset_StatefulSetDetail as StatefulSetT,
-  StatefulSetEventsDocument,
-  StatefulSetEventsQuery,
-  StatefulSetEventsQueryVariables,
-  StatefulSetPodsDocument,
-  StatefulSetPodsQuery,
-  StatefulSetPodsQueryVariables,
-  useStatefulSetQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  CommonEvent,
+  CommonEventList,
+  PodPod,
+  PodPodList,
+} from '../../../generated/kubernetes'
+import {
+  getStatefulSetEventsInfiniteOptions,
+  getStatefulSetOptions,
+  getStatefulSetPodsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
@@ -33,7 +30,6 @@ import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
 import { PodInfo } from '../common/PodInfo'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { ResourceList } from '../common/ResourceList'
 
 import { Kind } from '../common/types'
 import { MetadataSidecar } from '../common/utils'
@@ -42,6 +38,7 @@ import { usePodsColumns } from './Pods'
 
 import { getBreadcrumbs } from './StatefulSets'
 import { WorkloadStatusChip } from './utils'
+import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -51,16 +48,13 @@ const directory: Array<TabEntry> = [
 
 export default function StatefulSet(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name, namespace } = useParams()
-  const { data, loading } = useStatefulSetQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as DeploymentQueryVariables,
-  })
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const { data: statefulSet, isFetching } = useQuery(
+    getStatefulSetOptions({
+      client: AxiosInstance(clusterId),
+      path: { statefulset: name, namespace },
+    })
+  )
 
   useSetBreadcrumbs(
     useMemo(
@@ -86,9 +80,7 @@ export default function StatefulSet(): ReactElement<any> {
     )
   )
 
-  const statefulSet = data?.handleGetStatefulSetDetail as StatefulSetT
-
-  if (loading) {
+  if (isFetching) {
     return <LoadingIndicator />
   }
 
@@ -128,19 +120,11 @@ export function StatefulSetPods(): ReactElement<any> {
   const columns = usePodsColumns()
 
   return (
-    <ResourceList<
-      PodListT,
-      PodT,
-      StatefulSetPodsQuery,
-      StatefulSetPodsQueryVariables
-    >
+    <UpdatedResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
-      queryDocument={StatefulSetPodsDocument}
-      queryOptions={{
-        variables: { namespace, name } as StatefulSetPodsQueryVariables,
-      }}
-      queryName="handleGetStatefulSetPods"
+      queryOptions={getStatefulSetPodsInfiniteOptions}
+      pathParams={{ statefulset: name, namespace }}
       itemsKey="pods"
     />
   )
@@ -151,19 +135,11 @@ export function StatefulSetEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<
-      EventListT,
-      EventT,
-      StatefulSetEventsQuery,
-      StatefulSetEventsQueryVariables
-    >
+    <UpdatedResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
-      queryDocument={StatefulSetEventsDocument}
-      queryOptions={{
-        variables: { namespace, name } as StatefulSetEventsQueryVariables,
-      }}
-      queryName="handleGetStatefulSetEvents"
+      queryOptions={getStatefulSetEventsInfiniteOptions}
+      pathParams={{ statefulset: name, namespace }}
       itemsKey="events"
       disableOnRowClick
     />

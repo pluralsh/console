@@ -1,23 +1,23 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
+
+import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
 import {
-  Configmap_ConfigMap as ConfigMapT,
-  Configmap_ConfigMapList as ConfigMapListT,
-  ConfigMapsDocument,
-  ConfigMapsQuery,
-  ConfigMapsQueryVariables,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+  ConfigmapConfigMap,
+  ConfigmapConfigMapList,
+} from '../../../generated/kubernetes'
+import {
+  getAllConfigMapsInfiniteOptions,
+  getConfigMapsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   CONFIG_MAPS_REL_PATH,
   getConfigurationAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
-
+import { useDataSelect } from '../common/DataSelect'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { useDefaultColumns } from '../common/utils'
 
 import { getConfigurationBreadcrumbs } from './Configuration'
@@ -30,10 +30,11 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<ConfigMapT>()
+const columnHelper = createColumnHelper<ConfigmapConfigMap>()
 
 export default function ConfigMaps() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -45,16 +46,14 @@ export default function ConfigMaps() {
   )
 
   return (
-    <ResourceList<
-      ConfigMapListT,
-      ConfigMapT,
-      ConfigMapsQuery,
-      ConfigMapsQueryVariables
-    >
+    <UpdatedResourceList<ConfigmapConfigMapList, ConfigmapConfigMap>
       namespaced
       columns={columns}
-      queryDocument={ConfigMapsDocument}
-      queryName="handleGetConfigMapList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getConfigMapsInfiniteOptions
+          : getAllConfigMapsInfiniteOptions
+      }
       itemsKey="items"
     />
   )

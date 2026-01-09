@@ -2,8 +2,6 @@ import { ChipList } from '@pluralsh/design-system'
 import { ReactElement } from 'react'
 import { formatLocalizedDateTime } from 'utils/datetime'
 
-import { Controller_ResourceOwner as ResourceOwnerT } from '../../../generated/graphql-kubernetes'
-
 import Annotations from './Annotations'
 import ResourceInfoCard, {
   ResourceInfoCardEntry,
@@ -11,9 +9,10 @@ import ResourceInfoCard, {
 } from './ResourceInfoCard'
 import ResourceLink from './ResourceLink'
 import { toKind } from './types'
+import { ControllerResourceOwner } from 'generated/kubernetes'
 
 interface ResourceOwnerProps {
-  owner: Nullable<ResourceOwnerT>
+  owner: Nullable<ControllerResourceOwner>
 }
 
 export default function ResourceOwner({
@@ -36,7 +35,7 @@ export default function ResourceOwner({
           {owner?.pods?.running} / {owner?.pods?.desired}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Creation date">
-          {formatLocalizedDateTime(owner?.objectMeta?.creationTimestamp)}
+          {formatLocalizedDateTime(owner?.objectMeta?.creationTimestamp?.Time)}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Labels">
           <ChipList

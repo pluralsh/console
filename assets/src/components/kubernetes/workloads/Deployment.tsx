@@ -6,27 +6,21 @@ import {
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { formatLocalizedDateTime } from 'utils/datetime'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
-  Common_Event as EventT,
-  Common_EventList as EventListT,
-  Common_PodInfo as PodInfoT,
-  Deployment_DeploymentDetail as DeploymentT,
-  DeploymentEventsDocument,
-  DeploymentEventsQuery,
-  DeploymentEventsQueryVariables,
-  DeploymentNewReplicaSetQueryVariables,
-  DeploymentOldReplicaSetsDocument,
-  DeploymentOldReplicaSetsQuery,
-  DeploymentOldReplicaSetsQueryVariables,
-  DeploymentQueryVariables,
-  Replicaset_ReplicaSet as ReplicaSetT,
-  Replicaset_ReplicaSetList as ReplicaSetListT,
-  useDeploymentNewReplicaSetQuery,
-  useDeploymentQuery,
-  V1_LabelSelector as LabelSelectorT,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  CommonEvent,
+  CommonEventList,
+  ReplicasetReplicaSet,
+  ReplicasetReplicaSetList,
+} from '../../../generated/kubernetes'
+import {
+  getDeploymentEventsInfiniteOptions,
+  getDeploymentNewReplicaSetOptions,
+  getDeploymentOldReplicaSetsInfiniteOptions,
+  getDeploymentOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   DEPLOYMENTS_REL_PATH,
   getResourceDetailsAbsPath,
@@ -46,7 +40,7 @@ import ResourceInfoCard, {
   ResourceInfoCardSection,
 } from '../common/ResourceInfoCard'
 import ResourceLink from '../common/ResourceLink'
-import { ResourceList } from '../common/ResourceList'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { fromResource, Kind, Resource } from '../common/types'
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
@@ -64,16 +58,13 @@ const directory: Array<TabEntry> = [
 
 export default function Deployment(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name, namespace } = useParams()
-  const { data, loading } = useDeploymentQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as DeploymentQueryVariables,
-  })
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const { data: deployment, isFetching } = useQuery(
+    getDeploymentOptions({
+      client: AxiosInstance(clusterId),
+      path: { deployment: name, namespace },
+    })
+  )
 
   useSetBreadcrumbs(
     useMemo(
@@ -99,9 +90,7 @@ export default function Deployment(): ReactElement<any> {
     )
   )
 
-  const deployment = data?.handleGetDeploymentDetail as DeploymentT
-
-  if (loading) {
+  if (isFetching) {
     return <LoadingIndicator />
   }
 
@@ -127,9 +116,7 @@ export default function Deployment(): ReactElement<any> {
             />
           </SidecarItem>
           <SidecarItem heading="Selector">
-            <LabelSelector
-              selector={{ matchLabels: deployment?.selector } as LabelSelectorT}
-            />
+            <LabelSelector selector={{ matchLabels: deployment?.selector }} />
           </SidecarItem>
         </MetadataSidecar>
       }
@@ -140,7 +127,7 @@ export default function Deployment(): ReactElement<any> {
 }
 
 export function DeploymentReplicaSets(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = useReplicaSetsColumns()
 
   return (
@@ -151,22 +138,11 @@ export function DeploymentReplicaSets(): ReactElement<any> {
       </section>
       <section>
         <SubTitle>Old Replica Sets</SubTitle>
-        <ResourceList<
-          ReplicaSetListT,
-          ReplicaSetT,
-          DeploymentOldReplicaSetsQuery,
-          DeploymentOldReplicaSetsQueryVariables
-        >
+        <UpdatedResourceList<ReplicasetReplicaSetList, ReplicasetReplicaSet>
           namespaced
           columns={columns}
-          queryDocument={DeploymentOldReplicaSetsDocument}
-          queryOptions={{
-            variables: {
-              namespace,
-              name,
-            } as DeploymentOldReplicaSetsQueryVariables,
-          }}
-          queryName="handleGetDeploymentOldReplicaSets"
+          queryOptions={getDeploymentOldReplicaSetsInfiniteOptions}
+          pathParams={{ deployment: name, namespace }}
           itemsKey="replicaSets"
         />
       </section>
@@ -175,21 +151,17 @@ export function DeploymentReplicaSets(): ReactElement<any> {
 }
 
 function NewReplicaSet(): ReactElement<any> {
-  const { clusterId, name, namespace } = useParams()
-  const { data, loading } = useDeploymentNewReplicaSetQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as DeploymentNewReplicaSetQueryVariables,
-  })
+  const { name = '', namespace = '', clusterId = '' } = useParams()
 
-  const replicaSet = data?.handleGetDeploymentNewReplicaSet
+  const { data: replicaSet, isFetching } = useQuery(
+    getDeploymentNewReplicaSetOptions({
+      client: AxiosInstance(clusterId),
+      path: { deployment: name, namespace },
+    })
+  )
 
   return (
-    <ResourceInfoCard loading={loading}>
+    <ResourceInfoCard loading={isFetching}>
       <ResourceInfoCardSection>
         <ResourceInfoCardEntry heading="Name">
           <ResourceLink
@@ -206,10 +178,12 @@ function NewReplicaSet(): ReactElement<any> {
           />
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Creation date">
-          {formatLocalizedDateTime(replicaSet?.objectMeta?.creationTimestamp)}{' '}
+          {formatLocalizedDateTime(
+            replicaSet?.objectMeta?.creationTimestamp?.Time
+          )}{' '}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Pods">
-          <PodInfo info={replicaSet?.podInfo as PodInfoT} />
+          <PodInfo info={replicaSet?.podInfo} />
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Labels">
           <ChipList
@@ -245,22 +219,11 @@ export function DeploymentEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<
-      EventListT,
-      EventT,
-      DeploymentEventsQuery,
-      DeploymentEventsQueryVariables
-    >
+    <UpdatedResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
-      queryDocument={DeploymentEventsDocument}
-      queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as DeploymentEventsQueryVariables,
-      }}
-      queryName="handleGetDeploymentEvents"
+      queryOptions={getDeploymentEventsInfiniteOptions}
+      pathParams={{ deployment: name, namespace }}
       itemsKey="events"
       disableOnRowClick
     />

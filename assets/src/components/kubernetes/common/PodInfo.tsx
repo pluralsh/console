@@ -1,9 +1,9 @@
 import { ReactNode, useMemo } from 'react'
 
-import { Common_PodInfo as PodInfoT } from '../../../generated/graphql-kubernetes'
+import { CommonPodInfo } from 'generated/kubernetes'
 
 interface PodInfoProps {
-  info: PodInfoT
+  info?: CommonPodInfo
 }
 
 export function PodInfo({ info }: PodInfoProps): ReactNode {
