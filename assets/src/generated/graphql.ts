@@ -15334,8 +15334,9 @@ export type SearchGroupsQueryVariables = Exact<{
 export type SearchGroupsQuery = { __typename?: 'RootQueryType', groups?: { __typename?: 'GroupConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'GroupEdge', node?: { __typename?: 'Group', id: string, name: string, description?: string | null, global?: boolean | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
 
 export type GroupMembersQueryVariables = Exact<{
-  cursor?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -15964,7 +15965,8 @@ export type PersonaConfigurationFragment = { __typename?: 'PersonaConfiguration'
 export type PersonaFragment = { __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null };
 
 export type PersonasQueryVariables = Exact<{
-  cursor?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -30031,8 +30033,8 @@ export type SearchGroupsLazyQueryHookResult = ReturnType<typeof useSearchGroupsL
 export type SearchGroupsSuspenseQueryHookResult = ReturnType<typeof useSearchGroupsSuspenseQuery>;
 export type SearchGroupsQueryResult = Apollo.QueryResult<SearchGroupsQuery, SearchGroupsQueryVariables>;
 export const GroupMembersDocument = gql`
-    query GroupMembers($cursor: String, $id: ID!) {
-  groupMembers(groupId: $id, after: $cursor, first: 20) {
+    query GroupMembers($id: ID!, $first: Int = 20, $after: String) {
+  groupMembers(groupId: $id, after: $after, first: $first) {
     pageInfo {
       ...PageInfo
     }
@@ -30058,8 +30060,9 @@ ${GroupMemberFragmentDoc}`;
  * @example
  * const { data, loading, error } = useGroupMembersQuery({
  *   variables: {
- *      cursor: // value for 'cursor'
  *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *   },
  * });
  */
@@ -32604,8 +32607,8 @@ export type DeleteOidcProviderMutationHookResult = ReturnType<typeof useDeleteOi
 export type DeleteOidcProviderMutationResult = Apollo.MutationResult<DeleteOidcProviderMutation>;
 export type DeleteOidcProviderMutationOptions = Apollo.BaseMutationOptions<DeleteOidcProviderMutation, DeleteOidcProviderMutationVariables>;
 export const PersonasDocument = gql`
-    query Personas($cursor: String) {
-  personas(first: 3, after: $cursor) {
+    query Personas($first: Int = 3, $after: String) {
+  personas(first: $first, after: $after) {
     pageInfo {
       ...PageInfo
     }
@@ -32631,7 +32634,8 @@ ${PersonaFragmentDoc}`;
  * @example
  * const { data, loading, error } = usePersonasQuery({
  *   variables: {
- *      cursor: // value for 'cursor'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *   },
  * });
  */

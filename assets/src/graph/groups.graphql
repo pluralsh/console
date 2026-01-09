@@ -42,8 +42,8 @@ query SearchGroups($q: String, $cursor: String) {
   }
 }
 
-query GroupMembers($cursor: String, $id: ID!) {
-  groupMembers(groupId: $id, after: $cursor, first: 20) {
+query GroupMembers($id: ID!, $first: Int = 20, $after: String) {
+  groupMembers(groupId: $id, after: $after, first: $first) {
     pageInfo {
       ...PageInfo
     }
