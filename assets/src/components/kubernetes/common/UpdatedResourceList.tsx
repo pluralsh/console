@@ -56,6 +56,7 @@ interface ResourceListProps<TResourceList> {
   disableOnRowClick?: boolean
   maxHeight?: string
   tableOptions?: Omit<TableOptions<any>, 'data' | 'columns' | 'getCoreRowModel'>
+  pathParams?: object
   setRefetch?: Dispatch<
     SetStateAction<
       Dispatch<
@@ -80,6 +81,7 @@ export function UpdatedResourceList<
   disableOnRowClick,
   maxHeight,
   tableOptions,
+  pathParams,
   setRefetch,
 }: ResourceListProps<TResourceList>): ReactElement<any> {
   const navigate = useNavigate()
@@ -93,7 +95,7 @@ export function UpdatedResourceList<
     useInfiniteQuery<TResourceList>({
       ...queryOptions({
         client: AxiosInstance(cluster?.id ?? ''),
-        path: namespaced ? { namespace } : undefined,
+        path: { ...(namespaced ? { namespace } : undefined), ...pathParams },
         query: {
           filterBy: `name,${filter}`,
           sortBy: sortBy,
