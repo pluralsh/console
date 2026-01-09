@@ -3,10 +3,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
-import {
-  Maybe,
-  Statefulset_StatefulSet as StatefulSetT,
-} from '../../../generated/graphql-kubernetes'
+import { Maybe } from '../../../generated/graphql-kubernetes'
 import {
   getWorkloadsAbsPath,
   STATEFUL_SETS_REL_PATH,
@@ -36,7 +33,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<StatefulSetT>()
+const columnHelper = createColumnHelper<StatefulsetStatefulSet>()
 
 const colImages = columnHelper.accessor((ss) => ss, {
   id: 'images',
