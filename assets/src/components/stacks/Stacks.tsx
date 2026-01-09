@@ -16,7 +16,6 @@ import {
   SearchIcon,
   SubTab,
   TabList,
-  Toast,
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -28,6 +27,10 @@ import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsCon
 
 import usePersistedState from 'components/hooks/usePersistedState'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
+
+import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
+import { StackedText } from 'components/utils/table/StackedText.tsx'
+import { VirtualList } from 'components/utils/VirtualList.tsx'
 import { isEmpty } from 'lodash'
 import { Key, useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -47,7 +50,6 @@ import {
   StackTinyFragment,
   StackType,
   TagType,
-  useKickStackMutation,
   useStackQuery,
   useStacksQuery,
 } from '../../generated/graphql'
@@ -68,18 +70,12 @@ import { mapExistingNodes } from '../../utils/graphql'
 
 import { useProjectId } from '../contexts/ProjectsContext'
 import { GqlError } from '../utils/Alert'
-import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
-
-import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
-import { StackedText } from 'components/utils/table/StackedText.tsx'
-import { VirtualList } from 'components/utils/VirtualList.tsx'
 import { MoreMenu } from '../utils/MoreMenu'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { LinkTabWrap } from '../utils/Tabs'
 import { StackStatusChip } from './common/StackStatusChip.tsx'
-import StackCustomRun from './customrun/StackCustomRun'
-import RestoreStackButton from './RestoreStackButton.tsx'
+import StackActions from './StackActions'
 import { StackDeletedEmptyState } from './StackDeletedEmptyState'
 import StackDeleteModal from './StackDeleteModal'
 import StackDetachModal from './StackDetachModal'
@@ -144,7 +140,6 @@ export function Stacks() {
   const pathMatch = useMatch(`${getStacksAbsPath(stackId)}/:tab`)
   const tab = pathMatch?.params?.tab || ''
   const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
-  const [showRestoreToast, setShowRestoreToast] = useState(false)
 
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
@@ -264,17 +259,6 @@ export function Stacks() {
         gap: theme.spacing.xlarge,
       }}
     >
-      {showRestoreToast && (
-        <Toast
-          position={'bottom'}
-          onClose={() => setShowRestoreToast(false)}
-          closeTimeout={5000}
-          margin="large"
-          severity="success"
-        >
-          Stack &quot;{tinyStack?.name}&quot; restored.
-        </Toast>
-      )}
       <Flex
         direction="column"
         gap="small"
@@ -386,23 +370,10 @@ export function Stacks() {
               secondPartialType="body1"
             />
             <Flex gap="medium">
-              {!deleting ? (
-                <KickButton
-                  floating
-                  pulledAt={tinyStack?.repository?.pulledAt}
-                  kickMutationHook={useKickStackMutation}
-                  message="Resync"
-                  tooltipMessage="Use this to sync this stack now instead of at the next poll interval"
-                  variables={{ id: tinyStack?.id }}
-                  width="max-content"
-                />
-              ) : (
-                <RestoreStackButton
-                  id={tinyStack?.id ?? ''}
-                  setShowToast={setShowRestoreToast}
-                />
-              )}
-              <StackCustomRun stackId={tinyStack?.id ?? ''} />
+              <StackActions
+                deleting={deleting}
+                stack={tinyStack}
+              />
               <MoreMenu
                 disabled={!fullStack}
                 onSelectionChange={(newKey) => setMenuKey(newKey)}

@@ -1,7 +1,8 @@
 /* eslint-disable */
 /* prettier-ignore */
-import { gql } from '@apollo/client';
-import * as Apollo from '@apollo/client';
+import * as Apollo from '@apollo/client'
+import { gql } from '@apollo/client'
+
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -16280,6 +16281,13 @@ export type RestoreStackMutationVariables = Exact<{
 
 
 export type RestoreStackMutation = { __typename?: 'RootMutationType', restoreStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
+
+export type TriggerStackRunMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type TriggerStackRunMutation = { __typename?: 'RootMutationType', triggerRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null };
 
 export type LogsDeltaSubscriptionVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -34483,6 +34491,39 @@ export function useRestoreStackMutation(baseOptions?: Apollo.MutationHookOptions
 export type RestoreStackMutationHookResult = ReturnType<typeof useRestoreStackMutation>;
 export type RestoreStackMutationResult = Apollo.MutationResult<RestoreStackMutation>;
 export type RestoreStackMutationOptions = Apollo.BaseMutationOptions<RestoreStackMutation, RestoreStackMutationVariables>;
+export const TriggerStackRunDocument = gql`
+    mutation TriggerStackRun($id: ID!) {
+  triggerRun(id: $id) {
+    ...StackRun
+  }
+}
+    ${StackRunFragmentDoc}`;
+export type TriggerStackRunMutationFn = Apollo.MutationFunction<TriggerStackRunMutation, TriggerStackRunMutationVariables>;
+
+/**
+ * __useTriggerStackRunMutation__
+ *
+ * To run a mutation, you first call `useTriggerStackRunMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useTriggerStackRunMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [triggerStackRunMutation, { data, loading, error }] = useTriggerStackRunMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useTriggerStackRunMutation(baseOptions?: Apollo.MutationHookOptions<TriggerStackRunMutation, TriggerStackRunMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<TriggerStackRunMutation, TriggerStackRunMutationVariables>(TriggerStackRunDocument, options);
+      }
+export type TriggerStackRunMutationHookResult = ReturnType<typeof useTriggerStackRunMutation>;
+export type TriggerStackRunMutationResult = Apollo.MutationResult<TriggerStackRunMutation>;
+export type TriggerStackRunMutationOptions = Apollo.BaseMutationOptions<TriggerStackRunMutation, TriggerStackRunMutationVariables>;
 export const LogsDeltaDocument = gql`
     subscription LogsDelta($id: ID!) {
   runLogsDelta(stepId: $id) {
@@ -35458,6 +35499,7 @@ export const namedOperations = {
     ApproveStackRun: 'ApproveStackRun',
     RestartStackRun: 'RestartStackRun',
     RestoreStack: 'RestoreStack',
+    TriggerStackRun: 'TriggerStackRun',
     CreateAccessToken: 'CreateAccessToken',
     DeleteAccessToken: 'DeleteAccessToken',
     ShareSecret: 'ShareSecret',
