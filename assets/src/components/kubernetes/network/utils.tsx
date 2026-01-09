@@ -5,10 +5,7 @@ import { Chip } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { TableText } from '../../cluster/TableElements'
-import {
-  Common_Endpoint as EndpointT,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+import { CommonEndpoint } from '../../../generated/kubernetes'
 
 export const serviceTypeDisplayName = {
   clusterip: 'Cluster IP',
@@ -20,7 +17,7 @@ export const serviceTypeDisplayName = {
 export function TableEndpoints({
   endpoints,
 }: {
-  endpoints: Maybe<EndpointT>[]
+  endpoints?: (CommonEndpoint | null)[] | null
 }) {
   return endpoints.map((endpoint) =>
     isEmpty(endpoint?.ports) ? (
@@ -37,7 +34,11 @@ export function TableEndpoints({
   )
 }
 
-export function Endpoints({ endpoints }: { endpoints: Maybe<EndpointT>[] }) {
+export function Endpoints({
+  endpoints,
+}: {
+  endpoints?: (CommonEndpoint | null)[] | null
+}) {
   const theme = useTheme()
 
   if (isEmpty(endpoints)) return '-'

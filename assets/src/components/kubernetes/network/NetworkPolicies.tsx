@@ -1,28 +1,29 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  Maybe,
-  NetworkPoliciesDocument,
-  NetworkPoliciesQuery,
-  NetworkPoliciesQueryVariables,
-  Networkpolicy_NetworkPolicy as NetworkPolicyT,
-  Networkpolicy_NetworkPolicyList as NetworkPolicyListT,
-} from '../../../generated/graphql-kubernetes'
+  NetworkpolicyNetworkPolicy,
+  NetworkpolicyNetworkPolicyList,
+} from '../../../generated/kubernetes'
+import {
+  getAllNetworkPoliciesInfiniteOptions,
+  getNetworkPoliciesInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen'
 import {
   getNetworkAbsPath,
   NETWORK_POLICIES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-
-import { ResourceList } from '../common/ResourceList'
+import { useDataSelect } from '../common/DataSelect'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { useDefaultColumns } from '../common/utils'
-
 import { getNetworkBreadcrumbs } from './Network'
 
-export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+export const getBreadcrumbs = (
+  cluster?: KubernetesClusterFragment | null | undefined
+) => [
   ...getNetworkBreadcrumbs(cluster),
   {
     label: 'network policies',
@@ -30,10 +31,11 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<NetworkPolicyT>()
+const columnHelper = createColumnHelper<NetworkpolicyNetworkPolicy>()
 
 export default function NetworkPolicies() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -45,16 +47,17 @@ export default function NetworkPolicies() {
   )
 
   return (
-    <ResourceList<
-      NetworkPolicyListT,
-      NetworkPolicyT,
-      NetworkPoliciesQuery,
-      NetworkPoliciesQueryVariables
+    <UpdatedResourceList<
+      NetworkpolicyNetworkPolicyList,
+      NetworkpolicyNetworkPolicy
     >
       namespaced
       columns={columns}
-      queryDocument={NetworkPoliciesDocument}
-      queryName="handleGetNetworkPolicyList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getNetworkPoliciesInfiniteOptions
+          : getAllNetworkPoliciesInfiniteOptions
+      }
       itemsKey="items"
     />
   )
