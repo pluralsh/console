@@ -17,7 +17,6 @@ import { getSecretOptions } from '../../../generated/kubernetes/@tanstack/react-
 import { useQuery } from '@tanstack/react-query'
 import { AxiosInstance } from '../../../helpers/axios.ts'
 
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { MetadataSidecar } from '../common/utils'
