@@ -2,23 +2,24 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { Maybe } from '../../../generated/graphql-kubernetes'
 
 import {
-  Maybe,
-  Serviceaccount_ServiceAccount as ServiceAccountT,
-  Serviceaccount_ServiceAccountList as ServiceAccountListT,
-  ServiceAccountsDocument,
-  ServiceAccountsQuery,
-  ServiceAccountsQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+  ServiceaccountServiceAccount,
+  ServiceaccountServiceAccountList,
+} from '../../../generated/kubernetes'
 import {
-  getRbacAbsPath,
+  getAllServiceAccountsInfiniteOptions,
+  getServiceAccountsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
+import {
   SERVICE_ACCOUNTS_REL_PATH,
+  getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
+import { useDataSelect } from '../common/DataSelect'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { useDefaultColumns } from '../common/utils'
-
 import { getRbacBreadcrumbs } from './Rbac'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
@@ -29,10 +30,11 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<ServiceAccountT>()
+const columnHelper = createColumnHelper<ServiceaccountServiceAccount>()
 
 export default function ServiceAccounts() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -44,16 +46,17 @@ export default function ServiceAccounts() {
   )
 
   return (
-    <ResourceList<
-      ServiceAccountListT,
-      ServiceAccountT,
-      ServiceAccountsQuery,
-      ServiceAccountsQueryVariables
+    <UpdatedResourceList<
+      ServiceaccountServiceAccountList,
+      ServiceaccountServiceAccount
     >
       namespaced
       columns={columns}
-      queryDocument={ServiceAccountsDocument}
-      queryName="handleGetServiceAccountList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getServiceAccountsInfiniteOptions
+          : getAllServiceAccountsInfiniteOptions
+      }
       itemsKey="items"
     />
   )
