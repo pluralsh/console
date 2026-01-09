@@ -12,11 +12,11 @@ import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import {
-  SecretQueryVariables,
-  Secret_SecretDetail as SecretT,
-  useSecretQuery,
-} from '../../../generated/graphql-kubernetes'
+import { SecretSecretDetail } from '../../../generated/kubernetes'
+import { getSecretOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
+
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
@@ -42,19 +42,13 @@ const directory: Array<TabEntry> = [
 
 export default function Secret(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
-  const { data, loading } = useSecretQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    fetchPolicy: 'cache-and-network',
-    variables: {
-      name,
-      namespace,
-    } as SecretQueryVariables,
-  })
-
-  const secret = data?.handleGetSecretDetail
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const { data: secret, isLoading: loading } = useQuery(
+    getSecretOptions({
+      client: AxiosInstance(clusterId),
+      path: { name, namespace },
+    })
+  )
 
   useSetBreadcrumbs(
     useMemo(
@@ -162,7 +156,7 @@ const columns = [
 ]
 
 export function SecretData(): ReactElement<any> {
-  const secret = useOutletContext() as SecretT
+  const secret = useOutletContext() as SecretSecretDetail
   const [revealAll, setRevealAll] = useState(false)
 
   const headerContent = useMemo(
