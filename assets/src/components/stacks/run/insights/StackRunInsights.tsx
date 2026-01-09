@@ -12,6 +12,7 @@ import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
 import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import { StackedText } from '../../../utils/table/StackedText.tsx'
 import { StackRunOutletContextT } from '../Route.tsx'
+import { AISuggestFix } from 'components/ai/chatbot/AISuggestFix.tsx'
 
 export function StackRunInsights() {
   const theme = useTheme()
@@ -59,8 +60,7 @@ export function StackRunInsights() {
             insightId={stackRun?.insight?.id}
             messages={[insightMessage(stackRun?.insight)]}
           />
-          {/* TODO: Enable once API forbidden error is fixed */}
-          {/* <AISuggestFix insight={stackRun?.insight} /> */}
+          <AISuggestFix insight={stackRun?.insight} />
         </Flex>
       </Flex>
       <InsightDisplay

@@ -756,6 +756,14 @@ type RootMutationType {
 
   deleteClusterIsoImage(id: ID!): ClusterIsoImage
 
+  upsertUpgradePlanCallout(attributes: UpgradePlanCalloutAttributes!): UpgradePlanCallout
+
+  deleteUpgradePlanCallout(name: String!): UpgradePlanCallout
+
+  upsertCustomCompatibilityMatrix(attributes: CustomCompatibilityMatrixAttributes!): CustomCompatibilityMatrix
+
+  deleteCustomCompatibilityMatrix(name: String!): CustomCompatibilityMatrix
+
   createServiceDeployment(
     clusterId: ID
 
@@ -3907,6 +3915,9 @@ type StackRun {
 
   "whether this run is a dry run"
   dryRun: Boolean!
+
+  "whether this run is a destroy run"
+  destroy: Boolean
 
   "optional k8s job configuration for the job that will apply this stack"
   jobSpec: JobGateSpec
@@ -7220,6 +7231,69 @@ input HealthRange {
   max: Int
 }
 
+"a callout for the upgrade plan"
+input UpgradePlanCalloutAttributes {
+  "the name of the callout"
+  name: String!
+
+  "the callouts for this instance"
+  callouts: [UpgradePlanCalloutCalloutAttributes]
+
+  "additional context for this callout"
+  context: Json
+}
+
+"a callout for a specific addon in the upgrade plan"
+input UpgradePlanCalloutCalloutAttributes {
+  "the addon this callout applies to"
+  addon: String!
+
+  "the template to use for this callout"
+  template: String!
+}
+
+input CustomCompatibilityMatrixAttributes {
+  "the name of the matrix"
+  name: String!
+
+  "the icon to use for this matrix"
+  icon: String
+
+  "the git url to use for this matrix"
+  gitUrl: String
+
+  "the release url to use for this matrix"
+  releaseUrl: String
+
+  "the readme url to use for this matrix"
+  readmeUrl: String
+
+  "the versions for this matrix"
+  versions: [CompatibilityMatrixVersionAttributes]
+}
+
+input CompatibilityMatrixVersionAttributes {
+  "the version of the matrix"
+  version: String!
+
+  "the chart version of the matrix"
+  chartVersion: String
+
+  "the kube version of the matrix"
+  kube: [String!]
+
+  "the summary for this version"
+  summary: CompatibilityMatrixSummaryAttributes
+}
+
+input CompatibilityMatrixSummaryAttributes {
+  "the helm changes for this version"
+  helmChanges: [String!]
+
+  "the breaking changes for this version"
+  breakingChanges: [String!]
+}
+
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
   "the id of this provider"
@@ -7893,6 +7967,7 @@ type RuntimeAddonUpgrade {
   addon: RuntimeAddon
   current: AddonVersion
   fix: AddonVersion
+  callout: String
 }
 
 type CloudAddonUpgrade {
@@ -8335,6 +8410,65 @@ type KubernetesChangelog {
 
   "the api updates in this version"
   apiUpdates: [String]
+}
+
+type UpgradePlanCallout {
+  id: ID!
+  name: String!
+  callouts: [UpgradePlanCalloutCallout]
+  context: Map
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type UpgradePlanCalloutCallout {
+  addon: String!
+  template: String!
+}
+
+"a custom compatibility matrix for a given addon"
+type CustomCompatibilityMatrix {
+  id: ID!
+
+  "the name of the addon this matrix applies to"
+  name: String!
+
+  "the icon to use for this matrix"
+  icon: String
+
+  "the git url of this add-on"
+  gitUrl: String
+
+  "the release url of this add-on"
+  releaseUrl: String
+
+  "the readme url of this add-on"
+  readmeUrl: String
+
+  "the versions for this matrix"
+  versions: [CustomCompatibilityMatrixVersion]
+}
+
+type CustomCompatibilityMatrixVersion {
+  "the application version of the addon this matrix applies to"
+  version: String!
+
+  "the chart version of the addon this matrix applies to"
+  chartVersion: String
+
+  "the kube versions of the addon this matrix applies to"
+  kube: [String!]
+
+  "the summary for this version"
+  summary: CompatibilityMatrixSummary
+}
+
+type CompatibilityMatrixSummary {
+  "the helm changes for this version"
+  helmChanges: [String!]
+
+  "the breaking changes for this version"
+  breakingChanges: [String!]
 }
 
 type ClusterConnection {

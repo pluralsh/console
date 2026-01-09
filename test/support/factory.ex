@@ -1121,6 +1121,23 @@ defmodule Console.Factory do
     }
   end
 
+  def upgrade_plan_callout_factory do
+    %Schema.UpgradePlanCallout{
+      name: sequence(:upgrade_plan_callout, & "upgrade-plan-callout-#{&1}"),
+      callouts: [%{addon: "ingress-nginx", template: "template"}],
+      context: %{"some" => "context"}
+    }
+  end
+
+  def custom_compatibility_matrix_factory do
+    %Schema.CustomCompatibilityMatrix{
+      name: sequence(:custom_compatibility_matrix, & "custom-compatibility-matrix-#{&1}"),
+      git_url: "git@github.com:test/test.git",
+      release_url: "https://github.com/test/test/releases/tag/v1.0.0",
+      versions: [%{version: "1.0.0", chart_version: "1.0.0", kube: ["1.25"]}]
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

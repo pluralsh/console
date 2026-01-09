@@ -46,11 +46,6 @@ query Me {
     }
     unreadNotifications
   }
-  clusterInfo {
-    version
-    platform
-    gitCommit
-  }
   configuration {
     gitCommit
     isDemoProject

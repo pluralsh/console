@@ -9,6 +9,7 @@ import {
 import { InsightDisplay } from '../ai/insights/InsightDisplay.tsx'
 import IconFrameRefreshButton from '../utils/RefreshIconFrame.tsx'
 import { ComponentDetailsContext } from './ComponentDetails.tsx'
+import { AISuggestFix } from 'components/ai/chatbot/AISuggestFix.tsx'
 
 export function ComponentInsights() {
   const { component, refetch, loading } =
@@ -43,7 +44,7 @@ export function ComponentInsights() {
           insightId={component?.insight?.id}
           messages={[insightMessage(component?.insight)]}
         />
-        {/* <AISuggestFix insight={component?.insight} /> */}
+        <AISuggestFix insight={component?.insight} />
       </Flex>
       <InsightDisplay
         insight={component.insight}

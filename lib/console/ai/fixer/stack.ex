@@ -46,7 +46,8 @@ defmodule Console.AI.Fixer.Stack do
     end
   end
 
-  @spec prompt(Stack.t(), AiInsight.t()) :: {:ok, [{:user, binary}]} | Console.error()
+  @spec prompt(Stack.t() | StackRun.t(), AiInsight.t()) :: {:ok, [{:user, binary}]} | Console.error()
+  def prompt(%StackRun{stack: %Stack{} = stack}, insight), do: prompt(stack, insight)
   def prompt(%Stack{} = stack, insight) do
     stack = Repo.preload(stack, [:repository, :parent])
     with {:ok, f} <- Stacks.tarstream(last_run(stack)),
@@ -70,6 +71,7 @@ defmodule Console.AI.Fixer.Stack do
       |> ok()
     end
   end
+  def prompt(_, _), do: {:error, "cannot generate prompt for this resource"}
 
   defp stack_details(%Stack{git: %Service.Git{ref: ref, folder: f}, repository: %GitRepository{url: url}} = stack) do
     """

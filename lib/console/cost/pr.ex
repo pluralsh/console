@@ -47,7 +47,7 @@ defmodule Console.Cost.Pr do
          {:ok, [_ | prompt]} <- Fixer.Service.prompt(svc, "") do
       prepend(prompt, {:user, @pr})
       |> append({:user, cost_prompt(rec)})
-      |> Provider.tool_call([Pr])
+      |> Provider.simple_tool_call(Pr)
       |> Fixer.handle_tool_call(%{service_id: svc.id}, user)
     end
   end
