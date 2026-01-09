@@ -5238,17 +5238,6 @@ export type ConfigMapQueryVariables = Exact<{
 
 export type ConfigMapQuery = { __typename?: 'Query', handleGetConfigMapDetail?: { __typename?: 'configmap_ConfigMapDetail', data?: any | null, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
 
-export type SecretsQueryVariables = Exact<{
-  namespace: Scalars['String']['input'];
-  filterBy?: InputMaybe<Scalars['String']['input']>;
-  sortBy?: InputMaybe<Scalars['String']['input']>;
-  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
-  page?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type SecretsQuery = { __typename?: 'Query', handleGetSecretList?: { __typename?: 'secret_SecretList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, secrets: Array<{ __typename?: 'secret_Secret', type: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
-
 export type SecretQueryVariables = Exact<{
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
@@ -8320,70 +8309,6 @@ export type ConfigMapQueryHookResult = ReturnType<typeof useConfigMapQuery>;
 export type ConfigMapLazyQueryHookResult = ReturnType<typeof useConfigMapLazyQuery>;
 export type ConfigMapSuspenseQueryHookResult = ReturnType<typeof useConfigMapSuspenseQuery>;
 export type ConfigMapQueryResult = Apollo.QueryResult<ConfigMapQuery, ConfigMapQueryVariables>;
-export const SecretsDocument = gql`
-    query Secrets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
-  handleGetSecretList(
-    namespace: $namespace
-    filterBy: $filterBy
-    sortBy: $sortBy
-    itemsPerPage: $itemsPerPage
-    page: $page
-  ) @rest(path: "secret/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
-    errors
-    listMeta @type(name: "types_ListMeta") {
-      ...ListMeta
-    }
-    secrets {
-      typeMeta @type(name: "types_TypeMeta") {
-        ...TypeMeta
-      }
-      objectMeta @type(name: "types_ObjectMeta") {
-        ...ObjectMeta
-      }
-      type
-    }
-  }
-}
-    ${ListMetaFragmentDoc}
-${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
-
-/**
- * __useSecretsQuery__
- *
- * To run a query within a React component, call `useSecretsQuery` and pass it any options that fit your needs.
- * When your component renders, `useSecretsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useSecretsQuery({
- *   variables: {
- *      namespace: // value for 'namespace'
- *      filterBy: // value for 'filterBy'
- *      sortBy: // value for 'sortBy'
- *      itemsPerPage: // value for 'itemsPerPage'
- *      page: // value for 'page'
- *   },
- * });
- */
-export function useSecretsQuery(baseOptions: Apollo.QueryHookOptions<SecretsQuery, SecretsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SecretsQuery, SecretsQueryVariables>(SecretsDocument, options);
-      }
-export function useSecretsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SecretsQuery, SecretsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SecretsQuery, SecretsQueryVariables>(SecretsDocument, options);
-        }
-export function useSecretsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SecretsQuery, SecretsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<SecretsQuery, SecretsQueryVariables>(SecretsDocument, options);
-        }
-export type SecretsQueryHookResult = ReturnType<typeof useSecretsQuery>;
-export type SecretsLazyQueryHookResult = ReturnType<typeof useSecretsLazyQuery>;
-export type SecretsSuspenseQueryHookResult = ReturnType<typeof useSecretsSuspenseQuery>;
-export type SecretsQueryResult = Apollo.QueryResult<SecretsQuery, SecretsQueryVariables>;
 export const SecretDocument = gql`
     query Secret($name: String!, $namespace: String!) {
   handleGetSecretDetail(namespace: $namespace, name: $name) @rest(path: "secret/{args.namespace}/{args.name}") {

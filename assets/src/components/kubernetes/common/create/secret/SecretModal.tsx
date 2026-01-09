@@ -1,4 +1,4 @@
-import { ApolloError, FetchResult, LazyQueryExecFunction } from '@apollo/client'
+import { ApolloError, FetchResult } from '@apollo/client'
 import {
   Button,
   FormField,
@@ -11,8 +11,6 @@ import { useNamespaces } from 'components/kubernetes/Cluster'
 import { GqlError } from 'components/utils/Alert'
 import {
   DeployFromInputMutation,
-  SecretsQuery,
-  SecretsQueryVariables,
   useDeployFromInputMutation,
 } from 'generated/graphql-kubernetes'
 import { KubernetesClient } from 'helpers/kubernetes.client'
@@ -24,6 +22,12 @@ import { SecretBasicAuthForm } from './type/BasicAuth.tsx'
 import { SecretOpaqueForm } from './type/Opaque'
 import { SecretServiceAccountForm } from './type/ServiceAccount'
 import { SecretSSHForm } from './type/SSH'
+import {
+  InfiniteData,
+  QueryObserverResult,
+  RefetchOptions,
+} from '@tanstack/react-query'
+import { ResourceList } from '../../updatedtypes.ts'
 
 const FormContainer = styled.div`
   display: flex;
@@ -36,7 +40,9 @@ const FormContainer = styled.div`
 interface CreateSecretModalProps {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
-  refetch?: LazyQueryExecFunction<SecretsQuery, SecretsQueryVariables>
+  refetch: (
+    options?: RefetchOptions
+  ) => Promise<QueryObserverResult<InfiniteData<ResourceList>, unknown>>
   onCreate?: (name: string, namespace: string) => void
 }
 
@@ -94,13 +100,7 @@ export function CreateSecretModal({
       return
     }
 
-    refetch({
-      context: {
-        headers: {
-          'Cache-Control': 'no-cache',
-        },
-      },
-    })
+    refetch()
       .then(() => {
         onCreate?.(name, namespace)
         setOpen(false)

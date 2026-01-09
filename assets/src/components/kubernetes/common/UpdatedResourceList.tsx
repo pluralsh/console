@@ -1,11 +1,19 @@
 import { Table } from '@pluralsh/design-system'
 import {
   InfiniteData,
+  QueryObserverResult,
+  RefetchOptions,
   useInfiniteQuery,
   UseInfiniteQueryOptions,
 } from '@tanstack/react-query'
 import { Row, SortingState, TableOptions } from '@tanstack/react-table'
-import { ReactElement, useEffect, useMemo } from 'react'
+import {
+  Dispatch,
+  ReactElement,
+  SetStateAction,
+  useEffect,
+  useMemo,
+} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AxiosInstance } from '../../../helpers/axios.ts'
 
@@ -48,6 +56,15 @@ interface ResourceListProps<TResourceList> {
   disableOnRowClick?: boolean
   maxHeight?: string
   tableOptions?: Omit<TableOptions<any>, 'data' | 'columns' | 'getCoreRowModel'>
+  setRefetch?: Dispatch<
+    SetStateAction<
+      Dispatch<
+        (
+          options?: RefetchOptions
+        ) => Promise<QueryObserverResult<InfiniteData<TResourceList>, unknown>>
+      >
+    >
+  >
 }
 
 export function UpdatedResourceList<
@@ -63,6 +80,7 @@ export function UpdatedResourceList<
   disableOnRowClick,
   maxHeight,
   tableOptions,
+  setRefetch,
 }: ResourceListProps<TResourceList>): ReactElement<any> {
   const navigate = useNavigate()
   const cluster = useCluster()
@@ -71,7 +89,7 @@ export function UpdatedResourceList<
     meta: { cluster, ...tableOptions },
   })
 
-  const { data, isFetching, hasNextPage, fetchNextPage } =
+  const { data, isFetching, hasNextPage, fetchNextPage, refetch } =
     useInfiniteQuery<TResourceList>({
       ...queryOptions({
         client: AxiosInstance(cluster?.id ?? ''),
@@ -102,7 +120,10 @@ export function UpdatedResourceList<
     [data?.pages, itemsKey]
   )
 
-  useEffect(() => setNamespaced(namespaced), [namespaced, setNamespaced])
+  useEffect(() => {
+    setRefetch?.(() => refetch)
+    setNamespaced(namespaced)
+  }, [namespaced, setNamespaced, refetch, setRefetch])
 
   return (
     <>
