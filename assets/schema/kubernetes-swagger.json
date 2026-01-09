@@ -7,8 +7,12 @@
   "paths": {
     "/api/v1/_raw/{kind}/name/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a non-namespaced resource",
         "operationId": "GetResource",
         "parameters": [
@@ -73,8 +77,12 @@
         }
       },
       "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "creates or updates a non-namespaced resource",
         "operationId": "UpdateResource",
         "parameters": [
@@ -144,8 +152,12 @@
         }
       },
       "delete": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "deletes a non-namespaced resource",
         "operationId": "DeleteResource",
         "parameters": [
@@ -221,8 +233,12 @@
     },
     "/api/v1/_raw/{kind}/namespace/{namespace}/name/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns unstructured resource from a namespace",
         "operationId": "GetNamespacedResource",
         "parameters": [
@@ -294,8 +310,12 @@
         }
       },
       "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "creates or updates a resource in a namespace",
         "operationId": "UpdateNamespacedResource",
         "parameters": [
@@ -372,8 +392,12 @@
         }
       },
       "delete": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "deletes a resource from a namespace",
         "operationId": "DeleteNamespacedResource",
         "parameters": [
@@ -456,8 +480,12 @@
     },
     "/api/v1/appdeployment": {
       "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "creates an application based on provided deployment.AppDeploymentSpec",
         "operationId": "CreateAppDeployment",
         "parameters": [
@@ -518,8 +546,12 @@
     },
     "/api/v1/appdeployment/protocols": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of available protocols for the service",
         "operationId": "GetAvailableProtocols",
         "parameters": [
@@ -572,8 +604,12 @@
     },
     "/api/v1/appdeployment/validate/imagereference": {
       "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "checks if provided image is valid",
         "operationId": "ValidateImageReference",
         "parameters": [
@@ -634,8 +670,12 @@
     },
     "/api/v1/appdeployment/validate/name": {
       "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "checks if provided name is valid",
         "operationId": "ValidateAppName",
         "parameters": [
@@ -696,8 +736,12 @@
     },
     "/api/v1/appdeployment/validate/protocol": {
       "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "checks if provided service protocol is valid",
         "operationId": "ValidateProtocol",
         "parameters": [
@@ -758,8 +802,12 @@
     },
     "/api/v1/appdeploymentfromfile": {
       "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "create an application from file",
         "operationId": "CreateAppDeploymentFromFile",
         "parameters": [
@@ -820,8 +868,12 @@
     },
     "/api/v1/clusterrole": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of ClusterRoles",
         "operationId": "GetClusterRoles",
         "parameters": [
@@ -874,8 +926,12 @@
     },
     "/api/v1/clusterrole/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about ClusterRole",
         "operationId": "GetClusterRole",
         "parameters": [
@@ -935,8 +991,12 @@
     },
     "/api/v1/clusterrolebinding": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of ClusterRoleBindings",
         "operationId": "GetClusterRoleBindings",
         "parameters": [
@@ -989,8 +1049,12 @@
     },
     "/api/v1/clusterrolebinding/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about ClusterRoleBinding",
         "operationId": "GetClusterRoleBinding",
         "parameters": [
@@ -1050,8 +1114,12 @@
     },
     "/api/v1/configmap": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of ConfigMaps from all namespaces",
         "operationId": "GetAllConfigMaps",
         "parameters": [
@@ -1104,8 +1172,12 @@
     },
     "/api/v1/configmap/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of ConfigMaps in a namespaces",
         "operationId": "GetConfigMaps",
         "parameters": [
@@ -1165,8 +1237,12 @@
     },
     "/api/v1/configmap/{namespace}/{configmap}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about ConfigMap",
         "operationId": "GetConfigMap",
         "parameters": [
@@ -1233,8 +1309,12 @@
     },
     "/api/v1/crd": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of CustomResourceDefinition",
         "operationId": "GetCustomResourceDefinitions",
         "parameters": [
@@ -1287,8 +1367,12 @@
     },
     "/api/v1/crd/{crd}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about CustomResourceDefinition",
         "operationId": "GetCustomResourceDefinition",
         "parameters": [
@@ -1348,8 +1432,12 @@
     },
     "/api/v1/crd/{namespace}/{crd}/object": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of objects of CustomResourceDefinition",
         "operationId": "GetCustomResourceObjects",
         "parameters": [
@@ -1416,8 +1504,12 @@
     },
     "/api/v1/crd/{namespace}/{crd}/{object}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about custom resource object",
         "operationId": "GetCustomResourceObject",
         "parameters": [
@@ -1491,8 +1583,12 @@
     },
     "/api/v1/crd/{namespace}/{crd}/{object}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns Events for custom resource object",
         "operationId": "GetCustomResourceObjectEvents",
         "parameters": [
@@ -1566,8 +1662,12 @@
     },
     "/api/v1/cronjob": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of CronJobs from all namespaces",
         "operationId": "GetAllCronJobs",
         "parameters": [
@@ -1620,8 +1720,12 @@
     },
     "/api/v1/cronjob/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of CronJobs in a namespaces",
         "operationId": "GetCronJobs",
         "parameters": [
@@ -1681,8 +1785,12 @@
     },
     "/api/v1/cronjob/{namespace}/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about CronJob",
         "operationId": "GetCronJob",
         "parameters": [
@@ -1749,8 +1857,12 @@
     },
     "/api/v1/cronjob/{namespace}/{name}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events for CronJob",
         "operationId": "GetCronJobEvents",
         "parameters": [
@@ -1817,8 +1929,12 @@
     },
     "/api/v1/cronjob/{namespace}/{name}/job": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Jobs for CronJob",
         "operationId": "GetCronJobJobs",
         "parameters": [
@@ -1891,8 +2007,12 @@
     },
     "/api/v1/cronjob/{namespace}/{name}/trigger": {
       "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "triggers a Job based on CronJob",
         "operationId": "TriggerCronJob",
         "parameters": [
@@ -1956,8 +2076,12 @@
     },
     "/api/v1/csrftoken/{action}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "generates a one-time CSRF token that can be used by POST request",
         "operationId": "GetCSRFToken",
         "parameters": [
@@ -2017,8 +2141,12 @@
     },
     "/api/v1/daemonset": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of DaemonSets from all namespaces",
         "operationId": "GetAllDaemonSets",
         "parameters": [
@@ -2071,8 +2199,12 @@
     },
     "/api/v1/daemonset/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of DaemonSets in a namespaces",
         "operationId": "GetDaemonSets",
         "parameters": [
@@ -2132,8 +2264,12 @@
     },
     "/api/v1/daemonset/{namespace}/{daemonSet}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about DaemonSet",
         "operationId": "GetDaemonSet",
         "parameters": [
@@ -2200,8 +2336,12 @@
     },
     "/api/v1/daemonset/{namespace}/{daemonSet}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events for DaemonSet",
         "operationId": "GetDaemonSetEvents",
         "parameters": [
@@ -2268,8 +2408,12 @@
     },
     "/api/v1/daemonset/{namespace}/{daemonSet}/pod": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Pods for DaemonSet",
         "operationId": "GetDaemonSetPods",
         "parameters": [
@@ -2336,8 +2480,12 @@
     },
     "/api/v1/daemonset/{namespace}/{daemonSet}/restart": {
       "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "rollout restart of the Daemon Set",
         "operationId": "RestartDaemonSet",
         "parameters": [
@@ -2404,8 +2552,12 @@
     },
     "/api/v1/daemonset/{namespace}/{daemonSet}/service": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Services for DaemonSet",
         "operationId": "GetDaemonSetServices",
         "parameters": [
@@ -2472,8 +2624,12 @@
     },
     "/api/v1/deployment": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Deployments from all namespaces",
         "operationId": "GetAllDeployments",
         "parameters": [
@@ -2526,8 +2682,12 @@
     },
     "/api/v1/deployment/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Deployments in a namespaces",
         "operationId": "GetDeployments",
         "parameters": [
@@ -2587,8 +2747,12 @@
     },
     "/api/v1/deployment/{namespace}/{deployment}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about Deployment",
         "operationId": "GetDeployment",
         "parameters": [
@@ -2655,8 +2819,12 @@
     },
     "/api/v1/deployment/{namespace}/{deployment}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events for Deployment",
         "operationId": "GetDeploymentEvents",
         "parameters": [
@@ -2723,8 +2891,12 @@
     },
     "/api/v1/deployment/{namespace}/{deployment}/newreplicaset": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of new ReplicaSets for Deployment",
         "operationId": "GetDeploymentNewReplicaSet",
         "parameters": [
@@ -2791,8 +2963,12 @@
     },
     "/api/v1/deployment/{namespace}/{deployment}/oldreplicaset": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of old ReplicaSets for Deployment",
         "operationId": "GetDeploymentOldReplicaSets",
         "parameters": [
@@ -2859,8 +3035,12 @@
     },
     "/api/v1/deployment/{namespace}/{deployment}/pause": {
       "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "pauses the Deployment",
         "operationId": "PauseDeployment",
         "parameters": [
@@ -2927,8 +3107,12 @@
     },
     "/api/v1/deployment/{namespace}/{deployment}/restart": {
       "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "rollout restart of the Deployment",
         "operationId": "RestartDeployment",
         "parameters": [
@@ -2995,8 +3179,12 @@
     },
     "/api/v1/deployment/{namespace}/{deployment}/resume": {
       "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "resumes the Deployment",
         "operationId": "ResumeDeployment",
         "parameters": [
@@ -3063,8 +3251,12 @@
     },
     "/api/v1/deployment/{namespace}/{deployment}/rollback": {
       "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "rolls back the Deployment to the target revision",
         "operationId": "RollbackDeployment",
         "parameters": [
@@ -3139,8 +3331,12 @@
     },
     "/api/v1/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events from all namespaces",
         "operationId": "GetAllEvents",
         "parameters": [
@@ -3193,8 +3389,12 @@
     },
     "/api/v1/event/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events in a namespace",
         "operationId": "GetEvents",
         "parameters": [
@@ -3254,8 +3454,12 @@
     },
     "/api/v1/horizontalpodautoscaler": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of HorizontalPodAutoscalers from all namespaces",
         "operationId": "GetAllHorizontalPodAutoscalers",
         "parameters": [
@@ -3308,8 +3512,12 @@
     },
     "/api/v1/horizontalpodautoscaler/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of HorizontalPodAutoscalers in a namespaces",
         "operationId": "GetHorizontalPodAutoscalers",
         "parameters": [
@@ -3369,8 +3577,12 @@
     },
     "/api/v1/horizontalpodautoscaler/{namespace}/{horizontalpodautoscaler}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about HorizontalPodAutoscaler",
         "operationId": "GetHorizontalPodAutoscaler",
         "parameters": [
@@ -3437,8 +3649,12 @@
     },
     "/api/v1/ingress": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Ingresses from all namespaces",
         "operationId": "GetAllIngresses",
         "parameters": [
@@ -3491,8 +3707,12 @@
     },
     "/api/v1/ingress/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Ingresses in a namespaces",
         "operationId": "GetIngresses",
         "parameters": [
@@ -3552,8 +3772,12 @@
     },
     "/api/v1/ingress/{namespace}/{ingress}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events for Ingress",
         "operationId": "GetIngressEvents",
         "parameters": [
@@ -3620,8 +3844,12 @@
     },
     "/api/v1/ingress/{namespace}/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about Ingress",
         "operationId": "GetIngress",
         "parameters": [
@@ -3688,8 +3916,12 @@
     },
     "/api/v1/ingressclass": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of IngressClasses",
         "operationId": "GetIngressClasses",
         "parameters": [
@@ -3742,8 +3974,12 @@
     },
     "/api/v1/ingressclass/{ingressclass}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about IngressClass",
         "operationId": "GetIngressClass",
         "parameters": [
@@ -3803,8 +4039,12 @@
     },
     "/api/v1/integration/{name}/state": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "operationId": "handleGetState",
         "parameters": [
           {
@@ -3853,8 +4093,12 @@
     },
     "/api/v1/job": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Jobs from all namespaces",
         "operationId": "GetAllJobs",
         "parameters": [
@@ -3907,8 +4151,12 @@
     },
     "/api/v1/job/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Jobs in a namespaces",
         "operationId": "GetJobs",
         "parameters": [
@@ -3968,8 +4216,12 @@
     },
     "/api/v1/job/{namespace}/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about Job",
         "operationId": "GetJob",
         "parameters": [
@@ -4036,8 +4288,12 @@
     },
     "/api/v1/job/{namespace}/{name}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events for Job",
         "operationId": "GetJobEvents",
         "parameters": [
@@ -4104,8 +4360,12 @@
     },
     "/api/v1/job/{namespace}/{name}/pod": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Pods for Job",
         "operationId": "GetJobPods",
         "parameters": [
@@ -4172,8 +4432,12 @@
     },
     "/api/v1/log/file/{namespace}/{pod}/{container}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a text file with logs from a Container",
         "operationId": "GetLogFile",
         "parameters": [
@@ -4250,8 +4514,12 @@
     },
     "/api/v1/log/source/{namespace}/{resourceName}/{resourceType}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns log sources for a resource",
         "operationId": "GetLogSource",
         "parameters": [
@@ -4325,8 +4593,12 @@
     },
     "/api/v1/log/{namespace}/{pod}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns logs from a Pod",
         "operationId": "GetPodLogs",
         "parameters": [
@@ -4393,8 +4665,12 @@
     },
     "/api/v1/log/{namespace}/{pod}/{container}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns logs from a Container",
         "operationId": "GetContainerLogs",
         "parameters": [
@@ -4468,8 +4744,12 @@
     },
     "/api/v1/namespace": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Namespaces",
         "operationId": "GetNamespaces",
         "parameters": [
@@ -4520,8 +4800,12 @@
         }
       },
       "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "create a Namespace",
         "operationId": "CreateNamespace",
         "parameters": [
@@ -4582,8 +4866,12 @@
     },
     "/api/v1/namespace/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about Namespace",
         "operationId": "GetNamespace",
         "parameters": [
@@ -4643,8 +4931,12 @@
     },
     "/api/v1/namespace/{name}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events for Namespace",
         "operationId": "GetNamespaceEvents",
         "parameters": [
@@ -4704,8 +4996,12 @@
     },
     "/api/v1/networkpolicy": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of NetworkPolicies from all namespaces",
         "operationId": "GetAllNetworkPolicies",
         "parameters": [
@@ -4758,8 +5054,12 @@
     },
     "/api/v1/networkpolicy/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of NetworkPolicies in a namespaces",
         "operationId": "GetNetworkPolicies",
         "parameters": [
@@ -4819,8 +5119,12 @@
     },
     "/api/v1/networkpolicy/{namespace}/{networkpolicy}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about NetworkPolicy",
         "operationId": "GetNetworkPolicy",
         "parameters": [
@@ -4887,8 +5191,12 @@
     },
     "/api/v1/node": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Nodes",
         "operationId": "GetNodes",
         "parameters": [
@@ -4941,8 +5249,12 @@
     },
     "/api/v1/node/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about Node",
         "operationId": "GetNode",
         "parameters": [
@@ -5002,8 +5314,12 @@
     },
     "/api/v1/node/{name}/drain": {
       "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "drains Node",
         "operationId": "DrainNode",
         "parameters": [
@@ -5068,8 +5384,12 @@
     },
     "/api/v1/node/{name}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events for Node",
         "operationId": "GetNodeEvents",
         "parameters": [
@@ -5129,8 +5449,12 @@
     },
     "/api/v1/node/{name}/pod": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Pods for Node",
         "operationId": "GetNodePods",
         "parameters": [
@@ -5190,8 +5514,12 @@
     },
     "/api/v1/persistentvolume": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of PersistentVolumes from all namespaces",
         "operationId": "GetPersistentVolumes",
         "parameters": [
@@ -5244,8 +5572,12 @@
     },
     "/api/v1/persistentvolume/namespace/{namespace}/name/{persistentvolume}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about PersistentVolume",
         "operationId": "GetPersistentVolumeWithNamespace",
         "parameters": [
@@ -5305,8 +5637,12 @@
     },
     "/api/v1/persistentvolume/{persistentvolume}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about PersistentVolume",
         "operationId": "GetPersistentVolume",
         "parameters": [
@@ -5366,8 +5702,12 @@
     },
     "/api/v1/persistentvolumeclaim": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of PersistentVolumeClaim",
         "operationId": "GetAllPersistentVolumeClaims",
         "parameters": [
@@ -5420,8 +5760,12 @@
     },
     "/api/v1/persistentvolumeclaim/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of PersistentVolumeClaim from specified namespace",
         "operationId": "GetPersistentVolumeClaims",
         "parameters": [
@@ -5481,8 +5825,12 @@
     },
     "/api/v1/persistentvolumeclaim/{namespace}/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about PersistentVolumeClaim",
         "operationId": "GetPersistentVolumeClaim",
         "parameters": [
@@ -5549,8 +5897,12 @@
     },
     "/api/v1/pod": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Pods from all namespaces",
         "operationId": "GetAllPods",
         "parameters": [
@@ -5603,8 +5955,12 @@
     },
     "/api/v1/pod/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Pods in a namespaces",
         "operationId": "GetPods",
         "parameters": [
@@ -5664,8 +6020,12 @@
     },
     "/api/v1/pod/{namespace}/{pod}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about Pod",
         "operationId": "GetPod",
         "parameters": [
@@ -5732,8 +6092,12 @@
     },
     "/api/v1/pod/{namespace}/{pod}/container": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of containers for Pod",
         "operationId": "GetPodContainers",
         "parameters": [
@@ -5800,8 +6164,12 @@
     },
     "/api/v1/pod/{namespace}/{pod}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events for Pod",
         "operationId": "GetPodEvents",
         "parameters": [
@@ -5868,8 +6236,12 @@
     },
     "/api/v1/pod/{namespace}/{pod}/persistentvolumeclaim": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of containers for Pod",
         "operationId": "GetPodPersistentVolumeClaims",
         "parameters": [
@@ -5936,8 +6308,12 @@
     },
     "/api/v1/pod/{namespace}/{pod}/shell/{container}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "handles exec into pod",
         "operationId": "ExecShell",
         "parameters": [
@@ -6011,8 +6387,12 @@
     },
     "/api/v1/poddisruptionbudget": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of PodDisruptionBudget",
         "operationId": "GetAllPodDisruptionBudgets",
         "parameters": [
@@ -6065,8 +6445,12 @@
     },
     "/api/v1/poddisruptionbudget/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of PodDisruptionBudget from specified namespace",
         "operationId": "GetPodDisruptionBudgets",
         "parameters": [
@@ -6126,8 +6510,12 @@
     },
     "/api/v1/poddisruptionbudget/{namespace}/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about PodDisruptionBudget",
         "operationId": "GetPodDisruptionBudget",
         "parameters": [
@@ -6194,8 +6582,12 @@
     },
     "/api/v1/replicaset": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of ReplicaSets from all namespaces",
         "operationId": "GetAllReplicaSets",
         "parameters": [
@@ -6248,8 +6640,12 @@
     },
     "/api/v1/replicaset/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of ReplicaSets in a namespace",
         "operationId": "GetReplicaSets",
         "parameters": [
@@ -6309,8 +6705,12 @@
     },
     "/api/v1/replicaset/{namespace}/{replicaSet}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about ReplicaSet",
         "operationId": "GetReplicaSet",
         "parameters": [
@@ -6377,8 +6777,12 @@
     },
     "/api/v1/replicaset/{namespace}/{replicaSet}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events for ReplicaSet",
         "operationId": "GetReplicaSetEvents",
         "parameters": [
@@ -6445,8 +6849,12 @@
     },
     "/api/v1/replicaset/{namespace}/{replicaSet}/pod": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Pods for ReplicaSet",
         "operationId": "GetReplicaSetPods",
         "parameters": [
@@ -6513,8 +6921,12 @@
     },
     "/api/v1/replicaset/{namespace}/{replicaSet}/service": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Services for ReplicaSet",
         "operationId": "GetReplicaSetServices",
         "parameters": [
@@ -6581,8 +6993,12 @@
     },
     "/api/v1/replicationcontroller": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of ReplicationControllers from all namespaces",
         "operationId": "GetAllReplicationControllers",
         "parameters": [
@@ -6635,8 +7051,12 @@
     },
     "/api/v1/replicationcontroller/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of ReplicationController in a namespace",
         "operationId": "GetReplicationControllers",
         "parameters": [
@@ -6696,8 +7116,12 @@
     },
     "/api/v1/replicationcontroller/{namespace}/{replicationController}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about ReplicationController",
         "operationId": "GetReplicationController",
         "parameters": [
@@ -6764,8 +7188,12 @@
     },
     "/api/v1/replicationcontroller/{namespace}/{replicationController}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events for ReplicationController",
         "operationId": "GetReplicationControllerEvents",
         "parameters": [
@@ -6832,8 +7260,12 @@
     },
     "/api/v1/replicationcontroller/{namespace}/{replicationController}/pod": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Pods for ReplicationController",
         "operationId": "GetReplicationControllerPods",
         "parameters": [
@@ -6900,8 +7332,12 @@
     },
     "/api/v1/replicationcontroller/{namespace}/{replicationController}/service": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Services for ReplicationController",
         "operationId": "GetReplicationControllerServices",
         "parameters": [
@@ -6968,8 +7404,12 @@
     },
     "/api/v1/replicationcontroller/{namespace}/{replicationController}/update/pod": {
       "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "scales ReplicationController to a number of replicas",
         "operationId": "UpdateReplicationControllerReplicas",
         "parameters": [
@@ -7041,8 +7481,12 @@
     },
     "/api/v1/role": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Roles from all namespace",
         "operationId": "GetAllRoles",
         "parameters": [
@@ -7095,8 +7539,12 @@
     },
     "/api/v1/role/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Roles in a namespace",
         "operationId": "GetRoles",
         "parameters": [
@@ -7156,8 +7604,12 @@
     },
     "/api/v1/role/{namespace}/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about Role",
         "operationId": "GetRole",
         "parameters": [
@@ -7224,8 +7676,12 @@
     },
     "/api/v1/rolebinding": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of RoleBindings from all namespace",
         "operationId": "GetAllRoleBindings",
         "parameters": [
@@ -7278,8 +7734,12 @@
     },
     "/api/v1/rolebinding/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of RoleBindings in a namespace",
         "operationId": "GetRoleBindings",
         "parameters": [
@@ -7339,8 +7799,12 @@
     },
     "/api/v1/rolebinding/{namespace}/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about RoleBinding",
         "operationId": "GetRoleBinding",
         "parameters": [
@@ -7407,8 +7871,12 @@
     },
     "/api/v1/scale/{kind}/{namespace}/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a number of replicas of namespaced resource",
         "operationId": "GetNamespacedResourceReplicas",
         "parameters": [
@@ -7480,8 +7948,12 @@
         }
       },
       "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "scales a namespaced resource",
         "operationId": "ScaleNamespacedResource",
         "parameters": [
@@ -7561,8 +8033,12 @@
     },
     "/api/v1/scale/{kind}/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a number of replicas of non-namespaced resource",
         "operationId": "GetResourceReplicas",
         "parameters": [
@@ -7627,8 +8103,12 @@
         }
       },
       "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "scales a non-namespaced resource",
         "operationId": "ScaleResource",
         "parameters": [
@@ -7701,8 +8181,12 @@
     },
     "/api/v1/secret": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Secrets from all namespaces",
         "operationId": "GetAllSecrets",
         "parameters": [
@@ -7753,8 +8237,12 @@
         }
       },
       "post": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "stores ImagePullSecret in a Kubernetes Secret",
         "operationId": "CreateImagePullSecret",
         "parameters": [
@@ -7815,8 +8303,12 @@
     },
     "/api/v1/secret/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Secrets in a namespace",
         "operationId": "GetSecrets",
         "parameters": [
@@ -7876,8 +8368,12 @@
     },
     "/api/v1/secret/{namespace}/{name}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about Secret",
         "operationId": "GetSecret",
         "parameters": [
@@ -7944,8 +8440,12 @@
     },
     "/api/v1/service": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Services from all namespaces",
         "operationId": "GetAllServices",
         "parameters": [
@@ -7998,8 +8498,12 @@
     },
     "/api/v1/service/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Services in a namespace",
         "operationId": "GetServices",
         "parameters": [
@@ -8059,8 +8563,12 @@
     },
     "/api/v1/service/{namespace}/{service}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about Service",
         "operationId": "GetService",
         "parameters": [
@@ -8127,8 +8635,12 @@
     },
     "/api/v1/service/{namespace}/{service}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events for Service",
         "operationId": "GetServiceEvents",
         "parameters": [
@@ -8195,8 +8707,12 @@
     },
     "/api/v1/service/{namespace}/{service}/ingress": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Ingresses for Service",
         "operationId": "GetServiceIngresses",
         "parameters": [
@@ -8263,8 +8779,12 @@
     },
     "/api/v1/service/{namespace}/{service}/pod": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Pods for Service",
         "operationId": "GetServicePods",
         "parameters": [
@@ -8331,8 +8851,12 @@
     },
     "/api/v1/serviceaccount": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of ServiceAccounts from all namespaces",
         "operationId": "GetAllServiceAccounts",
         "parameters": [
@@ -8385,8 +8909,12 @@
     },
     "/api/v1/serviceaccount/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of ServiceAccounts in a namespaces",
         "operationId": "GetServiceAccounts",
         "parameters": [
@@ -8446,8 +8974,12 @@
     },
     "/api/v1/serviceaccount/{namespace}/{serviceaccount}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about ServiceAccount",
         "operationId": "GetServiceAccount",
         "parameters": [
@@ -8514,8 +9046,12 @@
     },
     "/api/v1/serviceaccount/{namespace}/{serviceaccount}/imagepullsecret": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of ImagePullSecret Secrets for ServiceAccount",
         "operationId": "GetServiceAccountImagePullSecrets",
         "parameters": [
@@ -8582,8 +9118,12 @@
     },
     "/api/v1/serviceaccount/{namespace}/{serviceaccount}/secret": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Secrets for ServiceAccount",
         "operationId": "GetServiceAccountSecrets",
         "parameters": [
@@ -8650,8 +9190,12 @@
     },
     "/api/v1/statefulset": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of StatefulSets from all namespaces",
         "operationId": "GetAllStatefulSets",
         "parameters": [
@@ -8704,8 +9248,12 @@
     },
     "/api/v1/statefulset/{namespace}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of StatefulSets in a namespaces",
         "operationId": "GetStatefulSets",
         "parameters": [
@@ -8765,8 +9313,12 @@
     },
     "/api/v1/statefulset/{namespace}/{statefulset}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about StatefulSets",
         "operationId": "GetStatefulSet",
         "parameters": [
@@ -8833,8 +9385,12 @@
     },
     "/api/v1/statefulset/{namespace}/{statefulset}/event": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of Events for StatefulSets",
         "operationId": "GetStatefulSetEvents",
         "parameters": [
@@ -8901,8 +9457,12 @@
     },
     "/api/v1/statefulset/{namespace}/{statefulset}/pod": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns  a list of Pods for StatefulSets",
         "operationId": "GetStatefulSetPods",
         "parameters": [
@@ -8969,8 +9529,12 @@
     },
     "/api/v1/statefulset/{namespace}/{statefulset}/restart": {
       "put": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "rollout restart of the Daemon Set",
         "operationId": "RestartStatefulSet",
         "parameters": [
@@ -9037,8 +9601,12 @@
     },
     "/api/v1/storageclass": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of StorageClasses",
         "operationId": "GetStorageClasses",
         "parameters": [
@@ -9091,8 +9659,12 @@
     },
     "/api/v1/storageclass/{storageclass}": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns detailed information about StorageClass",
         "operationId": "GetStorageClass",
         "parameters": [
@@ -9152,8 +9724,12 @@
     },
     "/api/v1/storageclass/{storageclass}/persistentvolume": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of PersistentVolumes assigned to StorageClass",
         "operationId": "GetStorageClassPersistentVolumes",
         "parameters": [
@@ -9213,8 +9789,12 @@
     },
     "/api/v1/{kind}/{namespace}/{name}/horizontalpodautoscaler": {
       "get": {
-        "consumes": ["application/json"],
-        "produces": ["application/json"],
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
         "summary": "returns a list of HorizontalPodAutoscalers for resource",
         "operationId": "GetHorizontalPodAutoscalersForResource",
         "parameters": [
@@ -9289,7 +9869,10 @@
   },
   "definitions": {
     "api.DataPoint": {
-      "required": ["x", "y"],
+      "required": [
+        "x",
+        "y"
+      ],
       "properties": {
         "x": {
           "type": "integer",
@@ -9302,7 +9885,11 @@
       }
     },
     "api.IntegrationState": {
-      "required": ["connected", "lastChecked", "error"],
+      "required": [
+        "connected",
+        "lastChecked",
+        "error"
+      ],
       "properties": {
         "connected": {
           "type": "boolean"
@@ -9316,7 +9903,11 @@
       }
     },
     "api.Metric": {
-      "required": ["dataPoints", "metricPoints", "metricName"],
+      "required": [
+        "dataPoints",
+        "metricPoints",
+        "metricName"
+      ],
       "properties": {
         "aggregation": {
           "type": "string"
@@ -9339,7 +9930,10 @@
       }
     },
     "api.MetricPoint": {
-      "required": ["timestamp", "value"],
+      "required": [
+        "timestamp",
+        "value"
+      ],
       "properties": {
         "timestamp": {
           "type": "string",
@@ -9352,7 +9946,10 @@
       }
     },
     "big.Int": {
-      "required": ["neg", "abs"],
+      "required": [
+        "neg",
+        "abs"
+      ],
       "properties": {
         "abs": {
           "type": "array",
@@ -9367,7 +9964,10 @@
       }
     },
     "clusterrole.ClusterRole": {
-      "required": ["objectMeta", "typeMeta"],
+      "required": [
+        "objectMeta",
+        "typeMeta"
+      ],
       "properties": {
         "objectMeta": {
           "$ref": "#/definitions/types.ObjectMeta"
@@ -9378,7 +9978,12 @@
       }
     },
     "clusterrole.ClusterRoleDetail": {
-      "required": ["objectMeta", "typeMeta", "rules", "errors"],
+      "required": [
+        "objectMeta",
+        "typeMeta",
+        "rules",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -9401,7 +10006,11 @@
       }
     },
     "clusterrole.ClusterRoleList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -9421,7 +10030,10 @@
       }
     },
     "clusterrolebinding.ClusterRoleBinding": {
-      "required": ["objectMeta", "typeMeta"],
+      "required": [
+        "objectMeta",
+        "typeMeta"
+      ],
       "properties": {
         "objectMeta": {
           "$ref": "#/definitions/types.ObjectMeta"
@@ -9432,7 +10044,12 @@
       }
     },
     "clusterrolebinding.ClusterRoleBindingDetail": {
-      "required": ["objectMeta", "typeMeta", "roleRef", "errors"],
+      "required": [
+        "objectMeta",
+        "typeMeta",
+        "roleRef",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -9458,7 +10075,11 @@
       }
     },
     "clusterrolebinding.ClusterRoleBindingList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -9508,7 +10129,10 @@
       }
     },
     "common.Endpoint": {
-      "required": ["host", "ports"],
+      "required": [
+        "host",
+        "ports"
+      ],
       "properties": {
         "host": {
           "type": "string"
@@ -9582,7 +10206,11 @@
       }
     },
     "common.EventList": {
-      "required": ["listMeta", "events", "errors"],
+      "required": [
+        "listMeta",
+        "events",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -9644,7 +10272,13 @@
       }
     },
     "common.ResourceStatus": {
-      "required": ["running", "pending", "failed", "succeeded", "terminating"],
+      "required": [
+        "running",
+        "pending",
+        "failed",
+        "succeeded",
+        "terminating"
+      ],
       "properties": {
         "failed": {
           "type": "integer",
@@ -9669,7 +10303,11 @@
       }
     },
     "common.ServicePort": {
-      "required": ["port", "protocol", "nodePort"],
+      "required": [
+        "port",
+        "protocol",
+        "nodePort"
+      ],
       "properties": {
         "nodePort": {
           "type": "integer",
@@ -9685,7 +10323,10 @@
       }
     },
     "configmap.ConfigMap": {
-      "required": ["objectMeta", "typeMeta"],
+      "required": [
+        "objectMeta",
+        "typeMeta"
+      ],
       "properties": {
         "objectMeta": {
           "$ref": "#/definitions/types.ObjectMeta"
@@ -9696,7 +10337,10 @@
       }
     },
     "configmap.ConfigMapDetail": {
-      "required": ["objectMeta", "typeMeta"],
+      "required": [
+        "objectMeta",
+        "typeMeta"
+      ],
       "properties": {
         "data": {
           "type": "object",
@@ -9713,7 +10357,11 @@
       }
     },
     "configmap.ConfigMapList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -9733,7 +10381,11 @@
       }
     },
     "controller.LogSources": {
-      "required": ["containerNames", "initContainerNames", "podNames"],
+      "required": [
+        "containerNames",
+        "initContainerNames",
+        "podNames"
+      ],
       "properties": {
         "containerNames": {
           "type": "array",
@@ -9827,13 +10479,13 @@
     },
     "cronjob.CronJobDetail": {
       "required": [
-        "lastSchedule",
-        "containerImages",
         "objectMeta",
         "typeMeta",
         "schedule",
         "suspend",
         "active",
+        "lastSchedule",
+        "containerImages",
         "concurrencyPolicy",
         "startingDeadlineSeconds",
         "errors"
@@ -9880,7 +10532,12 @@
       }
     },
     "cronjob.CronJobList": {
-      "required": ["listMeta", "items", "status", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "status",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -9903,7 +10560,9 @@
       }
     },
     "csrf.Response": {
-      "required": ["token"],
+      "required": [
+        "token"
+      ],
       "properties": {
         "token": {
           "type": "string"
@@ -9944,11 +10603,11 @@
     },
     "daemonset.DaemonSetDetail": {
       "required": [
+        "initContainerImages",
         "objectMeta",
         "typeMeta",
         "podInfo",
         "containerImages",
-        "initContainerImages",
         "errors"
       ],
       "properties": {
@@ -10020,7 +10679,11 @@
       }
     },
     "deployment.AppDeploymentFromFileResponse": {
-      "required": ["name", "content", "error"],
+      "required": [
+        "name",
+        "content",
+        "error"
+      ],
       "properties": {
         "content": {
           "type": "string"
@@ -10034,7 +10697,12 @@
       }
     },
     "deployment.AppDeploymentFromFileSpec": {
-      "required": ["name", "namespace", "content", "validate"],
+      "required": [
+        "name",
+        "namespace",
+        "content",
+        "validate"
+      ],
       "properties": {
         "content": {
           "type": "string"
@@ -10160,11 +10828,11 @@
     },
     "deployment.DeploymentDetail": {
       "required": [
+        "containerImages",
         "initContainerImages",
         "objectMeta",
         "typeMeta",
         "pods",
-        "containerImages",
         "selector",
         "statusInfo",
         "conditions",
@@ -10268,7 +10936,10 @@
       }
     },
     "deployment.EnvironmentVariable": {
-      "required": ["name", "value"],
+      "required": [
+        "name",
+        "value"
+      ],
       "properties": {
         "name": {
           "type": "string"
@@ -10279,7 +10950,10 @@
       }
     },
     "deployment.Label": {
-      "required": ["key", "value"],
+      "required": [
+        "key",
+        "value"
+      ],
       "properties": {
         "key": {
           "type": "string"
@@ -10290,7 +10964,11 @@
       }
     },
     "deployment.PortMapping": {
-      "required": ["port", "targetPort", "protocol"],
+      "required": [
+        "port",
+        "targetPort",
+        "protocol"
+      ],
       "properties": {
         "port": {
           "type": "integer",
@@ -10306,7 +10984,9 @@
       }
     },
     "deployment.Protocols": {
-      "required": ["protocols"],
+      "required": [
+        "protocols"
+      ],
       "properties": {
         "protocols": {
           "type": "array",
@@ -10317,7 +10997,10 @@
       }
     },
     "deployment.RollingUpdateStrategy": {
-      "required": ["maxSurge", "maxUnavailable"],
+      "required": [
+        "maxSurge",
+        "maxUnavailable"
+      ],
       "properties": {
         "maxSurge": {
           "$ref": "#/definitions/intstr.IntOrString"
@@ -10328,7 +11011,9 @@
       }
     },
     "deployment.RolloutSpec": {
-      "required": ["revision"],
+      "required": [
+        "revision"
+      ],
       "properties": {
         "revision": {
           "type": "string"
@@ -10336,7 +11021,12 @@
       }
     },
     "deployment.StatusInfo": {
-      "required": ["replicas", "updated", "available", "unavailable"],
+      "required": [
+        "replicas",
+        "updated",
+        "available",
+        "unavailable"
+      ],
       "properties": {
         "available": {
           "type": "integer",
@@ -10390,7 +11080,10 @@
       }
     },
     "endpoint.EndpointList": {
-      "required": ["listMeta", "endpoints"],
+      "required": [
+        "listMeta",
+        "endpoints"
+      ],
       "properties": {
         "endpoints": {
           "type": "array",
@@ -10408,7 +11101,9 @@
       "type": "object"
     },
     "handler.TerminalResponse": {
-      "required": ["id"],
+      "required": [
+        "id"
+      ],
       "properties": {
         "id": {
           "type": "string"
@@ -10455,13 +11150,13 @@
     },
     "horizontalpodautoscaler.HorizontalPodAutoscalerDetail": {
       "required": [
-        "minReplicas",
         "maxReplicas",
         "currentCPUUtilizationPercentage",
         "targetCPUUtilizationPercentage",
         "objectMeta",
         "typeMeta",
         "scaleTargetRef",
+        "minReplicas",
         "currentReplicas",
         "desiredReplicas",
         "lastScaleTime"
@@ -10506,7 +11201,11 @@
       }
     },
     "horizontalpodautoscaler.HorizontalPodAutoscalerList": {
-      "required": ["listMeta", "horizontalpodautoscalers", "errors"],
+      "required": [
+        "listMeta",
+        "horizontalpodautoscalers",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -10526,7 +11225,10 @@
       }
     },
     "horizontalpodautoscaler.ScaleTargetRef": {
-      "required": ["kind", "name"],
+      "required": [
+        "kind",
+        "name"
+      ],
       "properties": {
         "kind": {
           "type": "string"
@@ -10537,7 +11239,10 @@
       }
     },
     "inf.Dec": {
-      "required": ["unscaled", "scale"],
+      "required": [
+        "unscaled",
+        "scale"
+      ],
       "properties": {
         "scale": {
           "type": "integer",
@@ -10549,7 +11254,12 @@
       }
     },
     "ingress.Ingress": {
-      "required": ["objectMeta", "typeMeta", "endpoints", "hosts"],
+      "required": [
+        "objectMeta",
+        "typeMeta",
+        "endpoints",
+        "hosts"
+      ],
       "properties": {
         "endpoints": {
           "type": "array",
@@ -10573,10 +11283,10 @@
     },
     "ingress.IngressDetail": {
       "required": [
-        "objectMeta",
-        "typeMeta",
         "endpoints",
         "hosts",
+        "objectMeta",
+        "typeMeta",
         "spec",
         "status",
         "errors"
@@ -10615,7 +11325,11 @@
       }
     },
     "ingress.IngressList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -10635,7 +11349,11 @@
       }
     },
     "ingressclass.IngressClass": {
-      "required": ["objectMeta", "typeMeta", "controller"],
+      "required": [
+        "objectMeta",
+        "typeMeta",
+        "controller"
+      ],
       "properties": {
         "controller": {
           "type": "string"
@@ -10649,7 +11367,11 @@
       }
     },
     "ingressclass.IngressClassList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -10669,7 +11391,11 @@
       }
     },
     "intstr.IntOrString": {
-      "required": ["Type", "IntVal", "StrVal"],
+      "required": [
+        "Type",
+        "IntVal",
+        "StrVal"
+      ],
       "properties": {
         "IntVal": {
           "type": "integer",
@@ -10727,13 +11453,13 @@
     },
     "job.JobDetail": {
       "required": [
-        "parallelism",
-        "jobStatus",
         "objectMeta",
         "typeMeta",
         "podInfo",
         "containerImages",
         "initContainerImages",
+        "parallelism",
+        "jobStatus",
         "completions",
         "errors"
       ],
@@ -10779,7 +11505,13 @@
       }
     },
     "job.JobList": {
-      "required": ["listMeta", "cumulativeMetrics", "status", "jobs", "errors"],
+      "required": [
+        "listMeta",
+        "cumulativeMetrics",
+        "status",
+        "jobs",
+        "errors"
+      ],
       "properties": {
         "cumulativeMetrics": {
           "type": "array",
@@ -10808,7 +11540,11 @@
       }
     },
     "job.JobStatus": {
-      "required": ["status", "message", "conditions"],
+      "required": [
+        "status",
+        "message",
+        "conditions"
+      ],
       "properties": {
         "conditions": {
           "type": "array",
@@ -10850,7 +11586,11 @@
       }
     },
     "logs.LogDetails": {
-      "required": ["info", "selection", "logs"],
+      "required": [
+        "info",
+        "selection",
+        "logs"
+      ],
       "properties": {
         "info": {
           "$ref": "#/definitions/logs.LogInfo"
@@ -10897,7 +11637,10 @@
       }
     },
     "logs.LogLine": {
-      "required": ["timestamp", "content"],
+      "required": [
+        "timestamp",
+        "content"
+      ],
       "properties": {
         "content": {
           "type": "string"
@@ -10908,7 +11651,10 @@
       }
     },
     "logs.LogLineId": {
-      "required": ["timestamp", "lineNum"],
+      "required": [
+        "timestamp",
+        "lineNum"
+      ],
       "properties": {
         "lineNum": {
           "type": "integer",
@@ -10944,7 +11690,11 @@
       }
     },
     "namespace.Namespace": {
-      "required": ["objectMeta", "typeMeta", "phase"],
+      "required": [
+        "objectMeta",
+        "typeMeta",
+        "phase"
+      ],
       "properties": {
         "objectMeta": {
           "$ref": "#/definitions/types.ObjectMeta"
@@ -10994,7 +11744,11 @@
       }
     },
     "namespace.NamespaceList": {
-      "required": ["listMeta", "namespaces", "errors"],
+      "required": [
+        "listMeta",
+        "namespaces",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -11014,7 +11768,9 @@
       }
     },
     "namespace.NamespaceSpec": {
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
         "name": {
           "type": "string"
@@ -11022,7 +11778,10 @@
       }
     },
     "networkpolicy.NetworkPolicy": {
-      "required": ["objectMeta", "typeMeta"],
+      "required": [
+        "objectMeta",
+        "typeMeta"
+      ],
       "properties": {
         "objectMeta": {
           "$ref": "#/definitions/types.ObjectMeta"
@@ -11033,7 +11792,12 @@
       }
     },
     "networkpolicy.NetworkPolicyDetail": {
-      "required": ["objectMeta", "typeMeta", "podSelector", "errors"],
+      "required": [
+        "objectMeta",
+        "typeMeta",
+        "podSelector",
+        "errors"
+      ],
       "properties": {
         "egress": {
           "type": "array",
@@ -11071,7 +11835,11 @@
       }
     },
     "networkpolicy.NetworkPolicyList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -11299,7 +12067,12 @@
       }
     },
     "node.NodeList": {
-      "required": ["listMeta", "nodes", "cumulativeMetrics", "errors"],
+      "required": [
+        "listMeta",
+        "nodes",
+        "cumulativeMetrics",
+        "errors"
+      ],
       "properties": {
         "cumulativeMetrics": {
           "type": "array",
@@ -11382,15 +12155,15 @@
     "persistentvolume.PersistentVolumeDetail": {
       "required": [
         "objectMeta",
-        "typeMeta",
-        "capacity",
         "accessModes",
+        "storageClass",
         "status",
         "claim",
-        "reason",
+        "typeMeta",
+        "capacity",
         "reclaimPolicy",
-        "storageClass",
         "mountOptions",
+        "reason",
         "message",
         "persistentVolumeSource"
       ],
@@ -11443,7 +12216,11 @@
       }
     },
     "persistentvolume.PersistentVolumeList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -11504,13 +12281,13 @@
     },
     "persistentvolumeclaim.PersistentVolumeClaimDetail": {
       "required": [
+        "capacity",
+        "accessModes",
+        "storageClass",
         "objectMeta",
         "typeMeta",
         "status",
-        "volume",
-        "capacity",
-        "accessModes",
-        "storageClass"
+        "volume"
       ],
       "properties": {
         "accessModes": {
@@ -11543,7 +12320,11 @@
       }
     },
     "persistentvolumeclaim.PersistentVolumeClaimList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -11632,7 +12413,11 @@
       }
     },
     "pod.ContainerStatus": {
-      "required": ["name", "state", "ready"],
+      "required": [
+        "name",
+        "state",
+        "ready"
+      ],
       "properties": {
         "name": {
           "type": "string"
@@ -11646,7 +12431,11 @@
       }
     },
     "pod.EnvVar": {
-      "required": ["name", "value", "valueFrom"],
+      "required": [
+        "name",
+        "value",
+        "valueFrom"
+      ],
       "properties": {
         "name": {
           "type": "string"
@@ -11656,6 +12445,21 @@
         },
         "valueFrom": {
           "$ref": "#/definitions/v1.EnvVarSource"
+        }
+      }
+    },
+    "pod.GPUAllocation": {
+      "required": [
+        "quantity",
+        "type"
+      ],
+      "properties": {
+        "quantity": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "type": {
+          "type": "string"
         }
       }
     },
@@ -11720,7 +12524,9 @@
         "cpuRequests",
         "cpuLimits",
         "memoryRequests",
-        "memoryLimits"
+        "memoryLimits",
+        "gpuRequests",
+        "gpuLimits"
       ],
       "properties": {
         "cpuLimits": {
@@ -11730,6 +12536,18 @@
         "cpuRequests": {
           "type": "integer",
           "format": "int64"
+        },
+        "gpuLimits": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pod.GPUAllocation"
+          }
+        },
+        "gpuRequests": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pod.GPUAllocation"
+          }
         },
         "memoryLimits": {
           "type": "integer",
@@ -11837,7 +12655,13 @@
       }
     },
     "pod.PodList": {
-      "required": ["listMeta", "cumulativeMetrics", "status", "pods", "errors"],
+      "required": [
+        "listMeta",
+        "cumulativeMetrics",
+        "status",
+        "pods",
+        "errors"
+      ],
       "properties": {
         "cumulativeMetrics": {
           "type": "array",
@@ -11896,7 +12720,13 @@
       }
     },
     "pod.VolumeMount": {
-      "required": ["name", "readOnly", "mountPath", "subPath", "volume"],
+      "required": [
+        "name",
+        "readOnly",
+        "mountPath",
+        "subPath",
+        "volume"
+      ],
       "properties": {
         "mountPath": {
           "type": "string"
@@ -11966,15 +12796,15 @@
     },
     "poddisruptionbudget.PodDisruptionBudgetDetail": {
       "required": [
+        "objectMeta",
+        "typeMeta",
+        "desiredHealthy",
+        "disruptionsAllowed",
         "minAvailable",
         "maxUnavailable",
         "unhealthyPodEvictionPolicy",
-        "disruptionsAllowed",
-        "typeMeta",
         "currentHealthy",
-        "desiredHealthy",
         "expectedPods",
-        "objectMeta",
         "disruptedPods"
       ],
       "properties": {
@@ -12021,7 +12851,11 @@
       }
     },
     "poddisruptionbudget.PodDisruptionBudgetList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -12074,11 +12908,11 @@
     },
     "replicaset.ReplicaSetDetail": {
       "required": [
+        "initContainerImages",
         "objectMeta",
         "typeMeta",
         "podInfo",
         "containerImages",
-        "initContainerImages",
         "selector",
         "horizontalPodAutoscalerList",
         "errors"
@@ -12188,11 +13022,11 @@
     },
     "replicationcontroller.ReplicationControllerDetail": {
       "required": [
+        "containerImages",
+        "initContainerImages",
         "objectMeta",
         "typeMeta",
         "podInfo",
-        "containerImages",
-        "initContainerImages",
         "labelSelector",
         "errors"
       ],
@@ -12268,7 +13102,9 @@
       }
     },
     "replicationcontroller.ReplicationControllerSpec": {
-      "required": ["replicas"],
+      "required": [
+        "replicas"
+      ],
       "properties": {
         "replicas": {
           "type": "integer",
@@ -12277,7 +13113,12 @@
       }
     },
     "resource.Quantity": {
-      "required": ["i", "d", "s", "Format"],
+      "required": [
+        "i",
+        "d",
+        "s",
+        "Format"
+      ],
       "properties": {
         "Format": {
           "type": "string"
@@ -12294,7 +13135,9 @@
       }
     },
     "resource.infDecAmount": {
-      "required": ["Dec"],
+      "required": [
+        "Dec"
+      ],
       "properties": {
         "Dec": {
           "$ref": "#/definitions/inf.Dec"
@@ -12302,7 +13145,10 @@
       }
     },
     "resource.int64Amount": {
-      "required": ["value", "scale"],
+      "required": [
+        "value",
+        "scale"
+      ],
       "properties": {
         "scale": {
           "type": "integer",
@@ -12315,7 +13161,10 @@
       }
     },
     "resourcequota.ResourceQuotaDetail": {
-      "required": ["objectMeta", "typeMeta"],
+      "required": [
+        "objectMeta",
+        "typeMeta"
+      ],
       "properties": {
         "objectMeta": {
           "$ref": "#/definitions/types.ObjectMeta"
@@ -12338,7 +13187,10 @@
       }
     },
     "resourcequota.ResourceQuotaDetailList": {
-      "required": ["listMeta", "items"],
+      "required": [
+        "listMeta",
+        "items"
+      ],
       "properties": {
         "items": {
           "type": "array",
@@ -12362,7 +13214,10 @@
       }
     },
     "role.Role": {
-      "required": ["objectMeta", "typeMeta"],
+      "required": [
+        "objectMeta",
+        "typeMeta"
+      ],
       "properties": {
         "objectMeta": {
           "$ref": "#/definitions/types.ObjectMeta"
@@ -12373,7 +13228,12 @@
       }
     },
     "role.RoleDetail": {
-      "required": ["objectMeta", "typeMeta", "rules", "errors"],
+      "required": [
+        "typeMeta",
+        "objectMeta",
+        "rules",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -12396,7 +13256,11 @@
       }
     },
     "role.RoleList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -12416,7 +13280,10 @@
       }
     },
     "rolebinding.RoleBinding": {
-      "required": ["objectMeta", "typeMeta"],
+      "required": [
+        "objectMeta",
+        "typeMeta"
+      ],
       "properties": {
         "objectMeta": {
           "$ref": "#/definitions/types.ObjectMeta"
@@ -12427,7 +13294,12 @@
       }
     },
     "rolebinding.RoleBindingDetail": {
-      "required": ["objectMeta", "typeMeta", "roleRef", "errors"],
+      "required": [
+        "objectMeta",
+        "typeMeta",
+        "roleRef",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -12453,7 +13325,11 @@
       }
     },
     "rolebinding.RoleBindingList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -12473,7 +13349,10 @@
       }
     },
     "scaling.ReplicaCounts": {
-      "required": ["desiredReplicas", "actualReplicas"],
+      "required": [
+        "desiredReplicas",
+        "actualReplicas"
+      ],
       "properties": {
         "actualReplicas": {
           "type": "integer",
@@ -12486,7 +13365,11 @@
       }
     },
     "secret.ImagePullSecretSpec": {
-      "required": ["name", "namespace", "data"],
+      "required": [
+        "name",
+        "namespace",
+        "data"
+      ],
       "properties": {
         "data": {
           "type": "string"
@@ -12500,7 +13383,11 @@
       }
     },
     "secret.Secret": {
-      "required": ["objectMeta", "typeMeta", "type"],
+      "required": [
+        "objectMeta",
+        "typeMeta",
+        "type"
+      ],
       "properties": {
         "objectMeta": {
           "$ref": "#/definitions/types.ObjectMeta"
@@ -12514,7 +13401,12 @@
       }
     },
     "secret.SecretDetail": {
-      "required": ["type", "objectMeta", "typeMeta", "data"],
+      "required": [
+        "objectMeta",
+        "typeMeta",
+        "type",
+        "data"
+      ],
       "properties": {
         "data": {
           "type": "object",
@@ -12534,7 +13426,11 @@
       }
     },
     "secret.SecretList": {
-      "required": ["listMeta", "secrets", "errors"],
+      "required": [
+        "listMeta",
+        "secrets",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -12595,13 +13491,13 @@
     },
     "service.ServiceDetail": {
       "required": [
-        "type",
-        "clusterIP",
-        "objectMeta",
         "typeMeta",
         "internalEndpoint",
         "externalEndpoints",
         "selector",
+        "type",
+        "clusterIP",
+        "objectMeta",
         "endpointList",
         "sessionAffinity",
         "errors"
@@ -12649,7 +13545,11 @@
       }
     },
     "service.ServiceList": {
-      "required": ["listMeta", "services", "errors"],
+      "required": [
+        "listMeta",
+        "services",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -12669,7 +13569,10 @@
       }
     },
     "serviceaccount.ServiceAccount": {
-      "required": ["objectMeta", "typeMeta"],
+      "required": [
+        "objectMeta",
+        "typeMeta"
+      ],
       "properties": {
         "objectMeta": {
           "$ref": "#/definitions/types.ObjectMeta"
@@ -12680,7 +13583,11 @@
       }
     },
     "serviceaccount.ServiceAccountDetail": {
-      "required": ["objectMeta", "typeMeta", "errors"],
+      "required": [
+        "objectMeta",
+        "typeMeta",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -12697,7 +13604,11 @@
       }
     },
     "serviceaccount.ServiceAccountList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -12750,11 +13661,11 @@
     },
     "statefulset.StatefulSetDetail": {
       "required": [
+        "objectMeta",
+        "typeMeta",
         "podInfo",
         "containerImages",
         "initContainerImages",
-        "objectMeta",
-        "typeMeta",
         "errors"
       ],
       "properties": {
@@ -12823,7 +13734,12 @@
       }
     },
     "storageclass.StorageClass": {
-      "required": ["objectMeta", "typeMeta", "provisioner", "parameters"],
+      "required": [
+        "objectMeta",
+        "typeMeta",
+        "provisioner",
+        "parameters"
+      ],
       "properties": {
         "objectMeta": {
           "$ref": "#/definitions/types.ObjectMeta"
@@ -12843,7 +13759,11 @@
       }
     },
     "storageclass.StorageClassList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -12897,12 +13817,12 @@
     },
     "types.CustomResourceDefinitionDetail": {
       "required": [
+        "objectMeta",
         "typeMeta",
         "group",
         "scope",
         "names",
         "established",
-        "objectMeta",
         "conditions",
         "objects",
         "subresources",
@@ -12960,7 +13880,11 @@
       }
     },
     "types.CustomResourceDefinitionList": {
-      "required": ["listMeta", "items", "errors"],
+      "required": [
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -12980,7 +13904,10 @@
       }
     },
     "types.CustomResourceDefinitionNames": {
-      "required": ["plural", "kind"],
+      "required": [
+        "plural",
+        "kind"
+      ],
       "properties": {
         "categories": {
           "type": "array",
@@ -13009,7 +13936,11 @@
       }
     },
     "types.CustomResourceDefinitionVersion": {
-      "required": ["name", "served", "storage"],
+      "required": [
+        "name",
+        "served",
+        "storage"
+      ],
       "properties": {
         "name": {
           "type": "string"
@@ -13023,7 +13954,10 @@
       }
     },
     "types.CustomResourceObject": {
-      "required": ["typeMeta", "objectMeta"],
+      "required": [
+        "typeMeta",
+        "objectMeta"
+      ],
       "properties": {
         "objectMeta": {
           "$ref": "#/definitions/types.ObjectMeta"
@@ -13034,7 +13968,11 @@
       }
     },
     "types.CustomResourceObjectDetail": {
-      "required": ["typeMeta", "objectMeta", "errors"],
+      "required": [
+        "typeMeta",
+        "objectMeta",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -13051,7 +13989,12 @@
       }
     },
     "types.CustomResourceObjectList": {
-      "required": ["typeMeta", "listMeta", "items", "errors"],
+      "required": [
+        "typeMeta",
+        "listMeta",
+        "items",
+        "errors"
+      ],
       "properties": {
         "errors": {
           "type": "array",
@@ -13074,7 +14017,9 @@
       }
     },
     "types.ListMeta": {
-      "required": ["totalItems"],
+      "required": [
+        "totalItems"
+      ],
       "properties": {
         "totalItems": {
           "type": "integer",
@@ -13117,7 +14062,10 @@
       }
     },
     "types.OwnerReference": {
-      "required": ["kind", "name"],
+      "required": [
+        "kind",
+        "name"
+      ],
       "properties": {
         "kind": {
           "type": "string"
@@ -13141,7 +14089,9 @@
       }
     },
     "unstructured.Unstructured": {
-      "required": ["Object"],
+      "required": [
+        "Object"
+      ],
       "properties": {
         "Object": {
           "type": "object"
@@ -13150,7 +14100,9 @@
     },
     "v1.AWSElasticBlockStoreVolumeSource": {
       "description": "Represents a Persistent Disk resource in AWS.\n\nAn AWS EBS disk must exist before mounting to a container. The disk must also be in the same AWS zone as the kubelet. An AWS EBS disk can only be mounted as read/write once. AWS EBS volumes support ownership management and SELinux relabeling.",
-      "required": ["volumeID"],
+      "required": [
+        "volumeID"
+      ],
       "properties": {
         "fsType": {
           "description": "fsType is the filesystem type of the volume that you want to mount. Tip: Ensure that the filesystem type is supported by the host operating system. Examples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified. More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore",
@@ -13173,7 +14125,9 @@
     },
     "v1.AppArmorProfile": {
       "description": "AppArmorProfile defines a pod or container's AppArmor settings.",
-      "required": ["type"],
+      "required": [
+        "type"
+      ],
       "properties": {
         "localhostProfile": {
           "description": "localhostProfile indicates a profile loaded on the node that should be used. The profile must be preconfigured on the node to work. Must match the loaded name of the profile. Must be set if and only if type is \"Localhost\".",
@@ -13187,7 +14141,10 @@
     },
     "v1.AzureDiskVolumeSource": {
       "description": "AzureDisk represents an Azure Data Disk mount on the host and bind mount to the pod.",
-      "required": ["diskName", "diskURI"],
+      "required": [
+        "diskName",
+        "diskURI"
+      ],
       "properties": {
         "cachingMode": {
           "description": "cachingMode is the Host Caching mode: None, Read Only, Read Write.",
@@ -13217,7 +14174,11 @@
     },
     "v1.AzureFilePersistentVolumeSource": {
       "description": "AzureFile represents an Azure File Service mount on the host and bind mount to the pod.",
-      "required": ["secretName", "shareName", "secretNamespace"],
+      "required": [
+        "secretName",
+        "shareName",
+        "secretNamespace"
+      ],
       "properties": {
         "readOnly": {
           "description": "readOnly defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts.",
@@ -13239,7 +14200,10 @@
     },
     "v1.AzureFileVolumeSource": {
       "description": "AzureFile represents an Azure File Service mount on the host and bind mount to the pod.",
-      "required": ["secretName", "shareName"],
+      "required": [
+        "secretName",
+        "shareName"
+      ],
       "properties": {
         "readOnly": {
           "description": "readOnly defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts.",
@@ -13257,7 +14221,10 @@
     },
     "v1.CSIPersistentVolumeSource": {
       "description": "Represents storage that is managed by an external CSI volume driver",
-      "required": ["driver", "volumeHandle"],
+      "required": [
+        "driver",
+        "volumeHandle"
+      ],
       "properties": {
         "controllerExpandSecretRef": {
           "description": "controllerExpandSecretRef is a reference to the secret object containing sensitive information to pass to the CSI driver to complete the CSI ControllerExpandVolume call. This field is optional, and may be empty if no secret is required. If the secret object contains more than one secret, all secrets are passed.",
@@ -13306,7 +14273,9 @@
     },
     "v1.CSIVolumeSource": {
       "description": "Represents a source location of a volume to mount, managed by an external CSI driver",
-      "required": ["driver"],
+      "required": [
+        "driver"
+      ],
       "properties": {
         "driver": {
           "description": "driver is the name of the CSI driver that handles this volume. Consult with your admin for the correct name as registered in the cluster.",
@@ -13354,7 +14323,9 @@
     },
     "v1.CephFSPersistentVolumeSource": {
       "description": "Represents a Ceph Filesystem mount that lasts the lifetime of a pod Cephfs volumes do not support ownership management or SELinux relabeling.",
-      "required": ["monitors"],
+      "required": [
+        "monitors"
+      ],
       "properties": {
         "monitors": {
           "description": "monitors is Required: Monitors is a collection of Ceph monitors More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it",
@@ -13387,7 +14358,9 @@
     },
     "v1.CephFSVolumeSource": {
       "description": "Represents a Ceph Filesystem mount that lasts the lifetime of a pod Cephfs volumes do not support ownership management or SELinux relabeling.",
-      "required": ["monitors"],
+      "required": [
+        "monitors"
+      ],
       "properties": {
         "monitors": {
           "description": "monitors is Required: Monitors is a collection of Ceph monitors More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it",
@@ -13420,7 +14393,9 @@
     },
     "v1.CinderPersistentVolumeSource": {
       "description": "Represents a cinder volume resource in Openstack. A Cinder volume must exist before mounting to a container. The volume must also be in the same region as the kubelet. Cinder volumes support ownership management and SELinux relabeling.",
-      "required": ["volumeID"],
+      "required": [
+        "volumeID"
+      ],
       "properties": {
         "fsType": {
           "description": "fsType Filesystem type to mount. Must be a filesystem type supported by the host operating system. Examples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified. More info: https://examples.k8s.io/mysql-cinder-pd/README.md",
@@ -13442,7 +14417,9 @@
     },
     "v1.CinderVolumeSource": {
       "description": "Represents a cinder volume resource in Openstack. A Cinder volume must exist before mounting to a container. The volume must also be in the same region as the kubelet. Cinder volumes support ownership management and SELinux relabeling.",
-      "required": ["volumeID"],
+      "required": [
+        "volumeID"
+      ],
       "properties": {
         "fsType": {
           "description": "fsType is the filesystem type to mount. Must be a filesystem type supported by the host operating system. Examples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified. More info: https://examples.k8s.io/mysql-cinder-pd/README.md",
@@ -13464,7 +14441,9 @@
     },
     "v1.ClusterTrustBundleProjection": {
       "description": "ClusterTrustBundleProjection describes how to select a set of ClusterTrustBundle objects and project their contents into the pod filesystem.",
-      "required": ["path"],
+      "required": [
+        "path"
+      ],
       "properties": {
         "labelSelector": {
           "description": "Select all ClusterTrustBundles that match this label selector.  Only has effect if signerName is set.  Mutually-exclusive with name.  If unset, interpreted as \"match nothing\".  If set but empty, interpreted as \"match everything\".",
@@ -13490,7 +14469,9 @@
     },
     "v1.ConfigMapKeySelector": {
       "description": "Selects a key from a ConfigMap.",
-      "required": ["key"],
+      "required": [
+        "key"
+      ],
       "properties": {
         "key": {
           "description": "The key to select.",
@@ -13579,7 +14560,9 @@
     },
     "v1.ContainerStateTerminated": {
       "description": "ContainerStateTerminated is a terminated state of a container.",
-      "required": ["exitCode"],
+      "required": [
+        "exitCode"
+      ],
       "properties": {
         "containerID": {
           "description": "Container's ID in the format '\u003ctype\u003e://\u003ccontainer_id\u003e'",
@@ -13628,7 +14611,13 @@
     },
     "v1.ContainerStatus": {
       "description": "ContainerStatus contains details for the current status of this container.",
-      "required": ["name", "ready", "restartCount", "image", "imageID"],
+      "required": [
+        "name",
+        "ready",
+        "restartCount",
+        "image",
+        "imageID"
+      ],
       "properties": {
         "allocatedResources": {
           "description": "AllocatedResources represents the compute resources allocated for this container by the node. Kubelet sets this value to Container.Resources.Requests upon successful pod admission and after successfully admitting desired pod resize.",
@@ -13725,7 +14714,9 @@
     },
     "v1.DownwardAPIVolumeFile": {
       "description": "DownwardAPIVolumeFile represents information to create the file containing the pod field",
-      "required": ["path"],
+      "required": [
+        "path"
+      ],
       "properties": {
         "fieldRef": {
           "description": "Required: Selects a field of the pod: only annotations, labels, name, namespace and uid are supported.",
@@ -13881,7 +14872,11 @@
     },
     "v1.FileKeySelector": {
       "description": "FileKeySelector selects a key of the env file.",
-      "required": ["volumeName", "path", "key"],
+      "required": [
+        "volumeName",
+        "path",
+        "key"
+      ],
       "properties": {
         "key": {
           "description": "The key within the env file. An invalid key will prevent the pod from starting. The keys defined within a source may consist of any printable ASCII characters except '='. During Alpha stage of the EnvFiles feature gate, the key size is limited to 128 characters.",
@@ -13903,7 +14898,9 @@
     },
     "v1.FlexPersistentVolumeSource": {
       "description": "FlexPersistentVolumeSource represents a generic persistent volume resource that is provisioned/attached using an exec based plugin.",
-      "required": ["driver"],
+      "required": [
+        "driver"
+      ],
       "properties": {
         "driver": {
           "description": "driver is the name of the driver to use for this volume.",
@@ -13932,7 +14929,9 @@
     },
     "v1.FlexVolumeSource": {
       "description": "FlexVolume represents a generic volume resource that is provisioned/attached using an exec based plugin.",
-      "required": ["driver"],
+      "required": [
+        "driver"
+      ],
       "properties": {
         "driver": {
           "description": "driver is the name of the driver to use for this volume.",
@@ -13974,7 +14973,9 @@
     },
     "v1.GCEPersistentDiskVolumeSource": {
       "description": "Represents a Persistent Disk resource in Google Compute Engine.\n\nA GCE PD must exist before mounting to a container. The disk must also be in the same GCE project and zone as the kubelet. A GCE PD can only be mounted as read/write once or read-only many times. GCE PDs support ownership management and SELinux relabeling.",
-      "required": ["pdName"],
+      "required": [
+        "pdName"
+      ],
       "properties": {
         "fsType": {
           "description": "fsType is filesystem type of the volume that you want to mount. Tip: Ensure that the filesystem type is supported by the host operating system. Examples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified. More info: https://kubernetes.io/docs/concepts/storage/volumes#gcepersistentdisk",
@@ -13997,7 +14998,10 @@
     },
     "v1.GRPCAction": {
       "description": "GRPCAction specifies an action involving a GRPC service.",
-      "required": ["port", "service"],
+      "required": [
+        "port",
+        "service"
+      ],
       "properties": {
         "port": {
           "description": "Port number of the gRPC service. Number must be in the range 1 to 65535.",
@@ -14012,7 +15016,9 @@
     },
     "v1.GitRepoVolumeSource": {
       "description": "Represents a volume that is populated with the contents of a git repository. Git repo volumes do not support ownership management. Git repo volumes support SELinux relabeling.\n\nDEPRECATED: GitRepo is deprecated. To provision a container with a git repo, mount an EmptyDir into an InitContainer that clones the repo using git, then mount the EmptyDir into the Pod's container.",
-      "required": ["repository"],
+      "required": [
+        "repository"
+      ],
       "properties": {
         "directory": {
           "description": "directory is the target directory name. Must not contain or start with '..'.  If '.' is supplied, the volume directory will be the git repository.  Otherwise, if specified, the volume will contain the git repository in the subdirectory with the given name.",
@@ -14030,7 +15036,10 @@
     },
     "v1.GlusterfsPersistentVolumeSource": {
       "description": "Represents a Glusterfs mount that lasts the lifetime of a pod. Glusterfs volumes do not support ownership management or SELinux relabeling.",
-      "required": ["endpoints", "path"],
+      "required": [
+        "endpoints",
+        "path"
+      ],
       "properties": {
         "endpoints": {
           "description": "endpoints is the endpoint name that details Glusterfs topology. More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod",
@@ -14052,7 +15061,10 @@
     },
     "v1.GlusterfsVolumeSource": {
       "description": "Represents a Glusterfs mount that lasts the lifetime of a pod. Glusterfs volumes do not support ownership management or SELinux relabeling.",
-      "required": ["endpoints", "path"],
+      "required": [
+        "endpoints",
+        "path"
+      ],
       "properties": {
         "endpoints": {
           "description": "endpoints is the endpoint name that details Glusterfs topology.",
@@ -14070,7 +15082,9 @@
     },
     "v1.HTTPGetAction": {
       "description": "HTTPGetAction describes an action based on HTTP Get requests.",
-      "required": ["port"],
+      "required": [
+        "port"
+      ],
       "properties": {
         "host": {
           "description": "Host name to connect to, defaults to the pod IP. You probably want to set \"Host\" in httpHeaders instead.",
@@ -14099,7 +15113,10 @@
     },
     "v1.HTTPHeader": {
       "description": "HTTPHeader describes a custom header to be used in HTTP probes",
-      "required": ["name", "value"],
+      "required": [
+        "name",
+        "value"
+      ],
       "properties": {
         "name": {
           "description": "The header field name. This will be canonicalized upon output, so case-variant names will be understood as the same header.",
@@ -14113,7 +15130,10 @@
     },
     "v1.HTTPIngressPath": {
       "description": "HTTPIngressPath associates a path with a backend. Incoming urls matching the path are forwarded to the backend.",
-      "required": ["pathType", "backend"],
+      "required": [
+        "pathType",
+        "backend"
+      ],
       "properties": {
         "backend": {
           "description": "backend defines the referenced service endpoint to which the traffic will be forwarded to.",
@@ -14131,7 +15151,9 @@
     },
     "v1.HTTPIngressRuleValue": {
       "description": "HTTPIngressRuleValue is a list of http selectors pointing to backends. In the example: http://\u003chost\u003e/\u003cpath\u003e?\u003csearchpart\u003e -\u003e backend where where parts of the url correspond to RFC 3986, this resource will be used to match against everything after the last '/' and before the first '?' or '#'.",
-      "required": ["paths"],
+      "required": [
+        "paths"
+      ],
       "properties": {
         "paths": {
           "description": "paths is a collection of paths that map requests to backends.",
@@ -14144,7 +15166,9 @@
     },
     "v1.HostPathVolumeSource": {
       "description": "Represents a host path mapped into a pod. Host path volumes do not support ownership management or SELinux relabeling.",
-      "required": ["path"],
+      "required": [
+        "path"
+      ],
       "properties": {
         "path": {
           "description": "path of the directory on the host. If the path is a symlink, it will follow the link to the real path. More info: https://kubernetes.io/docs/concepts/storage/volumes#hostpath",
@@ -14158,7 +15182,9 @@
     },
     "v1.IPBlock": {
       "description": "IPBlock describes a particular CIDR (Ex. \"192.168.1.0/24\",\"2001:db8::/64\") that is allowed to the pods matched by a NetworkPolicySpec's podSelector. The except entry describes CIDRs that should not be included within this rule.",
-      "required": ["cidr"],
+      "required": [
+        "cidr"
+      ],
       "properties": {
         "cidr": {
           "description": "cidr is a string representing the IPBlock Valid examples are \"192.168.1.0/24\" or \"2001:db8::/64\"",
@@ -14175,7 +15201,11 @@
     },
     "v1.ISCSIPersistentVolumeSource": {
       "description": "ISCSIPersistentVolumeSource represents an ISCSI disk. ISCSI volumes can only be mounted as read/write once. ISCSI volumes support ownership management and SELinux relabeling.",
-      "required": ["targetPortal", "iqn", "lun"],
+      "required": [
+        "targetPortal",
+        "iqn",
+        "lun"
+      ],
       "properties": {
         "chapAuthDiscovery": {
           "description": "chapAuthDiscovery defines whether support iSCSI Discovery CHAP authentication",
@@ -14229,7 +15259,11 @@
     },
     "v1.ISCSIVolumeSource": {
       "description": "Represents an ISCSI disk. ISCSI volumes can only be mounted as read/write once. ISCSI volumes support ownership management and SELinux relabeling.",
-      "required": ["targetPortal", "iqn", "lun"],
+      "required": [
+        "targetPortal",
+        "iqn",
+        "lun"
+      ],
       "properties": {
         "chapAuthDiscovery": {
           "description": "chapAuthDiscovery defines whether support iSCSI Discovery CHAP authentication",
@@ -14341,7 +15375,10 @@
     },
     "v1.IngressPortStatus": {
       "description": "IngressPortStatus represents the error condition of a service port",
-      "required": ["port", "protocol"],
+      "required": [
+        "port",
+        "protocol"
+      ],
       "properties": {
         "error": {
           "description": "error is to record the problem with the service port The format of the error shall comply with the following rules: - built-in error values shall be specified in this file and those shall use\n  CamelCase names\n- cloud provider specific error values must have names that comply with the\n  format foo.example.com/CamelCase.",
@@ -14372,7 +15409,9 @@
     },
     "v1.IngressServiceBackend": {
       "description": "IngressServiceBackend references a Kubernetes Service as a Backend.",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
         "name": {
           "description": "name is the referenced service. The service must exist in the same namespace as the Ingress object.",
@@ -14438,7 +15477,10 @@
     },
     "v1.KeyToPath": {
       "description": "Maps a string key to a path within a volume.",
-      "required": ["key", "path"],
+      "required": [
+        "key",
+        "path"
+      ],
       "properties": {
         "key": {
           "description": "key is the key to project.",
@@ -14476,7 +15518,10 @@
     },
     "v1.LabelSelectorRequirement": {
       "description": "A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.",
-      "required": ["key", "operator"],
+      "required": [
+        "key",
+        "operator"
+      ],
       "properties": {
         "key": {
           "description": "key is the label key that the selector applies to.",
@@ -14497,7 +15542,10 @@
     },
     "v1.LinuxContainerUser": {
       "description": "LinuxContainerUser represents user identity information in Linux containers",
-      "required": ["uid", "gid"],
+      "required": [
+        "uid",
+        "gid"
+      ],
       "properties": {
         "gid": {
           "description": "GID is the primary gid initially attached to the first process in the container",
@@ -14530,7 +15578,9 @@
     },
     "v1.LocalVolumeSource": {
       "description": "Local represents directly-attached storage with node affinity",
-      "required": ["path"],
+      "required": [
+        "path"
+      ],
       "properties": {
         "fsType": {
           "description": "fsType is the filesystem type to mount. It applies only when the Path is a block device. Must be a filesystem type supported by the host operating system. Ex. \"ext4\", \"xfs\", \"ntfs\". The default value is to auto-select a filesystem if unspecified.",
@@ -14577,7 +15627,10 @@
     },
     "v1.NFSVolumeSource": {
       "description": "Represents an NFS mount that lasts the lifetime of a pod. NFS volumes do not support ownership management or SELinux relabeling.",
-      "required": ["server", "path"],
+      "required": [
+        "server",
+        "path"
+      ],
       "properties": {
         "path": {
           "description": "path that is exported by the NFS server. More info: https://kubernetes.io/docs/concepts/storage/volumes#nfs",
@@ -14668,7 +15721,10 @@
     },
     "v1.NodeAddress": {
       "description": "NodeAddress contains information for the node's address.",
-      "required": ["type", "address"],
+      "required": [
+        "type",
+        "address"
+      ],
       "properties": {
         "address": {
           "description": "The node address.",
@@ -14753,7 +15809,9 @@
     },
     "v1.ObjectFieldSelector": {
       "description": "ObjectFieldSelector selects an APIVersioned field of an object.",
-      "required": ["fieldPath"],
+      "required": [
+        "fieldPath"
+      ],
       "properties": {
         "apiVersion": {
           "description": "Version of the schema the FieldPath is written in terms of, defaults to \"v1\".",
@@ -14882,7 +15940,12 @@
     },
     "v1.OwnerReference": {
       "description": "OwnerReference contains enough information to let you identify an owning object. An owning object must be in the same namespace as the dependent, or be cluster-scoped, so there is no namespace field.",
-      "required": ["apiVersion", "kind", "name", "uid"],
+      "required": [
+        "apiVersion",
+        "kind",
+        "name",
+        "uid"
+      ],
       "properties": {
         "apiVersion": {
           "description": "API version of the referent.",
@@ -14956,7 +16019,9 @@
     },
     "v1.PersistentVolumeClaimTemplate": {
       "description": "PersistentVolumeClaimTemplate is used to produce PersistentVolumeClaim objects as part of an EphemeralVolumeSource.",
-      "required": ["spec"],
+      "required": [
+        "spec"
+      ],
       "properties": {
         "metadata": {
           "description": "May contain labels and annotations that will be copied into the PVC when creating it. No other fields are allowed and will be rejected during validation.",
@@ -14970,7 +16035,9 @@
     },
     "v1.PersistentVolumeClaimVolumeSource": {
       "description": "PersistentVolumeClaimVolumeSource references the user's PVC in the same namespace. This volume finds the bound PV and mounts that volume for the pod. A PersistentVolumeClaimVolumeSource is, essentially, a wrapper around another type of volume that is owned by someone else (the system).",
-      "required": ["claimName"],
+      "required": [
+        "claimName"
+      ],
       "properties": {
         "claimName": {
           "description": "claimName is the name of a PersistentVolumeClaim in the same namespace as the pod using this volume. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims",
@@ -15077,7 +16144,9 @@
     },
     "v1.PhotonPersistentDiskVolumeSource": {
       "description": "Represents a Photon Controller persistent disk resource.",
-      "required": ["pdID"],
+      "required": [
+        "pdID"
+      ],
       "properties": {
         "fsType": {
           "description": "fsType is the filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.",
@@ -15188,7 +16257,9 @@
     },
     "v1.PolicyRule": {
       "description": "PolicyRule holds information that describes a policy rule, but does not contain information about who the rule applies to or which namespace the rule applies to.",
-      "required": ["verbs"],
+      "required": [
+        "verbs"
+      ],
       "properties": {
         "apiGroups": {
           "description": "APIGroups is the name of the APIGroup that contains the resources.  If multiple API groups are specified, any action requested against one of the enumerated resources in any API group will be allowed. \"\" represents the core API group and \"*\" represents all API groups.",
@@ -15229,7 +16300,9 @@
     },
     "v1.PortworxVolumeSource": {
       "description": "PortworxVolumeSource represents a Portworx volume resource.",
-      "required": ["volumeID"],
+      "required": [
+        "volumeID"
+      ],
       "properties": {
         "fsType": {
           "description": "fSType represents the filesystem type to mount Must be a filesystem type supported by the host operating system. Ex. \"ext4\", \"xfs\". Implicitly inferred to be \"ext4\" if unspecified.",
@@ -15298,7 +16371,9 @@
     },
     "v1.ProjectedVolumeSource": {
       "description": "Represents a projected volume source",
-      "required": ["sources"],
+      "required": [
+        "sources"
+      ],
       "properties": {
         "defaultMode": {
           "description": "defaultMode are the mode bits used to set permissions on created files by default. Must be an octal value between 0000 and 0777 or a decimal value between 0 and 511. YAML accepts both octal and decimal values, JSON requires decimal values for mode bits. Directories within the path are not affected by this setting. This might be in conflict with other options that affect the file mode, like fsGroup, and the result can be other mode bits set.",
@@ -15316,7 +16391,10 @@
     },
     "v1.QuobyteVolumeSource": {
       "description": "Represents a Quobyte mount that lasts the lifetime of a pod. Quobyte volumes do not support ownership management or SELinux relabeling.",
-      "required": ["registry", "volume"],
+      "required": [
+        "registry",
+        "volume"
+      ],
       "properties": {
         "group": {
           "description": "group to map volume access to Default is no group",
@@ -15346,7 +16424,10 @@
     },
     "v1.RBDPersistentVolumeSource": {
       "description": "Represents a Rados Block Device mount that lasts the lifetime of a pod. RBD volumes support ownership management and SELinux relabeling.",
-      "required": ["monitors", "image"],
+      "required": [
+        "monitors",
+        "image"
+      ],
       "properties": {
         "fsType": {
           "description": "fsType is the filesystem type of the volume that you want to mount. Tip: Ensure that the filesystem type is supported by the host operating system. Examples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified. More info: https://kubernetes.io/docs/concepts/storage/volumes#rbd",
@@ -15387,7 +16468,10 @@
     },
     "v1.RBDVolumeSource": {
       "description": "Represents a Rados Block Device mount that lasts the lifetime of a pod. RBD volumes support ownership management and SELinux relabeling.",
-      "required": ["monitors", "image"],
+      "required": [
+        "monitors",
+        "image"
+      ],
       "properties": {
         "fsType": {
           "description": "fsType is the filesystem type of the volume that you want to mount. Tip: Ensure that the filesystem type is supported by the host operating system. Examples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified. More info: https://kubernetes.io/docs/concepts/storage/volumes#rbd",
@@ -15428,7 +16512,9 @@
     },
     "v1.ResourceClaim": {
       "description": "ResourceClaim references one entry in PodSpec.ResourceClaims.",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
         "name": {
           "description": "Name must match the name of one entry in pod.spec.resourceClaims of the Pod where this field is used. It makes that resource available inside a container.",
@@ -15442,7 +16528,9 @@
     },
     "v1.ResourceFieldSelector": {
       "description": "ResourceFieldSelector represents container resources (cpu, memory) and their output format",
-      "required": ["resource"],
+      "required": [
+        "resource"
+      ],
       "properties": {
         "containerName": {
           "description": "Container name: required for volumes, optional for env vars",
@@ -15460,7 +16548,9 @@
     },
     "v1.ResourceHealth": {
       "description": "ResourceHealth represents the health of a resource. It has the latest device health information. This is a part of KEP https://kep.k8s.io/4680.",
-      "required": ["resourceID"],
+      "required": [
+        "resourceID"
+      ],
       "properties": {
         "health": {
           "description": "Health of the resource. can be one of:\n - Healthy: operates as normal\n - Unhealthy: reported unhealthy. We consider this a temporary health issue\n              since we do not have a mechanism today to distinguish\n              temporary and permanent issues.\n - Unknown: The status cannot be determined.\n            For example, Device Plugin got unregistered and hasn't been re-registered since.\n\nIn future we may want to introduce the PermanentlyUnhealthy Status.",
@@ -15500,7 +16590,9 @@
     },
     "v1.ResourceStatus": {
       "description": "ResourceStatus represents the status of a single resource allocated to a Pod.",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
         "name": {
           "description": "Name of the resource. Must be unique within the pod and in case of non-DRA resource, match one of the resources from the pod spec. For DRA resources, the value must be \"claim:\u003cclaim_name\u003e/\u003crequest\u003e\". When this status is reported about a container, the \"claim_name\" and \"request\" must match one of the claims of this container.",
@@ -15517,7 +16609,11 @@
     },
     "v1.RoleRef": {
       "description": "RoleRef contains information that points to the role being used",
-      "required": ["apiGroup", "kind", "name"],
+      "required": [
+        "apiGroup",
+        "kind",
+        "name"
+      ],
       "properties": {
         "apiGroup": {
           "description": "APIGroup is the group for the resource being referenced",
@@ -15556,7 +16652,11 @@
     },
     "v1.ScaleIOPersistentVolumeSource": {
       "description": "ScaleIOPersistentVolumeSource represents a persistent ScaleIO volume",
-      "required": ["gateway", "system", "secretRef"],
+      "required": [
+        "gateway",
+        "system",
+        "secretRef"
+      ],
       "properties": {
         "fsType": {
           "description": "fsType is the filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. \"ext4\", \"xfs\", \"ntfs\". Default is \"xfs\"",
@@ -15602,7 +16702,11 @@
     },
     "v1.ScaleIOVolumeSource": {
       "description": "ScaleIOVolumeSource represents a persistent ScaleIO volume",
-      "required": ["gateway", "system", "secretRef"],
+      "required": [
+        "gateway",
+        "system",
+        "secretRef"
+      ],
       "properties": {
         "fsType": {
           "description": "fsType is the filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. \"ext4\", \"xfs\", \"ntfs\". Default is \"xfs\".",
@@ -15648,7 +16752,9 @@
     },
     "v1.SeccompProfile": {
       "description": "SeccompProfile defines a pod/container's seccomp profile settings. Only one profile source may be set.",
-      "required": ["type"],
+      "required": [
+        "type"
+      ],
       "properties": {
         "localhostProfile": {
           "description": "localhostProfile indicates a profile defined in a file on the node should be used. The profile must be preconfigured on the node to work. Must be a descending path, relative to the kubelet's configured seccomp profile location. Must be set if type is \"Localhost\". Must NOT be set for any other type.",
@@ -15662,7 +16768,9 @@
     },
     "v1.SecretKeySelector": {
       "description": "SecretKeySelector selects a key of a Secret.",
-      "required": ["key"],
+      "required": [
+        "key"
+      ],
       "properties": {
         "key": {
           "description": "The key of the secret to select from.  Must be a valid secret key.",
@@ -15793,7 +16901,9 @@
     },
     "v1.ServiceAccountTokenProjection": {
       "description": "ServiceAccountTokenProjection represents a projected service account token volume. This projection can be used to insert a service account token into the pods runtime filesystem for use against APIs (Kubernetes API Server or otherwise).",
-      "required": ["path"],
+      "required": [
+        "path"
+      ],
       "properties": {
         "audience": {
           "description": "audience is the intended audience of the token. A recipient of a token must identify itself with an identifier specified in the audience of the token, and otherwise should reject the token. The audience defaults to the identifier of the apiserver.",
@@ -15876,7 +16986,10 @@
     },
     "v1.Subject": {
       "description": "Subject contains a reference to the object or user identities a role binding applies to.  This can either hold a direct API object reference, or a value for non-objects such as user and group names.",
-      "required": ["kind", "name"],
+      "required": [
+        "kind",
+        "name"
+      ],
       "properties": {
         "apiGroup": {
           "description": "APIGroup holds the API group of the referenced subject. Defaults to \"\" for ServiceAccount subjects. Defaults to \"rbac.authorization.k8s.io\" for User and Group subjects.",
@@ -15898,7 +17011,10 @@
     },
     "v1.Sysctl": {
       "description": "Sysctl defines a kernel parameter to be set",
-      "required": ["name", "value"],
+      "required": [
+        "name",
+        "value"
+      ],
       "properties": {
         "name": {
           "description": "Name of a property to set",
@@ -15912,7 +17028,9 @@
     },
     "v1.TCPSocketAction": {
       "description": "TCPSocketAction describes an action based on opening a socket",
-      "required": ["port"],
+      "required": [
+        "port"
+      ],
       "properties": {
         "host": {
           "description": "Optional: Host name to connect to, defaults to the pod IP.",
@@ -15926,7 +17044,10 @@
     },
     "v1.Taint": {
       "description": "The node this Taint is attached to has the \"effect\" on any pod that does not tolerate the Taint.",
-      "required": ["key", "effect"],
+      "required": [
+        "key",
+        "effect"
+      ],
       "properties": {
         "effect": {
           "description": "Required. The effect of the taint on pods that do not tolerate the taint. Valid effects are NoSchedule, PreferNoSchedule and NoExecute.",
@@ -15947,7 +17068,9 @@
       }
     },
     "v1.Time": {
-      "required": ["Time"],
+      "required": [
+        "Time"
+      ],
       "properties": {
         "Time": {
           "type": "string",
@@ -15970,7 +17093,11 @@
     },
     "v1.TypedLocalObjectReference": {
       "description": "TypedLocalObjectReference contains enough information to let you locate the typed referenced object inside the same namespace.",
-      "required": ["apiGroup", "kind", "name"],
+      "required": [
+        "apiGroup",
+        "kind",
+        "name"
+      ],
       "properties": {
         "apiGroup": {
           "description": "APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.",
@@ -15988,7 +17115,11 @@
     },
     "v1.TypedObjectReference": {
       "description": "TypedObjectReference contains enough information to let you locate the typed referenced object",
-      "required": ["apiGroup", "kind", "name"],
+      "required": [
+        "apiGroup",
+        "kind",
+        "name"
+      ],
       "properties": {
         "apiGroup": {
           "description": "APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.",
@@ -16010,7 +17141,9 @@
     },
     "v1.Volume": {
       "description": "Volume represents a named volume in a pod that may be accessed by any container in the pod.",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "properties": {
         "awsElasticBlockStore": {
           "description": "awsElasticBlockStore represents an AWS Disk resource that is attached to a kubelet's host machine and then exposed to the pod. Deprecated: AWSElasticBlockStore is deprecated. All operations for the in-tree awsElasticBlockStore type are redirected to the ebs.csi.aws.com CSI driver. More info: https://kubernetes.io/docs/concepts/storage/volumes#awselasticblockstore",
@@ -16140,7 +17273,10 @@
     },
     "v1.VolumeMountStatus": {
       "description": "VolumeMountStatus shows status of volume mounts.",
-      "required": ["name", "mountPath"],
+      "required": [
+        "name",
+        "mountPath"
+      ],
       "properties": {
         "mountPath": {
           "description": "MountPath corresponds to the original VolumeMount.",
@@ -16210,7 +17346,9 @@
     },
     "v1.VsphereVirtualDiskVolumeSource": {
       "description": "Represents a vSphere volume resource.",
-      "required": ["volumePath"],
+      "required": [
+        "volumePath"
+      ],
       "properties": {
         "fsType": {
           "description": "fsType is filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.",
@@ -16252,7 +17390,9 @@
       }
     },
     "validation.AppNameValidity": {
-      "required": ["valid"],
+      "required": [
+        "valid"
+      ],
       "properties": {
         "valid": {
           "type": "boolean"
@@ -16260,7 +17400,10 @@
       }
     },
     "validation.AppNameValiditySpec": {
-      "required": ["name", "namespace"],
+      "required": [
+        "name",
+        "namespace"
+      ],
       "properties": {
         "name": {
           "type": "string"
@@ -16271,7 +17414,10 @@
       }
     },
     "validation.ImageReferenceValidity": {
-      "required": ["valid", "reason"],
+      "required": [
+        "valid",
+        "reason"
+      ],
       "properties": {
         "reason": {
           "type": "string"
@@ -16282,7 +17428,9 @@
       }
     },
     "validation.ImageReferenceValiditySpec": {
-      "required": ["reference"],
+      "required": [
+        "reference"
+      ],
       "properties": {
         "reference": {
           "type": "string"
@@ -16290,7 +17438,9 @@
       }
     },
     "validation.ProtocolValidity": {
-      "required": ["valid"],
+      "required": [
+        "valid"
+      ],
       "properties": {
         "valid": {
           "type": "boolean"
@@ -16298,7 +17448,10 @@
       }
     },
     "validation.ProtocolValiditySpec": {
-      "required": ["protocol", "isExternal"],
+      "required": [
+        "protocol",
+        "isExternal"
+      ],
       "properties": {
         "isExternal": {
           "type": "boolean"
