@@ -124,6 +124,7 @@ defmodule Console.Schema.Cluster do
 
     field :distro_changed,  :boolean, default: false, virtual: true
     field :token_readable,  :boolean, default: false, virtual: true
+    field :gs_instance,     :map, virtual: true
 
     embeds_one :upgrade_plan, UpgradePlan, on_replace: :update do
       boolean_fields [:deprecations, :compatibilities, :incompatibilities, :kubelet_skew]
