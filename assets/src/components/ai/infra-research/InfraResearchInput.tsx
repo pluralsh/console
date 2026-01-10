@@ -2,7 +2,7 @@ import { GqlError } from 'components/utils/Alert'
 import { useCreateInfraResearchMutation } from 'generated/graphql'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AI_THREADS_REL_PATH } from 'routes/aiRoutesConsts'
+import { getInfraResearchAbsPath } from 'routes/aiRoutesConsts'
 import { ChatInputSimple } from '../chatbot/input/ChatInput'
 
 export function InfraResearchInput() {
@@ -13,7 +13,9 @@ export function InfraResearchInput() {
     variables: { attributes: { prompt } },
     onCompleted: ({ createInfraResearch }) =>
       createInfraResearch?.id &&
-      navigate(`${createInfraResearch.id}/${AI_THREADS_REL_PATH}`),
+      navigate(
+        getInfraResearchAbsPath({ infraResearchId: createInfraResearch.id })
+      ),
     refetchQueries: ['InfraResearches'],
     awaitRefetchQueries: true,
   })

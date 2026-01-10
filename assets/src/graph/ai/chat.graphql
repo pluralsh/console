@@ -54,6 +54,10 @@ fragment ChatThreadTiny on ChatThread {
   session {
     ...AgentSession
   }
+  research {
+    id
+    prompt
+  }
 }
 
 fragment ChatThreadDetails on ChatThread {

@@ -1,4 +1,4 @@
-import { CSSProperties, DefaultTheme } from 'styled-components'
+import { DefaultTheme, StyledObject } from 'styled-components'
 import { type PrefixKeys } from '../utils/ts-utils'
 
 export type SemanticSpacingKey = keyof typeof spacing
@@ -53,10 +53,10 @@ export type SpacerProps<T = SemanticSpacingKey | number> = {
 
 // separates out semantic spacing props, resolves them, and adds them to the css style object
 export function resolveSpacersAndSanitizeCss(
-  props: Record<string, any> & { css?: CSSProperties },
+  props: Record<string, any> & { css?: StyledObject },
   { spacing }: DefaultTheme
 ) {
-  const spacerCssProps: Record<string, number> = {}
+  const spacerCssProps: StyledObject = {}
   const rest: Record<string, any> = {}
   Object.entries(props).forEach(([propKey, propValue]) => {
     if (spacerKeys.has(propKey))

@@ -21,7 +21,7 @@ export type ChipProps = ComponentPropsWithRef<typeof Card> & {
   size?: ChipSize
   condensed?: boolean
   severity?: ChipSeverity
-  inactive?: boolean
+  inactive?: boolean | 'keep-fill'
   icon?: ReactElement<any>
   iconColor?: SemanticColorKey
   loading?: boolean
@@ -68,7 +68,7 @@ const sizeToCloseHeight = {
 const ChipCardSC = styled(Card)<{
   $size: ChipSize
   $severity: ChipSeverity
-  $inactive: boolean
+  $inactive: ChipProps['inactive']
   $truncateWidth?: number
   $truncateEdge?: 'start' | 'end'
   $condensed?: boolean
@@ -87,7 +87,8 @@ const ChipCardSC = styled(Card)<{
 
   return {
     '&&': {
-      backgroundColor: $inactive ? 'transparent' : undefined,
+      backgroundColor:
+        $inactive && $inactive !== 'keep-fill' ? 'transparent' : undefined,
       padding: `${$size === 'large' ? 6 : theme.spacing.xxxsmall}px ${
         $size === 'large' && $condensed
           ? 6

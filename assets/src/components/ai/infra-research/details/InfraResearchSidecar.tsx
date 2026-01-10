@@ -1,26 +1,33 @@
 import {
   Button,
-  Flex,
+  ButtonProps,
+  CheckIcon,
+  Chip,
+  ErrorOutlineIcon,
+  FailedFilledIcon,
   GitPullIcon,
-  IconFrame,
+  QueuedOutlineIcon,
   Sidecar,
   StackIcon,
 } from '@pluralsh/design-system'
-import { ServiceStatusChip } from 'components/cd/services/ServiceStatusChip'
-import { StackStatusChip } from 'components/stacks/common/StackStatusChip'
+import { serviceStatusToSeverity } from 'components/cd/services/ServiceStatusChip'
 import { SidecarSkeleton } from 'components/utils/SkeletonLoaders'
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
-import { InfraResearchFragment, InfraResearchStatus } from 'generated/graphql'
+import { TRUNCATE } from 'components/utils/truncate'
+import { BadgeLabelP, OverlineH3 } from 'components/utils/typography/Text'
+import {
+  InfraResearchFragment,
+  InfraResearchStatus,
+  ServiceDeploymentTinyFragment,
+  StackMinimalFragment,
+  StackStatus,
+} from 'generated/graphql'
+import { isEmpty } from 'lodash'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { Fragment } from 'react/jsx-runtime'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { getStacksAbsPath } from 'routes/stacksRoutesConsts'
-import { isNonNullable } from 'utils/isNonNullable'
-import {
-  ActionItemHeaderSC,
-  ActionItemSC,
-} from '../../chatbot/actions-panel/ChatbotActionsPanel'
-import { isEmpty } from 'lodash'
+import { useTheme } from 'styled-components'
+import { ActionItemSC } from '../../chatbot/actions-panel/ChatbotActionsPanel'
 
 export function InfraResearchSidecar({
   infraResearch,
@@ -29,90 +36,114 @@ export function InfraResearchSidecar({
   infraResearch: Nullable<InfraResearchFragment>
   loading: boolean
 }) {
-  if (!infraResearch?.associations) return loading ? <SidecarSkeleton /> : null
+  const { spacing } = useTheme()
+  const { stacks, services } = useMemo(() => {
+    const stacks: StackMinimalFragment[] = []
+    const services: ServiceDeploymentTinyFragment[] = []
+    infraResearch?.associations?.forEach((assoc) => {
+      if (assoc?.stack) stacks.push(assoc.stack)
+      if (assoc?.service) services.push(assoc.service)
+    })
+    return { stacks, services }
+  }, [infraResearch?.associations])
+  const hasAssociations = !(isEmpty(stacks) && isEmpty(services))
 
-  if (
-    isEmpty(infraResearch.associations) &&
-    infraResearch.status === InfraResearchStatus.Completed
-  )
+  if (loading) return <SidecarSkeleton />
+  if (!hasAssociations && infraResearch?.status !== InfraResearchStatus.Running)
     return null
 
   return (
-    <Sidecar css={{ padding: 0 }}>
-      <ActionItemSC>
-        <Body2BoldP>Associated resources</Body2BoldP>
+    <Sidecar
+      css={{
+        padding: `0 0 ${spacing.medium}px`,
+        '& > p': { padding: `0 0 ${spacing.xsmall}px ${spacing.medium}px` },
+      }}
+    >
+      <ActionItemSC
+        css={{ borderBottom: 'none', paddingBottom: spacing.large }}
+      >
+        <OverlineH3 $color="text-xlight">Associated resources</OverlineH3>
       </ActionItemSC>
-      {infraResearch.associations
-        .filter(isNonNullable)
-        .map(({ id, stack, service }) => (
-          <Fragment key={id}>
-            {stack && (
-              <ActionItemSC>
-                <ActionItemHeaderSC>
-                  <IconFrame
-                    icon={<StackIcon />}
-                    size="small"
-                  />
-                  Stack
-                  <Flex
-                    flex={1}
-                    justifyContent="flex-end"
-                  >
-                    <StackStatusChip
-                      status={stack.status}
-                      deleting={!!stack.deletedAt}
-                      size="small"
-                    />
-                  </Flex>
-                </ActionItemHeaderSC>
-                <CaptionP $color="text-xlight">{stack.name}</CaptionP>
-                <Flex justifyContent="flex-end">
-                  <Button
-                    small
-                    as={Link}
-                    to={getStacksAbsPath(stack.id)}
-                  >
-                    View stack
-                  </Button>
-                </Flex>
-              </ActionItemSC>
-            )}
-            {service && (
-              <ActionItemSC>
-                <ActionItemHeaderSC>
-                  <IconFrame
-                    icon={<GitPullIcon />}
-                    size="small"
-                  />
-                  Service
-                  <Flex
-                    flex={1}
-                    justifyContent="flex-end"
-                  >
-                    <ServiceStatusChip
-                      status={service.status}
-                      componentStatus={service.componentStatus}
-                      size="small"
-                    />
-                  </Flex>
-                </ActionItemHeaderSC>
-                <CaptionP $color="text-xlight">{service.name}</CaptionP>
-                <Flex justifyContent="flex-end">
-                  <Button
-                    small
-                    as={Link}
-                    to={getServiceDetailsPath({
-                      serviceId: service?.id,
-                      clusterId: service?.cluster?.id,
-                    })}
-                  >
-                    View service
-                  </Button>
-                </Flex>
-              </ActionItemSC>
-            )}
-          </Fragment>
-        ))}
+      <BadgeLabelP $color="text-light">Stacks</BadgeLabelP>
+      {stacks.map(({ id, name, status }) => (
+        <ResourceItem
+          key={id}
+          startIcon={<StackIcon />}
+          endIcon={stackStatusToIcon(status)}
+          to={getStacksAbsPath(id)}
+          content={name}
+        />
+      ))}
+      <div css={{ height: spacing.large }} />
+      <BadgeLabelP $color="text-light">Services</BadgeLabelP>
+      {services.map(({ id, name, status, cluster, componentStatus }) => (
+        <ResourceItem
+          key={id}
+          startIcon={<GitPullIcon />}
+          endIcon={
+            <Chip
+              size="small"
+              severity={serviceStatusToSeverity(status)}
+            >
+              {componentStatus}
+            </Chip>
+          }
+          to={getServiceDetailsPath({ serviceId: id, clusterId: cluster?.id })}
+          content={name}
+        />
+      ))}
     </Sidecar>
   )
+}
+
+function ResourceItem({
+  to,
+  content,
+  ...props
+}: { to: string; content: string } & ButtonProps) {
+  return (
+    <Button
+      small
+      tertiary
+      as={Link}
+      to={to}
+      innerFlexProps={{ flex: 1, minWidth: 0 }}
+      {...props}
+    >
+      <span css={{ ...TRUNCATE }}>{content} </span>
+    </Button>
+  )
+}
+
+const stackStatusToIcon = (status: StackStatus) => {
+  switch (status) {
+    case StackStatus.Successful:
+      return (
+        <CheckIcon
+          color="icon-success"
+          size={12}
+        />
+      )
+    case StackStatus.Failed:
+      return (
+        <ErrorOutlineIcon
+          color="icon-danger"
+          size={12}
+        />
+      )
+    case StackStatus.Cancelled:
+      return (
+        <FailedFilledIcon
+          color="icon-info"
+          size={12}
+        />
+      )
+    default:
+      return (
+        <QueuedOutlineIcon
+          color="icon-light"
+          size={12}
+        />
+      )
+  }
 }

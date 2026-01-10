@@ -3,6 +3,7 @@ import {
   Sidecar,
   SidecarItem,
 } from '@pluralsh/design-system'
+import chroma from 'chroma-js'
 import styled, {
   CSSObject,
   CSSProperties,
@@ -165,24 +166,24 @@ export function ChartSkeleton({ scale = 1 }: { scale?: number }) {
 }
 
 export const RectangleSkeleton = styled.div<{
-  $height?: SemanticSpacingKey
+  $height?: SemanticSpacingKey | CSSProperties['height']
   $width?: CSSProperties['width']
 }>(({ theme, $height = 'small', $width }) => ({
   '@keyframes moving-gradient': {
-    '0%': { backgroundPosition: '-250px 0' },
-    '100%': { backgroundPosition: '250px 0' },
+    '0%': { backgroundPosition: '100% 0' },
+    '100%': { backgroundPosition: '-100% 0' },
   },
   width: $width ?? '100%',
   position: 'relative',
   '&::after': {
     content: '""',
-    borderRadius: theme.borderRadiuses.medium,
+    borderRadius: theme.borderRadiuses.large,
     width: $width ?? '150px',
     display: 'block',
-    height: theme.spacing[$height],
-    background: `linear-gradient(to right, ${theme.colors.border} 20%, ${theme.colors['border-fill-two']} 50%, ${theme.colors.border} 80%)`,
-    backgroundSize: '500px 100px',
-    animation: 'moving-gradient 2s infinite linear forwards',
+    height: $height in theme.spacing ? theme.spacing[$height] : $height,
+    background: `linear-gradient(130deg, ${chroma(theme.colors.border).alpha(0.2).hex()} 20%, ${theme.colors['border-fill-one']} 50%, ${chroma(theme.colors.border).alpha(0.2).hex()} 80%)`,
+    backgroundSize: '200% 100%',
+    animation: 'moving-gradient 3.75s linear infinite forwards',
   },
 }))
 
