@@ -3,6 +3,7 @@ import {
   Button,
   ButtonProps,
   Chip,
+  ChipProps,
   ChipSeverity,
   Divider,
   EmptyState,
@@ -63,6 +64,7 @@ export function InfraResearch() {
     isChatbotOpen,
     createNewThread,
     mutationLoading: createThreadLoading,
+    goToInfraResearch,
   } = useChatbot()
 
   const [parseError, setParseError] = useState<Nullable<Error>>(null)
@@ -75,17 +77,23 @@ export function InfraResearch() {
   })
   const infraResearch = data?.infraResearch
 
-  const [fixResearchDiagram, { loading: fixLoading, error: fixError }] =
-    useFixResearchDiagramMutation({
-      onCompleted: () => setParseFixAttempts((prev) => prev + 1),
-    })
+  const [
+    fixResearchDiagram,
+    { loading: fixLoading, error: fixError, reset: resetFix },
+  ] = useFixResearchDiagramMutation({
+    onCompleted: () => setParseFixAttempts((prev) => prev + 1),
+  })
   const recreateMutation = useCreateInfraResearchMutation({
     variables: { attributes: { prompt: infraResearch?.prompt || '' } },
     onCompleted: ({ createInfraResearch }) => {
-      if (createInfraResearch?.id)
+      if (createInfraResearch?.id) {
         navigate(
           getInfraResearchAbsPath({ infraResearchId: createInfraResearch.id })
         )
+        goToInfraResearch(createInfraResearch.id)
+        setParseError(null)
+        resetFix()
+      }
     },
   })
 
@@ -159,27 +167,11 @@ export function InfraResearch() {
           />
           <Flex gap="small">
             {status && (
-              <Chip
+              <InfraResearchStatusChip
+                status={status}
                 clickable={!isEmpty(infraResearch?.threads)}
-                onClick={() => {
-                  // TODO: open new chat panel
-                }}
-                size="large"
-                fillLevel={isRunning ? 2 : 1}
-                severity={statusToSeverity[status]}
-              >
-                {isRunning ? (
-                  <Flex
-                    gap="xsmall"
-                    align="center"
-                  >
-                    <SpinnerAlt />
-                    <span>View progress</span>
-                  </Flex>
-                ) : (
-                  capitalize(status)
-                )}
-              </Chip>
+                onClick={() => goToInfraResearch(id)}
+              />
             )}
             {!isChatbotOpen && headerButtons}
             {status !== InfraResearchStatus.Failed && (
@@ -316,6 +308,37 @@ function RegenerateButton({
         Regenerate
       </Button>
     </WrapWithIf>
+  )
+}
+
+export function InfraResearchStatusChip({
+  status,
+  runningText = 'View progress',
+  ...props
+}: {
+  status: InfraResearchStatus
+  runningText?: string
+} & ChipProps) {
+  const isRunning = status === InfraResearchStatus.Running
+  return (
+    <Chip
+      size="large"
+      fillLevel={isRunning ? 2 : 1}
+      severity={statusToSeverity[status]}
+      {...props}
+    >
+      {isRunning ? (
+        <Flex
+          gap="xsmall"
+          align="center"
+        >
+          <SpinnerAlt />
+          <span>{runningText}</span>
+        </Flex>
+      ) : (
+        capitalize(status)
+      )}
+    </Chip>
   )
 }
 
