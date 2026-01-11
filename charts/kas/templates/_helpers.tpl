@@ -50,6 +50,10 @@ app.kubernetes.io/name: {{ include "kas.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
+{{- define "kas.deploymentName" -}}
+{{- printf "%s-server" (include "kas.fullname" .) }}
+{{- end }}
+
 {{/*
 Create the name of the service to use
 */}}
