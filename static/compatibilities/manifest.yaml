@@ -35,3 +35,4 @@ names:
 - gpu-operator
 - elastic-agent
 - rabbitmq-cluster-operator
+- kserve
