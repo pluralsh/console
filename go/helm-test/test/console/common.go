@@ -92,7 +92,7 @@ func DefaultResources() struct {
 		},
 		Kas: KAS{
 			Deployment: common.ManifestKey{
-				Name: "console-kas",
+				Name: "console-kas-server",
 				GroupKind: schema.GroupKind{
 					Group: common.GroupApps,
 					Kind:  common.KindDeployment,
