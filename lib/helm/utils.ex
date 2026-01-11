@@ -34,6 +34,11 @@ defmodule Console.Helm.Utils do
     |> Enum.find(&matches?(vsn, &1.version))
   end
 
+  def has_wildcard?(vsn) do
+    String.split(vsn, ".")
+    |> Enum.any?(& &1 in ["*", "x"])
+  end
+
   def matches?(pattern, vsn) do
     Regex.match?(wildcard(pattern), vsn)
   end
