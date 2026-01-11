@@ -10184,6 +10184,21 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/datastore-chart-v0.0.1/datastore-0.0.1.tgz
     version: 0.0.1
+  kas:
+  - apiVersion: v2
+    appVersion: 0.2.0
+    created: "2026-01-11T02:29:13.899457253Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: file://../../chart-dependencies/redis
+      version: 24.0.0
+    description: k8s agent server
+    digest: cb26355a27b292307382e6f08accc7705b1fbcb5de9712f946882eb210fe73af
+    name: kas
+    urls:
+    - https://github.com/pluralsh/console/releases/download/kas-chart-v0.3.1/kas-0.3.1.tgz
+    version: 0.3.1
   network-observability-operator:
   - apiVersion: v2
     appVersion: 1.8.0-community
@@ -10352,4 +10367,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2026-01-11T02:01:33.095847171Z"
+generated: "2026-01-11T02:29:13.900886925Z"
