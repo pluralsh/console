@@ -57,6 +57,7 @@ interface ResourceListProps<TResourceList> {
   maxHeight?: string
   tableOptions?: Omit<TableOptions<any>, 'data' | 'columns' | 'getCoreRowModel'>
   pathParams?: object
+  queryParams?: object
   setRefetch?: Dispatch<
     SetStateAction<
       Dispatch<
@@ -82,6 +83,7 @@ export function UpdatedResourceList<
   maxHeight,
   tableOptions,
   pathParams,
+  queryParams,
   setRefetch,
 }: ResourceListProps<TResourceList>): ReactElement<any> {
   const navigate = useNavigate()
@@ -100,6 +102,7 @@ export function UpdatedResourceList<
           filterBy: `name,${filter}`,
           sortBy: sortBy,
           ...DEFAULT_DATA_SELECT,
+          ...queryParams,
         },
       }),
       initialPageParam: DEFAULT_DATA_SELECT.page,
