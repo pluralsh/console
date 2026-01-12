@@ -6,14 +6,12 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
-import {
-  NetworkPolicyQueryVariables,
-  Networkpolicy_NetworkPolicyDetail as NetworkPolicyT,
-  useNetworkPolicyQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { getNetworkPolicyOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { MetadataSidecar, useCodeTabs } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 import {
@@ -29,6 +27,7 @@ import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './Services'
+import { NetworkpolicyNetworkPolicyDetail } from 'generated/kubernetes/types.gen.ts'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -37,18 +36,18 @@ const directory: Array<TabEntry> = [
 
 export default function NetworkPolicy(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
-  const { data, loading } = useNetworkPolicyQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as NetworkPolicyQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: np,
+    isFetching,
+    error,
+  } = useQuery({
+    ...getNetworkPolicyOptions({
+      client: AxiosInstance(clusterId),
+      path: { networkpolicy: name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const np = data?.handleGetNetworkPolicyDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -74,7 +73,13 @@ export default function NetworkPolicy(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isFetching) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails
@@ -85,7 +90,7 @@ export default function NetworkPolicy(): ReactElement<any> {
             <ChipList
               size="small"
               limit={3}
-              values={Object.entries(np?.podSelector?.matchLabels)}
+              values={Object.entries(np?.podSelector?.matchLabels ?? {})}
               transformValue={(label) => label.join(': ')}
               emptyState={<div>-</div>}
             />
@@ -107,7 +112,7 @@ export default function NetworkPolicy(): ReactElement<any> {
 }
 
 export function NetworkPolicyInfo(): ReactElement<any> {
-  const np = useOutletContext() as NetworkPolicyT
+  const np = useOutletContext() as NetworkpolicyNetworkPolicyDetail
   const ingressTabs = useCodeTabs(np.ingress)
   const egressTabs = useCodeTabs(np.egress)
 
