@@ -3,14 +3,13 @@ import { useState } from 'react'
 
 import { useIsPinnedResource } from '../Cluster'
 
-import { Types_CustomResourceDefinition as CustomResourceDefinitionT } from '../../../generated/graphql-kubernetes'
-
 import PinCustomResourceDefinitionModal from './PinCustomResourceDefinitionModal'
+import { TypesCustomResourceDefinition } from 'generated/kubernetes'
 
 export default function PinCustomResourceDefinition({
   crd,
 }: {
-  crd: CustomResourceDefinitionT
+  crd: TypesCustomResourceDefinition
 }) {
   const [open, setOpen] = useState(false)
   const isPinned = useIsPinnedResource(crd.names.kind, crd.version, crd.group)

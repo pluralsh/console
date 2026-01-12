@@ -13,12 +13,8 @@ import { ReactNode, useMemo, useState } from 'react'
 import { formatLocalizedDateTime } from 'utils/datetime'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
-import {
-  Maybe,
-  Types_ListMeta as ListMetaT,
-  Types_ObjectMeta as ObjectMetaT,
-  Types_TypeMeta as TypeMetaT,
-} from '../../../generated/graphql-kubernetes'
+import { Maybe } from 'generated/graphql-plural'
+
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
@@ -26,7 +22,11 @@ import Annotations from './Annotations'
 import DeleteResourceButton from './DeleteResource'
 import ResourceLink from './ResourceLink'
 import { Kind, Resource } from './types'
-import { TypesObjectMeta, TypesTypeMeta } from 'generated/kubernetes'
+import {
+  TypesListMeta,
+  TypesObjectMeta,
+  TypesTypeMeta,
+} from 'generated/kubernetes'
 
 export const ITEMS_PER_PAGE = 25
 
@@ -126,7 +126,7 @@ export function ResourceReadyChip({
   )
 }
 
-export function usePageInfo(items: any[], listMeta: ListMetaT | undefined) {
+export function usePageInfo(items: any[], listMeta: TypesListMeta | undefined) {
   const totalItems = listMeta?.totalItems ?? 0
   const pages = Math.ceil(totalItems / ITEMS_PER_PAGE)
   const page = Math.ceil(items.length / ITEMS_PER_PAGE)

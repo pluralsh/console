@@ -1,11 +1,6 @@
 import { Chip, ChipList, CloseIcon, Code } from '@pluralsh/design-system'
 import { dump } from 'js-yaml'
 
-import {
-  Pod_Container as ContainerT,
-  Maybe,
-  V1_Probe as ProbeT,
-} from '../../../generated/graphql-kubernetes'
 import { ContainerStatus } from '../../cluster/ContainerStatuses'
 import { toReadiness } from '../workloads/utils'
 

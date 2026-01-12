@@ -5,14 +5,18 @@ import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { useTheme } from 'styled-components'
 
+import { useQuery } from '@tanstack/react-query'
+
 import {
   KubernetesClusterFragment,
   Maybe,
   PinnedCustomResourceFragment,
   useKubernetesClustersQuery,
 } from '../../generated/graphql'
-import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../helpers/kubernetes.client'
+import { getNamespacesOptions } from '../../generated/kubernetes/@tanstack/react-query.gen'
+
+import { AxiosInstance } from '../../helpers/axios'
+
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { GqlError } from '../utils/Alert'
@@ -115,17 +119,18 @@ export default function Cluster() {
     data: namespacesData,
     error: namespacesError,
     refetch: refetchNamespaces,
-  } = useNamespacesQuery({
-    client: KubernetesClient(clusterId!),
-    skip: !clusterId,
+  } = useQuery({
+    ...getNamespacesOptions({ client: AxiosInstance(clusterId!) }),
+    enabled: !!clusterId,
+    refetchInterval: 30_000,
   })
 
   const namespaces = useMemo(
     () =>
-      (namespacesData?.handleGetNamespaces?.namespaces ?? [])
+      (namespacesData?.namespaces ?? [])
         .map((namespace) => namespace?.objectMeta?.name)
         .filter((namespace): namespace is string => !isEmpty(namespace)),
-    [namespacesData?.handleGetNamespaces?.namespaces]
+    [namespacesData?.namespaces]
   )
 
   const context = useMemo(

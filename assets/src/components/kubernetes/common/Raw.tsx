@@ -5,15 +5,15 @@ import { ReactElement, useEffect, useMemo, useState } from 'react'
 import { useMatch, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
+import { useQuery, useMutation } from '@tanstack/react-query'
+
 import {
-  NamespacedResourceQueryVariables,
-  ResourceQueryVariables,
-  useNamespacedResourceQuery,
-  useNamespacedResourceUpdateMutation,
-  useResourceQuery,
-  useResourceUpdateMutation,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  getNamespacedResourceOptions,
+  getResourceOptions,
+  updateNamespacedResourceMutation,
+  updateResourceMutation,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen'
+import { AxiosInstance } from '../../../helpers/axios'
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { hash } from '../../../utils/sha'
 import { GqlError, GqlErrorType } from '../../utils/Alert'
@@ -21,7 +21,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 
 export default function Raw(): ReactElement<any> {
   const theme = useTheme()
-  const { clusterId, name, namespace, crd } = useParams()
+  const { clusterId, name = '', namespace, crd } = useParams()
   const pathMatch = useMatch(`${getKubernetesAbsPath(clusterId)}/:kind/*`)
   const [current, setCurrent] = useState<string>()
   const [sha, setSHA] = useState<string>()
@@ -31,36 +31,50 @@ export default function Raw(): ReactElement<any> {
     () => crd ?? pluralize(pathMatch?.params?.kind || '', 1),
     [pathMatch?.params?.kind, crd]
   )
-  const resourceQuery = useMemo(
-    () => (namespace ? useNamespacedResourceQuery : useResourceQuery),
-    [namespace]
-  )
-  const updateMutation = useMemo(
-    () =>
-      namespace
-        ? useNamespacedResourceUpdateMutation
-        : useResourceUpdateMutation,
-    [namespace]
-  )
-  const { data, refetch, loading, error } = resourceQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    fetchPolicy: 'no-cache',
-    variables: {
-      kind,
-      name,
-      namespace,
-      input: load(current ?? '{}'),
-    } as ResourceQueryVariables & NamespacedResourceQueryVariables,
+
+  const client = AxiosInstance(clusterId ?? '')
+
+  const namespacedQuery = useQuery({
+    ...getNamespacedResourceOptions({
+      client,
+      path: { kind, name, namespace: namespace! },
+    }),
+    enabled: !!clusterId && !!namespace,
+    gcTime: 0,
   })
-  const [mutation] = updateMutation({
-    client: KubernetesClient(clusterId ?? ''),
-    onCompleted: () => refetch().finally(() => setUpdating(false)),
+
+  const clusterQuery = useQuery({
+    ...getResourceOptions({
+      client,
+      path: { kind, name },
+    }),
+    enabled: !!clusterId && !namespace,
+    gcTime: 0,
+  })
+
+  const { data, refetch, isFetching, error } = namespace
+    ? namespacedQuery
+    : clusterQuery
+
+  const namespacedMutation = useMutation({
+    ...updateNamespacedResourceMutation(),
+    onSuccess: () => refetch().finally(() => setUpdating(false)),
     onError: (err) => {
       setUpdating(false)
       setUpdateError(err)
     },
   })
+
+  const clusterMutation = useMutation({
+    ...updateResourceMutation(),
+    onSuccess: () => refetch().finally(() => setUpdating(false)),
+    onError: (err) => {
+      setUpdating(false)
+      setUpdateError(err)
+    },
+  })
+
+  const mutation = namespace ? namespacedMutation : clusterMutation
 
   useEffect(() => {
     if (!updateError) {
@@ -76,7 +90,7 @@ export default function Raw(): ReactElement<any> {
       return
     }
 
-    const current = dump(data?.handleGetResource?.Object)
+    const current = dump(data?.Object)
 
     setCurrent(current)
     calculateSHA(current)
@@ -88,7 +102,7 @@ export default function Raw(): ReactElement<any> {
 
   if (!current && !error) return <LoadingIndicator />
 
-  if (!data?.handleGetResource?.Object && !loading)
+  if (!data?.Object && !isFetching)
     return <GqlError error="Could not fetch resource" />
 
   return (
@@ -117,16 +131,15 @@ export default function Raw(): ReactElement<any> {
         saveLabel="Update"
         onSave={(v) => {
           try {
-            const input = load(v)
+            const input = load(v) as any
 
             setUpdating(true)
-            mutation({
-              variables: {
-                kind,
-                name: name ?? '',
-                namespace: namespace ?? '',
-                input,
-              },
+            mutation.mutate({
+              client,
+              path: namespace
+                ? { kind, name: name ?? '', namespace: namespace ?? '' }
+                : { kind, name: name ?? '', namespace: '' },
+              body: input,
             })
           } catch (e) {
             setUpdateError(e instanceof Error ? e.message : (e as any))

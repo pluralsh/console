@@ -3,7 +3,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
-import { Maybe } from '../../../generated/graphql-kubernetes'
+import { Maybe } from 'generated/graphql-plural'
 import {
   CronjobCronJob,
   CronjobCronJobList,

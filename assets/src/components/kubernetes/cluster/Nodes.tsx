@@ -8,7 +8,7 @@ import { filesize } from 'filesize'
 import { useMemo, useState } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
-import { Maybe } from '../../../generated/graphql-kubernetes'
+import { Maybe } from 'generated/graphql-plural'
 import {
   getClusterAbsPath,
   NODES_REL_PATH,

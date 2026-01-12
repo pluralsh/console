@@ -20,7 +20,6 @@ import {
   NamespacedResourceDeleteDocument,
   ResourceDeleteDocument,
 } from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
 
 import { Confirm, ConfirmProps } from '../../utils/Confirm'
 

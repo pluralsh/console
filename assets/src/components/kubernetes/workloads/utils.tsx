@@ -2,14 +2,11 @@ import { Chip, Tooltip, WrapWithIf } from '@pluralsh/design-system'
 import { ComponentProps } from 'react'
 import { isEmpty } from 'lodash'
 
-import {
-  ContainerState,
-  Common_Event as EventT,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+import { Maybe } from 'generated/graphql-plural'
+
 import { Readiness, ReadinessT } from '../../../utils/status'
 import { TruncateStart } from '../../utils/table/Truncate'
-import { CommonPodInfo } from '../../../generated/kubernetes'
+import { CommonEvent, CommonPodInfo } from '../../../generated/kubernetes'
 
 const podStatusSeverity = {
   Running: 'success',
@@ -41,7 +38,7 @@ export function PodStatusChip({
   warnings,
 }: {
   status: string
-  warnings: Maybe<EventT>[]
+  warnings: Maybe<CommonEvent>[]
 }) {
   let severity = podStatusSeverity[status] ?? 'neutral'
 

@@ -4,7 +4,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
-import { Maybe } from '../../../generated/graphql-kubernetes'
+import { Maybe } from 'generated/graphql-plural'
 import {
   getStorageAbsPath,
   STORAGE_CLASSES_REL_PATH,

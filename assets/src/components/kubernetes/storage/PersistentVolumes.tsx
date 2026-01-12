@@ -3,7 +3,6 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
-import { Maybe } from '../../../generated/graphql-kubernetes'
 import {
   getStorageAbsPath,
   PERSISTENT_VOLUMES_REL_PATH,
@@ -22,7 +21,9 @@ import {
 } from '../../../generated/kubernetes'
 import { getPersistentVolumesInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 
-export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+export const getBreadcrumbs = (
+  cluster?: Nullable<KubernetesClusterFragment>
+) => [
   ...getStorageBreadcrumbs(cluster),
   {
     label: 'persistent volumes',

@@ -1,11 +1,10 @@
 // import type { OperationVariables } from '@apollo/client/core'
 
-import { TypesObjectMeta, TypesTypeMeta } from 'generated/kubernetes'
 import {
-  Types_ListMeta as ListMetaT,
-  Types_ObjectMeta as ObjectMetaT,
-  Types_TypeMeta as TypeMetaT,
-} from '../../../generated/graphql-kubernetes'
+  TypesListMeta,
+  TypesObjectMeta,
+  TypesTypeMeta,
+} from 'generated/kubernetes'
 
 interface ErrorStatus {
   code: number
@@ -32,7 +31,7 @@ interface ResourceVariables extends DataSelectVariables {
 
 interface ResourceList {
   errors: Array<Error>
-  listMeta: ListMetaT
+  listMeta: TypesListMeta
 }
 
 interface Resource {

@@ -31,7 +31,7 @@
     "fix:js": "eslint ./src --fix",
     "fix:css": "stylelint src/**/*.css --fix",
     "graphql:codegen": "graphql-codegen --config codegen.yml",
-    "kubernetes:codegen": "openapi-ts -i ./schema/kubernetes-swagger.json -o ./src/generated/kubernetes -p @tanstack/react-query -p @hey-api/client-axios",
+    "openapi:codegen": "openapi-ts -i ./schema/swagger.json -o ./src/generated/kubernetes -p @tanstack/react-query -p @hey-api/client-axios",
     "analyze": "vite-bundle-visualizer -o stats.html"
   },
   "engines": {
@@ -66,7 +66,6 @@
     "apollo-boost": "0.4.9",
     "apollo-link-context": "1.0.20",
     "apollo-link-error": "1.1.13",
-    "apollo-link-rest": "0.9.0",
     "apollo-link-retry": "2.2.16",
     "axios": "1.13.2",
     "chroma-js": "2.4.2",

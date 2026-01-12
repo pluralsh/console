@@ -3,11 +3,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { Maybe } from 'generated/graphql-plural'
 
-import {
-  Maybe,
-  Namespace_Namespace as NamespaceT,
-} from '../../../generated/graphql-kubernetes'
 import {
   getClusterAbsPath,
   NAMESPACES_REL_PATH,

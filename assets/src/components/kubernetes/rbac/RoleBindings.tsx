@@ -2,7 +2,6 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
-import { Maybe } from '../../../generated/graphql-kubernetes'
 
 import {
   RolebindingRoleBinding,
@@ -22,7 +21,9 @@ import { UpdatedResourceList } from '../common/UpdatedResourceList'
 import { useDefaultColumns } from '../common/utils'
 import { getRbacBreadcrumbs } from './Rbac'
 
-export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+export const getBreadcrumbs = (
+  cluster?: Nullable<KubernetesClusterFragment>
+) => [
   ...getRbacBreadcrumbs(cluster),
   {
     label: 'role bindings',
