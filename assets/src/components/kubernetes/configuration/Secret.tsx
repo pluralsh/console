@@ -42,7 +42,7 @@ const directory: Array<TabEntry> = [
 export default function Secret(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId = '', name = '', namespace = '' } = useParams()
-  const { data: secret, isLoading: loading } = useQuery(
+  const { data: secret, isFetching } = useQuery(
     getSecretOptions({
       client: AxiosInstance(clusterId),
       path: { name, namespace },
@@ -73,7 +73,7 @@ export default function Secret(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (isFetching) return <LoadingIndicator />
 
   return (
     <ResourceDetails

@@ -1,13 +1,11 @@
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import { MetadataSidecar } from '../common/utils'
-import {
-  ServiceAccountQueryVariables,
-  useServiceAccountQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { getServiceAccountOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   SERVICE_ACCOUNTS_REL_PATH,
   getRbacAbsPath,
@@ -15,6 +13,7 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
 import { useCluster } from '../Cluster'
@@ -27,18 +26,18 @@ const directory: Array<TabEntry> = [{ path: 'raw', label: 'Raw' }] as const
 
 export default function ServiceAccount(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
-  const { data, loading } = useServiceAccountQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as ServiceAccountQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: serviceAccount,
+    isFetching,
+    error,
+  } = useQuery({
+    ...getServiceAccountOptions({
+      client: AxiosInstance(clusterId),
+      path: { serviceaccount: name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const serviceAccount = data?.handleGetServiceAccountDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -64,7 +63,13 @@ export default function ServiceAccount(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isFetching) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails

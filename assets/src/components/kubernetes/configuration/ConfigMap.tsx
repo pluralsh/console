@@ -33,7 +33,7 @@ const directory: Array<TabEntry> = [
 export default function ConfigMap(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId = '', name = '', namespace = '' } = useParams()
-  const { data: cm, isLoading: loading } = useQuery(
+  const { data: cm, isFetching } = useQuery(
     getConfigMapOptions({
       client: AxiosInstance(clusterId),
       path: { configmap: name, namespace },
@@ -64,7 +64,7 @@ export default function ConfigMap(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (isFetching) return <LoadingIndicator />
 
   return (
     <ResourceDetails

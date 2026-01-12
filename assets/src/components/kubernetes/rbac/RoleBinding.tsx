@@ -1,13 +1,10 @@
 import { ReactElement, useMemo } from 'react'
 import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
-import {
-  RoleBindingQueryVariables,
-  Rolebinding_RoleBindingDetail as RoleBindingT,
-  useRoleBindingQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { getRoleBindingOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import { MetadataSidecar } from '../common/utils'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
@@ -17,6 +14,7 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import Subjects from '../common/Subjects'
 
 import { useCluster } from '../Cluster'
@@ -25,6 +23,7 @@ import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './RoleBindings'
 import { useTheme } from 'styled-components'
+import { RolebindingRoleBindingDetail } from 'generated/kubernetes/types.gen.ts'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Subjects' },
@@ -34,18 +33,18 @@ const directory: Array<TabEntry> = [
 export default function RoleBinding() {
   const theme = useTheme()
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
-  const { data, loading } = useRoleBindingQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as RoleBindingQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: rb,
+    isFetching,
+    error,
+  } = useQuery({
+    ...getRoleBindingOptions({
+      client: AxiosInstance(clusterId),
+      path: { name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const rb = data?.handleGetRoleBindingDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -71,7 +70,13 @@ export default function RoleBinding() {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isFetching) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails
@@ -101,7 +106,7 @@ export default function RoleBinding() {
 
 // TODO: Add links.
 export function RoleBindingSubjects(): ReactElement<any> {
-  const rb = useOutletContext() as RoleBindingT
+  const rb = useOutletContext() as RolebindingRoleBindingDetail
 
   return <Subjects subjects={rb?.subjects} />
 }
