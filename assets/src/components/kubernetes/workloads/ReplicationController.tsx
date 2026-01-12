@@ -5,29 +5,24 @@ import {
 } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
-  Common_Event as EventT,
-  Common_EventList as EventListT,
-  DeploymentQueryVariables,
-  Pod_Pod as PodT,
-  Pod_PodList as PodListT,
-  Replicationcontroller_ReplicationControllerDetail as ReplicationControllerT,
-  ReplicationControllerEventsDocument,
-  ReplicationControllerEventsQuery,
-  ReplicationControllerEventsQueryVariables,
-  ReplicationControllerPodsDocument,
-  ReplicationControllerPodsQuery,
-  ReplicationControllerPodsQueryVariables,
-  ReplicationControllerServicesDocument,
-  ReplicationControllerServicesQuery,
-  ReplicationControllerServicesQueryVariables,
-  Service_Service as ServiceT,
-  Service_ServiceList as ServiceListT,
-  useReplicationControllerQuery,
-  V1_LabelSelector as LabelSelectorT,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  CommonEvent,
+  CommonEventList,
+  PodPod,
+  PodPodList,
+  ServiceService,
+  ServiceServiceList,
+  V1LabelSelector as LabelSelectorT,
+} from '../../../generated/kubernetes'
+import {
+  getReplicationControllerEventsInfiniteOptions,
+  getReplicationControllerOptions,
+  getReplicationControllerPodsInfiniteOptions,
+  getReplicationControllerServicesInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
@@ -40,9 +35,10 @@ import { useEventsColumns } from '../cluster/Events'
 import { LabelSelector } from '../common/LabelSelector'
 import { PodInfo } from '../common/PodInfo'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { ResourceList } from '../common/ResourceList'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 
 import { Kind } from '../common/types'
+import { GqlError } from '../../utils/Alert'
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 import { useServicesColumns } from '../network/Services'
@@ -60,15 +56,17 @@ const directory: Array<TabEntry> = [
 
 export default function ReplicationController(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name, namespace } = useParams()
-  const { data, loading } = useReplicationControllerQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as DeploymentQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: rc,
+    isFetching,
+    error,
+  } = useQuery({
+    ...getReplicationControllerOptions({
+      client: AxiosInstance(clusterId),
+      path: { replicationController: name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
 
   useSetBreadcrumbs(
@@ -95,10 +93,11 @@ export default function ReplicationController(): ReactElement<any> {
     )
   )
 
-  const rc =
-    data?.handleGetReplicationControllerDetail as ReplicationControllerT
+  if (error) {
+    return <GqlError error={error} />
+  }
 
-  if (loading) {
+  if (isFetching) {
     return <LoadingIndicator />
   }
 
@@ -139,78 +138,45 @@ export default function ReplicationController(): ReactElement<any> {
 }
 
 export function ReplicationControllerPods(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = usePodsColumns()
 
   return (
-    <ResourceList<
-      PodListT,
-      PodT,
-      ReplicationControllerPodsQuery,
-      ReplicationControllerPodsQueryVariables
-    >
+    <UpdatedResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
-      queryDocument={ReplicationControllerPodsDocument}
-      queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as ReplicationControllerPodsQueryVariables,
-      }}
-      queryName="handleGetReplicationControllerPods"
+      queryOptions={getReplicationControllerPodsInfiniteOptions}
+      pathParams={{ replicationController: name, namespace }}
       itemsKey="pods"
     />
   )
 }
 
 export function ReplicationControllerServices(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = useServicesColumns()
 
   return (
-    <ResourceList<
-      ServiceListT,
-      ServiceT,
-      ReplicationControllerServicesQuery,
-      ReplicationControllerServicesQueryVariables
-    >
+    <UpdatedResourceList<ServiceServiceList, ServiceService>
       namespaced
       columns={columns}
-      queryDocument={ReplicationControllerServicesDocument}
-      queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as ReplicationControllerServicesQueryVariables,
-      }}
-      queryName="handleGetReplicationControllerServices"
+      queryOptions={getReplicationControllerServicesInfiniteOptions}
+      pathParams={{ replicationController: name, namespace }}
       itemsKey="services"
     />
   )
 }
 
 export function ReplicationControllerEvents(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<
-      EventListT,
-      EventT,
-      ReplicationControllerEventsQuery,
-      ReplicationControllerEventsQueryVariables
-    >
+    <UpdatedResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
-      queryDocument={ReplicationControllerEventsDocument}
-      queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as ReplicationControllerEventsQueryVariables,
-      }}
-      queryName="handleGetReplicationControllerEvents"
+      queryOptions={getReplicationControllerEventsInfiniteOptions}
+      pathParams={{ replicationController: name, namespace }}
       itemsKey="events"
       disableOnRowClick
     />
