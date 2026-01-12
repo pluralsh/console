@@ -9,4 +9,17 @@ metadata:
     app.kubernetes.io/created-by: controller
   name: customcompatibilitymatrix-sample
 spec:
-  # TODO(user): Add fields here
+  icon: https://velero.io/img/Velero.svg
+  gitUrl: https://github.com/vmware-tanzu/velero
+  releaseUrl: https://github.com/vmware-tanzu/velero/releases/tag/v{vsn}
+  versions:
+    - version: v1.5.4
+      chartVersion: 2.22.1
+      kube:
+        - "1.35"
+        - "1.34"
+      summary:
+        helmChanges:
+          - "Added support for AWS EBS CSI driver"
+        breakingChanges:
+          - "Removed support for AWS EBS CSI driver"

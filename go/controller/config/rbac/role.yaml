@@ -35,6 +35,7 @@ rules:
   - clusters
   - clustersyncs
   - complianceReportGenerators
+  - customcompatibilitymatrices
   - customstackruns
   - deploymentsettings
   - federatedcredentials
@@ -86,6 +87,7 @@ rules:
   - clusters/finalizers
   - clustersyncs/finalizers
   - complianceReportGenerators/finalizers
+  - customcompatibilitymatrices/finalizers
   - customstackruns/finalizers
   - deploymentsettings/finalizers
   - federatedcredentials/finalizers
@@ -131,6 +133,7 @@ rules:
   - clusters/status
   - clustersyncs/status
   - complianceReportGenerators/status
+  - customcompatibilitymatrices/status
   - customstackruns/status
   - deploymentsettings/status
   - federatedcredentials/status

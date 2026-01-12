@@ -69,7 +69,8 @@ func (r *CustomCompatibilityMatrixReconciler) Reconcile(ctx context.Context, req
 		return ctrl.Result{}, err
 	}
 	if !ccm.Status.IsSHAEqual(sha) {
-		consoleCCM, err := r.ConsoleClient.UpsertCustomCompatibilityMatrix(ctx, ccm.Attributes())
+		attr := ccm.Attributes()
+		consoleCCM, err := r.ConsoleClient.UpsertCustomCompatibilityMatrix(ctx, attr)
 		if err != nil {
 			utils.MarkCondition(ccm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -101,7 +102,7 @@ func (r *CustomCompatibilityMatrixReconciler) addOrRemoveFinalizer(ctx context.C
 			controllerutil.RemoveFinalizer(ccm, CustomCompatibilityMatrixFinalizer)
 			return &ctrl.Result{}, nil
 		}
-		if err := r.ConsoleClient.DeleteCustomCompatibilityMatrix(ctx, *ccm.Status.ID); err != nil && !errors.IsNotFound(err) {
+		if err := r.ConsoleClient.DeleteCustomCompatibilityMatrix(ctx, ccm.ConsoleName()); err != nil && !errors.IsNotFound(err) {
 			utils.MarkCondition(ccm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return &ctrl.Result{}, err
 		}
