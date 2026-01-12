@@ -1,4 +1,3 @@
-import { ApolloError, FetchResult } from '@apollo/client'
 import {
   Button,
   FormField,
@@ -9,11 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { useNamespaces } from 'components/kubernetes/Cluster'
 import { GqlError } from 'components/utils/Alert'
-import {
-  DeployFromInputMutation,
-  useDeployFromInputMutation,
-} from 'generated/graphql-kubernetes'
-import { KubernetesClient } from 'helpers/kubernetes.client'
+
 import { Dispatch, ReactNode, SetStateAction, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
@@ -26,8 +21,11 @@ import {
   InfiniteData,
   QueryObserverResult,
   RefetchOptions,
+  useMutation,
 } from '@tanstack/react-query'
 import { ResourceList } from '../../updatedtypes.ts'
+import { createAppDeploymentFromFileMutation } from '../../../../../generated/kubernetes/@tanstack/react-query.gen'
+import { AxiosInstance } from '../../../../../helpers/axios'
 
 const FormContainer = styled.div`
   display: flex;
@@ -66,47 +64,36 @@ export function CreateSecretModal({
   const [serviceAccount, setServiceAccount] = useState('')
 
   const secretTypes = Object.values(SecretType)
+  const client = AxiosInstance(clusterId ?? '')
 
-  const [deploy] = useDeployFromInputMutation({
-    client: KubernetesClient(clusterId ?? ''),
-    variables: {
-      input: {
-        name,
-        namespace,
-        validate: true,
-        content: yaml,
-      },
+  const deployMutation = useMutation({
+    ...createAppDeploymentFromFileMutation({ client }),
+    onSuccess: (data) => {
+      if (data.error) {
+        setError(data.error)
+        setCreating(false)
+        return
+      }
+
+      if (!refetch) {
+        setCreating(false)
+        setOpen(false)
+        onCreate?.(name, namespace)
+        return
+      }
+
+      refetch()
+        .then(() => {
+          onCreate?.(name, namespace)
+          setOpen(false)
+        })
+        .finally(() => setCreating(false))
     },
-    onError: (error) => {
+    onError: (error: any) => {
       setCreating(false)
-      setError(error.message)
+      setError(error.response?.data?.message || error.message)
     },
   })
-
-  const onComplete = (result: FetchResult<DeployFromInputMutation>) => {
-    const apolloError = result?.errors as unknown as ApolloError
-    const responseError =
-      apolloError?.cause?.['result'] ?? result.data?.handleDeployFromFile?.error
-    if (responseError) {
-      setError(responseError)
-      setCreating(false)
-      return
-    }
-
-    if (!refetch) {
-      setCreating(false)
-      setOpen(false)
-      onCreate?.(name, namespace)
-      return
-    }
-
-    refetch()
-      .then(() => {
-        onCreate?.(name, namespace)
-        setOpen(false)
-      })
-      .finally(() => setCreating(false))
-  }
 
   useEffect(() => {
     setYaml(
@@ -137,7 +124,14 @@ export function CreateSecretModal({
           setOpen={setOpen}
           valid={valid}
           submit={() => {
-            deploy().then(onComplete, console.log)
+            deployMutation.mutate({
+              body: {
+                name,
+                namespace,
+                validate: true,
+                content: yaml,
+              },
+            })
           }}
         />
       }
