@@ -22,6 +22,7 @@ GOIMPORTS ?= $(BINARIES_DIR)/goimports
 GOLANGCI_LINT ?= $(BINARIES_DIR)/golangci-lint
 GQLGEN ?= $(BINARIES_DIR)/gqlgen
 GQLGENC ?= $(BINARIES_DIR)/gqlgenc
+GOTESTSUM ?= $(BINARIES_DIR)/gotestsum
 HELMIFY := $(BINARIES_DIR)/helmify
 KUBEBUILDER ?= $(BINARIES_DIR)/kubebuilder
 KUSTOMIZE ?= $(BINARIES_DIR)/kustomize

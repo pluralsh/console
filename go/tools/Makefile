@@ -90,6 +90,10 @@ install-envtest: --tool ## Download and install setup-envtest in the $BINARIES_D
 install-ginkgo: TOOL = ginkgo
 install-ginkgo: --tool ## Download and install ginkgo in the $BINARIES_DIR
 
+.PHONY: install-gotestsum
+install-gotestsum: TOOL = gotestsum
+install-gotestsum: --tool ## Download and install gotestsum in the $BINARIES_DIR
+
 .PHONY: install-protoc-gen-go
 install-protoc-gen-go: TOOL = protoc-gen-go
 install-protoc-gen-go: --tool ## Download and install protoc-gen-go in the $BINARIES_DIR

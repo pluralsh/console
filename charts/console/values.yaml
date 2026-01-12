@@ -36,13 +36,13 @@ replicaCount: 2
 homeDir: /home/console
 
 # podLabels is the set of pod labels to apply to spec.template.metadata.labels
-podLabels: {}
+podLabels: { }
 # podAnnotations is the set of pod annotations to apply to spec.template.metadata.annotations
-podAnnotations: {}
+podAnnotations: { }
 
 # migrator is used to configure the console migration Job defined in migration.yaml, specifically the migrator container
 migrator:
-  command: ["/opt/app/bin/migrate"]
+  command: [ "/opt/app/bin/migrate" ]
   nodeSelector: ~
   securityContext: ~
   containerSecurityContext: ~
@@ -119,8 +119,30 @@ ociAuth:
   tag: ~
   imagePullPolicy: IfNotPresent
 
+nexus:
+  enabled: true
+  image:
+    repository: nexus
+    tag: ~
+    pullPolicy: IfNotPresent
+  config:
+    server:
+      address: ":8080"
+      readTimeout: "30s"
+      writeTimeout: "30s"
+      idleTimeout: "120s"
+      shutdownTimeout: "30s"
+    console:
+      grpcEndpoint: "localhost:50051"
+      configPollInterval: "60s"
+      requestTimeout: "10s"
+      connectionRetry:
+        maxAttempts: 5
+        initialBackoff: "1s"
+        maxBackoff: "30s"
+
 # initContainers is used to create a list of init containers for your console deployment
-initContainers: []
+initContainers: [ ]
 
 # cliContainer is used to create a container for the plural cli
 cliContainer:
@@ -133,12 +155,12 @@ cliContainer:
 # serviceAccount is used to determine if a service account should be created. If create is set to true, a service account will be created with the name of console
 serviceAccount:
   create: true
-  annotations: {}
+  annotations: { }
 
 # extraEnv is used to add environment variables to the console container
 extraEnv: ~
 # extraSecretEnv is used to add secret key-value pairs to the console container
-extraSecretEnv: []
+extraSecretEnv: [ ]
 
 # livenessProbe configures the liveness probe for the console container. See https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe:
@@ -163,7 +185,7 @@ readinessProbe:
   successThreshold: 1
 
 # imagePullSecrets is used to configure Kubernetes image pull secrets. See https://kubernetes.io/docs/concepts/containers/images/
-imagePullSecrets: []
+imagePullSecrets: [ ]
 
 # nameOverride is used to expand chart name (see templates/_helpers.tpl) if set (otherwise uses Chart.Name). Truncated after 63 characters and also any trailing - characters (hyphens) are removed
 nameOverride: ""
@@ -266,10 +288,10 @@ resources:
   #   memory: 128Mi
 
 # nodeSelector for console deployment and git-server deployment, see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
-nodeSelector: {}
+nodeSelector: { }
 
 # tolerations for console deployment and git-server deployment, see https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
-tolerations: []
+tolerations: [ ]
 
 # affinity for console and git-server deployments. See https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
 affinity:
@@ -359,7 +381,7 @@ kas:
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-    pullSecrets: []
+    pullSecrets: [ ]
 
   consoleUrl: ""
 
@@ -367,8 +389,8 @@ kas:
 
   fullnameOverride: ""
 
-  podAnnotations: {}
-  podLabels: {}
+  podAnnotations: { }
+  podLabels: { }
 
   podSecurityContext:
     runAsUser: 65532
@@ -380,17 +402,17 @@ kas:
 
   priorityClassName: ""
 
-  extraEnv: []
+  extraEnv: [ ]
 
-  extraArgs: []
+  extraArgs: [ ]
 
-  nodeSelector: {}
+  nodeSelector: { }
 
-  affinity: {}
+  affinity: { }
 
-  tolerations: []
+  tolerations: [ ]
 
-  initContainers: []
+  initContainers: [ ]
 
   resources:
     limits:
@@ -413,7 +435,7 @@ kas:
     # Specifies whether a service account should be created.
     create: true
     # Annotations to add to the service account.
-    annotations: {}
+    annotations: { }
     # The name of the service account to use.
     # If not set and create is true, a name is generated using the fullname template.
     name: ""
@@ -423,8 +445,8 @@ kas:
     path: /metrics
     serviceMonitor:
       enabled: false
-      additionalLabels: {}
-      endpointConfig: {}
+      additionalLabels: { }
+      endpointConfig: { }
 
   replicCount: 1
 
@@ -496,21 +518,21 @@ cloudQuery:
     tag: ~
     args: ~
 
-  imagePullSecrets: []
+  imagePullSecrets: [ ]
 
   serviceAccount:
     create: true
     automount: true
-    annotations: {}
+    annotations: { }
 
-  podAnnotations: {}
-  podLabels: {}
+  podAnnotations: { }
+  podLabels: { }
 
-  podSecurityContext: {}
+  podSecurityContext: { }
   # fsGroup: 2000
 
-  securityContext: {}
-    # capabilities:
+  securityContext: { }
+  # capabilities:
   #   drop:
   #   - ALL
   # readOnlyRootFilesystem: true
@@ -552,28 +574,28 @@ cloudQuery:
         key: "password"
 
   # Additional volumes on the output Deployment definition.
-  volumes: []
+  volumes: [ ]
   # - name: foo
   #   secret:
   #     secretName: mysecret
   #     optional: false
 
   # Additional volumeMounts on the output Deployment definition.
-  volumeMounts: []
+  volumeMounts: [ ]
   # - name: foo
   #   mountPath: "/etc/foo"
   #   readOnly: true
 
-  nodeSelector: {}
-  tolerations: []
-  affinity: {}
+  nodeSelector: { }
+  tolerations: [ ]
+  affinity: { }
 
 dex:
   enabled: false
 
   clientSecret: ~
 
-  additionalDexSecrets: {}
+  additionalDexSecrets: { }
 
   config:
     # Set it to a valid URL
@@ -598,16 +620,16 @@ dex:
     #     emailToLowercase: false
 
     staticClients:
-    - id: console
-      secretEnv: CONSOLE_CLIENT_SECRET
-      name: 'Plural Console'
-      # Where the app will be running.
-      redirectURIs:
-      - 'https://<your-console-host>/oauth/callback'
+      - id: console
+        secretEnv: CONSOLE_CLIENT_SECRET
+        name: 'Plural Console'
+        # Where the app will be running.
+        redirectURIs:
+          - 'https://<your-console-host>/oauth/callback'
 
   envFrom:
-  - secretRef:
-      name: dex-env
+    - secretRef:
+        name: dex-env
 
   ingress:
     enabled: true
@@ -626,4 +648,3 @@ dex:
     tls:
       - hosts:
           - <your-console-fqdn>
-        secretName: dex-cert

@@ -1,0 +1,51 @@
+# Binaries
+bin/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.txt
+coverage.html
+
+# Go workspace file
+go.work
+go.work.sum
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Dependency directories
+vendor/
+
+# Temporary files
+tmp/
+*.tmp
+*.bak
+
+# Environment files
+.env
+.env.local
+*.env
+
+# Config with secrets (keep examples)
+config/config.local.yaml
+
+# Build artifacts
+*.log
+
+# Proto generated files (uncomment if not committing generated code)
+# proto/gen/
+

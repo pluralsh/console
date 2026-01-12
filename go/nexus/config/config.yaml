@@ -1,0 +1,27 @@
+# Example configuration file for the nexus application
+server:
+  # HTTP server bind address
+  address: ":8080"
+
+  # Request timeouts
+  readTimeout: "30s"
+  writeTimeout: "30s"
+  idleTimeout: "120s"
+  shutdownTimeout: "30s"
+
+console:
+  # Console gRPC endpoint - REQUIRED
+  grpcEndpoint: "https://console.plrl-dev-aws.onplural.sh"
+
+  # How often to poll Console for AI config updates
+  # Minimum: 10s, Recommended: 60s
+  configPollInterval: "60s"
+
+  # Timeout for individual gRPC requests
+  requestTimeout: "10s"
+
+  # Connection retry settings
+  connectionRetry:
+    maxAttempts: 5
+    initialBackoff: "1s"
+    maxBackoff: "30s"
