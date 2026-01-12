@@ -8,27 +8,28 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
-  Common_Event as EventT,
-  Common_EventList as EventListT,
-  Limitrange_LimitRangeItem as LimitRangeT,
-  Namespace_NamespaceDetail as NamespaceT,
-  NamespaceEventsDocument,
-  NamespaceEventsQuery,
-  NamespaceEventsQueryVariables,
-  NamespaceQueryVariables,
-  Resourcequota_ResourceQuotaDetail as ResourceQuotaT,
-  useNamespaceQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  CommonEvent,
+  CommonEventList,
+  LimitrangeLimitRangeItem as LimitRangeT,
+  NamespaceNamespaceDetail,
+  ResourcequotaResourceQuotaDetail as ResourceQuotaT,
+} from '../../../generated/kubernetes'
+import {
+  getNamespaceEventsInfiniteOptions,
+  getNamespaceOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { SubTitle } from '../../utils/SubTitle'
 
 import { useCluster } from '../Cluster'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { ResourceList } from '../common/ResourceList'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 
 import { Kind } from '../common/types'
 import { MetadataSidecar } from '../common/utils'
@@ -44,17 +45,18 @@ const directory: Array<TabEntry> = [
 
 export default function Namespace(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '' } = useParams()
-  const { data, loading } = useNamespaceQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-    } as NamespaceQueryVariables,
+  const { clusterId = '', name = '' } = useParams()
+  const {
+    data: namespace,
+    isFetching,
+    error,
+  } = useQuery({
+    ...getNamespaceOptions({
+      client: AxiosInstance(clusterId),
+      path: { name },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const namespace = data?.handleGetNamespaceDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -69,7 +71,13 @@ export default function Namespace(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isFetching) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails
@@ -133,7 +141,7 @@ const lrColumns = [
 ]
 
 export function NamespaceInfo(): ReactElement<any> {
-  const namespace = useOutletContext() as NamespaceT
+  const namespace = useOutletContext() as NamespaceNamespaceDetail
 
   return (
     <>
@@ -168,23 +176,15 @@ export function NamespaceInfo(): ReactElement<any> {
 }
 
 export function NamespaceEvents(): ReactElement<any> {
-  const { name } = useParams()
+  const { name = '' } = useParams()
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<
-      EventListT,
-      EventT,
-      NamespaceEventsQuery,
-      NamespaceEventsQueryVariables
-    >
+    <UpdatedResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
-      queryDocument={NamespaceEventsDocument}
-      queryOptions={{
-        variables: { name } as NamespaceEventsQueryVariables,
-      }}
-      queryName="handleGetNamespaceEvents"
+      queryOptions={getNamespaceEventsInfiniteOptions}
+      pathParams={{ name }}
       itemsKey="events"
       disableOnRowClick
     />

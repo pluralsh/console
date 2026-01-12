@@ -1,14 +1,12 @@
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { MetadataSidecar } from '../common/utils'
-import {
-  PodDisruptionBudgetQueryVariables,
-  usePodDisruptionBudgetQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { getPodDisruptionBudgetOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   getResourceDetailsAbsPath,
   getClusterAbsPath,
@@ -16,6 +14,7 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
@@ -27,15 +26,18 @@ const directory: Array<TabEntry> = [{ path: '', label: 'Raw' }] as const
 
 export default function PodDisruptionBudget(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
-  const { data, loading } = usePodDisruptionBudgetQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: { name, namespace } as PodDisruptionBudgetQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: pdb,
+    isFetching,
+    error,
+  } = useQuery({
+    ...getPodDisruptionBudgetOptions({
+      client: AxiosInstance(clusterId),
+      path: { name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const pdb = data?.handleGetPodDisruptionBudgetDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -61,7 +63,13 @@ export default function PodDisruptionBudget(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isFetching) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails
