@@ -217,19 +217,7 @@ export function usePodsColumns(): Array<object> {
       colCreationTimestamp,
       colAction,
     ],
-    [
-      colName,
-      colNamespace,
-      colNode,
-      colImages,
-      colRestarts,
-      colCpu,
-      colMemory,
-      colGPU,
-      colContainers,
-      colCreationTimestamp,
-      colAction,
-    ]
+    [colName, colNamespace, colCreationTimestamp, colAction]
   )
 }
 
