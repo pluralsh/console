@@ -60,6 +60,7 @@ const (
 	PrGovernanceReconciler               Reconciler = "prgovernance"
 	SentinelReconciler                   Reconciler = "sentinel"
 	GroupReconciler                      Reconciler = "groups"
+	CustomCompatibilityMatrixReconciler  Reconciler = "customcompatibilitymatrix"
 )
 
 // ToController maps a Reconciler to its corresponding Controller.
