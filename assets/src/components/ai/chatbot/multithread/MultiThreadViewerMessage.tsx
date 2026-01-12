@@ -1,10 +1,10 @@
+import { Code, getLastStringChild, Modal } from '@pluralsh/design-system'
+import { CaptionP } from 'components/utils/typography/Text'
+import { ChatFragment, ChatType } from 'generated/graphql'
 import { ReactElement, ReactNode, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import styled from 'styled-components'
-import { Code, getLastStringChild, Modal } from '@pluralsh/design-system'
-import { ChatFragment, ChatType } from 'generated/graphql'
-import { CaptionP } from 'components/utils/typography/Text'
 import { ToolCallContent } from '../ToolCallContent'
 
 export function MultiThreadViewerMessage({
@@ -12,18 +12,6 @@ export function MultiThreadViewerMessage({
 }: {
   message: ChatFragment
 }) {
-  return (
-    <WrapperSC>
-      <MessageContent message={message} />
-    </WrapperSC>
-  )
-}
-
-function MessageContent({
-  message,
-}: {
-  message: ChatFragment
-}): ReactElement | null {
   switch (message.type) {
     case ChatType.Tool:
       return <ToolCallLabel message={message} />
@@ -142,10 +130,6 @@ function SimplifiedMarkdown({ text }: { text: string }) {
     </SimpleMarkdownSC>
   )
 }
-
-const WrapperSC = styled.div(({ theme }) => ({
-  padding: `${theme.spacing.xxsmall}px 0`,
-}))
 
 const ClickableLabelSC = styled.button(({ theme }) => ({
   background: 'none',

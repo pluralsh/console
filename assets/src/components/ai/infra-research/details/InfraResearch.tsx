@@ -29,7 +29,7 @@ import {
   useFixResearchDiagramMutation,
   useInfraResearchQuery,
 } from 'generated/graphql'
-import { capitalize, isEmpty, truncate } from 'lodash'
+import { capitalize, truncate } from 'lodash'
 import { ReactNode, useMemo, useState } from 'react'
 import { useMatch, useNavigate } from 'react-router-dom'
 import {
@@ -112,7 +112,7 @@ export function InfraResearch() {
   if (!(infraResearch || loading))
     return <EmptyState message="Infra research not found." />
 
-  const { status, analysis, diagram } = infraResearch ?? {}
+  const { status, analysis, diagram, threads } = infraResearch ?? {}
   const isRunning = status === InfraResearchStatus.Running
 
   const headerButtons =
@@ -169,8 +169,10 @@ export function InfraResearch() {
             {status && (
               <InfraResearchStatusChip
                 status={status}
-                clickable={!isEmpty(infraResearch?.threads)}
-                onClick={() => goToInfraResearch(id)}
+                {...((isRunning || (threads?.length ?? 0) > 1) && {
+                  clickable: true,
+                  onClick: () => goToInfraResearch(id),
+                })}
               />
             )}
             {!isChatbotOpen && headerButtons}
