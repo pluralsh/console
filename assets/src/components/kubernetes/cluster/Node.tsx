@@ -17,18 +17,6 @@ import { useMemo, useState } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import {
-  Common_EventList as EventListT,
-  Common_Event as EventT,
-  NodeEventsQuery,
-  NodeEventsQueryVariables,
-  NodePodsQuery,
-  NodePodsQueryVariables,
-  Node_NodeDetail as NodeT,
-  Pod_PodList as PodListT,
-  Pod_Pod as PodT,
-} from '../../../generated/graphql-kubernetes'
-
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { GaugeWrap } from '../../cluster/Gauges'
 import { cpuFmt, roundToTwoPlaces } from '../../cluster/utils'
@@ -41,7 +29,7 @@ import Conditions from '../common/Conditions'
 import { DrainNodeModal } from '../common/DrainNodeModal.tsx'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
-import { ResourceList } from '../common/ResourceList'
+import { UpdatedResourceList } from '../common/UpdatedResourceList'
 
 import { Kind } from '../common/types'
 
@@ -50,9 +38,20 @@ import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
 import { usePodsColumns } from '../workloads/Pods'
 import { useEventsColumns } from './Events'
 import { getBreadcrumbs } from './Nodes'
-import { getNodeOptions } from 'generated/kubernetes/@tanstack/react-query.gen.ts'
+import {
+  getNodeOptions,
+  getNodePodsInfiniteOptions,
+  getNodeEventsInfiniteOptions,
+} from 'generated/kubernetes/@tanstack/react-query.gen.ts'
 import { useQuery } from '@tanstack/react-query'
 import { AxiosInstance } from 'helpers/axios.ts'
+import {
+  CommonEvent,
+  CommonEventList,
+  NodeNodeDetail,
+  PodPod,
+  PodPodList,
+} from 'generated/kubernetes/types.gen.ts'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -152,7 +151,7 @@ export default function Node() {
 
 export function NodeInfo() {
   const theme = useTheme()
-  const node = useOutletContext() as NodeT
+  const node = useOutletContext() as NodeNodeDetail
 
   const { memoryData, cpuData, podsData } = useMemo(() => {
     const {
@@ -304,7 +303,7 @@ export function NodeInfo() {
 }
 
 export function NodeConditions() {
-  const node = useOutletContext<NodeT>()
+  const node = useOutletContext<NodeNodeDetail>()
 
   return <Conditions conditions={node.conditions} />
 }
@@ -320,7 +319,7 @@ const columns = [
 ]
 
 export function NodeContainerImages() {
-  const node = useOutletContext<NodeT>()
+  const node = useOutletContext<NodeNodeDetail>()
 
   return (
     <Table
@@ -335,14 +334,11 @@ export function NodePods() {
   const columns = usePodsColumns()
 
   return (
-    <ResourceList<PodListT, PodT, NodePodsQuery, NodePodsQueryVariables>
+    <UpdatedResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
-      queryDocument={NodePodsDocument}
-      queryOptions={{
-        variables: { name } as NodePodsQueryVariables,
-      }}
-      queryName="handleGetNodePods"
+      queryOptions={getNodePodsInfiniteOptions}
+      pathParams={{ name }}
       itemsKey="pods"
     />
   )
@@ -353,14 +349,11 @@ export function NodeEvents() {
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<EventListT, EventT, NodeEventsQuery, NodeEventsQueryVariables>
+    <UpdatedResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
-      queryDocument={NodeEventsDocument}
-      queryOptions={{
-        variables: { name } as NodeEventsQueryVariables,
-      }}
-      queryName="handleGetNodeEvents"
+      queryOptions={getNodeEventsInfiniteOptions}
+      pathParams={{ name }}
       itemsKey="events"
       disableOnRowClick
     />
