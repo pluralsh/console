@@ -422,4 +422,12 @@ func init() {
 			}
 		})
 
+	types.RegisterController(types.UpgradePlanCalloutReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.UpgradePlanCalloutReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}
+	})
 }

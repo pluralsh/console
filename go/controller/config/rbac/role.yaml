@@ -68,6 +68,7 @@ rules:
   - servicecontexts
   - servicedeployments
   - stackdefinitions
+  - upgradeplancallouts
   verbs:
   - create
   - delete
@@ -120,6 +121,7 @@ rules:
   - servicecontexts/finalizers
   - servicedeployments/finalizers
   - stackdefinitions/finalizers
+  - upgradeplancallouts/finalizers
   verbs:
   - update
 - apiGroups:
@@ -166,6 +168,7 @@ rules:
   - servicecontexts/status
   - servicedeployments/status
   - stackdefinitions/status
+  - upgradeplancallouts/status
   verbs:
   - get
   - patch

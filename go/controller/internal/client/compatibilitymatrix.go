@@ -22,3 +22,20 @@ func (c *client) DeleteCustomCompatibilityMatrix(ctx context.Context, name strin
 	}
 	return nil
 }
+
+func (c *client) UpsertUpgradePlanCallout(ctx context.Context, attributes console.UpgradePlanCalloutAttributes) (*console.UpgradePlanCalloutFragment, error) {
+	response, err := c.consoleClient.UpsertUpgradePlanCallout(ctx, attributes)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.UpsertUpgradePlanCallout, nil
+}
+
+func (c *client) DeleteUpgradePlanCallout(ctx context.Context, name string) error {
+	_, err := c.consoleClient.DeleteUpgradePlanCallout(ctx, name)
+	if err != nil {
+		return err
+	}
+	return nil
+}

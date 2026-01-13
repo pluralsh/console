@@ -61,6 +61,7 @@ const (
 	SentinelReconciler                   Reconciler = "sentinel"
 	GroupReconciler                      Reconciler = "groups"
 	CustomCompatibilityMatrixReconciler  Reconciler = "customcompatibilitymatrix"
+	UpgradePlanCalloutReconciler         Reconciler = "upgradeplancallout"
 )
 
 // ToController maps a Reconciler to its corresponding Controller.

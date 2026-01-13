@@ -186,6 +186,8 @@ type ConsoleClient interface {
 	GetGlobalServiceByName(name string) (*console.GlobalServiceFragment, error)
 	UpsertCustomCompatibilityMatrix(ctx context.Context, attributes console.CustomCompatibilityMatrixAttributes) (*console.CustomCompatibilityMatrixFragment, error)
 	DeleteCustomCompatibilityMatrix(ctx context.Context, name string) error
+	UpsertUpgradePlanCallout(ctx context.Context, attributes console.UpgradePlanCalloutAttributes) (*console.UpgradePlanCalloutFragment, error)
+	DeleteUpgradePlanCallout(ctx context.Context, name string) error
 }
 
 func New(url, token string, datadogEnabled bool) ConsoleClient {
