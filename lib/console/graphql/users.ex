@@ -480,7 +480,8 @@ defmodule Console.GraphQl.Users do
 
     field :access_token, :access_token do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,    :id
+      arg :token, :string
 
       resolve &User.resolve_token/2
     end

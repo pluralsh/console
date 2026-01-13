@@ -55,8 +55,8 @@ defmodule Console.Schema.AiInsight do
     from(i in query, where: coalesce(i.updated_at, i.inserted_at) <= ^too_old)
   end
 
-  def memoized?(%__MODULE__{force: true}), do: false
-  def memoized?(%__MODULE__{text: nil}), do: false
+  def memoized?(%__MODULE__{force: true}, _), do: false
+  def memoized?(%__MODULE__{text: nil}, _), do: false
   def memoized?(%__MODULE__{error: [_ | _]} = is, _), do: Timex.after?(ts(is), expiry(:fast))
   def memoized?(%__MODULE__{sha: sha} = is, sha), do: Timex.after?(ts(is), expiry(:slow))
   def memoized?(%__MODULE__{} = is, _), do: Timex.after?(ts(is), expiry(:fast))

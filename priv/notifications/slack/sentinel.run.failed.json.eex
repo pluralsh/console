@@ -1,0 +1,26 @@
+{
+    "text": "⏰ A run has failed for the <%= @sentinel_run.sentinel.name %> sentinel",
+	"blocks": [
+		{
+			"type": "section",
+			"text": {
+                "type": "plain_text",
+                "text": "The run failed for <%= @failed %> of <%= @total %> checks."
+            }
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "View Run",
+						"emoji": true
+					},
+					"url": "<%= Console.url("/ai/sentinels/#{@sentinel_run.sentinel.id}/runs/#{@sentinel_run.id}") %>"
+				}
+			]
+		}
+	]
+}

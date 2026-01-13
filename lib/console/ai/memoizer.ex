@@ -32,7 +32,7 @@ defmodule Console.AI.Memoizer do
   def generate(model) do
     model   = Evidence.preload(model)
     insight = Evidence.insight(model)
-    case AiInsight.memoized?(insight, nil) do
+    case AiInsight.memoized?(insight, nil) |> IO.inspect(label: "memoized? (resource: #{model.__struct__}{id: #{model.id}})") do
       true -> {:ok, insight}
       false -> try_generate(model, insight)
     end

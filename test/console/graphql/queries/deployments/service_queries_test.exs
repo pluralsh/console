@@ -657,21 +657,38 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
   describe "serviceContext" do
     test "it can fetch the service context for a service" do
       context = insert(:service_context)
-      user = admin_user()
+      user    = admin_user()
+      scopes  = ~w(
+        service.context.read
+        getCluster
+        createCluster
+        deleteCluster
+      )
 
       {:ok, %{data: %{"serviceContext" => found}}} = run_query("""
         query ServiceContext($name: String!) {
           serviceContext(name: $name) { id name }
         }
-      """, %{"name" => context.name}, %{current_user: %{user | scopes: [build(:scope, apis: ~w(
-        service.context.read
-        getCluster
-        createCluster
-        deleteCluster
-      ))]}})
+      """, %{"name" => context.name}, %{current_user: %{user | scopes: [build(:scope, apis: scopes)]}})
 
       assert found["id"] == context.id
       assert found["name"] == context.name
+    end
+
+    test "it will fail if scopes do not align" do
+      context = insert(:service_context)
+      user    = admin_user()
+      scopes  = ~w(
+        createCluster
+        deleteCluster
+        updateCluster
+      )
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query ServiceContext($name: String!) {
+          serviceContext(name: $name) { id name }
+        }
+      """, %{"name" => context.name}, %{current_user: %{user | scopes: [build(:scope, apis: scopes)]}})
     end
   end
 end

@@ -9483,7 +9483,8 @@ export type RootQueryType = {
 
 
 export type RootQueryTypeAccessTokenArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  token?: InputMaybe<Scalars['String']['input']>;
 };
 
 

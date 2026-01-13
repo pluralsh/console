@@ -33,7 +33,7 @@ type RootQueryType {
 
   accessTokens(after: String, first: Int, before: String, last: Int): AccessTokenConnection
 
-  accessToken(id: ID!): AccessToken
+  accessToken(id: ID, token: String): AccessToken
 
   persona(id: ID!): Persona
 

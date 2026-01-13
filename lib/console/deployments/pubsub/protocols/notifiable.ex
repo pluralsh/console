@@ -247,3 +247,17 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.AlertCreated 
 
   def individual(_), do: :ok
 end
+
+defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.SentinelRunUpdated do
+  alias Console.Deployments.Notifications.Utils
+  alias Console.Schema.SentinelRun
+
+  def message(%{item: %SentinelRun{status: :failed} = run}) do
+    run = Console.Repo.preload(run, [:sentinel])
+    failed = Enum.any?(run.results, & &1.status == :failed)
+    {"sentinel.run.failed", Utils.filters(run), %{sentinel_run: run, failed: failed, total: length(run.results)}}
+  end
+  def message(_), do: :ok
+
+  def individual(_), do: :ok
+end
