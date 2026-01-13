@@ -1,4 +1,11 @@
-import { ComponentProps, useEffect, useMemo, useState } from 'react'
+import {
+  ComponentProps,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import Fuse from 'fuse.js'
 import { ComboBox, ListBoxItem } from '@pluralsh/design-system'
 
@@ -13,12 +20,14 @@ export function NamespaceFilter({
 }: {
   namespaces: string[]
   namespace?: string
-  onChange: (arg: any) => any
+  onChange: Dispatch<SetStateAction<Nullable<string>>>
 } & Partial<ComponentProps<typeof ComboBox>>) {
   const theme = useTheme()
   const [value, setValue] = useState<string | undefined>(namespace)
 
-  useEffect(() => setValue(namespace), [namespace])
+  useEffect(() => {
+    setValue(namespace)
+  }, [namespace])
 
   const filteredNamespaces = useMemo(() => {
     const fuse = new Fuse(namespaces, { threshold: 0.25 })
@@ -42,8 +51,8 @@ export function NamespaceFilter({
       onInputChange={setValue}
       selectedKey={namespace}
       onSelectionChange={(key) => {
-        onChange(key)
-        setValue(key as string)
+        onChange(key as Nullable<string>)
+        setValue((key ?? '') as string)
       }}
       dropdownFooterFixed={
         <NamespaceListFooter
