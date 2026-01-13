@@ -20,6 +20,7 @@ import {
   IngressIngressList,
   PodPod,
   PodPodList,
+  ServiceServiceDetail,
 } from '../../../generated/kubernetes'
 import {
   getServiceEventsInfiniteOptions,
@@ -158,9 +159,9 @@ const columns = [
   }),
 ]
 
-export function ServiceInfo(): ReactElement<any> {
+export function ServiceInfo(): ReactElement {
   const theme = useTheme()
-  const service = useOutletContext() as any
+  const service = useOutletContext<ServiceServiceDetail>()
 
   return (
     <>
