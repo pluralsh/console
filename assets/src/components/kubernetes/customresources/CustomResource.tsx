@@ -12,7 +12,7 @@ import { GqlError } from '../../utils/Alert'
 import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 
 import { Kind } from '../common/types'
 
@@ -98,7 +98,7 @@ export function CustomResourceEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <UpdatedResourceList<CommonEventList, CommonEvent>
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
       queryOptions={getCustomResourceObjectEventsInfiniteOptions}

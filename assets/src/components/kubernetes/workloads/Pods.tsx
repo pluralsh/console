@@ -20,7 +20,7 @@ import { UsageText } from '../../cluster/TableElements'
 import { useCluster } from '../Cluster'
 import { useDataSelect } from '../common/DataSelect'
 import ResourceLink from '../common/ResourceLink'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { Kind } from '../common/types'
 import { useDefaultColumns } from '../common/utils'
 import { WorkloadImages, toReadiness } from './utils'
@@ -229,7 +229,7 @@ export default function Pods() {
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <UpdatedResourceList<PodPodList, PodPod>
+    <ResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
       queryOptions={

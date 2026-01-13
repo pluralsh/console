@@ -23,7 +23,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { GqlError } from '../../utils/Alert'
 import { useCluster } from '../Cluster'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { Kind } from '../common/types'
 import { MetadataSidecar, useDefaultColumns } from '../common/utils'
 import {
@@ -125,7 +125,7 @@ export function StorageClassPersistentVolumes(): ReactElement<any> {
 
   return (
     <section>
-      <UpdatedResourceList<
+      <ResourceList<
         PersistentvolumePersistentVolumeList,
         PersistentvolumePersistentVolume
       >

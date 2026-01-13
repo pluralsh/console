@@ -13,7 +13,7 @@ import {
   getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
 
 import { getRbacBreadcrumbs } from './Rbac'
@@ -43,7 +43,7 @@ export default function ClusterRoles() {
   )
 
   return (
-    <UpdatedResourceList<ClusterroleClusterRoleList, ClusterroleClusterRole>
+    <ResourceList<ClusterroleClusterRoleList, ClusterroleClusterRole>
       columns={columns}
       queryOptions={getClusterRolesInfiniteOptions}
       itemsKey="items"

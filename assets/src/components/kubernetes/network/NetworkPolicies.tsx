@@ -17,7 +17,7 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 import { useDataSelect } from '../common/DataSelect'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
 import { getNetworkBreadcrumbs } from './Network'
 
@@ -47,10 +47,7 @@ export default function NetworkPolicies() {
   )
 
   return (
-    <UpdatedResourceList<
-      NetworkpolicyNetworkPolicyList,
-      NetworkpolicyNetworkPolicy
-    >
+    <ResourceList<NetworkpolicyNetworkPolicyList, NetworkpolicyNetworkPolicy>
       namespaced
       columns={columns}
       queryOptions={

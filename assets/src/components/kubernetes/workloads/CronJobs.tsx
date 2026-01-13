@@ -19,7 +19,7 @@ import {
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { useCluster } from '../Cluster'
 import { useDataSelect } from '../common/DataSelect.tsx'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
 import { CronJobSuspendChip, WorkloadImages } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
@@ -89,7 +89,7 @@ export default function CronJobs() {
   )
 
   return (
-    <UpdatedResourceList<CronjobCronJobList, CronjobCronJob>
+    <ResourceList<CronjobCronJobList, CronjobCronJob>
       namespaced
       columns={columns}
       queryOptions={

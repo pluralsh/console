@@ -26,7 +26,7 @@ import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
 import Conditions from '../common/Conditions'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList'
 
 import { Kind } from '../common/types'
 import { MetadataSidecar } from '../common/utils'
@@ -129,7 +129,7 @@ export function JobPods(): ReactElement<any> {
   const columns = usePodsColumns()
 
   return (
-    <UpdatedResourceList
+    <ResourceList
       columns={columns}
       queryOptions={getJobPodsInfiniteOptions}
       pathParams={{ name, namespace }}
@@ -143,7 +143,7 @@ export function JobEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <UpdatedResourceList
+    <ResourceList
       columns={columns}
       queryOptions={getJobEventsInfiniteOptions}
       pathParams={{ name, namespace }}

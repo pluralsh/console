@@ -11,7 +11,7 @@ import {
 import { UsageText } from '../../cluster/TableElements'
 
 import { useCluster } from '../Cluster'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
@@ -94,7 +94,7 @@ export default function Deployments() {
   )
 
   return (
-    <UpdatedResourceList<DeploymentDeploymentList, DeploymentDeployment>
+    <ResourceList<DeploymentDeploymentList, DeploymentDeployment>
       namespaced
       columns={columns}
       queryOptions={

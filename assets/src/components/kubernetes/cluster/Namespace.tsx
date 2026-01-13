@@ -29,7 +29,7 @@ import { SubTitle } from '../../utils/SubTitle'
 
 import { useCluster } from '../Cluster'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 
 import { Kind } from '../common/types'
 import { MetadataSidecar } from '../common/utils'
@@ -180,7 +180,7 @@ export function NamespaceEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <UpdatedResourceList<CommonEventList, CommonEvent>
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
       queryOptions={getNamespaceEventsInfiniteOptions}

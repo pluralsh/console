@@ -8,7 +8,7 @@ import { getCustomResourceDefinitionsInfiniteOptions } from '../../../generated/
 import { getCustomResourcesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { useCluster, usePinnedResources } from '../Cluster'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
 import PinCustomResourceDefinition from './PinCustomResourceDefinition'
 import PinnedCustomResourceDefinitions from './PinnedCustomResourceDefinitions'
@@ -151,7 +151,7 @@ export default function CustomResourceDefinitions() {
           paddingBottom: theme.spacing.large,
         }}
       >
-        <UpdatedResourceList<
+        <ResourceList<
           TypesCustomResourceDefinitionList,
           TypesCustomResourceDefinition
         >

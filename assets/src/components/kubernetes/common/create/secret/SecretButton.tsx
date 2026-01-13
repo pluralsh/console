@@ -11,7 +11,7 @@ import {
   QueryObserverResult,
   RefetchOptions,
 } from '@tanstack/react-query'
-import { ResourceList } from '../../updatedtypes.ts'
+import { ResourceList } from '../../types.ts'
 
 interface CreateSecretButtonProps {
   text: string

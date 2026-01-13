@@ -14,7 +14,7 @@ import { useDefaultColumns } from '../common/utils'
 import { getStorageBreadcrumbs } from './Storage'
 
 import { PVStatusChip } from './utils'
-import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
+import { ResourceList } from '../common/ResourceList.tsx'
 import {
   PersistentvolumePersistentVolume,
   PersistentvolumePersistentVolumeList,
@@ -141,7 +141,7 @@ export default function PersistentVolumes() {
   )
 
   return (
-    <UpdatedResourceList<
+    <ResourceList<
       PersistentvolumePersistentVolumeList,
       PersistentvolumePersistentVolume
     >

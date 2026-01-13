@@ -7,7 +7,7 @@ import {
 import { getHorizontalPodAutoscalersInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen'
 import ResourceLink from '../common/ResourceLink'
 
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { toKind } from '../common/types'
 import { useDefaultColumns } from '../common/utils'
 
@@ -74,7 +74,7 @@ export default function HorizontalPodAutoscalers(): ReactElement<any> {
   const columns = useHorizontalPodAutoscalersColumns()
 
   return (
-    <UpdatedResourceList<HorizontalPodAutoscalerListT, HorizontalPodAutoscalerT>
+    <ResourceList<HorizontalPodAutoscalerListT, HorizontalPodAutoscalerT>
       namespaced
       columns={columns}
       queryOptions={getHorizontalPodAutoscalersInfiniteOptions}

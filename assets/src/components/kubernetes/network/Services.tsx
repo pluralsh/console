@@ -18,7 +18,7 @@ import {
 
 import { useCluster } from '../Cluster'
 import { useDataSelect } from '../common/DataSelect'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
 import { getNetworkBreadcrumbs } from './Network'
 
@@ -95,7 +95,7 @@ export default function Services() {
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <UpdatedResourceList<ServiceServiceList, ServiceService>
+    <ResourceList<ServiceServiceList, ServiceService>
       namespaced
       columns={columns}
       queryOptions={

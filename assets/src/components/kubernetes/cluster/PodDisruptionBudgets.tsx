@@ -13,7 +13,7 @@ import {
   PDBS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
 
 import { getClusterBreadcrumbs } from './Cluster.tsx'
@@ -61,7 +61,7 @@ export default function PodDisruptionBudgets() {
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <UpdatedResourceList<PodDisruptionBudgetListT, PodDisruptionBudgetT>
+    <ResourceList<PodDisruptionBudgetListT, PodDisruptionBudgetT>
       namespaced
       columns={columns}
       queryOptions={getPodDisruptionBudgetsInfiniteOptions}

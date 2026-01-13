@@ -29,7 +29,7 @@ import Conditions from '../common/Conditions'
 import { DrainNodeModal } from '../common/DrainNodeModal.tsx'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 
 import { Kind } from '../common/types'
 
@@ -70,7 +70,7 @@ export default function Node() {
 
   const {
     data: node,
-    isLoading: loading,
+    isFetching,
     error,
   } = useQuery({
     ...getNodeOptions({
@@ -99,7 +99,7 @@ export default function Node() {
         error={error}
         css={{ margin: spacing.large }}
       />
-    ) : loading ? (
+    ) : isFetching ? (
       <LoadingIndicator />
     ) : (
       <EmptyState message="Node not found" />
@@ -335,7 +335,7 @@ export function NodePods() {
   const columns = usePodsColumns()
 
   return (
-    <UpdatedResourceList<PodPodList, PodPod>
+    <ResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
       queryOptions={getNodePodsInfiniteOptions}
@@ -350,7 +350,7 @@ export function NodeEvents() {
   const columns = useEventsColumns()
 
   return (
-    <UpdatedResourceList<CommonEventList, CommonEvent>
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
       queryOptions={getNodeEventsInfiniteOptions}

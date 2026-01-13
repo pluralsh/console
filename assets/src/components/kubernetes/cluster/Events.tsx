@@ -15,7 +15,7 @@ import {
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { useCluster } from '../Cluster'
 import ResourceLink from '../common/ResourceLink'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { Kind } from '../common/types'
 import { getClusterBreadcrumbs } from './Cluster'
 
@@ -128,7 +128,7 @@ export default function Events() {
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <UpdatedResourceList<EventListT, EventT>
+    <ResourceList<EventListT, EventT>
       namespaced
       columns={columns}
       queryOptions={getEventsInfiniteOptions}

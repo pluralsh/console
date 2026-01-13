@@ -13,7 +13,7 @@ import { useCluster } from '../Cluster'
 import { useDefaultColumns } from '../common/utils'
 
 import { getStorageBreadcrumbs } from './Storage'
-import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
+import { ResourceList } from '../common/ResourceList.tsx'
 import {
   StorageclassStorageClass,
   StorageclassStorageClassList,
@@ -76,7 +76,7 @@ export default function StorageClasses() {
   )
 
   return (
-    <UpdatedResourceList<StorageclassStorageClassList, StorageclassStorageClass>
+    <ResourceList<StorageclassStorageClassList, StorageclassStorageClass>
       columns={columns}
       queryOptions={getStorageClassesInfiniteOptions}
       itemsKey="items"

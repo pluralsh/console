@@ -35,7 +35,7 @@ import { useEventsColumns } from '../cluster/Events'
 import { LabelSelector } from '../common/LabelSelector'
 import { PodInfo } from '../common/PodInfo'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 
 import { Kind } from '../common/types'
 import { GqlError } from '../../utils/Alert'
@@ -142,7 +142,7 @@ export function ReplicationControllerPods(): ReactElement<any> {
   const columns = usePodsColumns()
 
   return (
-    <UpdatedResourceList<PodPodList, PodPod>
+    <ResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
       queryOptions={getReplicationControllerPodsInfiniteOptions}
@@ -157,7 +157,7 @@ export function ReplicationControllerServices(): ReactElement<any> {
   const columns = useServicesColumns()
 
   return (
-    <UpdatedResourceList<ServiceServiceList, ServiceService>
+    <ResourceList<ServiceServiceList, ServiceService>
       namespaced
       columns={columns}
       queryOptions={getReplicationControllerServicesInfiniteOptions}
@@ -172,7 +172,7 @@ export function ReplicationControllerEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <UpdatedResourceList<CommonEventList, CommonEvent>
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
       queryOptions={getReplicationControllerEventsInfiniteOptions}

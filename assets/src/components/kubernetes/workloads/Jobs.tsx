@@ -14,7 +14,7 @@ import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
-import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { JobJob, JobJobList } from '../../../generated/kubernetes'
 import {
   getAllJobsInfiniteOptions,
@@ -93,7 +93,7 @@ export default function Jobs() {
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <UpdatedResourceList<JobJobList, JobJob>
+    <ResourceList<JobJobList, JobJob>
       namespaced
       columns={columns}
       queryOptions={

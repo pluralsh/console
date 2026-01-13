@@ -1,21 +1,9 @@
-// import type { OperationVariables } from '@apollo/client/core'
-
 import {
   TypesListMeta,
   TypesObjectMeta,
   TypesTypeMeta,
+  Error as ErrorType,
 } from 'generated/kubernetes'
-
-interface ErrorStatus {
-  code: number
-  message: string
-  reason: string
-  status: string
-}
-
-interface Error {
-  ErrStatus: ErrorStatus
-}
 
 interface DataSelectVariables {
   filterBy?: Nullable<string>
@@ -30,7 +18,7 @@ interface ResourceVariables extends DataSelectVariables {
 }
 
 interface ResourceList {
-  errors: Array<Error>
+  errors: Array<ErrorType>
   listMeta: TypesListMeta
 }
 
@@ -117,7 +105,7 @@ function fromResource(resource: Resource): ObjectReference {
 }
 
 export type {
-  Error,
+  ErrorType,
   ResourceVariables,
   ResourceList,
   Resource,

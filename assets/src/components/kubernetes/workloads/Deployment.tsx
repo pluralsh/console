@@ -40,7 +40,7 @@ import ResourceInfoCard, {
   ResourceInfoCardSection,
 } from '../common/ResourceInfoCard'
 import ResourceLink from '../common/ResourceLink'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { fromResource, Kind, Resource } from '../common/types'
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
@@ -139,7 +139,7 @@ export function DeploymentReplicaSets(): ReactElement<any> {
       </section>
       <section>
         <SubTitle>Old Replica Sets</SubTitle>
-        <UpdatedResourceList<ReplicasetReplicaSetList, ReplicasetReplicaSet>
+        <ResourceList<ReplicasetReplicaSetList, ReplicasetReplicaSet>
           namespaced
           columns={columns}
           queryOptions={getDeploymentOldReplicaSetsInfiniteOptions}
@@ -221,7 +221,7 @@ export function DeploymentEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <UpdatedResourceList<CommonEventList, CommonEvent>
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
       queryOptions={getDeploymentEventsInfiniteOptions}

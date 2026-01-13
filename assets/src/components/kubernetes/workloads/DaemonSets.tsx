@@ -21,7 +21,7 @@ import { UsageText } from '../../cluster/TableElements'
 
 import { useCluster } from '../Cluster'
 import { useDataSelect } from '../common/DataSelect.tsx'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
@@ -94,7 +94,7 @@ export default function DaemonSets() {
   )
 
   return (
-    <UpdatedResourceList<DaemonsetDaemonSetList, DaemonsetDaemonSet>
+    <ResourceList<DaemonsetDaemonSetList, DaemonsetDaemonSet>
       namespaced
       columns={columns}
       queryOptions={

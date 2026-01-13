@@ -35,7 +35,7 @@ import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscal
 import { LabelSelector } from '../common/LabelSelector'
 import { PodInfo } from '../common/PodInfo'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { Kind } from '../common/types'
 import { GqlError } from '../../utils/Alert'
 import { MetadataSidecar } from '../common/utils'
@@ -153,7 +153,7 @@ export function ReplicaSetEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <UpdatedResourceList<CommonEventList, CommonEvent>
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
       queryOptions={getReplicaSetEventsInfiniteOptions}
@@ -169,7 +169,7 @@ export function ReplicaSetPods(): ReactElement<any> {
   const columns = usePodsColumns()
 
   return (
-    <UpdatedResourceList<PodPodList, PodPod>
+    <ResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
       queryOptions={getReplicaSetPodsInfiniteOptions}
@@ -184,7 +184,7 @@ export function ReplicaSetServices(): ReactElement<any> {
   const columns = useServicesColumns()
 
   return (
-    <UpdatedResourceList<ServiceServiceList, ServiceService>
+    <ResourceList<ServiceServiceList, ServiceService>
       namespaced
       columns={columns}
       queryOptions={getReplicaSetServicesInfiniteOptions}

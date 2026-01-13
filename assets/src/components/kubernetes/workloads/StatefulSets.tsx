@@ -22,7 +22,7 @@ import {
   getAllStatefulSetsInfiniteOptions,
   getStatefulSetsInfiniteOptions,
 } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
-import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDataSelect } from '../common/DataSelect.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
@@ -92,7 +92,7 @@ export default function StatefulSets() {
   )
 
   return (
-    <UpdatedResourceList<StatefulsetStatefulSetList, StatefulsetStatefulSet>
+    <ResourceList<StatefulsetStatefulSetList, StatefulsetStatefulSet>
       namespaced
       columns={columns}
       queryOptions={

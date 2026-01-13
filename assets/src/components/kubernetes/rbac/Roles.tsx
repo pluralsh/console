@@ -14,7 +14,7 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 import { useDataSelect } from '../common/DataSelect'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
 import { getRbacBreadcrumbs } from './Rbac'
 
@@ -44,7 +44,7 @@ export default function Roles() {
   )
 
   return (
-    <UpdatedResourceList<RoleRoleList, RoleRole>
+    <ResourceList<RoleRoleList, RoleRole>
       namespaced
       columns={columns}
       queryOptions={

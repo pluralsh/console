@@ -20,7 +20,7 @@ import { DrainNodeModal } from '../common/DrainNodeModal.tsx'
 import { ResourceReadyChip, useDefaultColumns } from '../common/utils'
 
 import { getClusterBreadcrumbs } from './Cluster'
-import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { NodeNode, NodeNodeList } from '../../../generated/kubernetes'
 import { getNodesInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 
@@ -162,7 +162,7 @@ export default function Nodes() {
   )
 
   return (
-    <UpdatedResourceList<NodeNodeList, NodeNode>
+    <ResourceList<NodeNodeList, NodeNode>
       columns={columns}
       queryOptions={getNodesInfiniteOptions}
       itemsKey="nodes"

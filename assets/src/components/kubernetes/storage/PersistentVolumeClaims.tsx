@@ -19,7 +19,7 @@ import {
 import { useCluster } from '../Cluster'
 import { useDataSelect } from '../common/DataSelect'
 import ResourceLink from '../common/ResourceLink'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { Kind } from '../common/types'
 import { useDefaultColumns } from '../common/utils'
 import { getStorageBreadcrumbs } from './Storage'
@@ -122,7 +122,7 @@ export default function PersistentVolumeClaims() {
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <UpdatedResourceList<
+    <ResourceList<
       PersistentvolumeclaimPersistentVolumeClaimList,
       PersistentvolumeclaimPersistentVolumeClaim
     >

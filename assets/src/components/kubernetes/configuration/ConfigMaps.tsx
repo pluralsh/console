@@ -17,7 +17,7 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 import { useDataSelect } from '../common/DataSelect'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
 
 import { getConfigurationBreadcrumbs } from './Configuration'
@@ -46,7 +46,7 @@ export default function ConfigMaps() {
   )
 
   return (
-    <UpdatedResourceList<ConfigmapConfigMapList, ConfigmapConfigMap>
+    <ResourceList<ConfigmapConfigMapList, ConfigmapConfigMap>
       namespaced
       columns={columns}
       queryOptions={

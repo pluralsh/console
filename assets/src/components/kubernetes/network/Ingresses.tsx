@@ -20,7 +20,7 @@ import { TableText } from '../../cluster/TableElements'
 
 import { useCluster } from '../Cluster'
 import { useDataSelect } from '../common/DataSelect'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
 import { getNetworkBreadcrumbs } from './Network'
 
@@ -83,7 +83,7 @@ export default function Ingresses() {
   const columns = useIngressesColumns()
 
   return (
-    <UpdatedResourceList<IngressIngressList, IngressIngress>
+    <ResourceList<IngressIngressList, IngressIngress>
       namespaced
       columns={columns}
       queryOptions={

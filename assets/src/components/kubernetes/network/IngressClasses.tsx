@@ -12,7 +12,7 @@ import {
   INGRESS_CLASSES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
 
 import { getNetworkBreadcrumbs } from './Network'
@@ -51,7 +51,7 @@ export default function IngressClasses() {
   )
 
   return (
-    <UpdatedResourceList<IngressclassIngressClassList, IngressclassIngressClass>
+    <ResourceList<IngressclassIngressClassList, IngressclassIngressClass>
       columns={columns}
       queryOptions={getIngressClassesInfiniteOptions}
       itemsKey="items"

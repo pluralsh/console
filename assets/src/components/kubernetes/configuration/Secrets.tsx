@@ -16,7 +16,7 @@ import { useSetPageHeaderAction } from '../../cd/ContinuousDeployment.tsx'
 import { useCluster } from '../Cluster'
 import { useDataSelect } from '../common/DataSelect'
 import { CreateSecretButton } from '../common/create/secret/SecretButton.tsx'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
 
 import { getConfigurationBreadcrumbs } from './Configuration'
@@ -65,7 +65,7 @@ export default function Secrets() {
   )
 
   return (
-    <UpdatedResourceList<SecretSecretList, SecretSecret>
+    <ResourceList<SecretSecretList, SecretSecret>
       namespaced
       columns={columns}
       queryOptions={

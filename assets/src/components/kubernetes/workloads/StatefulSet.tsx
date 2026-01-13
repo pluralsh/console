@@ -38,7 +38,7 @@ import { usePodsColumns } from './Pods'
 
 import { getBreadcrumbs } from './StatefulSets'
 import { WorkloadStatusChip } from './utils'
-import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
+import { ResourceList } from '../common/ResourceList.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -121,7 +121,7 @@ export function StatefulSetPods(): ReactElement<any> {
   const columns = usePodsColumns()
 
   return (
-    <UpdatedResourceList<PodPodList, PodPod>
+    <ResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
       queryOptions={getStatefulSetPodsInfiniteOptions}
@@ -136,7 +136,7 @@ export function StatefulSetEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <UpdatedResourceList<CommonEventList, CommonEvent>
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
       queryOptions={getStatefulSetEventsInfiniteOptions}

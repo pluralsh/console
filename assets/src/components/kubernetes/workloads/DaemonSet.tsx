@@ -32,7 +32,7 @@ import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
 import { LabelSelector } from '../common/LabelSelector'
 import { PodInfo } from '../common/PodInfo'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
 import { Kind } from '../common/types'
@@ -125,7 +125,7 @@ export function DaemonSetPods(): ReactElement<any> {
   const columns = usePodsColumns()
 
   return (
-    <UpdatedResourceList<PodPodList, PodPod>
+    <ResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
       queryOptions={getDaemonSetPodsInfiniteOptions}
@@ -140,7 +140,7 @@ export function DaemonSetServices(): ReactElement<any> {
   const columns = useServicesColumns()
 
   return (
-    <UpdatedResourceList<ServiceServiceList, ServiceService>
+    <ResourceList<ServiceServiceList, ServiceService>
       namespaced
       columns={columns}
       queryOptions={getDaemonSetServicesInfiniteOptions}
@@ -155,7 +155,7 @@ export function DaemonSetEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <UpdatedResourceList<CommonEventList, CommonEvent>
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
       queryOptions={getDaemonSetEventsInfiniteOptions}

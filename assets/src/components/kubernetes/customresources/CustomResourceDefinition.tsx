@@ -27,7 +27,7 @@ import { useCluster } from '../Cluster'
 import Conditions from '../common/Conditions'
 import { DataSelectInputs, useDataSelect } from '../common/DataSelect'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 
 import { Kind } from '../common/types'
 
@@ -146,7 +146,7 @@ export function CustomResourceDefinitionObjects() {
   useSetPageHeaderContent(headerContent)
 
   return (
-    <UpdatedResourceList<CustomResourceListT, CustomResourceT>
+    <ResourceList<CustomResourceListT, CustomResourceT>
       namespaced={namespaced}
       customResource
       columns={columns}

@@ -57,7 +57,7 @@ import ImagePullSecrets from '../common/ImagePullSecrets'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import ResourceLink from '../common/ResourceLink'
 import ResourceOwner from '../common/ResourceOwner'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { Kind } from '../common/types'
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
@@ -80,7 +80,7 @@ export function Pod(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: pod,
-    isLoading: loading,
+    isFetching,
     error,
   } = useQuery({
     ...getPodOptions({
@@ -109,7 +109,7 @@ export function Pod(): ReactElement<any> {
     )
   )
 
-  if (loading) {
+  if (isFetching) {
     return <LoadingIndicator />
   }
 
@@ -253,12 +253,7 @@ export function PodLogs(): ReactElement<any> {
     containers.at(0) ?? ''
   )
 
-  const {
-    data,
-    isLoading: loading,
-    refetch,
-    error,
-  } = useQuery({
+  const { data, isFetching, refetch, error } = useQuery({
     ...getContainerLogsOptions({
       client: AxiosInstance(clusterId),
       path: {
@@ -313,7 +308,7 @@ export function PodLogs(): ReactElement<any> {
       </div>
       <ContainerLogsTable
         logs={reverse(data?.logs.map((line) => line?.content || '') || [])}
-        loading={loading}
+        loading={isFetching}
         refetch={refetch}
         container={selected as string}
       />
@@ -326,7 +321,7 @@ export function PodEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <UpdatedResourceList<CommonEventList, CommonEvent>
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
       queryOptions={getPodEventsInfiniteOptions}

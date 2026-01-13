@@ -23,7 +23,7 @@ import {
   RefetchOptions,
   useMutation,
 } from '@tanstack/react-query'
-import { ResourceList } from '../../updatedtypes.ts'
+import { ResourceList } from '../../types.ts'
 import { createAppDeploymentFromFileMutation } from '../../../../../generated/kubernetes/@tanstack/react-query.gen'
 import { AxiosInstance } from '../../../../../helpers/axios'
 

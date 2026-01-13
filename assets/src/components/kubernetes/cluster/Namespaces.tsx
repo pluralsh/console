@@ -15,7 +15,7 @@ import { useDefaultColumns } from '../common/utils'
 import { getClusterBreadcrumbs } from './Cluster'
 
 import { NamespacePhaseChip } from './utils'
-import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
+import { ResourceList } from '../common/ResourceList.tsx'
 import {
   NamespaceNamespace,
   NamespaceNamespaceList,
@@ -51,7 +51,7 @@ export default function Namespaces() {
   )
 
   return (
-    <UpdatedResourceList<NamespaceNamespaceList, NamespaceNamespace>
+    <ResourceList<NamespaceNamespaceList, NamespaceNamespace>
       columns={columns}
       queryOptions={getNamespacesInfiniteOptions}
       itemsKey="namespaces"

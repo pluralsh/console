@@ -18,7 +18,7 @@ import {
   ReplicationcontrollerReplicationController,
   ReplicationcontrollerReplicationControllerList,
 } from '../../../generated/kubernetes'
-import { UpdatedResourceList } from '../common/UpdatedResourceList.tsx'
+import { ResourceList } from '../common/ResourceList.tsx'
 import {
   getAllReplicationControllersInfiniteOptions,
   getReplicationControllersInfiniteOptions,
@@ -95,7 +95,7 @@ export default function ReplicationControllers() {
   )
 
   return (
-    <UpdatedResourceList<
+    <ResourceList<
       ReplicationcontrollerReplicationControllerList,
       ReplicationcontrollerReplicationController
     >

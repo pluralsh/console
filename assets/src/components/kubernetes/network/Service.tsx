@@ -40,7 +40,7 @@ import { useEventsColumns } from '../cluster/Events'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 
 import { Kind } from '../common/types'
 import { GqlError } from '../../utils/Alert'
@@ -209,7 +209,7 @@ export function ServiceIngresses(): ReactElement<any> {
   const columns = useIngressesColumns()
 
   return (
-    <UpdatedResourceList<IngressIngressList, IngressIngress>
+    <ResourceList<IngressIngressList, IngressIngress>
       namespaced
       columns={columns}
       queryOptions={getServiceIngressesInfiniteOptions}
@@ -224,7 +224,7 @@ export function ServicePods(): ReactElement<any> {
   const columns = usePodsColumns()
 
   return (
-    <UpdatedResourceList<PodPodList, PodPod>
+    <ResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
       queryOptions={getServicePodsInfiniteOptions}
@@ -239,7 +239,7 @@ export function ServiceEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <UpdatedResourceList<CommonEventList, CommonEvent>
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
       queryOptions={getServiceEventsInfiniteOptions}

@@ -34,7 +34,7 @@ import { SubTitle } from '../../utils/SubTitle'
 import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { UpdatedResourceList } from '../common/UpdatedResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 
 import { Kind } from '../common/types'
 import { GqlError } from '../../utils/Alert'
@@ -187,7 +187,7 @@ export function CronJobJobs(): ReactElement<any> {
     <>
       <section>
         <SubTitle>Active Jobs</SubTitle>
-        <UpdatedResourceList<JobJobList, JobJob>
+        <ResourceList<JobJobList, JobJob>
           namespaced
           columns={columns}
           initialSort={[{ id: 'creationTimestamp', desc: true }]}
@@ -199,7 +199,7 @@ export function CronJobJobs(): ReactElement<any> {
       </section>
       <section>
         <SubTitle>Inactive Jobs</SubTitle>
-        <UpdatedResourceList<JobJobList, JobJob>
+        <ResourceList<JobJobList, JobJob>
           namespaced
           columns={columns}
           initialSort={[{ id: 'creationTimestamp', desc: true }]}
@@ -219,7 +219,7 @@ export function CronJobEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <UpdatedResourceList<CommonEventList, CommonEvent>
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
       queryOptions={getCronJobEventsInfiniteOptions}
