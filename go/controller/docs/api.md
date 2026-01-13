@@ -17,6 +17,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ClusterRestoreTrigger](#clusterrestoretrigger)
 - [ClusterSync](#clustersync)
 - [ComplianceReportGenerator](#compliancereportgenerator)
+- [CustomCompatibilityMatrix](#customcompatibilitymatrix)
 - [CustomStackRun](#customstackrun)
 - [DeploymentSettings](#deploymentsettings)
 - [FederatedCredential](#federatedcredential)
@@ -49,6 +50,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ServiceContext](#servicecontext)
 - [ServiceDeployment](#servicedeployment)
 - [StackDefinition](#stackdefinition)
+- [UpgradePlanCallout](#upgradeplancallout)
 
 
 
@@ -119,6 +121,23 @@ _Appears in:_
 | `secretAccessKey` _[ObjectKeyReference](#objectkeyreference)_ |  |  |  |
 | `region` _string_ | The region this connection applies to |  | Optional: \{\} <br /> |
 | `regions` _string array_ | A list of regions this connection can query |  | Optional: \{\} <br /> |
+
+
+#### AddonCallout
+
+
+
+AddonCallout a callout for a specific addon in the upgrade plan
+
+
+
+_Appears in:_
+- [UpgradePlanCalloutSpec](#upgradeplancalloutspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `addon` _string_ | Addon the addon this callout applies to |  |  |
+| `template` _string_ | Template the template to use for this callout |  |  |
 
 
 #### AiApprovalConfiguration
@@ -912,6 +931,42 @@ _Appears in:_
 | `dir` _string_ | Dir is the working directory for the command. |  | Optional: \{\} <br /> |
 
 
+#### CompatibilityMatrixSummary
+
+
+
+
+
+
+
+_Appears in:_
+- [CompatibilityMatrixVersion](#compatibilitymatrixversion)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `helmChanges` _string array_ | HelmChanges the helm changes for this version |  | Optional: \{\} <br /> |
+| `breakingChanges` _string array_ | BreakingChanges the breaking changes for this version |  | Optional: \{\} <br /> |
+
+
+#### CompatibilityMatrixVersion
+
+
+
+
+
+
+
+_Appears in:_
+- [CustomCompatibilityMatrixSpec](#customcompatibilitymatrixspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `version` _string_ | Version the version of the matrix |  |  |
+| `chartVersion` _string_ | ChartVersion the chart version of the matrix |  | Optional: \{\} <br /> |
+| `kube` _string array_ | Kube the kube version of the matrix |  | Optional: \{\} <br /> |
+| `summary` _[CompatibilityMatrixSummary](#compatibilitymatrixsummary)_ | Summary the summary for this version |  | Optional: \{\} <br /> |
+
+
 #### ComplianceReportGenerator
 
 
@@ -1056,6 +1111,46 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef the SCM connection to use for pr automations |  | Optional: \{\} <br /> |
+
+
+#### CustomCompatibilityMatrix
+
+
+
+CustomCompatibilityMatrix is the Schema for the customcompatibilitymatrices API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `CustomCompatibilityMatrix` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[CustomCompatibilityMatrixSpec](#customcompatibilitymatrixspec)_ |  |  |  |
+
+
+#### CustomCompatibilityMatrixSpec
+
+
+
+CustomCompatibilityMatrixSpec defines the desired state of CustomCompatibilityMatrix
+
+
+
+_Appears in:_
+- [CustomCompatibilityMatrix](#customcompatibilitymatrix)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of this CustomCompatibilityMatrixSpec. If not provided CustomCompatibilityMatrixSpec's own name from CustomCompatibilityMatrixSpec.ObjectMeta will be used. |  | Optional: \{\} <br /> |
+| `icon` _string_ | Icon the icon to use for this matrix |  | Optional: \{\} <br /> |
+| `gitUrl` _string_ | GitURL the git url to use for this matrix |  | Optional: \{\} <br /> |
+| `releaseUrl` _string_ | ReleaseURL the release url to use for this matrix |  | Optional: \{\} <br /> |
+| `readmeUrl` _string_ | ReadmeURL the readme url to use for this matrix |  | Optional: \{\} <br /> |
+| `versions` _[CompatibilityMatrixVersion](#compatibilitymatrixversion) array_ | Versions the versions for this matrix |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### CustomRunStep
@@ -3718,6 +3813,7 @@ _Appears in:_
 - [ClusterSpec](#clusterspec)
 - [ClusterSyncSpec](#clustersyncspec)
 - [ComplianceReportGeneratorSpec](#compliancereportgeneratorspec)
+- [CustomCompatibilityMatrixSpec](#customcompatibilitymatrixspec)
 - [CustomStackRunSpec](#customstackrunspec)
 - [DeploymentSettingsSpec](#deploymentsettingsspec)
 - [FederatedCredentialSpec](#federatedcredentialspec)
@@ -3750,6 +3846,7 @@ _Appears in:_
 - [ServiceContextSpec](#servicecontextspec)
 - [ServiceSpec](#servicespec)
 - [StackDefinitionSpec](#stackdefinitionspec)
+- [UpgradePlanCalloutSpec](#upgradeplancalloutspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -4731,6 +4828,43 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `createPr` _[CreatePr](#createpr)_ | CreatePr holds the configuration for the pr automation tool. |  | Optional: \{\} <br /> |
+
+
+#### UpgradePlanCallout
+
+
+
+UpgradePlanCallout is the Schema for the upgradeplancallouts API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `UpgradePlanCallout` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[UpgradePlanCalloutSpec](#upgradeplancalloutspec)_ |  |  |  |
+
+
+#### UpgradePlanCalloutSpec
+
+
+
+UpgradePlanCalloutSpec defines the desired state of UpgradePlanCallout
+
+
+
+_Appears in:_
+- [UpgradePlanCallout](#upgradeplancallout)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of this UpgradePlanCallout. If not provided UpgradePlanCallout's own name from UpgradePlanCallout.ObjectMeta will be used. |  | Optional: \{\} <br /> |
+| `callouts` _[AddonCallout](#addoncallout) array_ | Callouts the callouts for this instance |  |  |
+| `context` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Context is an untyped object containing the context for this callout |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### VectorStore
