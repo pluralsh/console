@@ -47,7 +47,7 @@ export default function StorageClass(): ReactElement<any> {
   const { clusterId = '', name = '' } = useParams()
   const {
     data: sc,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getStorageClassOptions({
@@ -74,7 +74,7 @@ export default function StorageClass(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

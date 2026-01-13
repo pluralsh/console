@@ -80,7 +80,7 @@ export function Pod(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: pod,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getPodOptions({
@@ -109,7 +109,7 @@ export function Pod(): ReactElement<any> {
     )
   )
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 
@@ -253,7 +253,7 @@ export function PodLogs(): ReactElement<any> {
     containers.at(0) ?? ''
   )
 
-  const { data, isFetching, refetch, error } = useQuery({
+  const { data, isLoading, refetch, error } = useQuery({
     ...getContainerLogsOptions({
       client: AxiosInstance(clusterId),
       path: {
@@ -308,7 +308,7 @@ export function PodLogs(): ReactElement<any> {
       </div>
       <ContainerLogsTable
         logs={reverse(data?.logs.map((line) => line?.content || '') || [])}
-        loading={isFetching}
+        loading={isLoading}
         refetch={refetch}
         container={selected as string}
       />

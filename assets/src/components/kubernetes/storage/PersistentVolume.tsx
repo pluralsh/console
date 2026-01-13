@@ -36,7 +36,7 @@ export default function PersistentVolume(): ReactElement<any> {
   const { clusterId = '', name = '' } = useParams()
   const {
     data: pv,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getPersistentVolumeOptions({
@@ -69,7 +69,7 @@ export default function PersistentVolume(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

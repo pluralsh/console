@@ -55,7 +55,7 @@ export default function Raw(): ReactElement<any> {
     refetchInterval: 30_000,
   })
 
-  const { data, refetch, isFetching, error } = namespace
+  const { data, refetch, isLoading, error } = namespace
     ? namespacedQuery
     : clusterQuery
 
@@ -105,7 +105,7 @@ export default function Raw(): ReactElement<any> {
 
   if (!current && !error) return <LoadingIndicator />
 
-  if (!data?.Object && !isFetching)
+  if (!data?.Object && !isLoading)
     return <GqlError error="Could not fetch resource" />
 
   return (

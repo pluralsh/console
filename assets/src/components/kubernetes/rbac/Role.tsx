@@ -32,7 +32,7 @@ export default function Role(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: role,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getRoleOptions({
@@ -65,7 +65,7 @@ export default function Role(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

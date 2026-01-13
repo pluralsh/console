@@ -48,7 +48,7 @@ export default function Namespace(): ReactElement<any> {
   const { clusterId = '', name = '' } = useParams()
   const {
     data: namespace,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getNamespaceOptions({
@@ -75,7 +75,7 @@ export default function Namespace(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

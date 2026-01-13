@@ -39,7 +39,7 @@ export default function NetworkPolicy(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: np,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getNetworkPolicyOptions({
@@ -77,7 +77,7 @@ export default function NetworkPolicy(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

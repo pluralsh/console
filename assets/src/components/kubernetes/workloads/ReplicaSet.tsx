@@ -59,7 +59,7 @@ export default function ReplicaSet(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: rs,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getReplicaSetOptions({
@@ -97,7 +97,7 @@ export default function ReplicaSet(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

@@ -29,7 +29,7 @@ export default function ServiceAccount(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: serviceAccount,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getServiceAccountOptions({
@@ -67,7 +67,7 @@ export default function ServiceAccount(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

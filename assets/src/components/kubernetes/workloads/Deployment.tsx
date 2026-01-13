@@ -62,7 +62,7 @@ export default function Deployment(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: deployment,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getDeploymentOptions({
@@ -96,7 +96,7 @@ export default function Deployment(): ReactElement<any> {
     )
   )
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 
@@ -163,7 +163,7 @@ export function DeploymentReplicaSets(): ReactElement<any> {
 function NewReplicaSet(): ReactElement<any> {
   const { name = '', namespace = '', clusterId = '' } = useParams()
 
-  const { data: replicaSet, isFetching } = useQuery({
+  const { data: replicaSet, isLoading } = useQuery({
     ...getDeploymentNewReplicaSetOptions({
       client: AxiosInstance(clusterId),
       path: { deployment: name, namespace },
@@ -172,7 +172,7 @@ function NewReplicaSet(): ReactElement<any> {
   })
 
   return (
-    <ResourceInfoCard loading={isFetching}>
+    <ResourceInfoCard loading={isLoading}>
       <ResourceInfoCardSection>
         <ResourceInfoCardEntry heading="Name">
           <ResourceLink

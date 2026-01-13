@@ -35,7 +35,7 @@ export default function CustomResource(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '', crd = '' } = useParams()
   const {
     data: cr,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getCustomResourceObjectOptions({
@@ -79,7 +79,7 @@ export default function CustomResource(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

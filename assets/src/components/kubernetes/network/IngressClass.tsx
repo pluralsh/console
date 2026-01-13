@@ -24,7 +24,7 @@ export default function IngressClass(): ReactElement<any> {
   const { clusterId = '', name = '' } = useParams()
   const {
     data: ic,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getIngressClassOptions({
@@ -51,7 +51,7 @@ export default function IngressClass(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

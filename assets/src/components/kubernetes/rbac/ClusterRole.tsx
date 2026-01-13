@@ -25,7 +25,7 @@ export default function ClusterRole(): ReactElement<any> {
   const { clusterId = '', name = '' } = useParams()
   const {
     data: cr,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getClusterRoleOptions({
@@ -53,7 +53,7 @@ export default function ClusterRole(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

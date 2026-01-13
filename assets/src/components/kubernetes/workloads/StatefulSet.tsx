@@ -52,7 +52,7 @@ export default function StatefulSet(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: statefulSet,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getStatefulSetOptions({
@@ -86,7 +86,7 @@ export default function StatefulSet(): ReactElement<any> {
     )
   )
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

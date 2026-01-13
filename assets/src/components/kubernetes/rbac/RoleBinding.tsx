@@ -36,7 +36,7 @@ export default function RoleBinding() {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: rb,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getRoleBindingOptions({
@@ -74,7 +74,7 @@ export default function RoleBinding() {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

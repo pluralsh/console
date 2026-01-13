@@ -51,7 +51,7 @@ export default function Job(): ReactElement<any> {
   const {
     data: job,
     error,
-    isFetching,
+    isLoading,
   } = useQuery({
     ...getJobOptions({
       client: AxiosInstance(clusterId),
@@ -83,7 +83,7 @@ export default function Job(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

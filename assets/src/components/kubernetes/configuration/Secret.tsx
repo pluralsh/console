@@ -45,7 +45,7 @@ export default function Secret(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: secret,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getSecretOptions({
@@ -79,7 +79,7 @@ export default function Secret(): ReactElement<any> {
     )
   )
 
-  if (isFetching) return <LoadingIndicator />
+  if (isLoading) return <LoadingIndicator />
 
   if (error) return <GqlError error={error} />
 

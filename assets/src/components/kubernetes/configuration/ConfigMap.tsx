@@ -36,7 +36,7 @@ export default function ConfigMap(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: cm,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getConfigMapOptions({
@@ -70,7 +70,7 @@ export default function ConfigMap(): ReactElement<any> {
     )
   )
 
-  if (isFetching) return <LoadingIndicator />
+  if (isLoading) return <LoadingIndicator />
 
   if (error) return <GqlError error={error} />
 

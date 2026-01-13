@@ -56,7 +56,7 @@ export default function CronJob(): ReactElement<any> {
 
   const {
     data: cronJob,
-    isFetching,
+    isLoading,
     error,
     refetch,
   } = useQuery({
@@ -104,7 +104,7 @@ export default function CronJob(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

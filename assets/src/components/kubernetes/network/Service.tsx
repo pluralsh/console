@@ -66,7 +66,7 @@ export default function Service(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: service,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getServiceOptions({
@@ -104,7 +104,7 @@ export default function Service(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

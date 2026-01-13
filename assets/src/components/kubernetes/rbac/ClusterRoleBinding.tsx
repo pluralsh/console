@@ -29,7 +29,7 @@ export default function ClusterRoleBinding() {
   const { clusterId = '', name = '' } = useParams()
   const {
     data: crb,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getClusterRoleBindingOptions({
@@ -60,7 +60,7 @@ export default function ClusterRoleBinding() {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

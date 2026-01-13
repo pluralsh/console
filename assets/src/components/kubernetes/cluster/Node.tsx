@@ -70,7 +70,7 @@ export default function Node() {
 
   const {
     data: node,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getNodeOptions({
@@ -99,7 +99,7 @@ export default function Node() {
         error={error}
         css={{ margin: spacing.large }}
       />
-    ) : isFetching ? (
+    ) : isLoading ? (
       <LoadingIndicator />
     ) : (
       <EmptyState message="Node not found" />

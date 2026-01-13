@@ -59,7 +59,7 @@ export default function ReplicationController(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: rc,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getReplicationControllerOptions({
@@ -97,7 +97,7 @@ export default function ReplicationController(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

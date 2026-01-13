@@ -57,7 +57,7 @@ export default function DaemonSet(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: daemonSet,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getDaemonSetOptions({
@@ -91,7 +91,7 @@ export default function DaemonSet(): ReactElement<any> {
     )
   )
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 

@@ -29,7 +29,7 @@ export default function PodDisruptionBudget(): ReactElement<any> {
   const { clusterId = '', name = '', namespace = '' } = useParams()
   const {
     data: pdb,
-    isFetching,
+    isLoading,
     error,
   } = useQuery({
     ...getPodDisruptionBudgetOptions({
@@ -67,7 +67,7 @@ export default function PodDisruptionBudget(): ReactElement<any> {
     return <GqlError error={error} />
   }
 
-  if (isFetching) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 
