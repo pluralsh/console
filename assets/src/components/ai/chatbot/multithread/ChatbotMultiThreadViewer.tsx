@@ -14,7 +14,7 @@ const DOT_GAP = 16
 const STEPPER_LEFT_OFFSET = 16
 const THREAD_GAP: SemanticSpacingKey = 'small'
 // trigger height with compact padding (padding + content + padding)
-const TRIGGER_HEIGHT = 36
+const TRIGGER_HEIGHT = 46
 
 export function ChatbotMultiThreadViewer({
   threads,
@@ -24,9 +24,13 @@ export function ChatbotMultiThreadViewer({
   isExpectingStream?: boolean
 }) {
   const { borders, borderRadiuses } = useTheme()
-
+  const threadIdList = threads.map((thread) => thread.id)
   return (
-    <WrapperAccordionSC type="multiple">
+    <WrapperAccordionSC
+      type="multiple"
+      key={threadIdList.join('-')} // force re-render when threads change
+      defaultValue={threadIdList}
+    >
       {threads.map((thread) => (
         <StepperAccordionItemSC
           key={thread.id}
