@@ -99,20 +99,22 @@ export default function Secret(): ReactElement<any> {
 
 type SecretDataEntry = {
   key: string
-  value: any
+  value: string
 }
 
 function SecretDataValue({
   value,
   forceReveal,
 }: {
-  value: any
+  value: string
   forceReveal: boolean
 }) {
   const theme = useTheme()
-  const [reveal, setReveal] = useState(false)
+  const [reveal, setReveal] = useState(forceReveal)
 
-  useEffect(() => setReveal(forceReveal), [setReveal, forceReveal])
+  useEffect(() => {
+    setReveal(forceReveal)
+  }, [forceReveal])
 
   return (
     <div
