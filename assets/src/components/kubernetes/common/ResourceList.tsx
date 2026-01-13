@@ -93,7 +93,7 @@ export function ResourceList<
     meta: { cluster, ...tableOptions },
   })
 
-  const { data, isFetching, hasNextPage, fetchNextPage, refetch } =
+  const { data, isLoading, isFetching, hasNextPage, fetchNextPage, refetch } =
     useInfiniteQuery<TResourceList>({
       ...queryOptions({
         client: AxiosInstance(cluster?.id ?? ''),
@@ -138,7 +138,7 @@ export function ResourceList<
         fullHeightWrap
         data={items}
         columns={columns}
-        loading={isFetching && items.length === 0}
+        loading={isLoading && items.length === 0}
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={isFetching}
@@ -150,7 +150,7 @@ export function ResourceList<
         }}
         virtualizeRows
         onRowClick={
-          disableOnRowClick || isFetching
+          disableOnRowClick || isLoading
             ? undefined
             : (_, row: Row<ResourceT>) => {
                 navigate(
