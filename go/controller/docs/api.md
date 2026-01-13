@@ -123,6 +123,23 @@ _Appears in:_
 | `regions` _string array_ | A list of regions this connection can query |  | Optional: \{\} <br /> |
 
 
+#### AddonCallout
+
+
+
+AddonCallout a callout for a specific addon in the upgrade plan
+
+
+
+_Appears in:_
+- [UpgradePlanCalloutSpec](#upgradeplancalloutspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `addon` _string_ | Addon the addon this callout applies to |  |  |
+| `template` _string_ | Template the template to use for this callout |  |  |
+
+
 #### AiApprovalConfiguration
 
 
@@ -4831,23 +4848,6 @@ UpgradePlanCallout is the Schema for the upgradeplancallouts API
 | `spec` _[UpgradePlanCalloutSpec](#upgradeplancalloutspec)_ |  |  |  |
 
 
-#### UpgradePlanCalloutCallout
-
-
-
-UpgradePlanCalloutCallout a callout for a specific addon in the upgrade plan
-
-
-
-_Appears in:_
-- [UpgradePlanCalloutSpec](#upgradeplancalloutspec)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `addon` _string_ | Addon the addon this callout applies to |  |  |
-| `template` _string_ | Template the template to use for this callout |  |  |
-
-
 #### UpgradePlanCalloutSpec
 
 
@@ -4862,8 +4862,8 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this UpgradePlanCallout. If not provided UpgradePlanCallout's own name from UpgradePlanCallout.ObjectMeta will be used. |  | Optional: \{\} <br /> |
-| `callouts` _[UpgradePlanCalloutCallout](#upgradeplancalloutcallout) array_ | Callouts the callouts for this instance |  |  |
-| `context` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Context is a raw extension containing the context for this callout |  | Optional: \{\} <br /> |
+| `callouts` _[AddonCallout](#addoncallout) array_ | Callouts the callouts for this instance |  |  |
+| `context` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Context is an untyped object containing the context for this callout |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 

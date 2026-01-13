@@ -48,8 +48,8 @@ spec:
               callouts:
                 description: Callouts the callouts for this instance
                 items:
-                  description: UpgradePlanCalloutCallout a callout for a specific
-                    addon in the upgrade plan
+                  description: AddonCallout a callout for a specific addon in the
+                    upgrade plan
                   properties:
                     addon:
                       description: Addon the addon this callout applies to
@@ -63,7 +63,7 @@ spec:
                   type: object
                 type: array
               context:
-                description: Context is a raw extension containing the context for
+                description: Context is an untyped object containing the context for
                   this callout
                 type: object
                 x-kubernetes-preserve-unknown-fields: true

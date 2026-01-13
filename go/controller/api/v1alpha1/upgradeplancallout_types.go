@@ -15,9 +15,9 @@ type UpgradePlanCalloutSpec struct {
 	Name *string `json:"name,omitempty"`
 
 	// Callouts the callouts for this instance
-	Callouts []UpgradePlanCalloutCallout `json:"callouts,omitempty"`
+	Callouts []AddonCallout `json:"callouts,omitempty"`
 
-	// Context is a raw extension containing the context for this callout
+	// Context is an untyped object containing the context for this callout
 	// +kubebuilder:validation:Optional
 	Context runtime.RawExtension `json:"context,omitempty"`
 
@@ -27,8 +27,8 @@ type UpgradePlanCalloutSpec struct {
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
 }
 
-// UpgradePlanCalloutCallout a callout for a specific addon in the upgrade plan
-type UpgradePlanCalloutCallout struct {
+// AddonCallout a callout for a specific addon in the upgrade plan
+type AddonCallout struct {
 	// Addon the addon this callout applies to
 	Addon string `json:"addon"`
 	// Template the template to use for this callout
