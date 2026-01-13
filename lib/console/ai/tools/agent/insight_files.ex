@@ -25,7 +25,7 @@ defmodule Console.AI.Tools.Agent.InsightFiles do
     Console.AI.Fixer.Base.raw()
     with %AiInsight{} = insight <- Tool.insight(),
          %User{} = user <- Tool.actor(),
-         insight <- Console.Repo.preload(insight, [:service, :stack, :alert]),
+         insight <- Console.Repo.preload(insight, [:service, :stack, :alert, :stack_run, :service_component]),
          {:ok, insight} <- Policies.allow(insight, user, :read),
          {:ok, result} <- get_contents(insight) do
       Jason.encode(result)

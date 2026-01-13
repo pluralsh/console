@@ -1,8 +1,7 @@
 /* eslint-disable */
 /* prettier-ignore */
-import * as Apollo from '@apollo/client'
-import { gql } from '@apollo/client'
-
+import { gql } from '@apollo/client';
+import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -3048,6 +3047,7 @@ export type ConsoleConfiguration = {
   installed?: Maybe<Scalars['Boolean']['output']>;
   isDemoProject?: Maybe<Scalars['Boolean']['output']>;
   isSandbox?: Maybe<Scalars['Boolean']['output']>;
+  licenseExpiry?: Maybe<Scalars['DateTime']['output']>;
   manifest?: Maybe<PluralManifest>;
   oidcName?: Maybe<Scalars['String']['output']>;
   pluralLogin?: Maybe<Scalars['Boolean']['output']>;

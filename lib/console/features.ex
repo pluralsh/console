@@ -27,6 +27,15 @@ defmodule Console.Features do
     end
   end
 
+  def expiry() do
+    with key when is_binary(key) <- Console.conf(:license_key),
+         {:ok, %{"exp" => exp}} when is_integer(exp) and exp > 0 <- Joken.peek_header(key) do
+      DateTime.from_unix(exp)
+    else
+      _ -> nil
+    end
+  end
+
   def fetch(), do: GenServer.call(__MODULE__, :fetch)
 
   def account(), do: GenServer.call(__MODULE__, :account)

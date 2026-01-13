@@ -2446,14 +2446,15 @@ type ConsoleConfiguration struct {
 	VpnEnabled     *bool   `json:"vpnEnabled,omitempty"`
 	SentryEnabled  *bool   `json:"sentryEnabled,omitempty"`
 	// whether at least one cluster has been installed, false if a user hasn't fully onboarded
-	Installed    *bool              `json:"installed,omitempty"`
-	Cloud        *bool              `json:"cloud,omitempty"`
-	Byok         *bool              `json:"byok,omitempty"`
-	ExternalOidc *bool              `json:"externalOidc,omitempty"`
-	OidcName     *string            `json:"oidcName,omitempty"`
-	Features     *AvailableFeatures `json:"features,omitempty"`
-	Manifest     *PluralManifest    `json:"manifest,omitempty"`
-	GitStatus    *GitStatus         `json:"gitStatus,omitempty"`
+	Installed     *bool              `json:"installed,omitempty"`
+	Cloud         *bool              `json:"cloud,omitempty"`
+	Byok          *bool              `json:"byok,omitempty"`
+	ExternalOidc  *bool              `json:"externalOidc,omitempty"`
+	OidcName      *string            `json:"oidcName,omitempty"`
+	Features      *AvailableFeatures `json:"features,omitempty"`
+	LicenseExpiry *string            `json:"licenseExpiry,omitempty"`
+	Manifest      *PluralManifest    `json:"manifest,omitempty"`
+	GitStatus     *GitStatus         `json:"gitStatus,omitempty"`
 }
 
 type ConstraintRef struct {

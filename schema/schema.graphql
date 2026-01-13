@@ -11796,6 +11796,8 @@ type ConsoleConfiguration {
 
   features: AvailableFeatures
 
+  licenseExpiry: DateTime
+
   manifest: PluralManifest
 
   gitStatus: GitStatus

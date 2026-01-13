@@ -653,4 +653,25 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       """, %{"id" => service.id}, %{current_user: insert(:user)})
     end
   end
+
+  describe "serviceContext" do
+    test "it can fetch the service context for a service" do
+      context = insert(:service_context)
+      user = admin_user()
+
+      {:ok, %{data: %{"serviceContext" => found}}} = run_query("""
+        query ServiceContext($name: String!) {
+          serviceContext(name: $name) { id name }
+        }
+      """, %{"name" => context.name}, %{current_user: %{user | scopes: [build(:scope, apis: ~w(
+        service.context.read
+        getCluster
+        createCluster
+        deleteCluster
+      ))]}})
+
+      assert found["id"] == context.id
+      assert found["name"] == context.name
+    end
+  end
 end
