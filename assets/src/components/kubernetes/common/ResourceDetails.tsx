@@ -14,6 +14,7 @@ import { PageHeaderContext } from '../../cd/ContinuousDeployment'
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts.tsx'
 import { AxiosInstance } from '../../../helpers/axios.ts'
 import { useExplainWithAI } from '../../ai/AIContext.tsx'
+import { GqlError } from '../../utils/Alert'
 import {
   getNamespacedResourceOptions,
   getResourceOptions,
@@ -72,7 +73,7 @@ export default function ResourceDetails({
     refetchInterval: 30_000,
   })
 
-  const { data } = namespace ? namespacedQuery : clusterQuery
+  const { data, error } = namespace ? namespacedQuery : clusterQuery
 
   const prompt = useMemo(() => {
     return data?.Object
@@ -81,6 +82,10 @@ export default function ResourceDetails({
   }, [data?.Object, kind])
 
   useExplainWithAI(prompt)
+
+  if (error) {
+    return <GqlError error={error} />
+  }
 
   return (
     <ResponsiveLayoutPage

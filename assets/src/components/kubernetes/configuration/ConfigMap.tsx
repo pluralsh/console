@@ -14,6 +14,7 @@ import {
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 
@@ -33,7 +34,11 @@ const directory: Array<TabEntry> = [
 export default function ConfigMap(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId = '', name = '', namespace = '' } = useParams()
-  const { data: cm, isFetching } = useQuery({
+  const {
+    data: cm,
+    isFetching,
+    error,
+  } = useQuery({
     ...getConfigMapOptions({
       client: AxiosInstance(clusterId),
       path: { configmap: name, namespace },
@@ -66,6 +71,8 @@ export default function ConfigMap(): ReactElement<any> {
   )
 
   if (isFetching) return <LoadingIndicator />
+
+  if (error) return <GqlError error={error} />
 
   return (
     <ResourceDetails

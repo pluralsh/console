@@ -25,6 +25,7 @@ import {
   STATEFUL_SETS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 
 import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
@@ -49,7 +50,11 @@ const directory: Array<TabEntry> = [
 export default function StatefulSet(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId = '', name = '', namespace = '' } = useParams()
-  const { data: statefulSet, isFetching } = useQuery({
+  const {
+    data: statefulSet,
+    isFetching,
+    error,
+  } = useQuery({
     ...getStatefulSetOptions({
       client: AxiosInstance(clusterId),
       path: { statefulset: name, namespace },
@@ -83,6 +88,10 @@ export default function StatefulSet(): ReactElement<any> {
 
   if (isFetching) {
     return <LoadingIndicator />
+  }
+
+  if (error) {
+    return <GqlError error={error} />
   }
 
   return (

@@ -27,6 +27,7 @@ import {
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { SubTitle } from '../../utils/SubTitle'
 import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
@@ -59,7 +60,11 @@ const directory: Array<TabEntry> = [
 export default function Deployment(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId = '', name = '', namespace = '' } = useParams()
-  const { data: deployment, isFetching } = useQuery({
+  const {
+    data: deployment,
+    isFetching,
+    error,
+  } = useQuery({
     ...getDeploymentOptions({
       client: AxiosInstance(clusterId),
       path: { deployment: name, namespace },
@@ -93,6 +98,10 @@ export default function Deployment(): ReactElement<any> {
 
   if (isFetching) {
     return <LoadingIndicator />
+  }
+
+  if (error) {
+    return <GqlError error={error} />
   }
 
   return (

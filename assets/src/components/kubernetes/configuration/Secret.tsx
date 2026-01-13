@@ -18,6 +18,7 @@ import { useQuery } from '@tanstack/react-query'
 import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
@@ -42,7 +43,11 @@ const directory: Array<TabEntry> = [
 export default function Secret(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId = '', name = '', namespace = '' } = useParams()
-  const { data: secret, isFetching } = useQuery({
+  const {
+    data: secret,
+    isFetching,
+    error,
+  } = useQuery({
     ...getSecretOptions({
       client: AxiosInstance(clusterId),
       path: { name, namespace },
@@ -75,6 +80,8 @@ export default function Secret(): ReactElement<any> {
   )
 
   if (isFetching) return <LoadingIndicator />
+
+  if (error) return <GqlError error={error} />
 
   return (
     <ResourceDetails

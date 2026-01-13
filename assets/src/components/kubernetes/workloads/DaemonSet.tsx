@@ -28,6 +28,7 @@ import {
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
 import { LabelSelector } from '../common/LabelSelector'
@@ -54,7 +55,11 @@ const directory: Array<TabEntry> = [
 export default function DaemonSet(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId = '', name = '', namespace = '' } = useParams()
-  const { data: daemonSet, isFetching } = useQuery({
+  const {
+    data: daemonSet,
+    isFetching,
+    error,
+  } = useQuery({
     ...getDaemonSetOptions({
       client: AxiosInstance(clusterId),
       path: { daemonSet: name, namespace },
@@ -88,6 +93,10 @@ export default function DaemonSet(): ReactElement<any> {
 
   if (isFetching) {
     return <LoadingIndicator />
+  }
+
+  if (error) {
+    return <GqlError error={error} />
   }
 
   return (
