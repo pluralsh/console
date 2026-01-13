@@ -80,20 +80,15 @@ export default function Raw(): ReactElement<any> {
   const mutation = namespace ? namespacedMutation : clusterMutation
 
   useEffect(() => {
-    if (!updateError) {
-      return
-    }
+    if (!updateError) return
 
-    // Dismiss error after 6 seconds
-    setTimeout(() => setUpdateError(undefined), 6_000)
+    setTimeout(() => setUpdateError(undefined), 6_000) // Dismiss error after 6s
   }, [updateError])
 
   useEffect(() => {
-    if (!data) {
-      return
-    }
+    if (!data) return
 
-    const current = dump(data?.Object)
+    const current = dump(data)
 
     setCurrent(current)
     calculateSHA(current)
@@ -103,10 +98,11 @@ export default function Raw(): ReactElement<any> {
     }
   }, [data])
 
-  if (!current && !error) return <LoadingIndicator />
+  if (error) return <GqlError error={error} />
 
-  if (!data?.Object && !isLoading)
-    return <GqlError error="Could not fetch resource" />
+  if (!data && !isLoading) return <GqlError error="Could not fetch resource" />
+
+  if (!current && !error) return <LoadingIndicator />
 
   return (
     <>
