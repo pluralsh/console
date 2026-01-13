@@ -18,6 +18,7 @@ import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { hash } from '../../../utils/sha'
 import { GqlError, GqlErrorType } from '../../utils/Alert'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { AxiosError } from 'axios'
 
 export default function Raw(): ReactElement<any> {
   const theme = useTheme()
@@ -133,7 +134,7 @@ export default function Raw(): ReactElement<any> {
         saveLabel="Update"
         onSave={(v) => {
           try {
-            const input = load(v) as any
+            const input = load(v) as Record<string, unknown>
 
             setUpdating(true)
             mutation.mutate({
@@ -144,7 +145,13 @@ export default function Raw(): ReactElement<any> {
               body: input,
             })
           } catch (e) {
-            setUpdateError(e instanceof Error ? e.message : (e as any))
+            setUpdateError(
+              e instanceof Error
+                ? e.message
+                : e instanceof AxiosError
+                  ? e.message
+                  : String(e)
+            )
           }
         }}
       />
