@@ -72,12 +72,13 @@ export default function Node() {
     data: node,
     isLoading: loading,
     error,
-  } = useQuery(
-    getNodeOptions({
+  } = useQuery({
+    ...getNodeOptions({
       client: AxiosInstance(clusterId),
       path: { name },
-    })
-  )
+    }),
+    refetchInterval: 30_000,
+  })
 
   useSetBreadcrumbs(
     useMemo(

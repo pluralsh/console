@@ -82,12 +82,13 @@ export function Pod(): ReactElement<any> {
     data: pod,
     isLoading: loading,
     error,
-  } = useQuery(
-    getPodOptions({
+  } = useQuery({
+    ...getPodOptions({
       client: AxiosInstance(clusterId),
       path: { pod: name, namespace },
-    })
-  )
+    }),
+    refetchInterval: 30_000,
+  })
 
   useSetBreadcrumbs(
     useMemo(
@@ -257,16 +258,17 @@ export function PodLogs(): ReactElement<any> {
     isLoading: loading,
     refetch,
     error,
-  } = useQuery(
-    getContainerLogsOptions({
+  } = useQuery({
+    ...getContainerLogsOptions({
       client: AxiosInstance(clusterId),
       path: {
         container: selected as string,
         pod: name,
         namespace,
       },
-    })
-  )
+    }),
+    refetchInterval: 30_000,
+  })
 
   if (error)
     return (

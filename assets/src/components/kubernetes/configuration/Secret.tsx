@@ -42,12 +42,13 @@ const directory: Array<TabEntry> = [
 export default function Secret(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId = '', name = '', namespace = '' } = useParams()
-  const { data: secret, isFetching } = useQuery(
-    getSecretOptions({
+  const { data: secret, isFetching } = useQuery({
+    ...getSecretOptions({
       client: AxiosInstance(clusterId),
       path: { name, namespace },
-    })
-  )
+    }),
+    refetchInterval: 30_000,
+  })
 
   useSetBreadcrumbs(
     useMemo(

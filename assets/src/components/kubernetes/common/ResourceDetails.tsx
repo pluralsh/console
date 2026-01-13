@@ -59,6 +59,7 @@ export default function ResourceDetails({
     }),
     enabled: !!clusterId && !!namespace && kind !== 'secret',
     gcTime: 0,
+    refetchInterval: 30_000,
   })
 
   const clusterQuery = useQuery({
@@ -68,6 +69,7 @@ export default function ResourceDetails({
     }),
     enabled: !!clusterId && !namespace && kind !== 'secret',
     gcTime: 0,
+    refetchInterval: 30_000,
   })
 
   const { data } = namespace ? namespacedQuery : clusterQuery

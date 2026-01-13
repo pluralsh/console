@@ -33,12 +33,13 @@ const directory: Array<TabEntry> = [
 export default function ConfigMap(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId = '', name = '', namespace = '' } = useParams()
-  const { data: cm, isFetching } = useQuery(
-    getConfigMapOptions({
+  const { data: cm, isFetching } = useQuery({
+    ...getConfigMapOptions({
       client: AxiosInstance(clusterId),
       path: { configmap: name, namespace },
-    })
-  )
+    }),
+    refetchInterval: 30_000,
+  })
 
   useSetBreadcrumbs(
     useMemo(

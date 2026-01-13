@@ -49,12 +49,13 @@ const directory: Array<TabEntry> = [
 export default function StatefulSet(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId = '', name = '', namespace = '' } = useParams()
-  const { data: statefulSet, isFetching } = useQuery(
-    getStatefulSetOptions({
+  const { data: statefulSet, isFetching } = useQuery({
+    ...getStatefulSetOptions({
       client: AxiosInstance(clusterId),
       path: { statefulset: name, namespace },
-    })
-  )
+    }),
+    refetchInterval: 30_000,
+  })
 
   useSetBreadcrumbs(
     useMemo(

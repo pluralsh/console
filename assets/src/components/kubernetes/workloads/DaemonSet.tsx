@@ -54,12 +54,13 @@ const directory: Array<TabEntry> = [
 export default function DaemonSet(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId = '', name = '', namespace = '' } = useParams()
-  const { data: daemonSet, isFetching } = useQuery(
-    getDaemonSetOptions({
+  const { data: daemonSet, isFetching } = useQuery({
+    ...getDaemonSetOptions({
       client: AxiosInstance(clusterId),
       path: { daemonSet: name, namespace },
-    })
-  )
+    }),
+    refetchInterval: 30_000,
+  })
 
   useSetBreadcrumbs(
     useMemo(

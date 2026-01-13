@@ -112,6 +112,7 @@ export function UpdatedResourceList<
         const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
         return pages < totalPages ? pages + 1 : undefined
       },
+      refetchInterval: 30_000,
     })
 
   const { items, errors } = useMemo(

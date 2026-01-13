@@ -59,12 +59,13 @@ const directory: Array<TabEntry> = [
 export default function Deployment(): ReactElement<any> {
   const cluster = useCluster()
   const { clusterId = '', name = '', namespace = '' } = useParams()
-  const { data: deployment, isFetching } = useQuery(
-    getDeploymentOptions({
+  const { data: deployment, isFetching } = useQuery({
+    ...getDeploymentOptions({
       client: AxiosInstance(clusterId),
       path: { deployment: name, namespace },
-    })
-  )
+    }),
+    refetchInterval: 30_000,
+  })
 
   useSetBreadcrumbs(
     useMemo(
@@ -153,12 +154,13 @@ export function DeploymentReplicaSets(): ReactElement<any> {
 function NewReplicaSet(): ReactElement<any> {
   const { name = '', namespace = '', clusterId = '' } = useParams()
 
-  const { data: replicaSet, isFetching } = useQuery(
-    getDeploymentNewReplicaSetOptions({
+  const { data: replicaSet, isFetching } = useQuery({
+    ...getDeploymentNewReplicaSetOptions({
       client: AxiosInstance(clusterId),
       path: { deployment: name, namespace },
-    })
-  )
+    }),
+    refetchInterval: 30_000,
+  })
 
   return (
     <ResourceInfoCard loading={isFetching}>

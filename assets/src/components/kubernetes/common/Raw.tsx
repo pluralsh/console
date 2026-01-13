@@ -41,6 +41,7 @@ export default function Raw(): ReactElement<any> {
     }),
     enabled: !!clusterId && !!namespace,
     gcTime: 0,
+    refetchInterval: 30_000,
   })
 
   const clusterQuery = useQuery({
@@ -50,6 +51,7 @@ export default function Raw(): ReactElement<any> {
     }),
     enabled: !!clusterId && !namespace,
     gcTime: 0,
+    refetchInterval: 30_000,
   })
 
   const { data, refetch, isFetching, error } = namespace
