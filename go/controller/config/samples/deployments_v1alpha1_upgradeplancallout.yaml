@@ -9,4 +9,11 @@ metadata:
     app.kubernetes.io/created-by: controller
   name: upgradeplancallout-sample
 spec:
-  # TODO(user): Add fields here
+  callouts:
+    - addon: test
+      template: test
+    - addon: test2
+      template: test2
+  context:
+    key1: value1
+    key2: value2

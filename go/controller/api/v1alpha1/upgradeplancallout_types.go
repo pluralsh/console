@@ -37,6 +37,8 @@ type UpgradePlanCalloutCallout struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:scope=Cluster
+//+kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="UpgradePlanCallout ID"
 
 // UpgradePlanCallout is the Schema for the upgradeplancallouts API
 type UpgradePlanCallout struct {
