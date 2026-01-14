@@ -6013,6 +6013,9 @@ input HelmMinimalAttributes {
 
   "the helm release name to use when rendering this helm chart"
   release: String
+
+  "whether to ignore helm hooks when rendering this helm chart"
+  ignoreHooks: Boolean
 }
 
 input ServiceCloneAttributes {
@@ -6399,6 +6402,9 @@ type HelmMinimal {
 
   "the helm release name to use when rendering this helm chart"
   release: String
+
+  "whether to ignore helm hooks when rendering this helm chart"
+  ignoreHooks: Boolean
 }
 
 "metadata needed for configuring kustomize"
@@ -6764,6 +6770,9 @@ input ClusterAttributes {
 
   kubeconfig: KubeconfigAttributes
 
+  "whether to disable ai insights for this cluster"
+  disableAi: Boolean
+
   cloudSettings: CloudSettingsAttributes
 
   "the project id this cluster will belong to"
@@ -6863,6 +6872,9 @@ input ClusterUpdateAttributes {
   distro: ClusterDistro
 
   metadata: Json
+
+  "whether to disable ai insights for this cluster"
+  disableAi: Boolean
 
   nodePools: [NodePoolAttributes]
 
@@ -7413,6 +7425,9 @@ type Cluster {
 
   "the interval in seconds between pings to the cluster"
   pingInterval: Int
+
+  "whether to disable ai insights for this cluster"
+  disableAi: Boolean
 
   "The version of OpenShift this cluster is running"
   openshiftVersion: String

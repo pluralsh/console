@@ -3,6 +3,26 @@ defmodule Console.AI.FixerTest do
   use Mimic
   alias Console.AI.Fixer
 
+  describe "#refresh/2" do
+    test "it can refresh a service insight" do
+      user = insert(:user)
+      service = insert(:service, write_bindings: [%{user_id: user.id}])
+      insight = insert(:ai_insight, service: service)
+
+      comp = insert(:service_component, service: service)
+      insight2 = insert(:ai_insight, service_component: comp)
+
+      {:ok, refreshed} = Fixer.refresh(insight.id, user)
+
+      assert refreshed.id == insight.id
+      svc = refetch(service)
+      assert Timex.before?(svc.ai_poll_at, Timex.now())
+      assert svc.force_insight
+
+      assert refetch(insight2).force
+    end
+  end
+
   describe "#pr/2" do
     test "it can spawn a fix pr" do
       insert(:scm_connection, token: "some-pat", default: true)

@@ -1888,6 +1888,8 @@ export type Cluster = {
   deprecatedCrds?: Maybe<DeprecatedCustomResourceConnection>;
   /** fetches the discovered custom resources with new versions to be used */
   deprecatedCustomResources?: Maybe<Array<Maybe<DeprecatedCustomResource>>>;
+  /** whether to disable ai insights for this cluster */
+  disableAi?: Maybe<Scalars['Boolean']['output']>;
   /** the distribution of kubernetes this cluster is running */
   distro?: Maybe<ClusterDistro>;
   /** whether the current user can edit this cluster */
@@ -2118,6 +2120,8 @@ export type ClusterAttributes = {
   cloudSettings?: InputMaybe<CloudSettingsAttributes>;
   /** a cloud credential to use when provisioning this cluster */
   credentialId?: InputMaybe<Scalars['ID']['input']>;
+  /** whether to disable ai insights for this cluster */
+  disableAi?: InputMaybe<Scalars['Boolean']['input']>;
   distro?: InputMaybe<ClusterDistro>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: InputMaybe<Scalars['String']['input']>;
@@ -2669,6 +2673,8 @@ export type ClusterTargetAttributes = {
 };
 
 export type ClusterUpdateAttributes = {
+  /** whether to disable ai insights for this cluster */
+  disableAi?: InputMaybe<Scalars['Boolean']['input']>;
   distro?: InputMaybe<ClusterDistro>;
   /** a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name */
   handle?: InputMaybe<Scalars['String']['input']>;
@@ -4316,6 +4322,8 @@ export type HelmGcpAuthAttributes = {
 
 export type HelmMinimal = {
   __typename?: 'HelmMinimal';
+  /** whether to ignore helm hooks when rendering this helm chart */
+  ignoreHooks?: Maybe<Scalars['Boolean']['output']>;
   /** the helm release name to use when rendering this helm chart */
   release?: Maybe<Scalars['String']['output']>;
   /** a helm values file to use when rendering this helm chart */
@@ -4325,6 +4333,8 @@ export type HelmMinimal = {
 };
 
 export type HelmMinimalAttributes = {
+  /** whether to ignore helm hooks when rendering this helm chart */
+  ignoreHooks?: InputMaybe<Scalars['Boolean']['input']>;
   /** the helm release name to use when rendering this helm chart */
   release?: InputMaybe<Scalars['String']['input']>;
   /** a helm values file to use when rendering this helm chart */

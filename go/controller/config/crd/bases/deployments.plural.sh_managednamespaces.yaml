@@ -511,6 +511,10 @@ spec:
                       properties:
                         helm:
                           properties:
+                            ignoreHooks:
+                              description: IgnoreHooks indicates whether to ignore
+                                Helm hooks when rendering this Helm chart.
+                              type: boolean
                             release:
                               description: Release is a Helm release name to use when
                                 rendering this Helm chart.
