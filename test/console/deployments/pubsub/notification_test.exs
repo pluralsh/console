@@ -265,6 +265,38 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
     end
   end
 
+  describe "SentinelRunUpdated" do
+    test "it can generate a slack message" do
+      run = insert(:sentinel_run, status: :failed)
+      router = insert(:notification_router, events: ["sentinel.run.failed"])
+      insert(:router_sink, router: router)
+      insert(:router_filter, router: router)
+
+      me = self()
+      expect(HTTPoison, :post, fn _, body, _ ->
+        send me, {:body, body}
+        {:ok, %HTTPoison.Response{}}
+      end)
+
+      event = %PubSub.SentinelRunUpdated{item: run}
+      :ok = Notifications.handle_event(event)
+
+      assert_receive {:body, body}
+
+      {:ok, _} = Jason.decode(body)
+    end
+
+    test "it will ignore if status is not failed" do
+      run = insert(:sentinel_run, status: :pending)
+      router = insert(:notification_router, events: ["sentinel.run.failed"])
+      insert(:router_sink, router: router)
+      reject(&HTTPoison.post/3)
+
+      event = %PubSub.SentinelRunUpdated{item: run}
+      :ok = Notifications.handle_event(event)
+    end
+  end
+
   describe "AlertCreated" do
     test "it can generate a slack message" do
       cluster = insert(:cluster)

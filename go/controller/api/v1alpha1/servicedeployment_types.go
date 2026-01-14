@@ -357,13 +357,20 @@ type Renderer struct {
 
 type HelmMinimal struct {
 	// Values a Helm values file to use when rendering this Helm chart.
+	// +kubebuilder:validation:Optional
 	Values *string `json:"values,omitempty"`
 
 	// ValuesFiles a list of relative paths to values files to use for Helm chart templating.
+	// +kubebuilder:validation:Optional
 	ValuesFiles []string `json:"valuesFiles,omitempty"`
 
 	// Release is a Helm release name to use when rendering this Helm chart.
+	// +kubebuilder:validation:Optional
 	Release *string `json:"release,omitempty"`
+
+	// IgnoreHooks indicates whether to ignore Helm hooks when rendering this Helm chart.
+	// +kubebuilder:validation:Optional
+	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
 }
 
 type ServiceImport struct {

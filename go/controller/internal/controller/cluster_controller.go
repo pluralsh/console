@@ -184,6 +184,7 @@ func (r *ClusterReconciler) Attributes(cluster *v1alpha1.Cluster) (*console.Clus
 
 	return &console.ClusterUpdateAttributes{
 		Handle:        cluster.Spec.Handle,
+		DisableAi:     cluster.Spec.DisableAI,
 		Tags:          tagAttributes.Tags,
 		Metadata:      tagAttributes.Metadata,
 		ReadBindings:  readBindings,

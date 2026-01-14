@@ -1532,6 +1532,8 @@ type Cluster struct {
 	UpgradePlan *ClusterUpgradePlan `json:"upgradePlan,omitempty"`
 	// the interval in seconds between pings to the cluster
 	PingInterval *int64 `json:"pingInterval,omitempty"`
+	// whether to disable ai insights for this cluster
+	DisableAi *bool `json:"disableAi,omitempty"`
 	// The version of OpenShift this cluster is running
 	OpenshiftVersion *string `json:"openshiftVersion,omitempty"`
 	// The number of nodes in this cluster
@@ -1666,12 +1668,14 @@ type ClusterAttributes struct {
 	Handle     *string `json:"handle,omitempty"`
 	ProviderID *string `json:"providerId,omitempty"`
 	// a cloud credential to use when provisioning this cluster
-	CredentialID  *string                  `json:"credentialId,omitempty"`
-	Version       *string                  `json:"version,omitempty"`
-	Distro        *ClusterDistro           `json:"distro,omitempty"`
-	Metadata      *string                  `json:"metadata,omitempty"`
-	Protect       *bool                    `json:"protect,omitempty"`
-	Kubeconfig    *KubeconfigAttributes    `json:"kubeconfig,omitempty"`
+	CredentialID *string               `json:"credentialId,omitempty"`
+	Version      *string               `json:"version,omitempty"`
+	Distro       *ClusterDistro        `json:"distro,omitempty"`
+	Metadata     *string               `json:"metadata,omitempty"`
+	Protect      *bool                 `json:"protect,omitempty"`
+	Kubeconfig   *KubeconfigAttributes `json:"kubeconfig,omitempty"`
+	// whether to disable ai insights for this cluster
+	DisableAi     *bool                    `json:"disableAi,omitempty"`
 	CloudSettings *CloudSettingsAttributes `json:"cloudSettings,omitempty"`
 	// the project id this cluster will belong to
 	ProjectID *string `json:"projectId,omitempty"`
@@ -2170,10 +2174,12 @@ type ClusterUpdateAttributes struct {
 	// pass a kubeconfig for this cluster (DEPRECATED)
 	Kubeconfig *KubeconfigAttributes `json:"kubeconfig,omitempty"`
 	// status of the upgrade plan for this cluster
-	UpgradePlan   *UpgradePlanAttributes     `json:"upgradePlan,omitempty"`
-	Protect       *bool                      `json:"protect,omitempty"`
-	Distro        *ClusterDistro             `json:"distro,omitempty"`
-	Metadata      *string                    `json:"metadata,omitempty"`
+	UpgradePlan *UpgradePlanAttributes `json:"upgradePlan,omitempty"`
+	Protect     *bool                  `json:"protect,omitempty"`
+	Distro      *ClusterDistro         `json:"distro,omitempty"`
+	Metadata    *string                `json:"metadata,omitempty"`
+	// whether to disable ai insights for this cluster
+	DisableAi     *bool                      `json:"disableAi,omitempty"`
 	NodePools     []*NodePoolAttributes      `json:"nodePools,omitempty"`
 	Tags          []*TagAttributes           `json:"tags,omitempty"`
 	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
@@ -2446,14 +2452,15 @@ type ConsoleConfiguration struct {
 	VpnEnabled     *bool   `json:"vpnEnabled,omitempty"`
 	SentryEnabled  *bool   `json:"sentryEnabled,omitempty"`
 	// whether at least one cluster has been installed, false if a user hasn't fully onboarded
-	Installed    *bool              `json:"installed,omitempty"`
-	Cloud        *bool              `json:"cloud,omitempty"`
-	Byok         *bool              `json:"byok,omitempty"`
-	ExternalOidc *bool              `json:"externalOidc,omitempty"`
-	OidcName     *string            `json:"oidcName,omitempty"`
-	Features     *AvailableFeatures `json:"features,omitempty"`
-	Manifest     *PluralManifest    `json:"manifest,omitempty"`
-	GitStatus    *GitStatus         `json:"gitStatus,omitempty"`
+	Installed     *bool              `json:"installed,omitempty"`
+	Cloud         *bool              `json:"cloud,omitempty"`
+	Byok          *bool              `json:"byok,omitempty"`
+	ExternalOidc  *bool              `json:"externalOidc,omitempty"`
+	OidcName      *string            `json:"oidcName,omitempty"`
+	Features      *AvailableFeatures `json:"features,omitempty"`
+	LicenseExpiry *string            `json:"licenseExpiry,omitempty"`
+	Manifest      *PluralManifest    `json:"manifest,omitempty"`
+	GitStatus     *GitStatus         `json:"gitStatus,omitempty"`
 }
 
 type ConstraintRef struct {
@@ -3519,6 +3526,8 @@ type HelmMinimal struct {
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// the helm release name to use when rendering this helm chart
 	Release *string `json:"release,omitempty"`
+	// whether to ignore helm hooks when rendering this helm chart
+	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
 }
 
 type HelmMinimalAttributes struct {
@@ -3528,6 +3537,8 @@ type HelmMinimalAttributes struct {
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// the helm release name to use when rendering this helm chart
 	Release *string `json:"release,omitempty"`
+	// whether to ignore helm hooks when rendering this helm chart
+	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
 }
 
 // A direct Plural representation of a Helm repository

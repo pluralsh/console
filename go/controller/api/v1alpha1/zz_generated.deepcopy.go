@@ -1331,6 +1331,11 @@ func (in *ClusterSpec) DeepCopyInto(out *ClusterSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.DisableAI != nil {
+		in, out := &in.DisableAI, &out.DisableAI
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Reconciliation != nil {
 		in, out := &in.Reconciliation, &out.Reconciliation
 		*out = new(Reconciliation)
@@ -3237,6 +3242,11 @@ func (in *HelmMinimal) DeepCopyInto(out *HelmMinimal) {
 	if in.Release != nil {
 		in, out := &in.Release, &out.Release
 		*out = new(string)
+		**out = **in
+	}
+	if in.IgnoreHooks != nil {
+		in, out := &in.IgnoreHooks, &out.IgnoreHooks
+		*out = new(bool)
 		**out = **in
 	}
 }

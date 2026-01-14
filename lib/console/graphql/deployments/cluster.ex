@@ -42,6 +42,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :metadata,       :json
     field :protect,        :boolean
     field :kubeconfig,     :kubeconfig_attributes
+    field :disable_ai,     :boolean, description: "whether to disable ai insights for this cluster"
     field :cloud_settings, :cloud_settings_attributes
     field :project_id,     :id, description: "the project id this cluster will belong to"
     field :upgrade_plan,   :upgrade_plan_attributes, description: "status of the upgrade plan for this cluster"
@@ -105,6 +106,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :protect,      :boolean
     field :distro,       :cluster_distro
     field :metadata,     :json
+    field :disable_ai,   :boolean, description: "whether to disable ai insights for this cluster"
     field :node_pools,   list_of(:node_pool_attributes)
     field :tags,         list_of(:tag_attributes)
     field :read_bindings,  list_of(:policy_binding_attributes)
@@ -478,6 +480,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :settings,          :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
     field :upgrade_plan,      :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
     field :ping_interval,      :integer, description: "the interval in seconds between pings to the cluster"
+    field :disable_ai,         :boolean, description: "whether to disable ai insights for this cluster"
 
     field :openshift_version,  :string, description: "The version of OpenShift this cluster is running"
     field :node_count,         :integer, description: "The number of nodes in this cluster"

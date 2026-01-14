@@ -280,6 +280,31 @@ defmodule Console.GraphQl.UserQueriesTest do
         }
       """, %{"id" => token.id}, %{current_user: insert(:user)})
     end
+
+    test "it can introspect an access token" do
+      user = insert(:user)
+      token = insert(:access_token, user: user)
+
+      {:ok, %{data: %{"accessToken" => found}}} = run_query("""
+        query accessToken($token: String!) {
+          accessToken(token: $token) { id }
+        }
+      """, %{"token" => token.token}, %{current_user: user})
+
+      assert found["id"] == token.id
+    end
+
+    test "users cannot introspect other users tokens" do
+      user = insert(:user)
+      other = insert(:user)
+      token = insert(:access_token, user: other)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query accessToken($token: String!) {
+          accessToken(token: $token) { id }
+        }
+      """, %{"token" => token.token}, %{current_user: user})
+    end
   end
 
   describe "accessTokens" do
