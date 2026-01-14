@@ -2194,6 +2194,7 @@ type HelmMinimalFragment struct {
 	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
+	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 }
 
 func (t *HelmMinimalFragment) GetValues() *string {
@@ -2213,6 +2214,12 @@ func (t *HelmMinimalFragment) GetRelease() *string {
 		t = &HelmMinimalFragment{}
 	}
 	return t.Release
+}
+func (t *HelmMinimalFragment) GetIgnoreHooks() *bool {
+	if t == nil {
+		t = &HelmMinimalFragment{}
+	}
+	return t.IgnoreHooks
 }
 
 type RendererFragment struct {
@@ -32951,6 +32958,7 @@ fragment HelmMinimalFragment on HelmMinimal {
 	values
 	valuesFiles
 	release
+	ignoreHooks
 }
 fragment ServiceDependencyFragment on ServiceDependency {
 	id
@@ -33457,6 +33465,7 @@ fragment HelmMinimalFragment on HelmMinimal {
 	values
 	valuesFiles
 	release
+	ignoreHooks
 }
 fragment ServiceDependencyFragment on ServiceDependency {
 	id
