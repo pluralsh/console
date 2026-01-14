@@ -19,6 +19,7 @@ import { PersonaConfigurationFragment } from 'generated/graphql'
 import { ReactNode, useMemo, useState } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
 import {
+  AI_SETTINGS_REL_PATH,
   AUDITS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
   NOTIFICATIONS_REL_PATH,
@@ -33,6 +34,7 @@ const getDirectory = (
 ): Directory => [
   { path: USER_MANAGEMENT_REL_PATH, label: 'User management' },
   { path: GLOBAL_SETTINGS_REL_PATH, label: 'Global settings' },
+  { path: AI_SETTINGS_REL_PATH, label: 'AI settings' },
   { path: PROJECT_SETTINGS_REL_PATH, label: 'Project settings' },
   { path: NOTIFICATIONS_REL_PATH, label: 'Notifications' },
   {

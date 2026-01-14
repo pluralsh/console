@@ -16,7 +16,7 @@ import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
 import { CreateAgentRunButton } from './CreateAgentRun'
-import { AgentRuntimeIconFrame } from '../agent-runtimes/AiAgentRuntimeIcon.tsx'
+import { AgentRuntimeIconFrame } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 
 export function AIAgentRuns() {
   const navigate = useNavigate()
