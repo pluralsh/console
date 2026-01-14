@@ -1,8 +1,8 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { ReactElement, useMemo } from 'react'
 import {
-  HorizontalpodautoscalerHorizontalPodAutoscaler as HorizontalPodAutoscalerT,
-  HorizontalpodautoscalerHorizontalPodAutoscalerList as HorizontalPodAutoscalerListT,
+  HorizontalpodautoscalerHorizontalPodAutoscaler,
+  HorizontalpodautoscalerHorizontalPodAutoscalerList,
 } from '../../../generated/kubernetes'
 import { getHorizontalPodAutoscalersInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen'
 import ResourceLink from '../common/ResourceLink'
@@ -11,7 +11,8 @@ import { ResourceList } from '../common/ResourceList'
 import { toKind } from '../common/types'
 import { useDefaultColumns } from '../common/utils'
 
-const columnHelper = createColumnHelper<HorizontalPodAutoscalerT>()
+const columnHelper =
+  createColumnHelper<HorizontalpodautoscalerHorizontalPodAutoscaler>()
 
 const COLUMNS = {
   colMinReplicas: columnHelper.accessor((hpa) => hpa?.minReplicas, {
@@ -74,7 +75,10 @@ export default function HorizontalPodAutoscalers(): ReactElement<any> {
   const columns = useHorizontalPodAutoscalersColumns()
 
   return (
-    <ResourceList<HorizontalPodAutoscalerListT, HorizontalPodAutoscalerT>
+    <ResourceList<
+      HorizontalpodautoscalerHorizontalPodAutoscalerList,
+      HorizontalpodautoscalerHorizontalPodAutoscaler
+    >
       namespaced
       columns={columns}
       queryOptions={getHorizontalPodAutoscalersInfiniteOptions}
