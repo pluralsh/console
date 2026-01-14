@@ -182,7 +182,9 @@ export function ChatbotPanelThread({
             <GqlError error={error} />
           ) : (
             <Body1P css={{ color: theme.colors['text-long-form'] }}>
-              How can I help you?
+              {curThreadDetails?.research?.id
+                ? 'What would you like to know about this research?'
+                : 'How can I help you?'}
             </Body1P>
           )
         ) : (
@@ -272,7 +274,7 @@ export const ChatbotMessagesWrapperSC = styled.div(({ theme }) => ({
   flex: 1,
   scrollbarWidth: 'none',
   overflowY: 'auto',
-  padding: `0 ${theme.spacing.medium}px 0 ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.medium}px ${theme.spacing.medium}px 0 ${theme.spacing.medium}px`,
   position: 'relative',
   height: '100%',
 
