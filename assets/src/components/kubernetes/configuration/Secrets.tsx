@@ -1,6 +1,6 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
 import { SecretSecret, SecretSecretList } from '../../../generated/kubernetes'
@@ -40,15 +40,9 @@ const colType = columnHelper.accessor((secret) => secret.type, {
 export default function Secrets() {
   const cluster = useCluster()
   const { hasNamespaceFilterActive } = useDataSelect()
-  const [refetch, setRefetch] = useState<any>()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
-  useSetPageHeaderAction(
-    <CreateSecretButton
-      text="Create secret"
-      refetch={refetch}
-    />
-  )
+  useSetPageHeaderAction(<CreateSecretButton text="Create secret" />)
 
   const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
@@ -74,7 +68,6 @@ export default function Secrets() {
           : getAllSecretsInfiniteOptions
       }
       itemsKey="secrets"
-      setRefetch={setRefetch}
     />
   )
 }

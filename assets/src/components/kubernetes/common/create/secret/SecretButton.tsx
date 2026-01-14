@@ -6,21 +6,12 @@ import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
 import { useTheme } from 'styled-components'
 import { Kind } from '../../types.ts'
 import { CreateSecretModal } from './SecretModal.tsx'
-import {
-  InfiniteData,
-  QueryObserverResult,
-  RefetchOptions,
-} from '@tanstack/react-query'
-import { ResourceList } from '../../types.ts'
 
 interface CreateSecretButtonProps {
   text: string
-  refetch: (
-    options?: RefetchOptions
-  ) => Promise<QueryObserverResult<InfiniteData<ResourceList>, unknown>>
 }
 
-export function CreateSecretButton({ text, refetch }: CreateSecretButtonProps) {
+export function CreateSecretButton({ text }: CreateSecretButtonProps) {
   const theme = useTheme()
   const { clusterId } = useParams()
 
@@ -50,7 +41,6 @@ export function CreateSecretButton({ text, refetch }: CreateSecretButtonProps) {
           <CreateSecretModal
             open={open}
             setOpen={setOpen}
-            refetch={refetch}
             onCreate={onCreate}
           />
         </ModalMountTransition>

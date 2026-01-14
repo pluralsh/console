@@ -17,13 +17,7 @@ import { SecretBasicAuthForm } from './type/BasicAuth.tsx'
 import { SecretOpaqueForm } from './type/Opaque'
 import { SecretServiceAccountForm } from './type/ServiceAccount'
 import { SecretSSHForm } from './type/SSH'
-import {
-  InfiniteData,
-  QueryObserverResult,
-  RefetchOptions,
-  useMutation,
-} from '@tanstack/react-query'
-import { ResourceList } from '../../types.ts'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { createAppDeploymentFromFileMutation } from '../../../../../generated/kubernetes/@tanstack/react-query.gen'
 import { AxiosInstance } from '../../../../../helpers/axios'
 
@@ -38,19 +32,16 @@ const FormContainer = styled.div`
 interface CreateSecretModalProps {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
-  refetch: (
-    options?: RefetchOptions
-  ) => Promise<QueryObserverResult<InfiniteData<ResourceList>, unknown>>
   onCreate?: (name: string, namespace: string) => void
 }
 
 export function CreateSecretModal({
   open,
   setOpen,
-  refetch,
   onCreate,
 }: CreateSecretModalProps) {
   const { clusterId } = useParams()
+  const queryClient = useQueryClient()
   const namespaces = useNamespaces()
 
   const [yaml, setYaml] = useState('')
@@ -68,26 +59,23 @@ export function CreateSecretModal({
 
   const deployMutation = useMutation({
     ...createAppDeploymentFromFileMutation({ client }),
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data.error) {
         setError(data.error)
         setCreating(false)
         return
       }
 
-      if (!refetch) {
-        setCreating(false)
-        setOpen(false)
-        onCreate?.(name, namespace)
-        return
-      }
+      await queryClient.invalidateQueries({
+        predicate: (query) => {
+          const key = query.queryKey[0] as { _id?: string } | undefined
+          return key?._id === 'getAllSecrets' || key?._id === 'getSecrets'
+        },
+      })
 
-      refetch()
-        .then(() => {
-          onCreate?.(name, namespace)
-          setOpen(false)
-        })
-        .finally(() => setCreating(false))
+      setCreating(false)
+      setOpen(false)
+      onCreate?.(name, namespace)
     },
     onError: (error: any) => {
       setCreating(false)
