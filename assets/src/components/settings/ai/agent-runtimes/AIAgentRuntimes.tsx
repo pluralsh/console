@@ -114,7 +114,6 @@ const columns = [
             icon={<PeopleIcon />}
             onClick={() => setOpen(true)}
             tooltip="Manage permissions"
-            type="secondary"
           />
           <AIAgentRuntimePermissionsModal
             open={open}
