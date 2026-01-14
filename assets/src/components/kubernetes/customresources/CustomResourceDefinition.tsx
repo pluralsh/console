@@ -151,8 +151,8 @@ export function CustomResourceDefinitionObjects() {
       customResource
       columns={columns}
       queryOptions={getCustomResourceObjectsInfiniteOptions}
-      pathParams={{ customResourceDefinition: name }}
-      queryParams={{
+      pathParams={{
+        crd: name,
         namespace: isEmpty(dataSelect.namespace) ? ' ' : dataSelect.namespace,
       }}
       itemsKey="items"
