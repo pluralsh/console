@@ -30,8 +30,6 @@ if (process.env.NODE_ENV === 'development') {
   loadErrorMessages()
 }
 
-// setAxiosFactory(getAxiosInstance)
-
 const sentryCreateBrowserRouter =
   Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
 
