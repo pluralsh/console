@@ -7,16 +7,17 @@ import {
   Table,
   Toast,
 } from '@pluralsh/design-system'
-import { FLOW_DOCS_URL } from 'components/flows/Flows'
+import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { GqlError } from 'components/utils/Alert'
-import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { Body1P } from 'components/utils/typography/Text'
 import {
   useGenerateMcpTokenLazyQuery,
   useMcpServersQuery,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
-import styled from 'styled-components'
+import { Link } from 'react-router-dom'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import {
   ColActions,
@@ -24,9 +25,11 @@ import {
   ColInfo,
   McpTableAction,
 } from './McpServerTableCols'
-import { InputRevealer } from 'components/cd/providers/InputRevealer'
+
+export const MCP_DOCS_URL = 'http://docs.plural.sh/plural-features/flows/mcp'
 
 export function McpServers() {
+  const { spacing } = useTheme()
   const [showJwtModal, setShowJwtModal] = useState(false)
   const [showToast, setShowToast] = useState(false)
 
@@ -57,41 +60,41 @@ export function McpServers() {
   return (
     <WrapperSC>
       {tokenError && <GqlError error={tokenError} />}
-      <Flex justifyContent="space-between">
-        <StackedText
-          first="MCP servers"
-          firstPartialType="body2Bold"
-          firstColor="text"
-          second="Add and manage MCP servers to be connected to Flows and AI chats."
-          secondPartialType="body2"
-          secondColor="text-light"
-        />
-        <Flex gap="small">
-          <Button
-            secondary
-            as="a"
-            href={FLOW_DOCS_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            endIcon={<ArrowTopRightIcon />}
-          >
-            Add via CRD
-          </Button>
-          <Button
-            floating
-            loading={generatingToken}
-            onClick={() => generateToken()}
-          >
-            Generate JWT
-          </Button>
-        </Flex>
+      <Flex
+        align="center"
+        gap="small"
+      >
+        <Body1P
+          $color="text-light"
+          css={{ flex: 1, textWrap: 'pretty', marginRight: spacing.medium }}
+        >
+          Add and manage MCP servers to be connected to Flows and AI chats.
+        </Body1P>
+        <Button
+          secondary
+          as={Link}
+          to={MCP_DOCS_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          endIcon={<ArrowTopRightIcon />}
+          style={{ flexShrink: 0, width: 200 }}
+        >
+          Add via CRD
+        </Button>
+        <Button
+          floating
+          loading={generatingToken}
+          onClick={() => generateToken()}
+          style={{ flexShrink: 0 }}
+        >
+          Generate JWT
+        </Button>
       </Flex>
       <Table
+        loose
+        hideHeader
         fullHeightWrap
         virtualizeRows
-        fillLevel={1}
-        hideHeader
-        rowBg="base"
         loading={!data && loading}
         data={mcpServers}
         columns={cols}
@@ -146,6 +149,7 @@ export function McpServers() {
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  minWidth: 678,
   overflow: 'hidden',
   height: '100%',
   gap: theme.spacing.medium,
