@@ -142,7 +142,8 @@ const cols = [
         <Flex
           gap="small"
           align="center"
-          maxWidth="250px"
+          justify="space-between"
+          width="100%"
         >
           <Tooltip
             placement="top"
@@ -193,7 +194,7 @@ const cols = [
               floating
               onClick={handleClick}
             >
-              Resolve
+              Mark as resolved
             </Button>
           )}
           <AlertResolutionModal
