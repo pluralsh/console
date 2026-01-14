@@ -12,6 +12,7 @@ fragment HelmMinimalFragment on HelmMinimal {
     values
     valuesFiles
     release
+    ignoreHooks
 }
 
 fragment RendererFragment on Renderer {

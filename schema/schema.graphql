@@ -6013,6 +6013,8 @@ input HelmMinimalAttributes {
 
   "the helm release name to use when rendering this helm chart"
   release: String
+
+  ignoreHooks: Boolean
 }
 
 input ServiceCloneAttributes {
@@ -6399,6 +6401,8 @@ type HelmMinimal {
 
   "the helm release name to use when rendering this helm chart"
   release: String
+
+  ignoreHooks: Boolean
 }
 
 "metadata needed for configuring kustomize"
