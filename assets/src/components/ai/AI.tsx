@@ -16,10 +16,8 @@ import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
   AI_ABS_PATH,
   AI_AGENT_RUNS_REL_PATH,
-  AI_AGENT_RUNTIMES_REL_PATH,
   AI_AGENT_SESSIONS_REL_PATH,
   AI_INFRA_RESEARCH_REL_PATH,
-  AI_MCP_SERVERS_REL_PATH,
   AI_SENTINELS_REL_PATH,
   AI_THREADS_REL_PATH,
 } from 'routes/aiRoutesConsts'
@@ -42,12 +40,8 @@ const getDirectory = (agentEnabled: boolean) => [
   { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
   { label: 'Chat threads', path: AI_THREADS_REL_PATH },
   { label: 'Infra research', path: AI_INFRA_RESEARCH_REL_PATH },
-  { label: 'MCP servers', path: AI_MCP_SERVERS_REL_PATH },
   ...(agentEnabled
-    ? [
-        { label: 'Agent runtimes', path: AI_AGENT_RUNTIMES_REL_PATH },
-        { label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH },
-      ]
+    ? [{ label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH }]
     : []),
 ]
 

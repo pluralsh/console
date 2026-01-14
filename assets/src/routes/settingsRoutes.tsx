@@ -54,6 +54,8 @@ import {
   USER_MANAGEMENT_REL_PATH,
 } from './settingsRoutesConst'
 import { AISettings } from 'components/settings/ai/AISettings'
+import { McpServers } from 'components/settings/ai/mcp/McpServers'
+import { AIAgentRuntimes } from 'components/settings/ai/agent-runtimes/AIAgentRuntimes'
 
 const userManagementRoutes = (
   <Route
@@ -87,6 +89,7 @@ const userManagementRoutes = (
     />
   </Route>
 )
+
 const globalSettingsRoutes = (
   <Route
     path={GLOBAL_SETTINGS_REL_PATH}
@@ -145,6 +148,7 @@ const globalSettingsRoutes = (
     />
   </Route>
 )
+
 const aiSettingsRoutes = (
   <Route
     path={AI_SETTINGS_REL_PATH}
@@ -165,11 +169,11 @@ const aiSettingsRoutes = (
     />
     <Route
       path={AI_SETTINGS_AGENT_RUNTIMES_REL_PATH}
-      element={<div>todo: agent runtimes</div>}
+      element={<AIAgentRuntimes />}
     />
     <Route
       path={AI_SETTINGS_MCP_SERVERS_REL_PATH}
-      element={<div>todo: mcp servers</div>}
+      element={<McpServers />}
     />
   </Route>
 )

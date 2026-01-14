@@ -1,4 +1,4 @@
-import { AgentRuntimeType } from '../../../generated/graphql.ts'
+import { AgentRuntimeType } from 'generated/graphql'
 import {
   IconFrame,
   styledTheme,
@@ -10,7 +10,7 @@ import { useTheme } from 'styled-components'
 import {
   fillLevelToBackground,
   fillLevelToBorderColor,
-} from '../../utils/FillLevelDiv.tsx'
+} from 'components/utils/FillLevelDiv.tsx'
 
 export const AgentRuntimeIcons = {
   [AgentRuntimeType.Claude]: {

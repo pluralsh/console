@@ -15,7 +15,6 @@ export const AI_SENTINELS_RUNS_JOBS_REL_PATH = 'jobs'
 export const AI_SENTINELS_RUNS_JOBS_OUTPUT_REL_PATH = 'output'
 export const AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH = 'job'
 
-export const AI_AGENT_RUNTIMES_REL_PATH = 'agent-runtimes'
 export const AI_AGENT_RUNS_REL_PATH = 'agent-runs'
 export const AI_AGENT_RUNS_PROGRESS_REL_PATH = 'progress'
 export const AI_AGENT_RUNS_ANALYSIS_REL_PATH = 'analysis'
