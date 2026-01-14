@@ -1,8 +1,7 @@
 /* eslint-disable */
 /* prettier-ignore */
-import * as Apollo from '@apollo/client'
-import { gql } from '@apollo/client'
-
+import { gql } from '@apollo/client';
+import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
@@ -4316,6 +4315,8 @@ export type HelmGcpAuthAttributes = {
 
 export type HelmMinimal = {
   __typename?: 'HelmMinimal';
+  /** whether to ignore hooks when rendering this helm chart */
+  ignoreHooks?: Maybe<Scalars['Boolean']['output']>;
   /** the helm release name to use when rendering this helm chart */
   release?: Maybe<Scalars['String']['output']>;
   /** a helm values file to use when rendering this helm chart */
@@ -4325,6 +4326,8 @@ export type HelmMinimal = {
 };
 
 export type HelmMinimalAttributes = {
+  /** whether to ignore hooks when rendering this helm chart */
+  ignoreHooks?: InputMaybe<Scalars['Boolean']['input']>;
   /** the helm release name to use when rendering this helm chart */
   release?: InputMaybe<Scalars['String']['input']>;
   /** a helm values file to use when rendering this helm chart */

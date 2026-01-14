@@ -123,6 +123,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :values,       :string, description: "a helm values file to use when rendering this helm chart"
     field :values_files, list_of(:string), description: "a list of relative paths to values files to use for helm chart templating"
     field :release,      :string, description: "the helm release name to use when rendering this helm chart"
+    field :ignore_hooks, :boolean, description: "whether to ignore hooks when rendering this helm chart"
   end
 
   input_object :service_clone_attributes do
@@ -399,6 +400,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :values,       :string, description: "a helm values file to use when rendering this helm chart"
     field :values_files, list_of(:string), description: "a list of relative paths to values files to use for helm chart templating"
     field :release,      :string, description: "the helm release name to use when rendering this helm chart"
+    field :ignore_hooks, :boolean, description: "whether to ignore hooks when rendering this helm chart"
   end
 
   @desc "metadata needed for configuring kustomize"

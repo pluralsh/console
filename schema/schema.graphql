@@ -6014,6 +6014,7 @@ input HelmMinimalAttributes {
   "the helm release name to use when rendering this helm chart"
   release: String
 
+  "whether to ignore hooks when rendering this helm chart"
   ignoreHooks: Boolean
 }
 
@@ -6402,6 +6403,7 @@ type HelmMinimal {
   "the helm release name to use when rendering this helm chart"
   release: String
 
+  "whether to ignore hooks when rendering this helm chart"
   ignoreHooks: Boolean
 }
 

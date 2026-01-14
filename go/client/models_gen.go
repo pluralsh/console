@@ -3518,8 +3518,9 @@ type HelmMinimal struct {
 	// a list of relative paths to values files to use for helm chart templating
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// the helm release name to use when rendering this helm chart
-	Release     *string `json:"release,omitempty"`
-	IgnoreHooks *bool   `json:"ignoreHooks,omitempty"`
+	Release *string `json:"release,omitempty"`
+	// whether to ignore hooks when rendering this helm chart
+	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
 }
 
 type HelmMinimalAttributes struct {
@@ -3528,8 +3529,9 @@ type HelmMinimalAttributes struct {
 	// a list of relative paths to values files to use for helm chart templating
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// the helm release name to use when rendering this helm chart
-	Release     *string `json:"release,omitempty"`
-	IgnoreHooks *bool   `json:"ignoreHooks,omitempty"`
+	Release *string `json:"release,omitempty"`
+	// whether to ignore hooks when rendering this helm chart
+	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
 }
 
 // A direct Plural representation of a Helm repository
