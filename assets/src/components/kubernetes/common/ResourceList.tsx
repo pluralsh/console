@@ -93,18 +93,21 @@ export function ResourceList<
     meta: { cluster, ...tableOptions },
   })
 
+  const options = queryOptions({
+    client: AxiosInstance(cluster?.id ?? ''),
+    path: { ...(namespaced ? { namespace } : undefined), ...pathParams },
+    query: {
+      filterBy: `name,${filter}`,
+      sortBy: sortBy,
+      ...DEFAULT_DATA_SELECT,
+      ...queryParams,
+    },
+  })
+
   const { data, isLoading, isFetching, hasNextPage, fetchNextPage, refetch } =
     useInfiniteQuery<TResourceList>({
-      ...queryOptions({
-        client: AxiosInstance(cluster?.id ?? ''),
-        path: { ...(namespaced ? { namespace } : undefined), ...pathParams },
-        query: {
-          filterBy: `name,${filter}`,
-          sortBy: sortBy,
-          ...DEFAULT_DATA_SELECT,
-          ...queryParams,
-        },
-      }),
+      ...options,
+      queryKey: [...options.queryKey, 'clusterId ', cluster?.id], // Add clusterId to queryKey to refetch when cluster changes
       initialPageParam: DEFAULT_DATA_SELECT.page,
       getNextPageParam: (lastPage, allPages) => {
         const pages = allPages.length
