@@ -18,6 +18,7 @@ defmodule Console.Deployments.Cron do
     AppNotification,
     Alert,
     ClusterAuditLog,
+    PolicyBinding,
     PolicyConstraint,
     VulnerabilityReport,
     ServiceTemplate,
@@ -295,6 +296,21 @@ defmodule Console.Deployments.Cron do
       Logger.info "pruning dangling template #{template.id}"
       Repo.delete(template, timeout: 10_000)
     end, max_concurrency: 10)
+    |> Stream.run()
+  end
+
+  def prune_dangling_policy_bindings() do
+    PolicyBinding.dangling()
+    |> PolicyBinding.ordered(asc: :id)
+    |> Repo.stream(method: :keyset)
+    |> Console.throttle(count: 100, pause: 1)
+    |> Stream.chunk_every(100)
+    |> Stream.each(fn bindings ->
+      ids = Enum.map(bindings, & &1.id)
+      Logger.info "pruning #{length(ids)} dangling policy bindings"
+      PolicyBinding.for_ids(ids)
+      |> Repo.delete_all(timeout: 10_000)
+    end)
     |> Stream.run()
   end
 
