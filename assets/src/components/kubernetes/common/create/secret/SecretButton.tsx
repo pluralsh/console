@@ -4,14 +4,13 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
 import { useTheme } from 'styled-components'
-import { Kind } from '../../types.ts'
+import { Kind, ResourceList } from '../../types.ts'
 import { CreateSecretModal } from './SecretModal.tsx'
 import {
   InfiniteData,
   QueryObserverResult,
   RefetchOptions,
 } from '@tanstack/react-query'
-import { ResourceList } from '../../types.ts'
 
 interface CreateSecretButtonProps {
   text: string
