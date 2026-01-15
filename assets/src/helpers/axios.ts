@@ -5,12 +5,14 @@ const clients = new Map<string, Client>()
 
 export const AxiosInstance = (clusterID: string) => {
   if (!clients.has(clusterID)) {
-    clients.set(
-      clusterID,
-      createClient({
-        headers: { Authorization: `Bearer plrl:${clusterID}:${fetchToken()}` },
-      })
-    )
+    const client = createClient()
+
+    client.instance.interceptors.request.use((config) => {
+      config.headers.Authorization = `Bearer plrl:${clusterID}:${fetchToken()}`
+      return config
+    })
+
+    clients.set(clusterID, client)
   }
 
   return clients.get(clusterID)!
