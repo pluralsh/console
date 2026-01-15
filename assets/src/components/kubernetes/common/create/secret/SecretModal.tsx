@@ -82,6 +82,15 @@ export function CreateSecretModal({
         return
       }
 
+      // Add Cache-Control header for this refetch only
+      const interceptorId = client.instance.interceptors.request.use(
+        (config) => {
+          config.headers['Cache-Control'] = 'no-cache'
+          client.instance.interceptors.request.eject(interceptorId)
+          return config
+        }
+      )
+
       refetch()
         .then(() => {
           onCreate?.(name, namespace)
