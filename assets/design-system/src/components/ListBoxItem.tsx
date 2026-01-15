@@ -39,10 +39,6 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
     alignItems: 'center',
     position: 'relative',
     width: 'auto',
-    borderBottom:
-      theme.mode === 'light'
-        ? theme.borders.default
-        : theme.borders['fill-two'],
     padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
     backgroundColor: 'none',
     cursor: 'pointer',

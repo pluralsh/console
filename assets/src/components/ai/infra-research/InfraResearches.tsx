@@ -23,10 +23,10 @@ import { capitalize, isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_INFRA_RESEARCH_REL_PATH } from 'routes/aiRoutesConsts'
+import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { getAIBreadcrumbs } from '../AI'
-import { getInfraResearchDefaultTab } from './details/InfraResearch'
 import { exampleCards, InfraResearchExampleCard } from './InfraResearchExamples'
 import { InfraResearchInput } from './InfraResearchInput'
 
@@ -39,11 +39,12 @@ export function InfraResearches() {
       queryHook: useInfraResearchesQuery,
       keyPath: ['infraResearches'],
     })
-
   const infraResearches = useMemo(
     () => mapExistingNodes(data?.infraResearches),
     [data?.infraResearches]
   )
+  const isLoading = !data && loading
+  const noExistingData = isEmpty(infraResearches) && !(isLoading || error)
 
   useSetBreadcrumbs(useMemo(() => getInfraResearchesBreadcrumbs(), []))
 
@@ -53,11 +54,7 @@ export function InfraResearches() {
       gap="xlarge"
       overflow="auto"
     >
-      <Flex
-        direction="column"
-        gap="large"
-        paddingRight={160}
-      >
+      <PromptSectionSC>
         <StackedText
           first={
             <Flex
@@ -80,11 +77,15 @@ export function InfraResearches() {
           gap="xsmall"
         />
         <Divider backgroundColor="border" />
-        {isEmpty(infraResearches) && (
+        {noExistingData && (
           <Title2H1>What is your investigation question?</Title2H1>
         )}
         <InfraResearchInput />
-        <Flex gap="xsmall">
+        <Flex
+          gap="xsmall"
+          overflow="auto"
+          css={{ [`@container (max-width: ${800}px)`]: { display: 'none' } }}
+        >
           {exampleCards.map((card) => (
             <InfraResearchExampleCard
               key={card.title}
@@ -92,8 +93,8 @@ export function InfraResearches() {
             />
           ))}
         </Flex>
-      </Flex>
-      {!isEmpty(infraResearches) && !error && (
+      </PromptSectionSC>
+      {!noExistingData && (
         <Flex
           direction="column"
           gap="small"
@@ -106,6 +107,7 @@ export function InfraResearches() {
             second="Previous prompts and questions"
             secondPartialType="body2"
             secondColor="text-light"
+            loading={isLoading}
           />
           {error ? (
             <GqlError error={error} />
@@ -115,7 +117,7 @@ export function InfraResearches() {
               fullHeightWrap
               virtualizeRows
               rowBg="raised"
-              loading={!data && loading}
+              loading={isLoading}
               data={infraResearches}
               columns={columns}
               hasNextPage={pageInfo?.hasNextPage}
@@ -124,10 +126,8 @@ export function InfraResearches() {
               onVirtualSliceChange={setVirtualSlice}
               emptyStateProps={{ message: 'No infra research runs found.' }}
               getRowLink={({ original }) => {
-                const { id, status } = original as InfraResearchFragment
-                return (
-                  <Link to={`${id}/${getInfraResearchDefaultTab(status)}`} />
-                )
+                const { id } = original as InfraResearchFragment
+                return <Link to={id} />
               }}
             />
           )}
@@ -200,3 +200,13 @@ export function InfraResearchStatusChip({
     </Chip>
   )
 }
+
+const PromptSectionSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.large,
+  paddingRight: 160,
+  [`@container (max-width: ${theme.breakpoints.desktop}px)`]: {
+    paddingRight: theme.spacing.small,
+  },
+}))

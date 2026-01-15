@@ -31,8 +31,8 @@ defmodule Console.Deployments.Services do
   alias Console.Deployments.Helm
   require Logger
 
-  @cache_adapter Console.conf(:cache_adapter)
-  @secrets_ttl :timer.hours(1)
+  @local_adapter Console.conf(:local_cache)
+  @secrets_ttl :timer.hours(24)
 
   @type service_resp :: {:ok, Service.t} | Console.error
   @type revision_resp :: {:ok, Revision.t} | Console.error
@@ -1002,8 +1002,10 @@ defmodule Console.Deployments.Services do
   Fetches a service's configuration from the configured store
   """
   @spec configuration(Service.t | Revision.t) :: Store.secrets_resp
-  @decorate cacheable(cache: @cache_adapter, key: {:secrets, id}, opts: [ttl: @secrets_ttl])
-  def configuration(%Revision{id: id}), do: secret_store().fetch(id)
+  @decorate cacheable(cache: @local_adapter, key: {:secrets, id}, opts: [ttl: @secrets_ttl])
+  def configuration(%Revision{id: id, configuration: [_ | _] = config}) when is_binary(id),
+    do: {:ok, Map.new(config, & {&1.name, &1.value})}
+  def configuration(%Revision{id: id}) when is_binary(id), do: secret_store().fetch(id)
   def configuration(%Service{revision_id: id}) when is_binary(id), do: secret_store().fetch(id)
   def configuration(%Service{revision_id: id}) when is_nil(id), do: {:ok, %{}}
 

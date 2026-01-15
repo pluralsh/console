@@ -1269,9 +1269,9 @@ func (_c *ConsoleClientMock_CreateServiceAccount_Call) RunAndReturn(run func(con
 	return _c
 }
 
-// CreateServiceAccountToken provides a mock function with given fields: ctx, id, scopes
-func (_m *ConsoleClientMock) CreateServiceAccountToken(ctx context.Context, id string, scopes []*client.ScopeAttributes) (*client.AccessTokenFragment, error) {
-	ret := _m.Called(ctx, id, scopes)
+// CreateServiceAccountToken provides a mock function with given fields: ctx, id, scopes, expiry
+func (_m *ConsoleClientMock) CreateServiceAccountToken(ctx context.Context, id string, scopes []*client.ScopeAttributes, expiry *string) (*client.AccessTokenFragment, error) {
+	ret := _m.Called(ctx, id, scopes, expiry)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateServiceAccountToken")
@@ -1279,19 +1279,19 @@ func (_m *ConsoleClientMock) CreateServiceAccountToken(ctx context.Context, id s
 
 	var r0 *client.AccessTokenFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, []*client.ScopeAttributes) (*client.AccessTokenFragment, error)); ok {
-		return rf(ctx, id, scopes)
+	if rf, ok := ret.Get(0).(func(context.Context, string, []*client.ScopeAttributes, *string) (*client.AccessTokenFragment, error)); ok {
+		return rf(ctx, id, scopes, expiry)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, []*client.ScopeAttributes) *client.AccessTokenFragment); ok {
-		r0 = rf(ctx, id, scopes)
+	if rf, ok := ret.Get(0).(func(context.Context, string, []*client.ScopeAttributes, *string) *client.AccessTokenFragment); ok {
+		r0 = rf(ctx, id, scopes, expiry)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*client.AccessTokenFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, []*client.ScopeAttributes) error); ok {
-		r1 = rf(ctx, id, scopes)
+	if rf, ok := ret.Get(1).(func(context.Context, string, []*client.ScopeAttributes, *string) error); ok {
+		r1 = rf(ctx, id, scopes, expiry)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1308,13 +1308,14 @@ type ConsoleClientMock_CreateServiceAccountToken_Call struct {
 //   - ctx context.Context
 //   - id string
 //   - scopes []*client.ScopeAttributes
-func (_e *ConsoleClientMock_Expecter) CreateServiceAccountToken(ctx interface{}, id interface{}, scopes interface{}) *ConsoleClientMock_CreateServiceAccountToken_Call {
-	return &ConsoleClientMock_CreateServiceAccountToken_Call{Call: _e.mock.On("CreateServiceAccountToken", ctx, id, scopes)}
+//   - expiry *string
+func (_e *ConsoleClientMock_Expecter) CreateServiceAccountToken(ctx interface{}, id interface{}, scopes interface{}, expiry interface{}) *ConsoleClientMock_CreateServiceAccountToken_Call {
+	return &ConsoleClientMock_CreateServiceAccountToken_Call{Call: _e.mock.On("CreateServiceAccountToken", ctx, id, scopes, expiry)}
 }
 
-func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) Run(run func(ctx context.Context, id string, scopes []*client.ScopeAttributes)) *ConsoleClientMock_CreateServiceAccountToken_Call {
+func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) Run(run func(ctx context.Context, id string, scopes []*client.ScopeAttributes, expiry *string)) *ConsoleClientMock_CreateServiceAccountToken_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].([]*client.ScopeAttributes))
+		run(args[0].(context.Context), args[1].(string), args[2].([]*client.ScopeAttributes), args[3].(*string))
 	})
 	return _c
 }
@@ -1324,7 +1325,7 @@ func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) Return(_a0 *client.A
 	return _c
 }
 
-func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) RunAndReturn(run func(context.Context, string, []*client.ScopeAttributes) (*client.AccessTokenFragment, error)) *ConsoleClientMock_CreateServiceAccountToken_Call {
+func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) RunAndReturn(run func(context.Context, string, []*client.ScopeAttributes, *string) (*client.AccessTokenFragment, error)) *ConsoleClientMock_CreateServiceAccountToken_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -1689,6 +1690,53 @@ func (_c *ConsoleClientMock_DeleteComplianceReportGenerator_Call) Return(_a0 err
 }
 
 func (_c *ConsoleClientMock_DeleteComplianceReportGenerator_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteComplianceReportGenerator_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteCustomCompatibilityMatrix provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) DeleteCustomCompatibilityMatrix(ctx context.Context, name string) error {
+	ret := _m.Called(ctx, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteCustomCompatibilityMatrix")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, name)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteCustomCompatibilityMatrix_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteCustomCompatibilityMatrix'
+type ConsoleClientMock_DeleteCustomCompatibilityMatrix_Call struct {
+	*mock.Call
+}
+
+// DeleteCustomCompatibilityMatrix is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+func (_e *ConsoleClientMock_Expecter) DeleteCustomCompatibilityMatrix(ctx interface{}, name interface{}) *ConsoleClientMock_DeleteCustomCompatibilityMatrix_Call {
+	return &ConsoleClientMock_DeleteCustomCompatibilityMatrix_Call{Call: _e.mock.On("DeleteCustomCompatibilityMatrix", ctx, name)}
+}
+
+func (_c *ConsoleClientMock_DeleteCustomCompatibilityMatrix_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_DeleteCustomCompatibilityMatrix_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteCustomCompatibilityMatrix_Call) Return(_a0 error) *ConsoleClientMock_DeleteCustomCompatibilityMatrix_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteCustomCompatibilityMatrix_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteCustomCompatibilityMatrix_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2935,6 +2983,53 @@ func (_c *ConsoleClientMock_DeleteStackDefinition_Call) RunAndReturn(run func(co
 	return _c
 }
 
+// DeleteUpgradePlanCallout provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) DeleteUpgradePlanCallout(ctx context.Context, name string) error {
+	ret := _m.Called(ctx, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteUpgradePlanCallout")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, name)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteUpgradePlanCallout_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteUpgradePlanCallout'
+type ConsoleClientMock_DeleteUpgradePlanCallout_Call struct {
+	*mock.Call
+}
+
+// DeleteUpgradePlanCallout is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+func (_e *ConsoleClientMock_Expecter) DeleteUpgradePlanCallout(ctx interface{}, name interface{}) *ConsoleClientMock_DeleteUpgradePlanCallout_Call {
+	return &ConsoleClientMock_DeleteUpgradePlanCallout_Call{Call: _e.mock.On("DeleteUpgradePlanCallout", ctx, name)}
+}
+
+func (_c *ConsoleClientMock_DeleteUpgradePlanCallout_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_DeleteUpgradePlanCallout_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteUpgradePlanCallout_Call) Return(_a0 error) *ConsoleClientMock_DeleteUpgradePlanCallout_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteUpgradePlanCallout_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteUpgradePlanCallout_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DetachService provides a mock function with given fields: serviceId
 func (_m *ConsoleClientMock) DetachService(serviceId string) error {
 	ret := _m.Called(serviceId)
@@ -3904,6 +3999,62 @@ func (_c *ConsoleClientMock_GetGroup_Call) Return(_a0 *client.GroupFragment, _a1
 }
 
 func (_c *ConsoleClientMock_GetGroup_Call) RunAndReturn(run func(string) (*client.GroupFragment, error)) *ConsoleClientMock_GetGroup_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetGroupId provides a mock function with given fields: name
+func (_m *ConsoleClientMock) GetGroupId(name string) (string, error) {
+	ret := _m.Called(name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetGroupId")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
+		return rf(name)
+	}
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(name)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetGroupId_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetGroupId'
+type ConsoleClientMock_GetGroupId_Call struct {
+	*mock.Call
+}
+
+// GetGroupId is a helper method to define mock.On call
+//   - name string
+func (_e *ConsoleClientMock_Expecter) GetGroupId(name interface{}) *ConsoleClientMock_GetGroupId_Call {
+	return &ConsoleClientMock_GetGroupId_Call{Call: _e.mock.On("GetGroupId", name)}
+}
+
+func (_c *ConsoleClientMock_GetGroupId_Call) Run(run func(name string)) *ConsoleClientMock_GetGroupId_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetGroupId_Call) Return(_a0 string, _a1 error) *ConsoleClientMock_GetGroupId_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetGroupId_Call) RunAndReturn(run func(string) (string, error)) *ConsoleClientMock_GetGroupId_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5904,6 +6055,62 @@ func (_c *ConsoleClientMock_GetUser_Call) Return(_a0 *client.UserFragment, _a1 e
 }
 
 func (_c *ConsoleClientMock_GetUser_Call) RunAndReturn(run func(string) (*client.UserFragment, error)) *ConsoleClientMock_GetUser_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetUserId provides a mock function with given fields: email
+func (_m *ConsoleClientMock) GetUserId(email string) (string, error) {
+	ret := _m.Called(email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserId")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
+		return rf(email)
+	}
+	if rf, ok := ret.Get(0).(func(string) string); ok {
+		r0 = rf(email)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetUserId_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetUserId'
+type ConsoleClientMock_GetUserId_Call struct {
+	*mock.Call
+}
+
+// GetUserId is a helper method to define mock.On call
+//   - email string
+func (_e *ConsoleClientMock_Expecter) GetUserId(email interface{}) *ConsoleClientMock_GetUserId_Call {
+	return &ConsoleClientMock_GetUserId_Call{Call: _e.mock.On("GetUserId", email)}
+}
+
+func (_c *ConsoleClientMock_GetUserId_Call) Run(run func(email string)) *ConsoleClientMock_GetUserId_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetUserId_Call) Return(_a0 string, _a1 error) *ConsoleClientMock_GetUserId_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetUserId_Call) RunAndReturn(run func(string) (string, error)) *ConsoleClientMock_GetUserId_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -8787,6 +8994,65 @@ func (_c *ConsoleClientMock_UpsertComplianceReportGenerator_Call) RunAndReturn(r
 	return _c
 }
 
+// UpsertCustomCompatibilityMatrix provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) UpsertCustomCompatibilityMatrix(ctx context.Context, attributes client.CustomCompatibilityMatrixAttributes) (*client.CustomCompatibilityMatrixFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpsertCustomCompatibilityMatrix")
+	}
+
+	var r0 *client.CustomCompatibilityMatrixFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.CustomCompatibilityMatrixAttributes) (*client.CustomCompatibilityMatrixFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.CustomCompatibilityMatrixAttributes) *client.CustomCompatibilityMatrixFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.CustomCompatibilityMatrixFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.CustomCompatibilityMatrixAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpsertCustomCompatibilityMatrix_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertCustomCompatibilityMatrix'
+type ConsoleClientMock_UpsertCustomCompatibilityMatrix_Call struct {
+	*mock.Call
+}
+
+// UpsertCustomCompatibilityMatrix is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.CustomCompatibilityMatrixAttributes
+func (_e *ConsoleClientMock_Expecter) UpsertCustomCompatibilityMatrix(ctx interface{}, attributes interface{}) *ConsoleClientMock_UpsertCustomCompatibilityMatrix_Call {
+	return &ConsoleClientMock_UpsertCustomCompatibilityMatrix_Call{Call: _e.mock.On("UpsertCustomCompatibilityMatrix", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpsertCustomCompatibilityMatrix_Call) Run(run func(ctx context.Context, attributes client.CustomCompatibilityMatrixAttributes)) *ConsoleClientMock_UpsertCustomCompatibilityMatrix_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.CustomCompatibilityMatrixAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertCustomCompatibilityMatrix_Call) Return(_a0 *client.CustomCompatibilityMatrixFragment, _a1 error) *ConsoleClientMock_UpsertCustomCompatibilityMatrix_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertCustomCompatibilityMatrix_Call) RunAndReturn(run func(context.Context, client.CustomCompatibilityMatrixAttributes) (*client.CustomCompatibilityMatrixFragment, error)) *ConsoleClientMock_UpsertCustomCompatibilityMatrix_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // UpsertFlow provides a mock function with given fields: ctx, attr
 func (_m *ConsoleClientMock) UpsertFlow(ctx context.Context, attr client.FlowAttributes) (*client.FlowFragment, error) {
 	ret := _m.Called(ctx, attr)
@@ -9315,6 +9581,65 @@ func (_c *ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call) Return(_a0 *c
 }
 
 func (_c *ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call) RunAndReturn(run func(context.Context, client.PreviewEnvironmentTemplateAttributes) (*client.PreviewEnvironmentTemplateFragment, error)) *ConsoleClientMock_UpsertPreviewEnvironmentTemplate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpsertUpgradePlanCallout provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) UpsertUpgradePlanCallout(ctx context.Context, attributes client.UpgradePlanCalloutAttributes) (*client.UpgradePlanCalloutFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpsertUpgradePlanCallout")
+	}
+
+	var r0 *client.UpgradePlanCalloutFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.UpgradePlanCalloutAttributes) (*client.UpgradePlanCalloutFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.UpgradePlanCalloutAttributes) *client.UpgradePlanCalloutFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.UpgradePlanCalloutFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.UpgradePlanCalloutAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpsertUpgradePlanCallout_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertUpgradePlanCallout'
+type ConsoleClientMock_UpsertUpgradePlanCallout_Call struct {
+	*mock.Call
+}
+
+// UpsertUpgradePlanCallout is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.UpgradePlanCalloutAttributes
+func (_e *ConsoleClientMock_Expecter) UpsertUpgradePlanCallout(ctx interface{}, attributes interface{}) *ConsoleClientMock_UpsertUpgradePlanCallout_Call {
+	return &ConsoleClientMock_UpsertUpgradePlanCallout_Call{Call: _e.mock.On("UpsertUpgradePlanCallout", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpsertUpgradePlanCallout_Call) Run(run func(ctx context.Context, attributes client.UpgradePlanCalloutAttributes)) *ConsoleClientMock_UpsertUpgradePlanCallout_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.UpgradePlanCalloutAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertUpgradePlanCallout_Call) Return(_a0 *client.UpgradePlanCalloutFragment, _a1 error) *ConsoleClientMock_UpsertUpgradePlanCallout_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertUpgradePlanCallout_Call) RunAndReturn(run func(context.Context, client.UpgradePlanCalloutAttributes) (*client.UpgradePlanCalloutFragment, error)) *ConsoleClientMock_UpsertUpgradePlanCallout_Call {
 	_c.Call.Return(run)
 	return _c
 }

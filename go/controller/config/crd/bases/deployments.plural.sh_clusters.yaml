@@ -195,6 +195,10 @@ spec:
                     type: object
                 type: object
                 x-kubernetes-map-type: atomic
+              disableAI:
+                description: DisableAI indicates whether to disable ai insights for
+                  this cluster.
+                type: boolean
               handle:
                 description: |-
                   Handle is a short, unique human-readable name used to identify this cluster.

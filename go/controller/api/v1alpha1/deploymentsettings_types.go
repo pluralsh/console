@@ -644,12 +644,19 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			return nil, err
 		}
 
+		secretKey, err := in.Bedrock.AwsSecretAccessKey(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+
 		attr.Bedrock = &console.BedrockAiAttributes{
-			ModelID:        in.Bedrock.ModelID,
-			ToolModelID:    in.Bedrock.ToolModelId,
-			AccessToken:    lo.ToPtr(secret),
-			Region:         lo.ToPtr(in.Bedrock.Region),
-			EmbeddingModel: in.Bedrock.EmbeddingModel,
+			ModelID:            in.Bedrock.ModelID,
+			ToolModelID:        in.Bedrock.ToolModelId,
+			AccessToken:        secret,
+			Region:             lo.ToPtr(in.Bedrock.Region),
+			EmbeddingModel:     in.Bedrock.EmbeddingModel,
+			AWSSecretAccessKey: secretKey,
+			AWSAccessKeyID:     in.Bedrock.AwsAccessKeyID,
 		}
 	}
 
@@ -836,8 +843,18 @@ type BedrockSettings struct {
 	// TokenSecretRef is a reference to the local secret holding the token to access
 	// the configured AI provider.
 	//
-	// +kubebuilder:validation:Required
-	TokenSecretRef corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
+	// +kubebuilder:validation:Optional
+	TokenSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
+
+	// AWS Access Key ID to use for authentication
+	//
+	// +kubebuilder:validation:Optional
+	AwsAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
+
+	// AWS Secret Access Key to use for authentication
+	//
+	// +kubebuilder:validation:Optional
+	AwsSecretAccessKeyRef *corev1.SecretKeySelector `json:"awsSecretAccessKeyRef,omitempty"`
 }
 
 type VertexSettings struct {
@@ -934,12 +951,30 @@ func (in *OllamaSettings) Authorization(ctx context.Context, c client.Client, na
 	return lo.ToPtr(res), err
 }
 
-func (in *BedrockSettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
+func (in *BedrockSettings) Token(ctx context.Context, c client.Client, namespace string) (*string, error) {
 	if in == nil {
-		return "", fmt.Errorf("configured bedrock settings cannot be nil")
+		return nil, fmt.Errorf("configured bedrock settings cannot be nil")
 	}
 
-	return utils.GetSecretKey(ctx, c, &in.TokenSecretRef, namespace)
+	if in.TokenSecretRef == nil {
+		return nil, nil
+	}
+
+	res, err := utils.GetSecretKey(ctx, c, in.TokenSecretRef, namespace)
+	return lo.ToPtr(res), err
+}
+
+func (in *BedrockSettings) AwsSecretAccessKey(ctx context.Context, c client.Client, namespace string) (*string, error) {
+	if in == nil {
+		return nil, fmt.Errorf("configured bedrock settings cannot be nil")
+	}
+
+	if in.AwsSecretAccessKeyRef == nil {
+		return nil, nil
+	}
+
+	res, err := utils.GetSecretKey(ctx, c, in.AwsSecretAccessKeyRef, namespace)
+	return lo.ToPtr(res), err
 }
 
 func (in *VertexSettings) ServiceAccountJSON(ctx context.Context, c client.Client, namespace string) (*string, error) {

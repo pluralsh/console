@@ -81,7 +81,7 @@ export function useFetchSlice<
   const [endCursors, setEndCursors] = useState<
     { index: number; cursor: string }[]
   >([])
-  const endCursor = queryResult?.data?.[queryKey]?.pageInfo.endCursor
+  const endCursor = queryResult?.data?.[queryKey]?.pageInfo?.endCursor
   const endCursorIndex = (queryResult?.data?.[queryKey]?.edges?.length ?? 0) - 1
   const prevEndCursor = usePrevious(endCursor)
 

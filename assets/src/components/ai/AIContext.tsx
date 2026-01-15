@@ -10,6 +10,7 @@ import {
   useChatThreadDetailsQuery,
   useCloneChatThreadMutation,
   useCreateChatThreadMutation,
+  useInfraResearchQuery,
 } from 'generated/graphql.ts'
 import {
   createContext,
@@ -51,6 +52,11 @@ export const AUTO_AGENT_TYPES = [
 
 export type AutoAgentSessionT = Nullable<(typeof AUTO_AGENT_TYPES)[number]>
 
+export enum AIViewTypes {
+  ChatThread = 'CHAT_THREAD',
+  InfraResearch = 'INFRA_RESEARCH',
+}
+
 const isAutoAgentType = (
   type: Nullable<AgentSessionType>
 ): type is NonNullable<AutoAgentSessionT> => {
@@ -60,6 +66,9 @@ const isAutoAgentType = (
 type ChatbotContextT = {
   open: boolean
   setOpen: (open: boolean) => void
+
+  viewType: AIViewTypes
+  setViewType: (viewType: AIViewTypes) => void
 
   actionsPanelOpen: boolean
   setActionsPanelOpen: (show: boolean) => void
@@ -88,6 +97,10 @@ type ChatbotContextT = {
   agentInitMode: AutoAgentSessionT
   setAgentInitMode: Dispatch<SetStateAction<AutoAgentSessionT>>
 
+  // used to render infra research view if it's the current ViewType
+  currentResearchId: Nullable<string>
+  setCurrentResearchId: (researchId: Nullable<string>) => void
+
   // the thread with the given ID will send this message, and then clear the value, next time it opens
   // particularly useful for cases where we want to create a new thread with an initial message (and want to guarantee the message isn't sent to the wrong place)
   queuedChatMessage: Nullable<QueuedChatMessage>
@@ -112,11 +125,18 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
   const { setIsExpanded: setSidebarExpanded } = use(SidebarContext)
   const [open, setOpenState] = usePersistedState('plural-ai-chat-open', false)
+  const [viewType, setViewType] = usePersistedState<AIViewTypes>(
+    'plural-ai-view-type',
+    AIViewTypes.ChatThread
+  )
   const [actionsPanelOpen, setActionsPanelOpen] = useState<boolean>(false)
   const [mcpPanelOpen, setMcpPanelOpen] = useState<boolean>(false)
   const [currentThreadId, setCurrentThreadId] = usePersistedState<
     Nullable<string>
   >('plural-ai-current-thread-id', null)
+  const [currentResearchId, setCurrentResearchId] = usePersistedState<
+    Nullable<string>
+  >('plural-ai-current-research-id', null)
   const [lastNonAgentThreadId, setLastNonAgentThreadId] =
     useState<Nullable<string>>()
   const [agentInitMode, setAgentInitMode] =
@@ -130,15 +150,35 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
     loading: currentThreadLoading,
     error: threadError,
   } = useChatThreadDetailsQuery({
-    skip: !currentThreadId || !open,
+    skip: !currentThreadId || !open || viewType !== AIViewTypes.ChatThread,
     variables: { id: currentThreadId ?? '' },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
-  // should handle cases of stale thread id being persisted
+
+  const { error: researchError } = useInfraResearchQuery({
+    variables: { id: currentResearchId ?? '' },
+    skip: !open || viewType !== AIViewTypes.InfraResearch,
+    fetchPolicy: 'network-only',
+    pollInterval: POLL_INTERVAL,
+  })
+
+  // should handle cases of stale ids being persisted
   useEffect(() => {
     if (currentThreadId && threadError) setCurrentThreadId(null)
-  }, [currentThreadId, setCurrentThreadId, threadError])
+    if (researchError) {
+      setCurrentResearchId(null)
+      setViewType(AIViewTypes.ChatThread)
+    }
+  }, [
+    currentResearchId,
+    currentThreadId,
+    researchError,
+    setCurrentResearchId,
+    setCurrentThreadId,
+    threadError,
+    setViewType,
+  ])
 
   const currentThread = threadData?.chatThread
 
@@ -165,12 +205,16 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
         currentThreadLoading,
         currentThreadId,
         setCurrentThreadId,
+        currentResearchId,
+        setCurrentResearchId,
         selectedAgent,
         agentInitMode,
         setAgentInitMode,
         lastNonAgentThreadId,
         setLastNonAgentThreadId,
         setShowForkToast,
+        viewType,
+        setViewType,
         actionsPanelOpen,
         setActionsPanelOpen,
         mcpPanelOpen,
@@ -217,9 +261,9 @@ function ExplainWithAIContextProvider({ children }: { children: ReactNode }) {
 
 export function useChatbotContext() {
   const context = use(ChatbotContext)
-  if (!context) {
+  if (!context)
     throw new Error('useChatbot must be used within a ChatbotProvider')
-  }
+
   return context
 }
 
@@ -227,7 +271,9 @@ export function useChatbot() {
   const {
     open,
     setOpen,
+    setViewType,
     setCurrentThreadId,
+    setCurrentResearchId,
     lastNonAgentThreadId,
     setAgentInitMode,
     setShowForkToast,
@@ -243,12 +289,30 @@ export function useChatbot() {
   const goToThread = useCallback(
     (threadId: Nullable<string>, queuedMessage?: Nullable<string>) => {
       setCurrentThreadId(threadId)
+      setViewType(AIViewTypes.ChatThread)
+      setCurrentResearchId(null)
       setAgentInitMode(null)
       setOpen(true)
       if (queuedMessage && threadId)
         setQueuedChatMessage({ message: queuedMessage, threadId })
     },
-    [setAgentInitMode, setCurrentThreadId, setOpen, setQueuedChatMessage]
+    [
+      setAgentInitMode,
+      setCurrentThreadId,
+      setCurrentResearchId,
+      setOpen,
+      setQueuedChatMessage,
+      setViewType,
+    ]
+  )
+
+  const goToInfraResearch = useCallback(
+    (researchId: string) => {
+      setViewType(AIViewTypes.InfraResearch)
+      setCurrentResearchId(researchId)
+      setOpen(true)
+    },
+    [setViewType, setCurrentResearchId, setOpen]
   )
 
   const createNewThread = (
@@ -277,6 +341,7 @@ export function useChatbot() {
         variables: { id, seq },
         onCompleted: (data) => {
           setCurrentThreadId(data.cloneThread?.id)
+          setViewType(AIViewTypes.ChatThread)
           setOpen(true)
           setShowForkToast(true)
           onCompleted?.(data)
@@ -285,12 +350,12 @@ export function useChatbot() {
       })
     },
     goToThread,
+    goToInfraResearch,
     goToLastNonAgentThread: () => {
       if (!lastNonAgentThreadId) {
         createNewThread({ summary: 'New chat with Plural AI' })
         return
       }
-
       goToThread(lastNonAgentThreadId)
     },
     isChatbotOpen: open,
@@ -299,6 +364,7 @@ export function useChatbot() {
     mutationError: createError || forkError,
     setOpen,
     setCurrentThreadId,
+    setCurrentResearchId,
     lastNonAgentThreadId,
     setAgentInitMode,
     setShowForkToast,

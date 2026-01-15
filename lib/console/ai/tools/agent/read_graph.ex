@@ -1,6 +1,7 @@
 defmodule Console.AI.Tools.Agent.ReadGraph do
   use Console.AI.Tools.Agent.Base
   alias Console.AI.Research.Graph
+  alias Console.Schema.InfraResearch
 
   embedded_schema do
   end
@@ -16,5 +17,12 @@ defmodule Console.AI.Tools.Agent.ReadGraph do
   def name(), do: plrl_tool("read_graph")
   def description(), do: "Fetches the current state of the knowledge graph of the investigation to this point.  Use this if you need to remember any details of work done"
 
-  def implement(_), do: Graph.encode()
+  def implement(_) do
+    case Tool.parent() do
+      %InfraResearch{} = r ->
+        Graph.convert(r)
+        |> Graph.encode()
+      _ -> Graph.encode()
+    end
+  end
 end

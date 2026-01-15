@@ -26,7 +26,7 @@ defmodule Console.Helm.Interface.HTTP do
 end
 
 defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
-  import Console.Helm.Utils, only: [match_version: 2]
+  import Console.Helm.Utils, only: [match_version: 2, has_wildcard?: 1]
   alias Console.Schema.HelmRepository
   alias Console.Helm.{Index, Chart}
 
@@ -44,10 +44,9 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
   defp handle_body(%Req.Response{status: 200, body: body}) when is_binary(body),
     do: YamlElixir.read_from_string(body)
 
-  def chart(%@for{repo: %HelmRepository{url: "http" <> _}} = client, %Index{entries: entries}, chart, vsn) do
-    entries = Map.new(entries, & {&1.name, &1.versions})
-    with {:chart, %{^chart => charts}} <- {:chart, entries},
-         {:version, %Chart{} = chart} <- {:version, match_version(charts, vsn)},
+  def chart(%@for{repo: %HelmRepository{url: "http" <> _}} = client, %Index{indexed: %{} = indexed}, chart, vsn) do
+    with {:chart, %{^chart => charts}} <- {:chart, indexed},
+         {:version, %Chart{} = chart} <- {:version, find_version(charts, vsn)},
          {:ok, url} <- check_url(chart.urls) do
       {:ok, client, url, chart.digest}
     else
@@ -67,4 +66,11 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
   defp check_url(["oci://" <> _ = url | _]), do: {:error, "invalid oci helm url: #{url}"}
   defp check_url([url | _]) when is_binary(url), do: {:ok, url}
   defp check_url(_), do: {:error, "no urls found for chart"}
+
+  defp find_version(charts, vsn) do
+    case has_wildcard?(vsn) do
+      false -> Map.get(charts, vsn)
+      true -> Map.values(charts) |> match_version(vsn)
+    end
+  end
 end

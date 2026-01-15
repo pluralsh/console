@@ -16,6 +16,8 @@ defmodule Console.Schema.InfraResearch do
       field :notes,   {:array, :string}
 
       embeds_one :graph, Graph, on_replace: :update do
+        field :notes, {:array, :string}
+
         embeds_many :vertices, Vertex, on_replace: :delete do
           field :identifier,  :string
           field :type,        :string

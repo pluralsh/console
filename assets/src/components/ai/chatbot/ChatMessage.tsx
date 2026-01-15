@@ -245,7 +245,7 @@ export function PrLinkoutCard({ url, title }: { url: string; title: string }) {
         window.open(url, '_blank')
       }}
       css={{
-        padding: `${theme.spacing.small}px ${theme.spacing.large}px`,
+        padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
         width: '100%',
       }}
     >
@@ -258,8 +258,8 @@ export function PrLinkoutCard({ url, title }: { url: string; title: string }) {
           align="center"
         >
           <AppIcon
-            icon={<GitHubLogoIcon size={32} />}
-            size="xsmall"
+            icon={<GitHubLogoIcon size={24} />}
+            size="xxsmall"
           />
           <Body2BoldP $color="text-light">{title}</Body2BoldP>
         </Flex>

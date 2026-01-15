@@ -328,6 +328,22 @@ defmodule Console.Services.Users do
     end
   end
 
+  @doc """
+  Introspects an access token and returns the token back if it is valid
+  """
+  @spec introspect_access_token(binary, User.t) :: token_resp
+  def introspect_access_token(token, %User{id: id} = user) do
+    Repo.get_by(AccessToken, token: token)
+    |> Repo.preload([:user])
+    |> case do
+      %AccessToken{user: %User{id: ^id}} = token -> {:ok, token}
+      %AccessToken{user: %User{service_account: true} = sa} = token ->
+        Console.Deployments.Policies.allow(sa, user, :assume)
+        |> when_ok(fn _ -> {:ok, token} end)
+      _ -> {:error, "cannot introspect this token"}
+    end
+  end
+
   defp group_attrs(%{"groups" => [_ | _] = groups}), do: groups
   defp group_attrs(%{"adgroups" => [_ | _] = groups}), do: groups
   defp group_attrs(%{"groups" => group}) when is_binary(group), do: [group]

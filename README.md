@@ -24,9 +24,16 @@ We are currently trying to aggregate compatibility and dependency information fo
 * $150 for adding a new application and all to-date compatibility information
 * $300 for a new compatibility scraper (these are all defined in `utils/compatibility/scrapers`)
 
-To be eligible for the upgrade bounty you'll need to submit a PR to this repo with the changes and a link to whatever documentation confirms the correctness of the information.  We'll then review and if it's correct and useful for the broader community, you'll be eligible for the reward once merged.
+To be eligible for the upgrade bounty you'll need to submit a PR to this repo with the changes and a link to whatever documentation confirms the correctness of the information.  We'll then review and if it's correct and useful for the broader community, you'll be eligible for the reward once merged.  A quality PR for compatibility tables includes:
 
-It would also be great to ensure the compatibility is tested before submitting a review, that can be done by modifying the file at `lib/console/deployments/compatibilities/table.ex#11` to have the url var point to your fork/branch.  You should then be able to run `mix test` to confirm everything is correct (this does require setting up elixir on your laptop).
+1. The table itself at `static/compatibilities`
+2. A scraper to automatically generate them in the future at `utils/compatibility/scrapers`
+3. A link to the docs in PR description proving the logic in 1-2 is sound
+4. Ensure the following are provided (you can use either argo-cd or ingress-nginx as decent examples to imitate):
+   a. helm repository url
+   b. brand icon (add dark icon if necessary when standard icon is only dark colors)
+   c. git repository url
+   d. release url
 
 To claim the reward, you should get in touch with us on our discord at https://discord.gg/pluralsh and we'll simply need to confirm that you did the work (easy way to do that is linking your discord handle on the relevant PRs) and we'll give you the bounty you've earned.
 

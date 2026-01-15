@@ -19,7 +19,7 @@ import { CreatePrModal } from 'components/self-service/pr/automations/CreatePrMo
 
 import { GqlError } from 'components/utils/Alert'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
-import { Body2BoldP, Body2P, CaptionP } from 'components/utils/typography/Text'
+import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
   AgentSessionFragment,
   AiRole,
@@ -32,10 +32,10 @@ import {
   useDeleteChatMutation,
 } from 'generated/graphql'
 
-import isJson from 'is-json'
 import { ReactElement, useState } from 'react'
 
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
+import { ToolCallContent } from './ToolCallContent'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
 import styled, { useTheme } from 'styled-components'
 import { iconUrl as getIconUrl } from 'utils/icon'
@@ -388,25 +388,6 @@ function PrCallContent({
   )
 }
 
-enum MessageFormat {
-  Json = 'json',
-  Markdown = 'markdown',
-}
-
-const messageFormat = (message: string): MessageFormat => {
-  if (isJson(message)) return MessageFormat.Json
-  return MessageFormat.Markdown
-}
-
-const prettifyJson = (message: string): string => {
-  try {
-    const formatted = JSON.stringify(JSON.parse(message), null, 1)
-    return formatted
-  } catch (_) {
-    return message
-  }
-}
-
 function ToolMessageContent({
   id,
   content,
@@ -418,7 +399,6 @@ function ToolMessageContent({
   const { spacing } = useTheme()
   const [openValue, setOpenValue] = useState('')
   const pendingConfirmation = confirm && !confirmedAt
-  const format = messageFormat(content)
   const [deleteMessage, { loading: deleteLoading, error: deleteError }] =
     useDeleteChatMutation({
       awaitRefetchQueries: true,
@@ -487,50 +467,11 @@ function ToolMessageContent({
               </Flex>
             }
           >
-            <Flex
-              direction="column"
-              marginTop={spacing.small}
-              gap="small"
-            >
-              {attributes?.tool?.arguments && (
-                <div>
-                  <Body2P $color="text-light">Arguments:</Body2P>
-                  <ToolMessageContentSC>
-                    <Code
-                      language="json"
-                      showHeader={false}
-                      css={{ height: '100%', background: 'none' }}
-                    >
-                      {JSON.stringify(attributes?.tool?.arguments, null, 2)}
-                    </Code>
-                  </ToolMessageContentSC>
-                </div>
-              )}
-              <div>
-                <Body2P $color="text-light">Response:</Body2P>
-                <ToolMessageContentSC>
-                  {format === MessageFormat.Json && (
-                    <Code
-                      language="json"
-                      showHeader={false}
-                      css={{ height: '100%', background: 'none' }}
-                    >
-                      {prettifyJson(content)}
-                    </Code>
-                  )}
-                  {format === MessageFormat.Markdown && (
-                    <Card
-                      css={{
-                        padding: spacing.medium,
-                        background: 'none',
-                        height: '100%',
-                      }}
-                    >
-                      <Markdown text={content} />
-                    </Card>
-                  )}
-                </ToolMessageContentSC>
-              </div>
+            <Flex marginTop={spacing.small}>
+              <ToolCallContent
+                content={content}
+                attributes={attributes}
+              />
             </Flex>
           </AccordionItem>
         </Accordion>
@@ -571,14 +512,6 @@ const ToolMessageWrapperSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-one'],
   border: theme.borders.default,
   padding: theme.spacing.small,
-  borderRadius: theme.borderRadiuses.large,
-}))
-const ToolMessageContentSC = styled.div(({ theme }) => ({
-  maxHeight: 324,
-  marginTop: theme.spacing.xxsmall,
-  maxWidth: '100%',
-  overflow: 'auto',
-  background: theme.colors['fill-two'],
   borderRadius: theme.borderRadiuses.large,
 }))
 

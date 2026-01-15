@@ -42,6 +42,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :metadata,       :json
     field :protect,        :boolean
     field :kubeconfig,     :kubeconfig_attributes
+    field :disable_ai,     :boolean, description: "whether to disable ai insights for this cluster"
     field :cloud_settings, :cloud_settings_attributes
     field :project_id,     :id, description: "the project id this cluster will belong to"
     field :upgrade_plan,   :upgrade_plan_attributes, description: "status of the upgrade plan for this cluster"
@@ -105,6 +106,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :protect,      :boolean
     field :distro,       :cluster_distro
     field :metadata,     :json
+    field :disable_ai,   :boolean, description: "whether to disable ai insights for this cluster"
     field :node_pools,   list_of(:node_pool_attributes)
     field :tags,         list_of(:tag_attributes)
     field :read_bindings,  list_of(:policy_binding_attributes)
@@ -378,6 +380,40 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :max, :integer
   end
 
+  @desc "a callout for the upgrade plan"
+  input_object :upgrade_plan_callout_attributes do
+    field :name, non_null(:string), description: "the name of the callout"
+    field :callouts, list_of(:upgrade_plan_callout_callout_attributes), description: "the callouts for this instance"
+    field :context, :json, description: "additional context for this callout"
+  end
+
+  @desc "a callout for a specific addon in the upgrade plan"
+  input_object :upgrade_plan_callout_callout_attributes do
+    field :addon,    non_null(:string), description: "the addon this callout applies to"
+    field :template, non_null(:string), description: "the template to use for this callout"
+  end
+
+  input_object :custom_compatibility_matrix_attributes do
+    field :name,        non_null(:string), description: "the name of the matrix"
+    field :icon,        :string, description: "the icon to use for this matrix"
+    field :git_url,     :string, description: "the git url to use for this matrix"
+    field :release_url, :string, description: "the release url to use for this matrix"
+    field :readme_url,  :string, description: "the readme url to use for this matrix"
+    field :versions,    list_of(:compatibility_matrix_version_attributes), description: "the versions for this matrix"
+  end
+
+  input_object :compatibility_matrix_version_attributes do
+    field :version,       non_null(:string), description: "the version of the matrix"
+    field :chart_version, :string, description: "the chart version of the matrix"
+    field :kube,          list_of(non_null(:string)), description: "the kube version of the matrix"
+    field :summary,       :compatibility_matrix_summary_attributes, description: "the summary for this version"
+  end
+
+  input_object :compatibility_matrix_summary_attributes do
+    field :helm_changes, list_of(non_null(:string)), description: "the helm changes for this version"
+    field :breaking_changes, list_of(non_null(:string)), description: "the breaking changes for this version"
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -444,6 +480,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :settings,          :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
     field :upgrade_plan,      :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
     field :ping_interval,      :integer, description: "the interval in seconds between pings to the cluster"
+    field :disable_ai,         :boolean, description: "whether to disable ai insights for this cluster"
 
     field :openshift_version,  :string, description: "The version of OpenShift this cluster is running"
     field :node_count,         :integer, description: "The number of nodes in this cluster"
@@ -619,6 +656,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     connection field :audit_logs, node_type: :cluster_audit_log do
       resolve &Deployments.list_cluster_audits/3
+    end
+
+    @desc "lists all deprecated custom resources for this cluster with optional filtering"
+    connection field :deprecated_crds, node_type: :deprecated_custom_resource do
+      arg :q, :string, description: "a search query to filter on group, kind, namespace or name"
+      resolve &Deployments.list_deprecated_crds/3
     end
 
     timestamps()
@@ -874,6 +917,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :addon,   :runtime_addon
     field :current, :addon_version
     field :fix,     :addon_version
+    field :callout, :string
   end
 
   object :cloud_addon_upgrade do
@@ -1214,6 +1258,43 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :api_updates, list_of(:string), description: "the api updates in this version"
   end
 
+  object :upgrade_plan_callout do
+    field :id,       non_null(:id)
+    field :name,     non_null(:string)
+    field :callouts, list_of(:upgrade_plan_callout_callout)
+    field :context,  :map
+
+    timestamps()
+  end
+
+  object :upgrade_plan_callout_callout do
+    field :addon,    non_null(:string)
+    field :template, non_null(:string)
+  end
+
+  @desc "a custom compatibility matrix for a given addon"
+  object :custom_compatibility_matrix do
+    field :id,          non_null(:id)
+    field :name,        non_null(:string), description: "the name of the addon this matrix applies to"
+    field :icon,        :string, description: "the icon to use for this matrix"
+    field :git_url,     :string, description: "the git url of this add-on"
+    field :release_url, :string, description: "the release url of this add-on"
+    field :readme_url,  :string, description: "the readme url of this add-on"
+    field :versions,    list_of(:custom_compatibility_matrix_version), description: "the versions for this matrix"
+  end
+
+  object :custom_compatibility_matrix_version do
+    field :version,       non_null(:string), description: "the application version of the addon this matrix applies to"
+    field :chart_version, :string, description: "the chart version of the addon this matrix applies to"
+    field :kube,          list_of(non_null(:string)), description: "the kube versions of the addon this matrix applies to"
+    field :summary,       :compatibility_matrix_summary, description: "the summary for this version"
+  end
+
+  object :compatibility_matrix_summary do
+    field :helm_changes,     list_of(non_null(:string)), description: "the helm changes for this version"
+    field :breaking_changes, list_of(non_null(:string)), description: "the breaking changes for this version"
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -1226,6 +1307,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   connection node_type: :cluster_registration
   connection node_type: :cluster_iso_image
   connection node_type: :project_usage_history
+  connection node_type: :deprecated_custom_resource
   delta :cluster
   delta :cluster_provider
 
@@ -1699,6 +1781,46 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_cluster_iso_image/2
+    end
+
+    field :upsert_upgrade_plan_callout, :upgrade_plan_callout do
+      middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
+      arg :attributes, non_null(:upgrade_plan_callout_attributes)
+
+      resolve &Deployments.upsert_upgrade_plan_callout/2
+    end
+
+    field :delete_upgrade_plan_callout, :upgrade_plan_callout do
+      middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
+      arg :name, non_null(:string)
+
+      resolve &Deployments.delete_upgrade_plan_callout/2
+    end
+
+    field :upsert_custom_compatibility_matrix, :custom_compatibility_matrix do
+      middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
+      arg :attributes, non_null(:custom_compatibility_matrix_attributes)
+
+      resolve &Deployments.upsert_custom_compatibility_matrix/2
+    end
+
+    field :delete_custom_compatibility_matrix, :custom_compatibility_matrix do
+      middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
+      arg :name, non_null(:string)
+
+      resolve &Deployments.delete_custom_compatibility_matrix/2
     end
   end
 end

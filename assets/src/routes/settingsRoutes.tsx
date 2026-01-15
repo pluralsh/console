@@ -32,13 +32,17 @@ import NotificationSinks from '../components/settings/notifications/sinks/Notifi
 
 import NotificationRouters from '../components/settings/notifications/routers/NotificationRouters'
 
-import { GlobalSettingsAiProvider } from 'components/settings/global/GlobalSettingsAiProvider'
+import { AISettingsProvider } from 'components/settings/ai/AISettingsProvider'
 import { ObservabilityProviders } from 'components/settings/global/observability/ObservabilityProviders'
 import { ObservabilityWebhooks } from 'components/settings/global/observability/ObservabilityWebhooks'
 import { OidcSettings } from 'components/settings/global/oidc/OidcSettings'
 import { RequireCdEnabled } from './cdRoutes'
 import {
   ACCESS_TOKENS_REL_PATH,
+  AI_SETTINGS_AGENT_RUNTIMES_REL_PATH,
+  AI_SETTINGS_AI_PROVIDER_REL_PATH,
+  AI_SETTINGS_MCP_SERVERS_REL_PATH,
+  AI_SETTINGS_REL_PATH,
   AUDITS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
   NOTIFICATIONS_REL_PATH,
@@ -49,6 +53,9 @@ import {
   USER_MANAGEMENT_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
 } from './settingsRoutesConst'
+import { AISettings } from 'components/settings/ai/AISettings'
+import { McpServers } from 'components/settings/ai/mcp/McpServers'
+import { AIAgentRuntimes } from 'components/settings/ai/agent-runtimes/AIAgentRuntimes'
 
 const userManagementRoutes = (
   <Route
@@ -82,6 +89,7 @@ const userManagementRoutes = (
     />
   </Route>
 )
+
 const globalSettingsRoutes = (
   <Route
     path={GLOBAL_SETTINGS_REL_PATH}
@@ -103,10 +111,6 @@ const globalSettingsRoutes = (
     <Route
       path="repositories"
       element={<GlobalSettingsRepositories />}
-    />
-    <Route
-      path="ai-provider"
-      element={<GlobalSettingsAiProvider />}
     />
     <Route
       path="agents"
@@ -141,6 +145,35 @@ const globalSettingsRoutes = (
     <Route
       path="smtp"
       element={<GlobalSettingsSMTP />}
+    />
+  </Route>
+)
+
+const aiSettingsRoutes = (
+  <Route
+    path={AI_SETTINGS_REL_PATH}
+    element={<AISettings />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to={AI_SETTINGS_AI_PROVIDER_REL_PATH}
+        />
+      }
+    />
+    <Route
+      path={AI_SETTINGS_AI_PROVIDER_REL_PATH}
+      element={<AISettingsProvider />}
+    />
+    <Route
+      path={AI_SETTINGS_AGENT_RUNTIMES_REL_PATH}
+      element={<AIAgentRuntimes />}
+    />
+    <Route
+      path={AI_SETTINGS_MCP_SERVERS_REL_PATH}
+      element={<McpServers />}
     />
   </Route>
 )
@@ -220,6 +253,7 @@ export const settingsRoutes = (
     />
     {userManagementRoutes}
     {globalSettingsRoutes}
+    {aiSettingsRoutes}
     {projectSettingsRoutes}
     {notificationsRoutes}
     {auditRoutes}

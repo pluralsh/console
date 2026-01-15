@@ -1,3 +1,5 @@
+import elkLayouts from '@mermaid-js/layout-elk'
+import mermaid from 'mermaid'
 import {
   ComponentPropsWithoutRef,
   Ref,
@@ -6,19 +8,24 @@ import {
   useLayoutEffect,
   useState,
 } from 'react'
-import mermaid from 'mermaid'
-import elkLayouts from '@mermaid-js/layout-elk'
+import styled from 'styled-components'
 import {
   CheckIcon,
+  CloseIcon,
   CopyIcon,
   DownloadIcon,
+  ExpandIcon,
   IconFrame,
   ReloadIcon,
   styledTheme,
 } from '..'
 import { useCopyText } from './Code'
 import Highlight from './Highlight'
+import { ModalWrapper } from './ModalWrapper'
 import { PanZoomWrapper } from './PanZoomWrapper'
+import WrapWithIf from './WrapWithIf'
+
+export const MERMAID_BG_COLOR = '#f7f8fa'
 
 mermaid.initialize({
   startOnLoad: false,
@@ -53,6 +60,7 @@ export function Mermaid({
   const [isLoading, setIsLoading] = useState(true)
   const [error, setErrorState] = useState<Nullable<Error>>(null)
   const [panZoomKey, setPanZoomKey] = useState(0) // increment to force panzoom wrapper to reset
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const { copied, handleCopy } = useCopyText(diagram)
 
   const setError = useCallback(
@@ -91,7 +99,7 @@ export function Mermaid({
         if (!isMounted) return
         const err =
           caughtErr instanceof Error ? caughtErr : new Error(String(caughtErr))
-        console.error('Error parsing Mermaid (rendering plaintext):', err)
+        console.warn('Error parsing Mermaid (rendering plaintext):', err)
         setError(err)
         setIsLoading(false)
         cachedRenders[id] = err
@@ -115,50 +123,77 @@ export function Mermaid({
     )
 
   return (
-    <PanZoomWrapper
-      key={panZoomKey}
-      actionButtons={
-        <>
-          <IconFrame
-            clickable
-            onClick={() => setPanZoomKey((key) => key + 1)}
-            icon={<ReloadIcon />}
-            type="floating"
-            tooltip="Reset view to original size"
-          />
-          <IconFrame
-            clickable
-            onClick={handleCopy}
-            icon={copied ? <CheckIcon /> : <CopyIcon />}
-            type="floating"
-            tooltip="Copy Mermaid code"
-          />
-          <IconFrame
-            clickable
-            onClick={() => svgStr && downloadMermaidSvg(svgStr)}
-            icon={<DownloadIcon />}
-            type="floating"
-            tooltip="Download as PNG"
-          />
-        </>
+    <WrapWithIf
+      condition={isFullscreen}
+      wrapper={
+        <FullscreenWrapperSC
+          open={isFullscreen}
+          onOpenChange={setIsFullscreen}
+          title="Mermaid Diagram"
+        />
       }
-      {...props}
     >
-      {isLoading ? (
-        <div css={{ color: styledTheme.colors.grey[950] }}>
-          Loading diagram...
-        </div>
-      ) : (
-        svgStr && (
-          <div
-            dangerouslySetInnerHTML={{ __html: svgStr }}
-            style={{ textAlign: 'center' }}
-          />
-        )
-      )}
-    </PanZoomWrapper>
+      <PanZoomWrapper
+        key={panZoomKey}
+        actionButtons={
+          <>
+            <IconFrame
+              clickable
+              onClick={() => setPanZoomKey((key) => key + 1)}
+              icon={<ReloadIcon />}
+              type="floating"
+              tooltip="Reset view to original size"
+            />
+            <IconFrame
+              clickable
+              onClick={handleCopy}
+              icon={copied ? <CheckIcon /> : <CopyIcon />}
+              type="floating"
+              tooltip="Copy Mermaid code"
+            />
+            <IconFrame
+              clickable
+              onClick={() => svgStr && downloadMermaidSvg(svgStr)}
+              icon={<DownloadIcon />}
+              type="floating"
+              tooltip="Download as PNG"
+            />
+            <IconFrame
+              clickable
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              icon={isFullscreen ? <CloseIcon /> : <ExpandIcon />}
+              type="floating"
+              tooltip={isFullscreen ? 'Exit fullscreen' : 'View fullscreen'}
+            />
+          </>
+        }
+        css={isFullscreen ? { width: '100%', height: '100%' } : undefined}
+        {...props}
+      >
+        {isLoading ? (
+          <div css={{ color: styledTheme.colors.grey[950] }}>
+            Loading diagram...
+          </div>
+        ) : (
+          svgStr && (
+            <div
+              dangerouslySetInnerHTML={{ __html: svgStr }}
+              style={{ textAlign: 'center' }}
+            />
+          )
+        )}
+      </PanZoomWrapper>
+    </WrapWithIf>
   )
 }
+
+const FullscreenWrapperSC = styled(ModalWrapper)(({ theme }) => ({
+  width: 'calc(100vw - 80px)',
+  height: 'calc(100vh - 80px)',
+  backgroundColor: MERMAID_BG_COLOR,
+  borderRadius: theme.borderRadiuses.large,
+  overflow: 'hidden',
+}))
 
 export const downloadMermaidSvg = (svgStr: string) => {
   const parser = new DOMParser()

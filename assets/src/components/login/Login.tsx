@@ -75,7 +75,7 @@ export function EnsureLogin({ children }) {
 
   const loginContextValue = data
 
-  if (error || (!loading && !data?.clusterInfo)) {
+  if (error || (!loading && !data?.configuration)) {
     return (
       <LoginError
         me={data?.me}
@@ -84,7 +84,7 @@ export function EnsureLogin({ children }) {
     )
   }
 
-  if (!data?.clusterInfo) return null
+  if (!data?.configuration) return null
 
   return (
     <LoginContextProvider value={loginContextValue}>

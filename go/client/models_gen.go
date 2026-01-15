@@ -404,6 +404,27 @@ type AgentRunEdge struct {
 	Cursor *string   `json:"cursor,omitempty"`
 }
 
+// A repository that has been used by an agent run in the past, useful for typeaheads and dropdowns
+type AgentRunRepository struct {
+	ID string `json:"id"`
+	// the url of the repository
+	URL string `json:"url"`
+	// the last time the repository was used
+	LastUsedAt *string `json:"lastUsedAt,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type AgentRunRepositoryConnection struct {
+	PageInfo PageInfo                  `json:"pageInfo"`
+	Edges    []*AgentRunRepositoryEdge `json:"edges,omitempty"`
+}
+
+type AgentRunRepositoryEdge struct {
+	Node   *AgentRunRepository `json:"node,omitempty"`
+	Cursor *string             `json:"cursor,omitempty"`
+}
+
 type AgentRunStatusAttributes struct {
 	// the status of this agent run
 	Status AgentRunStatus `json:"status"`
@@ -1304,9 +1325,11 @@ type ChatThread struct {
 	Settings      *ChatThreadSettings `json:"settings,omitempty"`
 	LastMessageAt *string             `json:"lastMessageAt,omitempty"`
 	Flow          *Flow               `json:"flow,omitempty"`
+	Service       *ServiceDeployment  `json:"service,omitempty"`
 	User          *User               `json:"user,omitempty"`
 	Insight       *AiInsight          `json:"insight,omitempty"`
 	Session       *AgentSession       `json:"session,omitempty"`
+	Research      *InfraResearch      `json:"research,omitempty"`
 	// the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists
 	Tools      []*McpServerTool `json:"tools,omitempty"`
 	Chats      *ChatConnection  `json:"chats,omitempty"`
@@ -1325,6 +1348,10 @@ type ChatThreadAttributes struct {
 	InsightID *string `json:"insightId,omitempty"`
 	// the flow this thread was created in
 	FlowID *string `json:"flowId,omitempty"`
+	// the service this thread was created for
+	ServiceID *string `json:"serviceId,omitempty"`
+	// the research this thread was created for
+	ResearchID *string `json:"researchId,omitempty"`
 	// the settings for this thread
 	Settings *ChatThreadSettingsAttributes `json:"settings,omitempty"`
 	// the session to use for this thread
@@ -1505,6 +1532,8 @@ type Cluster struct {
 	UpgradePlan *ClusterUpgradePlan `json:"upgradePlan,omitempty"`
 	// the interval in seconds between pings to the cluster
 	PingInterval *int64 `json:"pingInterval,omitempty"`
+	// whether to disable ai insights for this cluster
+	DisableAi *bool `json:"disableAi,omitempty"`
 	// The version of OpenShift this cluster is running
 	OpenshiftVersion *string `json:"openshiftVersion,omitempty"`
 	// The number of nodes in this cluster
@@ -1616,10 +1645,12 @@ type Cluster struct {
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
 	CloudAddons []*CloudAddon `json:"cloudAddons,omitempty"`
 	// whether the current user can edit this cluster
-	Editable   *bool                      `json:"editable,omitempty"`
-	AuditLogs  *ClusterAuditLogConnection `json:"auditLogs,omitempty"`
-	InsertedAt *string                    `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                    `json:"updatedAt,omitempty"`
+	Editable  *bool                      `json:"editable,omitempty"`
+	AuditLogs *ClusterAuditLogConnection `json:"auditLogs,omitempty"`
+	// lists all deprecated custom resources for this cluster with optional filtering
+	DeprecatedCrds *DeprecatedCustomResourceConnection `json:"deprecatedCrds,omitempty"`
+	InsertedAt     *string                             `json:"insertedAt,omitempty"`
+	UpdatedAt      *string                             `json:"updatedAt,omitempty"`
 }
 
 // A common kubernetes cluster add-on like cert-manager, istio, etc
@@ -1637,12 +1668,14 @@ type ClusterAttributes struct {
 	Handle     *string `json:"handle,omitempty"`
 	ProviderID *string `json:"providerId,omitempty"`
 	// a cloud credential to use when provisioning this cluster
-	CredentialID  *string                  `json:"credentialId,omitempty"`
-	Version       *string                  `json:"version,omitempty"`
-	Distro        *ClusterDistro           `json:"distro,omitempty"`
-	Metadata      *string                  `json:"metadata,omitempty"`
-	Protect       *bool                    `json:"protect,omitempty"`
-	Kubeconfig    *KubeconfigAttributes    `json:"kubeconfig,omitempty"`
+	CredentialID *string               `json:"credentialId,omitempty"`
+	Version      *string               `json:"version,omitempty"`
+	Distro       *ClusterDistro        `json:"distro,omitempty"`
+	Metadata     *string               `json:"metadata,omitempty"`
+	Protect      *bool                 `json:"protect,omitempty"`
+	Kubeconfig   *KubeconfigAttributes `json:"kubeconfig,omitempty"`
+	// whether to disable ai insights for this cluster
+	DisableAi     *bool                    `json:"disableAi,omitempty"`
 	CloudSettings *CloudSettingsAttributes `json:"cloudSettings,omitempty"`
 	// the project id this cluster will belong to
 	ProjectID *string `json:"projectId,omitempty"`
@@ -2141,10 +2174,12 @@ type ClusterUpdateAttributes struct {
 	// pass a kubeconfig for this cluster (DEPRECATED)
 	Kubeconfig *KubeconfigAttributes `json:"kubeconfig,omitempty"`
 	// status of the upgrade plan for this cluster
-	UpgradePlan   *UpgradePlanAttributes     `json:"upgradePlan,omitempty"`
-	Protect       *bool                      `json:"protect,omitempty"`
-	Distro        *ClusterDistro             `json:"distro,omitempty"`
-	Metadata      *string                    `json:"metadata,omitempty"`
+	UpgradePlan *UpgradePlanAttributes `json:"upgradePlan,omitempty"`
+	Protect     *bool                  `json:"protect,omitempty"`
+	Distro      *ClusterDistro         `json:"distro,omitempty"`
+	Metadata    *string                `json:"metadata,omitempty"`
+	// whether to disable ai insights for this cluster
+	DisableAi     *bool                      `json:"disableAi,omitempty"`
 	NodePools     []*NodePoolAttributes      `json:"nodePools,omitempty"`
 	Tags          []*TagAttributes           `json:"tags,omitempty"`
 	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
@@ -2244,6 +2279,31 @@ type CommitShaAttributes struct {
 	Sha string `json:"sha"`
 	// the branch of the commit
 	Branch string `json:"branch"`
+}
+
+type CompatibilityMatrixSummary struct {
+	// the helm changes for this version
+	HelmChanges []string `json:"helmChanges,omitempty"`
+	// the breaking changes for this version
+	BreakingChanges []string `json:"breakingChanges,omitempty"`
+}
+
+type CompatibilityMatrixSummaryAttributes struct {
+	// the helm changes for this version
+	HelmChanges []string `json:"helmChanges,omitempty"`
+	// the breaking changes for this version
+	BreakingChanges []string `json:"breakingChanges,omitempty"`
+}
+
+type CompatibilityMatrixVersionAttributes struct {
+	// the version of the matrix
+	Version string `json:"version"`
+	// the chart version of the matrix
+	ChartVersion *string `json:"chartVersion,omitempty"`
+	// the kube version of the matrix
+	Kube []string `json:"kube,omitempty"`
+	// the summary for this version
+	Summary *CompatibilityMatrixSummaryAttributes `json:"summary,omitempty"`
 }
 
 type ComplianceReportGenerator struct {
@@ -2392,14 +2452,15 @@ type ConsoleConfiguration struct {
 	VpnEnabled     *bool   `json:"vpnEnabled,omitempty"`
 	SentryEnabled  *bool   `json:"sentryEnabled,omitempty"`
 	// whether at least one cluster has been installed, false if a user hasn't fully onboarded
-	Installed    *bool              `json:"installed,omitempty"`
-	Cloud        *bool              `json:"cloud,omitempty"`
-	Byok         *bool              `json:"byok,omitempty"`
-	ExternalOidc *bool              `json:"externalOidc,omitempty"`
-	OidcName     *string            `json:"oidcName,omitempty"`
-	Features     *AvailableFeatures `json:"features,omitempty"`
-	Manifest     *PluralManifest    `json:"manifest,omitempty"`
-	GitStatus    *GitStatus         `json:"gitStatus,omitempty"`
+	Installed     *bool              `json:"installed,omitempty"`
+	Cloud         *bool              `json:"cloud,omitempty"`
+	Byok          *bool              `json:"byok,omitempty"`
+	ExternalOidc  *bool              `json:"externalOidc,omitempty"`
+	OidcName      *string            `json:"oidcName,omitempty"`
+	Features      *AvailableFeatures `json:"features,omitempty"`
+	LicenseExpiry *string            `json:"licenseExpiry,omitempty"`
+	Manifest      *PluralManifest    `json:"manifest,omitempty"`
+	GitStatus     *GitStatus         `json:"gitStatus,omitempty"`
 }
 
 type ConstraintRef struct {
@@ -2569,6 +2630,49 @@ type CrossVersionResourceTarget struct {
 	APIVersion *string `json:"apiVersion,omitempty"`
 	Kind       *string `json:"kind,omitempty"`
 	Name       *string `json:"name,omitempty"`
+}
+
+// a custom compatibility matrix for a given addon
+type CustomCompatibilityMatrix struct {
+	ID string `json:"id"`
+	// the name of the addon this matrix applies to
+	Name string `json:"name"`
+	// the icon to use for this matrix
+	Icon *string `json:"icon,omitempty"`
+	// the git url of this add-on
+	GitURL *string `json:"gitUrl,omitempty"`
+	// the release url of this add-on
+	ReleaseURL *string `json:"releaseUrl,omitempty"`
+	// the readme url of this add-on
+	ReadmeURL *string `json:"readmeUrl,omitempty"`
+	// the versions for this matrix
+	Versions []*CustomCompatibilityMatrixVersion `json:"versions,omitempty"`
+}
+
+type CustomCompatibilityMatrixAttributes struct {
+	// the name of the matrix
+	Name string `json:"name"`
+	// the icon to use for this matrix
+	Icon *string `json:"icon,omitempty"`
+	// the git url to use for this matrix
+	GitURL *string `json:"gitUrl,omitempty"`
+	// the release url to use for this matrix
+	ReleaseURL *string `json:"releaseUrl,omitempty"`
+	// the readme url to use for this matrix
+	ReadmeURL *string `json:"readmeUrl,omitempty"`
+	// the versions for this matrix
+	Versions []*CompatibilityMatrixVersionAttributes `json:"versions,omitempty"`
+}
+
+type CustomCompatibilityMatrixVersion struct {
+	// the application version of the addon this matrix applies to
+	Version string `json:"version"`
+	// the chart version of the addon this matrix applies to
+	ChartVersion *string `json:"chartVersion,omitempty"`
+	// the kube versions of the addon this matrix applies to
+	Kube []string `json:"kube,omitempty"`
+	// the summary for this version
+	Summary *CompatibilityMatrixSummary `json:"summary,omitempty"`
 }
 
 type CustomRunStep struct {
@@ -2857,6 +2961,16 @@ type DeprecatedCustomResourceAttributes struct {
 	Name      string  `json:"name"`
 	// the next valid version for this resource
 	NextVersion string `json:"nextVersion"`
+}
+
+type DeprecatedCustomResourceConnection struct {
+	PageInfo PageInfo                        `json:"pageInfo"`
+	Edges    []*DeprecatedCustomResourceEdge `json:"edges,omitempty"`
+}
+
+type DeprecatedCustomResourceEdge struct {
+	Node   *DeprecatedCustomResource `json:"node,omitempty"`
+	Cursor *string                   `json:"cursor,omitempty"`
 }
 
 // Allows you to control whether a specific set of fields in a kubernetes object is drift detected
@@ -3412,6 +3526,8 @@ type HelmMinimal struct {
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// the helm release name to use when rendering this helm chart
 	Release *string `json:"release,omitempty"`
+	// whether to ignore helm hooks when rendering this helm chart
+	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
 }
 
 type HelmMinimalAttributes struct {
@@ -3421,6 +3537,8 @@ type HelmMinimalAttributes struct {
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// the helm release name to use when rendering this helm chart
 	Release *string `json:"release,omitempty"`
+	// whether to ignore helm hooks when rendering this helm chart
+	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
 }
 
 // A direct Plural representation of a Helm repository
@@ -6411,6 +6529,7 @@ type RuntimeAddonUpgrade struct {
 	Addon   *RuntimeAddon `json:"addon,omitempty"`
 	Current *AddonVersion `json:"current,omitempty"`
 	Fix     *AddonVersion `json:"fix,omitempty"`
+	Callout *string       `json:"callout,omitempty"`
 }
 
 // a service encapsulating a controller like istio/ingress-nginx/etc that is meant to extend the kubernetes api
@@ -7582,6 +7701,8 @@ type StackRun struct {
 	Git GitRef `json:"git"`
 	// whether this run is a dry run
 	DryRun bool `json:"dryRun"`
+	// whether this run is a destroy run
+	Destroy *bool `json:"destroy,omitempty"`
 	// optional k8s job configuration for the job that will apply this stack
 	JobSpec      *JobGateSpec  `json:"jobSpec,omitempty"`
 	PolicyEngine *PolicyEngine `json:"policyEngine,omitempty"`
@@ -8025,6 +8146,38 @@ type UpgradePlanAttributes struct {
 	Deprecations *bool `json:"deprecations,omitempty"`
 }
 
+type UpgradePlanCallout struct {
+	ID         string                       `json:"id"`
+	Name       string                       `json:"name"`
+	Callouts   []*UpgradePlanCalloutCallout `json:"callouts,omitempty"`
+	Context    map[string]any               `json:"context,omitempty"`
+	InsertedAt *string                      `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                      `json:"updatedAt,omitempty"`
+}
+
+// a callout for the upgrade plan
+type UpgradePlanCalloutAttributes struct {
+	// the name of the callout
+	Name string `json:"name"`
+	// the callouts for this instance
+	Callouts []*UpgradePlanCalloutCalloutAttributes `json:"callouts,omitempty"`
+	// additional context for this callout
+	Context *string `json:"context,omitempty"`
+}
+
+type UpgradePlanCalloutCallout struct {
+	Addon    string `json:"addon"`
+	Template string `json:"template"`
+}
+
+// a callout for a specific addon in the upgrade plan
+type UpgradePlanCalloutCalloutAttributes struct {
+	// the addon this callout applies to
+	Addon string `json:"addon"`
+	// the template to use for this callout
+	Template string `json:"template"`
+}
+
 type UpgradePlanSpec struct {
 	Version     *string `json:"version,omitempty"`
 	Cordon      *bool   `json:"cordon,omitempty"`
@@ -8266,6 +8419,7 @@ type Vulnerability struct {
 	FixedVersion     *string       `json:"fixedVersion,omitempty"`
 	InstalledVersion *string       `json:"installedVersion,omitempty"`
 	Severity         *VulnSeverity `json:"severity,omitempty"`
+	AgentRuntime     *string       `json:"agentRuntime,omitempty"`
 	Score            *float64      `json:"score,omitempty"`
 	Title            *string       `json:"title,omitempty"`
 	Description      *string       `json:"description,omitempty"`
@@ -8291,6 +8445,7 @@ type VulnerabilityAttributes struct {
 	Severity         *VulnSeverity         `json:"severity,omitempty"`
 	Score            *float64              `json:"score,omitempty"`
 	RepositoryURL    *string               `json:"repositoryUrl,omitempty"`
+	AgentRuntime     *string               `json:"agentRuntime,omitempty"`
 	Title            *string               `json:"title,omitempty"`
 	Description      *string               `json:"description,omitempty"`
 	CvssSource       *string               `json:"cvssSource,omitempty"`
@@ -8315,10 +8470,12 @@ type VulnerabilityReport struct {
 	// the language the artifact is written in
 	ArtifactLanguage *AgentRunLanguage `json:"artifactLanguage,omitempty"`
 	// the language version of the artifact, if applicable
-	ArtifactLanguageVersion *string       `json:"artifactLanguageVersion,omitempty"`
-	Os                      *VulnOs       `json:"os,omitempty"`
-	Summary                 *VulnSummary  `json:"summary,omitempty"`
-	Artifact                *VulnArtifact `json:"artifact,omitempty"`
+	ArtifactLanguageVersion *string `json:"artifactLanguageVersion,omitempty"`
+	// the agent runtime to use with this vulnerability report
+	AgentRuntime *string       `json:"agentRuntime,omitempty"`
+	Os           *VulnOs       `json:"os,omitempty"`
+	Summary      *VulnSummary  `json:"summary,omitempty"`
+	Artifact     *VulnArtifact `json:"artifact,omitempty"`
 	// the grade of the vulnerability report
 	Grade           *VulnReportGrade `json:"grade,omitempty"`
 	Vulnerabilities []*Vulnerability `json:"vulnerabilities,omitempty"`
@@ -8335,13 +8492,15 @@ type VulnerabilityReportAttributes struct {
 	// the language the artifact is written in
 	ArtifactLanguage *AgentRunLanguage `json:"artifactLanguage,omitempty"`
 	// the language version of the artifact, if applicable
-	ArtifactLanguageVersion *string                    `json:"artifactLanguageVersion,omitempty"`
-	Os                      *VulnOsAttributes          `json:"os,omitempty"`
-	Summary                 *VulnSummaryAttributes     `json:"summary,omitempty"`
-	Artifact                *VulnArtifactAttributes    `json:"artifact,omitempty"`
-	Vulnerabilities         []*VulnerabilityAttributes `json:"vulnerabilities,omitempty"`
-	Services                []*ServiceVulnAttributes   `json:"services,omitempty"`
-	Namespaces              []*NamespaceVulnAttributes `json:"namespaces,omitempty"`
+	ArtifactLanguageVersion *string `json:"artifactLanguageVersion,omitempty"`
+	// the agent runtime to use with this vulnerability report
+	AgentRuntime    *string                    `json:"agentRuntime,omitempty"`
+	Os              *VulnOsAttributes          `json:"os,omitempty"`
+	Summary         *VulnSummaryAttributes     `json:"summary,omitempty"`
+	Artifact        *VulnArtifactAttributes    `json:"artifact,omitempty"`
+	Vulnerabilities []*VulnerabilityAttributes `json:"vulnerabilities,omitempty"`
+	Services        []*ServiceVulnAttributes   `json:"services,omitempty"`
+	Namespaces      []*NamespaceVulnAttributes `json:"namespaces,omitempty"`
 }
 
 type VulnerabilityReportConnection struct {

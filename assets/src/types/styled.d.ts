@@ -1,5 +1,7 @@
 // import original module declarations
 import 'styled-components'
+// using more specific object type instead of full styled-components CSSProp to simplify things (and we never use the other types in CSSProp anyway)
+import type { StyledObject } from 'styled-components'
 
 import { type styledTheme } from '@pluralsh/design-system'
 
@@ -7,7 +9,7 @@ import { type styledTheme } from '@pluralsh/design-system'
 // also allow any CSS custom variable to be used in CSSProperties
 declare module 'react' {
   interface Attributes {
-    css?: CSSProp | undefined
+    css?: StyledObject | undefined
   }
   interface CSSProperties {
     [key: `--${string}`]: Nullable<string | number>

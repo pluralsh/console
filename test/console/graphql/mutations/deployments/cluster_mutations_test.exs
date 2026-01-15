@@ -680,4 +680,122 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
       refute refetch(iso)
     end
   end
+
+  describe "upsertUpgradePlanCallout" do
+    test "admins can upsert a new callout" do
+      {:ok, %{data: %{"upsertUpgradePlanCallout" => callout}}} = run_query("""
+        mutation Upsert($attrs: UpgradePlanCalloutAttributes!) {
+          upsertUpgradePlanCallout(attributes: $attrs) {
+            id
+            name
+            callouts { addon template }
+            context
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "test",
+          "callouts" => [%{
+            "addon" => "ingress-nginx",
+            "template" => "template"
+          }],
+          "context" => JSON.encode!(%{"some" => "context"})
+        }
+      }, %{current_user: admin_user()})
+
+      assert callout["id"]
+      assert callout["name"] == "test"
+      assert callout["callouts"] == [%{
+        "addon" => "ingress-nginx",
+        "template" => "template"
+      }]
+      assert callout["context"] == %{"some" => "context"}
+    end
+  end
+
+  describe "deleteUpgradePlanCallout" do
+    test "admins can delete a callout" do
+      callout = insert(:upgrade_plan_callout)
+      {:ok, %{data: %{"deleteUpgradePlanCallout" => deleted}}} = run_query("""
+        mutation Delete($name: String!) {
+          deleteUpgradePlanCallout(name: $name) {
+            id
+          }
+        }
+      """, %{"name" => callout.name}, %{current_user: admin_user()})
+
+      assert deleted["id"] == callout.id
+      refute refetch(callout)
+    end
+  end
+
+  describe "upsertCustomCompatibilityMatrix" do
+    test "admins can upsert a new matrix" do
+      {:ok, %{data: %{"upsertCustomCompatibilityMatrix" => matrix}}} = run_query("""
+        mutation Upsert($attrs: CustomCompatibilityMatrixAttributes!) {
+          upsertCustomCompatibilityMatrix(attributes: $attrs) {
+            id
+            name
+            icon
+            gitUrl
+            releaseUrl
+            readmeUrl
+            versions {
+              version
+              chartVersion
+              kube
+              summary { helmChanges breakingChanges }
+            }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "test",
+          "icon" => "icon",
+          "gitUrl" => "git@github.com:test/test.git",
+          "releaseUrl" => "https://github.com/test/test/releases/tag/v1.0.0",
+          "readmeUrl" => "https://github.com/test/test/blob/main/README.md",
+          "versions" => [%{
+            "version" => "1.0.0",
+            "chartVersion" => "1.0.0",
+            "kube" => ["1.25"],
+            "summary" => %{
+              "helmChanges" => ["helm change"],
+              "breakingChanges" => ["breaking change"]
+            }
+          }]
+        }
+      }, %{current_user: admin_user()})
+
+      assert matrix["id"]
+      assert matrix["name"] == "test"
+      assert matrix["icon"] == "icon"
+      assert matrix["gitUrl"] == "git@github.com:test/test.git"
+      assert matrix["releaseUrl"] == "https://github.com/test/test/releases/tag/v1.0.0"
+      assert matrix["readmeUrl"] == "https://github.com/test/test/blob/main/README.md"
+
+      [version] = matrix["versions"]
+      assert version["version"] == "1.0.0"
+      assert version["chartVersion"] == "1.0.0"
+      assert version["kube"] == ["1.25"]
+      assert version["summary"]["helmChanges"] == ["helm change"]
+      assert version["summary"]["breakingChanges"] == ["breaking change"]
+    end
+  end
+
+  describe "deleteCustomCompatibilityMatrix" do
+    test "admins can delete a matrix" do
+      matrix = insert(:custom_compatibility_matrix)
+      {:ok, %{data: %{"deleteCustomCompatibilityMatrix" => deleted}}} = run_query("""
+        mutation Delete($name: String!) {
+          deleteCustomCompatibilityMatrix(name: $name) {
+            id
+          }
+        }
+      """, %{"name" => matrix.name}, %{current_user: admin_user()})
+
+      assert deleted["id"] == matrix.id
+      refute refetch(matrix)
+    end
+  end
 end

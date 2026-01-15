@@ -1,0 +1,33 @@
+mutation UpsertCustomCompatibilityMatrix($attributes: CustomCompatibilityMatrixAttributes!) {
+    upsertCustomCompatibilityMatrix(attributes: $attributes)  {
+        ...CustomCompatibilityMatrixFragment
+    }
+}
+
+mutation DeleteCustomCompatibilityMatrix($name: String!) {
+    deleteCustomCompatibilityMatrix(name: $name) {
+        id
+    }
+}
+
+mutation UpsertUpgradePlanCallout($attributes: UpgradePlanCalloutAttributes!) {
+    upsertUpgradePlanCallout(attributes: $attributes)  {
+        ...UpgradePlanCalloutFragment
+    }
+}
+
+mutation DeleteUpgradePlanCallout($name: String!) {
+    deleteUpgradePlanCallout(name: $name) {
+        id
+    }
+}
+
+fragment CustomCompatibilityMatrixFragment on CustomCompatibilityMatrix {
+    id
+    name
+}
+
+fragment UpgradePlanCalloutFragment on UpgradePlanCallout {
+    id
+    name
+}

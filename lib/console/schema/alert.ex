@@ -20,6 +20,7 @@ defmodule Console.Schema.Alert do
     field :type,     ObservabilityWebhook.Type
     field :severity, Severity
     field :state,    State
+    field :state_changed, :boolean, virtual: true, default: false
 
     field :title,       :string
     field :message,     :string
@@ -129,6 +130,7 @@ defmodule Console.Schema.Alert do
     |> foreign_key_constraint(:insight_id)
     |> validate_required(~w(type title state severity message fingerprint)a)
     |> validate_one_present(~w(project_id cluster_id service_id flow_id)a)
+    |> change_markers(state: :state_changed)
   end
 
   def stacktrace_changeset(model, attrs) do

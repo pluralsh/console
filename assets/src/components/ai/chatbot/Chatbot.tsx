@@ -7,7 +7,7 @@ import styled from 'styled-components'
 import { useChatThreadMessagesQuery } from '../../../generated/graphql.ts'
 import { mapExistingNodes } from '../../../utils/graphql.ts'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
-import { useChatbot, useChatbotContext } from '../AIContext.tsx'
+import { AIViewTypes, useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { ChatbotAgentInit } from './ChatbotAgentInit.tsx'
 
 import { ChatbotActionsPanel } from './actions-panel/ChatbotActionsPanel.tsx'
@@ -16,6 +16,7 @@ import { ChatbotHeader } from './ChatbotHeader.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
 import { McpServerShelf } from './tools/McpServerShelf.tsx'
 import { useResizablePane } from './useResizeableChatPane.tsx'
+import { ChatbotPanelInfraResearch } from './ChatbotPanelInfraResearch.tsx'
 
 const MIN_WIDTH = 500
 const MAX_WIDTH_VW = 40
@@ -55,7 +56,8 @@ export function ChatbotPanel() {
 }
 
 function ChatbotPanelInner() {
-  const { currentThread, currentThreadId, agentInitMode } = useChatbot()
+  const { currentThread, currentThreadId, agentInitMode, viewType } =
+    useChatbot()
   const { data, loading, error, fetchNextPage, pageInfo, refetch } =
     useFetchPaginatedData(
       {
@@ -101,6 +103,8 @@ function ChatbotPanelInner() {
         <ChatbotHeader />
         {!!agentInitMode ? (
           <ChatbotAgentInit />
+        ) : viewType === AIViewTypes.InfraResearch ? (
+          <ChatbotPanelInfraResearch />
         ) : (
           <ChatbotPanelThread
             messages={messages}

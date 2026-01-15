@@ -16,7 +16,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     ClusterAuditLog,
     ClusterRegistration,
     ClusterISOImage,
-    DeploymentSettings
+    DeploymentSettings,
+    DeprecatedCustomResource
   }
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
@@ -171,6 +172,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> paginate(args)
   end
 
+  def list_deprecated_crds(%Cluster{id: id}, args, _) do
+    DeprecatedCustomResource.for_cluster(id)
+    |> maybe_search(DeprecatedCustomResource, args)
+    |> DeprecatedCustomResource.ordered()
+    |> paginate(args)
+  end
+
   def agent_helm_values_for_cluster(_, _, _) do
     case Settings.cached() do
       %DeploymentSettings{agent_helm_values: vals} when is_binary(vals) ->
@@ -316,6 +324,18 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def delete_cluster_iso_image(%{id: id}, %{context: %{current_user: user}}),
     do: Clusters.delete_cluster_iso_image(id, user)
+
+  def upsert_upgrade_plan_callout(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Clusters.upsert_upgrade_plan_callout(attrs, user)
+
+  def delete_upgrade_plan_callout(%{name: name}, %{context: %{current_user: user}}),
+    do: Clusters.delete_upgrade_plan_callout(name, user)
+
+  def upsert_custom_compatibility_matrix(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Clusters.upsert_custom_compatibility_matrix(attrs, user)
+
+  def delete_custom_compatibility_matrix(%{name: name}, %{context: %{current_user: user}}),
+    do: Clusters.delete_custom_compatibility_matrix(name, user)
 
   def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Clusters.ping(attrs, cluster)

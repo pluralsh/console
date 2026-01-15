@@ -75,7 +75,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
-	if exists {
+	if exists && !project.Spec.Reconciliation.DriftDetect() {
 		utils.MarkReadOnly(project)
 		return in.handleExistingProject(ctx, project)
 	}

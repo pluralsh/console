@@ -41,8 +41,8 @@ fragment Persona on Persona {
   }
 }
 
-query Personas($cursor: String) {
-  personas(first: 3, after: $cursor) {
+query Personas($first: Int = 3, $after: String) {
+  personas(first: $first, after: $after) {
     pageInfo {
       ...PageInfo
     }

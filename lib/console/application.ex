@@ -22,6 +22,7 @@ defmodule Console.Application do
       Console.MultilevelCache,
       Console.TestCache,
       Console.LocalCache,
+      {Task.Supervisor, name: Console.AI.TaskSupervisor},
       {Registry, [keys: :unique, name: Console.Buffer.Base.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Pipelines.Supervisor.registry()]},
@@ -56,6 +57,11 @@ defmodule Console.Application do
       Console.AI.GothManager,
       Console.PromEx,
       Console.AI.Graph.Indexer.Supervisor,
+      {GRPC.Server.Supervisor,
+        endpoint: Console.GRPC.Endpoint,
+        port: 50051,
+        start_server: Console.conf(:initialize)
+      }
     ] ++ consumers()
       ++ oidc_providers()
       ++ [Piazza.GracefulShutdown]

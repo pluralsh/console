@@ -1,11 +1,12 @@
 import {
+  ClockIcon,
   CloseIcon,
   Flex,
   HamburgerMenuCollapseIcon,
-  HistoryIcon,
   IconFrame,
   PlusIconAlt,
   Spinner,
+  TelescopeIcon,
   Toast,
 } from '@pluralsh/design-system'
 import {
@@ -13,18 +14,23 @@ import {
   CommandPaletteTab,
 } from 'components/commandpalette/CommandPaletteContext.tsx'
 import { Body2BoldP } from 'components/utils/typography/Text'
-import { useCloudConnectionsQuery } from 'generated/graphql'
-import { capitalize } from 'lodash'
+import {
+  useCloudConnectionsQuery,
+  useInfraResearchQuery,
+} from 'generated/graphql'
+import { capitalize, truncate } from 'lodash'
 import { use } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { getFlowDetailsPath } from '../../../routes/flowRoutesConsts.tsx'
 import { StackedText } from '../../utils/table/StackedText.tsx'
-import { useChatbot } from '../AIContext'
+import { AIViewTypes, useChatbot } from '../AIContext'
 import { getInsightPathInfo, TableEntryResourceLink } from '../AITableEntry'
 import { AgentSelect } from './AgentSelect.tsx'
 import { AgentSessionTypeSelect } from './AgentSessionTypeSelect.tsx'
 import { CHATBOT_HEADER_HEIGHT } from './Chatbot.tsx'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
+import { getInfraResearchAbsPath } from 'routes/aiRoutesConsts.tsx'
+import { InfraResearchStatusChip } from '../infra-research/details/InfraResearch.tsx'
 
 export function ChatbotHeader() {
   const { colors } = useTheme()
@@ -39,6 +45,8 @@ export function ChatbotHeader() {
     createNewThread,
     mutationLoading,
     mutationError,
+    viewType,
+    currentResearchId,
   } = useChatbot()
 
   const { data: cloudConnections, loading: cloudConnectionsLoading } =
@@ -50,6 +58,10 @@ export function ChatbotHeader() {
     path: [currentThread.flow.name],
     url: getFlowDetailsPath({ flowId: currentThread.flow.id }),
   }
+  const { data: researchData } = useInfraResearchQuery({
+    variables: { id: currentResearchId ?? '' },
+    skip: !currentResearchId || viewType !== AIViewTypes.InfraResearch,
+  })
 
   return (
     <Flex direction="column">
@@ -93,7 +105,7 @@ export function ChatbotHeader() {
           )}
           <IconFrame
             clickable
-            icon={<HistoryIcon />}
+            icon={<ClockIcon />}
             type="tertiary"
             tooltip="View chat threads"
             onClick={() => setCmdkOpen(true, CommandPaletteTab.Threads)}
@@ -109,20 +121,55 @@ export function ChatbotHeader() {
         </Flex>
       </MainHeaderSC>
       <SubHeaderSC>
-        <StackedText
-          truncate
-          first={
-            agentInitMode
-              ? `New ${capitalize(agentInitMode)} agent session`
-              : (currentThread?.summary ??
-                (currentThreadId ? '' : 'New chat with Plural AI'))
-          }
-          second={<TableEntryResourceLink {...(insightPathInfo || flowPath)} />}
-          firstPartialType="body2Bold"
-          firstColor="text"
-          secondPartialType="caption"
-        />
-        <AgentSessionTypeSelect />
+        {viewType === AIViewTypes.InfraResearch || currentThread?.research ? (
+          <StackedText
+            icon={<TelescopeIcon />}
+            first={`Infrastructure research${viewType === AIViewTypes.InfraResearch ? ' progress' : ''}`}
+            firstPartialType="body1"
+            firstColor="text"
+            second={
+              viewType === AIViewTypes.ChatThread && (
+                <TableEntryResourceLink
+                  path={[
+                    truncate(currentThread?.research?.prompt ?? '', {
+                      length: 50,
+                    }),
+                  ]}
+                  url={getInfraResearchAbsPath({
+                    infraResearchId: currentThread?.research?.id ?? '',
+                  })}
+                />
+              )
+            }
+          />
+        ) : (
+          <>
+            <StackedText
+              truncate
+              first={
+                agentInitMode
+                  ? `New ${capitalize(agentInitMode)} agent session`
+                  : (currentThread?.summary ??
+                    (currentThreadId ? '' : 'New chat with Plural AI'))
+              }
+              second={
+                <TableEntryResourceLink {...(insightPathInfo || flowPath)} />
+              }
+              firstPartialType="body2Bold"
+              firstColor="text"
+              secondPartialType="caption"
+            />
+            <AgentSessionTypeSelect />
+          </>
+        )}
+        {viewType === AIViewTypes.InfraResearch &&
+          researchData?.infraResearch?.status && (
+            <InfraResearchStatusChip
+              size="medium"
+              status={researchData.infraResearch.status}
+              runningText="Running"
+            />
+          )}
       </SubHeaderSC>
       <Toast
         show={!!mutationError}

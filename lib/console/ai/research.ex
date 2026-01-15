@@ -50,8 +50,8 @@ defmodule Console.AI.Research do
   Only the creator of the research can update it.
   """
   @spec update_research(map, InfraResearch.t | binary, User.t) :: research_resp
-  def update_research(attrs, id, %User{id: id}) when is_binary(id),
-    do: update_research(attrs, get!(id), %User{id: id})
+  def update_research(attrs, research_id, %User{id: id}) when is_binary(research_id),
+    do: update_research(attrs, get!(research_id), %User{id: id})
   def update_research(attrs, %InfraResearch{user_id: id} = research, %User{id: id}) when is_binary(id) do
     InfraResearch.changeset(research, attrs)
     |> Repo.update()

@@ -72,6 +72,10 @@ type ConsoleClient interface {
 	ListServiceDeployments(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListServiceDeployments, error)
 	MyCluster(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*MyCluster, error)
 	UpsertVirtualCluster(ctx context.Context, parentID string, attributes ClusterAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertVirtualCluster, error)
+	UpsertCustomCompatibilityMatrix(ctx context.Context, attributes CustomCompatibilityMatrixAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCustomCompatibilityMatrix, error)
+	DeleteCustomCompatibilityMatrix(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*DeleteCustomCompatibilityMatrix, error)
+	UpsertUpgradePlanCallout(ctx context.Context, attributes UpgradePlanCalloutAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertUpgradePlanCallout, error)
+	DeleteUpgradePlanCallout(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*DeleteUpgradePlanCallout, error)
 	GetGlobalServiceDeployment(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetGlobalServiceDeployment, error)
 	GetGlobalServiceDeploymentByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGlobalServiceDeploymentByName, error)
 	CreateGlobalServiceDeployment(ctx context.Context, serviceID string, attributes GlobalServiceAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGlobalServiceDeployment, error)
@@ -241,7 +245,7 @@ type ConsoleClient interface {
 	ServiceAccounts(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ServiceAccounts, error)
 	CreateServiceAccount(ctx context.Context, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccount, error)
 	UpdateServiceAccount(ctx context.Context, id string, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceAccount, error)
-	CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error)
+	CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, expiry *string, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error)
 	ShareSecret(ctx context.Context, attributes SharedSecretAttributes, interceptors ...clientv2.RequestInterceptor) (*ShareSecret, error)
 	ListClusterStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStacks, error)
 	ListClusterStackIds(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStackIds, error)
@@ -1302,6 +1306,42 @@ func (t *ClusterConditionFragment) GetReason() *string {
 	return t.Reason
 }
 
+type CustomCompatibilityMatrixFragment struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *CustomCompatibilityMatrixFragment) GetID() string {
+	if t == nil {
+		t = &CustomCompatibilityMatrixFragment{}
+	}
+	return t.ID
+}
+func (t *CustomCompatibilityMatrixFragment) GetName() string {
+	if t == nil {
+		t = &CustomCompatibilityMatrixFragment{}
+	}
+	return t.Name
+}
+
+type UpgradePlanCalloutFragment struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpgradePlanCalloutFragment) GetID() string {
+	if t == nil {
+		t = &UpgradePlanCalloutFragment{}
+	}
+	return t.ID
+}
+func (t *UpgradePlanCalloutFragment) GetName() string {
+	if t == nil {
+		t = &UpgradePlanCalloutFragment{}
+	}
+	return t.Name
+}
+
 type DiffNormalizerFragment struct {
 	Namespace    *string   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	Name         *string   "json:\"name,omitempty\" graphql:\"name\""
@@ -2154,6 +2194,7 @@ type HelmMinimalFragment struct {
 	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
+	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 }
 
 func (t *HelmMinimalFragment) GetValues() *string {
@@ -2173,6 +2214,12 @@ func (t *HelmMinimalFragment) GetRelease() *string {
 		t = &HelmMinimalFragment{}
 	}
 	return t.Release
+}
+func (t *HelmMinimalFragment) GetIgnoreHooks() *bool {
+	if t == nil {
+		t = &HelmMinimalFragment{}
+	}
+	return t.IgnoreHooks
 }
 
 type RendererFragment struct {
@@ -13534,6 +13581,28 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetReadBindings() []*PolicyB
 	return t.ReadBindings
 }
 
+type DeleteCustomCompatibilityMatrix_DeleteCustomCompatibilityMatrix struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteCustomCompatibilityMatrix_DeleteCustomCompatibilityMatrix) GetID() string {
+	if t == nil {
+		t = &DeleteCustomCompatibilityMatrix_DeleteCustomCompatibilityMatrix{}
+	}
+	return t.ID
+}
+
+type DeleteUpgradePlanCallout_DeleteUpgradePlanCallout struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteUpgradePlanCallout_DeleteUpgradePlanCallout) GetID() string {
+	if t == nil {
+		t = &DeleteUpgradePlanCallout_DeleteUpgradePlanCallout{}
+	}
+	return t.ID
+}
+
 type GetGlobalServiceDeployment_GlobalService_GlobalServiceFragment_Provider struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -22512,6 +22581,50 @@ func (t *UpsertVirtualCluster) GetUpsertVirtualCluster() *UpsertVirtualCluster_U
 	return t.UpsertVirtualCluster
 }
 
+type UpsertCustomCompatibilityMatrix struct {
+	UpsertCustomCompatibilityMatrix *CustomCompatibilityMatrixFragment "json:\"upsertCustomCompatibilityMatrix,omitempty\" graphql:\"upsertCustomCompatibilityMatrix\""
+}
+
+func (t *UpsertCustomCompatibilityMatrix) GetUpsertCustomCompatibilityMatrix() *CustomCompatibilityMatrixFragment {
+	if t == nil {
+		t = &UpsertCustomCompatibilityMatrix{}
+	}
+	return t.UpsertCustomCompatibilityMatrix
+}
+
+type DeleteCustomCompatibilityMatrix struct {
+	DeleteCustomCompatibilityMatrix *DeleteCustomCompatibilityMatrix_DeleteCustomCompatibilityMatrix "json:\"deleteCustomCompatibilityMatrix,omitempty\" graphql:\"deleteCustomCompatibilityMatrix\""
+}
+
+func (t *DeleteCustomCompatibilityMatrix) GetDeleteCustomCompatibilityMatrix() *DeleteCustomCompatibilityMatrix_DeleteCustomCompatibilityMatrix {
+	if t == nil {
+		t = &DeleteCustomCompatibilityMatrix{}
+	}
+	return t.DeleteCustomCompatibilityMatrix
+}
+
+type UpsertUpgradePlanCallout struct {
+	UpsertUpgradePlanCallout *UpgradePlanCalloutFragment "json:\"upsertUpgradePlanCallout,omitempty\" graphql:\"upsertUpgradePlanCallout\""
+}
+
+func (t *UpsertUpgradePlanCallout) GetUpsertUpgradePlanCallout() *UpgradePlanCalloutFragment {
+	if t == nil {
+		t = &UpsertUpgradePlanCallout{}
+	}
+	return t.UpsertUpgradePlanCallout
+}
+
+type DeleteUpgradePlanCallout struct {
+	DeleteUpgradePlanCallout *DeleteUpgradePlanCallout_DeleteUpgradePlanCallout "json:\"deleteUpgradePlanCallout,omitempty\" graphql:\"deleteUpgradePlanCallout\""
+}
+
+func (t *DeleteUpgradePlanCallout) GetDeleteUpgradePlanCallout() *DeleteUpgradePlanCallout_DeleteUpgradePlanCallout {
+	if t == nil {
+		t = &DeleteUpgradePlanCallout{}
+	}
+	return t.DeleteUpgradePlanCallout
+}
+
 type GetGlobalServiceDeployment struct {
 	GlobalService *GlobalServiceFragment "json:\"globalService,omitempty\" graphql:\"globalService\""
 }
@@ -30206,6 +30319,110 @@ func (c *Client) UpsertVirtualCluster(ctx context.Context, parentID string, attr
 	return &res, nil
 }
 
+const UpsertCustomCompatibilityMatrixDocument = `mutation UpsertCustomCompatibilityMatrix ($attributes: CustomCompatibilityMatrixAttributes!) {
+	upsertCustomCompatibilityMatrix(attributes: $attributes) {
+		... CustomCompatibilityMatrixFragment
+	}
+}
+fragment CustomCompatibilityMatrixFragment on CustomCompatibilityMatrix {
+	id
+	name
+}
+`
+
+func (c *Client) UpsertCustomCompatibilityMatrix(ctx context.Context, attributes CustomCompatibilityMatrixAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCustomCompatibilityMatrix, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertCustomCompatibilityMatrix
+	if err := c.Client.Post(ctx, "UpsertCustomCompatibilityMatrix", UpsertCustomCompatibilityMatrixDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteCustomCompatibilityMatrixDocument = `mutation DeleteCustomCompatibilityMatrix ($name: String!) {
+	deleteCustomCompatibilityMatrix(name: $name) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteCustomCompatibilityMatrix(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*DeleteCustomCompatibilityMatrix, error) {
+	vars := map[string]any{
+		"name": name,
+	}
+
+	var res DeleteCustomCompatibilityMatrix
+	if err := c.Client.Post(ctx, "DeleteCustomCompatibilityMatrix", DeleteCustomCompatibilityMatrixDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertUpgradePlanCalloutDocument = `mutation UpsertUpgradePlanCallout ($attributes: UpgradePlanCalloutAttributes!) {
+	upsertUpgradePlanCallout(attributes: $attributes) {
+		... UpgradePlanCalloutFragment
+	}
+}
+fragment UpgradePlanCalloutFragment on UpgradePlanCallout {
+	id
+	name
+}
+`
+
+func (c *Client) UpsertUpgradePlanCallout(ctx context.Context, attributes UpgradePlanCalloutAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertUpgradePlanCallout, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertUpgradePlanCallout
+	if err := c.Client.Post(ctx, "UpsertUpgradePlanCallout", UpsertUpgradePlanCalloutDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteUpgradePlanCalloutDocument = `mutation DeleteUpgradePlanCallout ($name: String!) {
+	deleteUpgradePlanCallout(name: $name) {
+		id
+	}
+}
+`
+
+func (c *Client) DeleteUpgradePlanCallout(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*DeleteUpgradePlanCallout, error) {
+	vars := map[string]any{
+		"name": name,
+	}
+
+	var res DeleteUpgradePlanCallout
+	if err := c.Client.Post(ctx, "DeleteUpgradePlanCallout", DeleteUpgradePlanCalloutDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetGlobalServiceDeploymentDocument = `query GetGlobalServiceDeployment ($id: ID!) {
 	globalService(id: $id) {
 		... GlobalServiceFragment
@@ -32741,6 +32958,7 @@ fragment HelmMinimalFragment on HelmMinimal {
 	values
 	valuesFiles
 	release
+	ignoreHooks
 }
 fragment ServiceDependencyFragment on ServiceDependency {
 	id
@@ -33247,6 +33465,7 @@ fragment HelmMinimalFragment on HelmMinimal {
 	values
 	valuesFiles
 	release
+	ignoreHooks
 }
 fragment ServiceDependencyFragment on ServiceDependency {
 	id
@@ -40850,8 +41069,8 @@ func (c *Client) UpdateServiceAccount(ctx context.Context, id string, attributes
 	return &res, nil
 }
 
-const CreateServiceAccountTokenDocument = `mutation CreateServiceAccountToken ($id: ID!, $scopes: [ScopeAttributes]) {
-	createServiceAccountToken(id: $id, scopes: $scopes) {
+const CreateServiceAccountTokenDocument = `mutation CreateServiceAccountToken ($id: ID!, $scopes: [ScopeAttributes], $expiry: String) {
+	createServiceAccountToken(id: $id, scopes: $scopes, expiry: $expiry) {
 		... AccessTokenFragment
 	}
 }
@@ -40861,10 +41080,11 @@ fragment AccessTokenFragment on AccessToken {
 }
 `
 
-func (c *Client) CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error) {
+func (c *Client) CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, expiry *string, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error) {
 	vars := map[string]any{
 		"id":     id,
 		"scopes": scopes,
+		"expiry": expiry,
 	}
 
 	var res CreateServiceAccountToken
@@ -45212,6 +45432,10 @@ var DocumentOperationNames = map[string]string{
 	ListServiceDeploymentsDocument:                    "ListServiceDeployments",
 	MyClusterDocument:                                 "MyCluster",
 	UpsertVirtualClusterDocument:                      "UpsertVirtualCluster",
+	UpsertCustomCompatibilityMatrixDocument:           "UpsertCustomCompatibilityMatrix",
+	DeleteCustomCompatibilityMatrixDocument:           "DeleteCustomCompatibilityMatrix",
+	UpsertUpgradePlanCalloutDocument:                  "UpsertUpgradePlanCallout",
+	DeleteUpgradePlanCalloutDocument:                  "DeleteUpgradePlanCallout",
 	GetGlobalServiceDeploymentDocument:                "GetGlobalServiceDeployment",
 	GetGlobalServiceDeploymentByNameDocument:          "GetGlobalServiceDeploymentByName",
 	CreateGlobalServiceDeploymentDocument:             "CreateGlobalServiceDeployment",

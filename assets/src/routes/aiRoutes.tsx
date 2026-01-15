@@ -6,10 +6,10 @@ import {
   AIAgentRun,
 } from 'components/ai/agent-runs/AIAgentRun.tsx'
 import { AIAgentRuns } from 'components/ai/agent-runs/AIAgentRuns.tsx'
-import { AIAgentRuntimes } from 'components/ai/agent-runtimes/AIAgentRuntimes.tsx'
 import { AI } from 'components/ai/AI.tsx'
 import { AIThreads } from 'components/ai/AIThreads.tsx'
-import { McpServers } from 'components/ai/mcp/McpServers.tsx'
+import { InfraResearch } from 'components/ai/infra-research/details/InfraResearch.tsx'
+import { InfraResearches } from 'components/ai/infra-research/InfraResearches.tsx'
 import { SentinelRunJob } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJob.tsx'
 import { SentinelRunJobK8sJob } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJobK8sJob.tsx'
 import { SentinelRunJobOutput } from 'components/ai/sentinels/sentinel/run/jobs/job/SentinelRunJobOutput.tsx'
@@ -27,14 +27,10 @@ import {
   AI_AGENT_RUNS_PROGRESS_REL_PATH,
   AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH,
   AI_AGENT_RUNS_REL_PATH,
-  AI_AGENT_RUNTIMES_REL_PATH,
   AI_AGENT_SESSIONS_REL_PATH,
   AI_INFRA_RESEARCH_ABS_PATH,
-  AI_INFRA_RESEARCH_ANALYSIS_REL_PATH,
-  AI_INFRA_RESEARCH_DIAGRAM_REL_PATH,
   AI_INFRA_RESEARCH_PARAM_ID,
   AI_INFRA_RESEARCH_REL_PATH,
-  AI_MCP_SERVERS_REL_PATH,
   AI_SENTINELS_REL_PATH,
   AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH,
   AI_SENTINELS_RUNS_JOBS_OUTPUT_REL_PATH,
@@ -48,11 +44,6 @@ import {
 } from './aiRoutesConsts'
 import { getPodDetailsRoutes } from './cdRoutes.tsx'
 import { jobRoutes } from './jobRoutes.tsx'
-import { InfraResearches } from 'components/ai/infra-research/InfraResearches.tsx'
-import { InfraResearch } from 'components/ai/infra-research/details/InfraResearch.tsx'
-import { InfraResearchAnalysis } from 'components/ai/infra-research/details/InfraResearchAnalysis.tsx'
-import { InfraResearchDiagram } from 'components/ai/infra-research/details/InfraResearchDiagram.tsx'
-import { InfraResearchThreads } from 'components/ai/infra-research/details/InfraResearchThreads.tsx'
 
 export const aiRoutes = [
   <Route
@@ -73,20 +64,12 @@ export const aiRoutes = [
       element={<AIAgentSessions />}
     />
     <Route
-      path={AI_AGENT_RUNTIMES_REL_PATH}
-      element={<AIAgentRuntimes />}
-    />
-    <Route
       path={AI_AGENT_RUNS_REL_PATH}
       element={<AIAgentRuns />}
     />
     <Route
       path={AI_THREADS_REL_PATH}
       element={<AIThreads />}
-    />
-    <Route
-      path={AI_MCP_SERVERS_REL_PATH}
-      element={<McpServers />}
     />
     <Route
       path={AI_SENTINELS_REL_PATH}
@@ -100,29 +83,7 @@ export const aiRoutes = [
   <Route
     path={`${AI_INFRA_RESEARCH_ABS_PATH}/:${AI_INFRA_RESEARCH_PARAM_ID}`}
     element={<InfraResearch />}
-  >
-    <Route
-      index
-      element={
-        <Navigate
-          replace
-          to={AI_INFRA_RESEARCH_DIAGRAM_REL_PATH}
-        />
-      }
-    />
-    <Route
-      path={AI_INFRA_RESEARCH_DIAGRAM_REL_PATH}
-      element={<InfraResearchDiagram />}
-    />
-    <Route
-      path={AI_INFRA_RESEARCH_ANALYSIS_REL_PATH}
-      element={<InfraResearchAnalysis />}
-    />
-    <Route
-      path={AI_THREADS_REL_PATH}
-      element={<InfraResearchThreads />}
-    />
-  </Route>,
+  />,
   // other agent routes
   <Route
     path={`${AI_AGENT_RUNS_ABS_PATH}/:${AI_AGENT_RUNS_PARAM_RUN_ID}`}

@@ -33,7 +33,9 @@ defmodule Console.Deployments.Clusters do
     ClusterISOImage,
     CloudAddon,
     DeploymentSettings,
-    DeprecatedCustomResource
+    DeprecatedCustomResource,
+    UpgradePlanCallout,
+    CustomCompatibilityMatrix
   }
   alias Console.Deployments.Compatibilities
   require Logger
@@ -51,6 +53,8 @@ defmodule Console.Deployments.Clusters do
   @type pinned_resp :: {:ok, PinnedCustomResource.t} | Console.error
   @type reg_resp :: {:ok, ClusterRegistration.t} | Console.error
   @type iso_resp :: {:ok, ClusterISOImage.t} | Console.error
+  @type upgrade_plan_callout_resp :: {:ok, UpgradePlanCallout.t} | Console.error
+  @type custom_compatibility_matrix_resp :: {:ok, CustomCompatibilityMatrix.t} | Console.error
 
   @spec count() :: integer
   def count(), do: Repo.aggregate(Cluster, :count)
@@ -94,6 +98,12 @@ defmodule Console.Deployments.Clusters do
   def get_cluster_iso_image!(id), do: Repo.get!(ClusterISOImage, id)
   def get_iso_image_by_image!(img), do: Repo.get_by!(ClusterISOImage, image: img)
 
+  def get_callout_by_name(name), do: Repo.get_by(UpgradePlanCallout, name: name)
+  def get_callout_by_name!(name), do: Repo.get_by!(UpgradePlanCallout, name: name)
+
+  def get_matrix_by_name(name), do: Repo.get_by(CustomCompatibilityMatrix, name: name)
+  def get_matrix_by_name!(name), do: Repo.get_by!(CustomCompatibilityMatrix, name: name)
+
   def get_runtime_service(id) do
     Console.Repo.get(RuntimeService, id)
     |> with_addon()
@@ -115,6 +125,25 @@ defmodule Console.Deployments.Clusters do
     Repo.get!(ClusterInsightComponent, id)
     |> Repo.preload([:cluster])
     |> allow(user, :read)
+  end
+
+  @doc """
+  Fetches all registered upgrade plan callouts within the global limit
+  """
+  @spec upgrade_callouts() :: [UpgradePlanCallout.t]
+  @decorate cacheable(cache: @local_adapter, key: :upgrade_callouts, opts: [ttl: :timer.minutes(10)])
+  def upgrade_callouts() do
+    UpgradePlanCallout.with_limit(100)
+    |> Repo.all()
+  end
+
+  @doc """
+  Find all custom compatibility matrices in the system
+  """
+  @spec compatibility_matrices() :: [CustomCompatibilityMatrix.t]
+  def compatibility_matrices() do
+    CustomCompatibilityMatrix.with_limit(200)
+    |> Repo.all()
   end
 
   @doc """
@@ -577,30 +606,47 @@ defmodule Console.Deployments.Clusters do
       _ -> false
     end)
 
+    callouts = Enum.flat_map(upgrade_callouts(), fn callout -> Enum.map(callout.callouts, & {&1.addon, {callout, &1}}) end)
+               |> Map.new()
+
     %{
       failed_insights: Enum.filter(cluster.upgrade_insights, & &1.status == :failed),
       blocking_addons: Enum.map(blocking_addons, fn %RuntimeService{addon_version: vsn, addon: addon, version: current} ->
         with %{} = fix <- AddOn.upgrade_version(addon, cluster, current),
               {{:ok, release_url}, fix} <- {release(addon, fix.version), fix} do
-          %{
+          add_callout(%{
             current: vsn,
             fix: Map.put(fix, :release_url, release_url),
             addon: addon
-          }
+          }, callouts)
         else
           nil -> %{current: vsn, addon: addon}
-          {_, fix} -> %{current: vsn, fix: fix, addon: addon}
+          {_, fix} -> add_callout(%{current: vsn, fix: fix, addon: addon}, callouts)
         end
       end),
       blocking_cloud_addons: Enum.map(blocking_cloud_addons, fn %CloudAddon{info: ca, version_info: vsn, version: current} = addon ->
-        %{
+        add_callout(%{
           current: vsn,
           fix: CloudAddOnSpec.upgrade_version(ca, cluster, current),
           addon: addon
-        }
+        }, callouts)
       end),
     }
   end
+
+  defp add_callout(%{current: _, fix: %{}, addon: addon} = result, %{} = callouts) when map_size(callouts) > 0 do
+    with {%UpgradePlanCallout{context: ctx}, %{template: template}} <- Map.get(callouts, addon.name),
+         {:parse, {:ok, tpl}} <- {:parse, Solid.parse(template)},
+         context = Map.put(result, :context, ctx) |> Console.mapify() |> Console.string_map(),
+         {:render, {:ok, res, _}} <- {:render, Solid.render(tpl, context, [strict_variables: true, strict_filters: true])} do
+      Map.put(result, :callout, IO.iodata_to_binary(res))
+    else
+      {:parse, {:error, err}} -> Map.put(result, :callout, Solid.TemplateError.message(err))
+      {:render, {:error, errs, _}} -> Map.put(result, :callout, Enum.map(errs, &inspect/1) |> Enum.join(", "))
+      _ -> result
+    end
+  end
+  defp add_callout(result, _), do: result
 
   @doc """
   Determines current status of this clusters upgrade plan given what information we currently have
@@ -884,6 +930,42 @@ defmodule Console.Deployments.Clusters do
     end)
     |> execute(extract: :provider)
     |> notify(:delete, user)
+  end
+
+  @spec upsert_upgrade_plan_callout(map, User.t) :: upgrade_plan_callout_resp
+  def upsert_upgrade_plan_callout(%{name: name} = attrs, %User{} = user) do
+    case get_callout_by_name(name) do
+      %UpgradePlanCallout{} = callout -> callout
+      _ -> %UpgradePlanCallout{name: name}
+    end
+    |> UpgradePlanCallout.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @spec delete_upgrade_plan_callout(binary, User.t) :: upgrade_plan_callout_resp
+  def delete_upgrade_plan_callout(name, %User{} = user) do
+    get_callout_by_name!(name)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
+
+  @spec upsert_custom_compatibility_matrix(map, User.t) :: custom_compatibility_matrix_resp
+  def upsert_custom_compatibility_matrix(%{name: name} = attrs, %User{} = user) do
+    case get_matrix_by_name(name) do
+      %CustomCompatibilityMatrix{} = matrix -> matrix
+      _ -> %CustomCompatibilityMatrix{name: name}
+    end
+    |> CustomCompatibilityMatrix.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @spec delete_custom_compatibility_matrix(binary, User.t) :: custom_compatibility_matrix_resp
+  def delete_custom_compatibility_matrix(name, %User{} = user) do
+    get_matrix_by_name!(name)
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 
   @doc """

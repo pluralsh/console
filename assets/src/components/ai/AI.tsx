@@ -10,26 +10,28 @@ import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import usePersistedState from 'components/hooks/usePersistedState'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { SubTabs } from 'components/utils/SubTabs'
-import { use, useMemo } from 'react'
+import { isNil } from 'lodash'
+import { use, useLayoutEffect, useMemo } from 'react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
   AI_ABS_PATH,
   AI_AGENT_RUNS_REL_PATH,
-  AI_AGENT_RUNTIMES_REL_PATH,
   AI_AGENT_SESSIONS_REL_PATH,
   AI_INFRA_RESEARCH_REL_PATH,
-  AI_MCP_SERVERS_REL_PATH,
   AI_SENTINELS_REL_PATH,
   AI_THREADS_REL_PATH,
 } from 'routes/aiRoutesConsts'
-import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
+import {
+  AI_SETTINGS_ABS_PATH,
+  AI_SETTINGS_AI_PROVIDER_ABS_PATH,
+} from 'routes/settingsRoutesConst'
 import styled from 'styled-components'
 import {
   useAIEnabled,
   useLoadingDeploymentSettings,
 } from '../contexts/DeploymentSettingsContext'
 import LoadingIndicator from '../utils/LoadingIndicator'
-import { AI_PROVIDER_ABS_PATH, AIDisabledState } from './AIThreads'
+import { AIDisabledState } from './AIThreads'
 
 const DISMISSED_AI_ENABLED_DIALOG_KEY = 'dismissedAIEnabledDialog'
 
@@ -38,12 +40,8 @@ const getDirectory = (agentEnabled: boolean) => [
   { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
   { label: 'Chat threads', path: AI_THREADS_REL_PATH },
   { label: 'Infra research', path: AI_INFRA_RESEARCH_REL_PATH },
-  { label: 'MCP servers', path: AI_MCP_SERVERS_REL_PATH },
   ...(agentEnabled
-    ? [
-        { label: 'Agent runtimes', path: AI_AGENT_RUNTIMES_REL_PATH },
-        { label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH },
-      ]
+    ? [{ label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH }]
     : []),
 ]
 
@@ -57,11 +55,15 @@ export function AI() {
   const aiEnabled = useAIEnabled()
   const [showEnableAIDialog, setShowEnableAIDialog] = usePersistedState(
     DISMISSED_AI_ENABLED_DIALOG_KEY,
-    !aiEnabled
+    false
   )
   const loading = useLoadingDeploymentSettings()
   const agentEnabled = !!use(FeatureFlagContext).featureFlags.Agent
   useSetBreadcrumbs(useMemo(() => getAIBreadcrumbs(tab), [tab]))
+
+  useLayoutEffect(() => {
+    if (!isNil(aiEnabled)) setShowEnableAIDialog(!aiEnabled)
+  }, [aiEnabled, setShowEnableAIDialog])
 
   if (loading) return <LoadingIndicator />
 
@@ -74,7 +76,7 @@ export function AI() {
             clickable
             icon={<GearTrainIcon />}
             as={Link}
-            to={`${GLOBAL_SETTINGS_ABS_PATH}/ai-provider`}
+            to={AI_SETTINGS_ABS_PATH}
             tooltip="AI Settings"
             type="floating"
           />
@@ -95,7 +97,7 @@ export function AI() {
             </Button>
             <Button
               as={Link}
-              to={AI_PROVIDER_ABS_PATH}
+              to={AI_SETTINGS_AI_PROVIDER_ABS_PATH}
             >
               Go to settings
             </Button>

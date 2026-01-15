@@ -22,6 +22,11 @@ defmodule Console.Deployments.Compatibilities.Table do
   def init(_) do
     :timer.send_interval(@poll, :poll)
     send self(), :poll
+    if Console.conf(:initialize) do
+      send self(), :custom
+      :timer.send_interval(@poll, :custom)
+    end
+
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
     table = Enum.reduce(Static.compatibilities(), table, &KeyValueSet.put!(&2, &1.name, &1))
     {:ok, %State{table: table, url: Console.plrl_assets_url(@url), static: Console.conf(:airgap)}}
@@ -75,6 +80,13 @@ defmodule Console.Deployments.Compatibilities.Table do
         Logger.error "failed to fetch kubernetes addon manifest: #{inspect(err)}"
         {:noreply, state}
     end
+  end
+
+  def handle_info(:custom, %State{table: table} = state) do
+    Console.Deployments.Clusters.compatibility_matrices()
+    |> Enum.map(&Console.Schema.CustomCompatibilityMatrix.convert/1)
+    |> Enum.reduce(table, &KeyValueSet.put!(&2, &1.name, &1))
+    |> then(& {:noreply, %{state | table: &1}})
   end
 
   defp fetch_addons(url) do

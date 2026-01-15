@@ -52,6 +52,8 @@ type ConsoleClient interface {
 	IsPipelineExisting(id string) (bool, error)
 	GetUser(email string) (*console.UserFragment, error)
 	GetGroup(name string) (*console.GroupFragment, error)
+	GetUserId(email string) (string, error)
+	GetGroupId(name string) (string, error)
 	GetGroupTiny(name string) (*console.GetGroupTiny_Group, error)
 	IsGroupExists(id string) (bool, error)
 	CreateGroup(ctx context.Context, attr console.GroupAttributes) (*console.GroupFragment, error)
@@ -62,7 +64,7 @@ type ConsoleClient interface {
 	UpdateServiceAccount(ctx context.Context, id string, attributes console.ServiceAccountAttributes) (*console.UserFragment, error)
 	DeleteServiceAccount(ctx context.Context, id string) error
 	IsServiceAccountExists(ctx context.Context, email string) (bool, error)
-	CreateServiceAccountToken(ctx context.Context, id string, scopes []*console.ScopeAttributes) (*console.AccessTokenFragment, error)
+	CreateServiceAccountToken(ctx context.Context, id string, scopes []*console.ScopeAttributes, expiry *string) (*console.AccessTokenFragment, error)
 	CreateScmConnection(ctx context.Context, attributes console.ScmConnectionAttributes) (*console.ScmConnectionFragment, error)
 	UpdateScmConnection(ctx context.Context, id string, attributes console.ScmConnectionAttributes) (*console.ScmConnectionFragment, error)
 	DeleteScmConnection(ctx context.Context, id string) error
@@ -182,6 +184,10 @@ type ConsoleClient interface {
 	CreateSentinel(ctx context.Context, attr *console.SentinelAttributes) (*console.SentinelFragment, error)
 	UpdateSentinel(ctx context.Context, id string, attr *console.SentinelAttributes) (*console.SentinelFragment, error)
 	GetGlobalServiceByName(name string) (*console.GlobalServiceFragment, error)
+	UpsertCustomCompatibilityMatrix(ctx context.Context, attributes console.CustomCompatibilityMatrixAttributes) (*console.CustomCompatibilityMatrixFragment, error)
+	DeleteCustomCompatibilityMatrix(ctx context.Context, name string) error
+	UpsertUpgradePlanCallout(ctx context.Context, attributes console.UpgradePlanCalloutAttributes) (*console.UpgradePlanCalloutFragment, error)
+	DeleteUpgradePlanCallout(ctx context.Context, name string) error
 }
 
 func New(url, token string, datadogEnabled bool) ConsoleClient {

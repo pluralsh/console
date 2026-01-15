@@ -77,13 +77,15 @@ defmodule Console.AI.Memoizer do
          {:ok, summary} <- Provider.summary(insight) do
       %{
         ai_poll_at: next_poll_at(),
+        force_insight: false,
         insight: Map.merge(attrs, %{id: id, force: false, text: insight, summary: summary, errors: [], sha: sha})
       }
     else
       {:error, error} ->
         %{
           insight: %{id: id, errors: [%{source: "ai", error: fmt_error(error)}], sha: sha},
-          ai_poll_at: next_poll_at()
+          ai_poll_at: next_poll_at(),
+          force_insight: false
         }
     end
   end
@@ -91,6 +93,7 @@ defmodule Console.AI.Memoizer do
   defp gen_error(%schema{} = model, error) do
     schema.changeset(model, %{
       ai_poll_at: next_poll_at(),
+      force_insight: false,
       insight: %{errors: [%{source: "evidence", message: fmt_error(error)}]}
     })
     |> Repo.update()
