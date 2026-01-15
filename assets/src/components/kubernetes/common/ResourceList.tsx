@@ -148,7 +148,7 @@ export function ResourceList<
         reactTableOptions={{
           ...reactTableOptions,
           ...{
-            meta: { ...reactTableOptions.meta, customResource },
+            meta: { ...reactTableOptions.meta, customResource, refetch },
           },
         }}
         virtualizeRows

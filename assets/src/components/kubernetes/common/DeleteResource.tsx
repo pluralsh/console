@@ -103,10 +103,22 @@ function DeleteResourceModal({
   const namespacedMutation = useMutation({
     ...deleteNamespacedResourceMutation(),
     onSuccess: () => {
+      console.log('refetch', refetch)
+
       if (refetch) {
+        const interceptorId = client.instance.interceptors.request.use(
+          (config) => {
+            config.headers['Cache-Control'] = 'no-cache'
+            return config
+          }
+        )
+
         refetch()
           .then(() => setOpen(false))
-          .finally(() => setDeleting(false))
+          .finally(() => {
+            client.instance.interceptors.request.eject(interceptorId)
+            setDeleting(false)
+          })
       } else {
         setDeleting(false)
         setOpen(false)
@@ -125,9 +137,19 @@ function DeleteResourceModal({
     ...deleteResourceMutation(),
     onSuccess: () => {
       if (refetch) {
+        const interceptorId = client.instance.interceptors.request.use(
+          (config) => {
+            config.headers['Cache-Control'] = 'no-cache'
+            return config
+          }
+        )
+
         refetch()
           .then(() => setOpen(false))
-          .finally(() => setDeleting(false))
+          .finally(() => {
+            client.instance.interceptors.request.eject(interceptorId)
+            setDeleting(false)
+          })
       } else {
         setDeleting(false)
         setOpen(false)
