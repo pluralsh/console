@@ -433,6 +433,10 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: not is_nil(c.deleted_at))
   end
 
+  def ai_enabled(query \\ __MODULE__) do
+    from(c in query, where: is_nil(c.disable_ai) or not c.disable_ai)
+  end
+
   def installable(query \\ __MODULE__) do
     from(c in query, where: (not is_nil(c.provider_id) or c.self) and is_nil(c.deleted_at))
   end
