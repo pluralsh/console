@@ -19,7 +19,7 @@ export function TableEndpoints({
 }: {
   endpoints?: (CommonEndpoint | null)[] | null
 }) {
-  return endpoints.map((endpoint) =>
+  return endpoints?.map((endpoint) =>
     isEmpty(endpoint?.ports) ? (
       <TableText key={endpoint?.host}>{endpoint?.host}</TableText>
     ) : (
@@ -45,7 +45,7 @@ export function Endpoints({
 
   return (
     <div css={{ display: 'flex', gap: theme.spacing.xsmall, flexWrap: 'wrap' }}>
-      {endpoints.map((endpoint, i) =>
+      {endpoints?.map((endpoint, i) =>
         isEmpty(endpoint?.ports) ? (
           <Chip
             key={i}
