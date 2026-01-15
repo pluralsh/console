@@ -10,7 +10,6 @@ import { useQuery } from '@tanstack/react-query'
 import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
-  getStorageClassPersistentVolumes,
   PersistentvolumePersistentVolume,
   PersistentvolumePersistentVolumeList,
   StorageclassStorageClass,
