@@ -805,6 +805,7 @@ _Appears in:_
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write access policies for this cluster.<br />Controls which users and groups can view or manage this cluster through RBAC. |  | Optional: \{\} <br /> |
 | `cloudSettings` _[ClusterCloudSettings](#clustercloudsettings)_ | CloudSettings contains cloud provider-specific configuration for this cluster.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
 | `nodePools` _[ClusterNodePool](#clusternodepool) array_ | NodePools defines the worker node configurations managed by this cluster.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
+| `disableAI` _boolean_ | DisableAI indicates whether to disable ai insights for this cluster. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
@@ -1808,9 +1809,10 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `values` _string_ | Values a Helm values file to use when rendering this Helm chart. |  |  |
-| `valuesFiles` _string array_ | ValuesFiles a list of relative paths to values files to use for Helm chart templating. |  |  |
-| `release` _string_ | Release is a Helm release name to use when rendering this Helm chart. |  |  |
+| `values` _string_ | Values a Helm values file to use when rendering this Helm chart. |  | Optional: \{\} <br /> |
+| `valuesFiles` _string array_ | ValuesFiles a list of relative paths to values files to use for Helm chart templating. |  | Optional: \{\} <br /> |
+| `release` _string_ | Release is a Helm release name to use when rendering this Helm chart. |  | Optional: \{\} <br /> |
+| `ignoreHooks` _boolean_ | IgnoreHooks indicates whether to ignore Helm hooks when rendering this Helm chart. |  | Optional: \{\} <br /> |
 
 
 #### HelmRepository

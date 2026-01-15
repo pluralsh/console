@@ -6,6 +6,7 @@ import {
   Table,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
+import { ClusterNameAndIcon } from 'components/cd/services/ServicesColumns.tsx'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { AgentRuntimeFragment, useAgentRuntimesQuery } from 'generated/graphql'
@@ -13,9 +14,8 @@ import { truncate } from 'lodash'
 import { useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable.ts'
-import { ClusterNameAndIcon } from '../../cd/services/ServicesColumns.tsx'
+import { AgentRuntimeIconFrame } from './AIAgentRuntimeIcon.tsx'
 import { AIAgentRuntimePermissionsModal } from './AIAgentRuntimePermissionsModal.tsx'
-import { AgentRuntimeIconFrame } from './AiAgentRuntimeIcon.tsx'
 
 export function AIAgentRuntimes() {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -56,48 +56,43 @@ export function AIAgentRuntimes() {
 const columnHelper = createColumnHelper<AgentRuntimeFragment>()
 
 const columns = [
-  columnHelper.accessor((runtime) => runtime.name, {
-    id: 'name',
-    header: 'Name',
-    cell: ({
-      row: {
-        original: { name, type },
-      },
-    }) => (
-      <Flex
-        align="center"
-        gap="xsmall"
-      >
-        <AgentRuntimeIconFrame type={type} />
-        <span>{truncate(name, { length: 60 })}</span>
-      </Flex>
-    ),
-  }),
-  columnHelper.accessor((runtime) => runtime.default, {
-    id: 'default',
-    header: 'Default',
-    cell: ({ getValue }) =>
-      getValue() ? (
-        <Chip
-          size="small"
-          severity="info"
+  columnHelper.accessor((runtime) => runtime, {
+    id: 'runtime',
+    header: 'Runtime',
+    cell: ({ getValue }) => {
+      const { name, type, default: isDefault } = getValue()
+      return (
+        <Flex
+          align="center"
+          gap="small"
         >
-          Default
-        </Chip>
-      ) : undefined,
+          <AgentRuntimeIconFrame type={type} />
+          <span>{truncate(name, { length: 60 })}</span>
+          {isDefault && (
+            <Chip
+              fillLevel={0}
+              size="small"
+              severity="info"
+            >
+              Default agent
+            </Chip>
+          )}
+        </Flex>
+      )
+    },
   }),
   columnHelper.accessor((runtime) => runtime.aiProxy, {
     id: 'aiProxy',
     header: 'AI Proxy',
-    cell: ({ getValue }) =>
-      getValue() ? (
-        <Chip
-          size="small"
-          severity="info"
-        >
-          Enabled
-        </Chip>
-      ) : undefined,
+    cell: ({ getValue }) => (
+      <Chip
+        fillLevel={0}
+        size="small"
+        severity={getValue() ? 'success' : 'neutral'}
+      >
+        {getValue() ? 'Enabled' : 'Disabled'}
+      </Chip>
+    ),
   }),
   columnHelper.accessor((runtime) => runtime.cluster, {
     id: 'cluster',
@@ -119,7 +114,7 @@ const columns = [
             icon={<PeopleIcon />}
             onClick={() => setOpen(true)}
             tooltip="Manage permissions"
-            type="floating"
+            type="secondary"
           />
           <AIAgentRuntimePermissionsModal
             open={open}

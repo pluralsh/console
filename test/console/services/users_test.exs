@@ -521,4 +521,41 @@ defmodule Console.Services.UsersTest do
       {:error, _} = Users.delete_bootstrap_token(bootstrap.id, user)
     end
   end
+
+  describe "#introspect_access_token/2" do
+    test "a user can introspect their own token" do
+      user = insert(:user)
+      token = insert(:access_token, user: user)
+
+      {:ok, introspected} = Users.introspect_access_token(token.token, user)
+
+      assert introspected.id == token.id
+    end
+
+    test "a service account can introspect a token" do
+      user  = insert(:user)
+      sa    = insert(:user, service_account: true, assume_bindings: [%{user_id: user.id}])
+      token = insert(:access_token, user: sa)
+
+      {:ok, introspected} = Users.introspect_access_token(token.token, user)
+
+      assert introspected.id == token.id
+    end
+
+    test "users cannot introspect other users tokens" do
+      user  = insert(:user)
+      other = insert(:user)
+      token = insert(:access_token, user: other)
+
+      {:error, _} = Users.introspect_access_token(token.token, user)
+    end
+
+    test "users cannot introspect tokens from service accoutns they cannot impersonate" do
+      user  = insert(:user)
+      sa    = insert(:user, service_account: true)
+      token = insert(:access_token, user: sa)
+
+      {:error, _} = Users.introspect_access_token(token.token, user)
+    end
+  end
 end

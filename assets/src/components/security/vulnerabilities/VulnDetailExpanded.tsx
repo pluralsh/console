@@ -128,7 +128,7 @@ function CVSSSection({
                   { name: 'Network', value: VulnAttackVector.Network },
                 ]}
                 colorMap={{
-                  PHYSICAL: 'success',
+                  PHYSICAL: 'neutral',
                   LOCAL: 'warning',
                   ADJACENT: 'danger',
                   NETWORK: 'critical',

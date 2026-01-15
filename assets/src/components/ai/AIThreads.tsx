@@ -12,7 +12,7 @@ import {
 } from 'generated/graphql.ts'
 import { ReactNode, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { GLOBAL_SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
+import { AI_SETTINGS_AI_PROVIDER_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
 
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert.tsx'
@@ -21,8 +21,6 @@ import { CSSProperties, useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql.ts'
 import { Body1BoldP } from '../utils/typography/Text.tsx'
 import { AITableEntry, sortThreadsOrPins } from './AITableEntry.tsx'
-
-export const AI_PROVIDER_ABS_PATH = `${GLOBAL_SETTINGS_ABS_PATH}/ai-provider`
 
 const columnHelper = createColumnHelper<ChatThreadTinyFragment>()
 
@@ -140,7 +138,7 @@ export function AIDisabledState({
         <Button
           as={Link}
           startIcon={<GearTrainIcon />}
-          to={AI_PROVIDER_ABS_PATH}
+          to={AI_SETTINGS_AI_PROVIDER_ABS_PATH}
         >
           Go to settings
         </Button>

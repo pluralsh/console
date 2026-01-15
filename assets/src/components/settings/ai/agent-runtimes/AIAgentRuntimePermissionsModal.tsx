@@ -16,7 +16,7 @@ import {
 } from 'react'
 
 import { FormBindings } from 'components/utils/bindings.tsx'
-import { StepBody } from '../../cd/ModalAlt.tsx'
+import { StepBody } from 'components/cd/ModalAlt.tsx'
 
 export function AIAgentRuntimePermissionsModal({
   open,
