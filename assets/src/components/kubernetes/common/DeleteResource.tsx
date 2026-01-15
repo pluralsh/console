@@ -103,8 +103,6 @@ function DeleteResourceModal({
   const namespacedMutation = useMutation({
     ...deleteNamespacedResourceMutation(),
     onSuccess: () => {
-      console.log('refetch', refetch)
-
       if (refetch) {
         const interceptorId = client.instance.interceptors.request.use(
           (config) => {
