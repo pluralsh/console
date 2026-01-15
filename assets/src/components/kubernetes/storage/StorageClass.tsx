@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
+  getStorageClassPersistentVolumes,
   PersistentvolumePersistentVolume,
   PersistentvolumePersistentVolumeList,
   StorageclassStorageClass,
@@ -131,7 +132,7 @@ export function StorageClassPersistentVolumes(): ReactElement<any> {
       >
         columns={columns}
         queryOptions={getStorageClassPersistentVolumesInfiniteOptions}
-        pathParams={{ storageClass: sc?.objectMeta.name }}
+        pathParams={{ storageclass: sc?.objectMeta.name }}
         itemsKey="items"
       />
     </section>
