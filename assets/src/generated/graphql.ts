@@ -1634,6 +1634,56 @@ export type ChatMessage = {
   role: AiRole;
 };
 
+/** A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams */
+export type ChatProviderConnection = {
+  __typename?: 'ChatProviderConnection';
+  /** the configuration for this chat connection */
+  configuration: ChatProviderConnectionConfiguration;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of this chat connection */
+  name: Scalars['String']['output'];
+  /** the type of this chat connection */
+  type: ChatProviderConnectionType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams */
+export type ChatProviderConnectionAttributes = {
+  configuration: ChatProviderConnectionConfigurationAttributes;
+  /** the name of this chat connection */
+  name: Scalars['String']['input'];
+  /** the type of this chat connection */
+  type: ChatProviderConnectionType;
+};
+
+export type ChatProviderConnectionConfiguration = {
+  __typename?: 'ChatProviderConnectionConfiguration';
+  /** the configuration for the slack connection */
+  slack?: Maybe<SlackConnectionConfiguration>;
+};
+
+export type ChatProviderConnectionConfigurationAttributes = {
+  slack?: InputMaybe<SlackConnectionConfigurationAttributes>;
+};
+
+export type ChatProviderConnectionConnection = {
+  __typename?: 'ChatProviderConnectionConnection';
+  edges?: Maybe<Array<Maybe<ChatProviderConnectionEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ChatProviderConnectionEdge = {
+  __typename?: 'ChatProviderConnectionEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ChatProviderConnection>;
+};
+
+export enum ChatProviderConnectionType {
+  Slack = 'SLACK',
+  Teams = 'TEAMS'
+}
+
 /** A list of chat messages around a specific topic created on demand */
 export type ChatThread = {
   __typename?: 'ChatThread';
@@ -7848,6 +7898,7 @@ export type RootMutationType = {
   deleteCatalog?: Maybe<Catalog>;
   /** deletes a chat from a users history */
   deleteChat?: Maybe<Chat>;
+  deleteChatProviderConnection?: Maybe<ChatProviderConnection>;
   deleteCloudConnection?: Maybe<CloudConnection>;
   deleteCluster?: Maybe<Cluster>;
   deleteClusterIsoImage?: Maybe<ClusterIsoImage>;
@@ -8014,6 +8065,7 @@ export type RootMutationType = {
   updateUser?: Maybe<User>;
   upsertAgentRuntime?: Maybe<AgentRuntime>;
   upsertCatalog?: Maybe<Catalog>;
+  upsertChatProviderConnection?: Maybe<ChatProviderConnection>;
   upsertCloudConnection?: Maybe<CloudConnection>;
   upsertComplianceReportGenerator?: Maybe<ComplianceReportGenerator>;
   upsertCustomCompatibilityMatrix?: Maybe<CustomCompatibilityMatrix>;
@@ -8420,6 +8472,11 @@ export type RootMutationTypeDeleteCatalogArgs = {
 
 
 export type RootMutationTypeDeleteChatArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteChatProviderConnectionArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -9183,6 +9240,11 @@ export type RootMutationTypeUpsertCatalogArgs = {
 };
 
 
+export type RootMutationTypeUpsertChatProviderConnectionArgs = {
+  attributes: ChatProviderConnectionAttributes;
+};
+
+
 export type RootMutationTypeUpsertCloudConnectionArgs = {
   attributes: CloudConnectionAttributes;
 };
@@ -9302,6 +9364,8 @@ export type RootQueryType = {
   catalogSearch?: Maybe<Array<Maybe<CatalogSearchResult>>>;
   catalogs?: Maybe<CatalogConnection>;
   certificate?: Maybe<Certificate>;
+  chatProviderConnection?: Maybe<ChatProviderConnection>;
+  chatProviderConnections?: Maybe<ChatProviderConnectionConnection>;
   /** gets an individual chat thread, with the ability to sideload chats on top */
   chatThread?: Maybe<ChatThread>;
   chatThreads?: Maybe<ChatThreadConnection>;
@@ -9645,6 +9709,22 @@ export type RootQueryTypeCertificateArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeChatProviderConnectionArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeChatProviderConnectionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<ChatProviderConnectionType>;
 };
 
 
@@ -11999,6 +12079,18 @@ export enum SinkType {
   Slack = 'SLACK',
   Teams = 'TEAMS'
 }
+
+export type SlackConnectionConfiguration = {
+  __typename?: 'SlackConnectionConfiguration';
+  /** the bot id for the slack connection */
+  botId?: Maybe<Scalars['String']['output']>;
+};
+
+export type SlackConnectionConfigurationAttributes = {
+  appToken: Scalars['String']['input'];
+  botId?: InputMaybe<Scalars['String']['input']>;
+  botToken: Scalars['String']['input'];
+};
 
 /** SMTP server configuration for email notifications */
 export type SmtpSettings = {
