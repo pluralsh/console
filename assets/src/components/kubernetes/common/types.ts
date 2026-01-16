@@ -11,7 +11,7 @@ interface ErrorStatus {
   status: string
 }
 
-interface ErrorType {
+interface Error {
   ErrStatus: ErrorStatus
 }
 
@@ -28,7 +28,7 @@ interface ResourceVariables extends DataSelectVariables {
 }
 
 interface ResourceList {
-  errors: Array<ErrorType>
+  errors: Array<Error>
   listMeta: TypesListMeta
 }
 
@@ -115,7 +115,7 @@ function fromResource(resource: Resource): ObjectReference {
 }
 
 export type {
-  ErrorType,
+  Error,
   ErrorStatus,
   ResourceVariables,
   ResourceList,
