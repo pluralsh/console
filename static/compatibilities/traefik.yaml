@@ -3,25 +3,27 @@ git_url: https://github.com/traefik/traefik
 release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 versions:
-- version: 3.6.5
+- version: 3.6.6
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['From v3.6.0 (baseline): added new ACME certificatesResolvers options;
-        added least-time and HighestRandomWeight load-balancing strategies; added
-        TCP (active) healthchecks and passive health checks; added Knative provider
-        and improvements to Kubernetes/Gateway API and Ingress publishing (including
-        ExternalName services); added multi-layer routing; added HTTP/2 HPACK table
-        size options; and several dashboard/UI tweaks.', v3.6.5 is a patch release
-        with no new features called out in the notes you provided; it focuses on fixes/behavior
-        clarifications.]
-    breaking_changes: ['Access logs will now also be printed for rejected requests;
-        the release note explicitly warns about this new behavior, so log volume/content
-        may change and could affect log-based alerts/costs.']
-  chart_version: 38.0.1
+    features: ['v3.6.0 introduced multiple enhancements: new ACME certificate resolver
+        options; additional provider capabilities (Knative provider, ECS IPv6, Docker
+        discovery for non-running containers, ExternalName services in Kubernetes
+        Ingress); new load-balancing strategies (LeastTime and HighestRandomWeight);
+        TCP health checks plus passive health checks; multi-layer routing; and dashboard/UI
+        tweaks.', 'Between v3.6.0 and v3.6.6 (based on v3.6.6 notes), changes are
+        mainly bugfixes and dependency bumps: updated lego (ACME) and quic-go (HTTP/3),
+        Redis verification fix, and a server fix denying encoded characters; plus
+        documentation improvements.']
+    breaking_changes: ['No breaking changes are called out in the provided notes for
+        v3.6.6; however v3.6.0 explicitly instructs to read the v3.6 migration guide,
+        implying potential migration considerations when entering the 3.6 line from
+        earlier versions.']
+  chart_version: 38.0.2
   images: []
 - version: 3.6.0
   kube: ['1.35', '1.34', '1.33', '1.32']

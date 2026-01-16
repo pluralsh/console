@@ -10,207 +10,228 @@ versions:
   incompatibilities: []
   summary: null
   chart_version: 25.10.1
-  images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.9.1', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v25.10.1',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.18.2']
+  images: []
 - version: 25.10.0
   kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 25.10.0
-  images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.9.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v25.10.0',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.18.2']
+  images: []
 - version: 25.3.2
   kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 25.3.2
-  images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.8.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v25.3.2',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.17.3']
+  images: []
 - version: 25.3.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 25.3.0
-  images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.8.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v25.3.0',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.17.2']
+  images: []
 - version: 24.9.1
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 24.9.1
-  images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.7.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v24.9.1',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.16.6']
+  images: []
 - version: 24.9.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 24.9.0
-  images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.7.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v24.9.0',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.16.6']
+  images: []
 - version: 24.6.1
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 24.6.1
-  images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.10', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v24.6.1',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.16.3']
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gdrdrv, gpu-operator-validator,
+    k8s-cc-manager, k8s-device-plugin, k8s-driver-manager, k8s-kata-manager, k8s-mig-manager,
+    kubevirt-gpu-device-plugin, 'nvcr.io/nvidia/gpu-operator:v24.6.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.3',
+    vgpu-device-manager, vgpu-manager]
 - version: 24.6.0
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 24.6.0
-  images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.10', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v24.6.0',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.16.3']
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gdrdrv, gpu-operator-validator,
+    k8s-cc-manager, k8s-device-plugin, k8s-driver-manager, k8s-kata-manager, k8s-mig-manager,
+    kubevirt-gpu-device-plugin, 'nvcr.io/nvidia/gpu-operator:v24.6.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.3',
+    vgpu-device-manager, vgpu-manager]
 - version: 24.3.0
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 24.3.0
-  images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.8', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v24.3.0',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.15.4']
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gdrdrv, gpu-operator-validator,
+    k8s-cc-manager, k8s-device-plugin, k8s-driver-manager, k8s-kata-manager, k8s-mig-manager,
+    kubevirt-gpu-device-plugin, 'nvcr.io/nvidia/gpu-operator:v24.3.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.15.4',
+    vgpu-device-manager, vgpu-manager]
 - version: 23.9.2
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 23.9.2
-  images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.5', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v23.9.2',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.14.2']
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-cc-manager, k8s-device-plugin, k8s-driver-manager,
+    k8s-kata-manager, k8s-mig-manager, kubevirt-gpu-device-plugin, 'nvcr.io/nvidia/gpu-operator:v23.9.2',
+    'registry.k8s.io/nfd/node-feature-discovery:v0.14.2', vgpu-device-manager, vgpu-manager]
 - version: 23.9.1
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 23.9.1
-  images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.2', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v23.9.1',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.14.2']
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-cc-manager, k8s-device-plugin, k8s-driver-manager,
+    k8s-kata-manager, k8s-mig-manager, kubevirt-gpu-device-plugin, 'nvcr.io/nvidia/gpu-operator:v23.9.1',
+    'registry.k8s.io/nfd/node-feature-discovery:v0.14.2', vgpu-device-manager, vgpu-manager]
 - version: 23.9.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 23.9.0
-  images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.2', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v23.9.0',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.14.2']
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-cc-manager, k8s-device-plugin, k8s-driver-manager,
+    k8s-kata-manager, k8s-mig-manager, kubevirt-gpu-device-plugin, 'nvcr.io/nvidia/gpu-operator:v23.9.0',
+    'registry.k8s.io/nfd/node-feature-discovery:v0.14.2', vgpu-device-manager, vgpu-manager]
 - version: 23.6.2
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 23.6.2
-  images: ['nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v23.6.2',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-cc-manager, k8s-device-plugin, k8s-driver-manager,
+    k8s-kata-manager, k8s-mig-manager, kubevirt-gpu-device-plugin, 'nvcr.io/nvidia/gpu-operator:v23.6.2',
+    'registry.k8s.io/nfd/node-feature-discovery:v0.13.1', vgpu-device-manager, vgpu-manager]
 - version: 23.6.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 23.6.0
-  images: ['nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-    'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp', 'nvcr.io/nvidia/gpu-operator:v23.6.0',
-    'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-cc-manager, k8s-device-plugin, k8s-driver-manager,
+    k8s-kata-manager, k8s-mig-manager, kubevirt-gpu-device-plugin, 'nvcr.io/nvidia/gpu-operator:v23.6.0',
+    'registry.k8s.io/nfd/node-feature-discovery:v0.13.1', vgpu-device-manager, vgpu-manager]
 - version: 23.3.1
   kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 23.3.1
-  images: ['nvcr.io/nvidia/gpu-operator:v23.3.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1']
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-device-plugin, k8s-driver-manager, k8s-mig-manager,
+    kubevirt-gpu-device-plugin, 'nvcr.io/nvidia/gpu-operator:v23.3.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1',
+    vgpu-device-manager, vgpu-manager]
 - version: 23.3.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 23.3.0
-  images: ['nvcr.io/nvidia/gpu-operator:v23.3.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1']
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-device-plugin, k8s-driver-manager, k8s-mig-manager,
+    kubevirt-gpu-device-plugin, 'nvcr.io/nvidia/gpu-operator:v23.3.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1',
+    vgpu-device-manager, vgpu-manager]
 - version: 22.9.1
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 22.9.1
-  images: []
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-device-plugin, k8s-driver-manager, k8s-mig-manager,
+    'k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', kubevirt-gpu-device-plugin, 'nvcr.io/nvidia/gpu-operator:v22.9.1',
+    vgpu-device-manager, vgpu-manager]
 - version: 22.9.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 22.9.0
-  images: []
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-device-plugin, k8s-driver-manager, k8s-mig-manager,
+    'k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', kubevirt-gpu-device-plugin, 'nvcr.io/nvidia/gpu-operator:v22.9.0',
+    vgpu-device-manager, vgpu-manager]
 - version: 1.11.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.11.0
-  images: []
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-device-plugin, k8s-driver-manager, k8s-mig-manager,
+    'k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.11.0']
 - version: 1.10.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.10.0
-  images: []
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-device-plugin, k8s-driver-manager, k8s-mig-manager,
+    'k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.10.0']
 - version: 1.9.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.9.0
-  images: []
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-device-plugin, k8s-driver-manager, k8s-mig-manager,
+    'k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.9.0']
 - version: 1.8.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.8.0
-  images: []
+  images: [container-toolkit, cuda, dcgm, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-device-plugin, k8s-driver-manager, k8s-mig-manager,
+    'k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.8.0']
 - version: 1.7.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.7.0
-  images: []
+  images: [container-toolkit, cuda, dcgm-exporter, driver, gpu-feature-discovery,
+    gpu-operator-validator, k8s-device-plugin, k8s-mig-manager, 'nvcr.io/nvidia/gpu-operator:v1.7.0',
+    'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
 - version: 1.6.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.6.0
-  images: []
+  images: [container-toolkit, cuda-sample, dcgm-exporter, driver, gpu-feature-discovery,
+    k8s-device-plugin, 'nvcr.io/nvidia/gpu-operator:1.6.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
 - version: 1.5.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.5.0
-  images: []
+  images: [container-toolkit, cuda-sample, dcgm-exporter, driver, gpu-feature-discovery,
+    k8s-device-plugin, 'nvcr.io/nvidia/gpu-operator:1.5.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
 - version: 1.4.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.4.0
-  images: []
+  images: [container-toolkit, cuda-sample, dcgm-exporter, driver, gpu-feature-discovery,
+    k8s-device-plugin, 'nvcr.io/nvidia/gpu-operator:1.4.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
