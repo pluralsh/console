@@ -74,7 +74,7 @@ export function DataSelectInputs() {
   const { clusterId } = useParams()
   const { namespaced, namespace, filter, setParams } = useDataSelect()
 
-  const [nsState, setNsState] = useState(namespace)
+  const [nsState, setNsState] = useState<string | undefined>(namespace)
   const [filterState, setFilterState] = useState(filter)
   const debFilterState = useDebounce(filterState, 200)
 

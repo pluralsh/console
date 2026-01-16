@@ -20,7 +20,7 @@ export function NamespaceFilter({
 }: {
   namespaces: string[]
   namespace?: string
-  onChange: Dispatch<SetStateAction<string>>
+  onChange: Dispatch<SetStateAction<string | undefined>>
 } & Partial<ComponentProps<typeof ComboBox>>) {
   const theme = useTheme()
   const [value, setValue] = useState<string | undefined>(namespace)
@@ -51,7 +51,7 @@ export function NamespaceFilter({
       onInputChange={setValue}
       selectedKey={namespace}
       onSelectionChange={(key) => {
-        onChange((key ?? '') as string)
+        onChange(key as string | undefined)
         setValue((key ?? '') as string)
       }}
       dropdownFooterFixed={
