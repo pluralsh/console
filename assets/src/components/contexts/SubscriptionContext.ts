@@ -15,6 +15,8 @@ export type SubscriptionContextType = {
   isLegacyUser: boolean
   isGrandfathered: boolean
   isGrandfatheringExpired: boolean
+  isLicenseExpiring: boolean
+  licenseExpiry: Nullable<Date>
   refetch: () => void
 }
 
@@ -25,6 +27,8 @@ const SubscriptionContext = createContext<SubscriptionContextType>({
   isLegacyUser: false,
   isGrandfathered: false,
   isGrandfatheringExpired: false,
+  isLicenseExpiring: false,
+  licenseExpiry: null,
   refetch: () => {},
 })
 

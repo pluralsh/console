@@ -1,5 +1,5 @@
 import { ReactNode, useMemo } from 'react'
-import { dayjsExtended as dayjs, isBefore } from 'utils/datetime'
+import { dayjsExtended as dayjs, isBefore, toDateOrUndef } from 'utils/datetime'
 import SubscriptionContext, {
   SubscriptionContextType,
 } from 'components/contexts/SubscriptionContext'
@@ -34,6 +34,10 @@ export default function BillingSubscriptionProvider({
     const isLegacyUser = !!grandfatheredUntil
     const isGrandfathered =
       isLegacyUser && isBefore(new Date(), grandfatheredUntil)
+    const licenseExpiry = toDateOrUndef(data?.configuration?.licenseExpiry)
+    const isLicenseExpiring =
+      !!licenseExpiry &&
+      dayjs(licenseExpiry).isBetween(dayjs(), dayjs().add(1, 'week'))
 
     // Marking grandfathering as expired only for a month after expiry date.
     // Afterwards expiry banners will not be visible and UI will be the same as for open-source users.
@@ -56,6 +60,8 @@ export default function BillingSubscriptionProvider({
       isLegacyUser,
       isGrandfathered,
       isGrandfatheringExpired,
+      isLicenseExpiring,
+      licenseExpiry,
       refetch,
     }
   }, [data, refetch])
@@ -69,8 +75,8 @@ export default function BillingSubscriptionProvider({
   if (loading) return <LoadingIndicator />
 
   return (
-    <SubscriptionContext.Provider value={subscriptionContextValue}>
+    <SubscriptionContext value={subscriptionContextValue}>
       {children}
-    </SubscriptionContext.Provider>
+    </SubscriptionContext>
   )
 }

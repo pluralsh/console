@@ -15714,7 +15714,7 @@ export type AccountFragment = { __typename?: 'Account', grandfatheredUntil?: str
 export type SubscriptionQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type SubscriptionQuery = { __typename?: 'RootQueryType', account?: { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null } | null };
+export type SubscriptionQuery = { __typename?: 'RootQueryType', account?: { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null } | null, configuration?: { __typename?: 'ConsoleConfiguration', licenseExpiry?: string | null } | null };
 
 export type MeGroupsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -31329,6 +31329,9 @@ export const SubscriptionDocument = gql`
     query Subscription {
   account {
     ...Account
+  }
+  configuration {
+    licenseExpiry
   }
 }
     ${AccountFragmentDoc}`;

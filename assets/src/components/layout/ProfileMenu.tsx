@@ -55,6 +55,7 @@ export function ProfileMenu() {
       <SimplePopupMenu
         isOpen={isMenuOpen}
         setIsOpen={setIsMenuOpen}
+        css={{ width: 245 }}
       >
         <Button
           small

@@ -1232,10 +1232,10 @@
          "name": "UnstructuredResource",
          "body": "query UnstructuredResource($group: String, $kind: String!, $name: String!, $namespace: String, $serviceId: ID!, $version: String!) {\n  unstructuredResource(\n    group: $group\n    kind: $kind\n    name: $name\n    namespace: $namespace\n    serviceId: $serviceId\n    version: $version\n  ) {\n    ...UnstructuredResource\n    __typename\n  }\n}\n\nfragment UnstructuredResource on KubernetesUnstructured {\n  raw\n  metadata {\n    ...Metadata\n    __typename\n  }\n  events {\n    ...Event\n    __typename\n  }\n  __typename\n}\n\nfragment Metadata on Metadata {\n  uid\n  name\n  namespace\n  labels {\n    name\n    value\n    __typename\n  }\n  annotations {\n    name\n    value\n    __typename\n  }\n  creationTimestamp\n  __typename\n}\n\nfragment Event on Event {\n  action\n  lastTimestamp\n  count\n  message\n  reason\n  type\n  __typename\n}"
       },
-      "sha256:e81d942d0ef0e9fc4bfa76f92964f5c8f093ba918002345d7bc8b6f3cbf99987": {
+      "sha256:7385b2b2f8c386cdfcc142e20d39574a3caff9f87a68f5d59623d12abd527b0f": {
          "type": "query",
          "name": "Subscription",
-         "body": "query Subscription {\n  account {\n    ...Account\n    __typename\n  }\n}\n\nfragment Account on Account {\n  grandfatheredUntil\n  delinquentAt\n  availableFeatures {\n    audits\n    userManagement\n    databaseManagement\n    __typename\n  }\n  subscription {\n    id\n    plan {\n      id\n      name\n      period\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
+         "body": "query Subscription {\n  account {\n    ...Account\n    __typename\n  }\n  configuration {\n    licenseExpiry\n    __typename\n  }\n}\n\nfragment Account on Account {\n  grandfatheredUntil\n  delinquentAt\n  availableFeatures {\n    audits\n    userManagement\n    databaseManagement\n    __typename\n  }\n  subscription {\n    id\n    plan {\n      id\n      name\n      period\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
       },
       "sha256:a50f25e8e3b273958072fd876f946dbc5986dbf56d181a209054f37ee504c700": {
          "type": "query",
