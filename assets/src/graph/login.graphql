@@ -27,6 +27,9 @@ query Subscription {
   account {
     ...Account
   }
+  configuration {
+    licenseExpiry
+  }
 }
 
 query MeGroups {

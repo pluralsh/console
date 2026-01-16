@@ -349,12 +349,12 @@ export default function Cluster() {
               })}
             </MoreMenu>
             <ClusterPermissionsModal
-              cluster={cluster!}
+              cluster={cluster}
               open={menuKey === 'permissions'}
               onClose={() => setMenuKey('')}
             />
             <ClusterSettingsModal
-              cluster={cluster!}
+              cluster={cluster}
               open={menuKey === 'settings'}
               onClose={() => setMenuKey('')}
             />

@@ -2,8 +2,6 @@ import {
   Button,
   Flex,
   FormField,
-  GearTrainIcon,
-  IconFrame,
   Input,
   Modal,
   Switch,
@@ -15,17 +13,14 @@ import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import {
-  ClusterFragment,
   ClustersRowFragment,
   useUpdateClusterMutation,
 } from 'generated/graphql'
 import isEqual from 'lodash/isEqual'
-import { ComponentProps, useMemo, useState } from 'react'
+import { ComponentProps, useMemo } from 'react'
 
 import { tagsToNameValue } from '../services/CreateGlobalService'
 import { TagSelection } from '../services/TagSelection'
-
-type Cluster = Pick<ClusterFragment, 'id' | 'name' | 'version'>
 
 function ClusterSettingsModalInner({
   cluster,
@@ -33,7 +28,7 @@ function ClusterSettingsModalInner({
   onClose,
   ...props
 }: ComponentProps<typeof Modal> & {
-  cluster: ClustersRowFragment
+  cluster: Nullable<ClustersRowFragment>
 }) {
   const initialTags: Record<string, string> = useMemo(
     () =>
@@ -46,11 +41,16 @@ function ClusterSettingsModalInner({
   )
 
   const {
-    state,
+    state: { name, protect, tags, disableAi },
     update: updateState,
     hasUpdates,
   } = useUpdateState(
-    { name: cluster?.name, protect: !!cluster?.protect, tags: initialTags },
+    {
+      name: cluster?.name,
+      protect: !!cluster?.protect,
+      tags: initialTags,
+      disableAi: !!cluster?.disableAi,
+    },
     { tags: (a, b) => !isEqual(a, b) }
   )
   const [mutation, { loading, error }] = useUpdateClusterMutation({
@@ -67,7 +67,7 @@ function ClusterSettingsModalInner({
       size="large"
       open={open}
       onClose={onClose}
-      header={props.header || `Cluster settings – ${cluster.name}`}
+      header={props.header || `Cluster settings - ${cluster.name}`}
       formProps={{
         onSubmit: (e) => {
           e.preventDefault()
@@ -76,9 +76,10 @@ function ClusterSettingsModalInner({
               variables: {
                 id: cluster.id,
                 attributes: {
-                  name: state.name,
-                  protect: state.protect,
-                  tags: tagsToNameValue(state.tags),
+                  name,
+                  protect,
+                  tags: tagsToNameValue(tags),
+                  disableAi,
                 },
               },
             })
@@ -115,13 +116,13 @@ function ClusterSettingsModalInner({
       >
         <FormField label="Name">
           <Input
-            value={state.name}
+            value={name}
             onChange={(e) => updateState({ name: e.target.value })}
           />
         </FormField>
         {!cluster.self && (
           <Switch
-            checked={state.protect}
+            checked={protect}
             onChange={(checked) => updateState({ protect: checked })}
           >
             Protect from deletion
@@ -129,10 +130,16 @@ function ClusterSettingsModalInner({
         )}
         <FormField label="Tags">
           <TagSelection
-            tags={state.tags}
+            tags={tags}
             setTags={(tags) => updateState({ tags })}
           />
         </FormField>
+        <Switch
+          checked={disableAi}
+          onChange={(checked) => updateState({ disableAi: checked })}
+        >
+          Disable AI insights
+        </Switch>
         {error && <GqlError error={error} />}
       </Flex>
     </Modal>
@@ -146,27 +153,5 @@ export function ClusterSettingsModal(
     <ModalMountTransition open={props.open}>
       <ClusterSettingsModalInner {...props} />
     </ModalMountTransition>
-  )
-}
-
-export default function ClusterSettings({ cluster }: { cluster: Cluster }) {
-  const [isOpen, setIsOpen] = useState(false)
-
-  return (
-    <>
-      <IconFrame
-        type="secondary"
-        size="large"
-        tooltip="Cluster settings"
-        clickable
-        icon={<GearTrainIcon />}
-        onClick={() => setIsOpen(true)}
-      />
-      <ClusterSettingsModal
-        cluster={cluster}
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-      />
-    </>
   )
 }

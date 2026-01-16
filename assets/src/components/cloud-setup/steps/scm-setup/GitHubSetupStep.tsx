@@ -86,6 +86,7 @@ export function GitHubSetupStep() {
       gap="medium"
     >
       {registerGhAppError && <GqlError error={registerGhAppError} />}
+      {webhookError && <GqlError error={webhookError} />}
       {showWebhookSetup ? (
         <WebhookFormSC
           onSubmit={(e) => {
@@ -93,10 +94,12 @@ export function GitHubSetupStep() {
             createWebhook()
           }}
         >
-          {webhookError && <GqlError error={webhookError} />}
           <Body1P>
             Please provide the GitHub organization or repository slug so Plural
             can create a webhook to listen for updates.
+          </Body1P>
+          <Body1P $color="icon-info">
+            Note: this can be done later in SCM connection settings
           </Body1P>
           <FormField
             required
@@ -115,6 +118,7 @@ export function GitHubSetupStep() {
           >
             <Button
               tertiary
+              type="button"
               padding="none"
               css={{ color: colors['text-xlight'] }}
               onClick={() => setParams(undefined)}
