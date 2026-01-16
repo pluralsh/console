@@ -87,7 +87,7 @@ export default function StackActions({
           Stack &quot;{stack?.name}&quot; restored.
         </Toast>
       )}
-      {!deleting ? (
+      {deleting ? (
         <>
           <StackCustomRun stackId={stack?.id ?? ''} />
           <RestoreStackButton
