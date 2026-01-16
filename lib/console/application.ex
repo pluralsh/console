@@ -57,6 +57,7 @@ defmodule Console.Application do
       Console.AI.GothManager,
       Console.PromEx,
       Console.AI.Graph.Indexer.Supervisor,
+      Console.Chat.Supervisor,
       {GRPC.Server.Supervisor,
         endpoint: Console.GRPC.Endpoint,
         port: 50051,

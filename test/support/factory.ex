@@ -1138,6 +1138,14 @@ defmodule Console.Factory do
     }
   end
 
+  def chat_connection_factory do
+    %Schema.ChatConnection{
+      name: sequence(:chat_connection, & "chat-connection-#{&1}"),
+      type: :slack,
+      configuration: %{slack: %{app_token: "token", bot_token: "token", bot_id: "id"}}
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

@@ -32,6 +32,7 @@ defmodule Console.Schema.PrAutomation do
     field :dark_icon,        :string
     field :branch_prefix,    :string
     field :labels,           {:array, :string}
+    field :ignore_templates, :boolean, virtual: true
 
     embeds_one :git, Service.Git, on_replace: :update
     embeds_one :proxy, ScmConnection.Proxy, on_replace: :update

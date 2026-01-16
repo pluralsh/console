@@ -462,6 +462,12 @@ type RootQueryType {
 
   sentinelRunJob(id: ID!): SentinelRunJob
 
+  chatProviderConnections(
+    after: String, first: Int, before: String, last: Int, type: ChatProviderConnectionType, q: String
+  ): ChatProviderConnectionConnection
+
+  chatProviderConnection(id: ID, name: String): ChatProviderConnection
+
   aiInsight(id: ID!): AiInsight
 
   "General api to query the configured LLM for your console"
@@ -1080,6 +1086,10 @@ type RootMutationType {
 
   updateSentinelRunJob(id: ID!, attributes: SentinelRunJobUpdateAttributes): SentinelRunJob
 
+  upsertChatProviderConnection(attributes: ChatProviderConnectionAttributes!): ChatProviderConnection
+
+  deleteChatProviderConnection(id: ID!): ChatProviderConnection
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
@@ -1256,6 +1266,65 @@ type PolicyBinding {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+enum ChatProviderConnectionType {
+  SLACK
+  TEAMS
+}
+
+"A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
+input ChatProviderConnectionAttributes {
+  "the name of this chat connection"
+  name: String!
+
+  "the type of this chat connection"
+  type: ChatProviderConnectionType!
+
+  configuration: ChatProviderConnectionConfigurationAttributes!
+}
+
+input ChatProviderConnectionConfigurationAttributes {
+  slack: SlackConnectionConfigurationAttributes
+}
+
+input SlackConnectionConfigurationAttributes {
+  appToken: String!
+  botToken: String!
+  botId: String
+}
+
+"A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
+type ChatProviderConnection {
+  id: ID!
+
+  "the name of this chat connection"
+  name: String!
+
+  "the type of this chat connection"
+  type: ChatProviderConnectionType!
+
+  "the configuration for this chat connection"
+  configuration: ChatProviderConnectionConfiguration!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type ChatProviderConnectionConfiguration {
+  "the configuration for the slack connection"
+  slack: SlackConnectionConfiguration
+}
+
+type SlackConnectionConfiguration {
+  "the bot id for the slack connection"
+  botId: String
+}
+
+type ChatProviderConnectionConnection {
+  pageInfo: PageInfo!
+  edges: [ChatProviderConnectionEdge]
 }
 
 enum AgentRuntimeType {
@@ -12244,5 +12313,10 @@ type AgentRunEdge {
 
 type AgentRuntimeEdge {
   node: AgentRuntime
+  cursor: String
+}
+
+type ChatProviderConnectionEdge {
+  node: ChatProviderConnection
   cursor: String
 }

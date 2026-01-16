@@ -1317,6 +1317,47 @@ type ChatMessage struct {
 	Content string `json:"content"`
 }
 
+// A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams
+type ChatProviderConnection struct {
+	ID string `json:"id"`
+	// the name of this chat connection
+	Name string `json:"name"`
+	// the type of this chat connection
+	Type ChatProviderConnectionType `json:"type"`
+	// the configuration for this chat connection
+	Configuration ChatProviderConnectionConfiguration `json:"configuration"`
+	InsertedAt    *string                             `json:"insertedAt,omitempty"`
+	UpdatedAt     *string                             `json:"updatedAt,omitempty"`
+}
+
+// A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams
+type ChatProviderConnectionAttributes struct {
+	// the name of this chat connection
+	Name string `json:"name"`
+	// the type of this chat connection
+	Type          ChatProviderConnectionType                    `json:"type"`
+	Configuration ChatProviderConnectionConfigurationAttributes `json:"configuration"`
+}
+
+type ChatProviderConnectionConfiguration struct {
+	// the configuration for the slack connection
+	Slack *SlackConnectionConfiguration `json:"slack,omitempty"`
+}
+
+type ChatProviderConnectionConfigurationAttributes struct {
+	Slack *SlackConnectionConfigurationAttributes `json:"slack,omitempty"`
+}
+
+type ChatProviderConnectionConnection struct {
+	PageInfo PageInfo                      `json:"pageInfo"`
+	Edges    []*ChatProviderConnectionEdge `json:"edges,omitempty"`
+}
+
+type ChatProviderConnectionEdge struct {
+	Node   *ChatProviderConnection `json:"node,omitempty"`
+	Cursor *string                 `json:"cursor,omitempty"`
+}
+
 // A list of chat messages around a specific topic created on demand
 type ChatThread struct {
 	ID            string              `json:"id"`
@@ -7444,6 +7485,17 @@ type SinkConfigurationAttributes struct {
 	Plural *PluralSinkAttributes `json:"plural,omitempty"`
 }
 
+type SlackConnectionConfiguration struct {
+	// the bot id for the slack connection
+	BotID *string `json:"botId,omitempty"`
+}
+
+type SlackConnectionConfigurationAttributes struct {
+	AppToken string  `json:"appToken"`
+	BotToken string  `json:"botToken"`
+	BotID    *string `json:"botId,omitempty"`
+}
+
 // SMTP server configuration for email notifications
 type SMTPSettings struct {
 	Server string `json:"server"`
@@ -9254,6 +9306,47 @@ func (e *AutoscalingTarget) UnmarshalGQL(v any) error {
 }
 
 func (e AutoscalingTarget) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ChatProviderConnectionType string
+
+const (
+	ChatProviderConnectionTypeSLACk ChatProviderConnectionType = "SLACK"
+	ChatProviderConnectionTypeTeams ChatProviderConnectionType = "TEAMS"
+)
+
+var AllChatProviderConnectionType = []ChatProviderConnectionType{
+	ChatProviderConnectionTypeSLACk,
+	ChatProviderConnectionTypeTeams,
+}
+
+func (e ChatProviderConnectionType) IsValid() bool {
+	switch e {
+	case ChatProviderConnectionTypeSLACk, ChatProviderConnectionTypeTeams:
+		return true
+	}
+	return false
+}
+
+func (e ChatProviderConnectionType) String() string {
+	return string(e)
+}
+
+func (e *ChatProviderConnectionType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ChatProviderConnectionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ChatProviderConnectionType", str)
+	}
+	return nil
+}
+
+func (e ChatProviderConnectionType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
