@@ -1,12 +1,14 @@
-import { Button, Code } from '@pluralsh/design-system'
+import { Button, Code, Tab, TabList, TabPanel } from '@pluralsh/design-system'
 import {
   Dispatch,
   SetStateAction,
   createContext,
   useContext,
+  useRef,
   useState,
 } from 'react'
 import { useTheme } from 'styled-components'
+import { Key } from '@react-types/shared'
 
 import { CloudSettingsAttributes, ClusterAttributes } from 'generated/graphql'
 
@@ -20,6 +22,11 @@ import { ProviderCloud } from './types'
 export enum ClusterCreateMode {
   New = 'new',
   Import = 'import',
+}
+
+export enum ClusterImportTab {
+  Terraform = 'terraform',
+  CLI = 'cli',
 }
 
 export const ORDERED_CLOUDS = [
@@ -269,6 +276,8 @@ function CreateClusterModal({
 }) {
   const theme = useTheme()
   const [name, setName] = useState<string>('')
+  const [activeTab, setActiveTab] = useState<Key>(ClusterImportTab.Terraform)
+  const tabStateRef = useRef<any>(null)
 
   return (
     <ModalAlt
@@ -280,24 +289,50 @@ function CreateClusterModal({
         onClose?.()
       }}
     >
-      <NameVersionHandle {...{ name, setName }} />
-      <div>
-        <StepH css={{ marginBottom: theme.spacing.small }}>
-          Run the below command to create a new cluster
-        </StepH>
-        <Code>{`plural cd clusters bootstrap --name ${
-          name || '{your-cluster-name}'
-        }`}</Code>
-      </div>
-      <div>
-        <StepH css={{ marginBottom: theme.spacing.small }}>
-          Tip: use the following command to reinstall if the initial
-          installation fails
-        </StepH>
-        <Code>{`plural cd clusters reinstall @${
-          name || '{your-cluster-name}'
-        }`}</Code>
-      </div>
+      Choose your preferred method to import your cluster:
+      <TabList
+        stateRef={tabStateRef}
+        stateProps={{
+          orientation: 'horizontal',
+          selectedKey: activeTab,
+          onSelectionChange: setActiveTab,
+        }}
+      >
+        <Tab key={ClusterImportTab.Terraform}>Terraform</Tab>
+        <Tab key={ClusterImportTab.CLI}>CLI</Tab>
+      </TabList>
+      <TabPanel
+        stateRef={tabStateRef}
+        tabKey={activeTab}
+      >
+        {activeTab === ClusterImportTab.Terraform && (
+          <div css={{ padding: theme.spacing.medium }}>
+            <p>...</p>
+          </div>
+        )}
+        {activeTab === ClusterImportTab.CLI && (
+          <>
+            <NameVersionHandle {...{ name, setName }} />
+            <div>
+              <StepH css={{ marginBottom: theme.spacing.small }}>
+                Run the below command to create a new cluster
+              </StepH>
+              <Code>{`plural cd clusters bootstrap --name ${
+                name || '{your-cluster-name}'
+              }`}</Code>
+            </div>
+            <div>
+              <StepH css={{ marginBottom: theme.spacing.small }}>
+                Tip: use the following command to reinstall if the initial
+                installation fails
+              </StepH>
+              <Code>{`plural cd clusters reinstall @${
+                name || '{your-cluster-name}'
+              }`}</Code>
+            </div>
+          </>
+        )}
+      </TabPanel>
     </ModalAlt>
   )
 }
