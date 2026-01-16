@@ -26,8 +26,8 @@ def get_gpu_images(version):
     images = set(get_chart_images(url, app_name, version) or [])
 
 
-    # Filter to only include the main gpu-operator image with a proper tag.
-    filtered = [img for img in images if "gpu-operator" in img and ":" in img and "/" in img]
+    # Keep only items that ARE valid docker images (contain both repository and tag separators)
+    filtered = [img for img in images if ":" in img and "/" in img]
 
     return sorted(filtered)
 
