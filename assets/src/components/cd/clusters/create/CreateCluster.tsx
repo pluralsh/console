@@ -1,4 +1,11 @@
-import { Button, Code, Tab, TabList, TabPanel } from '@pluralsh/design-system'
+import {
+  Button,
+  Code,
+  Flex,
+  Tab,
+  TabList,
+  TabPanel,
+} from '@pluralsh/design-system'
 import {
   Dispatch,
   SetStateAction,
@@ -18,6 +25,7 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { NameVersionHandle } from './NameVersionHandle'
 import { ProviderCloud } from './types'
+import { Body2P } from 'components/utils/typography/Text'
 
 export enum ClusterCreateMode {
   New = 'new',
@@ -289,7 +297,10 @@ function CreateClusterModal({
         onClose?.()
       }}
     >
-      Choose your preferred method to import your cluster:
+      <Body2P>
+        Choose your preferred method to import your cluster and follow the
+        instructions below.
+      </Body2P>
       <TabList
         stateRef={tabStateRef}
         stateProps={{
@@ -306,31 +317,37 @@ function CreateClusterModal({
         tabKey={activeTab}
       >
         {activeTab === ClusterImportTab.Terraform && (
-          <div css={{ padding: theme.spacing.medium }}>
+          <Flex
+            flexDirection="column"
+            gap="small"
+          >
             <p>...</p>
-          </div>
+          </Flex>
         )}
         {activeTab === ClusterImportTab.CLI && (
-          <>
+          <Flex
+            flexDirection="column"
+            gap="small"
+          >
             <NameVersionHandle {...{ name, setName }} />
             <div>
-              <StepH css={{ marginBottom: theme.spacing.small }}>
+              <Body2P css={{ marginBottom: theme.spacing.small }}>
                 Run the below command to create a new cluster
-              </StepH>
+              </Body2P>
               <Code>{`plural cd clusters bootstrap --name ${
                 name || '{your-cluster-name}'
               }`}</Code>
             </div>
             <div>
-              <StepH css={{ marginBottom: theme.spacing.small }}>
-                Tip: use the following command to reinstall if the initial
-                installation fails
-              </StepH>
+              <Body2P css={{ marginBottom: theme.spacing.small }}>
+                Tip: Use the following command to reinstall if the initial
+                installation fails.
+              </Body2P>
               <Code>{`plural cd clusters reinstall @${
                 name || '{your-cluster-name}'
               }`}</Code>
             </div>
-          </>
+          </Flex>
         )}
       </TabPanel>
     </ModalAlt>
