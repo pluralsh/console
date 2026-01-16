@@ -18,10 +18,11 @@ defmodule Console.Repo do
       (if is_binary(region), do: %{region: region}, else: %{})
     )
 
-    {:ok, Keyword.merge(opts,
-      password: token,
-      ssl_opts: rds_ssl_opts(:aws, opts[:hostname])
-    )}
+    Keyword.merge(opts, [password: token, ssl: rds_ssl_opts(:aws, opts[:hostname])])
+  end
+
+  def setup_rds_iam(username) do
+    query("GRANT rds_iam TO \"#{username}\"", [])
   end
 
   def rds_ssl_opts(:aws, url) do

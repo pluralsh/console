@@ -117,7 +117,7 @@ function getTabContent(
   return `
 ## ${capitalize(tab)}
 
-${isEmpty(textList) ? 'None reported.' : textList?.map((text) => `- ${text}`).join('\n')}
+${isEmpty(textList) ? 'None reported.' : textList?.join('\n\n')}
 `
 }
 
