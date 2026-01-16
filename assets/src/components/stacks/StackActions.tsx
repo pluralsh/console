@@ -16,6 +16,7 @@ import StackCustomRunModal from './customrun/StackCustomRunModal'
 import KickButton from '../utils/KickButton'
 import RestoreStackButton from './RestoreStackButton'
 import { MoreMenu } from '../utils/MoreMenu'
+import StackCustomRun from './customrun/StackCustomRun'
 
 enum MenuItemKey {
   None = '',
@@ -86,11 +87,14 @@ export default function StackActions({
           Stack &quot;{stack?.name}&quot; restored.
         </Toast>
       )}
-      {deleting ? (
-        <RestoreStackButton
-          id={stack?.id ?? ''}
-          setShowToast={setShowRestoreToast}
-        />
+      {!deleting ? (
+        <>
+          <StackCustomRun stackId={stack?.id ?? ''} />
+          <RestoreStackButton
+            id={stack?.id ?? ''}
+            setShowToast={setShowRestoreToast}
+          />
+        </>
       ) : (
         <div
           css={{
