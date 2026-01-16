@@ -89,11 +89,11 @@ export default function StackActions({
       )}
       {deleting ? (
         <>
-          <StackCustomRun stackId={stack?.id ?? ''} />
           <RestoreStackButton
             id={stack?.id ?? ''}
             setShowToast={setShowRestoreToast}
           />
+          <StackCustomRun stackId={stack?.id ?? ''} />
         </>
       ) : (
         <div
