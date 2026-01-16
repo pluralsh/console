@@ -19,7 +19,7 @@ import { Key } from '@react-types/shared'
 
 import { CloudSettingsAttributes, ClusterAttributes } from 'generated/graphql'
 
-import ModalAlt, { StepH } from 'components/cd/ModalAlt'
+import ModalAlt from 'components/cd/ModalAlt'
 import { useOpenTransition } from 'components/hooks/suspense/useOpenTransition'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
