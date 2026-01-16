@@ -26,6 +26,7 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { NameVersionHandle } from './NameVersionHandle'
 import { ProviderCloud } from './types'
 import { Body2P } from 'components/utils/typography/Text'
+import { InlineLink } from 'components/utils/typography/InlineLink'
 
 export enum ClusterCreateMode {
   New = 'new',
@@ -325,13 +326,13 @@ function CreateClusterModal({
               <Body2P css={{ marginBottom: theme.spacing.small }}>
                 To import your cluster using Terraform, first configure the
                 Plural provider according to the{' '}
-                <a
+                <InlineLink
                   href="https://registry.terraform.io/providers/pluralsh/plural/latest/docs"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   documentation
-                </a>
+                </InlineLink>
                 .
               </Body2P>
               <Body2P css={{ marginBottom: theme.spacing.small }}>
