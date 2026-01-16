@@ -323,12 +323,20 @@ function CreateClusterModal({
           >
             <div>
               <Body2P css={{ marginBottom: theme.spacing.small }}>
-                To import your cluster using the Plural Terraform provider,
-                start with its configuration. It is documented in
-                https://registry.terraform.io/providers/pluralsh/plural/latest/docs.
+                To import your cluster using Terraform, first configure the
+                Plural provider according to the{' '}
+                <a
+                  href="https://registry.terraform.io/providers/pluralsh/plural/latest/docs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  documentation
+                </a>
+                .
               </Body2P>
               <Body2P css={{ marginBottom: theme.spacing.small }}>
-                And then define the cluster resource:
+                Once the provider is configured, use the cluster resource to
+                import it:
               </Body2P>
               <Code language="hcl">{`resource "plural_cluster" "example" {
   name   = "my-cluster"
