@@ -28,7 +28,7 @@ interface ResourceVariables extends DataSelectVariables {
 }
 
 interface ResourceList {
-  errors: Array<Error>
+  errors: Array<unknown>
   listMeta: TypesListMeta
 }
 
