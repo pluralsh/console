@@ -2,8 +2,18 @@ import {
   TypesListMeta,
   TypesObjectMeta,
   TypesTypeMeta,
-  Error as ErrorType,
 } from 'generated/kubernetes'
+
+interface ErrorStatus {
+  code: number
+  message: string
+  reason: string
+  status: string
+}
+
+interface ErrorType {
+  ErrStatus: ErrorStatus
+}
 
 interface DataSelectVariables {
   filterBy?: Nullable<string>
@@ -106,6 +116,7 @@ function fromResource(resource: Resource): ObjectReference {
 
 export type {
   ErrorType,
+  ErrorStatus,
   ResourceVariables,
   ResourceList,
   Resource,
