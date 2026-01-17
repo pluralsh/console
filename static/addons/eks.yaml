@@ -294,7 +294,25 @@
   publisher: akuity
 - name: amazon-cloudwatch-observability
   versions:
+  - version: v5.1.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v5.0.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v4.9.0-eksbuild.1
     compatibilities:
     - '1.34'
     - '1.33'
@@ -2894,6 +2912,11 @@
   publisher: s3
 - name: aws-network-flow-monitoring-agent
   versions:
+  - version: v1.1.3-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.1.2-eksbuild.1
     compatibilities:
     - '1.34'
@@ -3901,6 +3924,14 @@
   publisher: Cribl
 - name: cyberark_cert-manager-eks
   versions:
+  - version: v1.19.2-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.19.1-eksbuild.1
     compatibilities:
     - '1.33'
