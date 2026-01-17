@@ -6,6 +6,8 @@ import {
   ChipProps,
   ConfettiIcon,
   Flex,
+  Input,
+  SearchIcon,
   SuccessIcon,
   Tab,
   Table,
@@ -13,9 +15,11 @@ import {
   WarningIcon,
 } from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
+import Fuse from 'fuse.js'
 import {
   ClusterDistro,
   ClusterOverviewDetailsFragment,
+  ClusterUpgradeDeprecatedCustomResourceFragment,
   ClusterUpgradePlanFragment,
   UpgradeInsight,
   UpgradeInsightStatus,
@@ -29,6 +33,7 @@ import { GqlError } from '../../../../utils/Alert.tsx'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
 import { produce } from 'immer'
+import { isNonNullable } from 'utils/isNonNullable.ts'
 import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout.ts'
 import { ClusterDistroShortNames } from '../../../../utils/ClusterDistro.tsx'
 import { clusterDeprecatedCustomResourcesColumns } from '../../clusterDeprecatedCustomResourcesColumns.tsx'
@@ -46,6 +51,7 @@ import {
   upgradeInsightsColumns,
 } from '../../UpgradeInsights.tsx'
 import { UpgradesConsolidatedTable } from './UpgradesConsolidatedTable.tsx'
+import { useThrottle } from 'components/hooks/useThrottle.tsx'
 
 enum DeprecationType {
   GitOps = 'gitOps',
@@ -56,6 +62,13 @@ enum AddonType {
   All = 'all',
   Cloud = 'cloud',
 }
+
+const deprecatedCRSearchOptions: Fuse.IFuseOptions<ClusterUpgradeDeprecatedCustomResourceFragment> =
+  {
+    keys: ['name', 'namespace', 'group'],
+    threshold: 0.25,
+    ignoreLocation: true,
+  }
 
 export enum UpgradeAccordionName {
   Preflight = 'preflight',
@@ -104,6 +117,8 @@ export function UpgradesTab({
   const [addonType, setAddonType] = useState(AddonType.All)
   const [deprecationType, setDeprecationType] = useState(DeprecationType.GitOps)
   const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
+  const [deprecatedCRSearch, setDeprecatedCRSearch] = useState('')
+  const throttledCRSearch = useThrottle(deprecatedCRSearch, 250)
 
   const { numUpgradeBlockers } = getClusterUpgradeInfo(cluster)
 
@@ -122,6 +137,16 @@ export function UpgradesTab({
     () => getPreFlightChecklist(cluster?.upgradePlan),
     [cluster?.upgradePlan]
   )
+
+  const filteredDeprecatedCRs = useMemo(() => {
+    const resources =
+      cluster?.deprecatedCustomResources?.filter(isNonNullable) ?? []
+    return !throttledCRSearch
+      ? resources
+      : new Fuse(resources, deprecatedCRSearchOptions)
+          .search(throttledCRSearch)
+          .map(({ item }) => item)
+  }, [cluster?.deprecatedCustomResources, throttledCRSearch])
 
   const scrollOnMount = (
     domNode: HTMLDivElement | null,
@@ -284,7 +309,7 @@ export function UpgradesTab({
                   }}
                 />
               ) : (
-                <EmptyState description="No services with API deprecations discovered!" />
+                <ConfettiEmptyState description="No services with API deprecations discovered!" />
               )}
             </div>
           )}
@@ -305,7 +330,7 @@ export function UpgradesTab({
                   }}
                 />
               ) : (
-                <EmptyState description="No services with cloud provider insights discovered!" />
+                <ConfettiEmptyState description="No services with cloud provider insights discovered!" />
               )}
             </div>
           )}
@@ -379,7 +404,7 @@ export function UpgradesTab({
                   cluster={cluster}
                 />
               ) : (
-                <EmptyState description="No known add-ons found" />
+                <ConfettiEmptyState description="No known add-ons found" />
               )}
             </div>
           )}
@@ -391,7 +416,7 @@ export function UpgradesTab({
                   cluster={cluster}
                 />
               ) : (
-                <EmptyState description="No known cloud add-ons found" />
+                <ConfettiEmptyState description="No known cloud add-ons found" />
               )}
             </div>
           )}
@@ -421,16 +446,28 @@ export function UpgradesTab({
             />
           }
         >
+          <div css={{ padding: theme.spacing.xsmall }}>
+            <Input
+              css={{ background: 'transparent' }}
+              placeholder="Search custom resources"
+              startIcon={<SearchIcon />}
+              value={deprecatedCRSearch}
+              onChange={(e) => setDeprecatedCRSearch(e.target.value)}
+            />
+          </div>
           {!isEmpty(cluster?.deprecatedCustomResources) ? (
             <Table
               flush
               virtualizeRows
-              data={cluster?.deprecatedCustomResources ?? []}
+              data={filteredDeprecatedCRs}
               columns={clusterDeprecatedCustomResourcesColumns}
               maxHeight={500}
+              emptyStateProps={{
+                message: 'No custom resources match your search.',
+              }}
             />
           ) : (
-            <EmptyState description="You do not have any deprecated custom resources." />
+            <ConfettiEmptyState description="You do not have any deprecated custom resources." />
           )}
         </AccordionItem>
       </Accordion>
@@ -440,7 +477,7 @@ export function UpgradesTab({
   )
 }
 
-function EmptyState({ description }) {
+function ConfettiEmptyState({ description }) {
   const theme = useTheme()
 
   return (
