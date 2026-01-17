@@ -3,25 +3,14 @@ git_url: https://github.com/argoproj/argo-cd
 release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 versions:
-- version: 3.2.3
+- version: 3.2.5
   kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
-  summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ["v3.2.3: Dependency update only \u2013 bumped golang.org/x/crypto from\
-        \ 0.42.0 to 0.46.0 (security/crypto library refresh).", 'v3.2.1: Repo-server
-        fix for a concurrency issue with Git detached HEAD processing, reducing intermittent
-        repo refresh/manifest generation errors.', 'v3.2.1: Multiple UI fixes (status
-        panel null-safety, tooltip resource units, layout overlap, conditional rendering
-        of ApplicationSelector) improving UI stability and correctness.', 'v3.2.1:
-        Health assessment tweak for ISVC resources: allow healthy when the Stopped
-        condition is False.']
-    breaking_changes: []
-  chart_version: 9.2.4
+  summary: null
+  chart_version: 9.3.4
   images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
-    'quay.io/argoproj/argocd:v3.2.3']
+    'quay.io/argoproj/argocd:v3.2.5']
 - version: 3.2.1
   kube: ['1.35', '1.34', '1.33']
   requirements: []

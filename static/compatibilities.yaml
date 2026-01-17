@@ -2401,25 +2401,45 @@ addons:
   helm_repository_url: https://helm.cilium.io/
   helm_values: debug.verbose=flow
   versions:
-  - version: 1.18.5
-    kube: ['1.34', '1.33', '1.32']
+  - version: 1.18.6
+    kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: ''
-      chart_updates: []
-      features: ['Envoy proxy was bumped within the 1.18 line (to 1.34.11/1.34.12),
-          bringing in upstream proxy fixes and behavior updates.', 'Hybrid-DSR support
-          was added via the existing annotation infrastructure, enabling a new service
-          load-balancing mode where applicable.', Kubernetes endpoints that are terminating
-          are now retained in BPF backend state (regardless of the "serving" condition)
-          to reduce connection disruption during pod termination., Secret-sync controller
-          gained a periodic resync to improve eventual consistency.]
-      breaking_changes: []
-    chart_version: 1.18.5
-    images: ['quay.io/cilium/cilium-envoy:v1.34.12-1765374555-6a93b0bbba8d6dc75b651cbafeedb062b2997716@sha256:3108521821c6922695ff1f6ef24b09026c94b195283f8bfbfc0fa49356a156e1',
-      'quay.io/cilium/cilium:v1.18.5@sha256:2c92fb05962a346eaf0ce11b912ba434dc10bd54b9989e970416681f4a069628',
-      'quay.io/cilium/operator-generic:v1.18.5@sha256:36c3f6f14c8ced7f45b40b0a927639894b44269dd653f9528e7a0dc363a4eb99']
+      helm_changes: "## Helm / upgrade-impacting notes (1.18.2 \u2192 1.18.6)\n\n\
+        - **Helm charts are now published to OCI registries** (1.18.6 major change).\
+        \ This may change how you fetch the chart (e.g., `helm pull oci://...`) and\
+        \ may require updating CI/CD that previously used a Helm repo URL.\n- **Preflight\
+        \ check behavior changed**: Cilium preflight **no longer includes Envoy ConfigMaps**\
+        \ (1.18.6). If your upgrade runbooks relied on preflight validating Envoy\
+        \ configmaps, adjust expectations.\n- **ServiceMonitor labels defaulting**:\
+        \ Helm now **ensures consistent default labels across all ServiceMonitor resources**\
+        \ (noted in 1.18.2). If you select ServiceMonitors via labels in Prometheus\
+        \ Operator, double-check your selectors.\n- **Ingress service NodePort handling**:\
+        \ Helm will **only set `nodePort` for `cilium-ingress-service` if explicitly\
+        \ specified** (noted in 1.18.2). If you previously relied on an implicitly\
+        \ set NodePort, you may need to set it in values.\n"
+      chart_updates: ['Helm chart distribution: charts are published to OCI registries
+          (requires updating chart acquisition and potentially authentication).',
+        'Preflight job content adjusted: Envoy ConfigMaps excluded, reducing false
+          positives/complexity when running preflight.', ServiceMonitor manifests
+          updated to apply consistent default labels., Ingress service template updated
+          so NodePort is only injected when configured.]
+      features: ['Helm charts published to OCI registries, simplifying artifact distribution
+          and allowing OCI-native mirroring/caching.', 'BGP Control Plane v2: configurable
+          BGP origin attribute for LoadBalancer IPs to ease migration from MetalLB.',
+        'Hubble/eBPF: support policy verdict reporting from L3 devices (noted under
+          other changes in 1.18.6).']
+      breaking_changes: [Helm chart retrieval may break existing pipelines if they
+          assume a traditional Helm repo; they must be updated to pull from OCI (or
+          use an updated repo mechanism if provided by your org)., 'CiliumNetworkPolicy
+          validation is stricter: namespaced CNPs with `nodeSelector` inside a `specs[]`
+          array are now rejected instead of silently ignored; existing manifests relying
+          on the old behavior will fail admission/validation.']
+    chart_version: 1.18.6
+    images: ['quay.io/cilium/cilium-envoy:v1.35.9-1767794330-db497dd19e346b39d81d7b5c0dedf6c812bcc5c9@sha256:81398e449f2d3d0a6a70527e4f641aaa685d3156bea0bb30712fae3fd8822b86',
+      'quay.io/cilium/cilium:v1.18.6@sha256:42ec562a5ff6c8a860c0639f5a7611685e253fd9eb2d2fcdade693724c9166a4',
+      'quay.io/cilium/operator-generic:v1.18.6@sha256:34a827ce9ed021c8adf8f0feca131f53b3c54a3ef529053d871d0347ec4d69af']
   - version: 1.18.2
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -2506,6 +2526,26 @@ addons:
     images: ['quay.io/cilium/cilium-envoy:v1.34.4-1753677767-266d5a01d1d55bd1d60148f991b98dac0390d363@sha256:231b5bd9682dfc648ae97f33dcdc5225c5a526194dda08124f5eded833bf02bf',
       'quay.io/cilium/cilium:v1.18.0@sha256:dfea023972d06ec183cfa3c9e7809716f85daaff042e573ef366e9ec6a0c0ab2',
       'quay.io/cilium/operator-generic:v1.18.0@sha256:398378b4507b6e9db22be2f4455d8f8e509b189470061b0f813f0fabaf944f51']
+  - version: 1.17.12
+    kube: ['1.35', '1.34', '1.33']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Helm charts are now published to OCI registries (in addition
+          to/transitioning from previous distribution). This impacts how you reference
+          the chart source in your Helm commands and your internal mirroring process.]
+      features: [GAMMA reconciler supports attaching multiple HTTPRoutes to the same
+          Service (from 1.17.8 notes)., Hubble BPF now supports policy verdicts from
+          L3 devices (listed in 1.17.12 other changes)., Documentation/examples added
+          for using the egressDeny field in CiliumNetworkPolicy.]
+      breaking_changes: ['Chart distribution change: Helm charts are published to
+          OCI registries; environments that only pull from the old Helm repo URL may
+          need updates to chart references, auth, and mirroring.']
+    chart_version: 1.17.12
+    images: ['quay.io/cilium/cilium-envoy:v1.34.12-1767177245-7935d4d711cb6f8020385a50c996b90896e16a71@sha256:377175048c79d12c129d29e7a56268e1edaad37c96e649e892465c01bf2b4f8f',
+      'quay.io/cilium/cilium:v1.17.12@sha256:f525e12698149b3958024599493d9cc56fadbc46c9250cbced8016e9b9b679e5',
+      'quay.io/cilium/operator-generic:v1.17.12@sha256:0b675406b1e43b198962d4f9c3a5ba6bb68fc98836cba05b224860109112f6d9']
   - version: 1.17.8
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -2621,6 +2661,21 @@ addons:
     images: ['quay.io/cilium/cilium-envoy:v1.31.5-1737535524-fe8efeb16a7d233bffd05af9ea53599340d3f18e@sha256:57a3aa6355a3223da360395e3a109802867ff635cb852aa0afe03ec7bf04e545',
       'quay.io/cilium/cilium:v1.17.0@sha256:51f21bdd003c3975b5aaaf41bd21aee23cc08f44efaa27effc91c621bc9d8b1d',
       'quay.io/cilium/operator-generic:v1.17.0@sha256:1ce5a5a287166fc70b6a5ced3990aaa442496242d1d4930b5a3125e44cccdca8']
+  - version: 1.16.19
+    kube: ['1.35', '1.34', '1.33']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: [Helm charts are now published to OCI registries (in addition
+          to/with a change of the OCI registry used).]
+      features: ['Helm chart distribution supports OCI registries, enabling `helm
+          pull oci://...` style consumption where desired.']
+      breaking_changes: []
+    chart_version: 1.16.19
+    images: ['quay.io/cilium/cilium-envoy:v1.34.12-1767177245-7935d4d711cb6f8020385a50c996b90896e16a71@sha256:377175048c79d12c129d29e7a56268e1edaad37c96e649e892465c01bf2b4f8f',
+      'quay.io/cilium/cilium:v1.16.19@sha256:f0c260e30ef97ce3e45e833e702ab47efbbb1dadd0a394969c0a65553e98fefb',
+      'quay.io/cilium/operator-generic:v1.16.19@sha256:8879e792c5566f6349b5f2865e07c0dd690eb32638afc4417b51b0ec574fa5f0']
   - version: 1.16.15
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -6109,7 +6164,31 @@ addons:
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: '- **Helm chart update for new CLI options (v1.8.0)**: the chart
+        was updated to expose/configure new controller CLI flags/options. When upgrading,
+        diff your current `values.yaml` against the new chart defaults and ensure
+        any controller args/env values you set are still valid. (`Update helm chart
+        for new CLI options` #8571)
+
+        - No other explicit helm-values changes were called out in the provided notes;
+        still run `helm diff upgrade` and check rendered manifests for changes in
+        Deployments/Args/Env.'
+      chart_updates: ['Helm chart updated to support newly introduced controller CLI
+          options (v1.8.0, #8571).']
+      features: ['(v1.6.0) Support delayed registration for AWS KWOK, improving compatibility
+          with Kubernetes-in-Kubernetes testing environments.', '(v1.6.0) Capacity
+          Block support, enabling provisioning against EC2 Capacity Blocks where applicable.',
+        '(v1.6.0) Temporarily ignore (ICE) Availability Zones when subnets in that
+          AZ run out of available IPs, improving resilience during IP exhaustion.',
+        (v1.6.0) Additional Bottlerocket log settings support., (v1.6.0) Auto-relaxing
+          minimum values support to make certain constraints less brittle., (v1.8.0)
+          `spec.ipPrefixCount` support to pre-warm IP prefixes for faster pod networking
+          scale-up., (v1.8.0) Support for `InstanceMatchCriteria` in `CapacityReservationSelectorTerms`
+          for more precise Capacity Reservation selection., '(v1.8.0) Bottlerocket:
+          use default ephemeral storage bind command, simplifying/defaulting node
+          setup behavior.']
+      breaking_changes: []
     chart_version: 1.8.0
     images: ['public.ecr.aws/karpenter/controller:1.8.0@sha256:f913075cdd31cfcdfaa9726ca7a0b264832fc42e8a48eb573a2a0f454b38b112']
   - version: 1.6.0
@@ -6361,6 +6440,38 @@ addons:
   helm_repository_url: https://prometheus-community.github.io/helm-charts
   chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
   versions:
+  - version: 81.0.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary:
+      helm_changes: ''
+      chart_updates: ['Chart version bump: kube-prometheus-stack to 81.0.0.', "Prometheus\
+          \ Operator version bumped to v0.88.0 (from prior chart\u2019s operator version).",
+        CI/dependency housekeeping in 80.14.4 (Helm/Helm v4.0.5 in CI; non-major dependency
+          updates).]
+      features: ['Prometheus Operator updated to 0.88.0, bringing in upstream Operator
+          improvements/fixes included in that release.']
+      breaking_changes: [Possible breaking changes may be introduced via Prometheus
+          Operator 0.88.0; review Operator 0.88.0 release notes for CRD/schema/behavior
+          changes before upgrading.]
+    chart_version: 81.0.0
+    images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.4',
+      'quay.io/kiwigrid/k8s-sidecar:2.2.1', 'quay.io/prometheus-operator/prometheus-operator:v0.88.0',
+      'quay.io/prometheus/alertmanager:v0.30.1', 'quay.io/prometheus/node-exporter:v1.10.2',
+      'quay.io/prometheus/prometheus:v3.9.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
+  - version: 80.14.4
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 80.14.4
+    images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.4',
+      'quay.io/kiwigrid/k8s-sidecar:2.2.1', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+      'quay.io/prometheus/alertmanager:v0.30.1', 'quay.io/prometheus/node-exporter:v1.10.2',
+      'quay.io/prometheus/prometheus:v3.9.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
   - version: 80.10.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -6878,7 +6989,19 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['64.0.0: Reverted "Add downward compat for Prom CRD" (PR #4883).
+          This is a chart-level change affecting how Prometheus CRD compatibility
+          was handled.', '65.8.1: Improved selector information for `additionalPodMonitors`
+          and `additionalServiceMonitors` (PR #4974). This is a chart behavior/UX
+          improvement for generated selectors.']
+      features: ['Improved visibility/clarity of selectors used for `additionalPodMonitors`
+          and `additionalServiceMonitors`, making it easier to understand/verify which
+          targets will be picked up.']
+      breaking_changes: ['Potential behavioral change around Prometheus CRD compatibility
+          due to the revert in 64.0.0; if you relied on the previously-added "downward
+          compatibility" logic, verify CRD versions and upgrade path before proceeding.']
     chart_version: 65.8.1
     images: []
   - version: 64.0.0
@@ -8365,6 +8488,12 @@ addons:
   git_url: https://github.com/open-telemetry/opentelemetry-operator
   release_url: https://github.com/open-telemetry/opentelemetry-operator/releases/tag/v{vsn}
   versions:
+  - version: 0.143.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
   - version: 0.142.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -9180,25 +9309,24 @@ addons:
   release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
   helm_repository_url: https://traefik.github.io/charts
   versions:
-  - version: 3.6.5
+  - version: 3.6.6
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['From v3.6.0 (baseline): added new ACME certificatesResolvers options;
-          added least-time and HighestRandomWeight load-balancing strategies; added
-          TCP (active) healthchecks and passive health checks; added Knative provider
-          and improvements to Kubernetes/Gateway API and Ingress publishing (including
-          ExternalName services); added multi-layer routing; added HTTP/2 HPACK table
-          size options; and several dashboard/UI tweaks.', v3.6.5 is a patch release
-          with no new features called out in the notes you provided; it focuses on
-          fixes/behavior clarifications.]
-      breaking_changes: ['Access logs will now also be printed for rejected requests;
-          the release note explicitly warns about this new behavior, so log volume/content
-          may change and could affect log-based alerts/costs.']
-    chart_version: 38.0.1
+      features: [New ACME certificate resolver options (v3.6.0)., 'New load-balancing
+          strategies: LeastTime and HighestRandomWeight (including CRD support) (v3.6.0).',
+        'Health check improvements: TCP health checks and passive health checks (v3.6.0).',
+        'Kubernetes-related additions: Knative provider, Gateway API bumped to v1.4.0,
+          Ingress can publish ExternalName Services, and CRD supports HighestRandomWeight
+          (v3.6.0).', 'Networking/protocol additions: AWS ECS IPv6 support, HTTP/2
+          HPACK table size options, and plugin syscall support (v3.6.0).', 'Routing/UI
+          enhancements: multi-layer routing and dashboard Hub demo/compact table layout
+          (v3.6.0).']
+      breaking_changes: []
+    chart_version: 38.0.2
     images: []
   - version: 3.6.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -9386,30 +9514,28 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['fs-backup (file system backup) is redesigned into a micro-service
-          architecture, enabling concurrency control, cancel/resume, better isolation,
-          and steadier node-agent resource usage.', File system backup now supports
-          Windows workloads by running data mover pods on Windows nodes., 'Support
-          for Kubernetes VolumeGroupSnapshot (beta upstream) is added for both CSI
-          snapshot backups and CSI snapshot data movement, enabling crash-consistent
-          snapshots across multiple volumes.', 'PriorityClass can now be configured
-          across Velero components (server, node-agent, data movers, and repository
-          maintenance jobs) to influence scheduling/eviction.', 'Data mover scalability/resiliency
-          improvements: throttle creation via node-agent PrepareQueueLength; resume/cancel
-          behavior improved across node-agent restarts; restore node-selection matches
-          backup and can be set per storage class.', Resource policies gain an includeExcludePolicy
-          so reusable include/exclude filters can be centralized in a configmap.,
-        'CLI can auto-discover and use ca cert from the BackupStorageLocation for
-          download requests; added BSL availability metric; added s390x support. ']
-      breaking_changes: ['Restic-based fs-backup is removed: --uploader-type=restic
-          is no longer a valid installation configuration (restores from existing
-          restic backups still supported until v1.19).', 'Repository maintenance job
-          tuning flags are removed from the velero server args (--keep-latest-maintenance-jobs,
-          --maintenance-job-*-request/limit); these settings move to a repository
-          maintenance job ConfigMap.', 'PVC restore behavior change: selected-node
-          annotation is now always removed when there is no node mapping (previously
-          it could be preserved if the node existed).']
-    chart_version: 11.3.1
+      features: ['Modernized fs-backup to a micro-service architecture: adds concurrency
+          control, cancel/resume, better resilience to node-agent restarts, and steadier
+          resource usage.', fs-backup now supports Windows workloads by running data
+          mover pods on Windows nodes (complements CSI snapshot data movement for
+          Windows from 1.16)., Beta support for Kubernetes Volume Group Snapshots
+          (VGS) for CSI snapshot backups and CSI snapshot data movement to improve
+          write-order consistency across multiple volumes., 'PriorityClass support
+          across Velero components (server, node-agent, data mover pods, and repository
+          maintenance jobs) to control scheduling priority.', 'Scalability/resiliency
+          improvements for data movers: configurable node-agent PrepareQueueLength
+          to avoid excessive Pending pods; resume/cancel behavior improved across
+          restarts; restore node selection and per-storage-class node selection added
+          for CSI snapshot data movement.', Resource policy gains reusable include/exclude
+          filters via includeExcludePolicy in addition to volumePolicy.]
+      breaking_changes: ['Restic uploader path removed: --uploader-type=restic is
+          no longer a valid install option; you can still restore from existing Restic-based
+          backups until v1.19.', 'Repository maintenance job flags removed from velero
+          server (--keep-latest-maintenance-jobs, --maintenance-job-*-request/limit);
+          configuration is now via a repository maintenance job ConfigMap.', 'PVC
+          restore behavior change: selected-node annotation is always removed when
+          no node mapping exists; previously it could be preserved if the node existed.']
+    chart_version: 11.3.2
     images: ['docker.io/bitnamilegacy/kubectl:1.35', 'velero/velero:v1.17.1']
   - version: 1.17.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
@@ -9485,34 +9611,28 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Windows cluster support: Velero components (server/node-agent/data
-          mover/maintenance jobs) can run in hybrid Linux/Windows clusters and back
-          up/restore Windows workloads using the built-in data mover (with documented
-          Windows limitations).', 'Parallel Item Block backup: item blocks (and their
-          pre/post hooks) can be processed concurrently to improve backup throughput;
-          parallelism is configurable via the new `--item-block-worker-count` server
-          flag (default 1).', 'Data mover restore scalability: a new node-agent config
-          option `ignoreDelayBinding` lets restores for WaitForFirstConsumer volumes
-          spread across nodes instead of being constrained to an attached node, improving
-          parallelism and resource balance.', 'Improved data mover observability:
-          node-agent logs now include richer diagnostics for failures and cleanup
-          issues of intermediate objects by default.', "CSI snapshot usability improvement:\
-          \ unnecessary retained `VolumeSnapshotContent` objects are excluded from\
-          \ backups so they aren\u2019t synced/restored to other clusters sharing\
-          \ a BSL.", 'BackupRepository maintenance resiliency/observability: BackupRepository
-          CRs now track `RecentMaintenance` history; maintenance jobs are recaptured
-          after server restart; maintenance/init is skipped for readOnly BSLs; Kopia
-          maintenance cadence can be tuned via `fullMaintenanceInterval` (normal/fast/eager
-          GC).', 'Volume Policy enhancement: volume policy can filter volumes by PVC
-          labels.', 'Object-level resource status restore control: annotate individual
-          objects with `velero.io/restore-status` to opt in/out of restoring status
-          per object.', 'Velero restore-helper binary now ships inside the main Velero
-          image (velero/velero includes velero, velero-helper, velero-restore-helper).']
-      breaking_changes: ['No explicit breaking changes were called out in the provided
-          v1.16.0 notes; however, behavior changes to note include parallelized item-block
-          processing (new concurrency knob) and removal of retained VolumeSnapshotContent
-          from backups, which may affect any workflows that depended on those objects
-          being present.']
+      features: ['Windows cluster support: Velero can now run in Windows clusters
+          and back up/restore Windows workloads; node-agent, data mover pods, and
+          some maintenance jobs can be scheduled onto Windows nodes (with stated limitations
+          like no fs-backup for Windows).', 'Parallel ItemBlock backup: item blocks
+          can be processed concurrently to improve backup throughput; controlled by
+          new server flag `--item-block-worker-count` (default 1).', 'Data mover restore
+          scalability: restores for WaitForFirstConsumer volumes can be spread across
+          nodes using new node-agent config flag `ignoreDelayBinding`, improving parallelism
+          and resource balance.', 'Data mover observability: node-agent logs now include
+          more intermediate-object status and cleanup failure details for data mover
+          operations, enabled by default.', 'CSI snapshot usability: VolumeSnapshotContent
+          objects are no longer unnecessarily retained in backups/restores, reducing
+          cross-cluster sync noise.', 'Backup repository maintenance improvements:
+          maintenance history (`RecentMaintenance`) added to BackupRepository CR,
+          jobs are re-captured after server restarts, maintenance/init skipped for
+          readOnly BSLs, and configurable `fullMaintenanceInterval` supports `normalGC/fastGC/eagerGC`.',
+        'Volume Policy enhancements: can filter volumes by PVC labels (and additional
+          CSI VolumeAttributes properties mentioned in changes).', 'Per-object resource
+          status restore: control status restore per object via `velero.io/restore-status`
+          annotation.', 'Image packaging: velero, velero-helper, and velero-restore-helper
+          are merged into the single Velero image.']
+      breaking_changes: []
     chart_version: 10.1.3
     images: ['docker.io/bitnamilegacy/kubectl:1.35', 'velero/velero:v1.16.2']
   - version: 1.15.0
@@ -9523,32 +9643,31 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Data mover micro service: CSI snapshot data movement shifts from
-          node-agent pods to dedicated per-backup/restore pods, improving security
-          (no hostPath), resource isolation, and resilience.', "Item Block concepts\
-          \ + ItemBlockAction (IBA) plugin type: resources can be grouped into \u201C\
-          item blocks\u201D for future concurrent backup processing; built-in IBAs\
-          \ for Pods and PVCs are included (multi-threading not yet enabled).", 'Repository
-          maintenance node selection: new ConfigMap lets you constrain where repo
-          maintenance Jobs run, so heavy maintenance can be scheduled on non-critical/idle
-          nodes.', 'Backup PVC configuration for data movement: new ConfigMap supports
-          read-only mounts (can speed expose for some storage like Ceph) and choosing
-          a different StorageClass for backup PVCs.', 'Backup repository cache limit
-          configuration: new ConfigMap lets you cap client-side cache size per repository
-          to reduce ephemeral-storage pressure/evictions.', 'Performance/operability
-          improvements: fixed a server memory leak after plugin calls; plugin executions
-          inherit velero server client QPS/burst; Kopia maintenance memory improvements
-          upstream. ']
-      breaking_changes: ['Restic uploader path is now deprecated starting in 1.15:
-          backups/restores still succeed, but Velero will emit warnings if installed
-          with --uploader-type=restic or if Restic is used for fs-backup.', 'Node-agent
-          configuration ConfigMap name is no longer fixed: if you use a custom config
-          map you must pass --node-agent-configmap to point Velero at it.', 'Repository
-          maintenance job settings are moving from Velero server flags to a dedicated
-          repository maintenance ConfigMap; if both are set, ConfigMap values take
-          precedence (flags remain for backward compatibility).', Changing PVC selected-node
-          restore feature is deprecated and will be removed in a future release; avoid
-          relying on it going forward.]
+      features: ['Data mover micro service: CSI Snapshot Data Movement now runs in
+          dedicated per-backup/per-restore pods instead of node-agent hostPath access,
+          improving security isolation, resilience, and enabling per-operation resource
+          sizing.', Item Block concepts and new ItemBlockAction (IBA) plugin type
+          to group correlated resources for future concurrent processing (v1.15 supports
+          item blocks/IBAs but still runs single-threaded)., 'Repository maintenance
+          job node selection via a new repository maintenance configuration ConfigMap,
+          allowing maintenance jobs to run on designated/idle nodes.', 'Backup PVC
+          configuration for data mover: optionally mount backupPVCs read-only (can
+          speed up expose for some storage like Ceph) and set storage class for backupPVCs
+          using a backup PVC ConfigMap.', Backup repository cache limit configuration
+          via a new backup repository configuration ConfigMap to prevent pods from
+          exhausting ephemeral storage., 'Performance fixes: plugin-call memory leak
+          fixed; client-qps/client-burst inherited by plugins; Kopia improvements
+          to reduce memory during large-repo maintenance.']
+      breaking_changes: [Restic is deprecated for fs-backup starting in 1.15; workloads
+          still work but warnings appear when using --uploader-type=restic or restic-based
+          fs-backups/restores., node-agent configuration ConfigMap name is no longer
+          fixed; if you customize it you must pass the velero server parameter --node-agent-configmap.,
+        'Repository maintenance job settings are moving from velero server flags to
+          the new repository maintenance job configuration ConfigMap; ConfigMap values
+          take precedence when both are set. Affected flags: --keep-latest-maintenance-jobs,
+          --maintenance-job-*-request/limit.', The 'Changing PVC selected-node' feature
+          is deprecated in 1.15 and will be removed in a future release; avoid relying
+          on it.]
     chart_version: 8.7.2
     images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.15.2']
   - version: 1.14.0
@@ -9558,42 +9677,35 @@ addons:
     incompatibilities: []
     summary:
       helm_changes: ''
-      chart_updates: [Velero v1.14.0 ships with Golang 1.22.2 and Kopia v0.17.0 (runtime/dependency
-          update)., Repository (kopia/restic) maintenance work is moved out of the
-          Velero server pod into separate Kubernetes Jobs to avoid Velero pod OOM
-          during maintenance., CSI plugin code is merged into the core Velero repo
-          and is installed by default as an internal plugin (deployment/plugin packaging
-          change)., Restore workflow now includes a new "Finalizing" phase; some operations
-          (PV label patching and post-restore hooks after data movement) occur in
-          this phase., Restore metadata now persists per-volume VolumeInfo similar
-          to backups; CLI output is enhanced to show restored volume info and CSI
-          snapshot restores., Namespace filtering behavior changes when label selectors
-          are used without explicit included/excluded namespaces (more restrictive).,
-        Default resource requests/limits for node-agent are removed to make node-agent
-          pods BestEffort by default (resource/QoS change).]
-      features: ['Repository maintenance for kopia/restic backups now runs in separate
-          Jobs, reducing risk of the Velero server pod being OOM-killed during maintenance.',
-        'VolumePolicies now support actions beyond skipping volumes, allowing per-volume
-          selection of filesystem backup (fs-backup) vs snapshot based on policy rules.',
-        'Data movement (datamover) backup pods can be constrained to eligible nodes
-          via a ConfigMap, helping control resource placement for long-running/high-resource
-          jobs.', 'Restore operations now persist VolumeInfo metadata per restored
-          volume, and `velero restore describe` shows more detailed restored volume
-          information.', Restores include a new "Finalizing" phase to ensure PV label
-          restoration and hook execution timing are correct after snapshot/data movement
-          restores complete., Azure authentication adds support for certificate-based
-          service principal auth as an alternative to client-secret auth.]
-      breaking_changes: [CSI plugin is now built-in and installed by default in v1.14;
-          do not install it separately via `velero install --plugins ...` or you may
-          end up with duplicate/conflicting CSI plugins., 'Node-agent default CPU/memory
-          requests and limits are removed, so pods become BestEffort unless you explicitly
-          set resources; this can change scheduling/eviction behavior and performance
-          under contention.', 'Backup namespace selection changes when `labelSelector`/`orLabelSelectors`
-          are set but `includedNamespaces`/`excludedNamespaces` are not: only namespaces
-          containing matching resources are included (previously all namespaces were
-          included).', 'During restores, patching PVs in the new Finalizing state
-          can cause restores to end as `PartiallyFailed` if a PV is stuck `Pending`,
-          whereas earlier versions might have reported `Complete`.']
+      chart_updates: []
+      features: ['Repository maintenance for kopia/restic is moved out of the Velero
+          server pod into Kubernetes Jobs, reducing risk of Velero pod OOM during
+          maintenance and allowing you to tune job resources at install time.', "VolumePolicies\
+          \ are extended beyond \u201Cskip\u201D to allow choosing per-volume backup\
+          \ method (\u201Cfs-backup\u201D vs \u201Csnapshot\u201D), enabling finer-grained\
+          \ opt-in/out behavior without modifying workloads.", 'Data mover backups
+          can now constrain where datamover pods run via a ConfigMap-based node selection
+          mechanism, helping control resource-heavy jobs and placement.', Restore
+          VolumeInfo metadata is now persisted (similar to backup VolumeInfo in 1.13)
+          and `velero restore describe` surfaces more detailed volume handling/results.,
+        "A new Restore phase, \u201CFinalizing\u201D, is introduced to ensure certain\
+          \ actions happen after data movement completes (e.g., PV label patching,\
+          \ post-restore hooks).", 'Azure plugin gains certificate-based Service Principal
+          authentication (in addition to secret-based), enabling phishing-resistant
+          auth aligned with Azure recommendations.', 'Dependency/runtime updates:
+          Go 1.22.x and Kopia 0.17.0; Azure SDK/storage client modernization and AWS
+          SDK updates for identity improvements.']
+      breaking_changes: [CSI plugin is merged into the main Velero repo and is installed
+          by default as an internal plugin; you must stop installing it via `velero
+          install --plugins ...` to avoid conflicts/duplication., 'Default CPU/memory
+          requests/limits for node-agent are removed, making node-agent pods BestEffort
+          by default; you may need to explicitly set resources if you relied on the
+          previous defaults.', 'Namespace filtering behavior changes when `includedNamespaces`/`excludedNamespaces`
+          are unset but `labelSelector`/`orLabelSelectors` are set: only namespaces
+          containing matching resources are backed up (previously all namespaces were
+          included).', 'Restores may now end in PartiallyFailed in cases where PV
+          patching during the new Finalizing phase is blocked (e.g., PV stuck Pending),
+          whereas older versions could report Complete in similar scenarios.']
     chart_version: 7.2.2
     images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.14.1']
   - version: 1.13.0
@@ -9605,36 +9717,36 @@ addons:
       helm_changes: ''
       chart_updates: []
       features: ['Resource Modifiers now support JSON Merge Patch and Strategic Merge
-          Patch in addition to JSON Patch, enabling more flexible restore-time mutations
-          using the same ConfigMap rules.', Node-agent concurrency controls let you
-          cap how many data-movement activities run per node (globally and/or per-node)
-          to manage cluster CPU/memory/network usage during fs-backups and CSI snapshot
-          data movement., 'Kopia uploader parallel file upload options are now configurable,
-          improving backup/data-mover throughput.', 'Restore can optionally write
-          sparse files for fs-restore and CSI snapshot data movement restores, potentially
-          improving performance and storage efficiency for sparse data.', "`velero\
-          \ backup describe` now includes a dedicated \u201CBackup Volumes\u201D section\
-          \ and can always display CSI snapshot/data-movement volume info without\
-          \ relying on the client-side EnableCSI gate.", New VolumeInfo metadata file
-          is written into each backup to record PVC/PV and volume method/snapshot/status
-          details and drive PV restore decisions; downstream tools can also consume
-          this summary., 'Improved resiliency for CSI snapshot data movement when
-          the Velero server pod or node-agent restarts, reducing chances of stuck
-          or interrupted backup/restore.', Backup/Restore CR status and `describe`
-          output now include hook execution stats (HooksAttempted/HooksFailed) for
-          better observability., AWS SDK for Go moved to v2 for better CPU/memory
-          performance., Azure AD/Workload Identity is now supported for Kopia operations
-          (filesystem backup/data mover) in addition to prior Azure plugin support.,
-        'Runtime/dependency updates: Go 1.21.6 and Kopia 0.15.0, plus various library
-          bumps for CVEs.']
-      breaking_changes: ["`velero backup describe` output format changed: some existing\
-          \ snapshot/fs-backup information moved into the new \u201CBackup Volumes\u201D\
-          \ section and formatting differs, which may break scripts parsing the output.",
-        'API type change: `DataUploadSpec.DataMoverConfig` changed from `*map[string][string]`
-          to `map[string]string`, requiring updates for any code/tools that create/patch
-          DataUpload resources.', '`velero install` behavior change: informer cache
-          is now enabled by default (previously disabled), which can increase memory
-          usage and may require adjusting limits or explicitly disabling it.']
+          Patch in addition to JSON Patch, allowing more flexible restore-time resource
+          transformations using the same ConfigMap rules.', 'Node-agent can now limit/shape
+          how many data-movement loads (fs-backups and CSI snapshot data movement)
+          run concurrently per node, configurable globally and per-node.', Kopia uploader
+          gained tunables for parallel file upload to improve backup/data-mover throughput
+          and overall backup speed., 'Restores via fs-restore and CSI snapshot data
+          movement can optionally write sparse files, reducing I/O and speeding restores
+          for sparse datasets.', '`velero backup describe` now includes a Backup Volumes
+          section summarizing volume handling across native snapshots, fs-backup,
+          CSI snapshots and CSI snapshot data movement (including data-movement details
+          previously missing).', 'Backups now write a new VolumeInfo metadata file
+          containing PVC/PV and snapshot/method/status details, used to drive PV restore
+          behavior and enable downstream summary/inspection tooling.', Server and
+          node-agent restart behavior was improved so in-progress backup/restore and
+          CSI snapshot data-movement operations are less likely to get stuck after
+          restarts., Hook execution results are now tracked in Backup/Restore CR status
+          (HooksAttempted/HooksFailed) and shown in describe output for better observability.,
+        'AWS integration moved to aws-sdk-go-v2, improving CPU/memory efficiency compared
+          to v1.', Azure AD/Workload Identity is now supported for Kopia operations
+          (filesystem backups/data mover) in addition to prior Azure plugin support
+          for native snapshots.]
+      breaking_changes: ['`velero backup describe` output format changed: some existing
+          snapshot/fs-backup details were moved into the new Backup Volumes section,
+          which may break scripts parsing the old output.', 'API type change: `DataMoverConfig`
+          in `DataUploadSpec` changed from `*map[string]string` to `map[string]string`,
+          requiring updates for any code/plugins/clients that build these objects.',
+        '`velero install` behavior change: informer cache is now enabled by default
+          (previously disabled), which can increase memory usage and may require adjusting
+          pod resources or explicitly disabling via `--disable-informer-cache` if
+          OOM occurs.']
     chart_version: 6.7.0
     images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.13.2']
   - version: 1.12.0
@@ -9643,37 +9755,38 @@ addons:
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "## Helm chart / values changes to plan for\n- **Chart v4.0.0+\
-        \ changes BSL/VSL shape (breaking):** `configuration.backupStorageLocation`\
-        \ and `configuration.volumeSnapshotLocation` changed **from a map to a list/slice**.\
-        \ Update your `values.yaml` to the new list format **before** upgrading the\
-        \ chart/app to 1.12.\n- **If you rely on Restic as default uploader:** v1.12\
-        \ changes the default `uploader-type` from `restic` to `kopia`. In Helm values,\
-        \ ensure you explicitly set the uploader type you want (or confirm Kopia is\
-        \ acceptable) so behavior doesn\u2019t change unintentionally.\n- **Finalizers\
-        \ impact uninstall/delete:** with v1.12 finalizers on Velero CRs, avoid deleting\
-        \ the namespace directly; plan to use `velero uninstall` or remove finalizers\
-        \ as part of teardown procedures."
-      chart_updates: [Velero Helm chart v4.0.0+ supports multiple BackupStorageLocations
-          (BSL) and VolumeSnapshotLocations (VSL); corresponding configuration structure
-          is now a list (not backward compatible).]
-      features: ['CSI Snapshot Data Movement: supports moving CSI snapshot data into
-          durable backup storage and restoring across environments/clouds.', 'Resource
-          Modifiers (JSON substitutions): apply JSON patch-style modifications to
-          resources during restore without writing a RestoreItemAction plugin.', 'Multiple
-          VolumeSnapshotClasses: allows selecting a specific VolumeSnapshotClass per
-          backup instead of relying on a single labeled class.', 'Restore finalizer:
-          `velero restore delete` now cleans up associated external/backup-storage
-          data, not just Kubernetes objects.']
-      breaking_changes: [Default `uploader-type` changes from `restic` to `kopia`;
-          file-system backup behavior changes unless you pin the uploader type., 'CSI
-          snapshot timing behavior changed: snapshot creation sync timeout is now
-          configurable via `backup.spec.csiSnapshotTimeout`, and async `ReadyToUse`
-          waits use operation timeout (default 4h).', Helm chart v4.0.0+ changes BSL/VSL
-          values from map to list; existing `values.yaml` will not apply cleanly without
-          conversion., Finalizers on resources like restores/data uploads/downloads
-          can cause namespace deletion to hang if you delete the namespace directly;
-          use `velero uninstall` or handle finalizers first.]
+      helm_changes: "### Helm chart / values changes to address before upgrading\n\
+        - **Velero Helm chart v4.0.0+ changes BSL/VSL values format (breaking)**:\
+        \ `configuration.backupStorageLocation` and `configuration.volumeSnapshotLocation`\
+        \ changed **from a map to a list/slice** to support multiple BSLs/VSLs. This\
+        \ is **not backward compatible**, so **convert your values to lists before\
+        \ upgrading**.\n- **Uploader default changes**: if you rely on defaults, note\
+        \ that Velero\u2019s `uploader-type` default switches from **`restic` \u2192\
+        \ `kopia`** in v1.12. If your Helm chart exposes this as a value (or you pass\
+        \ it via `velero install` args), set it explicitly to keep current behavior.\n\
+        - **Namespace deletion behavior changes due to finalizers**: chart uninstall/cleanup\
+        \ should use `velero uninstall` (or ensure finalizers are handled) rather\
+        \ than deleting the namespace directly, otherwise deletion can hang.\n"
+      chart_updates: [Helm chart v4.0.0+ supports configuring **multiple** BackupStorageLocations
+          (BSL) and VolumeSnapshotLocations (VSL)., BSL/VSL configuration schema changed
+          from **map** to **slice/list** (breaking; requires values migration).]
+      features: ['CSI Snapshot Data Movement: moves CSI snapshot data out of the cluster
+          into durable backup storage and enables restores across environments/clouds.',
+        'Resource Modifiers (JSON Substitutions): apply JSONPatch-style modifications
+          to selected resources during restore without writing a RestoreItemAction
+          plugin.', 'Multiple VolumeSnapshotClasses: choose a specific VolumeSnapshotClass
+          per backup instead of relying on driver-name matching + label selection.',
+        'Restore finalizer: `velero restore delete` now also cleans up associated
+          external/backup-location restore data, not just the Kubernetes restore CR.']
+      breaking_changes: [Default `uploader-type` changed from `restic` to `kopia`;
+          filesystem backups will use Kopia unless you explicitly set restic., 'CSI
+          snapshot timing/timeout behavior changed: snapshot handle wait is now `backup.spec.csiSnapshotTimeout`
+          instead of a fixed 10 minutes; async wait for ReadyToUse uses the operation
+          timeout (default 4 hours).', Helm chart v4.0.0+ changes BSL/VSL from map
+          to list; you must migrate Helm values before upgrading or the release will
+          fail/misconfigure locations., Finalizers added to Velero CRs (restore/dataupload/datadownload)
+          can cause **namespace deletion to hang** if you delete the namespace directly;
+          use `velero uninstall` or remove finalizers safely.]
     chart_version: 5.2.2
     images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.12.3']
   - version: 1.11.0
@@ -10986,25 +11099,14 @@ addons:
   release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
   helm_repository_url: https://argoproj.github.io/argo-helm
   versions:
-  - version: 3.2.3
+  - version: 3.2.5
     kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
-    summary:
-      helm_changes: ''
-      chart_updates: []
-      features: ["v3.2.3: Dependency update only \u2013 bumped golang.org/x/crypto\
-          \ from 0.42.0 to 0.46.0 (security/crypto library refresh).", 'v3.2.1: Repo-server
-          fix for a concurrency issue with Git detached HEAD processing, reducing
-          intermittent repo refresh/manifest generation errors.', 'v3.2.1: Multiple
-          UI fixes (status panel null-safety, tooltip resource units, layout overlap,
-          conditional rendering of ApplicationSelector) improving UI stability and
-          correctness.', 'v3.2.1: Health assessment tweak for ISVC resources: allow
-          healthy when the Stopped condition is False.']
-      breaking_changes: []
-    chart_version: 9.2.4
+    summary: null
+    chart_version: 9.3.4
     images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
-      'quay.io/argoproj/argocd:v3.2.3']
+      'quay.io/argoproj/argocd:v3.2.5']
   - version: 3.2.1
     kube: ['1.35', '1.34', '1.33']
     requirements: []
@@ -13264,61 +13366,61 @@ addons:
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     chart_version: 25.10.1
-    images: ['nvcr.io/nvidia/gpu-operator:v25.10.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.18.2']
+    images: []
     incompatibilities: []
   - version: 25.10.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     chart_version: 25.10.0
-    images: ['nvcr.io/nvidia/gpu-operator:v25.10.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.18.2']
+    images: []
     incompatibilities: []
   - version: 25.3.4
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     chart_version: 25.3.4
-    images: ['nvcr.io/nvidia/gpu-operator:v25.3.4', 'registry.k8s.io/nfd/node-feature-discovery:v0.17.3']
+    images: []
     incompatibilities: []
   - version: 25.3.3
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     chart_version: 25.3.3
-    images: ['nvcr.io/nvidia/gpu-operator:v25.3.3', 'registry.k8s.io/nfd/node-feature-discovery:v0.17.3']
+    images: []
     incompatibilities: []
   - version: 25.3.2
     kube: ['1.34', '1.33', '1.32']
     requirements: []
     chart_version: 25.3.2
-    images: ['nvcr.io/nvidia/gpu-operator:v25.3.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.17.3']
+    images: []
     incompatibilities: []
   - version: 25.3.1
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     chart_version: 25.3.1
-    images: ['nvcr.io/nvidia/gpu-operator:v25.3.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.17.3']
+    images: []
     incompatibilities: []
   - version: 25.3.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
     chart_version: 25.3.0
-    images: ['nvcr.io/nvidia/gpu-operator:v25.3.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.17.2']
+    images: []
     incompatibilities: []
   - version: 24.9.2
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     chart_version: 24.9.2
-    images: ['nvcr.io/nvidia/gpu-operator:v24.9.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.6']
+    images: []
     incompatibilities: []
   - version: 24.9.1
     kube: ['1.32', '1.31', '1.30']
     requirements: []
     chart_version: 24.9.1
-    images: ['nvcr.io/nvidia/gpu-operator:v24.9.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.6']
+    images: []
     incompatibilities: []
   - version: 24.9.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
     chart_version: 24.9.0
-    images: ['nvcr.io/nvidia/gpu-operator:v24.9.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.6']
+    images: []
     incompatibilities: []
   - version: 24.6.2
     kube: ['1.31', '1.30', '1.29']
@@ -13531,13 +13633,13 @@ addons:
   helm_repository_url: https://helm.elastic.co
   readme_url: https://github.com/elastic/elasticsearch/blob/main/README.asciidoc
   versions:
-  - version: 9.2.3
-    kube: ['1.34', '1.33', '1.32']
+  - version: 9.2.4
+    kube: ['1.35', '1.34', '1.33']
     requirements: []
     incompatibilities: []
     summary: null
-    chart_version: 9.2.3
-    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.2.3', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+    chart_version: 9.2.4
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.2.4', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 9.2.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -13545,6 +13647,13 @@ addons:
     summary: null
     chart_version: 9.2.0
     images: ['docker.elastic.co/elastic-agent/elastic-agent:9.2.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
+  - version: 9.1.9
+    kube: ['1.35', '1.34', '1.33']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 9.1.9
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:9.1.9', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 9.1.4
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -13573,6 +13682,13 @@ addons:
     summary: null
     chart_version: 9.0.0
     images: ['docker.elastic.co/elastic-agent/elastic-agent:9.0.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
+  - version: 8.19.10
+    kube: ['1.35', '1.34', '1.33']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 8.19.10
+    images: ['docker.elastic.co/elastic-agent/elastic-agent:8.19.10', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
   - version: 8.19.3
     kube: ['1.34', '1.33', '1.32']
     requirements: []
@@ -13620,172 +13736,446 @@ addons:
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['RabbitMQ cluster-operator v2.16.0 adds support for scaling RabbitMQ
+          clusters down to zero replicas, enabling complete shutdown when desired.',
+        'v2.16.1 deploys RabbitMQ 4.1.3 by default, so new/updated clusters will roll
+          to that RabbitMQ version unless you pin a different image/tag.']
+      breaking_changes: [Upgrading the operator to v2.16.1 will trigger a rolling
+          update of managed RabbitMQ StatefulSets; pause reconciliation before upgrading
+          if you need to control when clusters restart/update., 'v2.16.1 bumps the
+          Go toolchain to address CVE-2025-4674 and CVE-2025-47907; while not typically
+          user-facing, it changes the operator binary build/runtime and should be
+          validated in your environment.']
     chart_version: 4.4.34
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.16.1-debian-12-r0', 'docker.io/bitnami/rabbitmq:4.1.3-debian-12-r1',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.8-debian-12-r0', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.4-debian-12-r0']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.16.1-debian-12-r0', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.4-debian-12-r0']
   - version: 2.16.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Upgrading the cluster-operator to v2.16.0 will trigger reconciliation
+          and may roll RabbitMQ cluster StatefulSets (rolling restart). Use the pause/reconcile
+          mechanism to control timing.]
+      features: [Support scaling a RabbitMQ cluster to zero replicas ("scale to zero").]
+      breaking_changes: []
     chart_version: 4.4.32
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.16.0-debian-12-r2', 'docker.io/bitnami/rabbitmq:4.1.3-debian-12-r1',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.7-debian-12-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.3-debian-12-r2']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.16.0-debian-12-r2', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.3-debian-12-r2']
   - version: 2.15.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ["Operator upgrade will trigger reconciliation that can roll\
+          \ RabbitMQ clusters (StatefulSet rolling update). Plan the upgrade by pausing\
+          \ reconciliation on clusters you don\u2019t want updated immediately, then\
+          \ resume when ready.", Default RabbitMQ version deployed by the operator
+          changes to RabbitMQ 4.1.1 in v2.15.0., Prometheus rules were updated for
+          RabbitMQ v4.1 and Grafana queue dashboard was updated (monitoring artifacts
+          change)., OLM (Operator Lifecycle Manager) workflow/manifests were refactored
+          and tweaked; impacts only if you install/manage via OLM., Go toolchain bump
+          to fix CVE-2025-22874 (security maintenance).]
+      features: [Optional setting to automatically enable all RabbitMQ feature flags.,
+        'Updated monitoring content: Prometheus alerting/recording rules for RabbitMQ
+          v4.1 and refreshed Grafana queue dashboard.', 'Security maintenance: Go
+          bump addressing CVE-2025-22874.']
+      breaking_changes: ['Behavioral change: upgrading the operator can cause rolling
+          updates of managed RabbitMQ StatefulSets; pause reconciliation if you need
+          to control timing.', 'Potential compatibility change: default RabbitMQ moves
+          to 4.1.1; validate plugin/feature-flag compatibility and runbooks for RabbitMQ
+          4.1 before letting clusters roll.']
     chart_version: 4.4.26
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.15.0-debian-12-r1', 'docker.io/bitnami/rabbitmq:4.1.2-debian-12-r1',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.7-debian-12-r1', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.3-debian-12-r0']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.15.0-debian-12-r1', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.3-debian-12-r0']
   - version: 2.14.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Upgrading the cluster-operator to v2.14.0 will trigger reconciliation
+          and likely roll RabbitMQ StatefulSets (rolling restart) unless reconciliation
+          is paused., v2.14.0 is mostly internal/tooling/refactor and dependency bumps;
+          behavior changes are minimal compared to v2.13.0., 'If you are also crossing
+          v2.13.0 during the upgrade path, note v2.13.0 changed the default RabbitMQ
+          image to `rabbitmq:4.1.0-management` and reduced init-container resource
+          defaults; these can trigger pod spec changes and therefore rolling updates.']
+      features: ['Operational heads-up remains: upgrade can roll RabbitMQ clusters;
+          use pause/resume reconciliation to control timing.', '(From v2.13.0, if
+          relevant in your environment) Support custom Kubernetes Service labels via
+          `spec.service.labels`.', '(From v2.13.0, if relevant) Adds PrometheusRule
+          alerts for RabbitMQ alarm states and improves alert rule validation/merging.']
+      breaking_changes: [No explicit breaking changes were called out in the v2.14.0
+          release notes; expect mainly dependency/tooling changes., 'Be aware of implicit
+          change impact when upgrading (rolling update of StatefulSets) and, if coming
+          from <2.13.0, the default RabbitMQ image change to `rabbitmq:4.1.0-management`
+          may alter cluster runtime and trigger restarts.']
     chart_version: 4.4.22
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.14.0-debian-12-r3', 'docker.io/bitnami/rabbitmq:4.1.1-debian-12-r2',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.6-debian-12-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.1-debian-12-r3']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.14.0-debian-12-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.1-debian-12-r3']
   - version: 2.13.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Operator upgrade to v2.13.0 will trigger rolling updates of
+          managed RabbitMQ clusters (StatefulSets) due to default image/behavior changes;
+          plan coordination with pause/resume reconciliation., 'Default RabbitMQ image
+          used by the operator updated to rabbitmq:4.1.0-management (was 4.0.5-management
+          in v2.12.0 when image not specified).', "Init container resource requests/limits\
+          \ reduced significantly (memory 500Mi\u219264Mi, CPU 100m\u219220m).", 'CRD/API
+          feature: support custom Service labels via spec.service.labels.', 'Monitoring:
+          adds PrometheusRule for RabbitMQ alarm states; adds promtool validation;
+          adjusts rules to merge rabbitmq_identity_info.', 'Operational behavior:
+          improved cluster deletion logic.', 'Maintenance: dependency bumps and codebase
+          modernization; operatorhub publication metadata updated (replaces field).']
+      features: ['Custom Service labels supported via RabbitMQCluster spec.service.labels,
+          enabling consistent labeling for discovery/policy.', New PrometheusRule
+          coverage for RabbitMQ alarm states plus promtool validation improves alerting
+          correctness., Lower init container CPU/memory reduces footprint during pod
+          initialization., Improved cluster deletion handling reduces stuck/failing
+          deletions.]
+      breaking_changes: [Upgrading the operator to v2.13.0 will cause rolling updates
+          of managed RabbitMQ StatefulSets; pause reconciliation if you need to control
+          timing., 'Default RabbitMQ image changes to rabbitmq:4.1.0-management when
+          spec.image is unset, which may change runtime behavior compared to prior
+          defaults.']
     chart_version: 4.4.13
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.13.0-debian-12-r0', 'docker.io/bitnami/rabbitmq:4.1.0-debian-12-r3',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.6-debian-12-r0', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.0-debian-12-r1']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.13.0-debian-12-r0', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.0-debian-12-r1']
   - version: 2.12.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Default RabbitMQ image changes: if `image` is not specified, the
+          operator now defaults to `rabbitmq:4.0.5-management`.', '`readinessProbe`
+          and `livenessProbe` for the RabbitMQ pods can now be overridden via spec/values,
+          allowing custom health check tuning.']
+      breaking_changes: ["Implicit image change: clusters that previously relied on\
+          \ the operator\u2019s default image will now roll to `rabbitmq:4.0.5-management`\
+          \ unless you pin `spec.image`/chart values, which can trigger a RabbitMQ\
+          \ version change and rolling update."]
     chart_version: 4.4.2
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.12.0-debian-12-r1', 'docker.io/bitnami/rabbitmq:4.0.5-debian-12-r1',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r33', 'docker.io/bitnami/rmq-messaging-topology-operator:1.15.0-debian-12-r5']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.12.0-debian-12-r1', 'docker.io/bitnami/rmq-messaging-topology-operator:1.15.0-debian-12-r5']
   - version: 2.11.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Operator upgrade to v2.11.0 will trigger reconciliation changes
+          that roll RabbitMQ clusters (rolling update of StatefulSets) unless reconciliation
+          is paused., 'Default user secret content changes: `connection_string` is
+          now added to the default_user secret.', TLS port enablement condition updated
+          for Web MQTT/STOMP (behavior around exposing/enabling these TLS ports may
+          change)., 'Fix: CA certs no longer override server certs (TLS secret/cert
+          selection behavior corrected).', 'Operational robustness: mirroring-related
+          shutdown errors are ignored to reduce noisy failures.']
+      features: ['Default user secret now includes a `connection_string`, simplifying
+          client configuration (you can fetch host/port/user/vhost in one value).',
+        Improved support for Web MQTT/STOMP over TLS by adjusting the condition used
+          to enable those TLS ports.]
+      breaking_changes: ['Upgrading the operator can cause rolling updates of managed
+          RabbitMQ StatefulSets. If you need to control downtime, pause reconciliation
+          before upgrading and resume when ready.', TLS certificate selection behavior
+          may change if you previously relied on CA certs overriding server certs;
+          verify your TLS secrets and resulting certificates after upgrade.]
     chart_version: 4.4.0
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.11.0-debian-12-r4', 'docker.io/bitnami/rabbitmq:4.0.4-debian-12-r1',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r31', 'docker.io/bitnami/rmq-messaging-topology-operator:1.15.0-debian-12-r2']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.11.0-debian-12-r4', 'docker.io/bitnami/rmq-messaging-topology-operator:1.15.0-debian-12-r2']
   - version: 2.10.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Operator upgrade triggers rolling updates of managed RabbitMQ
+          StatefulSets; plan reconciliation pause/resume to control timing., Default
+          RabbitMQ version changes from 3.13.2 (v2.9.0) to 3.13.7 (v2.10.0)., 'Security
+          hardening: disables ANONYMOUS login by default.', Adds support for annotation
+          `rabbitmq.com/disable-default-topology-spread-constraints` to disable default
+          topology spread constraints., Removes `vm_memory_high_watermark_paging_ratio`
+          from generated/managed configuration., Increases maximum length of `additionalConfig`.]
+      features: [New annotation `rabbitmq.com/disable-default-topology-spread-constraints`
+          allows opting out of default topology spread constraints when scheduling
+          pods., '`additionalConfig` can now be longer, enabling larger inline RabbitMQ
+          configuration blocks.', 'Operator defaults to RabbitMQ 3.13.7, bringing
+          upstream fixes and improvements.']
+      breaking_changes: [ANONYMOUS login is disabled; clients relying on anonymous
+          connections will fail until credentials/users are configured., '`vm_memory_high_watermark_paging_ratio`
+          is removed; clusters depending on it must adjust memory watermark-related
+          settings accordingly.']
     chart_version: 4.3.24
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.10.0-debian-12-r2', 'docker.io/bitnami/rabbitmq:4.0.2-debian-12-r0',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r28', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.2-debian-12-r6']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.10.0-debian-12-r2', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.2-debian-12-r6']
   - version: 2.9.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Operator upgrade to v2.9.0 updates the ClusterOperator CRD (apply
+          CRD changes as part of the upgrade)., Upgrading the operator will trigger
+          reconciliation that causes a rolling update of managed RabbitMQ StatefulSets
+          (plan for cluster rolling restart/update).]
+      features: [RabbitMQ image version is bumped to 3.13.2 for clusters managed by
+          the operator (from the 3.13 line introduced in 2.8.0)., 'Operator now avoids
+          restarting the cluster after a scale-out, reducing unnecessary disruptions
+          during capacity increases.']
+      breaking_changes: ['Operator upgrade to v2.9.0 will roll managed RabbitMQ clusters
+          by default (StatefulSet rolling update). If you need to control timing,
+          you must pause reconciliation before upgrading and resume later.']
     chart_version: 4.3.20
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.9.0-debian-12-r8', 'docker.io/bitnami/rabbitmq:3.13.7-debian-12-r0',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r26', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.2-debian-12-r5']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.9.0-debian-12-r8', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.2-debian-12-r5']
   - version: 2.8.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Default RabbitMQ version deployed by the operator changes to
+          3.13 (from the prior default)., 'Operator performance/scale change: it now
+          filters which Kubernetes objects it caches from the API (reduced cache scope).',
+        'Certificate/vault integration fix: annotations for certs generated via Vault
+          intermediate CA were corrected.', 'CI/tooling changes: OLM testing pipeline
+          migrated from Concourse to GitHub Actions; OLM action updated to new script
+          (affects maintainers more than runtime).']
+      features: ["RabbitMQ 3.13 is now the default version the operator deploys for\
+          \ clusters if you don\u2019t pin an explicit RabbitMQ image/version.", 'Operator
+          watches/caches fewer API objects, which should reduce memory/API load especially
+          in large clusters.']
+      breaking_changes: [Implicit RabbitMQ version bump to 3.13 can change runtime
+          behavior if you relied on the previous default; pin your RabbitMQ image/version
+          if you need stability across operator upgrades.]
     chart_version: 4.2.7
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.8.0-debian-12-r4', 'docker.io/bitnami/rabbitmq:3.13.2-debian-12-r1',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r18', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.0-debian-12-r0']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.8.0-debian-12-r4', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.0-debian-12-r0']
   - version: 2.7.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['Maintenance: updates, removal of deprecated modules and function
+          calls (operator internal refactor/cleanup).', Update Kubernetes apimachinery
+          to v0.29 and related dependencies., 'CI/build pipeline tweak: revert docker/build-push-action
+          version bump due to known issue.']
+      features: [No user-facing operator features called out in v2.7.0 release notes;
+          changes are primarily dependency/maintenance updates.]
+      breaking_changes: [Potential compatibility shift due to moving to apimachinery
+          0.29 (Kubernetes library version bump). Validate against your cluster Kubernetes
+          version and any pinned client/library expectations.]
     chart_version: 4.2.0
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.7.0-debian-12-r8', 'docker.io/bitnami/rabbitmq:3.12.13-debian-12-r2',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r14', 'docker.io/bitnami/rmq-messaging-topology-operator:1.13.0-debian-12-r7']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.7.0-debian-12-r8', 'docker.io/bitnami/rmq-messaging-topology-operator:1.13.0-debian-12-r7']
   - version: 2.6.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: "- No Helm chart changelog was provided, so chart/values-specific\
+        \ changes can\u2019t be confirmed from the supplied notes.\n- **Potential\
+        \ values/schema change to verify in your chart**: `imagePullSecrets` is now\
+        \ treated as an **array/list** (not a single object/string). If your `values.yaml`\
+        \ sets `imagePullSecrets`, ensure it is in list form, e.g.:\n  ```yaml\n \
+        \ imagePullSecrets:\n    - name: my-registry-secret\n  ```"
+      chart_updates: [Dependencies updated to Kubernetes 1.28 APIs/libraries (client-go).,
+        Kustomize version bumped (build tooling)., Docs/network-policy example updated
+          to include stream ports for inter-node traffic., Support added for Erlang
+          INET configuration (operator feature)., 'CI/workflow tweak: exclude Google
+          Auth in PRs (maintenance).']
+      features: ['Support for Erlang INET configuration, enabling additional Erlang
+          networking configuration via the operator.', 'Network policy documentation
+          updated to include stream ports for inter-node traffic, improving guidance
+          for hardened clusters.']
+      breaking_changes: ['`imagePullSecrets` is now an array; existing single-value
+          configurations may fail schema validation or render incorrectly until converted
+          to a list.', 'Dependencies updated to Kubernetes 1.28; if you run very old
+          Kubernetes versions, verify compatibility of the operator and its CRDs/APIs
+          with your cluster version.']
     chart_version: 3.14.0
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.6.0-debian-11-r3', 'docker.io/bitnami/rabbitmq:3.12.12-debian-11-r3',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-11-r5', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.2-debian-11-r1']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.6.0-debian-11-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.2-debian-11-r1']
   - version: 2.5.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['Build/CI and repo maintenance updates: Go modules bumped to
+          v2, Makefile refactored, and README default RabbitMQ version documentation
+          corrected.', Added/expanded multi-arch build support (ppc64le and s390x).,
+        Internal kustomize/patch naming updated from `patches` to `patchesStrategicMerge`
+          (relevant if you consume repo overlays/manifests directly).]
+      features: [Improved platform support by adding container image builds for ppc64le
+          and s390x architectures., 'Maintenance improvements (Go modules v2, Makefile
+          refactor) that should make builds and dependency management more consistent.']
+      breaking_changes: ["If you directly use the repo\u2019s kustomize overlays/manifests,\
+          \ the rename from `patches` to `patchesStrategicMerge` can break your kustomization\
+          \ configuration and requires updating your files accordingly."]
     chart_version: 3.10.5
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.5.0-debian-11-r39', 'docker.io/bitnami/rabbitmq:3.11.26-debian-11-r0',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-11-r2', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.1-debian-11-r2']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.5.0-debian-11-r39', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.1-debian-11-r2']
   - version: 2.4.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: [Default RabbitMQ version bumped to 3.12.2 in cluster-operator v2.4.0.]
+      breaking_changes: ['Upgrading to RabbitMQ 3.12 has prerequisites: your clusters
+          must already be on RabbitMQ 3.11.18+ and all feature flags must be enabled
+          before the upgrade (e.g., `rabbitmqctl list_feature_flags` and `rabbitmqctl
+          enable_feature_flag all`).']
     chart_version: 3.7.1
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.4.0-debian-11-r15', 'docker.io/bitnami/rabbitmq:3.11.21-debian-11-r0',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-debian-11-r14', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.0-debian-11-r14']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.4.0-debian-11-r15', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.0-debian-11-r14']
   - version: 2.3.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['Controller/runtime dependencies updated: controller-runtime
+          bumped and Kubernetes API bumped to 1.27; build now uses Go 1.20.', Operator
+          release artifacts now include explicit multi-arch variants (-amd64 and -arm64);
+          CI K8s version bumped., 'Grafana dashboards updated (including rabbitmq-queue-dashboard
+          fixes: datasource usage, better legends, 10s refresh).', 'Fixes: LowDiskWatermarkPredicted
+          alert fixed; plugin paths/env var name fixed.', 'Functionality change: allow
+          multi-namespace cache scoping.', 'Code cleanup: deprecated methods removed.',
+        Default RabbitMQ image updated to 3.11.18.]
+      features: ['Multi-namespace cache scoping support was added, enabling the operator
+          cache to watch multiple namespaces more flexibly.', 'Release artifacts now
+          include separate amd64 and arm64 builds, improving multi-architecture deployment
+          options.', 'Updated Grafana dashboards with improvements to queue dashboard
+          usability (legends, refresh interval, datasource handling).']
+      breaking_changes: [Kubernetes/controller-runtime dependency bump to Kubernetes
+          API 1.27 and Go 1.20 may require you to run the operator on a compatible
+          Kubernetes version and rebuild any custom images/plugins against the new
+          toolchain., Removal of deprecated methods could break any external integrations
+          or forks that relied on those deprecated APIs (mostly relevant for custom
+          builds/extensions).]
     chart_version: 3.6.2
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.3.0-scratch-r3', 'docker.io/bitnami/rabbitmq:3.11.19-debian-11-r18',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r23', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.0-scratch-r2']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.3.0-scratch-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.0-scratch-r2']
   - version: 2.2.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: ['**Operator now controls images**: v2.2.0 includes a change
+          to let the RabbitMQ operator control images (#1181). This can affect how/where
+          RabbitMQ image overrides are configured (values/CR fields), so review your
+          current image override approach before upgrading.', '**StatefulSet PVC retention
+          policy override**: v2.2.0 adds support to override `StatefulSet.Spec.PersistentVolumeClaimRetentionPolicy`
+          (#1237), enabling more explicit control over PVC behavior on scale-down/delete.',
+        '**Logging noise reduced**: some verbose log lines were moved to debug level
+          (#1269), which may change what you see at default log level.', '**Stream
+          port handling**: the operator now opens the stream port when the stream
+          management plugin is enabled (#1284), which may result in additional Service/port
+          exposure compared to prior behavior.']
+      features: ['Operator can control RabbitMQ images, which may simplify or centralize
+          image selection/overrides (#1181).', Ability to override StatefulSet `PersistentVolumeClaimRetentionPolicy`
+          for better control of PVC lifecycle (#1237)., Automatic opening of the RabbitMQ
+          stream port when the stream management plugin is enabled (#1284)., Default
+          RabbitMQ version was bumped to 3.11.10-management (#1291).]
+      breaking_changes: [Upgrading the operator can trigger rolling updates of managed
+          RabbitMQ StatefulSets; coordinate by pausing reconciliation before the operator
+          upgrade and resuming when safe (noted in v2.1.0 release notes)., Default
+          RabbitMQ image/version bump may change the RabbitMQ patch version deployed
+          if you rely on defaults; pin the RabbitMQ image/version explicitly to avoid
+          unintended broker updates (#1247/#1251/#1291).]
     chart_version: 3.4.1
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.2.0-scratch-r7', 'docker.io/bitnami/rabbitmq:3.11.16-debian-11-r3',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r21', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.3-scratch-r1']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.2.0-scratch-r7', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.3-scratch-r1']
   - version: 2.1.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Multi-arch support: the cluster-operator image is now a multi-architecture
+          OCI that runs on both AMD64 and ARM64, with the runtime pulling the correct
+          variant automatically.', 'Supports `minReadySeconds` in the RabbitMQ StatefulSet
+          spec, allowing you to require pods to be ready for a minimum time before
+          being considered available.', 'External Secret enhancement: option to skip
+          creation of the default user secret and an added example for admin external
+          secret usage.', Adds an aggregating ClusterRole for Service Bindings and
+          a label to improve service discoverability.]
+      breaking_changes: [Operator upgrade to v2.1.0 will trigger reconciliation that
+          can roll RabbitMQ StatefulSets (rolling update) unless reconciliation is
+          paused; plan the maintenance window accordingly., 'If you are coming from
+          versions <2.0.0 (not your stated path), note v2.0.0 introduced a hard requirement
+          for RabbitMQ >= 3.9.9; ensure clusters meet this before operator upgrades
+          to avoid pods failing to start.']
     chart_version: 3.2.5
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.1.0-scratch-r6', 'docker.io/bitnami/rabbitmq:3.10.18-debian-11-r4',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r16', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.1-scratch-r2']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.1.0-scratch-r6', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.1-scratch-r2']
   - version: 2.0.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Operator now requires RabbitMQ 3.9.9+; RabbitMQ 3.8 support
+          removed., Kubernetes/controller-runtime dependencies bumped to Kubernetes
+          API 1.25 (controller-runtime 0.13) and related CRD regeneration., Operator
+          upgrade will trigger rolling updates of managed RabbitMQ clusters (StatefulSets)
+          unless reconciliation is paused., 'Miscellaneous: more reliable system tests,
+          CodeQL/workflow updates, pprof debug endpoint (added in 1.14.0), alert rule
+          fix for FileDescriptorsNearLimit, cluster size hint. ']
+      features: [Ability to pause reconciliation to control when clusters roll after
+          the operator upgrade (called out as the recommended procedure)., Updated
+          CRDs/manifests generated against newer Kubernetes APIs (1.25) improving
+          compatibility with newer clusters., Operational improvements and observability
+          tweaks (pprof debug endpoint in 1.14.0; alert rule fix in 2.0.0).]
+      breaking_changes: ['RabbitMQ 3.8 is no longer supported; all existing RabbitMQ
+          clusters must be upgraded to RabbitMQ 3.9.9+ before upgrading the operator,
+          otherwise clusters may fail to start.', Upgrading the operator to 2.0.0
+          will cause managed RabbitMQ clusters to roll (StatefulSet rolling update)
+          unless reconciliation is paused beforehand.]
     chart_version: 3.1.5
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.0.0-scratch-r6', 'docker.io/bitnami/rabbitmq:3.10.13-debian-11-r6',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r12', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.0-scratch-r0']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.0.0-scratch-r6', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.0-scratch-r0']
   - version: 1.14.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Manifests are now generated using Kubernetes 1.24 and controller-gen
+          0.9 (operator CRDs/manifests regenerated; expect CRD diffs on upgrade).,
+        Removed Prometheus scrape annotation from generated resources (changes how
+          metrics are discovered if you relied on annotations)., Added a pprof debug
+          endpoint to the operator (new optional diagnostics surface)., Error handling
+          now wraps all errors (log/error message formatting may change)., Refactored
+          operator defaults into a separate function (internal change; no user-facing
+          behavior expected)., 'Dependency/runtime updates: controller-runtime 0.12.1,
+          controller-tools 0.9.0, kind 0.14.0, etc. (may affect supported Kubernetes
+          versions/behavior).']
+      features: [Added a pprof debug endpoint for troubleshooting operator performance/issues.,
+        Updated generated manifests/CRDs using newer Kubernetes/controller-gen tooling
+          (improves compatibility with newer clusters).]
+      breaking_changes: ['Prometheus scrape annotation was removed; if your monitoring
+          relied on that annotation for discovery, you must switch to a ServiceMonitor/PodMonitor
+          or update your Prometheus discovery configuration.']
     chart_version: 2.7.4
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:1.14.0-scratch-r6', 'docker.io/bitnami/rabbitmq:3.10.7-debian-11-r8',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r8', 'docker.io/bitnami/rmq-messaging-topology-operator:1.8.0-scratch-r1']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:1.14.0-scratch-r6', 'docker.io/bitnami/rmq-messaging-topology-operator:1.8.0-scratch-r1']
   - version: 1.13.1
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -13793,8 +14183,7 @@ addons:
     incompatibilities: []
     summary: null
     chart_version: 2.6.6
-    images: ['docker.io/bitnami/rabbitmq-cluster-operator:1.13.1-scratch-r3', 'docker.io/bitnami/rabbitmq:3.10.5-debian-11-r2',
-      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r2', 'docker.io/bitnami/rmq-messaging-topology-operator:1.6.0-scratch-r0']
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:1.13.1-scratch-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.6.0-scratch-r0']
   name: rabbitmq-cluster-operator
 - icon: https://kserve.github.io/website/img/kserve-logo-small.png
   git_url: https://github.com/kserve/kserve
@@ -13806,7 +14195,45 @@ addons:
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Introduces new LLMInferenceService and LLMInferenceServiceConfig
+          CRDs plus a new llmisvc controller scaffold and Helm chart; includes validating
+          webhooks and associated RBAC/templating changes., "Refactors terminology/labels:\
+          \ \u201CRawDeployment\u201D \u2192 \u201CStandard\u201D and \u201CServerless\u201D\
+          \ \u2192 \u201CKNative\u201D, which may affect any automation that keys\
+          \ off those names/annotations.", CRD packaging renamed to reflect all KServe
+          CRDs (file rename); you should expect CRD manifests/filenames to differ
+          even if kinds are compatible., Helm chart updates around kserve-resources
+          to disable desired ServingRuntimes by default and to expose `uidModelcar`
+          configuration., Helm options enabled/exposed for OpenTelemetry collector
+          and autoscaler; KEDA autoscaling loop had fixes and now supports secure
+          Prometheus access., 'Deprecation/removal: `EnableDirectPvcVolumeMount` flag
+          removed; manifests/values using it must be updated/removed.', Istio dependency
+          updates (notably bump to 1.27.1) and fixes for Istio installation failures;
+          dependency install scripts added/centralized.]
+      features: ['Stop/resume support added across InferenceService components (predictor/transformer/explainer),
+          inference graphs, and raw/standard deployments.', 'New LLM-focused APIs:
+          LLMInferenceService + LLMInferenceServiceConfig types/CRDs, controller and
+          Helm chart, plus webhook validation and preset/config merging.', 'Inference
+          logging expanded: supports blob storage and adds GCS/Azure backends; metadata
+          headers and embedded spec handling improved.', 'Storage improvements: remote
+          storage URI injection for ServingRuntimes, support for multiple storage
+          URIs per InferenceService, and S3 config via secret data; CA bundle injection
+          improvements.', 'Autoscaling/observability improvements: custom InferenceGraph
+          router timeouts, OpenTelemetry autoscaling multiple metrics support, KEDA
+          secure Prometheus access, and more Helm-exposed tuning for autoscaler/otel
+          collector.', 'Runtime/tooling updates: vLLM upgraded (0.9.x series), Torch
+          upgraded (2.6/2.7), and SDK/storage module changes (storage module promoted/segregated).']
+      breaking_changes: ["Removed backwards-compatibility around a \u2018default\u2019\
+          \ suffix; any resources/names relying on that compatibility may no longer\
+          \ resolve the same way.", Dropped pydantic v1 support; Python clients/extensions
+          pinned to pydantic v1 will need to upgrade., '`EnableDirectPvcVolumeMount`
+          flag removed (deprecated); any deployments/Helm values depending on it must
+          be removed or replaced.', Standard predictor now disallows the `name` field;
+          manifests that set it will fail validation., "Terminology refactor (\u201C\
+          RawDeployment\u201D\u2192\u201CStandard\u201D, \u201CServerless\u201D\u2192\
+          \u201CKNative\u201D) can break scripts/alerts that match old strings/labels."]
     chart_version: v0.16.0
     images: ['docker.io/seldonio/mlserver:1.5.0', 'kserve/huggingfaceserver:v0.16.0',
       'kserve/huggingfaceserver:v0.16.0-gpu', 'kserve/kserve-controller:v0.16.0',
@@ -13830,7 +14257,22 @@ addons:
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['Model caching: introduces LocalModelNode CR, renames ClusterLocalModel
+          to LocalModelCache, adds admission webhook, supports multiple node groups,
+          allows disabling via annotation, improves agent/job cleanup and reconciliation
+          configurability, and redownloads missing models.', 'Inference protocol/serving
+          fixes: supports datetime object serialization in v1/v2 responses and improves
+          graceful shutdown behavior of the model server.', 'HuggingFace vLLM runtime
+          improvements (from 0.13.1 baseline): bumps vLLM to 0.4.3, adds NCCL and
+          other required packages, propagates trust_remote_code, improves chat template
+          generation prompt handling, and fixes logprobs. ']
+      breaking_changes: ['Potential CRD/API impact in model cache: rename from ClusterLocalModel
+          to LocalModelCache and new LocalModelNode resource may require updating
+          manifests/RBAC/webhooks if you previously used the old model cache CRD or
+          controller.']
     chart_version: v0.14.1
     images: ['docker.io/seldonio/mlserver:1.5.0', 'kserve/huggingfaceserver:v0.14.1',
       'kserve/kserve-controller:v0.14.1', 'kserve/lgbserver:v0.14.1', 'kserve/modelmesh-controller:v0.12.0',
@@ -13843,7 +14285,19 @@ addons:
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: []
+      features: ['v0.12.1 (runtime/deps): FastAPI updated to 0.109.1; Ray 2.10 supported/pinned;
+          Pydantic v2 support added.', 'v0.12.1 (controller/webhook): Modelcar injection
+          made idempotent, reducing repeated/duplicate sidecar injection issues on
+          reconcile.', 'v0.13.1 (HuggingFace/vLLM runtime): vLLM bumped to 0.4.3 and
+          NCCL package added to improve GPU/distributed inference compatibility.',
+        'v0.13.1 (vLLM startup/templates): trust_remote_code flag is propagated through
+          vLLM startup; chat template generation updated to use add_generation_prompt;
+          additional packages installed for vLLM model loading.', 'v0.13.1 (runtime
+          behavior): Fixes logprobs reporting for vLLM.']
+      breaking_changes: []
     chart_version: v0.13.1
     images: ['docker.io/seldonio/mlserver:1.3.2', 'gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1',
       'kserve/huggingfaceserver:v0.13.1', 'kserve/kserve-controller:v0.13.1', 'kserve/lgbserver:v0.13.1',
@@ -13883,14 +14337,56 @@ addons:
     kube: ['1.24', '1.23', '1.22', '1.21']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [Helm chart updated to deploy `kserve-manager` as a **Deployment**
+          (previously a StatefulSet) to support HA; note that the StatefulSet will
+          be removed in v0.10., Helm chart now published as a release asset (installation
+          workflows may change to consume chart artifacts from GitHub releases).]
+      features: [New `InferenceGraph` API to compose multi-step inference pipelines;
+          includes an InferenceGraph Python SDK., ModelMesh is now fully compatible
+          with the KServe `InferenceService` API (continued API unification)., New
+          unified model storage configuration via a new `storage` spec; adds Azure
+          File Share support and `webhdfs` support in `storageURI`/storage spec.,
+        'InferenceService improvements: per-component autoscaling target/metric, configurable
+          ingress class name, domain template generation, configurable URL scheme,
+          and a Model Status API with controller logic to update it.', 'ServingRuntime
+          enhancements: `protocolVersion` field, ability to mount volumes via `ServingRuntimePodSpec`,
+          expanded container fields, and env support for built-in adapter settings.',
+        Added MLflow support as a model format/integration.]
+      breaking_changes: ['Control-plane change: `kserve-manager` moves from StatefulSet
+          to Deployment in v0.9.0. If you rely on the StatefulSet name/behavior (stable
+          pod identity, volume claims), adjust monitoring/RBAC/PodDisruptionBudgets
+          accordingly; StatefulSet support will be removed in v0.10.']
     chart_version: v0.9.0
     images: []
   - version: 0.8.0
     kube: ['1.22', '1.21', '1.20']
     requirements: []
     incompatibilities: []
-    summary: null
+    summary:
+      helm_changes: ''
+      chart_updates: [KServe controller updated to use Knative 1.0 (underlying dependency
+          alignment impacts manifests/CRDs installed by the chart)., cert-manager
+          dependency updated to v1 (cluster prereq/version alignment)., 'Chart refreshed
+          for v0.8.0 release (image tags, runtime defaults, security hardening such
+          as non-root images and controller service account usage).']
+      features: ['New ServingRuntime and ClusterServingRuntime CRDs to define runtime
+          pod templates and supported model formats, replacing the previous configmap-based
+          runtime definitions and enabling easier customization/extensibility.', 'Auto-selection
+          of serving runtimes based on model format, with out-of-the-box ClusterServingRuntimes
+          to preserve default behavior.', ServingRuntime spec gains a multiModel field
+          to support multi-model serving capabilities., "Transformer\u2194Predictor\
+          \ gRPC support.", TorchServe v2 REST protocol support., Python SDK updates
+          including ServingRuntime support and updated CloudEvent handling; sklearnserver
+          now supports mixed-type inputs.]
+      breaking_changes: ["Python SDK class names renamed (KFModel\u2192Model, KFServer\u2192\
+          ModelServer, KFModelRepository\u2192ModelRepository); any user code importing\
+          \ old names must be updated.", 'pytorchserver runtime deprecated; PyTorch
+          models now default to TorchServe serving runtime, which can change runtime
+          behavior and configuration expectations.', 'ONNX runtime server deprecated;
+          ONNX models now default to Triton Inference Server, which may require different
+          model packaging/configuration and can affect resource usage/ports/protocols.']
     chart_version: v0.8.0
     images: []
   - version: 0.7.0

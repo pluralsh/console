@@ -5,6 +5,38 @@ readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/m
 helm_repository_url: https://prometheus-community.github.io/helm-charts
 chart_changelog_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/refs/heads/main/charts/kube-prometheus-stack/UPGRADE.md
 versions:
+- version: 81.0.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Chart version bump: kube-prometheus-stack to 81.0.0.', "Prometheus\
+        \ Operator version bumped to v0.88.0 (from prior chart\u2019s operator version).",
+      CI/dependency housekeeping in 80.14.4 (Helm/Helm v4.0.5 in CI; non-major dependency
+        updates).]
+    features: ['Prometheus Operator updated to 0.88.0, bringing in upstream Operator
+        improvements/fixes included in that release.']
+    breaking_changes: [Possible breaking changes may be introduced via Prometheus
+        Operator 0.88.0; review Operator 0.88.0 release notes for CRD/schema/behavior
+        changes before upgrading.]
+  chart_version: 81.0.0
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.2.1', 'quay.io/prometheus-operator/prometheus-operator:v0.88.0',
+    'quay.io/prometheus/alertmanager:v0.30.1', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.9.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
+- version: 80.14.4
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 80.14.4
+  images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.4',
+    'quay.io/kiwigrid/k8s-sidecar:2.2.1', 'quay.io/prometheus-operator/prometheus-operator:v0.87.1',
+    'quay.io/prometheus/alertmanager:v0.30.1', 'quay.io/prometheus/node-exporter:v1.10.2',
+    'quay.io/prometheus/prometheus:v3.9.1', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.17.0']
 - version: 80.10.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25']
@@ -510,7 +542,19 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['64.0.0: Reverted "Add downward compat for Prom CRD" (PR #4883).
+        This is a chart-level change affecting how Prometheus CRD compatibility was
+        handled.', '65.8.1: Improved selector information for `additionalPodMonitors`
+        and `additionalServiceMonitors` (PR #4974). This is a chart behavior/UX improvement
+        for generated selectors.']
+    features: ['Improved visibility/clarity of selectors used for `additionalPodMonitors`
+        and `additionalServiceMonitors`, making it easier to understand/verify which
+        targets will be picked up.']
+    breaking_changes: ['Potential behavioral change around Prometheus CRD compatibility
+        due to the revert in 64.0.0; if you relied on the previously-added "downward
+        compatibility" logic, verify CRD versions and upgrade path before proceeding.']
   chart_version: 65.8.1
   images: []
 - version: 64.0.0
