@@ -67,6 +67,9 @@ console:
     # assetsProxyUrl use this if you need to proxy downloads of new compatibility matrices or other live updated information from our datasets
     assetsProxyUrl: ~
 
+    # rdsIamAuthentication is used to configure whether rds iam authentication should be enabled for all db connections.  Ensure your database is prepared to handle IAM authentication before enabling here.
+    rdsIamAuthentication: false
+
   additionalContainers: ~
   containerSecurityContext:
     capabilities:

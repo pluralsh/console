@@ -276,6 +276,21 @@ export const useCreateClusterContext = () => {
 //   )
 // }
 
+const providerDocs = `
+provider "plural" {
+  kubernetes = {
+    # kubeconfig options defined at https://registry.terraform.io/providers/pluralsh/plural/latest/docs#kubeconfig-1
+  }
+}
+`.trim()
+
+const clusterDocs = `
+resource "plural_cluster" "example" {
+  name   = "my-cluster"
+  handle = "my-cluster"
+}
+`.trim()
+
 function CreateClusterModal({
   open,
   onClose,
@@ -322,28 +337,24 @@ function CreateClusterModal({
             flexDirection="column"
             gap="small"
           >
-            <div>
-              <Body2P css={{ marginBottom: theme.spacing.small }}>
-                To import your cluster using Terraform, first configure the
-                Plural provider according to the{' '}
-                <InlineLink
-                  href="https://registry.terraform.io/providers/pluralsh/plural/latest/docs"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  documentation
-                </InlineLink>
-                .
-              </Body2P>
-              <Body2P css={{ marginBottom: theme.spacing.small }}>
-                Once the provider is configured, use the cluster resource to
-                import it:
-              </Body2P>
-              <Code language="hcl">{`resource "plural_cluster" "example" {
-  name   = "my-cluster"
-  handle = "my-cluster"
-}`}</Code>
-            </div>
+            <Body2P>
+              To import your cluster using Terraform, first configure the Plural
+              provider according to the{' '}
+              <InlineLink
+                href="https://registry.terraform.io/providers/pluralsh/plural/latest/docs"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                documentation
+              </InlineLink>
+              .
+            </Body2P>
+            <Code language="hcl">{providerDocs}</Code>
+            <Body2P>
+              Once the provider is configured, use the cluster resource to
+              import it:
+            </Body2P>
+            <Code language="hcl">{clusterDocs}</Code>
           </Flex>
         )}
         {activeTab === ClusterImportTab.CLI && (

@@ -161,7 +161,9 @@ end
 
 if get_env("CONSOLE_RDS_IAM_AUTH") == "true" do
   config :console, Console.Repo,
-    configure: {Console.Repo, :configure_iam_authentication, [get_env("CONSOLE_AWS_REGION")]}
+    stacktrace: true,
+    show_sensitive_data_on_connection_error: true,
+    configure: {Console.Repo, :configure_iam_authentication, [get_env("CONSOLE_AWS_REGION") || get_env("AWS_REGION")]}
 end
 
 git_url = get_env("GIT_URL")
