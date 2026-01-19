@@ -79,6 +79,7 @@ export default function ProjectSelect() {
           </ListBoxFooter>
         }
         inputProps={{
+          placeholder: 'All projects',
           style: { border: 'none' },
         }}
       >
