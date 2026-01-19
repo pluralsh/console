@@ -14,11 +14,13 @@ import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectsContext } from '../contexts/ProjectsContext'
 import { ApolloError } from '@apollo/client/core'
 import { useProjectsTinyQuery } from 'generated/graphql'
+import { useDebounce } from '@react-hooks-library/core'
 
 export default function ProjectSelect() {
   const theme = useTheme()
   const { projectId, setProjectId } = useProjectsContext()
   const [query, setQuery] = useState('')
+  const debouncedQuery = useDebounce(query, 500)
   const [error, setError] = useState<ApolloError>()
 
   const { data, loading } = useProjectsTinyQuery({
@@ -28,7 +30,7 @@ export default function ProjectSelect() {
       setError(error)
       setTimeout(() => setError(undefined), 5000)
     },
-    variables: { q: query },
+    variables: { q: debouncedQuery },
   })
 
   const projects = useMemo(
@@ -52,6 +54,13 @@ export default function ProjectSelect() {
         onSelectionChange={(id) => setProjectId(id as string)}
         onInputChange={(value) => setQuery(value)}
         titleContent={<ProjectIcon color={theme.colors['icon-light']} />}
+        dropdownFooter={
+          !data && loading ? (
+            <ListBoxFooter>Loading</ListBoxFooter>
+          ) : isEmpty(projects) ? (
+            <ListBoxFooter>No results</ListBoxFooter>
+          ) : undefined
+        }
         dropdownFooterFixed={
           <ListBoxFooter
             onClick={() => setProjectId('')}
