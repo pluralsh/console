@@ -46,7 +46,11 @@ export default function ProjectSelect() {
         borderRadius: theme.borderRadiuses.medium,
         marginLeft: theme.spacing.large,
       }}
-      style={{ border: projectId ? theme.borders['outline-focused'] : 'none' }}
+      style={{
+        border: projectId
+          ? theme.borders['outline-focused']
+          : theme.borders.input,
+      }}
     >
       <ComboBox
         aria-label="project"
@@ -74,6 +78,9 @@ export default function ProjectSelect() {
             </span>
           </ListBoxFooter>
         }
+        inputProps={{
+          style: { border: 'none' },
+        }}
       >
         {projects.map((p) => (
           <ListBoxItem
