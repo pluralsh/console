@@ -1,4 +1,5 @@
 import {
+  Banner,
   CheckRoundedIcon,
   ComboBox,
   ListBoxFooter,
@@ -8,12 +9,32 @@ import {
 import { useTheme } from 'styled-components'
 
 import { isEmpty } from 'lodash'
-
+import { useMemo, useState } from 'react'
+import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectsContext } from '../contexts/ProjectsContext'
+import { ApolloError } from '@apollo/client/core'
+import { useProjectsTinyQuery } from 'generated/graphql'
 
 export default function ProjectSelect() {
   const theme = useTheme()
-  const { projects, projectId, setProjectId } = useProjectsContext()
+  const { projectId, setProjectId } = useProjectsContext()
+  const [query, setQuery] = useState('')
+  const [error, setError] = useState<ApolloError>()
+
+  const { data, loading } = useProjectsTinyQuery({
+    pollInterval: 60_000,
+    fetchPolicy: 'cache-and-network',
+    onError: (error) => {
+      setError(error)
+      setTimeout(() => setError(undefined), 5000)
+    },
+    variables: { q: query },
+  })
+
+  const projects = useMemo(
+    () => mapExistingNodes(data?.projects),
+    [data?.projects]
+  )
 
   return (
     <div
@@ -29,6 +50,7 @@ export default function ProjectSelect() {
         label="Project"
         selectedKey={projectId}
         onSelectionChange={(id) => setProjectId(id as string)}
+        onInputChange={(value) => setQuery(value)}
         titleContent={<ProjectIcon color={theme.colors['icon-light']} />}
         dropdownFooterFixed={
           <ListBoxFooter
@@ -51,6 +73,19 @@ export default function ProjectSelect() {
           />
         ))}
       </ComboBox>
+      {error && (
+        <Banner
+          heading="Failed to fetch projects"
+          severity="error"
+          position="fixed"
+          bottom={24}
+          right={100}
+          zIndex={1000}
+          onClose={() => setError(undefined)}
+        >
+          {error.message}
+        </Banner>
+      )}
     </div>
   )
 }
