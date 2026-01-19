@@ -8,7 +8,43 @@ versions:
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['KServe resources Helm chart: disables desired ServingRuntimes
+        by default (check for changes in which runtimes are installed/enabled).',
+      'Helm chart: exposes `uidModelcar` value (if you rely on modelcar/UID settings,
+        review/override accordingly).', 'Helm chart: enables configuration options
+        for `opentelemetryCollector` and `autoscaler` (new/expanded values you can
+        tune).', 'Helm chart: initial LLMInferenceService (llmisvc) controller scaffold
+        and Helm packaging; later updates include webhook config and a separate `llmisvc-crd-minimal`
+        chart fix (expect new optional chart/component and possibly additional CRDs/webhooks
+        if you enable it).', 'CRD packaging/filenames: CRD file renamed to reflect
+        all KServe CRDs (adjust any automation that references specific CRD filenames/paths).',
+      "Terminology/refactor: manifests and references renamed from \"RawDeployment\"\
+        \u2192\"Standard\" and \"Serverless\"\u2192\"KNative\" (update docs/runbooks/values\
+        \ that refer to old names where applicable)."]
+    features: ['Stop/resume support added across components: InferenceService, transformer,
+        explainer, and inference graph, including raw/standard deployment flows.',
+      'Introduces new LLM APIs and CRDs: `LLMInferenceService` and `LLMInferenceServiceConfig`,
+        plus an initial controller/webhooks and example assets for llm-d workflows.',
+      'Inference logging can now write to blob storage, with added support for GCS
+        and Azure, and metadata/header handling improvements.', Supports multiple
+        storage URIs for a single InferenceService (multi-source model artifacts).,
+      Adds remote storage URI injection support for ServingRuntimes to simplify runtime/model
+        wiring., 'Autoscaling observability improvements: supports multiple metrics
+        in OpenTelemetryCollector and adds optional secure Prometheus access for KEDA;
+        Helm now exposes more knobs.', Progressive rollout implemented for "raw"/standard
+        deployments (safer incremental traffic/replica changes)., Adds new Time Series
+        Forecast API endpoint., 'GPU support improvements: NVIDIA MIG GPU resource
+        detection and OCI support for multi-node/multi-GPU use cases.']
+    breaking_changes: ['Removed compatibility around a "default" suffix (if you relied
+        on legacy naming/label conventions, reconcile resource names/refs).', 'Python
+        tooling/dependencies: dropped Pydantic v1 support; if you have custom SDK/extensions
+        pinned to pydantic<2, they must be updated.', 'Deprecated/removed `EnableDirectPvcVolumeMount`
+        flag; clusters relying on direct PVC volume mount behavior must switch to
+        the supported alternative (e.g., modelcar/storage initializer patterns).',
+      'Standard predictor spec change: disallows `name` field; manifests using it
+        will be rejected by validation/webhooks after upgrade.']
   chart_version: v0.16.0
   images: ['docker.io/seldonio/mlserver:1.5.0', 'kserve/huggingfaceserver:v0.16.0',
     'kserve/huggingfaceserver:v0.16.0-gpu', 'kserve/kserve-controller:v0.16.0', 'kserve/lgbserver:v0.16.0',
@@ -19,7 +55,29 @@ versions:
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ["Upgrade spans KServe app versions v0.14.1 \u2192 v0.15.2 (intermediate\
+        \ 0.15.x changes not provided in notes).", 'Security fix included: CVE-2025-43859
+        patch in v0.15.2.', 'Default behavior change: ModelCar is enabled by default
+        in v0.15.2.', Knative autoscaler configmap read order during reconciliation
+        was reworked; may affect scaling behavior if you rely on custom autoscaler
+        settings., ModelServer init now accepts/uses a predictor_config parameter;
+        may affect custom model server integrations or init hooks.]
+    features: ['Model caching/local model support expanded in v0.14.1: LocalModelNode
+        CR, LocalModelCache (renamed from ClusterLocalModel), admission webhook, multi-node-group
+        support, and a local node agent with configurable reconciliation frequency.',
+      'Model cache robustness improvements: detect missing models and re-download;
+        cleanup jobs; safer root model directory handling; PVC naming includes node
+        group.', 'Response serialization improved: supports datetime object serialization
+        for v1/v2 responses.', 'Operational default change in v0.15.2: ModelCar enabled
+        by default, potentially improving model packaging/serving workflows.']
+    breaking_changes: ['ModelCar now enabled by default (v0.15.2). If you previously
+        did not deploy/use ModelCar, expect new sidecar/behavior and verify resource
+        usage, image pulls, and compatibility with your storage/model download approach.',
+      "Model cache API/resource naming changed earlier (ClusterLocalModel \u2192 LocalModelCache).\
+        \ If any manifests, RBAC, or automation still references the old name, they\
+        \ will need updating."]
   chart_version: v0.15.2
   images: ['docker.io/seldonio/mlserver:1.5.0', 'kserve/huggingfaceserver:v0.15.2',
     'kserve/huggingfaceserver:v0.15.2-gpu', 'kserve/kserve-controller:v0.15.2', 'kserve/lgbserver:v0.15.2',
@@ -30,7 +88,18 @@ versions:
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['v0.14.1 introduces a LocalModelNode/LocalModelCache model-caching
+        system with an agent, admission webhook, node-group support, and behaviors
+        like redownloading missing models and optional disabling via annotation.',
+      v0.14.1 adds support for serializing datetime objects in v1/v2 inference responses
+        and includes reliability fixes such as graceful shutdown improvements for
+        the model server.]
+    breaking_changes: ['Model cache CRD naming changed: ClusterLocalModel was renamed
+        to LocalModelCache, so any existing manifests/RBAC/automation that reference
+        the old kind/name must be updated before or during the upgrade.']
   chart_version: v0.14.1
   images: ['docker.io/seldonio/mlserver:1.5.0', 'kserve/huggingfaceserver:v0.14.1',
     'kserve/kserve-controller:v0.14.1', 'kserve/lgbserver:v0.14.1', 'kserve/modelmesh-controller:v0.12.0',
@@ -43,7 +112,18 @@ versions:
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['v0.12.1: Updated FastAPI to 0.109.1 and added/supports Ray 2.10 in
+        the relevant runtime images.', 'v0.12.1: Added Pydantic v2 support (runtime
+        compatibility update).', 'v0.12.1: Made Modelcar injection idempotent to avoid
+        repeated/inconsistent sidecar injection.', 'v0.13.1: HuggingFace/vLLM runtime
+        updates: bumped vLLM to 0.4.3 and added NCCL for GPU/multi-GPU scenarios.',
+      'v0.13.1: vLLM startup improvements (propagates trust_remote_code flag; chat
+        template uses add_generation_prompt).', 'v0.13.1: vLLM fixes and dependencies
+        (logprobs fix; extra packages to load models).']
+    breaking_changes: []
   chart_version: v0.13.1
   images: ['docker.io/seldonio/mlserver:1.3.2', 'gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1',
     'kserve/huggingfaceserver:v0.13.1', 'kserve/kserve-controller:v0.13.1', 'kserve/lgbserver:v0.13.1',
@@ -83,14 +163,59 @@ versions:
   kube: ['1.24', '1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [KServe manager (controller) changed from StatefulSet to Deployment
+        for HA; helm chart updated accordingly (statefulset to be removed in 0.10).,
+      Helm chart is now published as a release asset (packaging/distribution change).]
+    features: ['InferenceGraph: new API for defining multi-step inference pipelines/graphs,
+        plus Python SDK support.', 'ModelMesh compatibility: ModelMesh is now fully
+        compatible with the KServe InferenceService API; transformers can work with
+        ModelMesh.', 'Storage spec unification: new storage spec for unified model
+        storage configuration; added Azure File Share support and WebHDFS support.',
+      'ServingRuntime enhancements: protocolVersion field; add volumes to ServingRuntimePodSpec;
+        allow more container spec fields and env for built-in adapters.', 'Core Inference
+        improvements: MLflow support; configurable autoscaling target/metric per InferenceService
+        component; ingress class name and domain template config; Model Status API
+        and status update logic; configurable InferenceService URL scheme.']
+    breaking_changes: ['Controller/manager workload type changes from StatefulSet
+        to Deployment; any ops relying on stable pod identity, StatefulSet-specific
+        fields, or existing PDB/affinity/selectors may need adjustment. StatefulSet
+        will be removed in 0.10, so treat this as a migration now.']
   chart_version: v0.9.0
   images: []
 - version: 0.8.0
   kube: ['1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Introduces new ServingRuntime and ClusterServingRuntime CRDs;
+        moves runtime definitions from a control-plane ConfigMap to CRDs with built-in
+        ClusterServingRuntimes provided for backwards-compatible defaults., KServe
+        controller updated to use Knative 1.0; cert-manager updated to v1., 'Defaults
+        change: PyTorch models now use TorchServe runtime; ONNX models now use Triton
+        Inference Server; legacy pytorchserver and onnxruntime server are deprecated.',
+      'Security/behavior changes: controller should not use default ServiceAccount;
+        python server images now run as non-root; various manifest security fixes.',
+      'Raw Kubernetes deployment path and model agent fixes/improvements (including
+        custom container port, raw deployment agent fix).']
+    features: ['New ServingRuntime (namespace-scoped) and ClusterServingRuntime (cluster-scoped)
+        CRDs to define serving pod templates and supported model formats, replacing
+        the prior runtime ConfigMap approach.', Automatic runtime selection based
+        on model format plus a new multiModel field on ServingRuntime for multi-model
+        serving., gRPC supported between transformer and predictor for in-cluster
+        inference pipelines., TorchServe v2 REST protocol support and improved sklearnserver
+        input handling (mixed types)., Python SDK updates including ServingRuntime
+        support and improved CloudEvent handling.]
+    breaking_changes: ["Python SDK class renames: KFModel\u2192Model, KFServer\u2192\
+        ModelServer, KFModelRepository\u2192ModelRepository; downstream code must\
+        \ update imports/usages accordingly.", 'Runtime default changes/deprecations:
+        kserve pytorchserver deprecated (defaults to TorchServe); ONNX runtime server
+        deprecated (defaults to Triton). Review InferenceService specs and expectations
+        if you relied on the old servers.', 'Platform dependency upgrades (cert-manager
+        v1, Knative 1.0) may require cluster prerequisites and compatible versions
+        before upgrading.']
   chart_version: v0.8.0
   images: []
 - version: 0.7.0

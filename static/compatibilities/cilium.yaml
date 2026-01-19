@@ -3,25 +3,32 @@ release_url: https://github.com/cilium/cilium/releases/tag/v{vsn}
 helm_repository_url: https://helm.cilium.io/
 helm_values: debug.verbose=flow
 versions:
-- version: 1.18.5
-  kube: ['1.34', '1.33', '1.32']
+- version: 1.18.6
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
-    chart_updates: []
-    features: ['Envoy proxy was bumped within the 1.18 line (to 1.34.11/1.34.12),
-        bringing in upstream proxy fixes and behavior updates.', 'Hybrid-DSR support
-        was added via the existing annotation infrastructure, enabling a new service
-        load-balancing mode where applicable.', Kubernetes endpoints that are terminating
-        are now retained in BPF backend state (regardless of the "serving" condition)
-        to reduce connection disruption during pod termination., Secret-sync controller
-        gained a periodic resync to improve eventual consistency.]
-    breaking_changes: []
-  chart_version: 1.18.5
-  images: ['quay.io/cilium/cilium-envoy:v1.34.12-1765374555-6a93b0bbba8d6dc75b651cbafeedb062b2997716@sha256:3108521821c6922695ff1f6ef24b09026c94b195283f8bfbfc0fa49356a156e1',
-    'quay.io/cilium/cilium:v1.18.5@sha256:2c92fb05962a346eaf0ce11b912ba434dc10bd54b9989e970416681f4a069628',
-    'quay.io/cilium/operator-generic:v1.18.5@sha256:36c3f6f14c8ced7f45b40b0a927639894b44269dd653f9528e7a0dc363a4eb99']
+    chart_updates: ['Helm charts are now published to OCI registries (in addition
+        to/instead of prior distribution), and the release process/registry target
+        changed accordingly.', Helm chart templates were adjusted so the cilium-ingress-service
+        only sets a nodePort when explicitly specified (avoids unexpected NodePort
+        allocation)., Helm chart ServiceMonitor resources now apply consistent default
+        labels (may affect Prometheus label selectors).]
+    features: ['BGP Control Plane v2: configurable BGP origin attribute for LoadBalancer
+        IP advertisements to ease migration from MetalLB.', Documentation/examples
+        added for the `egressDeny` field in CiliumNetworkPolicy (policy authoring
+        improvement)., 'Hubble/eBPF: support for policy verdicts from L3 devices (visibility
+        improvement).']
+    breaking_changes: ['Helm distribution change: charts are published to OCI registries;
+        your automation may need to switch from `helm repo add` + `helm upgrade` to
+        `helm pull oci://...` or updating registry auth/mirrors.', 'Cilium preflight
+        no longer includes Envoy ConfigMaps; if you previously relied on preflight
+        validating those, adjust expectations/checks in your upgrade runbooks.']
+  chart_version: 1.18.6
+  images: ['quay.io/cilium/cilium-envoy:v1.35.9-1767794330-db497dd19e346b39d81d7b5c0dedf6c812bcc5c9@sha256:81398e449f2d3d0a6a70527e4f641aaa685d3156bea0bb30712fae3fd8822b86',
+    'quay.io/cilium/cilium:v1.18.6@sha256:42ec562a5ff6c8a860c0639f5a7611685e253fd9eb2d2fcdade693724c9166a4',
+    'quay.io/cilium/operator-generic:v1.18.6@sha256:34a827ce9ed021c8adf8f0feca131f53b3c54a3ef529053d871d0347ec4d69af']
 - version: 1.18.2
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -107,6 +114,25 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.34.4-1753677767-266d5a01d1d55bd1d60148f991b98dac0390d363@sha256:231b5bd9682dfc648ae97f33dcdc5225c5a526194dda08124f5eded833bf02bf',
     'quay.io/cilium/cilium:v1.18.0@sha256:dfea023972d06ec183cfa3c9e7809716f85daaff042e573ef366e9ec6a0c0ab2',
     'quay.io/cilium/operator-generic:v1.18.0@sha256:398378b4507b6e9db22be2f4455d8f8e509b189470061b0f813f0fabaf944f51']
+- version: 1.17.12
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Cilium Helm charts are now published to OCI registries; update
+        any automation that pulls charts from a Helm repo to use an OCI registry path
+        instead., Release tooling changed the OCI registry location (upstream/backport
+        note).]
+    features: ['Helm charts are now published to OCI registries, enabling OCI-based
+        chart distribution in addition to (or instead of) traditional Helm repositories.']
+    breaking_changes: ['If your deployment tooling expects charts from a classic Helm
+        repository URL, you may need to switch to an OCI chart reference and update
+        `helm pull/upgrade` commands accordingly.']
+  chart_version: 1.17.12
+  images: ['quay.io/cilium/cilium-envoy:v1.34.12-1767177245-7935d4d711cb6f8020385a50c996b90896e16a71@sha256:377175048c79d12c129d29e7a56268e1edaad37c96e649e892465c01bf2b4f8f',
+    'quay.io/cilium/cilium:v1.17.12@sha256:f525e12698149b3958024599493d9cc56fadbc46c9250cbced8016e9b9b679e5',
+    'quay.io/cilium/operator-generic:v1.17.12@sha256:0b675406b1e43b198962d4f9c3a5ba6bb68fc98836cba05b224860109112f6d9']
 - version: 1.17.8
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -220,6 +246,31 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.31.5-1737535524-fe8efeb16a7d233bffd05af9ea53599340d3f18e@sha256:57a3aa6355a3223da360395e3a109802867ff635cb852aa0afe03ec7bf04e545',
     'quay.io/cilium/cilium:v1.17.0@sha256:51f21bdd003c3975b5aaaf41bd21aee23cc08f44efaa27effc91c621bc9d8b1d',
     'quay.io/cilium/operator-generic:v1.17.0@sha256:1ce5a5a287166fc70b6a5ced3990aaa442496242d1d4930b5a3125e44cccdca8']
+- version: 1.16.19
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "- **Helm chart distribution change:** Starting in **v1.16.19**,\
+      \ Cilium **publishes Helm charts to OCI registries**. If you currently pull\
+      \ charts from a traditional Helm repo (`helm repo add cilium \u2026`), you can\
+      \ continue if your environment still supports it, but be prepared to **switch\
+      \ to OCI-based pulls** (e.g., `helm pull oci://\u2026` / `helm upgrade \u2026\
+      \ oci://\u2026`) depending on how your org consumes charts.\n- No explicit Helm\
+      \ values/key changes were mentioned in the provided notes. Treat this as a **patch\
+      \ upgrade** within 1.16 and keep your existing `values.yaml`, but still run\
+      \ a `helm diff` and validate rendered manifests.\n"
+    chart_updates: [Helm charts are now published to OCI registries (packaging/distribution
+        change).]
+    features: ['Helm charts can now be consumed from OCI registries, enabling OCI-native
+        artifact workflows and mirroring via container registries.']
+    breaking_changes: ['Potential process change if your upgrade pipeline assumes
+        a classic Helm chart repository URL: you may need to adjust to pulling/upgrading
+        the chart via an OCI registry in v1.16.19.']
+  chart_version: 1.16.19
+  images: ['quay.io/cilium/cilium-envoy:v1.34.12-1767177245-7935d4d711cb6f8020385a50c996b90896e16a71@sha256:377175048c79d12c129d29e7a56268e1edaad37c96e649e892465c01bf2b4f8f',
+    'quay.io/cilium/cilium:v1.16.19@sha256:f0c260e30ef97ce3e45e833e702ab47efbbb1dadd0a394969c0a65553e98fefb',
+    'quay.io/cilium/operator-generic:v1.16.19@sha256:8879e792c5566f6349b5f2865e07c0dd690eb32638afc4417b51b0ec574fa5f0']
 - version: 1.16.15
   kube: ['1.34', '1.33', '1.32']
   requirements: []
