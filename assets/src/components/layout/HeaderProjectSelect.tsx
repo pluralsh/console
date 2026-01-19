@@ -1,9 +1,9 @@
 import {
   CheckRoundedIcon,
+  ComboBox,
   ListBoxFooter,
   ListBoxItem,
   ProjectIcon,
-  Select,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
@@ -24,9 +24,11 @@ export default function ProjectSelect() {
       }}
       style={{ border: projectId ? theme.borders['outline-focused'] : 'none' }}
     >
-      <Select
-        transparent
+      <ComboBox
         aria-label="project"
+        label="Project"
+        selectedKey={projectId}
+        onSelectionChange={(id) => setProjectId(id as string)}
         titleContent={<ProjectIcon color={theme.colors['icon-light']} />}
         dropdownFooterFixed={
           <ListBoxFooter
@@ -38,10 +40,6 @@ export default function ProjectSelect() {
             </span>
           </ListBoxFooter>
         }
-        label="All projects"
-        size="small"
-        onSelectionChange={(id) => setProjectId(id as string)}
-        selectedKey={projectId}
       >
         {projects.map((p) => (
           <ListBoxItem
@@ -52,7 +50,7 @@ export default function ProjectSelect() {
             selected={isEmpty(projectId)} // Show checkboxes next to all projects if that option is selected.
           />
         ))}
-      </Select>
+      </ComboBox>
     </div>
   )
 }
