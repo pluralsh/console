@@ -5,6 +5,7 @@ import {
   ListBoxFooter,
   ListBoxItem,
   ProjectIcon,
+  Spinner,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
@@ -56,7 +57,9 @@ export default function ProjectSelect() {
         titleContent={<ProjectIcon color={theme.colors['icon-light']} />}
         dropdownFooter={
           !data && loading ? (
-            <ListBoxFooter>Loading</ListBoxFooter>
+            <ListBoxFooter>
+              <Spinner />
+            </ListBoxFooter>
           ) : isEmpty(projects) ? (
             <ListBoxFooter>No results</ListBoxFooter>
           ) : undefined
