@@ -9,172 +9,436 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Upgrading the cluster-operator to v2.16.x will trigger reconciliation
+        that updates RabbitMQ clusters (rolling update of the underlying StatefulSets).
+        To control timing, pause reconciliation before upgrading the operator and
+        resume when ready.', Default RabbitMQ version deployed by the operator is
+        now RabbitMQ 4.1.3 (v2.16.1).]
+    features: [Support scaling RabbitMQ clusters down to zero replicas (v2.16.0).,
+      Operator now deploys RabbitMQ 4.1.3 by default (v2.16.1).]
+    breaking_changes: [Upgrading the operator will roll RabbitMQ StatefulSets (cluster
+        updates) unless reconciliation is paused; plan for rolling restarts during
+        the upgrade window.]
   chart_version: 4.4.34
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.16.1-debian-12-r0', 'docker.io/bitnami/rabbitmq:4.1.3-debian-12-r1',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.8-debian-12-r0', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.4-debian-12-r0']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.16.1-debian-12-r0', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.4-debian-12-r0']
 - version: 2.16.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Operator can now scale RabbitMQ to zero replicas (support for scale-to-zero
+        RabbitMQ clusters).]
+    breaking_changes: [Upgrading the cluster-operator triggers reconciliation and
+        a rolling update of managed RabbitMQ StatefulSets unless reconciliation is
+        paused; plan and pause/resume if you need to control rollout timing.]
   chart_version: 4.4.32
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.16.0-debian-12-r2', 'docker.io/bitnami/rabbitmq:4.1.3-debian-12-r1',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.7-debian-12-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.3-debian-12-r2']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.16.0-debian-12-r2', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.3-debian-12-r2']
 - version: 2.15.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Operator upgrade to v2.15.0 will trigger reconciliation and rolling
+        updates of managed RabbitMQ StatefulSets unless reconciliation is paused.,
+      Default RabbitMQ version deployed by the operator/cluster defaults to RabbitMQ
+        4.1.1 (from prior default)., Prometheus rules updated for RabbitMQ 4.1 (monitoring/alerts
+        may change)., Grafana queue dashboard updated (dashboards content/metrics
+        may change)., 'OLM (Operator Lifecycle Manager) manifests/workflow refactored
+        and tweaked (relevant if installing via OLM, less so for Helm).', Go toolchain
+        bumped; includes fix for CVE-2025-22874 (security hardening of operator binary).]
+    features: [Can optionally enable all RabbitMQ feature flags automatically (new
+        operator capability; useful for smoothing upgrades where feature flags gate
+        behavior)., 'Monitoring updates: Prometheus alerting/recording rules refreshed
+        for RabbitMQ 4.1 and queue Grafana dashboard updated.', 'Security/maintenance:
+        operator rebuilt with bumped Go version including a fix for CVE-2025-22874.']
+    breaking_changes: [Operator upgrade triggers rolling updates of existing RabbitMQ
+        clusters via StatefulSet changes unless you pause reconciliation; plan maintenance
+        windows accordingly., 'Default RabbitMQ version changes to 4.1.1; if your
+        clusters rely on pinning an older RabbitMQ image/version, explicitly set it
+        to avoid an unexpected broker version jump.']
   chart_version: 4.4.26
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.15.0-debian-12-r1', 'docker.io/bitnami/rabbitmq:4.1.2-debian-12-r1',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.7-debian-12-r1', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.3-debian-12-r0']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.15.0-debian-12-r1', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.3-debian-12-r0']
 - version: 2.14.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [v2.14.0 is a small operator maintenance release (docs/tooling/dependency
+        refactors)., Upgrading the operator may trigger a rolling update of managed
+        RabbitMQ StatefulSets; plan for controlled reconciliation (pause/resume).]
+    features: [Improved/expanded documentation (includes default delayStartSeconds).,
+      Operational logging now includes an explicit log line when FIPS mode is enabled.]
+    breaking_changes: [Operator upgrade can trigger rolling updates of all managed
+        RabbitMQ clusters; pause reconciliation if you need to control rollout timing
+        (behavior highlighted in release notes).]
   chart_version: 4.4.22
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.14.0-debian-12-r3', 'docker.io/bitnami/rabbitmq:4.1.1-debian-12-r2',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.6-debian-12-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.1-debian-12-r3']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.14.0-debian-12-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.1-debian-12-r3']
 - version: 2.13.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Operator upgrade will trigger rolling updates of managed RabbitMQ
+        clusters (StatefulSets) unless reconciliation is paused., 'Default RabbitMQ
+        image used by the operator changes from `rabbitmq:4.0.5-management` (v2.12.x)
+        to `rabbitmq:4.1.0-management` (v2.13.0).', "Resource defaults for the init\
+        \ container are reduced significantly (memory 500Mi \u2192 64Mi, CPU 100m\
+        \ \u2192 20m).", 'New CRD field support: `spec.service.labels` to apply custom
+        labels to Services created for RabbitMQ clusters.', 'Adds/updates monitoring
+        assets: PrometheusRule for RabbitMQ alarm states; rule config to merge `rabbitmq_identity_info`;
+        includes `promtool` validation for alert rules.', Cluster deletion behavior
+        improved (cleaner/faster teardown)., Codebase modernization and dependency
+        bumps; operatorhub publication metadata updated (re-adds `replaces` field).]
+    features: [Support custom Service labels via `spec.service.labels` on the RabbitMQCluster
+        CR., PrometheusRule added for RabbitMQ alarm state alerting., 'Init container
+        resource usage reduced by default, lowering baseline footprint.']
+    breaking_changes: [Upgrading the operator to v2.13.0 will roll RabbitMQ clusters
+        (StatefulSets) due to default image/version and/or rendered manifest changes;
+        plan for controlled rollouts by pausing reconciliation before upgrading and
+        resuming afterward if desired., 'Default RabbitMQ image tag changes to 4.1.0-management
+        when `spec.image` is not set, which can change RabbitMQ version during operator
+        upgrade.']
   chart_version: 4.4.13
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.13.0-debian-12-r0', 'docker.io/bitnami/rabbitmq:4.1.0-debian-12-r3',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.6-debian-12-r0', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.0-debian-12-r1']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.13.0-debian-12-r0', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.0-debian-12-r1']
 - version: 2.12.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Operator defaults the RabbitMQ image to `rabbitmq:4.0.5-management`
+        when `spec.image` is not set (was previously unspecified/older default depending
+        on chart/operator behavior).', RabbitMQ `readinessProbe` and `livenessProbe`
+        settings are now overridable via the CR/spec (adds configurability for health
+        checks).]
+    features: ['Default RabbitMQ image is now `rabbitmq:4.0.5-management` when not
+        explicitly set, making deployments more deterministic.', 'You can now override
+        the RabbitMQ readiness and liveness probes to tune health checks for your
+        environment (slow storage, large clusters, etc.).']
+    breaking_changes: ['If you relied on the previous implicit default RabbitMQ image,
+        upgrading to v2.12.0 may trigger a RabbitMQ version change to `rabbitmq:4.0.5-management`,
+        which can cause a rolling update and potential behavior changes; pin `spec.image`
+        to avoid surprises.']
   chart_version: 4.4.2
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.12.0-debian-12-r1', 'docker.io/bitnami/rabbitmq:4.0.5-debian-12-r1',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r33', 'docker.io/bitnami/rmq-messaging-topology-operator:1.15.0-debian-12-r5']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.12.0-debian-12-r1', 'docker.io/bitnami/rmq-messaging-topology-operator:1.15.0-debian-12-r5']
 - version: 2.11.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Operator upgrade will trigger reconciliation-driven rolling updates
+        of managed RabbitMQ clusters (StatefulSets). Plan/coordinate this (pause reconciliation
+        if you need to control timing)., TLS/web-mqtt-stomp port condition logic updated;
+        certificate handling fixed to avoid CA certs overriding server certs., Mirroring-related
+        shutdown errors are now ignored to reduce noisy/failing reconciliations.,
+      Dependency updates and lint/CI fixes (no functional impact expected).]
+    features: ['Default user Secret now also contains a `connection_string` key, simplifying
+        client configuration/bootstrapping.', Improved conditions/logic around enabling
+        Web MQTT/STOMP TLS ports.]
+    breaking_changes: [Upgrading the cluster-operator to 2.11.0 will cause rolling
+        updates of underlying RabbitMQ cluster StatefulSets via reconciliation; treat
+        as a potentially disruptive change and pause reconciliation if you need to
+        defer cluster updates.]
   chart_version: 4.4.0
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.11.0-debian-12-r4', 'docker.io/bitnami/rabbitmq:4.0.4-debian-12-r1',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r31', 'docker.io/bitnami/rmq-messaging-topology-operator:1.15.0-debian-12-r2']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.11.0-debian-12-r4', 'docker.io/bitnami/rmq-messaging-topology-operator:1.15.0-debian-12-r2']
 - version: 2.10.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Operator upgrade will trigger rolling updates of managed RabbitMQ
+        clusters (StatefulSets). Plan reconciliation pause/resume if you need to control
+        rollout timing., CRD updated (landed in v2.9.0); ensure CRDs in the cluster
+        are updated as part of the upgrade., Internal build/CI/OLM workflow changes
+        (no direct runtime impact expected)., Kustomize config updated to replace
+        deprecated patchesStrategicMerge with v1beta1 patches (relevant if you vendor/manifests/kustomize
+        overlays from the repo).]
+    features: ["Annotation rabbitmq.com/disable-default-topology-spread-constraints\
+        \ added to allow opting out of the operator\u2019s default topology spread\
+        \ constraints.", 'additionalConfig max length increased, allowing larger inline
+        RabbitMQ configuration payloads.', Operator now defaults RabbitMQ to 3.13.7
+        (up from 3.13.2 in v2.9.0).]
+    breaking_changes: [Anonymous (unauthenticated) login is disabled by default; clients
+        relying on the ANONYMOUS mechanism will fail until reconfigured., vm_memory_high_watermark_paging_ratio
+        was removed; any reliance on this parameter in generated/assumed config should
+        be revisited (especially if you were setting it via additionalConfig).]
   chart_version: 4.3.24
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.10.0-debian-12-r2', 'docker.io/bitnami/rabbitmq:4.0.2-debian-12-r0',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r28', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.2-debian-12-r6']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.10.0-debian-12-r2', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.2-debian-12-r6']
 - version: 2.9.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Operator upgrade to v2.9.0 updates the ClusterOperator CRD., Upgrading
+        the operator will trigger rolling updates of managed RabbitMQ StatefulSets
+        (clusters) unless reconciliation is paused., Improved shutdown behavior during
+        termination (graceful shutdown fix)., 'Behavior change: scaling out should
+        no longer cause an unnecessary cluster restart.', RabbitMQ version bump in
+        managed clusters to 3.13.2., CI/build pipeline updates (OLM bundle publish
+        fix; docker/build-push-action update with provenance disabled).]
+    features: ['RabbitMQ in managed clusters is bumped to 3.13.2 (from the prior 3.13.x
+        baseline), bringing the upstream RabbitMQ fixes included in 3.13.2.', 'Operator
+        no longer restarts the cluster after a scale-out operation, reducing disruption
+        during capacity increases.']
+    breaking_changes: ['Upgrading the cluster-operator to 2.9.0 will cause a rolling
+        update of underlying RabbitMQ StatefulSets (cluster pods). If you need to
+        control timing, you must pause reconciliation before upgrading and resume
+        when safe.', CRD update may require applying new CRDs before/with the operator
+        upgrade; older manifests/clients that assume the previous CRD schema could
+        fail validation until updated.]
   chart_version: 4.3.20
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.9.0-debian-12-r8', 'docker.io/bitnami/rabbitmq:3.13.7-debian-12-r0',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r26', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.2-debian-12-r5']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.9.0-debian-12-r8', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.2-debian-12-r5']
 - version: 2.8.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [RabbitMQ 3.13 is now the default RabbitMQ version deployed by the operator.,
+      'The operator now filters which Kubernetes API objects it caches (more selective
+        watch/cache behavior), which can reduce memory/CPU usage on large clusters.']
+    breaking_changes: ['Default RabbitMQ version changes to 3.13; if you relied on
+        the previous default version, pin the RabbitMQ image/version explicitly to
+        avoid an unplanned broker upgrade.']
   chart_version: 4.2.7
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.8.0-debian-12-r4', 'docker.io/bitnami/rabbitmq:3.13.2-debian-12-r1',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r18', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.0-debian-12-r0']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.8.0-debian-12-r4', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.0-debian-12-r0']
 - version: 2.7.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Operator dependencies and Kubernetes API machinery libraries were
+        updated (apimachinery to 0.29 along with related deps)., 'General maintenance
+        work: updates plus removal of deprecated modules and function calls.', 'CI/build
+        change: reverted a docker/build-push-action version bump due to a known upstream
+        issue.']
+    features: [Primarily a maintenance/dependency refresh release; no new user-facing
+        features called out in the v2.7.0 notes., Keeps compatibility with newer Kubernetes
+        library versions by updating apimachinery and dependencies.]
+    breaking_changes: [Removal of deprecated modules and function calls may break
+        custom integrations or forks that relied on those deprecated internals; review
+        any custom builds/patches.]
   chart_version: 4.2.0
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.7.0-debian-12-r8', 'docker.io/bitnami/rabbitmq:3.12.13-debian-12-r2',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r14', 'docker.io/bitnami/rmq-messaging-topology-operator:1.13.0-debian-12-r7']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.7.0-debian-12-r8', 'docker.io/bitnami/rmq-messaging-topology-operator:1.13.0-debian-12-r7']
 - version: 2.6.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Dependencies updated: client-go and kustomize bumped; Kubernetes
+        dependencies updated to v1.28.', 'Docs updated: inter-node-traffic NetworkPolicy
+        now includes stream ports.', 'CI/workflows: exclude Google Auth in PRs.',
+      'Feature added: support for Erlang INET configuration.', 'Change: `imagePullSecrets`
+        is now treated as an array (may require values format updates).']
+    features: ['Adds support for configuring Erlang INET settings for RabbitMQ pods,
+        enabling more control over Erlang networking behavior.', 'NetworkPolicy documentation
+        now includes stream ports for inter-node traffic, reflecting support/expectations
+        for streams networking.']
+    breaking_changes: ['`imagePullSecrets` is now an array; if you previously set
+        it as a single object/string in manifests or values, you must update to list
+        syntax to avoid rendering/validation issues.', 'The operator now targets Kubernetes
+        1.28 dependencies; while usually compatible with older clusters, verify your
+        cluster version and run smoke tests as API removals/behavior changes may surface.']
   chart_version: 3.14.0
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.6.0-debian-11-r3', 'docker.io/bitnami/rabbitmq:3.12.12-debian-11-r3',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-11-r5', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.2-debian-11-r1']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.6.0-debian-11-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.2-debian-11-r1']
 - version: 2.5.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Operator release v2.5.0 is mostly maintenance/infra work: README
+        corrected for default RabbitMQ version; Go modules bumped to v2; build workflow
+        updated to support additional architectures (ppc64le, s390x); Kustomize-related
+        rename from `patches` to `patchesStrategicMerge`; Makefile refactor.']
+    features: [Adds/expands multi-architecture image build support (ppc64le and s390x).,
+      Documentation update clarifies the default RabbitMQ version used by the operator.]
+    breaking_changes: ["If you consume this repo\u2019s Kustomize overlays, `patches`\
+        \ was renamed to `patchesStrategicMerge` and may require updating your Kustomization\
+        \ manifests.", Go module path/version bump to v2 can affect downstream builds
+        if you vendor/compile the operator from source; not typically user-facing
+        for Helm-only installs.]
   chart_version: 3.10.5
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.5.0-debian-11-r39', 'docker.io/bitnami/rabbitmq:3.11.26-debian-11-r0',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-11-r2', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.1-debian-11-r2']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.5.0-debian-11-r39', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.1-debian-11-r2']
 - version: 2.4.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Default RabbitMQ version is now 3.12.2 (previously 3.11.18 in v2.3.0).]
+    breaking_changes: ['Upgrading to RabbitMQ 3.12 has prerequisites: your cluster
+        must already be on 3.11.18+ and you must enable all feature flags before upgrading
+        (`rabbitmqctl list_feature_flags` / `rabbitmqctl enable_feature_flag all`).']
   chart_version: 3.7.1
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.4.0-debian-11-r15', 'docker.io/bitnami/rabbitmq:3.11.21-debian-11-r0',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.2-debian-11-r14', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.0-debian-11-r14']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.4.0-debian-11-r15', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.0-debian-11-r14']
 - version: 2.3.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Adds support for scoping the controller cache across multiple
+        namespaces (multi-namespace cache scoping)., 'Updates/refreshes bundled Grafana
+        dashboards, including the rabbitmq-queue-dashboard (datasource fix, improved
+        legends, 10s refresh) and general dashboard updates.', Fixes/adjusts plugin
+        paths and environment variable names used for plugins., Removes deprecated
+        methods in the operator codebase., 'Upgrades dependencies/runtime: controller-runtime
+        and Kubernetes API to 1.27; Go toolchain to 1.20.', 'Build/release pipeline
+        changes: generate amd64 and arm64 release artifacts; CI Kubernetes version
+        bump.', "Updates the operator\u2019s default RabbitMQ image version to 3.11.18."]
+    features: ['Multi-namespace cache scoping is now supported, enabling the operator
+        to watch/cache resources across more than one namespace with scoped caching.',
+      'Grafana dashboards were updated and the queue dashboard improved (datasource
+        handling, clearer legends, faster refresh).', Release artifacts are now produced
+        for both amd64 and arm64 platforms.]
+    breaking_changes: [Deprecated methods were removed; any external integrations
+        or custom builds relying on those deprecated operator APIs may need updates.,
+      Dependency bumps (controller-runtime/Kubernetes API to 1.27 and Go 1.20) may
+        require updating your build/tooling if you compile or vendor the operator.]
   chart_version: 3.6.2
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.3.0-scratch-r3', 'docker.io/bitnami/rabbitmq:3.11.19-debian-11-r18',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r23', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.0-scratch-r2']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.3.0-scratch-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.0-scratch-r2']
 - version: 2.2.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['**Operator upgrade behavior warning (v2.1.0 note, still relevant):**
+        upgrading the cluster-operator can trigger rolling updates of managed RabbitMQ
+        StatefulSets. If you need to control timing, pause reconciliation on RabbitMQCluster
+        resources before upgrading, then resume when safe.', '**Image/packaging changes:**
+        v2.1.0 introduced multi-arch (amd64/arm64) operator image; v2.2.0 continues
+        image pipeline changes (including arm64 image generation and some single-arch
+        pipeline work/reverts).', '**RBAC additions:** v2.1.0 added an Aggregating
+        ClusterRole for Service Bindings.', '**StatefulSet spec enhancements:** v2.1.0
+        added support for `minReadySeconds`; v2.2.0 added an override for `StatefulSet.spec.persistentVolumeClaimRetentionPolicy`.',
+      '**Logging:** v2.2.0 moved verbose log lines to debug level.', '**Networking/plugin
+        behavior:** v2.2.0 opens the stream port when the stream management plugin
+        is enabled.']
+    features: [Multi-architecture operator image support (amd64 and arm64) so the
+        same manifest works across node architectures., Support for `minReadySeconds`
+        in the StatefulSet spec to control rollout readiness behavior., Ability to
+        override `StatefulSet.spec.persistentVolumeClaimRetentionPolicy` for PVC retention
+        behavior on scale/down or delete., Operator now opens the stream port automatically
+        when the stream management plugin is enabled.]
+    breaking_changes: [Default RabbitMQ image/version used by the operator was bumped
+        (to 3.11.10-management) which can change the RabbitMQ version you deploy if
+        you rely on operator defaults; pin your RabbitMQ image/version explicitly
+        if you need to avoid an unplanned RabbitMQ upgrade., "Operator image selection/control\
+        \ behavior changed (\u201Clet rabbitmq operator to control images\u201D);\
+        \ if you previously assumed images were fully user-controlled via manifests/overlays,\
+        \ validate your image override/pinning strategy before upgrading."]
   chart_version: 3.4.1
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.2.0-scratch-r7', 'docker.io/bitnami/rabbitmq:3.11.16-debian-11-r3',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r21', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.3-scratch-r1']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.2.0-scratch-r7', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.3-scratch-r1']
 - version: 2.1.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Operator images are now multi-architecture (amd64 + arm64) and
+        will be resolved automatically by the container runtime., Adds an Aggregating
+        ClusterRole for Service Bindings integration., Operator startup is delayed
+        by 30 seconds (likely to allow dependencies like the API server/CRDs to be
+        ready)., Adds support for `minReadySeconds` in the underlying StatefulSet
+        spec., PodDisruptionBudget manifest updated., Adds label(s) for service discoverability.,
+      External Secret integration updated to optionally skip creating the default
+        user secret; includes a new admin external secret example., 'CI/CD pipeline
+        work: Concourse pipelines migrated to GitHub Actions; various GitHub Action
+        dependency/tag bumps and Go patch updates.']
+    features: [Multi-arch support out of the box (amd64 and arm64) via a multi-architecture
+        OCI image., Support for `minReadySeconds` in the RabbitMQ cluster StatefulSet
+        spec to control rollout readiness timing., External Secret behavior can skip
+        default user secret creation; includes an admin external secret example.,
+      Service Bindings support improved via an aggregating ClusterRole and improved
+        service discoverability labeling.]
+    breaking_changes: ['No new hard breaking changes called out for 2.1.0 itself,
+        but upgrading the operator will trigger reconciliation and a rolling update
+        of managed RabbitMQ StatefulSets unless reconciliation is paused.']
   chart_version: 3.2.5
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.1.0-scratch-r6', 'docker.io/bitnami/rabbitmq:3.10.18-debian-11-r4',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r16', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.1-scratch-r2']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.1.0-scratch-r6', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.1-scratch-r2']
 - version: 2.0.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Operator now requires RabbitMQ 3.9.9+; RabbitMQ 3.8 support removed.,
+      Upgrading the operator to v2.0.0 will trigger rolling updates of managed RabbitMQ
+        clusters (StatefulSets) unless reconciliation is paused., CRDs regenerated
+        after Kubernetes API/controller-gen bump; operator built/tested against newer
+        Kubernetes dependencies (k8s api 1.25 / controller-runtime 0.13)., 'Alerting
+        rule fix: FileDescriptorsNearLimit.', 'Operator build/tooling updates: Go
+        1.19, govulncheck, CI/workflow improvements, OperatorHub publishing workflow,
+        pprof debug endpoint added in 1.14.0 (already present before 2.0.0).']
+    features: [Set a cluster size hint (improves operator behavior/coordination when
+        sizing clusters)., 'More reliable system tests and improved CI/security tooling
+        (CodeQL updates, govulncheck, pinned Go toolchain).']
+    breaking_changes: [RabbitMQ 3.8 is no longer supported; clusters must run RabbitMQ
+        3.9.9+ before upgrading the operator or clusters may fail to start., Operator
+        upgrade will reconcile and roll RabbitMQ StatefulSets; pause reconciliation
+        if you need to control when clusters are updated.]
   chart_version: 3.1.5
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.0.0-scratch-r6', 'docker.io/bitnami/rabbitmq:3.10.13-debian-11-r6',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r12', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.0-scratch-r0']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.0.0-scratch-r6', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.0-scratch-r0']
 - version: 1.14.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Manifests are now generated with Kubernetes 1.24 APIs using controller-gen
+        0.9 (and controller-runtime bumped to 0.12.1). This can change generated CRDs/RBAC/manifests
+        formatting and apiVersions compared to the prior release; review diffs and
+        ensure your cluster version/PSA setup is compatible., 'Prometheus scrape annotation
+        was removed from generated resources; if you relied on annotations-based autodiscovery,
+        you may need to add your own annotations or switch to a ServiceMonitor/PodMonitor
+        approach.', 'Error handling was refactored to wrap errors consistently; impacts
+        are mainly in logs/event messages (better context), not behavior.', Operator
+        defaults were refactored into a separate function (internal code structure
+        change).]
+    features: ["Adds a pprof debug endpoint to the operator for performance profiling/troubleshooting\
+        \ (ensure it\u2019s appropriately secured/accessible in your environment)."]
+    breaking_changes: [Prometheus scrape annotations were removed; any monitoring
+        setup depending on those annotations may stop scraping metrics unless you
+        add replacements or use Prometheus Operator CRs., 'Manifests/CRDs regenerated
+        with newer Kubernetes/controller-gen versions may alter applied resources;
+        verify CRD diffs and apply order during upgrade, especially in clusters with
+        strict admission/PSA policies.']
   chart_version: 2.7.4
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:1.14.0-scratch-r6', 'docker.io/bitnami/rabbitmq:3.10.7-debian-11-r8',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r8', 'docker.io/bitnami/rmq-messaging-topology-operator:1.8.0-scratch-r1']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:1.14.0-scratch-r6', 'docker.io/bitnami/rmq-messaging-topology-operator:1.8.0-scratch-r1']
 - version: 1.13.1
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
@@ -182,5 +446,4 @@ versions:
   incompatibilities: []
   summary: null
   chart_version: 2.6.6
-  images: ['docker.io/bitnami/rabbitmq-cluster-operator:1.13.1-scratch-r3', 'docker.io/bitnami/rabbitmq:3.10.5-debian-11-r2',
-    'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r2', 'docker.io/bitnami/rmq-messaging-topology-operator:1.6.0-scratch-r0']
+  images: ['docker.io/bitnami/rabbitmq-cluster-operator:1.13.1-scratch-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.6.0-scratch-r0']

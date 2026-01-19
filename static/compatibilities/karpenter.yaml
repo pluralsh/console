@@ -8,7 +8,27 @@ versions:
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ["v1.6.0: Helm chart change implied by controller securityContext\
+        \ update: removed `runAsNonRoot` to allow running under restricted PodSecurityPolicies\
+        \ (PPS). Verify any custom `podSecurityContext/securityContext` overrides\
+        \ don\u2019t re-introduce constraints that block startup.", "v1.8.0: Helm\
+        \ chart updated for new CLI options (release note: \u201CUpdate helm chart\
+        \ for new CLI options\u201D). Review chart values / `extraArgs` and ensure\
+        \ flags align with the new controller binary options."]
+    features: ['v1.6.0: Adds delayed registration support for AWS KWOK, enabling integration
+        with the Kubernetes-without-Kubelet testing workflow.', 'v1.6.0: Adds Capacity
+        Block support for EC2 Capacity Blocks/Capacity Reservations use-cases.', "v1.6.0:\
+        \ Temporarily \u201CICE\u201D (exclude) AZs when subnets in an AZ run out\
+        \ of available IPs to reduce launch failures.", 'v1.6.0: Adds additional Bottlerocket
+        log settings support.', 'v1.6.0: Supports auto-relaxing minimum values in
+        scheduling/constraints to improve provisioning success.', 'v1.8.0: Adds `spec.IpPrefixCount`
+        to allow pre-warming IP prefixes (helps reduce pod networking/IP allocation
+        latency).', 'v1.8.0: Adds support for `InstanceMatchCriteria` in `CapacityReservationSelectorTerms`
+        to better target capacity reservations.', 'v1.8.0: Bottlerocket: uses default
+        ephemeral storage bind command, improving compatibility with defaults.']
+    breaking_changes: []
   chart_version: 1.8.0
   images: ['public.ecr.aws/karpenter/controller:1.8.0@sha256:f913075cdd31cfcdfaa9726ca7a0b264832fc42e8a48eb573a2a0f454b38b112']
 - version: 1.6.0

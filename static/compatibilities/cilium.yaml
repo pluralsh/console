@@ -3,25 +3,32 @@ release_url: https://github.com/cilium/cilium/releases/tag/v{vsn}
 helm_repository_url: https://helm.cilium.io/
 helm_values: debug.verbose=flow
 versions:
-- version: 1.18.5
-  kube: ['1.34', '1.33', '1.32']
+- version: 1.18.6
+  kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: ''
-    chart_updates: []
-    features: ['Envoy proxy was bumped within the 1.18 line (to 1.34.11/1.34.12),
-        bringing in upstream proxy fixes and behavior updates.', 'Hybrid-DSR support
-        was added via the existing annotation infrastructure, enabling a new service
-        load-balancing mode where applicable.', Kubernetes endpoints that are terminating
-        are now retained in BPF backend state (regardless of the "serving" condition)
-        to reduce connection disruption during pod termination., Secret-sync controller
-        gained a periodic resync to improve eventual consistency.]
+    helm_changes: "- **Chart distribution change:** v1.18.6 adds support for publishing\
+      \ the Helm charts to **OCI registries**. If you currently pull charts from the\
+      \ classic Helm repo, you *can* keep doing that, but you may also switch to OCI-style\
+      \ pulls (e.g., `oci://\u2026`).\n- **Preflight behavior change:** The **Cilium\
+      \ preflight** check no longer includes **Envoy ConfigMaps**, which makes preflight\
+      \ easier to run correctly (less chance of false issues from leftover/managed\
+      \ ConfigMaps).\n- **Runtime dependency:** `cilium-envoy` now pulls in **`libatomic1`**\
+      \ as a dependency. This is handled in the image packaging, but it\u2019s a useful\
+      \ note if you run in restricted/base-image environments or do image scanning/allowlisting."
+    chart_updates: [Helm chart publishing supports OCI registries (and includes an
+        OCI registry change note)., Preflight chart/job no longer checks Envoy ConfigMaps.,
+      Envoy runtime dependency updated to include libatomic1 in the runtime image
+        packaging.]
+    features: ['Helm charts can now be consumed from OCI registries, enabling artifact-registry
+        style workflows and mirroring.', Preflight is simpler to run because it no
+        longer considers Envoy ConfigMaps as part of the check.]
     breaking_changes: []
-  chart_version: 1.18.5
-  images: ['quay.io/cilium/cilium-envoy:v1.34.12-1765374555-6a93b0bbba8d6dc75b651cbafeedb062b2997716@sha256:3108521821c6922695ff1f6ef24b09026c94b195283f8bfbfc0fa49356a156e1',
-    'quay.io/cilium/cilium:v1.18.5@sha256:2c92fb05962a346eaf0ce11b912ba434dc10bd54b9989e970416681f4a069628',
-    'quay.io/cilium/operator-generic:v1.18.5@sha256:36c3f6f14c8ced7f45b40b0a927639894b44269dd653f9528e7a0dc363a4eb99']
+  chart_version: 1.18.6
+  images: ['quay.io/cilium/cilium-envoy:v1.35.9-1767794330-db497dd19e346b39d81d7b5c0dedf6c812bcc5c9@sha256:81398e449f2d3d0a6a70527e4f641aaa685d3156bea0bb30712fae3fd8822b86',
+    'quay.io/cilium/cilium:v1.18.6@sha256:42ec562a5ff6c8a860c0639f5a7611685e253fd9eb2d2fcdade693724c9166a4',
+    'quay.io/cilium/operator-generic:v1.18.6@sha256:34a827ce9ed021c8adf8f0feca131f53b3c54a3ef529053d871d0347ec4d69af']
 - version: 1.18.2
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -107,6 +114,23 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.34.4-1753677767-266d5a01d1d55bd1d60148f991b98dac0390d363@sha256:231b5bd9682dfc648ae97f33dcdc5225c5a526194dda08124f5eded833bf02bf',
     'quay.io/cilium/cilium:v1.18.0@sha256:dfea023972d06ec183cfa3c9e7809716f85daaff042e573ef366e9ec6a0c0ab2',
     'quay.io/cilium/operator-generic:v1.18.0@sha256:398378b4507b6e9db22be2f4455d8f8e509b189470061b0f813f0fabaf944f51']
+- version: 1.17.12
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: ['Helm charts are now published to OCI registries (and the release
+        automation changes the OCI registry). If you currently pull charts from the
+        legacy Helm repo, plan to switch your chart source to an OCI registry and
+        adjust your CI/CD (authentication, mirroring, helm registry login, etc.).']
+    features: ['Helm charts can now be consumed from OCI registries, simplifying distribution
+        via container registries and enabling standard registry auth/mirroring flows.']
+    breaking_changes: []
+  chart_version: 1.17.12
+  images: ['quay.io/cilium/cilium-envoy:v1.34.12-1767177245-7935d4d711cb6f8020385a50c996b90896e16a71@sha256:377175048c79d12c129d29e7a56268e1edaad37c96e649e892465c01bf2b4f8f',
+    'quay.io/cilium/cilium:v1.17.12@sha256:f525e12698149b3958024599493d9cc56fadbc46c9250cbced8016e9b9b679e5',
+    'quay.io/cilium/operator-generic:v1.17.12@sha256:0b675406b1e43b198962d4f9c3a5ba6bb68fc98836cba05b224860109112f6d9']
 - version: 1.17.8
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -220,6 +244,36 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.31.5-1737535524-fe8efeb16a7d233bffd05af9ea53599340d3f18e@sha256:57a3aa6355a3223da360395e3a109802867ff635cb852aa0afe03ec7bf04e545',
     'quay.io/cilium/cilium:v1.17.0@sha256:51f21bdd003c3975b5aaaf41bd21aee23cc08f44efaa27effc91c621bc9d8b1d',
     'quay.io/cilium/operator-generic:v1.17.0@sha256:1ce5a5a287166fc70b6a5ced3990aaa442496242d1d4930b5a3125e44cccdca8']
+- version: 1.16.19
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: "### Helm / install-impacting changes\n- **Charts are now published\
+      \ to OCI registries** (1.16.19). If your pipeline currently pulls charts from\
+      \ the classic Helm repo URL, you may need to switch to OCI-style pulls.\n  -\
+      \ Example flow (generic): `helm registry login \u2026` then `helm pull oci://<registry>/<org>/<chart>\
+      \ --version <x.y.z>` or `helm upgrade \u2026 oci://\u2026`.\n  - Also note the\
+      \ release mentions a **change of OCI registry** (\u201Crelease: change OCI registry\u201D\
+      ). Verify the correct registry/repository path used by your org.\n- **Image\
+      \ digests updated** as part of the install manifests between patch releases;\
+      \ if you pin digests, update them to the new version\u2019s digests.\n- **CNI\
+      \ plugins bumped to v1.9.0** (1.16.19). If you vendor CNI binaries or have strict\
+      \ compatibility/pinning, validate this aligns with your node images/AMIs and\
+      \ cluster standards."
+    chart_updates: ['Helm chart distribution change: Cilium Helm charts are published
+        to OCI registries (and the OCI registry location changed). This primarily
+        affects how you fetch the chart in CI/CD, not the runtime behavior of the
+        chart.', "Install/manifests refreshed with new image digests for the patch\
+        \ line (v1.16.18 \u2192 v1.16.19 referenced)."]
+    features: ['Helm charts are now published to OCI registries, enabling OCI-based
+        chart distribution and consumption.', Documentation/examples added for using
+        `egressDeny` in `CiliumNetworkPolicy` (policy authoring aid).]
+    breaking_changes: []
+  chart_version: 1.16.19
+  images: ['quay.io/cilium/cilium-envoy:v1.34.12-1767177245-7935d4d711cb6f8020385a50c996b90896e16a71@sha256:377175048c79d12c129d29e7a56268e1edaad37c96e649e892465c01bf2b4f8f',
+    'quay.io/cilium/cilium:v1.16.19@sha256:f0c260e30ef97ce3e45e833e702ab47efbbb1dadd0a394969c0a65553e98fefb',
+    'quay.io/cilium/operator-generic:v1.16.19@sha256:8879e792c5566f6349b5f2865e07c0dd690eb32638afc4417b51b0ec574fa5f0']
 - version: 1.16.15
   kube: ['1.34', '1.33', '1.32']
   requirements: []
