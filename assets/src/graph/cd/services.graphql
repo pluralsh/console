@@ -49,6 +49,7 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   repository {
     id
     url
+    httpsPath
   }
   insertedAt
   updatedAt

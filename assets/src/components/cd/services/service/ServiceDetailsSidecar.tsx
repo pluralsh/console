@@ -8,6 +8,7 @@ import {
   GitHubLogoIcon,
   Sidecar,
   SidecarItem,
+  WrapWithIf,
 } from '@pluralsh/design-system'
 
 import KickButton from 'components/utils/KickButton'
@@ -33,6 +34,7 @@ import StackStatusIcon from 'components/stacks/common/StackStatusIcon'
 import { ServiceStatusChip } from '../ServiceStatusChip'
 
 import ServicePromote from './ServicePromote'
+import { InlineA } from 'components/utils/typography/Text'
 
 export function ServiceDetailsSidecar({
   serviceDeployment,
@@ -168,15 +170,12 @@ export function ServiceDetailsSidecar({
               </Flex>
             }
           >
-            <div
-              css={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: theme.spacing.xsmall,
-              }}
+            <WrapWithIf
+              condition={!!repository.httpsPath}
+              wrapper={<InlineA href={repository.httpsPath} />}
             >
               {repository.url}
-            </div>
+            </WrapWithIf>
           </SidecarItem>
         )}
         {git && <SidecarItem heading="Git folder">{git.folder}</SidecarItem>}
