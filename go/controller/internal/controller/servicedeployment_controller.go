@@ -471,6 +471,7 @@ func setRenderers(service *v1alpha1.ServiceDeployment, attr *console.ServiceDepl
 					Values:      renderer.Helm.Values,
 					ValuesFiles: lo.ToSlicePtr(renderer.Helm.ValuesFiles),
 					Release:     renderer.Helm.Release,
+					IgnoreHooks: renderer.Helm.IgnoreHooks,
 				}
 			}
 			attr.Renderers = append(attr.Renderers, newRenderer)

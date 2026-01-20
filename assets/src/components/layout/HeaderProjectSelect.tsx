@@ -1,19 +1,37 @@
 import {
   CheckRoundedIcon,
+  ComboBox,
   ListBoxFooter,
   ListBoxItem,
   ProjectIcon,
-  Select,
+  Spinner,
+  Toast,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { isEmpty } from 'lodash'
-
+import { useMemo, useState } from 'react'
+import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectsContext } from '../contexts/ProjectsContext'
+import { useProjectsTinyQuery } from 'generated/graphql'
+import { useDebounce } from '@react-hooks-library/core'
 
 export default function ProjectSelect() {
   const theme = useTheme()
-  const { projects, projectId, setProjectId } = useProjectsContext()
+  const { projectId, setProjectId } = useProjectsContext()
+  const [query, setQuery] = useState('')
+  const debouncedQuery = useDebounce(query, 500)
+
+  const { data, loading, error } = useProjectsTinyQuery({
+    pollInterval: 60_000,
+    fetchPolicy: 'cache-and-network',
+    variables: { q: debouncedQuery },
+  })
+
+  const projects = useMemo(
+    () => mapExistingNodes(data?.projects),
+    [data?.projects]
+  )
 
   return (
     <div
@@ -22,12 +40,28 @@ export default function ProjectSelect() {
         borderRadius: theme.borderRadiuses.medium,
         marginLeft: theme.spacing.large,
       }}
-      style={{ border: projectId ? theme.borders['outline-focused'] : 'none' }}
+      style={{
+        border: projectId
+          ? theme.borders['outline-focused']
+          : theme.borders.input,
+      }}
     >
-      <Select
-        transparent
+      <ComboBox
         aria-label="project"
+        label="Project"
+        selectedKey={projectId}
+        onSelectionChange={(id) => setProjectId(id as string)}
+        onInputChange={(value) => setQuery(value)}
         titleContent={<ProjectIcon color={theme.colors['icon-light']} />}
+        dropdownFooter={
+          !data && loading ? (
+            <ListBoxFooter>
+              <Spinner />
+            </ListBoxFooter>
+          ) : isEmpty(projects) ? (
+            <ListBoxFooter>No results</ListBoxFooter>
+          ) : undefined
+        }
         dropdownFooterFixed={
           <ListBoxFooter
             onClick={() => setProjectId('')}
@@ -38,10 +72,10 @@ export default function ProjectSelect() {
             </span>
           </ListBoxFooter>
         }
-        label="All projects"
-        size="small"
-        onSelectionChange={(id) => setProjectId(id as string)}
-        selectedKey={projectId}
+        inputProps={{
+          placeholder: 'All projects',
+          style: { border: 'none' },
+        }}
       >
         {projects.map((p) => (
           <ListBoxItem
@@ -52,7 +86,18 @@ export default function ProjectSelect() {
             selected={isEmpty(projectId)} // Show checkboxes next to all projects if that option is selected.
           />
         ))}
-      </Select>
+      </ComboBox>
+      {error && (
+        <Toast
+          heading="Error loading projects"
+          severity="danger"
+          position="bottom"
+          closeTimeout={5000}
+          margin="large"
+        >
+          {error.message}
+        </Toast>
+      )}
     </div>
   )
 }

@@ -34,34 +34,48 @@ defmodule Console.AI.Fixer do
   """
   @spec refresh(binary, User.t) :: {:ok, AiInsight.t} | Console.error
   def refresh(id, %User{} = user) do
-    Repo.get!(AiInsight, id)
-    |> Repo.preload([:service, :stack, :alert, :cluster])
-    |> AiInsight.changeset(%{force: true})
-    |> allow(user, :read)
-    |> when_ok(:update)
-    |> case do
-      {:ok, %AiInsight{service: %Service{} = svc} = insight} ->
-        do_refresh(svc, insight)
-      {:ok, %AiInsight{stack: %Stack{} = stack} = insight} ->
-        do_refresh(stack, insight)
-      {:ok, %AiInsight{alert: %Alert{} = alert} = insight} ->
-        do_refresh(alert, insight)
-      {:ok, %AiInsight{cluster: %Cluster{} = cluster} = insight} ->
-        do_refresh(cluster, insight)
-      {:ok, _} ->
+    start_transaction()
+    |> add_operation(:insight, fn _ ->
+      Repo.get!(AiInsight, id)
+      |> Repo.preload([:service, :stack, :alert, :cluster])
+      |> AiInsight.changeset(%{force: true})
+      |> allow(user, :read)
+      |> when_ok(:update)
+    end)
+    |> add_operation(:refresh, fn
+      %{insight: %AiInsight{service: %Service{} = svc}} ->
+        do_refresh(svc)
+      %{insight: %AiInsight{stack: %Stack{} = stack}} ->
+        do_refresh(stack)
+      %{insight: %AiInsight{alert: %Alert{} = alert}} ->
+        do_refresh(alert)
+      %{insight: %AiInsight{cluster: %Cluster{} = cluster}} ->
+        do_refresh(cluster)
+      _ ->
         {:error, "can only refresh service, stack, cluster, or alert insights, sub-insights are propagated downstream"}
-      err -> err
-    end
+    end)
+    |> add_operation(:children, fn %{refresh: parent} -> refresh_children(parent) end)
+    |> execute(extract: :insight)
   end
 
-  defp do_refresh(%{__struct__: model} = svc, insight) do
-    model.changeset(svc, %{ai_poll_at: DateTime.utc_now()})
+  defp do_refresh(%{__struct__: schema} = model) do
+    schema.changeset(model, %{ai_poll_at: Timex.now(), force_insight: true})
     |> Repo.update()
-    |> case do
-      {:ok, _} -> {:ok, insight}
-      err -> err
-    end
   end
+
+  defp refresh_children(%Service{id: id}) do
+    AiInsight.all_components(id)
+    |> Repo.update_all(set: [force: true])
+    |> ok()
+  end
+
+  defp refresh_children(%Stack{id: id}) do
+    AiInsight.all_stack_runs(id)
+    |> Repo.update_all(set: [force: true])
+    |> ok()
+  end
+
+  defp refresh_children(_), do: {:ok, []}
 
   @doc """
   Generate a fix recommendation from an ai insight struct

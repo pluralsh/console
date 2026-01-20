@@ -74,7 +74,7 @@ export function InsightDisplay({
               <ContentHeaderSC css={{ paddingRight: 0 }}>
                 <Flex gap="small">
                   <SearchIcon />
-                  <span>{"insight's evidence"}</span>
+                  <span>evidence</span>
                 </Flex>
                 <IconFrame
                   clickable

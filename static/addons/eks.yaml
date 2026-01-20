@@ -294,7 +294,25 @@
   publisher: akuity
 - name: amazon-cloudwatch-observability
   versions:
+  - version: v5.1.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
   - version: v5.0.0-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+  - version: v4.9.0-eksbuild.1
     compatibilities:
     - '1.34'
     - '1.33'
@@ -2894,6 +2912,11 @@
   publisher: s3
 - name: aws-network-flow-monitoring-agent
   versions:
+  - version: v1.1.3-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.1.2-eksbuild.1
     compatibilities:
     - '1.34'
@@ -3901,8 +3924,24 @@
   publisher: Cribl
 - name: cyberark_cert-manager-eks
   versions:
+  - version: v1.19.2-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.19.1-eksbuild.1
     compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+  - version: v1.18.4-eksbuild.1
+    compatibilities:
+    - '1.34'
     - '1.33'
     - '1.32'
     - '1.31'
@@ -4221,6 +4260,19 @@
     - '1.22'
     - '1.21'
   publisher: dynatrace
+- name: eg-innovations_eg-universal-agent-operator
+  versions:
+  - version: v0.0.54-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
+  publisher: eG Innovations
 - name: eks-node-monitoring-agent
   versions:
   - version: v1.4.3-eksbuild.2
@@ -5158,6 +5210,10 @@
   - version: v1.34.0-eksbuild.2
     compatibilities:
     - '1.34'
+  - version: v1.33.7-eksbuild.2
+    compatibilities:
+    - '1.34'
+    - '1.33'
   - version: v1.33.5-eksbuild.2
     compatibilities:
     - '1.34'
@@ -5178,6 +5234,11 @@
     compatibilities:
     - '1.34'
     - '1.33'
+  - version: v1.32.11-eksbuild.2
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.32.9-eksbuild.2
     compatibilities:
     - '1.34'
@@ -5223,6 +5284,12 @@
     - '1.34'
     - '1.33'
     - '1.32'
+  - version: v1.31.14-eksbuild.2
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.31.13-eksbuild.2
     compatibilities:
     - '1.34'
@@ -5301,6 +5368,12 @@
     - '1.33'
     - '1.32'
     - '1.31'
+  - version: v1.30.14-eksbuild.20
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.30.14-eksbuild.18
     compatibilities:
     - '1.33'
@@ -5397,6 +5470,12 @@
     - '1.32'
     - '1.31'
     - '1.30'
+  - version: v1.29.15-eksbuild.28
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.29.15-eksbuild.26
     compatibilities:
     - '1.32'
@@ -6313,6 +6392,16 @@
   publisher: eks
 - name: kubecost_kubecost
   versions:
+  - version: v3.0.6-eksbuild.1
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
+    - '1.28'
+    - '1.27'
   - version: v2.7.1-eksbuild.1
     compatibilities:
     - '1.32'

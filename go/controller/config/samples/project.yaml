@@ -1,7 +1,6 @@
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Project
 metadata:
-  name: test
+  name: default
 spec:
-  name: marcin-test
-  description: Sample project
+  name: default

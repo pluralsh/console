@@ -89,14 +89,10 @@ config :console, Console.Cron.Scheduler,
   ]
 
 config :ex_aws,
-  region: {:system, "AWS_REGION"},
-  secret_access_key: [{:system, "AWS_ACCESS_KEY_ID"}, {:awscli, "profile_name", 30}],
-  access_key_id: [{:system, "AWS_SECRET_ACCESS_KEY"}, {:awscli, "profile_name", 30}],
-  awscli_auth_adapter: ExAws.STS.AuthCache.AssumeRoleWebIdentityAdapter
+  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :pod_identity, :instance_role],
+  secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :pod_identity, :instance_role]
 
-config :console, :watchers, [
-  Console.Watchers.Upgrade,
-]
+config :console, :watchers, [Console.Watchers.Upgrade]
 
 config :console, Console.PromEx,
   metrics_server: [

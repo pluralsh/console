@@ -219,6 +219,7 @@ fragment ClustersRow on Cluster {
     extended
     extendedFrom
   }
+  disableAi
 }
 
 fragment ClusterUpgradePlan on ClusterUpgradePlan {

@@ -90,6 +90,7 @@ defmodule Console.AI.Tools.Agent.Coding.GenericPr do
                           title: pr.pr_title,
                           message: pr.pr_description,
                           identifier: identifier,
+                          ignore_templates: true,
                         }, branch, %{}),
         {:ok, pull_request} <- GitSvc.create_pull_request(Map.merge(attrs, session_attrs(sess))),
         {:ok, _} <- update_session(%{pull_request_id: pull_request.id, branch: branch}) do

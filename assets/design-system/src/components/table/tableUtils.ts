@@ -16,8 +16,8 @@ import {
 } from 'react'
 
 import { type EmptyStateProps } from '../EmptyState'
-import { SemanticColorKey } from 'src/theme/colors'
-import { FillLevel } from '../contexts/FillLevelContext'
+import { type FillLevel } from '../contexts/FillLevelContext'
+import { type SemanticColorKey } from '../../theme/colors'
 
 export type TableProps = Omit<CSSProperties, keyof TableBaseProps> &
   TableBaseProps

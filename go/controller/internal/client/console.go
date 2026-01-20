@@ -184,6 +184,10 @@ type ConsoleClient interface {
 	CreateSentinel(ctx context.Context, attr *console.SentinelAttributes) (*console.SentinelFragment, error)
 	UpdateSentinel(ctx context.Context, id string, attr *console.SentinelAttributes) (*console.SentinelFragment, error)
 	GetGlobalServiceByName(name string) (*console.GlobalServiceFragment, error)
+	UpsertCustomCompatibilityMatrix(ctx context.Context, attributes console.CustomCompatibilityMatrixAttributes) (*console.CustomCompatibilityMatrixFragment, error)
+	DeleteCustomCompatibilityMatrix(ctx context.Context, name string) error
+	UpsertUpgradePlanCallout(ctx context.Context, attributes console.UpgradePlanCalloutAttributes) (*console.UpgradePlanCalloutFragment, error)
+	DeleteUpgradePlanCallout(ctx context.Context, name string) error
 }
 
 func New(url, token string, datadogEnabled bool) ConsoleClient {

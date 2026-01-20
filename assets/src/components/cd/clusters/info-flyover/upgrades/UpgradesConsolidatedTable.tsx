@@ -5,13 +5,14 @@ import { DistroProviderIconFrame } from 'components/utils/ClusterDistro'
 import CopyButton from 'components/utils/CopyButton'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import { Body2P, CaptionP } from 'components/utils/typography/Text'
+import { Body2P } from 'components/utils/typography/Text'
 import {
-  CloudAddon,
-  CloudAddonUpgrade,
+  AddonVersionSummaryFragment,
+  CloudAddonFragment,
+  CloudAddonUpgradeFragment,
   ClusterOverviewDetailsFragment,
   RuntimeAddon,
-  RuntimeAddonUpgrade,
+  RuntimeAddonUpgradeFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { ReactNode, useMemo } from 'react'
@@ -21,8 +22,9 @@ import {
   getClusterAddOnDetailsPath,
 } from 'routes/cdRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
+import { UpgradesConsolidatedTableExpander } from './UpgradesConsolidatedTableExpander'
 
-type AddonOverview = {
+export type AddonOverview = {
   id?: Nullable<string>
   name: string
   icon?: ReactNode
@@ -34,15 +36,18 @@ type AddonOverview = {
   fixChartVersion?: Nullable<string>
   releaseUrl?: Nullable<string>
   images?: string[]
+  callout?: Nullable<string>
+  summary?: Nullable<AddonVersionSummaryFragment>
 }
 
 type CloudOrHelmAddon =
-  | (RuntimeAddonUpgrade & { addon: RuntimeAddon })
-  | (CloudAddonUpgrade & { addon: CloudAddon })
+  | (RuntimeAddonUpgradeFragment & {
+      addon: Pick<RuntimeAddon, 'name' | 'icon'>
+    })
+  | (CloudAddonUpgradeFragment & { addon: CloudAddonFragment })
 
-type TableMeta = {
-  clusterId: string
-}
+type TableMeta = { clusterId: string }
+
 export function UpgradesConsolidatedTable({
   cluster,
 }: {
@@ -78,6 +83,7 @@ export function UpgradesConsolidatedTable({
             id: cluster.runtimeServices?.find(
               (service) => service?.name === addon.addon.name
             )?.id,
+            callout: addon.callout,
             currentChartVersion: addon.current?.chartVersion,
             fixChartVersion: addon.fix?.chartVersion,
             icon: (
@@ -88,8 +94,9 @@ export function UpgradesConsolidatedTable({
             ),
           }),
           ...(addon.fix?.__typename === 'AddonVersion' && {
-            releaseUrl: addon.fix?.releaseUrl,
-            images: addon.fix?.images?.filter(isNonNullable) ?? [],
+            releaseUrl: addon.fix.releaseUrl,
+            images: addon.fix.images?.filter(isNonNullable) ?? [],
+            summary: addon.fix.summary,
           }),
         })),
     [blockingAddons, blockingCloudAddons, cluster.runtimeServices]
@@ -101,26 +108,13 @@ export function UpgradesConsolidatedTable({
       data={data}
       columns={cols}
       reactTableOptions={reactTableOptions}
-      getRowCanExpand={(row: Row<AddonOverview>) =>
-        !isEmpty(row.original.images)
-      }
-      getRowIsClickable={(row: Row<AddonOverview>) =>
-        !isEmpty(row.original?.images)
-      }
-      renderExpanded={({ row }: { row: Row<AddonOverview> }) => (
-        <div>
-          <CaptionP
-            $color="text-xlight"
-            css={{ userSelect: 'none' }}
-          >
-            Images needed to procure:
-          </CaptionP>
-          {row.original.images?.map((image) => (
-            <CaptionP key={image}>{image}</CaptionP>
-          ))}
-        </div>
-      )}
+      getRowCanExpand={isRowExpandable}
+      getRowIsClickable={isRowExpandable}
       onRowClick={(_, row) => row.getToggleExpandedHandler()()}
+      renderExpanded={({ row }: { row: Row<AddonOverview> }) => (
+        <UpgradesConsolidatedTableExpander row={row} />
+      )}
+      expandedRowType="custom"
     />
   )
 }
@@ -269,3 +263,8 @@ const overviewDataToMarkdown = (data: AddonOverview[], clusterId: string) =>
       } | ${addon.images?.join('<br>') || '--'} |`
     })
     .join('\n')}`
+
+const isRowExpandable = ({
+  original: { images, callout, summary },
+}: Row<AddonOverview>) =>
+  !isEmpty(images) || !isEmpty(callout) || !isEmpty(summary)

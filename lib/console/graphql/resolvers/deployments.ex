@@ -103,6 +103,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     AgentMessage,
     SentinelRun,
     SentinelRunJob,
+    ChatConnection
   }
 
   def query(Project, _), do: Project
@@ -194,6 +195,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(AgentPromptHistory, _), do: AgentPromptHistory
   def query(AgentPrompt, _), do: AgentPrompt.ordered()
   def query(AgentMessage, _), do: AgentMessage.ordered()
+  def query(ChatConnection, _), do: ChatConnection
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
@@ -211,6 +213,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Flow
   delegates Console.GraphQl.Resolvers.Deployments.Sentinel
   delegates Console.GraphQl.Resolvers.Deployments.Agent
+  delegates Console.GraphQl.Resolvers.Deployments.Integration
 
   def list_addons(_, _), do: AddOns.addons()
 

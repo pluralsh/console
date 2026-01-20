@@ -33,18 +33,18 @@ import { PartialDeep } from 'type-fest'
 import {
   AIVerbosityLevel,
   useExplainWithAIContext,
-} from '../../ai/AIContext.tsx'
-import { GqlError } from '../../utils/Alert.tsx'
+} from 'components/ai/AIContext.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
 import {
+  initialSettingsAttributes,
+  OpenAISettings,
   AnthropicSettings,
+  OllamaSettings,
   AzureSettings,
   BedrockSettings,
-  initialSettingsAttributes,
-  OllamaSettings,
-  OpenAISettings,
-  validateAttributes,
   VertexSettings,
-} from './GlobalSettingsAIProviders.tsx'
+  validateAttributes,
+} from './AISettingsProviders.tsx'
 
 const updateSettings = produce(
   (
@@ -57,7 +57,7 @@ const updateSettings = produce(
   }
 )
 
-export function GlobalSettingsAiProvider() {
+export function AISettingsProvider() {
   const theme = useTheme()
   const { ai } = useDeploymentSettings()
   const [enabled, setEnabled] = useState<boolean>(ai?.enabled ?? false)

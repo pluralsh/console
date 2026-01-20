@@ -33,7 +33,7 @@ type RootQueryType {
 
   accessTokens(after: String, first: Int, before: String, last: Int): AccessTokenConnection
 
-  accessToken(id: ID!): AccessToken
+  accessToken(id: ID, token: String): AccessToken
 
   persona(id: ID!): Persona
 
@@ -461,6 +461,12 @@ type RootQueryType {
   clusterSentinelRunJobs(after: String, first: Int, before: String, last: Int): SentinelRunJobConnection
 
   sentinelRunJob(id: ID!): SentinelRunJob
+
+  chatProviderConnections(
+    after: String, first: Int, before: String, last: Int, type: ChatProviderConnectionType, q: String
+  ): ChatProviderConnectionConnection
+
+  chatProviderConnection(id: ID, name: String): ChatProviderConnection
 
   aiInsight(id: ID!): AiInsight
 
@@ -1080,6 +1086,10 @@ type RootMutationType {
 
   updateSentinelRunJob(id: ID!, attributes: SentinelRunJobUpdateAttributes): SentinelRunJob
 
+  upsertChatProviderConnection(attributes: ChatProviderConnectionAttributes!): ChatProviderConnection
+
+  deleteChatProviderConnection(id: ID!): ChatProviderConnection
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
@@ -1256,6 +1266,65 @@ type PolicyBinding {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+enum ChatProviderConnectionType {
+  SLACK
+  TEAMS
+}
+
+"A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
+input ChatProviderConnectionAttributes {
+  "the name of this chat connection"
+  name: String!
+
+  "the type of this chat connection"
+  type: ChatProviderConnectionType!
+
+  configuration: ChatProviderConnectionConfigurationAttributes!
+}
+
+input ChatProviderConnectionConfigurationAttributes {
+  slack: SlackConnectionConfigurationAttributes
+}
+
+input SlackConnectionConfigurationAttributes {
+  appToken: String!
+  botToken: String!
+  botId: String
+}
+
+"A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
+type ChatProviderConnection {
+  id: ID!
+
+  "the name of this chat connection"
+  name: String!
+
+  "the type of this chat connection"
+  type: ChatProviderConnectionType!
+
+  "the configuration for this chat connection"
+  configuration: ChatProviderConnectionConfiguration!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type ChatProviderConnectionConfiguration {
+  "the configuration for the slack connection"
+  slack: SlackConnectionConfiguration
+}
+
+type SlackConnectionConfiguration {
+  "the bot id for the slack connection"
+  botId: String
+}
+
+type ChatProviderConnectionConnection {
+  pageInfo: PageInfo!
+  edges: [ChatProviderConnectionEdge]
 }
 
 enum AgentRuntimeType {
@@ -6013,6 +6082,9 @@ input HelmMinimalAttributes {
 
   "the helm release name to use when rendering this helm chart"
   release: String
+
+  "whether to ignore helm hooks when rendering this helm chart"
+  ignoreHooks: Boolean
 }
 
 input ServiceCloneAttributes {
@@ -6399,6 +6471,9 @@ type HelmMinimal {
 
   "the helm release name to use when rendering this helm chart"
   release: String
+
+  "whether to ignore helm hooks when rendering this helm chart"
+  ignoreHooks: Boolean
 }
 
 "metadata needed for configuring kustomize"
@@ -6764,6 +6839,9 @@ input ClusterAttributes {
 
   kubeconfig: KubeconfigAttributes
 
+  "whether to disable ai insights for this cluster"
+  disableAi: Boolean
+
   cloudSettings: CloudSettingsAttributes
 
   "the project id this cluster will belong to"
@@ -6863,6 +6941,9 @@ input ClusterUpdateAttributes {
   distro: ClusterDistro
 
   metadata: Json
+
+  "whether to disable ai insights for this cluster"
+  disableAi: Boolean
 
   nodePools: [NodePoolAttributes]
 
@@ -7413,6 +7494,9 @@ type Cluster {
 
   "the interval in seconds between pings to the cluster"
   pingInterval: Int
+
+  "whether to disable ai insights for this cluster"
+  disableAi: Boolean
 
   "The version of OpenShift this cluster is running"
   openshiftVersion: String
@@ -11796,6 +11880,8 @@ type ConsoleConfiguration {
 
   features: AvailableFeatures
 
+  licenseExpiry: DateTime
+
   manifest: PluralManifest
 
   gitStatus: GitStatus
@@ -12227,5 +12313,10 @@ type AgentRunEdge {
 
 type AgentRuntimeEdge {
   node: AgentRuntime
+  cursor: String
+}
+
+type ChatProviderConnectionEdge {
+  node: ChatProviderConnection
   cursor: String
 }

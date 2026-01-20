@@ -93,7 +93,7 @@ export function BasicEvidenceLine({
       <IconFrame
         icon={icon}
         css={{ flexShrink: 0 }}
-        type="floating"
+        type="secondary"
       />
       <span css={{ ...TRUNCATE, flex: 1 }}>{content}</span>
       <IconFrame
@@ -123,7 +123,7 @@ const EvidenceLineSC = styled.div<{ $table: boolean }>(({ theme, $table }) => ({
   alignItems: 'center',
   gap: theme.spacing.small,
   cursor: 'pointer',
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
   borderBottom: $table ? theme.borders.input : 'none',
   '&:hover': {
     backgroundColor: $table ? theme.colors['fill-one-hover'] : 'transparent',

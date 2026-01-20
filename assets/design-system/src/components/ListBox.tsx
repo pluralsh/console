@@ -107,7 +107,7 @@ function propsToTextValue(props: Record<string, unknown> | null | undefined) {
 }
 
 function useItemWrappedChildren(
-  children: ReactElement<any> | ReactElement<any>[],
+  children: ReactElement<any> | (ReactElement<any> | false)[],
   header?: ReactElement<any>,
   footer?: ReactElement<any>
 ) {

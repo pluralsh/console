@@ -22,34 +22,12 @@ export const getGlobalSettingsBreadcrumbs = (page: string) => [
 ]
 
 const directory = [
-  {
-    path: 'permissions',
-    label: 'Permissions',
-  },
-  {
-    path: 'repositories',
-    label: 'Repositories',
-  },
-  {
-    path: 'ai-provider',
-    label: 'AI provider',
-  },
-  {
-    path: 'agents',
-    label: 'Agent config',
-  },
-  {
-    path: 'observability',
-    label: 'Observability',
-  },
-  {
-    path: 'oidc',
-    label: 'OIDC',
-  },
-  {
-    path: 'smtp',
-    label: 'SMTP',
-  },
+  { path: 'permissions', label: 'Permissions' },
+  { path: 'repositories', label: 'Repositories' },
+  { path: 'agents', label: 'Agent config' },
+  { path: 'observability', label: 'Observability' },
+  { path: 'oidc', label: 'OIDC' },
+  { path: 'smtp', label: 'SMTP' },
 ]
 
 type GlobalSettingsContextType = {

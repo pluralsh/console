@@ -55,7 +55,7 @@ export type TabStateRef = RefObject<{
 
 type ChildrenType =
   | Nullable<ReactElement<TabBaseProps>>
-  | Nullable<ReactElement<TabBaseProps>>[]
+  | Nullable<ReactElement<TabBaseProps> | false>[]
 
 type TabListProps = {
   stateRef: TabStateRef

@@ -27,6 +27,8 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
+const scopeHashAnnotation = "deployments.plural.sh/last-scope-hash"
+
 // ServiceAccountReconciler reconciles a v1alpha1.ServiceAccount object.
 // Implements reconcile.Reconciler and types.Controller
 type ServiceAccountReconciler struct {
@@ -87,20 +89,6 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 		logger.Error(err, "unable to calculate sa SHA")
 		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
-	}
-
-	// Check if secret with token exists
-	hasTokenSecret := false
-	if sa.Spec.TokenSecretRef != nil {
-		secret, _ := utils.GetSecret(ctx, r.Client, sa.Spec.TokenSecretRef)
-		if secret != nil {
-			_, hasTokenSecret = secret.Data[credentials.CredentialsSecretTokenKey]
-		}
-	}
-
-	// Mark token as not ready if found any changes in the resource or if secret doesn't exist
-	if changed || !hasTokenSecret {
-		utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyTokenConditionType, v1.ConditionFalse, v1alpha1.ReadyTokenConditionReasonError, "token not synchronized yet")
 	}
 
 	// Sync ServiceAccount CRD with the Console API
@@ -175,34 +163,45 @@ func (r *ServiceAccountReconciler) isAlreadyExists(ctx context.Context, sa *v1al
 }
 
 func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.ServiceAccount, changed bool) (*console.UserFragment, error) {
-	exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.Spec.Email)
+	existingSA, err := r.ConsoleClient.GetServiceAccount(ctx, sa.Spec.Email)
 	if err != nil {
-		return nil, err
+		if !errors.IsNotFound(err) {
+			return nil, err
+		}
+		return r.ConsoleClient.CreateServiceAccount(ctx, sa.Attributes())
 	}
 
 	// Update only if ServiceAccount has changed
-	if changed && exists {
+	if changed {
 		attr := sa.Attributes()
-		return r.ConsoleClient.UpdateServiceAccount(ctx, sa.Status.GetID(), attr)
+		return r.ConsoleClient.UpdateServiceAccount(ctx, existingSA.ID, attr)
 	}
 
-	// Read the ServiceAccount from Console API if it already exists
-	if exists {
-		return r.ConsoleClient.GetServiceAccount(ctx, sa.Spec.Email)
-	}
-
-	// Create the ServiceAccount in Console API if it doesn't exist
-	return r.ConsoleClient.CreateServiceAccount(ctx, sa.Attributes())
+	return existingSA, nil
 }
 
 func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.ServiceAccount) error {
-	if sa.Status.IsStatusConditionTrue(v1alpha1.ReadyTokenConditionType) {
-		return nil
-	}
-
 	if sa.Spec.TokenSecretRef == nil {
 		return nil
 	}
+
+	if sa.Annotations == nil {
+		sa.Annotations = make(map[string]string)
+	}
+	var err error
+	currentScopeSHA := ""
+	scopeSHA := sa.Annotations[scopeHashAnnotation]
+	if len(sa.Spec.Scopes) > 0 {
+		currentScopeSHA, err = utils.HashObject(sa.Spec.Scopes)
+		if err != nil {
+			return err
+		}
+	}
+	// If scope hasn't changed, no need to recreate the token
+	if scopeSHA == currentScopeSHA {
+		return nil
+	}
+	sa.Annotations[scopeHashAnnotation] = currentScopeSHA
 
 	token, err := r.ConsoleClient.CreateServiceAccountToken(ctx, *sa.Status.ID, sa.Spec.ScopeAttributes(), sa.Spec.TokenExpiry)
 	if err != nil {

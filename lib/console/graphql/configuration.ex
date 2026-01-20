@@ -48,6 +48,7 @@ defmodule Console.GraphQl.Configuration do
     field :external_oidc,   :boolean, resolve: fn _, _, _ -> {:ok, !!Console.conf(:oidc_login)} end
     field :oidc_name,       :string,  resolve: fn _, _, _ -> {:ok, Console.conf(:oidc_name)} end
     field :features,        :available_features
+    field :license_expiry,  :datetime, resolve: fn _, _, _ -> {:ok, Console.Features.expiry()} end
 
     field :manifest,        :plural_manifest, resolve: fn
       _, _, _ ->

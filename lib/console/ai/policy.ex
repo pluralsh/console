@@ -33,7 +33,7 @@ defmodule Console.AI.Policy do
   def can?(%User{} = u, %Stack{} = stack, action), do: Deployments.can?(u, stack, action)
 
   def can?(user, %AiInsight{} = insight, action) do
-    case Repo.preload(insight, [:stack, :service, alert: [:service, :cluster]]) do
+    case Repo.preload(insight, [:stack, :stack_run, :service, :service_component, alert: [:service, :cluster]]) do
       %AiInsight{alert: %Alert{service: %Service{} = svc}} -> Deployments.can?(user, svc, action)
       %AiInsight{alert: %Alert{cluster: %Cluster{} = cluster}} -> Deployments.can?(user, cluster, action)
       %AiInsight{stack: %Stack{} = stack} -> Deployments.can?(user, stack, action)

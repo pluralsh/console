@@ -1317,6 +1317,47 @@ type ChatMessage struct {
 	Content string `json:"content"`
 }
 
+// A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams
+type ChatProviderConnection struct {
+	ID string `json:"id"`
+	// the name of this chat connection
+	Name string `json:"name"`
+	// the type of this chat connection
+	Type ChatProviderConnectionType `json:"type"`
+	// the configuration for this chat connection
+	Configuration ChatProviderConnectionConfiguration `json:"configuration"`
+	InsertedAt    *string                             `json:"insertedAt,omitempty"`
+	UpdatedAt     *string                             `json:"updatedAt,omitempty"`
+}
+
+// A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams
+type ChatProviderConnectionAttributes struct {
+	// the name of this chat connection
+	Name string `json:"name"`
+	// the type of this chat connection
+	Type          ChatProviderConnectionType                    `json:"type"`
+	Configuration ChatProviderConnectionConfigurationAttributes `json:"configuration"`
+}
+
+type ChatProviderConnectionConfiguration struct {
+	// the configuration for the slack connection
+	Slack *SlackConnectionConfiguration `json:"slack,omitempty"`
+}
+
+type ChatProviderConnectionConfigurationAttributes struct {
+	Slack *SlackConnectionConfigurationAttributes `json:"slack,omitempty"`
+}
+
+type ChatProviderConnectionConnection struct {
+	PageInfo PageInfo                      `json:"pageInfo"`
+	Edges    []*ChatProviderConnectionEdge `json:"edges,omitempty"`
+}
+
+type ChatProviderConnectionEdge struct {
+	Node   *ChatProviderConnection `json:"node,omitempty"`
+	Cursor *string                 `json:"cursor,omitempty"`
+}
+
 // A list of chat messages around a specific topic created on demand
 type ChatThread struct {
 	ID            string              `json:"id"`
@@ -1532,6 +1573,8 @@ type Cluster struct {
 	UpgradePlan *ClusterUpgradePlan `json:"upgradePlan,omitempty"`
 	// the interval in seconds between pings to the cluster
 	PingInterval *int64 `json:"pingInterval,omitempty"`
+	// whether to disable ai insights for this cluster
+	DisableAi *bool `json:"disableAi,omitempty"`
 	// The version of OpenShift this cluster is running
 	OpenshiftVersion *string `json:"openshiftVersion,omitempty"`
 	// The number of nodes in this cluster
@@ -1666,12 +1709,14 @@ type ClusterAttributes struct {
 	Handle     *string `json:"handle,omitempty"`
 	ProviderID *string `json:"providerId,omitempty"`
 	// a cloud credential to use when provisioning this cluster
-	CredentialID  *string                  `json:"credentialId,omitempty"`
-	Version       *string                  `json:"version,omitempty"`
-	Distro        *ClusterDistro           `json:"distro,omitempty"`
-	Metadata      *string                  `json:"metadata,omitempty"`
-	Protect       *bool                    `json:"protect,omitempty"`
-	Kubeconfig    *KubeconfigAttributes    `json:"kubeconfig,omitempty"`
+	CredentialID *string               `json:"credentialId,omitempty"`
+	Version      *string               `json:"version,omitempty"`
+	Distro       *ClusterDistro        `json:"distro,omitempty"`
+	Metadata     *string               `json:"metadata,omitempty"`
+	Protect      *bool                 `json:"protect,omitempty"`
+	Kubeconfig   *KubeconfigAttributes `json:"kubeconfig,omitempty"`
+	// whether to disable ai insights for this cluster
+	DisableAi     *bool                    `json:"disableAi,omitempty"`
 	CloudSettings *CloudSettingsAttributes `json:"cloudSettings,omitempty"`
 	// the project id this cluster will belong to
 	ProjectID *string `json:"projectId,omitempty"`
@@ -2170,10 +2215,12 @@ type ClusterUpdateAttributes struct {
 	// pass a kubeconfig for this cluster (DEPRECATED)
 	Kubeconfig *KubeconfigAttributes `json:"kubeconfig,omitempty"`
 	// status of the upgrade plan for this cluster
-	UpgradePlan   *UpgradePlanAttributes     `json:"upgradePlan,omitempty"`
-	Protect       *bool                      `json:"protect,omitempty"`
-	Distro        *ClusterDistro             `json:"distro,omitempty"`
-	Metadata      *string                    `json:"metadata,omitempty"`
+	UpgradePlan *UpgradePlanAttributes `json:"upgradePlan,omitempty"`
+	Protect     *bool                  `json:"protect,omitempty"`
+	Distro      *ClusterDistro         `json:"distro,omitempty"`
+	Metadata    *string                `json:"metadata,omitempty"`
+	// whether to disable ai insights for this cluster
+	DisableAi     *bool                      `json:"disableAi,omitempty"`
 	NodePools     []*NodePoolAttributes      `json:"nodePools,omitempty"`
 	Tags          []*TagAttributes           `json:"tags,omitempty"`
 	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
@@ -2446,14 +2493,15 @@ type ConsoleConfiguration struct {
 	VpnEnabled     *bool   `json:"vpnEnabled,omitempty"`
 	SentryEnabled  *bool   `json:"sentryEnabled,omitempty"`
 	// whether at least one cluster has been installed, false if a user hasn't fully onboarded
-	Installed    *bool              `json:"installed,omitempty"`
-	Cloud        *bool              `json:"cloud,omitempty"`
-	Byok         *bool              `json:"byok,omitempty"`
-	ExternalOidc *bool              `json:"externalOidc,omitempty"`
-	OidcName     *string            `json:"oidcName,omitempty"`
-	Features     *AvailableFeatures `json:"features,omitempty"`
-	Manifest     *PluralManifest    `json:"manifest,omitempty"`
-	GitStatus    *GitStatus         `json:"gitStatus,omitempty"`
+	Installed     *bool              `json:"installed,omitempty"`
+	Cloud         *bool              `json:"cloud,omitempty"`
+	Byok          *bool              `json:"byok,omitempty"`
+	ExternalOidc  *bool              `json:"externalOidc,omitempty"`
+	OidcName      *string            `json:"oidcName,omitempty"`
+	Features      *AvailableFeatures `json:"features,omitempty"`
+	LicenseExpiry *string            `json:"licenseExpiry,omitempty"`
+	Manifest      *PluralManifest    `json:"manifest,omitempty"`
+	GitStatus     *GitStatus         `json:"gitStatus,omitempty"`
 }
 
 type ConstraintRef struct {
@@ -3519,6 +3567,8 @@ type HelmMinimal struct {
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// the helm release name to use when rendering this helm chart
 	Release *string `json:"release,omitempty"`
+	// whether to ignore helm hooks when rendering this helm chart
+	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
 }
 
 type HelmMinimalAttributes struct {
@@ -3528,6 +3578,8 @@ type HelmMinimalAttributes struct {
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
 	// the helm release name to use when rendering this helm chart
 	Release *string `json:"release,omitempty"`
+	// whether to ignore helm hooks when rendering this helm chart
+	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
 }
 
 // A direct Plural representation of a Helm repository
@@ -7433,6 +7485,17 @@ type SinkConfigurationAttributes struct {
 	Plural *PluralSinkAttributes `json:"plural,omitempty"`
 }
 
+type SlackConnectionConfiguration struct {
+	// the bot id for the slack connection
+	BotID *string `json:"botId,omitempty"`
+}
+
+type SlackConnectionConfigurationAttributes struct {
+	AppToken string  `json:"appToken"`
+	BotToken string  `json:"botToken"`
+	BotID    *string `json:"botId,omitempty"`
+}
+
 // SMTP server configuration for email notifications
 type SMTPSettings struct {
 	Server string `json:"server"`
@@ -9243,6 +9306,47 @@ func (e *AutoscalingTarget) UnmarshalGQL(v any) error {
 }
 
 func (e AutoscalingTarget) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ChatProviderConnectionType string
+
+const (
+	ChatProviderConnectionTypeSLACk ChatProviderConnectionType = "SLACK"
+	ChatProviderConnectionTypeTeams ChatProviderConnectionType = "TEAMS"
+)
+
+var AllChatProviderConnectionType = []ChatProviderConnectionType{
+	ChatProviderConnectionTypeSLACk,
+	ChatProviderConnectionTypeTeams,
+}
+
+func (e ChatProviderConnectionType) IsValid() bool {
+	switch e {
+	case ChatProviderConnectionTypeSLACk, ChatProviderConnectionTypeTeams:
+		return true
+	}
+	return false
+}
+
+func (e ChatProviderConnectionType) String() string {
+	return string(e)
+}
+
+func (e *ChatProviderConnectionType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ChatProviderConnectionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ChatProviderConnectionType", str)
+	}
+	return nil
+}
+
+func (e ChatProviderConnectionType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
