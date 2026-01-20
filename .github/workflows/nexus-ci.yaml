@@ -11,10 +11,7 @@ on:
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
-  REGISTRY_IMAGE: pluralsh/nexus
-
-permissions:
-  contents: read
+  REGISTRY_IMAGE: ghcr.io/pluralsh/nexus
 
 jobs:
   lint:
@@ -152,7 +149,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/pluralsh/nexus
+            ${{ env.REGISTRY_IMAGE }}
           tags: |
             type=sha
             type=ref,event=pr
