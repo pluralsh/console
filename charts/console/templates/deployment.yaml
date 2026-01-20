@@ -34,7 +34,7 @@ spec:
       serviceAccountName: console
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+        {{ toYaml . | nindent 8 }}
     {{- end }}
       {{ if .Values.console.securityContext }}
       securityContext:
@@ -132,6 +132,9 @@ spec:
         imagePullPolicy: {{ .Values.nexus.image.pullPolicy }}
         args:
         - --config=/home/nexus/config.yaml
+        {{ if .Values.nexus.image.extraArgs }}
+        {{ toYaml .Values.nexus.image.extraArgs | nindent 8 }}
+        {{ end }}
         ports:
         - name: nexus-http
           containerPort: 8080

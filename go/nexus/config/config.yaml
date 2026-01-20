@@ -3,6 +3,9 @@ server:
   # HTTP server bind address
   address: ":8080"
 
+  # Base path for all AI proxy requests
+  path: "/ai/proxy"
+
   # Request timeouts
   readTimeout: "30s"
   writeTimeout: "30s"

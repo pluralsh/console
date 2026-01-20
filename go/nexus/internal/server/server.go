@@ -42,6 +42,7 @@ func New(cfg *config.ServerConfig, consoleClient console.Client) *Server {
 func (s *Server) SetupRoutes() {
 	r := s.router
 
+	r.Use(middleware.StripPrefix(s.config.Path))
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(nexusmw.RequestLogger())

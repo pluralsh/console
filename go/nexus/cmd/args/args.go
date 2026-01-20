@@ -17,6 +17,7 @@ var (
 
 	// Server flags (override config file and env vars)
 	argServerAddress = flag.String("server-address", "", "HTTP server bind address (e.g., ':8080')")
+	argServerPath    = flag.String("server-path", "", "HTTP server base path (e.g., '/ai/proxy')")
 
 	// Console flags (override config file and env vars)
 	argConsoleEndpoint       = flag.String("console-endpoint", "", "Console gRPC endpoint (e.g., 'localhost:9090')")

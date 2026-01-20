@@ -12,44 +12,44 @@ spec:
   ingressClassName: {{ .Values.ingress.ingressClass }}
   {{ if .Values.ingress.tls.enabled }}
   tls:
-    - hosts:
-        - {{ .Values.ingress.console_dns | quote }}
-      secretName: console-tls
+  - hosts:
+    - {{ .Values.ingress.console_dns | quote }}
+    secretName: console-tls
   {{ end }}
   rules:
-    - host: {{ .Values.ingress.console_dns | quote }}
-      http:
-        paths:
-          - path: {{ .Values.kas.agent.path }}
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ .Release.Name }}-kas-service
-                port:
-                  number: {{ .Values.kas.service.agentProxyPort }}
-          - path: {{ .Values.kas.api.path }}
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ .Release.Name }}-kas-service
-                port:
-                  number: {{ .Values.kas.api.port }}
+  - host: {{ .Values.ingress.console_dns | quote }}
+    http:
+      paths:
+      - path: {{ .Values.kas.agent.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}-kas-service
+            port:
+              number: {{ .Values.kas.service.agentProxyPort }}
+      - path: {{ .Values.kas.api.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: {{ .Release.Name }}-kas-service
+            port:
+              number: {{ .Values.kas.api.port }}
       {{- if .Values.nexus.enabled }}
-          - path: /ai/proxy
-            pathType: Prefix
-            backend:
-              service:
-                name: console
-                port:
-                  name: nexus-http
+      - path: {{ .Values.nexus.config.server.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: console
+            port:
+              name: nexus-http
       {{- end }}
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: console
-                port:
-                  name: http
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: console
+            port:
+              name: http
 {{ if .Values.ingress.rewrite.enabled }}
 ---
 apiVersion: networking.k8s.io/v1
@@ -69,28 +69,28 @@ spec:
   ingressClassName: {{ .Values.ingress.ingressClass }}
   {{ if .Values.ingress.tls.enabled }}
   tls:
-    - hosts:
-        - {{ .Values.ingress.console_dns | quote }}
-      secretName: console-tls
+  - hosts:
+    - {{ .Values.ingress.console_dns | quote }}
+    secretName: console-tls
   {{ end }}
   rules:
-    - host: {{ .Values.ingress.console_dns | quote }}
-      http:
-        paths:
-          - path: /kas(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: console-kas-service
-                port:
-                  number: 8154
-          - path: /ext/kas(/|$)(.*)
-            pathType: ImplementationSpecific
-            backend:
-              service:
-                name: console-kas-service
-                port:
-                  number: 8150
+  - host: {{ .Values.ingress.console_dns | quote }}
+    http:
+      paths:
+      - path: /kas(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: console-kas-service
+            port:
+              number: 8154
+      - path: /ext/kas(/|$)(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: console-kas-service
+            port:
+              number: 8150
 {{ end }}
 {{ if .Values.externalIngress.hostname }}
 ---
@@ -108,26 +108,26 @@ spec:
   ingressClassName: {{ .Values.externalIngress.ingressClass }}
   {{ if .Values.externalIngress.tls.enabled }}
   tls:
-    - hosts:
-        - {{ .Values.externalIngress.hostname | quote }}
-      secretName: console-external-tls
+  - hosts:
+    - {{ .Values.externalIngress.hostname | quote }}
+    secretName: console-external-tls
   {{ end }}
   rules:
-    - host: {{ .Values.externalIngress.hostname | quote }}
-      http:
-        paths:
-          - path: /ext/kas
-            pathType: Prefix
-            backend:
-              service:
-                name: console-kas-service
-                port:
-                  number: 8180
-          - path: /ext
-            pathType: Prefix
-            backend:
-              service:
-                name: console
-                port:
-                  name: http
+  - host: {{ .Values.externalIngress.hostname | quote }}
+    http:
+      paths:
+      - path: /ext/kas
+        pathType: Prefix
+        backend:
+          service:
+            name: console-kas-service
+            port:
+              number: 8180
+      - path: /ext
+        pathType: Prefix
+        backend:
+          service:
+            name: console
+            port:
+              name: http
 {{ end }}

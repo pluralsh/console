@@ -17,6 +17,9 @@ type ServerConfig struct {
 	// Address is the bind address for the HTTP server (e.g., ":8080")
 	Address string `json:"address"`
 
+	// Path is the base path for the HTTP server (e.g., "/ai/proxy")
+	Path string `json:"path"`
+
 	// ReadTimeout is the maximum duration for reading the entire request
 	ReadTimeout time.Duration `json:"readTimeout"`
 

@@ -74,6 +74,7 @@ func loadFromEnv(cfg *Config) {
 	// Bind specific environment variables
 	envBindings := map[string]*string{
 		"server.address":         &cfg.Server.Address,
+		"server.path":            &cfg.Server.Path,
 		"console.grpcEndpoint":   &cfg.Console.GRPCEndpoint,
 		"observability.logLevel": &cfg.Observability.LogLevel,
 	}

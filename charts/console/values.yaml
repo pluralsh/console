@@ -74,7 +74,7 @@ console:
   containerSecurityContext:
     capabilities:
       drop:
-        - ALL
+      - ALL
     allowPrivilegeEscalation: false
     runAsNonRoot: false
     readOnlyRootFilesystem: true
@@ -128,8 +128,10 @@ nexus:
     repository: nexus
     tag: ~
     pullPolicy: IfNotPresent
+    extraArgs: [ ]
   config:
     server:
+      path: /ai/proxy
       address: ":8080"
       readTimeout: "30s"
       writeTimeout: "30s"
@@ -300,15 +302,15 @@ tolerations: [ ]
 affinity:
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-              - key: 'app.kubernetes.io/name'
-                operator: In
-                values:
-                  - console
-          topologyKey: "kubernetes.io/hostname"
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: 'app.kubernetes.io/name'
+            operator: In
+            values:
+            - console
+        topologyKey: "kubernetes.io/hostname"
 
 monitoring:
   # enabled determines if the monitor.yaml and prometheusrule.yaml templates should be used
@@ -623,16 +625,16 @@ dex:
     #     emailToLowercase: false
 
     staticClients:
-      - id: console
-        secretEnv: CONSOLE_CLIENT_SECRET
-        name: 'Plural Console'
-        # Where the app will be running.
-        redirectURIs:
-          - 'https://<your-console-host>/oauth/callback'
+    - id: console
+      secretEnv: CONSOLE_CLIENT_SECRET
+      name: 'Plural Console'
+      # Where the app will be running.
+      redirectURIs:
+      - 'https://<your-console-host>/oauth/callback'
 
   envFrom:
-    - secretRef:
-        name: dex-env
+  - secretRef:
+      name: dex-env
 
   ingress:
     enabled: true
@@ -643,11 +645,11 @@ dex:
       cert-manager.io/cluster-issuer: letsencrypt-prod
 
     hosts:
-      - host: <your-console-fqdn>
-        paths:
-          - path: /dex
-            pathType: Prefix
+    - host: <your-console-fqdn>
+      paths:
+      - path: /dex
+        pathType: Prefix
 
     tls:
-      - hosts:
-          - <your-console-fqdn>
+    - hosts:
+      - <your-console-fqdn>
