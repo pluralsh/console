@@ -90,8 +90,10 @@ console:
 	}
 
 	// Set environment variable (should override file)
-	os.Setenv("NEXUS_SERVER_ADDRESS", ":7777")
-	defer os.Unsetenv("NEXUS_SERVER_ADDRESS")
+	_ = os.Setenv("NEXUS_SERVER_ADDRESS", ":7777")
+	defer func() {
+		_ = os.Unsetenv("NEXUS_SERVER_ADDRESS")
+	}()
 
 	cfg, err := config.Load(configFile)
 	if err != nil {
@@ -137,8 +139,10 @@ func TestLoadFromFileOrDefaults_FileNotExists(t *testing.T) {
 	configFile := filepath.Join(tmpDir, "nonexistent.yaml")
 
 	// Set required env var to pass validation
-	os.Setenv("NEXUS_CONSOLE_GRPCENDPOINT", "default-console:9090")
-	defer os.Unsetenv("NEXUS_CONSOLE_GRPCENDPOINT")
+	_ = os.Setenv("NEXUS_CONSOLE_GRPCENDPOINT", "default-console:9090")
+	defer func() {
+		_ = os.Unsetenv("NEXUS_CONSOLE_GRPCENDPOINT")
+	}()
 
 	cfg, err := config.LoadFromFileOrDefaults(configFile)
 	if err != nil {

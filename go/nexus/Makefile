@@ -77,13 +77,18 @@ test-coverage: --tool ## run tests with coverage
 	@echo "Coverage report generated: coverage.html"
 
 .PHONY: lint
-lint: ## run golangci-lint
-	@echo "Running golangci-lint..."
-	golangci-lint run ./...
+lint: TOOL = golangci-lint
+lint: --tool ## run golangci-lint
+	@$(GOLANGCI_LINT) run ./...
 
 .PHONY: verify
 verify: lint test ## run all verification steps (linting and tests)
 	@echo "All verification steps passed!"
+
+.PHONY: fix
+fix: TOOL = golangci-lint
+fix: --tool ## fix issues found by linters
+	@$(GOLANGCI_LINT) run --fix ./...
 
 ##@ Codegen
 

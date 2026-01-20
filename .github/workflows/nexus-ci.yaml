@@ -72,7 +72,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: go/nexus
-          file: ./Dockerfile
+          file: go/nexus/Dockerfile
           push: false
           tags: ghcr.io/pluralsh/nexus:${{ github.sha }}
           cache-from: type=gha

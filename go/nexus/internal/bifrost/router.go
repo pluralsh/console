@@ -268,7 +268,7 @@ func (in *GenericRouter) createHandler(config RouteConfig) http.HandlerFunc {
 	}
 }
 
-func (in *GenericRouter) handleFileRequest(w http.ResponseWriter, config RouteConfig, req *http.Request, fileReq *FileRequest, ctx *schemas.BifrostContext) {
+func (in *GenericRouter) handleFileRequest(w http.ResponseWriter, config RouteConfig, _ *http.Request, fileReq *FileRequest, ctx *schemas.BifrostContext) {
 	var response any
 	var err error
 
@@ -628,7 +628,7 @@ func (in *GenericRouter) safeGetRequestType(chunk *schemas.BifrostStream) string
 	return "unknown"
 }
 
-func (in *GenericRouter) handleNonStreamingRequest(w http.ResponseWriter, config RouteConfig, req *http.Request, bifrostReq *schemas.BifrostRequest, ctx *schemas.BifrostContext) {
+func (in *GenericRouter) handleNonStreamingRequest(w http.ResponseWriter, config RouteConfig, _ *http.Request, bifrostReq *schemas.BifrostRequest, ctx *schemas.BifrostContext) {
 	var response any
 	var err error
 
@@ -710,7 +710,7 @@ func (in *GenericRouter) sendError(w http.ResponseWriter, bifrostCtx *schemas.Bi
 	if err := json.NewEncoder(w).Encode(responseObj); err != nil {
 		in.logger.Error("failed to encode error response", zap.Error(err))
 		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte(fmt.Sprintf("failed to encode error response: %v", err)))
+		_, _ = fmt.Fprintf(w, "failed to encode error response: %v", err)
 	}
 }
 

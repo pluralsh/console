@@ -27,7 +27,7 @@ func Recovery() func(http.Handler) http.Handler {
 					// Return 500 Internal Server Error
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusInternalServerError)
-					fmt.Fprintf(w, `{"error":"internal server error","message":"an unexpected error occurred"}`)
+					_, _ = fmt.Fprintf(w, `{"error":"internal server error","message":"an unexpected error occurred"}`)
 				}
 			}()
 

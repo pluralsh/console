@@ -84,7 +84,7 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 	case schemas.Anthropic:
 		cfg := aiConfig.GetAnthropic()
 		if cfg == nil || cfg.GetApiKey() == "" {
-			return nil, fmt.Errorf("Anthropic not configured")
+			return nil, fmt.Errorf("anthropic not configured")
 		}
 		return []schemas.Key{
 			{

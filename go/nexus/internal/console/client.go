@@ -61,7 +61,7 @@ func (c *client) init() error {
 }
 
 // createConnection creates a gRPC connection with appropriate credentials and settings
-func (c *client) createConnection(cfg *config.ConsoleConfig, logger *zap.Logger) (*grpc.ClientConn, error) {
+func (c *client) createConnection(cfg *config.ConsoleConfig, _ *zap.Logger) (*grpc.ClientConn, error) {
 	// Prepare dial options
 	var opts []grpc.DialOption
 

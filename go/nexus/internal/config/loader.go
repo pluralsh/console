@@ -22,9 +22,7 @@ func Load(configFile string) (*Config, error) {
 	}
 
 	// Override with environment variables
-	if err := loadFromEnv(cfg); err != nil {
-		return nil, fmt.Errorf("failed to load from environment: %w", err)
-	}
+	loadFromEnv(cfg)
 
 	// Validate the final configuration
 	if err := Validate(cfg); err != nil {
@@ -61,7 +59,7 @@ func loadFromFile(configFile string, cfg *Config) error {
 // loadFromEnv loads configuration from environment variables
 // Environment variables use the format: NEXUS_SECTION_FIELD
 // Example: NEXUS_SERVER_ADDRESS, NEXUS_CONSOLE_GRPCENDPOINT
-func loadFromEnv(cfg *Config) error {
+func loadFromEnv(cfg *Config) {
 	v := viper.New()
 
 	// Set prefix for environment variables
@@ -100,8 +98,6 @@ func loadFromEnv(cfg *Config) error {
 	if v.IsSet("console.connectionRetry.maxBackoff") {
 		cfg.Console.ConnectionRetry.MaxBackoff = v.GetDuration("console.connectionRetry.maxBackoff")
 	}
-
-	return nil
 }
 
 // LoadFromFileOrDefaults loads config from file if it exists, otherwise uses defaults
@@ -110,9 +106,7 @@ func LoadFromFileOrDefaults(configFile string) (*Config, error) {
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		// File doesn't exist, use defaults
 		cfg := Defaults()
-		if err := loadFromEnv(cfg); err != nil {
-			return nil, err
-		}
+		loadFromEnv(cfg)
 		if err := Validate(cfg); err != nil {
 			return nil, err
 		}

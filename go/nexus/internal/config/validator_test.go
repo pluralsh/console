@@ -9,6 +9,8 @@ import (
 	"github.com/pluralsh/console/go/nexus/internal/config"
 )
 
+const grpcEndpoint = "console:9090"
+
 func TestValidate_ValidConfig(t *testing.T) {
 	cfg := config.Defaults()
 	cfg.Console.GRPCEndpoint = "console.example.com:9090"
@@ -63,7 +65,7 @@ func TestValidateServer_InvalidAddress(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := config.Defaults()
-			cfg.Console.GRPCEndpoint = "console:9090"
+			cfg.Console.GRPCEndpoint = grpcEndpoint
 			cfg.Server.Address = tt.address
 
 			err := config.Validate(cfg)
@@ -78,7 +80,7 @@ func TestValidateServer_InvalidAddress(t *testing.T) {
 
 func TestValidateServer_NegativeTimeouts(t *testing.T) {
 	cfg := config.Defaults()
-	cfg.Console.GRPCEndpoint = "console:9090"
+	cfg.Console.GRPCEndpoint = grpcEndpoint
 	cfg.Server.ReadTimeout = -1 * time.Second
 
 	err := config.Validate(cfg)
@@ -131,7 +133,7 @@ func TestValidateConsole_InvalidEndpoint(t *testing.T) {
 
 func TestValidateConsole_PollIntervalTooShort(t *testing.T) {
 	cfg := config.Defaults()
-	cfg.Console.GRPCEndpoint = "console:9090"
+	cfg.Console.GRPCEndpoint = grpcEndpoint
 	cfg.Console.ConfigPollInterval = 5 * time.Second // Too short
 
 	err := config.Validate(cfg)
@@ -157,7 +159,7 @@ func TestValidateConsole_PollIntervalTooShort(t *testing.T) {
 
 func TestValidateConsole_InvalidRetryConfig(t *testing.T) {
 	cfg := config.Defaults()
-	cfg.Console.GRPCEndpoint = "console:9090"
+	cfg.Console.GRPCEndpoint = grpcEndpoint
 	cfg.Console.ConnectionRetry.MaxAttempts = 0 // Invalid
 
 	err := config.Validate(cfg)
@@ -183,7 +185,7 @@ func TestValidateConsole_InvalidRetryConfig(t *testing.T) {
 
 func TestValidateConsole_MaxBackoffLessThanInitial(t *testing.T) {
 	cfg := config.Defaults()
-	cfg.Console.GRPCEndpoint = "console:9090"
+	cfg.Console.GRPCEndpoint = grpcEndpoint
 	cfg.Console.ConnectionRetry.InitialBackoff = 30 * time.Second
 	cfg.Console.ConnectionRetry.MaxBackoff = 10 * time.Second // Less than initial
 

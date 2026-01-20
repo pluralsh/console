@@ -163,7 +163,9 @@ func parseOpenAIFileUploadMultipartRequest(req *http.Request, target interface{}
 	if err != nil {
 		return errors.New("file field is required")
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	// Read file data
 	fileData, err := io.ReadAll(file)

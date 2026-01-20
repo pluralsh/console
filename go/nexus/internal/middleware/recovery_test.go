@@ -18,7 +18,7 @@ func init() {
 func TestRecovery_NoPanic(t *testing.T) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("success"))
+		_, _ = w.Write([]byte("success"))
 	})
 
 	recoveryHandler := middleware.Recovery()(handler)
@@ -92,7 +92,7 @@ func TestRecovery_WithErrorPanic(t *testing.T) {
 func TestRecovery_PartialResponseWritten(t *testing.T) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("partial"))
+		_, _ = w.Write([]byte("partial"))
 		panic("error after partial write")
 	})
 
