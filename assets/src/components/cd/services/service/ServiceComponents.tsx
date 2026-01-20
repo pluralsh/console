@@ -2,6 +2,7 @@ import {
   ArrowScroll,
   Callout,
   ComponentsIcon,
+  FileIcon,
   FillLevelProvider,
   Flex,
   ListIcon,
@@ -43,6 +44,7 @@ import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 const directory = [
   { path: 'list', icon: <ListIcon />, tooltip: 'List view' },
   { path: 'tree', icon: <NetworkInterfaceIcon />, tooltip: 'Tree view' },
+  { path: 'files', icon: <FileIcon />, tooltip: 'Files view' },
 ]
 
 const defaultView = 'list'
