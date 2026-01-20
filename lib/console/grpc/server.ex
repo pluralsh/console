@@ -33,6 +33,8 @@ defmodule Console.GRPC.Server do
     }
   end
 
+  defp to_pb(nil), do: nil
+
   defp to_pb(%AI.OpenAi{} = openai) do
     %Plrl.OpenAiConfig{
       apiKey: openai.access_token,
