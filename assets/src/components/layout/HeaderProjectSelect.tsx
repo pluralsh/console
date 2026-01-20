@@ -3,18 +3,18 @@ import {
   ComboBox,
   ListBoxFooter,
   ListBoxItem,
-  ProjectIcon,
+  SearchIcon,
   Spinner,
   Toast,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
+import { useDebounce } from '@react-hooks-library/core'
+import { useProjectsTinyQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectsContext } from '../contexts/ProjectsContext'
-import { useProjectsTinyQuery } from 'generated/graphql'
-import { useDebounce } from '@react-hooks-library/core'
 
 export default function ProjectSelect() {
   const theme = useTheme()
@@ -52,7 +52,7 @@ export default function ProjectSelect() {
         selectedKey={projectId}
         onSelectionChange={(id) => setProjectId(id as string)}
         onInputChange={(value) => setQuery(value)}
-        titleContent={<ProjectIcon color={theme.colors['icon-light']} />}
+        startIcon={<SearchIcon size={12} />}
         dropdownFooter={
           !data && loading ? (
             <ListBoxFooter>
@@ -74,7 +74,7 @@ export default function ProjectSelect() {
         }
         inputProps={{
           placeholder: 'All projects',
-          style: { border: 'none' },
+          style: { border: 'none', minHeight: 30 },
         }}
       >
         {projects.map((p) => (
