@@ -8,10 +8,6 @@ on:
       - ".github/workflows/nexus-ci.yaml"
       - "go/nexus/**"
 
-defaults:
-  run:
-    working-directory: go/nexus
-
 jobs:
   lint:
     name: Lint
@@ -23,10 +19,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version-file: go/nexus/go.mod
 
       - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v8
+        with:
+          working-directory: go/nexus
 
   test:
     name: Test
@@ -38,10 +36,11 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version-file: go/nexus/go.mod
 
       - name: Run tests
         run: make test
+        working-directory: go/nexus
 
   build:
     name: Build
@@ -53,10 +52,11 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: go.mod
+          go-version-file: go/nexus/go.mod
 
       - name: Build binary
         run: make build
+        working-directory: go/nexus
 
   docker:
     name: Docker Build
@@ -71,7 +71,7 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: go/nexus
           file: ./Dockerfile
           push: false
           tags: ghcr.io/pluralsh/nexus:${{ github.sha }}
