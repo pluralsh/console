@@ -1,0 +1,10 @@
+fragment ServiceFile on ServiceFile {
+  path
+  content
+}
+
+query ServiceTarball($id: ID!) {
+  serviceTarball(id: $id) {
+    ...ServiceFile
+  }
+}
