@@ -72,7 +72,9 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 		}
 		return []schemas.Key{
 			{
-				Value:          cfg.GetApiKey(),
+				Value: schemas.EnvVar{
+					Val: cfg.GetApiKey(),
+				},
 				Models:         []string{cfg.GetModel(), cfg.GetEmbeddingModel(), cfg.GetToolModel()},
 				UseForBatchAPI: lo.ToPtr(true),
 				Weight:         1.0,
@@ -86,7 +88,9 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 		}
 		return []schemas.Key{
 			{
-				Value:          cfg.GetApiKey(),
+				Value: schemas.EnvVar{
+					Val: cfg.GetApiKey(),
+				},
 				Models:         []string{cfg.GetModel(), cfg.GetToolModel()},
 				UseForBatchAPI: lo.ToPtr(true),
 				Weight:         1.0,

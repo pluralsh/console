@@ -11,7 +11,7 @@ server:
 
 console:
   # Console gRPC endpoint - REQUIRED
-  grpcEndpoint: "https://console.plrl-dev-aws.onplural.sh"
+  grpcEndpoint: "localhost:55510"
 
   # How often to poll Console for AI config updates
   # Minimum: 10s, Recommended: 60s

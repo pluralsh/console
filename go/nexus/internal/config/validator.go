@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"net/url"
 	"strings"
 	"time"
 )
@@ -44,16 +43,6 @@ func Validate(cfg *Config) error {
 
 	// Validate Console config
 	if err := validateConsole(&cfg.Console); err != nil {
-		errors = append(errors, err...)
-	}
-
-	// Validate RateLimiting config
-	if err := validateRateLimiting(&cfg.RateLimiting); err != nil {
-		errors = append(errors, err...)
-	}
-
-	// Validate Observability config
-	if err := validateObservability(&cfg.Observability); err != nil {
 		errors = append(errors, err...)
 	}
 
@@ -176,102 +165,4 @@ func validateConsole(cfg *ConsoleConfig) ValidationErrors {
 	}
 
 	return errors
-}
-
-func validateRateLimiting(cfg *RateLimitingConfig) ValidationErrors {
-	var errors ValidationErrors
-
-	// Validate backend
-	if cfg.Enabled {
-		// Validate per-user limits
-		if cfg.PerUser.RequestsPerMinute < 0 {
-			errors = append(errors, ValidationError{
-				Field:   "rateLimiting.perUser.requestsPerMinute",
-				Message: "requestsPerMinute cannot be negative",
-			})
-		}
-
-		// Validate per-token limits
-		if cfg.PerToken.RequestsPerMinute < 0 {
-			errors = append(errors, ValidationError{
-				Field:   "rateLimiting.perToken.requestsPerMinute",
-				Message: "requestsPerMinute cannot be negative",
-			})
-		}
-	}
-
-	return errors
-}
-
-func validateObservability(cfg *ObservabilityConfig) ValidationErrors {
-	var errors ValidationErrors
-
-	// Validate log level
-	validLogLevels := map[string]bool{
-		"debug": true,
-		"info":  true,
-		"warn":  true,
-		"error": true,
-	}
-	if !validLogLevels[cfg.LogLevel] {
-		errors = append(errors, ValidationError{
-			Field:   "observability.logLevel",
-			Message: "logLevel must be one of: debug, info, warn, error",
-		})
-	}
-
-	// Validate metrics path
-	if cfg.Metrics.Enabled {
-		if cfg.Metrics.Path == "" {
-			errors = append(errors, ValidationError{
-				Field:   "observability.metrics.path",
-				Message: "path is required when metrics are enabled",
-			})
-		} else if !strings.HasPrefix(cfg.Metrics.Path, "/") {
-			errors = append(errors, ValidationError{
-				Field:   "observability.metrics.path",
-				Message: "path must start with '/'",
-			})
-		}
-	}
-
-	// Validate tracing config
-	if cfg.Tracing.Enabled {
-		if cfg.Tracing.Service == "" {
-			errors = append(errors, ValidationError{
-				Field:   "observability.tracing.service",
-				Message: "service name is required when tracing is enabled",
-			})
-		}
-		if cfg.Tracing.DatadogAgentHost == "" {
-			errors = append(errors, ValidationError{
-				Field:   "observability.tracing.datadogAgentHost",
-				Message: "datadogAgentHost is required when tracing is enabled",
-			})
-		}
-	}
-
-	return errors
-}
-
-// validateURL validates a URL string
-func validateURL(urlStr string) error {
-	if urlStr == "" {
-		return fmt.Errorf("URL cannot be empty")
-	}
-
-	u, err := url.Parse(urlStr)
-	if err != nil {
-		return fmt.Errorf("invalid URL: %w", err)
-	}
-
-	if u.Scheme == "" {
-		return fmt.Errorf("URL must have a scheme (http:// or https://)")
-	}
-
-	if u.Host == "" {
-		return fmt.Errorf("URL must have a host")
-	}
-
-	return nil
 }

@@ -75,14 +75,9 @@ func loadFromEnv(cfg *Config) error {
 
 	// Bind specific environment variables
 	envBindings := map[string]*string{
-		"server.address":                         &cfg.Server.Address,
-		"console.grpcEndpoint":                   &cfg.Console.GRPCEndpoint,
-		"rateLimiting.enabled":                   nil, // bool
-		"observability.logLevel":                 &cfg.Observability.LogLevel,
-		"observability.debugMode":                nil, // bool
-		"observability.metrics.enabled":          nil, // bool
-		"observability.tracing.enabled":          nil, // bool
-		"observability.tracing.datadogAgentHost": &cfg.Observability.Tracing.DatadogAgentHost,
+		"server.address":         &cfg.Server.Address,
+		"console.grpcEndpoint":   &cfg.Console.GRPCEndpoint,
+		"observability.logLevel": &cfg.Observability.LogLevel,
 	}
 
 	// Override string values from environment
@@ -90,25 +85,6 @@ func loadFromEnv(cfg *Config) error {
 		if target != nil && v.IsSet(key) {
 			*target = v.GetString(key)
 		}
-	}
-
-	// Handle bool values
-	if v.IsSet("rateLimiting.enabled") {
-		cfg.RateLimiting.Enabled = v.GetBool("rateLimiting.enabled")
-	}
-	if v.IsSet("observability.metrics.enabled") {
-		cfg.Observability.Metrics.Enabled = v.GetBool("observability.metrics.enabled")
-	}
-	if v.IsSet("observability.tracing.enabled") {
-		cfg.Observability.Tracing.Enabled = v.GetBool("observability.tracing.enabled")
-	}
-
-	// Handle int values
-	if v.IsSet("rateLimiting.perUser.requestsPerMinute") {
-		cfg.RateLimiting.PerUser.RequestsPerMinute = v.GetInt("rateLimiting.perUser.requestsPerMinute")
-	}
-	if v.IsSet("rateLimiting.perToken.requestsPerMinute") {
-		cfg.RateLimiting.PerToken.RequestsPerMinute = v.GetInt("rateLimiting.perToken.requestsPerMinute")
 	}
 
 	// Handle duration values

@@ -27,22 +27,6 @@ func TestDefaults(t *testing.T) {
 	if cfg.Console.ConnectionRetry.MaxAttempts != 5 {
 		t.Errorf("expected max attempts 5, got %d", cfg.Console.ConnectionRetry.MaxAttempts)
 	}
-
-	// Test RateLimiting defaults
-	if !cfg.RateLimiting.Enabled {
-		t.Error("expected rate limiting enabled by default")
-	}
-	if cfg.RateLimiting.PerUser.RequestsPerMinute != 60 {
-		t.Errorf("expected 60 requests/min per user, got %d", cfg.RateLimiting.PerUser.RequestsPerMinute)
-	}
-
-	// Test Observability defaults
-	if cfg.Observability.LogLevel != "info" {
-		t.Errorf("expected info log level, got %s", cfg.Observability.LogLevel)
-	}
-	if cfg.Observability.Metrics.Path != "/metrics" {
-		t.Errorf("expected /metrics path, got %s", cfg.Observability.Metrics.Path)
-	}
 }
 
 func TestLoadFromFile(t *testing.T) {
@@ -63,25 +47,6 @@ console:
     maxAttempts: 3
     initialBackoff: "2s"
     maxBackoff: "60s"
-
-rateLimiting:
-  enabled: true
-  backend: "memory"
-  perUser:
-    requestsPerMinute: 100
-  perToken:
-    requestsPerMinute: 200
-
-observability:
-  logLevel: "debug"
-  debugMode: true
-  metrics:
-    enabled: true
-    path: "/custom-metrics"
-  tracing:
-    enabled: true
-    service: "test-nexus"
-    datadogAgentHost: "localhost:8125"
 `
 
 	if err := os.WriteFile(configFile, []byte(configContent), 0644); err != nil {
@@ -105,12 +70,6 @@ observability:
 	}
 	if cfg.Console.ConfigPollInterval != 30*time.Second {
 		t.Errorf("expected poll interval 30s, got %v", cfg.Console.ConfigPollInterval)
-	}
-	if cfg.RateLimiting.PerUser.RequestsPerMinute != 100 {
-		t.Errorf("expected 100 requests/min, got %d", cfg.RateLimiting.PerUser.RequestsPerMinute)
-	}
-	if cfg.Observability.LogLevel != "debug" {
-		t.Errorf("expected debug log level, got %s", cfg.Observability.LogLevel)
 	}
 }
 

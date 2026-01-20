@@ -9,7 +9,6 @@ import (
 type Config struct {
 	Server        ServerConfig        `json:"server"`
 	Console       ConsoleConfig       `json:"console"`
-	RateLimiting  RateLimitingConfig  `json:"rateLimiting"`
 	Observability ObservabilityConfig `json:"observability"`
 }
 
@@ -53,36 +52,9 @@ type ConnectionRetryConfig struct {
 	MaxBackoff     time.Duration `json:"maxBackoff"`
 }
 
-// RateLimitingConfig contains rate limiting settings
-type RateLimitingConfig struct {
-	Enabled  bool              `json:"enabled"`
-	PerUser  RateLimitSettings `json:"perUser"`
-	PerToken RateLimitSettings `json:"perToken"`
-}
-
-// RateLimitSettings defines rate limit thresholds
-type RateLimitSettings struct {
-	RequestsPerMinute int `json:"requestsPerMinute"`
-}
-
-// ObservabilityConfig contains logging, metrics, and tracing settings
+// ObservabilityConfig contains logging settings
 type ObservabilityConfig struct {
-	LogLevel string        `json:"logLevel"`
-	Metrics  MetricsConfig `json:"metrics"`
-	Tracing  TracingConfig `json:"tracing"`
-}
-
-// MetricsConfig contains Prometheus metrics settings
-type MetricsConfig struct {
-	Enabled bool   `json:"enabled"`
-	Path    string `json:"path"`
-}
-
-// TracingConfig contains Datadog tracing settings
-type TracingConfig struct {
-	Enabled          bool   `json:"enabled"`
-	Service          string `json:"service"`
-	DatadogAgentHost string `json:"datadogAgentHost"`
+	LogLevel string `json:"logLevel"`
 }
 
 // Defaults returns a Config with default values
@@ -105,36 +77,14 @@ func Defaults() *Config {
 				MaxBackoff:     30 * time.Second,
 			},
 		},
-		RateLimiting: RateLimitingConfig{
-			Enabled: true,
-			PerUser: RateLimitSettings{
-				RequestsPerMinute: 60,
-			},
-			PerToken: RateLimitSettings{
-				RequestsPerMinute: 100,
-			},
-		},
-		Observability: ObservabilityConfig{
-			LogLevel: "info",
-			Metrics: MetricsConfig{
-				Enabled: true,
-				Path:    "/metrics",
-			},
-			Tracing: TracingConfig{
-				Enabled:          false,
-				Service:          "nexus",
-				DatadogAgentHost: "localhost:8126",
-			},
-		},
 	}
 }
 
 // String returns a string representation of the config (with sensitive data redacted)
 func (c *Config) String() string {
-	return fmt.Sprintf("Config{Server: %+v, Console: %s, RateLimiting: %+v, Observability: %+v}",
+	return fmt.Sprintf("Config{Server: %+v, Console: %s, Observability: %+v}",
 		c.Server,
 		redactConsoleConfig(c.Console),
-		c.RateLimiting,
 		c.Observability,
 	)
 }

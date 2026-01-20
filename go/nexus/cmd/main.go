@@ -55,9 +55,6 @@ func serve() error {
 		zap.String("server_address", args.ServerAddress()),
 		zap.String("console_endpoint", args.ConsoleGRPCEndpoint()),
 		zap.Duration("config_poll_interval", args.ConsoleConfigPollInterval()),
-		zap.Bool("rate_limiting_enabled", args.RateLimitingEnabled()),
-		zap.Bool("metrics_enabled", args.MetricsEnabled()),
-		zap.String("metrics_path", args.MetricsPath()),
 	)
 
 	// Load configuration

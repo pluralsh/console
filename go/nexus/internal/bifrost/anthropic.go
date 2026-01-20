@@ -60,7 +60,7 @@ func (in *AnthropicRouter) newMessagesRoute() RouteConfig {
 			return nil, errors.New("invalid request type")
 		},
 		ResponsesResponseConverter: func(ctx *schemas.BifrostContext, resp *schemas.BifrostResponsesResponse) (interface{}, error) {
-			return anthropic.ToAnthropicResponsesResponse(resp), nil
+			return anthropic.ToAnthropicResponsesResponse(ctx, resp), nil
 		},
 		ErrorConverter: func(ctx *schemas.BifrostContext, err *schemas.BifrostError) interface{} {
 			return anthropic.ToAnthropicChatCompletionError(err)
