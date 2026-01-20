@@ -10,16 +10,6 @@ import (
 	"github.com/pluralsh/console/go/nexus/internal/log"
 )
 
-// contextKey is a custom type for context keys to avoid collisions
-type contextKey string
-
-const (
-	// UserIDKey is the context key for storing the authenticated user ID
-	UserIDKey contextKey = "user_id"
-	// TokenKey is the context key for storing the original token
-	TokenKey contextKey = "token"
-)
-
 // ConsoleAuthenticator is an interface for authenticating tokens with Console
 type ConsoleAuthenticator interface {
 	ProxyAuthentication(ctx context.Context, token string) (bool, error)
@@ -84,18 +74,13 @@ func Auth(authenticator ConsoleAuthenticator) func(http.Handler) http.Handler {
 				return
 			}
 
-			// Authentication successful - add token to context for downstream handlers
-			ctx := context.WithValue(r.Context(), TokenKey, token)
-			// TODO: Once Console returns user ID, add it to context:
-			// ctx = context.WithValue(ctx, UserIDKey, userID)
-
 			logger.Debug("authentication successful",
 				zap.String("path", r.URL.Path),
 				zap.String("method", r.Method),
 			)
 
 			// Continue to next handler with authenticated context
-			next.ServeHTTP(w, r.WithContext(ctx))
+			next.ServeHTTP(w, r.WithContext(r.Context()))
 		})
 	}
 }
@@ -121,16 +106,4 @@ func extractToken(authHeader string) string {
 
 	// Single part - treat as raw token (for backwards compatibility)
 	return strings.TrimSpace(authHeader)
-}
-
-// GetTokenFromContext retrieves the token from the request context
-func GetTokenFromContext(ctx context.Context) (string, bool) {
-	token, ok := ctx.Value(TokenKey).(string)
-	return token, ok
-}
-
-// GetUserIDFromContext retrieves the user ID from the request context
-func GetUserIDFromContext(ctx context.Context) (string, bool) {
-	userID, ok := ctx.Value(UserIDKey).(string)
-	return userID, ok
 }

@@ -51,11 +51,6 @@ func TestAuth_BearerToken(t *testing.T) {
 	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		handlerCalled = true
 
-		// Verify token is in context
-		token, ok := GetTokenFromContext(r.Context())
-		assert.True(t, ok, "token should be in context")
-		assert.Equal(t, "test-bearer-token", token)
-
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -78,11 +73,6 @@ func TestAuth_DeployToken(t *testing.T) {
 	handlerCalled := false
 	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		handlerCalled = true
-
-		// Verify token is in context
-		token, ok := GetTokenFromContext(r.Context())
-		assert.True(t, ok, "token should be in context")
-		assert.Equal(t, "test-deploy-token", token)
 
 		w.WriteHeader(http.StatusOK)
 	}))
@@ -211,8 +201,7 @@ func TestAuth_NoCache(t *testing.T) {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			callCount++
 			// Simulate successful auth
-			ctx := context.WithValue(r.Context(), TokenKey, "test-token")
-			next.ServeHTTP(w, r.WithContext(ctx))
+			next.ServeHTTP(w, r.WithContext(r.Context()))
 		})
 	}
 
@@ -252,11 +241,6 @@ func TestAuth_ContextPreservation(t *testing.T) {
 		// Verify custom context value is preserved
 		value := r.Context().Value(customKey)
 		assert.Equal(t, customValue, value)
-
-		// Verify token was added to context
-		token, ok := GetTokenFromContext(r.Context())
-		assert.True(t, ok)
-		assert.Equal(t, "test-token", token)
 
 		w.WriteHeader(http.StatusOK)
 	}))
@@ -332,48 +316,6 @@ func TestExtractToken(t *testing.T) {
 			assert.Equal(t, tc.expected, result)
 		})
 	}
-}
-
-// TestGetTokenFromContext tests retrieving token from context
-func TestGetTokenFromContext(t *testing.T) {
-	// Test with token in context
-	ctx := context.WithValue(context.Background(), TokenKey, "test-token")
-	token, ok := GetTokenFromContext(ctx)
-	assert.True(t, ok)
-	assert.Equal(t, "test-token", token)
-
-	// Test without token in context
-	ctx = context.Background()
-	token, ok = GetTokenFromContext(ctx)
-	assert.False(t, ok)
-	assert.Empty(t, token)
-
-	// Test with wrong type in context
-	ctx = context.WithValue(context.Background(), TokenKey, 123)
-	token, ok = GetTokenFromContext(ctx)
-	assert.False(t, ok)
-	assert.Empty(t, token)
-}
-
-// TestGetUserIDFromContext tests retrieving user ID from context
-func TestGetUserIDFromContext(t *testing.T) {
-	// Test with user ID in context
-	ctx := context.WithValue(context.Background(), UserIDKey, "user-123")
-	userID, ok := GetUserIDFromContext(ctx)
-	assert.True(t, ok)
-	assert.Equal(t, "user-123", userID)
-
-	// Test without user ID in context
-	ctx = context.Background()
-	userID, ok = GetUserIDFromContext(ctx)
-	assert.False(t, ok)
-	assert.Empty(t, userID)
-
-	// Test with wrong type in context
-	ctx = context.WithValue(context.Background(), UserIDKey, 123)
-	userID, ok = GetUserIDFromContext(ctx)
-	assert.False(t, ok)
-	assert.Empty(t, userID)
 }
 
 // TestAuth_CaseInsensitivePrefix tests that Bearer/Deploy prefixes are case-insensitive
