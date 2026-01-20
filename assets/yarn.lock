@@ -12189,6 +12189,7 @@ __metadata:
     qs: 6.14.0
     query-string: 8.1.0
     react: 19.2.2
+    react-complex-tree: 2.6.1
     react-copy-to-clipboard: 5.1.0
     react-diff-viewer: 3.1.1
     react-dom: 19.2.2
@@ -21733,6 +21734,15 @@ __metadata:
   peerDependencies:
     react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0 || ^19.0.0-rc
   checksum: 315e33c4c4c1c22480b7c7ddac8f26e510d71aadc0c745e8b48193d651792f33e2135eac4c173637deb24701482390f99b996c2e52a89152a492bf79b6ed143b
+  languageName: node
+  linkType: hard
+
+"react-complex-tree@npm:2.6.1":
+  version: 2.6.1
+  resolution: "react-complex-tree@npm:2.6.1"
+  peerDependencies:
+    react: ">=16.0.0"
+  checksum: 95cd9bd460212c928e31365ac34ae7e9d023f451ee4d447bf8171b47f9caa81c82475d71091f0215ea25bbe190634d1b04d4f690cb373eae770f12df3410c023
   languageName: node
   linkType: hard
 
