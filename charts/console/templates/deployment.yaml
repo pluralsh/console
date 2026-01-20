@@ -76,12 +76,12 @@ spec:
             - secretRef:
                 name: console-env
           env:
-        {{ include "console.env" . | nindent 8 }}
             - name: REPLICAS
               value: {{ .Values.replicaCount | quote }}
-        {{- if  .Values.extraEnv }}
-        {{- toYaml .Values.extraEnv | nindent 8 }}
-        {{- end }}
+            {{ include "console.env" . | nindent 12 }}
+            {{- if  .Values.extraEnv }}
+            {{ toYaml .Values.extraEnv | nindent 12 }}
+            {{- end }}
           volumeMounts:
             - name: temp-dir
               mountPath: /tmp
@@ -121,11 +121,11 @@ spec:
               containerPort: 4369
               protocol: TCP
           livenessProbe:
-        {{ toYaml .Values.livenessProbe | nindent 10 }}
+          {{ toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
-        {{ toYaml .Values.readinessProbe | nindent 10 }}
+          {{ toYaml .Values.readinessProbe | nindent 12 }}
           resources:
-        {{- toYaml .Values.resources | nindent 10 }}
+          {{- toYaml .Values.resources | nindent 12 }}
       {{- if .Values.nexus.enabled }}
         - name: nexus
           image: "{{ .Values.global.registry }}/{{ .Values.nexus.image.repository }}:{{ .Values.nexus.image.tag | default .Chart.AppVersion }}"
