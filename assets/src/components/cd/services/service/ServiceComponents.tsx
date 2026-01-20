@@ -39,6 +39,7 @@ import {
 } from './component/Components.tsx'
 import { countDeprecations } from './deprecationUtils'
 import { ComponentsTreeView } from './ServiceComponentsTree.tsx'
+import { ComponentsFilesView } from './ServiceComponentsFiles.tsx'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 
 const directory = [
@@ -130,6 +131,7 @@ export function ServiceComponents() {
           searchQuery={searchQuery}
         />
       )}
+      {view === 'files' && <ComponentsFilesView />}
     </ScrollablePage>
   )
 }
