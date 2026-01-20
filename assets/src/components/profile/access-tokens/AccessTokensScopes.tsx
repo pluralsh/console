@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash'
 import { createColumnHelper } from '@tanstack/react-table'
 import styled from 'styled-components'
 
-import { AccessTokenFragment, AccessTokenScope } from '../../generated/graphql'
+import { AccessTokenFragment, AccessTokenScope } from 'generated/graphql'
 
 const ChipList = styled(ListBoxItemChipList)(() => ({
   justifyContent: 'flex-start',

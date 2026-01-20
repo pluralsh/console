@@ -11,7 +11,7 @@ import {
 } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 
-import { ChipList } from '../cd/services/CreateGlobalService'
+import { ChipList } from 'components/cd/services/CreateGlobalService'
 
 import { Scope } from './AccessTokensCreateModal'
 

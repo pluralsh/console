@@ -6,9 +6,9 @@ import { isEmpty } from 'lodash'
 import {
   AccessTokensDocument,
   useCreateAccessTokenMutation,
-} from '../../generated/graphql'
-import { GqlError } from '../utils/Alert'
-import { appendConnection, updateCache } from '../../utils/graphql'
+} from 'generated/graphql'
+import { GqlError } from 'components/utils/Alert'
+import { appendConnection, updateCache } from 'utils/graphql'
 
 import { AccessTokensCreateScope } from './AccessTokensCreateScope'
 

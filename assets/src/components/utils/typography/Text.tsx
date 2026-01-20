@@ -68,7 +68,7 @@ export function InlineA({
   ...props
 }: {
   href: Nullable<string>
-  children: ReactNode
+  children?: ReactNode
 } & Omit<ComponentPropsWithRef<typeof StandardUrlSC>, 'children' | 'href'>) {
   return (
     <StandardUrlSC

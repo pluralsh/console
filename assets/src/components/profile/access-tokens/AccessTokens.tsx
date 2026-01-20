@@ -22,7 +22,7 @@ import {
 } from 'generated/graphql'
 
 import isEmpty from 'lodash/isEmpty'
-import { Suspense, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 
@@ -35,25 +35,23 @@ import {
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
-import { formatLocation } from '../../utils/geo'
+import { Confirm } from 'components/utils/Confirm'
+import { DeleteIconButton } from 'components/utils/IconButtons'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+import { formatLocation } from 'utils/geo'
 import {
   Edge,
   mapExistingNodes,
   removeConnection,
   updateCache,
-} from '../../utils/graphql'
-import { Confirm } from '../utils/Confirm'
-import { DeleteIconButton } from '../utils/IconButtons'
-import LoadingIndicator from '../utils/LoadingIndicator'
-import { DateTimeCol } from '../utils/table/DateTimeCol'
-
-import { ModalMountTransition } from '../utils/ModalMountTransition'
+} from 'utils/graphql'
 
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { AccessTokensCreateModal } from './AccessTokensCreateModal'
+import { PROFILE_BREADCRUMBS } from '../MyProfile'
+import { useOpenAccessTokenModal } from './AccessTokenContext'
 import { AccessTokensScopes } from './AccessTokensScopes'
-import { PROFILE_BREADCRUMBS } from './MyProfile'
 
 const TOOLTIP =
   'Access tokens allow you to access the Plural API for automation and active Plural clusters.'
@@ -245,7 +243,7 @@ const settingsBreadcrumbs = [
 
 export function AccessTokens() {
   const isInSettings = useLocation().pathname.includes('settings')
-  const [open, setOpen] = useState(false)
+  const openModal = useOpenAccessTokenModal()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
       queryHook: useAccessTokensQuery,
@@ -276,7 +274,7 @@ export function AccessTokens() {
       {!isEmpty(tokensList) && (
         <Button
           secondary
-          onClick={() => setOpen(true)}
+          onClick={openModal}
         >
           Create access token
         </Button>
@@ -314,20 +312,12 @@ export function AccessTokens() {
         <EmptyState message="Looks like you don't have any access tokens yet.">
           <Button
             secondary
-            onClick={() => setOpen(true)}
+            onClick={openModal}
           >
             Create access token
           </Button>
         </EmptyState>
       )}
-      <Suspense fallback={null}>
-        <ModalMountTransition open={open}>
-          <AccessTokensCreateModal
-            open={open}
-            setOpen={setOpen}
-          />
-        </ModalMountTransition>
-      </Suspense>
     </div>
   )
 }

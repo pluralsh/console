@@ -22,7 +22,7 @@ import ProjectSettings from 'components/settings/projectsettings/ProjectSettings
 
 import ServiceAccounts from 'components/settings/usermanagement/serviceaccounts/ServiceAccounts'
 
-import { AccessTokens } from 'components/profile/AccessTokens'
+import { AccessTokens } from 'components/profile/access-tokens/AccessTokens'
 
 import { GlobalSettingsSMTP } from 'components/settings/global/GlobalSettingsSMTP'
 
