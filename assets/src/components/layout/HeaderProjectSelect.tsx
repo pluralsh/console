@@ -1,11 +1,11 @@
 import {
-  Banner,
   CheckRoundedIcon,
   ComboBox,
   ListBoxFooter,
   ListBoxItem,
   ProjectIcon,
   Spinner,
+  Toast,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
@@ -13,7 +13,6 @@ import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectsContext } from '../contexts/ProjectsContext'
-import { ApolloError } from '@apollo/client/core'
 import { useProjectsTinyQuery } from 'generated/graphql'
 import { useDebounce } from '@react-hooks-library/core'
 
@@ -22,15 +21,10 @@ export default function ProjectSelect() {
   const { projectId, setProjectId } = useProjectsContext()
   const [query, setQuery] = useState('')
   const debouncedQuery = useDebounce(query, 500)
-  const [error, setError] = useState<ApolloError>()
 
-  const { data, loading } = useProjectsTinyQuery({
+  const { data, loading, error } = useProjectsTinyQuery({
     pollInterval: 60_000,
     fetchPolicy: 'cache-and-network',
-    onError: (error) => {
-      setError(error)
-      setTimeout(() => setError(undefined), 5000)
-    },
     variables: { q: debouncedQuery },
   })
 
@@ -94,17 +88,15 @@ export default function ProjectSelect() {
         ))}
       </ComboBox>
       {error && (
-        <Banner
-          heading="Failed to fetch projects"
-          severity="error"
-          position="fixed"
-          bottom={24}
-          right={100}
-          zIndex={1000}
-          onClose={() => setError(undefined)}
+        <Toast
+          heading="Error loading projects"
+          severity="danger"
+          position="bottom"
+          closeTimeout={5000}
+          margin="large"
         >
           {error.message}
-        </Banner>
+        </Toast>
       )}
     </div>
   )
