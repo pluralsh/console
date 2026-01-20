@@ -2,7 +2,6 @@ package console
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -102,12 +101,7 @@ func (c *client) healthCheck(ctx context.Context) error {
 	// Try to call GetAiConfig - if it succeeds or fails with expected error, connection is healthy
 	_, err := c.grpcClient.GetAiConfig(ctx, &pb.AiConfigRequest{})
 	if err != nil {
-		// Connection errors are failures, but application-level errors mean the connection works
-		if errors.Is(ctx.Err(), context.DeadlineExceeded) {
-			return fmt.Errorf("health check timeout: %w", err)
-		}
-		// For now, we consider any response (even error) as healthy connection
-		c.logger.Debug("health check received response", zap.Error(err))
+		return fmt.Errorf("health check GetAiConfig failed: %w", err)
 	}
 
 	return nil

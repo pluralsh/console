@@ -70,6 +70,8 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 		if cfg == nil || cfg.ApiKey == nil {
 			return nil, fmt.Errorf("OpenAI not configured")
 		}
+
+		in.logger.Debug("OpenAI configuration", zap.String("model", cfg.GetModel()), zap.String("embedding_model", cfg.GetEmbeddingModel()), zap.String("tool_model", cfg.GetToolModel()))
 		return []schemas.Key{
 			{
 				Value: schemas.EnvVar{
@@ -86,6 +88,8 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 		if cfg == nil || cfg.GetApiKey() == "" {
 			return nil, fmt.Errorf("anthropic not configured")
 		}
+
+		in.logger.Debug("Anthropic configuration", zap.String("model", cfg.GetModel()), zap.String("tool_model", cfg.GetToolModel()))
 		return []schemas.Key{
 			{
 				Value: schemas.EnvVar{
