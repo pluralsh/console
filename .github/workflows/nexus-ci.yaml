@@ -23,13 +23,10 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.25'
-          cache-dependency-path: go.sum
+          go-version-file: go.mod
 
-      - name: Install golangci-lint
+      - name: Run golangci-lint
         uses: golangci/golangci-lint-action@v8
-        with:
-          working-directory: nexus
 
   test:
     name: Test
@@ -42,19 +39,6 @@ jobs:
         uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
-
-      - name: Install protoc
-        run: |
-          PROTOC_VERSION=25.1
-          wget https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip
-          unzip protoc-${PROTOC_VERSION}-linux-x86_64.zip -d $HOME/.local
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Install protoc plugins
-        run: make install-tools
-
-      - name: Generate proto code
-        run: make proto
 
       - name: Run tests
         run: make test
@@ -69,21 +53,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v6
         with:
-          go-version: '1.25'
-          cache-dependency-path: go.sum
-
-      - name: Install protoc
-        run: |
-          PROTOC_VERSION=25.1
-          wget https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-x86_64.zip
-          unzip protoc-${PROTOC_VERSION}-linux-x86_64.zip -d $HOME/.local
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-
-      - name: Install protoc plugins
-        run: make install-tools
-
-      - name: Generate proto code
-        run: make proto
+          go-version-file: go.mod
 
       - name: Build binary
         run: make build
