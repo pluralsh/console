@@ -176,8 +176,8 @@ function getMenuItems({
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {
-      text: 'Cost Management',
-      expandedLabel: 'Cost Management',
+      text: 'Cost management',
+      expandedLabel: 'Cost management',
       icon: <CostManagementIcon />,
       path: '/cost-management',
       hotkeys: ['shift C+M'],

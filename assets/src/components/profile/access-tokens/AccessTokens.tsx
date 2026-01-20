@@ -35,25 +35,25 @@ import {
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
-import { formatLocation } from '../../utils/geo'
+import { formatLocation } from 'utils/geo'
 import {
   Edge,
   mapExistingNodes,
   removeConnection,
   updateCache,
-} from '../../utils/graphql'
-import { Confirm } from '../utils/Confirm'
-import { DeleteIconButton } from '../utils/IconButtons'
-import LoadingIndicator from '../utils/LoadingIndicator'
-import { DateTimeCol } from '../utils/table/DateTimeCol'
+} from 'utils/graphql'
+import { Confirm } from 'components/utils/Confirm'
+import { DeleteIconButton } from 'components/utils/IconButtons'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
-import { ModalMountTransition } from '../utils/ModalMountTransition'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { AccessTokensCreateModal } from './AccessTokensCreateModal'
 import { AccessTokensScopes } from './AccessTokensScopes'
-import { PROFILE_BREADCRUMBS } from './MyProfile'
+import { PROFILE_BREADCRUMBS } from '../MyProfile'
 
 const TOOLTIP =
   'Access tokens allow you to access the Plural API for automation and active Plural clusters.'
