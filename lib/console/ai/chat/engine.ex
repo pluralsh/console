@@ -110,7 +110,7 @@ defmodule Console.AI.Chat.Engine do
   defp tool_msgs(_, tools), do: tools
 
   @spec call_plrl_tools([Tool.t], [module]) :: {:ok, [%{role: Provider.sender, content: binary}]} | {:error, binary}
-  defp call_plrl_tools(tools, impls) do
+  def call_plrl_tools(tools, impls) do
     by_name = Map.new(impls, & {&1.name(), &1})
     stream = Stream.stream(:user)
     Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args}, acc ->

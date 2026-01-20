@@ -128,7 +128,7 @@ defmodule Console.AI.Fixer.Base do
   end
   defp maybe_add_values(contents, _), do: contents
 
-  defp blacklist(filename) do
+  def blacklist(filename) do
     cond do
       String.ends_with?(filename, "values.yaml.static") -> true
       Path.extname(filename) in @extension_blacklist -> true
