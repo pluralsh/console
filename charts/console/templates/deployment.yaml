@@ -49,96 +49,96 @@ spec:
       {{ if .Values.console.additionalContainers }}
       {{ toYaml .Values.console.additionalContainers | nindent 6 }}
       {{ end }}
-        - name: auth
+      - name: auth
         {{ if .Values.console.containerSecurityContext }}
-          securityContext:
+        securityContext:
         {{- toYaml .Values.console.containerSecurityContext | nindent 10 }}
         {{ end }}
-          image: "{{ .Values.global.registry }}/{{ .Values.ociAuth.repository }}:{{ .Values.ociAuth.tag | default (printf "v%s" .Chart.AppVersion) }}"
-          imagePullPolicy: {{ .Values.ociAuth.imagePullPolicy }}
-          args:
-            - --token-file=/shared/token
-          volumeMounts:
-            - name: conf-dir
-              mountPath: /shared
-          ports:
-            - name: sidecar
-              containerPort: 3000
-              protocol: TCP
-        - name: console
+        image: "{{ .Values.global.registry }}/{{ .Values.ociAuth.repository }}:{{ .Values.ociAuth.tag | default (printf "v%s" .Chart.AppVersion) }}"
+        imagePullPolicy: {{ .Values.ociAuth.imagePullPolicy }}
+        args:
+        - --token-file=/shared/token
+        volumeMounts:
+        - name: conf-dir
+          mountPath: /shared
+        ports:
+        - name: sidecar
+          containerPort: 3000
+          protocol: TCP
+      - name: console
         {{ if .Values.console.containerSecurityContext }}
-          securityContext:
+        securityContext:
         {{- toYaml .Values.console.containerSecurityContext | nindent 10 }}
         {{ end }}
-          image: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
-          envFrom:
-            - secretRef:
-                name: console-env
-          env:
-            - name: REPLICAS
-              value: {{ .Values.replicaCount | quote }}
-            {{ include "console.env" . | nindent 12 }}
-            {{- if  .Values.extraEnv }}
-            {{ toYaml .Values.extraEnv | nindent 12 }}
-            {{- end }}
-          volumeMounts:
-            - name: temp-dir
-              mountPath: /tmp
-            - name: conf-dir
-              mountPath: /shared
-            - name: home-cache-dir
-              mountPath: {{ .Values.homeDir }}/.cache
+        image: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+        envFrom:
+        - secretRef:
+            name: console-env
+        env:
+        - name: REPLICAS
+          value: {{ .Values.replicaCount | quote }}
+        {{ include "console.env" . | nindent 8 }}
+        {{- if  .Values.extraEnv }}
+        {{ toYaml .Values.extraEnv | nindent 8 }}
+        {{- end }}
+        volumeMounts:
+        - name: temp-dir
+          mountPath: /tmp
+        - name: conf-dir
+          mountPath: /shared
+        - name: home-cache-dir
+          mountPath: {{ .Values.homeDir }}/.cache
         {{ if .Values.cloud.pgRootCert }}
-            - mountPath: /opt/app/certs
-              name: pg-cert
+        - mountPath: /opt/app/certs
+          name: pg-cert
         {{ end }}
         {{ if .Values.cliContainer.enabled }}
-            - name: cli-override
-              mountPath: /usr/local/bin/plural
-              subPath: plural
+        - name: cli-override
+          mountPath: /usr/local/bin/plural
+          subPath: plural
         {{- end }}
         {{- if or .Values.secrets.identity .Values.secrets.key }}
-            - name: console-conf
-              mountPath: {{ .Values.homeDir }}/.plural
+        - name: console-conf
+          mountPath: {{ .Values.homeDir }}/.plural
         {{- end }}
         {{ if not .Values.disableAdditionalVolumes }}
         {{ if .Values.global.additionalVolumeMounts }}
         {{ toYaml .Values.global.additionalVolumeMounts | nindent 8 }}
         {{ end }}
         {{ end }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port }}
-              protocol: TCP
-            - name: grpc
-              containerPort: 50051
-              protocol: TCP
-            - name: metrics
-              containerPort: 9090
-              protocol: TCP
-            - name: epmd
-              containerPort: 4369
-              protocol: TCP
-          livenessProbe:
-          {{ toYaml .Values.livenessProbe | nindent 12 }}
-          readinessProbe:
-          {{ toYaml .Values.readinessProbe | nindent 12 }}
-          resources:
-          {{- toYaml .Values.resources | nindent 12 }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.port }}
+          protocol: TCP
+        - name: grpc
+          containerPort: 50051
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        - name: epmd
+          containerPort: 4369
+          protocol: TCP
+        livenessProbe:
+        {{ toYaml .Values.livenessProbe | nindent 10 }}
+        readinessProbe:
+        {{ toYaml .Values.readinessProbe | nindent 10 }}
+        resources:
+        {{- toYaml .Values.resources | nindent 10 }}
       {{- if .Values.nexus.enabled }}
-        - name: nexus
-          image: "{{ .Values.global.registry }}/{{ .Values.nexus.image.repository }}:{{ .Values.nexus.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.nexus.image.pullPolicy }}
-          args:
-            - --config=/home/nexus/config.yaml
-          ports:
-            - name: nexus-http
-              containerPort: 8080
-          volumeMounts:
-            - name: nexus-config
-              mountPath: /home/nexus
-              readOnly: true
+      - name: nexus
+        image: "{{ .Values.global.registry }}/{{ .Values.nexus.image.repository }}:{{ .Values.nexus.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.nexus.image.pullPolicy }}
+        args:
+        - --config=/home/nexus/config.yaml
+        ports:
+        - name: nexus-http
+          containerPort: 8080
+        volumeMounts:
+        - name: nexus-config
+          mountPath: /home/nexus
+          readOnly: true
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -153,30 +153,30 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
-        - name: temp-dir
-          emptyDir: { }
-        - name: conf-dir
-          emptyDir: { }
-        - name: home-cache-dir
-          emptyDir: { }
+      - name: temp-dir
+        emptyDir: { }
+      - name: conf-dir
+        emptyDir: { }
+      - name: home-cache-dir
+        emptyDir: { }
       {{ if .Values.cloud.pgRootCert }}
-        - name: pg-cert
-          secret:
-            secretName: pg-root-cert
+      - name: pg-cert
+        secret:
+          secretName: pg-root-cert
       {{ end }}
       {{ if .Values.cliContainer.enabled }}
-        - name: cli-override
-          emptyDir: { }
+      - name: cli-override
+        emptyDir: { }
       {{ end }}
       {{- if or .Values.secrets.identity .Values.secrets.key }}
-        - name: console-conf
-          secret:
-            secretName: console-conf
+      - name: console-conf
+        secret:
+          secretName: console-conf
       {{- end }}
       {{- if .Values.nexus.enabled }}
-        - name: nexus-config
-          secret:
-            secretName: nexus-config
+      - name: nexus-config
+        secret:
+          secretName: nexus-config
       {{- end }}
       {{ if .Values.global.additionalVolumes }}
       {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
