@@ -12,6 +12,7 @@ import {
   GitPullIcon,
   HomeIcon,
   IconProps,
+  KeyIcon,
   KubernetesAltIcon,
   PeopleIcon,
   PodContainerIcon,
@@ -68,6 +69,7 @@ import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
 import { CommandPaletteContext } from './CommandPaletteContext.tsx'
+import { useOpenAccessTokenModal } from 'components/profile/access-tokens/AccessTokenContext.tsx'
 
 export type CommandGroup = {
   commands: Command[]
@@ -139,7 +141,8 @@ export function useCommands({
   showHidden?: boolean
   filter?: string
 }): CommandGroup[] {
-  const open = useShareSecretOpen()
+  const openShareSecret = useShareSecretOpen()
+  const openAccessTokenModal = useOpenAccessTokenModal()
   const { setDocsSearchOpen } = use(CommandPaletteContext)
   const mode = useThemeColorMode()
   const navigate = useNavigate()
@@ -283,7 +286,7 @@ export function useCommands({
           },
           {
             id: 'cost-management',
-            label: 'Cost Management',
+            label: 'Cost management',
             icon: CostManagementIcon,
             callback: () => navigate(COST_MANAGEMENT_ABS_PATH),
             deps: [navigate],
@@ -372,9 +375,17 @@ export function useCommands({
             id: 'share-secret',
             label: 'Share secret',
             icon: EyeIcon,
-            callback: open,
+            callback: openShareSecret,
             options: { preventDefault: true },
             hotkeys: ['C then S'],
+          },
+          {
+            id: 'access-token',
+            label: 'Create access token',
+            icon: KeyIcon,
+            callback: openAccessTokenModal,
+            options: { preventDefault: true },
+            hotkeys: ['C then A'],
           },
           {
             id: 'switch-mode',
@@ -394,7 +405,8 @@ export function useCommands({
       navigate,
       featureFlags.Edge,
       cluster?.id,
-      open,
+      openShareSecret,
+      openAccessTokenModal,
       mode,
       showHidden,
       hiddenCommands,

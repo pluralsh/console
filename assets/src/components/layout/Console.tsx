@@ -32,6 +32,7 @@ import Header from './Header'
 import { Sidebar, SidebarProvider } from './Sidebar'
 import Subheader from './Subheader'
 import { SentryInitializer } from '../SentryInitializer'
+import { AccessTokenProvider } from 'components/profile/access-tokens/AccessTokenContext'
 
 export default function Console() {
   return (
@@ -45,17 +46,19 @@ export default function Console() {
                   <BreadcrumbsProvider>
                     <TerminalThemeProvider>
                       <ShareSecretProvider>
-                        <DeploymentSettingsProvider>
-                          <SidebarProvider>
-                            <AIContextProvider>
-                              <FeatureFlagProvider>
-                                <CommandPaletteProvider>
-                                  <ConsoleContent />
-                                </CommandPaletteProvider>
-                              </FeatureFlagProvider>
-                            </AIContextProvider>
-                          </SidebarProvider>
-                        </DeploymentSettingsProvider>
+                        <AccessTokenProvider>
+                          <DeploymentSettingsProvider>
+                            <SidebarProvider>
+                              <AIContextProvider>
+                                <FeatureFlagProvider>
+                                  <CommandPaletteProvider>
+                                    <ConsoleContent />
+                                  </CommandPaletteProvider>
+                                </FeatureFlagProvider>
+                              </AIContextProvider>
+                            </SidebarProvider>
+                          </DeploymentSettingsProvider>
+                        </AccessTokenProvider>
                       </ShareSecretProvider>
                     </TerminalThemeProvider>
                   </BreadcrumbsProvider>
