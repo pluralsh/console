@@ -4,7 +4,7 @@ defmodule Console.AI.Fixer.Service do
   import Console.AI.Fixer.Base
   alias Console.Repo
   alias Console.AI.{Fixer.Parent, Provider}
-  alias Console.Schema.{Service, GitRepository, Cluster}
+  alias Console.Schema.{Service, ServiceComponent, GitRepository, Cluster}
   alias Console.Deployments.{Services, Tar}
   alias Console.Deployments.Git.Discovery
 
@@ -37,7 +37,10 @@ defmodule Console.AI.Fixer.Service do
     end
   end
 
-  def prompt(%Service{} = svc, insight, opts \\ []) do
+  def prompt(parent, insight, opts \\ [])
+  def prompt(%ServiceComponent{service: %Service{} = svc}, insight, opts),
+    do: prompt(svc, insight, opts)
+  def prompt(%Service{} = svc, insight, opts) do
     svc = Repo.preload(svc, [:cluster, :repository, :parent, owner: :parent, insight: :evidence])
     with {:ok, details} <- file_contents(svc, opts) do
       Enum.concat([

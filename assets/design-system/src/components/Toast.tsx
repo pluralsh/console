@@ -8,6 +8,7 @@ import {
 
 import { type Severity } from '../types'
 import { type Extends } from '../utils/ts-utils'
+import { ApolloError } from '@apollo/client'
 
 import Banner, { type BannerProps } from './Banner'
 import Layer, { type LayerPositionType } from './Layer'
@@ -95,7 +96,7 @@ function Toast({
 }
 
 type GraphQLToastProps = {
-  error: { graphQLErrors: Array<{ message: string }> }
+  error: Nullable<Partial<ApolloError>>
   header: string
 } & ToastProps
 
@@ -106,10 +107,11 @@ function GraphQLToast({
 }: GraphQLToastProps): JSX.Element {
   return (
     <Toast
+      heading={header}
       severity="danger"
       {...props}
     >
-      {header}: {error?.graphQLErrors[0]?.message}
+      {error?.graphQLErrors[0]?.message}
     </Toast>
   )
 }

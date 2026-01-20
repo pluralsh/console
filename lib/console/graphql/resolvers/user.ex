@@ -151,13 +151,15 @@ defmodule Console.GraphQl.Resolvers.User do
   def resolve_invite(%{id: secure_id}, _),
     do: {:ok, Users.get_invite(secure_id)}
 
-  def resolve_token(%{id: id}, %{context: %{current_user: %{id: user_id}}}) do
-    Console.Repo.get!(AccessToken, id)
-    |> case do
-      %{user_id: ^user_id} = token -> {:ok, token}
+  def resolve_token(%{id: id}, %{context: %{current_user: %{id: user_id}}}) when is_binary(id) do
+    case Console.Repo.get!(AccessToken, id) do
+      %AccessToken{user_id: ^user_id} = token -> {:ok, token}
       _ -> {:error, "forbidden"}
     end
   end
+  def resolve_token(%{token: token}, %{context: %{current_user: user}}) when is_binary(token),
+    do: Users.introspect_access_token(token, user)
+  def resolve_token(_, _), do: {:error, "must provide either an id or a token"}
 
   def signin_user(%{email: email, password: password}, _) do
     Users.login_user(email, password)
@@ -227,7 +229,7 @@ defmodule Console.GraphQl.Resolvers.User do
 
   def create_access_token(%{id: id} = args, _) do
     case Users.get_user!(id) do
-      %User{service_account: true} = user -> Users.create_access_token(Map.take(args, [:scopes]), user)
+      %User{service_account: true} = user -> Users.create_access_token(Map.take(args, [:scopes, :expiry]), user)
       _ -> {:error, "forbidden"}
     end
   end

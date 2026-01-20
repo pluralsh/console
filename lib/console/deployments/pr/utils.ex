@@ -64,6 +64,8 @@ defmodule Console.Deployments.Pr.Utils do
   defp do_fetch(:preview, name), do: name
   defp do_fetch(:merge_cron, cron), do: cron
 
+  def description(%PrAutomation{ignore_templates: true, message: msg, title: title}, _),
+    do: {:ok, title, msg}
   def description(%PrAutomation{message: msg, title: title}, ctx) do
     with {:ok, body} <- render_solid(msg, ctx),
          {:ok, title} <- render_solid(title, ctx),

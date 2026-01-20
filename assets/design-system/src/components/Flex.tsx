@@ -1,7 +1,7 @@
 // almost drop-in replacement for anywhere 'honorable' Flex is used
 
-import { type CSSProperties, type ReactNode, Ref, memo } from 'react'
-import styled, { type DefaultTheme } from 'styled-components'
+import { Ref, memo, type CSSProperties, type ReactNode } from 'react'
+import styled, { StyledObject, type DefaultTheme } from 'styled-components'
 import Tooltip, { TooltipProps } from './Tooltip'
 import WrapWithIf from './WrapWithIf'
 
@@ -40,6 +40,11 @@ type FlexBaseProps = {
 
   tooltip?: Omit<TooltipProps, 'children'>
 
+  /**
+   * in case we want raw css like media/container queries, hover states, etc
+   */
+  css?: StyledObject
+
   ref?: Ref<HTMLDivElement>
   className?: string
   children?: ReactNode
@@ -61,6 +66,7 @@ function BaseFlex({
   padding,
   tooltip,
   children,
+  css,
   ...otherProps
 }: FlexProps) {
   return (
@@ -82,7 +88,7 @@ function BaseFlex({
           $gap: gap,
           $padding: padding,
         }}
-        css={{ ...otherProps }}
+        css={{ ...otherProps, ...css }}
       >
         {children}
       </FlexSC>

@@ -3,6 +3,7 @@ fragment InfraResearch on InfraResearch {
   prompt
   status
   diagram
+  published
   analysis {
     ...InfraResearchAnalysis
   }
@@ -60,6 +61,15 @@ query InfraResearches(
 
 mutation CreateInfraResearch($attributes: InfraResearchAttributes!) {
   createInfraResearch(attributes: $attributes) {
+    ...InfraResearch
+  }
+}
+
+mutation UpdateInfraResearch(
+  $id: ID!
+  $attributes: InfraResearchUpdateAttributes!
+) {
+  updateInfraResearch(id: $id, attributes: $attributes) {
     ...InfraResearch
   }
 }

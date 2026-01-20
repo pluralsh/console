@@ -17,6 +17,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ClusterRestoreTrigger](#clusterrestoretrigger)
 - [ClusterSync](#clustersync)
 - [ComplianceReportGenerator](#compliancereportgenerator)
+- [CustomCompatibilityMatrix](#customcompatibilitymatrix)
 - [CustomStackRun](#customstackrun)
 - [DeploymentSettings](#deploymentsettings)
 - [FederatedCredential](#federatedcredential)
@@ -49,6 +50,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ServiceContext](#servicecontext)
 - [ServiceDeployment](#servicedeployment)
 - [StackDefinition](#stackdefinition)
+- [UpgradePlanCallout](#upgradeplancallout)
 
 
 
@@ -119,6 +121,23 @@ _Appears in:_
 | `secretAccessKey` _[ObjectKeyReference](#objectkeyreference)_ |  |  |  |
 | `region` _string_ | The region this connection applies to |  | Optional: \{\} <br /> |
 | `regions` _string array_ | A list of regions this connection can query |  | Optional: \{\} <br /> |
+
+
+#### AddonCallout
+
+
+
+AddonCallout a callout for a specific addon in the upgrade plan
+
+
+
+_Appears in:_
+- [UpgradePlanCalloutSpec](#upgradeplancalloutspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `addon` _string_ | Addon the addon this callout applies to |  |  |
+| `template` _string_ | Template the template to use for this callout |  |  |
 
 
 #### AiApprovalConfiguration
@@ -253,7 +272,9 @@ _Appears in:_
 | `toolModelId` _string_ | ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
 | `region` _string_ | Region is the AWS region the model is hosted in |  | Required: \{\} <br /> |
-| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Optional: \{\} <br /> |
+| `awsAccessKeyId` _string_ | AWS Access Key ID to use for authentication |  | Optional: \{\} <br /> |
+| `awsSecretAccessKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | AWS Secret Access Key to use for authentication |  | Optional: \{\} <br /> |
 
 
 #### Binding
@@ -784,6 +805,7 @@ _Appears in:_
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write access policies for this cluster.<br />Controls which users and groups can view or manage this cluster through RBAC. |  | Optional: \{\} <br /> |
 | `cloudSettings` _[ClusterCloudSettings](#clustercloudsettings)_ | CloudSettings contains cloud provider-specific configuration for this cluster.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
 | `nodePools` _[ClusterNodePool](#clusternodepool) array_ | NodePools defines the worker node configurations managed by this cluster.<br />Deprecated.<br />Do not use. |  | Optional: \{\} <br /> |
+| `disableAI` _boolean_ | DisableAI indicates whether to disable ai insights for this cluster. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
@@ -908,6 +930,42 @@ _Appears in:_
 | `cmd` _string_ | Cmd is the command to execute |  | Required: \{\} <br /> |
 | `args` _string array_ | Args are the arguments to pass to the command. |  | Optional: \{\} <br /> |
 | `dir` _string_ | Dir is the working directory for the command. |  | Optional: \{\} <br /> |
+
+
+#### CompatibilityMatrixSummary
+
+
+
+
+
+
+
+_Appears in:_
+- [CompatibilityMatrixVersion](#compatibilitymatrixversion)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `helmChanges` _string array_ | HelmChanges the helm changes for this version |  | Optional: \{\} <br /> |
+| `breakingChanges` _string array_ | BreakingChanges the breaking changes for this version |  | Optional: \{\} <br /> |
+
+
+#### CompatibilityMatrixVersion
+
+
+
+
+
+
+
+_Appears in:_
+- [CustomCompatibilityMatrixSpec](#customcompatibilitymatrixspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `version` _string_ | Version the version of the matrix |  |  |
+| `chartVersion` _string_ | ChartVersion the chart version of the matrix |  | Optional: \{\} <br /> |
+| `kube` _string array_ | Kube the kube version of the matrix |  | Optional: \{\} <br /> |
+| `summary` _[CompatibilityMatrixSummary](#compatibilitymatrixsummary)_ | Summary the summary for this version |  | Optional: \{\} <br /> |
 
 
 #### ComplianceReportGenerator
@@ -1054,6 +1112,46 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef the SCM connection to use for pr automations |  | Optional: \{\} <br /> |
+
+
+#### CustomCompatibilityMatrix
+
+
+
+CustomCompatibilityMatrix is the Schema for the customcompatibilitymatrices API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `CustomCompatibilityMatrix` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[CustomCompatibilityMatrixSpec](#customcompatibilitymatrixspec)_ |  |  |  |
+
+
+#### CustomCompatibilityMatrixSpec
+
+
+
+CustomCompatibilityMatrixSpec defines the desired state of CustomCompatibilityMatrix
+
+
+
+_Appears in:_
+- [CustomCompatibilityMatrix](#customcompatibilitymatrix)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of this CustomCompatibilityMatrixSpec. If not provided CustomCompatibilityMatrixSpec's own name from CustomCompatibilityMatrixSpec.ObjectMeta will be used. |  | Optional: \{\} <br /> |
+| `icon` _string_ | Icon the icon to use for this matrix |  | Optional: \{\} <br /> |
+| `gitUrl` _string_ | GitURL the git url to use for this matrix |  | Optional: \{\} <br /> |
+| `releaseUrl` _string_ | ReleaseURL the release url to use for this matrix |  | Optional: \{\} <br /> |
+| `readmeUrl` _string_ | ReadmeURL the readme url to use for this matrix |  | Optional: \{\} <br /> |
+| `versions` _[CompatibilityMatrixVersion](#compatibilitymatrixversion) array_ | Versions the versions for this matrix |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### CustomRunStep
@@ -1711,9 +1809,10 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `values` _string_ | Values a Helm values file to use when rendering this Helm chart. |  |  |
-| `valuesFiles` _string array_ | ValuesFiles a list of relative paths to values files to use for Helm chart templating. |  |  |
-| `release` _string_ | Release is a Helm release name to use when rendering this Helm chart. |  |  |
+| `values` _string_ | Values a Helm values file to use when rendering this Helm chart. |  | Optional: \{\} <br /> |
+| `valuesFiles` _string array_ | ValuesFiles a list of relative paths to values files to use for Helm chart templating. |  | Optional: \{\} <br /> |
+| `release` _string_ | Release is a Helm release name to use when rendering this Helm chart. |  | Optional: \{\} <br /> |
+| `ignoreHooks` _boolean_ | IgnoreHooks indicates whether to ignore Helm hooks when rendering this Helm chart. |  | Optional: \{\} <br /> |
 
 
 #### HelmRepository
@@ -2237,7 +2336,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name specifies the name for this notification router.<br />If not provided, the name from the resource metadata will be used. |  | Optional: \{\} <br /> |
-| `events` _string array_ | Events define the list of event types this router should subscribe to.<br />Use "*" to subscribe to all events, or specify specific event names to filter<br />for particular types of notifications. Common events include deployment updates,<br />service health changes, pipeline status changes, and security alerts. |  | Optional: \{\} <br /> |
+| `events` _string array_ | Events define the list of event types this router should subscribe to.<br />Use "*" to subscribe to all events, or specify specific event names to filter<br />for particular types of notifications.<br />Event names are: alert.fired, alert.resolved, service.update, stack.run, stack.pending, pipeline.update, pr.close, service.insight, cluster.insight, stack.insight, cluster.insight, service.insight, stack.insight, alert.insight |  | Optional: \{\} <br /> |
 | `filters` _[RouterFilters](#routerfilters) array_ | Filters define criteria for selectively routing events.<br />These filters control which events trigger notifications, allowing teams<br />to focus on relevant events. Multiple filters can be combined. |  | Optional: \{\} <br /> |
 | `sinks` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Sinks specify the notification destinations where filtered events should be delivered.<br />Each sink represents a configured notification channel such as Slack webhooks,<br />Microsoft Teams channels, or in-app notification systems. Events matching the<br />router's criteria will be formatted and sent to all configured sinks.<br />It is a reference to the NotificationSink resource. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
@@ -3716,6 +3815,7 @@ _Appears in:_
 - [ClusterSpec](#clusterspec)
 - [ClusterSyncSpec](#clustersyncspec)
 - [ComplianceReportGeneratorSpec](#compliancereportgeneratorspec)
+- [CustomCompatibilityMatrixSpec](#customcompatibilitymatrixspec)
 - [CustomStackRunSpec](#customstackrunspec)
 - [DeploymentSettingsSpec](#deploymentsettingsspec)
 - [FederatedCredentialSpec](#federatedcredentialspec)
@@ -3748,6 +3848,7 @@ _Appears in:_
 - [ServiceContextSpec](#servicecontextspec)
 - [ServiceSpec](#servicespec)
 - [StackDefinitionSpec](#stackdefinitionspec)
+- [UpgradePlanCalloutSpec](#upgradeplancalloutspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -4090,6 +4191,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `email` _string_ | Email address that will be bound to this service account for identification<br />and authentication purposes. This email serves as the unique identifier<br />for the service account within the Console API. |  | Required: \{\} <br />Type: string <br /> |
 | `scopes` _[ServiceAccountScope](#serviceaccountscope) array_ | Scopes define the access boundaries for this service account, controlling<br />which Console APIs and resources it can interact with. Each scope can restrict<br />access to specific API endpoints and resource identifiers, enabling fine-grained<br />permission control for automated processes. |  | Optional: \{\} <br /> |
+| `tokenExpiry` _string_ | TokenExpiry is the TTL of the access token, e.g. 1h, 1d, 1w |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | TokenSecretRef references a Kubernetes secret that should contain the<br />authentication token for this service account. This enables secure storage<br />and management of credentials within the cluster. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
@@ -4728,6 +4830,43 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `createPr` _[CreatePr](#createpr)_ | CreatePr holds the configuration for the pr automation tool. |  | Optional: \{\} <br /> |
+
+
+#### UpgradePlanCallout
+
+
+
+UpgradePlanCallout is the Schema for the upgradeplancallouts API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `UpgradePlanCallout` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[UpgradePlanCalloutSpec](#upgradeplancalloutspec)_ |  |  |  |
+
+
+#### UpgradePlanCalloutSpec
+
+
+
+UpgradePlanCalloutSpec defines the desired state of UpgradePlanCallout
+
+
+
+_Appears in:_
+- [UpgradePlanCallout](#upgradeplancallout)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of this UpgradePlanCallout. If not provided UpgradePlanCallout's own name from UpgradePlanCallout.ObjectMeta will be used. |  | Optional: \{\} <br /> |
+| `callouts` _[AddonCallout](#addoncallout) array_ | Callouts the callouts for this instance |  |  |
+| `context` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Context is an untyped object containing the context for this callout |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 
 #### VectorStore

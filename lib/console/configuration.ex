@@ -9,7 +9,7 @@ defmodule Console.Configuration do
       plural_login: Console.conf(:plural_login),
       vpn_enabled: Console.Services.VPN.enabled?(),
       features: Console.Features.fetch(),
-      sentry_enabled: !!Application.get_env(:sentry, :dsn)
+      sentry_enabled: !!Application.get_env(:sentry, :dsn),
     }
   end
 end

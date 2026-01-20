@@ -55,6 +55,8 @@ defmodule Console.Schema.ServiceComponent do
 
   def for_name(query, name), do: from(sc in query, where: sc.name == ^name)
 
+  def synced(query), do: from(sc in query, where: sc.synced)
+
   @valid ~w(state synced group version kind namespace name uid)a
 
   def changeset(model, attrs \\ %{}) do

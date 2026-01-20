@@ -26,11 +26,24 @@ fragment ClusterUpgradeDeprecatedCustomResource on DeprecatedCustomResource {
   nextVersion
 }
 
+fragment AddonVersionSummary on AddonVersionSummary {
+  breakingChanges
+  chartUpdates
+  features
+  helmChanges
+}
+
 fragment RuntimeAddonVersion on AddonVersion {
   version
   chartVersion
   images
   releaseUrl
+}
+fragment RuntimeAddonVersionWithSummary on AddonVersion {
+  ...RuntimeAddonVersion
+  summary {
+    ...AddonVersionSummary
+  }
 }
 fragment CloudAddonVersion on CloudAddonVersionInformation {
   version
@@ -46,11 +59,12 @@ fragment RuntimeAddonUpgrade on RuntimeAddonUpgrade {
     name
     icon
   }
+  callout
   current {
     ...RuntimeAddonVersion
   }
   fix {
-    ...RuntimeAddonVersion
+    ...RuntimeAddonVersionWithSummary
   }
 }
 

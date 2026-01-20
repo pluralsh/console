@@ -100,6 +100,7 @@ defmodule Console.Schema.Cluster do
     field :metadata,        :map
     field :health_score,    :integer
     field :ping_interval,   :integer
+    field :disable_ai,      :boolean, default: false
 
     field :version,         :string
     field :current_version, :string
@@ -124,6 +125,7 @@ defmodule Console.Schema.Cluster do
 
     field :distro_changed,  :boolean, default: false, virtual: true
     field :token_readable,  :boolean, default: false, virtual: true
+    field :gs_instance,     :map, virtual: true
 
     embeds_one :upgrade_plan, UpgradePlan, on_replace: :update do
       boolean_fields [:deprecations, :compatibilities, :incompatibilities, :kubelet_skew]
@@ -431,6 +433,10 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: not is_nil(c.deleted_at))
   end
 
+  def ai_enabled(query \\ __MODULE__) do
+    from(c in query, where: is_nil(c.disable_ai) or not c.disable_ai)
+  end
+
   def installable(query \\ __MODULE__) do
     from(c in query, where: (not is_nil(c.provider_id) or c.self) and is_nil(c.deleted_at))
   end
@@ -455,7 +461,7 @@ defmodule Console.Schema.Cluster do
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id ai_poll_at distro metadata protect project_id service_id credential_id self version current_version name handle installed)a
+  @valid ~w(provider_id ai_poll_at disable_ai distro metadata protect project_id service_id credential_id self version current_version name handle installed)a
 
   def changeset(model, attrs \\ %{}) do
     model

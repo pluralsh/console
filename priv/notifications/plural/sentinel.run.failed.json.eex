@@ -1,0 +1,5 @@
+⏰ A run has failed for the <%= @sentinel_run.sentinel.name %> sentinel
+
+The run failed for <%= @failed %> of <%= @total %> checks.
+
+You can view it here: <%= Console.url("/ai/sentinels/#{@sentinel_run.sentinel.id}/runs/#{@sentinel_run.id}") %>

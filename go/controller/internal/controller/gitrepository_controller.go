@@ -85,7 +85,7 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
-	if exists {
+	if exists && !repo.Spec.Reconciliation.DriftDetect() {
 		logger.V(9).Info("repository already exists, running in read-only mode", "name", repo.Name, "namespace", repo.Namespace)
 		return r.handleExistingRepo(repo)
 	}
@@ -178,8 +178,9 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("scm connection is not ready")
 		}
 
-		if err := utils.TryAddOwnerRef(ctx, r.Client, repo, connection, r.Scheme); err != nil {
-			return nil, nil, err
+		// for backward compatibility, remove owner ref from connection
+		if err := utils.TryRemoveOwnerRef(ctx, r.Client, repo, connection, r.Scheme); err != nil {
+			log.FromContext(ctx).V(9).Info(fmt.Sprintf("failed to remove owner ref from scm connection: %v", err))
 		}
 		attrs.ConnectionID = connection.Status.ID
 	}

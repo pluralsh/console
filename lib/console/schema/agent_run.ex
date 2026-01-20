@@ -108,12 +108,12 @@ defmodule Console.Schema.AgentRun do
     |> validate_required(~w(summary analysis)a)
   end
 
-  defp validate_repository(cs) do
-    validate_change(cs, :repository, fn
-      :repository, "ssh://" <> _ -> []
-      :repository, "git@" <> _ -> []
-      :repository, "https://" <> _ -> []
-      :repository, _ -> [repository: "must be a valid https or ssh git clone URL (e.g. https://github.com/pluralsh/plural.git or git@github.com:pluralsh/plural.git)"]
+  def validate_repository(cs, field \\ :repository) do
+    validate_change(cs, field, fn
+      ^field, "ssh://" <> _ -> []
+      ^field, "git@" <> _ -> []
+      ^field, "https://" <> _ -> []
+      ^field, _ -> [{field, "must be a valid https or ssh git clone URL (e.g. https://github.com/pluralsh/plural.git or git@github.com:pluralsh/plural.git)"}]
     end)
   end
 end

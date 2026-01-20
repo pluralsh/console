@@ -575,6 +575,12 @@ mutation RestoreStack($id: ID!) {
   }
 }
 
+mutation TriggerStackRun($id: ID!) {
+  triggerRun(id: $id) {
+    ...StackRun
+  }
+}
+
 subscription LogsDelta($id: ID!) {
   runLogsDelta(stepId: $id) {
     delta

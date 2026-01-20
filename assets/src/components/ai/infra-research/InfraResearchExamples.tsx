@@ -2,7 +2,6 @@ import { Card } from '@pluralsh/design-system'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import styled from 'styled-components'
-import { ChatSubmitButton } from '../chatbot/input/ChatInput'
 
 export function InfraResearchExampleCard({
   title,
@@ -15,10 +14,10 @@ export function InfraResearchExampleCard({
     <CardSC>
       <StretchedFlex>
         <Body2BoldP $color="text">{title}</Body2BoldP>
-        <ChatSubmitButton
+        {/* <ChatSubmitButton
           as="div"
           bgColor="fill-two"
-        />
+        /> */}
       </StretchedFlex>
       <Body2P $color="text-light">{description}</Body2P>
     </CardSC>
@@ -30,7 +29,7 @@ const CardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
-  minWidth: 256,
+  minWidth: 225,
   maxWidth: 456,
   padding: theme.spacing.medium,
   flex: '1 0 0',

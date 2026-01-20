@@ -598,6 +598,23 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
 
       assert trunc(edge["statistics"]["bytes"]) == 13324
     end
+
+    test "it can list deprecated custom resources for a cluster" do
+      cluster = insert(:cluster)
+      crds = insert_list(3, :deprecated_custom_resource, cluster: cluster)
+      insert_list(3, :deprecated_custom_resource)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query Cluster($id: ID!) {
+          cluster(id: $id) {
+            deprecatedCrds(first: 5) { edges { node { id } } }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert from_connection(found["deprecatedCrds"])
+             |> ids_equal(crds)
+    end
   end
 
   describe "kubernetesVersionInfo" do

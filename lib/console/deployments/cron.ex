@@ -319,6 +319,18 @@ defmodule Console.Deployments.Cron do
     |> Stream.run()
   end
 
+  def prune_agent_run_repositories() do
+    Logger.info "pruning dangling agent run repositories"
+    Console.Schema.AgentRunRepository.expired()
+    |> Repo.delete_all(timeout: 300_000)
+  end
+
+  def prune_access_tokens() do
+    Logger.info "pruning dangling access tokens"
+    Console.Schema.AccessToken.expired()
+    |> Repo.delete_all(timeout: 300_000)
+  end
+
   def prune_helm_repositories() do
     Logger.info "pruning dangling helm repositories"
     Service.helm_repos()

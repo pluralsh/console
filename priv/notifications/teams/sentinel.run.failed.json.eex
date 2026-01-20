@@ -1,0 +1,20 @@
+{
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "0076D7",
+    "summary": "⏰ A run has failed for the <%= @sentinel_run.sentinel.name %> sentinel",
+    "sections": [{
+        "activityTitle": "⏰ A run has failed for the <%= @sentinel_run.sentinel.name %> sentinel",
+        "activitySubtitle": "<%= @sentinel_run.sentinel.name %>",
+        "activityText": "The run failed for <%= @failed %> of <%= @total %> checks.",
+        "markdown": true
+    }],
+    "potentialAction": [{
+        "@type": "OpenUri",
+        "name": "Go to URL",
+        "targets": [{
+            "os": "default",
+            "uri": "<%= Console.url("/ai/sentinels/#{@sentinel_run.sentinel.id}/runs/#{@sentinel_run.id}") %>"
+        }]
+    }]
+}

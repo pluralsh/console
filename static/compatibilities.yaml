@@ -8365,6 +8365,12 @@ addons:
   git_url: https://github.com/open-telemetry/opentelemetry-operator
   release_url: https://github.com/open-telemetry/opentelemetry-operator/releases/tag/v{vsn}
   versions:
+  - version: 0.142.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
   - version: 0.141.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
       '1.25']
@@ -11724,6 +11730,7 @@ addons:
   release_url: https://github.com/VictoriaMetrics/operator/releases/tag/v{vsn}
   helm_repository_url: https://victoriametrics.github.io/helm-charts
   readme_url: https://github.com/VictoriaMetrics/operator/blob/master/README.md
+  icon: https://dashboard.snapcraft.io/site_media/appmedia/2020/11/output-onlinepngtools.png
   versions:
   - version: 0.66.1
     kube: ['1.34', '1.33', '1.32']
@@ -13251,218 +13258,273 @@ addons:
   git_url: https://github.com/NVIDIA/gpu-operator
   release_url: https://github.com/NVIDIA/gpu-operator/releases/tag/{vsn}
   helm_repository_url: https://nvidia.github.io/gpu-operator
+  helm_values: dcgmExporter.config.name=default
   readme_url: https://github.com/NVIDIA/gpu-operator/blob/main/README.md
   versions:
   - version: 25.10.1
     kube: ['1.34', '1.33', '1.32']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 25.10.1
-    images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.9.1', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v25.10.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.18.2']
+    images: ['nvcr.io/nvidia/gpu-operator:v25.10.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.18.2']
+    incompatibilities: []
   - version: 25.10.0
     kube: ['1.34', '1.33', '1.32']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 25.10.0
-    images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.9.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v25.10.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.18.2']
+    images: ['nvcr.io/nvidia/gpu-operator:v25.10.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.18.2']
+    incompatibilities: []
+  - version: 25.3.4
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    chart_version: 25.3.4
+    images: ['nvcr.io/nvidia/gpu-operator:v25.3.4', 'registry.k8s.io/nfd/node-feature-discovery:v0.17.3']
+    incompatibilities: []
+  - version: 25.3.3
+    kube: ['1.34', '1.33', '1.32']
+    requirements: []
+    chart_version: 25.3.3
+    images: ['nvcr.io/nvidia/gpu-operator:v25.3.3', 'registry.k8s.io/nfd/node-feature-discovery:v0.17.3']
+    incompatibilities: []
   - version: 25.3.2
     kube: ['1.34', '1.33', '1.32']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 25.3.2
-    images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.8.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v25.3.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.17.3']
+    images: ['nvcr.io/nvidia/gpu-operator:v25.3.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.17.3']
+    incompatibilities: []
+  - version: 25.3.1
+    kube: ['1.33', '1.32', '1.31']
+    requirements: []
+    chart_version: 25.3.1
+    images: ['nvcr.io/nvidia/gpu-operator:v25.3.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.17.3']
+    incompatibilities: []
   - version: 25.3.0
     kube: ['1.33', '1.32', '1.31']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 25.3.0
-    images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.8.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v25.3.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.17.2']
+    images: ['nvcr.io/nvidia/gpu-operator:v25.3.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.17.2']
+    incompatibilities: []
+  - version: 24.9.2
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    chart_version: 24.9.2
+    images: ['nvcr.io/nvidia/gpu-operator:v24.9.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.6']
+    incompatibilities: []
   - version: 24.9.1
     kube: ['1.32', '1.31', '1.30']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 24.9.1
-    images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.7.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v24.9.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.6']
+    images: ['nvcr.io/nvidia/gpu-operator:v24.9.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.6']
+    incompatibilities: []
   - version: 24.9.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 24.9.0
-    images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.7.0', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v24.9.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.6']
+    images: ['nvcr.io/nvidia/gpu-operator:v24.9.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.6']
+    incompatibilities: []
+  - version: 24.6.2
+    kube: ['1.31', '1.30', '1.29']
+    requirements: []
+    chart_version: 24.6.2
+    images: ['nvcr.io/nvidia/gpu-operator:v24.6.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.3']
+    incompatibilities: []
   - version: 24.6.1
     kube: ['1.31', '1.30', '1.29']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 24.6.1
-    images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.10', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v24.6.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.3']
+    images: ['nvcr.io/nvidia/gpu-operator:v24.6.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.3']
+    incompatibilities: []
   - version: 24.6.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 24.6.0
-    images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.10', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v24.6.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.3']
+    images: ['nvcr.io/nvidia/gpu-operator:v24.6.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.16.3']
+    incompatibilities: []
   - version: 24.3.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 24.3.0
-    images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.8', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v24.3.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.15.4']
+    images: ['nvcr.io/nvidia/gpu-operator:v24.3.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.15.4']
+    incompatibilities: []
   - version: 23.9.2
     kube: ['1.30', '1.29', '1.28']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 23.9.2
-    images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.5', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v23.9.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.14.2']
+    images: ['nvcr.io/nvidia/gpu-operator:v23.9.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.14.2']
+    incompatibilities: []
   - version: 23.9.1
     kube: ['1.29', '1.28', '1.27']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 23.9.1
-    images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.2', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v23.9.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.14.2']
+    images: ['nvcr.io/nvidia/gpu-operator:v23.9.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.14.2']
+    incompatibilities: []
   - version: 23.9.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 23.9.0
-    images: ['nvcr.io/nvidia/cloud-native/k8s-driver-manager:v0.6.2', 'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v23.9.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.14.2']
+    images: ['nvcr.io/nvidia/gpu-operator:v23.9.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.14.2']
+    incompatibilities: []
   - version: 23.6.2
     kube: ['1.29', '1.28', '1.27']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 23.6.2
-    images: ['nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v23.6.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
+    images: ['nvcr.io/nvidia/gpu-operator:v23.6.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
+    incompatibilities: []
+  - version: 23.6.1
+    kube: ['1.28', '1.27', '1.26']
+    requirements: []
+    chart_version: 23.6.1
+    images: ['nvcr.io/nvidia/gpu-operator:v23.6.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
+    incompatibilities: []
   - version: 23.6.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 23.6.0
-    images: ['nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.54.03',
-      'nvcr.io/nvidia/cloud-native/kata-gpu-artifacts:ubuntu22.04-535.86.10-snp',
-      'nvcr.io/nvidia/gpu-operator:v23.6.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
+    images: ['nvcr.io/nvidia/gpu-operator:v23.6.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.13.1']
+    incompatibilities: []
+  - version: 23.3.2
+    kube: ['1.27', '1.26', '1.25']
+    requirements: []
+    chart_version: 23.3.2
+    images: ['nvcr.io/nvidia/gpu-operator:v23.3.2', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1']
+    incompatibilities: []
   - version: 23.3.1
     kube: ['1.27', '1.26', '1.25']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 23.3.1
     images: ['nvcr.io/nvidia/gpu-operator:v23.3.1', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1']
+    incompatibilities: []
   - version: 23.3.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 23.3.0
     images: ['nvcr.io/nvidia/gpu-operator:v23.3.0', 'registry.k8s.io/nfd/node-feature-discovery:v0.12.1']
+    incompatibilities: []
+  - version: 22.9.2
+    kube: ['1.26', '1.25', '1.24']
+    requirements: []
+    chart_version: 22.9.2
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v22.9.2']
+    incompatibilities: []
   - version: 22.9.1
     kube: ['1.26', '1.25', '1.24']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 22.9.1
-    images: []
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v22.9.1']
+    incompatibilities: []
   - version: 22.9.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 22.9.0
-    images: []
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v22.9.0']
+    incompatibilities: []
+  - version: 1.11.1
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    chart_version: 1.11.1
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.11.1']
+    incompatibilities: []
   - version: 1.11.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 1.11.0
-    images: []
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.11.0']
+    incompatibilities: []
+  - version: 1.10.1
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    chart_version: 1.10.1
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.10.1']
+    incompatibilities: []
   - version: 1.10.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 1.10.0
-    images: []
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v1.10.0']
+    incompatibilities: []
+  - version: 1.9.1
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    chart_version: 1.9.1
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.9.1']
+    incompatibilities: []
   - version: 1.9.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 1.9.0
-    images: []
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.9.0']
+    incompatibilities: []
+  - version: 1.8.2
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    chart_version: 1.8.2
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.8.2']
+    incompatibilities: []
+  - version: 1.8.1
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    chart_version: 1.8.1
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.8.1']
+    incompatibilities: []
   - version: 1.8.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 1.8.0
-    images: []
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.8.0']
+    incompatibilities: []
+  - version: 1.7.1
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    chart_version: 1.7.1
+    images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.8.2', 'nvcr.io/nvidia/gpu-operator:v1.7.1']
+    incompatibilities: []
   - version: 1.7.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 1.7.0
-    images: []
+    images: ['nvcr.io/nvidia/gpu-operator:v1.7.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+    incompatibilities: []
+  - version: 1.6.2
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    chart_version: 1.6.2
+    images: ['nvcr.io/nvidia/gpu-operator:1.6.2', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+    incompatibilities: []
+  - version: 1.6.1
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    chart_version: 1.6.1
+    images: ['nvcr.io/nvidia/gpu-operator:1.6.1', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+    incompatibilities: []
   - version: 1.6.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 1.6.0
-    images: []
+    images: ['nvcr.io/nvidia/gpu-operator:1.6.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+    incompatibilities: []
+  - version: 1.5.2
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    chart_version: 1.5.2
+    images: ['nvcr.io/nvidia/gpu-operator:1.5.2', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+    incompatibilities: []
+  - version: 1.5.1
+    kube: ['1.25', '1.24', '1.23']
+    requirements: []
+    chart_version: 1.5.1
+    images: ['nvcr.io/nvidia/gpu-operator:1.5.1', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+    incompatibilities: []
   - version: 1.5.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 1.5.0
-    images: []
+    images: ['nvcr.io/nvidia/gpu-operator:1.5.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+    incompatibilities: []
   - version: 1.4.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
-    incompatibilities: []
-    summary: null
     chart_version: 1.4.0
-    images: []
+    images: ['nvcr.io/nvidia/gpu-operator:1.4.0', 'quay.io/kubernetes_incubator/node-feature-discovery:v0.6.0']
+    incompatibilities: []
   name: gpu-operator
 - icon: https://raw.githubusercontent.com/pluralsh/plural-artifacts/main/elasticsearch/plural/icons/elastic.png?raw=true
   git_url: https://github.com/elastic/elasticsearch
@@ -13548,3 +13610,295 @@ addons:
     chart_version: 8.18.0
     images: ['docker.elastic.co/elastic-agent/elastic-agent:8.18.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.15.0']
   name: elastic-agent
+- icon: https://avatars.githubusercontent.com/u/96669?s=48&v=4
+  git_url: https://github.com/rabbitmq/cluster-operator
+  release_url: https://github.com/rabbitmq/cluster-operator/releases/tag/v{vsn}
+  helm_repository_url: https://charts.bitnami.com/bitnami
+  chart_name: rabbitmq-cluster-operator
+  versions:
+  - version: 2.16.1
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 4.4.34
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.16.1-debian-12-r0', 'docker.io/bitnami/rabbitmq:4.1.3-debian-12-r1',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.8-debian-12-r0', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.4-debian-12-r0']
+  - version: 2.16.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 4.4.32
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.16.0-debian-12-r2', 'docker.io/bitnami/rabbitmq:4.1.3-debian-12-r1',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.7-debian-12-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.3-debian-12-r2']
+  - version: 2.15.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 4.4.26
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.15.0-debian-12-r1', 'docker.io/bitnami/rabbitmq:4.1.2-debian-12-r1',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.7-debian-12-r1', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.3-debian-12-r0']
+  - version: 2.14.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 4.4.22
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.14.0-debian-12-r3', 'docker.io/bitnami/rabbitmq:4.1.1-debian-12-r2',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.6-debian-12-r3', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.1-debian-12-r3']
+  - version: 2.13.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 4.4.13
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.13.0-debian-12-r0', 'docker.io/bitnami/rabbitmq:4.1.0-debian-12-r3',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.6-debian-12-r0', 'docker.io/bitnami/rmq-messaging-topology-operator:1.17.0-debian-12-r1']
+  - version: 2.12.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 4.4.2
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.12.0-debian-12-r1', 'docker.io/bitnami/rabbitmq:4.0.5-debian-12-r1',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r33', 'docker.io/bitnami/rmq-messaging-topology-operator:1.15.0-debian-12-r5']
+  - version: 2.11.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 4.4.0
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.11.0-debian-12-r4', 'docker.io/bitnami/rabbitmq:4.0.4-debian-12-r1',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r31', 'docker.io/bitnami/rmq-messaging-topology-operator:1.15.0-debian-12-r2']
+  - version: 2.10.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 4.3.24
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.10.0-debian-12-r2', 'docker.io/bitnami/rabbitmq:4.0.2-debian-12-r0',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r28', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.2-debian-12-r6']
+  - version: 2.9.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 4.3.20
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.9.0-debian-12-r8', 'docker.io/bitnami/rabbitmq:3.13.7-debian-12-r0',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r26', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.2-debian-12-r5']
+  - version: 2.8.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 4.2.7
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.8.0-debian-12-r4', 'docker.io/bitnami/rabbitmq:3.13.2-debian-12-r1',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r18', 'docker.io/bitnami/rmq-messaging-topology-operator:1.14.0-debian-12-r0']
+  - version: 2.7.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 4.2.0
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.7.0-debian-12-r8', 'docker.io/bitnami/rabbitmq:3.12.13-debian-12-r2',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-12-r14', 'docker.io/bitnami/rmq-messaging-topology-operator:1.13.0-debian-12-r7']
+  - version: 2.6.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.14.0
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.6.0-debian-11-r3', 'docker.io/bitnami/rabbitmq:3.12.12-debian-11-r3',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-11-r5', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.2-debian-11-r1']
+  - version: 2.5.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.10.5
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.5.0-debian-11-r39', 'docker.io/bitnami/rabbitmq:3.11.26-debian-11-r0',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.4-debian-11-r2', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.1-debian-11-r2']
+  - version: 2.4.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.7.1
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.4.0-debian-11-r15', 'docker.io/bitnami/rabbitmq:3.11.21-debian-11-r0',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-debian-11-r14', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.0-debian-11-r14']
+  - version: 2.3.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.6.2
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.3.0-scratch-r3', 'docker.io/bitnami/rabbitmq:3.11.19-debian-11-r18',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r23', 'docker.io/bitnami/rmq-messaging-topology-operator:1.12.0-scratch-r2']
+  - version: 2.2.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.4.1
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.2.0-scratch-r7', 'docker.io/bitnami/rabbitmq:3.11.16-debian-11-r3',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r21', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.3-scratch-r1']
+  - version: 2.1.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.2.5
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.1.0-scratch-r6', 'docker.io/bitnami/rabbitmq:3.10.18-debian-11-r4',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r16', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.1-scratch-r2']
+  - version: 2.0.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 3.1.5
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:2.0.0-scratch-r6', 'docker.io/bitnami/rabbitmq:3.10.13-debian-11-r6',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r12', 'docker.io/bitnami/rmq-messaging-topology-operator:1.10.0-scratch-r0']
+  - version: 1.14.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.7.4
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:1.14.0-scratch-r6', 'docker.io/bitnami/rabbitmq:3.10.7-debian-11-r8',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r8', 'docker.io/bitnami/rmq-messaging-topology-operator:1.8.0-scratch-r1']
+  - version: 1.13.1
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: 2.6.6
+    images: ['docker.io/bitnami/rabbitmq-cluster-operator:1.13.1-scratch-r3', 'docker.io/bitnami/rabbitmq:3.10.5-debian-11-r2',
+      'docker.io/bitnami/rmq-default-credential-updater:1.0.2-scratch-r2', 'docker.io/bitnami/rmq-messaging-topology-operator:1.6.0-scratch-r0']
+  name: rabbitmq-cluster-operator
+- icon: https://kserve.github.io/website/img/kserve-logo-small.png
+  git_url: https://github.com/kserve/kserve
+  release_url: https://github.com/kserve/kserve/releases/tag/v{vsn}
+  helm_repository_url: oci://ghcr.io/kserve/charts/kserve
+  chart_name: kserve
+  versions:
+  - version: 0.16.0
+    kube: ['1.35', '1.34', '1.33', '1.32']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v0.16.0
+    images: ['docker.io/seldonio/mlserver:1.5.0', 'kserve/huggingfaceserver:v0.16.0',
+      'kserve/huggingfaceserver:v0.16.0-gpu', 'kserve/kserve-controller:v0.16.0',
+      'kserve/lgbserver:v0.16.0', 'kserve/paddleserver:v0.16.0', 'kserve/pmmlserver:v0.16.0',
+      'kserve/sklearnserver:v0.16.0', 'kserve/storage-initializer:v0.16.0', 'kserve/xgbserver:v0.16.0',
+      'nvcr.io/nvidia/tritonserver:23.05-py3', 'pytorch/torchserve-kfs:0.9.0', 'quay.io/brancz/kube-rbac-proxy:v0.18.0',
+      'tensorflow/serving:2.6.2']
+  - version: 0.15.2
+    kube: ['1.32', '1.31', '1.30']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v0.15.2
+    images: ['docker.io/seldonio/mlserver:1.5.0', 'kserve/huggingfaceserver:v0.15.2',
+      'kserve/huggingfaceserver:v0.15.2-gpu', 'kserve/kserve-controller:v0.15.2',
+      'kserve/lgbserver:v0.15.2', 'kserve/paddleserver:v0.15.2', 'kserve/pmmlserver:v0.15.2',
+      'kserve/sklearnserver:v0.15.2', 'kserve/storage-initializer:v0.15.2', 'kserve/xgbserver:v0.15.2',
+      'nvcr.io/nvidia/tritonserver:23.05-py3', 'pytorch/torchserve-kfs:0.9.0', 'quay.io/brancz/kube-rbac-proxy:v0.18.0',
+      'tensorflow/serving:2.6.2']
+  - version: 0.14.1
+    kube: ['1.30', '1.29', '1.28']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v0.14.1
+    images: ['docker.io/seldonio/mlserver:1.5.0', 'kserve/huggingfaceserver:v0.14.1',
+      'kserve/kserve-controller:v0.14.1', 'kserve/lgbserver:v0.14.1', 'kserve/modelmesh-controller:v0.12.0',
+      'kserve/paddleserver:v0.14.1', 'kserve/pmmlserver:v0.14.1', 'kserve/sklearnserver:v0.14.1',
+      'kserve/storage-initializer:v0.14.1', 'kserve/xgbserver:v0.14.1', 'nvcr.io/nvidia/tritonserver:23.04-py3',
+      'nvcr.io/nvidia/tritonserver:23.05-py3', 'openvino/model_server:2022.2', 'pytorch/torchserve-kfs:0.9.0',
+      'pytorch/torchserve:0.7.1-cpu', 'quay.io/brancz/kube-rbac-proxy:v0.18.0', 'seldonio/mlserver:1.3.2',
+      'tensorflow/serving:2.6.2']
+  - version: 0.13.1
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v0.13.1
+    images: ['docker.io/seldonio/mlserver:1.3.2', 'gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1',
+      'kserve/huggingfaceserver:v0.13.1', 'kserve/kserve-controller:v0.13.1', 'kserve/lgbserver:v0.13.1',
+      'kserve/modelmesh-controller:v0.12.0-rc0', 'kserve/paddleserver:v0.13.1', 'kserve/pmmlserver:v0.13.1',
+      'kserve/sklearnserver:v0.13.1', 'kserve/storage-initializer:v0.13.1', 'kserve/xgbserver:v0.13.1',
+      'nvcr.io/nvidia/tritonserver:23.04-py3', 'nvcr.io/nvidia/tritonserver:23.05-py3',
+      'openvino/model_server:2022.2', 'pytorch/torchserve-kfs:0.9.0', 'pytorch/torchserve:0.7.1-cpu',
+      'seldonio/mlserver:1.3.2', 'tensorflow/serving:2.6.2']
+  - version: 0.12.1
+    kube: ['1.29', '1.28', '1.27']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v0.12.1
+    images: ['docker.io/seldonio/mlserver:1.3.2', 'gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1',
+      'kserve/huggingfaceserver:v0.12.1', 'kserve/kserve-controller:v0.12.1', 'kserve/lgbserver:v0.12.1',
+      'kserve/modelmesh-controller:v0.11.2', 'kserve/paddleserver:v0.12.1', 'kserve/pmmlserver:v0.12.1',
+      'kserve/sklearnserver:v0.12.1', 'kserve/storage-initializer:v0.12.1', 'kserve/xgbserver:v0.12.1',
+      'nvcr.io/nvidia/tritonserver:23.04-py3', 'nvcr.io/nvidia/tritonserver:23.05-py3',
+      'openvino/model_server:2022.2', 'pytorch/torchserve-kfs:0.9.0', 'pytorch/torchserve:0.7.1-cpu',
+      'seldonio/mlserver:1.3.2', 'tensorflow/serving:2.6.2']
+  - version: 0.11.2
+    kube: ['1.27', '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v0.11.2
+    images: []
+  - version: 0.10.2
+    kube: ['1.25', '1.24', '1.23', '1.22']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v0.10.2
+    images: []
+  - version: 0.9.0
+    kube: ['1.24', '1.23', '1.22', '1.21']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v0.9.0
+    images: []
+  - version: 0.8.0
+    kube: ['1.22', '1.21', '1.20']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v0.8.0
+    images: []
+  - version: 0.7.0
+    kube: ['1.22', '1.21', '1.20', '1.19']
+    requirements: []
+    incompatibilities: []
+    summary: null
+    chart_version: v0.7.0
+    images: []
+  name: kserve

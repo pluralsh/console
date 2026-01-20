@@ -50,6 +50,7 @@ function AccordionItem({
   caret = 'right',
   trigger,
   additionalContentStyles,
+  triggerWrapperStyles,
   children,
   ...props
 }: {
@@ -61,6 +62,7 @@ function AccordionItem({
   trigger: ReactNode
   children: ReactNode
   additionalContentStyles?: CSSObject
+  triggerWrapperStyles?: CSSObject
 } & Omit<ComponentProps<typeof RadixAccordion.Item>, 'value'>) {
   const theme = useTheme()
   const paddingSize = getPaddingSize(theme, padding)
@@ -75,6 +77,7 @@ function AccordionItem({
         <TriggerSC
           $caret={caret}
           $padding={paddingSize}
+          css={triggerWrapperStyles}
         >
           {trigger}
           {caret !== 'none' &&

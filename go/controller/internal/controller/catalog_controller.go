@@ -73,7 +73,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	if err != nil {
 		return common.HandleRequeue(nil, err, catalog.SetCondition)
 	}
-	if exists {
+	if exists && !catalog.Spec.Reconciliation.DriftDetect() {
 		utils.MarkReadOnly(catalog)
 		return r.handleExistingResource(ctx, catalog)
 	}

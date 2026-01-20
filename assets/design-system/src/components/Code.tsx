@@ -20,7 +20,7 @@ import Card, { type CardProps } from './Card'
 import Flex from './Flex'
 import Highlight from './Highlight'
 import { ListBoxItem } from './ListBoxItem'
-import { Mermaid, MermaidRefHandle } from './Mermaid'
+import { Mermaid, MERMAID_BG_COLOR, MermaidRefHandle } from './Mermaid'
 import { Select } from './Select'
 import SubTab from './SubTab'
 import { TabList, type TabListStateProps } from './TabList'
@@ -375,7 +375,7 @@ const CodeContentSC = styled.div<{
   }px`,
   borderBottomLeftRadius: theme.borderRadiuses.large,
   borderBottomRightRadius: theme.borderRadiuses.large,
-  ...($validMermaid ? { backgroundColor: 'white', padding: 0 } : {}),
+  ...($validMermaid ? { backgroundColor: MERMAID_BG_COLOR, padding: 0 } : {}),
 }))
 
 function CodeUnstyled({

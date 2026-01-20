@@ -3,6 +3,7 @@ import { useState } from 'react'
 
 import { type LayerPositionType } from '../components/Layer'
 import { GraphQLToast, Toast, type ToastSeverity } from '../components/Toast'
+import { ApolloError } from '@apollo/client'
 
 export default {
   title: 'Toast',
@@ -99,13 +100,11 @@ function GraphQLTemplate() {
         show={visible}
         margin="large"
         onClose={() => setVisible(false)}
-        error={{
-          graphQLErrors: [
-            {
-              message: 'XYZ could not be found',
-            },
-          ],
-        }}
+        error={
+          new ApolloError({
+            graphQLErrors: [{ message: 'XYZ could not be found' }],
+          })
+        }
         header="404 Not Found"
       />
     </Flex>

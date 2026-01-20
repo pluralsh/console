@@ -16,6 +16,22 @@ defmodule Console.AI.ResearchTest do
     end
   end
 
+  describe "update_research/3" do
+    test "it can update a research" do
+      user     = insert(:user)
+      research = insert(:infra_research, user: user, prompt: "Give me a diagram of the grafana deployment")
+
+      {:ok, research} = Research.update_research(%{published: true}, research.id, user)
+
+      assert research.published
+    end
+
+    test "users cannot update others' research" do
+      research = insert(:infra_research)
+      {:error, _} = Research.update_research(%{published: true}, research.id, insert(:user))
+    end
+  end
+
   describe "fix_diagram/3" do
     test "it can fix a diagram" do
       user = insert(:user)

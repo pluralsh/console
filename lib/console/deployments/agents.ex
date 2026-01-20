@@ -16,7 +16,8 @@ defmodule Console.Deployments.Agents do
     Group,
     ScmConnection,
     PullRequest,
-    AgentMessage
+    AgentMessage,
+    AgentRunRepository
   }
 
   @type error :: Console.error
@@ -259,6 +260,20 @@ defmodule Console.Deployments.Agents do
     |> execute(extract: :update)
     |> notify(:update)
   end
+
+  @doc """
+  It will record the repository for an agent run if it was successful
+  """
+  @spec record_repository(AgentRun.t) :: {:ok, AgentRunRepository.t} | error
+  def record_repository(%AgentRun{repository: repo, status: :successful}) do
+    case Repo.get_by(AgentRunRepository, url: repo) do
+      %AgentRunRepository{} = repo -> repo
+      _ -> %AgentRunRepository{url: repo}
+    end
+    |> AgentRunRepository.changeset(%{last_used_at: Timex.now(), url: repo})
+    |> Repo.insert_or_update()
+  end
+  def record_repository(_), do: {:error, "cannot record repository for non-successful agent runs"}
 
   @doc """
   Fetches the k8s pod resource from the agent run configured cluster via KAS

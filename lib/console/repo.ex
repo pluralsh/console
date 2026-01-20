@@ -10,6 +10,21 @@ defmodule Console.Repo do
     |> get(id)
   end
 
+  def configure_iam_authentication(opts, region) do
+    token = ExAws.RDS.generate_db_auth_token(
+      opts[:hostname],
+      opts[:username],
+      opts[:port],
+      (if is_binary(region), do: %{region: region}, else: %{})
+    )
+
+    Keyword.merge(opts, [password: token, ssl: rds_ssl_opts(:aws, opts[:hostname])])
+  end
+
+  def setup_rds_iam(username) do
+    query("GRANT rds_iam TO \"#{username}\"", [])
+  end
+
   def rds_ssl_opts(:aws, url) do
     [
       verify: :verify_peer,
@@ -32,7 +47,7 @@ defmodule Console.Repo do
 
   defp parse_hostname(url) do
     case URI.parse(url) do
-      %URI{host: host} -> String.to_charlist(host)
+      %URI{host: host} when is_binary(host) -> String.to_charlist(host)
       _ -> String.to_charlist(url)
     end
   end

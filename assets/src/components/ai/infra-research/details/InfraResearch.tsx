@@ -1,86 +1,104 @@
 import {
+  AiSparkleFilledIcon,
+  Button,
+  ButtonProps,
+  Chip,
+  ChipProps,
+  ChipSeverity,
+  Divider,
+  EmptyState,
   Flex,
-  SubTab,
-  TabList,
+  ReloadIcon,
+  SpinnerAlt,
+  Tooltip,
   useSetBreadcrumbs,
+  WrapWithIf,
 } from '@pluralsh/design-system'
+import { useChatbot } from 'components/ai/AIContext'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import { useLogin } from 'components/contexts'
 import { GqlError } from 'components/utils/Alert'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { LinkTabWrap } from 'components/utils/Tabs'
+import { StackedText } from 'components/utils/table/StackedText'
+import { Body1P, Body2BoldP } from 'components/utils/typography/Text'
 import {
   InfraResearchFragment,
   InfraResearchStatus,
+  useCreateInfraResearchMutation,
+  useFixResearchDiagramMutation,
   useInfraResearchQuery,
 } from 'generated/graphql'
-import { truncate } from 'lodash'
-import { useMemo, useRef } from 'react'
-import { Outlet, useMatch } from 'react-router-dom'
+import { capitalize, truncate } from 'lodash'
+import { ReactNode, useMemo, useState } from 'react'
+import { useMatch, useNavigate } from 'react-router-dom'
 import {
   AI_INFRA_RESEARCH_ABS_PATH,
-  AI_INFRA_RESEARCH_ANALYSIS_REL_PATH,
-  AI_INFRA_RESEARCH_DIAGRAM_REL_PATH,
   AI_INFRA_RESEARCH_PARAM_ID,
-  AI_THREADS_REL_PATH,
   getInfraResearchAbsPath,
 } from 'routes/aiRoutesConsts'
-import styled from 'styled-components'
-import {
-  getInfraResearchesBreadcrumbs,
-  InfraResearchStatusChip,
-} from '../InfraResearches'
+import styled, { useTheme } from 'styled-components'
+import { getInfraResearchesBreadcrumbs } from '../InfraResearches'
+import { InfraResearchAnalysis } from './InfraResearchAnalysis'
+import { InfraResearchDiagram } from './InfraResearchDiagram'
+import { InfraResearchShareMenu } from './InfraResearchShareMenu'
 import { InfraResearchSidecar } from './InfraResearchSidecar'
 
-const directory = [
-  { path: AI_INFRA_RESEARCH_DIAGRAM_REL_PATH, label: 'Diagram' },
-  { path: AI_INFRA_RESEARCH_ANALYSIS_REL_PATH, label: 'Analysis' },
-  { path: AI_THREADS_REL_PATH, label: 'Threads' },
-]
-
-function getBreadcrumbs(
-  infraResearch: Nullable<InfraResearchFragment>,
-  tab: string
-) {
+function getBreadcrumbs(infraResearch: Nullable<InfraResearchFragment>) {
   return [
     ...getInfraResearchesBreadcrumbs(),
     {
       label: truncate(infraResearch?.prompt ?? '', { length: 30 }),
-      url: getInfraResearchAbsPath({
-        infraResearchId: infraResearch?.id,
-        tab: getInfraResearchDefaultTab(infraResearch?.status),
-      }),
-    },
-    {
-      label: directory.find((d) => d.path === tab)?.path ?? '',
-      url: getInfraResearchAbsPath({ infraResearchId: infraResearch?.id, tab }),
+      url: getInfraResearchAbsPath({ infraResearchId: infraResearch?.id }),
     },
   ]
 }
 
-export type InfraResearchContextType = {
-  infraResearch: Nullable<InfraResearchFragment>
-}
-
 export function InfraResearch() {
-  const { me } = useLogin()
-  const { researchId = '', tab = '' } =
-    useMatch(
-      `${AI_INFRA_RESEARCH_ABS_PATH}/:${AI_INFRA_RESEARCH_PARAM_ID}/:tab?/*`
-    )?.params ?? {}
-  const tabStateRef = useRef<any>(null)
+  const navigate = useNavigate()
+  const { spacing } = useTheme()
+  const { researchId: id = '' } =
+    useMatch(`${AI_INFRA_RESEARCH_ABS_PATH}/:${AI_INFRA_RESEARCH_PARAM_ID}/*`)
+      ?.params ?? {}
+  const {
+    isChatbotOpen,
+    createNewThread,
+    mutationLoading: createThreadLoading,
+    goToInfraResearch,
+  } = useChatbot()
+
+  const [parseError, setParseError] = useState<Nullable<Error>>(null)
+  const [parseFixAttempts, setParseFixAttempts] = useState(0)
 
   const { data, loading, error } = useInfraResearchQuery({
-    variables: { id: researchId },
+    variables: { id },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
   const infraResearch = data?.infraResearch
 
+  const [
+    fixResearchDiagram,
+    { loading: fixLoading, error: fixError, reset: resetFix },
+  ] = useFixResearchDiagramMutation({
+    onCompleted: () => setParseFixAttempts((prev) => prev + 1),
+  })
+  const recreateMutation = useCreateInfraResearchMutation({
+    variables: { attributes: { prompt: infraResearch?.prompt || '' } },
+    onCompleted: ({ createInfraResearch }) => {
+      if (createInfraResearch?.id) {
+        navigate(
+          getInfraResearchAbsPath({ infraResearchId: createInfraResearch.id })
+        )
+        goToInfraResearch(createInfraResearch.id)
+        setParseError(null)
+        resetFix()
+      }
+    },
+  })
+
   useSetBreadcrumbs(
-    useMemo(() => getBreadcrumbs(infraResearch, tab), [infraResearch, tab])
+    useMemo(() => getBreadcrumbs(infraResearch), [infraResearch])
   )
 
   if (error)
@@ -91,54 +109,249 @@ export function InfraResearch() {
       />
     )
 
+  if (!(infraResearch || loading))
+    return <EmptyState message="Infra research not found." />
+
+  const { status, analysis, diagram, threads } = infraResearch ?? {}
+  const isRunning = status === InfraResearchStatus.Running
+
+  const headerButtons =
+    status === InfraResearchStatus.Completed ? (
+      <Flex gap="small">
+        <RegenerateButton
+          secondary
+          mutation={recreateMutation}
+          tooltip={
+            <span>
+              Creates a new research with same prompt
+              <br />
+              Useful if you want to try it again fresh
+            </span>
+          }
+        />
+
+        <Button
+          small
+          secondary
+          loading={createThreadLoading}
+          onClick={() =>
+            createNewThread({
+              researchId: id,
+              summary: `Further discussion about "${truncate(infraResearch?.prompt ?? '', { length: 30 })}"`,
+            })
+          }
+        >
+          Analyze further with Plural AI
+        </Button>
+      </Flex>
+    ) : null
+
   return (
-    <MainContentSC>
+    <WrapperSC>
       <Flex
         direction="column"
-        gap="medium"
+        gap="large"
         flex={1}
         minWidth={0}
+        paddingRight={spacing.xsmall}
+        overflow="auto"
       >
         <StretchedFlex>
-          <TabList
-            stateRef={tabStateRef}
-            stateProps={{ selectedKey: tab }}
-          >
-            {directory
-              .filter(({ path }) =>
-                infraResearch?.user && me?.id === infraResearch.user.id
-                  ? true
-                  : path !== AI_THREADS_REL_PATH
-              )
-              .map(({ label, path }) => (
-                <LinkTabWrap
-                  subTab
-                  key={path}
-                  to={path}
-                >
-                  <SubTab key={path}>{label}</SubTab>
-                </LinkTabWrap>
-              ))}
-          </TabList>
-          <InfraResearchStatusChip status={infraResearch?.status} />
+          <StackedText
+            first="Prompt"
+            firstPartialType="subtitle1"
+            firstColor="text"
+            second={infraResearch?.prompt}
+            secondPartialType="body2"
+            secondColor="text-xlight"
+          />
+          <Flex gap="small">
+            {status && (
+              <InfraResearchStatusChip
+                status={status}
+                {...((isRunning || (threads?.length ?? 0) > 1) && {
+                  clickable: true,
+                  onClick: () => goToInfraResearch(id),
+                })}
+              />
+            )}
+            {!isChatbotOpen && headerButtons}
+            {status !== InfraResearchStatus.Failed && (
+              <InfraResearchShareMenu infraResearch={infraResearch} />
+            )}
+          </Flex>
         </StretchedFlex>
-        {!data && loading ? (
-          <LoadingIndicator />
+        {isChatbotOpen && headerButtons}
+        <Divider backgroundColor="border" />
+        {recreateMutation[1].error && (
+          <GqlError error={recreateMutation[1].error} />
+        )}
+        {fixError && <GqlError error={fixError} />}
+        {parseError && (
+          <GqlError
+            error={parseError}
+            action={
+              parseFixAttempts < 2 ? (
+                <Tooltip
+                  placement="top"
+                  label={
+                    <span>
+                      Attempts to fix Mermaid syntax errors automatically-
+                      success may vary
+                    </span>
+                  }
+                  css={{ maxWidth: 275 }}
+                >
+                  <Button
+                    small
+                    loading={fixLoading}
+                    startIcon={<AiSparkleFilledIcon />}
+                    onClick={() =>
+                      fixResearchDiagram({
+                        variables: { id, error: parseError.message },
+                      })
+                    }
+                  >
+                    Fix parse errors
+                  </Button>
+                </Tooltip>
+              ) : (
+                <RegenerateButton mutation={recreateMutation} />
+              )
+            }
+          />
+        )}
+        {status === InfraResearchStatus.Failed ? (
+          <GqlError
+            error="An error occurred while generating this research. Try running it again with the button below."
+            action={<RegenerateButton mutation={recreateMutation} />}
+          />
         ) : (
-          <Outlet context={{ infraResearch }} />
+          <>
+            <Body2BoldP $color="text">Diagram</Body2BoldP>
+            <Flex
+              direction="column"
+              gap="medium"
+            >
+              {isRunning && (
+                <Body1P $shimmer>
+                  Generating your diagram. This may take a few minutes. Feel
+                  free to leave the page while the agent runs in the background.
+                </Body1P>
+              )}
+              {isRunning || loading ? (
+                <RectangleSkeleton
+                  $width="100%"
+                  $height={300}
+                />
+              ) : (
+                <InfraResearchDiagram
+                  diagram={diagram}
+                  setParseError={setParseError}
+                />
+              )}
+            </Flex>
+            <Body2BoldP $color="text">Analysis</Body2BoldP>
+            {isRunning || loading ? (
+              <Flex
+                direction="column"
+                gap="medium"
+              >
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <RectangleSkeleton
+                    key={index}
+                    $width={`${100 - [12, 0, 5, 3][index % 4]}%`}
+                    $height="medium"
+                  />
+                ))}
+              </Flex>
+            ) : (
+              <InfraResearchAnalysis analysis={analysis} />
+            )}
+          </>
         )}
       </Flex>
-      <ResponsiveLayoutSidecarContainer css={{ width: 300 }}>
+      <ResponsiveLayoutSidecarContainer $breakpointWidth={768}>
         <InfraResearchSidecar
           infraResearch={infraResearch}
-          loading={loading}
+          loading={!infraResearch && loading}
         />
       </ResponsiveLayoutSidecarContainer>
-    </MainContentSC>
+    </WrapperSC>
   )
 }
 
-const MainContentSC = styled.div(({ theme }) => ({
+function RegenerateButton({
+  mutation,
+  tooltip,
+  ...props
+}: {
+  mutation: ReturnType<typeof useCreateInfraResearchMutation>
+  tooltip?: ReactNode
+} & ButtonProps) {
+  const [regenerate, { loading }] = mutation
+  return (
+    <WrapWithIf
+      condition={!!tooltip}
+      wrapper={
+        <Tooltip
+          placement="top"
+          label={tooltip}
+        />
+      }
+    >
+      <Button
+        small
+        loading={loading}
+        onClick={() => regenerate()}
+        startIcon={<ReloadIcon />}
+        {...props}
+      >
+        Regenerate
+      </Button>
+    </WrapWithIf>
+  )
+}
+
+export function InfraResearchStatusChip({
+  status,
+  runningText = 'View progress',
+  ...props
+}: {
+  status: InfraResearchStatus
+  runningText?: string
+} & ChipProps) {
+  const isRunning = status === InfraResearchStatus.Running
+  return (
+    <Chip
+      size="large"
+      fillLevel={isRunning ? 2 : 1}
+      severity={statusToSeverity[status]}
+      {...props}
+    >
+      {isRunning ? (
+        <Flex
+          gap="xsmall"
+          align="center"
+        >
+          <SpinnerAlt />
+          <span>{runningText}</span>
+        </Flex>
+      ) : (
+        capitalize(status)
+      )}
+    </Chip>
+  )
+}
+
+const statusToSeverity: Record<InfraResearchStatus, ChipSeverity> = {
+  [InfraResearchStatus.Running]: 'neutral',
+  [InfraResearchStatus.Completed]: 'success',
+  [InfraResearchStatus.Failed]: 'danger',
+  [InfraResearchStatus.Pending]: 'info',
+}
+
+const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   padding: theme.spacing.large,
   maxWidth: theme.breakpoints.desktopLarge,
@@ -147,10 +360,3 @@ const MainContentSC = styled.div(({ theme }) => ({
   height: '100%',
   minHeight: 0,
 }))
-
-export const getInfraResearchDefaultTab = (
-  status: Nullable<InfraResearchStatus>
-) =>
-  status === InfraResearchStatus.Completed
-    ? AI_INFRA_RESEARCH_DIAGRAM_REL_PATH
-    : AI_THREADS_REL_PATH

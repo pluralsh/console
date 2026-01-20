@@ -51,6 +51,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
   defp traverse_children(%ServiceComponent{id: id}, true) do
     ServiceComponentChild.for_component(id)
     |> ServiceComponentChild.for_states([:failed, :pending])
+    |> ServiceComponentChild.with_limit(15)
     |> Console.Repo.all()
     |> Console.Repo.preload([:insight, component: [service: :cluster]])
     |> Enum.map(& {&1, Worker.generate(&1)})

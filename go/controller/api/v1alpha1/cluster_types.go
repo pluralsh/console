@@ -169,6 +169,10 @@ type ClusterSpec struct {
 	// +kubebuilder:validation:Optional
 	NodePools []ClusterNodePool `json:"nodePools"`
 
+	// DisableAI indicates whether to disable ai insights for this cluster.
+	// +kubebuilder:validation:Optional
+	DisableAI *bool `json:"disableAI,omitempty"`
+
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals.
 	// +kubebuilder:validation:Optional

@@ -12,6 +12,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
   def generate(%Service{} = service) do
     components = ServiceComponent.for_service(service.id)
                  |> ServiceComponent.for_states([:failed, :pending])
+                 |> ServiceComponent.synced()
                  |> Repo.all()
                  |> Repo.preload([:insight, service: :cluster])
                  |> Enum.map(&{&1, Worker.generate(&1)})

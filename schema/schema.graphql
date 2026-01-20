@@ -33,7 +33,7 @@ type RootQueryType {
 
   accessTokens(after: String, first: Int, before: String, last: Int): AccessTokenConnection
 
-  accessToken(id: ID!): AccessToken
+  accessToken(id: ID, token: String): AccessToken
 
   persona(id: ID!): Persona
 
@@ -452,6 +452,8 @@ type RootQueryType {
 
   agentRuns(after: String, first: Int, before: String, last: Int, runtimeId: ID): AgentRunConnection
 
+  agentRunRepositories(after: String, first: Int, before: String, last: Int, q: String): AgentRunRepositoryConnection
+
   agentRuntime(id: ID, name: String): AgentRuntime
 
   agentRun(id: ID!): AgentRun
@@ -459,6 +461,12 @@ type RootQueryType {
   clusterSentinelRunJobs(after: String, first: Int, before: String, last: Int): SentinelRunJobConnection
 
   sentinelRunJob(id: ID!): SentinelRunJob
+
+  chatProviderConnections(
+    after: String, first: Int, before: String, last: Int, type: ChatProviderConnectionType, q: String
+  ): ChatProviderConnectionConnection
+
+  chatProviderConnection(id: ID, name: String): ChatProviderConnection
 
   aiInsight(id: ID!): AiInsight
 
@@ -583,9 +591,21 @@ type RootMutationType {
 
   deleteRole(id: ID!): Role
 
-  createAccessToken(scopes: [ScopeAttributes]): AccessToken
+  createAccessToken(
+    scopes: [ScopeAttributes]
 
-  createServiceAccountToken(id: ID!, scopes: [ScopeAttributes]): AccessToken
+    "the ttl of the access token, e.g. 1h, 1d, 1w"
+    expiry: String
+  ): AccessToken
+
+  createServiceAccountToken(
+    id: ID!
+
+    scopes: [ScopeAttributes]
+
+    "the ttl of the access token, e.g. 1h, 1d, 1w"
+    expiry: String
+  ): AccessToken
 
   deleteAccessToken(id: ID, token: String): AccessToken
 
@@ -741,6 +761,14 @@ type RootMutationType {
   updateClusterIsoImage(id: ID!, attributes: ClusterIsoImageAttributes!): ClusterIsoImage
 
   deleteClusterIsoImage(id: ID!): ClusterIsoImage
+
+  upsertUpgradePlanCallout(attributes: UpgradePlanCalloutAttributes!): UpgradePlanCallout
+
+  deleteUpgradePlanCallout(name: String!): UpgradePlanCallout
+
+  upsertCustomCompatibilityMatrix(attributes: CustomCompatibilityMatrixAttributes!): CustomCompatibilityMatrix
+
+  deleteCustomCompatibilityMatrix(name: String!): CustomCompatibilityMatrix
 
   createServiceDeployment(
     clusterId: ID
@@ -1058,6 +1086,10 @@ type RootMutationType {
 
   updateSentinelRunJob(id: ID!, attributes: SentinelRunJobUpdateAttributes): SentinelRunJob
 
+  upsertChatProviderConnection(attributes: ChatProviderConnectionAttributes!): ChatProviderConnection
+
+  deleteChatProviderConnection(id: ID!): ChatProviderConnection
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
@@ -1234,6 +1266,65 @@ type PolicyBinding {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+enum ChatProviderConnectionType {
+  SLACK
+  TEAMS
+}
+
+"A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
+input ChatProviderConnectionAttributes {
+  "the name of this chat connection"
+  name: String!
+
+  "the type of this chat connection"
+  type: ChatProviderConnectionType!
+
+  configuration: ChatProviderConnectionConfigurationAttributes!
+}
+
+input ChatProviderConnectionConfigurationAttributes {
+  slack: SlackConnectionConfigurationAttributes
+}
+
+input SlackConnectionConfigurationAttributes {
+  appToken: String!
+  botToken: String!
+  botId: String
+}
+
+"A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
+type ChatProviderConnection {
+  id: ID!
+
+  "the name of this chat connection"
+  name: String!
+
+  "the type of this chat connection"
+  type: ChatProviderConnectionType!
+
+  "the configuration for this chat connection"
+  configuration: ChatProviderConnectionConfiguration!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type ChatProviderConnectionConfiguration {
+  "the configuration for the slack connection"
+  slack: SlackConnectionConfiguration
+}
+
+type SlackConnectionConfiguration {
+  "the bot id for the slack connection"
+  botId: String
+}
+
+type ChatProviderConnectionConnection {
+  pageInfo: PageInfo!
+  edges: [ChatProviderConnectionEdge]
 }
 
 enum AgentRuntimeType {
@@ -1691,6 +1782,21 @@ type AgentMessageTool {
   output: String
 }
 
+"A repository that has been used by an agent run in the past, useful for typeaheads and dropdowns"
+type AgentRunRepository {
+  id: ID!
+
+  "the url of the repository"
+  url: String!
+
+  "the last time the repository was used"
+  lastUsedAt: DateTime
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type AgentRuntimeConnection {
   pageInfo: PageInfo!
   edges: [AgentRuntimeEdge]
@@ -1699,6 +1805,11 @@ type AgentRuntimeConnection {
 type AgentRunConnection {
   pageInfo: PageInfo!
   edges: [AgentRunEdge]
+}
+
+type AgentRunRepositoryConnection {
+  pageInfo: PageInfo!
+  edges: [AgentRunRepositoryEdge]
 }
 
 type AgentMessageDelta {
@@ -3874,6 +3985,9 @@ type StackRun {
   "whether this run is a dry run"
   dryRun: Boolean!
 
+  "whether this run is a destroy run"
+  destroy: Boolean
+
   "optional k8s job configuration for the job that will apply this stack"
   jobSpec: JobGateSpec
 
@@ -4567,6 +4681,9 @@ input VulnerabilityReportAttributes {
   "the language version of the artifact, if applicable"
   artifactLanguageVersion: String
 
+  "the agent runtime to use with this vulnerability report"
+  agentRuntime: String
+
   os: VulnOsAttributes
 
   summary: VulnSummaryAttributes
@@ -4610,6 +4727,7 @@ input VulnerabilityAttributes {
   severity: VulnSeverity
   score: Float
   repositoryUrl: String
+  agentRuntime: String
   title: String
   description: String
   cvssSource: String
@@ -4740,6 +4858,9 @@ type VulnerabilityReport {
   "the language version of the artifact, if applicable"
   artifactLanguageVersion: String
 
+  "the agent runtime to use with this vulnerability report"
+  agentRuntime: String
+
   os: VulnOs
 
   summary: VulnSummary
@@ -4789,6 +4910,7 @@ type Vulnerability {
   fixedVersion: String
   installedVersion: String
   severity: VulnSeverity
+  agentRuntime: String
   score: Float
   title: String
   description: String
@@ -5960,6 +6082,9 @@ input HelmMinimalAttributes {
 
   "the helm release name to use when rendering this helm chart"
   release: String
+
+  "whether to ignore helm hooks when rendering this helm chart"
+  ignoreHooks: Boolean
 }
 
 input ServiceCloneAttributes {
@@ -6346,6 +6471,9 @@ type HelmMinimal {
 
   "the helm release name to use when rendering this helm chart"
   release: String
+
+  "whether to ignore helm hooks when rendering this helm chart"
+  ignoreHooks: Boolean
 }
 
 "metadata needed for configuring kustomize"
@@ -6711,6 +6839,9 @@ input ClusterAttributes {
 
   kubeconfig: KubeconfigAttributes
 
+  "whether to disable ai insights for this cluster"
+  disableAi: Boolean
+
   cloudSettings: CloudSettingsAttributes
 
   "the project id this cluster will belong to"
@@ -6810,6 +6941,9 @@ input ClusterUpdateAttributes {
   distro: ClusterDistro
 
   metadata: Json
+
+  "whether to disable ai insights for this cluster"
+  disableAi: Boolean
 
   nodePools: [NodePoolAttributes]
 
@@ -7178,6 +7312,69 @@ input HealthRange {
   max: Int
 }
 
+"a callout for the upgrade plan"
+input UpgradePlanCalloutAttributes {
+  "the name of the callout"
+  name: String!
+
+  "the callouts for this instance"
+  callouts: [UpgradePlanCalloutCalloutAttributes]
+
+  "additional context for this callout"
+  context: Json
+}
+
+"a callout for a specific addon in the upgrade plan"
+input UpgradePlanCalloutCalloutAttributes {
+  "the addon this callout applies to"
+  addon: String!
+
+  "the template to use for this callout"
+  template: String!
+}
+
+input CustomCompatibilityMatrixAttributes {
+  "the name of the matrix"
+  name: String!
+
+  "the icon to use for this matrix"
+  icon: String
+
+  "the git url to use for this matrix"
+  gitUrl: String
+
+  "the release url to use for this matrix"
+  releaseUrl: String
+
+  "the readme url to use for this matrix"
+  readmeUrl: String
+
+  "the versions for this matrix"
+  versions: [CompatibilityMatrixVersionAttributes]
+}
+
+input CompatibilityMatrixVersionAttributes {
+  "the version of the matrix"
+  version: String!
+
+  "the chart version of the matrix"
+  chartVersion: String
+
+  "the kube version of the matrix"
+  kube: [String!]
+
+  "the summary for this version"
+  summary: CompatibilityMatrixSummaryAttributes
+}
+
+input CompatibilityMatrixSummaryAttributes {
+  "the helm changes for this version"
+  helmChanges: [String!]
+
+  "the breaking changes for this version"
+  breakingChanges: [String!]
+}
+
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
   "the id of this provider"
@@ -7297,6 +7494,9 @@ type Cluster {
 
   "the interval in seconds between pings to the cluster"
   pingInterval: Int
+
+  "whether to disable ai insights for this cluster"
+  disableAi: Boolean
 
   "The version of OpenShift this cluster is running"
   openshiftVersion: String
@@ -7489,6 +7689,20 @@ type Cluster {
   editable: Boolean
 
   auditLogs(after: String, first: Int, before: String, last: Int): ClusterAuditLogConnection
+
+  "lists all deprecated custom resources for this cluster with optional filtering"
+  deprecatedCrds(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "a search query to filter on group, kind, namespace or name"
+    q: String
+  ): DeprecatedCustomResourceConnection
 
   insertedAt: DateTime
 
@@ -7837,6 +8051,7 @@ type RuntimeAddonUpgrade {
   addon: RuntimeAddon
   current: AddonVersion
   fix: AddonVersion
+  callout: String
 }
 
 type CloudAddonUpgrade {
@@ -8281,6 +8496,65 @@ type KubernetesChangelog {
   apiUpdates: [String]
 }
 
+type UpgradePlanCallout {
+  id: ID!
+  name: String!
+  callouts: [UpgradePlanCalloutCallout]
+  context: Map
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type UpgradePlanCalloutCallout {
+  addon: String!
+  template: String!
+}
+
+"a custom compatibility matrix for a given addon"
+type CustomCompatibilityMatrix {
+  id: ID!
+
+  "the name of the addon this matrix applies to"
+  name: String!
+
+  "the icon to use for this matrix"
+  icon: String
+
+  "the git url of this add-on"
+  gitUrl: String
+
+  "the release url of this add-on"
+  releaseUrl: String
+
+  "the readme url of this add-on"
+  readmeUrl: String
+
+  "the versions for this matrix"
+  versions: [CustomCompatibilityMatrixVersion]
+}
+
+type CustomCompatibilityMatrixVersion {
+  "the application version of the addon this matrix applies to"
+  version: String!
+
+  "the chart version of the addon this matrix applies to"
+  chartVersion: String
+
+  "the kube versions of the addon this matrix applies to"
+  kube: [String!]
+
+  "the summary for this version"
+  summary: CompatibilityMatrixSummary
+}
+
+type CompatibilityMatrixSummary {
+  "the helm changes for this version"
+  helmChanges: [String!]
+
+  "the breaking changes for this version"
+  breakingChanges: [String!]
+}
+
 type ClusterConnection {
   pageInfo: PageInfo!
   edges: [ClusterEdge]
@@ -8339,6 +8613,11 @@ type ClusterIsoImageConnection {
 type ProjectUsageHistoryConnection {
   pageInfo: PageInfo!
   edges: [ProjectUsageHistoryEdge]
+}
+
+type DeprecatedCustomResourceConnection {
+  pageInfo: PageInfo!
+  edges: [DeprecatedCustomResourceEdge]
 }
 
 enum AuthMethod {
@@ -9848,6 +10127,12 @@ input ChatThreadAttributes {
   "the flow this thread was created in"
   flowId: ID
 
+  "the service this thread was created for"
+  serviceId: ID
+
+  "the research this thread was created for"
+  researchId: ID
+
   "the settings for this thread"
   settings: ChatThreadSettingsAttributes
 
@@ -9964,11 +10249,15 @@ type ChatThread {
 
   flow: Flow
 
+  service: ServiceDeployment
+
   user: User
 
   insight: AiInsight
 
   session: AgentSession
+
+  research: InfraResearch
 
   "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
   tools: [McpServerTool]
@@ -11591,6 +11880,8 @@ type ConsoleConfiguration {
 
   features: AvailableFeatures
 
+  licenseExpiry: DateTime
+
   manifest: PluralManifest
 
   gitStatus: GitStatus
@@ -11762,6 +12053,11 @@ type HelmRepositoryEdge {
 
 type GitRepositoryEdge {
   node: GitRepository
+  cursor: String
+}
+
+type DeprecatedCustomResourceEdge {
+  node: DeprecatedCustomResource
   cursor: String
 }
 
@@ -12005,6 +12301,11 @@ type SentinelEdge {
   cursor: String
 }
 
+type AgentRunRepositoryEdge {
+  node: AgentRunRepository
+  cursor: String
+}
+
 type AgentRunEdge {
   node: AgentRun
   cursor: String
@@ -12012,5 +12313,10 @@ type AgentRunEdge {
 
 type AgentRuntimeEdge {
   node: AgentRuntime
+  cursor: String
+}
+
+type ChatProviderConnectionEdge {
+  node: ChatProviderConnection
   cursor: String
 }

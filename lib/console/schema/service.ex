@@ -135,6 +135,7 @@ defmodule Console.Schema.Service do
         field :values,       :map
         field :values_files, :map
         field :release,      :string
+        field :ignore_hooks, :boolean
       end
     end
 
@@ -146,7 +147,7 @@ defmodule Console.Schema.Service do
 
     defp helm_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(values values_files release)a)
+      |> cast(attrs, ~w(values values_files ignore_hooks release)a)
     end
   end
 
@@ -170,7 +171,8 @@ defmodule Console.Schema.Service do
     field :interval,         :string
     field :agent_id,         :string
 
-    field :ai_poll_at, :utc_datetime_usec
+    field :ai_poll_at,    :utc_datetime_usec
+    field :force_insight, :boolean, default: false
 
     field :norevise, :boolean, virtual: true, default: false
     field :kick,     :boolean, virtual: true, default: false
@@ -296,6 +298,10 @@ defmodule Console.Schema.Service do
     )
   end
 
+  def for_clusters(query \\ __MODULE__, cluster_ids) do
+    from(s in query, where: s.cluster_id in ^cluster_ids)
+  end
+
   def for_cluster(query \\ __MODULE__, cluster_id) do
     from(s in query, where: s.cluster_id == ^cluster_id)
   end
@@ -350,7 +356,7 @@ defmodule Console.Schema.Service do
 
   def stable(query \\ __MODULE__) do
     at = Timex.now() |> Timex.shift(minutes: -10)
-    from(s in query, where: s.status != :stale or coalesce(s.updated_at, s.inserted_at) <= ^at)
+    from(s in query, where: s.status != :stale or coalesce(s.updated_at, s.inserted_at) <= ^at or s.force_insight)
   end
 
   def ordered(query \\ __MODULE__, order \\ [asc: :cluster_id, asc: :name]) do
@@ -385,7 +391,7 @@ defmodule Console.Schema.Service do
     now = DateTime.utc_now()
     from(s in query,
       join: c in ^Cluster.health(Cluster, true),
-        on: c.id == s.cluster_id,
+        on: c.id == s.cluster_id and (is_nil(c.disable_ai) or not c.disable_ai),
       where: (is_nil(s.ai_poll_at) or s.ai_poll_at < ^now),
       order_by: [asc: :ai_poll_at]
     )
@@ -417,7 +423,7 @@ defmodule Console.Schema.Service do
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 
-  @valid ~w(name protect interval flow_id parent_id docs_path agent_id component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message ai_poll_at)a
+  @valid ~w(name protect interval flow_id parent_id docs_path agent_id component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message force_insight ai_poll_at)a
   @immutable ~w(cluster_id)a
 
   def changeset(model, attrs \\ %{}) do

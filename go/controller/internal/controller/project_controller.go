@@ -75,7 +75,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
-	if exists {
+	if exists && !project.Spec.Reconciliation.DriftDetect() {
 		utils.MarkReadOnly(project)
 		return in.handleExistingProject(ctx, project)
 	}
@@ -228,32 +228,27 @@ func (in *ProjectReconciler) attributes(project *v1alpha1.Project) (*console.Pro
 
 func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project, changed bool) (*console.ProjectFragment, error) {
 	logger := log.FromContext(ctx)
-	exists, err := in.ConsoleClient.IsProjectExists(ctx, nil, lo.ToPtr(project.ConsoleName()))
-	if err != nil {
-		return nil, err
-	}
-
-	if changed && exists {
-		attrs, err := in.attributes(project)
-		if err != nil {
-			return nil, err
-		}
-
-		logger.Info(fmt.Sprintf("updating project %s", project.ConsoleName()))
-		return in.ConsoleClient.UpdateProject(ctx, project.Status.GetID(), *attrs)
-	}
-
-	if exists {
-		return in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
-	}
 
 	attrs, err := in.attributes(project)
 	if err != nil {
 		return nil, err
 	}
 
-	logger.Info(fmt.Sprintf("%s project does not exist, creating it", project.ConsoleName()))
-	return in.ConsoleClient.CreateProject(ctx, *attrs)
+	existingProject, err := in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
+	if err != nil {
+		if !errors.IsNotFound(err) {
+			return nil, err
+		}
+		logger.Info(fmt.Sprintf("%s project does not exist, creating it", project.ConsoleName()))
+		return in.ConsoleClient.CreateProject(ctx, *attrs)
+	}
+
+	if changed {
+		logger.Info(fmt.Sprintf("updating project %s", project.ConsoleName()))
+		return in.ConsoleClient.UpdateProject(ctx, existingProject.ID, *attrs)
+	}
+
+	return existingProject, nil
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

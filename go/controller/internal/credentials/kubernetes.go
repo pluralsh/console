@@ -3,15 +3,11 @@ package credentials
 import (
 	"context"
 	"fmt"
-	"reflect"
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -77,31 +73,4 @@ func syncCredentialsCondition(conditionSetter func(condition metav1.Condition), 
 	}
 
 	conditionSetter(condition)
-}
-
-func tryAddOwnerRef(ctx context.Context, c client.Client, owner client.Object, object client.Object, scheme *runtime.Scheme) error {
-	key := client.ObjectKeyFromObject(object)
-
-	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
-		if err := c.Get(ctx, key, object); err != nil {
-			return err
-		}
-
-		if owner.GetDeletionTimestamp() != nil || object.GetDeletionTimestamp() != nil {
-			return nil
-		}
-
-		original := object.DeepCopyObject().(client.Object)
-
-		err := controllerutil.SetOwnerReference(owner, object, scheme)
-		if err != nil {
-			return err
-		}
-
-		if reflect.DeepEqual(original.GetOwnerReferences(), object.GetOwnerReferences()) {
-			return nil
-		}
-
-		return c.Patch(ctx, object, client.MergeFromWithOptions(original, client.MergeFromWithOptimisticLock{}))
-	})
 }

@@ -189,33 +189,13 @@ def get_chart_images(url, chart, version, values=None):
         return None
 
     objects = list(yaml.safe_load_all(result.stdout))
-    
-    # Verify app.kubernetes.io/name labels
-    expected_name = chart
-    found_names = set()
-    for obj in objects:
-        if not obj or 'metadata' not in obj:
-            continue
-        labels = obj.get('metadata', {}).get('labels', {})
-        name_label = labels.get('app.kubernetes.io/name')
-        if name_label:
-            found_names.add(name_label)
-
-    if found_names and expected_name not in found_names:
-        print_warning(f"Chart {chart} (v{version}) renders labels {found_names}, but expected '{expected_name}'. Check if 'chart_name' or 'helm_values' in YAML is correct.")
-        return None
-
     return sorted(list(set(find_nested_images(objects))))
 
 _IMAGE_RE = re.compile(
     r"""
     ^
-    (?:[a-z0-9.-]+(?::\d+)?/)?        # optional registry (with optional port)
-    [a-z0-9._-]+(?:/[a-z0-9._-]+)+    # repo path must contain at least one '/'
-    (?:                               
-        :[A-Za-z0-9._-]+              # optional tag
-      | @sha256:[a-f0-9]{64}          # or digest
-    )
+    (?:[a-z0-9.-]+(?::\d+)?/)?  # optional registry (with optional port)
+    [a-z0-9._\-/]+(:[A-Za-z0-9._-]+)?(@sha256:[a-f0-9]{64})?
     $
     """,
     re.IGNORECASE | re.VERBOSE,
@@ -242,20 +222,16 @@ def find_nested_images(objs: Any) -> List[str]:
         if x is None:
             return
 
-        if isinstance(x, str):
-            if _looks_like_image(x):
-                images.add(x)
-            return
-
         if isinstance(x, dict):
-            for v in x.values():
+            for k, v in x.items():
+                if k == "image":
+                    images.add(v)
+                    continue
                 walk(v)
-            return
 
         if isinstance(x, (list, tuple, set)):
             for item in x:
                 walk(item)
-            return
 
         # ignore other scalar types (int/bool/float/etc.)
 

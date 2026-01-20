@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package plrl;
+
+message AiConfigRequest {}
+
+message AiConfig {
+  bool enabled = 1;
+  
+  OpenAiConfig openai = 2;
+  AnthropicConfig anthropic = 3;
+  VertexAiConfig vertexAi = 4;
+  BedrockConfig bedrock = 5;
+  AzureOpenAiConfig azure = 6;
+}
+
+message OpenAiConfig {
+  optional string apiKey = 1;
+  optional string model = 2;
+  optional string embeddingModel = 3;
+  optional string toolModel = 4;
+  optional string baseUrl = 5;
+}
+
+message AnthropicConfig {
+  optional string baseUrl = 1;
+  optional string apiKey = 2;
+  optional string model = 3;
+  optional string embeddingModel = 4;
+  optional string toolModel = 5;
+}
+
+message VertexAiConfig {
+  optional string apiKey = 1;
+  optional string model = 2;
+  optional string endpoint = 3;
+  optional string serviceAccountJson = 4;
+  optional string embeddingModel = 5;
+  optional string toolModel = 6;
+  optional string project = 7;
+  optional string location = 8;
+}
+
+message BedrockConfig {
+    optional string modelId = 1;
+    optional string toolModelId = 2;
+    optional string accessToken = 3;
+    optional string region = 4;
+    optional string embeddingModelId = 5;
+    optional string awsAccessKeyId = 6;
+    optional string awsSecretAccessKey = 7;
+}
+
+message AzureOpenAiConfig {
+  optional string apiVersion = 1;
+  optional string model = 2;
+  optional string endpoint = 4;
+  optional string embeddingModel = 5;
+  optional string toolModel = 6;
+  optional string accessToken = 7;
+}
+
+message ProxyAuthenticationRequest {
+    string token = 1;
+}
+
+message ProxyAuthenticationResponse {
+    bool authenticated = 1;
+}
+
+// The AI configuration service definition.
+service PluralServer {
+  rpc GetAiConfig (AiConfigRequest) returns (AiConfig);
+  rpc ProxyAuthentication (ProxyAuthenticationRequest) returns (ProxyAuthenticationResponse);
+}

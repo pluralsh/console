@@ -713,6 +713,8 @@ defmodule Console.Deployments.Stacks do
     end)
     |> add_operation(:run, fn %{stack: stack} ->
       case latest_run(stack.id) do
+        %StackRun{git: %{ref: sha}, destroy: true} ->
+          create_run(stack, sha, %{message: "Manually triggered run for commit #{sha}"})
         %StackRun{git: %{ref: sha}, message: msg} ->
           create_run(stack, sha, %{message: msg})
         _ -> poll(stack)
@@ -732,6 +734,7 @@ defmodule Console.Deployments.Stacks do
       %StackRun{stack_id: stack.id, status: :queued}
       |> StackRun.changeset(
         stack_attrs(stack, sha)
+        |> Map.put(:destroy, not is_nil(stack.deleted_at))
         |> Map.put(:steps, commands(stack, !!attrs[:dry_run]))
         |> DeepMerge.deep_merge(attrs)
       )

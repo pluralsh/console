@@ -84,7 +84,7 @@ export function SpinnerAlt({
         fill="none"
       />
       {/* spinner */}
-      <circle
+      <SpinningCircleSC
         cx={size / 2}
         cy={size / 2}
         r={radius}
@@ -93,12 +93,12 @@ export function SpinnerAlt({
         fill="none"
         strokeDasharray={`${circumference * 0.33} ${circumference * 0.8}`}
         strokeLinecap="round"
-        css={`
-          transform-origin: center;
-          animation: ${rotateAnim} 1s cubic-bezier(0.4, 0.15, 0.6, 0.85)
-            infinite;
-        `}
       />
     </svg>
   )
 }
+
+const SpinningCircleSC = styled.circle`
+  transform-origin: center;
+  animation: ${rotateAnim} 1s cubic-bezier(0.4, 0.15, 0.6, 0.85) infinite;
+`

@@ -412,4 +412,22 @@ func init() {
 		}
 	})
 
+	types.RegisterController(types.CustomCompatibilityMatrixReconciler,
+		func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+			credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+			return &controller.CustomCompatibilityMatrixReconciler{
+				Client:        mgr.GetClient(),
+				ConsoleClient: consoleClient,
+				Scheme:        mgr.GetScheme(),
+			}
+		})
+
+	types.RegisterController(types.UpgradePlanCalloutReconciler, func(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+		credentialsCache credentials.NamespaceCredentialsCache) types.Controller {
+		return &controller.UpgradePlanCalloutReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}
+	})
 }

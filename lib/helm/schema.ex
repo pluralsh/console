@@ -18,13 +18,19 @@ end
 defmodule Console.Helm.Index do
   alias Console.Helm.Chart
 
-  defstruct [:oci, :entries, :apiVersion]
+  defstruct [:oci, :entries, :indexed, :apiVersion]
 
   def transform(%__MODULE__{entries: %{} = entries} = repo) do
     entries = Enum.map(entries, fn {name, charts} ->
       %{name: name, versions: Enum.map(charts, &Chart.build/1)}
     end)
-    %{repo | entries: entries}
+    %{repo | entries: entries, indexed: indexed(entries)}
   end
   def transform(pass), do: pass
+
+  defp indexed(entries) do
+    Map.new(entries, fn entry ->
+      {entry.name, Map.new(entry.versions, & {&1.version, &1})}
+    end)
+  end
 end

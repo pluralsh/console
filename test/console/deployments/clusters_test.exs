@@ -1564,4 +1564,88 @@ defmodule Console.Deployments.ClustersTest do
       {:error, _} = Clusters.delete_cluster_iso_image(iso.id, user)
     end
   end
+
+  describe "#upsert_upgrade_plan_callout/2" do
+    test "admins can upsert a new callout" do
+      {:ok, callout} = Clusters.upsert_upgrade_plan_callout(%{
+        name: "test",
+        callouts: [%{addon: "ingress-nginx", template: "template"}],
+        context: %{"some" => "context"}
+      },  admin_user())
+      assert callout.name == "test"
+      assert callout.context == %{"some" => "context"}
+
+      [%{addon: "ingress-nginx", template: "template"}] = callout.callouts
+    end
+
+    test "non admins cannot upsert" do
+      {:error, _} = Clusters.upsert_upgrade_plan_callout(%{
+        name: "test",
+        callouts: [%{addon: "ingress-nginx", template: "template"}],
+        context: %{"some" => "context"}
+      }, insert(:user))
+    end
+  end
+
+  describe "#delete_upgrade_plan_callout/2" do
+    test "admins can delete a callout" do
+      callout = insert(:upgrade_plan_callout)
+      {:ok, deleted} = Clusters.delete_upgrade_plan_callout(callout.name, admin_user())
+
+      assert deleted.id == callout.id
+      refute refetch(callout)
+    end
+
+    test "non admins cannot delete" do
+      callout = insert(:upgrade_plan_callout)
+      {:error, _} = Clusters.delete_upgrade_plan_callout(callout.name, insert(:user))
+    end
+  end
+
+  describe "#upsert_custom_compatibility_matrix/2" do
+    test "admins can upsert a new matrix" do
+      {:ok, matrix} = Clusters.upsert_custom_compatibility_matrix(%{
+        name: "test",
+        icon: "icon",
+        git_url: "git@github.com:test/test.git",
+        release_url: "https://github.com/test/test/releases/tag/v1.0.0",
+        versions: [%{version: "1.0.0", chart_version: "1.0.0", kube: ["1.25"]}]
+      }, admin_user())
+
+      assert matrix.name == "test"
+      assert matrix.icon == "icon"
+      assert matrix.git_url == "git@github.com:test/test.git"
+      assert matrix.release_url == "https://github.com/test/test/releases/tag/v1.0.0"
+
+      [version] = matrix.versions
+      assert version.version == "1.0.0"
+      assert version.chart_version == "1.0.0"
+      assert version.kube == ["1.25"]
+    end
+
+    test "non-admins cannot upsert" do
+      {:error, _} = Clusters.upsert_custom_compatibility_matrix(%{
+        name: "test",
+        icon: "icon",
+        git_url: "git@github.com:test/test.git",
+        release_url: "https://github.com/test/test/releases/tag/v1.0.0",
+        versions: [%{version: "1.0.0", chart_version: "1.0.0", kube: ["1.25"]}]
+      }, insert(:user))
+    end
+  end
+
+  describe "#delete_custom_compatibility_matrix/2" do
+    test "admins can delete a matrix" do
+      matrix = insert(:custom_compatibility_matrix)
+      {:ok, deleted} = Clusters.delete_custom_compatibility_matrix(matrix.name, admin_user())
+
+      assert deleted.id == matrix.id
+      refute refetch(matrix)
+    end
+
+    test "non-admins cannot delete" do
+      matrix = insert(:custom_compatibility_matrix)
+      {:error, _} = Clusters.delete_custom_compatibility_matrix(matrix.name, insert(:user))
+    end
+  end
 end

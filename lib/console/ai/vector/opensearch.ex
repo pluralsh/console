@@ -135,6 +135,7 @@ defmodule Console.AI.Vector.Opensearch do
           must: [
             nested_query,
             %{bool: %{filter: Enum.map(filters, fn
+              {k, {:raw, vs}} when is_list(vs) -> %{terms: %{k => vs}}
               {k, {:raw, v}} -> %{term: %{k => v}}
               {k, v} -> %{term: %{"filters.#{k}.keyword" => v}}
             end)}}

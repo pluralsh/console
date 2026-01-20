@@ -162,7 +162,7 @@ var _ = Describe("Project Controller", Ordered, func() {
 			Expect(k8sClient.Update(ctx, project)).To(Succeed())
 
 			cacheConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			cacheConsoleClient.On("GetUser", mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, "test@plural.sh"))
+			cacheConsoleClient.On("GetUserId", mock.Anything).Return("", errors.NewNotFound(schema.GroupResource{}, "test@plural.sh"))
 			identity.ResetCache(cacheConsoleClient)
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)

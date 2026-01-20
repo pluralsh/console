@@ -122,8 +122,7 @@ function Status({ status }: StepStatusProps): ReactNode {
     case StepStatus.Failed:
       return (
         <ErrorIcon
-          color="icon-error"
-          cursor="help"
+          color="icon-danger"
           size={12}
         />
       )

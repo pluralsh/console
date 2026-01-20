@@ -1,5 +1,5 @@
 defmodule Console.Schema.ServiceComponentChild do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{ServiceComponent, AiInsight}
 
   schema "service_component_children" do

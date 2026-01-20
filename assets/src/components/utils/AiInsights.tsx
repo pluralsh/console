@@ -5,6 +5,7 @@ import {
   IconFrame,
   IconFrameProps,
   IconProps,
+  Markdown,
 } from '@pluralsh/design-system'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { AiInsightSummaryFragment, InsightFreshness } from 'generated/graphql'
@@ -71,7 +72,6 @@ export function AiInsightSummaryIcon({
       tooltip={
         <Flex
           direction="column"
-          gap="small"
           maxWidth={320}
           color={theme.colors.text}
         >
@@ -84,7 +84,7 @@ export function AiInsightSummaryIcon({
               {fromNow(insight.updatedAt)}
             </CaptionP>
           </Flex>
-          {insight.summary}
+          <Markdown text={insight.summary ?? ''}></Markdown>
         </Flex>
       }
       icon={

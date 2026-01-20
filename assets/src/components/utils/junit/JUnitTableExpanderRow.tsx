@@ -10,7 +10,6 @@ import {
 } from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
-import { ReactElement } from 'react'
 import { useTheme } from 'styled-components'
 import { TestCase, TestcaseResult, TestSuite } from 'utils/junitParse'
 import { StretchedFlex } from '../StretchedFlex'
@@ -72,7 +71,7 @@ function JUnitTestCaseAccordion({ testcase }: { testcase: TestCase }) {
               second={`${time}s`}
               secondColor="text-light"
             />
-            {testStatusToIcon(status)}
+            {testStatusToIcon({ status })}
           </StretchedFlex>
         }
         caret="left"
@@ -172,36 +171,41 @@ export const getTestcaseStatus = (testcase: TestCase): JUnitTestStatus => {
   return JUnitTestStatus.Passed
 }
 
-export const testStatusToIcon = (
-  status: JUnitTestStatus,
-  size: number = 16
-): ReactElement => {
+export const testStatusToIcon = ({
+  status,
+  inactive = false,
+  size = 16,
+}: {
+  status: JUnitTestStatus
+  inactive?: boolean
+  size?: number
+}) => {
   switch (status) {
     case JUnitTestStatus.Passed:
       return (
         <CheckRoundedIcon
-          color="icon-success"
+          color={inactive ? 'icon-disabled' : 'icon-success'}
           size={size}
         />
       )
     case JUnitTestStatus.Failed:
       return (
         <FailedFilledIcon
-          color="icon-danger"
+          color={inactive ? 'icon-disabled' : 'icon-danger'}
           size={size}
         />
       )
     case JUnitTestStatus.Error:
       return (
         <WarningIcon
-          color="icon-warning"
+          color={inactive ? 'icon-disabled' : 'icon-warning'}
           size={size}
         />
       )
     case JUnitTestStatus.Skipped:
       return (
         <IndeterminateOutlineIcon
-          color="icon-info"
+          color={inactive ? 'icon-disabled' : 'icon-info'}
           size={size}
         />
       )

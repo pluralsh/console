@@ -237,7 +237,7 @@ defmodule Console.Deployments.Global do
   def add_to_cluster(%GlobalService{} = global, %Cluster{id: cid} = cluster, user) do
     global = Repo.preload(global, [:context])
     global = load_configuration(global)
-    case {global, Services.get_service_by_name(cid, svc_name(global))} do
+    case {global, cluster.gs_instance || Services.get_service_by_name(cid, svc_name(global))} do
       {%GlobalService{id: id}, %Service{owner_id: id} = svc} -> sync_service(global, svc, user)
       {%GlobalService{reparent: true}, %Service{} = svc} -> sync_service(global, svc, user)
       {%GlobalService{id: gid, template: %ServiceTemplate{} = tpl}, nil} ->
@@ -329,6 +329,8 @@ defmodule Console.Deployments.Global do
     |> Cluster.target(global)
     |> Cluster.stream()
     |> Repo.stream(method: :keyset)
+    |> Stream.chunk_every(100)
+    |> Stream.flat_map(&add_gs_instances(global, &1))
     |> Task.async_stream(&add_to_cluster(global, &1, bot), max_concurrency: 10)
     |> Stream.map(fn
       {:ok, res} -> res
@@ -348,6 +350,16 @@ defmodule Console.Deployments.Global do
     |> MapSet.to_list()
     |> maybe_drain(global)
     :ok
+  end
+
+  defp add_gs_instances(%GlobalService{id: gid}, clusters) when is_list(clusters) do
+    Enum.map(clusters, & &1.id)
+    |> Service.for_clusters()
+    |> Service.for_owner(gid)
+    |> Service.preloaded([:context_bindings, :dependencies, :cluster])
+    |> Repo.all()
+    |> Map.new(& {&1.cluster_id, &1})
+    |> then(& Enum.map(clusters, fn cluster -> %Cluster{cluster | gs_instance: &1[cluster.id]} end))
   end
 
   @doc """

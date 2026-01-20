@@ -1102,6 +1102,50 @@ defmodule Console.Factory do
     }
   end
 
+  def agent_run_repository_factory do
+    %Schema.AgentRunRepository{
+      url: sequence(:agent_run_repository, & "https://github.com/pluralsh/repo-#{&1}.git"),
+      last_used_at: Timex.now()
+    }
+  end
+
+  def deprecated_custom_resource_factory do
+    %Schema.DeprecatedCustomResource{
+      cluster: build(:cluster),
+      group: "networking.k8s.io",
+      version: "v1beta1",
+      kind: "ingress",
+      namespace: "name",
+      name: sequence(:deprecated_custom_resource, & "crd-#{&1}"),
+      next_version: "v1"
+    }
+  end
+
+  def upgrade_plan_callout_factory do
+    %Schema.UpgradePlanCallout{
+      name: sequence(:upgrade_plan_callout, & "upgrade-plan-callout-#{&1}"),
+      callouts: [%{addon: "ingress-nginx", template: "template"}],
+      context: %{"some" => "context"}
+    }
+  end
+
+  def custom_compatibility_matrix_factory do
+    %Schema.CustomCompatibilityMatrix{
+      name: sequence(:custom_compatibility_matrix, & "custom-compatibility-matrix-#{&1}"),
+      git_url: "git@github.com:test/test.git",
+      release_url: "https://github.com/test/test/releases/tag/v1.0.0",
+      versions: [%{version: "1.0.0", chart_version: "1.0.0", kube: ["1.25"]}]
+    }
+  end
+
+  def chat_connection_factory do
+    %Schema.ChatConnection{
+      name: sequence(:chat_connection, & "chat-connection-#{&1}"),
+      type: :slack,
+      configuration: %{slack: %{app_token: "token", bot_token: "token", bot_id: "id"}}
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

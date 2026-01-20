@@ -27,6 +27,9 @@ query Subscription {
   account {
     ...Account
   }
+  configuration {
+    licenseExpiry
+  }
 }
 
 query MeGroups {
@@ -45,11 +48,6 @@ query Me {
       ...Role
     }
     unreadNotifications
-  }
-  clusterInfo {
-    version
-    platform
-    gitCommit
   }
   configuration {
     gitCommit

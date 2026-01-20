@@ -114,7 +114,7 @@ defmodule Console.AI.Research.Agent do
                               analysis: %{
                                 summary: result.summary,
                                 notes: result.notes,
-                                graph: Console.mapify(Graph.fetch())
+                                graph: Graph.fetch() |> Graph.graph_data() |> Console.mapify()
                               },
                               diagram: result.diagram
                           }) do

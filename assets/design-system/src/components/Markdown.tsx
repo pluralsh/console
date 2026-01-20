@@ -18,7 +18,7 @@ type MarkdownProps = {
   isStreaming?: boolean
 } & ReactMarkdownOptions
 
-function getLastStringChild(children: any, depth = 0): any {
+export function getLastStringChild(children: any, depth = 0): any {
   let lastChild = null
 
   Children.forEach(children, (child) => {

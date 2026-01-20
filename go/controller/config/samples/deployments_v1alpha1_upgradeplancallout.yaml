@@ -1,0 +1,19 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: UpgradePlanCallout
+metadata:
+  labels:
+    app.kubernetes.io/name: upgradeplancallout
+    app.kubernetes.io/instance: upgradeplancallout-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: upgradeplancallout-sample
+spec:
+  callouts:
+    - addon: test
+      template: test
+    - addon: test2
+      template: test2
+  context:
+    key1: value1
+    key2: value2

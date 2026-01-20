@@ -1,9 +1,9 @@
-import { CSSProp } from 'styled-components'
+import { StyledObject } from 'styled-components'
 import { v4 } from 'uuid'
 
 import { AWSNodeGroup, NodeGroup, ProviderCloud } from './types'
 
-const disabledNumberInputArrows: CSSProp = {
+const disabledNumberInputArrows: StyledObject = {
   'input[type="number"]': {
     '-moz-appearance': 'textfield',
   },
@@ -109,9 +109,9 @@ function NewNodeGroup(provider: ProviderCloud): NodeGroup {
 }
 
 export {
-  disabledNumberInputArrows,
-  RegionsForProvider,
   DefaultRegionForProvider,
+  disabledNumberInputArrows,
   NewNodeGroup,
   ProviderToDisplayName,
+  RegionsForProvider,
 }
