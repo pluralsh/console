@@ -1,7 +1,7 @@
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useServiceTarballQuery } from 'generated/graphql'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   UncontrolledTreeEnvironment,
@@ -12,6 +12,7 @@ import 'react-complex-tree/lib/style.css'
 import type { TreeItem as TreeItemType } from 'react-complex-tree'
 import styled from 'styled-components'
 import { useSetSidenavContent } from './ServiceDetails'
+import { Code } from '@pluralsh/design-system'
 
 const DarkTreeWrapper = styled.div`
   --rct-color-tree-bg: transparent;
@@ -37,10 +38,14 @@ type TreeNode = {
   name: string
   path: string
   isFile: boolean
+  content?: string
   children: TreeNode[]
 }
 
-function buildTree(paths: string[]): TreeNode[] {
+function buildTree(
+  paths: string[],
+  contentMap: Record<string, string>
+): TreeNode[] {
   const root: Record<string, TreeNode> = {}
 
   paths.forEach((path) => {
@@ -57,6 +62,7 @@ function buildTree(paths: string[]): TreeNode[] {
           name: part,
           path: currentPath,
           isFile,
+          content: isFile ? contentMap[currentPath] : undefined,
           children: [] as any,
         }
       }
@@ -118,7 +124,7 @@ function convertToTreeItems(nodes: TreeNode[]): Record<string, TreeItemType> {
       index: node.id,
       isFolder: !node.isFile,
       children: node.children.map((c) => c.id),
-      data: { name: node.name, path: node.path },
+      data: { name: node.name, path: node.path, content: node.content },
     }
     node.children.forEach(addNode)
   }
@@ -130,6 +136,7 @@ function convertToTreeItems(nodes: TreeNode[]): Record<string, TreeItemType> {
 
 export function ComponentsFilesView() {
   const { serviceId } = useParams<{ serviceId: string }>()
+  const [selectedFile, setSelectedFile] = useState<string | null>(null)
 
   const { data, loading, error } = useServiceTarballQuery({
     variables: { id: serviceId! },
@@ -137,9 +144,17 @@ export function ComponentsFilesView() {
   })
 
   const treeItems = useMemo(() => {
-    const paths = data?.serviceTarball
-      ?.map((file) => file?.path)
-      .filter(Boolean) as string[]
+    const files = data?.serviceTarball ?? []
+    const paths = files.map((file) => file?.path).filter(Boolean) as string[]
+    const contentMap = files.reduce(
+      (acc, file) => {
+        if (file?.path && file?.content) {
+          acc[file.path] = file.content
+        }
+        return acc
+      },
+      {} as Record<string, string>
+    )
 
     if (!paths?.length) {
       return {
@@ -152,7 +167,7 @@ export function ComponentsFilesView() {
       }
     }
 
-    return convertToTreeItems(buildTree(paths))
+    return convertToTreeItems(buildTree(paths, contentMap))
   }, [data])
 
   const sidenavContent = useMemo(
@@ -175,6 +190,12 @@ export function ComponentsFilesView() {
             canDragAndDrop={false}
             canDropOnFolder={false}
             canReorderItems={false}
+            onSelectItems={(items) => {
+              const itemId = items[0]
+              if (itemId && treeItems[itemId]?.data?.content) {
+                setSelectedFile(treeItems[itemId].data.content)
+              }
+            }}
           >
             <Tree
               treeId="file-tree"
@@ -193,5 +214,15 @@ export function ComponentsFilesView() {
 
   if (loading) return <LoadingIndicator />
 
-  return <div>...</div>
+  return selectedFile ? (
+    <Code
+      language="yaml"
+      maxHeight="100%"
+      overflowY="auto"
+    >
+      {selectedFile}
+    </Code>
+  ) : (
+    <p>Select a file from the tree on the left to view its contents.</p>
+  )
 }
