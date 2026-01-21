@@ -136,7 +136,10 @@ function convertToTreeItems(nodes: TreeNode[]): Record<string, TreeItemType> {
 
 export function ComponentsFilesView() {
   const { serviceId } = useParams<{ serviceId: string }>()
-  const [selectedFile, setSelectedFile] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<{
+    name: string
+    content: string
+  } | null>(null)
 
   const { data, loading, error } = useServiceTarballQuery({
     variables: { id: serviceId! },
@@ -193,7 +196,10 @@ export function ComponentsFilesView() {
             onSelectItems={(items) => {
               const itemId = items[0]
               if (itemId && treeItems[itemId]?.data?.content) {
-                setSelectedFile(treeItems[itemId].data.content)
+                setSelectedFile({
+                  name: treeItems[itemId].data.name,
+                  content: treeItems[itemId].data.content,
+                })
               }
             }}
           >
@@ -216,11 +222,12 @@ export function ComponentsFilesView() {
 
   return selectedFile ? (
     <Code
+      title={selectedFile.name}
       language="yaml"
       maxHeight="100%"
       overflowY="auto"
     >
-      {selectedFile}
+      {selectedFile.content}
     </Code>
   ) : (
     <p>Select a file from the tree on the left to view its contents.</p>
