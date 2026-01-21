@@ -3,6 +3,41 @@ git_url: https://github.com/rook/rook
 release_url: https://github.com/rook/rook/releases/tag/v{vsn}
 helm_repository_url: https://charts.rook.io/release
 versions:
+- version: 1.19.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: '- **`rook-ceph-cluster` chart Ceph image values changed**: the
+      Ceph image is now defined with **separate repository and tag settings** (instead
+      of a single image string). Review and update any overridden values to match
+      the new schema; see the Rook upgrade guide for the exact keys and examples.
+
+      - **External mode behavior change**: if you supply a Ceph admin keyring, Rook
+      **will not auto-create CSI Ceph clients** anymore. Ensure CSI users/keys are
+      created via the external cluster script/process and that your CSI secrets/configs
+      reference those clients.'
+    chart_updates: []
+    features: ['Experimental NVMe over Fabrics (NVMe-oF): expose RBD volumes via NVMe/TCP
+        for in-cluster pods and external clients using standard NVMe initiators.',
+      'CephCSI v3.16 integration: adds NVMe-oF CSI driver support, improved fencing
+        during node failure, block volume usage stats, and configurable block encryption
+        cipher.', Operator can optionally reconcile multiple CephCluster CRs concurrently
+        via `ROOK_RECONCILE_CONCURRENT_CLUSTERS>1` when managing multiple clusters.,
+      'Improved operator logging: controller log lines include namespaced names for
+        more consistent troubleshooting.']
+    breaking_changes: ["Supported Kubernetes versions are now **v1.30\u2013v1.35**;\
+        \ clusters on older Kubernetes must upgrade Kubernetes first.", 'Minimum supported
+        Ceph version is **v19.2.0**. If your Rook v1.18 cluster runs Ceph v18, you
+        must upgrade Ceph to v19.2.0+ before upgrading Rook.', '`CephFilesystem.spec.metadataServer.activeStandby`
+        behavior changed: when set to `false`, the standby MDS deployment is scaled
+        down/removed (not just disabling standby cache). Plan for reduced failover
+        redundancy if you had `activeStandby=false`.', 'In external mode with an admin
+        keyring provided, Rook no longer creates CSI clients automatically; CSI client
+        provisioning must be handled explicitly (typically via the external cluster
+        script).']
+  chart_version: 1.19.0
+  images: []
 - version: 1.18.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
