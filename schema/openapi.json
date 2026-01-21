@@ -1,0 +1,67 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Plural REST API",
+    "description": "Main HTTP API for Plural",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://localhost/"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "User": {
+        "title": "User",
+        "description": "A registed user",
+        "properties": {
+          "email": {
+            "format": "email",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "roles": "Elixir.Console.OpenAPI.Roles",
+          "service_account": {
+            "type": "boolean"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "inserted_at"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/api/v1/me": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "Me"
+      }
+    }
+  }
+}

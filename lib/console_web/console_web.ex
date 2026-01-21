@@ -60,6 +60,24 @@ defmodule ConsoleWeb do
     end
   end
 
+  def api_controller do
+    quote do
+      use Phoenix.Controller, namespace: ConsoleWeb
+      use Oaskit.Controller
+      import ConsoleWeb.Controllers.Base
+      alias Console.OpenAPI
+      require Logger
+
+      use Gettext, backend: ConsoleWeb.Gettext
+
+      import Plug.Conn
+
+      plug Oaskit.Plugs.ValidateRequest
+
+      action_fallback ConsoleWeb.FallbackController
+    end
+  end
+
   @doc """
   When used, dispatch to the appropriate controller/view/etc.
   """

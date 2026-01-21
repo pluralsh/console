@@ -48,4 +48,8 @@ defmodule ConsoleWeb.ConnCase do
     do: put_req_header(conn, "authorization", "Token #{token}")
   def add_auth_headers(conn, %BootstrapToken{token: token}),
     do: put_req_header(conn, "authorization", "Token #{token}")
+
+  def valid_response(conn, status) do
+    Oaskit.Test.valid_response(Console.OpenAPI, conn, status)
+  end
 end
