@@ -31,6 +31,7 @@ names:
 - tigera-operator
 - argo-cd
 - vector
+- volcano-controller
 - victoria-metrics-operator
 - gpu-operator
 - elastic-agent
