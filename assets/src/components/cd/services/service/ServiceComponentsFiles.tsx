@@ -20,11 +20,11 @@ type TreeNode = {
 }
 
 function buildTree(paths: string[]): TreeNode[] {
-  const root: Record<string, any> = {}
+  const root: Record<string, TreeNode> = {}
 
   paths.forEach((path) => {
     const parts = path.split('/')
-    let currentLevel = root
+    let currentLevel: Record<string, TreeNode> = root
 
     parts.forEach((part, index) => {
       const currentPath = parts.slice(0, index + 1).join('/')
@@ -36,25 +36,23 @@ function buildTree(paths: string[]): TreeNode[] {
           name: part,
           path: currentPath,
           isFile,
-          children: {},
+          children: [] as any,
         }
       }
 
       if (!isFile) {
-        currentLevel = currentLevel[part].children
+        currentLevel = currentLevel[part].children as any
       }
     })
   })
 
-  // Convert nested object structure to array-based tree
-  function objectToArray(obj: Record<string, any>): TreeNode[] {
-    return Object.values(obj).map((node) => ({
+  // Convert nested object structure to array-based tree and collapse single-child folders
+  const objectToArray = (obj: Record<string, TreeNode>): TreeNode[] =>
+    Object.values(obj).map((node) => ({
       ...node,
-      children: node.isFile ? [] : objectToArray(node.children),
+      children: node.isFile ? [] : objectToArray(node.children as any),
     }))
-  }
 
-  // Convert the root object to an array and collapse single-child folders
   return collapseSingleChildFolders(objectToArray(root))
 }
 
@@ -84,10 +82,8 @@ function collapseSingleChildFolders(nodes: TreeNode[]): TreeNode[] {
   })
 }
 
-function convertToTreeItems(
-  nodes: TreeNode[]
-): Record<string, TreeItemType<any>> {
-  const items: Record<string, TreeItemType<any>> = {
+function convertToTreeItems(nodes: TreeNode[]): Record<string, TreeItemType> {
+  const items: Record<string, TreeItemType> = {
     root: {
       index: 'root',
       isFolder: true,
@@ -96,15 +92,13 @@ function convertToTreeItems(
     },
   }
 
-  function addNode(node: TreeNode) {
-    const itemChildren = node.children.map((c) => c.id)
+  const addNode = (node: TreeNode) => {
     items[node.id] = {
       index: node.id,
       isFolder: !node.isFile,
-      children: itemChildren,
+      children: node.children.map((c) => c.id),
       data: { name: node.name, path: node.path },
     }
-
     node.children.forEach(addNode)
   }
 
@@ -121,17 +115,24 @@ export function ComponentsFilesView() {
     skip: !serviceId,
   })
 
-  const treeData = useMemo(() => {
+  const treeItems = useMemo(() => {
     const paths = data?.serviceTarball
       ?.map((file) => file?.path)
       .filter(Boolean) as string[]
-    if (!paths || paths.length === 0) return []
-    return buildTree(paths)
+
+    if (!paths?.length) {
+      return {
+        root: {
+          index: 'root',
+          isFolder: true,
+          children: [],
+          data: { name: 'Root' },
+        },
+      }
+    }
+
+    return convertToTreeItems(buildTree(paths))
   }, [data])
-
-  const treeItems = useMemo(() => convertToTreeItems(treeData), [treeData])
-
-  console.log('treeItems', treeItems)
 
   if (error) return <GqlError error={error} />
 
