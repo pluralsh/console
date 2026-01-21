@@ -1,0 +1,337 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "Plural REST API",
+    "description": "Main HTTP API for Plural",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://localhost/"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Cluster": {
+        "title": "Cluster",
+        "description": "A cluster",
+        "properties": {
+          "tags": {
+            "items": "Elixir.OpenAPI.CD.Tag",
+            "type": "array"
+          },
+          "availability_zones": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "cpu_total": {
+            "type": "number"
+          },
+          "cpu_util": {
+            "type": "number"
+          },
+          "current_version": {
+            "type": "string"
+          },
+          "distro": {
+            "enum": [
+              "generic",
+              "eks",
+              "aks",
+              "gke",
+              "rke",
+              "k3s",
+              "openshift"
+            ],
+            "type": "string"
+          },
+          "handle": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kubelet_version": {
+            "type": "string"
+          },
+          "memory_total": {
+            "type": "number"
+          },
+          "memory_util": {
+            "type": "number"
+          },
+          "metadata": {
+            "additional_properties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace_count": {
+            "type": "integer"
+          },
+          "node_count": {
+            "type": "integer"
+          },
+          "openshift_version": {
+            "type": "string"
+          },
+          "pinged_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pod_count": {
+            "type": "integer"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterInput": {
+        "title": "ClusterInput",
+        "description": "A cluster input",
+        "properties": {
+          "handle": {
+            "type": "string"
+          },
+          "metadata": {
+            "additional_properties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.CD.Cluster.List": {
+        "description": "A list of clusters",
+        "properties": {
+          "data": {
+            "items": "Elixir.Cluster",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "User": {
+        "title": "User",
+        "description": "A registed user",
+        "properties": {
+          "email": {
+            "format": "email",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "roles": "Elixir.Console.OpenAPI.Roles",
+          "service_account": {
+            "type": "boolean"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "inserted_at"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "paths": {
+    "/api/v1/cd/clusters": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.CD.Cluster.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListClusters",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cluster"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateCluster",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClusterInput"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/v1/cd/clusters/{id}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cluster"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteCluster",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "detach",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ]
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cluster"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetCluster",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Cluster"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpdateCluster",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClusterInput"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "Me"
+      }
+    }
+  }
+}
