@@ -537,3 +537,82 @@ def update_compatibility_info(filepath, new_versions):
             print_error(f"Failed to update compatibility info for {filepath}")
     except Exception as e:
         traceback.print_exc()
+
+
+def fetch_eol_data(slug):
+    """Fetch EOL data for a product from endoflife.date API."""
+    if not slug:
+        return None
+    url = f"https://endoflife.date/api/{slug}.json"
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            data = response.json()
+            return data
+        else:
+            return None
+    except Exception as e:
+        return None
+
+
+def match_version_to_eol_cycle(version_str, eol_cycles):
+    """
+    Match an addon version to an EOL cycle.
+    Tries exact match first, then prefix matching (e.g., "1.19.0" matches "1.19")
+    """
+    if not eol_cycles or not version_str:
+        return None
+    
+    version = version_str.lstrip('v')
+    
+    for cycle in eol_cycles:
+        cycle_name = cycle.get('cycle', '')
+        if cycle_name == version:
+            eol_date = cycle.get('eol')
+            if eol_date:
+                return eol_date
+    
+    version_parts = version.split('.')
+    if len(version_parts) >= 2:
+        major_minor = f"{version_parts[0]}.{version_parts[1]}"
+        for cycle in eol_cycles:
+            cycle_name = cycle.get('cycle', '')
+            if cycle_name == major_minor:
+                eol_date = cycle.get('eol')
+                if eol_date:
+                    return eol_date
+    
+    return None
+
+
+def enrich_addon_with_eol(addon_dict, slug_map):
+    """
+    Enrich all versions in an addon dict with EOL data.
+    Fetches EOL data once per addon, then matches all versions.
+    """
+    addon_name = addon_dict.get('name')
+    if not addon_name:
+        return addon_dict
+    
+    versions = addon_dict.get('versions', [])
+    if not versions:
+        return addon_dict
+    
+    slug = slug_map.get(addon_name)
+    if not slug:
+        return addon_dict
+    
+    eol_cycles = fetch_eol_data(slug)
+    if not eol_cycles:
+        return addon_dict
+    
+    enriched_count = 0
+    for version in versions:
+        version_str = version.get('version')
+        if version_str:
+            eol_date = match_version_to_eol_cycle(version_str, eol_cycles)
+            if eol_date:
+                version['eolAt'] = eol_date
+                enriched_count += 1
+    
+    return addon_dict

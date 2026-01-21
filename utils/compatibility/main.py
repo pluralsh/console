@@ -3,7 +3,7 @@ import os
 import time
 import importlib
 from colorama import Fore, Style
-from utils import read_yaml, write_yaml, print_error, print_warning, latest_kube_version
+from utils import read_yaml, write_yaml, print_error, print_warning, latest_kube_version, enrich_addon_with_eol
 from kube_versions import generate_kube_changelog
 
 def call_scraper(scraper):
@@ -37,7 +37,16 @@ if not manifest:
 if "names" not in manifest:
     print_error("No names found in the manifest file.")
 
+EOL_SLUG_MAP = {}
 for name in manifest["names"]:
+    slug = name
+  
+    EOL_SLUG_MAP[name] = slug
+
+# Add overrides here as needed, e.g.:
+# EOL_SLUG_MAP["some-addon"] = "different-endoflife-slug"
+
+for name in EOL_SLUG_MAP:
     scraper = os.getenv("SCRAPER")
     if scraper and name not in scraper:
         continue
@@ -54,9 +63,12 @@ for name in manifest["names"]:
     time.sleep(60)
 
 addons = []
-for name in manifest["names"]:
+for name in EOL_SLUG_MAP:
     addon = read_yaml(f"../../static/compatibilities/{name}.yaml")
     addon["name"] = name
+    
+    enrich_addon_with_eol(addon, EOL_SLUG_MAP)
+    
     addons.append(addon)
 
 write_yaml("../../static/compatibilities.yaml", {"addons": addons})
