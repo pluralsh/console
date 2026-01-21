@@ -11,6 +11,7 @@ import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 
 type AppIconHue = 'default' | 'lighter' | 'lightest'
 type AppIconSize =
+  | 'xxxsmall'
   | 'xxsmall'
   | 'xsmall'
   | 'small'
@@ -41,6 +42,7 @@ const parentFillLevelToHue = {
 } as const satisfies Record<FillLevel, AppIconHue>
 
 const sizeToWidth = {
+  xxxsmall: 24,
   xxsmall: 36,
   xsmall: 48,
   small: 64,
@@ -50,6 +52,7 @@ const sizeToWidth = {
 } as const satisfies Record<AppIconSize, number>
 
 const sizeToIconWidth = {
+  xxxsmall: 12,
   xxsmall: 20,
   xsmall: 32,
   small: 48,
@@ -72,10 +75,8 @@ const hueToBorderColor = {
 
 const sizeToFont = (size: AppIconSize, theme: DefaultTheme) =>
   ({
-    xxsmall: {
-      ...theme.partials.text.body2Bold,
-      fontSize: 12,
-    },
+    xxxsmall: { ...theme.partials.text.caption, fontSize: 10 },
+    xxsmall: { ...theme.partials.text.body2Bold, fontSize: 12 },
     xsmall: theme.partials.text.body2Bold,
     small: theme.partials.text.subtitle2,
     medium: theme.partials.text.subtitle1,
@@ -168,6 +169,7 @@ function AppIcon({
     icon = cloneElement(icon, {
       color: theme.colors['icon-default'],
       width: iconWidth,
+      size: iconWidth,
       ...(icon?.props || {}),
     })
   }

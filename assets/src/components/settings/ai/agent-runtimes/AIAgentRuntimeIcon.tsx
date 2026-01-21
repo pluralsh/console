@@ -1,75 +1,35 @@
-import { AgentRuntimeType } from 'generated/graphql'
 import {
-  IconFrame,
-  styledTheme,
-  toFillLevel,
-  useFillLevel,
+  AiSparkleFilledIcon,
+  AppIcon,
+  ClaudeLogoIcon,
+  GeminiLogoIcon,
+  IconProps,
+  OpenCodeLogoIcon,
 } from '@pluralsh/design-system'
-import { ComponentProps } from 'react'
-import { useTheme } from 'styled-components'
-import {
-  fillLevelToBackground,
-  fillLevelToBorderColor,
-} from 'components/utils/FillLevelDiv.tsx'
-
-export const AgentRuntimeIcons = {
-  [AgentRuntimeType.Claude]: {
-    dark: `/claude-logo.svg`,
-    light: `/claude-logo.svg`,
-  },
-  [AgentRuntimeType.Gemini]: {
-    dark: `/gemini-logo.svg`,
-    light: `/gemini-logo.svg`,
-  },
-  [AgentRuntimeType.Opencode]: {
-    dark: `/opencode-logo-dark.svg`,
-    light: `/opencode-logo-light.svg`,
-  },
-} as const satisfies Record<
-  Exclude<AgentRuntimeType, AgentRuntimeType.Custom>,
-  Record<typeof styledTheme.mode, string>
->
+import { AgentRuntimeType } from 'generated/graphql'
+import { ComponentPropsWithRef, type ComponentType } from 'react'
 
 export function AgentRuntimeIcon({
   type,
-  size,
+  fullColor = true,
   ...props
 }: {
-  type: AgentRuntimeType
-  size?: number
-} & ComponentProps<'img'>) {
-  const theme = useTheme()
-
-  return type === AgentRuntimeType.Custom ? undefined : (
-    <img
-      alt={type}
-      src={AgentRuntimeIcons[type][theme.mode]}
-      {...props}
-      {...(size ? { width: size } : {})}
-    />
-  )
-}
-
-export function AgentRuntimeIconFrame({
-  type,
-  fillLevel: fillLevelProp,
-  ...props
-}: {
-  type: AgentRuntimeType
-  fillLevel?: number
-} & Omit<ComponentProps<typeof IconFrame>, 'icon'>) {
-  const { colors } = useTheme()
-  const inferredFillLevel = useFillLevel() + 1
-  const fillLevel = fillLevelProp ?? inferredFillLevel
+  type: Nullable<AgentRuntimeType>
+  fullColor?: boolean
+} & ComponentPropsWithRef<typeof AppIcon>) {
+  const Icon = runtimeToIcon[type ?? AgentRuntimeType.Custom]
   return (
-    <IconFrame
-      css={{
-        background: colors[fillLevelToBackground[toFillLevel(fillLevel)]],
-        borderColor: colors[fillLevelToBorderColor[toFillLevel(fillLevel)]],
-      }}
-      textValue={type}
-      icon={<AgentRuntimeIcon type={type} />}
+    <AppIcon
+      icon={<Icon fullColor={fullColor} />}
+      size="xxxsmall"
       {...props}
     />
   )
 }
+
+const runtimeToIcon = {
+  [AgentRuntimeType.Claude]: ClaudeLogoIcon,
+  [AgentRuntimeType.Gemini]: GeminiLogoIcon,
+  [AgentRuntimeType.Opencode]: OpenCodeLogoIcon,
+  [AgentRuntimeType.Custom]: AiSparkleFilledIcon,
+} as const satisfies Record<AgentRuntimeType, ComponentType<IconProps>>
