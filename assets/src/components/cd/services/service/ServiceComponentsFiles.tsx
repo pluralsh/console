@@ -61,9 +61,9 @@ type TreeNode = {
   children: TreeNode[]
 }
 
-function buildTree(contentMap: Record<string, string>): TreeNode[] {
+function buildTree(contentMap: Map<string, string>): TreeNode[] {
   const root: Record<string, TreeNode> = {}
-  const paths = Object.keys(contentMap)
+  const paths = Array.from(contentMap.keys())
 
   paths.forEach((path) => {
     const parts = path.split('/')
@@ -79,7 +79,7 @@ function buildTree(contentMap: Record<string, string>): TreeNode[] {
           name: part,
           path: currentPath,
           isFile,
-          content: isFile ? contentMap[currentPath] : undefined,
+          content: isFile ? contentMap.get(currentPath) : undefined,
           children: [] as any,
         }
       }
@@ -162,17 +162,14 @@ export function ComponentsFilesView() {
 
   const treeItems = useMemo(() => {
     const files = data?.serviceTarball ?? []
-    const contentMap = files.reduce(
-      (acc, file) => {
-        if (file?.path && file?.content) {
-          acc[file.path] = file.content
-        }
-        return acc
-      },
-      {} as Record<string, string>
-    )
+    const contentMap = files.reduce((acc, file) => {
+      if (file?.path && file?.content) {
+        acc.set(file.path, file.content)
+      }
+      return acc
+    }, new Map<string, string>())
 
-    if (Object.keys(contentMap).length === 0) {
+    if (contentMap.size === 0) {
       return {
         root: {
           index: 'root',
