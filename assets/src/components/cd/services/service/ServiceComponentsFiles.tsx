@@ -15,24 +15,41 @@ import { useSetSidenavContent } from './ServiceDetails'
 import { Code } from '@pluralsh/design-system'
 import { getLanguageFromFileName } from 'utils/file'
 
-const DarkTreeWrapper = styled.div`
-  --rct-color-tree-bg: transparent;
-  --rct-color-tree-focus-outline: transparent;
-  --rct-color-focustree-item-selected-bg: #373737;
-  --rct-color-focustree-item-selected-text: #ffffff;
-  --rct-color-focustree-item-focused-border: transparent;
-  --rct-color-focustree-item-draggingover-bg: #313131;
-  --rct-color-focustree-item-draggingover-color: #ffffff;
-  --rct-color-nonfocustree-item-selected-bg: #373737;
-  --rct-color-nonfocustree-item-selected-text: #ffffff;
-  --rct-color-nonfocustree-item-focused-border: #4f4f4f;
-  --rct-color-search-highlight-bg: #2f5381;
-  --rct-color-drag-between-line-bg: transparent;
-  --rct-color-arrow: #ffffff;
+const DarkTreeWrapper = styled.div(({ theme }) => ({
+  '--rct-color-tree-bg': 'transparent',
+  '--rct-color-tree-focus-outline': 'transparent',
+  '--rct-color-focustree-item-selected-bg': theme.colors['fill-one-hover'],
+  '--rct-color-focustree-item-selected-text': theme.colors.text,
+  '--rct-color-focustree-item-focused-border': 'transparent',
+  '--rct-color-focustree-item-draggingover-bg':
+    theme.colors['fill-one-selected'],
+  '--rct-color-focustree-item-draggingover-color': theme.colors.text,
+  '--rct-color-nonfocustree-item-selected-bg': theme.colors['fill-one-hover'],
+  '--rct-color-nonfocustree-item-selected-text': theme.colors.text,
+  '--rct-color-nonfocustree-item-focused-border': 'transparent',
+  '--rct-color-search-highlight-bg': theme.colors['action-primary'],
+  '--rct-color-arrow': theme.colors['icon-default'],
+  height: '100%',
+  width: '100%',
 
-  height: 100%;
-  width: 100%;
-`
+  '.rct-tree-item-title-container': {
+    borderRadius: theme.borderRadiuses.medium,
+
+    '&:hover': {
+      backgroundColor: theme.colors['fill-one-hover'],
+    },
+
+    '.rct-tree-item-button': {
+      ...theme.partials.text.body2,
+      color: theme.colors['text-light'],
+      padding: `${theme.spacing.medium}px ${theme.spacing.small}px`,
+
+      '&.rct-tree-item-button-focused': {
+        color: theme.colors['text'],
+      },
+    },
+  },
+}))
 
 type TreeNode = {
   id: string
