@@ -1,4 +1,4 @@
-import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Button, Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import {
   createContext,
   memo,
@@ -263,7 +263,9 @@ function ServiceDetailsBase() {
   const personaType = useServicePersonaType()
 
   const [isRefetching, setIsRefetching] = useState(false)
+
   const [sidenavContent, setSidenavContent] = useState<ReactNode | null>(null)
+  const [showOriginalSidenav, setShowOriginalSidenav] = useState(false)
 
   const {
     data: serviceData,
@@ -339,7 +341,9 @@ function ServiceDetailsBase() {
                 paddingBottom: theme.spacing.medium,
               }}
             >
-              {sidenavContent || (
+              {sidenavContent && !showOriginalSidenav ? (
+                sidenavContent
+              ) : (
                 <SideNavEntries
                   directory={directory}
                   pathname={pathname}
@@ -348,6 +352,16 @@ function ServiceDetailsBase() {
                 />
               )}
             </div>
+            {sidenavContent && (
+              <Button
+                floating
+                onClick={() => setShowOriginalSidenav(!showOriginalSidenav)}
+              >
+                {showOriginalSidenav
+                  ? 'Show custom content'
+                  : 'Show navigation'}
+              </Button>
+            )}
           </div>
         </ResponsiveLayoutSidenavContainer>
         <ResponsiveLayoutSpacer />
