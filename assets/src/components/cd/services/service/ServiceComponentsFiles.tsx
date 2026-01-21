@@ -12,8 +12,20 @@ import 'react-complex-tree/lib/style.css'
 import type { TreeItem as TreeItemType } from 'react-complex-tree'
 import styled from 'styled-components'
 import { useSetSidenavContent } from './ServiceDetails'
-import { Code } from '@pluralsh/design-system'
+import { Code, FileIcon, FolderIcon } from '@pluralsh/design-system'
 import { getLanguageFromFileName } from 'utils/file'
+
+const TreeItemIcon = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  marginRight: theme.spacing.xsmall,
+  color: theme.colors['icon-default'],
+}))
+
+const TreeItemTitleWrapper = styled.div({
+  display: 'flex',
+  alignItems: 'center',
+})
 
 const DarkTreeWrapper = styled.div(({ theme }) => ({
   '--rct-color-tree-bg': 'transparent',
@@ -195,6 +207,18 @@ export function ComponentsFilesView() {
               }))
             }
             getItemTitle={(item) => item.data.name}
+            renderItemTitle={({ item }) => (
+              <TreeItemTitleWrapper>
+                <TreeItemIcon>
+                  {item.isFolder ? (
+                    <FolderIcon size={14} />
+                  ) : (
+                    <FileIcon size={14} />
+                  )}
+                </TreeItemIcon>
+                {item.data.name}
+              </TreeItemTitleWrapper>
+            )}
             viewState={{
               'file-tree': {
                 expandedItems: [],
