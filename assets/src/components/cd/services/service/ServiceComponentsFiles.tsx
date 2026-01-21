@@ -222,10 +222,9 @@ export function ComponentsFilesView() {
 
   return selectedFile ? (
     <Code
-      title={selectedFile.name}
+      height="100%"
       language="yaml"
-      maxHeight="100%"
-      overflowY="auto"
+      title={selectedFile.name}
     >
       {selectedFile.content}
     </Code>
