@@ -28,3 +28,21 @@ export function downloadAsFile(content, name, type = 'text') {
 
   download(url, name)
 }
+
+export function getLanguageFromFileName(fileName: string): string | undefined {
+  const extension = fileName.split('.').pop()?.toLowerCase()
+
+  const languageMap: Record<string, string> = {
+    yaml: 'yaml',
+    yml: 'yaml',
+    go: 'go',
+    md: 'markdown',
+    tpl: 'go',
+    json: 'json',
+    toml: 'toml',
+    txt: 'text',
+    dockerfile: 'dockerfile',
+  }
+
+  return extension ? languageMap[extension] : undefined
+}

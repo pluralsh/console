@@ -13,6 +13,7 @@ import type { TreeItem as TreeItemType } from 'react-complex-tree'
 import styled from 'styled-components'
 import { useSetSidenavContent } from './ServiceDetails'
 import { Code } from '@pluralsh/design-system'
+import { getLanguageFromFileName } from 'utils/file'
 
 const DarkTreeWrapper = styled.div`
   --rct-color-tree-bg: transparent;
@@ -223,7 +224,7 @@ export function ComponentsFilesView() {
   return selectedFile ? (
     <Code
       height="100%"
-      language="yaml"
+      language={getLanguageFromFileName(selectedFile.name)}
       title={selectedFile.name}
     >
       {selectedFile.content}
