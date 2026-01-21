@@ -23,14 +23,8 @@ type ServerConfig struct {
 	// ReadTimeout is the maximum duration for reading the entire request
 	ReadTimeout time.Duration `json:"readTimeout"`
 
-	// WriteTimeout is the maximum duration before timing out writes
-	WriteTimeout time.Duration `json:"writeTimeout"`
-
 	// IdleTimeout is the maximum amount of time to wait for the next request
 	IdleTimeout time.Duration `json:"idleTimeout"`
-
-	// ShutdownTimeout is the maximum duration to wait for graceful shutdown
-	ShutdownTimeout time.Duration `json:"shutdownTimeout"`
 }
 
 // ConsoleConfig contains Console gRPC client settings
@@ -38,10 +32,10 @@ type ConsoleConfig struct {
 	// GRPCEndpoint is the Console gRPC endpoint (required)
 	GRPCEndpoint string `json:"grpcEndpoint"`
 
-	// ConfigPollInterval is how often to poll Console for AI config updates
-	ConfigPollInterval time.Duration `json:"configPollInterval"`
+	// ConfigTTL is the duration to cache Console configuration
+	ConfigTTL time.Duration `json:"configTTL"`
 
-	// ConnectionRetry settings
+	// ConnectionRetry contains client connection retry backoff settings
 	ConnectionRetry ConnectionRetryConfig `json:"connectionRetry"`
 
 	// RequestTimeout for Console gRPC calls
@@ -64,16 +58,14 @@ type ObservabilityConfig struct {
 func Defaults() *Config {
 	return &Config{
 		Server: ServerConfig{
-			Address:         ":8080",
-			ReadTimeout:     30 * time.Second,
-			WriteTimeout:    30 * time.Second,
-			IdleTimeout:     120 * time.Second,
-			ShutdownTimeout: 30 * time.Second,
+			Address:     ":8080",
+			ReadTimeout: 30 * time.Second,
+			IdleTimeout: 120 * time.Second,
 		},
 		Console: ConsoleConfig{
-			GRPCEndpoint:       "",
-			ConfigPollInterval: 60 * time.Second,
-			RequestTimeout:     10 * time.Second,
+			GRPCEndpoint:   "localhost:50051",
+			ConfigTTL:      60 * time.Second,
+			RequestTimeout: 10 * time.Second,
 			ConnectionRetry: ConnectionRetryConfig{
 				MaxAttempts:    5,
 				InitialBackoff: 1 * time.Second,
@@ -93,8 +85,8 @@ func (c *Config) String() string {
 }
 
 func redactConsoleConfig(c ConsoleConfig) string {
-	return fmt.Sprintf("ConsoleConfig{GRPCEndpoint: %s, ConfigPollInterval: %s}",
+	return fmt.Sprintf("ConsoleConfig{GRPCEndpoint: %s, ConfigTTL: %s}",
 		c.GRPCEndpoint,
-		c.ConfigPollInterval,
+		c.ConfigTTL,
 	)
 }

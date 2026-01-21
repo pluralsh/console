@@ -11,7 +11,6 @@ import (
 )
 
 // Account implements the Bifrost account interface using Console configuration
-// TODO: Cache results and refresh on interval to avoid repeated Console calls
 type Account struct {
 	consoleClient console.Client
 	logger        *zap.Logger

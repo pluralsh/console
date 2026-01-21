@@ -17,7 +17,7 @@ type ConsoleAuthenticator interface {
 
 // Auth creates an authentication middleware that validates tokens with Console
 // FR-3.1: Federated authentication to Console via gRPC
-// FR-3.2: Support for Bearer tokens and Deploy tokens
+// FR-3.2: Support for Bearer tokens
 // FR-3.3: Return 403 for invalid tokens
 // FR-3.4: Return 401 for missing tokens
 // FR-3.5: No caching - validate on every request
@@ -26,11 +26,9 @@ func Auth(authenticator ConsoleAuthenticator) func(http.Handler) http.Handler {
 
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Extract Authorization header
 			authHeader := r.Header.Get("Authorization")
 			if authHeader == "" {
-				// FR-3.4: Return 401 for missing token
-				logger.Warn("missing authorization header",
+				logger.Error("missing authorization header",
 					zap.String("path", r.URL.Path),
 					zap.String("method", r.Method),
 				)
@@ -38,11 +36,9 @@ func Auth(authenticator ConsoleAuthenticator) func(http.Handler) http.Handler {
 				return
 			}
 
-			// Extract token from header
-			// FR-3.2: Support "Bearer <token>" and "Deploy <token>" formats
 			token := extractToken(authHeader)
 			if token == "" {
-				logger.Warn("invalid authorization header format",
+				logger.Error("invalid authorization header format",
 					zap.String("path", r.URL.Path),
 					zap.String("method", r.Method),
 				)
@@ -50,8 +46,6 @@ func Auth(authenticator ConsoleAuthenticator) func(http.Handler) http.Handler {
 				return
 			}
 
-			// FR-3.5: No caching - validate on every request
-			// FR-3.1: Call Console ProxyAuthentication
 			authenticated, err := authenticator.ProxyAuthentication(r.Context(), token)
 			if err != nil {
 				logger.Error("authentication check failed",
@@ -65,8 +59,7 @@ func Auth(authenticator ConsoleAuthenticator) func(http.Handler) http.Handler {
 			}
 
 			if !authenticated {
-				// FR-3.3: Return 403 for invalid tokens
-				logger.Warn("authentication failed - invalid token",
+				logger.Error("authentication failed - invalid token",
 					zap.String("path", r.URL.Path),
 					zap.String("method", r.Method),
 				)
@@ -88,22 +81,16 @@ func Auth(authenticator ConsoleAuthenticator) func(http.Handler) http.Handler {
 // extractToken extracts the token from Authorization header
 // Supports:
 // - "Bearer <token>"
-// - "Deploy <token>"
-// - "<token>" (raw token)
 func extractToken(authHeader string) string {
 	// Split on first space
 	parts := strings.SplitN(authHeader, " ", 2)
 
 	if len(parts) == 2 {
-		// Format: "Bearer <token>" or "Deploy <token>"
 		prefix := strings.ToLower(parts[0])
-		if prefix == "bearer" || prefix == "deploy" {
+		if prefix == "bearer" {
 			return strings.TrimSpace(parts[1])
 		}
-		// Unknown prefix, return empty
-		return ""
 	}
 
-	// Single part - treat as raw token (for backwards compatibility)
-	return strings.TrimSpace(authHeader)
+	return ""
 }

@@ -50,9 +50,8 @@ run: ## run the service locally
 	NEXUS_ANTHROPIC_MODEL=$(NEXUS_ANTHROPIC_MODEL) \
 	NEXUS_ANTHROPIC_TOOLMODEL=$(NEXUS_ANTHROPIC_TOOLMODEL) \
 	go run ./cmd/main.go \
-		--config config/config.yaml \
-		--log-level debug
-
+		--config config/config.yaml
+		
 .PHONY: clean
 clean: ## clean build artifacts
 	@echo "Cleaning build artifacts..."

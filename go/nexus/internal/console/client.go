@@ -36,6 +36,7 @@ type client struct {
 	grpcClient pb.PluralServerClient
 	config     *config.ConsoleConfig
 	logger     *zap.Logger
+	cache      *clientCache
 }
 
 func (c *client) init() error {
@@ -48,13 +49,14 @@ func (c *client) init() error {
 	c.grpcClient = pb.NewPluralServerClient(conn)
 
 	// Verify connection health
-	if err := c.healthCheck(context.Background()); err != nil {
+	if err = c.healthCheck(context.Background()); err != nil {
 		if closeErr := conn.Close(); closeErr != nil {
 			c.logger.Error("failed to close connection after health check failure", zap.Error(closeErr))
 		}
 		return fmt.Errorf("health check failed: %w", err)
 	}
 
+	c.cache = newClientCache(c.getAiConfig, c.config.ConfigTTL)
 	c.logger.Info("console gRPC client connected", zap.String("endpoint", c.config.GRPCEndpoint))
 	return nil
 }
@@ -65,7 +67,6 @@ func (c *client) createConnection(cfg *config.ConsoleConfig, _ *zap.Logger) (*gr
 	var opts []grpc.DialOption
 
 	// Configure credentials
-	// TODO: Do we need to support TLS?
 	opts = append(opts, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	// Configure keep-alive
@@ -118,19 +119,18 @@ func (c *client) Close() error {
 
 // GetAiConfig retrieves the AI configuration from Console
 func (c *client) GetAiConfig(ctx context.Context) (*pb.AiConfig, error) {
+	return c.cache.GetAiConfig(ctx)
+}
+
+func (c *client) getAiConfig(ctx context.Context) (*pb.AiConfig, error) {
 	// Apply request timeout
 	ctx, cancel := context.WithTimeout(ctx, c.config.RequestTimeout)
 	defer cancel()
 
-	c.logger.Debug("calling GetAiConfig")
-
 	aiConfig, err := c.grpcClient.GetAiConfig(ctx, &pb.AiConfigRequest{})
 	if err != nil {
-		c.logger.Error("GetAiConfig failed", zap.Error(err))
-		return nil, fmt.Errorf("GetAiConfig failed: %w", err)
+		return nil, fmt.Errorf("could not get AI config: %w", err)
 	}
-
-	c.logger.Debug("GetAiConfig succeeded", zap.Bool("has_openai", aiConfig.Openai != nil))
 
 	return aiConfig, nil
 }

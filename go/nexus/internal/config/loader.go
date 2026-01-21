@@ -88,7 +88,7 @@ func loadFromEnv(cfg *Config) {
 
 	// Handle duration values
 	if v.IsSet("console.configPollInterval") {
-		cfg.Console.ConfigPollInterval = v.GetDuration("console.configPollInterval")
+		cfg.Console.ConfigTTL = v.GetDuration("console.configPollInterval")
 	}
 	if v.IsSet("console.requestTimeout") {
 		cfg.Console.RequestTimeout = v.GetDuration("console.requestTimeout")

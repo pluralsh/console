@@ -21,8 +21,8 @@ func TestDefaults(t *testing.T) {
 	}
 
 	// Test Console defaults
-	if cfg.Console.ConfigPollInterval != 60*time.Second {
-		t.Errorf("expected poll interval 60s, got %v", cfg.Console.ConfigPollInterval)
+	if cfg.Console.ConfigTTL != 60*time.Second {
+		t.Errorf("expected poll interval 60s, got %v", cfg.Console.ConfigTTL)
 	}
 	if cfg.Console.ConnectionRetry.MaxAttempts != 5 {
 		t.Errorf("expected max attempts 5, got %d", cfg.Console.ConnectionRetry.MaxAttempts)
@@ -38,10 +38,11 @@ func TestLoadFromFile(t *testing.T) {
 server:
   address: ":9090"
   readTimeout: "45s"
+  idleTimeout: "150s"
 
 console:
   grpcEndpoint: "console.example.com:9090"
-  configPollInterval: "30s"
+  configTTL: "30s"
   requestTimeout: "15s"
   connectionRetry:
     maxAttempts: 3
@@ -65,11 +66,26 @@ console:
 	if cfg.Server.ReadTimeout != 45*time.Second {
 		t.Errorf("expected read timeout 45s, got %v", cfg.Server.ReadTimeout)
 	}
+	if cfg.Server.IdleTimeout != 150*time.Second {
+		t.Errorf("expected idle timeout 150s, got %v", cfg.Server.IdleTimeout)
+	}
 	if cfg.Console.GRPCEndpoint != "console.example.com:9090" {
 		t.Errorf("expected console endpoint console.example.com:9090, got %s", cfg.Console.GRPCEndpoint)
 	}
-	if cfg.Console.ConfigPollInterval != 30*time.Second {
-		t.Errorf("expected poll interval 30s, got %v", cfg.Console.ConfigPollInterval)
+	if cfg.Console.ConfigTTL != 30*time.Second {
+		t.Errorf("expected poll interval 30s, got %v", cfg.Console.ConfigTTL)
+	}
+	if cfg.Console.RequestTimeout != 15*time.Second {
+		t.Errorf("expected request timeout 15s, got %v", cfg.Console.RequestTimeout)
+	}
+	if cfg.Console.ConnectionRetry.MaxAttempts != 3 {
+		t.Errorf("expected max attempts 3, got %d", cfg.Console.ConnectionRetry.MaxAttempts)
+	}
+	if cfg.Console.ConnectionRetry.InitialBackoff != 2*time.Second {
+		t.Errorf("expected initial backoff 2s, got %v", cfg.Console.ConnectionRetry.InitialBackoff)
+	}
+	if cfg.Console.ConnectionRetry.MaxBackoff != 60*time.Second {
+		t.Errorf("expected max backoff 60s, got %v", cfg.Console.ConnectionRetry.MaxBackoff)
 	}
 }
 

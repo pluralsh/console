@@ -34,11 +34,6 @@ func main() {
 	// Ensure logger is flushed on exit
 	defer log.Sync()
 
-	log.Logger().Info("nexus starting",
-		zap.String("version", version.Version),
-		zap.String("log_level", args.LogLevel()),
-	)
-
 	// Start the server
 	if err := serve(); err != nil {
 		log.Logger().Error("failed to start server", zap.Error(err))
@@ -49,25 +44,21 @@ func main() {
 // serve implements the serve command
 func serve() error {
 	logger := log.Logger()
+	cfg := args.Config()
 
 	logger.Info("initializing Nexus server",
 		zap.String("version", version.Version),
-		zap.String("server_address", args.ServerAddress()),
-		zap.String("console_endpoint", args.ConsoleGRPCEndpoint()),
-		zap.Duration("config_poll_interval", args.ConsoleConfigPollInterval()),
+		zap.String("log_level", cfg.Observability.LogLevel),
+		zap.String("server_address", cfg.Server.Address),
+		zap.String("console_endpoint", cfg.Console.GRPCEndpoint),
+		zap.Duration("config_ttl", cfg.Console.ConfigTTL),
 	)
 
-	// Load configuration
-	cfg := args.Config()
-
-	// Validate configuration
 	if err := config.Validate(cfg); err != nil {
 		return fmt.Errorf("invalid configuration: %w", err)
 	}
-
 	logger.Info("configuration loaded successfully")
 
-	// Create Console gRPC client
 	logger.Info("connecting to Console gRPC", zap.String("endpoint", cfg.Console.GRPCEndpoint))
 	consoleClient, err := console.NewRetryableClient(&cfg.Console)
 	if err != nil {
@@ -79,19 +70,8 @@ func serve() error {
 		}
 	}()
 
-	// Verify Console connectivity
-	if !consoleClient.IsConnected() {
-		logger.Warn("Console client not initially connected, will retry on requests")
-	} else {
-		logger.Info("Console client connected successfully")
-	}
-
-	// Create HTTP server
-	srv := server.New(&cfg.Server, consoleClient)
-
 	logger.Info("starting HTTP server", zap.String("address", cfg.Server.Address))
-
-	// Start server in background and get ready channel
+	srv := server.New(&cfg.Server, consoleClient)
 	ctx := context.Background()
 	readyChan, err := srv.Start(ctx)
 	if err != nil {

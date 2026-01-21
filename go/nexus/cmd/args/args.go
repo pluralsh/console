@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/pluralsh/console/go/nexus/internal/config"
 	"github.com/pluralsh/console/go/nexus/internal/log"
@@ -18,10 +17,12 @@ var (
 	// Server flags (override config file and env vars)
 	argServerAddress = flag.String("server-address", "", "HTTP server bind address (e.g., ':8080')")
 	argServerPath    = flag.String("server-path", "", "HTTP server base path (e.g., '/ai/proxy')")
+	argReadTimeout   = flag.Duration("server-read-timeout", 0, "HTTP server read timeout duration (e.g., '15s')")
+	argIdleTimeout   = flag.Duration("server-idle-timeout", 0, "HTTP server idle timeout duration (e.g., '60s')")
 
 	// Console flags (override config file and env vars)
-	argConsoleEndpoint       = flag.String("console-endpoint", "", "Console gRPC endpoint (e.g., 'localhost:9090')")
-	argConsoleConfigPoll     = flag.Duration("console-config-poll", 0, "Config poll interval (e.g., '60s')")
+	argConsoleEndpoint       = flag.String("console-endpoint", "", "Console gRPC endpoint (e.g., 'localhost:50051')")
+	argConsoleConfigTTL      = flag.Duration("console-config-ttl", 0, "Config time-to-live duration (e.g., '30s')")
 	argConsoleRequestTimeout = flag.Duration("console-request-timeout", 0, "Request timeout (e.g., '10s')")
 
 	// Observability flags (override config file and env vars)
@@ -66,13 +67,22 @@ func applyFlagOverrides() {
 	if *argServerAddress != "" {
 		cfg.Server.Address = *argServerAddress
 	}
+	if *argServerPath != "" {
+		cfg.Server.Path = *argServerPath
+	}
+	if *argReadTimeout != 0 {
+		cfg.Server.ReadTimeout = *argReadTimeout
+	}
+	if *argIdleTimeout != 0 {
+		cfg.Server.IdleTimeout = *argIdleTimeout
+	}
 
 	// Console overrides
 	if *argConsoleEndpoint != "" {
 		cfg.Console.GRPCEndpoint = *argConsoleEndpoint
 	}
-	if *argConsoleConfigPoll != 0 {
-		cfg.Console.ConfigPollInterval = *argConsoleConfigPoll
+	if *argConsoleConfigTTL != 0 {
+		cfg.Console.ConfigTTL = *argConsoleConfigTTL
 	}
 	if *argConsoleRequestTimeout != 0 {
 		cfg.Console.RequestTimeout = *argConsoleRequestTimeout
@@ -97,58 +107,4 @@ func Config() *config.Config {
 // Version returns whether version flag was set
 func Version() bool {
 	return *argVersion
-}
-
-// Server configuration accessors
-
-func ServerAddress() string {
-	return cfg.Server.Address
-}
-
-func ServerReadTimeout() time.Duration {
-	return cfg.Server.ReadTimeout
-}
-
-func ServerWriteTimeout() time.Duration {
-	return cfg.Server.WriteTimeout
-}
-
-func ServerIdleTimeout() time.Duration {
-	return cfg.Server.IdleTimeout
-}
-
-func ServerShutdownTimeout() time.Duration {
-	return cfg.Server.ShutdownTimeout
-}
-
-// Console configuration accessors
-
-func ConsoleGRPCEndpoint() string {
-	return cfg.Console.GRPCEndpoint
-}
-
-func ConsoleConfigPollInterval() time.Duration {
-	return cfg.Console.ConfigPollInterval
-}
-
-func ConsoleRequestTimeout() time.Duration {
-	return cfg.Console.RequestTimeout
-}
-
-func ConsoleMaxRetryAttempts() int {
-	return cfg.Console.ConnectionRetry.MaxAttempts
-}
-
-func ConsoleInitialBackoff() time.Duration {
-	return cfg.Console.ConnectionRetry.InitialBackoff
-}
-
-func ConsoleMaxBackoff() time.Duration {
-	return cfg.Console.ConnectionRetry.MaxBackoff
-}
-
-// Observability configuration accessors
-
-func LogLevel() string {
-	return cfg.Observability.LogLevel
 }

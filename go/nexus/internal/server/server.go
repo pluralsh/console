@@ -176,8 +176,3 @@ func (s *Server) Addr() string {
 	}
 	return ""
 }
-
-// Router returns the underlying Chi router for testing
-func (s *Server) Router() chi.Router {
-	return s.router
-}

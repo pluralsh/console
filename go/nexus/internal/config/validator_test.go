@@ -134,7 +134,7 @@ func TestValidateConsole_InvalidEndpoint(t *testing.T) {
 func TestValidateConsole_PollIntervalTooShort(t *testing.T) {
 	cfg := config.Defaults()
 	cfg.Console.GRPCEndpoint = grpcEndpoint
-	cfg.Console.ConfigPollInterval = 5 * time.Second // Too short
+	cfg.Console.ConfigTTL = 5 * time.Second // Too short
 
 	err := config.Validate(cfg)
 	if err == nil {

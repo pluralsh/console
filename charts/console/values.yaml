@@ -131,20 +131,20 @@ nexus:
     extraArgs: [ ]
   config:
     server:
-      path: /ai/proxy
       address: ":8080"
+      path: /ai/proxy
       readTimeout: "30s"
-      writeTimeout: "30s"
       idleTimeout: "120s"
-      shutdownTimeout: "30s"
     console:
       grpcEndpoint: "localhost:50051"
-      configPollInterval: "60s"
+      configTTL: "60s"
       requestTimeout: "10s"
       connectionRetry:
         maxAttempts: 5
         initialBackoff: "1s"
         maxBackoff: "30s"
+    observability:
+      logLevel: info
 
 # initContainers is used to create a list of init containers for your console deployment
 initContainers: [ ]

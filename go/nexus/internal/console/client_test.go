@@ -58,9 +58,9 @@ func strPtr(s string) *string {
 // createTestConfig creates a test configuration
 func createTestConfig() *config.ConsoleConfig {
 	return &config.ConsoleConfig{
-		GRPCEndpoint:       "bufconn",
-		ConfigPollInterval: 60 * time.Second,
-		RequestTimeout:     10 * time.Second,
+		GRPCEndpoint:   "bufconn",
+		ConfigTTL:      60 * time.Second,
+		RequestTimeout: 10 * time.Second,
 		ConnectionRetry: config.ConnectionRetryConfig{
 			MaxAttempts:    3,
 			InitialBackoff: 100 * time.Millisecond,

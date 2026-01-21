@@ -8,17 +8,14 @@ server:
 
   # Request timeouts
   readTimeout: "30s"
-  writeTimeout: "30s"
   idleTimeout: "120s"
-  shutdownTimeout: "30s"
 
 console:
   # Console gRPC endpoint - REQUIRED
   grpcEndpoint: "localhost:55510"
 
-  # How often to poll Console for AI config updates
-  # Minimum: 10s, Recommended: 60s
-  configPollInterval: "60s"
+  # How often to refresh console configuration
+  configTTL: "60s"
 
   # Timeout for individual gRPC requests
   requestTimeout: "10s"
@@ -28,3 +25,6 @@ console:
     maxAttempts: 5
     initialBackoff: "1s"
     maxBackoff: "30s"
+
+observability:
+  logLevel: "debug"

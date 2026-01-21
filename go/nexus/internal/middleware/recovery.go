@@ -17,7 +17,7 @@ func Recovery() func(http.Handler) http.Handler {
 				if err := recover(); err != nil {
 					// Log the panic with stack trace
 					stack := debug.Stack()
-					log.WithContext(r.Context()).Error("panic recovered",
+					log.Logger().Error("panic recovered",
 						zap.Any("panic", err),
 						zap.ByteString("stack", stack),
 						zap.String("method", r.Method),

@@ -5,7 +5,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/pluralsh/console/go/nexus/internal/config"
 	"github.com/pluralsh/console/go/nexus/internal/server"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,17 +16,6 @@ type mockConsoleHealthChecker struct {
 
 func (m *mockConsoleHealthChecker) IsConnected() bool {
 	return m.connected
-}
-
-func TestNew(t *testing.T) {
-	cfg := &config.ServerConfig{
-		Address: ":8080",
-	}
-
-	srv := server.New(cfg, nil)
-	assert.NotNil(t, srv)
-	// Test that server is properly initialized by checking it has a router
-	assert.NotNil(t, srv.Router())
 }
 
 func TestHealthHandler(t *testing.T) {

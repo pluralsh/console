@@ -76,22 +76,10 @@ func validateServer(cfg *ServerConfig) ValidationErrors {
 			Message: "readTimeout cannot be negative",
 		})
 	}
-	if cfg.WriteTimeout < 0 {
-		errors = append(errors, ValidationError{
-			Field:   "server.writeTimeout",
-			Message: "writeTimeout cannot be negative",
-		})
-	}
 	if cfg.IdleTimeout < 0 {
 		errors = append(errors, ValidationError{
 			Field:   "server.idleTimeout",
 			Message: "idleTimeout cannot be negative",
-		})
-	}
-	if cfg.ShutdownTimeout < 0 {
-		errors = append(errors, ValidationError{
-			Field:   "server.shutdownTimeout",
-			Message: "shutdownTimeout cannot be negative",
 		})
 	}
 
@@ -118,12 +106,12 @@ func validateConsole(cfg *ConsoleConfig) ValidationErrors {
 	}
 
 	// Validate poll interval
-	if cfg.ConfigPollInterval <= 0 {
+	if cfg.ConfigTTL <= 0 {
 		errors = append(errors, ValidationError{
 			Field:   "console.configPollInterval",
 			Message: "configPollInterval must be positive",
 		})
-	} else if cfg.ConfigPollInterval < 10*time.Second {
+	} else if cfg.ConfigTTL < 10*time.Second {
 		errors = append(errors, ValidationError{
 			Field:   "console.configPollInterval",
 			Message: "configPollInterval should be at least 10 seconds to avoid excessive polling",
