@@ -11,6 +11,7 @@ import {
 import 'react-complex-tree/lib/style.css'
 import type { TreeItem as TreeItemType } from 'react-complex-tree'
 import styled from 'styled-components'
+import { useSetSidenavContent } from './ServiceDetails'
 
 const DarkTreeWrapper = styled.div`
   --rct-color-tree-bg: transparent;
@@ -154,35 +155,43 @@ export function ComponentsFilesView() {
     return convertToTreeItems(buildTree(paths))
   }, [data])
 
+  const sidenavContent = useMemo(
+    () =>
+      !loading && !error ? (
+        <DarkTreeWrapper>
+          <UncontrolledTreeEnvironment
+            dataProvider={
+              new StaticTreeDataProvider(treeItems, (item, data) => ({
+                ...item,
+                data,
+              }))
+            }
+            getItemTitle={(item) => item.data.name}
+            viewState={{
+              'file-tree': {
+                expandedItems: [],
+              },
+            }}
+            canDragAndDrop={false}
+            canDropOnFolder={false}
+            canReorderItems={false}
+          >
+            <Tree
+              treeId="file-tree"
+              rootItem="root"
+              treeLabel="Files"
+            />
+          </UncontrolledTreeEnvironment>
+        </DarkTreeWrapper>
+      ) : undefined,
+    [loading, error, treeItems]
+  )
+
+  useSetSidenavContent(sidenavContent)
+
   if (error) return <GqlError error={error} />
 
   if (loading) return <LoadingIndicator />
 
-  return (
-    <DarkTreeWrapper>
-      <UncontrolledTreeEnvironment
-        dataProvider={
-          new StaticTreeDataProvider(treeItems, (item, data) => ({
-            ...item,
-            data,
-          }))
-        }
-        getItemTitle={(item) => item.data.name}
-        viewState={{
-          'file-tree': {
-            expandedItems: [],
-          },
-        }}
-        canDragAndDrop={false}
-        canDropOnFolder={false}
-        canReorderItems={false}
-      >
-        <Tree
-          treeId="file-tree"
-          rootItem="root"
-          treeLabel="Files"
-        />
-      </UncontrolledTreeEnvironment>
-    </DarkTreeWrapper>
-  )
+  return <div>...</div>
 }
