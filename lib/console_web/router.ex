@@ -106,6 +106,14 @@ defmodule ConsoleWeb.Router do
 
       scope "/v1", OpenAPI do
         get "/me", UserController, :me
+
+        scope "/cd", CD do
+          post "/clusters",       ClusterController, :create
+          get "/clusters",        ClusterController, :index
+          get "/clusters/:id",    ClusterController, :show
+          put "/clusters/:id",    ClusterController, :update
+          delete "/clusters/:id", ClusterController, :delete
+        end
       end
     end
 

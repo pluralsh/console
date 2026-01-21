@@ -29,4 +29,10 @@ defmodule Console.OpenAPI.Base do
   end
 
   def timestamps(props), do: Map.merge(props, %{inserted_at: datetime(), updated_at: datetime()})
+
+  def ecto_enum(type) do
+    type.__enum_map__()
+    |> Enum.map(fn {key, _} -> key end)
+    |> string_enum_to_atom()
+  end
 end

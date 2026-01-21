@@ -65,7 +65,8 @@ defmodule ConsoleWeb do
       use Phoenix.Controller, namespace: ConsoleWeb
       use Oaskit.Controller
       import ConsoleWeb.Controllers.Base
-      alias Console.OpenAPI
+      import Console.Services.Base, only: [when_ok: 2]
+      alias Console.{OpenAPI, Repo, Schema}
       require Logger
 
       use Gettext, backend: ConsoleWeb.Gettext
