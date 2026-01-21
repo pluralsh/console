@@ -20,14 +20,14 @@ const DarkTreeWrapper = styled.div`
   --rct-color-tree-focus-outline: transparent;
   --rct-color-focustree-item-selected-bg: #373737;
   --rct-color-focustree-item-selected-text: #ffffff;
-  --rct-color-focustree-item-focused-border: #1d7be5;
+  --rct-color-focustree-item-focused-border: transparent;
   --rct-color-focustree-item-draggingover-bg: #313131;
   --rct-color-focustree-item-draggingover-color: #ffffff;
   --rct-color-nonfocustree-item-selected-bg: #373737;
   --rct-color-nonfocustree-item-selected-text: #ffffff;
   --rct-color-nonfocustree-item-focused-border: #4f4f4f;
   --rct-color-search-highlight-bg: #2f5381;
-  --rct-color-drag-between-line-bg: #1d7be5;
+  --rct-color-drag-between-line-bg: transparent;
   --rct-color-arrow: #ffffff;
 
   height: 100%;
