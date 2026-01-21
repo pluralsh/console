@@ -1,5 +1,14 @@
 import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { memo, Suspense, useMemo, useState } from 'react'
+import {
+  createContext,
+  memo,
+  ReactNode,
+  Suspense,
+  useContext,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react'
 import {
   Outlet,
   useLocation,
@@ -62,6 +71,31 @@ type ServiceContextType = {
 }
 
 export const useServiceContext = () => useOutletContext<ServiceContextType>()
+
+type SidenavOverrideContextType = {
+  setSidenavContent: (content: ReactNode | null) => void
+}
+
+const SidenavOverrideContext = createContext<SidenavOverrideContextType | null>(
+  null
+)
+
+export const useSetSidenavContent = (sidenavContent?: ReactNode) => {
+  const ctx = useContext(SidenavOverrideContext)
+
+  if (!ctx)
+    console.warn('useSetSidenavContent() must be used within ServiceDetails')
+
+  const { setSidenavContent } = ctx || {}
+
+  useLayoutEffect(() => {
+    setSidenavContent?.(sidenavContent ?? null)
+
+    return () => {
+      setSidenavContent?.(null)
+    }
+  }, [setSidenavContent, sidenavContent])
+}
 
 export const getServiceDetailsBreadcrumbs = ({
   cluster,
@@ -229,6 +263,7 @@ function ServiceDetailsBase() {
   const personaType = useServicePersonaType()
 
   const [isRefetching, setIsRefetching] = useState(false)
+  const [sidenavContent, setSidenavContent] = useState<ReactNode | null>(null)
 
   const {
     data: serviceData,
@@ -283,61 +318,65 @@ function ServiceDetailsBase() {
   )
 
   return (
-    <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-      <ResponsiveLayoutSidenavContainer>
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            rowGap: theme.spacing.medium,
-            overflow: 'hidden',
-            maxHeight: '100%',
-          }}
-        >
-          <Suspense fallback={null}>
-            <ServiceSelector />
-          </Suspense>
+    <SidenavOverrideContext.Provider value={{ setSidenavContent }}>
+      <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
+        <ResponsiveLayoutSidenavContainer>
           <div
             css={{
-              overflowY: 'auto',
-              paddingBottom: theme.spacing.medium,
+              display: 'flex',
+              flexDirection: 'column',
+              rowGap: theme.spacing.medium,
+              overflow: 'hidden',
+              maxHeight: '100%',
             }}
           >
-            <SideNavEntries
-              directory={directory}
-              pathname={pathname}
-              pathPrefix={pathPrefix}
-              docPageContext={docPageContext}
-            />
+            <Suspense fallback={null}>
+              <ServiceSelector />
+            </Suspense>
+            <div
+              css={{
+                overflowY: 'auto',
+                paddingBottom: theme.spacing.medium,
+              }}
+            >
+              {sidenavContent || (
+                <SideNavEntries
+                  directory={directory}
+                  pathname={pathname}
+                  pathPrefix={pathPrefix}
+                  docPageContext={docPageContext}
+                />
+              )}
+            </div>
           </div>
-        </div>
-      </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer role="main">
-        {!serviceDeployment && serviceError ? (
-          <GqlError error={serviceError} />
-        ) : serviceDeployment ? (
-          <Outlet
-            context={
-              {
-                service: serviceDeployment,
-                refetch: () => {
-                  setIsRefetching(true)
-                  return refetch().finally(() => setIsRefetching(false))
-                },
-                isRefetching,
-              } satisfies ServiceContextType
-            }
-          />
-        ) : (
-          <LoadingIndicator />
-        )}
-      </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSidecarContainer>
-        <ServiceDetailsSidecar serviceDeployment={serviceDeployment} />
-      </ResponsiveLayoutSidecarContainer>
-      <ResponsiveLayoutSpacer />
-    </ResponsiveLayoutPage>
+        </ResponsiveLayoutSidenavContainer>
+        <ResponsiveLayoutSpacer />
+        <ResponsiveLayoutContentContainer role="main">
+          {!serviceDeployment && serviceError ? (
+            <GqlError error={serviceError} />
+          ) : serviceDeployment ? (
+            <Outlet
+              context={
+                {
+                  service: serviceDeployment,
+                  refetch: () => {
+                    setIsRefetching(true)
+                    return refetch().finally(() => setIsRefetching(false))
+                  },
+                  isRefetching,
+                } satisfies ServiceContextType
+              }
+            />
+          ) : (
+            <LoadingIndicator />
+          )}
+        </ResponsiveLayoutContentContainer>
+        <ResponsiveLayoutSidecarContainer>
+          <ServiceDetailsSidecar serviceDeployment={serviceDeployment} />
+        </ResponsiveLayoutSidecarContainer>
+        <ResponsiveLayoutSpacer />
+      </ResponsiveLayoutPage>
+    </SidenavOverrideContext.Provider>
   )
 }
 
