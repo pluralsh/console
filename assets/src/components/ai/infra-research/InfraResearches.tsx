@@ -1,7 +1,5 @@
 import {
   CaretRightIcon,
-  Chip,
-  ChipProps,
   Divider,
   Flex,
   IconFrame,
@@ -16,10 +14,9 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { CaptionP, Title2H1 } from 'components/utils/typography/Text'
 import {
   InfraResearchFragment,
-  InfraResearchStatus,
   useInfraResearchesQuery,
 } from 'generated/graphql'
-import { capitalize, isEmpty } from 'lodash'
+import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_INFRA_RESEARCH_REL_PATH } from 'routes/aiRoutesConsts'
@@ -27,8 +24,9 @@ import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { getAIBreadcrumbs } from '../AI'
-import { exampleCards, InfraResearchExampleCard } from './InfraResearchExamples'
 import { InfraResearchInput } from './InfraResearchInput'
+import { RunStatusChip } from './details/InfraResearch'
+import { AIExampleCard, infraResearchExamples } from '../AIExampleCard'
 
 export const getInfraResearchesBreadcrumbs = () =>
   getAIBreadcrumbs(AI_INFRA_RESEARCH_REL_PATH)
@@ -86,8 +84,8 @@ export function InfraResearches() {
           overflow="auto"
           css={{ [`@container (max-width: ${800}px)`]: { display: 'none' } }}
         >
-          {exampleCards.map((card) => (
-            <InfraResearchExampleCard
+          {infraResearchExamples.map((card) => (
+            <AIExampleCard
               key={card.title}
               {...card}
             />
@@ -155,8 +153,7 @@ const columns = [
     id: 'status',
     header: 'Status',
     cell: ({ getValue }) => (
-      <InfraResearchStatusChip
-        size="medium"
+      <RunStatusChip
         fillLevel={2}
         status={getValue()}
       />
@@ -178,34 +175,6 @@ const columns = [
     },
   }),
 ]
-
-function statusSeverity(status: InfraResearchStatus) {
-  switch (status) {
-    case InfraResearchStatus.Completed:
-      return 'success'
-    case InfraResearchStatus.Failed:
-      return 'danger'
-    default:
-      return 'info'
-  }
-}
-
-export function InfraResearchStatusChip({
-  status,
-  ...props
-}: {
-  status: Nullable<InfraResearchStatus>
-} & ChipProps) {
-  if (!status) return null
-  return (
-    <Chip
-      {...props}
-      severity={statusSeverity(status)}
-    >
-      {capitalize(status)}
-    </Chip>
-  )
-}
 
 const PromptSectionSC = styled.div(({ theme }) => ({
   display: 'flex',

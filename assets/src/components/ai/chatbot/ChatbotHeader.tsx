@@ -30,7 +30,7 @@ import { AgentSessionTypeSelect } from './AgentSessionTypeSelect.tsx'
 import { CHATBOT_HEADER_HEIGHT } from './Chatbot.tsx'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
 import { getInfraResearchAbsPath } from 'routes/aiRoutesConsts.tsx'
-import { InfraResearchStatusChip } from '../infra-research/details/InfraResearch.tsx'
+import { RunStatusChip } from '../infra-research/details/InfraResearch.tsx'
 
 export function ChatbotHeader() {
   const { colors } = useTheme()
@@ -164,8 +164,7 @@ export function ChatbotHeader() {
         )}
         {viewType === AIViewTypes.InfraResearch &&
           researchData?.infraResearch?.status && (
-            <InfraResearchStatusChip
-              size="medium"
+            <RunStatusChip
               status={researchData.infraResearch.status}
             />
           )}

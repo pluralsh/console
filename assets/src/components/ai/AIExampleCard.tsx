@@ -3,7 +3,7 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 import styled from 'styled-components'
 
-export function InfraResearchExampleCard({
+export function AIExampleCard({
   title,
   description,
 }: {
@@ -35,7 +35,7 @@ const CardSC = styled(Card)(({ theme }) => ({
   flex: '1 0 0',
 }))
 
-export const exampleCards = [
+export const infraResearchExamples = [
   {
     title: 'Make diagrams',
     description: 'Visualize your infrastructure using Mermaid diagrams',
@@ -48,5 +48,21 @@ export const exampleCards = [
   {
     title: 'Learn about your cluster',
     description: 'Learn about your clusters and their components',
+  },
+] as const
+
+export const agentRunExamples = [
+  {
+    title: 'Double the size of Grafana DB',
+    description: 'Double the size of Grafana DB',
+  },
+  {
+    title: 'Use m5.large node type',
+    description: 'Use m5.large node type for the dem-dev cluster',
+  },
+  {
+    title: 'Add a node label selector',
+    description:
+      'Add a “platform.plural.sh/role: metrics” node label selector to the Grafana DB',
   },
 ] as const
