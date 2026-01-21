@@ -225,6 +225,8 @@ export function ComponentsFilesView() {
     <Code
       height="100%"
       language={getLanguageFromFileName(selectedFile.name)}
+      showHeader
+      showLineNumbers
       title={selectedFile.name}
     >
       {selectedFile.content}
