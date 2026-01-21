@@ -36,7 +36,8 @@ const DarkTreeWrapper = styled.div(({ theme }) => ({
   '--rct-color-focustree-item-draggingover-bg':
     theme.colors['fill-one-selected'],
   '--rct-color-focustree-item-draggingover-color': theme.colors.text,
-  '--rct-color-nonfocustree-item-selected-bg': theme.colors['fill-one-hover'],
+  '--rct-color-nonfocustree-item-selected-bg':
+    theme.colors['fill-one-selected'],
   '--rct-color-nonfocustree-item-selected-text': theme.colors.text,
   '--rct-color-nonfocustree-item-focused-border': 'transparent',
   '--rct-color-search-highlight-bg': theme.colors['action-primary'],
@@ -46,6 +47,7 @@ const DarkTreeWrapper = styled.div(({ theme }) => ({
 
   '.rct-tree-item-title-container': {
     borderRadius: theme.borderRadiuses.medium,
+    marginBottom: theme.spacing.xxxsmall,
 
     '&:hover': {
       backgroundColor: theme.colors['fill-one-hover'],
@@ -55,7 +57,8 @@ const DarkTreeWrapper = styled.div(({ theme }) => ({
       ...theme.partials.text.body2,
       color: theme.colors['text-light'],
       cursor: 'pointer',
-      padding: `${theme.spacing.medium}px ${theme.spacing.small}px`,
+      height: 'fit-content',
+      padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
 
       '&.rct-tree-item-button-focused': {
         color: theme.colors['text'],
