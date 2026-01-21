@@ -138,7 +138,10 @@ export function ComponentsFilesView() {
   if (loading) return <LoadingIndicator />
 
   return (
-    <div style={{ height: '100%', width: '100%' }}>
+    <div
+      className="rct-dark"
+      style={{ height: '100%', width: '100%' }}
+    >
       <UncontrolledTreeEnvironment
         dataProvider={
           new StaticTreeDataProvider(treeItems, (item, data) => ({
