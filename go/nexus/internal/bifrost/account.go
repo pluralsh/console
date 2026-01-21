@@ -121,11 +121,13 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 	case schemas.OpenAI:
 		if cfg := aiConfig.GetOpenai(); cfg != nil && cfg.GetBaseUrl() != "" {
 			config.NetworkConfig.BaseURL = cfg.GetBaseUrl()
+			config.NetworkConfig.DefaultRequestTimeoutInSeconds = 300 // 5 minutes
 		}
 
 	case schemas.Anthropic:
 		if cfg := aiConfig.GetAnthropic(); cfg != nil && cfg.GetBaseUrl() != "" {
 			config.NetworkConfig.BaseURL = cfg.GetBaseUrl()
+			config.NetworkConfig.DefaultRequestTimeoutInSeconds = 300 // 5 minutes
 		}
 	}
 

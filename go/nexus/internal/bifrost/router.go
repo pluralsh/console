@@ -481,6 +481,14 @@ func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.Bif
 			}
 
 			flusher.Flush()
+
+			// Some clients (like OpenAI) expect a [DONE] marker to stop listening,
+			// even if an error occurred during the stream.
+			if in.shouldSendDoneMarker(config.Provider, config.Path) {
+				_, _ = fmt.Fprint(w, "data: [DONE]\n\n")
+				flusher.Flush()
+			}
+
 			return
 		}
 
