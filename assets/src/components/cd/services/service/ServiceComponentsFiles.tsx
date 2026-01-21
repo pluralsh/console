@@ -43,11 +43,9 @@ type TreeNode = {
   children: TreeNode[]
 }
 
-function buildTree(
-  paths: string[],
-  contentMap: Record<string, string>
-): TreeNode[] {
+function buildTree(contentMap: Record<string, string>): TreeNode[] {
   const root: Record<string, TreeNode> = {}
+  const paths = Object.keys(contentMap)
 
   paths.forEach((path) => {
     const parts = path.split('/')
@@ -146,7 +144,6 @@ export function ComponentsFilesView() {
 
   const treeItems = useMemo(() => {
     const files = data?.serviceTarball ?? []
-    const paths = files.map((file) => file?.path).filter(Boolean) as string[]
     const contentMap = files.reduce(
       (acc, file) => {
         if (file?.path && file?.content) {
@@ -157,7 +154,7 @@ export function ComponentsFilesView() {
       {} as Record<string, string>
     )
 
-    if (!paths?.length) {
+    if (Object.keys(contentMap).length === 0) {
       return {
         root: {
           index: 'root',
@@ -168,12 +165,12 @@ export function ComponentsFilesView() {
       }
     }
 
-    return convertToTreeItems(buildTree(paths, contentMap))
+    return convertToTreeItems(buildTree(contentMap))
   }, [data])
 
   const sidenavContent = useMemo(
     () =>
-      !loading && !error ? (
+      data?.serviceTarball ? (
         <DarkTreeWrapper>
           <UncontrolledTreeEnvironment
             dataProvider={
@@ -209,7 +206,7 @@ export function ComponentsFilesView() {
           </UncontrolledTreeEnvironment>
         </DarkTreeWrapper>
       ) : undefined,
-    [loading, error, treeItems]
+    [data, treeItems]
   )
 
   useSetSidenavContent(sidenavContent)
