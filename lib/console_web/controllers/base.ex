@@ -1,6 +1,12 @@
 defmodule ConsoleWeb.Controllers.Base do
   alias Phoenix.Controller
 
+  def to_attrs(struct) do
+    Console.mapify(struct)
+    |> Enum.reject(fn {_, v} -> is_nil(v) end)
+    |> Map.new()
+  end
+
   def successful({:ok, result}, conn, schema),
     do: Controller.json(conn, schema.wire_format(result))
   def successful(pass, _, _), do: pass
