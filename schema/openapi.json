@@ -127,6 +127,171 @@
         },
         "type": "object"
       },
+      "Console.OpenAPI.Stack.List": {
+        "description": "A list of stacks",
+        "properties": {
+          "data": {
+            "items": "Elixir.Stack",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Git": {
+        "title": "Git",
+        "description": "Git reference configuration",
+        "properties": {
+          "folder": {
+            "type": "string"
+          },
+          "ref": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Stack": {
+        "title": "Stack",
+        "description": "An infrastructure stack",
+        "properties": {
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array"
+          },
+          "approval": {
+            "type": "boolean"
+          },
+          "cluster_id": {
+            "type": "string"
+          },
+          "deleted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "git": {
+            "$ref": "#/components/schemas/Git"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "interval": {
+            "type": "string"
+          },
+          "manage_state": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "paused": {
+            "type": "boolean"
+          },
+          "project_id": {
+            "type": "string"
+          },
+          "repository_id": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "pending",
+              "running",
+              "successful",
+              "failed",
+              "cancelled",
+              "pending_approval"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "terraform",
+              "ansible",
+              "custom"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "workdir": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StackInput": {
+        "title": "StackInput",
+        "description": "An infrastructure stack input",
+        "properties": {
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array"
+          },
+          "approval": {
+            "type": "boolean"
+          },
+          "cluster_id": {
+            "type": "string"
+          },
+          "git": {
+            "$ref": "#/components/schemas/Git"
+          },
+          "interval": {
+            "type": "string"
+          },
+          "manage_state": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "paused": {
+            "type": "boolean"
+          },
+          "project_id": {
+            "type": "string"
+          },
+          "repository_id": {
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "terraform",
+              "ansible",
+              "custom"
+            ],
+            "type": "string"
+          },
+          "workdir": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Tag": {
+        "title": "Tag",
+        "description": "A tag",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "User": {
         "title": "User",
         "description": "A registed user",
@@ -331,6 +496,161 @@
           }
         },
         "operationId": "Me"
+      }
+    },
+    "/api/v1/stacks": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.Stack.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListStacks",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stack"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateStack",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StackInput"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/v1/stacks/{id}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stack"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteStack",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "detach",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ]
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stack"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetStack",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stack"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpdateStack",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StackInput"
+              }
+            }
+          },
+          "required": true
+        }
       }
     }
   }

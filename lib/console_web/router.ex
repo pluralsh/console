@@ -114,6 +114,12 @@ defmodule ConsoleWeb.Router do
           put "/clusters/:id",    ClusterController, :update
           delete "/clusters/:id", ClusterController, :delete
         end
+
+        post "/stacks", StackController, :create
+        get "/stacks", StackController, :index
+        get "/stacks/:id", StackController, :show
+        put "/stacks/:id", StackController, :update
+        delete "/stacks/:id", StackController, :delete
       end
     end
 

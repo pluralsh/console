@@ -240,6 +240,8 @@ defmodule Console.Schema.Stack do
     from(s in query, order_by: ^order)
   end
 
+def preloaded(query \\ __MODULE__, preloads), do: from(s in query, preload: ^preloads)
+
   def for_status(query \\ __MODULE__, status) do
     from(s in query, where: s.status == ^status)
   end
