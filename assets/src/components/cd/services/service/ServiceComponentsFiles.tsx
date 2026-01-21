@@ -42,6 +42,7 @@ const DarkTreeWrapper = styled.div(({ theme }) => ({
     '.rct-tree-item-button': {
       ...theme.partials.text.body2,
       color: theme.colors['text-light'],
+      cursor: 'pointer',
       padding: `${theme.spacing.medium}px ${theme.spacing.small}px`,
 
       '&.rct-tree-item-button-focused': {
