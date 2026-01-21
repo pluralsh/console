@@ -153,7 +153,7 @@ function convertToTreeItems(nodes: TreeNode[]): Record<string, TreeItemType> {
 
 export function ComponentsFilesView() {
   const { serviceId } = useParams<{ serviceId: string }>()
-  const [selectedFile, setSelectedFile] = useState<ServiceFile | null>(null)
+  const [selectedFile, setSelectedFile] = useState<ServiceFile>()
 
   const { data, loading, error } = useServiceTarballQuery({
     variables: { id: serviceId! },
