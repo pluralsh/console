@@ -1,6 +1,6 @@
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useServiceTarballQuery } from 'generated/graphql'
+import { ServiceFile, useServiceTarballQuery } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
@@ -137,10 +137,7 @@ function convertToTreeItems(nodes: TreeNode[]): Record<string, TreeItemType> {
 
 export function ComponentsFilesView() {
   const { serviceId } = useParams<{ serviceId: string }>()
-  const [selectedFile, setSelectedFile] = useState<{
-    name: string
-    content: string
-  } | null>(null)
+  const [selectedFile, setSelectedFile] = useState<ServiceFile | null>(null)
 
   const { data, loading, error } = useServiceTarballQuery({
     variables: { id: serviceId! },
@@ -198,7 +195,7 @@ export function ComponentsFilesView() {
               const itemId = items[0]
               if (itemId && treeItems[itemId]?.data?.content) {
                 setSelectedFile({
-                  name: treeItems[itemId].data.name,
+                  path: treeItems[itemId].data.path,
                   content: treeItems[itemId].data.content,
                 })
               }
@@ -224,10 +221,10 @@ export function ComponentsFilesView() {
   return selectedFile ? (
     <Code
       height="100%"
-      language={getLanguageFromFileName(selectedFile.name)}
+      language={getLanguageFromFileName(selectedFile.path)}
       showHeader
       showLineNumbers
-      title={selectedFile.name}
+      title={selectedFile.path}
     >
       {selectedFile.content}
     </Code>
