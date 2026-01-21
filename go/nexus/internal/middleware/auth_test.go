@@ -65,51 +65,6 @@ func TestAuth_BearerToken(t *testing.T) {
 	assert.Equal(t, "test-bearer-token", authenticator.calledWith)
 }
 
-// TestAuth_DeployToken tests FR-3.2: Support for Deploy tokens
-func TestAuth_DeployToken(t *testing.T) {
-	authenticator := &mockAuthenticator{authenticated: true}
-	middleware := Auth(authenticator)
-
-	handlerCalled := false
-	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlerCalled = true
-
-		w.WriteHeader(http.StatusOK)
-	}))
-
-	req := httptest.NewRequest("GET", "/v1/chat/completions", nil)
-	req.Header.Set("Authorization", "Deploy test-deploy-token")
-	rec := httptest.NewRecorder()
-
-	handler.ServeHTTP(rec, req)
-
-	assert.True(t, handlerCalled, "handler should be called")
-	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, "test-deploy-token", authenticator.calledWith)
-}
-
-// TestAuth_RawToken tests backwards compatibility with raw tokens
-func TestAuth_RawToken(t *testing.T) {
-	authenticator := &mockAuthenticator{authenticated: true}
-	middleware := Auth(authenticator)
-
-	handlerCalled := false
-	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		handlerCalled = true
-		w.WriteHeader(http.StatusOK)
-	}))
-
-	req := httptest.NewRequest("GET", "/v1/chat/completions", nil)
-	req.Header.Set("Authorization", "raw-token-123")
-	rec := httptest.NewRecorder()
-
-	handler.ServeHTTP(rec, req)
-
-	assert.True(t, handlerCalled, "handler should be called")
-	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, "raw-token-123", authenticator.calledWith)
-}
-
 // TestAuth_InvalidToken tests FR-3.3: Return 403 for invalid tokens
 func TestAuth_InvalidToken(t *testing.T) {
 	authenticator := &mockAuthenticator{authenticated: false}
@@ -274,21 +229,6 @@ func TestExtractToken(t *testing.T) {
 			expected: "abc123",
 		},
 		{
-			name:     "Deploy token",
-			header:   "Deploy xyz789",
-			expected: "xyz789",
-		},
-		{
-			name:     "Deploy token with extra spaces",
-			header:   "Deploy   xyz789  ",
-			expected: "xyz789",
-		},
-		{
-			name:     "Raw token",
-			header:   "raw-token-123",
-			expected: "raw-token-123",
-		},
-		{
 			name:     "Unknown prefix",
 			header:   "Custom token-123",
 			expected: "",
@@ -301,11 +241,6 @@ func TestExtractToken(t *testing.T) {
 		{
 			name:     "Case insensitive Bearer",
 			header:   "BEARER token123",
-			expected: "token123",
-		},
-		{
-			name:     "Case insensitive Deploy",
-			header:   "DEPLOY token123",
 			expected: "token123",
 		},
 	}
@@ -328,9 +263,6 @@ func TestAuth_CaseInsensitivePrefix(t *testing.T) {
 		{"lowercase bearer", "bearer test-token", "test-token"},
 		{"uppercase bearer", "BEARER test-token", "test-token"},
 		{"mixed case bearer", "BeArEr test-token", "test-token"},
-		{"lowercase deploy", "deploy test-token", "test-token"},
-		{"uppercase deploy", "DEPLOY test-token", "test-token"},
-		{"mixed case deploy", "DePlOy test-token", "test-token"},
 	}
 
 	for _, tc := range testCases {
