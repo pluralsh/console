@@ -8,8 +8,28 @@ import {
   Tree,
   StaticTreeDataProvider,
 } from 'react-complex-tree'
-import 'react-complex-tree/lib/style-modern.css'
+import 'react-complex-tree/lib/style.css'
 import type { TreeItem as TreeItemType } from 'react-complex-tree'
+import styled from 'styled-components'
+
+const DarkTreeWrapper = styled.div`
+  --rct-color-tree-bg: transparent;
+  --rct-color-tree-focus-outline: transparent;
+  --rct-color-focustree-item-selected-bg: #373737;
+  --rct-color-focustree-item-selected-text: #ffffff;
+  --rct-color-focustree-item-focused-border: #1d7be5;
+  --rct-color-focustree-item-draggingover-bg: #313131;
+  --rct-color-focustree-item-draggingover-color: #ffffff;
+  --rct-color-nonfocustree-item-selected-bg: #373737;
+  --rct-color-nonfocustree-item-selected-text: #ffffff;
+  --rct-color-nonfocustree-item-focused-border: #4f4f4f;
+  --rct-color-search-highlight-bg: #2f5381;
+  --rct-color-drag-between-line-bg: #1d7be5;
+  --rct-color-arrow: #ffffff;
+
+  height: 100%;
+  width: 100%;
+`
 
 type TreeNode = {
   id: string
@@ -139,10 +159,7 @@ export function ComponentsFilesView() {
   if (loading) return <LoadingIndicator />
 
   return (
-    <div
-      className="rct-dark"
-      style={{ height: '100%', width: '100%' }}
-    >
+    <DarkTreeWrapper>
       <UncontrolledTreeEnvironment
         dataProvider={
           new StaticTreeDataProvider(treeItems, (item, data) => ({
@@ -166,6 +183,6 @@ export function ComponentsFilesView() {
           treeLabel="Files"
         />
       </UncontrolledTreeEnvironment>
-    </div>
+    </DarkTreeWrapper>
   )
 }
