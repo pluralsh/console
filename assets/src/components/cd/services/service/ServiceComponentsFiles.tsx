@@ -1,7 +1,7 @@
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ServiceFile, useServiceTarballQuery } from 'generated/graphql'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
 import styled, { useTheme } from 'styled-components'
@@ -11,6 +11,7 @@ import {
 } from './ServiceDetailsContext'
 import {
   Code,
+  EmptyState,
   FileIcon,
   Flex,
   FolderIcon,
@@ -211,6 +212,21 @@ function findNodeAndParent(
   return { node: undefined, parentId: null }
 }
 
+function findFirstFile(nodes: TreeNode[]): TreeNode | undefined {
+  for (const node of nodes) {
+    if (node.isFile) {
+      return node
+    }
+    if (node.children.length > 0) {
+      const found = findFirstFile(node.children)
+      if (found) {
+        return found
+      }
+    }
+  }
+  return undefined
+}
+
 export function ComponentsFilesView() {
   const theme = useTheme()
   const { service } = useServiceContext()
@@ -219,6 +235,8 @@ export function ComponentsFilesView() {
   const [parentOfSelectedId, setParentOfSelectedId] = useState<string | null>(
     null
   )
+  const [expandedItems, setExpandedItems] = useState<string[]>([])
+  const hasAutoSelectedRef = useRef(false)
 
   const { data, loading, error } = useServiceTarballQuery({
     variables: { id: service.id! },
@@ -241,10 +259,53 @@ export function ComponentsFilesView() {
     return buildTree(contentMap)
   }, [data])
 
+  // Auto-select first file when tree is loaded (only once)
+  useEffect(() => {
+    if (
+      treeNodes.length > 0 &&
+      !hasAutoSelectedRef.current &&
+      !selectedFileId
+    ) {
+      const firstFile = findFirstFile(treeNodes)
+      if (firstFile?.isFile && firstFile.content) {
+        const { parentId } = findNodeAndParent(treeNodes, firstFile.id)
+        setSelectedFile({
+          path: firstFile.path,
+          content: firstFile.content,
+        })
+        setSelectedFileId(firstFile.id)
+        setParentOfSelectedId(parentId)
+        hasAutoSelectedRef.current = true
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [treeNodes])
+
+  // Auto-expand parent directories when a file is selected
+  useEffect(() => {
+    if (selectedFileId && parentOfSelectedId) {
+      const requiredExpanded: string[] = []
+      let currentParentId: string | null = parentOfSelectedId
+
+      // Collect all ancestor parent IDs
+      while (currentParentId) {
+        requiredExpanded.push(currentParentId)
+        const { parentId } = findNodeAndParent(treeNodes, currentParentId)
+        currentParentId = parentId
+      }
+
+      // Merge with existing expanded items (preserve user-expanded items)
+      setExpandedItems((prev) => {
+        const merged = new Set([...prev, ...requiredExpanded])
+        return Array.from(merged)
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedFileId, parentOfSelectedId])
+
   const handleItemSelection = useCallback(
     (_event: unknown, itemId: string, isSelected: boolean) => {
       if (isSelected) {
-        // Single traversal to find both node and parent for better performance
         const { node, parentId } = findNodeAndParent(treeNodes, itemId)
         if (node?.isFile && node.content) {
           setSelectedFile({
@@ -305,12 +366,22 @@ export function ComponentsFilesView() {
     return data?.serviceTarball && treeNodes.length > 0 ? (
       <StyledTreeView
         itemChildrenIndentation={12}
+        selectedItems={selectedFileId ? [selectedFileId] : []}
+        expandedItems={expandedItems}
+        onExpandedItemsChange={(_event, itemIds) => setExpandedItems(itemIds)}
         onItemSelectionToggle={handleItemSelection}
       >
         {renderTree(treeNodes)}
       </StyledTreeView>
     ) : undefined
-  }, [data, treeNodes, parentOfSelectedId, selectedFileId, handleItemSelection])
+  }, [
+    data,
+    treeNodes,
+    parentOfSelectedId,
+    selectedFileId,
+    handleItemSelection,
+    expandedItems,
+  ])
 
   const headingSecondaryColor = theme.colors['text-xlight']
   const heading = useMemo(
@@ -345,6 +416,9 @@ export function ComponentsFilesView() {
       {selectedFile.content}
     </Code>
   ) : (
-    <p>Select a file from the tree on the left to view its contents.</p>
+    <EmptyState
+      message="No files found"
+      description="The service has no files."
+    />
   )
 }
