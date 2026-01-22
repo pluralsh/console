@@ -49,6 +49,10 @@ defmodule Console.Deployments.Git do
 
   def get_helm_repository(url), do: Repo.get_by(HelmRepository, url: url)
 
+  def get_helm_repository!(id), do: Repo.get!(HelmRepository, id)
+
+  def get_helm_repository_by_url!(url), do: Repo.get_by!(HelmRepository, url: url)
+
   def get_by_url!(url), do: Repo.get_by!(GitRepository, url: url)
 
   def get_by_url(url), do: Repo.get_by(GitRepository, url: url)

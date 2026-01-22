@@ -18,6 +18,33 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
     end
   end
 
+  describe "#show_by_url/2" do
+    test "returns the git repository by url", %{conn: conn} do
+      user = insert(:user)
+      repo = insert(:git_repository)
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> get("/api/v1/cd/git/repositories/url", url: repo.url)
+        |> json_response(200)
+
+      assert result["id"] == repo.id
+      assert result["url"] == repo.url
+    end
+
+    test "returns 404 when repository not found", %{conn: conn} do
+      user = insert(:user)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        conn
+        |> add_auth_headers(user)
+        |> get("/api/v1/cd/git/repositories/url", url: "https://github.com/nonexistent/repo.git")
+        |> json_response(404)
+      end
+    end
+  end
+
   describe "#index/2" do
     test "returns the list of git repositories", %{conn: conn} do
       user = insert(:user)

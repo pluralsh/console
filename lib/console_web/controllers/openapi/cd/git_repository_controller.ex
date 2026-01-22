@@ -15,6 +15,18 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryController do
     |> successful(conn, OpenAPI.CD.GitRepository)
   end
 
+  operation :show_by_url,
+    operation_id: "GetGitRepositoryByUrl",
+    parameters: [
+      url: [in: :query, schema: %{type: :string}, required: true]
+    ],
+    responses: [ok: OpenAPI.CD.GitRepository]
+  def show_by_url(conn, %{"url" => url}) do
+    Git.get_by_url!(url)
+    |> then(&{:ok, &1})
+    |> successful(conn, OpenAPI.CD.GitRepository)
+  end
+
   operation :index,
     operation_id: "ListGitRepositories",
     parameters: [

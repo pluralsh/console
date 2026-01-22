@@ -137,6 +137,40 @@
         },
         "type": "object"
       },
+      "Console.OpenAPI.CD.HelmRepository.List": {
+        "description": "A list of helm repositories",
+        "properties": {
+          "data": {
+            "items": "Elixir.Console.Schema.HelmRepository",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.SCM.Connection.GithubApp": {
+        "description": "A Github App connection",
+        "properties": {
+          "app_id": {
+            "description": "The Github App ID",
+            "type": "string"
+          },
+          "installation_id": {
+            "description": "The Github App installation ID",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.SCM.Connection.List": {
+        "description": "A list of SCM connections",
+        "properties": {
+          "data": {
+            "items": "Elixir.Connection",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Console.OpenAPI.Stack.List": {
         "description": "A list of stacks",
         "properties": {
@@ -244,6 +278,286 @@
         },
         "required": [
           "url"
+        ],
+        "type": "object"
+      },
+      "GithubAppInput": {
+        "title": "GithubAppInput",
+        "description": "Github App authentication configuration",
+        "properties": {
+          "app_id": {
+            "description": "The GitHub App ID",
+            "type": "string"
+          },
+          "installation_id": {
+            "description": "The GitHub App installation ID",
+            "type": "string"
+          },
+          "private_key": {
+            "description": "The private key for the GitHub App",
+            "type": "string"
+          }
+        },
+        "required": [
+          "app_id",
+          "installation_id",
+          "private_key"
+        ],
+        "type": "object"
+      },
+      "HelmRepository": {
+        "title": "HelmRepository",
+        "description": "A helm repository",
+        "properties": {
+          "error": {
+            "description": "The error message for the helm repository's last pull attempt",
+            "type": "string"
+          },
+          "health": {
+            "enum": [
+              "pullable",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "basic",
+              "bearer",
+              "gcp",
+              "azure",
+              "aws"
+            ],
+            "type": "string"
+          },
+          "pulled_at": {
+            "description": "The last successful pull timestamp",
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "description": "The url of the helm repository",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HelmRepositoryInput": {
+        "title": "HelmRepositoryInput",
+        "description": "Input for upserting a helm repository",
+        "properties": {
+          "auth": {
+            "description": "Authentication configuration for the helm repository",
+            "properties": {
+              "aws": {
+                "description": "AWS credentials for ECR",
+                "properties": {
+                  "access_key": {
+                    "description": "AWS access key ID",
+                    "type": "string"
+                  },
+                  "assume_role_arn": {
+                    "description": "ARN of the role to assume",
+                    "type": "string"
+                  },
+                  "secret_access_key": {
+                    "description": "AWS secret access key",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "azure": {
+                "description": "Azure credentials for ACR",
+                "properties": {
+                  "client_id": {
+                    "description": "Azure client ID",
+                    "type": "string"
+                  },
+                  "client_secret": {
+                    "description": "Azure client secret",
+                    "type": "string"
+                  },
+                  "subscription_id": {
+                    "description": "Azure subscription ID",
+                    "type": "string"
+                  },
+                  "tenant_id": {
+                    "description": "Azure tenant ID",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "basic": {
+                "description": "Basic auth credentials",
+                "properties": {
+                  "password": {
+                    "description": "The password for basic auth",
+                    "type": "string"
+                  },
+                  "username": {
+                    "description": "The username for basic auth",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "bearer": {
+                "description": "Bearer token auth",
+                "properties": {
+                  "token": {
+                    "description": "The bearer token",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "gcp": {
+                "description": "GCP credentials for GCR/Artifact Registry",
+                "properties": {
+                  "application_credentials": {
+                    "description": "GCP service account JSON credentials",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "provider": {
+            "enum": [
+              "basic",
+              "bearer",
+              "gcp",
+              "azure",
+              "aws"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "description": "The url of the helm repository",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScmConnection": {
+        "title": "ScmConnection",
+        "description": "An SCM connection for integrating with source control providers",
+        "properties": {
+          "api_url": {
+            "description": "Base URL for HTTP APIs for self-hosted versions if different from base URL",
+            "type": "string"
+          },
+          "base_url": {
+            "description": "Base URL for self-hosted versions of this provider",
+            "type": "string"
+          },
+          "default": {
+            "description": "Whether this is the default SCM connection",
+            "type": "boolean"
+          },
+          "github": {
+            "$ref": "#/components/schemas/Console.OpenAPI.SCM.Connection.GithubApp"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the SCM connection",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "github",
+              "gitlab",
+              "bitbucket",
+              "azure_devops",
+              "bitbucket_datacenter"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "username": {
+            "description": "The username for authentication",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
+      "ScmConnectionInput": {
+        "title": "ScmConnectionInput",
+        "description": "Input for creating or updating an SCM connection",
+        "properties": {
+          "api_url": {
+            "description": "Base URL for HTTP APIs for self-hosted versions if different from base URL",
+            "type": "string"
+          },
+          "base_url": {
+            "description": "Base URL for Git clones for self-hosted versions",
+            "type": "string"
+          },
+          "default": {
+            "description": "Whether this is the default SCM connection",
+            "type": "boolean"
+          },
+          "github": {
+            "$ref": "#/components/schemas/GithubAppInput"
+          },
+          "name": {
+            "description": "The name of the SCM connection",
+            "type": "string"
+          },
+          "signing_private_key": {
+            "description": "A private key used for signing commits",
+            "type": "string"
+          },
+          "token": {
+            "description": "The access token for authentication",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "github",
+              "gitlab",
+              "bitbucket",
+              "azure_devops",
+              "bitbucket_datacenter"
+            ],
+            "type": "string"
+          },
+          "username": {
+            "description": "The username for authentication",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
         ],
         "type": "object"
       },
@@ -638,6 +952,33 @@
         }
       }
     },
+    "/api/v1/cd/git/repositories/url": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetGitRepositoryByUrl",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
     "/api/v1/cd/git/repositories/{id}": {
       "delete": {
         "responses": {
@@ -725,6 +1066,120 @@
         }
       }
     },
+    "/api/v1/cd/helm/repositories": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.CD.HelmRepository.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListHelmRepositories",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpsertHelmRepository",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HelmRepositoryInput"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/v1/cd/helm/repositories/url": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetHelmRepositoryByUrl",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/v1/cd/helm/repositories/{id}": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetHelmRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
     "/api/v1/me": {
       "get": {
         "responses": {
@@ -740,6 +1195,153 @@
           }
         },
         "operationId": "Me"
+      }
+    },
+    "/api/v1/scm/connections": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.SCM.Connection.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListScmConnections",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScmConnection"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateScmConnection",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScmConnectionInput"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/v1/scm/connections/{id}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScmConnection"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteScmConnection",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScmConnection"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetScmConnection",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScmConnection"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpdateScmConnection",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScmConnectionInput"
+              }
+            }
+          },
+          "required": true
+        }
       }
     },
     "/api/v1/stacks": {
