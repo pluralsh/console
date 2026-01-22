@@ -78,7 +78,12 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     marginLeft: '14px',
     paddingLeft:
       'calc(var(--TreeView-itemChildrenIndentation) * var(--TreeView-itemDepth))',
-    borderLeft: `1px solid ${theme.colors['border-fill-two']}`,
+    borderLeft: `1px solid ${theme.colors['border']}`,
+
+    [`&:has(.${treeItemClasses.root} .${treeItemClasses.content}.Mui-selected)`]:
+      {
+        borderLeftColor: theme.colors.grey[600],
+      },
   },
 }))
 
