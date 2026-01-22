@@ -27,7 +27,7 @@ export function AgentRuntimeIcon({
   )
 }
 
-const runtimeToIcon = {
+export const runtimeToIcon = {
   [AgentRuntimeType.Claude]: ClaudeLogoIcon,
   [AgentRuntimeType.Gemini]: GeminiLogoIcon,
   [AgentRuntimeType.Opencode]: OpenCodeLogoIcon,

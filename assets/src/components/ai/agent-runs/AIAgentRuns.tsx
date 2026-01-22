@@ -1,11 +1,4 @@
-import {
-  DiscoverIcon,
-  Divider,
-  Flex,
-  IconFrame,
-  Table,
-} from '@pluralsh/design-system'
-import { ChatSubmitButton } from 'components/ai/chatbot/input/ChatInput'
+import { DiscoverIcon, Flex, IconFrame, Table } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -16,10 +9,11 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
+import { agentRunExamples, AIExampleCard } from '../AIExampleCard'
+import { AIAgentRunInput } from './AIAgentRunInput'
 import { agentRunsCols } from './AIAgentRunsTableCols'
 import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
 import { CreateAgentRunModal } from './CreateAgentRun'
-import { agentRunExamples, AIExampleCard } from '../AIExampleCard'
 
 export function AIAgentRuns() {
   const [selectedRuntimeId, setSelectedRuntimeId] = useState<Nullable<string>>()
@@ -66,10 +60,7 @@ export function AIAgentRuns() {
           secondColor="text-light"
           gap="xsmall"
         />
-        {!noExistingData && <Divider backgroundColor="border" />}
-        <AgentRunsPromptPlaceholder
-          onSubmit={() => setIsCreateModalOpen(true)}
-        />
+        <AIAgentRunInput />
         <Flex
           gap="xsmall"
           overflow="auto"
@@ -136,30 +127,6 @@ export function AIAgentRuns() {
   )
 }
 
-function AgentRunsPromptPlaceholder({ onSubmit }: { onSubmit: () => void }) {
-  return (
-    <PromptInputWrapperSC>
-      <PromptPlaceholderTextSC>
-        Ask the agent to manage your infrastructure, explore, or analyze.
-      </PromptPlaceholderTextSC>
-      <PromptFooterSC>
-        <Flex
-          gap="xsmall"
-          wrap="wrap"
-        >
-          <PlaceholderPillSC>Claude</PlaceholderPillSC>
-          <PlaceholderPillSC>Analyze</PlaceholderPillSC>
-          <PlaceholderPillSC>Repository / runtime</PlaceholderPillSC>
-        </Flex>
-        <ChatSubmitButton
-          onClick={onSubmit}
-          bgColor="fill-primary"
-        />
-      </PromptFooterSC>
-    </PromptInputWrapperSC>
-  )
-}
-
 const PromptSectionSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -168,43 +135,4 @@ const PromptSectionSC = styled.div(({ theme }) => ({
   [`@container (max-width: ${theme.breakpoints.desktop}px)`]: {
     paddingRight: theme.spacing.small,
   },
-}))
-
-const PromptInputWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
-  position: 'relative',
-  minHeight: 130,
-  padding: theme.spacing.small,
-  borderRadius: theme.borderRadiuses.large,
-  backgroundColor: theme.colors['fill-one'],
-  border: theme.borders.input,
-}))
-
-const PromptPlaceholderTextSC = styled.div(({ theme }) => ({
-  color: theme.colors['text-xlight'],
-  padding: `${theme.spacing.small}px ${theme.spacing.small}px`,
-}))
-
-const PromptFooterSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  gap: theme.spacing.small,
-  padding: `${theme.spacing.xxsmall}px ${theme.spacing.small}px`,
-}))
-
-const PlaceholderPillSC = styled.div(({ theme }) => ({
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: theme.spacing.xxsmall,
-  padding: `0 ${theme.spacing.small}px`,
-  height: 28,
-  borderRadius: 25,
-  border: theme.borders.input,
-  backgroundColor: theme.colors['fill-two'],
-  color: theme.colors['text-light'],
-  fontSize: 12,
-  whiteSpace: 'nowrap',
 }))
