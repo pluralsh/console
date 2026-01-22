@@ -2,6 +2,7 @@ icon: https://avatars.githubusercontent.com/u/49917779?s=48&v=4
 git_url: https://github.com/kedacore/keda
 release_url: https://github.com/kedacore/keda/releases/tag/v{vsn}
 helm_repository_url: https://kedacore.github.io/charts
+eolApiSlug: keda
 versions:
 - version: 2.18.0
   kube: ['1.33', '1.32', '1.31']

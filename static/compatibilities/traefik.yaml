@@ -2,6 +2,7 @@ icon: https://github.com/traefik/traefik/raw/master/docs/content/assets/img/trae
 git_url: https://github.com/traefik/traefik
 release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
+eolApiSlug: traefik
 versions:
 - version: 3.6.6
   kube: ['1.35', '1.34', '1.33', '1.32']
@@ -22,7 +23,7 @@ versions:
         \ guide\u2014treat that as a potential source of breaking/config behavior\
         \ changes and validate against your current config."]
   chart_version: 38.0.2
-  images: []
+  images: ['docker.io/traefik:v3.6.6']
 - version: 3.6.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []

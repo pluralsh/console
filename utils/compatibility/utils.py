@@ -585,7 +585,7 @@ def match_version_to_eol_cycle(version_str, eol_cycles):
     return None
 
 
-def enrich_addon_with_eol(addon_dict, slug_map):
+def enrich_addon_with_eol(addon_dict, slug):
     """
     Enrich all versions in an addon dict with EOL data.
     Fetches EOL data once per addon, then matches all versions.
@@ -596,10 +596,6 @@ def enrich_addon_with_eol(addon_dict, slug_map):
     
     versions = addon_dict.get('versions', [])
     if not versions:
-        return addon_dict
-    
-    slug = slug_map.get(addon_name)
-    if not slug:
         return addon_dict
     
     eol_cycles = fetch_eol_data(slug)

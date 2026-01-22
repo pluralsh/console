@@ -37,16 +37,7 @@ if not manifest:
 if "names" not in manifest:
     print_error("No names found in the manifest file.")
 
-EOL_SLUG_MAP = {}
 for name in manifest["names"]:
-    slug = name
-  
-    EOL_SLUG_MAP[name] = slug
-
-# Add overrides here as needed, e.g.:
-# EOL_SLUG_MAP["some-addon"] = "different-endoflife-slug"
-
-for name in EOL_SLUG_MAP:
     scraper = os.getenv("SCRAPER")
     if scraper and name not in scraper:
         continue
@@ -63,11 +54,12 @@ for name in EOL_SLUG_MAP:
     time.sleep(60)
 
 addons = []
-for name in EOL_SLUG_MAP:
+for name in manifest["names"]:
     addon = read_yaml(f"../../static/compatibilities/{name}.yaml")
     addon["name"] = name
-    
-    enrich_addon_with_eol(addon, EOL_SLUG_MAP)
+    slug = addon.get("eolApiSlug")
+    if slug:
+        enrich_addon_with_eol(addon, slug)
     
     addons.append(addon)
 

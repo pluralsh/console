@@ -1158,6 +1158,7 @@ addons:
   release_url: https://github.com/projectcalico/calico/releases/tag/v{vsn}
   helm_repository_url: https://docs.tigera.io/calico/charts
   chart_name: tigera-operator
+  eolApiSlug: calico
   versions:
   - version: 3.31.3
     kube: ['1.30', '1.29', '1.28', '1.27']
@@ -1253,6 +1254,7 @@ addons:
   git_url: https://github.com/cert-manager/cert-manager
   release_url: https://github.com/cert-manager/cert-manager/releases/tag/v{vsn}
   helm_repository_url: https://charts.jetstack.io
+  eolApiSlug: cert-manager
   versions:
   - version: 1.19.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
@@ -2421,6 +2423,7 @@ addons:
   release_url: https://github.com/cilium/cilium/releases/tag/v{vsn}
   helm_repository_url: https://helm.cilium.io/
   helm_values: debug.verbose=flow
+  eolApiSlug: cilium
   versions:
   - version: 1.18.6
     kube: ['1.35', '1.34', '1.33']
@@ -4130,6 +4133,7 @@ addons:
   git_url: https://github.com/projectcontour/contour
   release_url: https://github.com/projectcontour/contour/releases/tag/v{vsn}
   helm_repository_url: https://charts.bitnami.com/bitnami
+  eolApiSlug: contour
   versions:
   - version: 1.32.1
     kube: ['1.33', '1.32', '1.31']
@@ -5275,6 +5279,7 @@ addons:
   release_url: https://github.com/fluxcd/flux2/releases/tag/v{vsn}
   helm_repository_url: https://fluxcd-community.github.io/helm-charts
   chart_name: flux2
+  eolApiSlug: flux
   versions:
   - version: 2.7.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -5919,6 +5924,7 @@ addons:
   release_url: https://github.com/istio/istio/releases/tag/{vsn}
   helm_repository_url: https://istio-release.storage.googleapis.com/charts
   chart_name: istiod
+  eolApiSlug: istio
   versions:
   - version: 1.28.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
@@ -6074,6 +6080,7 @@ addons:
   git_url: https://github.com/jaegertracing/jaeger
   release_url: https://github.com/jaegertracing/jaeger/releases/tag/v{vsn}
   helm_repository_url: https://jaegertracing.github.io/helm-charts
+  eolApiSlug: jaeger
   versions:
   - version: 1.62.0
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
@@ -6393,6 +6400,7 @@ addons:
   git_url: https://github.com/kedacore/keda
   release_url: https://github.com/kedacore/keda/releases/tag/v{vsn}
   helm_repository_url: https://kedacore.github.io/charts
+  eolApiSlug: keda
   versions:
   - version: 2.18.0
     kube: ['1.33', '1.32', '1.31']
@@ -7288,6 +7296,7 @@ addons:
   git_url: https://github.com/kyverno/kyverno
   release_url: https://github.com/kyverno/kyverno/releases/tag/v{vsn}
   helm_repository_url: https://kyverno.github.io/kyverno/
+  eolApiSlug: kyverno
   versions:
   - version: 1.16.0
     kube: ['1.34', '1.33', '1.32', '1.31']
@@ -9422,6 +9431,7 @@ addons:
   git_url: https://github.com/traefik/traefik
   release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
   helm_repository_url: https://traefik.github.io/charts
+  eolApiSlug: traefik
   versions:
   - version: 3.6.6
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -9442,7 +9452,7 @@ addons:
           \ migration guide\u2014treat that as a potential source of breaking/config\
           \ behavior changes and validate against your current config."]
     chart_version: 38.0.2
-    images: []
+    images: ['docker.io/traefik:v3.6.6']
   - version: 3.6.0
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
@@ -9952,6 +9962,7 @@ addons:
 - icon: https://avatars.githubusercontent.com/u/33043890?s=48&v=4
   git_url: https://github.com/vitessio/vitess
   release_url: https://github.com/vitessio/vitess/releases/tag/v{vsn}
+  eolApiSlug: vitess
   versions:
   - version: 23.0.0
     kube: ['1.34', '1.33', '1.32', '1.31']
@@ -10044,6 +10055,7 @@ addons:
   release_url: https://github.com/open-policy-agent/gatekeeper/releases/tag/v{vsn}
   helm_repository_url: https://open-policy-agent.github.io/gatekeeper/charts
   chart_name: gatekeeper
+  eolApiSlug: gatekeeper
   versions:
   - version: 3.21.0
     kube: ['1.34', '1.33', '1.32']
@@ -11157,6 +11169,7 @@ addons:
   release_url: https://github.com/projectcalico/calico/releases/tag/v{vsn}
   helm_repository_url: https://docs.tigera.io/calico/charts
   chart_name: tigera-operator
+  eolApiSlug: calico
   versions:
   - version: 3.31.3
     kube: ['1.30', '1.29', '1.28', '1.27']
@@ -11186,6 +11199,7 @@ addons:
     summary: null
     chart_version: 3.29.0
     images: ['quay.io/tigera/operator:v1.36.0']
+    eolAt: '2025-10-21'
   - version: 3.28.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11193,6 +11207,7 @@ addons:
     summary: null
     chart_version: 3.28.0
     images: ['quay.io/tigera/operator:v1.34.0']
+    eolAt: '2025-05-05'
   - version: 3.27.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11200,6 +11215,7 @@ addons:
     summary: null
     chart_version: 3.27.0
     images: ['quay.io/tigera/operator:v1.32.3']
+    eolAt: '2024-10-29'
   - version: 3.26.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11207,6 +11223,7 @@ addons:
     summary: null
     chart_version: 3.26.0
     images: ['quay.io/tigera/operator:v1.30.0']
+    eolAt: '2024-05-11'
   - version: 3.25.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11214,6 +11231,7 @@ addons:
     summary: null
     chart_version: 3.25.0
     images: ['quay.io/tigera/operator:v1.29.0']
+    eolAt: '2023-12-15'
   - version: 3.24.1
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11247,6 +11265,7 @@ addons:
   git_url: https://github.com/argoproj/argo-cd
   release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
   helm_repository_url: https://argoproj.github.io/argo-helm
+  eolApiSlug: argocd
   versions:
   - version: 3.2.5
     kube: ['1.35', '1.34', '1.33']
