@@ -127,6 +127,16 @@
         },
         "type": "object"
       },
+      "Console.OpenAPI.CD.GitRepository.List": {
+        "description": "A list of git repositories",
+        "properties": {
+          "data": {
+            "items": "Elixir.Console.Schema.GitRepository",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Console.OpenAPI.Stack.List": {
         "description": "A list of stacks",
         "properties": {
@@ -148,6 +158,93 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "GitRepository": {
+        "title": "GitRepository",
+        "description": "A git repository",
+        "properties": {
+          "auth_method": {
+            "enum": [
+              "basic",
+              "ssh"
+            ],
+            "type": "string"
+          },
+          "error": {
+            "description": "The error message for the git repository's last pull attempt",
+            "type": "string"
+          },
+          "health": {
+            "enum": [
+              "pullable",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "https_path": {
+            "description": "The https url for this git repo if you need to customize it",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pulled_at": {
+            "description": "The last successful git pull timestamp",
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "description": "The url of the git repository, can be either an https or ssh url",
+            "type": "string"
+          },
+          "url_format": {
+            "description": "A format string to get the http url for a subfolder in a git repo",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GitRepositoryInput": {
+        "title": "GitRepositoryInput",
+        "description": "Input for creating or updating a git repository",
+        "properties": {
+          "connection_id": {
+            "description": "The id of the scm connection to use for authentication",
+            "type": "string"
+          },
+          "passphrase": {
+            "description": "A passphrase to decrypt the given private key",
+            "type": "string"
+          },
+          "password": {
+            "description": "The http password for http authenticated repos",
+            "type": "string"
+          },
+          "private_key": {
+            "description": "An ssh private key to use with this repo if an ssh url was given",
+            "type": "string"
+          },
+          "url": {
+            "description": "The url of the git repository, can be either an https or ssh url",
+            "type": "string"
+          },
+          "username": {
+            "description": "The http username for authenticated http repos, defaults to apiKey for github",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
         "type": "object"
       },
       "Stack": {
@@ -474,6 +571,153 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ClusterInput"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/v1/cd/git/repositories": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.CD.GitRepository.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListGitRepositories",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      },
+      "post": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateGitRepository",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GitRepositoryInput"
+              }
+            }
+          },
+          "required": true
+        }
+      }
+    },
+    "/api/v1/cd/git/repositories/{id}": {
+      "delete": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteGitRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetGitRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpdateGitRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GitRepositoryInput"
               }
             }
           },
