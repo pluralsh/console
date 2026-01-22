@@ -25,7 +25,7 @@ import { useCluster } from '../Cluster.tsx'
 
 import { useDataSelect } from './DataSelect.tsx'
 import {
-  Error,
+  Error as ErrorT,
   Resource as ResourceT,
   ResourceList as ResourceListT,
   ResourceListItemsKey,
@@ -126,7 +126,7 @@ export function ResourceList<
           itemsKey ? (value?.[itemsKey] as Array<TResource>) : []
         ) ?? [],
       errors: (data?.pages.flatMap((value) => value?.errors ?? []) ??
-        []) as Array<Error>,
+        []) as Array<ErrorT>,
     }),
     [data?.pages, itemsKey]
   )

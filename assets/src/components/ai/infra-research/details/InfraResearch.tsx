@@ -169,6 +169,7 @@ export function InfraResearch() {
             {status && (
               <InfraResearchStatusChip
                 status={status}
+                runningText="View progress"
                 {...((isRunning || (threads?.length ?? 0) > 1) && {
                   clickable: true,
                   onClick: () => goToInfraResearch(id),
@@ -315,7 +316,7 @@ function RegenerateButton({
 
 export function InfraResearchStatusChip({
   status,
-  runningText = 'View progress',
+  runningText = 'Running',
   ...props
 }: {
   status: InfraResearchStatus
