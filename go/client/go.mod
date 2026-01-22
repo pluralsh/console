@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/client
 
-go 1.25.1
+go 1.25.5
 
 require (
 	github.com/DataDog/dd-trace-go/v2 v2.3.0
