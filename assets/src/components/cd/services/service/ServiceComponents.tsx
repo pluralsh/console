@@ -31,7 +31,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 
 import { getServiceComponentPath } from 'routes/cdRoutesConsts'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { ButtonGroup } from '../../../utils/ButtonGroup.tsx'
 import { ComponentList } from './component/ComponentList.tsx'
@@ -60,6 +60,7 @@ const directory = [
 const defaultView = 'list'
 
 export function ServiceComponents() {
+  const theme = useTheme()
   const { service } = useServiceContext()
   const { createNewThread, mutationLoading } = useChatbot()
   const [selectedState, setSelectedState] = useState<Key | null>(null)
@@ -94,6 +95,8 @@ export function ServiceComponents() {
   return (
     <ServiceComponentsContext.Provider value={contextValue}>
       <ScrollablePage
+        noPadding
+        contentStyles={{ paddingTop: theme.spacing.medium }}
         scrollable
         heading={headingContent ?? 'Components'}
         headingContent={
