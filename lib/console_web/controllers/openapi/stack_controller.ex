@@ -4,6 +4,9 @@ defmodule ConsoleWeb.OpenAPI.StackController do
   alias Console.Deployments.Stacks
   alias Console.Schema.Stack
 
+  plug Scope, [resource: :stacks, action: :read] when action in [:show, :index]
+  plug Scope, [resource: :stacks, action: :write] when action in [:create, :update, :delete, :trigger_run, :resync, :restore]
+
   operation :show,
     operation_id: "GetStack",
     parameters: [

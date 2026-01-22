@@ -4,6 +4,9 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
   alias Console.Deployments.Clusters
   alias Console.Schema.Cluster
 
+  plug Scope, [resource: :cluster, action: :read] when action in [:show, :index]
+  plug Scope, [resource: :cluster, action: :write] when action in [:create, :update, :delete]
+
   operation :show,
     operation_id: "GetCluster",
     parameters: [

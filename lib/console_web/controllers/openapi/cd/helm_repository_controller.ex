@@ -3,6 +3,9 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryController do
   alias Console.Deployments.Git
   alias Console.Schema.HelmRepository
 
+  plug Scope, [resource: :repos, action: :read] when action in [:show, :index, :show_by_url]
+  plug Scope, [resource: :repos, action: :write] when action in [:upsert]
+
   operation :show,
     operation_id: "GetHelmRepository",
     parameters: [

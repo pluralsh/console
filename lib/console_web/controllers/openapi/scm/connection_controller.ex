@@ -3,6 +3,9 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionController do
   alias Console.Deployments.Git
   alias Console.Schema.ScmConnection
 
+  plug Scope, [resource: :scm, action: :read] when action in [:show, :index]
+  plug Scope, [resource: :scm, action: :write] when action in [:create, :update, :delete]
+
   operation :show,
     operation_id: "GetScmConnection",
     parameters: [

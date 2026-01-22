@@ -3,6 +3,9 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryController do
   alias Console.Deployments.Git
   alias Console.Schema.GitRepository
 
+  plug Scope, [resource: :repos, action: :read] when action in [:show, :index, :show_by_url]
+  plug Scope, [resource: :repos, action: :write] when action in [:create, :update, :delete]
+
   operation :show,
     operation_id: "GetGitRepository",
     parameters: [

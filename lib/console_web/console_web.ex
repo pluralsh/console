@@ -67,6 +67,7 @@ defmodule ConsoleWeb do
       import ConsoleWeb.Controllers.Base
       import Console.Services.Base, only: [when_ok: 2]
       alias Console.{OpenAPI, Repo, Schema}
+      alias ConsoleWeb.Plugs.Scope
       require Logger
 
       use Gettext, backend: ConsoleWeb.Gettext
