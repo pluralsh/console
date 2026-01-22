@@ -78,7 +78,7 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   [`& .${treeItemClasses.groupTransition}`]: {
     marginLeft: '14px',
     paddingLeft:
-      'calc(var(--TreeView-itemChildrenIndentation) * var(--TreeView-itemDepth))',
+      'calc(var(--TreeView-itemChildrenIndentation)) - max(0px, (var(--TreeView-itemDepth) - 2) * 12px))',
     borderLeft: `1px solid ${theme.colors['border']}`,
   },
 
