@@ -41,6 +41,7 @@ import { countDeprecations } from './deprecationUtils'
 import { ComponentsTreeView } from './ServiceComponentsTree.tsx'
 import { ComponentsFilesView } from './ServiceComponentsFiles.tsx'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
+import { ServiceComponentsContext } from './ServiceComponentsContext'
 
 const directory = [
   { path: 'list', icon: <ListIcon />, tooltip: 'Component list view' },
@@ -58,6 +59,8 @@ export function ServiceComponents() {
   const [selectedState, setSelectedState] = useState<Key | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchParams, setSearchParams] = useSearchParams()
+  const [filtersHidden, setFiltersHidden] = useState(false)
+  const [viewSwitchContent, setViewSwitchContent] = useState<ReactNode>()
   const [components, setComponents] = useState<
     ServiceDeploymentComponentFragment[]
   >([])
@@ -72,71 +75,86 @@ export function ServiceComponents() {
       width: 320,
     })
 
+  const contextValue = useMemo(
+    () => ({
+      setFiltersHidden,
+      setViewSwitchContent,
+    }),
+    []
+  )
+
   return (
-    <ScrollablePage
-      scrollable
-      heading="Components"
-      headingContent={
-        <ArrowScroll>
-          <FiltersWrapperSC>
-            <IconExpander
-              tooltip="Search components"
-              icon={<SearchIcon />}
-              active={!!searchQuery}
-              onClear={() => setSearchQuery('')}
-            >
-              <ExpandedInput
-                width={320}
-                inputValue={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search components"
+    <ServiceComponentsContext.Provider value={contextValue}>
+      <ScrollablePage
+        scrollable
+        heading="Components"
+        headingContent={
+          <ArrowScroll>
+            <FiltersWrapperSC>
+              {!filtersHidden && (
+                <>
+                  <IconExpander
+                    tooltip="Search components"
+                    icon={<SearchIcon />}
+                    active={!!searchQuery}
+                    onClear={() => setSearchQuery('')}
+                  >
+                    <ExpandedInput
+                      width={320}
+                      inputValue={searchQuery}
+                      onChange={setSearchQuery}
+                      placeholder="Search components"
+                    />
+                  </IconExpander>
+                  <IconExpander
+                    tooltip="Filter by component kind"
+                    icon={<ComponentsIcon />}
+                    active={!!selectedKinds.size}
+                    onClear={() => setSelectedKinds(new Set())}
+                  >
+                    {kindSelector}
+                  </IconExpander>
+                  <IconExpander
+                    tooltip="Filter by component state"
+                    icon={<UpdatesIcon />}
+                    active={!!selectedState}
+                    onClear={() => setSelectedState(null)}
+                  >
+                    <ComponentStateFilter
+                      selectedState={selectedState}
+                      setSelectedState={setSelectedState}
+                    />
+                  </IconExpander>
+                </>
+              )}
+              <ComponentsViewSwitch
+                tab={view}
+                setTab={(view: string) => setSearchParams({ view })}
               />
-            </IconExpander>
-            <IconExpander
-              tooltip="Filter by component kind"
-              icon={<ComponentsIcon />}
-              active={!!selectedKinds.size}
-              onClear={() => setSelectedKinds(new Set())}
-            >
-              {kindSelector}
-            </IconExpander>
-            <IconExpander
-              tooltip="Filter by component state"
-              icon={<UpdatesIcon />}
-              active={!!selectedState}
-              onClear={() => setSelectedState(null)}
-            >
-              <ComponentStateFilter
-                selectedState={selectedState}
-                setSelectedState={setSelectedState}
-              />
-            </IconExpander>
-            <ComponentsViewSwitch
-              tab={view}
-              setTab={(view: string) => setSearchParams({ view })}
-            />
-          </FiltersWrapperSC>
-        </ArrowScroll>
-      }
-    >
-      {view === 'list' && (
-        <ComponentsListView
-          setComponents={setComponents}
-          selectedKinds={selectedKinds}
-          selectedState={selectedState}
-          searchQuery={searchQuery}
-        />
-      )}
-      {view === 'tree' && (
-        <ComponentsTreeView
-          setComponents={setComponents}
-          selectedKinds={selectedKinds}
-          selectedState={selectedState}
-          searchQuery={searchQuery}
-        />
-      )}
-      {view === 'files' && <ComponentsFilesView />}
-    </ScrollablePage>
+              {viewSwitchContent}
+            </FiltersWrapperSC>
+          </ArrowScroll>
+        }
+      >
+        {view === 'list' && (
+          <ComponentsListView
+            setComponents={setComponents}
+            selectedKinds={selectedKinds}
+            selectedState={selectedState}
+            searchQuery={searchQuery}
+          />
+        )}
+        {view === 'tree' && (
+          <ComponentsTreeView
+            setComponents={setComponents}
+            selectedKinds={selectedKinds}
+            selectedState={selectedState}
+            searchQuery={searchQuery}
+          />
+        )}
+        {view === 'files' && <ComponentsFilesView />}
+      </ScrollablePage>
+    </ServiceComponentsContext.Provider>
   )
 }
 

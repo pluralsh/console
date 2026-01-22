@@ -2,7 +2,6 @@ import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ServiceFile, useServiceTarballQuery } from 'generated/graphql'
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
 import {
   UncontrolledTreeEnvironment,
   Tree,
@@ -11,9 +10,19 @@ import {
 import 'react-complex-tree/lib/style.css'
 import type { TreeItem as TreeItemType } from 'react-complex-tree'
 import styled from 'styled-components'
-import { useSetSidenavContent } from './ServiceDetails'
-import { Code, FileIcon, FolderIcon } from '@pluralsh/design-system'
+import { useServiceContext, useSetSidenavContent } from './ServiceDetails'
+import {
+  AiSparkleFilledIcon,
+  Button,
+  Code,
+  FileIcon,
+  FolderIcon,
+} from '@pluralsh/design-system'
 import { getLanguageFromFileName } from 'utils/file'
+import {
+  useSetServiceComponentsFiltersHidden,
+  useSetServiceComponentsViewSwitchContent,
+} from './ServiceComponentsContext'
 
 const TreeItemIcon = styled.div(({ theme }) => ({
   display: 'flex',
@@ -167,12 +176,12 @@ function convertToTreeItems(nodes: TreeNode[]): Record<string, TreeItemType> {
 }
 
 export function ComponentsFilesView() {
-  const { serviceId } = useParams<{ serviceId: string }>()
+  const { service } = useServiceContext()
   const [selectedFile, setSelectedFile] = useState<ServiceFile>()
 
   const { data, loading, error } = useServiceTarballQuery({
-    variables: { id: serviceId! },
-    skip: !serviceId,
+    variables: { id: service.id! },
+    skip: !service.id,
   })
 
   const treeItems = useMemo(() => {
@@ -252,6 +261,19 @@ export function ComponentsFilesView() {
   )
 
   useSetSidenavContent(sidenavContent)
+
+  const headerContent = useMemo(
+    () => (
+      <Button startIcon={<AiSparkleFilledIcon />}>
+        Chat with {service.name}
+      </Button>
+    ),
+    [service.name]
+  )
+
+  useSetServiceComponentsViewSwitchContent(headerContent)
+
+  useSetServiceComponentsFiltersHidden(true)
 
   if (error) return <GqlError error={error} />
 
