@@ -25,6 +25,7 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   [`& .${treeItemClasses.root}`]: {
     marginBottom: theme.spacing.xxxsmall,
     width: '100%',
+    paddingLeft: 2,
   },
 
   [`& .${treeItemClasses.content}`]: {
