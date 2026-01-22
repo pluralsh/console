@@ -46,11 +46,11 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     overflow: 'hidden',
 
     '&:hover': {
-      backgroundColor: theme.colors['fill-one-hover'],
+      backgroundColor: theme.colors['fill-zero-hover'],
     },
 
     '&.Mui-focused, &.Mui-selected, &.Mui-selected.Mui-focused': {
-      backgroundColor: theme.colors['fill-one-selected'],
+      backgroundColor: theme.colors['fill-zero-selected'],
       color: theme.colors.text,
     },
   },
@@ -80,6 +80,8 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     paddingLeft:
       'calc(var(--TreeView-itemChildrenIndentation)) - max(0px, (var(--TreeView-itemDepth) - 2) * 12px))',
     borderLeft: `1px solid ${theme.colors['border']}`,
+    marginTop: 2,
+    marginBottom: 2,
   },
 
   // Highlight only the direct parent's groupTransition border when it contains the selected file
