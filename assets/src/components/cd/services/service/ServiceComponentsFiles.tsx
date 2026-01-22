@@ -3,7 +3,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ServiceFile, useServiceTarballQuery } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
-import { TreeItem } from '@mui/x-tree-view/TreeItem'
+import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
 import styled, { useTheme } from 'styled-components'
 import {
   useServiceContext,
@@ -21,14 +21,12 @@ import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   height: '100%',
   width: '100%',
-  backgroundColor: 'transparent',
-  padding: 0,
 
-  '& .MuiTreeItem-root': {
+  [`& .${treeItemClasses.root}`]: {
     marginBottom: theme.spacing.xxxsmall,
   },
 
-  '& .MuiTreeItem-content': {
+  [`& .${treeItemClasses.content}`]: {
     borderRadius: theme.borderRadiuses.medium,
     padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
     ...theme.partials.text.body2,
@@ -44,7 +42,7 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     },
   },
 
-  '& .MuiTreeItem-iconContainer': {
+  [`& .${treeItemClasses.iconContainer}`]: {
     marginRight: 0,
     width: 'auto',
 
@@ -53,10 +51,17 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     },
   },
 
-  '& .MuiTreeItem-label': {
+  [`& .${treeItemClasses.label}`]: {
     display: 'flex',
     alignItems: 'center',
     padding: 0,
+  },
+
+  [`& .${treeItemClasses.groupTransition}`]: {
+    marginLeft: '14px',
+    paddingLeft:
+      'calc(var(--TreeView-itemChildrenIndentation) * var(--TreeView-itemDepth))',
+    borderLeft: `1px solid ${theme.colors['border-fill-two']}`,
   },
 }))
 
