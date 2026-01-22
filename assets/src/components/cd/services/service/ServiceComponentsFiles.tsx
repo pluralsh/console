@@ -2,13 +2,8 @@ import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ServiceFile, useServiceTarballQuery } from 'generated/graphql'
 import { useMemo, useState } from 'react'
-import {
-  UncontrolledTreeEnvironment,
-  Tree,
-  StaticTreeDataProvider,
-} from 'react-complex-tree'
-import 'react-complex-tree/lib/style.css'
-import type { TreeItem as TreeItemType } from 'react-complex-tree'
+import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
+import { TreeItem } from '@mui/x-tree-view/TreeItem'
 import styled, { useTheme } from 'styled-components'
 import {
   useServiceContext,
@@ -23,56 +18,53 @@ import {
 } from './ServiceComponentsContext'
 import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 
-const TreeItemIcon = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  marginRight: theme.spacing.xsmall,
-  color: theme.colors['icon-default'],
-}))
-
-const TreeItemTitleWrapper = styled.div({
-  display: 'flex',
-  alignItems: 'center',
-})
-
-const DarkTreeWrapper = styled.div(({ theme }) => ({
-  '--rct-color-tree-bg': 'transparent',
-  '--rct-color-tree-focus-outline': 'transparent',
-  '--rct-color-focustree-item-selected-bg': theme.colors['fill-one-hover'],
-  '--rct-color-focustree-item-selected-text': theme.colors.text,
-  '--rct-color-focustree-item-focused-border': 'transparent',
-  '--rct-color-focustree-item-draggingover-bg':
-    theme.colors['fill-one-selected'],
-  '--rct-color-focustree-item-draggingover-color': theme.colors.text,
-  '--rct-color-nonfocustree-item-selected-bg':
-    theme.colors['fill-one-selected'],
-  '--rct-color-nonfocustree-item-selected-text': theme.colors.text,
-  '--rct-color-nonfocustree-item-focused-border': 'transparent',
-  '--rct-color-search-highlight-bg': theme.colors['action-primary'],
-  '--rct-color-arrow': theme.colors['icon-default'],
+const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   height: '100%',
   width: '100%',
+  backgroundColor: 'transparent',
+  padding: 0,
 
-  '.rct-tree-item-title-container': {
-    borderRadius: theme.borderRadiuses.medium,
+  '& .MuiTreeItem-root': {
     marginBottom: theme.spacing.xxxsmall,
+  },
+
+  '& .MuiTreeItem-content': {
+    borderRadius: theme.borderRadiuses.medium,
+    padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
+    ...theme.partials.text.body2,
+    color: theme.colors['text-light'],
 
     '&:hover': {
       backgroundColor: theme.colors['fill-one-hover'],
     },
 
-    '.rct-tree-item-button': {
-      ...theme.partials.text.body2,
-      color: theme.colors['text-light'],
-      cursor: 'pointer',
-      height: 'fit-content',
-      padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
-
-      '&.rct-tree-item-button-focused': {
-        color: theme.colors['text'],
-      },
+    '&.Mui-focused, &.Mui-selected, &.Mui-selected.Mui-focused': {
+      backgroundColor: theme.colors['fill-one-selected'],
+      color: theme.colors.text,
     },
   },
+
+  '& .MuiTreeItem-iconContainer': {
+    marginRight: 0,
+    width: 'auto',
+
+    '& svg': {
+      fontSize: '14px',
+    },
+  },
+
+  '& .MuiTreeItem-label': {
+    display: 'flex',
+    alignItems: 'center',
+    padding: 0,
+  },
+}))
+
+const TreeItemIcon = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  marginRight: theme.spacing.xsmall,
+  color: theme.colors['icon-default'],
 }))
 
 type TreeNode = {
@@ -149,31 +141,6 @@ function collapseSingleChildFolders(nodes: TreeNode[]): TreeNode[] {
   })
 }
 
-function convertToTreeItems(nodes: TreeNode[]): Record<string, TreeItemType> {
-  const items: Record<string, TreeItemType> = {
-    root: {
-      index: 'root',
-      isFolder: true,
-      children: nodes.map((n) => n.id),
-      data: { name: 'Root' },
-    },
-  }
-
-  const addNode = (node: TreeNode) => {
-    items[node.id] = {
-      index: node.id,
-      isFolder: !node.isFile,
-      children: node.children.map((c) => c.id),
-      data: { name: node.name, path: node.path, content: node.content },
-    }
-    node.children.forEach(addNode)
-  }
-
-  nodes.forEach(addNode)
-
-  return items
-}
-
 export function ComponentsFilesView() {
   const theme = useTheme()
   const { service } = useServiceContext()
@@ -184,7 +151,7 @@ export function ComponentsFilesView() {
     skip: !service.id,
   })
 
-  const treeItems = useMemo(() => {
+  const treeNodes = useMemo(() => {
     const files = data?.serviceTarball ?? []
     const contentMap = files.reduce((acc, file) => {
       if (file?.path && file?.content) {
@@ -194,71 +161,71 @@ export function ComponentsFilesView() {
     }, new Map<string, string>())
 
     if (contentMap.size === 0) {
-      return {
-        root: {
-          index: 'root',
-          isFolder: true,
-          children: [],
-          data: { name: 'Root' },
-        },
-      }
+      return []
     }
 
-    return convertToTreeItems(buildTree(contentMap))
+    return buildTree(contentMap)
   }, [data])
 
-  const sidenavContent = useMemo(
-    () =>
-      data?.serviceTarball ? (
-        <DarkTreeWrapper>
-          <UncontrolledTreeEnvironment
-            dataProvider={
-              new StaticTreeDataProvider(treeItems, (item, data) => ({
-                ...item,
-                data,
-              }))
-            }
-            getItemTitle={(item) => item.data.name}
-            renderItemTitle={({ item }) => (
-              <TreeItemTitleWrapper>
-                <TreeItemIcon>
-                  {item.isFolder ? (
-                    <FolderIcon size={14} />
-                  ) : (
-                    <FileIcon size={14} />
-                  )}
-                </TreeItemIcon>
-                {item.data.name}
-              </TreeItemTitleWrapper>
-            )}
-            viewState={{
-              'file-tree': {
-                expandedItems: [],
-              },
-            }}
-            canDragAndDrop={false}
-            canDropOnFolder={false}
-            canReorderItems={false}
-            onSelectItems={(items) => {
-              const itemId = items[0]
-              if (itemId && treeItems[itemId]?.data?.content) {
-                setSelectedFile({
-                  path: treeItems[itemId].data.path,
-                  content: treeItems[itemId].data.content,
-                })
+  const sidenavContent = useMemo(() => {
+    // Recursive function to render tree items (defined inside useMemo)
+    const renderTree = (nodes: TreeNode[]): React.ReactNode =>
+      nodes.map((node) => (
+        <TreeItem
+          key={node.id}
+          itemId={node.id}
+          label={
+            <>
+              <TreeItemIcon>
+                {node.isFile ? (
+                  <FileIcon size={14} />
+                ) : (
+                  <FolderIcon size={14} />
+                )}
+              </TreeItemIcon>
+              {node.name}
+            </>
+          }
+        >
+          {!node.isFile &&
+            node.children.length > 0 &&
+            renderTree(node.children)}
+        </TreeItem>
+      ))
+
+    return data?.serviceTarball && treeNodes.length > 0 ? (
+      <StyledTreeView
+        onItemSelectionToggle={(_event, itemId, isSelected) => {
+          if (isSelected) {
+            // Find the node in the tree
+            const findNode = (
+              nodes: TreeNode[],
+              id: string
+            ): TreeNode | undefined => {
+              for (const node of nodes) {
+                if (node.id === id) return node
+                if (node.children.length > 0) {
+                  const found = findNode(node.children, id)
+                  if (found) return found
+                }
               }
-            }}
-          >
-            <Tree
-              treeId="file-tree"
-              rootItem="root"
-              treeLabel="Files"
-            />
-          </UncontrolledTreeEnvironment>
-        </DarkTreeWrapper>
-      ) : undefined,
-    [data, treeItems]
-  )
+              return undefined
+            }
+
+            const node = findNode(treeNodes, itemId)
+            if (node?.isFile && node.content) {
+              setSelectedFile({
+                path: node.path,
+                content: node.content,
+              })
+            }
+          }
+        }}
+      >
+        {renderTree(treeNodes)}
+      </StyledTreeView>
+    ) : undefined
+  }, [data, treeNodes])
 
   const heading = useMemo(
     () => (
