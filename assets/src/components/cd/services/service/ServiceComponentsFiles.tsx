@@ -79,12 +79,19 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     paddingLeft:
       'calc(var(--TreeView-itemChildrenIndentation) * var(--TreeView-itemDepth))',
     borderLeft: `1px solid ${theme.colors['border']}`,
-
-    [`&:has(.${treeItemClasses.root} .${treeItemClasses.content}.Mui-selected)`]:
-      {
-        borderLeftColor: theme.colors.grey[600],
-      },
   },
+
+  // Highlight only the direct parent's groupTransition border when it contains the selected file
+  [`& .${treeItemClasses.root}.parent-of-selected > .${treeItemClasses.groupTransition}:has(.${treeItemClasses.root}.file-selected)`]:
+    {
+      borderLeftColor: theme.colors.grey[600],
+    },
+
+  // Ensure nested groupTransitions (sibling directories) are not highlighted
+  [`& .${treeItemClasses.root}.parent-of-selected .${treeItemClasses.root}:not(.file-selected):not(.parent-of-selected) > .${treeItemClasses.groupTransition}`]:
+    {
+      borderLeftColor: theme.colors['border'],
+    },
 }))
 
 const TreeItemIcon = styled.div(({ theme }) => ({
@@ -178,10 +185,33 @@ function collapseSingleChildFolders(nodes: TreeNode[]): TreeNode[] {
   })
 }
 
+function findParentId(
+  nodes: TreeNode[],
+  targetId: string,
+  parentId: string | null = null
+): string | null {
+  for (const node of nodes) {
+    if (node.id === targetId) {
+      return parentId
+    }
+    if (node.children.length > 0) {
+      const found = findParentId(node.children, targetId, node.id)
+      if (found !== null) {
+        return found
+      }
+    }
+  }
+  return null
+}
+
 export function ComponentsFilesView() {
   const theme = useTheme()
   const { service } = useServiceContext()
   const [selectedFile, setSelectedFile] = useState<ServiceFile>()
+  const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
+  const [parentOfSelectedId, setParentOfSelectedId] = useState<string | null>(
+    null
+  )
 
   const { data, loading, error } = useServiceTarballQuery({
     variables: { id: service.id! },
@@ -206,36 +236,49 @@ export function ComponentsFilesView() {
 
   const sidenavContent = useMemo(() => {
     const renderTree = (nodes: TreeNode[]) =>
-      nodes.map((node) => (
-        <TreeItem
-          key={node.id}
-          itemId={node.id}
-          label={
-            <>
-              <Tooltip
-                label={node.name}
-                css={{ marginLeft: 6 }}
-              >
-                <div css={{ display: 'flex', flex: 1 }}>
-                  <TreeItemIcon>
-                    {node.isFile ? (
-                      <FileIcon size={14} />
-                    ) : (
-                      <FolderIcon size={14} />
-                    )}
-                  </TreeItemIcon>
+      nodes.map((node) => {
+        const isParentOfSelected =
+          !node.isFile && node.id === parentOfSelectedId
+        const isSelectedFile = node.isFile && node.id === selectedFileId
 
-                  <TreeItemText>{node.name}</TreeItemText>
-                </div>
-              </Tooltip>
-            </>
-          }
-        >
-          {!node.isFile &&
-            node.children.length > 0 &&
-            renderTree(node.children)}
-        </TreeItem>
-      ))
+        return (
+          <TreeItem
+            key={node.id}
+            itemId={node.id}
+            className={
+              isParentOfSelected
+                ? 'parent-of-selected'
+                : isSelectedFile
+                  ? 'file-selected'
+                  : undefined
+            }
+            label={
+              <>
+                <Tooltip
+                  label={node.name}
+                  css={{ marginLeft: 6 }}
+                >
+                  <div css={{ display: 'flex', flex: 1 }}>
+                    <TreeItemIcon>
+                      {node.isFile ? (
+                        <FileIcon size={14} />
+                      ) : (
+                        <FolderIcon size={14} />
+                      )}
+                    </TreeItemIcon>
+
+                    <TreeItemText>{node.name}</TreeItemText>
+                  </div>
+                </Tooltip>
+              </>
+            }
+          >
+            {!node.isFile &&
+              node.children.length > 0 &&
+              renderTree(node.children)}
+          </TreeItem>
+        )
+      })
 
     return data?.serviceTarball && treeNodes.length > 0 ? (
       <StyledTreeView
@@ -263,14 +306,24 @@ export function ComponentsFilesView() {
                 path: node.path,
                 content: node.content,
               })
+              setSelectedFileId(itemId)
+              // Find and set the parent directory ID
+              const parentId = findParentId(treeNodes, itemId)
+              setParentOfSelectedId(parentId)
+            } else {
+              setSelectedFileId(null)
+              setParentOfSelectedId(null)
             }
+          } else {
+            setSelectedFileId(null)
+            setParentOfSelectedId(null)
           }
         }}
       >
         {renderTree(treeNodes)}
       </StyledTreeView>
     ) : undefined
-  }, [data, treeNodes])
+  }, [data, treeNodes, parentOfSelectedId, selectedFileId])
 
   const heading = useMemo(
     () => (
