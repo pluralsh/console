@@ -108,9 +108,7 @@ const TreeItemText = styled.span({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   minWidth: 0,
-  flex: 1,
   direction: 'rtl',
-  textAlign: 'right',
 })
 
 type TreeNode = {
