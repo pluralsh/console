@@ -122,7 +122,7 @@ ociAuth:
   tag: ~
   imagePullPolicy: IfNotPresent
 
-nexus:
+aiProxy:
   enabled: true
   image:
     repository: nexus

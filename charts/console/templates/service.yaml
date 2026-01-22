@@ -8,19 +8,19 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: 4369
-      targetPort: epmd
-      protocol: TCP
-      name: epmd
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
-  {{- if .Values.nexus.enabled }}
-    - port: 8080
-      targetPort: nexus-http
-      protocol: TCP
-      name: nexus-http
+  - port: 4369
+    targetPort: epmd
+    protocol: TCP
+    name: epmd
+  - port: {{ .Values.service.port }}
+    targetPort: http
+    protocol: TCP
+    name: http
+  {{- if .Values.aiProxy.enabled }}
+  - port: 8080
+    targetPort: nexus-http
+    protocol: TCP
+    name: nexus-http
   {{- end }}
   selector:
     app.kubernetes.io/name: console
@@ -37,14 +37,14 @@ spec:
   type: ClusterIP
   clusterIP: None
   ports:
-    - port: 4369
-      targetPort: epmd
-      protocol: TCP
-      name: epmd
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
+  - port: 4369
+    targetPort: epmd
+    protocol: TCP
+    name: epmd
+  - port: {{ .Values.service.port }}
+    targetPort: http
+    protocol: TCP
+    name: http
   selector:
     app.kubernetes.io/name: console
     app.kubernetes.io/instance: {{ .Release.Name }}

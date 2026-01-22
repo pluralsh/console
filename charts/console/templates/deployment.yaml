@@ -26,7 +26,7 @@ spec:
         prometheus.io/path: "/metrics"
         prometheus.io/port: "9090"
         checksum/config: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
-        {{- if .Values.nexus.enabled }}
+        {{- if .Values.aiProxy.enabled }}
         checksum/nexus-config: {{ include (print $.Template.BasePath "/nexus-secret.yaml") . | sha256sum }}
         {{- end }}
 
@@ -111,9 +111,6 @@ spec:
         - name: http
           containerPort: {{ .Values.service.port }}
           protocol: TCP
-        - name: grpc
-          containerPort: 50051
-          protocol: TCP
         - name: metrics
           containerPort: 9090
           protocol: TCP
@@ -126,14 +123,14 @@ spec:
         {{ toYaml .Values.readinessProbe | nindent 10 }}
         resources:
         {{- toYaml .Values.resources | nindent 10 }}
-      {{- if .Values.nexus.enabled }}
+      {{- if .Values.aiProxy.enabled }}
       - name: nexus
-        image: "{{ .Values.global.registry }}/{{ .Values.nexus.image.repository }}:{{ .Values.nexus.image.tag | default .Chart.AppVersion }}"
-        imagePullPolicy: {{ .Values.nexus.image.pullPolicy }}
+        image: "{{ .Values.global.registry }}/{{ .Values.aiProxy.image.repository }}:{{ .Values.aiProxy.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.aiProxy.image.pullPolicy }}
         args:
         - --config=/home/nexus/config.yaml
-        {{ if .Values.nexus.image.extraArgs }}
-        {{ toYaml .Values.nexus.image.extraArgs | nindent 8 }}
+        {{ if .Values.aiProxy.image.extraArgs }}
+        {{ toYaml .Values.aiProxy.image.extraArgs | nindent 8 }}
         {{ end }}
         ports:
         - name: nexus-http
@@ -176,7 +173,7 @@ spec:
         secret:
           secretName: console-conf
       {{- end }}
-      {{- if .Values.nexus.enabled }}
+      {{- if .Values.aiProxy.enabled }}
       - name: nexus-config
         secret:
           secretName: nexus-config

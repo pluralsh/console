@@ -34,8 +34,8 @@ spec:
             name: {{ .Release.Name }}-kas-service
             port:
               number: {{ .Values.kas.api.port }}
-      {{- if .Values.nexus.enabled }}
-      - path: {{ .Values.nexus.config.server.path }}
+      {{- if .Values.aiProxy.enabled }}
+      - path: {{ .Values.aiProxy.config.server.path }}
         pathType: Prefix
         backend:
           service:
