@@ -2,7 +2,7 @@ import {
   ArrowScroll,
   Callout,
   ComponentsIcon,
-  FileIcon,
+  TreeViewIcon,
   FillLevelProvider,
   Flex,
   ListIcon,
@@ -43,9 +43,13 @@ import { ComponentsFilesView } from './ServiceComponentsFiles.tsx'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 
 const directory = [
-  { path: 'list', icon: <ListIcon />, tooltip: 'List view' },
-  { path: 'tree', icon: <NetworkInterfaceIcon />, tooltip: 'Tree view' },
-  { path: 'files', icon: <FileIcon />, tooltip: 'Files view' },
+  { path: 'list', icon: <ListIcon />, tooltip: 'Component list view' },
+  {
+    path: 'tree',
+    icon: <NetworkInterfaceIcon />,
+    tooltip: 'Components tree view',
+  },
+  { path: 'files', icon: <TreeViewIcon />, tooltip: 'Files tree view' },
 ]
 
 const defaultView = 'list'
