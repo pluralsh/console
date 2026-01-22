@@ -32,8 +32,8 @@ def parse_markdown_table(markdown: str) -> list[tuple[str, str]]:
 
 
 def extract_table_data(table_rows: list[tuple[str, str]], chart_versions):
-    rows: list[OrderedDict] = []
-    for kube_cell, coredns_cell in table_rows:  # Skip header row
+    combined: dict[str, dict[str, object]] = {}
+    for kube_cell, coredns_cell in table_rows:
         kubernetes_versions = kube_cell.strip()
         coredns_version = coredns_cell.strip()
 
@@ -56,12 +56,20 @@ def extract_table_data(table_rows: list[tuple[str, str]], chart_versions):
         if not chart_version:
             continue
 
+        entry = combined.setdefault(
+            coredns_version,
+            {"kube": set(), "chart_version": chart_version},
+        )
+        entry["kube"].update(kubernetes_versions_list)
+
+    rows: list[OrderedDict] = []
+    for version, entry in combined.items():
         rows.append(
             OrderedDict(
                 [
-                    ("version", coredns_version),
-                    ("kube", kubernetes_versions_list),
-                    ("chart_version", chart_version),
+                    ("version", version),
+                    ("kube", sorted(entry["kube"])),
+                    ("chart_version", entry["chart_version"]),
                     ("images", []),
                     ("requirements", []),
                     ("incompatibilities", []),
