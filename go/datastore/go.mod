@@ -14,9 +14,9 @@ require (
 	github.com/pluralsh/polly v0.2.0
 	github.com/samber/lo v1.51.0
 	github.com/stretchr/testify v1.11.1
-	k8s.io/api v0.33.2
+	k8s.io/api v0.34.1
 	k8s.io/apimachinery v0.34.1
-	k8s.io/client-go v0.33.2
+	k8s.io/client-go v0.34.1
 	k8s.io/klog v1.0.0
 	sigs.k8s.io/cluster-api v1.10.3
 	sigs.k8s.io/controller-runtime v0.21.0
@@ -154,7 +154,6 @@ require (
 	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.7.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
