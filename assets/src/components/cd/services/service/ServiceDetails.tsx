@@ -1,4 +1,4 @@
-import { Button, Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { memo, ReactNode, Suspense, useMemo, useState } from 'react'
 import { Outlet, useLocation, useMatch, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -216,7 +216,6 @@ function ServiceDetailsBase() {
   const [isRefetching, setIsRefetching] = useState(false)
 
   const [sidenavContent, setSidenavContent] = useState<ReactNode | null>(null)
-  const [showOriginalSidenav, setShowOriginalSidenav] = useState(false)
 
   const {
     data: serviceData,
@@ -291,9 +290,7 @@ function ServiceDetailsBase() {
               paddingBottom: theme.spacing.medium,
             }}
           >
-            {sidenavContent && !showOriginalSidenav ? (
-              sidenavContent
-            ) : (
+            {sidenavContent || (
               <SideNavEntries
                 directory={directory}
                 pathname={pathname}
@@ -302,14 +299,6 @@ function ServiceDetailsBase() {
               />
             )}
           </div>
-          {sidenavContent && (
-            <Button
-              floating
-              onClick={() => setShowOriginalSidenav(!showOriginalSidenav)}
-            >
-              {showOriginalSidenav ? 'Show custom content' : 'Show navigation'}
-            </Button>
-          )}
         </div>
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
