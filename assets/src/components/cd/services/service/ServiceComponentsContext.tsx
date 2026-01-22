@@ -1,6 +1,7 @@
 import {
   createContext,
   Dispatch,
+  ReactNode,
   SetStateAction,
   useContext,
   useLayoutEffect,
@@ -9,6 +10,7 @@ import {
 export type ServiceComponentsContextType = {
   setFiltersHidden: Dispatch<SetStateAction<boolean>>
   setShowChatButton: Dispatch<SetStateAction<boolean>>
+  setHeadingContent: Dispatch<SetStateAction<ReactNode | null>>
 }
 
 export const ServiceComponentsContext =
@@ -46,6 +48,28 @@ export const useSetServiceComponentsFiltersHidden = (
       setFiltersHidden?.(false)
     }
   }, [setFiltersHidden, filtersHidden])
+}
+
+export const useSetServiceComponentsHeadingContent = (
+  headingContent?: ReactNode
+) => {
+  const ctx = useContext(ServiceComponentsContext)
+
+  if (!ctx) {
+    console.warn(
+      'useSetServiceComponentsHeadingContent() must be used within ServiceComponentsContext'
+    )
+  }
+
+  const { setHeadingContent } = ctx || {}
+
+  useLayoutEffect(() => {
+    setHeadingContent?.(headingContent ?? null)
+
+    return () => {
+      setHeadingContent?.(null)
+    }
+  }, [setHeadingContent, headingContent])
 }
 
 export const useSetServiceComponentsChatButtonVisible = (

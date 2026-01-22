@@ -67,6 +67,7 @@ export function ServiceComponents() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [filtersHidden, setFiltersHidden] = useState(false)
   const [showChatButton, setShowChatButton] = useState(false)
+  const [headingContent, setHeadingContent] = useState<ReactNode | null>(null)
   const [components, setComponents] = useState<
     ServiceDeploymentComponentFragment[]
   >([])
@@ -85,6 +86,7 @@ export function ServiceComponents() {
     () => ({
       setFiltersHidden,
       setShowChatButton,
+      setHeadingContent,
     }),
     []
   )
@@ -93,7 +95,7 @@ export function ServiceComponents() {
     <ServiceComponentsContext.Provider value={contextValue}>
       <ScrollablePage
         scrollable
-        heading="Components"
+        heading={headingContent ?? 'Components'}
         headingContent={
           <ArrowScroll>
             <FiltersWrapperSC>

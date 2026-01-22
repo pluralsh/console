@@ -9,17 +9,19 @@ import {
 } from 'react-complex-tree'
 import 'react-complex-tree/lib/style.css'
 import type { TreeItem as TreeItemType } from 'react-complex-tree'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import {
   useServiceContext,
   useSetSidenavContent,
 } from './ServiceDetailsContext'
-import { Code, FileIcon, FolderIcon } from '@pluralsh/design-system'
+import { Code, FileIcon, Flex, FolderIcon } from '@pluralsh/design-system'
 import { getLanguageFromFileName } from 'utils/file'
 import {
   useSetServiceComponentsChatButtonVisible,
   useSetServiceComponentsFiltersHidden,
+  useSetServiceComponentsHeadingContent,
 } from './ServiceComponentsContext'
+import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 
 const TreeItemIcon = styled.div(({ theme }) => ({
   display: 'flex',
@@ -173,6 +175,7 @@ function convertToTreeItems(nodes: TreeNode[]): Record<string, TreeItemType> {
 }
 
 export function ComponentsFilesView() {
+  const theme = useTheme()
   const { service } = useServiceContext()
   const [selectedFile, setSelectedFile] = useState<ServiceFile>()
 
@@ -257,7 +260,20 @@ export function ComponentsFilesView() {
     [data, treeItems]
   )
 
+  const heading = useMemo(
+    () => (
+      <Flex flexDirection="column">
+        <Body1BoldP>{service.name}</Body1BoldP>
+        <CaptionP css={{ color: theme.colors['text-xlight'] }}>
+          ID: {service.id}
+        </CaptionP>
+      </Flex>
+    ),
+    [service.name, service.id, theme.colors]
+  )
+
   useSetSidenavContent(sidenavContent)
+  useSetServiceComponentsHeadingContent(heading)
   useSetServiceComponentsFiltersHidden(true)
   useSetServiceComponentsChatButtonVisible(true)
 
@@ -269,8 +285,7 @@ export function ComponentsFilesView() {
     <Code
       height="100%"
       language={getLanguageFromFileName(selectedFile.path)}
-      preserveTitleCase
-      showHeader
+      showHeader={false}
       showLineNumbers
       title={selectedFile.path}
     >
