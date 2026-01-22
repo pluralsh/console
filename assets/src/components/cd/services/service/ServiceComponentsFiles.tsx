@@ -1,7 +1,7 @@
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ServiceFile, useServiceTarballQuery } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
 import styled, { useTheme } from 'styled-components'
@@ -139,12 +139,15 @@ function buildTree(contentMap: Map<string, string>): TreeNode[] {
           path: currentPath,
           isFile,
           content: isFile ? contentMap.get(currentPath) : undefined,
-          children: [] as any,
+          children: [],
         }
       }
 
       if (!isFile) {
-        currentLevel = currentLevel[part].children as any
+        currentLevel = currentLevel[part].children as unknown as Record<
+          string,
+          TreeNode
+        >
       }
     })
   })
@@ -153,7 +156,9 @@ function buildTree(contentMap: Map<string, string>): TreeNode[] {
   const objectToArray = (obj: Record<string, TreeNode>): TreeNode[] =>
     Object.values(obj).map((node) => ({
       ...node,
-      children: node.isFile ? [] : objectToArray(node.children as any),
+      children: node.isFile
+        ? []
+        : objectToArray(node.children as unknown as Record<string, TreeNode>),
     }))
 
   return collapseSingleChildFolders(objectToArray(root))
@@ -183,6 +188,17 @@ function collapseSingleChildFolders(nodes: TreeNode[]): TreeNode[] {
       children: processedChildren,
     }
   })
+}
+
+function findNode(nodes: TreeNode[], id: string): TreeNode | undefined {
+  for (const node of nodes) {
+    if (node.id === id) return node
+    if (node.children.length > 0) {
+      const found = findNode(node.children, id)
+      if (found) return found
+    }
+  }
+  return undefined
 }
 
 function findParentId(
@@ -234,6 +250,23 @@ export function ComponentsFilesView() {
     return buildTree(contentMap)
   }, [data])
 
+  const handleItemSelection = useCallback(
+    (_event: unknown, itemId: string, isSelected: boolean) => {
+      if (isSelected) {
+        const node = findNode(treeNodes, itemId)
+        if (node?.isFile && node.content) {
+          setSelectedFile({
+            path: node.path,
+            content: node.content,
+          })
+          setSelectedFileId(itemId)
+          setParentOfSelectedId(findParentId(treeNodes, itemId))
+        }
+      }
+    },
+    [treeNodes]
+  )
+
   const sidenavContent = useMemo(() => {
     const renderTree = (nodes: TreeNode[]) =>
       nodes.map((node) => {
@@ -253,24 +286,21 @@ export function ComponentsFilesView() {
                   : undefined
             }
             label={
-              <>
-                <Tooltip
-                  label={node.name}
-                  css={{ marginLeft: 6 }}
-                >
-                  <div css={{ display: 'flex', flex: 1 }}>
-                    <TreeItemIcon>
-                      {node.isFile ? (
-                        <FileIcon size={14} />
-                      ) : (
-                        <FolderIcon size={14} />
-                      )}
-                    </TreeItemIcon>
-
-                    <TreeItemText>{node.name}</TreeItemText>
-                  </div>
-                </Tooltip>
-              </>
+              <Tooltip
+                label={node.name}
+                css={{ marginLeft: 6 }}
+              >
+                <div css={{ display: 'flex', flex: 1 }}>
+                  <TreeItemIcon>
+                    {node.isFile ? (
+                      <FileIcon size={14} />
+                    ) : (
+                      <FolderIcon size={14} />
+                    )}
+                  </TreeItemIcon>
+                  <TreeItemText>{node.name}</TreeItemText>
+                </div>
+              </Tooltip>
             }
           >
             {!node.isFile &&
@@ -283,58 +313,24 @@ export function ComponentsFilesView() {
     return data?.serviceTarball && treeNodes.length > 0 ? (
       <StyledTreeView
         itemChildrenIndentation={12}
-        onItemSelectionToggle={(_event, itemId, isSelected) => {
-          if (isSelected) {
-            // Find the node in the tree
-            const findNode = (
-              nodes: TreeNode[],
-              id: string
-            ): TreeNode | undefined => {
-              for (const node of nodes) {
-                if (node.id === id) return node
-                if (node.children.length > 0) {
-                  const found = findNode(node.children, id)
-                  if (found) return found
-                }
-              }
-              return undefined
-            }
-
-            const node = findNode(treeNodes, itemId)
-            if (node?.isFile && node.content) {
-              setSelectedFile({
-                path: node.path,
-                content: node.content,
-              })
-              setSelectedFileId(itemId)
-              // Find and set the parent directory ID
-              const parentId = findParentId(treeNodes, itemId)
-              setParentOfSelectedId(parentId)
-            } else {
-              setSelectedFileId(null)
-              setParentOfSelectedId(null)
-            }
-          } else {
-            setSelectedFileId(null)
-            setParentOfSelectedId(null)
-          }
-        }}
+        onItemSelectionToggle={handleItemSelection}
       >
         {renderTree(treeNodes)}
       </StyledTreeView>
     ) : undefined
-  }, [data, treeNodes, parentOfSelectedId, selectedFileId])
+  }, [data, treeNodes, parentOfSelectedId, selectedFileId, handleItemSelection])
 
+  const headingSecondaryColor = theme.colors['text-xlight']
   const heading = useMemo(
     () => (
       <Flex flexDirection="column">
         <Body1BoldP>{service.name}</Body1BoldP>
-        <CaptionP css={{ color: theme.colors['text-xlight'] }}>
+        <CaptionP css={{ color: headingSecondaryColor }}>
           ID: {service.id}
         </CaptionP>
       </Flex>
     ),
-    [service.name, service.id, theme.colors]
+    [service.name, service.id, headingSecondaryColor]
   )
 
   useSetSidenavContent(sidenavContent)
