@@ -167,7 +167,6 @@ export function ChatbotHeader() {
             <InfraResearchStatusChip
               size="medium"
               status={researchData.infraResearch.status}
-              runningText="Running"
             />
           )}
       </SubHeaderSC>

@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getInfraResearchAbsPath } from 'routes/aiRoutesConsts'
 import { ChatInputSimple } from '../chatbot/input/ChatInput'
+import { useAutofocusRef } from 'components/hooks/useAutofocusRef'
 
 export function InfraResearchInput() {
   const navigate = useNavigate()
+  const inputRef = useAutofocusRef()
   const [prompt, setPrompt] = useState('')
 
   const [mutation, { loading, error }] = useCreateInfraResearchMutation({
@@ -24,7 +26,7 @@ export function InfraResearchInput() {
     <>
       {error && <GqlError error={error} />}
       <ChatInputSimple
-        ref={(node) => node?.focus()}
+        ref={inputRef}
         placeholder="What do you want to investigate? (e.g. “Show me the architecture of the Grafana deployment”)"
         setValue={setPrompt}
         onSubmit={mutation}

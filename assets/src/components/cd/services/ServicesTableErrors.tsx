@@ -20,10 +20,12 @@ import { ServiceErrorsTable } from './service/ServiceErrors'
 export function ServiceErrorsChip({
   errors,
   alwaysShow = false,
+  showText = true,
   ...props
 }: {
   errors: Nullable<Nullable<ServiceErrorFragment>[]>
   alwaysShow?: boolean
+  showText?: boolean
 } & ComponentProps<typeof Chip>) {
   const allWarnings =
     !isEmpty(errors) && !!errors?.every((error) => error?.warning)
@@ -31,7 +33,10 @@ export function ServiceErrorsChip({
   if (!alwaysShow && isEmpty(errors)) return null
 
   return (
-    <Tooltip label="View errors">
+    <Tooltip
+      label={`View ${allWarnings ? 'warnings' : 'errors'}`}
+      placement="top"
+    >
       <Chip
         severity={
           isEmpty(errors) ? 'neutral' : allWarnings ? 'warning' : 'danger'
@@ -45,8 +50,9 @@ export function ServiceErrorsChip({
         }
         {...props}
       >
-        {errors?.length === 0 ? 'No' : errors?.length}
-        {pluralize(allWarnings ? ' warning' : ' error', errors?.length ?? 0)}
+        {errors?.length === 0 && showText ? 'No' : errors?.length}
+        {showText &&
+          pluralize(allWarnings ? ' warning' : ' error', errors?.length ?? 0)}
       </Chip>
     </Tooltip>
   )

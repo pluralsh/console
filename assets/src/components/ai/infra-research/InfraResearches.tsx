@@ -154,7 +154,13 @@ const columns = [
   columnHelper.accessor('status', {
     id: 'status',
     header: 'Status',
-    cell: ({ getValue }) => <InfraResearchStatusChip status={getValue()} />,
+    cell: ({ getValue }) => (
+      <InfraResearchStatusChip
+        size="medium"
+        fillLevel={2}
+        status={getValue()}
+      />
+    ),
   }),
   columnHelper.accessor(({ id }) => id, {
     id: 'actions',
