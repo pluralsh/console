@@ -1,4 +1,6 @@
 import { ApolloProvider } from '@apollo/client'
+
+import { loadDevMessages, loadErrorMessages } from '@apollo/client/dev'
 import {
   GlobalStyle,
   HonorableThemeProvider,
@@ -7,39 +9,42 @@ import {
   useThemeColorMode,
 } from '@pluralsh/design-system'
 import * as Sentry from '@sentry/react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+import DocSearchStyles from 'components/help/DocSearchStyles'
 import { ReactNode } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import {
-  ThemeProvider as StyledThemeProvider,
   StyleSheetManager,
+  ThemeProvider as StyledThemeProvider,
 } from 'styled-components'
-
-import DocSearchStyles from 'components/help/DocSearchStyles'
+import { shouldForwardProp } from 'utils/shouldForwardProp'
+import { PluralErrorBoundary } from './components/cd/PluralErrorBoundary'
 
 import { client } from './helpers/client'
 import { rootRoutes } from './routes/rootRoutes'
-
-import { loadDevMessages, loadErrorMessages } from '@apollo/client/dev'
-import { shouldForwardProp } from 'utils/shouldForwardProp'
-import { PluralErrorBoundary } from './components/cd/PluralErrorBoundary'
 
 // required by apollo so we can see errors in dev console
 if (process.env.NODE_ENV === 'development') {
   loadDevMessages()
   loadErrorMessages()
 }
+
 const sentryCreateBrowserRouter =
   Sentry.wrapCreateBrowserRouterV6(createBrowserRouter)
 
 const router = sentryCreateBrowserRouter(rootRoutes)
+const queryClient = new QueryClient()
 
 export default function App() {
   return (
-    <ApolloProvider client={client}>
-      <ThemeProviders>
-        <RouterProvider router={router} />
-      </ThemeProviders>
-    </ApolloProvider>
+    <QueryClientProvider client={queryClient}>
+      <ApolloProvider client={client}>
+        <ThemeProviders>
+          <RouterProvider router={router} />
+        </ThemeProviders>
+      </ApolloProvider>
+    </QueryClientProvider>
   )
 }
 

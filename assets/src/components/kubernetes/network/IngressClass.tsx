@@ -1,13 +1,12 @@
 import { ReactElement, useMemo } from 'react'
 import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { Outlet, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
-import {
-  IngressClassQueryVariables,
-  useIngressClassQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { getIngressClassOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { MetadataSidecar } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
@@ -22,17 +21,18 @@ const directory: Array<TabEntry> = [{ path: 'raw', label: 'Raw' }] as const
 
 export default function IngressClass(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '' } = useParams()
-  const { data, loading } = useIngressClassQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-    } as IngressClassQueryVariables,
+  const { clusterId = '', name = '' } = useParams()
+  const {
+    data: ic,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getIngressClassOptions({
+      client: AxiosInstance(clusterId),
+      path: { ingressclass: name },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const ic = data?.handleGetIngressClass
 
   useSetBreadcrumbs(
     useMemo(
@@ -47,7 +47,13 @@ export default function IngressClass(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails

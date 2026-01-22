@@ -3,15 +3,15 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
-
+import { Maybe } from 'generated/graphql-plural'
 import {
-  Daemonset_DaemonSet as DaemonSetT,
-  Daemonset_DaemonSetList as DaemonSetListT,
-  DaemonSetsDocument,
-  DaemonSetsQuery,
-  DaemonSetsQueryVariables,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+  DaemonsetDaemonSet,
+  DaemonsetDaemonSetList,
+} from '../../../generated/kubernetes'
+import {
+  getAllDaemonSetsInfiniteOptions,
+  getDaemonSetsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   DAEMON_SETS_REL_PATH,
   getWorkloadsAbsPath,
@@ -20,7 +20,8 @@ import {
 import { UsageText } from '../../cluster/TableElements'
 
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
+import { useDataSelect } from '../common/DataSelect.tsx'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
@@ -34,7 +35,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<DaemonSetT>()
+const columnHelper = createColumnHelper<DaemonsetDaemonSet>()
 
 const colImages = columnHelper.accessor((ds) => ds, {
   id: 'images',
@@ -70,8 +71,9 @@ const colStatus = columnHelper.accessor((ds) => ds.podInfo, {
   cell: ({ getValue }) => <WorkloadStatusChip podInfo={getValue()} />,
 })
 
-export default function CronJobs() {
+export default function DaemonSets() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -92,16 +94,14 @@ export default function CronJobs() {
   )
 
   return (
-    <ResourceList<
-      DaemonSetListT,
-      DaemonSetT,
-      DaemonSetsQuery,
-      DaemonSetsQueryVariables
-    >
+    <ResourceList<DaemonsetDaemonSetList, DaemonsetDaemonSet>
       namespaced
       columns={columns}
-      queryDocument={DaemonSetsDocument}
-      queryName="handleGetDaemonSetList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getDaemonSetsInfiniteOptions
+          : getAllDaemonSetsInfiniteOptions
+      }
       itemsKey="daemonSets"
     />
   )

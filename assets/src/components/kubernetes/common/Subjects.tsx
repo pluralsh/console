@@ -2,15 +2,13 @@ import { ReactElement } from 'react'
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import {
-  Maybe,
-  V1_Subject as SubjectT,
-} from '../../../generated/graphql-kubernetes'
+import { Maybe } from 'generated/graphql-plural'
 
 import { Kind } from './types'
 import ResourceLink from './ResourceLink'
+import { V1Subject } from 'generated/kubernetes'
 
-const columnHelper = createColumnHelper<SubjectT>()
+const columnHelper = createColumnHelper<V1Subject>()
 
 const columns = [
   columnHelper.accessor((subject) => subject?.name, {
@@ -50,7 +48,7 @@ const columns = [
 export default function Subjects({
   subjects,
 }: {
-  subjects?: Maybe<Array<Maybe<SubjectT>>>
+  subjects?: Maybe<Array<Maybe<V1Subject>>>
 }): ReactElement<any> {
   return (
     <Table

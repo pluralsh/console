@@ -9,24 +9,26 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
+
 import {
-  Common_Event as EventT,
-  Common_EventList as EventListT,
-  Ingress_IngressDetail as IngressT,
-  IngressEventsDocument,
-  IngressEventsQuery,
-  IngressEventsQueryVariables,
-  IngressQueryVariables,
-  useIngressQuery,
-  V1_HttpIngressPath as HTTPIngressPathT,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  CommonEvent,
+  CommonEventList,
+  V1HttpIngressPath as HTTPIngressPathT,
+  IngressIngressDetail,
+} from '../../../generated/kubernetes'
+import {
+  getIngressEventsInfiniteOptions,
+  getIngressOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   getNetworkAbsPath,
   getResourceDetailsAbsPath,
   INGRESSES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { SubTitle } from '../../utils/SubTitle'
 import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
@@ -34,7 +36,7 @@ import { useEventsColumns } from '../cluster/Events'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 import ResourceLink from '../common/ResourceLink'
-import { ResourceList } from '../common/ResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { Kind } from '../common/types'
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
@@ -50,18 +52,18 @@ const directory: Array<TabEntry> = [
 
 export default function Ingress(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
-  const { data, loading } = useIngressQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as IngressQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: ingress,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getIngressOptions({
+      client: AxiosInstance(clusterId),
+      path: { name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const ingress = data?.handleGetIngressDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -87,7 +89,13 @@ export default function Ingress(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails
@@ -189,7 +197,7 @@ const columns = [
 
 export function IngressInfo(): ReactElement<any> {
   const theme = useTheme()
-  const ingress = useOutletContext() as IngressT
+  const ingress = useOutletContext() as IngressIngressDetail
   const backend = ingress.spec.defaultBackend
 
   const tls = useMemo(() => {
@@ -273,26 +281,15 @@ export function IngressInfo(): ReactElement<any> {
 }
 
 export function IngressEvents(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<
-      EventListT,
-      EventT,
-      IngressEventsQuery,
-      IngressEventsQueryVariables
-    >
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
-      queryDocument={IngressEventsDocument}
-      queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as IngressEventsQueryVariables,
-      }}
-      queryName="handleGetIngressEvent"
+      queryOptions={getIngressEventsInfiniteOptions}
+      pathParams={{ name, namespace }}
       itemsKey="events"
       disableOnRowClick
     />

@@ -16,9 +16,9 @@ import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { useCluster } from '../Cluster'
-import { Maybe } from '../../../generated/graphql-kubernetes'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getBaseBreadcrumbs } from '../common/utils'
+import { Maybe } from 'generated/graphql-plural'
 
 export const getStorageBreadcrumbs = (
   cluster?: Maybe<KubernetesClusterFragment>

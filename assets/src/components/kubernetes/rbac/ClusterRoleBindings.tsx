@@ -4,24 +4,23 @@ import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
-  Clusterrolebinding_ClusterRoleBinding as ClusterRoleBindingT,
-  Clusterrolebinding_ClusterRoleBindingList as ClusterRoleBindingListT,
-  ClusterRoleBindingsDocument,
-  ClusterRoleBindingsQuery,
-  ClusterRoleBindingsQueryVariables,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+  ClusterrolebindingClusterRoleBinding,
+  ClusterrolebindingClusterRoleBindingList,
+} from '../../../generated/kubernetes'
+import { getClusterRoleBindingsInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   CLUSTER_ROLE_BINDINGS_REL_PATH,
   getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
 
 import { getRbacBreadcrumbs } from './Rbac'
 
-export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+export const getBreadcrumbs = (
+  cluster?: Nullable<KubernetesClusterFragment>
+) => [
   ...getRbacBreadcrumbs(cluster),
   {
     label: 'cluster role bindings',
@@ -29,7 +28,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<ClusterRoleBindingT>()
+const columnHelper = createColumnHelper<ClusterrolebindingClusterRoleBinding>()
 
 export default function ClusterRoleBindings() {
   const cluster = useCluster()
@@ -45,14 +44,11 @@ export default function ClusterRoleBindings() {
 
   return (
     <ResourceList<
-      ClusterRoleBindingListT,
-      ClusterRoleBindingT,
-      ClusterRoleBindingsQuery,
-      ClusterRoleBindingsQueryVariables
+      ClusterrolebindingClusterRoleBindingList,
+      ClusterrolebindingClusterRoleBinding
     >
       columns={columns}
-      queryDocument={ClusterRoleBindingsDocument}
-      queryName="handleGetClusterRoleBindingList"
+      queryOptions={getClusterRoleBindingsInfiniteOptions}
       itemsKey="items"
     />
   )

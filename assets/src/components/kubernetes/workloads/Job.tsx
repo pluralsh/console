@@ -5,23 +5,15 @@ import {
 } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 
 import {
-  Common_Event as EventT,
-  Common_EventList as EventListT,
-  Job_JobDetail as JobT,
-  JobEventsDocument,
-  JobEventsQuery,
-  JobEventsQueryVariables,
-  JobPodsDocument,
-  JobPodsQuery,
-  JobPodsQueryVariables,
-  JobQueryVariables,
-  Pod_Pod as PodT,
-  Pod_PodList as PodListT,
-  useJobQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  getJobEventsInfiniteOptions,
+  getJobOptions,
+  getJobPodsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen'
+import { JobJobDetail } from '../../../generated/kubernetes/types.gen'
+
 import {
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
@@ -42,6 +34,8 @@ import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './Jobs'
 import { usePodsColumns } from './Pods'
+import { AxiosInstance } from 'helpers/axios'
+import { GqlError } from 'components/utils/Alert'
 
 const directory: Array<TabEntry> = [
   { path: 'conditions', label: 'Conditions' },
@@ -52,15 +46,18 @@ const directory: Array<TabEntry> = [
 
 export default function Job(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name, namespace } = useParams()
-  const { data, loading } = useJobQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as JobQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+
+  const {
+    data: job,
+    error,
+    isLoading,
+  } = useQuery({
+    ...getJobOptions({
+      client: AxiosInstance(clusterId),
+      path: { name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
 
   useSetBreadcrumbs(
@@ -82,9 +79,11 @@ export default function Job(): ReactElement<any> {
     )
   )
 
-  const job = data?.handleGetJobDetail as JobT
+  if (error) {
+    return <GqlError error={error} />
+  }
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 
@@ -92,7 +91,7 @@ export default function Job(): ReactElement<any> {
     <ResourceDetails
       tabs={directory}
       sidecar={
-        <MetadataSidecar resource={job}>
+        <MetadataSidecar resource={job as JobJobDetail}>
           <SidecarItem heading="Status">
             <StatusChip
               readiness={job?.jobStatus?.status as ReadinessT}
@@ -120,7 +119,7 @@ export default function Job(): ReactElement<any> {
 }
 
 export function JobConditions(): ReactElement<any> {
-  const ctx = useOutletContext<JobT>()
+  const ctx = useOutletContext<JobJobDetail>()
 
   return <Conditions conditions={ctx?.jobStatus?.conditions} />
 }
@@ -130,14 +129,10 @@ export function JobPods(): ReactElement<any> {
   const columns = usePodsColumns()
 
   return (
-    <ResourceList<PodListT, PodT, JobPodsQuery, JobPodsQueryVariables>
-      namespaced
+    <ResourceList
       columns={columns}
-      queryDocument={JobPodsDocument}
-      queryOptions={{
-        variables: { namespace, name } as JobPodsQueryVariables,
-      }}
-      queryName="handleGetJobPods"
+      queryOptions={getJobPodsInfiniteOptions}
+      pathParams={{ name, namespace }}
       itemsKey="pods"
     />
   )
@@ -148,14 +143,10 @@ export function JobEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<EventListT, EventT, JobEventsQuery, JobEventsQueryVariables>
-      namespaced
+    <ResourceList
       columns={columns}
-      queryDocument={JobEventsDocument}
-      queryOptions={{
-        variables: { namespace, name } as JobEventsQueryVariables,
-      }}
-      queryName="handleGetJobEvents"
+      queryOptions={getJobEventsInfiniteOptions}
+      pathParams={{ name, namespace }}
       itemsKey="events"
       disableOnRowClick
     />

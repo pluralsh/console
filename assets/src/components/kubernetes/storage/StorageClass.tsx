@@ -6,22 +6,24 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
-import {
-  ConfigMapQueryVariables,
-  Storageclass_StorageClass as StorageClassT,
-  Storageclass_StorageClassList as StorageClassListT,
-  StorageClassPersistentVolumesDocument,
-  StorageClassPersistentVolumesQuery,
-  StorageClassPersistentVolumesQueryVariables,
-  useStorageClassQuery,
-} from '../../../generated/graphql-kubernetes'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import {
+  PersistentvolumePersistentVolume,
+  PersistentvolumePersistentVolumeList,
+  StorageclassStorageClass,
+} from '../../../generated/kubernetes'
+import {
+  getStorageClassOptions,
+  getStorageClassPersistentVolumesInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { useCluster } from '../Cluster'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { ResourceList } from '../common/ResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { Kind } from '../common/types'
 import { MetadataSidecar, useDefaultColumns } from '../common/utils'
 import {
@@ -42,15 +44,18 @@ const directory: Array<TabEntry> = [
 
 export default function StorageClass(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '' } = useParams()
-  const { data, loading } = useStorageClassQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: { name } as ConfigMapQueryVariables,
+  const { clusterId = '', name = '' } = useParams()
+  const {
+    data: sc,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getStorageClassOptions({
+      client: AxiosInstance(clusterId),
+      path: { storageclass: name },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const sc = data?.handleGetStorageClass
 
   useSetBreadcrumbs(
     useMemo(
@@ -65,7 +70,13 @@ export default function StorageClass(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails
@@ -90,10 +101,10 @@ export default function StorageClass(): ReactElement<any> {
   )
 }
 
-const columnHelper = createColumnHelper<StorageClassT>()
+const columnHelper = createColumnHelper<PersistentvolumePersistentVolume>()
 
 export function StorageClassPersistentVolumes(): ReactElement<any> {
-  const sc = useOutletContext() as StorageClassT
+  const sc = useOutletContext() as StorageclassStorageClass
 
   const { colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
@@ -115,19 +126,12 @@ export function StorageClassPersistentVolumes(): ReactElement<any> {
   return (
     <section>
       <ResourceList<
-        StorageClassListT,
-        StorageClassT,
-        StorageClassPersistentVolumesQuery,
-        StorageClassPersistentVolumesQueryVariables
+        PersistentvolumePersistentVolumeList,
+        PersistentvolumePersistentVolume
       >
         columns={columns}
-        queryDocument={StorageClassPersistentVolumesDocument}
-        queryOptions={{
-          variables: {
-            name: sc?.objectMeta.name,
-          } as StorageClassPersistentVolumesQueryVariables,
-        }}
-        queryName="handleGetStorageClassPersistentVolumes"
+        queryOptions={getStorageClassPersistentVolumesInfiniteOptions}
+        pathParams={{ storageclass: sc?.objectMeta.name }}
         itemsKey="items"
       />
     </section>

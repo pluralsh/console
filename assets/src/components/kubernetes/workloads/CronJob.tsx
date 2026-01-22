@@ -1,4 +1,3 @@
-import { ApolloError } from '@apollo/client'
 import {
   Button,
   ChipList,
@@ -10,25 +9,21 @@ import {
 import { ReactElement, useMemo, useState } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { formatLocalizedDateTime } from 'utils/datetime'
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
-  Common_Event as EventT,
-  Common_EventList as EventListT,
-  Cronjob_CronJobDetail as CronJobT,
-  CronJobEventsDocument,
-  CronJobEventsQuery,
-  CronJobEventsQueryVariables,
-  CronJobJobsDocument,
-  CronJobJobsQuery,
-  CronJobJobsQueryVariables,
-  CronJobQueryVariables,
-  CronJobTriggerMutationVariables,
-  Job_Job as JobT,
-  Job_JobList as JobListT,
-  useCronJobQuery,
-  useCronJobTriggerMutation,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  CommonEvent,
+  CommonEventList,
+  JobJob,
+  JobJobList,
+} from '../../../generated/kubernetes'
+import {
+  getCronJobEventsInfiniteOptions,
+  getCronJobJobsInfiniteOptions,
+  getCronJobOptions,
+  triggerCronJobMutation,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   CRON_JOBS_REL_PATH,
   getResourceDetailsAbsPath,
@@ -39,9 +34,10 @@ import { SubTitle } from '../../utils/SubTitle'
 import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { ResourceList } from '../common/ResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 
 import { Kind } from '../common/types'
+import { GqlError } from '../../utils/Alert'
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 import { getBreadcrumbs } from './CronJobs'
@@ -55,28 +51,28 @@ const directory: Array<TabEntry> = [
 
 export default function CronJob(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name, namespace } = useParams()
+  const { clusterId = '', name = '', namespace = '' } = useParams()
   const [triggerBanner, setTriggerBanner] = useState(false)
-  const [error, setError] = useState<ApolloError>()
 
-  const { data, loading, refetch } = useCronJobQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: { name, namespace } as CronJobQueryVariables,
+  const {
+    data: cronJob,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
+    ...getCronJobOptions({
+      client: AxiosInstance(clusterId),
+      path: { name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
 
-  const [mutation, { loading: mutationLoading }] = useCronJobTriggerMutation({
-    client: KubernetesClient(clusterId ?? ''),
-    variables: { name, namespace } as CronJobTriggerMutationVariables,
-    onCompleted: () => {
-      refetch({ name, namespace })
+  const mutation = useMutation({
+    ...triggerCronJobMutation(),
+    onSuccess: () => {
+      refetch()
       setTriggerBanner(true)
       setTimeout(() => setTriggerBanner(false), 3000)
-    },
-    onError: (error) => {
-      setError(error)
-      setTimeout(() => setError(undefined), 3000)
     },
   })
 
@@ -104,9 +100,11 @@ export default function CronJob(): ReactElement<any> {
     )
   )
 
-  const cronJob = data?.handleGetCronJobDetail as CronJobT
+  if (error) {
+    return <GqlError error={error} />
+  }
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 
@@ -118,8 +116,13 @@ export default function CronJob(): ReactElement<any> {
           <Button
             floating
             startIcon={<PlayIcon />}
-            onClick={() => mutation()}
-            loading={mutationLoading}
+            onClick={() =>
+              mutation.mutate({
+                client: AxiosInstance(clusterId),
+                path: { name, namespace },
+              })
+            }
+            loading={mutation.isPending}
           >
             Trigger
           </Button>
@@ -136,7 +139,7 @@ export default function CronJob(): ReactElement<any> {
             </SidecarItem>
             <SidecarItem heading="Schedule">{cronJob?.schedule}</SidecarItem>
             <SidecarItem heading="Last schedule">
-              {formatLocalizedDateTime(cronJob?.lastSchedule)}
+              {formatLocalizedDateTime(cronJob?.lastSchedule.Time)}
             </SidecarItem>
             <SidecarItem heading="Active jobs">{cronJob?.active}</SidecarItem>
             <SidecarItem heading="Suspended">
@@ -162,14 +165,14 @@ export default function CronJob(): ReactElement<any> {
           Cron job triggered successfully
         </Toast>
       )}
-      {error && (
+      {mutation.error && (
         <Toast
           heading="Error triggering cron job"
           severity="danger"
           margin="large"
           marginRight="xxxxlarge"
         >
-          {error.message}
+          {mutation.error.message}
         </Toast>
       )}
     </>
@@ -177,54 +180,32 @@ export default function CronJob(): ReactElement<any> {
 }
 
 export function CronJobJobs(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = useJobsColumns()
 
   return (
     <>
       <section>
         <SubTitle>Active Jobs</SubTitle>
-        <ResourceList<
-          JobListT,
-          JobT,
-          CronJobJobsQuery,
-          CronJobJobsQueryVariables
-        >
+        <ResourceList<JobJobList, JobJob>
           namespaced
           columns={columns}
           initialSort={[{ id: 'creationTimestamp', desc: true }]}
-          queryDocument={CronJobJobsDocument}
-          queryOptions={{
-            variables: {
-              namespace,
-              name,
-              active: 'true',
-            } as CronJobJobsQueryVariables,
-          }}
-          queryName="handleGetCronJobJobs"
+          queryOptions={getCronJobJobsInfiniteOptions}
+          pathParams={{ name, namespace }}
+          queryParams={{ active: 'true' }}
           itemsKey="jobs"
         />
       </section>
       <section>
         <SubTitle>Inactive Jobs</SubTitle>
-        <ResourceList<
-          JobListT,
-          JobT,
-          CronJobJobsQuery,
-          CronJobJobsQueryVariables
-        >
+        <ResourceList<JobJobList, JobJob>
           namespaced
           columns={columns}
           initialSort={[{ id: 'creationTimestamp', desc: true }]}
-          queryDocument={CronJobJobsDocument}
-          queryOptions={{
-            variables: {
-              namespace,
-              name,
-              active: 'false',
-            } as CronJobJobsQueryVariables,
-          }}
-          queryName="handleGetCronJobJobs"
+          queryOptions={getCronJobJobsInfiniteOptions}
+          pathParams={{ name, namespace }}
+          queryParams={{ active: 'false' }}
           itemsKey="jobs"
           maxHeight="500px"
         />
@@ -234,23 +215,15 @@ export function CronJobJobs(): ReactElement<any> {
 }
 
 export function CronJobEvents(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<
-      EventListT,
-      EventT,
-      CronJobEventsQuery,
-      CronJobEventsQueryVariables
-    >
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
-      queryDocument={CronJobEventsDocument}
-      queryOptions={{
-        variables: { namespace, name } as CronJobEventsQueryVariables,
-      }}
-      queryName="handleGetCronJobEvents"
+      queryOptions={getCronJobEventsInfiniteOptions}
+      pathParams={{ name, namespace }}
       itemsKey="events"
       disableOnRowClick
     />

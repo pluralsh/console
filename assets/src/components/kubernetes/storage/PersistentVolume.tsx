@@ -7,14 +7,12 @@ import {
 } from '@pluralsh/design-system'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
-import {
-  ConfigMapQueryVariables,
-  Persistentvolume_PersistentVolumeDetail as PersistentVolumeT,
-  usePersistentVolumeQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { getPersistentVolumeOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { MetadataSidecar } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
@@ -26,6 +24,7 @@ import { Kind } from '../common/types'
 
 import { PVStatusChip } from './utils'
 import { getBreadcrumbs } from './PersistentVolumes'
+import { PersistentvolumePersistentVolumeDetail } from 'generated/kubernetes/types.gen.ts'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -34,17 +33,18 @@ const directory: Array<TabEntry> = [
 
 export default function PersistentVolume(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '' } = useParams()
-  const { data, loading } = usePersistentVolumeQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-    } as ConfigMapQueryVariables,
+  const { clusterId = '', name = '' } = useParams()
+  const {
+    data: pv,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getPersistentVolumeOptions({
+      client: AxiosInstance(clusterId),
+      path: { persistentvolume: name },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const pv = data?.handleGetPersistentVolumeDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -65,7 +65,13 @@ export default function PersistentVolume(): ReactElement<any> {
 
   const [claimNamespace, claimName] = (pv?.claim ?? '').split('/')
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails
@@ -133,7 +139,7 @@ export default function PersistentVolume(): ReactElement<any> {
 
 export function PersistentVolumeInfo(): ReactElement<any> {
   const theme = useTheme()
-  const pv = useOutletContext() as PersistentVolumeT
+  const pv = useOutletContext() as PersistentvolumePersistentVolumeDetail
   const source = pv?.persistentVolumeSource
 
   return (
@@ -346,7 +352,7 @@ export function PersistentVolumeInfo(): ReactElement<any> {
             <ResourceInfoCardEntry heading="Volume attributes">
               <ChipList
                 size="small"
-                values={Object.entries(source.csi.volumeAttributes)}
+                values={Object.entries(source.csi.volumeAttributes ?? {})}
                 transformValue={(label) => label.join(': ')}
                 limit={5}
               />
@@ -397,8 +403,14 @@ export function PersistentVolumeInfo(): ReactElement<any> {
             <ResourceInfoCardEntry heading="Driver">
               {source.flexVolume.driver}
             </ResourceInfoCardEntry>
-            <ResourceInfoCardEntry heading="Driver">
-              {source.flexVolume.options}
+            <ResourceInfoCardEntry heading="Options">
+              <ChipList
+                size="small"
+                values={Object.entries(source.flexVolume.options ?? {})}
+                transformValue={(option) => option.join(': ')}
+                limit={5}
+                emptyState={null}
+              />
             </ResourceInfoCardEntry>
             <ResourceInfoCardEntry heading="Secret">
               <ResourceLink

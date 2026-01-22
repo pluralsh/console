@@ -87,6 +87,7 @@ export function useFetchSlice<
 
   useEffect(() => {
     if (endCursor && endCursor !== prevEndCursor && endCursorIndex >= 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEndCursors((prev) =>
         [
           ...(virtualSlice?.start?.index !== 0 ? prev : []),

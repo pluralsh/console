@@ -4,29 +4,31 @@ import { isEmpty } from 'lodash'
 import { useMemo } from 'react'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
-
 import {
-  Ingress_Ingress as IngressT,
-  Ingress_IngressList as IngressListT,
-  IngressesDocument,
-  IngressesQuery,
-  IngressesQueryVariables,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+  IngressIngress,
+  IngressIngressList,
+} from '../../../generated/kubernetes'
 import {
-  getNetworkAbsPath,
+  getAllIngressesInfiniteOptions,
+  getIngressesInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen'
+import {
   INGRESSES_REL_PATH,
+  getNetworkAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { TableText } from '../../cluster/TableElements'
 
 import { useCluster } from '../Cluster'
+import { useDataSelect } from '../common/DataSelect'
 import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
 import { getNetworkBreadcrumbs } from './Network'
 
 import { TableEndpoints } from './utils'
 
-export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+export const getBreadcrumbs = (
+  cluster?: KubernetesClusterFragment | null | undefined
+) => [
   ...getNetworkBreadcrumbs(cluster),
   {
     label: 'ingresses',
@@ -34,15 +36,15 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<IngressT>()
+const columnHelper = createColumnHelper<IngressIngress>()
 
-const colEndpoints = columnHelper.accessor((ingress) => ingress?.endpoints, {
+const colEndpoints = columnHelper.accessor((ingress) => ingress.endpoints, {
   id: 'endpoints',
   header: 'Endpoints',
   cell: ({ getValue }) => <TableEndpoints endpoints={getValue()} />,
 })
 
-const colHosts = columnHelper.accessor((ingress) => ingress?.hosts, {
+const colHosts = columnHelper.accessor((ingress) => ingress.hosts, {
   id: 'hosts',
   header: 'Hosts',
   cell: ({ getValue }) => {
@@ -50,7 +52,7 @@ const colHosts = columnHelper.accessor((ingress) => ingress?.hosts, {
 
     return isEmpty(hosts)
       ? '-'
-      : hosts.map((host) => <TableText>{host}</TableText>)
+      : hosts.map((host) => <TableText key={host}>{host}</TableText>)
   },
 })
 
@@ -74,22 +76,21 @@ export function useIngressesColumns(): Array<object> {
 
 export default function Ingresses() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   const columns = useIngressesColumns()
 
   return (
-    <ResourceList<
-      IngressListT,
-      IngressT,
-      IngressesQuery,
-      IngressesQueryVariables
-    >
+    <ResourceList<IngressIngressList, IngressIngress>
       namespaced
       columns={columns}
-      queryDocument={IngressesDocument}
-      queryName="handleGetIngressList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getIngressesInfiniteOptions
+          : getAllIngressesInfiniteOptions
+      }
       itemsKey="items"
     />
   )

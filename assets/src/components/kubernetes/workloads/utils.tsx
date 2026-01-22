@@ -2,14 +2,11 @@ import { Chip, Tooltip, WrapWithIf } from '@pluralsh/design-system'
 import { ComponentProps } from 'react'
 import { isEmpty } from 'lodash'
 
-import {
-  ContainerState,
-  Common_Event as EventT,
-  Maybe,
-  Common_PodInfo as PodInfoT,
-} from '../../../generated/graphql-kubernetes'
+import { Maybe } from 'generated/graphql-plural'
+
 import { Readiness, ReadinessT } from '../../../utils/status'
 import { TruncateStart } from '../../utils/table/Truncate'
+import { CommonEvent, CommonPodInfo } from '../../../generated/kubernetes'
 
 const podStatusSeverity = {
   Running: 'success',
@@ -41,7 +38,7 @@ export function PodStatusChip({
   warnings,
 }: {
   status: string
-  warnings: Maybe<EventT>[]
+  warnings: Maybe<CommonEvent>[]
 }) {
   let severity = podStatusSeverity[status] ?? 'neutral'
 
@@ -70,7 +67,7 @@ export function PodStatusChip({
 }
 
 function podInfoStatus(
-  podInfo: PodInfoT
+  podInfo?: CommonPodInfo
 ): [string, ComponentProps<typeof Chip>['severity']] {
   if (!podInfo) return ['Unknown', 'neutral']
   const { desired, succeeded, running, pending, failed, warnings } = podInfo
@@ -90,12 +87,12 @@ function podInfoStatus(
   return ['Unknown', 'neutral']
 }
 
-export function WorkloadStatusChip({ podInfo }: { podInfo: PodInfoT }) {
+export function WorkloadStatusChip({ podInfo }: { podInfo?: CommonPodInfo }) {
   const [status, severity] = podInfoStatus(podInfo)
 
   return (
     <WrapWithIf
-      condition={podInfo?.warnings?.length > 0}
+      condition={(podInfo?.warnings?.length ?? 0) > 0}
       wrapper={
         <Tooltip
           label={podInfo?.warnings?.map((ev) => ev?.message)?.join(', ')}
@@ -137,15 +134,15 @@ export function WorkloadImages({ images }: { images: Maybe<string>[] }) {
   )
 }
 
-export function toReadiness(state: ContainerState): ReadinessT {
+export function toReadiness(state: string): ReadinessT {
   switch (state) {
-    case ContainerState.Running:
+    case 'Running':
       return Readiness.Running
-    case ContainerState.Waiting:
+    case 'Waiting':
       return Readiness.InProgress
-    case ContainerState.Failed:
+    case 'Failed':
       return Readiness.Failed
-    case ContainerState.Terminated:
+    case 'Terminated':
       return Readiness.Complete
   }
 

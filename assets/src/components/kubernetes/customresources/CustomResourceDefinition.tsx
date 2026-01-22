@@ -7,25 +7,27 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
 import { ReactElement, useEffect, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
+
 import {
-  CustomResourceDefinitionQueryVariables,
-  Types_CustomResourceDefinitionDetail as CustomResourceDefinitionT,
-  Types_CustomResourceObjectList as CustomResourceListT,
-  CustomResourcesDocument,
-  CustomResourcesQuery,
-  CustomResourcesQueryVariables,
-  Types_CustomResourceObjectDetail as CustomResourceT,
-  useCustomResourceDefinitionQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  TypesCustomResourceObjectDetail as CustomResourceT,
+  TypesCustomResourceObjectList as CustomResourceListT,
+  TypesCustomResourceDefinitionDetail,
+} from '../../../generated/kubernetes'
+import {
+  getCustomResourceDefinitionOptions,
+  getCustomResourceObjectsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { useCluster } from '../Cluster'
 import Conditions from '../common/Conditions'
 import { DataSelectInputs, useDataSelect } from '../common/DataSelect'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { ResourceList } from '../common/ResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 
 import { Kind } from '../common/types'
 
@@ -42,17 +44,18 @@ const directory: Array<TabEntry> = [
 
 export default function CustomResourceDefinition(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '' } = useParams()
-  const { data, loading } = useCustomResourceDefinitionQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-    } as CustomResourceDefinitionQueryVariables,
+  const { clusterId = '', name = '' } = useParams()
+  const {
+    data: crd,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getCustomResourceDefinitionOptions({
+      client: AxiosInstance(clusterId),
+      path: { crd: name },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const crd = data?.handleGetCustomResourceDefinitionDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -71,7 +74,13 @@ export default function CustomResourceDefinition(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails
@@ -104,10 +113,10 @@ export default function CustomResourceDefinition(): ReactElement<any> {
 const columnHelper = createColumnHelper<CustomResourceT>()
 
 export function CustomResourceDefinitionObjects() {
-  const crd = useOutletContext() as CustomResourceDefinitionT
+  const crd = useOutletContext() as TypesCustomResourceDefinitionDetail
   const namespaced = crd?.scope.toLowerCase() === 'namespaced'
   const dataSelect = useDataSelect()
-  const { name } = useParams()
+  const { name = '' } = useParams()
   const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
@@ -137,31 +146,23 @@ export function CustomResourceDefinitionObjects() {
   useSetPageHeaderContent(headerContent)
 
   return (
-    <ResourceList<
-      CustomResourceListT,
-      CustomResourceT,
-      CustomResourcesQuery,
-      CustomResourcesQueryVariables
-    >
+    <ResourceList<CustomResourceListT, CustomResourceT>
       namespaced={namespaced}
       customResource
       columns={columns}
-      queryDocument={CustomResourcesDocument}
-      queryOptions={{
-        variables: {
-          filterBy: `name,${dataSelect.filter}`,
-          namespace: isEmpty(dataSelect.namespace) ? ' ' : dataSelect.namespace, // ' ' selects all namespaces.
-          name,
-        } as CustomResourcesQueryVariables,
+      queryOptions={getCustomResourceObjectsInfiniteOptions}
+      pathParams={{
+        crd: name,
+        namespace: isEmpty(dataSelect.namespace) ? ' ' : dataSelect.namespace,
       }}
-      queryName="handleGetCustomResourceObjectList"
       itemsKey="items"
     />
   )
 }
 
 export function CustomResourceDefinitionConditions(): ReactElement<any> {
-  const { conditions } = useOutletContext() as CustomResourceDefinitionT
+  const { conditions } =
+    useOutletContext() as TypesCustomResourceDefinitionDetail
 
   return <Conditions conditions={conditions} />
 }
