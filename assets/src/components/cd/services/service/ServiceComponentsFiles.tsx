@@ -212,21 +212,6 @@ function findNodeAndParent(
   return { node: undefined, parentId: null }
 }
 
-function findFirstFile(nodes: TreeNode[]): TreeNode | undefined {
-  for (const node of nodes) {
-    if (node.isFile) {
-      return node
-    }
-    if (node.children.length > 0) {
-      const found = findFirstFile(node.children)
-      if (found) {
-        return found
-      }
-    }
-  }
-  return undefined
-}
-
 export function ComponentsFilesView() {
   const theme = useTheme()
   const { service } = useServiceContext()
@@ -259,27 +244,32 @@ export function ComponentsFilesView() {
     return buildTree(contentMap)
   }, [data])
 
-  // Auto-select first file when tree is loaded (only once)
+  // Auto-select first file when data is loaded (only once)
   useEffect(() => {
     if (
-      treeNodes.length > 0 &&
+      data?.serviceTarball &&
+      data.serviceTarball.length > 0 &&
       !hasAutoSelectedRef.current &&
       !selectedFileId
     ) {
-      const firstFile = findFirstFile(treeNodes)
-      if (firstFile?.isFile && firstFile.content) {
-        const { parentId } = findNodeAndParent(treeNodes, firstFile.id)
+      // Get first file directly from serviceTarball
+      const firstFile = data.serviceTarball.find(
+        (file) => file?.path && file?.content
+      )
+      if (firstFile?.path && firstFile?.content) {
+        // Find parent in the tree (treeNodes should be ready by now)
+        const { parentId } = findNodeAndParent(treeNodes, firstFile.path)
         setSelectedFile({
           path: firstFile.path,
           content: firstFile.content,
         })
-        setSelectedFileId(firstFile.id)
+        setSelectedFileId(firstFile.path)
         setParentOfSelectedId(parentId)
         hasAutoSelectedRef.current = true
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [treeNodes])
+  }, [data?.serviceTarball, treeNodes])
 
   // Auto-expand parent directories when a file is selected
   useEffect(() => {
