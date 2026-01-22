@@ -78,4 +78,53 @@ defmodule ConsoleWeb.OpenAPI.StackController do
     |> when_ok(&Repo.preload(&1, [:tags]))
     |> successful(conn, OpenAPI.Stack)
   end
+
+  @doc """
+  Triggers a new stack run from the newest sha in the stack's run history
+  """
+  operation :trigger_run,
+    operation_id: "TriggerStackRun",
+    parameters: [
+      id: [in: :path, schema: %{type: :string}, required: true]
+    ],
+    responses: [ok: OpenAPI.StackRun]
+  def trigger_run(conn, %{"id" => id}) do
+    user = Console.Guardian.Plug.current_resource(conn)
+
+    Stacks.trigger_run(id, user)
+    |> successful(conn, OpenAPI.StackRun)
+  end
+
+  @doc """
+  Refresh the source repo of this stack, and potentially create a fresh run
+  """
+  operation :resync,
+    operation_id: "ResyncStack",
+    parameters: [
+      id: [in: :path, schema: %{type: :string}, required: true]
+    ],
+    responses: [ok: OpenAPI.StackRun]
+  def resync(conn, %{"id" => id}) do
+    user = Console.Guardian.Plug.current_resource(conn)
+
+    Stacks.kick(id, user)
+    |> successful(conn, OpenAPI.StackRun)
+  end
+
+  @doc """
+  Un-deletes a stack and cancels the destroy run that was spawned to remove its managed infrastructure
+  """
+  operation :restore,
+    operation_id: "RestoreStack",
+    parameters: [
+      id: [in: :path, schema: %{type: :string}, required: true]
+    ],
+    responses: [ok: OpenAPI.Stack]
+  def restore(conn, %{"id" => id}) do
+    user = Console.Guardian.Plug.current_resource(conn)
+
+    Stacks.restore_stack(id, user)
+    |> when_ok(&Repo.preload(&1, [:tags]))
+    |> successful(conn, OpenAPI.Stack)
+  end
 end

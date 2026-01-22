@@ -140,6 +140,9 @@ defmodule ConsoleWeb.Router do
         get "/stacks/:id", StackController, :show
         put "/stacks/:id", StackController, :update
         delete "/stacks/:id", StackController, :delete
+        post "/stacks/:id/trigger", StackController, :trigger_run
+        post "/stacks/:id/resync", StackController, :resync
+        put "/stacks/:id/restore", StackController, :restore
       end
     end
 
