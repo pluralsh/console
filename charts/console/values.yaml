@@ -42,7 +42,7 @@ podAnnotations: { }
 
 # migrator is used to configure the console migration Job defined in migration.yaml, specifically the migrator container
 migrator:
-  command: [ "/opt/app/bin/migrate" ]
+  command: ["/opt/app/bin/migrate"]
   nodeSelector: ~
   securityContext: ~
   containerSecurityContext: ~
@@ -128,7 +128,7 @@ aiProxy:
     repository: nexus
     tag: ~
     pullPolicy: IfNotPresent
-    extraArgs: [ ]
+    extraArgs: []
   config:
     server:
       address: ":8080"
@@ -147,7 +147,7 @@ aiProxy:
       logLevel: info
 
 # initContainers is used to create a list of init containers for your console deployment
-initContainers: [ ]
+initContainers: []
 
 # cliContainer is used to create a container for the plural cli
 cliContainer:
@@ -165,7 +165,7 @@ serviceAccount:
 # extraEnv is used to add environment variables to the console container
 extraEnv: ~
 # extraSecretEnv is used to add secret key-value pairs to the console container
-extraSecretEnv: [ ]
+extraSecretEnv: []
 
 # livenessProbe configures the liveness probe for the console container. See https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe:
@@ -190,7 +190,7 @@ readinessProbe:
   successThreshold: 1
 
 # imagePullSecrets is used to configure Kubernetes image pull secrets. See https://kubernetes.io/docs/concepts/containers/images/
-imagePullSecrets: [ ]
+imagePullSecrets: []
 
 # nameOverride is used to expand chart name (see templates/_helpers.tpl) if set (otherwise uses Chart.Name). Truncated after 63 characters and also any trailing - characters (hyphens) are removed
 nameOverride: ""
@@ -296,7 +296,7 @@ resources:
 nodeSelector: { }
 
 # tolerations for console deployment and git-server deployment, see https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
-tolerations: [ ]
+tolerations: []
 
 # affinity for console and git-server deployments. See https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
 affinity:
@@ -386,7 +386,7 @@ kas:
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
-    pullSecrets: [ ]
+    pullSecrets: []
 
   consoleUrl: ""
 
@@ -407,17 +407,17 @@ kas:
 
   priorityClassName: ""
 
-  extraEnv: [ ]
+  extraEnv: []
 
-  extraArgs: [ ]
+  extraArgs: []
 
   nodeSelector: { }
 
   affinity: { }
 
-  tolerations: [ ]
+  tolerations: []
 
-  initContainers: [ ]
+  initContainers: []
 
   resources:
     limits:
@@ -523,7 +523,7 @@ cloudQuery:
     tag: ~
     args: ~
 
-  imagePullSecrets: [ ]
+  imagePullSecrets: []
 
   serviceAccount:
     create: true
@@ -579,20 +579,20 @@ cloudQuery:
         key: "password"
 
   # Additional volumes on the output Deployment definition.
-  volumes: [ ]
+  volumes: []
   # - name: foo
   #   secret:
   #     secretName: mysecret
   #     optional: false
 
   # Additional volumeMounts on the output Deployment definition.
-  volumeMounts: [ ]
+  volumeMounts: []
   # - name: foo
   #   mountPath: "/etc/foo"
   #   readOnly: true
 
   nodeSelector: { }
-  tolerations: [ ]
+  tolerations: []
   affinity: { }
 
 dex:

@@ -125,6 +125,10 @@ spec:
         {{- toYaml .Values.resources | nindent 10 }}
       {{- if .Values.aiProxy.enabled }}
       - name: nexus
+        {{ if .Values.console.containerSecurityContext }}
+        securityContext:
+        {{- toYaml .Values.console.containerSecurityContext | nindent 10 }}
+        {{ end }}
         image: "{{ .Values.global.registry }}/{{ .Values.aiProxy.image.repository }}:{{ .Values.aiProxy.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.aiProxy.image.pullPolicy }}
         args:
