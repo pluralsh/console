@@ -9,7 +9,13 @@ import {
   useServiceContext,
   useSetSidenavContent,
 } from './ServiceDetailsContext'
-import { Code, FileIcon, Flex, FolderIcon } from '@pluralsh/design-system'
+import {
+  Code,
+  FileIcon,
+  Flex,
+  FolderIcon,
+  Tooltip,
+} from '@pluralsh/design-system'
 import { getLanguageFromFileName } from 'utils/file'
 import {
   useSetServiceComponentsChatButtonVisible,
@@ -194,22 +200,26 @@ export function ComponentsFilesView() {
   }, [data])
 
   const sidenavContent = useMemo(() => {
-    // Recursive function to render tree items (defined inside useMemo)
-    const renderTree = (nodes: TreeNode[]): React.ReactNode =>
+    const renderTree = (nodes: TreeNode[]) =>
       nodes.map((node) => (
         <TreeItem
           key={node.id}
           itemId={node.id}
           label={
             <>
-              <TreeItemIcon>
-                {node.isFile ? (
-                  <FileIcon size={14} />
-                ) : (
-                  <FolderIcon size={14} />
-                )}
-              </TreeItemIcon>
-              <TreeItemText>{node.name}</TreeItemText>
+              <Tooltip label={node.name}>
+                <div css={{ display: 'flex', flex: 1 }}>
+                  <TreeItemIcon>
+                    {node.isFile ? (
+                      <FileIcon size={14} />
+                    ) : (
+                      <FolderIcon size={14} />
+                    )}
+                  </TreeItemIcon>
+
+                  <TreeItemText>{node.name}</TreeItemText>
+                </div>
+              </Tooltip>
             </>
           }
         >
