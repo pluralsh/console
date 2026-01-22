@@ -108,6 +108,7 @@ const TreeItemText = styled.span({
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   minWidth: 0,
+  flex: 1,
   direction: 'rtl',
   textAlign: 'right',
 })
@@ -333,7 +334,14 @@ export function ComponentsFilesView() {
                 label={node.name}
                 css={{ marginLeft: 6 }}
               >
-                <div css={{ display: 'flex', flex: 1 }}>
+                <div
+                  css={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    width: '100%',
+                    minWidth: 0,
+                  }}
+                >
                   <TreeItemIcon>
                     {node.isFile ? (
                       <FileIcon size={14} />
