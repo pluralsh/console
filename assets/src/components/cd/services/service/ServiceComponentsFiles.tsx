@@ -190,34 +190,25 @@ function collapseSingleChildFolders(nodes: TreeNode[]): TreeNode[] {
   })
 }
 
-function findNode(nodes: TreeNode[], id: string): TreeNode | undefined {
-  for (const node of nodes) {
-    if (node.id === id) return node
-    if (node.children.length > 0) {
-      const found = findNode(node.children, id)
-      if (found) return found
-    }
-  }
-  return undefined
-}
-
-function findParentId(
+function findNodeAndParent(
   nodes: TreeNode[],
   targetId: string,
   parentId: string | null = null
-): string | null {
+): { node: TreeNode | undefined; parentId: string | null } {
   for (const node of nodes) {
     if (node.id === targetId) {
-      return parentId
+      return { node, parentId }
     }
+
     if (node.children.length > 0) {
-      const found = findParentId(node.children, targetId, node.id)
-      if (found !== null) {
-        return found
+      const result = findNodeAndParent(node.children, targetId, node.id)
+      if (result.node) {
+        return result
       }
     }
   }
-  return null
+
+  return { node: undefined, parentId: null }
 }
 
 export function ComponentsFilesView() {
@@ -253,14 +244,15 @@ export function ComponentsFilesView() {
   const handleItemSelection = useCallback(
     (_event: unknown, itemId: string, isSelected: boolean) => {
       if (isSelected) {
-        const node = findNode(treeNodes, itemId)
+        // Single traversal to find both node and parent for better performance
+        const { node, parentId } = findNodeAndParent(treeNodes, itemId)
         if (node?.isFile && node.content) {
           setSelectedFile({
             path: node.path,
             content: node.content,
           })
           setSelectedFileId(itemId)
-          setParentOfSelectedId(findParentId(treeNodes, itemId))
+          setParentOfSelectedId(parentId)
         }
       }
     },
