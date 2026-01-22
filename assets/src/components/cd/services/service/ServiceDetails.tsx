@@ -1,26 +1,10 @@
 import { Button, Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import {
-  createContext,
-  memo,
-  ReactNode,
-  Suspense,
-  useContext,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react'
-import {
-  Outlet,
-  useLocation,
-  useMatch,
-  useOutletContext,
-  useParams,
-} from 'react-router-dom'
+import { memo, ReactNode, Suspense, useMemo, useState } from 'react'
+import { Outlet, useLocation, useMatch, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import {
   ServiceDeploymentDetailsFragment,
-  ServiceDeploymentQuery,
   ServiceError,
   useFlowQuery,
   useServiceDeploymentQuery,
@@ -57,45 +41,12 @@ import {
 
 import { ServiceSelector } from '../ServiceSelector'
 
-import { ApolloQueryResult } from '@apollo/client'
 import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { serviceStatusToSeverity } from '../ServiceStatusChip'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 import { useServicePersonaType } from './settings/ServiceSettings'
-
-type ServiceContextType = {
-  service: ServiceDeploymentDetailsFragment
-  refetch: () => Promise<ApolloQueryResult<ServiceDeploymentQuery>>
-  isRefetching: boolean
-}
-
-export const useServiceContext = () => useOutletContext<ServiceContextType>()
-
-type SidenavOverrideContextType = {
-  setSidenavContent: (content: ReactNode | null) => void
-}
-
-const SidenavOverrideContext = createContext<SidenavOverrideContextType | null>(
-  null
-)
-
-export const useSetSidenavContent = (sidenavContent?: ReactNode) => {
-  const ctx = useContext(SidenavOverrideContext)
-
-  if (!ctx)
-    console.warn('useSetSidenavContent() must be used within ServiceDetails')
-
-  const { setSidenavContent } = ctx || {}
-
-  useLayoutEffect(() => {
-    setSidenavContent?.(sidenavContent ?? null)
-
-    return () => {
-      setSidenavContent?.(null)
-    }
-  }, [setSidenavContent, sidenavContent])
-}
+import { type ServiceDetailsContextType } from './ServiceDetailsContext'
 
 export const getServiceDetailsBreadcrumbs = ({
   cluster,
@@ -320,77 +271,74 @@ function ServiceDetailsBase() {
   )
 
   return (
-    <SidenavOverrideContext.Provider value={{ setSidenavContent }}>
-      <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-        <ResponsiveLayoutSidenavContainer>
+    <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
+      <ResponsiveLayoutSidenavContainer>
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            rowGap: theme.spacing.medium,
+            overflow: 'hidden',
+            maxHeight: '100%',
+          }}
+        >
+          <Suspense fallback={null}>
+            <ServiceSelector />
+          </Suspense>
           <div
             css={{
-              display: 'flex',
-              flexDirection: 'column',
-              rowGap: theme.spacing.medium,
-              overflow: 'hidden',
-              maxHeight: '100%',
+              overflowY: 'auto',
+              paddingBottom: theme.spacing.medium,
             }}
           >
-            <Suspense fallback={null}>
-              <ServiceSelector />
-            </Suspense>
-            <div
-              css={{
-                overflowY: 'auto',
-                paddingBottom: theme.spacing.medium,
-              }}
-            >
-              {sidenavContent && !showOriginalSidenav ? (
-                sidenavContent
-              ) : (
-                <SideNavEntries
-                  directory={directory}
-                  pathname={pathname}
-                  pathPrefix={pathPrefix}
-                  docPageContext={docPageContext}
-                />
-              )}
-            </div>
-            {sidenavContent && (
-              <Button
-                floating
-                onClick={() => setShowOriginalSidenav(!showOriginalSidenav)}
-              >
-                {showOriginalSidenav
-                  ? 'Show custom content'
-                  : 'Show navigation'}
-              </Button>
+            {sidenavContent && !showOriginalSidenav ? (
+              sidenavContent
+            ) : (
+              <SideNavEntries
+                directory={directory}
+                pathname={pathname}
+                pathPrefix={pathPrefix}
+                docPageContext={docPageContext}
+              />
             )}
           </div>
-        </ResponsiveLayoutSidenavContainer>
-        <ResponsiveLayoutSpacer />
-        <ResponsiveLayoutContentContainer role="main">
-          {!serviceDeployment && serviceError ? (
-            <GqlError error={serviceError} />
-          ) : serviceDeployment ? (
-            <Outlet
-              context={
-                {
-                  service: serviceDeployment,
-                  refetch: () => {
-                    setIsRefetching(true)
-                    return refetch().finally(() => setIsRefetching(false))
-                  },
-                  isRefetching,
-                } satisfies ServiceContextType
-              }
-            />
-          ) : (
-            <LoadingIndicator />
+          {sidenavContent && (
+            <Button
+              floating
+              onClick={() => setShowOriginalSidenav(!showOriginalSidenav)}
+            >
+              {showOriginalSidenav ? 'Show custom content' : 'Show navigation'}
+            </Button>
           )}
-        </ResponsiveLayoutContentContainer>
-        <ResponsiveLayoutSidecarContainer>
-          <ServiceDetailsSidecar serviceDeployment={serviceDeployment} />
-        </ResponsiveLayoutSidecarContainer>
-        <ResponsiveLayoutSpacer />
-      </ResponsiveLayoutPage>
-    </SidenavOverrideContext.Provider>
+        </div>
+      </ResponsiveLayoutSidenavContainer>
+      <ResponsiveLayoutSpacer />
+      <ResponsiveLayoutContentContainer role="main">
+        {!serviceDeployment && serviceError ? (
+          <GqlError error={serviceError} />
+        ) : serviceDeployment ? (
+          <Outlet
+            context={
+              {
+                service: serviceDeployment,
+                refetch: () => {
+                  setIsRefetching(true)
+                  return refetch().finally(() => setIsRefetching(false))
+                },
+                isRefetching,
+                setSidenavContent,
+              } satisfies ServiceDetailsContextType
+            }
+          />
+        ) : (
+          <LoadingIndicator />
+        )}
+      </ResponsiveLayoutContentContainer>
+      <ResponsiveLayoutSidecarContainer>
+        <ServiceDetailsSidecar serviceDeployment={serviceDeployment} />
+      </ResponsiveLayoutSidecarContainer>
+      <ResponsiveLayoutSpacer />
+    </ResponsiveLayoutPage>
   )
 }
 

@@ -12,7 +12,7 @@ import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { columns } from '../ServiceRevisionColumns'
-import { useServiceContext } from './ServiceDetails'
+import { useServiceContext } from './ServiceDetailsContext'
 import { SvcSettingsWrapperCardSC } from './settings/ServiceSecrets'
 
 export function ServiceRevisions() {

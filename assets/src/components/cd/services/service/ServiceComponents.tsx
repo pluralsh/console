@@ -44,7 +44,7 @@ import { ComponentsTreeView } from './ServiceComponentsTree.tsx'
 import { ComponentsFilesView } from './ServiceComponentsFiles.tsx'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 import { ServiceComponentsContext } from './ServiceComponentsContext'
-import { useServiceContext } from './ServiceDetails'
+import { useServiceContext } from './ServiceDetailsContext'
 import { useChatbot } from 'components/ai/AIContext'
 
 const directory = [

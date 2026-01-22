@@ -10,7 +10,10 @@ import {
 import 'react-complex-tree/lib/style.css'
 import type { TreeItem as TreeItemType } from 'react-complex-tree'
 import styled from 'styled-components'
-import { useServiceContext, useSetSidenavContent } from './ServiceDetails'
+import {
+  useServiceContext,
+  useSetSidenavContent,
+} from './ServiceDetailsContext'
 import { Code, FileIcon, FolderIcon } from '@pluralsh/design-system'
 import { getLanguageFromFileName } from 'utils/file'
 import {

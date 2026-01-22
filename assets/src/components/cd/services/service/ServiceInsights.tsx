@@ -10,7 +10,7 @@ import {
 } from '../../../ai/chatbot/ChatbotButton.tsx'
 import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
 import { StackedText } from '../../../utils/table/StackedText.tsx'
-import { useServiceContext } from './ServiceDetails'
+import { useServiceContext } from './ServiceDetailsContext'
 
 export function ServiceInsights() {
   const theme = useTheme()
