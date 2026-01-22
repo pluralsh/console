@@ -207,7 +207,10 @@ export function ComponentsFilesView() {
           itemId={node.id}
           label={
             <>
-              <Tooltip label={node.name}>
+              <Tooltip
+                label={node.name}
+                css={{ marginLeft: 6 }}
+              >
                 <div css={{ display: 'flex', flex: 1 }}>
                   <TreeItemIcon>
                     {node.isFile ? (
