@@ -24,6 +24,7 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
 
   [`& .${treeItemClasses.root}`]: {
     marginBottom: theme.spacing.xxxsmall,
+    width: '100%',
   },
 
   [`& .${treeItemClasses.content}`]: {
@@ -31,6 +32,10 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     padding: `${theme.spacing.xxsmall}px ${theme.spacing.xsmall}px`,
     ...theme.partials.text.body2,
     color: theme.colors['text-light'],
+    width: '100%',
+    minWidth: 0,
+    display: 'flex',
+    overflow: 'hidden',
 
     '&:hover': {
       backgroundColor: theme.colors['fill-one-hover'],
@@ -45,6 +50,7 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   [`& .${treeItemClasses.iconContainer}`]: {
     width: '14px',
     minWidth: '14px',
+    flexShrink: 0,
 
     '& svg': {
       fontSize: '14px',
@@ -55,6 +61,10 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     padding: 0,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
   },
 
   [`& .${treeItemClasses.groupTransition}`]: {
@@ -70,7 +80,17 @@ const TreeItemIcon = styled.div(({ theme }) => ({
   alignItems: 'center',
   marginRight: theme.spacing.xsmall,
   color: theme.colors['icon-default'],
+  flexShrink: 0,
 }))
+
+const TreeItemText = styled.span({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  minWidth: 0,
+  direction: 'rtl',
+  textAlign: 'right',
+})
 
 type TreeNode = {
   id: string
@@ -188,7 +208,7 @@ export function ComponentsFilesView() {
                   <FolderIcon size={14} />
                 )}
               </TreeItemIcon>
-              {node.name}
+              <TreeItemText>{node.name}</TreeItemText>
             </>
           }
         >
