@@ -1,5 +1,7 @@
 import {
   ArrowScroll,
+  AiSparkleFilledIcon,
+  Button,
   Callout,
   ComponentsIcon,
   TreeViewIcon,
@@ -42,6 +44,8 @@ import { ComponentsTreeView } from './ServiceComponentsTree.tsx'
 import { ComponentsFilesView } from './ServiceComponentsFiles.tsx'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 import { ServiceComponentsContext } from './ServiceComponentsContext'
+import { useServiceContext } from './ServiceDetails'
+import { useChatbot } from 'components/ai/AIContext'
 
 const directory = [
   { path: 'list', icon: <ListIcon />, tooltip: 'Component list view' },
@@ -56,11 +60,13 @@ const directory = [
 const defaultView = 'list'
 
 export function ServiceComponents() {
+  const { service } = useServiceContext()
+  const { createNewThread, mutationLoading } = useChatbot()
   const [selectedState, setSelectedState] = useState<Key | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchParams, setSearchParams] = useSearchParams()
   const [filtersHidden, setFiltersHidden] = useState(false)
-  const [viewSwitchContent, setViewSwitchContent] = useState<ReactNode>()
+  const [showChatButton, setShowChatButton] = useState(false)
   const [components, setComponents] = useState<
     ServiceDeploymentComponentFragment[]
   >([])
@@ -78,7 +84,7 @@ export function ServiceComponents() {
   const contextValue = useMemo(
     () => ({
       setFiltersHidden,
-      setViewSwitchContent,
+      setShowChatButton,
     }),
     []
   )
@@ -131,7 +137,20 @@ export function ServiceComponents() {
                 tab={view}
                 setTab={(view: string) => setSearchParams({ view })}
               />
-              {viewSwitchContent}
+              {showChatButton && (
+                <Button
+                  startIcon={<AiSparkleFilledIcon />}
+                  loading={mutationLoading}
+                  onClick={() =>
+                    createNewThread({
+                      serviceId: service.id,
+                      summary: `Chat with ${service.name}`,
+                    })
+                  }
+                >
+                  Chat with {service.name}
+                </Button>
+              )}
             </FiltersWrapperSC>
           </ArrowScroll>
         }

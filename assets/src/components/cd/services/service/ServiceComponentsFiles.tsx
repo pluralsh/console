@@ -11,17 +11,11 @@ import 'react-complex-tree/lib/style.css'
 import type { TreeItem as TreeItemType } from 'react-complex-tree'
 import styled from 'styled-components'
 import { useServiceContext, useSetSidenavContent } from './ServiceDetails'
-import {
-  AiSparkleFilledIcon,
-  Button,
-  Code,
-  FileIcon,
-  FolderIcon,
-} from '@pluralsh/design-system'
+import { Code, FileIcon, FolderIcon } from '@pluralsh/design-system'
 import { getLanguageFromFileName } from 'utils/file'
 import {
+  useSetServiceComponentsChatButtonVisible,
   useSetServiceComponentsFiltersHidden,
-  useSetServiceComponentsViewSwitchContent,
 } from './ServiceComponentsContext'
 
 const TreeItemIcon = styled.div(({ theme }) => ({
@@ -261,19 +255,8 @@ export function ComponentsFilesView() {
   )
 
   useSetSidenavContent(sidenavContent)
-
-  const headerContent = useMemo(
-    () => (
-      <Button startIcon={<AiSparkleFilledIcon />}>
-        Chat with {service.name}
-      </Button>
-    ),
-    [service.name]
-  )
-
-  useSetServiceComponentsViewSwitchContent(headerContent)
-
   useSetServiceComponentsFiltersHidden(true)
+  useSetServiceComponentsChatButtonVisible(true)
 
   if (error) return <GqlError error={error} />
 

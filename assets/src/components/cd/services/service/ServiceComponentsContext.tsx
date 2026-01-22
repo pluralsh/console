@@ -1,7 +1,6 @@
 import {
   createContext,
   Dispatch,
-  ReactNode,
   SetStateAction,
   useContext,
   useLayoutEffect,
@@ -9,7 +8,7 @@ import {
 
 export type ServiceComponentsContextType = {
   setFiltersHidden: Dispatch<SetStateAction<boolean>>
-  setViewSwitchContent: Dispatch<SetStateAction<ReactNode>>
+  setShowChatButton: Dispatch<SetStateAction<boolean>>
 }
 
 export const ServiceComponentsContext =
@@ -25,28 +24,6 @@ export const useServiceComponentsContext = (): ServiceComponentsContextType => {
   }
 
   return ctx
-}
-
-export const useSetServiceComponentsViewSwitchContent = (
-  viewSwitchContent?: ReactNode
-) => {
-  const ctx = useContext(ServiceComponentsContext)
-
-  if (!ctx) {
-    console.warn(
-      'useSetServiceComponentsViewSwitchContent() must be used within ServiceComponentsContext'
-    )
-  }
-
-  const { setViewSwitchContent } = ctx || {}
-
-  useLayoutEffect(() => {
-    setViewSwitchContent?.(viewSwitchContent ?? null)
-
-    return () => {
-      setViewSwitchContent?.(null)
-    }
-  }, [setViewSwitchContent, viewSwitchContent])
 }
 
 export const useSetServiceComponentsFiltersHidden = (
@@ -69,4 +46,26 @@ export const useSetServiceComponentsFiltersHidden = (
       setFiltersHidden?.(false)
     }
   }, [setFiltersHidden, filtersHidden])
+}
+
+export const useSetServiceComponentsChatButtonVisible = (
+  showChatButton: boolean
+) => {
+  const ctx = useContext(ServiceComponentsContext)
+
+  if (!ctx) {
+    console.warn(
+      'useSetServiceComponentsChatButtonVisible() must be used within ServiceComponentsContext'
+    )
+  }
+
+  const { setShowChatButton } = ctx || {}
+
+  useLayoutEffect(() => {
+    setShowChatButton?.(showChatButton)
+
+    return () => {
+      setShowChatButton?.(false)
+    }
+  }, [setShowChatButton, showChatButton])
 }
