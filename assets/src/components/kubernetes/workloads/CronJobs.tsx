@@ -3,25 +3,24 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
-
+import { Maybe } from 'generated/graphql-plural'
 import {
-  Cronjob_CronJob as CronJobT,
-  Cronjob_CronJobList as CronJobListT,
-  CronJobsDocument,
-  CronJobsQuery,
-  CronJobsQueryVariables,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+  CronjobCronJob,
+  CronjobCronJobList,
+} from '../../../generated/kubernetes'
+import {
+  getAllCronJobsInfiniteOptions,
+  getCronJobsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   CRON_JOBS_REL_PATH,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
-
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
+import { useDataSelect } from '../common/DataSelect.tsx'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
-
 import { CronJobSuspendChip, WorkloadImages } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
 
@@ -33,7 +32,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<CronJobT>()
+const columnHelper = createColumnHelper<CronjobCronJob>()
 
 const colSchedule = columnHelper.accessor((cj) => cj.schedule, {
   id: 'schedule',
@@ -59,7 +58,7 @@ const colActive = columnHelper.accessor((cj) => cj.active, {
   cell: ({ getValue }) => getValue(),
 })
 
-const colLastSchedule = columnHelper.accessor((cj) => cj.lastSchedule, {
+const colLastSchedule = columnHelper.accessor((cj) => cj.lastSchedule.Time, {
   id: 'lastSchedule',
   header: 'Last schedule',
   cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
@@ -67,6 +66,7 @@ const colLastSchedule = columnHelper.accessor((cj) => cj.lastSchedule, {
 
 export default function CronJobs() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -89,11 +89,14 @@ export default function CronJobs() {
   )
 
   return (
-    <ResourceList<CronJobListT, CronJobT, CronJobsQuery, CronJobsQueryVariables>
+    <ResourceList<CronjobCronJobList, CronjobCronJob>
       namespaced
       columns={columns}
-      queryDocument={CronJobsDocument}
-      queryName="handleGetCronJobList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getCronJobsInfiniteOptions
+          : getAllCronJobsInfiniteOptions
+      }
       itemsKey="items"
     />
   )

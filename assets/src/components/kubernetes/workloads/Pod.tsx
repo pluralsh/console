@@ -24,18 +24,18 @@ import {
 
 import { useTheme } from 'styled-components'
 import {
-  Common_EventList as EventListT,
-  Common_Event as EventT,
-  PodEventsDocument,
-  PodEventsQuery,
-  PodEventsQueryVariables,
-  PodQueryVariables,
-  Pod_PodDetail as PodT,
-  usePodLogsQuery,
-  usePodQuery,
-} from '../../../generated/graphql-kubernetes'
+  CommonEvent,
+  CommonEventList,
+  PodPodDetail,
+} from '../../../generated/kubernetes'
+import {
+  getContainerLogsOptions,
+  getPodEventsInfiniteOptions,
+  getPodOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
+import { AxiosInstance } from '../../../helpers/axios.ts'
+import { useQuery } from '@tanstack/react-query'
 
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
@@ -56,8 +56,8 @@ import Containers from '../common/Containers'
 import ImagePullSecrets from '../common/ImagePullSecrets'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import ResourceLink from '../common/ResourceLink'
-import { ResourceList } from '../common/ResourceList'
 import ResourceOwner from '../common/ResourceOwner'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { Kind } from '../common/types'
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
@@ -77,15 +77,17 @@ const directory: Array<TabEntry> = [
 
 export function Pod(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name, namespace } = useParams()
-  const { data, loading } = usePodQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as PodQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: pod,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getPodOptions({
+      client: AxiosInstance(clusterId),
+      path: { pod: name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
 
   useSetBreadcrumbs(
@@ -107,10 +109,12 @@ export function Pod(): ReactElement<any> {
     )
   )
 
-  const pod = data?.handleGetPodDetail as PodT
-
-  if (loading) {
+  if (isLoading) {
     return <LoadingIndicator />
+  }
+
+  if (error) {
+    return <GqlError error={error} />
   }
 
   return (
@@ -166,7 +170,7 @@ export function Pod(): ReactElement<any> {
 
 export function PodInfo(): ReactElement<any> {
   const cluster = useCluster()
-  const pod = useOutletContext() as PodT
+  const pod = useOutletContext() as PodPodDetail
   const conditions = pod?.conditions
   const pvcList = pod?.persistentVolumeClaimList
   const pvcListColumns = usePersistentVolumeClaimListColumns()
@@ -216,7 +220,7 @@ export function PodInfo(): ReactElement<any> {
 }
 
 export function PodContainers(): ReactElement<any> {
-  const pod = useOutletContext() as PodT
+  const pod = useOutletContext() as PodPodDetail
 
   return (
     <>
@@ -235,8 +239,8 @@ export function PodContainers(): ReactElement<any> {
 }
 
 export function PodLogs(): ReactElement<any> {
-  const { name, namespace, clusterId } = useParams()
-  const pod = useOutletContext() as Nullable<PodT>
+  const { name = '', namespace = '', clusterId = '' } = useParams()
+  const pod = useOutletContext() as Nullable<PodPodDetail>
   const theme = useTheme()
   const containers: Array<string> = useMemo(
     () => [
@@ -249,14 +253,16 @@ export function PodLogs(): ReactElement<any> {
     containers.at(0) ?? ''
   )
 
-  const { data, loading, refetch, error } = usePodLogsQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    variables: {
-      container: selected as string,
-      name: name ?? '',
-      namespace: namespace ?? '',
-    },
-    fetchPolicy: 'no-cache',
+  const { data, isLoading, refetch, error } = useQuery({
+    ...getContainerLogsOptions({
+      client: AxiosInstance(clusterId),
+      path: {
+        container: selected as string,
+        pod: name,
+        namespace,
+      },
+    }),
+    refetchInterval: 30_000,
   })
 
   if (error)
@@ -301,10 +307,8 @@ export function PodLogs(): ReactElement<any> {
         </FormField>
       </div>
       <ContainerLogsTable
-        logs={reverse(
-          data?.handleLogs?.logs.map((line) => line?.content || '') || []
-        )}
-        loading={loading}
+        logs={reverse(data?.logs.map((line) => line?.content || '') || [])}
+        loading={isLoading}
         refetch={refetch}
         container={selected as string}
       />
@@ -313,18 +317,15 @@ export function PodLogs(): ReactElement<any> {
 }
 
 export function PodEvents(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<EventListT, EventT, PodEventsQuery, PodEventsQueryVariables>
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
-      queryDocument={PodEventsDocument}
-      queryOptions={{
-        variables: { namespace, name } as PodEventsQueryVariables,
-      }}
-      queryName="handleGetPodEvents"
+      queryOptions={getPodEventsInfiniteOptions}
+      pathParams={{ pod: name, namespace }}
       itemsKey="events"
       disableOnRowClick
     />
@@ -334,7 +335,7 @@ export function PodEvents(): ReactElement<any> {
 export function PodExec(): ReactElement<any> {
   const theme = useTheme()
   const navigate = useNavigate()
-  const pod = useOutletContext() as Nullable<PodT>
+  const pod = useOutletContext() as Nullable<PodPodDetail>
   const { clusterId, name = '', namespace = '' } = useParams()
   const [searchParams] = useSearchParams()
   const container = searchParams.get('container')

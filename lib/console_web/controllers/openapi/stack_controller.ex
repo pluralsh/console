@@ -1,0 +1,81 @@
+defmodule ConsoleWeb.OpenAPI.StackController do
+  use ConsoleWeb, :api_controller
+  import Console.Deployments.Policies, only: [allow: 3]
+  alias Console.Deployments.Stacks
+  alias Console.Schema.Stack
+
+  operation :show,
+    operation_id: "GetStack",
+    parameters: [
+      id: [in: :path, schema: %{type: :string}, required: true]
+    ],
+    responses: [ok: OpenAPI.Stack]
+  def show(conn, %{"id" => id}) do
+    user = Console.Guardian.Plug.current_resource(conn)
+    Stacks.get_stack!(id)
+    |> Repo.preload([:tags])
+    |> allow(user, :read)
+    |> successful(conn, OpenAPI.Stack)
+  end
+
+  operation :index,
+    operation_id: "ListStacks",
+    parameters: [
+      page: [in: :query, schema: %{type: :integer}, required: false],
+      per_page: [in: :query, schema: %{type: :integer}, required: false]
+    ],
+    responses: [ok: OpenAPI.Stack.List]
+  def index(conn, _params) do
+    user = Console.Guardian.Plug.current_resource(conn)
+    Stack.for_user(user)
+    |> Stack.ordered()
+    |> Stack.preloaded([:tags])
+    |> paginate(conn, OpenAPI.Stack)
+  end
+
+  operation :create,
+    operation_id: "CreateStack",
+    request_body: OpenAPI.StackInput,
+    responses: [ok: OpenAPI.Stack]
+  def create(conn, _) do
+    user = Console.Guardian.Plug.current_resource(conn)
+    to_attrs(conn.private.oaskit.body_params)
+    |> Stacks.create_stack(user)
+    |> when_ok(&Repo.preload(&1, [:tags]))
+    |> successful(conn, OpenAPI.Stack)
+  end
+
+  operation :update,
+    operation_id: "UpdateStack",
+    parameters: [
+      id: [in: :path, schema: %{type: :string}, required: true]
+    ],
+    request_body: OpenAPI.StackInput,
+    responses: [ok: OpenAPI.Stack]
+  def update(conn, %{"id" => id}) do
+    user = Console.Guardian.Plug.current_resource(conn)
+
+    to_attrs(conn.private.oaskit.body_params)
+    |> Stacks.update_stack(id, user)
+    |> when_ok(&Repo.preload(&1, [:tags]))
+    |> successful(conn, OpenAPI.Stack)
+  end
+
+  operation :delete,
+    operation_id: "DeleteStack",
+    parameters: [
+      id: [in: :path, schema: %{type: :string}, required: true],
+      detach: [in: :query, schema: %{type: :boolean}, required: false]
+    ],
+    responses: [ok: OpenAPI.Stack]
+  def delete(conn, %{"id" => id}) do
+    user = Console.Guardian.Plug.current_resource(conn)
+
+    case conn.private.oaskit.query_params[:detach] do
+      true -> Stacks.detach_stack(id, user)
+      _ -> Stacks.delete_stack(id, user)
+    end
+    |> when_ok(&Repo.preload(&1, [:tags]))
+    |> successful(conn, OpenAPI.Stack)
+  end
+end

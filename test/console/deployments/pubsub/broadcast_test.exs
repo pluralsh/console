@@ -4,6 +4,16 @@ defmodule Console.Deployments.PubSub.BroadcastTest do
   alias Console.PubSub
   alias Console.Deployments.PubSub.Broadcast
 
+  describe "selector" do
+    test "it will properly select events to broadcast" do
+      event = %PubSub.ServiceCreated{item: insert(:service)}
+      protocol = Console.Deployments.PubSub.Broadcastable
+      any_mod = Module.concat(protocol, Any)
+      assert Console.PubSub.Consumer.implemented(protocol, any_mod, event)
+      refute Console.PubSub.Consumer.implemented(protocol, any_mod, %PubSub.FlowCreated{})
+    end
+  end
+
   describe "ServiceCreated" do
     test "it will push a service.event event" do
       %{id: id, cluster_id: cluster_id} = service = insert(:service)

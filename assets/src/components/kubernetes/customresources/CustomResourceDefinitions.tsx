@@ -2,16 +2,9 @@ import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
 
-import {
-  CustomResourceDefinitionsDocument,
-  CustomResourceDefinitionsQuery,
-  CustomResourceDefinitionsQueryVariables,
-  Maybe,
-  Types_CustomResourceDefinition as CustomResourceDefinitionT,
-  Types_CustomResourceDefinitionList as CustomResourceListT,
-} from '../../../generated/graphql-kubernetes'
+import { getCustomResourceDefinitionsInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen'
 import { getCustomResourcesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { useCluster, usePinnedResources } from '../Cluster'
@@ -21,6 +14,10 @@ import PinCustomResourceDefinition from './PinCustomResourceDefinition'
 import PinnedCustomResourceDefinitions from './PinnedCustomResourceDefinitions'
 
 import { CRDEstablishedChip } from './utils'
+import {
+  TypesCustomResourceDefinition,
+  TypesCustomResourceDefinitionList,
+} from 'generated/kubernetes'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -30,7 +27,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<CustomResourceDefinitionT>()
+const columnHelper = createColumnHelper<TypesCustomResourceDefinition>()
 
 const colName = columnHelper.accessor((r) => r?.objectMeta.name, {
   id: 'name',
@@ -155,14 +152,11 @@ export default function CustomResourceDefinitions() {
         }}
       >
         <ResourceList<
-          CustomResourceListT,
-          CustomResourceDefinitionT,
-          CustomResourceDefinitionsQuery,
-          CustomResourceDefinitionsQueryVariables
+          TypesCustomResourceDefinitionList,
+          TypesCustomResourceDefinition
         >
           columns={columns}
-          queryDocument={CustomResourceDefinitionsDocument}
-          queryName="handleGetCustomResourceDefinitionList"
+          queryOptions={getCustomResourceDefinitionsInfiniteOptions}
           itemsKey="items"
         />
       </div>

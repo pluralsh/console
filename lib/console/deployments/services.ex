@@ -3,6 +3,7 @@ defmodule Console.Deployments.Services do
   use Nebulex.Caching
   import Console.Deployments.Policies
   import Console, only: [probe: 2]
+  import Console.AI.Fixer.Base, only: [blacklist: 1]
   alias Console.PubSub
   alias Console.Services.Users
   alias Console.Deployments.{
@@ -184,8 +185,11 @@ defmodule Console.Deployments.Services do
     svc = get_service!(id)
     with {:ok, svc} <- allow(svc, user, :write),
          {:ok, f} <- tarstream(svc),
-         {:ok, contents} <- Tar.tar_stream(f),
-      do: {:ok, Enum.map(contents, fn {k, v} -> %{path: k, content: v} end)}
+         {:ok, contents} <- Tar.tar_stream(f) do
+      Enum.filter(contents, fn {k, _} -> !blacklist(k) end)
+      |> Enum.map(fn {k, v} -> %{path: k, content: v} end)
+      |> ok()
+    end
   end
 
   @doc """

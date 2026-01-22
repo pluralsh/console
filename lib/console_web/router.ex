@@ -11,6 +11,11 @@ defmodule ConsoleWeb.Router do
     plug ConsoleWeb.Plugs.Authorized
   end
 
+  pipeline :openapi do
+    plug :accepts, ["json"]
+    plug Oaskit.Plugs.SpecProvider, spec: Console.OpenAPI
+  end
+
   get "/health", ConsoleWeb.HealthController, :health
 
   scope "/v1", ConsoleWeb do
@@ -94,6 +99,28 @@ defmodule ConsoleWeb.Router do
       get "/git/tarballs", GitController, :tarball
       get "/git/stacks/tarballs", GitController, :stack_tarball
       get "/git/sentinels/tarballs", GitController, :sentinel_tarball
+    end
+
+    scope "/api", ConsoleWeb do
+      pipe_through [:openapi]
+
+      scope "/v1", OpenAPI do
+        get "/me", UserController, :me
+
+        scope "/cd", CD do
+          post "/clusters",       ClusterController, :create
+          get "/clusters",        ClusterController, :index
+          get "/clusters/:id",    ClusterController, :show
+          put "/clusters/:id",    ClusterController, :update
+          delete "/clusters/:id", ClusterController, :delete
+        end
+
+        post "/stacks", StackController, :create
+        get "/stacks", StackController, :index
+        get "/stacks/:id", StackController, :show
+        put "/stacks/:id", StackController, :update
+        delete "/stacks/:id", StackController, :delete
+      end
     end
 
     forward "/gql", Absinthe.Plug,

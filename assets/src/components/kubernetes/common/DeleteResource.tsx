@@ -1,10 +1,4 @@
-import {
-  ApolloError,
-  FetchResult,
-  LazyQueryExecFunction,
-  ServerError,
-  useMutation,
-} from '@apollo/client'
+import { useMutation } from '@tanstack/react-query'
 import {
   Checkbox,
   FormField,
@@ -13,14 +7,14 @@ import {
   Select,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { ReactNode, useMemo, useState } from 'react'
+import { ReactNode, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import {
-  NamespacedResourceDeleteDocument,
-  ResourceDeleteDocument,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  deleteNamespacedResourceMutation,
+  deleteResourceMutation,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen'
+import { AxiosInstance } from '../../../helpers/axios'
 
 import { Confirm, ConfirmProps } from '../../utils/Confirm'
 
@@ -28,7 +22,7 @@ import { Kind, Resource } from './types'
 
 interface DeleteResourceProps {
   resource: Resource
-  refetch?: Nullable<LazyQueryExecFunction<any, any>>
+  refetch?: Nullable<() => Promise<any>>
   customResource?: boolean
 }
 
@@ -72,27 +66,10 @@ enum DeletionPropagation {
   DeletePropagationOrphan = 'Orphan',
 }
 
-function toServerError(data: FetchResult): ServerError {
-  const defaultError: ServerError = {
-    statusCode: 500,
-    result: 'Could not delete resource',
-  } as ServerError
-
-  if (!data.errors) {
-    return defaultError
-  }
-
-  if (!((data.errors as unknown) instanceof ApolloError)) {
-    return defaultError
-  }
-
-  const apolloError: ApolloError = data.errors as unknown as ApolloError
-  const networkError: ServerError = apolloError?.networkError as ServerError
-
-  return {
-    statusCode: networkError?.statusCode,
-    result: networkError?.result ?? networkError?.message,
-  } as ServerError
+interface ServerError {
+  statusCode?: number
+  result?: string
+  message?: string
 }
 
 interface DeleteResourceModalProps
@@ -100,7 +77,7 @@ interface DeleteResourceModalProps
   open: boolean
   setOpen: (open: boolean) => void
   resource: Resource
-  refetch?: Nullable<LazyQueryExecFunction<any, any>>
+  refetch?: Nullable<() => Promise<any>>
 }
 
 function DeleteResourceModal({
@@ -121,35 +98,71 @@ function DeleteResourceModal({
   const name = resource?.objectMeta?.name ?? ''
   const namespace = resource?.objectMeta?.namespace ?? ''
   const kind = resource?.typeMeta?.kind ?? ''
-  const deleteDocument = useMemo(
-    () =>
-      namespace ? NamespacedResourceDeleteDocument : ResourceDeleteDocument,
-    [namespace]
-  )
+  const client = AxiosInstance(clusterId ?? '')
 
-  const [deleteResource, { error }] = useMutation(deleteDocument, {
-    client: KubernetesClient(clusterId ?? ''),
-    variables: {
-      name,
-      namespace,
-      kind,
-      propagation,
-      deleteNow: `${deleteNow}`,
+  const namespacedMutation = useMutation({
+    ...deleteNamespacedResourceMutation(),
+    onSuccess: () => {
+      if (refetch) {
+        const interceptorId = client.instance.interceptors.request.use(
+          (config) => {
+            config.headers['Cache-Control'] = 'no-cache'
+            return config
+          }
+        )
+
+        refetch()
+          .then(() => setOpen(false))
+          .finally(() => {
+            client.instance.interceptors.request.eject(interceptorId)
+            setDeleting(false)
+          })
+      } else {
+        setDeleting(false)
+        setOpen(false)
+      }
     },
-    onError: () => setDeleting(false),
-    onCompleted: () =>
-      refetch
-        ? refetch({
-            context: {
-              headers: {
-                'Cache-Control': 'no-cache',
-              },
-            },
-          })!
-            .then(() => setOpen(false))
-            .finally(() => setDeleting(false))
-        : undefined,
+    onError: (error: any) => {
+      setDeleting(false)
+      setServerError({
+        statusCode: error.response?.status,
+        result: error.response?.data?.message || error.message,
+      })
+    },
   })
+
+  const clusterMutation = useMutation({
+    ...deleteResourceMutation(),
+    onSuccess: () => {
+      if (refetch) {
+        const interceptorId = client.instance.interceptors.request.use(
+          (config) => {
+            config.headers['Cache-Control'] = 'no-cache'
+            return config
+          }
+        )
+
+        refetch()
+          .then(() => setOpen(false))
+          .finally(() => {
+            client.instance.interceptors.request.eject(interceptorId)
+            setDeleting(false)
+          })
+      } else {
+        setDeleting(false)
+        setOpen(false)
+      }
+    },
+    onError: (error: any) => {
+      setDeleting(false)
+      setServerError({
+        statusCode: error.response?.status,
+        result: error.response?.data?.message || error.message,
+      })
+    },
+  })
+
+  const mutation = namespace ? namespacedMutation : clusterMutation
 
   return (
     <Confirm
@@ -157,7 +170,7 @@ function DeleteResourceModal({
       destructive
       label="Delete"
       loading={deleting}
-      error={error}
+      error={mutation.error}
       errorMessage={
         serverError?.result?.toString() ?? 'Could not delete resource'
       }
@@ -165,7 +178,25 @@ function DeleteResourceModal({
       open={open}
       submit={() => {
         setDeleting(true)
-        deleteResource().then((data) => setServerError(toServerError(data)))
+        if (namespace) {
+          namespacedMutation.mutate({
+            client,
+            path: { kind, name, namespace },
+            query: {
+              propagation,
+              deleteNow: `${deleteNow}`,
+            },
+          })
+        } else {
+          clusterMutation.mutate({
+            client,
+            path: { kind, name },
+            query: {
+              propagation,
+              deleteNow: `${deleteNow}`,
+            },
+          })
+        }
       }}
       title={`Delete ${kind}`}
       text={`The ${kind} "${name}"${

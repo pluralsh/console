@@ -17,7 +17,7 @@ defmodule Console.Pipelines.AI.Base do
   end
 
   def if_enabled(fun) do
-    case Settings.cached() do
+    case Settings.local_cached() do
       %DeploymentSettings{ai: %{enabled: true}} ->
         fun.()
       _ -> []

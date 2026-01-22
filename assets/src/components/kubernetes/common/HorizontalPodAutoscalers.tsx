@@ -1,16 +1,14 @@
 import { ReactElement } from 'react'
 
-import {
-  Horizontalpodautoscaler_HorizontalPodAutoscaler as HorizontalPodAutoscalerT,
-  Horizontalpodautoscaler_HorizontalPodAutoscalerList as HorizontalPodAutoscalerListT,
-  HorizontalPodAutoscalersForResourceDocument,
-  HorizontalPodAutoscalersForResourceQuery,
-  HorizontalPodAutoscalersForResourceQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+import { getHorizontalPodAutoscalersForResourceInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen'
 import { useHorizontalPodAutoscalersColumns } from '../cluster/HorizontalPodAutoscalers'
 
 import { ResourceList } from './ResourceList'
 import { Kind } from './types'
+import {
+  HorizontalpodautoscalerHorizontalPodAutoscaler,
+  HorizontalpodautoscalerHorizontalPodAutoscalerList,
+} from 'generated/kubernetes'
 
 interface HorizontalPodAutoscalersProps {
   kind: Kind
@@ -27,23 +25,13 @@ export default function HorizontalPodAutoscalersForResource({
 
   return (
     <ResourceList<
-      HorizontalPodAutoscalerListT,
-      HorizontalPodAutoscalerT,
-      HorizontalPodAutoscalersForResourceQuery,
-      HorizontalPodAutoscalersForResourceQueryVariables
+      HorizontalpodautoscalerHorizontalPodAutoscalerList,
+      HorizontalpodautoscalerHorizontalPodAutoscaler
     >
       namespaced
       columns={columns}
-      queryDocument={HorizontalPodAutoscalersForResourceDocument}
-      queryOptions={{
-        variables: {
-          kind,
-          namespace,
-          name,
-        } as HorizontalPodAutoscalersForResourceQueryVariables,
-      }}
-      queryName="handleGetHorizontalPodAutoscalerListForResource"
-      itemsKey="horizontalpodautoscalers"
+      queryOptions={getHorizontalPodAutoscalersForResourceInfiniteOptions}
+      pathParams={{ kind, name, namespace }}
       disableOnRowClick
     />
   )

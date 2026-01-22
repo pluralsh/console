@@ -4,12 +4,13 @@ import { ReactNode, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { GqlError } from './Alert'
+import { AxiosError } from 'axios'
 
 export type ConfirmProps = {
   open: boolean
   close: Nullable<(...args: any[]) => unknown>
   title?: ReactNode
-  error?: ApolloError | undefined
+  error?: ApolloError | AxiosError | null | undefined
   errorHeader?: string
   errorMessage?: string
   text?: ReactNode

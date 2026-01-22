@@ -1,22 +1,19 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
-
+import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
 import {
-  Maybe,
-  Poddisruptionbudget_PodDisruptionBudget as PodDisruptionBudgetT,
-  Poddisruptionbudget_PodDisruptionBudgetList as PodDisruptionBudgetListT,
-  PodDisruptionBudgetsDocument,
-  PodDisruptionBudgetsQuery,
-  PodDisruptionBudgetsQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+  PoddisruptionbudgetPodDisruptionBudget as PodDisruptionBudgetT,
+  PoddisruptionbudgetPodDisruptionBudgetList as PodDisruptionBudgetListT,
+} from '../../../generated/kubernetes'
+import { getPodDisruptionBudgetsInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen'
+
 import {
   getClusterAbsPath,
   PDBS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
 
 import { getClusterBreadcrumbs } from './Cluster.tsx'
@@ -64,16 +61,10 @@ export default function PodDisruptionBudgets() {
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <ResourceList<
-      PodDisruptionBudgetListT,
-      PodDisruptionBudgetT,
-      PodDisruptionBudgetsQuery,
-      PodDisruptionBudgetsQueryVariables
-    >
+    <ResourceList<PodDisruptionBudgetListT, PodDisruptionBudgetT>
       namespaced
       columns={columns}
-      queryDocument={PodDisruptionBudgetsDocument}
-      queryName="handleGetPodDisruptionBudgetList"
+      queryOptions={getPodDisruptionBudgetsInfiniteOptions}
       itemsKey="items"
     />
   )

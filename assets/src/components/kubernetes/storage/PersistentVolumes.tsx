@@ -4,27 +4,26 @@ import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
 import {
-  Maybe,
-  Persistentvolume_PersistentVolume as PersistentVolumeT,
-  Persistentvolume_PersistentVolumeList as PersistentVolumeListT,
-  PersistentVolumesDocument,
-  PersistentVolumesQuery,
-  PersistentVolumesQueryVariables,
-} from '../../../generated/graphql-kubernetes'
-import {
   getStorageAbsPath,
   PERSISTENT_VOLUMES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 import ResourceLink from '../common/ResourceLink'
-import { ResourceList } from '../common/ResourceList'
 import { Kind } from '../common/types'
 import { useDefaultColumns } from '../common/utils'
 import { getStorageBreadcrumbs } from './Storage'
 
 import { PVStatusChip } from './utils'
+import { ResourceList } from '../common/ResourceList.tsx'
+import {
+  PersistentvolumePersistentVolume,
+  PersistentvolumePersistentVolumeList,
+} from '../../../generated/kubernetes'
+import { getPersistentVolumesInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 
-export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+export const getBreadcrumbs = (
+  cluster?: Nullable<KubernetesClusterFragment>
+) => [
   ...getStorageBreadcrumbs(cluster),
   {
     label: 'persistent volumes',
@@ -32,7 +31,8 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-export const columnHelper = createColumnHelper<PersistentVolumeT>()
+export const columnHelper =
+  createColumnHelper<PersistentvolumePersistentVolume>()
 
 export const colStatus = columnHelper.accessor((pv) => pv.status, {
   id: 'status',
@@ -142,14 +142,11 @@ export default function PersistentVolumes() {
 
   return (
     <ResourceList<
-      PersistentVolumeListT,
-      PersistentVolumeT,
-      PersistentVolumesQuery,
-      PersistentVolumesQueryVariables
+      PersistentvolumePersistentVolumeList,
+      PersistentvolumePersistentVolume
     >
       columns={columns}
-      queryDocument={PersistentVolumesDocument}
-      queryName="handleGetPersistentVolumeList"
+      queryOptions={getPersistentVolumesInfiniteOptions}
       itemsKey="items"
     />
   )

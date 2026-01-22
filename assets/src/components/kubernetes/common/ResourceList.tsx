@@ -1,161 +1,161 @@
-import {
-  DocumentNode,
-  LazyQueryExecFunction,
-  useLazyQuery,
-} from '@apollo/client'
-import type { QueryHookOptions } from '@apollo/client/react/types/types'
 import { Table } from '@pluralsh/design-system'
+import {
+  InfiniteData,
+  QueryObserverResult,
+  RefetchOptions,
+  useInfiniteQuery,
+  UseInfiniteQueryOptions,
+} from '@tanstack/react-query'
 import { Row, SortingState, TableOptions } from '@tanstack/react-table'
 import {
   Dispatch,
   ReactElement,
   SetStateAction,
-  useCallback,
   useEffect,
   useMemo,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
   getCustomResourceDetailsAbsPath,
   getResourceDetailsAbsPath,
-} from '../../../routes/kubernetesRoutesConsts'
-import { useCluster } from '../Cluster'
+} from '../../../routes/kubernetesRoutesConsts.tsx'
+import { useCluster } from '../Cluster.tsx'
 
-import { useDataSelect } from './DataSelect'
-import { ErrorToast } from './errors'
+import { useDataSelect } from './DataSelect.tsx'
 import {
-  QueryName,
+  Error,
   Resource as ResourceT,
   ResourceList as ResourceListT,
   ResourceListItemsKey,
-  ResourceVariables,
   toKind,
-} from './types'
+} from './types.ts'
 
 import {
   DEFAULT_DATA_SELECT,
-  extendConnection,
-  usePageInfo,
+  ITEMS_PER_PAGE,
   useSortedTableOptions,
-} from './utils'
+} from './utils.tsx'
+import { ErrorToast } from './errors.tsx'
 
-interface ResourceListProps<
-  TResourceList,
-  TQuery,
-  TVariables extends ResourceVariables,
-> {
+interface ResourceListProps<TResourceList> {
   columns: Array<object>
   initialSort?: SortingState
-  queryDocument: DocumentNode
-  queryOptions?: QueryHookOptions<TQuery, TVariables>
-  queryName: QueryName<TQuery>
-  itemsKey: ResourceListItemsKey<TResourceList>
+  queryOptions: (
+    options: any
+  ) => UseInfiniteQueryOptions<
+    TResourceList,
+    any,
+    InfiniteData<TResourceList>,
+    any,
+    any
+  >
+  itemsKey?: ResourceListItemsKey<TResourceList>
   namespaced?: boolean
   customResource?: boolean
   disableOnRowClick?: boolean
   maxHeight?: string
   tableOptions?: Omit<TableOptions<any>, 'data' | 'columns' | 'getCoreRowModel'>
+  pathParams?: object
+  queryParams?: object
   setRefetch?: Dispatch<
-    SetStateAction<Dispatch<LazyQueryExecFunction<TQuery, TVariables>>>
+    SetStateAction<
+      Dispatch<
+        (
+          options?: RefetchOptions
+        ) => Promise<QueryObserverResult<InfiniteData<TResourceList>, unknown>>
+      >
+    >
   >
 }
 
 export function ResourceList<
   TResourceList extends ResourceListT,
   TResource extends ResourceT,
-  TQuery,
-  TVariables extends ResourceVariables,
 >({
   columns,
   initialSort,
-  queryDocument,
   queryOptions,
   namespaced = false,
   customResource = false,
-  queryName,
   itemsKey,
   disableOnRowClick,
   maxHeight,
   tableOptions,
-
+  pathParams,
+  queryParams,
   setRefetch,
-}: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement<any> {
+}: ResourceListProps<TResourceList>): ReactElement<any> {
   const navigate = useNavigate()
   const cluster = useCluster()
-  const { setNamespaced, namespace, filter } = useDataSelect()
+  const { filter, namespace, setNamespaced } = useDataSelect()
   const { sortBy, reactTableOptions } = useSortedTableOptions(initialSort, {
     meta: { cluster, ...tableOptions },
   })
 
-  const pollInterval = 30_000 // 30 seconds
-  const [fetch, { data, loading, fetchMore }] = useLazyQuery<
-    TQuery,
-    TVariables
-  >(queryDocument!, {
-    client: KubernetesClient(cluster?.id ?? ''),
-    fetchPolicy: 'cache-and-network',
-    variables: {
+  const options = queryOptions({
+    client: AxiosInstance(cluster?.id ?? ''),
+    path: { ...(namespaced ? { namespace } : undefined), ...pathParams },
+    query: {
       filterBy: `name,${filter}`,
-      sortBy,
-      ...(namespaced ? { namespace } : {}),
-      ...(queryOptions?.variables ?? {}),
+      sortBy: sortBy,
       ...DEFAULT_DATA_SELECT,
-    } as TVariables,
+      ...queryParams,
+    },
   })
 
-  const resourceList = data?.[queryName] as TResourceList
-  const isLoading = loading && !resourceList
-  const items = useMemo(
-    () => (resourceList?.[itemsKey] as Array<TResource>) ?? [],
-    [itemsKey, resourceList]
-  )
-  const { page, hasNextPage } = usePageInfo(items, resourceList?.listMeta)
-
-  const fetchNextPage = useCallback(() => {
-    if (!hasNextPage) return
-    fetchMore({
-      variables: { page: page + 1 },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(prev, fetchMoreResult, queryName, itemsKey),
+  const { data, isLoading, isFetching, hasNextPage, fetchNextPage, refetch } =
+    useInfiniteQuery<TResourceList>({
+      ...options,
+      queryKey: [...options.queryKey, 'clusterId ', cluster?.id], // Add clusterId to queryKey to refetch when cluster changes
+      initialPageParam: DEFAULT_DATA_SELECT.page,
+      getNextPageParam: (lastPage, allPages) => {
+        const pages = allPages.length
+        const totalItems = lastPage.listMeta?.totalItems ?? 0
+        const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE)
+        return pages < totalPages ? pages + 1 : undefined
+      },
+      refetchInterval: 30_000,
     })
-  }, [fetchMore, hasNextPage, page, queryName, itemsKey])
+
+  const { items, errors } = useMemo(
+    () => ({
+      items:
+        data?.pages.flatMap((value) =>
+          itemsKey ? (value?.[itemsKey] as Array<TResource>) : []
+        ) ?? [],
+      errors: (data?.pages.flatMap((value) => value?.errors ?? []) ??
+        []) as Array<Error>,
+    }),
+    [data?.pages, itemsKey]
+  )
 
   useEffect(() => {
-    setRefetch?.(() => fetch)
+    setRefetch?.(() => refetch)
     setNamespaced(namespaced)
-  }, [fetch, namespaced, setNamespaced, setRefetch])
-
-  useEffect(() => {
-    // Initial fetch when component mounts
-    fetch()
-
-    // Set up polling to refetch data every pollInterval milliseconds
-    const interval = setInterval(() => fetch({ context: {} }), pollInterval)
-    return () => clearInterval(interval)
-  }, [fetch])
+  }, [namespaced, setNamespaced, refetch, setRefetch])
 
   return (
     <>
-      <ErrorToast errors={resourceList?.errors} />
+      <ErrorToast errors={errors} />
       <Table
         fullHeightWrap
         data={items}
         columns={columns}
-        loading={isLoading}
+        loading={isLoading && items.length === 0}
         hasNextPage={hasNextPage}
         fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
+        isFetchingNextPage={isFetching}
         reactTableOptions={{
           ...reactTableOptions,
           ...{
-            meta: { ...reactTableOptions.meta, refetch: fetch, customResource },
+            meta: { ...reactTableOptions.meta, customResource, refetch },
           },
         }}
         virtualizeRows
         onRowClick={
-          disableOnRowClick || loading
+          disableOnRowClick || isLoading
             ? undefined
             : (_, row: Row<ResourceT>) => {
                 navigate(

@@ -16,7 +16,7 @@ import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { useCluster } from '../Cluster'
-import { Maybe } from '../../../generated/graphql-kubernetes'
+import { Maybe } from 'generated/graphql-plural'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getBaseBreadcrumbs } from '../common/utils'
 

@@ -9,7 +9,6 @@ import {
   PinnedCustomResourceFragment,
   useUnpinCustomResourceMutation,
 } from '../../../generated/graphql'
-import { Maybe } from '../../../generated/graphql-kubernetes'
 import { useRefetch } from '../Cluster'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { Kind } from '../common/types'
@@ -34,7 +33,7 @@ export default function PinnedCustomResourceDefinitions({
   pinnedResources,
 }: {
   cluster?: KubernetesClusterFragment
-  pinnedResources: Maybe<PinnedCustomResourceFragment>[]
+  pinnedResources: Nullable<PinnedCustomResourceFragment>[]
 }) {
   const theme = useTheme()
   const navigate = useNavigate()

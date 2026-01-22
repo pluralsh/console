@@ -2,9 +2,9 @@ import { ReactElement } from 'react'
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { V1_PolicyRule as PolicyRuleT } from '../../../generated/graphql-kubernetes'
+import { V1PolicyRule } from 'generated/kubernetes'
 
-const columnHelper = createColumnHelper<PolicyRuleT>()
+const columnHelper = createColumnHelper<V1PolicyRule>()
 
 const columns = [
   columnHelper.accessor((rule) => rule?.resources, {
@@ -41,7 +41,7 @@ const columns = [
 export default function PolicyRules({
   rules,
 }: {
-  rules: Nullable<Array<Nullable<PolicyRuleT>>>
+  rules: Nullable<Array<Nullable<V1PolicyRule>>>
 }): ReactElement<any> {
   return (
     <Table

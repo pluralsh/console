@@ -29,7 +29,7 @@ export function ShareSecretProvider({ children }): ReactElement<any> {
   )
 
   return (
-    <ShareSecretContext.Provider value={context}>
+    <ShareSecretContext value={context}>
       {children}
       <ModalMountTransition open={open}>
         <ShareSecretModal
@@ -37,7 +37,7 @@ export function ShareSecretProvider({ children }): ReactElement<any> {
           setOpen={setOpen}
         />
       </ModalMountTransition>
-    </ShareSecretContext.Provider>
+    </ShareSecretContext>
   )
 }
 

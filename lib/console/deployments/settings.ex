@@ -13,6 +13,7 @@ defmodule Console.Deployments.Settings do
   @kube_vsn File.read!("KUBE_VERSION") |> String.trim()
 
   @cache_adapter Console.conf(:cache_adapter)
+  @local_adapter Console.conf(:local_cache)
   @ttl :timer.minutes(45)
 
   @type settings_resp :: {:ok, DeploymentSettings.t} | Console.error
@@ -48,6 +49,12 @@ defmodule Console.Deployments.Settings do
   """
   @spec cached() :: DeploymentSettings.t | nil
   def cached(), do: Console.Cache.process_cache(:settings, &fetch/0)
+
+  @doc """
+  same as `fetch_consistent/0` but caches in a node-local ets table
+  """
+  @decorate cacheable(cache: @local_adapter, key: :deployment_settings_local, opts: [ttl: :timer.minutes(10)])
+  def local_cached(), do: fetch_consistent()
 
   @doc """
   Fetches and caches the global deployment settings object, preloads also fetched along the way

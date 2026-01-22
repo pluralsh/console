@@ -1,5 +1,4 @@
 import { Home } from 'components/home/Home'
-import { AccessTokens } from 'components/profile/AccessTokens'
 import { EmailSettings } from 'components/profile/EmailSettings'
 import MyProfile from 'components/profile/MyProfile'
 import { Groups } from 'components/profile/Groups'
@@ -19,6 +18,7 @@ import { securityRoutes } from './securityRoutes'
 import { selfServiceRoutes } from './selfServiceRoutes'
 import { settingsRoutes } from './settingsRoutes'
 import { stacksRoutes } from './stacksRoutes'
+import { AccessTokens } from 'components/profile/access-tokens/AccessTokens.tsx'
 
 const profileRoutes = [
   <Route
