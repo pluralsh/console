@@ -43,8 +43,9 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   },
 
   [`& .${treeItemClasses.iconContainer}`]: {
-    marginRight: 0,
-    width: 'auto',
+    marginRight: '2px',
+    width: '14px',
+    minWidth: '14px',
 
     '& svg': {
       fontSize: '14px',
@@ -55,6 +56,7 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     padding: 0,
+    paddingLeft: '2px',
   },
 
   [`& .${treeItemClasses.groupTransition}`]: {
