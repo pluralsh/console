@@ -116,18 +116,18 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 		NetworkConfig:            schemas.DefaultNetworkConfig,
 		ConcurrencyAndBufferSize: schemas.DefaultConcurrencyAndBufferSize,
 	}
+	config.NetworkConfig.DefaultRequestTimeoutInSeconds = 300 // 5 minutes
 
 	switch provider {
 	case schemas.OpenAI:
 		if cfg := aiConfig.GetOpenai(); cfg != nil && cfg.GetBaseUrl() != "" {
 			config.NetworkConfig.BaseURL = cfg.GetBaseUrl()
-			config.NetworkConfig.DefaultRequestTimeoutInSeconds = 300 // 5 minutes
+
 		}
 
 	case schemas.Anthropic:
 		if cfg := aiConfig.GetAnthropic(); cfg != nil && cfg.GetBaseUrl() != "" {
 			config.NetworkConfig.BaseURL = cfg.GetBaseUrl()
-			config.NetworkConfig.DefaultRequestTimeoutInSeconds = 300 // 5 minutes
 		}
 	}
 
