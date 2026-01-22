@@ -43,7 +43,6 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   },
 
   [`& .${treeItemClasses.iconContainer}`]: {
-    marginRight: '2px',
     width: '14px',
     minWidth: '14px',
 
@@ -56,7 +55,6 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     display: 'flex',
     alignItems: 'center',
     padding: 0,
-    paddingLeft: '2px',
   },
 
   [`& .${treeItemClasses.groupTransition}`]: {
@@ -202,6 +200,7 @@ export function ComponentsFilesView() {
 
     return data?.serviceTarball && treeNodes.length > 0 ? (
       <StyledTreeView
+        itemChildrenIndentation={12}
         onItemSelectionToggle={(_event, itemId, isSelected) => {
           if (isSelected) {
             // Find the node in the tree
