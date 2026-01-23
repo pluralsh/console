@@ -13,12 +13,8 @@ import { ReactNode, useMemo, useState } from 'react'
 import { formatLocalizedDateTime } from 'utils/datetime'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
-import {
-  Types_ListMeta as ListMetaT,
-  Maybe,
-  Types_ObjectMeta as ObjectMetaT,
-  Types_TypeMeta as TypeMetaT,
-} from '../../../generated/graphql-kubernetes'
+import { Maybe } from 'generated/graphql-plural'
+
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
@@ -26,18 +22,23 @@ import Annotations from './Annotations'
 import DeleteResourceButton from './DeleteResource'
 import ResourceLink from './ResourceLink'
 import { Kind, Resource } from './types'
+import {
+  TypesListMeta,
+  TypesObjectMeta,
+  TypesTypeMeta,
+} from 'generated/kubernetes'
 
 export const ITEMS_PER_PAGE = 25
 
 export const DEFAULT_DATA_SELECT = {
-  itemsPerPage: `${ITEMS_PER_PAGE}`,
+  itemsPerPage: ITEMS_PER_PAGE,
   page: '1',
 }
 
 export function useDefaultColumns<
-  T extends { objectMeta: ObjectMetaT; typeMeta: TypeMetaT } = {
-    objectMeta: ObjectMetaT
-    typeMeta: TypeMetaT
+  T extends { objectMeta: TypesObjectMeta; typeMeta: TypesTypeMeta } = {
+    objectMeta: TypesObjectMeta
+    typeMeta: TypesTypeMeta
   },
 >(columnHelper: ColumnHelper<T>) {
   return useMemo(
@@ -73,7 +74,7 @@ export function useDefaultColumns<
         },
       }),
       colCreationTimestamp: columnHelper.accessor(
-        (r) => r?.objectMeta.creationTimestamp,
+        (r) => r?.objectMeta.creationTimestamp?.Time,
         {
           id: 'creationTimestamp',
           header: 'Creation',
@@ -125,7 +126,7 @@ export function ResourceReadyChip({
   )
 }
 
-export function usePageInfo(items: any[], listMeta: ListMetaT | undefined) {
+export function usePageInfo(items: any[], listMeta: TypesListMeta | undefined) {
   const totalItems = listMeta?.totalItems ?? 0
   const pages = Math.ceil(totalItems / ITEMS_PER_PAGE)
   const page = Math.ceil(items.length / ITEMS_PER_PAGE)
@@ -248,7 +249,7 @@ export function MetadataSidecar({
           )}
           <SidecarItem heading="UID">{objectMeta.uid}</SidecarItem>
           <SidecarItem heading="Creation date">
-            {formatLocalizedDateTime(objectMeta.creationTimestamp)}
+            {formatLocalizedDateTime(objectMeta.creationTimestamp?.Time)}
           </SidecarItem>
           <SidecarItem heading="Labels">
             <ChipList

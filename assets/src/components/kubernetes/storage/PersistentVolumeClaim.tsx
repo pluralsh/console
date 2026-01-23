@@ -5,14 +5,12 @@ import {
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { MetadataSidecar } from '../common/utils'
-import {
-  SecretQueryVariables,
-  usePersistentVolumeClaimQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { getPersistentVolumeClaimOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
   getResourceDetailsAbsPath,
@@ -20,6 +18,7 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 import ResourceLink from '../common/ResourceLink'
@@ -31,18 +30,18 @@ const directory: Array<TabEntry> = [{ path: '', label: 'Raw' }] as const
 
 export default function PersistentVolumeClaim(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
-  const { data, loading } = usePersistentVolumeClaimQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as SecretQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: pvc,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getPersistentVolumeClaimOptions({
+      client: AxiosInstance(clusterId),
+      path: { name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const pvc = data?.handleGetPersistentVolumeClaimDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -68,7 +67,13 @@ export default function PersistentVolumeClaim(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails

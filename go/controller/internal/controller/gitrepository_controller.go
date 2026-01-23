@@ -178,8 +178,9 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("scm connection is not ready")
 		}
 
-		if err := utils.TryAddOwnerRef(ctx, r.Client, repo, connection, r.Scheme); err != nil {
-			return nil, nil, err
+		// for backward compatibility, remove owner ref from connection
+		if err := utils.TryRemoveOwnerRef(ctx, r.Client, repo, connection, r.Scheme); err != nil {
+			log.FromContext(ctx).V(9).Info(fmt.Sprintf("failed to remove owner ref from scm connection: %v", err))
 		}
 		attrs.ConnectionID = connection.Status.ID
 	}

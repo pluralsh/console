@@ -1,15 +1,13 @@
 import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
 import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
-import {
-  ClusterRoleBindingQueryVariables,
-  Clusterrolebinding_ClusterRoleBindingDetail as ClusterRoleBindingT,
-  useClusterRoleBindingQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { getClusterRoleBindingOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { useCluster } from '../Cluster'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import Subjects from '../common/Subjects'
@@ -18,6 +16,7 @@ import { MetadataSidecar } from '../common/utils'
 
 import { useTheme } from 'styled-components'
 import { getBreadcrumbs } from './ClusterRoleBindings'
+import { ClusterrolebindingClusterRoleBindingDetail } from 'generated/kubernetes/types.gen.ts'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Subjects' },
@@ -27,17 +26,18 @@ const directory: Array<TabEntry> = [
 export default function ClusterRoleBinding() {
   const theme = useTheme()
   const cluster = useCluster()
-  const { clusterId, name = '' } = useParams()
-  const { data, loading } = useClusterRoleBindingQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-    } as ClusterRoleBindingQueryVariables,
+  const { clusterId = '', name = '' } = useParams()
+  const {
+    data: crb,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getClusterRoleBindingOptions({
+      client: AxiosInstance(clusterId),
+      path: { name },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const crb = data?.handleGetClusterRoleBindingDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -56,7 +56,13 @@ export default function ClusterRoleBinding() {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails
@@ -85,7 +91,7 @@ export default function ClusterRoleBinding() {
 
 // TODO: Add links.
 export function ClusterRoleBindingSubjects(): ReactElement<any> {
-  const crb = useOutletContext() as ClusterRoleBindingT
+  const crb = useOutletContext() as ClusterrolebindingClusterRoleBindingDetail
 
   return <Subjects subjects={crb?.subjects} />
 }

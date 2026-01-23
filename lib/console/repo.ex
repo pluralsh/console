@@ -1,9 +1,26 @@
+defmodule Console.Paginator do
+  import Ecto.Query
+
+  def paginate(query, opts \\ []) do
+    limit = opts[:limit] || 20
+    offset = opts[:offset] || 0
+
+    from(q in query, limit: ^limit, offset: ^offset)
+  end
+end
+
+
 defmodule Console.Repo do
   use Ecto.Repo,
     otp_app: :console,
     adapter: Ecto.Adapters.Postgres
 
   use Bourne
+
+  def paginate(query, opts) do
+    Console.Paginator.paginate(query, opts)
+    |> all()
+  end
 
   def locked(%mod{id: id}) do
     mod.with_lock()

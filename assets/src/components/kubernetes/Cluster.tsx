@@ -1,10 +1,11 @@
+import { EmptyState } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 import { createContext, useContext, useEffect, useMemo } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { useTheme } from 'styled-components'
 
-import { EmptyState } from '@pluralsh/design-system'
+import { useQuery } from '@tanstack/react-query'
 
 import {
   KubernetesClusterFragment,
@@ -12,15 +13,17 @@ import {
   PinnedCustomResourceFragment,
   useKubernetesClustersQuery,
 } from '../../generated/graphql'
-import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../helpers/kubernetes.client'
+import { getNamespacesOptions } from '../../generated/kubernetes/@tanstack/react-query.gen'
+
+import { AxiosInstance } from '../../helpers/axios'
+
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { GqlError } from '../utils/Alert'
 import LoadingIndicator from '../utils/LoadingIndicator'
+import { DataSelectProvider } from './common/DataSelect'
 
 import { LAST_SELECTED_CLUSTER_KEY } from './Navigation'
-import { DataSelectProvider } from './common/DataSelect'
 
 type ClusterContextT = {
   clusters: KubernetesClusterFragment[]
@@ -116,17 +119,18 @@ export default function Cluster() {
     data: namespacesData,
     error: namespacesError,
     refetch: refetchNamespaces,
-  } = useNamespacesQuery({
-    client: KubernetesClient(clusterId!),
-    skip: !clusterId,
+  } = useQuery({
+    ...getNamespacesOptions({ client: AxiosInstance(clusterId!) }),
+    enabled: !!clusterId,
+    refetchInterval: 30_000,
   })
 
   const namespaces = useMemo(
     () =>
-      (namespacesData?.handleGetNamespaces?.namespaces ?? [])
+      (namespacesData?.namespaces ?? [])
         .map((namespace) => namespace?.objectMeta?.name)
         .filter((namespace): namespace is string => !isEmpty(namespace)),
-    [namespacesData?.handleGetNamespaces?.namespaces]
+    [namespacesData?.namespaces]
   )
 
   const context = useMemo(

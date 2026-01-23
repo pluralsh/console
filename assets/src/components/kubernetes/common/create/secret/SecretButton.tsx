@@ -1,20 +1,22 @@
-import { LazyQueryExecFunction } from '@apollo/client'
 import { Button, Toast } from '@pluralsh/design-system'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition.tsx'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
 import { useTheme } from 'styled-components'
-import {
-  SecretsQuery,
-  SecretsQueryVariables,
-} from '../../../../../generated/graphql-kubernetes.ts'
-import { Kind } from '../../types.ts'
+import { Kind, ResourceList } from '../../types.ts'
 import { CreateSecretModal } from './SecretModal.tsx'
+import {
+  InfiniteData,
+  QueryObserverResult,
+  RefetchOptions,
+} from '@tanstack/react-query'
 
 interface CreateSecretButtonProps {
   text: string
-  refetch: LazyQueryExecFunction<SecretsQuery, SecretsQueryVariables>
+  refetch: (
+    options?: RefetchOptions
+  ) => Promise<QueryObserverResult<InfiniteData<ResourceList>, unknown>>
 }
 
 export function CreateSecretButton({ text, refetch }: CreateSecretButtonProps) {

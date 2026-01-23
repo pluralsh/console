@@ -4,23 +4,21 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
-import {
-  Maybe,
-  Storageclass_StorageClass as StorageClassT,
-  Storageclass_StorageClassList as StorageClassListT,
-  StorageClassesDocument,
-  StorageClassesQuery,
-  StorageClassesQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+import { Maybe } from 'generated/graphql-plural'
 import {
   getStorageAbsPath,
   STORAGE_CLASSES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
 
 import { getStorageBreadcrumbs } from './Storage'
+import { ResourceList } from '../common/ResourceList.tsx'
+import {
+  StorageclassStorageClass,
+  StorageclassStorageClassList,
+} from '../../../generated/kubernetes'
+import { getStorageClassesInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getStorageBreadcrumbs(cluster),
@@ -30,7 +28,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<StorageClassT>()
+const columnHelper = createColumnHelper<StorageclassStorageClass>()
 
 const colProvisioner = columnHelper.accessor(
   (storageClass) => storageClass.provisioner,
@@ -78,15 +76,9 @@ export default function StorageClasses() {
   )
 
   return (
-    <ResourceList<
-      StorageClassListT,
-      StorageClassT,
-      StorageClassesQuery,
-      StorageClassesQueryVariables
-    >
+    <ResourceList<StorageclassStorageClassList, StorageclassStorageClass>
       columns={columns}
-      queryDocument={StorageClassesDocument}
-      queryName="handleGetStorageClassList"
+      queryOptions={getStorageClassesInfiniteOptions}
       itemsKey="items"
     />
   )

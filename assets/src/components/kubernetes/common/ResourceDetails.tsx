@@ -3,6 +3,7 @@ import { SubTab, TabList } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { useMatch, useParams, useResolvedPath } from 'react-router-dom'
 import pluralize from 'pluralize'
+import { useQuery } from '@tanstack/react-query'
 
 import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
 import { LinkTabWrap } from '../../utils/Tabs'
@@ -11,14 +12,13 @@ import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpace
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
 import { PageHeaderContext } from '../../cd/ContinuousDeployment'
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts.tsx'
-import {
-  NamespacedResourceQueryVariables,
-  ResourceQueryVariables,
-  useNamespacedResourceQuery,
-  useResourceQuery,
-} from '../../../generated/graphql-kubernetes.ts'
-import { KubernetesClient } from '../../../helpers/kubernetes.client.ts'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 import { useExplainWithAI } from '../../ai/AIContext.tsx'
+import { GqlError } from '../../utils/Alert'
+import {
+  getNamespacedResourceOptions,
+  getResourceOptions,
+} from 'generated/kubernetes/@tanstack/react-query.gen.ts'
 
 export interface TabEntry {
   label: string
@@ -46,33 +46,46 @@ export default function ResourceDetails({
   const currentTab = tabs.find(({ path }) => path === (tab ?? ''))
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
-  const { clusterId, name, namespace, crd } = useParams()
+  const { clusterId, name = '', namespace, crd } = useParams()
   const kindPathMatch = useMatch(`${getKubernetesAbsPath(clusterId)}/:kind/*`)
   const kind = useMemo(
     () => crd ?? pluralize(kindPathMatch?.params?.kind || '', 1),
     [crd, kindPathMatch?.params?.kind]
   )
 
-  const resourceQuery = useMemo(
-    () => (namespace ? useNamespacedResourceQuery : useResourceQuery),
-    [namespace]
-  )
-
-  const { data } = resourceQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId || kind === 'secret',
-    fetchPolicy: 'no-cache',
-    variables: { kind, name, namespace } as ResourceQueryVariables &
-      NamespacedResourceQueryVariables,
+  const namespacedQuery = useQuery({
+    ...getNamespacedResourceOptions({
+      client: AxiosInstance(clusterId ?? ''),
+      path: { kind, name, namespace: namespace! },
+    }),
+    enabled: !!clusterId && !!namespace && kind !== 'secret',
+    gcTime: 0,
+    refetchInterval: 30_000,
   })
 
+  const clusterQuery = useQuery({
+    ...getResourceOptions({
+      client: AxiosInstance(clusterId ?? ''),
+      path: { kind, name },
+    }),
+    enabled: !!clusterId && !namespace && kind !== 'secret',
+    gcTime: 0,
+    refetchInterval: 30_000,
+  })
+
+  const { data, error } = namespace ? namespacedQuery : clusterQuery
+
   const prompt = useMemo(() => {
-    return data?.handleGetResource?.Object
-      ? `Describe the following Kubernetes ${kind} resource: ${JSON.stringify(data?.handleGetResource?.Object)}`
+    return data?.Object
+      ? `Describe the following Kubernetes ${kind} resource: ${JSON.stringify(data?.Object)}`
       : undefined
-  }, [data?.handleGetResource?.Object, kind])
+  }, [data?.Object, kind])
 
   useExplainWithAI(prompt)
+
+  if (error) {
+    return <GqlError error={error} />
+  }
 
   return (
     <ResponsiveLayoutPage

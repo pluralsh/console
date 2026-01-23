@@ -20,10 +20,10 @@ from utils import (
 app_name = "gpu-operator"
 filepath = f"../../static/compatibilities/{app_name}.yaml"
 
-def get_gpu_images(version):
+def get_gpu_images(version, values=None):
     url = "https://nvidia.github.io/gpu-operator"
     # Base images from default template
-    images = set(get_chart_images(url, app_name, version) or [])
+    images = set(get_chart_images(url, app_name, version, values) or [])
 
 
     # Keep only items that ARE valid docker images (contain both repository and tag separators)
@@ -37,6 +37,10 @@ def scrape():
     gpu_releases = list(reversed(list(get_github_releases_timestamps("NVIDIA", app_name))))
     chart_versions = get_chart_versions(app_name)
     versions = []
+
+    data = read_yaml(filepath)
+    helm_values = data.get("helm_values") if data else None
+
 
     pruned_releases = [(r.lstrip("v"), ts) for r, ts in gpu_releases if "-" not in r]
     for idx, gpu_release in enumerate(pruned_releases):
@@ -57,7 +61,7 @@ def scrape():
             ),
             "requirements": [],
             "chart_version": chart_version,
-            "images": get_gpu_images(chart_version),
+            "images": get_gpu_images(chart_version, helm_values),
             "incompatibilities": [],
         }
 

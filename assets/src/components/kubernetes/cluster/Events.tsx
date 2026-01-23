@@ -1,16 +1,13 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
 
 import {
-  Common_Event as EventT,
-  Common_EventList as EventListT,
-  EventsDocument,
-  EventsQuery,
-  EventsQueryVariables,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+  CommonEvent as EventT,
+  CommonEventList as EventListT,
+} from '../../../generated/kubernetes'
+import { getEventsInfiniteOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen'
 import {
   EVENTS_REL_PATH,
   getClusterAbsPath,
@@ -95,13 +92,13 @@ const colCount = columnHelper.accessor((event) => event.count, {
   cell: ({ getValue }) => getValue(),
 })
 
-const colFirstSeen = columnHelper.accessor((event) => event.firstSeen, {
+const colFirstSeen = columnHelper.accessor((event) => event.firstSeen.Time, {
   id: 'firstSeen',
   header: 'First seen',
   cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
 })
 
-const colLastSeen = columnHelper.accessor((event) => event.lastSeen, {
+const colLastSeen = columnHelper.accessor((event) => event.lastSeen.Time, {
   id: 'lastSeen',
   header: 'Last seen',
   cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
@@ -131,11 +128,10 @@ export default function Events() {
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <ResourceList<EventListT, EventT, EventsQuery, EventsQueryVariables>
+    <ResourceList<EventListT, EventT>
       namespaced
       columns={columns}
-      queryDocument={EventsDocument}
-      queryName="handleGetEventList"
+      queryOptions={getEventsInfiniteOptions}
       itemsKey="events"
       disableOnRowClick
     />

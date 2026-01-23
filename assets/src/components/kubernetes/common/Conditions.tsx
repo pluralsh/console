@@ -1,15 +1,12 @@
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import {
-  Common_Condition as ConditionT,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+import { CommonCondition } from 'generated/kubernetes'
 
-const columnHelper = createColumnHelper<ConditionT>()
+const columnHelper = createColumnHelper<CommonCondition>()
 
 interface ConditionsProps {
-  conditions: Array<Maybe<ConditionT>>
+  conditions: Array<CommonCondition>
   maxHeight?: string
 }
 

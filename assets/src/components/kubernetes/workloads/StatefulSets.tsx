@@ -3,25 +3,27 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 
-import {
-  Maybe,
-  Statefulset_StatefulSet as StatefulSetT,
-  Statefulset_StatefulSetList as StatefulSetListT,
-  StatefulSetsDocument,
-  StatefulSetsQuery,
-  StatefulSetsQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+import { Maybe } from 'generated/graphql-plural'
 import {
   getWorkloadsAbsPath,
   STATEFUL_SETS_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 import { UsageText } from '../../cluster/TableElements'
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
+import {
+  StatefulsetStatefulSet,
+  StatefulsetStatefulSetList,
+} from '../../../generated/kubernetes'
+import {
+  getAllStatefulSetsInfiniteOptions,
+  getStatefulSetsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
+import { ResourceList } from '../common/ResourceList.tsx'
+import { useDataSelect } from '../common/DataSelect.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -31,7 +33,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<StatefulSetT>()
+const columnHelper = createColumnHelper<StatefulsetStatefulSet>()
 
 const colImages = columnHelper.accessor((ss) => ss, {
   id: 'images',
@@ -69,6 +71,7 @@ const colStatus = columnHelper.accessor((ss) => ss.podInfo, {
 
 export default function StatefulSets() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -89,16 +92,14 @@ export default function StatefulSets() {
   )
 
   return (
-    <ResourceList<
-      StatefulSetListT,
-      StatefulSetT,
-      StatefulSetsQuery,
-      StatefulSetsQueryVariables
-    >
+    <ResourceList<StatefulsetStatefulSetList, StatefulsetStatefulSet>
       namespaced
       columns={columns}
-      queryDocument={StatefulSetsDocument}
-      queryName="handleGetStatefulSetList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getStatefulSetsInfiniteOptions
+          : getAllStatefulSetsInfiniteOptions
+      }
       itemsKey="statefulSets"
     />
   )

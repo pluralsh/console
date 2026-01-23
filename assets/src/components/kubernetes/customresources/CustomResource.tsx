@@ -1,22 +1,18 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
-import {
-  Common_Event as EventT,
-  Common_EventList as EventListT,
-  CustomResourceEventsDocument,
-  CustomResourceEventsQuery,
-  CustomResourceEventsQueryVariables,
-  CustomResourceQueryVariables,
-  useCustomResourceQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
+
+import { CommonEvent, CommonEventList } from '../../../generated/kubernetes'
+
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { ResourceList } from '../common/ResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 
 import { Kind } from '../common/types'
 
@@ -24,6 +20,10 @@ import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
+import {
+  getCustomResourceObjectEventsInfiniteOptions,
+  getCustomResourceObjectOptions,
+} from 'generated/kubernetes/@tanstack/react-query.gen.ts'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Raw' },
@@ -32,15 +32,18 @@ const directory: Array<TabEntry> = [
 
 export default function CustomResource(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace, crd = '' } = useParams()
-  const { data, loading } = useCustomResourceQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: { name, namespace, crd } as CustomResourceQueryVariables,
+  const { clusterId = '', name = '', namespace = '', crd = '' } = useParams()
+  const {
+    data: cr,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getCustomResourceObjectOptions({
+      client: AxiosInstance(clusterId),
+      path: { object: name, namespace, crd },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const cr = data?.handleGetCustomResourceObjectDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -72,7 +75,13 @@ export default function CustomResource(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails
@@ -85,27 +94,19 @@ export default function CustomResource(): ReactElement<any> {
 }
 
 export function CustomResourceEvents(): ReactElement<any> {
-  const { name, namespace, crd } = useParams()
+  const { name = '', namespace, crd = '' } = useParams()
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<
-      EventListT,
-      EventT,
-      CustomResourceEventsQuery,
-      CustomResourceEventsQueryVariables
-    >
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
-      queryDocument={CustomResourceEventsDocument}
-      queryOptions={{
-        variables: {
-          name,
-          namespace,
-          crd,
-        } as CustomResourceEventsQueryVariables,
+      queryOptions={getCustomResourceObjectEventsInfiniteOptions}
+      pathParams={{
+        object: name,
+        namespace,
+        crd,
       }}
-      queryName="handleGetCustomResourceObjectEvents"
       itemsKey="events"
       disableOnRowClick
     />

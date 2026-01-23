@@ -2,6 +2,7 @@ icon: https://raw.githubusercontent.com/pluralsh/plural-artifacts/main/nvidia-op
 git_url: https://github.com/NVIDIA/gpu-operator
 release_url: https://github.com/NVIDIA/gpu-operator/releases/tag/{vsn}
 helm_repository_url: https://nvidia.github.io/gpu-operator
+helm_values: dcgmExporter.config.name=default
 readme_url: https://github.com/NVIDIA/gpu-operator/blob/main/README.md
 versions:
 - version: 25.10.1

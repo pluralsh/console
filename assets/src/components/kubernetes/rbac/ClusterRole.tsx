@@ -1,15 +1,14 @@
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import {
-  ClusterRoleQueryVariables,
-  useClusterRoleQuery,
-} from '../../../generated/graphql-kubernetes'
+import { getClusterRoleOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import { MetadataSidecar } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
@@ -23,17 +22,18 @@ const directory: Array<TabEntry> = [
 
 export default function ClusterRole(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '' } = useParams()
-  const { data, loading } = useClusterRoleQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-    } as ClusterRoleQueryVariables,
+  const { clusterId = '', name = '' } = useParams()
+  const {
+    data: cr,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getClusterRoleOptions({
+      client: AxiosInstance(clusterId),
+      path: { name },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const cr = data?.handleGetClusterRoleDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -49,7 +49,13 @@ export default function ClusterRole(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails

@@ -1,16 +1,9 @@
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 
-import {
-  Deployment_Deployment as DeploymentT,
-  Deployment_DeploymentList as DeploymentListT,
-  DeploymentsDocument,
-  DeploymentsQuery,
-  DeploymentsQueryVariables,
-  Maybe,
-} from '../../../generated/graphql-kubernetes'
+import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
+
 import {
   DEPLOYMENTS_REL_PATH,
   getWorkloadsAbsPath,
@@ -18,11 +11,21 @@ import {
 import { UsageText } from '../../cluster/TableElements'
 
 import { useCluster } from '../Cluster'
-import { ResourceList } from '../common/ResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { useDefaultColumns } from '../common/utils'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
+import {
+  getAllDeploymentsInfiniteOptions,
+  getDeploymentsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
+
+import { useDataSelect } from '../common/DataSelect.tsx'
+import {
+  DeploymentDeployment,
+  DeploymentDeploymentList,
+} from '../../../generated/kubernetes'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -32,7 +35,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<DeploymentT>()
+const columnHelper = createColumnHelper<DeploymentDeployment>()
 
 const colImages = columnHelper.accessor((deployment) => deployment, {
   id: 'images',
@@ -70,6 +73,7 @@ const colStatus = columnHelper.accessor((deployment) => deployment.pods, {
 
 export default function Deployments() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -90,16 +94,14 @@ export default function Deployments() {
   )
 
   return (
-    <ResourceList<
-      DeploymentListT,
-      DeploymentT,
-      DeploymentsQuery,
-      DeploymentsQueryVariables
-    >
+    <ResourceList<DeploymentDeploymentList, DeploymentDeployment>
       namespaced
       columns={columns}
-      queryDocument={DeploymentsDocument}
-      queryName="handleGetDeployments"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getDeploymentsInfiniteOptions
+          : getAllDeploymentsInfiniteOptions
+      }
       itemsKey="deployments"
     />
   )

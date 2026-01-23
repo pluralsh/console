@@ -29,6 +29,18 @@ defmodule ConsoleWeb.ConnCase do
 
       # The default endpoint for testing
       @endpoint ConsoleWeb.Endpoint
+
+      def json_post(conn, path, body) do
+        conn
+        |> put_req_header("content-type", "application/json")
+        |> post(path, JSON.encode!(body))
+      end
+
+      def json_put(conn, path, body) do
+        conn
+        |> put_req_header("content-type", "application/json")
+        |> put(path, JSON.encode!(body))
+      end
     end
   end
 
@@ -48,4 +60,8 @@ defmodule ConsoleWeb.ConnCase do
     do: put_req_header(conn, "authorization", "Token #{token}")
   def add_auth_headers(conn, %BootstrapToken{token: token}),
     do: put_req_header(conn, "authorization", "Token #{token}")
+
+  def valid_response(conn, status) do
+    Oaskit.Test.valid_response(Console.OpenAPI, conn, status)
+  end
 end

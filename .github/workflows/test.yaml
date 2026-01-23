@@ -176,9 +176,11 @@ jobs:
         run: mix deps.get
       - name: update schema
         run: MIX_ENV=test mix absinthe.schema.sdl --schema Console.GraphQl  schema/schema.graphql
+      - name: update openapi schema
+        run: MIX_ENV=test mix openapi.dump Console.OpenAPI --pretty -o schema/openapi.json
       - name: Verify Changed files
         run: |
-          git diff --exit-code -- schema/schema.graphql || {
+          git diff --exit-code -- schema || {
             echo "::error Schema has changed changed. Please run 'make update-schema' and commit the changes."
             exit 1
           }

@@ -12,13 +12,13 @@ import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import {
-  SecretQueryVariables,
-  Secret_SecretDetail as SecretT,
-  useSecretQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { SecretSecretDetail } from '../../../generated/kubernetes'
+import { getSecretOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
+
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
@@ -42,19 +42,18 @@ const directory: Array<TabEntry> = [
 
 export default function Secret(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
-  const { data, loading } = useSecretQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    fetchPolicy: 'cache-and-network',
-    variables: {
-      name,
-      namespace,
-    } as SecretQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: secret,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getSecretOptions({
+      client: AxiosInstance(clusterId),
+      path: { name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const secret = data?.handleGetSecretDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -80,7 +79,9 @@ export default function Secret(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (isLoading) return <LoadingIndicator />
+
+  if (error) return <GqlError error={error} />
 
   return (
     <ResourceDetails
@@ -98,20 +99,22 @@ export default function Secret(): ReactElement<any> {
 
 type SecretDataEntry = {
   key: string
-  value: any
+  value: string
 }
 
 function SecretDataValue({
   value,
   forceReveal,
 }: {
-  value: any
+  value: string
   forceReveal: boolean
 }) {
   const theme = useTheme()
-  const [reveal, setReveal] = useState(false)
+  const [reveal, setReveal] = useState(forceReveal)
 
-  useEffect(() => setReveal(forceReveal), [setReveal, forceReveal])
+  useEffect(() => {
+    setReveal(forceReveal)
+  }, [forceReveal])
 
   return (
     <div
@@ -162,7 +165,7 @@ const columns = [
 ]
 
 export function SecretData(): ReactElement<any> {
-  const secret = useOutletContext() as SecretT
+  const secret = useOutletContext() as SecretSecretDetail
   const [revealAll, setRevealAll] = useState(false)
 
   const headerContent = useMemo(

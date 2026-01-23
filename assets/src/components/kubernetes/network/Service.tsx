@@ -9,29 +9,25 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
-  Common_Event as EventT,
-  Common_EventList as EventListT,
-  Endpoint_Endpoint as EndpointT,
-  Ingress_Ingress as IngressT,
-  Ingress_IngressList as IngressListT,
-  Pod_Pod as PodT,
-  Pod_PodList as PodListT,
-  Service_ServiceDetail as ServiceT,
-  ServiceEventsDocument,
-  ServiceEventsQuery,
-  ServiceEventsQueryVariables,
-  ServiceIngressesDocument,
-  ServiceIngressesQuery,
-  ServiceIngressesQueryVariables,
-  ServicePodsDocument,
-  ServicePodsQuery,
-  ServicePodsQueryVariables,
-  ServiceQueryVariables,
-  useServiceQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  CommonEvent,
+  CommonEventList,
+  EndpointEndpoint as EndpointT,
+  IngressIngress,
+  IngressIngressList,
+  PodPod,
+  PodPodList,
+  ServiceServiceDetail,
+} from '../../../generated/kubernetes'
+import {
+  getServiceEventsInfiniteOptions,
+  getServiceIngressesInfiniteOptions,
+  getServiceOptions,
+  getServicePodsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   getNetworkAbsPath,
   getResourceDetailsAbsPath,
@@ -45,9 +41,10 @@ import { useEventsColumns } from '../cluster/Events'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
-import { ResourceList } from '../common/ResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 
 import { Kind } from '../common/types'
+import { GqlError } from '../../utils/Alert'
 import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 import { usePodsColumns } from '../workloads/Pods'
@@ -66,18 +63,18 @@ const directory: Array<TabEntry> = [
 
 export default function Service(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
-  const { data, loading } = useServiceQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as ServiceQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: service,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getServiceOptions({
+      client: AxiosInstance(clusterId),
+      path: { service: name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const service = data?.handleGetServiceDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -103,7 +100,13 @@ export default function Service(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails
@@ -156,9 +159,9 @@ const columns = [
   }),
 ]
 
-export function ServiceInfo(): ReactElement<any> {
+export function ServiceInfo(): ReactElement {
   const theme = useTheme()
-  const service = useOutletContext() as ServiceT
+  const service = useOutletContext<ServiceServiceDetail>()
 
   return (
     <>
@@ -203,67 +206,45 @@ export function ServiceInfo(): ReactElement<any> {
 }
 
 export function ServiceIngresses(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = useIngressesColumns()
 
   return (
-    <ResourceList<
-      IngressListT,
-      IngressT,
-      ServiceIngressesQuery,
-      ServiceIngressesQueryVariables
-    >
+    <ResourceList<IngressIngressList, IngressIngress>
       namespaced
       columns={columns}
-      queryDocument={ServiceIngressesDocument}
-      queryOptions={{
-        variables: { namespace, name } as ServiceIngressesQueryVariables,
-      }}
-      queryName="handleGetServiceIngressList"
+      queryOptions={getServiceIngressesInfiniteOptions}
+      pathParams={{ service: name, namespace }}
       itemsKey="items"
     />
   )
 }
 
 export function ServicePods(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = usePodsColumns()
 
   return (
-    <ResourceList<PodListT, PodT, ServicePodsQuery, ServicePodsQueryVariables>
+    <ResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
-      queryDocument={ServicePodsDocument}
-      queryOptions={{
-        variables: { namespace, name } as ServicePodsQueryVariables,
-      }}
-      queryName="handleGetServicePods"
+      queryOptions={getServicePodsInfiniteOptions}
+      pathParams={{ service: name, namespace }}
       itemsKey="pods"
     />
   )
 }
 
 export function ServiceEvents(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<
-      EventListT,
-      EventT,
-      ServiceEventsQuery,
-      ServiceEventsQueryVariables
-    >
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
-      queryDocument={ServiceEventsDocument}
-      queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as ServiceEventsQueryVariables,
-      }}
-      queryName="handleGetServiceEvent"
+      queryOptions={getServiceEventsInfiniteOptions}
+      pathParams={{ service: name, namespace }}
       itemsKey="events"
       disableOnRowClick
     />

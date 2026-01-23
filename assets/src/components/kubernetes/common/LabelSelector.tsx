@@ -1,14 +1,13 @@
 import { ReactNode } from 'react'
 
 import { ChipList } from '@pluralsh/design-system'
+import { V1LabelSelector } from 'generated/kubernetes'
 
-import { V1_LabelSelector as LabelSelectorT } from '../../../generated/graphql-kubernetes'
-
-interface LabelSelectorProps {
-  selector: Nullable<LabelSelectorT>
-}
-
-export function LabelSelector({ selector }: LabelSelectorProps): ReactNode {
+export function LabelSelector({
+  selector,
+}: {
+  selector?: V1LabelSelector
+}): ReactNode {
   return (
     <ChipList
       size="small"

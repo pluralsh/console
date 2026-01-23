@@ -310,9 +310,10 @@ export function useChatbot() {
     (researchId: string) => {
       setViewType(AIViewTypes.InfraResearch)
       setCurrentResearchId(researchId)
+      setAgentInitMode(null)
       setOpen(true)
     },
-    [setViewType, setCurrentResearchId, setOpen]
+    [setAgentInitMode, setCurrentResearchId, setOpen, setViewType]
   )
 
   const createNewThread = (

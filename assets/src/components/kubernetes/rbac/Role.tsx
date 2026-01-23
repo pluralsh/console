@@ -1,14 +1,11 @@
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import { MetadataSidecar } from '../common/utils'
-import {
-  RoleQueryVariables,
-  Role_RoleDetail as RoleT,
-  useRoleQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { getRoleOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   ROLES_REL_PATH,
   getRbacAbsPath,
@@ -16,12 +13,14 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import PolicyRules from '../common/PolicyRules'
 import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './Roles'
+import { RoleRoleDetail } from 'generated/kubernetes/types.gen.ts'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Policy rules' },
@@ -30,15 +29,18 @@ const directory: Array<TabEntry> = [
 
 export default function Role(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
-  const { data, loading } = useRoleQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: { name, namespace } as RoleQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: role,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getRoleOptions({
+      client: AxiosInstance(clusterId),
+      path: { name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const role = data?.handleGetRoleDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -59,7 +61,13 @@ export default function Role(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
 
   return (
     <ResourceDetails
@@ -72,7 +80,7 @@ export default function Role(): ReactElement<any> {
 }
 
 export function RolePolicyRules(): ReactElement<any> {
-  const role = useOutletContext() as RoleT
+  const role = useOutletContext() as RoleRoleDetail
 
   return <PolicyRules rules={role.rules} />
 }

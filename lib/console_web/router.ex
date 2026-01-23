@@ -11,6 +11,11 @@ defmodule ConsoleWeb.Router do
     plug ConsoleWeb.Plugs.Authorized
   end
 
+  pipeline :openapi do
+    plug :accepts, ["json"]
+    plug Oaskit.Plugs.SpecProvider, spec: Console.OpenAPI
+  end
+
   get "/health", ConsoleWeb.HealthController, :health
 
   scope "/v1", ConsoleWeb do
@@ -94,6 +99,71 @@ defmodule ConsoleWeb.Router do
       get "/git/tarballs", GitController, :tarball
       get "/git/stacks/tarballs", GitController, :stack_tarball
       get "/git/sentinels/tarballs", GitController, :sentinel_tarball
+    end
+
+    scope "/api", ConsoleWeb do
+      pipe_through [:openapi]
+
+      scope "/v1", OpenAPI do
+        get "/me", UserController, :me
+
+        scope "/cd", CD do
+          post "/clusters",       ClusterController, :create
+          get "/clusters",        ClusterController, :index
+          get "/clusters/:id",    ClusterController, :show
+          put "/clusters/:id",    ClusterController, :update
+          delete "/clusters/:id", ClusterController, :delete
+
+          post "/git/repositories",       GitRepositoryController, :create
+          get "/git/repositories",        GitRepositoryController, :index
+          get "/git/repositories/url",    GitRepositoryController, :show_by_url
+          get "/git/repositories/:id",    GitRepositoryController, :show
+          put "/git/repositories/:id",    GitRepositoryController, :update
+          delete "/git/repositories/:id", GitRepositoryController, :delete
+
+          get "/helm/repositories",     HelmRepositoryController, :index
+          get "/helm/repositories/url", HelmRepositoryController, :show_by_url
+          get "/helm/repositories/:id", HelmRepositoryController, :show
+          post "/helm/repositories",    HelmRepositoryController, :upsert
+
+          post "/services",          ServiceController, :create
+          get "/services",           ServiceController, :index
+          get "/services/:id",       ServiceController, :show
+          put "/services/:id",       ServiceController, :update
+          delete "/services/:id",    ServiceController, :delete
+
+          post "/globalservices",          GlobalServiceController, :create
+          get "/globalservices",           GlobalServiceController, :index
+          get "/globalservices/:id",       GlobalServiceController, :show
+          put "/globalservices/:id",       GlobalServiceController, :update
+          delete "/globalservices/:id",    GlobalServiceController, :delete
+          post "/globalservices/:id/sync", GlobalServiceController, :sync
+
+          get "/pipelines",             PipelineController, :index
+          get "/pipelines/:id",         PipelineController, :show
+          post "/pipelines/:id/trigger", PipelineController, :trigger
+        end
+
+        scope "/scm", SCM do
+          post "/connections",       ConnectionController, :create
+          get "/connections",        ConnectionController, :index
+          get "/connections/:id",    ConnectionController, :show
+          put "/connections/:id",    ConnectionController, :update
+          delete "/connections/:id", ConnectionController, :delete
+        end
+
+        post "/stacks", StackController, :create
+        get "/stacks", StackController, :index
+        get "/stacks/:id", StackController, :show
+        put "/stacks/:id", StackController, :update
+        delete "/stacks/:id", StackController, :delete
+        post "/stacks/:id/trigger", StackController, :trigger_run
+        post "/stacks/:id/resync", StackController, :resync
+        put "/stacks/:id/restore", StackController, :restore
+
+        get "/projects", ProjectController, :index
+        get "/projects/:id", ProjectController, :show
+      end
     end
 
     forward "/gql", Absinthe.Plug,

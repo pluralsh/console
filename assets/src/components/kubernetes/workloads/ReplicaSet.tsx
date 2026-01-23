@@ -5,28 +5,23 @@ import {
 } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
-  Common_Event as EventT,
-  Common_EventList as EventListT,
-  Pod_Pod as PodT,
-  Pod_PodList as PodListT,
-  Replicaset_ReplicaSetDetail as ReplicaSetT,
-  ReplicaSetEventsDocument,
-  ReplicaSetEventsQuery,
-  ReplicaSetEventsQueryVariables,
-  ReplicaSetPodsDocument,
-  ReplicaSetPodsQuery,
-  ReplicaSetPodsQueryVariables,
-  ReplicaSetQueryVariables,
-  ReplicaSetServicesDocument,
-  ReplicaSetServicesQuery,
-  ReplicaSetServicesQueryVariables,
-  Service_Service as ServiceT,
-  Service_ServiceList as ServiceListT,
-  useReplicaSetQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  CommonEvent,
+  CommonEventList,
+  PodPod,
+  PodPodList,
+  ServiceService,
+  ServiceServiceList,
+} from '../../../generated/kubernetes'
+import {
+  getReplicaSetEventsInfiniteOptions,
+  getReplicaSetOptions,
+  getReplicaSetPodsInfiniteOptions,
+  getReplicaSetServicesInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
@@ -40,8 +35,9 @@ import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscal
 import { LabelSelector } from '../common/LabelSelector'
 import { PodInfo } from '../common/PodInfo'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { ResourceList } from '../common/ResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { Kind } from '../common/types'
+import { GqlError } from '../../utils/Alert'
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 import { useServicesColumns } from '../network/Services'
@@ -60,15 +56,17 @@ const directory: Array<TabEntry> = [
 
 export default function ReplicaSet(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name, namespace } = useParams()
-  const { data, loading } = useReplicaSetQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as ReplicaSetQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: rs,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getReplicaSetOptions({
+      client: AxiosInstance(clusterId),
+      path: { replicaSet: name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
 
   useSetBreadcrumbs(
@@ -95,9 +93,11 @@ export default function ReplicaSet(): ReactElement<any> {
     )
   )
 
-  const rs = data?.handleGetReplicaSetDetail as ReplicaSetT
+  if (error) {
+    return <GqlError error={error} />
+  }
 
-  if (loading) {
+  if (isLoading) {
     return <LoadingIndicator />
   }
 
@@ -149,26 +149,15 @@ export function ReplicaSetInfo(): ReactElement<any> {
 }
 
 export function ReplicaSetEvents(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<
-      EventListT,
-      EventT,
-      ReplicaSetEventsQuery,
-      ReplicaSetEventsQueryVariables
-    >
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
-      queryDocument={ReplicaSetEventsDocument}
-      queryOptions={{
-        variables: {
-          namespace,
-          name,
-        } as ReplicaSetEventsQueryVariables,
-      }}
-      queryName="handleGetReplicaSetEvents"
+      queryOptions={getReplicaSetEventsInfiniteOptions}
+      pathParams={{ replicaSet: name, namespace }}
       itemsKey="events"
       disableOnRowClick
     />
@@ -176,46 +165,30 @@ export function ReplicaSetEvents(): ReactElement<any> {
 }
 
 export function ReplicaSetPods(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = usePodsColumns()
 
   return (
-    <ResourceList<
-      PodListT,
-      PodT,
-      ReplicaSetPodsQuery,
-      ReplicaSetPodsQueryVariables
-    >
+    <ResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
-      queryDocument={ReplicaSetPodsDocument}
-      queryOptions={{
-        variables: { namespace, name } as ReplicaSetPodsQueryVariables,
-      }}
-      queryName="handleGetReplicaSetPods"
+      queryOptions={getReplicaSetPodsInfiniteOptions}
+      pathParams={{ replicaSet: name, namespace }}
       itemsKey="pods"
     />
   )
 }
 
 export function ReplicaSetServices(): ReactElement<any> {
-  const { name, namespace } = useParams()
+  const { name = '', namespace = '' } = useParams()
   const columns = useServicesColumns()
 
   return (
-    <ResourceList<
-      ServiceListT,
-      ServiceT,
-      ReplicaSetServicesQuery,
-      ReplicaSetServicesQueryVariables
-    >
+    <ResourceList<ServiceServiceList, ServiceService>
       namespaced
       columns={columns}
-      queryDocument={ReplicaSetServicesDocument}
-      queryOptions={{
-        variables: { namespace, name } as ReplicaSetServicesQueryVariables,
-      }}
-      queryName="handleGetReplicaSetServices"
+      queryOptions={getReplicaSetServicesInfiniteOptions}
+      pathParams={{ replicaSet: name, namespace }}
       itemsKey="services"
     />
   )

@@ -5,40 +5,36 @@ import {
 } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
 import {
-  Common_Event as EventT,
-  Common_EventList as EventListT,
-  Daemonset_DaemonSetDetail as DaemonSetT,
-  DaemonSetEventsDocument,
-  DaemonSetEventsQuery,
-  DaemonSetEventsQueryVariables,
-  DaemonSetPodsDocument,
-  DaemonSetPodsQuery,
-  DaemonSetPodsQueryVariables,
-  DaemonSetQueryVariables,
-  DaemonSetServicesDocument,
-  DaemonSetServicesQuery,
-  DaemonSetServicesQueryVariables,
-  Pod_Pod as PodT,
-  Pod_PodList as PodListT,
-  Service_Service as ServiceT,
-  Service_ServiceList as ServiceListT,
-  useDaemonSetQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+  CommonEvent,
+  CommonEventList,
+  PodPod,
+  PodPodList,
+  ServiceService,
+  ServiceServiceList,
+} from '../../../generated/kubernetes'
+import {
+  getDaemonSetEventsInfiniteOptions,
+  getDaemonSetOptions,
+  getDaemonSetPodsInfiniteOptions,
+  getDaemonSetServicesInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   DAEMON_SETS_REL_PATH,
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { useCluster } from '../Cluster'
 import { useEventsColumns } from '../cluster/Events'
 import { LabelSelector } from '../common/LabelSelector'
 import { PodInfo } from '../common/PodInfo'
+import { ResourceList } from '../common/ResourceList.tsx'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import { ResourceList } from '../common/ResourceList'
 
 import { Kind } from '../common/types'
 import { MetadataSidecar } from '../common/utils'
@@ -58,15 +54,17 @@ const directory: Array<TabEntry> = [
 
 export default function DaemonSet(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name, namespace } = useParams()
-  const { data, loading } = useDaemonSetQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as DaemonSetQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: daemonSet,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getDaemonSetOptions({
+      client: AxiosInstance(clusterId),
+      path: { daemonSet: name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
 
   useSetBreadcrumbs(
@@ -93,10 +91,12 @@ export default function DaemonSet(): ReactElement<any> {
     )
   )
 
-  const daemonSet = data?.handleGetDaemonSetDetail as DaemonSetT
-
-  if (loading) {
+  if (isLoading) {
     return <LoadingIndicator />
+  }
+
+  if (error) {
+    return <GqlError error={error} />
   }
 
   return (
@@ -134,19 +134,11 @@ export function DaemonSetPods(): ReactElement<any> {
   const columns = usePodsColumns()
 
   return (
-    <ResourceList<
-      PodListT,
-      PodT,
-      DaemonSetPodsQuery,
-      DaemonSetPodsQueryVariables
-    >
+    <ResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
-      queryDocument={DaemonSetPodsDocument}
-      queryOptions={{
-        variables: { namespace, name } as DaemonSetPodsQueryVariables,
-      }}
-      queryName="handleGetDaemonSetPods"
+      queryOptions={getDaemonSetPodsInfiniteOptions}
+      pathParams={{ daemonSet: name, namespace }}
       itemsKey="pods"
     />
   )
@@ -157,19 +149,11 @@ export function DaemonSetServices(): ReactElement<any> {
   const columns = useServicesColumns()
 
   return (
-    <ResourceList<
-      ServiceListT,
-      ServiceT,
-      DaemonSetServicesQuery,
-      DaemonSetServicesQueryVariables
-    >
+    <ResourceList<ServiceServiceList, ServiceService>
       namespaced
       columns={columns}
-      queryDocument={DaemonSetServicesDocument}
-      queryOptions={{
-        variables: { namespace, name } as DaemonSetServicesQueryVariables,
-      }}
-      queryName="handleGetDaemonSetServices"
+      queryOptions={getDaemonSetServicesInfiniteOptions}
+      pathParams={{ daemonSet: name, namespace }}
       itemsKey="services"
     />
   )
@@ -180,19 +164,11 @@ export function DaemonSetEvents(): ReactElement<any> {
   const columns = useEventsColumns()
 
   return (
-    <ResourceList<
-      EventListT,
-      EventT,
-      DaemonSetEventsQuery,
-      DaemonSetEventsQueryVariables
-    >
+    <ResourceList<CommonEventList, CommonEvent>
       namespaced
       columns={columns}
-      queryDocument={DaemonSetEventsDocument}
-      queryOptions={{
-        variables: { namespace, name } as DaemonSetEventsQueryVariables,
-      }}
-      queryName="handleGetDaemonSetEvents"
+      queryOptions={getDaemonSetEventsInfiniteOptions}
+      pathParams={{ daemonSet: name, namespace }}
       itemsKey="events"
       disableOnRowClick
     />

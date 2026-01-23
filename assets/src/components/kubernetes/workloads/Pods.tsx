@@ -1,35 +1,33 @@
 import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { filesize } from 'filesize'
-import { groupBy } from 'lodash'
 import { useMemo } from 'react'
-import { useTheme } from 'styled-components'
 
-import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment, Maybe } from '../../../generated/graphql'
+import { PodPod, PodPodList } from '../../../generated/kubernetes'
 import {
-  Maybe,
-  Pod_Pod as PodT,
-  Pod_PodList as PodListT,
-  PodsDocument,
-  PodsQuery,
-  PodsQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+  getAllPodsInfiniteOptions,
+  getPodsInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
-  getWorkloadsAbsPath,
   PODS_REL_PATH,
+  getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { isNonNullable } from '../../../utils/isNonNullable.ts'
 
 import { ContainerStatusT } from '../../cd/cluster/pod/PodsList.tsx'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 import { UsageText } from '../../cluster/TableElements'
 import { useCluster } from '../Cluster'
+import { useDataSelect } from '../common/DataSelect'
 import ResourceLink from '../common/ResourceLink'
-import { ResourceList } from '../common/ResourceList'
+import { ResourceList } from '../common/ResourceList.tsx'
 import { Kind } from '../common/types'
 import { useDefaultColumns } from '../common/utils'
-import { toReadiness, WorkloadImages } from './utils'
+import { WorkloadImages, toReadiness } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
+import { useTheme } from 'styled-components'
+import { groupBy } from 'lodash'
+import { isNonNullable } from 'utils/isNonNullable.ts'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -39,7 +37,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<PodT>()
+const columnHelper = createColumnHelper<PodPod>()
 
 const colImages = columnHelper.accessor((pod) => pod?.containerImages, {
   id: 'images',
@@ -225,16 +223,20 @@ export function usePodsColumns(): Array<object> {
 
 export default function Pods() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
   const columns = usePodsColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <ResourceList<PodListT, PodT, PodsQuery, PodsQueryVariables>
+    <ResourceList<PodPodList, PodPod>
       namespaced
       columns={columns}
-      queryDocument={PodsDocument}
-      queryName="handleGetPods"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getPodsInfiniteOptions
+          : getAllPodsInfiniteOptions
+      }
       itemsKey="pods"
     />
   )

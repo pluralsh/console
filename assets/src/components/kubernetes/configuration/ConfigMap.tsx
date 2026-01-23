@@ -3,19 +3,18 @@ import { dump } from 'js-yaml'
 import { isEmpty } from 'lodash'
 import { ReactElement, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { AxiosInstance } from '../../../helpers/axios.ts'
 
-import {
-  ConfigMapQueryVariables,
-  Configmap_ConfigMapDetail as ConfigMapT,
-  useConfigMapQuery,
-} from '../../../generated/graphql-kubernetes'
-import { KubernetesClient } from '../../../helpers/kubernetes.client'
+import { ConfigmapConfigMapDetail } from '../../../generated/kubernetes'
+import { getConfigMapOptions } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   CONFIG_MAPS_REL_PATH,
   getConfigurationAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { GqlError } from '../../utils/Alert'
 import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 
@@ -34,18 +33,18 @@ const directory: Array<TabEntry> = [
 
 export default function ConfigMap(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '' } = useParams()
-  const { data, loading } = useConfigMapQuery({
-    client: KubernetesClient(clusterId ?? ''),
-    skip: !clusterId,
-    pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as ConfigMapQueryVariables,
+  const { clusterId = '', name = '', namespace = '' } = useParams()
+  const {
+    data: cm,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getConfigMapOptions({
+      client: AxiosInstance(clusterId),
+      path: { configmap: name, namespace },
+    }),
+    refetchInterval: 30_000,
   })
-
-  const cm = data?.handleGetConfigMapDetail
 
   useSetBreadcrumbs(
     useMemo(
@@ -71,7 +70,9 @@ export default function ConfigMap(): ReactElement<any> {
     )
   )
 
-  if (loading) return <LoadingIndicator />
+  if (isLoading) return <LoadingIndicator />
+
+  if (error) return <GqlError error={error} />
 
   return (
     <ResourceDetails
@@ -84,7 +85,7 @@ export default function ConfigMap(): ReactElement<any> {
 }
 
 export function ConfigMapData(): ReactElement<any> {
-  const cm = useOutletContext() as ConfigMapT
+  const cm = useOutletContext() as ConfigmapConfigMapDetail
   const tabs = useMemo(
     () => [
       {

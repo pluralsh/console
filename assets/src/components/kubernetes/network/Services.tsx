@@ -3,28 +3,30 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
-
 import {
-  Maybe,
-  Service_Service as ServiceT,
-  Service_ServiceList as ServiceListT,
-  ServicesDocument,
-  ServicesQuery,
-  ServicesQueryVariables,
-} from '../../../generated/graphql-kubernetes'
+  ServiceService,
+  ServiceServiceList,
+} from '../../../generated/kubernetes'
+import {
+  getAllServicesInfiniteOptions,
+  getServicesInfiniteOptions,
+} from '../../../generated/kubernetes/@tanstack/react-query.gen'
 import {
   getNetworkAbsPath,
   SERVICES_REL_PATH,
 } from '../../../routes/kubernetesRoutesConsts'
 
 import { useCluster } from '../Cluster'
+import { useDataSelect } from '../common/DataSelect'
 import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
 import { getNetworkBreadcrumbs } from './Network'
 
 import { serviceTypeDisplayName, TableEndpoints } from './utils'
 
-export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+export const getBreadcrumbs = (
+  cluster?: KubernetesClusterFragment | null | undefined
+) => [
   ...getNetworkBreadcrumbs(cluster),
   {
     label: 'services',
@@ -32,7 +34,7 @@ export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<ServiceT>()
+const columnHelper = createColumnHelper<ServiceService>()
 
 const colType = columnHelper.accessor((service) => service.type, {
   id: 'type',
@@ -48,7 +50,7 @@ const colClusterIp = columnHelper.accessor((service) => service.clusterIP, {
 })
 
 const colInternalEndpoints = columnHelper.accessor(
-  (service) => service?.internalEndpoint,
+  (service) => service.internalEndpoint,
   {
     id: 'internalEndpoints',
     header: 'Internal endpoints',
@@ -57,7 +59,7 @@ const colInternalEndpoints = columnHelper.accessor(
 )
 
 const colExternalEndpoints = columnHelper.accessor(
-  (service) => service?.externalEndpoints,
+  (service) => service.externalEndpoints,
   {
     id: 'externalEndpoints',
     header: 'External endpoints',
@@ -87,16 +89,20 @@ export function useServicesColumns(): Array<object> {
 
 export default function Services() {
   const cluster = useCluster()
+  const { hasNamespaceFilterActive } = useDataSelect()
   const columns = useServicesColumns()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
   return (
-    <ResourceList<ServiceListT, ServiceT, ServicesQuery, ServicesQueryVariables>
+    <ResourceList<ServiceServiceList, ServiceService>
       namespaced
       columns={columns}
-      queryDocument={ServicesDocument}
-      queryName="handleGetServiceList"
+      queryOptions={
+        hasNamespaceFilterActive
+          ? getServicesInfiniteOptions
+          : getAllServicesInfiniteOptions
+      }
       itemsKey="services"
     />
   )

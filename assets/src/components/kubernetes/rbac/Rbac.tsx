@@ -16,12 +16,11 @@ import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { useCluster } from '../Cluster'
-import { Maybe } from '../../../generated/graphql-kubernetes'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getBaseBreadcrumbs } from '../common/utils'
 
 export const getRbacBreadcrumbs = (
-  cluster?: Maybe<KubernetesClusterFragment>
+  cluster?: Nullable<KubernetesClusterFragment>
 ) => [
   ...getBaseBreadcrumbs(cluster),
   {
