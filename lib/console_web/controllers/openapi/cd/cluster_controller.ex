@@ -4,8 +4,13 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
   alias Console.Deployments.Clusters
   alias Console.Schema.Cluster
 
+  plug Scope, [resource: :cluster, action: :read] when action in [:show, :index]
+  plug Scope, [resource: :cluster, action: :write] when action in [:create, :update, :delete]
+
   operation :show,
     operation_id: "GetCluster",
+    tags: ["cluster"],
+    "x-required-scopes": ["cluster.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],
@@ -20,6 +25,8 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
 
   operation :index,
     operation_id: "ListClusters",
+    tags: ["cluster"],
+    "x-required-scopes": ["cluster.read"],
     parameters: [
       page: [in: :query, schema: %{type: :integer}, required: false],
       per_page: [in: :query, schema: %{type: :integer}, required: false]
@@ -35,6 +42,8 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
 
   operation :create,
     operation_id: "CreateCluster",
+    tags: ["cluster"],
+    "x-required-scopes": ["cluster.write"],
     request_body: OpenAPI.CD.ClusterInput,
     responses: [ok: OpenAPI.CD.Cluster]
   def create(conn, _) do
@@ -47,6 +56,8 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
 
   operation :update,
     operation_id: "UpdateCluster",
+    tags: ["cluster"],
+    "x-required-scopes": ["cluster.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],
@@ -63,6 +74,8 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
 
   operation :delete,
     operation_id: "DeleteCluster",
+    tags: ["cluster"],
+    "x-required-scopes": ["cluster.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true],
       detach: [in: :query, schema: %{type: :boolean}, required: false]

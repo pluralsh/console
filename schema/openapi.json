@@ -127,6 +127,50 @@
         },
         "type": "object"
       },
+      "Console.OpenAPI.CD.GitRepository.List": {
+        "description": "A list of git repositories",
+        "properties": {
+          "data": {
+            "items": "Elixir.Console.Schema.GitRepository",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.CD.HelmRepository.List": {
+        "description": "A list of helm repositories",
+        "properties": {
+          "data": {
+            "items": "Elixir.Console.Schema.HelmRepository",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.SCM.Connection.GithubApp": {
+        "description": "A Github App connection",
+        "properties": {
+          "app_id": {
+            "description": "The Github App ID",
+            "type": "string"
+          },
+          "installation_id": {
+            "description": "The Github App installation ID",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.SCM.Connection.List": {
+        "description": "A list of SCM connections",
+        "properties": {
+          "data": {
+            "items": "Elixir.Connection",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Console.OpenAPI.Stack.List": {
         "description": "A list of stacks",
         "properties": {
@@ -148,6 +192,373 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "GitRepository": {
+        "title": "GitRepository",
+        "description": "A git repository",
+        "properties": {
+          "auth_method": {
+            "enum": [
+              "basic",
+              "ssh"
+            ],
+            "type": "string"
+          },
+          "error": {
+            "description": "The error message for the git repository's last pull attempt",
+            "type": "string"
+          },
+          "health": {
+            "enum": [
+              "pullable",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "https_path": {
+            "description": "The https url for this git repo if you need to customize it",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pulled_at": {
+            "description": "The last successful git pull timestamp",
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "description": "The url of the git repository, can be either an https or ssh url",
+            "type": "string"
+          },
+          "url_format": {
+            "description": "A format string to get the http url for a subfolder in a git repo",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GitRepositoryInput": {
+        "title": "GitRepositoryInput",
+        "description": "Input for creating or updating a git repository",
+        "properties": {
+          "connection_id": {
+            "description": "The id of the scm connection to use for authentication",
+            "type": "string"
+          },
+          "passphrase": {
+            "description": "A passphrase to decrypt the given private key",
+            "type": "string"
+          },
+          "password": {
+            "description": "The http password for http authenticated repos",
+            "type": "string"
+          },
+          "private_key": {
+            "description": "An ssh private key to use with this repo if an ssh url was given",
+            "type": "string"
+          },
+          "url": {
+            "description": "The url of the git repository, can be either an https or ssh url",
+            "type": "string"
+          },
+          "username": {
+            "description": "The http username for authenticated http repos, defaults to apiKey for github",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "type": "object"
+      },
+      "GithubAppInput": {
+        "title": "GithubAppInput",
+        "description": "Github App authentication configuration",
+        "properties": {
+          "app_id": {
+            "description": "The GitHub App ID",
+            "type": "string"
+          },
+          "installation_id": {
+            "description": "The GitHub App installation ID",
+            "type": "string"
+          },
+          "private_key": {
+            "description": "The private key for the GitHub App",
+            "type": "string"
+          }
+        },
+        "required": [
+          "app_id",
+          "installation_id",
+          "private_key"
+        ],
+        "type": "object"
+      },
+      "HelmRepository": {
+        "title": "HelmRepository",
+        "description": "A helm repository",
+        "properties": {
+          "error": {
+            "description": "The error message for the helm repository's last pull attempt",
+            "type": "string"
+          },
+          "health": {
+            "enum": [
+              "pullable",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "basic",
+              "bearer",
+              "gcp",
+              "azure",
+              "aws"
+            ],
+            "type": "string"
+          },
+          "pulled_at": {
+            "description": "The last successful pull timestamp",
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "description": "The url of the helm repository",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HelmRepositoryInput": {
+        "title": "HelmRepositoryInput",
+        "description": "Input for upserting a helm repository",
+        "properties": {
+          "auth": {
+            "description": "Authentication configuration for the helm repository",
+            "properties": {
+              "aws": {
+                "description": "AWS credentials for ECR",
+                "properties": {
+                  "access_key": {
+                    "description": "AWS access key ID",
+                    "type": "string"
+                  },
+                  "assume_role_arn": {
+                    "description": "ARN of the role to assume",
+                    "type": "string"
+                  },
+                  "secret_access_key": {
+                    "description": "AWS secret access key",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "azure": {
+                "description": "Azure credentials for ACR",
+                "properties": {
+                  "client_id": {
+                    "description": "Azure client ID",
+                    "type": "string"
+                  },
+                  "client_secret": {
+                    "description": "Azure client secret",
+                    "type": "string"
+                  },
+                  "subscription_id": {
+                    "description": "Azure subscription ID",
+                    "type": "string"
+                  },
+                  "tenant_id": {
+                    "description": "Azure tenant ID",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "basic": {
+                "description": "Basic auth credentials",
+                "properties": {
+                  "password": {
+                    "description": "The password for basic auth",
+                    "type": "string"
+                  },
+                  "username": {
+                    "description": "The username for basic auth",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "bearer": {
+                "description": "Bearer token auth",
+                "properties": {
+                  "token": {
+                    "description": "The bearer token",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "gcp": {
+                "description": "GCP credentials for GCR/Artifact Registry",
+                "properties": {
+                  "application_credentials": {
+                    "description": "GCP service account JSON credentials",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "provider": {
+            "enum": [
+              "basic",
+              "bearer",
+              "gcp",
+              "azure",
+              "aws"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "description": "The url of the helm repository",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ScmConnection": {
+        "title": "ScmConnection",
+        "description": "An SCM connection for integrating with source control providers",
+        "properties": {
+          "api_url": {
+            "description": "Base URL for HTTP APIs for self-hosted versions if different from base URL",
+            "type": "string"
+          },
+          "base_url": {
+            "description": "Base URL for self-hosted versions of this provider",
+            "type": "string"
+          },
+          "default": {
+            "description": "Whether this is the default SCM connection",
+            "type": "boolean"
+          },
+          "github": {
+            "$ref": "#/components/schemas/Console.OpenAPI.SCM.Connection.GithubApp"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the SCM connection",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "github",
+              "gitlab",
+              "bitbucket",
+              "azure_devops",
+              "bitbucket_datacenter"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "username": {
+            "description": "The username for authentication",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
+      "ScmConnectionInput": {
+        "title": "ScmConnectionInput",
+        "description": "Input for creating or updating an SCM connection",
+        "properties": {
+          "api_url": {
+            "description": "Base URL for HTTP APIs for self-hosted versions if different from base URL",
+            "type": "string"
+          },
+          "base_url": {
+            "description": "Base URL for Git clones for self-hosted versions",
+            "type": "string"
+          },
+          "default": {
+            "description": "Whether this is the default SCM connection",
+            "type": "boolean"
+          },
+          "github": {
+            "$ref": "#/components/schemas/GithubAppInput"
+          },
+          "name": {
+            "description": "The name of the SCM connection",
+            "type": "string"
+          },
+          "signing_private_key": {
+            "description": "A private key used for signing commits",
+            "type": "string"
+          },
+          "token": {
+            "description": "The access token for authentication",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "github",
+              "gitlab",
+              "bitbucket",
+              "azure_devops",
+              "bitbucket_datacenter"
+            ],
+            "type": "string"
+          },
+          "username": {
+            "description": "The username for authentication",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
         "type": "object"
       },
       "Stack": {
@@ -279,6 +690,81 @@
         },
         "type": "object"
       },
+      "StackRun": {
+        "title": "StackRun",
+        "description": "A stack run instance",
+        "properties": {
+          "approval": {
+            "type": "boolean"
+          },
+          "approved_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "cancellation_reason": {
+            "type": "string"
+          },
+          "cluster_id": {
+            "type": "string"
+          },
+          "destroy": {
+            "type": "boolean"
+          },
+          "dry_run": {
+            "type": "boolean"
+          },
+          "git": {
+            "$ref": "#/components/schemas/Git"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "manage_state": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "repository_id": {
+            "type": "string"
+          },
+          "stack_id": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "pending",
+              "running",
+              "successful",
+              "failed",
+              "cancelled",
+              "pending_approval"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "terraform",
+              "ansible",
+              "custom"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "workdir": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Tag": {
         "title": "Tag",
         "description": "A tag",
@@ -328,6 +814,9 @@
   "paths": {
     "/api/v1/cd/clusters": {
       "get": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -358,9 +847,15 @@
               "type": "integer"
             }
           }
+        ],
+        "x-required-scopes": [
+          "cluster.read"
         ]
       },
       "post": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -383,11 +878,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "cluster.write"
+        ]
       }
     },
     "/api/v1/cd/clusters/{id}": {
       "delete": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -418,9 +919,15 @@
               "type": "boolean"
             }
           }
+        ],
+        "x-required-scopes": [
+          "cluster.write"
         ]
       },
       "get": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -443,9 +950,15 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "cluster.read"
         ]
       },
       "put": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -478,11 +991,365 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "cluster.write"
+        ]
+      }
+    },
+    "/api/v1/cd/git/repositories": {
+      "get": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.CD.GitRepository.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListGitRepositories",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateGitRepository",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GitRepositoryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "repos.write"
+        ]
+      }
+    },
+    "/api/v1/cd/git/repositories/url": {
+      "get": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetGitRepositoryByUrl",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.read"
+        ]
+      }
+    },
+    "/api/v1/cd/git/repositories/{id}": {
+      "delete": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteGitRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.write"
+        ]
+      },
+      "get": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetGitRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.read"
+        ]
+      },
+      "put": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpdateGitRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GitRepositoryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "repos.write"
+        ]
+      }
+    },
+    "/api/v1/cd/helm/repositories": {
+      "get": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.CD.HelmRepository.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListHelmRepositories",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpsertHelmRepository",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HelmRepositoryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "repos.write"
+        ]
+      }
+    },
+    "/api/v1/cd/helm/repositories/url": {
+      "get": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetHelmRepositoryByUrl",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.read"
+        ]
+      }
+    },
+    "/api/v1/cd/helm/repositories/{id}": {
+      "get": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetHelmRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.read"
+        ]
       }
     },
     "/api/v1/me": {
       "get": {
+        "tags": [
+          "user"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -498,8 +1365,188 @@
         "operationId": "Me"
       }
     },
+    "/api/v1/scm/connections": {
+      "get": {
+        "tags": [
+          "scm"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.SCM.Connection.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListScmConnections",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "scm.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "scm"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScmConnection"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateScmConnection",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScmConnectionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "scm.write"
+        ]
+      }
+    },
+    "/api/v1/scm/connections/{id}": {
+      "delete": {
+        "tags": [
+          "scm"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScmConnection"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteScmConnection",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "scm.write"
+        ]
+      },
+      "get": {
+        "tags": [
+          "scm"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScmConnection"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetScmConnection",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "scm.read"
+        ]
+      },
+      "put": {
+        "tags": [
+          "scm"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScmConnection"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpdateScmConnection",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScmConnectionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "scm.write"
+        ]
+      }
+    },
     "/api/v1/stacks": {
       "get": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -530,9 +1577,15 @@
               "type": "integer"
             }
           }
+        ],
+        "x-required-scopes": [
+          "stacks.read"
         ]
       },
       "post": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -555,11 +1608,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "stacks.write"
+        ]
       }
     },
     "/api/v1/stacks/{id}": {
       "delete": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -590,9 +1649,15 @@
               "type": "boolean"
             }
           }
+        ],
+        "x-required-scopes": [
+          "stacks.write"
         ]
       },
       "get": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -615,9 +1680,15 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "stacks.read"
         ]
       },
       "put": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -650,7 +1721,109 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "stacks.write"
+        ]
+      }
+    },
+    "/api/v1/stacks/{id}/restore": {
+      "put": {
+        "tags": [
+          "stacks"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stack"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "RestoreStack",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "stacks.write"
+        ]
+      }
+    },
+    "/api/v1/stacks/{id}/resync": {
+      "post": {
+        "tags": [
+          "stacks"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StackRun"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ResyncStack",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "stacks.write"
+        ]
+      }
+    },
+    "/api/v1/stacks/{id}/trigger": {
+      "post": {
+        "tags": [
+          "stacks"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StackRun"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "TriggerStackRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "stacks.write"
+        ]
       }
     }
   }

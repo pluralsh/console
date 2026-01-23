@@ -113,6 +113,26 @@ defmodule ConsoleWeb.Router do
           get "/clusters/:id",    ClusterController, :show
           put "/clusters/:id",    ClusterController, :update
           delete "/clusters/:id", ClusterController, :delete
+
+          post "/git/repositories",       GitRepositoryController, :create
+          get "/git/repositories",        GitRepositoryController, :index
+          get "/git/repositories/url",    GitRepositoryController, :show_by_url
+          get "/git/repositories/:id",    GitRepositoryController, :show
+          put "/git/repositories/:id",    GitRepositoryController, :update
+          delete "/git/repositories/:id", GitRepositoryController, :delete
+
+          get "/helm/repositories",     HelmRepositoryController, :index
+          get "/helm/repositories/url", HelmRepositoryController, :show_by_url
+          get "/helm/repositories/:id", HelmRepositoryController, :show
+          post "/helm/repositories",    HelmRepositoryController, :upsert
+        end
+
+        scope "/scm", SCM do
+          post "/connections",       ConnectionController, :create
+          get "/connections",        ConnectionController, :index
+          get "/connections/:id",    ConnectionController, :show
+          put "/connections/:id",    ConnectionController, :update
+          delete "/connections/:id", ConnectionController, :delete
         end
 
         post "/stacks", StackController, :create
@@ -120,6 +140,9 @@ defmodule ConsoleWeb.Router do
         get "/stacks/:id", StackController, :show
         put "/stacks/:id", StackController, :update
         delete "/stacks/:id", StackController, :delete
+        post "/stacks/:id/trigger", StackController, :trigger_run
+        post "/stacks/:id/resync", StackController, :resync
+        put "/stacks/:id/restore", StackController, :restore
       end
     end
 

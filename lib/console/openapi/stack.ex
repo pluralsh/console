@@ -56,3 +56,30 @@ defmodule Console.OpenAPI.StackInput do
     }
   }
 end
+
+defmodule Console.OpenAPI.StackRun do
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "StackRun",
+    description: "A stack run instance",
+    properties: timestamps(%{
+      id: string(),
+      type: ecto_enum(Console.Schema.Stack.Type),
+      status: ecto_enum(Console.Schema.Stack.Status),
+      approval: boolean(),
+      dry_run: boolean(),
+      message: string(),
+      workdir: string(),
+      manage_state: boolean(),
+      destroy: boolean(),
+      cancellation_reason: string(),
+      approved_at: datetime(),
+      stack_id: string(),
+      repository_id: string(),
+      cluster_id: string(),
+      git: Console.OpenAPI.Git,
+    })
+  }
+end
