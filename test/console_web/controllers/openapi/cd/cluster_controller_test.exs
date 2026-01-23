@@ -43,17 +43,94 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
 
       assert ids_equal(results, clusters)
     end
+
+    test "filters by project_id", %{conn: conn} do
+      user = insert(:user)
+      project1 = insert(:project)
+      project2 = insert(:project)
+      clusters1 = insert_list(2, :cluster, project: project1, read_bindings: [%{user_id: user.id}])
+      insert_list(2, :cluster, project: project2, read_bindings: [%{user_id: user.id}])
+
+      %{"data" => results} =
+        conn
+        |> add_auth_headers(user)
+        |> get("/api/v1/cd/clusters?project_id=#{project1.id}")
+        |> json_response(200)
+
+      assert ids_equal(results, clusters1)
+    end
+
+    test "searches by name with q parameter", %{conn: conn} do
+      user = insert(:user)
+      cluster1 = insert(:cluster, name: "matching-cluster", read_bindings: [%{user_id: user.id}])
+      insert(:cluster, name: "other-cluster", read_bindings: [%{user_id: user.id}])
+
+      %{"data" => results} =
+        conn
+        |> add_auth_headers(user)
+        |> get("/api/v1/cd/clusters?q=matching")
+        |> json_response(200)
+
+      assert length(results) == 1
+      assert hd(results)["id"] == cluster1.id
+    end
+
+    test "filters by tag", %{conn: conn} do
+      user = insert(:user)
+      cluster1 = insert(:cluster, read_bindings: [%{user_id: user.id}], tags: [%{name: "env", value: "prod"}])
+      insert(:cluster, read_bindings: [%{user_id: user.id}], tags: [%{name: "env", value: "staging"}])
+
+      %{"data" => results} =
+        conn
+        |> add_auth_headers(user)
+        |> get("/api/v1/cd/clusters?tag=env:prod")
+        |> json_response(200)
+
+      assert length(results) == 1
+      assert hd(results)["id"] == cluster1.id
+    end
+
+    test "returns project_id in cluster response", %{conn: conn} do
+      user = insert(:user)
+      project = insert(:project)
+      cluster = insert(:cluster, project: project, read_bindings: [%{user_id: user.id}])
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> get("/api/v1/cd/clusters/#{cluster.id}")
+        |> json_response(200)
+
+      assert result["id"] == cluster.id
+      assert result["project_id"] == project.id
+    end
+
+    test "supports pagination", %{conn: conn} do
+      user = insert(:user)
+      insert_list(5, :cluster, read_bindings: [%{user_id: user.id}])
+
+      %{"data" => results} =
+        conn
+        |> add_auth_headers(user)
+        |> get("/api/v1/cd/clusters?page=1&per_page=2")
+        |> json_response(200)
+
+      assert length(results) == 2
+    end
   end
 
   describe "#create/2" do
     test "it can create a cluster", %{conn: conn} do
       insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
-      # expect(Console.Features, :available?, fn :cd -> true end)
 
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/cd/clusters", %{name: "test", handle: "test", metadata: %{"blah" => "blah"}})
+        |> json_post("/api/v1/cd/clusters", %{
+          name: "test",
+          handle: "test",
+          metadata: %{"blah" => "blah"}
+        })
         |> json_response(200)
 
       assert result["id"]
@@ -81,7 +158,11 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_put("/api/v1/cd/clusters/#{cluster.id}", %{name: "new-name", handle: "test", metadata: %{"blah" => "blah"}})
+        |> json_put("/api/v1/cd/clusters/#{cluster.id}", %{
+          name: "new-name",
+          handle: "test",
+          metadata: %{"blah" => "blah"}
+        })
         |> json_response(200)
 
       assert result["id"] == cluster.id
