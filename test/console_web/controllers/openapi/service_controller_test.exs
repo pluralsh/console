@@ -11,7 +11,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/services/#{service.id}")
+        |> get("/v1/api/cd/services/#{service.id}")
         |> json_response(200)
 
       assert result["id"] == service.id
@@ -26,7 +26,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> get("/api/v1/cd/services/#{service.id}")
+      |> get("/v1/api/cd/services/#{service.id}")
       |> json_response(403)
     end
   end
@@ -41,7 +41,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/services")
+        |> get("/v1/api/cd/services")
         |> json_response(200)
 
       assert ids_equal(results, services)
@@ -57,7 +57,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/services?cluster_id=#{cluster1.id}")
+        |> get("/v1/api/cd/services?cluster_id=#{cluster1.id}")
         |> json_response(200)
 
       assert ids_equal(results, services1)
@@ -72,7 +72,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/services?status=healthy")
+        |> get("/v1/api/cd/services?status=healthy")
         |> json_response(200)
 
       assert ids_equal(results, healthy_services)
@@ -87,7 +87,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/services?q=matching")
+        |> get("/v1/api/cd/services?q=matching")
         |> json_response(200)
 
       assert length(results) == 1
@@ -102,7 +102,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/services?page=1&per_page=2")
+        |> get("/v1/api/cd/services?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2
@@ -117,7 +117,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/cd/services?cluster_id=#{cluster.id}", %{
+        |> json_post("/v1/api/cd/services?cluster_id=#{cluster.id}", %{
           name: "test-service",
           namespace: "test-namespace",
           repository_id: repo.id,
@@ -140,7 +140,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
 
       conn
       |> add_auth_headers(insert(:user))
-      |> json_post("/api/v1/cd/services?cluster_id=#{cluster.id}", %{
+      |> json_post("/v1/api/cd/services?cluster_id=#{cluster.id}", %{
         name: "test-service",
         namespace: "test-namespace",
         repository_id: repo.id,
@@ -159,7 +159,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_put("/api/v1/cd/services/#{service.id}", %{
+        |> json_put("/v1/api/cd/services/#{service.id}", %{
           helm: %{values: "foo: bar"},
           name: service.name,
           namespace: service.namespace
@@ -176,7 +176,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> json_put("/api/v1/cd/services/#{service.id}", %{
+      |> json_put("/v1/api/cd/services/#{service.id}", %{
         helm: %{values: "foo: bar"},
         name: service.name,
         namespace: service.namespace
@@ -194,7 +194,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> delete("/api/v1/cd/services/#{service.id}")
+        |> delete("/v1/api/cd/services/#{service.id}")
         |> json_response(200)
 
       assert result["id"] == service.id
@@ -209,7 +209,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> delete("/api/v1/cd/services/#{service.id}?detach=true")
+        |> delete("/v1/api/cd/services/#{service.id}?detach=true")
         |> json_response(200)
 
       assert result["id"] == service.id
@@ -222,7 +222,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ServiceControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> delete("/api/v1/cd/services/#{service.id}")
+      |> delete("/v1/api/cd/services/#{service.id}")
       |> json_response(403)
     end
   end

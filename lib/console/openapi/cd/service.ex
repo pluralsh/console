@@ -155,6 +155,24 @@ defmodule Console.OpenAPI.CD.Kustomize do
   }
 end
 
+defmodule Console.OpenAPI.CD.ServiceConfigurationInput do
+  @moduledoc """
+  OpenAPI schema for service configuration key-value pairs.
+  """
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "ServiceConfigurationInput",
+    description: "A configuration key-value pair for a service deployment. These are used as templating values when rendering service manifests.",
+    properties: %{
+      name: string(description: "The name/key of the configuration value"),
+      value: string(description: "The value for this configuration key. If null, will remove this value"),
+    },
+    required: [:name]
+  }
+end
+
 defmodule Console.OpenAPI.CD.ServiceInput do
   @moduledoc """
   OpenAPI schema for service deployment creation/update input.
@@ -174,6 +192,7 @@ defmodule Console.OpenAPI.CD.ServiceInput do
       git: Console.OpenAPI.Git,
       helm: Console.OpenAPI.CD.HelmSpecInput,
       kustomize: Console.OpenAPI.CD.KustomizeInput,
+      configuration: array_of(Console.OpenAPI.CD.ServiceConfigurationInput, description: "Configuration values to template into the service manifests. You must pass the full list of configuration inputs"),
       sources: array_of(Console.OpenAPI.CD.ServiceSourceInput, description: "Additional source repositories for this service"),
       renderers: array_of(Console.OpenAPI.CD.ServiceRendererInput, description: "Custom renderers for processing service manifests"),
     },
