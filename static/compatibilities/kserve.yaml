@@ -75,7 +75,18 @@ versions:
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [v0.14.1 introduces a new LocalModelNode CR plus a node agent and updated
+        model-cache controller to support node-local model caching workflows., 'Model
+        cache functionality is expanded with multiple node groups, an admission webhook
+        for LocalModelCache, and an annotation to disable model cache per resource.',
+      Inference protocol responses now support datetime object serialization for both
+        v1 and v2 APIs.]
+    breaking_changes: [The ClusterLocalModel resource was renamed to LocalModelCache;
+        existing manifests/controllers referencing ClusterLocalModel must be updated
+        accordingly.]
   chart_version: v0.14.1
   images: ['docker.io/seldonio/mlserver:1.5.0', 'kserve/huggingfaceserver:v0.14.1',
     'kserve/kserve-controller:v0.14.1', 'kserve/lgbserver:v0.14.1', 'kserve/modelmesh-controller:v0.12.0',
@@ -88,7 +99,18 @@ versions:
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [HuggingFace vLLM runtime updated to vLLM 0.4.3 and now includes the
+        NCCL package for improved GPU/distributed performance., 'vLLM startup now
+        propagates the trust_remote_code flag more consistently, improving compatibility
+        with models that require remote code.', 'Chat template generation now uses
+        add_generation_prompt, improving prompt formatting for chat-style models.',
+      'vLLM logprobs handling was fixed, improving correctness for applications relying
+        on token probability outputs.', 'Additional packages required for vLLM model
+        loading are installed by default, reducing runtime load failures.']
+    breaking_changes: []
   chart_version: v0.13.1
   images: ['docker.io/seldonio/mlserver:1.3.2', 'gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1',
     'kserve/huggingfaceserver:v0.13.1', 'kserve/kserve-controller:v0.13.1', 'kserve/lgbserver:v0.13.1',
@@ -101,7 +123,13 @@ versions:
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Updates FastAPI to 0.109.1 and adds/keeps support for Ray 2.10 in the
+        0.12.1 release line., Adds Pydantic v2 support for the Python components/runtime
+        in 0.12.1.]
+    breaking_changes: []
   chart_version: v0.12.1
   images: ['docker.io/seldonio/mlserver:1.3.2', 'gcr.io/kubebuilder/kube-rbac-proxy:v0.13.1',
     'kserve/huggingfaceserver:v0.12.1', 'kserve/kserve-controller:v0.12.1', 'kserve/lgbserver:v0.12.1',
