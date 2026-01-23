@@ -546,6 +546,16 @@
         },
         "type": "object"
       },
+      "Console.OpenAPI.AI.SentinelRun.List": {
+        "description": "A paginated list of sentinel runs",
+        "properties": {
+          "data": {
+            "items": "Elixir.SentinelRun",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Console.OpenAPI.CD.Cluster.List": {
         "description": "A paginated list of clusters",
         "properties": {
@@ -1713,6 +1723,13 @@
             "format": "date-time",
             "type": "string"
           },
+          "jobs": {
+            "description": "Jobs spawned by this sentinel run for integration tests",
+            "items": {
+              "$ref": "#/components/schemas/SentinelRunJob"
+            },
+            "type": "array"
+          },
           "results": {
             "description": "Results of individual checks in this run",
             "items": {
@@ -1728,6 +1745,68 @@
             "description": "Current status of the run (pending, success, failed)",
             "enum": [
               "pending",
+              "success",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SentinelRunJob": {
+        "title": "SentinelRunJob",
+        "description": "An integration test job spawned by a sentinel run",
+        "properties": {
+          "check": {
+            "description": "Name of the check this job belongs to",
+            "type": "string"
+          },
+          "cluster_id": {
+            "description": "ID of the cluster this job ran on",
+            "type": "string"
+          },
+          "completed_at": {
+            "description": "Timestamp when the job completed",
+            "format": "date-time",
+            "type": "string"
+          },
+          "format": {
+            "description": "Output format of the job (plaintext, junit)",
+            "enum": [
+              "plaintext",
+              "junit"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the job",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "output": {
+            "description": "Output produced by the job",
+            "type": "string"
+          },
+          "repository_id": {
+            "description": "ID of the git repository used for the test",
+            "type": "string"
+          },
+          "sentinel_run_id": {
+            "description": "ID of the sentinel run this job belongs to",
+            "type": "string"
+          },
+          "status": {
+            "description": "Current status of the job (pending, running, success, failed)",
+            "enum": [
+              "pending",
+              "running",
               "success",
               "failed"
             ],
@@ -2609,6 +2688,39 @@
         ]
       }
     },
+    "/api/v1/ai/sentinelruns/{id}": {
+      "get": {
+        "tags": [
+          "sentinel"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SentinelRun"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetSentinelRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
     "/api/v1/ai/sentinels": {
       "get": {
         "tags": [
@@ -2734,6 +2846,55 @@
         ],
         "x-required-scopes": [
           "ai.write"
+        ]
+      }
+    },
+    "/api/v1/ai/sentinels/{sentinel_id}/runs": {
+      "get": {
+        "tags": [
+          "sentinel"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.AI.SentinelRun.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListSentinelRuns",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sentinel_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
         ]
       }
     },

@@ -56,6 +56,10 @@ defmodule Console.Schema.SentinelRun do
     from(s in query, order_by: ^order)
   end
 
+  def preloaded(query \\ __MODULE__, preloads) do
+    from(s in query, preload: ^preloads)
+  end
+
   @valid ~w(status sentinel_id)a
 
   def changeset(model, attrs \\ %{}) do

@@ -63,6 +63,14 @@ defmodule Console.OpenAPI.AI.SentinelRun do
   """
   use Console.OpenAPI.Base
 
+  defschema List, "A list of sentinel runs", %{
+    type: :object,
+    description: "A paginated list of sentinel runs",
+    properties: %{
+      data: array_of(SentinelRun)
+    }
+  }
+
   defschema %{
     type: :object,
     title: "SentinelRun",
@@ -73,6 +81,7 @@ defmodule Console.OpenAPI.AI.SentinelRun do
       sentinel_id: string(description: "ID of the sentinel that was executed"),
       completed_at: datetime(description: "Timestamp when the run completed"),
       results: array_of(Console.OpenAPI.AI.SentinelCheckResult, description: "Results of individual checks in this run"),
+      jobs: array_of(Console.OpenAPI.AI.SentinelRunJob, description: "Jobs spawned by this sentinel run for integration tests"),
     })
   }
 end
@@ -97,5 +106,32 @@ defmodule Console.OpenAPI.AI.SentinelCheckResult do
       successful_count: integer(description: "Number of successful jobs"),
       failed_count: integer(description: "Number of failed jobs"),
     }
+  }
+end
+
+defmodule Console.OpenAPI.AI.SentinelRunJob do
+  @moduledoc """
+  OpenAPI schema for sentinel run jobs.
+
+  A job represents a single integration test execution within a sentinel run,
+  typically running on a specific cluster.
+  """
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "SentinelRunJob",
+    description: "An integration test job spawned by a sentinel run",
+    properties: timestamps(%{
+      id: string(description: "Unique identifier for the job"),
+      check: string(description: "Name of the check this job belongs to"),
+      status: ecto_enum(Console.Schema.SentinelRunJob.Status, description: "Current status of the job (pending, running, success, failed)"),
+      format: ecto_enum(Console.Schema.SentinelRunJob.Format, description: "Output format of the job (plaintext, junit)"),
+      output: string(description: "Output produced by the job"),
+      completed_at: datetime(description: "Timestamp when the job completed"),
+      cluster_id: string(description: "ID of the cluster this job ran on"),
+      sentinel_run_id: string(description: "ID of the sentinel run this job belongs to"),
+      repository_id: string(description: "ID of the git repository used for the test"),
+    })
   }
 end

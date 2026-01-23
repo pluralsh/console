@@ -84,6 +84,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
     user = Console.Guardian.Plug.current_resource(conn)
 
     Sentinels.run_sentinel(id, user)
+    |> when_ok(&Repo.preload(&1, [:jobs]))
     |> successful(conn, OpenAPI.AI.SentinelRun)
   end
 end
