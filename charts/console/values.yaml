@@ -132,7 +132,7 @@ aiProxy:
   config:
     server:
       address: ":8080"
-      path: /ai/proxy
+      path: /ext/ai
       readTimeout: "30s"
       idleTimeout: "120s"
     console:
