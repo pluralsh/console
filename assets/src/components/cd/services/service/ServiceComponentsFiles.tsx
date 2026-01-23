@@ -23,6 +23,7 @@ import {
   useSetServiceComponentsHeadingContent,
 } from './ServiceComponentsContext'
 import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
+import { isEmpty } from 'lodash'
 
 const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   height: '100%',
@@ -55,12 +56,11 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   },
 
   [`& .${treeItemClasses.iconContainer}`]: {
-    width: '14px',
-    minWidth: '14px',
-    flexShrink: 0,
+    width: 14,
+    minWidth: 14,
 
     '& svg': {
-      fontSize: '14px',
+      fontSize: 14,
     },
   },
 
@@ -75,24 +75,15 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   },
 
   [`& .${treeItemClasses.groupTransition}`]: {
-    marginLeft: '14px',
     paddingLeft:
       'calc(var(--TreeView-itemChildrenIndentation)) - max(0px, (var(--TreeView-itemDepth) - 2) * 12px))',
     borderLeft: `1px solid ${theme.colors['border']}`,
-    marginTop: 2,
-    marginBottom: 2,
+    margin: `2px 0 2px 14px`,
   },
 
-  // Highlight only the direct parent's groupTransition border when it contains the selected file
   [`& .${treeItemClasses.root}.parent-of-selected > .${treeItemClasses.groupTransition}:has(.${treeItemClasses.root}.file-selected)`]:
     {
       borderLeftColor: theme.colors.grey[600],
-    },
-
-  // Ensure nested groupTransitions (sibling directories) are not highlighted
-  [`& .${treeItemClasses.root}.parent-of-selected .${treeItemClasses.root}:not(.file-selected):not(.parent-of-selected) > .${treeItemClasses.groupTransition}`]:
-    {
-      borderLeftColor: theme.colors['border'],
     },
 }))
 
@@ -142,7 +133,7 @@ function FileTreeItemIcon({ fileName }: { fileName: string }): React.ReactNode {
     return (
       <img
         src={iconPath}
-        alt={`${extension} file icon`}
+        alt={extension}
         width={FILE_ICON_SIZE}
         height={FILE_ICON_SIZE}
       />
@@ -254,9 +245,12 @@ function collapseSingleChildFolders(nodes: TreeNode[]): TreeNode[] {
 // Build a lookup map for efficient node access.
 function buildNodeLookup(
   nodes: TreeNode[],
-  parentMap: Map<string, string | null> = new Map(),
+  parentMap: Map<string, string | undefined> = new Map(),
   nodeMap: Map<string, TreeNode> = new Map()
-): { nodeMap: Map<string, TreeNode>; parentMap: Map<string, string | null> } {
+): {
+  nodeMap: Map<string, TreeNode>
+  parentMap: Map<string, string | undefined>
+} {
   nodes.forEach((node) => {
     nodeMap.set(node.id, node)
     if (node.children.length > 0) {
@@ -273,9 +267,7 @@ export function ComponentsFilesView() {
   const theme = useTheme()
   const { service } = useServiceContext()
   const [selectedFile, setSelectedFile] = useState<ServiceFile>()
-  const [parentOfSelectedId, setParentOfSelectedId] = useState<string | null>(
-    null
-  )
+  const [parentOfSelectedId, setParentOfSelectedId] = useState<string>()
   const [expandedItems, setExpandedItems] = useState<string[]>([])
   const hasAutoSelectedRef = useRef(false)
 
@@ -304,7 +296,7 @@ export function ComponentsFilesView() {
     if (treeNodes.length === 0) {
       return {
         nodeMap: new Map<string, TreeNode>(),
-        parentMap: new Map<string, string | null>(),
+        parentMap: new Map<string, string | undefined>(),
       }
     }
     return buildNodeLookup(treeNodes)
@@ -313,21 +305,14 @@ export function ComponentsFilesView() {
   // Auto-select first file when data is loaded
   useEffect(() => {
     if (
-      data?.serviceTarball &&
-      data.serviceTarball.length > 0 &&
+      !isEmpty(data?.serviceTarball) &&
       !hasAutoSelectedRef.current &&
       !selectedFile?.path
     ) {
-      // Get first file directly from serviceTarball
-      const firstFile = data.serviceTarball.find(
-        (file) => file?.path && file?.content
-      )
+      const firstFile = data?.serviceTarball?.find((f) => f?.path && f?.content)
       if (firstFile?.path && firstFile?.content) {
-        const parentId = parentMap.get(firstFile.path) ?? null
-        setSelectedFile({
-          path: firstFile.path,
-          content: firstFile.content,
-        })
+        const parentId = parentMap.get(firstFile.path)
+        setSelectedFile({ path: firstFile.path, content: firstFile.content })
         setParentOfSelectedId(parentId)
         hasAutoSelectedRef.current = true
       }
@@ -338,11 +323,11 @@ export function ComponentsFilesView() {
   useEffect(() => {
     if (selectedFile?.path && parentOfSelectedId) {
       const requiredExpanded: string[] = []
-      let currentParentId: string | null = parentOfSelectedId
+      let currentParentId: string | undefined = parentOfSelectedId
 
       while (currentParentId) {
         requiredExpanded.push(currentParentId)
-        currentParentId = parentMap.get(currentParentId) ?? null
+        currentParentId = parentMap.get(currentParentId)
       }
 
       setExpandedItems((prev) => {
@@ -356,10 +341,9 @@ export function ComponentsFilesView() {
     (_event: unknown, itemId: string, isSelected: boolean) => {
       if (isSelected) {
         const node = nodeMap.get(itemId)
-        const parentId = parentMap.get(itemId) ?? null
         if (node?.isFile && node.content) {
           setSelectedFile({ path: node.path, content: node.content })
-          setParentOfSelectedId(parentId)
+          setParentOfSelectedId(parentMap.get(itemId))
         }
       }
     },
