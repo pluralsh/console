@@ -2290,6 +2290,24 @@
         },
         "type": "object"
       },
+      "ServiceConfigurationInput": {
+        "title": "ServiceConfigurationInput",
+        "description": "A configuration key-value pair for a service deployment. These are used as templating values when rendering service manifests.",
+        "properties": {
+          "name": {
+            "description": "The name/key of the configuration value",
+            "type": "string"
+          },
+          "value": {
+            "description": "The value for this configuration key. If null, will remove this value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
       "ServiceError": {
         "title": "ServiceError",
         "description": "An error reported by the deployment operator during service sync",
@@ -2313,6 +2331,13 @@
         "title": "ServiceInput",
         "description": "Input for creating or updating a service deployment",
         "properties": {
+          "configuration": {
+            "description": "Configuration values to template into the service manifests. You must pass the full list of configuration inputs",
+            "items": {
+              "$ref": "#/components/schemas/ServiceConfigurationInput"
+            },
+            "type": "array"
+          },
           "dry_run": {
             "description": "If true, does not actually apply any changes to the cluster",
             "type": "boolean"
