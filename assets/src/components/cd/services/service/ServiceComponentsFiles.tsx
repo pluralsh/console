@@ -24,6 +24,8 @@ import {
 } from './ServiceComponentsContext'
 import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 import { isEmpty } from 'lodash'
+import { TruncateStart } from 'components/utils/table/Truncate'
+import { TRUNCATE_LEFT } from 'components/utils/truncate'
 
 const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   height: '100%',
@@ -52,15 +54,6 @@ const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
     '&.Mui-focused, &.Mui-selected, &.Mui-selected.Mui-focused': {
       backgroundColor: theme.colors['fill-zero-selected'],
       color: theme.colors.text,
-    },
-  },
-
-  [`& .${treeItemClasses.iconContainer}`]: {
-    width: 14,
-    minWidth: 14,
-
-    '& svg': {
-      fontSize: 14,
     },
   },
 
@@ -96,11 +89,8 @@ const TreeItemIcon = styled.div(({ theme }) => ({
 }))
 
 const TreeItemText = styled.span({
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
+  ...TRUNCATE_LEFT,
   minWidth: 0,
-  direction: 'rtl',
 })
 
 const FILE_TYPE_ICON_PATH = '/file-type-icons' as const
