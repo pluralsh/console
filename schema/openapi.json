@@ -338,6 +338,92 @@
         },
         "type": "object"
       },
+      "Catalog": {
+        "title": "Catalog",
+        "description": "A catalog of PR automations for self-service deployment workflows",
+        "properties": {
+          "author": {
+            "description": "Author or maintainer of the catalog",
+            "type": "string"
+          },
+          "category": {
+            "description": "Category for organizing catalogs (e.g., infrastructure, applications)",
+            "type": "string"
+          },
+          "dark_icon": {
+            "description": "URL or reference to the catalog's icon for dark mode",
+            "type": "string"
+          },
+          "description": {
+            "description": "Description of the catalog's purpose and contents",
+            "type": "string"
+          },
+          "icon": {
+            "description": "URL or reference to the catalog's icon for light mode",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the catalog",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the catalog",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this catalog belongs to",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CatalogInput": {
+        "title": "CatalogInput",
+        "description": "Input for creating or updating a catalog",
+        "properties": {
+          "author": {
+            "description": "Author or maintainer of the catalog",
+            "type": "string"
+          },
+          "category": {
+            "description": "Category for organizing the catalog",
+            "type": "string"
+          },
+          "dark_icon": {
+            "description": "URL or reference to the catalog's icon for dark mode",
+            "type": "string"
+          },
+          "description": {
+            "description": "Description of the catalog's purpose",
+            "type": "string"
+          },
+          "icon": {
+            "description": "URL or reference to the catalog's icon for light mode",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name for the catalog",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this catalog belongs to",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "author"
+        ],
+        "type": "object"
+      },
       "Cluster": {
         "title": "Cluster",
         "description": "A Kubernetes cluster that can be deployed to and managed through the platform",
@@ -626,6 +712,16 @@
         },
         "type": "object"
       },
+      "Console.OpenAPI.SCM.Catalog.List": {
+        "description": "A paginated list of catalogs",
+        "properties": {
+          "data": {
+            "items": "Elixir.Catalog",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Console.OpenAPI.SCM.Connection.GithubApp": {
         "description": "A Github App connection",
         "properties": {
@@ -650,6 +746,26 @@
         },
         "type": "object"
       },
+      "Console.OpenAPI.SCM.PrAutomation.List": {
+        "description": "A paginated list of PR automations",
+        "properties": {
+          "data": {
+            "items": "Elixir.PrAutomation",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.SCM.PullRequest.List": {
+        "description": "A paginated list of pull requests",
+        "properties": {
+          "data": {
+            "items": "Elixir.PullRequest",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Console.OpenAPI.Stack.List": {
         "description": "A list of stacks",
         "properties": {
@@ -658,6 +774,29 @@
             "type": "array"
           }
         },
+        "type": "object"
+      },
+      "CreatePullRequestInput": {
+        "title": "CreatePullRequestInput",
+        "description": "Input for creating a pull request using a PR automation",
+        "properties": {
+          "branch": {
+            "description": "Branch name for the pull request (overrides default)",
+            "type": "string"
+          },
+          "context": {
+            "additional_properties": true,
+            "description": "Context variables to pass to the PR automation templates",
+            "type": "object"
+          },
+          "identifier": {
+            "description": "Repository identifier (overrides default)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "context"
+        ],
         "type": "object"
       },
       "Git": {
@@ -1368,6 +1507,158 @@
         },
         "type": "object"
       },
+      "PrAutomation": {
+        "title": "PrAutomation",
+        "description": "A PR automation template for creating infrastructure or application pull requests",
+        "properties": {
+          "title": {
+            "description": "Title template for generated pull requests",
+            "type": "string"
+          },
+          "addon": {
+            "description": "Name of the addon this PR automation is associated with, if any",
+            "type": "string"
+          },
+          "branch": {
+            "description": "Default branch name for generated pull requests",
+            "type": "string"
+          },
+          "catalog_id": {
+            "description": "ID of the catalog this PR automation belongs to",
+            "type": "string"
+          },
+          "cluster_id": {
+            "description": "ID of the cluster this PR automation is associated with, if any",
+            "type": "string"
+          },
+          "configuration": {
+            "description": "Configuration fields for the PR automation",
+            "items": {
+              "$ref": "#/components/schemas/PrConfiguration"
+            },
+            "type": "array"
+          },
+          "connection_id": {
+            "description": "ID of the SCM connection used for creating pull requests",
+            "type": "string"
+          },
+          "dark_icon": {
+            "description": "URL or reference to the PR automation's icon for dark mode",
+            "type": "string"
+          },
+          "documentation": {
+            "description": "Documentation describing the PR automation's purpose and usage",
+            "type": "string"
+          },
+          "icon": {
+            "description": "URL or reference to the PR automation's icon for light mode",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the PR automation",
+            "type": "string"
+          },
+          "identifier": {
+            "description": "Repository identifier (e.g., owner/repo) for the PR automation",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "message": {
+            "description": "Message/body template for generated pull requests",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the PR automation",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this PR automation belongs to",
+            "type": "string"
+          },
+          "service_id": {
+            "description": "ID of the service this PR automation is associated with, if any",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PrConfiguration": {
+        "title": "PrConfiguration",
+        "description": "A configuration field for a PR automation",
+        "properties": {
+          "default": {
+            "description": "Default value for the configuration field",
+            "type": "string"
+          },
+          "documentation": {
+            "description": "Documentation describing the configuration field",
+            "type": "string"
+          },
+          "longform": {
+            "description": "Extended documentation for the configuration field",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the configuration field",
+            "type": "string"
+          },
+          "optional": {
+            "description": "Whether the configuration field is optional",
+            "type": "boolean"
+          },
+          "placeholder": {
+            "description": "Placeholder text for the configuration field input",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of the configuration field (string, int, bool, domain, file, function, enum, password)",
+            "enum": [
+              "string",
+              "int",
+              "bool",
+              "domain",
+              "bucket",
+              "file",
+              "function",
+              "password",
+              "enum",
+              "cluster",
+              "project",
+              "group",
+              "user",
+              "flow",
+              "json"
+            ],
+            "type": "string"
+          },
+          "validation": {
+            "$ref": "#/components/schemas/PrConfigurationValidation"
+          }
+        },
+        "type": "object"
+      },
+      "PrConfigurationValidation": {
+        "title": "PrConfigurationValidation",
+        "description": "Validation rules for a configuration field",
+        "properties": {
+          "message": {
+            "description": "Error message to display when validation fails",
+            "type": "string"
+          },
+          "regex": {
+            "description": "Regular expression pattern for validation",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Project": {
         "title": "Project",
         "description": "A project is a top-level organizational unit that groups related resources such as clusters, stacks, pipelines, and services",
@@ -1422,6 +1713,77 @@
           },
           "updated_at": {
             "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PullRequest": {
+        "title": "PullRequest",
+        "description": "A pull request reference tracked by the platform for deployment workflows",
+        "properties": {
+          "title": {
+            "description": "Title of the pull request",
+            "type": "string"
+          },
+          "body": {
+            "description": "Body/description of the pull request",
+            "type": "string"
+          },
+          "cluster_id": {
+            "description": "ID of the cluster this pull request is associated with, if any",
+            "type": "string"
+          },
+          "creator": {
+            "description": "Username of the pull request creator in the source control provider",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the pull request record",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "labels": {
+            "description": "Labels applied to the pull request",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ref": {
+            "description": "Git ref (branch name) for the pull request",
+            "type": "string"
+          },
+          "service_id": {
+            "description": "ID of the service this pull request is associated with, if any",
+            "type": "string"
+          },
+          "sha": {
+            "description": "Git SHA of the pull request head",
+            "type": "string"
+          },
+          "stack_id": {
+            "description": "ID of the stack this pull request is associated with, if any",
+            "type": "string"
+          },
+          "status": {
+            "description": "Current status of the pull request (open, merged, closed)",
+            "enum": [
+              "open",
+              "merged",
+              "closed"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "description": "URL of the pull request in the source control provider",
             "type": "string"
           }
         },
@@ -2487,7 +2849,7 @@
     }
   },
   "paths": {
-    "/api/v1/ai/runs": {
+    "/v1/api/ai/runs": {
       "get": {
         "tags": [
           "agent"
@@ -2567,7 +2929,7 @@
         ]
       }
     },
-    "/api/v1/ai/runs/{id}": {
+    "/v1/api/ai/runs/{id}": {
       "get": {
         "tags": [
           "agent"
@@ -2600,7 +2962,7 @@
         ]
       }
     },
-    "/api/v1/ai/runtimes": {
+    "/v1/api/ai/runtimes": {
       "get": {
         "tags": [
           "agent"
@@ -2655,7 +3017,7 @@
         ]
       }
     },
-    "/api/v1/ai/runtimes/{id}": {
+    "/v1/api/ai/runtimes/{id}": {
       "get": {
         "tags": [
           "agent"
@@ -2688,7 +3050,7 @@
         ]
       }
     },
-    "/api/v1/ai/sentinelruns/{id}": {
+    "/v1/api/ai/sentinelruns/{id}": {
       "get": {
         "tags": [
           "sentinel"
@@ -2721,7 +3083,7 @@
         ]
       }
     },
-    "/api/v1/ai/sentinels": {
+    "/v1/api/ai/sentinels": {
       "get": {
         "tags": [
           "sentinel"
@@ -2783,7 +3145,7 @@
         ]
       }
     },
-    "/api/v1/ai/sentinels/{id}": {
+    "/v1/api/ai/sentinels/{id}": {
       "get": {
         "tags": [
           "sentinel"
@@ -2816,7 +3178,7 @@
         ]
       }
     },
-    "/api/v1/ai/sentinels/{id}/trigger": {
+    "/v1/api/ai/sentinels/{id}/trigger": {
       "post": {
         "tags": [
           "sentinel"
@@ -2849,7 +3211,7 @@
         ]
       }
     },
-    "/api/v1/ai/sentinels/{sentinel_id}/runs": {
+    "/v1/api/ai/sentinels/{sentinel_id}/runs": {
       "get": {
         "tags": [
           "sentinel"
@@ -2898,7 +3260,7 @@
         ]
       }
     },
-    "/api/v1/ai/sessions": {
+    "/v1/api/ai/sessions": {
       "get": {
         "tags": [
           "agent"
@@ -2970,7 +3332,7 @@
         ]
       }
     },
-    "/api/v1/ai/sessions/{id}": {
+    "/v1/api/ai/sessions/{id}": {
       "get": {
         "tags": [
           "agent"
@@ -3003,7 +3365,7 @@
         ]
       }
     },
-    "/api/v1/cd/clusters": {
+    "/v1/api/cd/clusters": {
       "get": {
         "tags": [
           "cluster"
@@ -3128,7 +3490,7 @@
         ]
       }
     },
-    "/api/v1/cd/clusters/{id}": {
+    "/v1/api/cd/clusters/{id}": {
       "delete": {
         "tags": [
           "cluster"
@@ -3241,7 +3603,7 @@
         ]
       }
     },
-    "/api/v1/cd/git/repositories": {
+    "/v1/api/cd/git/repositories": {
       "get": {
         "tags": [
           "repos"
@@ -3313,7 +3675,7 @@
         ]
       }
     },
-    "/api/v1/cd/git/repositories/url": {
+    "/v1/api/cd/git/repositories/url": {
       "get": {
         "tags": [
           "repos"
@@ -3346,7 +3708,7 @@
         ]
       }
     },
-    "/api/v1/cd/git/repositories/{id}": {
+    "/v1/api/cd/git/repositories/{id}": {
       "delete": {
         "tags": [
           "repos"
@@ -3451,7 +3813,7 @@
         ]
       }
     },
-    "/api/v1/cd/globalservices": {
+    "/v1/api/cd/globalservices": {
       "get": {
         "tags": [
           "global"
@@ -3549,7 +3911,7 @@
         ]
       }
     },
-    "/api/v1/cd/globalservices/{id}": {
+    "/v1/api/cd/globalservices/{id}": {
       "delete": {
         "tags": [
           "global"
@@ -3654,7 +4016,7 @@
         ]
       }
     },
-    "/api/v1/cd/globalservices/{id}/sync": {
+    "/v1/api/cd/globalservices/{id}/sync": {
       "post": {
         "tags": [
           "global"
@@ -3687,7 +4049,7 @@
         ]
       }
     },
-    "/api/v1/cd/helm/repositories": {
+    "/v1/api/cd/helm/repositories": {
       "get": {
         "tags": [
           "repos"
@@ -3759,7 +4121,7 @@
         ]
       }
     },
-    "/api/v1/cd/helm/repositories/url": {
+    "/v1/api/cd/helm/repositories/url": {
       "get": {
         "tags": [
           "repos"
@@ -3792,7 +4154,7 @@
         ]
       }
     },
-    "/api/v1/cd/helm/repositories/{id}": {
+    "/v1/api/cd/helm/repositories/{id}": {
       "get": {
         "tags": [
           "repos"
@@ -3825,7 +4187,7 @@
         ]
       }
     },
-    "/api/v1/cd/pipelines": {
+    "/v1/api/cd/pipelines": {
       "get": {
         "tags": [
           "pipelines"
@@ -3884,7 +4246,7 @@
         ]
       }
     },
-    "/api/v1/cd/pipelines/{id}": {
+    "/v1/api/cd/pipelines/{id}": {
       "get": {
         "tags": [
           "pipelines"
@@ -3919,7 +4281,7 @@
         ]
       }
     },
-    "/api/v1/cd/pipelines/{id}/trigger": {
+    "/v1/api/cd/pipelines/{id}/trigger": {
       "post": {
         "tags": [
           "pipelines"
@@ -3964,7 +4326,7 @@
         ]
       }
     },
-    "/api/v1/cd/services": {
+    "/v1/api/cd/services": {
       "get": {
         "tags": [
           "service"
@@ -4070,7 +4432,7 @@
         ]
       }
     },
-    "/api/v1/cd/services/{id}": {
+    "/v1/api/cd/services/{id}": {
       "delete": {
         "tags": [
           "service"
@@ -4183,7 +4545,7 @@
         ]
       }
     },
-    "/api/v1/me": {
+    "/v1/api/me": {
       "get": {
         "tags": [
           "user"
@@ -4203,7 +4565,7 @@
         "operationId": "Me"
       }
     },
-    "/api/v1/projects": {
+    "/v1/api/projects": {
       "get": {
         "tags": [
           "projects"
@@ -4246,7 +4608,7 @@
         ]
       }
     },
-    "/api/v1/projects/{id}": {
+    "/v1/api/projects/{id}": {
       "get": {
         "tags": [
           "projects"
@@ -4282,7 +4644,257 @@
         ]
       }
     },
-    "/api/v1/scm/connections": {
+    "/v1/api/scm/catalogs": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.SCM.Catalog.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListCatalogs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "project_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "catalog"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpsertCatalog",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "catalog.write"
+        ]
+      }
+    },
+    "/v1/api/scm/catalogs/{catalog_id}/prautomations": {
+      "get": {
+        "tags": [
+          "prautomation"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.SCM.PrAutomation.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListPrAutomationsForCatalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "catalog_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/scm/catalogs/{id}": {
+      "delete": {
+        "tags": [
+          "catalog"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteCatalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.write"
+        ]
+      },
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetCatalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      },
+      "put": {
+        "tags": [
+          "catalog"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpdateCatalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "catalog.write"
+        ]
+      }
+    },
+    "/v1/api/scm/connections": {
       "get": {
         "tags": [
           "scm"
@@ -4354,7 +4966,7 @@
         ]
       }
     },
-    "/api/v1/scm/connections/{id}": {
+    "/v1/api/scm/connections/{id}": {
       "delete": {
         "tags": [
           "scm"
@@ -4459,7 +5071,262 @@
         ]
       }
     },
-    "/api/v1/stacks": {
+    "/v1/api/scm/prautomations": {
+      "get": {
+        "tags": [
+          "prautomation"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.SCM.PrAutomation.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListPrAutomations",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "project_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "catalog_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/scm/prautomations/{id}": {
+      "get": {
+        "tags": [
+          "prautomation"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrAutomation"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetPrAutomation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/scm/prautomations/{id}/invoke": {
+      "post": {
+        "tags": [
+          "prautomation"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PullRequest"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "InvokePrAutomation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePullRequestInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "catalog.write"
+        ]
+      }
+    },
+    "/v1/api/scm/pullrequests": {
+      "get": {
+        "tags": [
+          "pullrequest"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.SCM.PullRequest.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListPullRequests",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cluster_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stack_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "open",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/scm/pullrequests/{id}": {
+      "get": {
+        "tags": [
+          "pullrequest"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PullRequest"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetPullRequest",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/stacks": {
       "get": {
         "tags": [
           "stacks"
@@ -4531,7 +5398,7 @@
         ]
       }
     },
-    "/api/v1/stacks/{id}": {
+    "/v1/api/stacks/{id}": {
       "delete": {
         "tags": [
           "stacks"
@@ -4644,7 +5511,7 @@
         ]
       }
     },
-    "/api/v1/stacks/{id}/restore": {
+    "/v1/api/stacks/{id}/restore": {
       "put": {
         "tags": [
           "stacks"
@@ -4677,7 +5544,7 @@
         ]
       }
     },
-    "/api/v1/stacks/{id}/resync": {
+    "/v1/api/stacks/{id}/resync": {
       "post": {
         "tags": [
           "stacks"
@@ -4710,7 +5577,7 @@
         ]
       }
     },
-    "/api/v1/stacks/{id}/trigger": {
+    "/v1/api/stacks/{id}/trigger": {
       "post": {
         "tags": [
           "stacks"

@@ -10,7 +10,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/runs/#{run.id}")
+        |> get("/v1/api/ai/runs/#{run.id}")
         |> json_response(200)
 
       assert result["id"] == run.id
@@ -26,7 +26,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> get("/api/v1/ai/runs/#{run.id}")
+        |> get("/v1/api/ai/runs/#{run.id}")
         |> json_response(200)
 
       assert result["id"] == run.id
@@ -38,7 +38,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> get("/api/v1/ai/runs/#{run.id}")
+      |> get("/v1/api/ai/runs/#{run.id}")
       |> json_response(403)
     end
   end
@@ -53,7 +53,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/runs")
+        |> get("/v1/api/ai/runs")
         |> json_response(200)
 
       assert ids_equal(results, runs)
@@ -69,7 +69,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/runs?runtime_id=#{runtime1.id}")
+        |> get("/v1/api/ai/runs?runtime_id=#{runtime1.id}")
         |> json_response(200)
 
       assert ids_equal(results, runs1)
@@ -83,7 +83,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/runs?page=1&per_page=2")
+        |> get("/v1/api/ai/runs?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2
@@ -98,7 +98,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_post("/api/v1/ai/runs", %{
+        |> json_post("/v1/api/ai/runs", %{
           runtime_id: runtime.id,
           prompt: "Analyze this codebase",
           repository: "https://github.com/pluralsh/console.git",
@@ -120,7 +120,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_post("/api/v1/ai/runs", %{
+        |> json_post("/v1/api/ai/runs", %{
           runtime_id: runtime.id,
           prompt: "Add logging to the auth module",
           repository: "https://github.com/pluralsh/console.git",
@@ -138,7 +138,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/ai/runs", %{
+        |> json_post("/v1/api/ai/runs", %{
           runtime_id: runtime.id,
           prompt: "Test prompt",
           repository: "https://github.com/pluralsh/console.git",
@@ -155,7 +155,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRunControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> json_post("/api/v1/ai/runs", %{
+      |> json_post("/v1/api/ai/runs", %{
         runtime_id: runtime.id,
         prompt: "Test prompt",
         repository: "https://github.com/pluralsh/console.git",

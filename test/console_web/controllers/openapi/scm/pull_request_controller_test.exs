@@ -10,7 +10,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PullRequestControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/pullrequests/#{pr.id}")
+        |> get("/v1/api/scm/pullrequests/#{pr.id}")
         |> json_response(200)
 
       assert result["id"] == pr.id
@@ -27,7 +27,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PullRequestControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/pullrequests")
+        |> get("/v1/api/scm/pullrequests")
         |> json_response(200)
 
       assert ids_equal(results, prs)
@@ -42,7 +42,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PullRequestControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/pullrequests?cluster_id=#{cluster.id}")
+        |> get("/v1/api/scm/pullrequests?cluster_id=#{cluster.id}")
         |> json_response(200)
 
       assert ids_equal(results, prs1)
@@ -57,7 +57,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PullRequestControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/pullrequests?service_id=#{service.id}")
+        |> get("/v1/api/scm/pullrequests?service_id=#{service.id}")
         |> json_response(200)
 
       assert ids_equal(results, prs1)
@@ -72,7 +72,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PullRequestControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/pullrequests?stack_id=#{stack.id}")
+        |> get("/v1/api/scm/pullrequests?stack_id=#{stack.id}")
         |> json_response(200)
 
       assert ids_equal(results, prs1)
@@ -86,7 +86,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PullRequestControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/pullrequests?open=true")
+        |> get("/v1/api/scm/pullrequests?open=true")
         |> json_response(200)
 
       assert ids_equal(results, open_prs)
@@ -100,7 +100,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PullRequestControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/pullrequests?q=matching")
+        |> get("/v1/api/scm/pullrequests?q=matching")
         |> json_response(200)
 
       assert length(results) == 1
@@ -114,7 +114,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PullRequestControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/pullrequests?page=1&per_page=2")
+        |> get("/v1/api/scm/pullrequests?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2

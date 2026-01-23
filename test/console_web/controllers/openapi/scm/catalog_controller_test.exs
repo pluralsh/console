@@ -11,7 +11,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/catalogs/#{catalog.id}")
+        |> get("/v1/api/scm/catalogs/#{catalog.id}")
         |> json_response(200)
 
       assert result["id"] == catalog.id
@@ -26,7 +26,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> get("/api/v1/scm/catalogs/#{catalog.id}")
+      |> get("/v1/api/scm/catalogs/#{catalog.id}")
       |> json_response(403)
     end
   end
@@ -40,7 +40,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/catalogs")
+        |> get("/v1/api/scm/catalogs")
         |> json_response(200)
 
       assert ids_equal(results, catalogs)
@@ -56,7 +56,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/catalogs?project_id=#{project1.id}")
+        |> get("/v1/api/scm/catalogs?project_id=#{project1.id}")
         |> json_response(200)
 
       assert ids_equal(results, catalogs1)
@@ -71,7 +71,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/catalogs?q=matching")
+        |> get("/v1/api/scm/catalogs?q=matching")
         |> json_response(200)
 
       assert length(results) == 1
@@ -86,7 +86,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/catalogs?page=1&per_page=2")
+        |> get("/v1/api/scm/catalogs?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2
@@ -98,7 +98,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/scm/catalogs", %{
+        |> json_post("/v1/api/scm/catalogs", %{
           name: "test-catalog",
           author: "Test Author",
           description: "A test catalog",
@@ -121,7 +121,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_post("/api/v1/scm/catalogs", %{
+        |> json_post("/v1/api/scm/catalogs", %{
           name: "existing-catalog",
           author: "Updated Author",
           description: "Updated description"
@@ -136,7 +136,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
     test "non-admins cannot create a catalog without project access", %{conn: conn} do
       conn
       |> add_auth_headers(insert(:user))
-      |> json_post("/api/v1/scm/catalogs", %{
+      |> json_post("/v1/api/scm/catalogs", %{
         name: "test-catalog",
         author: "Test Author"
       })
@@ -153,7 +153,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_put("/api/v1/scm/catalogs/#{catalog.id}", %{
+        |> json_put("/v1/api/scm/catalogs/#{catalog.id}", %{
           name: catalog.name,
           author: catalog.author,
           description: "Updated description",
@@ -173,7 +173,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> json_put("/api/v1/scm/catalogs/#{catalog.id}", %{
+      |> json_put("/v1/api/scm/catalogs/#{catalog.id}", %{
         name: catalog.name,
         author: catalog.author,
         description: "Updated description"
@@ -191,7 +191,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> delete("/api/v1/scm/catalogs/#{catalog.id}")
+        |> delete("/v1/api/scm/catalogs/#{catalog.id}")
         |> json_response(200)
 
       assert result["id"] == catalog.id
@@ -205,7 +205,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> delete("/api/v1/scm/catalogs/#{catalog.id}")
+      |> delete("/v1/api/scm/catalogs/#{catalog.id}")
       |> json_response(403)
     end
   end

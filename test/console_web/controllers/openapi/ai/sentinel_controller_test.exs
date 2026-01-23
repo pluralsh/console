@@ -10,7 +10,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/sentinels/#{sentinel.id}")
+        |> get("/v1/api/ai/sentinels/#{sentinel.id}")
         |> json_response(200)
 
       assert result["id"] == sentinel.id
@@ -23,7 +23,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> get("/api/v1/ai/sentinels/#{sentinel.id}")
+        |> get("/v1/api/ai/sentinels/#{sentinel.id}")
         |> json_response(200)
 
       assert result["id"] == sentinel.id
@@ -35,7 +35,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> get("/api/v1/ai/sentinels/#{sentinel.id}")
+      |> get("/v1/api/ai/sentinels/#{sentinel.id}")
       |> json_response(403)
     end
   end
@@ -50,7 +50,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/sentinels")
+        |> get("/v1/api/ai/sentinels")
         |> json_response(200)
 
       assert ids_equal(results, sentinels)
@@ -65,7 +65,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/sentinels?status=pending")
+        |> get("/v1/api/ai/sentinels?status=pending")
         |> json_response(200)
 
       assert length(results) == 1
@@ -81,7 +81,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/sentinels?q=matching")
+        |> get("/v1/api/ai/sentinels?q=matching")
         |> json_response(200)
 
       assert length(results) == 1
@@ -96,7 +96,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/sentinels?page=1&per_page=2")
+        |> get("/v1/api/ai/sentinels?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2
@@ -108,7 +108,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(admin_user())
-        |> get("/api/v1/ai/sentinels")
+        |> get("/v1/api/ai/sentinels")
         |> json_response(200)
 
       assert ids_equal(results, sentinels)
@@ -124,7 +124,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> post("/api/v1/ai/sentinels/#{sentinel.id}/trigger")
+        |> post("/v1/api/ai/sentinels/#{sentinel.id}/trigger")
         |> json_response(200)
 
       assert result["id"]
@@ -138,7 +138,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> post("/api/v1/ai/sentinels/#{sentinel.id}/trigger")
+        |> post("/v1/api/ai/sentinels/#{sentinel.id}/trigger")
         |> json_response(200)
 
       assert result["id"]
@@ -152,7 +152,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> post("/api/v1/ai/sentinels/#{sentinel.id}/trigger")
+      |> post("/v1/api/ai/sentinels/#{sentinel.id}/trigger")
       |> json_response(403)
     end
   end

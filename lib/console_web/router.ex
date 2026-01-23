@@ -101,10 +101,10 @@ defmodule ConsoleWeb.Router do
       get "/git/sentinels/tarballs", GitController, :sentinel_tarball
     end
 
-    scope "/api", ConsoleWeb do
+    scope "/v1", ConsoleWeb do
       pipe_through [:openapi]
 
-      scope "/v1", OpenAPI do
+      scope "/api", OpenAPI do
         get "/me", UserController, :me
 
         scope "/cd", CD do

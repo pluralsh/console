@@ -12,7 +12,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelRunControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/sentinelruns/#{run.id}")
+        |> get("/v1/api/ai/sentinelruns/#{run.id}")
         |> json_response(200)
 
       assert result["id"] == run.id
@@ -28,7 +28,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelRunControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> get("/api/v1/ai/sentinelruns/#{run.id}")
+        |> get("/v1/api/ai/sentinelruns/#{run.id}")
         |> json_response(200)
 
       assert result["id"] == run.id
@@ -41,7 +41,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelRunControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> get("/api/v1/ai/sentinelruns/#{run.id}")
+      |> get("/v1/api/ai/sentinelruns/#{run.id}")
       |> json_response(403)
     end
   end
@@ -56,7 +56,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelRunControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/sentinels/#{sentinel.id}/runs")
+        |> get("/v1/api/ai/sentinels/#{sentinel.id}/runs")
         |> json_response(200)
 
       assert ids_equal(results, runs)
@@ -71,7 +71,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelRunControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/sentinels/#{sentinel.id}/runs?page=1&per_page=2")
+        |> get("/v1/api/ai/sentinels/#{sentinel.id}/runs?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2
@@ -84,7 +84,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelRunControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(admin_user())
-        |> get("/api/v1/ai/sentinels/#{sentinel.id}/runs")
+        |> get("/v1/api/ai/sentinels/#{sentinel.id}/runs")
         |> json_response(200)
 
       assert ids_equal(results, runs)
@@ -97,7 +97,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelRunControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> get("/api/v1/ai/sentinels/#{sentinel.id}/runs")
+      |> get("/v1/api/ai/sentinels/#{sentinel.id}/runs")
       |> json_response(403)
     end
   end

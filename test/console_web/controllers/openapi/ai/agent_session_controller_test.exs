@@ -10,7 +10,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentSessionControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/sessions/#{session.id}")
+        |> get("/v1/api/ai/sessions/#{session.id}")
         |> json_response(200)
 
       assert result["id"] == session.id
@@ -26,7 +26,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentSessionControllerTest do
       assert_raise Ecto.NoResultsError, fn ->
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/sessions/#{session.id}")
+        |> get("/v1/api/ai/sessions/#{session.id}")
         |> json_response(404)
       end
     end
@@ -43,7 +43,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentSessionControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/sessions")
+        |> get("/v1/api/ai/sessions")
         |> json_response(200)
 
       assert ids_equal(results, sessions)
@@ -56,7 +56,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentSessionControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/ai/sessions?page=1&per_page=2")
+        |> get("/v1/api/ai/sessions?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2
@@ -69,7 +69,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentSessionControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> json_post("/api/v1/ai/sessions", %{
+      |> json_post("/v1/api/ai/sessions", %{
         prompt: "Set up a kubernetes cluster in AWS",
         type: "provisioning"
       })
@@ -82,7 +82,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentSessionControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_post("/api/v1/ai/sessions", %{
+        |> json_post("/v1/api/ai/sessions", %{
           prompt: "Create a new terraform module for EKS",
           type: "terraform"
         })
@@ -98,7 +98,7 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentSessionControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_post("/api/v1/ai/sessions", %{
+        |> json_post("/v1/api/ai/sessions", %{
           prompt: "Debug the failing pods in production",
           type: "kubernetes"
         })

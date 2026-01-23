@@ -9,7 +9,7 @@ defmodule ConsoleWeb.OpenAPI.UserControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/me")
+        |> get("/v1/api/me")
         |> json_response(200)
 
       assert result["id"] == user.id

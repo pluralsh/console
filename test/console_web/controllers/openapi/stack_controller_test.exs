@@ -11,7 +11,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
         conn
 
         |> add_auth_headers(user)
-        |> get("/api/v1/stacks/#{stack.id}")
+        |> get("/v1/api/stacks/#{stack.id}")
         |> json_response(200)
 
       assert result["id"] == stack.id
@@ -26,7 +26,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> get("/api/v1/stacks/#{stack.id}")
+      |> get("/v1/api/stacks/#{stack.id}")
       |> json_response(403)
     end
   end
@@ -40,7 +40,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/stacks")
+        |> get("/v1/api/stacks")
         |> json_response(200)
 
       assert ids_equal(results, stacks)
@@ -55,7 +55,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/stacks", %{
+        |> json_post("/v1/api/stacks", %{
           name: "test-stack",
           type: "terraform",
           repository_id: repo.id,
@@ -75,7 +75,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
 
       conn
       |> add_auth_headers(insert(:user))
-      |> json_post("/api/v1/stacks", %{
+      |> json_post("/v1/api/stacks", %{
         name: "test-stack",
         type: "terraform",
         repository_id: repo.id,
@@ -94,7 +94,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_put("/api/v1/stacks/#{stack.id}", %{name: "new-name"})
+        |> json_put("/v1/api/stacks/#{stack.id}", %{name: "new-name"})
         |> json_response(200)
 
       assert result["id"] == stack.id
@@ -107,7 +107,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> json_put("/api/v1/stacks/#{stack.id}", %{name: "new-name"})
+      |> json_put("/v1/api/stacks/#{stack.id}", %{name: "new-name"})
       |> json_response(403)
     end
   end
@@ -120,7 +120,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> delete("/api/v1/stacks/#{stack.id}")
+        |> delete("/v1/api/stacks/#{stack.id}")
         |> json_response(200)
 
       assert result["id"] == stack.id
@@ -134,7 +134,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> delete("/api/v1/stacks/#{stack.id}?detach=true")
+        |> delete("/v1/api/stacks/#{stack.id}?detach=true")
         |> json_response(200)
 
       assert result["id"] == stack.id
@@ -147,7 +147,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> delete("/api/v1/stacks/#{stack.id}")
+      |> delete("/v1/api/stacks/#{stack.id}")
       |> json_response(403)
     end
   end
@@ -161,7 +161,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> post("/api/v1/stacks/#{stack.id}/trigger")
+        |> post("/v1/api/stacks/#{stack.id}/trigger")
         |> json_response(200)
 
       assert result["id"]
@@ -176,7 +176,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> post("/api/v1/stacks/#{stack.id}/trigger")
+      |> post("/v1/api/stacks/#{stack.id}/trigger")
       |> json_response(403)
     end
   end
@@ -190,7 +190,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
   #     result =
   #       conn
   #       |> add_auth_headers(user)
-  #       |> post("/api/v1/stacks/#{stack.id}/resync")
+  #       |> post("/v1/api/stacks/#{stack.id}/resync")
   #       |> json_response(200)
 
   #     assert result["id"]
@@ -203,7 +203,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
 
   #     conn
   #     |> add_auth_headers(user)
-  #     |> post("/api/v1/stacks/#{stack.id}/resync")
+  #     |> post("/v1/api/stacks/#{stack.id}/resync")
   #     |> json_response(403)
   #   end
   # end
@@ -216,7 +216,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> put("/api/v1/stacks/#{stack.id}/restore")
+        |> put("/v1/api/stacks/#{stack.id}/restore")
         |> json_response(200)
 
       assert result["id"] == stack.id
@@ -232,7 +232,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> put("/api/v1/stacks/#{stack.id}/restore")
+        |> put("/v1/api/stacks/#{stack.id}/restore")
         |> json_response(200)
 
       assert result["id"] == stack.id
@@ -246,7 +246,7 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> put("/api/v1/stacks/#{stack.id}/restore")
+      |> put("/v1/api/stacks/#{stack.id}/restore")
       |> json_response(403)
     end
   end

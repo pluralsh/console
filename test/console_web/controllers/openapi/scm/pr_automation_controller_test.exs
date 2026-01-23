@@ -12,7 +12,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/prautomations/#{pra.id}")
+        |> get("/v1/api/scm/prautomations/#{pra.id}")
         |> json_response(200)
 
       assert result["id"] == pra.id
@@ -30,7 +30,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/prautomations")
+        |> get("/v1/api/scm/prautomations")
         |> json_response(200)
 
       assert ids_equal(results, pras)
@@ -46,7 +46,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/prautomations?project_id=#{project1.id}")
+        |> get("/v1/api/scm/prautomations?project_id=#{project1.id}")
         |> json_response(200)
 
       assert ids_equal(results, pras1)
@@ -62,7 +62,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/prautomations?catalog_id=#{catalog1.id}")
+        |> get("/v1/api/scm/prautomations?catalog_id=#{catalog1.id}")
         |> json_response(200)
 
       assert ids_equal(results, pras1)
@@ -76,7 +76,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/prautomations?q=matching")
+        |> get("/v1/api/scm/prautomations?q=matching")
         |> json_response(200)
 
       assert length(results) == 1
@@ -90,7 +90,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/prautomations?page=1&per_page=2")
+        |> get("/v1/api/scm/prautomations?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2
@@ -107,7 +107,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/catalogs/#{catalog.id}/prautomations")
+        |> get("/v1/api/scm/catalogs/#{catalog.id}/prautomations")
         |> json_response(200)
 
       assert ids_equal(results, pras)
@@ -122,7 +122,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/catalogs/#{catalog.id}/prautomations?q=matching")
+        |> get("/v1/api/scm/catalogs/#{catalog.id}/prautomations?q=matching")
         |> json_response(200)
 
       assert length(results) == 1
@@ -137,7 +137,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/catalogs/#{catalog.id}/prautomations?page=1&per_page=2")
+        |> get("/v1/api/scm/catalogs/#{catalog.id}/prautomations?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2
@@ -155,7 +155,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_post("/api/v1/scm/prautomations/#{pra.id}/invoke", %{
+        |> json_post("/v1/api/scm/prautomations/#{pra.id}/invoke", %{
           branch: "feature-branch",
           context: %{key: "value"}
         })
@@ -172,7 +172,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> json_post("/api/v1/scm/prautomations/#{pra.id}/invoke", %{
+      |> json_post("/v1/api/scm/prautomations/#{pra.id}/invoke", %{
         branch: "feature-branch",
         context: %{key: "value"}
       })
