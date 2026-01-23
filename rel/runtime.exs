@@ -96,9 +96,8 @@ config :libcluster,
       strategy: Cluster.Strategy.Kubernetes,
       config: [
         mode: :ip,
-        kubernetes_ip_lookup_mode: :pods,
         kubernetes_node_basename: "console",
-        kubernetes_selector: "app.kubernetes.io/name=console,app.kubernetes.io/instance=console",
+        kubernetes_selector: "app=console",
         kubernetes_namespace: get_env("NAMESPACE"),
         polling_interval: 10_000
       ]
