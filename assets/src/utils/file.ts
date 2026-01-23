@@ -29,8 +29,12 @@ export function downloadAsFile(content, name, type = 'text') {
   download(url, name)
 }
 
+export function getExtensionFromFileName(fileName: string): string | undefined {
+  return fileName.split('.').pop()?.toLowerCase()
+}
+
 export function getLanguageFromFileName(fileName: string): string | undefined {
-  const extension = fileName.split('.').pop()?.toLowerCase()
+  const extension = getExtensionFromFileName(fileName)
 
   const languageMap: Record<string, string> = {
     yaml: 'yaml',

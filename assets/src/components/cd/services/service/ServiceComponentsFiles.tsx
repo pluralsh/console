@@ -12,12 +12,11 @@ import {
 import {
   Code,
   EmptyState,
-  FileIcon,
   Flex,
   FolderIcon,
   Tooltip,
 } from '@pluralsh/design-system'
-import { getLanguageFromFileName } from 'utils/file'
+import { getExtensionFromFileName, getLanguageFromFileName } from 'utils/file'
 import {
   useSetServiceComponentsChatButtonVisible,
   useSetServiceComponentsFiltersHidden,
@@ -120,6 +119,38 @@ type TreeNode = {
   isFile: boolean
   content?: string
   children: TreeNode[]
+}
+
+function FileTreeItemIcon({ fileName }: { fileName: string }): React.ReactNode {
+  const extension = getExtensionFromFileName(fileName)
+
+  return <FileTreeItemTextIcon extension={extension ?? ''} />
+}
+
+function FileTreeItemTextIcon({
+  extension,
+}: {
+  extension: string
+}): React.ReactNode {
+  const theme = useTheme()
+
+  return (
+    <div
+      css={{
+        width: 18,
+        height: 18,
+        color: theme.colors['text-success'],
+        fontFamily: 'Inter',
+        fontWeight: 600,
+        fontSize: 9,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {extension.toLowerCase().slice(0, 3)}
+    </div>
+  )
 }
 
 function buildTree(contentMap: Map<string, string>): TreeNode[] {
@@ -344,7 +375,7 @@ export function ComponentsFilesView() {
                 >
                   <TreeItemIcon>
                     {node.isFile ? (
-                      <FileIcon size={14} />
+                      <FileTreeItemIcon fileName={node.name} />
                     ) : (
                       <FolderIcon size={14} />
                     )}
