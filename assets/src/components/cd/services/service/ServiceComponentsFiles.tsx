@@ -138,7 +138,7 @@ function FileTreeItemTextIcon({
     <div
       css={{
         width: 18,
-        height: 18,
+        height: 12,
         color: theme.colors['text-success'],
         fontFamily: 'Inter',
         fontWeight: 600,
