@@ -16,6 +16,12 @@ spec:
     targetPort: http
     protocol: TCP
     name: http
+  {{- if .Values.aiProxy.enabled }}
+  - port: 8080
+    targetPort: nexus-http
+    protocol: TCP
+    name: nexus-http
+  {{- end }}
   selector:
     app.kubernetes.io/name: console
     app.kubernetes.io/instance: {{ .Release.Name }}

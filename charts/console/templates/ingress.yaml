@@ -34,12 +34,21 @@ spec:
             name: {{ .Release.Name }}-kas-service
             port:
               number: {{ .Values.kas.api.port }}
+      {{- if .Values.aiProxy.enabled }}
+      - path: {{ .Values.aiProxy.config.server.path }}
+        pathType: Prefix
+        backend:
+          service:
+            name: console
+            port:
+              name: nexus-http
+      {{- end }}
       - path: /
         pathType: Prefix
         backend:
-          service: 
+          service:
             name: console
-            port: 
+            port:
               name: http
 {{ if .Values.ingress.rewrite.enabled }}
 ---
@@ -110,15 +119,15 @@ spec:
       - path: /ext/kas
         pathType: Prefix
         backend:
-          service: 
+          service:
             name: console-kas-service
             port:
               number: 8180
       - path: /ext
         pathType: Prefix
         backend:
-          service: 
+          service:
             name: console
-            port: 
+            port:
               name: http
 {{ end }}

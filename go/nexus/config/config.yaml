@@ -1,0 +1,30 @@
+# Example configuration file for the nexus application
+server:
+  # HTTP server bind address
+  address: ":8080"
+
+  # Base path for all AI proxy requests
+  path: "/ai/proxy"
+
+  # Request timeouts
+  readTimeout: "30s"
+  idleTimeout: "120s"
+
+console:
+  # Console gRPC endpoint - REQUIRED
+  grpcEndpoint: "localhost:55510"
+
+  # How often to refresh console configuration
+  configTTL: "60s"
+
+  # Timeout for individual gRPC requests
+  requestTimeout: "10s"
+
+  # Connection retry settings
+  connectionRetry:
+    maxAttempts: 5
+    initialBackoff: "1s"
+    maxBackoff: "30s"
+
+observability:
+  logLevel: "debug"
