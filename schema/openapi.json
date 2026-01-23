@@ -296,17 +296,11 @@
             "type": "string"
           },
           "type": {
-            "description": "Type of agent session (terraform, kubernetes, provisioning, search, manifests, chat, research)",
+            "description": "Type of agent session (terraform, kubernetes)",
             "enum": [
               "terraform",
-              "kubernetes",
-              "provisioning",
-              "search",
-              "manifests",
-              "chat",
-              "research"
-            ],
-            "type": "string"
+              "kubernetes"
+            ]
           }
         },
         "required": [

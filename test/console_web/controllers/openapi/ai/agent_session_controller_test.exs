@@ -64,20 +64,16 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentSessionControllerTest do
   end
 
   describe "#create/2" do
-    test "creates an agent session", %{conn: conn} do
+    test "cannot create a provisioning agent session", %{conn: conn} do
       user = insert(:user)
 
-      result =
-        conn
-        |> add_auth_headers(user)
-        |> json_post("/api/v1/ai/sessions", %{
-          prompt: "Set up a kubernetes cluster in AWS",
-          type: "provisioning"
-        })
-        |> json_response(200)
-
-      assert result["id"]
-      assert result["type"] == "provisioning"
+      conn
+      |> add_auth_headers(user)
+      |> json_post("/api/v1/ai/sessions", %{
+        prompt: "Set up a kubernetes cluster in AWS",
+        type: "provisioning"
+      })
+      |> json_response(422)
     end
 
     test "creates a terraform agent session", %{conn: conn} do

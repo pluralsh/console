@@ -53,7 +53,7 @@ defmodule Console.OpenAPI.AI.AgentSessionInput do
     title: "AgentSessionInput",
     description: "Input for creating a new agent session to execute autonomous infrastructure tasks",
     properties: %{
-      type: ecto_enum(Console.Schema.AgentSession.Type, description: "Type of agent session (terraform, kubernetes, provisioning, search, manifests, chat, research)"),
+      type: enum(["terraform", "kubernetes"], description: "Type of agent session (terraform, kubernetes)"),
       prompt: string(description: "The prompt describing the task for the agent to perform"),
       plan_confirmed: boolean(description: "Whether the provisioning plan is pre-confirmed"),
       connection_id: string(description: "ID of the cloud connection to use for this session"),

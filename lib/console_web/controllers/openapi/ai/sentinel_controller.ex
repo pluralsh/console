@@ -59,8 +59,7 @@ defmodule ConsoleWeb.OpenAPI.AI.SentinelController do
   defp apply_filters(query, params) do
     Enum.reduce(params, query, fn
       {:status, status}, q when is_binary(status) ->
-        status_atom = String.to_existing_atom(status)
-        Sentinel.for_status(q, status_atom)
+        Sentinel.for_status(q, status)
       {:q, search}, q when is_binary(search) and byte_size(search) > 0 ->
         Sentinel.search(q, search)
       _, q -> q

@@ -56,7 +56,6 @@ defmodule ConsoleWeb.OpenAPI.AI.AgentRuntimeController do
 
   defp apply_filters(query, params) do
     Enum.reduce(params, query, fn
-      {:type, type}, q when is_atom(type) -> AgentRuntime.for_type(q, type)
       {:type, type}, q when is_binary(type) -> AgentRuntime.for_type(q, type)
       _, q -> q
     end)
