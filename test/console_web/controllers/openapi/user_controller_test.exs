@@ -30,5 +30,11 @@ defmodule ConsoleWeb.OpenAPI.UserControllerTest do
       assert result["email"] == user.email
       assert result["roles"]["admin"]
     end
+
+    test "it will 401 if you are not authenticated", %{conn: conn} do
+      conn
+      |> get("/v1/api/me")
+      |> json_response(401)
+    end
   end
 end
