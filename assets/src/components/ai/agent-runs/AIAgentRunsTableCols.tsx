@@ -28,12 +28,7 @@ const columnHelper = createColumnHelper<AgentRunFragment>()
 export const agentRunsCols = [
   columnHelper.accessor((run) => run.runtime?.type, {
     id: 'runtime',
-    cell: ({ getValue }) => (
-      <AgentRuntimeIcon
-        type={getValue()}
-        fullColor={false}
-      />
-    ),
+    cell: ({ getValue }) => <AgentRuntimeIcon type={getValue()} />,
   }),
   columnHelper.accessor((run) => run.prompt, {
     id: 'prompt',

@@ -59,7 +59,7 @@ export function AIAgentRuntimesSelector({
         placement="left"
         label={isLoading ? <RectangleSkeleton /> : placeholder}
         leftContent={
-          isLoading || !selectedRuntime ? undefined : <SelectedIcon />
+          isLoading || !selectedRuntime ? undefined : <SelectedIcon fullColor />
         }
         selectedKey={selectedRuntimeId ?? ''}
         onSelectionChange={(key) => setSelectedRuntimeId(key ? `${key}` : null)}
@@ -97,7 +97,7 @@ export function AIAgentRuntimesSelector({
             <ListBoxItem
               key={id}
               label={capitalize(name)}
-              leftContent={<Icon />}
+              leftContent={<Icon fullColor />}
             />
           )
         })}
