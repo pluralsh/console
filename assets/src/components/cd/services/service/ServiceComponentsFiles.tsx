@@ -273,7 +273,6 @@ export function ComponentsFilesView() {
   const theme = useTheme()
   const { service } = useServiceContext()
   const [selectedFile, setSelectedFile] = useState<ServiceFile>()
-  const [selectedFileId, setSelectedFileId] = useState<string | null>(null)
   const [parentOfSelectedId, setParentOfSelectedId] = useState<string | null>(
     null
   )
@@ -317,7 +316,7 @@ export function ComponentsFilesView() {
       data?.serviceTarball &&
       data.serviceTarball.length > 0 &&
       !hasAutoSelectedRef.current &&
-      !selectedFileId
+      !selectedFile?.path
     ) {
       // Get first file directly from serviceTarball
       const firstFile = data.serviceTarball.find(
@@ -329,16 +328,15 @@ export function ComponentsFilesView() {
           path: firstFile.path,
           content: firstFile.content,
         })
-        setSelectedFileId(firstFile.path)
         setParentOfSelectedId(parentId)
         hasAutoSelectedRef.current = true
       }
     }
-  }, [data?.serviceTarball, treeNodes, parentMap, selectedFileId])
+  }, [data?.serviceTarball, treeNodes, parentMap, selectedFile?.path])
 
   // Auto-expand parent directories when a file is selected
   useEffect(() => {
-    if (selectedFileId && parentOfSelectedId) {
+    if (selectedFile?.path && parentOfSelectedId) {
       const requiredExpanded: string[] = []
       let currentParentId: string | null = parentOfSelectedId
 
@@ -352,7 +350,7 @@ export function ComponentsFilesView() {
         return Array.from(merged)
       })
     }
-  }, [selectedFileId, parentOfSelectedId, parentMap])
+  }, [selectedFile?.path, parentOfSelectedId, parentMap])
 
   const handleItemSelection = useCallback(
     (_event: unknown, itemId: string, isSelected: boolean) => {
@@ -361,7 +359,6 @@ export function ComponentsFilesView() {
         const parentId = parentMap.get(itemId) ?? null
         if (node?.isFile && node.content) {
           setSelectedFile({ path: node.path, content: node.content })
-          setSelectedFileId(itemId)
           setParentOfSelectedId(parentId)
         }
       }
@@ -374,7 +371,7 @@ export function ComponentsFilesView() {
       nodes.map((node) => {
         const isParentOfSelected =
           !node.isFile && node.id === parentOfSelectedId
-        const isSelectedFile = node.isFile && node.id === selectedFileId
+        const isSelectedFile = node.isFile && node.id === selectedFile?.path
 
         return (
           <TreeItem
@@ -422,7 +419,7 @@ export function ComponentsFilesView() {
     return data?.serviceTarball && treeNodes.length > 0 ? (
       <StyledTreeView
         itemChildrenIndentation={12}
-        selectedItems={selectedFileId ? [selectedFileId] : []}
+        selectedItems={selectedFile?.path ? [selectedFile.path] : []}
         expandedItems={expandedItems}
         onExpandedItemsChange={(_event, itemIds) => setExpandedItems(itemIds)}
         onItemSelectionToggle={handleItemSelection}
@@ -434,7 +431,7 @@ export function ComponentsFilesView() {
     data,
     treeNodes,
     parentOfSelectedId,
-    selectedFileId,
+    selectedFile?.path,
     handleItemSelection,
     expandedItems,
   ])
