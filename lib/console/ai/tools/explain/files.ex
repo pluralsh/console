@@ -16,9 +16,10 @@ defmodule Console.AI.Tools.Explain.Files do
 
   def implement(%__MODULE__{}) do
     with {:svc, %Service{id: svc_id}} <- {:svc, Tool.parent()},
-         %User{} = user = Tool.actor(),
+         %User{} = user <- Tool.actor(),
          {:ok, files} <- Services.service_files(svc_id, user) do
       Jason.encode(%{files: Enum.map(files, fn %{path: path} -> path end)})
+      |> IO.inspect(label: "listing service files")
     else
       {:svc, _} -> {:error, "no service found"}
       err -> {:error, "internal error fetching files: #{inspect(err)}"}

@@ -1,17 +1,10 @@
 import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { memo, Suspense, useMemo, useState } from 'react'
-import {
-  Outlet,
-  useLocation,
-  useMatch,
-  useOutletContext,
-  useParams,
-} from 'react-router-dom'
+import { memo, ReactNode, Suspense, useMemo, useState } from 'react'
+import { Outlet, useLocation, useMatch, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import {
   ServiceDeploymentDetailsFragment,
-  ServiceDeploymentQuery,
   ServiceError,
   useFlowQuery,
   useServiceDeploymentQuery,
@@ -48,20 +41,12 @@ import {
 
 import { ServiceSelector } from '../ServiceSelector'
 
-import { ApolloQueryResult } from '@apollo/client'
 import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { serviceStatusToSeverity } from '../ServiceStatusChip'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 import { useServicePersonaType } from './settings/ServiceSettings'
-
-type ServiceContextType = {
-  service: ServiceDeploymentDetailsFragment
-  refetch: () => Promise<ApolloQueryResult<ServiceDeploymentQuery>>
-  isRefetching: boolean
-}
-
-export const useServiceContext = () => useOutletContext<ServiceContextType>()
+import { type ServiceDetailsContextType } from './ServiceDetailsContext'
 
 export const getServiceDetailsBreadcrumbs = ({
   cluster,
@@ -230,6 +215,8 @@ function ServiceDetailsBase() {
 
   const [isRefetching, setIsRefetching] = useState(false)
 
+  const [sidenavContent, setSidenavContent] = useState<ReactNode | null>(null)
+
   const {
     data: serviceData,
     error: serviceError,
@@ -303,12 +290,14 @@ function ServiceDetailsBase() {
               paddingBottom: theme.spacing.medium,
             }}
           >
-            <SideNavEntries
-              directory={directory}
-              pathname={pathname}
-              pathPrefix={pathPrefix}
-              docPageContext={docPageContext}
-            />
+            {sidenavContent || (
+              <SideNavEntries
+                directory={directory}
+                pathname={pathname}
+                pathPrefix={pathPrefix}
+                docPageContext={docPageContext}
+              />
+            )}
           </div>
         </div>
       </ResponsiveLayoutSidenavContainer>
@@ -326,7 +315,8 @@ function ServiceDetailsBase() {
                   return refetch().finally(() => setIsRefetching(false))
                 },
                 isRefetching,
-              } satisfies ServiceContextType
+                setSidenavContent,
+              } satisfies ServiceDetailsContextType
             }
           />
         ) : (

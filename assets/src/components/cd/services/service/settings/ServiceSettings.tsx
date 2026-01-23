@@ -21,10 +21,8 @@ import {
   SERVICE_SETTINGS_SECRETS_REL_PATH,
   SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH,
 } from 'routes/cdRoutesConsts'
-import {
-  getServiceDetailsBreadcrumbs,
-  useServiceContext,
-} from '../ServiceDetails'
+import { getServiceDetailsBreadcrumbs } from '../ServiceDetails'
+import { useServiceContext } from '../ServiceDetailsContext'
 
 type ServicePersonaType =
   | 'all-settings'

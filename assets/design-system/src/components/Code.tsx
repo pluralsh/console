@@ -43,6 +43,7 @@ type CodeProps = Omit<CardProps, 'children'> & {
   showHeader?: boolean
   tabs?: CodeTabData[]
   title?: ReactNode
+  preserveTitleCase?: boolean
   onSelectedTabChange?: (key: string) => void
   isStreaming?: boolean // currently just used to block mermaid from rendering mid-stream, but might have other uses later on
   setMermaidError?: (error: Nullable<Error>) => void
@@ -144,14 +145,15 @@ type CodeTabData = {
   content: string
 }
 
-const TitleArea = styled.div<{ $shrinkable: boolean }>(
-  ({ $shrinkable, theme }) => ({
+const TitleArea = styled.div<{ $shrinkable: boolean; $preserveCase?: boolean }>(
+  ({ $shrinkable, $preserveCase = false, theme }) => ({
     display: 'flex',
     flexShrink: $shrinkable ? 1 : 0,
     flexGrow: 1,
     gap: theme.spacing.xsmall,
     ...theme.partials.text.overline,
     color: 'text-light',
+    ...($preserveCase ? { textTransform: 'none' } : {}),
   })
 )
 
@@ -386,6 +388,7 @@ function CodeUnstyled({
   showHeader,
   tabs,
   title,
+  preserveTitleCase,
   onSelectedTabChange,
   isStreaming = false,
   setMermaidError,
@@ -423,7 +426,10 @@ function CodeUnstyled({
 
   const titleArea =
     (tabs && title) || !tabs ? (
-      <TitleArea $shrinkable={tabInterface === 'dropdown' || !tabs}>
+      <TitleArea
+        $shrinkable={tabInterface === 'dropdown' || !tabs}
+        $preserveCase={preserveTitleCase}
+      >
         <FileIcon />
         {(title || language) && <div>{title || language}</div>}
       </TitleArea>

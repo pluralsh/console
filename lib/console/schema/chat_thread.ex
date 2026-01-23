@@ -6,7 +6,8 @@ defmodule Console.Schema.ChatThread do
     AiInsight,
     Flow,
     AgentSession,
-    InfraResearch
+    InfraResearch,
+    Service
   }
 
   @max_threads 50

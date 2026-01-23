@@ -14498,6 +14498,15 @@ export type UsageQueryVariables = Exact<{
 
 export type UsageQuery = { __typename?: 'RootQueryType', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null };
 
+export type ServiceFileFragment = { __typename?: 'ServiceFile', path: string, content: string };
+
+export type ServiceTarballQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ServiceTarballQuery = { __typename?: 'RootQueryType', serviceTarball?: Array<{ __typename?: 'ServiceFile', path: string, content: string } | null> | null };
+
 export type GitRepositoryFragment = { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null };
 
 export type HelmRepositoryFragment = { __typename?: 'HelmRepository', id: string, url: string, health?: GitHealth | null, provider?: HelmAuthProvider | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null };
@@ -18291,6 +18300,12 @@ export const ComponentMetricsFragmentFragmentDoc = gql`
   }
 }
     ${MetricResponseFragmentDoc}`;
+export const ServiceFileFragmentDoc = gql`
+    fragment ServiceFile on ServiceFile {
+  path
+  content
+}
+    `;
 export const HelmRepositoryFragmentDoc = gql`
     fragment HelmRepository on HelmRepository {
   id
@@ -26027,6 +26042,46 @@ export type UsageQueryHookResult = ReturnType<typeof useUsageQuery>;
 export type UsageLazyQueryHookResult = ReturnType<typeof useUsageLazyQuery>;
 export type UsageSuspenseQueryHookResult = ReturnType<typeof useUsageSuspenseQuery>;
 export type UsageQueryResult = Apollo.QueryResult<UsageQuery, UsageQueryVariables>;
+export const ServiceTarballDocument = gql`
+    query ServiceTarball($id: ID!) {
+  serviceTarball(id: $id) {
+    ...ServiceFile
+  }
+}
+    ${ServiceFileFragmentDoc}`;
+
+/**
+ * __useServiceTarballQuery__
+ *
+ * To run a query within a React component, call `useServiceTarballQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceTarballQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceTarballQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useServiceTarballQuery(baseOptions: Apollo.QueryHookOptions<ServiceTarballQuery, ServiceTarballQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceTarballQuery, ServiceTarballQueryVariables>(ServiceTarballDocument, options);
+      }
+export function useServiceTarballLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceTarballQuery, ServiceTarballQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceTarballQuery, ServiceTarballQueryVariables>(ServiceTarballDocument, options);
+        }
+export function useServiceTarballSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceTarballQuery, ServiceTarballQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceTarballQuery, ServiceTarballQueryVariables>(ServiceTarballDocument, options);
+        }
+export type ServiceTarballQueryHookResult = ReturnType<typeof useServiceTarballQuery>;
+export type ServiceTarballLazyQueryHookResult = ReturnType<typeof useServiceTarballLazyQuery>;
+export type ServiceTarballSuspenseQueryHookResult = ReturnType<typeof useServiceTarballSuspenseQuery>;
+export type ServiceTarballQueryResult = Apollo.QueryResult<ServiceTarballQuery, ServiceTarballQueryVariables>;
 export const GitRepositoriesDocument = gql`
     query GitRepositories {
   gitRepositories(first: 100) {
@@ -35610,6 +35665,7 @@ export const namedOperations = {
     ClusterNetworkGraph: 'ClusterNetworkGraph',
     ServiceDeploymentComponentMetrics: 'ServiceDeploymentComponentMetrics',
     Usage: 'Usage',
+    ServiceTarball: 'ServiceTarball',
     GitRepositories: 'GitRepositories',
     HelmRepositories: 'HelmRepositories',
     FluxHelmRepositories: 'FluxHelmRepositories',
@@ -35986,6 +36042,7 @@ export const namedOperations = {
     NetworkMeshStatistics: 'NetworkMeshStatistics',
     NetworkMeshEdge: 'NetworkMeshEdge',
     ComponentMetricsFragment: 'ComponentMetricsFragment',
+    ServiceFile: 'ServiceFile',
     GitRepository: 'GitRepository',
     HelmRepository: 'HelmRepository',
     FluxHelmRepository: 'FluxHelmRepository',

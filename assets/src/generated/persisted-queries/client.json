@@ -577,6 +577,11 @@
          "name": "Usage",
          "body": "query Usage($cpu: String!, $mem: String!, $podCpu: String!, $podMem: String!, $step: String!, $offset: Int!, $clusterId: ID) {\n  cpu: metric(clusterId: $clusterId, query: $cpu, offset: $offset, step: $step) {\n    ...MetricResponse\n    __typename\n  }\n  mem: metric(clusterId: $clusterId, query: $mem, offset: $offset, step: $step) {\n    ...MetricResponse\n    __typename\n  }\n  podCpu: metric(\n    clusterId: $clusterId\n    query: $podCpu\n    offset: $offset\n    step: $step\n  ) {\n    ...MetricResponse\n    __typename\n  }\n  podMem: metric(\n    clusterId: $clusterId\n    query: $podMem\n    offset: $offset\n    step: $step\n  ) {\n    ...MetricResponse\n    __typename\n  }\n}\n\nfragment MetricResponse on MetricResponse {\n  metric\n  values {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:f8a56663b1efc6ea115b320e883c29b431b1f3ae7f0faa51602d8c0076f34fa8": {
+         "type": "query",
+         "name": "ServiceTarball",
+         "body": "query ServiceTarball($id: ID!) {\n  serviceTarball(id: $id) {\n    ...ServiceFile\n    __typename\n  }\n}\n\nfragment ServiceFile on ServiceFile {\n  path\n  content\n  __typename\n}"
+      },
       "sha256:1648935a257968c0342ce938990f4d23ed3bdf798f5b50cd1085f35eab3d4f2f": {
          "type": "query",
          "name": "GitRepositories",

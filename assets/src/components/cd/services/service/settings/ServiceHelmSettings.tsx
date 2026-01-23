@@ -10,7 +10,7 @@ import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { ChartForm } from '../../deployModal/DeployServiceSettingsHelm'
 import { ServiceSettingsHelmValues } from '../../deployModal/DeployServiceSettingsHelmValues'
-import { useServiceContext } from '../ServiceDetails'
+import { useServiceContext } from '../ServiceDetailsContext'
 
 export function ServiceHelmSettings() {
   const { me } = useLogin()
