@@ -55,7 +55,7 @@ export type SpacerProps<T = SemanticSpacingKey | number> = {
 export function resolveSpacersAndSanitizeCss(
   props: Record<string, any> & { css?: StyledObject },
   { spacing }: DefaultTheme
-) {
+): { rest: Record<string, any>; css: StyledObject } {
   const spacerCssProps: StyledObject = {}
   const rest: Record<string, any> = {}
   Object.entries(props).forEach(([propKey, propValue]) => {

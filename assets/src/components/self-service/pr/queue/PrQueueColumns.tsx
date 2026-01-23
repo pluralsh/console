@@ -16,7 +16,6 @@ import { createColumnHelper } from '@tanstack/react-table'
 import capitalize from 'lodash/capitalize'
 import { ComponentProps, ReactElement, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useTheme } from 'styled-components'
 
 import { ColClusterContent } from 'components/cd/clusters/ClustersColumns'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -86,9 +85,6 @@ export const ColTitle = columnHelper.accessor(({ node }) => node?.title, {
   id: 'title',
   header: 'PR Title',
   meta: { truncate: true },
-  cell: function Cell({ getValue }) {
-    return <>{getValue()}</>
-  },
 })
 
 export function PrStatusChip({
@@ -260,7 +256,6 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',
   header: '',
   cell: function Cell({ table, getValue }) {
-    const theme = useTheme()
     const pullReq = getValue()
     const refetch = table.options?.meta?.refetch || (() => {})
     const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
@@ -275,7 +270,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
         css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}
       >
         <IconFrame
-          icon={<ArrowTopRightIcon color={theme.colors['icon-light']} />}
+          icon={<ArrowTopRightIcon color="icon-light" />}
           as="a"
           href={pullReq.url}
           target="_blank"
@@ -310,6 +305,28 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
           onClose={() => setMenuKey(MenuItemKey.None)}
         />
       </div>
+    )
+  },
+})
+
+export const ColLinkout = columnHelper.accessor(({ node }) => node?.url, {
+  id: 'linkout',
+  header: '',
+  cell: function Cell({ getValue }) {
+    const url = getValue()
+
+    if (!url) return null
+    return (
+      <IconFrame
+        clickable
+        type="secondary"
+        tooltip="View pull request"
+        icon={<ArrowTopRightIcon color="icon-light" />}
+        as={Link}
+        to={url}
+        target="_blank"
+        rel="noopener noreferrer"
+      />
     )
   },
 })

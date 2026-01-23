@@ -14,7 +14,7 @@ import { truncate } from 'lodash'
 import { useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable.ts'
-import { AgentRuntimeIconFrame } from './AIAgentRuntimeIcon.tsx'
+import { AgentRuntimeIcon } from './AIAgentRuntimeIcon.tsx'
 import { AIAgentRuntimePermissionsModal } from './AIAgentRuntimePermissionsModal.tsx'
 
 export function AIAgentRuntimes() {
@@ -66,7 +66,7 @@ const columns = [
           align="center"
           gap="small"
         >
-          <AgentRuntimeIconFrame type={type} />
+          <AgentRuntimeIcon type={type} />
           <span>{truncate(name, { length: 60 })}</span>
           {isDefault && (
             <Chip
@@ -114,7 +114,6 @@ const columns = [
             icon={<PeopleIcon />}
             onClick={() => setOpen(true)}
             tooltip="Manage permissions"
-            type="secondary"
           />
           <AIAgentRuntimePermissionsModal
             open={open}

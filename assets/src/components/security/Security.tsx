@@ -62,6 +62,7 @@ const HeaderWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
   minHeight: 'fit-content',
+  flexShrink: 0,
   alignItems: 'center',
   gap: theme.spacing.medium,
   overflow: 'hidden',

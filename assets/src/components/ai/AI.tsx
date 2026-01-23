@@ -36,13 +36,13 @@ import { AIDisabledState } from './AIThreads'
 const DISMISSED_AI_ENABLED_DIALOG_KEY = 'dismissedAIEnabledDialog'
 
 const getDirectory = (agentEnabled: boolean) => [
-  { label: 'Agent sessions', path: AI_AGENT_SESSIONS_REL_PATH },
-  { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
-  { label: 'Chat threads', path: AI_THREADS_REL_PATH },
-  { label: 'Infra research', path: AI_INFRA_RESEARCH_REL_PATH },
   ...(agentEnabled
     ? [{ label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH }]
     : []),
+  { label: 'Infra research', path: AI_INFRA_RESEARCH_REL_PATH },
+  { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
+  { label: 'Agent sessions', path: AI_AGENT_SESSIONS_REL_PATH },
+  { label: 'Chat threads', path: AI_THREADS_REL_PATH },
 ]
 
 export const getAIBreadcrumbs = (tab: string = '') => [
