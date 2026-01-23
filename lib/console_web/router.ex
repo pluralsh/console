@@ -163,6 +163,10 @@ defmodule ConsoleWeb.Router do
 
         get "/projects", ProjectController, :index
         get "/projects/:id", ProjectController, :show
+
+        get "/catalogs", CatalogController, :index
+        get "/catalogs/:id", CatalogController, :show
+        get "/catalogs/:id/prautomations", CatalogController, :pr_automations
       end
     end
 
