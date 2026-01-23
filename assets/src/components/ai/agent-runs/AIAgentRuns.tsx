@@ -7,7 +7,7 @@ import { AgentRunFragment, useAgentRunsQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { agentRunExamples, AIExampleCard } from '../AIExampleCard'
 import { AIAgentRunInput } from './AIAgentRunInput'
@@ -16,6 +16,7 @@ import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
 import { CreateAgentRunModal } from './CreateAgentRun'
 
 export function AIAgentRuns() {
+  const { spacing } = useTheme()
   const [selectedRuntimeId, setSelectedRuntimeId] = useState<Nullable<string>>()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -38,6 +39,7 @@ export function AIAgentRuns() {
       direction="column"
       gap="xlarge"
       overflow="auto"
+      paddingRight={spacing.small}
     >
       <PromptSectionSC>
         <StackedText
@@ -133,6 +135,6 @@ const PromptSectionSC = styled.div(({ theme }) => ({
   gap: theme.spacing.large,
   paddingRight: 160,
   [`@container (max-width: ${theme.breakpoints.desktop}px)`]: {
-    paddingRight: theme.spacing.small,
+    paddingRight: 0,
   },
 }))

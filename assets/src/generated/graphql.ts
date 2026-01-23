@@ -13359,6 +13359,8 @@ export type AgentRunFragment = { __typename?: 'AgentRun', id: string, status: Ag
 
 export type AgentRuntimeFragment = { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
+export type AgentRunRepositoryFragment = { __typename?: 'AgentRunRepository', id: string, url: string, lastUsedAt?: string | null };
+
 export type AgentMessageFragment = { __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null };
 
 export type AgentMessageMetadataFragment = { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null };
@@ -13405,6 +13407,24 @@ export type AgentRuntimeQueryVariables = Exact<{
 
 export type AgentRuntimeQuery = { __typename?: 'RootQueryType', agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
+export type AgentRunPodLogsQueryVariables = Exact<{
+  runId: Scalars['ID']['input'];
+  container: Scalars['String']['input'];
+  sinceSeconds: Scalars['Int']['input'];
+}>;
+
+
+export type AgentRunPodLogsQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', pod?: { __typename?: 'Pod', logs?: Array<string | null> | null } | null } | null };
+
+export type AgentRunRepositoriesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type AgentRunRepositoriesQuery = { __typename?: 'RootQueryType', agentRunRepositories?: { __typename?: 'AgentRunRepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AgentRunRepositoryEdge', node?: { __typename?: 'AgentRunRepository', id: string, url: string, lastUsedAt?: string | null } | null } | null> | null } | null };
+
 export type CreateAgentRunMutationVariables = Exact<{
   runtimeId: Scalars['ID']['input'];
   attributes: AgentRunAttributes;
@@ -13433,15 +13453,6 @@ export type AgentRunDeltaSubscriptionVariables = Exact<{
 
 
 export type AgentRunDeltaSubscription = { __typename?: 'RootSubscriptionType', agentRunDelta?: { __typename?: 'AgentRunDelta', delta?: Delta | null, payload?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, creator?: string | null, insertedAt?: string | null, status?: PrStatus | null, title?: string | null, updatedAt?: string | null, url: string } | null> | null } | null } | null };
-
-export type AgentRunPodLogsQueryVariables = Exact<{
-  runId: Scalars['ID']['input'];
-  container: Scalars['String']['input'];
-  sinceSeconds: Scalars['Int']['input'];
-}>;
-
-
-export type AgentRunPodLogsQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', pod?: { __typename?: 'Pod', logs?: Array<string | null> | null } | null } | null };
 
 export type ChatFragment = { __typename?: 'Chat', id: string, content?: string | null, role: AiRole, seq: number, type: ChatType, confirm?: boolean | null, confirmedAt?: string | null, insertedAt?: string | null, updatedAt?: string | null, attributes?: { __typename?: 'ChatTypeAttributes', file?: { __typename?: 'ChatFile', name?: string | null } | null, tool?: { __typename?: 'ChatTool', name?: string | null, arguments?: Record<string, unknown> | null } | null, prCall?: { __typename?: 'PrCallAttributes', context?: Record<string, unknown> | null, branch?: string | null } | null } | null, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, patch?: string | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, prAutomation?: { __typename?: 'PrAutomation', id: string, name: string, icon?: string | null, darkIcon?: string | null, documentation?: string | null, addon?: string | null, identifier?: string | null, role?: PrRole | null, cluster?: { __typename?: 'Cluster', protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null, azure?: { __typename?: 'AzureDevopsConfiguration', username: string, organization: string, project: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, displayName?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, page?: number | null, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null, confirmation?: { __typename?: 'PrConfirmation', text?: string | null, checklist?: Array<{ __typename?: 'PrChecklist', label: string } | null> | null } | null } | null, server?: { __typename?: 'McpServer', id: string, name: string } | null };
 
@@ -16841,6 +16852,13 @@ export const AgentRuntimeFragmentDoc = gql`
 }
     ${ClusterTinyFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
+export const AgentRunRepositoryFragmentDoc = gql`
+    fragment AgentRunRepository on AgentRunRepository {
+  id
+  url
+  lastUsedAt
+}
+    `;
 export const AgentMessageDeltaFragmentDoc = gql`
     fragment AgentMessageDelta on AgentMessageDelta {
   delta
@@ -21432,6 +21450,100 @@ export type AgentRuntimeQueryHookResult = ReturnType<typeof useAgentRuntimeQuery
 export type AgentRuntimeLazyQueryHookResult = ReturnType<typeof useAgentRuntimeLazyQuery>;
 export type AgentRuntimeSuspenseQueryHookResult = ReturnType<typeof useAgentRuntimeSuspenseQuery>;
 export type AgentRuntimeQueryResult = Apollo.QueryResult<AgentRuntimeQuery, AgentRuntimeQueryVariables>;
+export const AgentRunPodLogsDocument = gql`
+    query AgentRunPodLogs($runId: ID!, $container: String!, $sinceSeconds: Int!) {
+  agentRun(id: $runId) {
+    pod {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
+    }
+  }
+}
+    `;
+
+/**
+ * __useAgentRunPodLogsQuery__
+ *
+ * To run a query within a React component, call `useAgentRunPodLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentRunPodLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentRunPodLogsQuery({
+ *   variables: {
+ *      runId: // value for 'runId'
+ *      container: // value for 'container'
+ *      sinceSeconds: // value for 'sinceSeconds'
+ *   },
+ * });
+ */
+export function useAgentRunPodLogsQuery(baseOptions: Apollo.QueryHookOptions<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>(AgentRunPodLogsDocument, options);
+      }
+export function useAgentRunPodLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>(AgentRunPodLogsDocument, options);
+        }
+export function useAgentRunPodLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>(AgentRunPodLogsDocument, options);
+        }
+export type AgentRunPodLogsQueryHookResult = ReturnType<typeof useAgentRunPodLogsQuery>;
+export type AgentRunPodLogsLazyQueryHookResult = ReturnType<typeof useAgentRunPodLogsLazyQuery>;
+export type AgentRunPodLogsSuspenseQueryHookResult = ReturnType<typeof useAgentRunPodLogsSuspenseQuery>;
+export type AgentRunPodLogsQueryResult = Apollo.QueryResult<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>;
+export const AgentRunRepositoriesDocument = gql`
+    query AgentRunRepositories($after: String, $first: Int = 100, $q: String) {
+  agentRunRepositories(after: $after, first: $first, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AgentRunRepository
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${AgentRunRepositoryFragmentDoc}`;
+
+/**
+ * __useAgentRunRepositoriesQuery__
+ *
+ * To run a query within a React component, call `useAgentRunRepositoriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentRunRepositoriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentRunRepositoriesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      q: // value for 'q'
+ *   },
+ * });
+ */
+export function useAgentRunRepositoriesQuery(baseOptions?: Apollo.QueryHookOptions<AgentRunRepositoriesQuery, AgentRunRepositoriesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AgentRunRepositoriesQuery, AgentRunRepositoriesQueryVariables>(AgentRunRepositoriesDocument, options);
+      }
+export function useAgentRunRepositoriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentRunRepositoriesQuery, AgentRunRepositoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AgentRunRepositoriesQuery, AgentRunRepositoriesQueryVariables>(AgentRunRepositoriesDocument, options);
+        }
+export function useAgentRunRepositoriesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentRunRepositoriesQuery, AgentRunRepositoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AgentRunRepositoriesQuery, AgentRunRepositoriesQueryVariables>(AgentRunRepositoriesDocument, options);
+        }
+export type AgentRunRepositoriesQueryHookResult = ReturnType<typeof useAgentRunRepositoriesQuery>;
+export type AgentRunRepositoriesLazyQueryHookResult = ReturnType<typeof useAgentRunRepositoriesLazyQuery>;
+export type AgentRunRepositoriesSuspenseQueryHookResult = ReturnType<typeof useAgentRunRepositoriesSuspenseQuery>;
+export type AgentRunRepositoriesQueryResult = Apollo.QueryResult<AgentRunRepositoriesQuery, AgentRunRepositoriesQueryVariables>;
 export const CreateAgentRunDocument = gql`
     mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {
   createAgentRun(runtimeId: $runtimeId, attributes: $attributes) {
@@ -21579,50 +21691,6 @@ export function useAgentRunDeltaSubscription(baseOptions: Apollo.SubscriptionHoo
       }
 export type AgentRunDeltaSubscriptionHookResult = ReturnType<typeof useAgentRunDeltaSubscription>;
 export type AgentRunDeltaSubscriptionResult = Apollo.SubscriptionResult<AgentRunDeltaSubscription>;
-export const AgentRunPodLogsDocument = gql`
-    query AgentRunPodLogs($runId: ID!, $container: String!, $sinceSeconds: Int!) {
-  agentRun(id: $runId) {
-    pod {
-      logs(container: $container, sinceSeconds: $sinceSeconds)
-    }
-  }
-}
-    `;
-
-/**
- * __useAgentRunPodLogsQuery__
- *
- * To run a query within a React component, call `useAgentRunPodLogsQuery` and pass it any options that fit your needs.
- * When your component renders, `useAgentRunPodLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useAgentRunPodLogsQuery({
- *   variables: {
- *      runId: // value for 'runId'
- *      container: // value for 'container'
- *      sinceSeconds: // value for 'sinceSeconds'
- *   },
- * });
- */
-export function useAgentRunPodLogsQuery(baseOptions: Apollo.QueryHookOptions<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>(AgentRunPodLogsDocument, options);
-      }
-export function useAgentRunPodLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>(AgentRunPodLogsDocument, options);
-        }
-export function useAgentRunPodLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>(AgentRunPodLogsDocument, options);
-        }
-export type AgentRunPodLogsQueryHookResult = ReturnType<typeof useAgentRunPodLogsQuery>;
-export type AgentRunPodLogsLazyQueryHookResult = ReturnType<typeof useAgentRunPodLogsLazyQuery>;
-export type AgentRunPodLogsSuspenseQueryHookResult = ReturnType<typeof useAgentRunPodLogsSuspenseQuery>;
-export type AgentRunPodLogsQueryResult = Apollo.QueryResult<AgentRunPodLogsQuery, AgentRunPodLogsQueryVariables>;
 export const ChatThreadsDocument = gql`
     query ChatThreads($first: Int = 100, $last: Int, $after: String, $before: String, $q: String) {
   chatThreads(first: $first, last: $last, after: $after, before: $before, q: $q) {
@@ -35481,6 +35549,7 @@ export const namedOperations = {
     AgentRuntimes: 'AgentRuntimes',
     AgentRuntime: 'AgentRuntime',
     AgentRunPodLogs: 'AgentRunPodLogs',
+    AgentRunRepositories: 'AgentRunRepositories',
     ChatThreads: 'ChatThreads',
     ChatAgentSession: 'ChatAgentSession',
     ChatThreadDetails: 'ChatThreadDetails',
@@ -35828,6 +35897,7 @@ export const namedOperations = {
     AgentRunTiny: 'AgentRunTiny',
     AgentRun: 'AgentRun',
     AgentRuntime: 'AgentRuntime',
+    AgentRunRepository: 'AgentRunRepository',
     AgentMessage: 'AgentMessage',
     AgentMessageMetadata: 'AgentMessageMetadata',
     AgentMessageCost: 'AgentMessageCost',

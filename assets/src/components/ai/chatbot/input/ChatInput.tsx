@@ -240,7 +240,7 @@ export function ChatInputSimple({
         onEnter={handleSubmit}
         disabled={loading || disabled}
       />
-      {options}
+      <div css={{ width: '100%', paddingRight: spacing.xlarge }}>{options}</div>
       <ChatSubmitButton
         loading={loading}
         loadingIndicator={<SpinnerAlt color="icon-xlight" />}

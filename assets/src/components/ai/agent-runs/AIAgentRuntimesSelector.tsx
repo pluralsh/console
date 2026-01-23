@@ -56,6 +56,7 @@ export function AIAgentRuntimesSelector({
         isOpen={isOpen}
         onOpenChange={setIsOpen}
         width={type === 'standard' ? 240 : 160}
+        placement="left"
         label={isLoading ? <RectangleSkeleton /> : placeholder}
         leftContent={
           isLoading || !selectedRuntime ? undefined : <SelectedIcon />

@@ -164,9 +164,7 @@ export function ChatbotHeader() {
         )}
         {viewType === AIViewTypes.InfraResearch &&
           researchData?.infraResearch?.status && (
-            <RunStatusChip
-              status={researchData.infraResearch.status}
-            />
+            <RunStatusChip status={researchData.infraResearch.status} />
           )}
       </SubHeaderSC>
       <Toast

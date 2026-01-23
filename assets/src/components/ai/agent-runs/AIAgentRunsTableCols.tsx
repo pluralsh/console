@@ -4,7 +4,6 @@ import {
   IconFrame,
   Modal,
   PrOpenIcon,
-  SmallPodIcon,
   Table,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -90,27 +89,32 @@ export const agentRunsCols = [
       )
     },
   }),
-  columnHelper.accessor((run) => run.podReference, {
-    id: 'podReference',
-    cell: function Cell({ getValue }) {
-      const { name, namespace } = getValue() ?? {}
-      return (
-        <IconFrame
-          type="secondary"
-          clickable
-          tooltip="View pod details"
-          icon={<SmallPodIcon color="icon-light" />}
-          as={Link}
-          to={`TODO: add pod details path`}
-        />
-      )
-    },
-  }),
+  // columnHelper.accessor((run) => run.podReference, {
+  //   id: 'podReference',
+  //   cell: function Cell({ getValue }) {
+  //     const { name, namespace } = getValue() ?? {}
+  //     return (
+  //       <IconFrame
+  //         type="secondary"
+  //         clickable
+  //         tooltip="View pod details"
+  //         icon={<SmallPodIcon color="icon-light" />}
+  //         as={Link}
+  //         to={`TODO: add pod details path`}
+  //       />
+  //     )
+  //   },
+  // }),
   columnHelper.accessor((run) => run.mode, {
     id: 'mode',
     enableSorting: true,
     cell: ({ getValue }) => (
-      <Chip severity="info">{capitalize(getValue())}</Chip>
+      <Chip
+        severity="info"
+        css={{ alignSelf: 'flex-end' }}
+      >
+        {capitalize(getValue())}
+      </Chip>
     ),
   }),
   columnHelper.accessor((run) => run.status, {
@@ -121,7 +125,7 @@ export const agentRunsCols = [
         <RunStatusChip
           fillLevel={2}
           status={getValue()}
-          runningText="Running"
+          css={{ alignSelf: 'flex-end' }}
         />
       )
     },

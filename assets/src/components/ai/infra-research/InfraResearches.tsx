@@ -74,9 +74,11 @@ export function InfraResearches() {
           secondColor="text-light"
           gap="xsmall"
         />
-        <Divider backgroundColor="border" />
         {noExistingData && (
-          <Title2H1>What is your investigation question?</Title2H1>
+          <>
+            <Divider backgroundColor="border" />
+            <Title2H1>What is your investigation question?</Title2H1>
+          </>
         )}
         <InfraResearchInput />
         <Flex
