@@ -113,8 +113,9 @@ const TreeItemText = styled.span({
 })
 
 const FILE_TYPE_ICON_PATH = '/file-type-icons' as const
+const FILE_ICON_SIZE = 18
 
-const FILE_TYPE_ICONS: Record<string, string> = {
+const FILE_TYPE_ICONS: Readonly<Record<string, string>> = {
   dockerfile: `${FILE_TYPE_ICON_PATH}/file_type_docker.svg`,
   helmignore: `${FILE_TYPE_ICON_PATH}/file_type_helm.svg`,
   json: `${FILE_TYPE_ICON_PATH}/file_type_json.svg`,
@@ -129,16 +130,7 @@ const FILE_TYPE_ICONS: Record<string, string> = {
   tpl: `${FILE_TYPE_ICON_PATH}/file_type_templ.svg`,
   tpl_: `${FILE_TYPE_ICON_PATH}/file_type_templ.svg`,
   txt: `${FILE_TYPE_ICON_PATH}/file_type_text.svg`,
-}
-
-type TreeNode = {
-  id: string
-  name: string
-  path: string
-  isFile: boolean
-  content?: string
-  children: TreeNode[]
-}
+} as const
 
 function FileTreeItemIcon({ fileName }: { fileName: string }): React.ReactNode {
   const extension = getExtensionFromFileName(fileName)
@@ -150,9 +142,9 @@ function FileTreeItemIcon({ fileName }: { fileName: string }): React.ReactNode {
     return (
       <img
         src={iconPath}
-        alt={extension}
-        width={18}
-        height={18}
+        alt={`${extension} file icon`}
+        width={FILE_ICON_SIZE}
+        height={FILE_ICON_SIZE}
       />
     )
   }
@@ -170,8 +162,8 @@ function FileTreeItemTextIcon({
   return (
     <div
       css={{
-        width: 18,
-        height: 18,
+        width: FILE_ICON_SIZE,
+        height: FILE_ICON_SIZE,
         color: theme.colors['text-success'],
         fontFamily: 'Inter',
         fontWeight: 600,
@@ -186,13 +178,26 @@ function FileTreeItemTextIcon({
   )
 }
 
+type TreeNode = {
+  id: string
+  name: string
+  path: string
+  isFile: boolean
+  content?: string
+  children: TreeNode[]
+}
+
+type TreeNodeBuilder = Omit<TreeNode, 'children'> & {
+  children: Record<string, TreeNodeBuilder>
+}
+
 function buildTree(contentMap: Map<string, string>): TreeNode[] {
-  const root: Record<string, TreeNode> = {}
+  const root: Record<string, TreeNodeBuilder> = {}
   const paths = Array.from(contentMap.keys())
 
   paths.forEach((path) => {
     const parts = path.split('/')
-    let currentLevel: Record<string, TreeNode> = root
+    let currentLevel: Record<string, TreeNodeBuilder> = root
 
     parts.forEach((part, index) => {
       const currentPath = parts.slice(0, index + 1).join('/')
@@ -205,76 +210,63 @@ function buildTree(contentMap: Map<string, string>): TreeNode[] {
           path: currentPath,
           isFile,
           content: isFile ? contentMap.get(currentPath) : undefined,
-          children: [],
+          children: {},
         }
       }
 
       if (!isFile) {
-        currentLevel = currentLevel[part].children as unknown as Record<
-          string,
-          TreeNode
-        >
+        currentLevel = currentLevel[part].children
       }
     })
   })
 
   // Convert nested object structure to array-based tree and collapse single-child folders
-  const objectToArray = (obj: Record<string, TreeNode>): TreeNode[] =>
+  const objectToArray = (obj: Record<string, TreeNodeBuilder>): TreeNode[] =>
     Object.values(obj).map((node) => ({
       ...node,
-      children: node.isFile
-        ? []
-        : objectToArray(node.children as unknown as Record<string, TreeNode>),
+      children: node.isFile ? [] : objectToArray(node.children),
     }))
 
   return collapseSingleChildFolders(objectToArray(root))
 }
 
+// Collapse single-child folders into a single node.
+// This is used to simplify the tree view and make it more readable.
 function collapseSingleChildFolders(nodes: TreeNode[]): TreeNode[] {
   return nodes.map((node) => {
     if (node.isFile) {
       return node
     }
 
-    // Recursively process children first
+    // Recursively process children first.
     const processedChildren = collapseSingleChildFolders(node.children)
 
-    // If this folder has only one child and that child is also a folder, collapse them
+    // If this folder has only one child and that child is also a folder, collapse them.
     if (processedChildren.length === 1 && !processedChildren[0].isFile) {
       const child = processedChildren[0]
-      return {
-        ...child,
-        name: `${node.name}/${child.name}`,
-        id: node.id, // Keep the original parent's id as the collapsed node id
-      }
+      return { ...child, name: `${node.name}/${child.name}`, id: node.id }
     }
 
-    return {
-      ...node,
-      children: processedChildren,
-    }
+    return { ...node, children: processedChildren }
   })
 }
 
-function findNodeAndParent(
+// Build a lookup map for efficient node access.
+function buildNodeLookup(
   nodes: TreeNode[],
-  targetId: string,
-  parentId: string | null = null
-): { node: TreeNode | undefined; parentId: string | null } {
-  for (const node of nodes) {
-    if (node.id === targetId) {
-      return { node, parentId }
-    }
-
+  parentMap: Map<string, string | null> = new Map(),
+  nodeMap: Map<string, TreeNode> = new Map()
+): { nodeMap: Map<string, TreeNode>; parentMap: Map<string, string | null> } {
+  nodes.forEach((node) => {
+    nodeMap.set(node.id, node)
     if (node.children.length > 0) {
-      const result = findNodeAndParent(node.children, targetId, node.id)
-      if (result.node) {
-        return result
-      }
+      node.children.forEach((child) => {
+        parentMap.set(child.id, node.id)
+      })
+      buildNodeLookup(node.children, parentMap, nodeMap)
     }
-  }
-
-  return { node: undefined, parentId: null }
+  })
+  return { nodeMap, parentMap }
 }
 
 export function ComponentsFilesView() {
@@ -309,7 +301,17 @@ export function ComponentsFilesView() {
     return buildTree(contentMap)
   }, [data])
 
-  // Auto-select first file when data is loaded (only once)
+  const { nodeMap, parentMap } = useMemo(() => {
+    if (treeNodes.length === 0) {
+      return {
+        nodeMap: new Map<string, TreeNode>(),
+        parentMap: new Map<string, string | null>(),
+      }
+    }
+    return buildNodeLookup(treeNodes)
+  }, [treeNodes])
+
+  // Auto-select first file when data is loaded
   useEffect(() => {
     if (
       data?.serviceTarball &&
@@ -322,8 +324,7 @@ export function ComponentsFilesView() {
         (file) => file?.path && file?.content
       )
       if (firstFile?.path && firstFile?.content) {
-        // Find parent in the tree (treeNodes should be ready by now)
-        const { parentId } = findNodeAndParent(treeNodes, firstFile.path)
+        const parentId = parentMap.get(firstFile.path) ?? null
         setSelectedFile({
           path: firstFile.path,
           content: firstFile.content,
@@ -333,8 +334,7 @@ export function ComponentsFilesView() {
         hasAutoSelectedRef.current = true
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.serviceTarball, treeNodes])
+  }, [data?.serviceTarball, treeNodes, parentMap, selectedFileId])
 
   // Auto-expand parent directories when a file is selected
   useEffect(() => {
@@ -342,37 +342,31 @@ export function ComponentsFilesView() {
       const requiredExpanded: string[] = []
       let currentParentId: string | null = parentOfSelectedId
 
-      // Collect all ancestor parent IDs
       while (currentParentId) {
         requiredExpanded.push(currentParentId)
-        const { parentId } = findNodeAndParent(treeNodes, currentParentId)
-        currentParentId = parentId
+        currentParentId = parentMap.get(currentParentId) ?? null
       }
 
-      // Merge with existing expanded items (preserve user-expanded items)
       setExpandedItems((prev) => {
         const merged = new Set([...prev, ...requiredExpanded])
         return Array.from(merged)
       })
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedFileId, parentOfSelectedId])
+  }, [selectedFileId, parentOfSelectedId, parentMap])
 
   const handleItemSelection = useCallback(
     (_event: unknown, itemId: string, isSelected: boolean) => {
       if (isSelected) {
-        const { node, parentId } = findNodeAndParent(treeNodes, itemId)
+        const node = nodeMap.get(itemId)
+        const parentId = parentMap.get(itemId) ?? null
         if (node?.isFile && node.content) {
-          setSelectedFile({
-            path: node.path,
-            content: node.content,
-          })
+          setSelectedFile({ path: node.path, content: node.content })
           setSelectedFileId(itemId)
           setParentOfSelectedId(parentId)
         }
       }
     },
-    [treeNodes]
+    [nodeMap, parentMap]
   )
 
   const sidenavContent = useMemo(() => {
