@@ -173,15 +173,15 @@ type TreeNodeBuilder = Omit<TreeNode, 'children'> & {
 
 function buildTree(contentMap: Map<string, string>): TreeNode[] {
   const root: Record<string, TreeNodeBuilder> = {}
-  const paths = Array.from(contentMap.keys())
 
-  paths.forEach((path) => {
+  for (const path of contentMap.keys()) {
     const parts = path.split('/')
     let currentLevel: Record<string, TreeNodeBuilder> = root
+    let currentPath = ''
 
     parts.forEach((part, index) => {
-      const currentPath = parts.slice(0, index + 1).join('/')
       const isFile = index === parts.length - 1
+      currentPath = currentPath ? `${currentPath}/${part}` : part
 
       if (!currentLevel[part]) {
         currentLevel[part] = {
@@ -198,7 +198,7 @@ function buildTree(contentMap: Map<string, string>): TreeNode[] {
         currentLevel = currentLevel[part].children
       }
     })
-  })
+  }
 
   // Convert to array structure and collapse single-child folders.
   const convertAndCollapse = (
