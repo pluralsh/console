@@ -24,7 +24,6 @@ import {
 } from './ServiceComponentsContext'
 import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
 import { isEmpty } from 'lodash'
-import { TruncateStart } from 'components/utils/table/Truncate'
 import { TRUNCATE_LEFT } from 'components/utils/truncate'
 
 const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
@@ -201,35 +200,46 @@ function buildTree(contentMap: Map<string, string>): TreeNode[] {
     })
   })
 
-  // Convert nested object structure to array-based tree and collapse single-child folders
-  const objectToArray = (obj: Record<string, TreeNodeBuilder>): TreeNode[] =>
-    Object.values(obj).map((node) => ({
-      ...node,
-      children: node.isFile ? [] : objectToArray(node.children),
-    }))
+  // Convert to array structure and collapse single-child folders.
+  const convertAndCollapse = (
+    obj: Record<string, TreeNodeBuilder>
+  ): TreeNode[] => {
+    return Object.values(obj).map((node) => {
+      if (node.isFile) {
+        return {
+          id: node.id,
+          name: node.name,
+          path: node.path,
+          isFile: true,
+          content: node.content,
+          children: [],
+        }
+      }
 
-  return collapseSingleChildFolders(objectToArray(root))
-}
+      // Recursively process children.
+      const processedChildren = convertAndCollapse(node.children)
 
-// Collapse single-child folders into a single node.
-// This is used to simplify the tree view and make it more readable.
-function collapseSingleChildFolders(nodes: TreeNode[]): TreeNode[] {
-  return nodes.map((node) => {
-    if (node.isFile) {
-      return node
-    }
+      // Collapse if this folder has only one child that is also a folder.
+      if (processedChildren.length === 1 && !processedChildren[0].isFile) {
+        const child = processedChildren[0]
+        return {
+          ...child,
+          name: `${node.name}/${child.name}`,
+          id: node.id,
+        }
+      }
 
-    // Recursively process children first.
-    const processedChildren = collapseSingleChildFolders(node.children)
+      return {
+        id: node.id,
+        name: node.name,
+        path: node.path,
+        isFile: false,
+        children: processedChildren,
+      }
+    })
+  }
 
-    // If this folder has only one child and that child is also a folder, collapse them.
-    if (processedChildren.length === 1 && !processedChildren[0].isFile) {
-      const child = processedChildren[0]
-      return { ...child, name: `${node.name}/${child.name}`, id: node.id }
-    }
-
-    return { ...node, children: processedChildren }
-  })
+  return convertAndCollapse(root)
 }
 
 // Build a lookup map for efficient node access.
