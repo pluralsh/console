@@ -150,6 +150,20 @@ defmodule ConsoleWeb.Router do
           get "/connections/:id",    ConnectionController, :show
           put "/connections/:id",    ConnectionController, :update
           delete "/connections/:id", ConnectionController, :delete
+
+          get "/pullrequests",     PullRequestController, :index
+          get "/pullrequests/:id", PullRequestController, :show
+
+          post "/catalogs",       CatalogController, :create
+          get "/catalogs",        CatalogController, :index
+          get "/catalogs/:id",    CatalogController, :show
+          put "/catalogs/:id",    CatalogController, :update
+          delete "/catalogs/:id", CatalogController, :delete
+
+          get "/catalogs/:catalog_id/prautomations",  PrAutomationController, :index_for_catalog
+          get "/prautomations",                       PrAutomationController, :index
+          get "/prautomations/:id",                   PrAutomationController, :show
+          post "/prautomations/:id/invoke",           PrAutomationController, :invoke
         end
 
         post "/stacks", StackController, :create
