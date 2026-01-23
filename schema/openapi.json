@@ -187,6 +187,133 @@
         },
         "type": "object"
       },
+      "AgentSession": {
+        "title": "AgentSession",
+        "description": "An autonomous AI agent session working on infrastructure tasks",
+        "properties": {
+          "agent_id": {
+            "description": "Internal agent identifier",
+            "type": "string"
+          },
+          "branch": {
+            "description": "The git branch this session's pull request is operating on",
+            "type": "string"
+          },
+          "cluster_id": {
+            "description": "ID of the cluster associated with this session",
+            "type": "string"
+          },
+          "commit_count": {
+            "description": "Number of commits made by this agent session",
+            "type": "integer"
+          },
+          "connection_id": {
+            "description": "ID of the cloud connection used by this session",
+            "type": "string"
+          },
+          "done": {
+            "description": "Whether the agent has declared the work for this session complete",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "Unique identifier for the agent session",
+            "type": "string"
+          },
+          "initialized": {
+            "description": "Whether the agent session has been initialized",
+            "type": "boolean"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "plan_confirmed": {
+            "description": "Whether the provisioning plan has been confirmed by the user",
+            "type": "boolean"
+          },
+          "prompt": {
+            "description": "The prompt given to the agent",
+            "type": "string"
+          },
+          "pull_request_id": {
+            "description": "ID of the pull request created by this session",
+            "type": "string"
+          },
+          "service_id": {
+            "description": "ID of the service associated with this session",
+            "type": "string"
+          },
+          "stack_id": {
+            "description": "ID of the infrastructure stack associated with this session",
+            "type": "string"
+          },
+          "thread_id": {
+            "description": "ID of the chat thread associated with this session",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of agent session (terraform, kubernetes, provisioning, search, manifests, chat, research)",
+            "enum": [
+              "terraform",
+              "kubernetes",
+              "provisioning",
+              "search",
+              "manifests",
+              "chat",
+              "research"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AgentSessionInput": {
+        "title": "AgentSessionInput",
+        "description": "Input for creating a new agent session to execute autonomous infrastructure tasks",
+        "properties": {
+          "cluster_id": {
+            "description": "ID of the cluster to use for this session",
+            "type": "string"
+          },
+          "connection_id": {
+            "description": "ID of the cloud connection to use for this session",
+            "type": "string"
+          },
+          "done": {
+            "description": "Whether to immediately mark this session as done",
+            "type": "boolean"
+          },
+          "plan_confirmed": {
+            "description": "Whether the provisioning plan is pre-confirmed",
+            "type": "boolean"
+          },
+          "prompt": {
+            "description": "The prompt describing the task for the agent to perform",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of agent session (terraform, kubernetes, provisioning, search, manifests, chat, research)",
+            "enum": [
+              "terraform",
+              "kubernetes",
+              "provisioning",
+              "search",
+              "manifests",
+              "chat",
+              "research"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "type": "object"
+      },
       "Cascade": {
         "title": "Cascade",
         "description": "Cascade behavior when the global service is deleted",
@@ -400,6 +527,16 @@
         "properties": {
           "data": {
             "items": "Elixir.AgentRuntime",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.AI.AgentSession.List": {
+        "description": "A paginated list of agent sessions",
+        "properties": {
+          "data": {
+            "items": "Elixir.AgentSession",
             "type": "array"
           }
         },
@@ -2603,6 +2740,111 @@
         ],
         "x-required-scopes": [
           "ai.write"
+        ]
+      }
+    },
+    "/api/v1/ai/sessions": {
+      "get": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.AI.AgentSession.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListAgentSessions",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSession"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateAgentSession",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentSessionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "ai.write"
+        ]
+      }
+    },
+    "/api/v1/ai/sessions/{id}": {
+      "get": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSession"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetAgentSession",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
         ]
       }
     },

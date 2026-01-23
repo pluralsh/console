@@ -172,6 +172,10 @@ defmodule ConsoleWeb.Router do
           get "/runs",        AgentRunController, :index
           get "/runs/:id",    AgentRunController, :show
 
+          post "/sessions",    AgentSessionController, :create
+          get "/sessions",     AgentSessionController, :index
+          get "/sessions/:id", AgentSessionController, :show
+
           get "/sentinels",             SentinelController, :index
           get "/sentinels/:id",         SentinelController, :show
           post "/sentinels/:id/trigger", SentinelController, :trigger
