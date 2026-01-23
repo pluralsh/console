@@ -13,6 +13,14 @@ Nexus enables secure, centralized AI access for coding agents by:
 - **Dynamically configuring** LLM providers based on Console settings
 - **Proxying requests** to multiple providers (OpenAI, Anthropic)
 
+## Documentation
+
+- `docs/README.md` - docs index and navigation
+- `docs/architecture.md` - component overview and request flows
+- `docs/development.md` - local workflow, tests, and repo layout
+- `docs/configuration.md` - config file, env vars, CLI flags, and precedence
+- `docs/operations.md` - runtime behavior, health checks, and deployment notes
+
 ## Quick Start
 
 ### Prerequisites
@@ -57,4 +65,3 @@ docker run -p 8080:8080 \
 
 - [Bifrost](https://github.com/maximhq/bifrost) - LLM gateway
 - [Plural Documentation](https://docs.plural.sh)
-
