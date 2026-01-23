@@ -13,6 +13,7 @@ defmodule ConsoleWeb.Router do
 
   pipeline :openapi do
     plug :accepts, ["json"]
+    plug ConsoleWeb.Plugs.EnsureAuthenticated
     plug Oaskit.Plugs.SpecProvider, spec: Console.OpenAPI
   end
 

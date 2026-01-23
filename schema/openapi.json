@@ -776,6 +776,18 @@
         },
         "type": "object"
       },
+      "Console.OpenAPI.User.Roles": {
+        "description": "The roles of the user",
+        "properties": {
+          "admin": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "admin"
+        ],
+        "type": "object"
+      },
       "CreatePullRequestInput": {
         "title": "CreatePullRequestInput",
         "description": "Input for creating a pull request using a PR automation",
@@ -2855,7 +2867,9 @@
             "format": "date-time",
             "type": "string"
           },
-          "roles": "Elixir.Console.OpenAPI.Roles",
+          "roles": {
+            "$ref": "#/components/schemas/Console.OpenAPI.User.Roles"
+          },
           "service_account": {
             "type": "boolean"
           },

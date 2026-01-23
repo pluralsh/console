@@ -16,5 +16,19 @@ defmodule ConsoleWeb.OpenAPI.UserControllerTest do
       assert result["email"] == user.email
       refute result["service_account"]
     end
+
+    test "returns me for an admin user", %{conn: conn} do
+      user = admin_user()
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/me")
+        |> json_response(200)
+
+      assert result["id"] == user.id
+      assert result["email"] == user.email
+      assert result["roles"]["admin"]
+    end
   end
 end
