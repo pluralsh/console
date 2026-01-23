@@ -205,16 +205,7 @@ function buildTree(contentMap: Map<string, string>): TreeNode[] {
     obj: Record<string, TreeNodeBuilder>
   ): TreeNode[] => {
     return Object.values(obj).map((node) => {
-      if (node.isFile) {
-        return {
-          id: node.id,
-          name: node.name,
-          path: node.path,
-          isFile: true,
-          content: node.content,
-          children: [],
-        }
-      }
+      if (node.isFile) return { ...node, children: [] }
 
       // Recursively process children.
       const processedChildren = convertAndCollapse(node.children)
@@ -222,20 +213,10 @@ function buildTree(contentMap: Map<string, string>): TreeNode[] {
       // Collapse if this folder has only one child that is also a folder.
       if (processedChildren.length === 1 && !processedChildren[0].isFile) {
         const child = processedChildren[0]
-        return {
-          ...child,
-          name: `${node.name}/${child.name}`,
-          id: node.id,
-        }
+        return { ...child, name: `${node.name}/${child.name}`, id: node.id }
       }
 
-      return {
-        id: node.id,
-        name: node.name,
-        path: node.path,
-        isFile: false,
-        children: processedChildren,
-      }
+      return { ...node, children: processedChildren }
     })
   }
 
