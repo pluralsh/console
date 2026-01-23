@@ -112,6 +112,25 @@ const TreeItemText = styled.span({
   direction: 'rtl',
 })
 
+const FILE_TYPE_ICON_PATH = '/file-type-icons' as const
+
+const FILE_TYPE_ICONS: Record<string, string> = {
+  dockerfile: `${FILE_TYPE_ICON_PATH}/file_type_docker.svg`,
+  helmignore: `${FILE_TYPE_ICON_PATH}/file_type_helm.svg`,
+  json: `${FILE_TYPE_ICON_PATH}/file_type_json.svg`,
+  yaml: `${FILE_TYPE_ICON_PATH}/file_type_light_yaml.svg`,
+  yml: `${FILE_TYPE_ICON_PATH}/file_type_yaml.svg`,
+  md: `${FILE_TYPE_ICON_PATH}/file_type_markdown.svg`,
+  markdown: `${FILE_TYPE_ICON_PATH}/file_type_markdown.svg`,
+  license: `${FILE_TYPE_ICON_PATH}/file_type_license.svg`,
+  liquid: `${FILE_TYPE_ICON_PATH}/file_type_liquid.svg`,
+  lua: `${FILE_TYPE_ICON_PATH}/file_type_lua.svg`,
+  toml: `${FILE_TYPE_ICON_PATH}/file_type_light_toml.svg`,
+  tpl: `${FILE_TYPE_ICON_PATH}/file_type_templ.svg`,
+  tpl_: `${FILE_TYPE_ICON_PATH}/file_type_templ.svg`,
+  txt: `${FILE_TYPE_ICON_PATH}/file_type_text.svg`,
+}
+
 type TreeNode = {
   id: string
   name: string
@@ -123,6 +142,20 @@ type TreeNode = {
 
 function FileTreeItemIcon({ fileName }: { fileName: string }): React.ReactNode {
   const extension = getExtensionFromFileName(fileName)
+  const iconPath = extension
+    ? FILE_TYPE_ICONS[extension.toLowerCase()]
+    : undefined
+
+  if (iconPath) {
+    return (
+      <img
+        src={iconPath}
+        alt={extension}
+        width={18}
+        height={18}
+      />
+    )
+  }
 
   return <FileTreeItemTextIcon extension={extension ?? ''} />
 }
@@ -138,7 +171,7 @@ function FileTreeItemTextIcon({
     <div
       css={{
         width: 18,
-        height: 12,
+        height: 18,
         color: theme.colors['text-success'],
         fontFamily: 'Inter',
         fontWeight: 600,
