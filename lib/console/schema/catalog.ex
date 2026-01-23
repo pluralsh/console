@@ -36,6 +36,10 @@ defmodule Console.Schema.Catalog do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, q) do
+    from(c in query, where: ilike(c.name, ^"%#{q}%"))
+  end
+
   def for_user(query \\ __MODULE__, user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(c in query,

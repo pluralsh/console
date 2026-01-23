@@ -59,9 +59,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.CatalogController do
   defp apply_filters(query, params) do
     Enum.reduce(params, query, fn
       {:project_id, id}, q when is_binary(id) -> Catalog.for_project(q, id)
-      {:q, search}, q when is_binary(search) and byte_size(search) > 0 ->
-        import Ecto.Query
-        from(c in q, where: ilike(c.name, ^"%#{search}%"))
+      {:q, search}, q when is_binary(search) and byte_size(search) > 0 -> Catalog.search(q, search)
       _, q -> q
     end)
   end

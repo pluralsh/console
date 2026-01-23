@@ -26,7 +26,6 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
     responses: [ok: OpenAPI.SCM.PrAutomation]
   def show(conn, %{"id" => id}) do
     Git.get_pr_automation!(id)
-    |> Repo.preload([:configuration])
     |> successful(conn, OpenAPI.SCM.PrAutomation)
   end
 
@@ -51,7 +50,6 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
     PrAutomation
     |> apply_filters(query_params)
     |> PrAutomation.ordered()
-    |> Repo.preload([:configuration])
     |> paginate(conn, OpenAPI.SCM.PrAutomation)
   end
 
@@ -75,7 +73,6 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
     PrAutomation.for_catalog(catalog_id)
     |> apply_filters(query_params)
     |> PrAutomation.ordered()
-    |> Repo.preload([:configuration])
     |> paginate(conn, OpenAPI.SCM.PrAutomation)
   end
 
@@ -98,9 +95,9 @@ defmodule ConsoleWeb.OpenAPI.SCM.PrAutomationController do
     user = Console.Guardian.Plug.current_resource(conn)
     body_params = conn.private.oaskit.body_params
 
-    branch = body_params[:branch]
-    identifier = body_params[:identifier]
-    context = body_params[:context] || %{}
+    branch = body_params.branch
+    identifier = body_params.identifier
+    context = body_params.context || %{}
 
     Git.create_pull_request(%{}, context, id, branch, identifier, user)
     |> successful(conn, OpenAPI.SCM.PullRequest)
