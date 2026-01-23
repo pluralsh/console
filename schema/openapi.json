@@ -42,6 +42,60 @@
         },
         "type": "object"
       },
+      "Catalog": {
+        "title": "Catalog",
+        "description": "A catalog of PR automations",
+        "properties": {
+          "tags": {
+            "description": "Tags associated with the catalog",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array"
+          },
+          "author": {
+            "description": "Author attribution for the catalog",
+            "type": "string"
+          },
+          "category": {
+            "description": "Category name used for browsing",
+            "type": "string"
+          },
+          "dark_icon": {
+            "description": "Dark mode icon URL for the catalog",
+            "type": "string"
+          },
+          "description": {
+            "description": "Long-form description of the catalog",
+            "type": "string"
+          },
+          "icon": {
+            "description": "Icon URL for the catalog",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the catalog",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Human-friendly name of the catalog",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the owning project",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Cluster": {
         "title": "Cluster",
         "description": "A Kubernetes cluster that can be deployed to and managed through the platform",
@@ -265,6 +319,26 @@
         "properties": {
           "data": {
             "items": "Elixir.Service",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.Catalog.List": {
+        "description": "A paginated list of catalogs",
+        "properties": {
+          "data": {
+            "items": "Elixir.Catalog",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.PrAutomation.List": {
+        "description": "A paginated list of PR automations",
+        "properties": {
+          "data": {
+            "items": "Elixir.PrAutomation",
             "type": "array"
           }
         },
@@ -1908,6 +1982,138 @@
     }
   },
   "paths": {
+    "/api/v1/catalogs": {
+      "get": {
+        "tags": [
+          "catalogs"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.Catalog.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListCatalogs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "project_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/api/v1/catalogs/{id}": {
+      "get": {
+        "tags": [
+          "catalogs"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetCatalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/api/v1/catalogs/{id}/prautomations": {
+      "get": {
+        "tags": [
+          "catalogs"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.PrAutomation.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListCatalogPrAutomations",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
     "/api/v1/cd/clusters": {
       "get": {
         "tags": [
