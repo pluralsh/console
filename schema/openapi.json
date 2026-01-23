@@ -12,6 +12,181 @@
   ],
   "components": {
     "schemas": {
+      "AgentRun": {
+        "title": "AgentRun",
+        "description": "An execution of an AI coding agent processing a prompt against a repository",
+        "properties": {
+          "branch": {
+            "description": "The git branch the agent is operating on (uses default branch if not set)",
+            "type": "string"
+          },
+          "error": {
+            "description": "Error message if the agent run failed",
+            "type": "string"
+          },
+          "flow_id": {
+            "description": "ID of the flow this agent run is associated with, if any",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the agent run",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "language": {
+            "description": "Programming language used in the agent run (javascript, python, java, cpp, csharp, go, ruby, php, terraform)",
+            "enum": [
+              "javascript",
+              "python",
+              "java",
+              "cpp",
+              "csharp",
+              "go",
+              "ruby",
+              "php",
+              "terraform"
+            ],
+            "type": "string"
+          },
+          "language_version": {
+            "description": "Specific version of the programming language to use",
+            "type": "string"
+          },
+          "mode": {
+            "description": "Mode of the agent run (analyze for read-only analysis, write for code modifications)",
+            "enum": [
+              "analyze",
+              "write"
+            ],
+            "type": "string"
+          },
+          "prompt": {
+            "description": "The prompt given to the AI agent to process",
+            "type": "string"
+          },
+          "repository": {
+            "description": "The git repository URL the agent is working on",
+            "type": "string"
+          },
+          "runtime_id": {
+            "description": "ID of the runtime executing this agent run",
+            "type": "string"
+          },
+          "shared": {
+            "description": "Whether this agent run is shared publicly",
+            "type": "boolean"
+          },
+          "status": {
+            "description": "Current status of the agent run (pending, running, successful, failed, cancelled)",
+            "enum": [
+              "pending",
+              "running",
+              "successful",
+              "failed",
+              "cancelled"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user_id": {
+            "description": "ID of the user who initiated this agent run",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AgentRunInput": {
+        "title": "AgentRunInput",
+        "description": "Input for creating a new agent run to execute an AI coding agent",
+        "properties": {
+          "flow_id": {
+            "description": "Optional flow ID to associate this agent run with",
+            "type": "string"
+          },
+          "mode": {
+            "description": "Mode of the agent run (analyze for read-only, write for modifications)",
+            "enum": [
+              "analyze",
+              "write"
+            ],
+            "type": "string"
+          },
+          "prompt": {
+            "description": "The prompt to give to the agent describing the task to perform",
+            "type": "string"
+          },
+          "repository": {
+            "description": "The git repository URL the agent will work on (https or ssh format)",
+            "type": "string"
+          },
+          "runtime_id": {
+            "description": "The runtime ID to execute the agent run on",
+            "type": "string"
+          },
+          "shared": {
+            "description": "Whether to share this agent run publicly",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "prompt",
+          "repository",
+          "mode",
+          "runtime_id"
+        ],
+        "type": "object"
+      },
+      "AgentRuntime": {
+        "title": "AgentRuntime",
+        "description": "An agent runtime configured on a cluster for executing AI coding agents",
+        "properties": {
+          "ai_proxy": {
+            "description": "Whether this runtime uses the built-in Plural AI proxy for LLM requests",
+            "type": "boolean"
+          },
+          "cluster_id": {
+            "description": "ID of the cluster this runtime is deployed on",
+            "type": "string"
+          },
+          "default": {
+            "description": "Whether this is the default runtime for coding agents",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "Unique identifier for the agent runtime",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Human-readable name of this runtime",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of agent runtime (claude, opencode, gemini, custom)",
+            "enum": [
+              "claude",
+              "opencode",
+              "gemini",
+              "custom"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Cascade": {
         "title": "Cascade",
         "description": "Cascade behavior when the global service is deleted",
@@ -206,6 +381,36 @@
           "project_id": {
             "description": "ID of the project this cluster belongs to",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.AI.AgentRun.List": {
+        "description": "A paginated list of agent runs",
+        "properties": {
+          "data": {
+            "items": "Elixir.AgentRun",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.AI.AgentRuntime.List": {
+        "description": "A paginated list of agent runtimes",
+        "properties": {
+          "data": {
+            "items": "Elixir.AgentRuntime",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.AI.Sentinel.List": {
+        "description": "A paginated list of sentinels",
+        "properties": {
+          "data": {
+            "items": "Elixir.Sentinel",
+            "type": "array"
           }
         },
         "type": "object"
@@ -1240,6 +1445,170 @@
         ],
         "type": "object"
       },
+      "Sentinel": {
+        "title": "Sentinel",
+        "description": "An automated monitoring system that runs checks against your infrastructure",
+        "properties": {
+          "checks": {
+            "description": "List of checks configured for this sentinel",
+            "items": {
+              "$ref": "#/components/schemas/SentinelCheck"
+            },
+            "type": "array"
+          },
+          "description": {
+            "description": "Description of what this sentinel monitors",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the sentinel",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "last_run_at": {
+            "description": "Timestamp of when this sentinel was last executed",
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Human-readable name of this sentinel",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this sentinel belongs to",
+            "type": "string"
+          },
+          "repository_id": {
+            "description": "ID of the git repository for rule files",
+            "type": "string"
+          },
+          "status": {
+            "description": "Status of the sentinel's last run (pending, success, failed)",
+            "enum": [
+              "pending",
+              "success",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SentinelCheck": {
+        "title": "SentinelCheck",
+        "description": "A specific monitoring check within a sentinel",
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the check",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of this check",
+            "type": "string"
+          },
+          "rule_file": {
+            "description": "Path to the rule file for this check within the repository",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of check (log, kubernetes, integration_test)",
+            "enum": [
+              "log",
+              "kubernetes",
+              "integration_test"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SentinelCheckResult": {
+        "title": "SentinelCheckResult",
+        "description": "The result of a single check within a sentinel run",
+        "properties": {
+          "failed_count": {
+            "description": "Number of failed jobs",
+            "type": "integer"
+          },
+          "job_count": {
+            "description": "Total number of jobs spawned for this check",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Name of the check that was executed",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Reason for failure if the check failed",
+            "type": "string"
+          },
+          "status": {
+            "description": "Status of this check (pending, success, failed)",
+            "enum": [
+              "pending",
+              "success",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "successful_count": {
+            "description": "Number of successful jobs",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SentinelRun": {
+        "title": "SentinelRun",
+        "description": "A single execution of a sentinel's monitoring checks",
+        "properties": {
+          "completed_at": {
+            "description": "Timestamp when the run completed",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the sentinel run",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "results": {
+            "description": "Results of individual checks in this run",
+            "items": {
+              "$ref": "#/components/schemas/SentinelCheckResult"
+            },
+            "type": "array"
+          },
+          "sentinel_id": {
+            "description": "ID of the sentinel that was executed",
+            "type": "string"
+          },
+          "status": {
+            "description": "Current status of the run (pending, success, failed)",
+            "enum": [
+              "pending",
+              "success",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Service": {
         "title": "Service",
         "description": "A service deployment reference deployed from a git repo into a cluster",
@@ -1908,6 +2277,335 @@
     }
   },
   "paths": {
+    "/api/v1/ai/runs": {
+      "get": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.AI.AgentRun.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListAgentRuns",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "runtime_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRun"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateAgentRun",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRunInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "ai.write"
+        ]
+      }
+    },
+    "/api/v1/ai/runs/{id}": {
+      "get": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRun"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetAgentRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/api/v1/ai/runtimes": {
+      "get": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.AI.AgentRuntime.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListAgentRuntimes",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "enum": [
+                "claude",
+                "opencode",
+                "gemini",
+                "custom"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/api/v1/ai/runtimes/{id}": {
+      "get": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRuntime"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetAgentRuntime",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/api/v1/ai/sentinels": {
+      "get": {
+        "tags": [
+          "sentinel"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.AI.Sentinel.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListSentinels",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "pending",
+                "success",
+                "failed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/api/v1/ai/sentinels/{id}": {
+      "get": {
+        "tags": [
+          "sentinel"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sentinel"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetSentinel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/api/v1/ai/sentinels/{id}/trigger": {
+      "post": {
+        "tags": [
+          "sentinel"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SentinelRun"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "TriggerSentinel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.write"
+        ]
+      }
+    },
     "/api/v1/cd/clusters": {
       "get": {
         "tags": [

@@ -163,6 +163,19 @@ defmodule ConsoleWeb.Router do
 
         get "/projects", ProjectController, :index
         get "/projects/:id", ProjectController, :show
+
+        scope "/ai", AI do
+          get "/runtimes",     AgentRuntimeController, :index
+          get "/runtimes/:id", AgentRuntimeController, :show
+
+          post "/runs",       AgentRunController, :create
+          get "/runs",        AgentRunController, :index
+          get "/runs/:id",    AgentRunController, :show
+
+          get "/sentinels",             SentinelController, :index
+          get "/sentinels/:id",         SentinelController, :show
+          post "/sentinels/:id/trigger", SentinelController, :trigger
+        end
       end
     end
 
