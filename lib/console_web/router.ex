@@ -125,6 +125,23 @@ defmodule ConsoleWeb.Router do
           get "/helm/repositories/url", HelmRepositoryController, :show_by_url
           get "/helm/repositories/:id", HelmRepositoryController, :show
           post "/helm/repositories",    HelmRepositoryController, :upsert
+
+          post "/services",          ServiceController, :create
+          get "/services",           ServiceController, :index
+          get "/services/:id",       ServiceController, :show
+          put "/services/:id",       ServiceController, :update
+          delete "/services/:id",    ServiceController, :delete
+
+          post "/globalservices",          GlobalServiceController, :create
+          get "/globalservices",           GlobalServiceController, :index
+          get "/globalservices/:id",       GlobalServiceController, :show
+          put "/globalservices/:id",       GlobalServiceController, :update
+          delete "/globalservices/:id",    GlobalServiceController, :delete
+          post "/globalservices/:id/sync", GlobalServiceController, :sync
+
+          get "/pipelines",             PipelineController, :index
+          get "/pipelines/:id",         PipelineController, :show
+          post "/pipelines/:id/trigger", PipelineController, :trigger
         end
 
         scope "/scm", SCM do
@@ -143,6 +160,9 @@ defmodule ConsoleWeb.Router do
         post "/stacks/:id/trigger", StackController, :trigger_run
         post "/stacks/:id/resync", StackController, :resync
         put "/stacks/:id/restore", StackController, :restore
+
+        get "/projects", ProjectController, :index
+        get "/projects/:id", ProjectController, :show
       end
     end
 

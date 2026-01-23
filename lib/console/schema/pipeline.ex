@@ -71,6 +71,10 @@ defmodule Console.Schema.Pipeline do
     from(p in query, order_by: ^order)
   end
 
+  def preloaded(query \\ __MODULE__, preloads \\ [stages: [services: :criteria], edges: :gates]) do
+    from(p in query, preload: ^preloads)
+  end
+
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(name project_id flow_id)a)
