@@ -431,7 +431,7 @@ export function ComponentsFilesView() {
     data,
     treeNodes,
     parentOfSelectedId,
-    selectedFile?.path,
+    selectedFile,
     handleItemSelection,
     expandedItems,
   ])
