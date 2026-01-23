@@ -814,6 +814,9 @@
   "paths": {
     "/api/v1/cd/clusters": {
       "get": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -844,9 +847,15 @@
               "type": "integer"
             }
           }
+        ],
+        "x-required-scopes": [
+          "cluster.read"
         ]
       },
       "post": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -869,11 +878,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "cluster.write"
+        ]
       }
     },
     "/api/v1/cd/clusters/{id}": {
       "delete": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -904,9 +919,15 @@
               "type": "boolean"
             }
           }
+        ],
+        "x-required-scopes": [
+          "cluster.write"
         ]
       },
       "get": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -929,9 +950,15 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "cluster.read"
         ]
       },
       "put": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -964,11 +991,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "cluster.write"
+        ]
       }
     },
     "/api/v1/cd/git/repositories": {
       "get": {
+        "tags": [
+          "repos"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -999,9 +1032,15 @@
               "type": "integer"
             }
           }
+        ],
+        "x-required-scopes": [
+          "repos.read"
         ]
       },
       "post": {
+        "tags": [
+          "repos"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1024,11 +1063,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "repos.write"
+        ]
       }
     },
     "/api/v1/cd/git/repositories/url": {
       "get": {
+        "tags": [
+          "repos"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1051,11 +1096,17 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "repos.read"
         ]
       }
     },
     "/api/v1/cd/git/repositories/{id}": {
       "delete": {
+        "tags": [
+          "repos"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1078,9 +1129,15 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "repos.write"
         ]
       },
       "get": {
+        "tags": [
+          "repos"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1103,9 +1160,15 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "repos.read"
         ]
       },
       "put": {
+        "tags": [
+          "repos"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1138,11 +1201,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "repos.write"
+        ]
       }
     },
     "/api/v1/cd/helm/repositories": {
       "get": {
+        "tags": [
+          "repos"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1173,9 +1242,15 @@
               "type": "integer"
             }
           }
+        ],
+        "x-required-scopes": [
+          "repos.read"
         ]
       },
       "post": {
+        "tags": [
+          "repos"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1198,11 +1273,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "repos.write"
+        ]
       }
     },
     "/api/v1/cd/helm/repositories/url": {
       "get": {
+        "tags": [
+          "repos"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1225,11 +1306,17 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "repos.read"
         ]
       }
     },
     "/api/v1/cd/helm/repositories/{id}": {
       "get": {
+        "tags": [
+          "repos"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1252,11 +1339,17 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "repos.read"
         ]
       }
     },
     "/api/v1/me": {
       "get": {
+        "tags": [
+          "user"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1274,6 +1367,9 @@
     },
     "/api/v1/scm/connections": {
       "get": {
+        "tags": [
+          "scm"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1304,9 +1400,15 @@
               "type": "integer"
             }
           }
+        ],
+        "x-required-scopes": [
+          "scm.read"
         ]
       },
       "post": {
+        "tags": [
+          "scm"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1329,11 +1431,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "scm.write"
+        ]
       }
     },
     "/api/v1/scm/connections/{id}": {
       "delete": {
+        "tags": [
+          "scm"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1356,9 +1464,15 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "scm.write"
         ]
       },
       "get": {
+        "tags": [
+          "scm"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1381,9 +1495,15 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "scm.read"
         ]
       },
       "put": {
+        "tags": [
+          "scm"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1416,11 +1536,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "scm.write"
+        ]
       }
     },
     "/api/v1/stacks": {
       "get": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1451,9 +1577,15 @@
               "type": "integer"
             }
           }
+        ],
+        "x-required-scopes": [
+          "stacks.read"
         ]
       },
       "post": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1476,11 +1608,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "stacks.write"
+        ]
       }
     },
     "/api/v1/stacks/{id}": {
       "delete": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1511,9 +1649,15 @@
               "type": "boolean"
             }
           }
+        ],
+        "x-required-scopes": [
+          "stacks.write"
         ]
       },
       "get": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1536,9 +1680,15 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "stacks.read"
         ]
       },
       "put": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1571,11 +1721,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "stacks.write"
+        ]
       }
     },
     "/api/v1/stacks/{id}/restore": {
       "put": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1598,11 +1754,17 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "stacks.write"
         ]
       }
     },
     "/api/v1/stacks/{id}/resync": {
       "post": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1625,11 +1787,17 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "stacks.write"
         ]
       }
     },
     "/api/v1/stacks/{id}/trigger": {
       "post": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -1652,6 +1820,9 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "stacks.write"
         ]
       }
     }

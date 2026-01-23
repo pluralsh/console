@@ -9,6 +9,8 @@ defmodule ConsoleWeb.OpenAPI.StackController do
 
   operation :show,
     operation_id: "GetStack",
+    tags: ["stacks"],
+    "x-required-scopes": ["stacks.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],
@@ -23,6 +25,8 @@ defmodule ConsoleWeb.OpenAPI.StackController do
 
   operation :index,
     operation_id: "ListStacks",
+    tags: ["stacks"],
+    "x-required-scopes": ["stacks.read"],
     parameters: [
       page: [in: :query, schema: %{type: :integer}, required: false],
       per_page: [in: :query, schema: %{type: :integer}, required: false]
@@ -38,6 +42,8 @@ defmodule ConsoleWeb.OpenAPI.StackController do
 
   operation :create,
     operation_id: "CreateStack",
+    tags: ["stacks"],
+    "x-required-scopes": ["stacks.write"],
     request_body: OpenAPI.StackInput,
     responses: [ok: OpenAPI.Stack]
   def create(conn, _) do
@@ -50,6 +56,8 @@ defmodule ConsoleWeb.OpenAPI.StackController do
 
   operation :update,
     operation_id: "UpdateStack",
+    tags: ["stacks"],
+    "x-required-scopes": ["stacks.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],
@@ -66,6 +74,8 @@ defmodule ConsoleWeb.OpenAPI.StackController do
 
   operation :delete,
     operation_id: "DeleteStack",
+    tags: ["stacks"],
+    "x-required-scopes": ["stacks.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true],
       detach: [in: :query, schema: %{type: :boolean}, required: false]
@@ -87,6 +97,8 @@ defmodule ConsoleWeb.OpenAPI.StackController do
   """
   operation :trigger_run,
     operation_id: "TriggerStackRun",
+    tags: ["stacks"],
+    "x-required-scopes": ["stacks.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],
@@ -103,6 +115,8 @@ defmodule ConsoleWeb.OpenAPI.StackController do
   """
   operation :resync,
     operation_id: "ResyncStack",
+    tags: ["stacks"],
+    "x-required-scopes": ["stacks.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],
@@ -119,6 +133,8 @@ defmodule ConsoleWeb.OpenAPI.StackController do
   """
   operation :restore,
     operation_id: "RestoreStack",
+    tags: ["stacks"],
+    "x-required-scopes": ["stacks.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],

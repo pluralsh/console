@@ -3,6 +3,7 @@ defmodule ConsoleWeb.OpenAPI.UserController do
 
   operation :me,
     operation_id: "Me",
+    tags: ["user"],
     responses: [ok: OpenAPI.User]
   def me(conn, _) do
     user = Console.Guardian.Plug.current_resource(conn)

@@ -8,6 +8,8 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryController do
 
   operation :show,
     operation_id: "GetHelmRepository",
+    tags: ["repos"],
+    "x-required-scopes": ["repos.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],
@@ -20,6 +22,8 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryController do
 
   operation :show_by_url,
     operation_id: "GetHelmRepositoryByUrl",
+    tags: ["repos"],
+    "x-required-scopes": ["repos.read"],
     parameters: [
       url: [in: :query, schema: %{type: :string}, required: true]
     ],
@@ -32,6 +36,8 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryController do
 
   operation :index,
     operation_id: "ListHelmRepositories",
+    tags: ["repos"],
+    "x-required-scopes": ["repos.read"],
     parameters: [
       page: [in: :query, schema: %{type: :integer}, required: false],
       per_page: [in: :query, schema: %{type: :integer}, required: false]
@@ -44,6 +50,8 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryController do
 
   operation :upsert,
     operation_id: "UpsertHelmRepository",
+    tags: ["repos"],
+    "x-required-scopes": ["repos.write"],
     request_body: OpenAPI.CD.HelmRepositoryInput,
     responses: [ok: OpenAPI.CD.HelmRepository]
   def upsert(conn, _) do

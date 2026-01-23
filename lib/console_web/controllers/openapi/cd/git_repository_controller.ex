@@ -8,6 +8,8 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryController do
 
   operation :show,
     operation_id: "GetGitRepository",
+    tags: ["repos"],
+    "x-required-scopes": ["repos.read"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],
@@ -20,6 +22,8 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryController do
 
   operation :show_by_url,
     operation_id: "GetGitRepositoryByUrl",
+    tags: ["repos"],
+    "x-required-scopes": ["repos.read"],
     parameters: [
       url: [in: :query, schema: %{type: :string}, required: true]
     ],
@@ -32,6 +36,8 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryController do
 
   operation :index,
     operation_id: "ListGitRepositories",
+    tags: ["repos"],
+    "x-required-scopes": ["repos.read"],
     parameters: [
       page: [in: :query, schema: %{type: :integer}, required: false],
       per_page: [in: :query, schema: %{type: :integer}, required: false]
@@ -44,6 +50,8 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryController do
 
   operation :create,
     operation_id: "CreateGitRepository",
+    tags: ["repos"],
+    "x-required-scopes": ["repos.write"],
     request_body: OpenAPI.CD.GitRepositoryInput,
     responses: [ok: OpenAPI.CD.GitRepository]
   def create(conn, _) do
@@ -55,6 +63,8 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryController do
 
   operation :update,
     operation_id: "UpdateGitRepository",
+    tags: ["repos"],
+    "x-required-scopes": ["repos.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],
@@ -70,6 +80,8 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryController do
 
   operation :delete,
     operation_id: "DeleteGitRepository",
+    tags: ["repos"],
+    "x-required-scopes": ["repos.write"],
     parameters: [
       id: [in: :path, schema: %{type: :string}, required: true]
     ],

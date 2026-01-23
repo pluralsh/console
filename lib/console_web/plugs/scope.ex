@@ -1,5 +1,6 @@
 defmodule ConsoleWeb.Plugs.Scope do
   alias Console.Schema.User
+
   def init(opts), do: opts
 
   def call(conn, opts) do
