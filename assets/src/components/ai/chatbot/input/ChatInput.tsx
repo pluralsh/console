@@ -2,6 +2,7 @@ import {
   AiSparkleFilledIcon,
   ArrowUpIcon,
   Button,
+  CaretDownIcon,
   Chip,
   Flex,
   PlusIcon,
@@ -14,6 +15,7 @@ import {
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { EditableDiv } from 'components/utils/EditableDiv.tsx'
+import { SemanticPartialType } from 'components/utils/table/StackedText.tsx'
 import {
   ChatThreadDetailsFragment,
   useAddChatContextMutation,
@@ -23,19 +25,20 @@ import {
   ComponentPropsWithRef,
   Dispatch,
   FormEvent,
+  ReactNode,
   SetStateAction,
   useCallback,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react'
+import { mergeRefs } from 'react-merge-refs'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from '../../AIContext.tsx'
 import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputCloudSelect } from './ChatInputCloudSelect.tsx'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
-import { mergeRefs } from 'react-merge-refs'
 
 export function ChatInput({
   ref,
@@ -213,12 +216,14 @@ export function ChatInputSimple({
   loading = false,
   disabled = false,
   bgColor = 'fill-zero-selected',
+  options,
   ...props
 }: {
   onSubmit: () => void
   allowSubmit?: boolean
   loading?: boolean
   bgColor?: SemanticColorKey
+  options?: ReactNode
 } & Omit<ComponentPropsWithRef<typeof EditableDiv>, 'onEnter'>) {
   const { spacing } = useTheme()
 
@@ -235,6 +240,7 @@ export function ChatInputSimple({
         onEnter={handleSubmit}
         disabled={loading || disabled}
       />
+      <div css={{ width: '100%', paddingRight: spacing.xlarge }}>{options}</div>
       <ChatSubmitButton
         loading={loading}
         loadingIndicator={<SpinnerAlt color="icon-xlight" />}
@@ -264,6 +270,39 @@ export function ChatSubmitButton({
     >
       <ArrowUpIcon />
     </ChatSubmitButtonSC>
+  )
+}
+
+export function ChatOptionPill({
+  isOpen = false,
+  textType = 'caption',
+  children,
+  ...props
+}: { textType?: SemanticPartialType } & ComponentPropsWithRef<typeof Chip>) {
+  const { partials, colors } = useTheme()
+  return (
+    <Chip
+      clickable
+      fillLevel={2}
+      size="large"
+      css={{ borderRadius: 12 }}
+      {...props}
+    >
+      <Flex
+        align="center"
+        gap="xsmall"
+        css={{ ...partials.text[textType], color: colors['text-xlight'] }}
+      >
+        {children}
+        <CaretDownIcon
+          size={10}
+          style={{
+            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+            transition: 'transform 0.2s ease-in-out',
+          }}
+        />
+      </Flex>
+    </Chip>
   )
 }
 

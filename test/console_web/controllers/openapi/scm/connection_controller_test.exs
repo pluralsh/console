@@ -9,7 +9,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/connections/#{scm.id}")
+        |> get("/v1/api/scm/connections/#{scm.id}")
         |> json_response(200)
 
       assert result["id"] == scm.id
@@ -26,7 +26,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/scm/connections")
+        |> get("/v1/api/scm/connections")
         |> json_response(200)
 
       assert ids_equal(results, connections)
@@ -38,7 +38,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/scm/connections", %{name: "github-conn", type: "github", token: "pat-test"})
+        |> json_post("/v1/api/scm/connections", %{name: "github-conn", type: "github", token: "pat-test"})
         |> json_response(200)
 
       assert result["id"]
@@ -49,7 +49,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionControllerTest do
     test "non-admin users cannot create an scm connection", %{conn: conn} do
       conn
       |> add_auth_headers(insert(:user))
-      |> json_post("/api/v1/scm/connections", %{name: "github-conn", type: "github", token: "pat-test"})
+      |> json_post("/v1/api/scm/connections", %{name: "github-conn", type: "github", token: "pat-test"})
       |> json_response(403)
     end
   end
@@ -61,7 +61,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_put("/api/v1/scm/connections/#{scm.id}", %{
+        |> json_put("/v1/api/scm/connections/#{scm.id}", %{
           type: scm.type,
           name: "updated-conn",
           token: "new-pat"
@@ -77,7 +77,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionControllerTest do
 
       conn
       |> add_auth_headers(insert(:user))
-      |> json_put("/api/v1/scm/connections/#{scm.id}", %{type: scm.type, name: "updated-conn"})
+      |> json_put("/v1/api/scm/connections/#{scm.id}", %{type: scm.type, name: "updated-conn"})
       |> json_response(403)
     end
   end
@@ -89,7 +89,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> delete("/api/v1/scm/connections/#{scm.id}")
+        |> delete("/v1/api/scm/connections/#{scm.id}")
         |> json_response(200)
 
       assert result["id"] == scm.id
@@ -101,7 +101,7 @@ defmodule ConsoleWeb.OpenAPI.SCM.ConnectionControllerTest do
 
       conn
       |> add_auth_headers(insert(:user))
-      |> delete("/api/v1/scm/connections/#{scm.id}")
+      |> delete("/v1/api/scm/connections/#{scm.id}")
       |> json_response(403)
     end
   end

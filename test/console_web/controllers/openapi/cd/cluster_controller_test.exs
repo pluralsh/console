@@ -10,7 +10,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/clusters/#{cluster.id}")
+        |> get("/v1/api/cd/clusters/#{cluster.id}")
         |> json_response(200)
 
       assert result["id"] == cluster.id
@@ -24,7 +24,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> get("/api/v1/cd/clusters/#{cluster.id}")
+      |> get("/v1/api/cd/clusters/#{cluster.id}")
       |> json_response(403)
     end
   end
@@ -38,7 +38,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/clusters")
+        |> get("/v1/api/cd/clusters")
         |> json_response(200)
 
       assert ids_equal(results, clusters)
@@ -54,7 +54,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/clusters?project_id=#{project1.id}")
+        |> get("/v1/api/cd/clusters?project_id=#{project1.id}")
         |> json_response(200)
 
       assert ids_equal(results, clusters1)
@@ -68,7 +68,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/clusters?q=matching")
+        |> get("/v1/api/cd/clusters?q=matching")
         |> json_response(200)
 
       assert length(results) == 1
@@ -83,7 +83,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/clusters?tag=env:prod")
+        |> get("/v1/api/cd/clusters?tag=env:prod")
         |> json_response(200)
 
       assert length(results) == 1
@@ -98,7 +98,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/clusters/#{cluster.id}")
+        |> get("/v1/api/cd/clusters/#{cluster.id}")
         |> json_response(200)
 
       assert result["id"] == cluster.id
@@ -112,7 +112,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/clusters?page=1&per_page=2")
+        |> get("/v1/api/cd/clusters?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2
@@ -126,7 +126,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/cd/clusters", %{
+        |> json_post("/v1/api/cd/clusters", %{
           name: "test",
           handle: "test",
           metadata: %{"blah" => "blah"}
@@ -145,7 +145,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
 
       conn
       |> add_auth_headers(insert(:user))
-      |> json_post("/api/v1/cd/clusters", %{name: "test", handle: "test", metadata: %{"blah" => "blah"}})
+      |> json_post("/v1/api/cd/clusters", %{name: "test", handle: "test", metadata: %{"blah" => "blah"}})
       |> json_response(403)
     end
   end
@@ -158,7 +158,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_put("/api/v1/cd/clusters/#{cluster.id}", %{
+        |> json_put("/v1/api/cd/clusters/#{cluster.id}", %{
           name: "new-name",
           handle: "test",
           metadata: %{"blah" => "blah"}
@@ -177,7 +177,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> json_put("/api/v1/cd/clusters/#{cluster.id}", %{name: "test", handle: "test", metadata: %{"blah" => "blah"}})
+      |> json_put("/v1/api/cd/clusters/#{cluster.id}", %{name: "test", handle: "test", metadata: %{"blah" => "blah"}})
       |> json_response(403)
     end
   end
@@ -190,7 +190,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> delete("/api/v1/cd/clusters/#{cluster.id}")
+        |> delete("/v1/api/cd/clusters/#{cluster.id}")
         |> json_response(200)
 
       assert result["id"] == cluster.id
@@ -204,7 +204,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> delete("/api/v1/cd/clusters/#{cluster.id}?detach=true")
+        |> delete("/v1/api/cd/clusters/#{cluster.id}?detach=true")
         |> json_response(200)
 
       assert result["id"] == cluster.id
@@ -217,7 +217,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> delete("/api/v1/cd/clusters/#{cluster.id}")
+      |> delete("/v1/api/cd/clusters/#{cluster.id}")
       |> json_response(403)
     end
   end

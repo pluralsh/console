@@ -31,7 +31,7 @@ export function CreateAgentRunButton() {
   )
 }
 
-function CreateAgentRunModal({
+export function CreateAgentRunModal({
   open,
   onClose,
 }: {
@@ -91,6 +91,7 @@ function CreateAgentRunModal({
         {error && <GqlError error={error} />}
         <FormField label="Runtime">
           <AIAgentRuntimesSelector
+            selectedRuntimeId={runtimeId}
             setSelectedRuntimeId={setRuntimeId}
             placeholder="Select a runtime"
           />

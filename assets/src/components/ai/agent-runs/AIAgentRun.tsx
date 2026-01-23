@@ -70,7 +70,7 @@ import TypingIndicator from '../../utils/TypingIndicator.tsx'
 import { VirtualList } from '../../utils/VirtualList.tsx'
 import { getAIBreadcrumbs } from '../AI'
 import { ChatMessage } from '../chatbot/ChatMessage'
-import { agentRunStatusToSeverity } from './AIAgentRuns'
+import { RunStatusChip } from '../infra-research/details/InfraResearch'
 
 export const getAgentRunBreadcrumbs = (
   runId: string,
@@ -158,12 +158,7 @@ function AgentRunSidecar({ run }: { run: Nullable<AgentRunFragment> }) {
         <Sidecar>
           <SidecarItem heading="ID">{run.id}</SidecarItem>
           <SidecarItem heading="Status">
-            <Chip
-              size="small"
-              severity={agentRunStatusToSeverity[run.status]}
-            >
-              {capitalize(run.status)}
-            </Chip>
+            <RunStatusChip status={run.status} />
           </SidecarItem>
           {run.mode && (
             <SidecarItem heading="Mode">

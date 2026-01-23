@@ -155,6 +155,7 @@ function FileMessageContent({
             align="center"
             wordBreak="break-word"
             marginRight={theme.spacing.small}
+            position="relative"
           >
             <FileIcon
               size={12}
@@ -168,7 +169,7 @@ function FileMessageContent({
               show={showActions}
               side={role === AiRole.User ? 'right' : 'left'}
               iconFrameType="floating"
-              css={{ position: 'absolute', right: 16, top: 4, zIndex: 1 }}
+              css={{ position: 'absolute', right: '80%', top: -12, zIndex: 1 }}
             />
           </Flex>
         }

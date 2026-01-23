@@ -10,6 +10,7 @@ import ResourceInfoCard, {
 import ResourceLink from './ResourceLink'
 import { toKind } from './types'
 import { ControllerResourceOwner } from 'generated/kubernetes'
+import { getCreationTimestampString } from './utils'
 
 interface ResourceOwnerProps {
   owner: Nullable<ControllerResourceOwner>
@@ -35,7 +36,9 @@ export default function ResourceOwner({
           {owner?.pods?.running} / {owner?.pods?.desired}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Creation date">
-          {formatLocalizedDateTime(owner?.objectMeta?.creationTimestamp?.Time)}
+          {formatLocalizedDateTime(
+            getCreationTimestampString(owner?.objectMeta?.creationTimestamp)
+          )}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Labels">
           <ChipList

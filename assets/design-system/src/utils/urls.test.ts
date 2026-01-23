@@ -3,6 +3,8 @@ import {
   isExternalUrl,
   isRelativeUrl,
   isSubrouteOf,
+  isValidRepoUrl,
+  prettifyRepoUrl,
   removeTrailingSlashes,
   toHtmlId,
 } from './urls'
@@ -135,5 +137,53 @@ describe('URL utils', () => {
     expect(getBarePathFromPath('http://path.com?var=val')).toBe(
       'http://path.com'
     )
+  })
+
+  it('should prettify repo urls', () => {
+    expect(prettifyRepoUrl('https://github.com/pluralsh/plural.git')).toBe(
+      'pluralsh/plural'
+    )
+    expect(prettifyRepoUrl('git@github.com:pluralsh/plural.git')).toBe(
+      'pluralsh/plural'
+    )
+    expect(prettifyRepoUrl('ssh://github.com/pluralsh/plural')).toBe(
+      'pluralsh/plural'
+    )
+    expect(prettifyRepoUrl('not-a-url')).toBe('not-a-url')
+  })
+
+  it('should validate repo urls', () => {
+    // valid https
+    expect(isValidRepoUrl('https://github.com/pluralsh/plural.git')).toBe(true)
+    expect(isValidRepoUrl('https://gitlab.com/org/repo')).toBe(true)
+    expect(isValidRepoUrl('  https://github.com/org/repo  ')).toBe(true)
+
+    // valid git@
+    expect(isValidRepoUrl('git@github.com:pluralsh/plural.git')).toBe(true)
+    expect(isValidRepoUrl('git@gitlab.com:org/repo.git')).toBe(true)
+    expect(isValidRepoUrl('git@gitlab.com:org/repo')).toBe(true)
+
+    // valid ssh://
+    expect(isValidRepoUrl('ssh://git@github.com/pluralsh/plural.git')).toBe(
+      true
+    )
+    expect(isValidRepoUrl('ssh://github.com/org/repo')).toBe(true)
+
+    // invalid - wrong protocol
+    expect(isValidRepoUrl('http://github.com/org/repo')).toBe(false)
+    expect(isValidRepoUrl('ftp://github.com/org/repo')).toBe(false)
+
+    // invalid - missing structure
+    expect(isValidRepoUrl('https://github.com')).toBe(false)
+    expect(isValidRepoUrl('https://github.com/pluralsh')).toBe(false)
+    expect(isValidRepoUrl('git@github.com:')).toBe(false)
+    expect(isValidRepoUrl('git@github.com:pluralsh')).toBe(false)
+    expect(isValidRepoUrl('ssh://github.com')).toBe(false)
+
+    // invalid - no protocol
+    expect(isValidRepoUrl('github.com/org/repo')).toBe(false)
+    expect(isValidRepoUrl('pluralsh/plural')).toBe(false)
+    expect(isValidRepoUrl('')).toBe(false)
+    expect(isValidRepoUrl('   ')).toBe(false)
   })
 })

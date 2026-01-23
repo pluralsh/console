@@ -10,7 +10,7 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/helm/repositories/#{repo.id}")
+        |> get("/v1/api/cd/helm/repositories/#{repo.id}")
         |> json_response(200)
 
       assert result["id"] == repo.id
@@ -26,7 +26,7 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/helm/repositories/url", url: repo.url)
+        |> get("/v1/api/cd/helm/repositories/url", url: repo.url)
         |> json_response(200)
 
       assert result["id"] == repo.id
@@ -39,7 +39,7 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryControllerTest do
       assert_raise Ecto.NoResultsError, fn ->
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/helm/repositories/url", url: "https://charts.nonexistent.com")
+        |> get("/v1/api/cd/helm/repositories/url", url: "https://charts.nonexistent.com")
         |> json_response(404)
       end
     end
@@ -53,7 +53,7 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/helm/repositories")
+        |> get("/v1/api/cd/helm/repositories")
         |> json_response(200)
 
       assert ids_equal(results, repos)
@@ -67,7 +67,7 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/cd/helm/repositories", %{url: url})
+        |> json_post("/v1/api/cd/helm/repositories", %{url: url})
         |> json_response(200)
 
       assert result["id"]
@@ -80,7 +80,7 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/cd/helm/repositories", %{url: repo.url, provider: "bearer", auth: %{bearer: %{token: "test"}}})
+        |> json_post("/v1/api/cd/helm/repositories", %{url: repo.url, provider: "bearer", auth: %{bearer: %{token: "test"}}})
         |> json_response(200)
 
       assert result["id"] == repo.id
@@ -96,7 +96,7 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_post("/api/v1/cd/helm/repositories", %{url: url})
+        |> json_post("/v1/api/cd/helm/repositories", %{url: url})
         |> json_response(200)
 
       assert result["id"]
@@ -106,7 +106,7 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryControllerTest do
     test "non-authorized users cannot upsert a helm repository", %{conn: conn} do
       conn
       |> add_auth_headers(insert(:user))
-      |> json_post("/api/v1/cd/helm/repositories", %{url: "https://charts.example.com"})
+      |> json_post("/v1/api/cd/helm/repositories", %{url: "https://charts.example.com"})
       |> json_response(403)
     end
   end
