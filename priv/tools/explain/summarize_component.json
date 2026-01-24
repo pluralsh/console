@@ -1,0 +1,14 @@
+{
+    "type": "object",
+    "properties": {
+        "prompt": {
+            "type": "string",
+            "description": "The prompt to use to summarize the component"
+        },
+        "component_id": {
+            "type": "string",
+            "description": "The plural service component id of the component to summarize"
+        }
+    },
+    "required": ["prompt", "component_id"]
+}
