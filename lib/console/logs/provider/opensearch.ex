@@ -86,6 +86,7 @@ defmodule Console.Logs.Provider.Opensearch do
       query: maybe_query(str)
              |> add_terms(q)
              |> add_range(q)
+             |> add_pod(q)
              |> add_namespaces(q)
              |> add_facets(q),
       sort: sort(q),
@@ -121,6 +122,10 @@ defmodule Console.Logs.Provider.Opensearch do
     ])
   end
   defp add_terms(query, _), do: query
+
+  defp add_pod(query, %Query{pod: pod}) when is_binary(pod) and byte_size(pod) > 0,
+    do: add_filter(query, %{term: %{"kubernetes.pod.name.keyword" => pod}})
+  defp add_pod(query, _), do: query
 
   defp add_namespaces(query, %Query{namespaces: [_ | _] = ns}) do
     add_filter(query, %{

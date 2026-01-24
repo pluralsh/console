@@ -1,0 +1,26 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "The query to use to filter logs"
+        },
+        "pod": {
+            "type": "string",
+            "description": "The name of the pod to search logs for.  This needs to be an EXACT name, you should *ALWAYS* discover the current pods first before using this filter"
+        },
+        "before": {
+            "type": "string",
+            "description": "An ISO8601 timestamp to search for logs either before or after"
+        },
+        "after": {
+            "type": "string",
+            "description": "An ISO8601 timestamp to search for logs either before or after"
+        },
+        "limit": {
+            "type": "integer",
+            "description": "The number of logs lines to return"
+        }
+    },
+    "required": []
+}

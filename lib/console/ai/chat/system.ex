@@ -49,7 +49,7 @@ defmodule Console.AI.Chat.System do
       cluster: [:id, :name, :handle, :metadata],
       repository: [:id, :url],
       sources: [:repository_id, :path],
-      helm: [:url, :chart, :version, :values, :values_file, :lua_script, :lua_file, :lua_folder],
+      helm: [:url, :chart, :version, :values, :values_files, :lua_script, :lua_file, :lua_folder],
       imports: [stack: [:name]],
       sync_config: [
         :enforce_namespace,

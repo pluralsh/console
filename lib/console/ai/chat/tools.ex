@@ -1,7 +1,13 @@
 defmodule Console.AI.Chat.Tools do
   alias Console.AI.Tools
   alias Console.AI.Tools.{Agent, Explain}
-  alias Console.Schema.{ChatThread, AgentSession, Cluster}
+  alias Console.Schema.{
+    ChatThread,
+    AgentSession,
+    Cluster,
+    AiInsight,
+    Service,
+  }
 
   @plrl_tools [
     Tools.Clusters,
@@ -84,6 +90,8 @@ defmodule Console.AI.Chat.Tools do
     Explain.Read
   ]
 
+  @service_insight_tools [Explain.ListComponents, Explain.SummarizeComponent]
+
   def tools(%ChatThread{} = t) do
     memory_tools(t)
     |> Enum.concat(flow_tools(t))
@@ -132,6 +140,14 @@ defmodule Console.AI.Chat.Tools do
   defp agent_tools(%ChatThread{session: %AgentSession{}}), do: @agent_pre_tools
   defp agent_tools(_), do: []
 
+  defp insight_tools(%ChatThread{insight: %AiInsight{service: %Service{}}}) do
+    case Console.Logs.Provider.enabled?() do
+      true -> [Explain.FetchLogs]
+      false -> []
+    end
+    |> Enum.concat(@service_insight_tools)
+    |> Enum.concat(@insight_tools)
+  end
   defp insight_tools(%ChatThread{insight_id: id}) when is_binary(id), do: @insight_tools
   defp insight_tools(_), do: []
 

@@ -23,6 +23,13 @@ defmodule Console.Logs.Provider do
   @spec accessible(Query.t, User.t) :: {:ok, Query.t} | error
   def accessible(%Query{} = query, %User{} = user), do: Query.accessible(query, user)
 
+  def enabled?() do
+    case client() do
+      {:ok, _} -> true
+      _ -> false
+    end
+  end
+
   defp client() do
     Console.Deployments.Settings.cached()
     |> client()

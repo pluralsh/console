@@ -344,7 +344,12 @@ defmodule Console.AI.Chat do
     start_transaction()
     |> add_operation(:access, fn _ -> thread_access(thread_id, user) end)
     |> add_operation(:save, fn _ -> save(messages, thread_id, user) end)
-    |> add_operation(:chat, fn _ ->
+    |> add_operation(:bump, fn %{access: thread} ->
+      ChatThread.changeset(thread, %{last_message_at: Timex.now()})
+      |> Repo.update()
+    end)
+    |> execute()
+    |> when_ok(fn _ ->
       Chat.for_thread(thread_id)
       |> Chat.ordered()
       |> Repo.all()
@@ -353,18 +358,7 @@ defmodule Console.AI.Chat do
       |> Enum.filter(& &1)
       |> Engine.completion(thread, user)
     end)
-    |> add_operation(:bump, fn %{access: thread} ->
-      ChatThread.changeset(thread, %{last_message_at: Timex.now()})
-      |> Repo.update()
-    end)
-    |> execute(timeout: 300_000)
-    |> case do
-      {:ok, %{chat: %Chat{} = chat}} -> {:ok, [chat]}
-      {:ok, %{chat: [%Chat{} | _] = chats}} -> {:ok, chats}
-      err -> err
-    end
   end
-
 
   @spec confirm_plan(binary, User.t) :: chats_resp
   def confirm_plan(thread_id, %User{} = user) do

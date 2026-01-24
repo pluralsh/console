@@ -27,7 +27,6 @@ defmodule Console.AI.Tools.Explain.Read do
          {:ok, files} <- Services.service_files(svc_id, user),
          {:file, %{} = result} <- {:file, Enum.find(files, fn %{path: path} -> path == file end)} do
       Jason.encode(%{file: result})
-      |> IO.inspect(label: "reading file #{file}")
     else
       {:svc, _} -> {:error, "no service found"}
       {:file, _} -> {:error, "file not found"}
