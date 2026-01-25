@@ -8,7 +8,22 @@ versions:
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ["Helm chart updated to reflect new CLI options (noted in v1.8.0\
+        \ chores: \u201CUpdate helm chart for new CLI options\u201D)."]
+    features: ['Delayed registration support for AWS KWOK (v1.6.0), improving KWOK-based
+        testing/virtual node flows.', Capacity Block support (v1.6.0) for provisioning
+        into EC2 Capacity Blocks., 'Temporarily ICE an AZ when its subnets run out
+        of IPs (v1.6.0), reducing thrash when IP capacity is exhausted.', Additional
+        Bottlerocket log settings support (v1.6.0)., Auto-relaxing minimum values
+        support (v1.6.0) to reduce configuration friction around minimum constraints.,
+      'Ability to set `spec.IpPrefixCount` to pre-warm IP prefixes (v1.8.0), helping
+        reduce pod IP allocation latency on new nodes.', 'Support `InstanceMatchCriteria`
+        in `CapacityReservationSelectorTerms` (v1.8.0), improving targeting of Capacity
+        Reservations.', 'Bottlerocket change: use default ephemeral storage bind command
+        (v1.8.0).']
+    breaking_changes: []
   chart_version: 1.8.0
   images: ['public.ecr.aws/karpenter/controller:1.8.0@sha256:f913075cdd31cfcdfaa9726ca7a0b264832fc42e8a48eb573a2a0f454b38b112']
 - version: 1.6.0
