@@ -36,6 +36,8 @@ import { StackTypeIcon } from '../stacks/common/StackTypeIcon.tsx'
 import { ClusterProviderIcon } from '../utils/Provider.tsx'
 import { useChatbot } from './AIContext.tsx'
 import { AITableActions } from './AITableActions.tsx'
+import { getInfraResearchAbsPath } from 'routes/aiRoutesConsts.tsx'
+import { truncate } from 'lodash'
 
 const AIThreadsTableEntrySC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -112,11 +114,7 @@ export function AIEntryLabel({
   isStale: boolean
 } & ComponentProps<typeof Flex>) {
   const { pathname } = useLocation()
-  const insightPathInfo = getInsightPathInfo(thread?.insight)
-  const flowPath = thread?.flow && {
-    path: [thread.flow.name],
-    url: getFlowDetailsPath({ flowId: thread.flow.id }),
-  }
+  const resourcePath = getResourceLinkPath(thread)
 
   return (
     <Flex
@@ -143,11 +141,10 @@ export function AIEntryLabel({
             gap="small"
             align="center"
           >
-            <TableEntryResourceLink {...(insightPathInfo || flowPath)} />{' '}
-            {insightPathInfo?.url &&
-              pathname?.includes(insightPathInfo.url) && (
-                <CaptionP $color="icon-info">Current page</CaptionP>
-              )}
+            <TableEntryResourceLink {...resourcePath} />{' '}
+            {resourcePath?.url && pathname?.includes(resourcePath.url) && (
+              <CaptionP $color="icon-info">Current page</CaptionP>
+            )}
           </Flex>
         }
         firstPartialType="body2"
@@ -333,6 +330,27 @@ export function TableEntryResourceLink({
   )
 }
 
+export const getResourceLinkPath = (
+  thread: Nullable<ChatThreadTinyFragment>
+) => {
+  if (!thread) return null
+  const { insight, flow, service, research } = thread
+  const insightPathInfo = getInsightPathInfo(insight)
+  const flowPath = flow && {
+    path: [flow.name],
+    url: getFlowDetailsPath({ flowId: flow.id }),
+  }
+  const servicePath = service && {
+    path: [service.name],
+    url: getServiceDetailsPath({ serviceId: service.id }),
+  }
+  const researchPath = research && {
+    path: [truncate(research.prompt ?? '', { length: 50 })],
+    url: getInfraResearchAbsPath({ infraResearchId: research.id }),
+  }
+  return insightPathInfo || flowPath || servicePath || researchPath
+}
+
 export const getThreadTimestamp = (thread: Nullable<ChatThreadTinyFragment>) =>
   thread?.lastMessageAt ?? thread?.insertedAt ?? new Date()
 
@@ -340,8 +358,3 @@ export const sortThreadsOrPins = (
   a: Nullable<ChatThreadTinyFragment>,
   b: Nullable<ChatThreadTinyFragment>
 ) => dayjs(getThreadTimestamp(b)).diff(dayjs(getThreadTimestamp(a)))
-
-export const truncate = (text?: Nullable<string>, maxLength: number = 50) => {
-  if (!text) return ''
-  return text.substring(0, maxLength) + (text.length > maxLength ? '...' : '')
-}
