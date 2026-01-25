@@ -203,6 +203,8 @@ defmodule Console.Deployments.AgentsTest do
       assert pr.title == "a pr"
       assert pr.flow_id == run.flow_id
       assert pr.agent_run_id == run.id
+
+      assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
     end
 
     test "it can create a pull request associated with a runs agent session" do

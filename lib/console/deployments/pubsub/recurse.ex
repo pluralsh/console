@@ -111,7 +111,7 @@ end
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
   alias Console.Repo
   alias Console.Schema.{PullRequest, Stack, Service, GitRepository}
-  alias Console.Deployments.{Stacks, Git.Discovery, Services}
+  alias Console.Deployments.{Stacks, Git.Discovery, Services, Agents}
 
   def process(%@for{item: %PullRequest{status: :merged, stack_id: id} = pr}) when is_binary(id) do
     with %PullRequest{stack: %Stack{} = stack} <- Repo.preload(pr, [stack: :repository]),
@@ -134,6 +134,9 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
         do: Stacks.poll(Repo.get(PullRequest, pr.id))
     end, ttl: :timer.seconds(30))
   end
+
+  def process(%@for{item: %PullRequest{agent_run_id: id} = pr}) when is_binary(id),
+    do: Agents.pr_review(pr)
 
   def process(_), do: :ok
 
