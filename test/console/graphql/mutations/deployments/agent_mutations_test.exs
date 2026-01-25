@@ -217,16 +217,33 @@ defmodule Console.GraphQL.Mutations.Deployments.AgentMutationsTest do
       run = insert(:agent_run, user: user)
 
       {:ok, %{data: %{"shareAgentRun" => shared}}} = run_query("""
-        mutation Share($id: ID!) {
-          shareAgentRun(id: $id) {
+        mutation Share($id: ID!, $shared: Boolean!) {
+          shareAgentRun(id: $id, shared: $shared) {
             id
             shared
           }
         }
-      """, %{"id" => run.id}, %{current_user: user})
+      """, %{"id" => run.id, "shared" => true}, %{current_user: user})
 
       assert shared["id"] == run.id
       assert shared["shared"]
+    end
+
+    test "a user can unshare their own agent run" do
+      user = insert(:user)
+      run = insert(:agent_run, user: user, shared: true)
+
+      {:ok, %{data: %{"shareAgentRun" => unshared}}} = run_query("""
+        mutation Share($id: ID!, $shared: Boolean!) {
+          shareAgentRun(id: $id, shared: $shared) {
+            id
+            shared
+          }
+        }
+      """, %{"id" => run.id, "shared" => false}, %{current_user: user})
+
+      assert unshared["id"] == run.id
+      refute unshared["shared"]
     end
   end
 

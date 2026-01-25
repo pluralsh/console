@@ -115,12 +115,12 @@ defmodule Console.Deployments.Agents do
   end
 
   @doc """
-  Shares an agent run, can only be performed by the user who initiated it
+  Shares or unshares an agent run, can only be performed by the user who initiated it
   """
-  @spec share_agent_run(binary, User.t) :: agent_run_resp
-  def share_agent_run(run_id, %User{} = user) do
+  @spec share_agent_run(binary, boolean, User.t) :: agent_run_resp
+  def share_agent_run(run_id, shared, %User{} = user) when is_boolean(shared) do
     get_agent_run!(run_id)
-    |> AgentRun.changeset(%{shared: true})
+    |> AgentRun.changeset(%{shared: shared})
     |> allow(user, :share)
     |> when_ok(:update)
   end
