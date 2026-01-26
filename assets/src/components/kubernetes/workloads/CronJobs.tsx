@@ -20,7 +20,7 @@ import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { useCluster } from '../Cluster'
 import { useDataSelect } from '../common/DataSelect.tsx'
 import { ResourceList } from '../common/ResourceList.tsx'
-import { getCreationTimestampString, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { CronJobSuspendChip, WorkloadImages } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
 
@@ -58,14 +58,11 @@ const colActive = columnHelper.accessor((cj) => cj.active, {
   cell: ({ getValue }) => getValue(),
 })
 
-const colLastSchedule = columnHelper.accessor(
-  (cj) => getCreationTimestampString(cj.lastSchedule),
-  {
-    id: 'lastSchedule',
-    header: 'Last schedule',
-    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
-  }
-)
+const colLastSchedule = columnHelper.accessor((cj) => cj.lastSchedule, {
+  id: 'lastSchedule',
+  header: 'Last schedule',
+  cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+})
 
 export default function CronJobs() {
   const cluster = useCluster()

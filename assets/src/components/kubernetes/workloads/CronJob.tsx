@@ -38,7 +38,7 @@ import { ResourceList } from '../common/ResourceList.tsx'
 
 import { Kind } from '../common/types'
 import { GqlError } from '../../utils/Alert'
-import { getCreationTimestampString, MetadataSidecar } from '../common/utils'
+import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 import { getBreadcrumbs } from './CronJobs'
 import { useJobsColumns } from './Jobs'
@@ -139,9 +139,7 @@ export default function CronJob(): ReactElement<any> {
             </SidecarItem>
             <SidecarItem heading="Schedule">{cronJob?.schedule}</SidecarItem>
             <SidecarItem heading="Last schedule">
-              {formatLocalizedDateTime(
-                getCreationTimestampString(cronJob?.lastSchedule)
-              )}
+              {formatLocalizedDateTime(cronJob?.lastSchedule)}
             </SidecarItem>
             <SidecarItem heading="Active jobs">{cronJob?.active}</SidecarItem>
             <SidecarItem heading="Suspended">

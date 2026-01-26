@@ -35,14 +35,6 @@ export const DEFAULT_DATA_SELECT = {
   page: '1',
 }
 
-export function getCreationTimestampString(
-  timestamp: string | { Time?: string } | undefined
-): string | undefined {
-  if (!timestamp) return undefined
-  if (typeof timestamp === 'string') return timestamp
-  return timestamp.Time
-}
-
 export function useDefaultColumns<
   T extends { objectMeta: TypesObjectMeta; typeMeta: TypesTypeMeta } = {
     objectMeta: TypesObjectMeta
@@ -82,7 +74,7 @@ export function useDefaultColumns<
         },
       }),
       colCreationTimestamp: columnHelper.accessor(
-        (r) => getCreationTimestampString(r?.objectMeta.creationTimestamp),
+        (r) => r?.objectMeta.creationTimestamp,
         {
           id: 'creationTimestamp',
           header: 'Creation',
@@ -259,9 +251,7 @@ export function MetadataSidecar({
           )}
           <SidecarItem heading="UID">{objectMeta.uid}</SidecarItem>
           <SidecarItem heading="Creation date">
-            {formatLocalizedDateTime(
-              getCreationTimestampString(objectMeta.creationTimestamp)
-            )}
+            {formatLocalizedDateTime(objectMeta.creationTimestamp)}
           </SidecarItem>
           <SidecarItem heading="Labels">
             <ChipList
