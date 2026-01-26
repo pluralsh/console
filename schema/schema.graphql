@@ -10527,6 +10527,7 @@ type ToolDelta {
   id: ID
   name: String
   arguments: Map
+  pending: Boolean
 }
 
 type AiDelta {

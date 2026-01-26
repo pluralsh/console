@@ -35,7 +35,7 @@ defmodule Console.AI.Tool do
     def new(args), do: struct(__MODULE__, args)
   end
 
-  defstruct [:id, :name, :arguments]
+  defstruct [:id, :name, :arguments, pending: false]
 
   @callback json_schema() :: map
   @callback name() :: atom

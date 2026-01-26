@@ -359,6 +359,7 @@ defmodule Console.GraphQl.AI do
     field :id,        :id
     field :name,      :string
     field :arguments, :map
+    field :pending,   :boolean
   end
 
   object :ai_delta do

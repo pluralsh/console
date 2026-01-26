@@ -13,7 +13,7 @@ defmodule Console.AI.Stream do
 
   def tool(), do: Process.get(@tool)
 
-  def tool(id, name), do: Process.put(@tool, %{id: id, name: name})
+  def tool(id, name, pending \\ false), do: Process.put(@tool, %{id: id, name: name, pending: pending})
 
   def stream(role) do
     case Process.get(@stream) do

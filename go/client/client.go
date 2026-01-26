@@ -508,66 +508,24 @@ func (t *AgentRunBaseFragment) GetTodos() []*AgentTodoFragment {
 }
 
 type AgentRunFragment struct {
-	ID              string                     "json:\"id\" graphql:\"id\""
-	Prompt          string                     "json:\"prompt\" graphql:\"prompt\""
-	Repository      string                     "json:\"repository\" graphql:\"repository\""
-	Mode            AgentRunMode               "json:\"mode\" graphql:\"mode\""
-	Language        *AgentRunLanguage          "json:\"language,omitempty\" graphql:\"language\""
-	LanguageVersion *string                    "json:\"languageVersion,omitempty\" graphql:\"languageVersion\""
-	Todos           []*AgentTodoFragment       "json:\"todos,omitempty\" graphql:\"todos\""
-	Status          AgentRunStatus             "json:\"status\" graphql:\"status\""
-	PodReference    *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
-	Error           *string                    "json:\"error,omitempty\" graphql:\"error\""
-	Analysis        *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
-	ScmCreds        *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
-	PluralCreds     *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
-	Runtime         *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
-	User            *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
-	Flow            *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
-	PullRequests    []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
+	AgentRunBaseFragment AgentRunBaseFragment
+	Status               AgentRunStatus             "json:\"status\" graphql:\"status\""
+	PodReference         *AgentPodReferenceFragment "json:\"podReference,omitempty\" graphql:\"podReference\""
+	Error                *string                    "json:\"error,omitempty\" graphql:\"error\""
+	Analysis             *AgentAnalysisFragment     "json:\"analysis,omitempty\" graphql:\"analysis\""
+	ScmCreds             *ScmCredentialFragment     "json:\"scmCreds,omitempty\" graphql:\"scmCreds\""
+	PluralCreds          *PluralCredsFragment       "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
+	Runtime              *AgentRuntimeFragment      "json:\"runtime,omitempty\" graphql:\"runtime\""
+	User                 *AgentRunFragment_User     "json:\"user,omitempty\" graphql:\"user\""
+	Flow                 *AgentRunFragment_Flow     "json:\"flow,omitempty\" graphql:\"flow\""
+	PullRequests         []*PullRequestFragment     "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 }
 
-func (t *AgentRunFragment) GetID() string {
+func (t *AgentRunFragment) GetAgentRunBaseFragment() *AgentRunBaseFragment {
 	if t == nil {
 		t = &AgentRunFragment{}
 	}
-	return t.ID
-}
-func (t *AgentRunFragment) GetPrompt() string {
-	if t == nil {
-		t = &AgentRunFragment{}
-	}
-	return t.Prompt
-}
-func (t *AgentRunFragment) GetRepository() string {
-	if t == nil {
-		t = &AgentRunFragment{}
-	}
-	return t.Repository
-}
-func (t *AgentRunFragment) GetMode() *AgentRunMode {
-	if t == nil {
-		t = &AgentRunFragment{}
-	}
-	return &t.Mode
-}
-func (t *AgentRunFragment) GetLanguage() *AgentRunLanguage {
-	if t == nil {
-		t = &AgentRunFragment{}
-	}
-	return t.Language
-}
-func (t *AgentRunFragment) GetLanguageVersion() *string {
-	if t == nil {
-		t = &AgentRunFragment{}
-	}
-	return t.LanguageVersion
-}
-func (t *AgentRunFragment) GetTodos() []*AgentTodoFragment {
-	if t == nil {
-		t = &AgentRunFragment{}
-	}
-	return t.Todos
+	return &t.AgentRunBaseFragment
 }
 func (t *AgentRunFragment) GetStatus() *AgentRunStatus {
 	if t == nil {
@@ -2376,81 +2334,25 @@ func (t *ComponentContentFragment) GetDesired() *string {
 }
 
 type ServiceDeploymentFragment struct {
-	ID            string                                     "json:\"id\" graphql:\"id\""
-	Name          string                                     "json:\"name\" graphql:\"name\""
-	Namespace     string                                     "json:\"namespace\" graphql:\"namespace\""
-	Version       string                                     "json:\"version\" graphql:\"version\""
-	Status        ServiceDeploymentStatus                    "json:\"status\" graphql:\"status\""
-	Kustomize     *KustomizeFragment                         "json:\"kustomize,omitempty\" graphql:\"kustomize\""
-	Git           *GitRefFragment                            "json:\"git,omitempty\" graphql:\"git\""
-	Helm          *HelmSpecFragment                          "json:\"helm,omitempty\" graphql:\"helm\""
-	Repository    *GitRepositoryFragment                     "json:\"repository,omitempty\" graphql:\"repository\""
-	Components    []*ServiceDeploymentFragment_Components    "json:\"components,omitempty\" graphql:\"components\""
-	Protect       *bool                                      "json:\"protect,omitempty\" graphql:\"protect\""
-	DeletedAt     *string                                    "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
-	Sha           *string                                    "json:\"sha,omitempty\" graphql:\"sha\""
-	Tarball       *string                                    "json:\"tarball,omitempty\" graphql:\"tarball\""
-	DryRun        *bool                                      "json:\"dryRun,omitempty\" graphql:\"dryRun\""
-	Templated     *bool                                      "json:\"templated,omitempty\" graphql:\"templated\""
-	Configuration []*ServiceDeploymentFragment_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
-	Flow          *ServiceDeploymentFragment_Flow            "json:\"flow,omitempty\" graphql:\"flow\""
-	SyncConfig    *ServiceDeploymentFragment_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
-	Metadata      *ServiceDeploymentFragment_Metadata        "json:\"metadata,omitempty\" graphql:\"metadata\""
+	ServiceDeploymentBaseFragment ServiceDeploymentBaseFragment
+	Components                    []*ServiceDeploymentFragment_Components    "json:\"components,omitempty\" graphql:\"components\""
+	Protect                       *bool                                      "json:\"protect,omitempty\" graphql:\"protect\""
+	DeletedAt                     *string                                    "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
+	Sha                           *string                                    "json:\"sha,omitempty\" graphql:\"sha\""
+	Tarball                       *string                                    "json:\"tarball,omitempty\" graphql:\"tarball\""
+	DryRun                        *bool                                      "json:\"dryRun,omitempty\" graphql:\"dryRun\""
+	Templated                     *bool                                      "json:\"templated,omitempty\" graphql:\"templated\""
+	Configuration                 []*ServiceDeploymentFragment_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Flow                          *ServiceDeploymentFragment_Flow            "json:\"flow,omitempty\" graphql:\"flow\""
+	SyncConfig                    *ServiceDeploymentFragment_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
+	Metadata                      *ServiceDeploymentFragment_Metadata        "json:\"metadata,omitempty\" graphql:\"metadata\""
 }
 
-func (t *ServiceDeploymentFragment) GetID() string {
+func (t *ServiceDeploymentFragment) GetServiceDeploymentBaseFragment() *ServiceDeploymentBaseFragment {
 	if t == nil {
 		t = &ServiceDeploymentFragment{}
 	}
-	return t.ID
-}
-func (t *ServiceDeploymentFragment) GetName() string {
-	if t == nil {
-		t = &ServiceDeploymentFragment{}
-	}
-	return t.Name
-}
-func (t *ServiceDeploymentFragment) GetNamespace() string {
-	if t == nil {
-		t = &ServiceDeploymentFragment{}
-	}
-	return t.Namespace
-}
-func (t *ServiceDeploymentFragment) GetVersion() string {
-	if t == nil {
-		t = &ServiceDeploymentFragment{}
-	}
-	return t.Version
-}
-func (t *ServiceDeploymentFragment) GetStatus() *ServiceDeploymentStatus {
-	if t == nil {
-		t = &ServiceDeploymentFragment{}
-	}
-	return &t.Status
-}
-func (t *ServiceDeploymentFragment) GetKustomize() *KustomizeFragment {
-	if t == nil {
-		t = &ServiceDeploymentFragment{}
-	}
-	return t.Kustomize
-}
-func (t *ServiceDeploymentFragment) GetGit() *GitRefFragment {
-	if t == nil {
-		t = &ServiceDeploymentFragment{}
-	}
-	return t.Git
-}
-func (t *ServiceDeploymentFragment) GetHelm() *HelmSpecFragment {
-	if t == nil {
-		t = &ServiceDeploymentFragment{}
-	}
-	return t.Helm
-}
-func (t *ServiceDeploymentFragment) GetRepository() *GitRepositoryFragment {
-	if t == nil {
-		t = &ServiceDeploymentFragment{}
-	}
-	return t.Repository
+	return &t.ServiceDeploymentBaseFragment
 }
 func (t *ServiceDeploymentFragment) GetComponents() []*ServiceDeploymentFragment_Components {
 	if t == nil {
@@ -2520,30 +2422,11 @@ func (t *ServiceDeploymentFragment) GetMetadata() *ServiceDeploymentFragment_Met
 }
 
 type ServiceDeploymentExtended struct {
-	Cluster       *BaseClusterFragment                                                 "json:\"cluster,omitempty\" graphql:\"cluster\""
-	Errors        []*ErrorFragment                                                     "json:\"errors,omitempty\" graphql:\"errors\""
-	Revision      *RevisionFragment                                                    "json:\"revision,omitempty\" graphql:\"revision\""
-	Contexts      []*ServiceContextFragment                                            "json:\"contexts,omitempty\" graphql:\"contexts\""
-	ID            string                                                               "json:\"id\" graphql:\"id\""
-	Name          string                                                               "json:\"name\" graphql:\"name\""
-	Namespace     string                                                               "json:\"namespace\" graphql:\"namespace\""
-	Version       string                                                               "json:\"version\" graphql:\"version\""
-	Status        ServiceDeploymentStatus                                              "json:\"status\" graphql:\"status\""
-	Kustomize     *KustomizeFragment                                                   "json:\"kustomize,omitempty\" graphql:\"kustomize\""
-	Git           *GitRefFragment                                                      "json:\"git,omitempty\" graphql:\"git\""
-	Helm          *HelmSpecFragment                                                    "json:\"helm,omitempty\" graphql:\"helm\""
-	Repository    *GitRepositoryFragment                                               "json:\"repository,omitempty\" graphql:\"repository\""
-	Components    []*ServiceDeploymentExtended_ServiceDeploymentFragment_Components    "json:\"components,omitempty\" graphql:\"components\""
-	Protect       *bool                                                                "json:\"protect,omitempty\" graphql:\"protect\""
-	DeletedAt     *string                                                              "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
-	Sha           *string                                                              "json:\"sha,omitempty\" graphql:\"sha\""
-	Tarball       *string                                                              "json:\"tarball,omitempty\" graphql:\"tarball\""
-	DryRun        *bool                                                                "json:\"dryRun,omitempty\" graphql:\"dryRun\""
-	Templated     *bool                                                                "json:\"templated,omitempty\" graphql:\"templated\""
-	Configuration []*ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration "json:\"configuration,omitempty\" graphql:\"configuration\""
-	Flow          *ServiceDeploymentExtended_ServiceDeploymentFragment_Flow            "json:\"flow,omitempty\" graphql:\"flow\""
-	SyncConfig    *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
-	Metadata      *ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata        "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Cluster                   *BaseClusterFragment      "json:\"cluster,omitempty\" graphql:\"cluster\""
+	Errors                    []*ErrorFragment          "json:\"errors,omitempty\" graphql:\"errors\""
+	Revision                  *RevisionFragment         "json:\"revision,omitempty\" graphql:\"revision\""
+	Contexts                  []*ServiceContextFragment "json:\"contexts,omitempty\" graphql:\"contexts\""
+	ServiceDeploymentFragment ServiceDeploymentFragment
 }
 
 func (t *ServiceDeploymentExtended) GetCluster() *BaseClusterFragment {
@@ -2570,125 +2453,11 @@ func (t *ServiceDeploymentExtended) GetContexts() []*ServiceContextFragment {
 	}
 	return t.Contexts
 }
-func (t *ServiceDeploymentExtended) GetID() string {
+func (t *ServiceDeploymentExtended) GetServiceDeploymentFragment() *ServiceDeploymentFragment {
 	if t == nil {
 		t = &ServiceDeploymentExtended{}
 	}
-	return t.ID
-}
-func (t *ServiceDeploymentExtended) GetName() string {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Name
-}
-func (t *ServiceDeploymentExtended) GetNamespace() string {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Namespace
-}
-func (t *ServiceDeploymentExtended) GetVersion() string {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Version
-}
-func (t *ServiceDeploymentExtended) GetStatus() *ServiceDeploymentStatus {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return &t.Status
-}
-func (t *ServiceDeploymentExtended) GetKustomize() *KustomizeFragment {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Kustomize
-}
-func (t *ServiceDeploymentExtended) GetGit() *GitRefFragment {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Git
-}
-func (t *ServiceDeploymentExtended) GetHelm() *HelmSpecFragment {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Helm
-}
-func (t *ServiceDeploymentExtended) GetRepository() *GitRepositoryFragment {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Repository
-}
-func (t *ServiceDeploymentExtended) GetComponents() []*ServiceDeploymentExtended_ServiceDeploymentFragment_Components {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Components
-}
-func (t *ServiceDeploymentExtended) GetProtect() *bool {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Protect
-}
-func (t *ServiceDeploymentExtended) GetDeletedAt() *string {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.DeletedAt
-}
-func (t *ServiceDeploymentExtended) GetSha() *string {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Sha
-}
-func (t *ServiceDeploymentExtended) GetTarball() *string {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Tarball
-}
-func (t *ServiceDeploymentExtended) GetDryRun() *bool {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.DryRun
-}
-func (t *ServiceDeploymentExtended) GetTemplated() *bool {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Templated
-}
-func (t *ServiceDeploymentExtended) GetConfiguration() []*ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Configuration
-}
-func (t *ServiceDeploymentExtended) GetFlow() *ServiceDeploymentExtended_ServiceDeploymentFragment_Flow {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Flow
-}
-func (t *ServiceDeploymentExtended) GetSyncConfig() *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.SyncConfig
-}
-func (t *ServiceDeploymentExtended) GetMetadata() *ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata {
-	if t == nil {
-		t = &ServiceDeploymentExtended{}
-	}
-	return t.Metadata
+	return &t.ServiceDeploymentFragment
 }
 
 type ErrorFragment struct {
@@ -5217,190 +4986,15 @@ func (t *StackRunIDFragment) GetID() string {
 }
 
 type StackRunFragment struct {
-	ID            string                                             "json:\"id\" graphql:\"id\""
-	Type          StackType                                          "json:\"type\" graphql:\"type\""
-	Status        StackStatus                                        "json:\"status\" graphql:\"status\""
-	Approval      *bool                                              "json:\"approval,omitempty\" graphql:\"approval\""
-	ApprovedAt    *string                                            "json:\"approvedAt,omitempty\" graphql:\"approvedAt\""
-	Tarball       string                                             "json:\"tarball\" graphql:\"tarball\""
-	Workdir       *string                                            "json:\"workdir,omitempty\" graphql:\"workdir\""
-	ManageState   *bool                                              "json:\"manageState,omitempty\" graphql:\"manageState\""
-	Variables     map[string]any                                     "json:\"variables,omitempty\" graphql:\"variables\""
-	DryRun        bool                                               "json:\"dryRun\" graphql:\"dryRun\""
-	StateUrls     *StackRunFragment_StackRunBaseFragment_StateUrls   "json:\"stateUrls,omitempty\" graphql:\"stateUrls\""
-	PluralCreds   *StackRunFragment_StackRunBaseFragment_PluralCreds "json:\"pluralCreds,omitempty\" graphql:\"pluralCreds\""
-	Actor         *UserFragment                                      "json:\"actor,omitempty\" graphql:\"actor\""
-	Stack         *InfrastructureStackFragment                       "json:\"stack,omitempty\" graphql:\"stack\""
-	State         *StackStateFragment                                "json:\"state,omitempty\" graphql:\"state\""
-	Steps         []*RunStepFragment                                 "json:\"steps,omitempty\" graphql:\"steps\""
-	Files         []*StackFileFragment                               "json:\"files,omitempty\" graphql:\"files\""
-	Git           GitRefFragment                                     "json:\"git\" graphql:\"git\""
-	Repository    *GitRepositoryFragment                             "json:\"repository,omitempty\" graphql:\"repository\""
-	JobSpec       *JobSpecFragment                                   "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
-	Configuration StackConfigurationFragment                         "json:\"configuration\" graphql:\"configuration\""
-	Environment   []*StackEnvironmentFragment                        "json:\"environment,omitempty\" graphql:\"environment\""
-	Output        []*StackOutputFragment                             "json:\"output,omitempty\" graphql:\"output\""
-	Errors        []*ServiceErrorFragment                            "json:\"errors,omitempty\" graphql:\"errors\""
-	Violations    []*StackPolicyViolationFragment                    "json:\"violations,omitempty\" graphql:\"violations\""
-	PolicyEngine  *PolicyEngineFragment                              "json:\"policyEngine,omitempty\" graphql:\"policyEngine\""
-	Approver      *UserFragment                                      "json:\"approver,omitempty\" graphql:\"approver\""
+	StackRunBaseFragment StackRunBaseFragment
+	Approver             *UserFragment "json:\"approver,omitempty\" graphql:\"approver\""
 }
 
-func (t *StackRunFragment) GetID() string {
+func (t *StackRunFragment) GetStackRunBaseFragment() *StackRunBaseFragment {
 	if t == nil {
 		t = &StackRunFragment{}
 	}
-	return t.ID
-}
-func (t *StackRunFragment) GetType() *StackType {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return &t.Type
-}
-func (t *StackRunFragment) GetStatus() *StackStatus {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return &t.Status
-}
-func (t *StackRunFragment) GetApproval() *bool {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Approval
-}
-func (t *StackRunFragment) GetApprovedAt() *string {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.ApprovedAt
-}
-func (t *StackRunFragment) GetTarball() string {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Tarball
-}
-func (t *StackRunFragment) GetWorkdir() *string {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Workdir
-}
-func (t *StackRunFragment) GetManageState() *bool {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.ManageState
-}
-func (t *StackRunFragment) GetVariables() map[string]any {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Variables
-}
-func (t *StackRunFragment) GetDryRun() bool {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.DryRun
-}
-func (t *StackRunFragment) GetStateUrls() *StackRunFragment_StackRunBaseFragment_StateUrls {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.StateUrls
-}
-func (t *StackRunFragment) GetPluralCreds() *StackRunFragment_StackRunBaseFragment_PluralCreds {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.PluralCreds
-}
-func (t *StackRunFragment) GetActor() *UserFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Actor
-}
-func (t *StackRunFragment) GetStack() *InfrastructureStackFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Stack
-}
-func (t *StackRunFragment) GetState() *StackStateFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.State
-}
-func (t *StackRunFragment) GetSteps() []*RunStepFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Steps
-}
-func (t *StackRunFragment) GetFiles() []*StackFileFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Files
-}
-func (t *StackRunFragment) GetGit() *GitRefFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return &t.Git
-}
-func (t *StackRunFragment) GetRepository() *GitRepositoryFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Repository
-}
-func (t *StackRunFragment) GetJobSpec() *JobSpecFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.JobSpec
-}
-func (t *StackRunFragment) GetConfiguration() *StackConfigurationFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return &t.Configuration
-}
-func (t *StackRunFragment) GetEnvironment() []*StackEnvironmentFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Environment
-}
-func (t *StackRunFragment) GetOutput() []*StackOutputFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Output
-}
-func (t *StackRunFragment) GetErrors() []*ServiceErrorFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Errors
-}
-func (t *StackRunFragment) GetViolations() []*StackPolicyViolationFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.Violations
-}
-func (t *StackRunFragment) GetPolicyEngine() *PolicyEngineFragment {
-	if t == nil {
-		t = &StackRunFragment{}
-	}
-	return t.PolicyEngine
+	return &t.StackRunBaseFragment
 }
 func (t *StackRunFragment) GetApprover() *UserFragment {
 	if t == nil {
@@ -6309,11 +5903,17 @@ func (t *AccessTokenFragment) GetToken() *string {
 }
 
 type AgentRunFragment_User struct {
+	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
 	Name  string "json:\"name\" graphql:\"name\""
-	Email string "json:\"email\" graphql:\"email\""
 }
 
+func (t *AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &AgentRunFragment_User{}
+	}
+	return t.Email
+}
 func (t *AgentRunFragment_User) GetID() string {
 	if t == nil {
 		t = &AgentRunFragment_User{}
@@ -6325,12 +5925,6 @@ func (t *AgentRunFragment_User) GetName() string {
 		t = &AgentRunFragment_User{}
 	}
 	return t.Name
-}
-func (t *AgentRunFragment_User) GetEmail() string {
-	if t == nil {
-		t = &AgentRunFragment_User{}
-	}
-	return t.Email
 }
 
 type AgentRunFragment_Flow struct {
@@ -6374,35 +5968,23 @@ func (t *ClusterRestoreFragment_Backup_ClusterBackupFragment_Cluster) GetID() st
 }
 
 type ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -6410,11 +5992,23 @@ func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploym
 	}
 	return t.Group
 }
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -6434,17 +6028,17 @@ func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploym
 	}
 	return t.Synced
 }
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -6477,28 +6071,28 @@ func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploym
 }
 
 type ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                            "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                        "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                            "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                        "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -6506,6 +6100,12 @@ func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploym
 		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -6519,61 +6119,43 @@ func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploym
 	}
 	return t.NamespaceMetadata
 }
-func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -6581,11 +6163,23 @@ func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) G
 	}
 	return t.Group
 }
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -6605,17 +6199,17 @@ func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) G
 	}
 	return t.Synced
 }
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -6648,28 +6242,28 @@ func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Flow) GetID()
 }
 
 type ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -6677,6 +6271,12 @@ func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) G
 		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -6690,49 +6290,73 @@ func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) G
 	}
 	return t.NamespaceMetadata
 }
-func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
-
-type ServiceDeploymentForAgent_Cluster struct {
-	ID             string         "json:\"id\" graphql:\"id\""
-	Name           string         "json:\"name\" graphql:\"name\""
-	Handle         *string        "json:\"handle,omitempty\" graphql:\"handle\""
-	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
-	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
-	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
-	Metadata       map[string]any "json:\"metadata,omitempty\" graphql:\"metadata\""
-	CurrentVersion *string        "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
-	KasURL         *string        "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
-	Distro         *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
+func (t *ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
+type ServiceDeploymentForAgent_Cluster struct {
+	CurrentVersion *string        "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
+	Distro         *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
+	Handle         *string        "json:\"handle,omitempty\" graphql:\"handle\""
+	ID             string         "json:\"id\" graphql:\"id\""
+	KasURL         *string        "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Metadata       map[string]any "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Name           string         "json:\"name\" graphql:\"name\""
+	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
+	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *ServiceDeploymentForAgent_Cluster) GetCurrentVersion() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.CurrentVersion
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Distro
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Handle
+}
 func (t *ServiceDeploymentForAgent_Cluster) GetID() string {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.ID
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetKasURL() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.KasURL
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Metadata
 }
 func (t *ServiceDeploymentForAgent_Cluster) GetName() string {
 	if t == nil {
@@ -6740,11 +6364,11 @@ func (t *ServiceDeploymentForAgent_Cluster) GetName() string {
 	}
 	return t.Name
 }
-func (t *ServiceDeploymentForAgent_Cluster) GetHandle() *string {
+func (t *ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_Cluster{}
 	}
-	return t.Handle
+	return t.PingedAt
 }
 func (t *ServiceDeploymentForAgent_Cluster) GetSelf() *bool {
 	if t == nil {
@@ -6758,83 +6382,29 @@ func (t *ServiceDeploymentForAgent_Cluster) GetVersion() *string {
 	}
 	return t.Version
 }
-func (t *ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.PingedAt
-}
-func (t *ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.Metadata
-}
-func (t *ServiceDeploymentForAgent_Cluster) GetCurrentVersion() *string {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.CurrentVersion
-}
-func (t *ServiceDeploymentForAgent_Cluster) GetKasURL() *string {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.KasURL
-}
-func (t *ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.Distro
-}
 
 type ServiceDeploymentForAgent_Helm struct {
-	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
-	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
-	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
-	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
-	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
 	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
+	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
+	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
+	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 }
 
-func (t *ServiceDeploymentForAgent_Helm) GetRelease() *string {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Helm{}
-	}
-	return t.Release
-}
-func (t *ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Helm{}
-	}
-	return t.ValuesFiles
-}
-func (t *ServiceDeploymentForAgent_Helm) GetValues() *string {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Helm{}
-	}
-	return t.Values
-}
-func (t *ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Helm{}
-	}
-	return t.IgnoreHooks
-}
 func (t *ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreCrds
 }
-func (t *ServiceDeploymentForAgent_Helm) GetLuaScript() *string {
+func (t *ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_Helm{}
 	}
-	return t.LuaScript
+	return t.IgnoreHooks
 }
 func (t *ServiceDeploymentForAgent_Helm) GetLuaFile() *string {
 	if t == nil {
@@ -6847,6 +6417,30 @@ func (t *ServiceDeploymentForAgent_Helm) GetLuaFolder() *string {
 		t = &ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFolder
+}
+func (t *ServiceDeploymentForAgent_Helm) GetLuaScript() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaScript
+}
+func (t *ServiceDeploymentForAgent_Helm) GetRelease() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Release
+}
+func (t *ServiceDeploymentForAgent_Helm) GetValues() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Values
+}
+func (t *ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.ValuesFiles
 }
 
 type ServiceDeploymentForAgent_Configuration struct {
@@ -6868,47 +6462,47 @@ func (t *ServiceDeploymentForAgent_Configuration) GetValue() string {
 }
 
 type ServiceDeploymentForAgent_Contexts struct {
-	Name          string         "json:\"name\" graphql:\"name\""
 	Configuration map[string]any "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Name          string         "json:\"name\" graphql:\"name\""
 }
 
-func (t *ServiceDeploymentForAgent_Contexts) GetName() string {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Contexts{}
-	}
-	return t.Name
-}
 func (t *ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_Contexts{}
 	}
 	return t.Configuration
 }
+func (t *ServiceDeploymentForAgent_Contexts) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Contexts{}
+	}
+	return t.Name
+}
 
 type ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
-	EnforceNamespace  *bool                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	DeleteNamespace   *bool                                                   "json:\"deleteNamespace,omitempty\" graphql:\"deleteNamespace\""
-	NamespaceMetadata *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 	DiffNormalizers   []*DiffNormalizerFragment                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+	EnforceNamespace  *bool                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 }
 
 func (t *ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
@@ -6917,29 +6511,29 @@ func (t *ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
 	}
 	return t.CreateNamespace
 }
-func (t *ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_SyncConfig{}
-	}
-	return t.EnforceNamespace
-}
 func (t *ServiceDeploymentForAgent_SyncConfig) GetDeleteNamespace() *bool {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.DeleteNamespace
 }
-func (t *ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_SyncConfig{}
-	}
-	return t.NamespaceMetadata
-}
 func (t *ServiceDeploymentForAgent_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+func (t *ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.NamespaceMetadata
 }
 
 type ServiceDeploymentForAgent_Revision struct {
@@ -6973,8 +6567,8 @@ func (t *ServiceDeploymentForAgent_Imports_Stack) GetName() string {
 
 type ServiceDeploymentForAgent_Imports_Outputs struct {
 	Name   string "json:\"name\" graphql:\"name\""
-	Value  string "json:\"value\" graphql:\"value\""
 	Secret *bool  "json:\"secret,omitempty\" graphql:\"secret\""
+	Value  string "json:\"value\" graphql:\"value\""
 }
 
 func (t *ServiceDeploymentForAgent_Imports_Outputs) GetName() string {
@@ -6983,23 +6577,23 @@ func (t *ServiceDeploymentForAgent_Imports_Outputs) GetName() string {
 	}
 	return t.Name
 }
-func (t *ServiceDeploymentForAgent_Imports_Outputs) GetValue() string {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Imports_Outputs{}
-	}
-	return t.Value
-}
 func (t *ServiceDeploymentForAgent_Imports_Outputs) GetSecret() *bool {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_Imports_Outputs{}
 	}
 	return t.Secret
 }
+func (t *ServiceDeploymentForAgent_Imports_Outputs) GetValue() string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Value
+}
 
 type ServiceDeploymentForAgent_Imports struct {
 	ID      string                                       "json:\"id\" graphql:\"id\""
-	Stack   *ServiceDeploymentForAgent_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 	Outputs []*ServiceDeploymentForAgent_Imports_Outputs "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *ServiceDeploymentForAgent_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 }
 
 func (t *ServiceDeploymentForAgent_Imports) GetID() string {
@@ -7008,25 +6602,31 @@ func (t *ServiceDeploymentForAgent_Imports) GetID() string {
 	}
 	return t.ID
 }
-func (t *ServiceDeploymentForAgent_Imports) GetStack() *ServiceDeploymentForAgent_Imports_Stack {
-	if t == nil {
-		t = &ServiceDeploymentForAgent_Imports{}
-	}
-	return t.Stack
-}
 func (t *ServiceDeploymentForAgent_Imports) GetOutputs() []*ServiceDeploymentForAgent_Imports_Outputs {
 	if t == nil {
 		t = &ServiceDeploymentForAgent_Imports{}
 	}
 	return t.Outputs
 }
-
-type FederatedCredentialFragment_User struct {
-	ID    string "json:\"id\" graphql:\"id\""
-	Name  string "json:\"name\" graphql:\"name\""
-	Email string "json:\"email\" graphql:\"email\""
+func (t *ServiceDeploymentForAgent_Imports) GetStack() *ServiceDeploymentForAgent_Imports_Stack {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Imports{}
+	}
+	return t.Stack
 }
 
+type FederatedCredentialFragment_User struct {
+	Email string "json:\"email\" graphql:\"email\""
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+}
+
+func (t *FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &FederatedCredentialFragment_User{}
+	}
+	return t.Email
+}
 func (t *FederatedCredentialFragment_User) GetID() string {
 	if t == nil {
 		t = &FederatedCredentialFragment_User{}
@@ -7038,12 +6638,6 @@ func (t *FederatedCredentialFragment_User) GetName() string {
 		t = &FederatedCredentialFragment_User{}
 	}
 	return t.Name
-}
-func (t *FederatedCredentialFragment_User) GetEmail() string {
-	if t == nil {
-		t = &FederatedCredentialFragment_User{}
-	}
-	return t.Email
 }
 
 type PipelineGateIDsEdgeFragment_Node_ struct {
@@ -7256,53 +6850,41 @@ func (t *MCPServerFragment_Authentication_Headers) GetValue() string {
 }
 
 type MCPServerFragment_Authentication struct {
-	Plural  *bool                                       "json:\"plural,omitempty\" graphql:\"plural\""
 	Headers []*MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                       "json:\"plural,omitempty\" graphql:\"plural\""
 }
 
-func (t *MCPServerFragment_Authentication) GetPlural() *bool {
-	if t == nil {
-		t = &MCPServerFragment_Authentication{}
-	}
-	return t.Plural
-}
 func (t *MCPServerFragment_Authentication) GetHeaders() []*MCPServerFragment_Authentication_Headers {
 	if t == nil {
 		t = &MCPServerFragment_Authentication{}
 	}
 	return t.Headers
 }
+func (t *MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &MCPServerFragment_Authentication{}
+	}
+	return t.Plural
+}
 
 type ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *ServiceDeploymentFragment_Components) GetID() string {
+func (t *ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -7310,11 +6892,23 @@ func (t *ServiceDeploymentFragment_Components) GetGroup() *string {
 	}
 	return t.Group
 }
+func (t *ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -7334,17 +6928,17 @@ func (t *ServiceDeploymentFragment_Components) GetSynced() bool {
 	}
 	return t.Synced
 }
+func (t *ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type ServiceDeploymentFragment_Configuration struct {
@@ -7377,28 +6971,28 @@ func (t *ServiceDeploymentFragment_Flow) GetID() string {
 }
 
 type ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -7406,6 +7000,12 @@ func (t *ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
 		t = &ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -7419,79 +7019,61 @@ func (t *ServiceDeploymentFragment_SyncConfig) GetNamespaceMetadata() *ServiceDe
 	}
 	return t.NamespaceMetadata
 }
-func (t *ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
-	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
+	Ref    string "json:\"ref\" graphql:\"ref\""
 }
 
-func (t *ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
-	if t == nil {
-		t = &ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
-	}
-	return t.Ref
-}
 func (t *ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetFolder() string {
 	if t == nil {
 		t = &ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
 	}
 	return t.Folder
 }
+func (t *ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
+	if t == nil {
+		t = &ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
+	}
+	return t.Ref
+}
 
 type ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -7499,11 +7081,23 @@ func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetGrou
 	}
 	return t.Group
 }
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -7523,17 +7117,17 @@ func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetSync
 	}
 	return t.Synced
 }
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration struct {
@@ -7566,28 +7160,28 @@ func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Flow) GetID() strin
 }
 
 type ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                             "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                             "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -7595,6 +7189,12 @@ func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCrea
 		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -7608,47 +7208,41 @@ func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetName
 	}
 	return t.NamespaceMetadata
 }
-func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type RevisionFragment_Git struct {
-	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
+	Ref    string "json:\"ref\" graphql:\"ref\""
 }
 
-func (t *RevisionFragment_Git) GetRef() string {
-	if t == nil {
-		t = &RevisionFragment_Git{}
-	}
-	return t.Ref
-}
 func (t *RevisionFragment_Git) GetFolder() string {
 	if t == nil {
 		t = &RevisionFragment_Git{}
 	}
 	return t.Folder
+}
+func (t *RevisionFragment_Git) GetRef() string {
+	if t == nil {
+		t = &RevisionFragment_Git{}
+	}
+	return t.Ref
 }
 
 type GroupMemberFragment_User struct {
@@ -7696,35 +7290,23 @@ func (t *DeploymentSettingsFragment_Ai_AISettingsFragment_Anthropic) GetModel() 
 }
 
 type ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -7732,11 +7314,23 @@ func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragme
 	}
 	return t.Group
 }
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -7756,17 +7350,17 @@ func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragme
 	}
 	return t.Synced
 }
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -7799,28 +7393,28 @@ func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragme
 }
 
 type ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                     "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                 "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                                     "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                 "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -7828,6 +7422,12 @@ func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragme
 		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -7841,49 +7441,73 @@ func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragme
 	}
 	return t.NamespaceMetadata
 }
-func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
-
-type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster struct {
-	ID             string         "json:\"id\" graphql:\"id\""
-	Name           string         "json:\"name\" graphql:\"name\""
-	Handle         *string        "json:\"handle,omitempty\" graphql:\"handle\""
-	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
-	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
-	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
-	Metadata       map[string]any "json:\"metadata,omitempty\" graphql:\"metadata\""
-	CurrentVersion *string        "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
-	KasURL         *string        "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
-	Distro         *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
+func (t *ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
+type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster struct {
+	CurrentVersion *string        "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
+	Distro         *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
+	Handle         *string        "json:\"handle,omitempty\" graphql:\"handle\""
+	ID             string         "json:\"id\" graphql:\"id\""
+	KasURL         *string        "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Metadata       map[string]any "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Name           string         "json:\"name\" graphql:\"name\""
+	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
+	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetCurrentVersion() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.CurrentVersion
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Distro
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Handle
+}
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetID() string {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.ID
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetKasURL() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.KasURL
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Metadata
 }
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetName() string {
 	if t == nil {
@@ -7891,11 +7515,11 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cl
 	}
 	return t.Name
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetHandle() *string {
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
 	}
-	return t.Handle
+	return t.PingedAt
 }
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetSelf() *bool {
 	if t == nil {
@@ -7909,83 +7533,29 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cl
 	}
 	return t.Version
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.PingedAt
-}
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.Metadata
-}
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetCurrentVersion() *string {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.CurrentVersion
-}
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetKasURL() *string {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.KasURL
-}
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.Distro
-}
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm struct {
-	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
-	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
-	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
-	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
-	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
 	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
+	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
+	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
+	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 }
 
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
-	}
-	return t.Release
-}
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
-	}
-	return t.ValuesFiles
-}
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetValues() *string {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
-	}
-	return t.Values
-}
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
-	}
-	return t.IgnoreHooks
-}
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreCrds
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaScript() *string {
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
-	return t.LuaScript
+	return t.IgnoreHooks
 }
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaFile() *string {
 	if t == nil {
@@ -7998,6 +7568,30 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_He
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFolder
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaScript() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaScript
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Release
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetValues() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Values
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.ValuesFiles
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
@@ -8019,47 +7613,47 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Co
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts struct {
-	Name          string         "json:\"name\" graphql:\"name\""
 	Configuration map[string]any "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Name          string         "json:\"name\" graphql:\"name\""
 }
 
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetName() string {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
-	}
-	return t.Name
-}
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
 	}
 	return t.Configuration
 }
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetName() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
+	}
+	return t.Name
+}
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                                                              "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
-	EnforceNamespace  *bool                                                                                              "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	DeleteNamespace   *bool                                                                                              "json:\"deleteNamespace,omitempty\" graphql:\"deleteNamespace\""
-	NamespaceMetadata *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 	DiffNormalizers   []*DiffNormalizerFragment                                                                          "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+	EnforceNamespace  *bool                                                                                              "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 }
 
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
@@ -8068,29 +7662,29 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Sy
 	}
 	return t.CreateNamespace
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
-	}
-	return t.EnforceNamespace
-}
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetDeleteNamespace() *bool {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.DeleteNamespace
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
-	}
-	return t.NamespaceMetadata
-}
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.NamespaceMetadata
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Revision struct {
@@ -8124,8 +7718,8 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Im
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs struct {
 	Name   string "json:\"name\" graphql:\"name\""
-	Value  string "json:\"value\" graphql:\"value\""
 	Secret *bool  "json:\"secret,omitempty\" graphql:\"secret\""
+	Value  string "json:\"value\" graphql:\"value\""
 }
 
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetName() string {
@@ -8134,23 +7728,23 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Im
 	}
 	return t.Name
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetValue() string {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs{}
-	}
-	return t.Value
-}
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetSecret() *bool {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs{}
 	}
 	return t.Secret
 }
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetValue() string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Value
+}
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports struct {
 	ID      string                                                                                  "json:\"id\" graphql:\"id\""
-	Stack   *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 	Outputs []*ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 }
 
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetID() string {
@@ -8159,17 +7753,17 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Im
 	}
 	return t.ID
 }
-func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetStack() *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack {
-	if t == nil {
-		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports{}
-	}
-	return t.Stack
-}
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetOutputs() []*ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs {
 	if t == nil {
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports{}
 	}
 	return t.Outputs
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetStack() *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports{}
+	}
+	return t.Stack
 }
 
 type GlobalServiceFragment_Provider struct {
@@ -8282,10 +7876,10 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Home) GetSec
 
 type PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
-	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
@@ -8294,6 +7888,12 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) Get
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Audits
+}
+func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
+	if t == nil {
+		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Backups
 }
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -8312,12 +7912,6 @@ func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) Get
 		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Settings
-}
-func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
-	if t == nil {
-		t = &PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
-	}
-	return t.Backups
 }
 func (t *PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
 	if t == nil {
@@ -8392,10 +7986,10 @@ func (t *PersonaConfigurationFragment_Home) GetSecurity() *bool {
 
 type PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
-	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
@@ -8404,6 +7998,12 @@ func (t *PersonaConfigurationFragment_Sidebar) GetAudits() *bool {
 		t = &PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Audits
+}
+func (t *PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
+	if t == nil {
+		t = &PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Backups
 }
 func (t *PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -8423,12 +8023,6 @@ func (t *PersonaConfigurationFragment_Sidebar) GetSettings() *bool {
 	}
 	return t.Settings
 }
-func (t *PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
-	if t == nil {
-		t = &PersonaConfigurationFragment_Sidebar{}
-	}
-	return t.Backups
-}
 func (t *PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
 	if t == nil {
 		t = &PersonaConfigurationFragment_Sidebar{}
@@ -8437,327 +8031,327 @@ func (t *PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
 }
 
 type PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
-	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
+	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 }
 
-func (t *PipelineFragment_Stages_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineFragment_Stages_PipelineStageFragment_Services_Criteria{}
-	}
-	return t.Source
-}
 func (t *PipelineFragment_Stages_PipelineStageFragment_Services_Criteria) GetSecrets() []*string {
 	if t == nil {
 		t = &PipelineFragment_Stages_PipelineStageFragment_Services_Criteria{}
 	}
 	return t.Secrets
 }
+func (t *PipelineFragment_Stages_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineFragment_Stages_PipelineStageFragment_Services_Criteria{}
+	}
+	return t.Source
+}
 
 type PipelineFragment_Stages_PipelineStageFragment_Services struct {
-	Service  *ServiceDeploymentBaseFragment                                   "json:\"service,omitempty\" graphql:\"service\""
 	Criteria *PipelineFragment_Stages_PipelineStageFragment_Services_Criteria "json:\"criteria,omitempty\" graphql:\"criteria\""
+	Service  *ServiceDeploymentBaseFragment                                   "json:\"service,omitempty\" graphql:\"service\""
 }
 
-func (t *PipelineFragment_Stages_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineFragment_Stages_PipelineStageFragment_Services{}
-	}
-	return t.Service
-}
 func (t *PipelineFragment_Stages_PipelineStageFragment_Services) GetCriteria() *PipelineFragment_Stages_PipelineStageFragment_Services_Criteria {
 	if t == nil {
 		t = &PipelineFragment_Stages_PipelineStageFragment_Services{}
 	}
 	return t.Criteria
 }
+func (t *PipelineFragment_Stages_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineFragment_Stages_PipelineStageFragment_Services{}
+	}
+	return t.Service
+}
 
 type PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria struct {
-	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
+	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 }
 
-func (t *PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria{}
-	}
-	return t.Source
-}
 func (t *PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria) GetSecrets() []*string {
 	if t == nil {
 		t = &PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria{}
 	}
 	return t.Secrets
 }
+func (t *PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria{}
+	}
+	return t.Source
+}
 
 type PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services struct {
-	Service  *ServiceDeploymentBaseFragment                                                                 "json:\"service,omitempty\" graphql:\"service\""
 	Criteria *PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria "json:\"criteria,omitempty\" graphql:\"criteria\""
+	Service  *ServiceDeploymentBaseFragment                                                                 "json:\"service,omitempty\" graphql:\"service\""
 }
 
-func (t *PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services{}
-	}
-	return t.Service
-}
 func (t *PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services) GetCriteria() *PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria {
 	if t == nil {
 		t = &PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services{}
 	}
 	return t.Criteria
 }
+func (t *PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services{}
+	}
+	return t.Service
+}
 
 type PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria struct {
-	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
+	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 }
 
-func (t *PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria{}
-	}
-	return t.Source
-}
 func (t *PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria) GetSecrets() []*string {
 	if t == nil {
 		t = &PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria{}
 	}
 	return t.Secrets
 }
+func (t *PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria{}
+	}
+	return t.Source
+}
 
 type PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services struct {
-	Service  *ServiceDeploymentBaseFragment                                                               "json:\"service,omitempty\" graphql:\"service\""
 	Criteria *PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria "json:\"criteria,omitempty\" graphql:\"criteria\""
+	Service  *ServiceDeploymentBaseFragment                                                               "json:\"service,omitempty\" graphql:\"service\""
 }
 
-func (t *PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
-	}
-	return t.Service
-}
 func (t *PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services) GetCriteria() *PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria {
 	if t == nil {
 		t = &PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
 	}
 	return t.Criteria
 }
+func (t *PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
+	}
+	return t.Service
+}
 
 type PipelineStageFragment_Services_Criteria struct {
-	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
+	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 }
 
-func (t *PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineStageFragment_Services_Criteria{}
-	}
-	return t.Source
-}
 func (t *PipelineStageFragment_Services_Criteria) GetSecrets() []*string {
 	if t == nil {
 		t = &PipelineStageFragment_Services_Criteria{}
 	}
 	return t.Secrets
 }
+func (t *PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineStageFragment_Services_Criteria{}
+	}
+	return t.Source
+}
 
 type PipelineStageFragment_Services struct {
-	Service  *ServiceDeploymentBaseFragment           "json:\"service,omitempty\" graphql:\"service\""
 	Criteria *PipelineStageFragment_Services_Criteria "json:\"criteria,omitempty\" graphql:\"criteria\""
+	Service  *ServiceDeploymentBaseFragment           "json:\"service,omitempty\" graphql:\"service\""
 }
 
-func (t *PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineStageFragment_Services{}
-	}
-	return t.Service
-}
 func (t *PipelineStageFragment_Services) GetCriteria() *PipelineStageFragment_Services_Criteria {
 	if t == nil {
 		t = &PipelineStageFragment_Services{}
 	}
 	return t.Criteria
 }
+func (t *PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineStageFragment_Services{}
+	}
+	return t.Service
+}
 
 type PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria struct {
-	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
+	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 }
 
-func (t *PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria{}
-	}
-	return t.Source
-}
 func (t *PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria) GetSecrets() []*string {
 	if t == nil {
 		t = &PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria{}
 	}
 	return t.Secrets
 }
+func (t *PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria{}
+	}
+	return t.Source
+}
 
 type PipelineStageEdgeFragment_From_PipelineStageFragment_Services struct {
-	Service  *ServiceDeploymentBaseFragment                                          "json:\"service,omitempty\" graphql:\"service\""
 	Criteria *PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria "json:\"criteria,omitempty\" graphql:\"criteria\""
+	Service  *ServiceDeploymentBaseFragment                                          "json:\"service,omitempty\" graphql:\"service\""
 }
 
-func (t *PipelineStageEdgeFragment_From_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineStageEdgeFragment_From_PipelineStageFragment_Services{}
-	}
-	return t.Service
-}
 func (t *PipelineStageEdgeFragment_From_PipelineStageFragment_Services) GetCriteria() *PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria {
 	if t == nil {
 		t = &PipelineStageEdgeFragment_From_PipelineStageFragment_Services{}
 	}
 	return t.Criteria
 }
+func (t *PipelineStageEdgeFragment_From_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineStageEdgeFragment_From_PipelineStageFragment_Services{}
+	}
+	return t.Service
+}
 
 type PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria struct {
-	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
+	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 }
 
-func (t *PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria{}
-	}
-	return t.Source
-}
 func (t *PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria) GetSecrets() []*string {
 	if t == nil {
 		t = &PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria{}
 	}
 	return t.Secrets
 }
+func (t *PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria{}
+	}
+	return t.Source
+}
 
 type PipelineStageEdgeFragment_To_PipelineStageFragment_Services struct {
-	Service  *ServiceDeploymentBaseFragment                                        "json:\"service,omitempty\" graphql:\"service\""
 	Criteria *PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria "json:\"criteria,omitempty\" graphql:\"criteria\""
+	Service  *ServiceDeploymentBaseFragment                                        "json:\"service,omitempty\" graphql:\"service\""
 }
 
-func (t *PipelineStageEdgeFragment_To_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
-	}
-	return t.Service
-}
 func (t *PipelineStageEdgeFragment_To_PipelineStageFragment_Services) GetCriteria() *PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria {
 	if t == nil {
 		t = &PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
 	}
 	return t.Criteria
 }
+func (t *PipelineStageEdgeFragment_To_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
+	}
+	return t.Service
+}
 
 type PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
-	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
+	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 }
 
-func (t *PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria{}
-	}
-	return t.Source
-}
 func (t *PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria) GetSecrets() []*string {
 	if t == nil {
 		t = &PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria{}
 	}
 	return t.Secrets
 }
+func (t *PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria{}
+	}
+	return t.Source
+}
 
 type PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services struct {
-	Service  *ServiceDeploymentBaseFragment                                                             "json:\"service,omitempty\" graphql:\"service\""
 	Criteria *PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria "json:\"criteria,omitempty\" graphql:\"criteria\""
+	Service  *ServiceDeploymentBaseFragment                                                             "json:\"service,omitempty\" graphql:\"service\""
 }
 
-func (t *PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services{}
-	}
-	return t.Service
-}
 func (t *PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services) GetCriteria() *PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria {
 	if t == nil {
 		t = &PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services{}
 	}
 	return t.Criteria
 }
+func (t *PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services{}
+	}
+	return t.Service
+}
 
 type PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria struct {
-	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
+	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 }
 
-func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria{}
-	}
-	return t.Source
-}
 func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria) GetSecrets() []*string {
 	if t == nil {
 		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria{}
 	}
 	return t.Secrets
 }
+func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria{}
+	}
+	return t.Source
+}
 
 type PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services struct {
-	Service  *ServiceDeploymentBaseFragment                                                                                           "json:\"service,omitempty\" graphql:\"service\""
 	Criteria *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria "json:\"criteria,omitempty\" graphql:\"criteria\""
+	Service  *ServiceDeploymentBaseFragment                                                                                           "json:\"service,omitempty\" graphql:\"service\""
 }
 
-func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services{}
-	}
-	return t.Service
-}
 func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services) GetCriteria() *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria {
 	if t == nil {
 		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services{}
 	}
 	return t.Criteria
 }
+func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services{}
+	}
+	return t.Service
+}
 
 type PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria struct {
-	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
+	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 }
 
-func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria{}
-	}
-	return t.Source
-}
 func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria) GetSecrets() []*string {
 	if t == nil {
 		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria{}
 	}
 	return t.Secrets
 }
+func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria{}
+	}
+	return t.Source
+}
 
 type PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services struct {
-	Service  *ServiceDeploymentBaseFragment                                                                                         "json:\"service,omitempty\" graphql:\"service\""
 	Criteria *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria "json:\"criteria,omitempty\" graphql:\"criteria\""
+	Service  *ServiceDeploymentBaseFragment                                                                                         "json:\"service,omitempty\" graphql:\"service\""
 }
 
-func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
-	}
-	return t.Service
-}
 func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services) GetCriteria() *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria {
 	if t == nil {
 		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
 	}
 	return t.Criteria
+}
+func (t *PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
+	}
+	return t.Service
 }
 
 type PreviewEnvironmentTemplateFragment_Flow struct {
@@ -9205,11 +8799,17 @@ func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpe
 }
 
 type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -9221,12 +8821,6 @@ func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Config
 		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -9266,21 +8860,21 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_StateUr
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds struct {
-	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 	Token *string "json:\"token,omitempty\" graphql:\"token\""
+	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 }
 
-func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds) GetURL() *string {
-	if t == nil {
-		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds{}
-	}
-	return t.URL
-}
 func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds) GetToken() *string {
 	if t == nil {
 		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds{}
 	}
 	return t.Token
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds) GetURL() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds{}
+	}
+	return t.URL
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9320,11 +8914,17 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_I
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -9336,12 +8936,6 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_I
 		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9381,11 +8975,17 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -9397,12 +8997,6 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configu
 		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9442,11 +9036,17 @@ func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpe
 }
 
 type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -9458,12 +9058,6 @@ func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_
 		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9503,11 +9097,17 @@ func (t *InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_Containe
 }
 
 type InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -9519,12 +9119,6 @@ func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Te
 		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type StackRunFragment_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -9564,21 +9158,21 @@ func (t *StackRunFragment_StackRunBaseFragment_StateUrls) GetTerraform() *StackR
 }
 
 type StackRunFragment_StackRunBaseFragment_PluralCreds struct {
-	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 	Token *string "json:\"token,omitempty\" graphql:\"token\""
+	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 }
 
-func (t *StackRunFragment_StackRunBaseFragment_PluralCreds) GetURL() *string {
-	if t == nil {
-		t = &StackRunFragment_StackRunBaseFragment_PluralCreds{}
-	}
-	return t.URL
-}
 func (t *StackRunFragment_StackRunBaseFragment_PluralCreds) GetToken() *string {
 	if t == nil {
 		t = &StackRunFragment_StackRunBaseFragment_PluralCreds{}
 	}
 	return t.Token
+}
+func (t *StackRunFragment_StackRunBaseFragment_PluralCreds) GetURL() *string {
+	if t == nil {
+		t = &StackRunFragment_StackRunBaseFragment_PluralCreds{}
+	}
+	return t.URL
 }
 
 type StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9618,11 +9212,17 @@ func (t *StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment
 }
 
 type StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -9634,12 +9234,6 @@ func (t *StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment
 		t = &StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9679,11 +9273,17 @@ func (t *StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Container
 }
 
 type StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -9695,12 +9295,6 @@ func (t *StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationF
 		t = &StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9740,11 +9334,17 @@ func (t *StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpe
 }
 
 type StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -9756,12 +9356,6 @@ func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraf
 		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type StackRunBaseFragment_StateUrls_Terraform struct {
@@ -9801,21 +9395,21 @@ func (t *StackRunBaseFragment_StateUrls) GetTerraform() *StackRunBaseFragment_St
 }
 
 type StackRunBaseFragment_PluralCreds struct {
-	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 	Token *string "json:\"token,omitempty\" graphql:\"token\""
+	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 }
 
-func (t *StackRunBaseFragment_PluralCreds) GetURL() *string {
-	if t == nil {
-		t = &StackRunBaseFragment_PluralCreds{}
-	}
-	return t.URL
-}
 func (t *StackRunBaseFragment_PluralCreds) GetToken() *string {
 	if t == nil {
 		t = &StackRunBaseFragment_PluralCreds{}
 	}
 	return t.Token
+}
+func (t *StackRunBaseFragment_PluralCreds) GetURL() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_PluralCreds{}
+	}
+	return t.URL
 }
 
 type StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9855,11 +9449,17 @@ func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecF
 }
 
 type StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -9871,12 +9471,6 @@ func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_St
 		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -9916,11 +9510,17 @@ func (t *StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFr
 }
 
 type StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -9933,19 +9533,19 @@ func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform
 	}
 	return t.Refresh
 }
-func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+
+type StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
+	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
+	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
+}
+
+func (t *StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
 	if t == nil {
-		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+		t = &StackConfigurationFragment_Terraform{}
 	}
 	return t.ApproveEmpty
 }
-
-type StackConfigurationFragment_Terraform struct {
-	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
-	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
-}
-
 func (t *StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &StackConfigurationFragment_Terraform{}
@@ -9957,12 +9557,6 @@ func (t *StackConfigurationFragment_Terraform) GetRefresh() *bool {
 		t = &StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type CustomStackRunFragment_Stack struct {
@@ -9977,16 +9571,16 @@ func (t *CustomStackRunFragment_Stack) GetID() *string {
 }
 
 type StackDefinitionFragment_Configuration_Hooks struct {
-	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
-	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
 	AfterStage StepStage "json:\"afterStage\" graphql:\"afterStage\""
+	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
+	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
 }
 
-func (t *StackDefinitionFragment_Configuration_Hooks) GetCmd() string {
+func (t *StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage {
 	if t == nil {
 		t = &StackDefinitionFragment_Configuration_Hooks{}
 	}
-	return t.Cmd
+	return &t.AfterStage
 }
 func (t *StackDefinitionFragment_Configuration_Hooks) GetArgs() []*string {
 	if t == nil {
@@ -9994,20 +9588,26 @@ func (t *StackDefinitionFragment_Configuration_Hooks) GetArgs() []*string {
 	}
 	return t.Args
 }
-func (t *StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage {
+func (t *StackDefinitionFragment_Configuration_Hooks) GetCmd() string {
 	if t == nil {
 		t = &StackDefinitionFragment_Configuration_Hooks{}
 	}
-	return &t.AfterStage
+	return t.Cmd
 }
 
 type StackDefinitionFragment_Configuration struct {
+	Hooks   []*StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 	Image   *string                                        "json:\"image,omitempty\" graphql:\"image\""
 	Tag     *string                                        "json:\"tag,omitempty\" graphql:\"tag\""
 	Version *string                                        "json:\"version,omitempty\" graphql:\"version\""
-	Hooks   []*StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
+func (t *StackDefinitionFragment_Configuration) GetHooks() []*StackDefinitionFragment_Configuration_Hooks {
+	if t == nil {
+		t = &StackDefinitionFragment_Configuration{}
+	}
+	return t.Hooks
+}
 func (t *StackDefinitionFragment_Configuration) GetImage() *string {
 	if t == nil {
 		t = &StackDefinitionFragment_Configuration{}
@@ -10026,43 +9626,37 @@ func (t *StackDefinitionFragment_Configuration) GetVersion() *string {
 	}
 	return t.Version
 }
-func (t *StackDefinitionFragment_Configuration) GetHooks() []*StackDefinitionFragment_Configuration_Hooks {
-	if t == nil {
-		t = &StackDefinitionFragment_Configuration{}
-	}
-	return t.Hooks
-}
 
 type StackDefinitionFragment_Steps struct {
-	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
 	Args            []*string "json:\"args,omitempty\" graphql:\"args\""
-	Stage           StepStage "json:\"stage\" graphql:\"stage\""
+	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
 	RequireApproval *bool     "json:\"requireApproval,omitempty\" graphql:\"requireApproval\""
+	Stage           StepStage "json:\"stage\" graphql:\"stage\""
 }
 
-func (t *StackDefinitionFragment_Steps) GetCmd() string {
-	if t == nil {
-		t = &StackDefinitionFragment_Steps{}
-	}
-	return t.Cmd
-}
 func (t *StackDefinitionFragment_Steps) GetArgs() []*string {
 	if t == nil {
 		t = &StackDefinitionFragment_Steps{}
 	}
 	return t.Args
 }
-func (t *StackDefinitionFragment_Steps) GetStage() *StepStage {
+func (t *StackDefinitionFragment_Steps) GetCmd() string {
 	if t == nil {
 		t = &StackDefinitionFragment_Steps{}
 	}
-	return &t.Stage
+	return t.Cmd
 }
 func (t *StackDefinitionFragment_Steps) GetRequireApproval() *bool {
 	if t == nil {
 		t = &StackDefinitionFragment_Steps{}
 	}
 	return t.RequireApproval
+}
+func (t *StackDefinitionFragment_Steps) GetStage() *StepStage {
+	if t == nil {
+		t = &StackDefinitionFragment_Steps{}
+	}
+	return &t.Stage
 }
 
 type DeleteAgentRuntime_DeleteAgentRuntime struct {
@@ -10106,11 +9700,17 @@ func (t *ListAgentRuntimes_AgentRuntimes) GetPageInfo() *PageInfoFragment {
 }
 
 type GetAgentRun_AgentRun_AgentRunFragment_User struct {
+	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
 	Name  string "json:\"name\" graphql:\"name\""
-	Email string "json:\"email\" graphql:\"email\""
 }
 
+func (t *GetAgentRun_AgentRun_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &GetAgentRun_AgentRun_AgentRunFragment_User{}
+	}
+	return t.Email
+}
 func (t *GetAgentRun_AgentRun_AgentRunFragment_User) GetID() string {
 	if t == nil {
 		t = &GetAgentRun_AgentRun_AgentRunFragment_User{}
@@ -10122,12 +9722,6 @@ func (t *GetAgentRun_AgentRun_AgentRunFragment_User) GetName() string {
 		t = &GetAgentRun_AgentRun_AgentRunFragment_User{}
 	}
 	return t.Name
-}
-func (t *GetAgentRun_AgentRun_AgentRunFragment_User) GetEmail() string {
-	if t == nil {
-		t = &GetAgentRun_AgentRun_AgentRunFragment_User{}
-	}
-	return t.Email
 }
 
 type GetAgentRun_AgentRun_AgentRunFragment_Flow struct {
@@ -10149,11 +9743,17 @@ func (t *GetAgentRun_AgentRun_AgentRunFragment_Flow) GetName() string {
 }
 
 type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User struct {
+	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
 	Name  string "json:\"name\" graphql:\"name\""
-	Email string "json:\"email\" graphql:\"email\""
 }
 
+func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.Email
+}
 func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User) GetID() string {
 	if t == nil {
 		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User{}
@@ -10165,12 +9765,6 @@ func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User) GetName() str
 		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User{}
 	}
 	return t.Name
-}
-func (t *ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User) GetEmail() string {
-	if t == nil {
-		t = &ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_User{}
-	}
-	return t.Email
 }
 
 type ListAgentRuns_AgentRuns_Edges_Node_AgentRunFragment_Flow struct {
@@ -10221,11 +9815,17 @@ func (t *ListAgentRuns_AgentRuns) GetPageInfo() *PageInfoFragment {
 }
 
 type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User struct {
+	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
 	Name  string "json:\"name\" graphql:\"name\""
-	Email string "json:\"email\" graphql:\"email\""
 }
 
+func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
+	}
+	return t.Email
+}
 func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetID() string {
 	if t == nil {
 		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
@@ -10237,12 +9837,6 @@ func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRu
 		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
 	}
 	return t.Name
-}
-func (t *ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User) GetEmail() string {
-	if t == nil {
-		t = &ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_User{}
-	}
-	return t.Email
 }
 
 type ListAgentRuntimePendingRuns_AgentRuntime_PendingRuns_Edges_Node_AgentRunFragment_Flow struct {
@@ -10326,11 +9920,17 @@ func (t *CancelAgentRun_CancelAgentRun) GetID() string {
 }
 
 type CreateAgentRun_CreateAgentRun_AgentRunFragment_User struct {
+	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
 	Name  string "json:\"name\" graphql:\"name\""
-	Email string "json:\"email\" graphql:\"email\""
 }
 
+func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_User{}
+	}
+	return t.Email
+}
 func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_User) GetID() string {
 	if t == nil {
 		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_User{}
@@ -10342,12 +9942,6 @@ func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_User) GetName() string {
 		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_User{}
 	}
 	return t.Name
-}
-func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_User) GetEmail() string {
-	if t == nil {
-		t = &CreateAgentRun_CreateAgentRun_AgentRunFragment_User{}
-	}
-	return t.Email
 }
 
 type CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow struct {
@@ -10369,11 +9963,17 @@ func (t *CreateAgentRun_CreateAgentRun_AgentRunFragment_Flow) GetName() string {
 }
 
 type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User struct {
+	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
 	Name  string "json:\"name\" graphql:\"name\""
-	Email string "json:\"email\" graphql:\"email\""
 }
 
+func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetEmail() string {
+	if t == nil {
+		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
+	}
+	return t.Email
+}
 func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetID() string {
 	if t == nil {
 		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
@@ -10385,12 +9985,6 @@ func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetName() string {
 		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
 	}
 	return t.Name
-}
-func (t *UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User) GetEmail() string {
-	if t == nil {
-		t = &UpdateAgentRun_UpdateAgentRun_AgentRunFragment_User{}
-	}
-	return t.Email
 }
 
 type UpdateAgentRun_UpdateAgentRun_AgentRunFragment_Flow struct {
@@ -10441,21 +10035,21 @@ func (t *ListScmWebhooks_ScmWebhooks_Edges) GetNode() *ScmWebhookFragment {
 }
 
 type ListScmWebhooks_ScmWebhooks struct {
-	PageInfo PageInfoFragment                     "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ListScmWebhooks_ScmWebhooks_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                     "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListScmWebhooks_ScmWebhooks) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListScmWebhooks_ScmWebhooks{}
-	}
-	return &t.PageInfo
-}
 func (t *ListScmWebhooks_ScmWebhooks) GetEdges() []*ListScmWebhooks_ScmWebhooks_Edges {
 	if t == nil {
 		t = &ListScmWebhooks_ScmWebhooks{}
 	}
 	return t.Edges
+}
+func (t *ListScmWebhooks_ScmWebhooks) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListScmWebhooks_ScmWebhooks{}
+	}
+	return &t.PageInfo
 }
 
 type ListObservabilityWebhooks_ObservabilityWebhooks_Edges struct {
@@ -10470,21 +10064,21 @@ func (t *ListObservabilityWebhooks_ObservabilityWebhooks_Edges) GetNode() *Obser
 }
 
 type ListObservabilityWebhooks_ObservabilityWebhooks struct {
-	PageInfo PageInfoFragment                                         "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ListObservabilityWebhooks_ObservabilityWebhooks_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                                         "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListObservabilityWebhooks_ObservabilityWebhooks) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListObservabilityWebhooks_ObservabilityWebhooks{}
-	}
-	return &t.PageInfo
-}
 func (t *ListObservabilityWebhooks_ObservabilityWebhooks) GetEdges() []*ListObservabilityWebhooks_ObservabilityWebhooks_Edges {
 	if t == nil {
 		t = &ListObservabilityWebhooks_ObservabilityWebhooks{}
 	}
 	return t.Edges
+}
+func (t *ListObservabilityWebhooks_ObservabilityWebhooks) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListObservabilityWebhooks_ObservabilityWebhooks{}
+	}
+	return &t.PageInfo
 }
 
 type CreateClusterBackup_CreateClusterBackup_ClusterBackupFragment_Cluster struct {
@@ -10572,35 +10166,23 @@ func (t *GetCatalogTiny_Catalog) GetName() string {
 }
 
 type CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -10608,11 +10190,23 @@ func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFra
 	}
 	return t.Group
 }
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -10632,17 +10226,17 @@ func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFra
 	}
 	return t.Synced
 }
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -10675,28 +10269,28 @@ func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFra
 }
 
 type CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                        "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                    "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                                        "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                    "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -10704,6 +10298,12 @@ func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFra
 		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -10717,120 +10317,54 @@ func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFra
 	}
 	return t.NamespaceMetadata
 }
-func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &CreateCluster_CreateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type CreateCluster_CreateCluster struct {
-	DeployToken    *string                  "json:\"deployToken,omitempty\" graphql:\"deployToken\""
-	ID             string                   "json:\"id\" graphql:\"id\""
-	Name           string                   "json:\"name\" graphql:\"name\""
-	Handle         *string                  "json:\"handle,omitempty\" graphql:\"handle\""
-	Self           *bool                    "json:\"self,omitempty\" graphql:\"self\""
-	Version        *string                  "json:\"version,omitempty\" graphql:\"version\""
-	InsertedAt     *string                  "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
-	PingedAt       *string                  "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
-	Protect        *bool                    "json:\"protect,omitempty\" graphql:\"protect\""
 	CurrentVersion *string                  "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
-	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
-	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	DeployToken    *string                  "json:\"deployToken,omitempty\" graphql:\"deployToken\""
 	Distro         *ClusterDistro           "json:\"distro,omitempty\" graphql:\"distro\""
-	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
-	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
+	Handle         *string                  "json:\"handle,omitempty\" graphql:\"handle\""
+	ID             string                   "json:\"id\" graphql:\"id\""
+	InsertedAt     *string                  "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Name           string                   "json:\"name\" graphql:\"name\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
-	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
+	PingedAt       *string                  "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
 	Project        *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
-	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	Protect        *bool                    "json:\"protect,omitempty\" graphql:\"protect\""
+	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	ReadBindings   []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+	Self           *bool                    "json:\"self,omitempty\" graphql:\"self\""
+	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
+	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
+	Version        *string                  "json:\"version,omitempty\" graphql:\"version\""
+	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
 }
 
-func (t *CreateCluster_CreateCluster) GetDeployToken() *string {
-	if t == nil {
-		t = &CreateCluster_CreateCluster{}
-	}
-	return t.DeployToken
-}
-func (t *CreateCluster_CreateCluster) GetID() string {
-	if t == nil {
-		t = &CreateCluster_CreateCluster{}
-	}
-	return t.ID
-}
-func (t *CreateCluster_CreateCluster) GetName() string {
-	if t == nil {
-		t = &CreateCluster_CreateCluster{}
-	}
-	return t.Name
-}
-func (t *CreateCluster_CreateCluster) GetHandle() *string {
-	if t == nil {
-		t = &CreateCluster_CreateCluster{}
-	}
-	return t.Handle
-}
-func (t *CreateCluster_CreateCluster) GetSelf() *bool {
-	if t == nil {
-		t = &CreateCluster_CreateCluster{}
-	}
-	return t.Self
-}
-func (t *CreateCluster_CreateCluster) GetVersion() *string {
-	if t == nil {
-		t = &CreateCluster_CreateCluster{}
-	}
-	return t.Version
-}
-func (t *CreateCluster_CreateCluster) GetInsertedAt() *string {
-	if t == nil {
-		t = &CreateCluster_CreateCluster{}
-	}
-	return t.InsertedAt
-}
-func (t *CreateCluster_CreateCluster) GetPingedAt() *string {
-	if t == nil {
-		t = &CreateCluster_CreateCluster{}
-	}
-	return t.PingedAt
-}
-func (t *CreateCluster_CreateCluster) GetProtect() *bool {
-	if t == nil {
-		t = &CreateCluster_CreateCluster{}
-	}
-	return t.Protect
-}
 func (t *CreateCluster_CreateCluster) GetCurrentVersion() *string {
 	if t == nil {
 		t = &CreateCluster_CreateCluster{}
 	}
 	return t.CurrentVersion
-}
-func (t *CreateCluster_CreateCluster) GetKasURL() *string {
-	if t == nil {
-		t = &CreateCluster_CreateCluster{}
-	}
-	return t.KasURL
 }
 func (t *CreateCluster_CreateCluster) GetDeletedAt() *string {
 	if t == nil {
@@ -10838,11 +10372,11 @@ func (t *CreateCluster_CreateCluster) GetDeletedAt() *string {
 	}
 	return t.DeletedAt
 }
-func (t *CreateCluster_CreateCluster) GetMetadata() map[string]any {
+func (t *CreateCluster_CreateCluster) GetDeployToken() *string {
 	if t == nil {
 		t = &CreateCluster_CreateCluster{}
 	}
-	return t.Metadata
+	return t.DeployToken
 }
 func (t *CreateCluster_CreateCluster) GetDistro() *ClusterDistro {
 	if t == nil {
@@ -10850,17 +10384,41 @@ func (t *CreateCluster_CreateCluster) GetDistro() *ClusterDistro {
 	}
 	return t.Distro
 }
-func (t *CreateCluster_CreateCluster) GetTags() []*ClusterTags {
+func (t *CreateCluster_CreateCluster) GetHandle() *string {
 	if t == nil {
 		t = &CreateCluster_CreateCluster{}
 	}
-	return t.Tags
+	return t.Handle
 }
-func (t *CreateCluster_CreateCluster) GetProvider() *ClusterProviderFragment {
+func (t *CreateCluster_CreateCluster) GetID() string {
 	if t == nil {
 		t = &CreateCluster_CreateCluster{}
 	}
-	return t.Provider
+	return t.ID
+}
+func (t *CreateCluster_CreateCluster) GetInsertedAt() *string {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.InsertedAt
+}
+func (t *CreateCluster_CreateCluster) GetKasURL() *string {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.KasURL
+}
+func (t *CreateCluster_CreateCluster) GetMetadata() map[string]any {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.Metadata
+}
+func (t *CreateCluster_CreateCluster) GetName() string {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.Name
 }
 func (t *CreateCluster_CreateCluster) GetNodePools() []*NodePoolFragment {
 	if t == nil {
@@ -10868,11 +10426,11 @@ func (t *CreateCluster_CreateCluster) GetNodePools() []*NodePoolFragment {
 	}
 	return t.NodePools
 }
-func (t *CreateCluster_CreateCluster) GetStatus() *ClusterStatusFragment {
+func (t *CreateCluster_CreateCluster) GetPingedAt() *string {
 	if t == nil {
 		t = &CreateCluster_CreateCluster{}
 	}
-	return t.Status
+	return t.PingedAt
 }
 func (t *CreateCluster_CreateCluster) GetProject() *TinyProjectFragment {
 	if t == nil {
@@ -10880,11 +10438,17 @@ func (t *CreateCluster_CreateCluster) GetProject() *TinyProjectFragment {
 	}
 	return t.Project
 }
-func (t *CreateCluster_CreateCluster) GetWriteBindings() []*PolicyBindingFragment {
+func (t *CreateCluster_CreateCluster) GetProtect() *bool {
 	if t == nil {
 		t = &CreateCluster_CreateCluster{}
 	}
-	return t.WriteBindings
+	return t.Protect
+}
+func (t *CreateCluster_CreateCluster) GetProvider() *ClusterProviderFragment {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.Provider
 }
 func (t *CreateCluster_CreateCluster) GetReadBindings() []*PolicyBindingFragment {
 	if t == nil {
@@ -10892,37 +10456,55 @@ func (t *CreateCluster_CreateCluster) GetReadBindings() []*PolicyBindingFragment
 	}
 	return t.ReadBindings
 }
+func (t *CreateCluster_CreateCluster) GetSelf() *bool {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.Self
+}
+func (t *CreateCluster_CreateCluster) GetStatus() *ClusterStatusFragment {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.Status
+}
+func (t *CreateCluster_CreateCluster) GetTags() []*ClusterTags {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.Tags
+}
+func (t *CreateCluster_CreateCluster) GetVersion() *string {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.Version
+}
+func (t *CreateCluster_CreateCluster) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &CreateCluster_CreateCluster{}
+	}
+	return t.WriteBindings
+}
 
 type UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -10930,11 +10512,23 @@ func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFra
 	}
 	return t.Group
 }
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -10954,17 +10548,17 @@ func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFra
 	}
 	return t.Synced
 }
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -10997,28 +10591,28 @@ func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFra
 }
 
 type UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                        "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                    "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                                        "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                    "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -11026,6 +10620,12 @@ func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFra
 		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -11039,29 +10639,23 @@ func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFra
 	}
 	return t.NamespaceMetadata
 }
-func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+func (t *UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &UpdateCluster_UpdateCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
 type DeleteCluster_DeleteCluster struct {
@@ -11087,35 +10681,23 @@ func (t *DetachCluster_DetachCluster) GetID() string {
 }
 
 type CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -11123,11 +10705,23 @@ func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Ser
 	}
 	return t.Group
 }
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -11147,17 +10741,17 @@ func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Ser
 	}
 	return t.Synced
 }
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -11190,28 +10784,28 @@ func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Ser
 }
 
 type CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                               "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                               "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -11219,6 +10813,12 @@ func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Ser
 		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -11232,61 +10832,43 @@ func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Ser
 	}
 	return t.NamespaceMetadata
 }
-func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -11294,11 +10876,23 @@ func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Ser
 	}
 	return t.Group
 }
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -11318,17 +10912,17 @@ func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Ser
 	}
 	return t.Synced
 }
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -11361,28 +10955,28 @@ func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Ser
 }
 
 type UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                               "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                               "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -11390,6 +10984,12 @@ func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Ser
 		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -11403,61 +11003,43 @@ func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Ser
 	}
 	return t.NamespaceMetadata
 }
-func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &UpdateClusterProvider_UpdateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -11465,11 +11047,23 @@ func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Ser
 	}
 	return t.Group
 }
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -11489,17 +11083,17 @@ func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Ser
 	}
 	return t.Synced
 }
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -11532,28 +11126,28 @@ func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Ser
 }
 
 type DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                               "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                               "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -11561,6 +11155,12 @@ func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Ser
 		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -11574,29 +11174,23 @@ func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Ser
 	}
 	return t.NamespaceMetadata
 }
-func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+func (t *DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &DeleteClusterProvider_DeleteClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
 type PingCluster_PingCluster struct {
@@ -11618,35 +11212,23 @@ func (t *PingCluster_PingCluster) GetName() string {
 }
 
 type ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -11654,11 +11236,23 @@ func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Pr
 	}
 	return t.Group
 }
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -11678,17 +11272,17 @@ func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Pr
 	}
 	return t.Synced
 }
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -11721,28 +11315,28 @@ func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Pr
 }
 
 type ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                                                 "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                             "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                                                                 "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                             "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -11750,6 +11344,12 @@ func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Pr
 		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -11763,29 +11363,23 @@ func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Pr
 	}
 	return t.NamespaceMetadata
 }
-func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+func (t *ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ListClusters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
 type ListClusters_Clusters struct {
@@ -11800,35 +11394,23 @@ func (t *ListClusters_Clusters) GetEdges() []*ClusterEdgeFragment {
 }
 
 type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -11836,11 +11418,23 @@ func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_Clus
 	}
 	return t.Group
 }
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -11860,17 +11454,17 @@ func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_Clus
 	}
 	return t.Synced
 }
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -11903,28 +11497,28 @@ func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_Clus
 }
 
 type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                                                               "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                                                                               "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -11932,6 +11526,12 @@ func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_Clus
 		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -11945,79 +11545,61 @@ func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_Clus
 	}
 	return t.NamespaceMetadata
 }
-func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters_Edges_ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type ListClustersWithParameters_Clusters struct {
-	PageInfo PageInfoFragment       "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ClusterEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment       "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListClustersWithParameters_Clusters) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListClustersWithParameters_Clusters{}
-	}
-	return &t.PageInfo
-}
 func (t *ListClustersWithParameters_Clusters) GetEdges() []*ClusterEdgeFragment {
 	if t == nil {
 		t = &ListClustersWithParameters_Clusters{}
 	}
 	return t.Edges
 }
+func (t *ListClustersWithParameters_Clusters) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListClustersWithParameters_Clusters{}
+	}
+	return &t.PageInfo
+}
 
 type GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -12025,11 +11607,23 @@ func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Ser
 	}
 	return t.Group
 }
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -12049,17 +11643,17 @@ func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Ser
 	}
 	return t.Synced
 }
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -12092,28 +11686,28 @@ func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Ser
 }
 
 type GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                               "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                               "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                           "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -12121,6 +11715,12 @@ func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Ser
 		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -12134,29 +11734,23 @@ func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Ser
 	}
 	return t.NamespaceMetadata
 }
-func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+func (t *GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetCluster_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
 type GetAgentUrl_Cluster struct {
@@ -12171,35 +11765,23 @@ func (t *GetAgentUrl_Cluster) GetAgentURL() *string {
 }
 
 type GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -12207,11 +11789,23 @@ func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFra
 	}
 	return t.Group
 }
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -12231,17 +11825,17 @@ func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFra
 	}
 	return t.Synced
 }
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -12274,28 +11868,28 @@ func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFra
 }
 
 type GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                        "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                    "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                                        "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                    "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -12303,6 +11897,12 @@ func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFra
 		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -12316,114 +11916,54 @@ func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFra
 	}
 	return t.NamespaceMetadata
 }
-func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type GetClusterWithToken_Cluster struct {
-	ID             string                   "json:\"id\" graphql:\"id\""
-	Name           string                   "json:\"name\" graphql:\"name\""
-	Handle         *string                  "json:\"handle,omitempty\" graphql:\"handle\""
-	Self           *bool                    "json:\"self,omitempty\" graphql:\"self\""
-	Version        *string                  "json:\"version,omitempty\" graphql:\"version\""
-	InsertedAt     *string                  "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
-	PingedAt       *string                  "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
-	Protect        *bool                    "json:\"protect,omitempty\" graphql:\"protect\""
 	CurrentVersion *string                  "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
-	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
-	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
-	Distro         *ClusterDistro           "json:\"distro,omitempty\" graphql:\"distro\""
-	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
-	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
-	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
-	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
-	Project        *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
-	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
-	ReadBindings   []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
 	DeployToken    *string                  "json:\"deployToken,omitempty\" graphql:\"deployToken\""
+	Distro         *ClusterDistro           "json:\"distro,omitempty\" graphql:\"distro\""
+	Handle         *string                  "json:\"handle,omitempty\" graphql:\"handle\""
+	ID             string                   "json:\"id\" graphql:\"id\""
+	InsertedAt     *string                  "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Name           string                   "json:\"name\" graphql:\"name\""
+	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
+	PingedAt       *string                  "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Project        *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
+	Protect        *bool                    "json:\"protect,omitempty\" graphql:\"protect\""
+	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
+	ReadBindings   []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+	Self           *bool                    "json:\"self,omitempty\" graphql:\"self\""
+	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
+	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
+	Version        *string                  "json:\"version,omitempty\" graphql:\"version\""
+	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
 }
 
-func (t *GetClusterWithToken_Cluster) GetID() string {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster{}
-	}
-	return t.ID
-}
-func (t *GetClusterWithToken_Cluster) GetName() string {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster{}
-	}
-	return t.Name
-}
-func (t *GetClusterWithToken_Cluster) GetHandle() *string {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster{}
-	}
-	return t.Handle
-}
-func (t *GetClusterWithToken_Cluster) GetSelf() *bool {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster{}
-	}
-	return t.Self
-}
-func (t *GetClusterWithToken_Cluster) GetVersion() *string {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster{}
-	}
-	return t.Version
-}
-func (t *GetClusterWithToken_Cluster) GetInsertedAt() *string {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster{}
-	}
-	return t.InsertedAt
-}
-func (t *GetClusterWithToken_Cluster) GetPingedAt() *string {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster{}
-	}
-	return t.PingedAt
-}
-func (t *GetClusterWithToken_Cluster) GetProtect() *bool {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster{}
-	}
-	return t.Protect
-}
 func (t *GetClusterWithToken_Cluster) GetCurrentVersion() *string {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster{}
 	}
 	return t.CurrentVersion
-}
-func (t *GetClusterWithToken_Cluster) GetKasURL() *string {
-	if t == nil {
-		t = &GetClusterWithToken_Cluster{}
-	}
-	return t.KasURL
 }
 func (t *GetClusterWithToken_Cluster) GetDeletedAt() *string {
 	if t == nil {
@@ -12431,11 +11971,11 @@ func (t *GetClusterWithToken_Cluster) GetDeletedAt() *string {
 	}
 	return t.DeletedAt
 }
-func (t *GetClusterWithToken_Cluster) GetMetadata() map[string]any {
+func (t *GetClusterWithToken_Cluster) GetDeployToken() *string {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster{}
 	}
-	return t.Metadata
+	return t.DeployToken
 }
 func (t *GetClusterWithToken_Cluster) GetDistro() *ClusterDistro {
 	if t == nil {
@@ -12443,17 +11983,41 @@ func (t *GetClusterWithToken_Cluster) GetDistro() *ClusterDistro {
 	}
 	return t.Distro
 }
-func (t *GetClusterWithToken_Cluster) GetTags() []*ClusterTags {
+func (t *GetClusterWithToken_Cluster) GetHandle() *string {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster{}
 	}
-	return t.Tags
+	return t.Handle
 }
-func (t *GetClusterWithToken_Cluster) GetProvider() *ClusterProviderFragment {
+func (t *GetClusterWithToken_Cluster) GetID() string {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster{}
 	}
-	return t.Provider
+	return t.ID
+}
+func (t *GetClusterWithToken_Cluster) GetInsertedAt() *string {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.InsertedAt
+}
+func (t *GetClusterWithToken_Cluster) GetKasURL() *string {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.KasURL
+}
+func (t *GetClusterWithToken_Cluster) GetMetadata() map[string]any {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.Metadata
+}
+func (t *GetClusterWithToken_Cluster) GetName() string {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.Name
 }
 func (t *GetClusterWithToken_Cluster) GetNodePools() []*NodePoolFragment {
 	if t == nil {
@@ -12461,11 +12025,11 @@ func (t *GetClusterWithToken_Cluster) GetNodePools() []*NodePoolFragment {
 	}
 	return t.NodePools
 }
-func (t *GetClusterWithToken_Cluster) GetStatus() *ClusterStatusFragment {
+func (t *GetClusterWithToken_Cluster) GetPingedAt() *string {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster{}
 	}
-	return t.Status
+	return t.PingedAt
 }
 func (t *GetClusterWithToken_Cluster) GetProject() *TinyProjectFragment {
 	if t == nil {
@@ -12473,11 +12037,17 @@ func (t *GetClusterWithToken_Cluster) GetProject() *TinyProjectFragment {
 	}
 	return t.Project
 }
-func (t *GetClusterWithToken_Cluster) GetWriteBindings() []*PolicyBindingFragment {
+func (t *GetClusterWithToken_Cluster) GetProtect() *bool {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster{}
 	}
-	return t.WriteBindings
+	return t.Protect
+}
+func (t *GetClusterWithToken_Cluster) GetProvider() *ClusterProviderFragment {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.Provider
 }
 func (t *GetClusterWithToken_Cluster) GetReadBindings() []*PolicyBindingFragment {
 	if t == nil {
@@ -12485,43 +12055,55 @@ func (t *GetClusterWithToken_Cluster) GetReadBindings() []*PolicyBindingFragment
 	}
 	return t.ReadBindings
 }
-func (t *GetClusterWithToken_Cluster) GetDeployToken() *string {
+func (t *GetClusterWithToken_Cluster) GetSelf() *bool {
 	if t == nil {
 		t = &GetClusterWithToken_Cluster{}
 	}
-	return t.DeployToken
+	return t.Self
+}
+func (t *GetClusterWithToken_Cluster) GetStatus() *ClusterStatusFragment {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.Status
+}
+func (t *GetClusterWithToken_Cluster) GetTags() []*ClusterTags {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.Tags
+}
+func (t *GetClusterWithToken_Cluster) GetVersion() *string {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.Version
+}
+func (t *GetClusterWithToken_Cluster) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &GetClusterWithToken_Cluster{}
+	}
+	return t.WriteBindings
 }
 
 type GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -12529,11 +12111,23 @@ func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFrag
 	}
 	return t.Group
 }
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -12553,17 +12147,17 @@ func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFrag
 	}
 	return t.Synced
 }
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -12596,28 +12190,28 @@ func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFrag
 }
 
 type GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                       "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                   "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                                       "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                   "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -12625,6 +12219,12 @@ func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFrag
 		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -12638,29 +12238,23 @@ func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFrag
 	}
 	return t.NamespaceMetadata
 }
-func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+func (t *GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetClusterByHandle_Cluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
 type GetClusterIdByHandle_Cluster_ struct {
@@ -12675,35 +12269,23 @@ func (t *GetClusterIdByHandle_Cluster_) GetID() string {
 }
 
 type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -12711,11 +12293,23 @@ func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_Serv
 	}
 	return t.Group
 }
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -12735,17 +12329,17 @@ func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_Serv
 	}
 	return t.Synced
 }
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -12778,28 +12372,28 @@ func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_Serv
 }
 
 type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                      "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                  "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                      "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                  "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -12807,6 +12401,12 @@ func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_Serv
 		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -12820,61 +12420,43 @@ func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_Serv
 	}
 	return t.NamespaceMetadata
 }
-func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetClusterProvider_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -12882,11 +12464,23 @@ func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Servi
 	}
 	return t.Group
 }
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -12906,17 +12500,17 @@ func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Servi
 	}
 	return t.Synced
 }
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -12949,28 +12543,28 @@ func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Servi
 }
 
 type GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                             "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                             "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -12978,6 +12572,12 @@ func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Servi
 		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -12991,61 +12591,43 @@ func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Servi
 	}
 	return t.NamespaceMetadata
 }
-func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetClusterProviderByCloud_ClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetID() string {
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -13053,11 +12635,23 @@ func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentF
 	}
 	return t.Group
 }
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -13077,17 +12671,17 @@ func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentF
 	}
 	return t.Synced
 }
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Configuration struct {
@@ -13120,28 +12714,28 @@ func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentF
 }
 
 type ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                        "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                    "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                        "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                    "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -13149,6 +12743,12 @@ func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentF
 		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -13162,29 +12762,23 @@ func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentF
 	}
 	return t.NamespaceMetadata
 }
-func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+func (t *ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ListServiceDeployments_ServiceDeployments_Edges_Node_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
 type ListServiceDeployments_ServiceDeployments_Edges struct {
@@ -13260,35 +12854,23 @@ func (t *MyCluster_MyCluster_) GetRestore() *ClusterRestoreFragment {
 }
 
 type UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -13296,11 +12878,23 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_Clus
 	}
 	return t.Group
 }
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -13320,17 +12914,17 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_Clus
 	}
 	return t.Synced
 }
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -13363,28 +12957,28 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_Clus
 }
 
 type UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                                      "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                  "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                                                      "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                  "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -13392,6 +12986,12 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_Clus
 		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -13405,120 +13005,54 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_Clus
 	}
 	return t.NamespaceMetadata
 }
-func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type UpsertVirtualCluster_UpsertVirtualCluster struct {
-	DeployToken    *string                  "json:\"deployToken,omitempty\" graphql:\"deployToken\""
-	ID             string                   "json:\"id\" graphql:\"id\""
-	Name           string                   "json:\"name\" graphql:\"name\""
-	Handle         *string                  "json:\"handle,omitempty\" graphql:\"handle\""
-	Self           *bool                    "json:\"self,omitempty\" graphql:\"self\""
-	Version        *string                  "json:\"version,omitempty\" graphql:\"version\""
-	InsertedAt     *string                  "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
-	PingedAt       *string                  "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
-	Protect        *bool                    "json:\"protect,omitempty\" graphql:\"protect\""
 	CurrentVersion *string                  "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
-	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	DeletedAt      *string                  "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
-	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	DeployToken    *string                  "json:\"deployToken,omitempty\" graphql:\"deployToken\""
 	Distro         *ClusterDistro           "json:\"distro,omitempty\" graphql:\"distro\""
-	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
-	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
+	Handle         *string                  "json:\"handle,omitempty\" graphql:\"handle\""
+	ID             string                   "json:\"id\" graphql:\"id\""
+	InsertedAt     *string                  "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	KasURL         *string                  "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Metadata       map[string]any           "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Name           string                   "json:\"name\" graphql:\"name\""
 	NodePools      []*NodePoolFragment      "json:\"nodePools,omitempty\" graphql:\"nodePools\""
-	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
+	PingedAt       *string                  "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
 	Project        *TinyProjectFragment     "json:\"project,omitempty\" graphql:\"project\""
-	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	Protect        *bool                    "json:\"protect,omitempty\" graphql:\"protect\""
+	Provider       *ClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	ReadBindings   []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+	Self           *bool                    "json:\"self,omitempty\" graphql:\"self\""
+	Status         *ClusterStatusFragment   "json:\"status,omitempty\" graphql:\"status\""
+	Tags           []*ClusterTags           "json:\"tags,omitempty\" graphql:\"tags\""
+	Version        *string                  "json:\"version,omitempty\" graphql:\"version\""
+	WriteBindings  []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
 }
 
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDeployToken() *string {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
-	}
-	return t.DeployToken
-}
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetID() string {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
-	}
-	return t.ID
-}
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetName() string {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
-	}
-	return t.Name
-}
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetHandle() *string {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
-	}
-	return t.Handle
-}
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetSelf() *bool {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
-	}
-	return t.Self
-}
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetVersion() *string {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
-	}
-	return t.Version
-}
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetInsertedAt() *string {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
-	}
-	return t.InsertedAt
-}
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetPingedAt() *string {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
-	}
-	return t.PingedAt
-}
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetProtect() *bool {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
-	}
-	return t.Protect
-}
 func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetCurrentVersion() *string {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
 	return t.CurrentVersion
-}
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetKasURL() *string {
-	if t == nil {
-		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
-	}
-	return t.KasURL
 }
 func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDeletedAt() *string {
 	if t == nil {
@@ -13526,11 +13060,11 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDeletedAt() *string {
 	}
 	return t.DeletedAt
 }
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetMetadata() map[string]any {
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDeployToken() *string {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
-	return t.Metadata
+	return t.DeployToken
 }
 func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDistro() *ClusterDistro {
 	if t == nil {
@@ -13538,17 +13072,41 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDistro() *ClusterDistro {
 	}
 	return t.Distro
 }
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetTags() []*ClusterTags {
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetHandle() *string {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
-	return t.Tags
+	return t.Handle
 }
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetProvider() *ClusterProviderFragment {
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetID() string {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
-	return t.Provider
+	return t.ID
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetInsertedAt() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.InsertedAt
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetKasURL() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.KasURL
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetMetadata() map[string]any {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Metadata
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetName() string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Name
 }
 func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetNodePools() []*NodePoolFragment {
 	if t == nil {
@@ -13556,11 +13114,11 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetNodePools() []*NodePoolFr
 	}
 	return t.NodePools
 }
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetStatus() *ClusterStatusFragment {
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetPingedAt() *string {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
-	return t.Status
+	return t.PingedAt
 }
 func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetProject() *TinyProjectFragment {
 	if t == nil {
@@ -13568,17 +13126,53 @@ func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetProject() *TinyProjectFra
 	}
 	return t.Project
 }
-func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetWriteBindings() []*PolicyBindingFragment {
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetProtect() *bool {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
-	return t.WriteBindings
+	return t.Protect
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetProvider() *ClusterProviderFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Provider
 }
 func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetReadBindings() []*PolicyBindingFragment {
 	if t == nil {
 		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
 	}
 	return t.ReadBindings
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetSelf() *bool {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Self
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetStatus() *ClusterStatusFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Status
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetTags() []*ClusterTags {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Tags
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetVersion() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Version
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.WriteBindings
 }
 
 type DeleteCustomCompatibilityMatrix_DeleteCustomCompatibilityMatrix struct {
@@ -13736,53 +13330,41 @@ func (t *DeleteGlobalServiceDeployment_DeleteGlobalService_GlobalServiceFragment
 }
 
 type CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
-	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
+	Ref    string "json:\"ref\" graphql:\"ref\""
 }
 
-func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
-	if t == nil {
-		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
-	}
-	return t.Ref
-}
 func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetFolder() string {
 	if t == nil {
 		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
 	}
 	return t.Folder
 }
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
+	}
+	return t.Ref
+}
 
 type CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -13790,11 +13372,23 @@ func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtend
 	}
 	return t.Group
 }
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -13814,17 +13408,17 @@ func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtend
 	}
 	return t.Synced
 }
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration struct {
@@ -13857,28 +13451,28 @@ func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtend
 }
 
 type CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                             "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                             "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -13886,6 +13480,12 @@ func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtend
 		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -13899,79 +13499,61 @@ func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtend
 	}
 	return t.NamespaceMetadata
 }
-func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
-	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
+	Ref    string "json:\"ref\" graphql:\"ref\""
 }
 
-func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
-	if t == nil {
-		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
-	}
-	return t.Ref
-}
 func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetFolder() string {
 	if t == nil {
 		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
 	}
 	return t.Folder
 }
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
+	}
+	return t.Ref
+}
 
 type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -13979,11 +13561,23 @@ func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploy
 	}
 	return t.Group
 }
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -14003,17 +13597,17 @@ func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploy
 	}
 	return t.Synced
 }
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration struct {
@@ -14046,28 +13640,28 @@ func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploy
 }
 
 type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                       "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                   "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                                       "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                   "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -14075,6 +13669,12 @@ func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploy
 		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -14088,61 +13688,43 @@ func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploy
 	}
 	return t.NamespaceMetadata
 }
-func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetID() string {
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -14150,11 +13732,23 @@ func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragme
 	}
 	return t.Group
 }
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -14174,17 +13768,17 @@ func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragme
 	}
 	return t.Synced
 }
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Configuration struct {
@@ -14217,28 +13811,28 @@ func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragme
 }
 
 type DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -14246,6 +13840,12 @@ func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragme
 		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -14259,61 +13859,43 @@ func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragme
 	}
 	return t.NamespaceMetadata
 }
-func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetID() string {
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -14321,11 +13903,23 @@ func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragme
 	}
 	return t.Group
 }
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -14345,17 +13939,17 @@ func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragme
 	}
 	return t.Synced
 }
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Configuration struct {
@@ -14388,28 +13982,28 @@ func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragme
 }
 
 type DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -14417,6 +14011,12 @@ func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragme
 		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -14430,79 +14030,61 @@ func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragme
 	}
 	return t.NamespaceMetadata
 }
-func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &DetachServiceDeployment_DetachServiceDeployment_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
-	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
+	Ref    string "json:\"ref\" graphql:\"ref\""
 }
 
-func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
-	if t == nil {
-		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
-	}
-	return t.Ref
-}
 func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetFolder() string {
 	if t == nil {
 		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
 	}
 	return t.Folder
 }
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
+	}
+	return t.Ref
+}
 
 type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -14510,11 +14092,23 @@ func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtend
 	}
 	return t.Group
 }
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -14534,17 +14128,17 @@ func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtend
 	}
 	return t.Synced
 }
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration struct {
@@ -14577,28 +14171,28 @@ func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtend
 }
 
 type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                             "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                             "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -14606,6 +14200,12 @@ func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtend
 		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -14619,79 +14219,61 @@ func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtend
 	}
 	return t.NamespaceMetadata
 }
-func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
-	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
+	Ref    string "json:\"ref\" graphql:\"ref\""
 }
 
-func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
-	if t == nil {
-		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
-	}
-	return t.Ref
-}
 func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetFolder() string {
 	if t == nil {
 		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
 	}
 	return t.Folder
 }
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
+	}
+	return t.Ref
+}
 
 type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -14699,11 +14281,23 @@ func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploy
 	}
 	return t.Group
 }
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -14723,17 +14317,17 @@ func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploy
 	}
 	return t.Synced
 }
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration struct {
@@ -14766,28 +14360,28 @@ func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploy
 }
 
 type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                       "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                   "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                                       "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                   "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -14795,6 +14389,12 @@ func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploy
 		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -14808,61 +14408,43 @@ func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploy
 	}
 	return t.NamespaceMetadata
 }
-func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetID() string {
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -14870,11 +14452,23 @@ func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Component
 	}
 	return t.Group
 }
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -14894,17 +14488,17 @@ func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Component
 	}
 	return t.Synced
 }
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Configuration struct {
@@ -14937,28 +14531,28 @@ func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Flow) Get
 }
 
 type CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                       "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                   "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                       "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                   "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -14966,6 +14560,12 @@ func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfi
 		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -14979,61 +14579,43 @@ func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfi
 	}
 	return t.NamespaceMetadata
 }
-func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetID() string {
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -15041,11 +14623,23 @@ func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment
 	}
 	return t.Group
 }
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -15065,17 +14659,17 @@ func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment
 	}
 	return t.Synced
 }
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Configuration struct {
@@ -15108,28 +14702,28 @@ func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment
 }
 
 type CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                 "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                             "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                 "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                             "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -15137,6 +14731,12 @@ func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment
 		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -15150,61 +14750,43 @@ func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment
 	}
 	return t.NamespaceMetadata
 }
-func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &CloneServiceDeploymentWithHandle_CloneService_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type RollbackService_RollbackService_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetID() string {
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -15212,11 +14794,23 @@ func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) G
 	}
 	return t.Group
 }
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -15236,17 +14830,17 @@ func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) G
 	}
 	return t.Synced
 }
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type RollbackService_RollbackService_ServiceDeploymentFragment_Configuration struct {
@@ -15279,28 +14873,28 @@ func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Flow) GetID()
 }
 
 type RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -15308,6 +14902,12 @@ func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig) G
 		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -15321,61 +14921,43 @@ func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig) G
 	}
 	return t.NamespaceMetadata
 }
-func (t *RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &RollbackService_RollbackService_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type RollbackService_RollbackService_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *RollbackService_RollbackService_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &RollbackService_RollbackService_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetID() string {
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -15383,11 +14965,23 @@ func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragme
 	}
 	return t.Group
 }
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -15407,17 +15001,17 @@ func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragme
 	}
 	return t.Synced
 }
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Configuration struct {
@@ -15450,28 +15044,28 @@ func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragme
 }
 
 type UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                   "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                   "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                               "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -15479,6 +15073,12 @@ func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragme
 		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -15492,61 +15092,43 @@ func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragme
 	}
 	return t.NamespaceMetadata
 }
-func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &UpdateServiceComponents_UpdateServiceComponents_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetID() string {
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -15554,11 +15136,23 @@ func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Compo
 	}
 	return t.Group
 }
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -15578,17 +15172,17 @@ func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Compo
 	}
 	return t.Synced
 }
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Configuration struct {
@@ -15621,28 +15215,28 @@ func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Flow)
 }
 
 type AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                           "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                       "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                           "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                       "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -15650,6 +15244,12 @@ func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncC
 		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -15663,29 +15263,23 @@ func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncC
 	}
 	return t.NamespaceMetadata
 }
-func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
 type UpdateDeploymentSettings_UpdateDeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Openai struct {
@@ -15733,53 +15327,41 @@ func (t *GetDeploymentSettings_DeploymentSettings_DeploymentSettingsFragment_Ai_
 }
 
 type GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
-	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
+	Ref    string "json:\"ref\" graphql:\"ref\""
 }
 
-func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
-	if t == nil {
-		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
-	}
-	return t.Ref
-}
 func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetFolder() string {
 	if t == nil {
 		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
 	}
 	return t.Folder
 }
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
+	}
+	return t.Ref
+}
 
 type GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -15787,11 +15369,23 @@ func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Servic
 	}
 	return t.Group
 }
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -15811,17 +15405,17 @@ func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Servic
 	}
 	return t.Synced
 }
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration struct {
@@ -15854,28 +15448,28 @@ func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Servic
 }
 
 type GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                    "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                    "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -15883,6 +15477,12 @@ func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Servic
 		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -15896,29 +15496,23 @@ func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Servic
 	}
 	return t.NamespaceMetadata
 }
-func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
 type GetServiceDeploymentTiny_ServiceDeployment struct {
@@ -15958,41 +15552,71 @@ func (t *GetServiceDeploymentComponents_ServiceDeployment_Components) GetState()
 }
 
 type GetServiceDeploymentComponents_ServiceDeployment struct {
-	ID         string                                                         "json:\"id\" graphql:\"id\""
 	Components []*GetServiceDeploymentComponents_ServiceDeployment_Components "json:\"components,omitempty\" graphql:\"components\""
+	ID         string                                                         "json:\"id\" graphql:\"id\""
 }
 
-func (t *GetServiceDeploymentComponents_ServiceDeployment) GetID() string {
-	if t == nil {
-		t = &GetServiceDeploymentComponents_ServiceDeployment{}
-	}
-	return t.ID
-}
 func (t *GetServiceDeploymentComponents_ServiceDeployment) GetComponents() []*GetServiceDeploymentComponents_ServiceDeployment_Components {
 	if t == nil {
 		t = &GetServiceDeploymentComponents_ServiceDeployment{}
 	}
 	return t.Components
 }
-
-type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster struct {
-	ID             string         "json:\"id\" graphql:\"id\""
-	Name           string         "json:\"name\" graphql:\"name\""
-	Handle         *string        "json:\"handle,omitempty\" graphql:\"handle\""
-	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
-	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
-	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
-	Metadata       map[string]any "json:\"metadata,omitempty\" graphql:\"metadata\""
-	CurrentVersion *string        "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
-	KasURL         *string        "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
-	Distro         *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
+func (t *GetServiceDeploymentComponents_ServiceDeployment) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentComponents_ServiceDeployment{}
+	}
+	return t.ID
 }
 
+type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster struct {
+	CurrentVersion *string        "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
+	Distro         *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
+	Handle         *string        "json:\"handle,omitempty\" graphql:\"handle\""
+	ID             string         "json:\"id\" graphql:\"id\""
+	KasURL         *string        "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Metadata       map[string]any "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Name           string         "json:\"name\" graphql:\"name\""
+	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
+	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetCurrentVersion() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.CurrentVersion
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Distro
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Handle
+}
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetID() string {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.ID
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetKasURL() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.KasURL
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Metadata
 }
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetName() string {
 	if t == nil {
@@ -16000,11 +15624,11 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 	}
 	return t.Name
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetHandle() *string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
-	return t.Handle
+	return t.PingedAt
 }
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetSelf() *bool {
 	if t == nil {
@@ -16018,83 +15642,29 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 	}
 	return t.Version
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.PingedAt
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.Metadata
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetCurrentVersion() *string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.CurrentVersion
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetKasURL() *string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.KasURL
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.Distro
-}
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm struct {
-	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
-	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
-	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
-	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
-	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
 	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
+	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
+	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
+	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetRelease() *string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
-	}
-	return t.Release
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
-	}
-	return t.ValuesFiles
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetValues() *string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
-	}
-	return t.Values
-}
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
-	}
-	return t.IgnoreHooks
-}
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreCrds
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetLuaScript() *string {
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
-	return t.LuaScript
+	return t.IgnoreHooks
 }
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetLuaFile() *string {
 	if t == nil {
@@ -16107,6 +15677,30 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFolder
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetLuaScript() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaScript
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetRelease() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Release
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetValues() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Values
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.ValuesFiles
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Configuration struct {
@@ -16128,47 +15722,47 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts struct {
-	Name          string         "json:\"name\" graphql:\"name\""
 	Configuration map[string]any "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Name          string         "json:\"name\" graphql:\"name\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts) GetName() string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts{}
-	}
-	return t.Name
-}
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts{}
 	}
 	return t.Configuration
 }
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Contexts{}
+	}
+	return t.Name
+}
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                  "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
-	EnforceNamespace  *bool                                                                                                  "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	DeleteNamespace   *bool                                                                                                  "json:\"deleteNamespace,omitempty\" graphql:\"deleteNamespace\""
-	NamespaceMetadata *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 	DiffNormalizers   []*DiffNormalizerFragment                                                                              "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+	EnforceNamespace  *bool                                                                                                  "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
@@ -16177,29 +15771,29 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 	}
 	return t.CreateNamespace
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
-	}
-	return t.EnforceNamespace
-}
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetDeleteNamespace() *bool {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.DeleteNamespace
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
-	}
-	return t.NamespaceMetadata
-}
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.NamespaceMetadata
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Revision struct {
@@ -16233,8 +15827,8 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs struct {
 	Name   string "json:\"name\" graphql:\"name\""
-	Value  string "json:\"value\" graphql:\"value\""
 	Secret *bool  "json:\"secret,omitempty\" graphql:\"secret\""
+	Value  string "json:\"value\" graphql:\"value\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs) GetName() string {
@@ -16243,23 +15837,23 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 	}
 	return t.Name
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs) GetValue() string {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs{}
-	}
-	return t.Value
-}
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs) GetSecret() *bool {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs{}
 	}
 	return t.Secret
 }
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs) GetValue() string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Value
+}
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports struct {
 	ID      string                                                                                      "json:\"id\" graphql:\"id\""
-	Stack   *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 	Outputs []*GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports) GetID() string {
@@ -16268,67 +15862,55 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 	}
 	return t.ID
 }
-func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports) GetStack() *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Stack {
-	if t == nil {
-		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports{}
-	}
-	return t.Stack
-}
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports) GetOutputs() []*GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Outputs {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports{}
 	}
 	return t.Outputs
 }
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports) GetStack() *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports_Stack {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Imports{}
+	}
+	return t.Stack
+}
 
 type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
-	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
+	Ref    string "json:\"ref\" graphql:\"ref\""
 }
 
-func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
-	if t == nil {
-		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
-	}
-	return t.Ref
-}
 func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetFolder() string {
 	if t == nil {
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
 	}
 	return t.Folder
 }
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
+	}
+	return t.Ref
+}
 
 type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -16336,11 +15918,23 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 	}
 	return t.Group
 }
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -16360,17 +15954,17 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 	}
 	return t.Synced
 }
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration struct {
@@ -16403,28 +15997,28 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 }
 
 type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                            "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                        "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                            "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                        "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -16432,6 +16026,12 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -16445,29 +16045,23 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 	}
 	return t.NamespaceMetadata
 }
-func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
 type ListServiceDeployment_ServiceDeployments struct {
@@ -16482,41 +16076,71 @@ func (t *ListServiceDeployment_ServiceDeployments) GetEdges() []*ServiceDeployme
 }
 
 type PagedClusterServices_PagedClusterServices struct {
-	PageInfo PageInfoFragment                 "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ServiceDeploymentEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                 "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *PagedClusterServices_PagedClusterServices) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &PagedClusterServices_PagedClusterServices{}
-	}
-	return &t.PageInfo
-}
 func (t *PagedClusterServices_PagedClusterServices) GetEdges() []*ServiceDeploymentEdgeFragment {
 	if t == nil {
 		t = &PagedClusterServices_PagedClusterServices{}
 	}
 	return t.Edges
 }
-
-type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster struct {
-	ID             string         "json:\"id\" graphql:\"id\""
-	Name           string         "json:\"name\" graphql:\"name\""
-	Handle         *string        "json:\"handle,omitempty\" graphql:\"handle\""
-	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
-	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
-	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
-	Metadata       map[string]any "json:\"metadata,omitempty\" graphql:\"metadata\""
-	CurrentVersion *string        "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
-	KasURL         *string        "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
-	Distro         *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
+func (t *PagedClusterServices_PagedClusterServices) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &PagedClusterServices_PagedClusterServices{}
+	}
+	return &t.PageInfo
 }
 
+type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster struct {
+	CurrentVersion *string        "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
+	Distro         *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
+	Handle         *string        "json:\"handle,omitempty\" graphql:\"handle\""
+	ID             string         "json:\"id\" graphql:\"id\""
+	KasURL         *string        "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	Metadata       map[string]any "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Name           string         "json:\"name\" graphql:\"name\""
+	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
+	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetCurrentVersion() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.CurrentVersion
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Distro
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Handle
+}
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetID() string {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.ID
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetKasURL() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.KasURL
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Metadata
 }
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetName() string {
 	if t == nil {
@@ -16524,11 +16148,11 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 	}
 	return t.Name
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetHandle() *string {
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
 	}
-	return t.Handle
+	return t.PingedAt
 }
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetSelf() *bool {
 	if t == nil {
@@ -16542,83 +16166,29 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 	}
 	return t.Version
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetPingedAt() *string {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.PingedAt
-}
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetMetadata() map[string]any {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.Metadata
-}
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetCurrentVersion() *string {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.CurrentVersion
-}
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetKasURL() *string {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.KasURL
-}
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetDistro() *ClusterDistro {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
-	}
-	return t.Distro
-}
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm struct {
-	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
-	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
-	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
-	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
-	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
 	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
+	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
+	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
+	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 }
 
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
-	}
-	return t.Release
-}
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
-	}
-	return t.ValuesFiles
-}
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetValues() *string {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
-	}
-	return t.Values
-}
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
-	}
-	return t.IgnoreHooks
-}
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreCrds
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaScript() *string {
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
-	return t.LuaScript
+	return t.IgnoreHooks
 }
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaFile() *string {
 	if t == nil {
@@ -16631,6 +16201,30 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.LuaFolder
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaScript() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.LuaScript
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetRelease() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Release
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetValues() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.Values
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetValuesFiles() []*string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.ValuesFiles
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Configuration struct {
@@ -16652,47 +16246,47 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts struct {
-	Name          string         "json:\"name\" graphql:\"name\""
 	Configuration map[string]any "json:\"configuration,omitempty\" graphql:\"configuration\""
+	Name          string         "json:\"name\" graphql:\"name\""
 }
 
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetName() string {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
-	}
-	return t.Name
-}
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetConfiguration() map[string]any {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
 	}
 	return t.Configuration
 }
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts) GetName() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Contexts{}
+	}
+	return t.Name
+}
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                                                      "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
-	EnforceNamespace  *bool                                                                                                                                                      "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	DeleteNamespace   *bool                                                                                                                                                      "json:\"deleteNamespace,omitempty\" graphql:\"deleteNamespace\""
-	NamespaceMetadata *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 	DiffNormalizers   []*DiffNormalizerFragment                                                                                                                                  "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
+	EnforceNamespace  *bool                                                                                                                                                      "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
+	NamespaceMetadata *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
 }
 
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetCreateNamespace() *bool {
@@ -16701,29 +16295,29 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 	}
 	return t.CreateNamespace
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
-	}
-	return t.EnforceNamespace
-}
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetDeleteNamespace() *bool {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.DeleteNamespace
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
-	}
-	return t.NamespaceMetadata
-}
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
 	}
 	return t.DiffNormalizers
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetEnforceNamespace() *bool {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.EnforceNamespace
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig) GetNamespaceMetadata() *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig_NamespaceMetadata {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_SyncConfig{}
+	}
+	return t.NamespaceMetadata
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Revision struct {
@@ -16757,8 +16351,8 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs struct {
 	Name   string "json:\"name\" graphql:\"name\""
-	Value  string "json:\"value\" graphql:\"value\""
 	Secret *bool  "json:\"secret,omitempty\" graphql:\"secret\""
+	Value  string "json:\"value\" graphql:\"value\""
 }
 
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetName() string {
@@ -16767,23 +16361,23 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 	}
 	return t.Name
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetValue() string {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs{}
-	}
-	return t.Value
-}
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetSecret() *bool {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs{}
 	}
 	return t.Secret
 }
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs) GetValue() string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs{}
+	}
+	return t.Value
+}
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports struct {
 	ID      string                                                                                                                                          "json:\"id\" graphql:\"id\""
-	Stack   *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 	Outputs []*PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 }
 
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetID() string {
@@ -16792,53 +16386,53 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 	}
 	return t.ID
 }
-func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetStack() *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports{}
-	}
-	return t.Stack
-}
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetOutputs() []*PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Outputs {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports{}
 	}
 	return t.Outputs
 }
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports) GetStack() *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports_Stack {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Imports{}
+	}
+	return t.Stack
+}
 
 type PagedClusterServicesForAgent_PagedClusterServices struct {
-	PageInfo PageInfoFragment                         "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ServiceDeploymentEdgeFragmentForAgent "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                         "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *PagedClusterServicesForAgent_PagedClusterServices) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &PagedClusterServicesForAgent_PagedClusterServices{}
-	}
-	return &t.PageInfo
-}
 func (t *PagedClusterServicesForAgent_PagedClusterServices) GetEdges() []*ServiceDeploymentEdgeFragmentForAgent {
 	if t == nil {
 		t = &PagedClusterServicesForAgent_PagedClusterServices{}
 	}
 	return t.Edges
 }
-
-type PagedClusterServiceIds_PagedClusterServices struct {
-	PageInfo PageInfoFragment                   "json:\"pageInfo\" graphql:\"pageInfo\""
-	Edges    []*ServiceDeploymentIDEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
-}
-
-func (t *PagedClusterServiceIds_PagedClusterServices) GetPageInfo() *PageInfoFragment {
+func (t *PagedClusterServicesForAgent_PagedClusterServices) GetPageInfo() *PageInfoFragment {
 	if t == nil {
-		t = &PagedClusterServiceIds_PagedClusterServices{}
+		t = &PagedClusterServicesForAgent_PagedClusterServices{}
 	}
 	return &t.PageInfo
 }
+
+type PagedClusterServiceIds_PagedClusterServices struct {
+	Edges    []*ServiceDeploymentIDEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                   "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
 func (t *PagedClusterServiceIds_PagedClusterServices) GetEdges() []*ServiceDeploymentIDEdgeFragment {
 	if t == nil {
 		t = &PagedClusterServiceIds_PagedClusterServices{}
 	}
 	return t.Edges
+}
+func (t *PagedClusterServiceIds_PagedClusterServices) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &PagedClusterServiceIds_PagedClusterServices{}
+	}
+	return &t.PageInfo
 }
 
 type ListServiceDeploymentByHandle_ServiceDeployments struct {
@@ -16937,53 +16531,41 @@ func (t *DeleteGlobalService_DeleteGlobalService_GlobalServiceFragment_Service) 
 }
 
 type KickService_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
-	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
+	Ref    string "json:\"ref\" graphql:\"ref\""
 }
 
-func (t *KickService_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
-	if t == nil {
-		t = &KickService_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
-	}
-	return t.Ref
-}
 func (t *KickService_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetFolder() string {
 	if t == nil {
 		t = &KickService_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
 	}
 	return t.Folder
 }
+func (t *KickService_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
+	}
+	return t.Ref
+}
 
 type KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -16991,11 +16573,23 @@ func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFrag
 	}
 	return t.Group
 }
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -17015,17 +16609,17 @@ func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFrag
 	}
 	return t.Synced
 }
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration struct {
@@ -17058,28 +16652,28 @@ func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFrag
 }
 
 type KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                     "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                 "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                     "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                 "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -17087,6 +16681,12 @@ func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFrag
 		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -17100,79 +16700,61 @@ func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFrag
 	}
 	return t.NamespaceMetadata
 }
-func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
 }
+func (t *KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
+}
 
 type KickServiceByHandle_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
-	Ref    string "json:\"ref\" graphql:\"ref\""
 	Folder string "json:\"folder\" graphql:\"folder\""
+	Ref    string "json:\"ref\" graphql:\"ref\""
 }
 
-func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
-	if t == nil {
-		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
-	}
-	return t.Ref
-}
 func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetFolder() string {
 	if t == nil {
 		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
 	}
 	return t.Folder
 }
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git) GetRef() string {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git{}
+	}
+	return t.Ref
+}
 
 type KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -17180,11 +16762,23 @@ func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploy
 	}
 	return t.Group
 }
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -17204,17 +16798,17 @@ func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploy
 	}
 	return t.Synced
 }
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Configuration struct {
@@ -17247,28 +16841,28 @@ func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploy
 }
 
 type KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                             "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                             "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -17276,6 +16870,12 @@ func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploy
 		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -17289,29 +16889,23 @@ func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploy
 	}
 	return t.NamespaceMetadata
 }
-func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
 type GetClusterRegistrations_ClusterRegistrations_Edges struct {
@@ -17326,29 +16920,35 @@ func (t *GetClusterRegistrations_ClusterRegistrations_Edges) GetNode() *ClusterR
 }
 
 type GetClusterRegistrations_ClusterRegistrations struct {
-	PageInfo PageInfoFragment                                      "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*GetClusterRegistrations_ClusterRegistrations_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                                      "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *GetClusterRegistrations_ClusterRegistrations) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &GetClusterRegistrations_ClusterRegistrations{}
-	}
-	return &t.PageInfo
-}
 func (t *GetClusterRegistrations_ClusterRegistrations) GetEdges() []*GetClusterRegistrations_ClusterRegistrations_Edges {
 	if t == nil {
 		t = &GetClusterRegistrations_ClusterRegistrations{}
 	}
 	return t.Edges
 }
-
-type GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User struct {
-	ID    string "json:\"id\" graphql:\"id\""
-	Name  string "json:\"name\" graphql:\"name\""
-	Email string "json:\"email\" graphql:\"email\""
+func (t *GetClusterRegistrations_ClusterRegistrations) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &GetClusterRegistrations_ClusterRegistrations{}
+	}
+	return &t.PageInfo
 }
 
+type GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User struct {
+	Email string "json:\"email\" graphql:\"email\""
+	ID    string "json:\"id\" graphql:\"id\""
+	Name  string "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
+}
 func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User) GetID() string {
 	if t == nil {
 		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
@@ -17360,12 +16960,6 @@ func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_
 		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
 	}
 	return t.Name
-}
-func (t *GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
-	if t == nil {
-		t = &GetFederatedCredential_FederatedCredential_FederatedCredentialFragment_User{}
-	}
-	return t.Email
 }
 
 type GetFederatedCredentialTiny_FederatedCredential struct {
@@ -17380,11 +16974,17 @@ func (t *GetFederatedCredentialTiny_FederatedCredential) GetID() string {
 }
 
 type CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User struct {
+	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
 	Name  string "json:\"name\" graphql:\"name\""
-	Email string "json:\"email\" graphql:\"email\""
 }
 
+func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
+}
 func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User) GetID() string {
 	if t == nil {
 		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
@@ -17396,12 +16996,6 @@ func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredential
 		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
 	}
 	return t.Name
-}
-func (t *CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
-	if t == nil {
-		t = &CreateFederatedCredential_CreateFederatedCredential_FederatedCredentialFragment_User{}
-	}
-	return t.Email
 }
 
 type DeleteFederatedCredential_DeleteFederatedCredential struct {
@@ -17416,11 +17010,17 @@ func (t *DeleteFederatedCredential_DeleteFederatedCredential) GetID() string {
 }
 
 type UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User struct {
+	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
 	Name  string "json:\"name\" graphql:\"name\""
-	Email string "json:\"email\" graphql:\"email\""
 }
 
+func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
+	if t == nil {
+		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
+	}
+	return t.Email
+}
 func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetID() string {
 	if t == nil {
 		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
@@ -17432,12 +17032,6 @@ func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredential
 		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
 	}
 	return t.Name
-}
-func (t *UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User) GetEmail() string {
-	if t == nil {
-		t = &UpdateFederatedCredential_UpdateFederatedCredential_FederatedCredentialFragment_User{}
-	}
-	return t.Email
 }
 
 type DeleteFlow_DeleteFlow struct {
@@ -17524,21 +17118,21 @@ func (t *PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node
 }
 
 type PagedClusterGates_PagedClusterGates struct {
-	PageInfo PageInfoFragment            "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*PipelineGateEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment            "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *PagedClusterGates_PagedClusterGates) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &PagedClusterGates_PagedClusterGates{}
-	}
-	return &t.PageInfo
-}
 func (t *PagedClusterGates_PagedClusterGates) GetEdges() []*PipelineGateEdgeFragment {
 	if t == nil {
 		t = &PagedClusterGates_PagedClusterGates{}
 	}
 	return t.Edges
+}
+func (t *PagedClusterGates_PagedClusterGates) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &PagedClusterGates_PagedClusterGates{}
+	}
+	return &t.PageInfo
 }
 
 type PagedClusterGateIDs_PagedClusterGates_Edges_PipelineGateIDsEdgeFragment_Node_ struct {
@@ -17553,21 +17147,21 @@ func (t *PagedClusterGateIDs_PagedClusterGates_Edges_PipelineGateIDsEdgeFragment
 }
 
 type PagedClusterGateIDs_PagedClusterGates struct {
-	PageInfo PageInfoFragment               "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*PipelineGateIDsEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment               "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *PagedClusterGateIDs_PagedClusterGates) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &PagedClusterGateIDs_PagedClusterGates{}
-	}
-	return &t.PageInfo
-}
 func (t *PagedClusterGateIDs_PagedClusterGates) GetEdges() []*PipelineGateIDsEdgeFragment {
 	if t == nil {
 		t = &PagedClusterGateIDs_PagedClusterGates{}
 	}
 	return t.Edges
+}
+func (t *PagedClusterGateIDs_PagedClusterGates) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &PagedClusterGateIDs_PagedClusterGates{}
+	}
+	return &t.PageInfo
 }
 
 type UpdateGate_UpdateGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -17683,21 +17277,21 @@ func (t *GetScmConnectionTiny_ScmConnection) GetName() string {
 }
 
 type ListScmConnections_ScmConnections_Edges struct {
-	Node   *ScmConnectionFragment "json:\"node,omitempty\" graphql:\"node\""
 	Cursor *string                "json:\"cursor,omitempty\" graphql:\"cursor\""
+	Node   *ScmConnectionFragment "json:\"node,omitempty\" graphql:\"node\""
 }
 
-func (t *ListScmConnections_ScmConnections_Edges) GetNode() *ScmConnectionFragment {
-	if t == nil {
-		t = &ListScmConnections_ScmConnections_Edges{}
-	}
-	return t.Node
-}
 func (t *ListScmConnections_ScmConnections_Edges) GetCursor() *string {
 	if t == nil {
 		t = &ListScmConnections_ScmConnections_Edges{}
 	}
 	return t.Cursor
+}
+func (t *ListScmConnections_ScmConnections_Edges) GetNode() *ScmConnectionFragment {
+	if t == nil {
+		t = &ListScmConnections_ScmConnections_Edges{}
+	}
+	return t.Node
 }
 
 type ListScmConnections_ScmConnections struct {
@@ -17730,21 +17324,21 @@ func (t *GetPrAutomationTiny_PrAutomation) GetName() string {
 }
 
 type ListPrAutomations_PrAutomations_Edges struct {
-	Node   *PrAutomationFragment "json:\"node,omitempty\" graphql:\"node\""
 	Cursor *string               "json:\"cursor,omitempty\" graphql:\"cursor\""
+	Node   *PrAutomationFragment "json:\"node,omitempty\" graphql:\"node\""
 }
 
-func (t *ListPrAutomations_PrAutomations_Edges) GetNode() *PrAutomationFragment {
-	if t == nil {
-		t = &ListPrAutomations_PrAutomations_Edges{}
-	}
-	return t.Node
-}
 func (t *ListPrAutomations_PrAutomations_Edges) GetCursor() *string {
 	if t == nil {
 		t = &ListPrAutomations_PrAutomations_Edges{}
 	}
 	return t.Cursor
+}
+func (t *ListPrAutomations_PrAutomations_Edges) GetNode() *PrAutomationFragment {
+	if t == nil {
+		t = &ListPrAutomations_PrAutomations_Edges{}
+	}
+	return t.Node
 }
 
 type ListPrAutomations_PrAutomations struct {
@@ -17788,21 +17382,21 @@ func (t *ListHelmRepositories_HelmRepositories_Edges) GetNode() *HelmRepositoryF
 }
 
 type ListHelmRepositories_HelmRepositories struct {
-	PageInfo PageInfoFragment                               "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ListHelmRepositories_HelmRepositories_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                               "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListHelmRepositories_HelmRepositories) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListHelmRepositories_HelmRepositories{}
-	}
-	return &t.PageInfo
-}
 func (t *ListHelmRepositories_HelmRepositories) GetEdges() []*ListHelmRepositories_HelmRepositories_Edges {
 	if t == nil {
 		t = &ListHelmRepositories_HelmRepositories{}
 	}
 	return t.Edges
+}
+func (t *ListHelmRepositories_HelmRepositories) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListHelmRepositories_HelmRepositories{}
+	}
+	return &t.PageInfo
 }
 
 type GetHelmRepositoryTiny_HelmRepository struct {
@@ -17835,21 +17429,21 @@ func (t *GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_He
 }
 
 type GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication struct {
-	Plural  *bool                                                                           "json:\"plural,omitempty\" graphql:\"plural\""
 	Headers []*GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                           "json:\"plural,omitempty\" graphql:\"plural\""
 }
 
-func (t *GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication) GetPlural() *bool {
-	if t == nil {
-		t = &GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication{}
-	}
-	return t.Plural
-}
 func (t *GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication) GetHeaders() []*GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication_Headers {
 	if t == nil {
 		t = &GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication{}
 	}
 	return t.Headers
+}
+func (t *GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &GetMCPServers_McpServers_Edges_Node_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type GetMCPServers_McpServers_Edges struct {
@@ -17864,21 +17458,21 @@ func (t *GetMCPServers_McpServers_Edges) GetNode() *MCPServerFragment {
 }
 
 type GetMCPServers_McpServers struct {
-	PageInfo PageInfoFragment                  "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*GetMCPServers_McpServers_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                  "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *GetMCPServers_McpServers) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &GetMCPServers_McpServers{}
-	}
-	return &t.PageInfo
-}
 func (t *GetMCPServers_McpServers) GetEdges() []*GetMCPServers_McpServers_Edges {
 	if t == nil {
 		t = &GetMCPServers_McpServers{}
 	}
 	return t.Edges
+}
+func (t *GetMCPServers_McpServers) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &GetMCPServers_McpServers{}
+	}
+	return &t.PageInfo
 }
 
 type GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers struct {
@@ -17900,21 +17494,21 @@ func (t *GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers) GetVal
 }
 
 type GetMCPServer_McpServer_MCPServerFragment_Authentication struct {
-	Plural  *bool                                                              "json:\"plural,omitempty\" graphql:\"plural\""
 	Headers []*GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                              "json:\"plural,omitempty\" graphql:\"plural\""
 }
 
-func (t *GetMCPServer_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
-	if t == nil {
-		t = &GetMCPServer_McpServer_MCPServerFragment_Authentication{}
-	}
-	return t.Plural
-}
 func (t *GetMCPServer_McpServer_MCPServerFragment_Authentication) GetHeaders() []*GetMCPServer_McpServer_MCPServerFragment_Authentication_Headers {
 	if t == nil {
 		t = &GetMCPServer_McpServer_MCPServerFragment_Authentication{}
 	}
 	return t.Headers
+}
+func (t *GetMCPServer_McpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &GetMCPServer_McpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers struct {
@@ -17936,21 +17530,21 @@ func (t *UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Header
 }
 
 type UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication struct {
-	Plural  *bool                                                                       "json:\"plural,omitempty\" graphql:\"plural\""
 	Headers []*UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers "json:\"headers,omitempty\" graphql:\"headers\""
+	Plural  *bool                                                                       "json:\"plural,omitempty\" graphql:\"plural\""
 }
 
-func (t *UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication) GetPlural() *bool {
-	if t == nil {
-		t = &UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication{}
-	}
-	return t.Plural
-}
 func (t *UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication) GetHeaders() []*UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication_Headers {
 	if t == nil {
 		t = &UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication{}
 	}
 	return t.Headers
+}
+func (t *UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication) GetPlural() *bool {
+	if t == nil {
+		t = &UpsertMCPServer_UpsertMcpServer_MCPServerFragment_Authentication{}
+	}
+	return t.Plural
 }
 
 type DeleteMCPServer_DeleteMcpServer struct {
@@ -17965,39 +17559,39 @@ func (t *DeleteMCPServer_DeleteMcpServer) GetID() string {
 }
 
 type ListNamespaces_ManagedNamespaces struct {
-	PageInfo PageInfoFragment                "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ManagedNamespaceEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListNamespaces_ManagedNamespaces) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListNamespaces_ManagedNamespaces{}
-	}
-	return &t.PageInfo
-}
 func (t *ListNamespaces_ManagedNamespaces) GetEdges() []*ManagedNamespaceEdgeFragment {
 	if t == nil {
 		t = &ListNamespaces_ManagedNamespaces{}
 	}
 	return t.Edges
 }
-
-type ListClusterNamespaces_ClusterManagedNamespaces struct {
-	PageInfo PageInfoFragment                "json:\"pageInfo\" graphql:\"pageInfo\""
-	Edges    []*ManagedNamespaceEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
-}
-
-func (t *ListClusterNamespaces_ClusterManagedNamespaces) GetPageInfo() *PageInfoFragment {
+func (t *ListNamespaces_ManagedNamespaces) GetPageInfo() *PageInfoFragment {
 	if t == nil {
-		t = &ListClusterNamespaces_ClusterManagedNamespaces{}
+		t = &ListNamespaces_ManagedNamespaces{}
 	}
 	return &t.PageInfo
 }
+
+type ListClusterNamespaces_ClusterManagedNamespaces struct {
+	Edges    []*ManagedNamespaceEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
 func (t *ListClusterNamespaces_ClusterManagedNamespaces) GetEdges() []*ManagedNamespaceEdgeFragment {
 	if t == nil {
 		t = &ListClusterNamespaces_ClusterManagedNamespaces{}
 	}
 	return t.Edges
+}
+func (t *ListClusterNamespaces_ClusterManagedNamespaces) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListClusterNamespaces_ClusterManagedNamespaces{}
+	}
+	return &t.PageInfo
 }
 
 type DeleteNamespace_DeleteManagedNamespace struct {
@@ -18012,21 +17606,21 @@ func (t *DeleteNamespace_DeleteManagedNamespace) GetID() string {
 }
 
 type ListNotificationSinks_NotificationSinks struct {
-	PageInfo PageInfoFragment                "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*NotificationSinkEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListNotificationSinks_NotificationSinks) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListNotificationSinks_NotificationSinks{}
-	}
-	return &t.PageInfo
-}
 func (t *ListNotificationSinks_NotificationSinks) GetEdges() []*NotificationSinkEdgeFragment {
 	if t == nil {
 		t = &ListNotificationSinks_NotificationSinks{}
 	}
 	return t.Edges
+}
+func (t *ListNotificationSinks_NotificationSinks) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListNotificationSinks_NotificationSinks{}
+	}
+	return &t.PageInfo
 }
 
 type ListObservabilityProviders_ObservabilityProviders_Edges struct {
@@ -18041,21 +17635,21 @@ func (t *ListObservabilityProviders_ObservabilityProviders_Edges) GetNode() *Obs
 }
 
 type ListObservabilityProviders_ObservabilityProviders struct {
-	PageInfo PageInfoFragment                                           "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ListObservabilityProviders_ObservabilityProviders_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                                           "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListObservabilityProviders_ObservabilityProviders) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListObservabilityProviders_ObservabilityProviders{}
-	}
-	return &t.PageInfo
-}
 func (t *ListObservabilityProviders_ObservabilityProviders) GetEdges() []*ListObservabilityProviders_ObservabilityProviders_Edges {
 	if t == nil {
 		t = &ListObservabilityProviders_ObservabilityProviders{}
 	}
 	return t.Edges
+}
+func (t *ListObservabilityProviders_ObservabilityProviders) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListObservabilityProviders_ObservabilityProviders{}
+	}
+	return &t.PageInfo
 }
 
 type GetObservabilityProviderTiny_ObservabilityProvider struct {
@@ -18160,10 +17754,10 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 
 type GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
-	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
@@ -18172,6 +17766,12 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Audits
+}
+func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
+	if t == nil {
+		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Backups
 }
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -18190,12 +17790,6 @@ func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFr
 		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Settings
-}
-func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
-	if t == nil {
-		t = &GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
-	}
-	return t.Backups
 }
 func (t *GetPersona_Persona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
 	if t == nil {
@@ -18288,10 +17882,10 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 
 type CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
-	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
@@ -18300,6 +17894,12 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Audits
+}
+func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
+	if t == nil {
+		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Backups
 }
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -18318,12 +17918,6 @@ func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Settings
-}
-func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
-	if t == nil {
-		t = &CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
-	}
-	return t.Backups
 }
 func (t *CreatePersona_CreatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
 	if t == nil {
@@ -18398,10 +17992,10 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 
 type UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
-	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
@@ -18410,6 +18004,12 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Audits
+}
+func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
+	if t == nil {
+		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Backups
 }
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -18428,12 +18028,6 @@ func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Settings
-}
-func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
-	if t == nil {
-		t = &UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
-	}
-	return t.Backups
 }
 func (t *UpdatePersona_UpdatePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
 	if t == nil {
@@ -18508,10 +18102,10 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 
 type DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar struct {
 	Audits       *bool "json:\"audits,omitempty\" graphql:\"audits\""
+	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
 	Kubernetes   *bool "json:\"kubernetes,omitempty\" graphql:\"kubernetes\""
 	PullRequests *bool "json:\"pullRequests,omitempty\" graphql:\"pullRequests\""
 	Settings     *bool "json:\"settings,omitempty\" graphql:\"settings\""
-	Backups      *bool "json:\"backups,omitempty\" graphql:\"backups\""
 	Stacks       *bool "json:\"stacks,omitempty\" graphql:\"stacks\""
 }
 
@@ -18520,6 +18114,12 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
 	}
 	return t.Audits
+}
+func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
+	if t == nil {
+		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
+	}
+	return t.Backups
 }
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetKubernetes() *bool {
 	if t == nil {
@@ -18539,12 +18139,6 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 	}
 	return t.Settings
 }
-func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetBackups() *bool {
-	if t == nil {
-		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
-	}
-	return t.Backups
-}
 func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar) GetStacks() *bool {
 	if t == nil {
 		t = &DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfigurationFragment_Sidebar{}
@@ -18553,111 +18147,111 @@ func (t *DeletePersona_DeletePersona_PersonaFragment_Configuration_PersonaConfig
 }
 
 type GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
-	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
+	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 }
 
-func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria{}
-	}
-	return t.Source
-}
 func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria) GetSecrets() []*string {
 	if t == nil {
 		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria{}
 	}
 	return t.Secrets
 }
+func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria{}
+	}
+	return t.Source
+}
 
 type GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services struct {
-	Service  *ServiceDeploymentBaseFragment                                                                                          "json:\"service,omitempty\" graphql:\"service\""
 	Criteria *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria "json:\"criteria,omitempty\" graphql:\"criteria\""
+	Service  *ServiceDeploymentBaseFragment                                                                                          "json:\"service,omitempty\" graphql:\"service\""
 }
 
-func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services{}
-	}
-	return t.Service
-}
 func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services) GetCriteria() *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria {
 	if t == nil {
 		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services{}
 	}
 	return t.Criteria
 }
+func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Stages_PipelineStageFragment_Services{}
+	}
+	return t.Service
+}
 
 type GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria struct {
-	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
+	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 }
 
-func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria{}
-	}
-	return t.Source
-}
 func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria) GetSecrets() []*string {
 	if t == nil {
 		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria{}
 	}
 	return t.Secrets
 }
+func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria{}
+	}
+	return t.Source
+}
 
 type GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services struct {
-	Service  *ServiceDeploymentBaseFragment                                                                                                                        "json:\"service,omitempty\" graphql:\"service\""
 	Criteria *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria "json:\"criteria,omitempty\" graphql:\"criteria\""
+	Service  *ServiceDeploymentBaseFragment                                                                                                                        "json:\"service,omitempty\" graphql:\"service\""
 }
 
-func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services{}
-	}
-	return t.Service
-}
 func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services) GetCriteria() *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services_Criteria {
 	if t == nil {
 		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services{}
 	}
 	return t.Criteria
 }
+func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_From_PipelineStageFragment_Services{}
+	}
+	return t.Service
+}
 
 type GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria struct {
-	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
+	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 }
 
-func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria{}
-	}
-	return t.Source
-}
 func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria) GetSecrets() []*string {
 	if t == nil {
 		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria{}
 	}
 	return t.Secrets
 }
+func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria) GetSource() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria{}
+	}
+	return t.Source
+}
 
 type GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services struct {
-	Service  *ServiceDeploymentBaseFragment                                                                                                                      "json:\"service,omitempty\" graphql:\"service\""
 	Criteria *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria "json:\"criteria,omitempty\" graphql:\"criteria\""
+	Service  *ServiceDeploymentBaseFragment                                                                                                                      "json:\"service,omitempty\" graphql:\"service\""
 }
 
-func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
-	if t == nil {
-		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
-	}
-	return t.Service
-}
 func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services) GetCriteria() *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services_Criteria {
 	if t == nil {
 		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
 	}
 	return t.Criteria
+}
+func (t *GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services) GetService() *ServiceDeploymentBaseFragment {
+	if t == nil {
+		t = &GetPipelines_Pipelines_Edges_PipelineEdgeFragment_Node_PipelineFragment_Edges_PipelineStageEdgeFragment_To_PipelineStageFragment_Services{}
+	}
+	return t.Service
 }
 
 type GetPipelines_Pipelines struct {
@@ -18683,21 +18277,21 @@ func (t *ListComplianceReportGenerators_ComplianceReportGenerators_Edges) GetNod
 }
 
 type ListComplianceReportGenerators_ComplianceReportGenerators struct {
-	PageInfo PageInfoFragment                                                   "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ListComplianceReportGenerators_ComplianceReportGenerators_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                                                   "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListComplianceReportGenerators_ComplianceReportGenerators) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListComplianceReportGenerators_ComplianceReportGenerators{}
-	}
-	return &t.PageInfo
-}
 func (t *ListComplianceReportGenerators_ComplianceReportGenerators) GetEdges() []*ListComplianceReportGenerators_ComplianceReportGenerators_Edges {
 	if t == nil {
 		t = &ListComplianceReportGenerators_ComplianceReportGenerators{}
 	}
 	return t.Edges
+}
+func (t *ListComplianceReportGenerators_ComplianceReportGenerators) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListComplianceReportGenerators_ComplianceReportGenerators{}
+	}
+	return &t.PageInfo
 }
 
 type GetPreviewEnvironmentTemplate_PreviewEnvironmentTemplate_PreviewEnvironmentTemplateFragment_Flow struct {
@@ -18789,21 +18383,21 @@ func (t *ListProjects_Projects_Edges) GetNode() *ProjectFragment {
 }
 
 type ListProjects_Projects struct {
-	PageInfo PageInfoFragment               "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ListProjects_Projects_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment               "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListProjects_Projects) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListProjects_Projects{}
-	}
-	return &t.PageInfo
-}
 func (t *ListProjects_Projects) GetEdges() []*ListProjects_Projects_Edges {
 	if t == nil {
 		t = &ListProjects_Projects{}
 	}
 	return t.Edges
+}
+func (t *ListProjects_Projects) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListProjects_Projects{}
+	}
+	return &t.PageInfo
 }
 
 type GetProjectTiny_Project struct {
@@ -18825,35 +18419,23 @@ func (t *GetProjectTiny_Project) GetName() string {
 }
 
 type ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
-	ID        string                    "json:\"id\" graphql:\"id\""
-	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
-	Name      string                    "json:\"name\" graphql:\"name\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	ID        string                    "json:\"id\" graphql:\"id\""
 	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Name      string                    "json:\"name\" graphql:\"name\""
 	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
 	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
 	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	UID       *string                   "json:\"uid,omitempty\" graphql:\"uid\""
 	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
-	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
 }
 
-func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
 	if t == nil {
 		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
-	return t.ID
-}
-func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
-	if t == nil {
-		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.UID
-}
-func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
-	if t == nil {
-		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Name
+	return t.Content
 }
 func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
 	if t == nil {
@@ -18861,11 +18443,23 @@ func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Servi
 	}
 	return t.Group
 }
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
 func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
 	if t == nil {
 		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Kind
+}
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
 }
 func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
 	if t == nil {
@@ -18885,17 +18479,17 @@ func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Servi
 	}
 	return t.Synced
 }
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetUID() *string {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.UID
+}
 func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
 	if t == nil {
 		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
 	}
 	return t.Version
-}
-func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
-	if t == nil {
-		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
-	}
-	return t.Content
 }
 
 type ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
@@ -18928,28 +18522,28 @@ func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Servi
 }
 
 type ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata struct {
-	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 	Annotations map[string]any "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Labels      map[string]any "json:\"labels,omitempty\" graphql:\"labels\""
 }
 
-func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
-	if t == nil {
-		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
-	}
-	return t.Labels
-}
 func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
 	}
 	return t.Annotations
 }
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata) GetLabels() map[string]any {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata{}
+	}
+	return t.Labels
+}
 
 type ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig struct {
 	CreateNamespace   *bool                                                                                                                             "json:\"createNamespace,omitempty\" graphql:\"createNamespace\""
+	DiffNormalizers   []*DiffNormalizerFragment                                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 	EnforceNamespace  *bool                                                                                                                             "json:\"enforceNamespace,omitempty\" graphql:\"enforceNamespace\""
 	NamespaceMetadata *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig_NamespaceMetadata "json:\"namespaceMetadata,omitempty\" graphql:\"namespaceMetadata\""
-	DiffNormalizers   []*DiffNormalizerFragment                                                                                                         "json:\"diffNormalizers,omitempty\" graphql:\"diffNormalizers\""
 }
 
 func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetCreateNamespace() *bool {
@@ -18957,6 +18551,12 @@ func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Servi
 		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
 	}
 	return t.CreateNamespace
+}
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
+	}
+	return t.DiffNormalizers
 }
 func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetEnforceNamespace() *bool {
 	if t == nil {
@@ -18970,29 +18570,23 @@ func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Servi
 	}
 	return t.NamespaceMetadata
 }
-func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig) GetDiffNormalizers() []*DiffNormalizerFragment {
-	if t == nil {
-		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_SyncConfig{}
-	}
-	return t.DiffNormalizers
-}
 
 type ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata struct {
-	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 	Fqdns  []*string "json:\"fqdns,omitempty\" graphql:\"fqdns\""
+	Images []*string "json:\"images,omitempty\" graphql:\"images\""
 }
 
-func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
-	if t == nil {
-		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
-	}
-	return t.Images
-}
 func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetFqdns() []*string {
 	if t == nil {
 		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
 	}
 	return t.Fqdns
+}
+func (t *ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata) GetImages() []*string {
+	if t == nil {
+		t = &ListProviders_ClusterProviders_Edges_Node_ClusterProviderFragment_Service_ServiceDeploymentFragment_Metadata{}
+	}
+	return t.Images
 }
 
 type ListProviders_ClusterProviders_Edges struct {
@@ -19105,21 +18699,21 @@ func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges) GetNode() *Sen
 }
 
 type ListClusterSentinelRunJobs_ClusterSentinelRunJobs struct {
-	PageInfo PageInfoFragment                                           "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                                           "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs{}
-	}
-	return &t.PageInfo
-}
 func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs) GetEdges() []*ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges {
 	if t == nil {
 		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs{}
 	}
 	return t.Edges
+}
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs{}
+	}
+	return &t.PageInfo
 }
 
 type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -19542,54 +19136,54 @@ func (t *ServiceAccounts_ServiceAccounts_Edges) GetNode() *UserFragment {
 }
 
 type ServiceAccounts_ServiceAccounts struct {
-	PageInfo PageInfoFragment                         "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ServiceAccounts_ServiceAccounts_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                         "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ServiceAccounts_ServiceAccounts) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ServiceAccounts_ServiceAccounts{}
-	}
-	return &t.PageInfo
-}
 func (t *ServiceAccounts_ServiceAccounts) GetEdges() []*ServiceAccounts_ServiceAccounts_Edges {
 	if t == nil {
 		t = &ServiceAccounts_ServiceAccounts{}
 	}
 	return t.Edges
 }
+func (t *ServiceAccounts_ServiceAccounts) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ServiceAccounts_ServiceAccounts{}
+	}
+	return &t.PageInfo
+}
 
 type ShareSecret_ShareSecret struct {
-	Name       string  "json:\"name\" graphql:\"name\""
 	Handle     string  "json:\"handle\" graphql:\"handle\""
-	Secret     string  "json:\"secret\" graphql:\"secret\""
 	InsertedAt *string "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	Name       string  "json:\"name\" graphql:\"name\""
+	Secret     string  "json:\"secret\" graphql:\"secret\""
 	UpdatedAt  *string "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
 }
 
-func (t *ShareSecret_ShareSecret) GetName() string {
-	if t == nil {
-		t = &ShareSecret_ShareSecret{}
-	}
-	return t.Name
-}
 func (t *ShareSecret_ShareSecret) GetHandle() string {
 	if t == nil {
 		t = &ShareSecret_ShareSecret{}
 	}
 	return t.Handle
 }
-func (t *ShareSecret_ShareSecret) GetSecret() string {
-	if t == nil {
-		t = &ShareSecret_ShareSecret{}
-	}
-	return t.Secret
-}
 func (t *ShareSecret_ShareSecret) GetInsertedAt() *string {
 	if t == nil {
 		t = &ShareSecret_ShareSecret{}
 	}
 	return t.InsertedAt
+}
+func (t *ShareSecret_ShareSecret) GetName() string {
+	if t == nil {
+		t = &ShareSecret_ShareSecret{}
+	}
+	return t.Name
+}
+func (t *ShareSecret_ShareSecret) GetSecret() string {
+	if t == nil {
+		t = &ShareSecret_ShareSecret{}
+	}
+	return t.Secret
 }
 func (t *ShareSecret_ShareSecret) GetUpdatedAt() *string {
 	if t == nil {
@@ -19635,21 +19229,21 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 }
 
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds struct {
-	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 	Token *string "json:\"token,omitempty\" graphql:\"token\""
+	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 }
 
-func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds) GetURL() *string {
-	if t == nil {
-		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds{}
-	}
-	return t.URL
-}
 func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds) GetToken() *string {
 	if t == nil {
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds{}
 	}
 	return t.Token
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds) GetURL() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_PluralCreds{}
+	}
+	return t.URL
 }
 
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -19689,11 +19283,17 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 }
 
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -19705,12 +19305,6 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -19750,11 +19344,17 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 }
 
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -19767,47 +19367,41 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 	}
 	return t.Refresh
 }
-func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
-}
 
 type ListClusterStacks_ClusterStackRuns struct {
-	PageInfo PageInfoFragment        "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*StackRunEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment        "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListClusterStacks_ClusterStackRuns) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListClusterStacks_ClusterStackRuns{}
-	}
-	return &t.PageInfo
-}
 func (t *ListClusterStacks_ClusterStackRuns) GetEdges() []*StackRunEdgeFragment {
 	if t == nil {
 		t = &ListClusterStacks_ClusterStackRuns{}
 	}
 	return t.Edges
 }
-
-type ListClusterStackIds_ClusterStackRuns struct {
-	PageInfo PageInfoFragment          "json:\"pageInfo\" graphql:\"pageInfo\""
-	Edges    []*StackRunIDEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
-}
-
-func (t *ListClusterStackIds_ClusterStackRuns) GetPageInfo() *PageInfoFragment {
+func (t *ListClusterStacks_ClusterStackRuns) GetPageInfo() *PageInfoFragment {
 	if t == nil {
-		t = &ListClusterStackIds_ClusterStackRuns{}
+		t = &ListClusterStacks_ClusterStackRuns{}
 	}
 	return &t.PageInfo
 }
+
+type ListClusterStackIds_ClusterStackRuns struct {
+	Edges    []*StackRunIDEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment          "json:\"pageInfo\" graphql:\"pageInfo\""
+}
+
 func (t *ListClusterStackIds_ClusterStackRuns) GetEdges() []*StackRunIDEdgeFragment {
 	if t == nil {
 		t = &ListClusterStackIds_ClusterStackRuns{}
 	}
 	return t.Edges
+}
+func (t *ListClusterStackIds_ClusterStackRuns) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListClusterStackIds_ClusterStackRuns{}
+	}
+	return &t.PageInfo
 }
 
 type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -19847,11 +19441,17 @@ func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFrag
 }
 
 type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -19864,29 +19464,23 @@ func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFrag
 	}
 	return t.Refresh
 }
-func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
-}
 
 type ListClusterMinimalStacks_ClusterStackRuns struct {
-	PageInfo PageInfoFragment               "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*MinimalStackRunEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment               "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListClusterMinimalStacks_ClusterStackRuns) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListClusterMinimalStacks_ClusterStackRuns{}
-	}
-	return &t.PageInfo
-}
 func (t *ListClusterMinimalStacks_ClusterStackRuns) GetEdges() []*MinimalStackRunEdgeFragment {
 	if t == nil {
 		t = &ListClusterMinimalStacks_ClusterStackRuns{}
 	}
 	return t.Edges
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns{}
+	}
+	return &t.PageInfo
 }
 
 type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -19926,11 +19520,17 @@ func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStack
 }
 
 type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -19943,29 +19543,23 @@ func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStack
 	}
 	return t.Refresh
 }
-func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
-}
 
 type ListInfrastructureStacks_InfrastructureStacks struct {
-	PageInfo PageInfoFragment                   "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*InfrastructureStackEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                   "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListInfrastructureStacks_InfrastructureStacks) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListInfrastructureStacks_InfrastructureStacks{}
-	}
-	return &t.PageInfo
-}
 func (t *ListInfrastructureStacks_InfrastructureStacks) GetEdges() []*InfrastructureStackEdgeFragment {
 	if t == nil {
 		t = &ListInfrastructureStacks_InfrastructureStacks{}
 	}
 	return t.Edges
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks{}
+	}
+	return &t.PageInfo
 }
 
 type GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20005,11 +19599,17 @@ func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFrag
 }
 
 type GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -20021,12 +19621,6 @@ func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_Stack
 		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -20066,21 +19660,21 @@ func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_StateUrls) G
 }
 
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_PluralCreds struct {
-	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 	Token *string "json:\"token,omitempty\" graphql:\"token\""
+	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 }
 
-func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_PluralCreds) GetURL() *string {
-	if t == nil {
-		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_PluralCreds{}
-	}
-	return t.URL
-}
 func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_PluralCreds) GetToken() *string {
 	if t == nil {
 		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_PluralCreds{}
 	}
 	return t.Token
+}
+func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_PluralCreds) GetURL() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_PluralCreds{}
+	}
+	return t.URL
 }
 
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20120,11 +19714,17 @@ func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_Infras
 }
 
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -20136,12 +19736,6 @@ func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_Infras
 		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20181,11 +19775,17 @@ func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_JobSpec_JobS
 }
 
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -20197,12 +19797,6 @@ func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuratio
 		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -20242,21 +19836,21 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_StateUrls) GetTerraform()
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_PluralCreds struct {
-	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 	Token *string "json:\"token,omitempty\" graphql:\"token\""
+	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 }
 
-func (t *GetStackRunBase_StackRun_StackRunBaseFragment_PluralCreds) GetURL() *string {
-	if t == nil {
-		t = &GetStackRunBase_StackRun_StackRunBaseFragment_PluralCreds{}
-	}
-	return t.URL
-}
 func (t *GetStackRunBase_StackRun_StackRunBaseFragment_PluralCreds) GetToken() *string {
 	if t == nil {
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_PluralCreds{}
 	}
 	return t.Token
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_PluralCreds) GetURL() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_PluralCreds{}
+	}
+	return t.URL
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20296,11 +19890,17 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStack
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -20312,12 +19912,6 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStack
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20357,11 +19951,17 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_C
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -20373,12 +19973,6 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfig
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -20418,21 +20012,21 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls) GetTerraf
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_PluralCreds struct {
-	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 	Token *string "json:\"token,omitempty\" graphql:\"token\""
+	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 }
 
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_PluralCreds) GetURL() *string {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_PluralCreds{}
-	}
-	return t.URL
-}
 func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_PluralCreds) GetToken() *string {
 	if t == nil {
 		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_PluralCreds{}
 	}
 	return t.Token
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_PluralCreds) GetURL() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_PluralCreds{}
+	}
+	return t.URL
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20472,11 +20066,17 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_Infrastructure
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -20488,12 +20088,6 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_Infrastructure
 		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20533,11 +20127,17 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragm
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -20549,12 +20149,6 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackC
 		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20594,11 +20188,17 @@ func (t *CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFrag
 }
 
 type CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -20610,12 +20210,6 @@ func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_Stack
 		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20655,11 +20249,17 @@ func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFrag
 }
 
 type UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -20671,12 +20271,6 @@ func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_Stack
 		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20716,11 +20310,17 @@ func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_
 }
 
 type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -20732,12 +20332,6 @@ func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_
 		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type AddStackRunLogs_AddRunLogs struct {
@@ -20832,21 +20426,21 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_PluralCreds struct {
-	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 	Token *string "json:\"token,omitempty\" graphql:\"token\""
+	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 }
 
-func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_PluralCreds) GetURL() *string {
-	if t == nil {
-		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_PluralCreds{}
-	}
-	return t.URL
-}
 func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_PluralCreds) GetToken() *string {
 	if t == nil {
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_PluralCreds{}
 	}
 	return t.Token
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_PluralCreds) GetURL() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_PluralCreds{}
+	}
+	return t.URL
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20886,11 +20480,17 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -20902,12 +20502,6 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -20947,11 +20541,17 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -20963,12 +20563,6 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges struct {
@@ -20983,21 +20577,21 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges) GetNode() *StackRunFragme
 }
 
 type ListStackRuns_InfrastructureStack_Runs struct {
-	PageInfo PageInfoFragment                                "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ListStackRuns_InfrastructureStack_Runs_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                                "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListStackRuns_InfrastructureStack_Runs) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListStackRuns_InfrastructureStack_Runs{}
-	}
-	return &t.PageInfo
-}
 func (t *ListStackRuns_InfrastructureStack_Runs) GetEdges() []*ListStackRuns_InfrastructureStack_Runs_Edges {
 	if t == nil {
 		t = &ListStackRuns_InfrastructureStack_Runs{}
 	}
 	return t.Edges
+}
+func (t *ListStackRuns_InfrastructureStack_Runs) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs{}
+	}
+	return &t.PageInfo
 }
 
 type ListStackRuns_InfrastructureStack struct {
@@ -21048,21 +20642,21 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls) GetTerraform() *T
 }
 
 type TriggerRun_TriggerRun_StackRunBaseFragment_PluralCreds struct {
-	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 	Token *string "json:\"token,omitempty\" graphql:\"token\""
+	URL   *string "json:\"url,omitempty\" graphql:\"url\""
 }
 
-func (t *TriggerRun_TriggerRun_StackRunBaseFragment_PluralCreds) GetURL() *string {
-	if t == nil {
-		t = &TriggerRun_TriggerRun_StackRunBaseFragment_PluralCreds{}
-	}
-	return t.URL
-}
 func (t *TriggerRun_TriggerRun_StackRunBaseFragment_PluralCreds) GetToken() *string {
 	if t == nil {
 		t = &TriggerRun_TriggerRun_StackRunBaseFragment_PluralCreds{}
 	}
 	return t.Token
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_PluralCreds) GetURL() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_PluralCreds{}
+	}
+	return t.URL
 }
 
 type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -21102,11 +20696,17 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFra
 }
 
 type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -21118,12 +20718,6 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFra
 		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
-}
-func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
 }
 
 type TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -21163,11 +20757,17 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Cont
 }
 
 type TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
+	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
 	Refresh      *bool  "json:\"refresh,omitempty\" graphql:\"refresh\""
-	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 }
 
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
+	}
+	return t.ApproveEmpty
+}
 func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetParallelism() *int64 {
 	if t == nil {
 		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
@@ -21180,24 +20780,18 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigura
 	}
 	return t.Refresh
 }
-func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform) GetApproveEmpty() *bool {
-	if t == nil {
-		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
-	}
-	return t.ApproveEmpty
-}
 
 type GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
-	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
-	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
 	AfterStage StepStage "json:\"afterStage\" graphql:\"afterStage\""
+	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
+	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
 }
 
-func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks) GetCmd() string {
+func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage {
 	if t == nil {
 		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks{}
 	}
-	return t.Cmd
+	return &t.AfterStage
 }
 func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks) GetArgs() []*string {
 	if t == nil {
@@ -21205,20 +20799,26 @@ func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuratio
 	}
 	return t.Args
 }
-func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage {
+func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks) GetCmd() string {
 	if t == nil {
 		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks{}
 	}
-	return &t.AfterStage
+	return t.Cmd
 }
 
 type GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration struct {
+	Hooks   []*GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 	Image   *string                                                                           "json:\"image,omitempty\" graphql:\"image\""
 	Tag     *string                                                                           "json:\"tag,omitempty\" graphql:\"tag\""
 	Version *string                                                                           "json:\"version,omitempty\" graphql:\"version\""
-	Hooks   []*GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
+func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration) GetHooks() []*GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks {
+	if t == nil {
+		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration{}
+	}
+	return t.Hooks
+}
 func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration) GetImage() *string {
 	if t == nil {
 		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration{}
@@ -21237,43 +20837,37 @@ func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuratio
 	}
 	return t.Version
 }
-func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration) GetHooks() []*GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks {
-	if t == nil {
-		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration{}
-	}
-	return t.Hooks
-}
 
 type GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps struct {
-	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
 	Args            []*string "json:\"args,omitempty\" graphql:\"args\""
-	Stage           StepStage "json:\"stage\" graphql:\"stage\""
+	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
 	RequireApproval *bool     "json:\"requireApproval,omitempty\" graphql:\"requireApproval\""
+	Stage           StepStage "json:\"stage\" graphql:\"stage\""
 }
 
-func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps) GetCmd() string {
-	if t == nil {
-		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps{}
-	}
-	return t.Cmd
-}
 func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps) GetArgs() []*string {
 	if t == nil {
 		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps{}
 	}
 	return t.Args
 }
-func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps) GetStage() *StepStage {
+func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps) GetCmd() string {
 	if t == nil {
 		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps{}
 	}
-	return &t.Stage
+	return t.Cmd
 }
 func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps) GetRequireApproval() *bool {
 	if t == nil {
 		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps{}
 	}
 	return t.RequireApproval
+}
+func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps) GetStage() *StepStage {
+	if t == nil {
+		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps{}
+	}
+	return &t.Stage
 }
 
 type GetStackDefinitionTiny_StackDefinition struct {
@@ -21295,16 +20889,16 @@ func (t *GetStackDefinitionTiny_StackDefinition) GetName() string {
 }
 
 type ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks struct {
-	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
-	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
 	AfterStage StepStage "json:\"afterStage\" graphql:\"afterStage\""
+	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
+	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
 }
 
-func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks) GetCmd() string {
+func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage {
 	if t == nil {
 		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks{}
 	}
-	return t.Cmd
+	return &t.AfterStage
 }
 func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks) GetArgs() []*string {
 	if t == nil {
@@ -21312,20 +20906,26 @@ func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragmen
 	}
 	return t.Args
 }
-func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage {
+func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks) GetCmd() string {
 	if t == nil {
 		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks{}
 	}
-	return &t.AfterStage
+	return t.Cmd
 }
 
 type ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration struct {
+	Hooks   []*ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 	Image   *string                                                                                         "json:\"image,omitempty\" graphql:\"image\""
 	Tag     *string                                                                                         "json:\"tag,omitempty\" graphql:\"tag\""
 	Version *string                                                                                         "json:\"version,omitempty\" graphql:\"version\""
-	Hooks   []*ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
+func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration) GetHooks() []*ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks {
+	if t == nil {
+		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration{}
+	}
+	return t.Hooks
+}
 func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration) GetImage() *string {
 	if t == nil {
 		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration{}
@@ -21344,43 +20944,37 @@ func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragmen
 	}
 	return t.Version
 }
-func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration) GetHooks() []*ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks {
-	if t == nil {
-		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration{}
-	}
-	return t.Hooks
-}
 
 type ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps struct {
-	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
 	Args            []*string "json:\"args,omitempty\" graphql:\"args\""
-	Stage           StepStage "json:\"stage\" graphql:\"stage\""
+	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
 	RequireApproval *bool     "json:\"requireApproval,omitempty\" graphql:\"requireApproval\""
+	Stage           StepStage "json:\"stage\" graphql:\"stage\""
 }
 
-func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps) GetCmd() string {
-	if t == nil {
-		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps{}
-	}
-	return t.Cmd
-}
 func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps) GetArgs() []*string {
 	if t == nil {
 		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps{}
 	}
 	return t.Args
 }
-func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps) GetStage() *StepStage {
+func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps) GetCmd() string {
 	if t == nil {
 		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps{}
 	}
-	return &t.Stage
+	return t.Cmd
 }
 func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps) GetRequireApproval() *bool {
 	if t == nil {
 		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps{}
 	}
 	return t.RequireApproval
+}
+func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps) GetStage() *StepStage {
+	if t == nil {
+		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps{}
+	}
+	return &t.Stage
 }
 
 type ListStackDefinitions_StackDefinitions_Edges struct {
@@ -21395,34 +20989,34 @@ func (t *ListStackDefinitions_StackDefinitions_Edges) GetNode() *StackDefinition
 }
 
 type ListStackDefinitions_StackDefinitions struct {
-	PageInfo PageInfoFragment                               "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ListStackDefinitions_StackDefinitions_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+	PageInfo PageInfoFragment                               "json:\"pageInfo\" graphql:\"pageInfo\""
 }
 
-func (t *ListStackDefinitions_StackDefinitions) GetPageInfo() *PageInfoFragment {
-	if t == nil {
-		t = &ListStackDefinitions_StackDefinitions{}
-	}
-	return &t.PageInfo
-}
 func (t *ListStackDefinitions_StackDefinitions) GetEdges() []*ListStackDefinitions_StackDefinitions_Edges {
 	if t == nil {
 		t = &ListStackDefinitions_StackDefinitions{}
 	}
 	return t.Edges
 }
-
-type CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
-	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
-	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
-	AfterStage StepStage "json:\"afterStage\" graphql:\"afterStage\""
+func (t *ListStackDefinitions_StackDefinitions) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListStackDefinitions_StackDefinitions{}
+	}
+	return &t.PageInfo
 }
 
-func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetCmd() string {
+type CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
+	AfterStage StepStage "json:\"afterStage\" graphql:\"afterStage\""
+	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
+	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
+}
+
+func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage {
 	if t == nil {
 		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks{}
 	}
-	return t.Cmd
+	return &t.AfterStage
 }
 func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetArgs() []*string {
 	if t == nil {
@@ -21430,20 +21024,26 @@ func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Con
 	}
 	return t.Args
 }
-func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage {
+func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetCmd() string {
 	if t == nil {
 		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks{}
 	}
-	return &t.AfterStage
+	return t.Cmd
 }
 
 type CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration struct {
+	Hooks   []*CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 	Image   *string                                                                                    "json:\"image,omitempty\" graphql:\"image\""
 	Tag     *string                                                                                    "json:\"tag,omitempty\" graphql:\"tag\""
 	Version *string                                                                                    "json:\"version,omitempty\" graphql:\"version\""
-	Hooks   []*CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
+func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration) GetHooks() []*CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks {
+	if t == nil {
+		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration{}
+	}
+	return t.Hooks
+}
 func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration) GetImage() *string {
 	if t == nil {
 		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration{}
@@ -21462,37 +21062,25 @@ func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Con
 	}
 	return t.Version
 }
-func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration) GetHooks() []*CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks {
-	if t == nil {
-		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration{}
-	}
-	return t.Hooks
-}
 
 type CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Steps struct {
-	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
 	Args            []*string "json:\"args,omitempty\" graphql:\"args\""
-	Stage           StepStage "json:\"stage\" graphql:\"stage\""
+	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
 	RequireApproval *bool     "json:\"requireApproval,omitempty\" graphql:\"requireApproval\""
+	Stage           StepStage "json:\"stage\" graphql:\"stage\""
 }
 
-func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Steps) GetCmd() string {
-	if t == nil {
-		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Steps{}
-	}
-	return t.Cmd
-}
 func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Steps) GetArgs() []*string {
 	if t == nil {
 		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Steps{}
 	}
 	return t.Args
 }
-func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Steps) GetStage() *StepStage {
+func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Steps) GetCmd() string {
 	if t == nil {
 		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Steps{}
 	}
-	return &t.Stage
+	return t.Cmd
 }
 func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Steps) GetRequireApproval() *bool {
 	if t == nil {
@@ -21500,18 +21088,24 @@ func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Ste
 	}
 	return t.RequireApproval
 }
-
-type UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
-	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
-	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
-	AfterStage StepStage "json:\"afterStage\" graphql:\"afterStage\""
+func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Steps) GetStage() *StepStage {
+	if t == nil {
+		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Steps{}
+	}
+	return &t.Stage
 }
 
-func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetCmd() string {
+type UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
+	AfterStage StepStage "json:\"afterStage\" graphql:\"afterStage\""
+	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
+	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
+}
+
+func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage {
 	if t == nil {
 		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks{}
 	}
-	return t.Cmd
+	return &t.AfterStage
 }
 func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetArgs() []*string {
 	if t == nil {
@@ -21519,20 +21113,26 @@ func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Con
 	}
 	return t.Args
 }
-func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage {
+func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetCmd() string {
 	if t == nil {
 		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks{}
 	}
-	return &t.AfterStage
+	return t.Cmd
 }
 
 type UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration struct {
+	Hooks   []*UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 	Image   *string                                                                                    "json:\"image,omitempty\" graphql:\"image\""
 	Tag     *string                                                                                    "json:\"tag,omitempty\" graphql:\"tag\""
 	Version *string                                                                                    "json:\"version,omitempty\" graphql:\"version\""
-	Hooks   []*UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
+func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration) GetHooks() []*UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks {
+	if t == nil {
+		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration{}
+	}
+	return t.Hooks
+}
 func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration) GetImage() *string {
 	if t == nil {
 		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration{}
@@ -21551,37 +21151,25 @@ func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Con
 	}
 	return t.Version
 }
-func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration) GetHooks() []*UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks {
-	if t == nil {
-		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration{}
-	}
-	return t.Hooks
-}
 
 type UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Steps struct {
-	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
 	Args            []*string "json:\"args,omitempty\" graphql:\"args\""
-	Stage           StepStage "json:\"stage\" graphql:\"stage\""
+	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
 	RequireApproval *bool     "json:\"requireApproval,omitempty\" graphql:\"requireApproval\""
+	Stage           StepStage "json:\"stage\" graphql:\"stage\""
 }
 
-func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Steps) GetCmd() string {
-	if t == nil {
-		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Steps{}
-	}
-	return t.Cmd
-}
 func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Steps) GetArgs() []*string {
 	if t == nil {
 		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Steps{}
 	}
 	return t.Args
 }
-func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Steps) GetStage() *StepStage {
+func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Steps) GetCmd() string {
 	if t == nil {
 		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Steps{}
 	}
-	return &t.Stage
+	return t.Cmd
 }
 func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Steps) GetRequireApproval() *bool {
 	if t == nil {
@@ -21589,18 +21177,24 @@ func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Ste
 	}
 	return t.RequireApproval
 }
-
-type DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
-	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
-	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
-	AfterStage StepStage "json:\"afterStage\" graphql:\"afterStage\""
+func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Steps) GetStage() *StepStage {
+	if t == nil {
+		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Steps{}
+	}
+	return &t.Stage
 }
 
-func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetCmd() string {
+type DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
+	AfterStage StepStage "json:\"afterStage\" graphql:\"afterStage\""
+	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
+	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
+}
+
+func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage {
 	if t == nil {
 		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks{}
 	}
-	return t.Cmd
+	return &t.AfterStage
 }
 func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetArgs() []*string {
 	if t == nil {
@@ -21608,20 +21202,26 @@ func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Con
 	}
 	return t.Args
 }
-func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage {
+func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks) GetCmd() string {
 	if t == nil {
 		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks{}
 	}
-	return &t.AfterStage
+	return t.Cmd
 }
 
 type DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration struct {
+	Hooks   []*DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 	Image   *string                                                                                    "json:\"image,omitempty\" graphql:\"image\""
 	Tag     *string                                                                                    "json:\"tag,omitempty\" graphql:\"tag\""
 	Version *string                                                                                    "json:\"version,omitempty\" graphql:\"version\""
-	Hooks   []*DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
+func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration) GetHooks() []*DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks {
+	if t == nil {
+		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration{}
+	}
+	return t.Hooks
+}
 func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration) GetImage() *string {
 	if t == nil {
 		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration{}
@@ -21640,43 +21240,37 @@ func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Con
 	}
 	return t.Version
 }
-func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration) GetHooks() []*DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks {
-	if t == nil {
-		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration{}
-	}
-	return t.Hooks
-}
 
 type DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps struct {
-	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
 	Args            []*string "json:\"args,omitempty\" graphql:\"args\""
-	Stage           StepStage "json:\"stage\" graphql:\"stage\""
+	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
 	RequireApproval *bool     "json:\"requireApproval,omitempty\" graphql:\"requireApproval\""
+	Stage           StepStage "json:\"stage\" graphql:\"stage\""
 }
 
-func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps) GetCmd() string {
-	if t == nil {
-		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps{}
-	}
-	return t.Cmd
-}
 func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps) GetArgs() []*string {
 	if t == nil {
 		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps{}
 	}
 	return t.Args
 }
-func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps) GetStage() *StepStage {
+func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps) GetCmd() string {
 	if t == nil {
 		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps{}
 	}
-	return &t.Stage
+	return t.Cmd
 }
 func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps) GetRequireApproval() *bool {
 	if t == nil {
 		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps{}
 	}
 	return t.RequireApproval
+}
+func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps) GetStage() *StepStage {
+	if t == nil {
+		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps{}
+	}
+	return &t.Stage
 }
 
 type ListAccessTokens_AccessTokens_Edges struct {
@@ -21738,24 +21332,18 @@ func (t *TokenExchange_TokenExchange_BoundRoles) GetName() string {
 }
 
 type TokenExchange_TokenExchange struct {
-	Name       string                                    "json:\"name\" graphql:\"name\""
-	ID         string                                    "json:\"id\" graphql:\"id\""
+	BoundRoles []*TokenExchange_TokenExchange_BoundRoles "json:\"boundRoles,omitempty\" graphql:\"boundRoles\""
 	Email      string                                    "json:\"email\" graphql:\"email\""
 	Groups     []*TokenExchange_TokenExchange_Groups     "json:\"groups,omitempty\" graphql:\"groups\""
-	BoundRoles []*TokenExchange_TokenExchange_BoundRoles "json:\"boundRoles,omitempty\" graphql:\"boundRoles\""
+	ID         string                                    "json:\"id\" graphql:\"id\""
+	Name       string                                    "json:\"name\" graphql:\"name\""
 }
 
-func (t *TokenExchange_TokenExchange) GetName() string {
+func (t *TokenExchange_TokenExchange) GetBoundRoles() []*TokenExchange_TokenExchange_BoundRoles {
 	if t == nil {
 		t = &TokenExchange_TokenExchange{}
 	}
-	return t.Name
-}
-func (t *TokenExchange_TokenExchange) GetID() string {
-	if t == nil {
-		t = &TokenExchange_TokenExchange{}
-	}
-	return t.ID
+	return t.BoundRoles
 }
 func (t *TokenExchange_TokenExchange) GetEmail() string {
 	if t == nil {
@@ -21769,11 +21357,17 @@ func (t *TokenExchange_TokenExchange) GetGroups() []*TokenExchange_TokenExchange
 	}
 	return t.Groups
 }
-func (t *TokenExchange_TokenExchange) GetBoundRoles() []*TokenExchange_TokenExchange_BoundRoles {
+func (t *TokenExchange_TokenExchange) GetID() string {
 	if t == nil {
 		t = &TokenExchange_TokenExchange{}
 	}
-	return t.BoundRoles
+	return t.ID
+}
+func (t *TokenExchange_TokenExchange) GetName() string {
+	if t == nil {
+		t = &TokenExchange_TokenExchange{}
+	}
+	return t.Name
 }
 
 type SaveUpgradeInsights_SaveUpgradeInsights struct {
@@ -21820,22 +21414,22 @@ func (t *GetUserTiny_User) GetName() string {
 }
 
 type Me_Me struct {
-	ID    string "json:\"id\" graphql:\"id\""
 	Email string "json:\"email\" graphql:\"email\""
+	ID    string "json:\"id\" graphql:\"id\""
 	Name  string "json:\"name\" graphql:\"name\""
 }
 
-func (t *Me_Me) GetID() string {
-	if t == nil {
-		t = &Me_Me{}
-	}
-	return t.ID
-}
 func (t *Me_Me) GetEmail() string {
 	if t == nil {
 		t = &Me_Me{}
 	}
 	return t.Email
+}
+func (t *Me_Me) GetID() string {
+	if t == nil {
+		t = &Me_Me{}
+	}
+	return t.ID
 }
 func (t *Me_Me) GetName() string {
 	if t == nil {
