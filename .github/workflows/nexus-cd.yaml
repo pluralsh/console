@@ -1,0 +1,205 @@
+name: CD / Nexus
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to deploy'
+        required: true
+  pull_request:
+    branches:
+    - "master"
+    paths:
+    - ".github/workflows/nexus-cd.yaml"
+    - "go/nexus/**"
+  push:
+    branches:
+    - "master"
+    paths:
+    - ".github/workflows/nexus-cd.yaml"
+    - "go/nexus/**"
+    tags:
+    - 'v*.*.*'
+
+permissions:
+  contents: read
+
+env:
+  GOPATH: /home/runner/go
+  GOBIN: /home/runner/go/bin
+  GOPROXY: "https://proxy.golang.org"
+  REGISTRY_IMAGE: ghcr.io/pluralsh/nexus
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
+
+jobs:
+  test:
+    name: Unit test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/nexus
+    timeout-minutes: 5
+    steps:
+    - uses: actions/checkout@v6
+    - uses: actions/setup-go@v6
+      with:
+        go-version-file: go/nexus/go.mod
+        cache: true
+    - run: go mod download
+    - run: PATH=$PATH:$GOPATH/bin make test
+
+  build-nexus:
+    name: Build nexus image
+    needs: [test]
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      packages: 'write'
+    strategy:
+      fail-fast: false
+      matrix:
+        platforms:
+        - platform: linux/amd64
+          runner: ubuntu-24.04
+        - platform: linux/arm64
+          runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.platforms.runner }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/nexus
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+    - name: Prepare
+      run: |
+        platform=${{ matrix.platforms.platform }}
+        echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY_IMAGE }}
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - uses: google-github-actions/auth@v1
+      with:
+        workload_identity_provider: 'projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github'
+        service_account: 'terraform@pluralsh.iam.gserviceaccount.com'
+        token_format: 'access_token'
+        create_credentials_file: true
+    - uses: google-github-actions/setup-gcloud@v1.0.1
+    - name: Login to GCR
+      run: gcloud auth configure-docker -q
+    - name: Login to Docker
+      uses: docker/login-action@v3
+      with:
+        username: mjgpluralsh
+        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Build and push by digest
+      id: build
+      uses: docker/build-push-action@v6
+      with:
+        context: "./go/nexus"
+        file: "./go/nexus/Dockerfile"
+        tags: ${{ env.REGISTRY_IMAGE }}
+        labels: ${{ steps.meta.outputs.labels }}
+        platforms: ${{ matrix.platforms.platform }}
+        outputs: type=image,push-by-digest=true,name-canonical=true,push=true
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          GIT_COMMIT=${{ github.sha }}
+          VERSION=${{ steps.meta.outputs.version }}
+    - name: Export digest
+      run: |
+        mkdir -p ${{ runner.temp }}/digests
+        digest="${{ steps.build.outputs.digest }}"
+        touch "${{ runner.temp }}/digests/${digest#sha256:}"
+    - name: Upload digest
+      uses: actions/upload-artifact@v6
+      with:
+        name: digests-nexus-${{ env.PLATFORM_PAIR }}-${{ github.run_id }}
+        path: ${{ runner.temp }}/digests/*
+        if-no-files-found: error
+        retention-days: 1
+  
+  publish-nexus:
+    name: Publish nexus image
+    needs: [build-nexus]
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+      packages: 'write'
+    strategy:
+      fail-fast: false
+      matrix:
+        images:
+        - ghcr.io/pluralsh/nexus
+        - gcr.io/pluralsh/nexus
+        - docker.io/pluralsh/nexus
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download digests
+      uses: actions/download-artifact@v7
+      with:
+        path: ${{ runner.temp }}/digests
+        pattern: digests-nexus-*
+        merge-multiple: true
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - uses: google-github-actions/auth@v1
+      with:
+        workload_identity_provider: 'projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github'
+        service_account: 'terraform@pluralsh.iam.gserviceaccount.com'
+        token_format: 'access_token'
+        create_credentials_file: true
+    - uses: google-github-actions/setup-gcloud@v1.0.1
+    - name: Login to GCR
+      run: gcloud auth configure-docker -q
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: mjgpluralsh
+        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Resolve tag version
+      id: tag_version
+      if: startsWith(github.ref, 'refs/tags/')
+      run: |
+        echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ matrix.images }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha
+          type=semver,pattern={{version}},value=${{ steps.tag_version.outputs.version }},enable=${{ steps.tag_version.outputs.version != '' }}
+          type=raw,value=${{ github.event.inputs.version }},enable=${{ github.event.inputs.version != '' }}
+    - name: Create manifest list and push
+      working-directory: ${{ runner.temp }}/digests
+      run: |
+        docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+          $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+    - name: Inspect image
+      run: |
+        docker buildx imagetools inspect ${{ matrix.images }}:${{ steps.meta.outputs.version }}
