@@ -28,6 +28,8 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { getAIBreadcrumbs } from '../../AI.tsx'
 import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
+import { isNonNullable } from 'utils/isNonNullable.ts'
+import { PullRequestCallout } from './PullRequestCallout.tsx'
 
 const getAgentRunBreadcrumbs = (runId: string, prompt: string) => [
   ...getAIBreadcrumbs(AI_AGENT_RUNS_REL_PATH),
@@ -118,6 +120,12 @@ export function AIAgentRun() {
             }
           />
         )}
+        {run?.pullRequests?.filter(isNonNullable)?.map((pr) => (
+          <PullRequestCallout
+            key={pr.id}
+            pullRequest={pr}
+          />
+        ))}
       </Flex>
       <AgentRunSidecar
         run={run}

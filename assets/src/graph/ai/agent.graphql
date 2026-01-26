@@ -13,13 +13,7 @@ fragment AgentRunTiny on AgentRun {
   repository
   branch
   pullRequests {
-    id
-    creator
-    insertedAt
-    status
-    title
-    updatedAt
-    url
+    ...PullRequestBasic
   }
 }
 
