@@ -12786,6 +12786,7 @@ export type ToolDelta = {
   arguments?: Maybe<Scalars['Map']['output']>;
   id?: Maybe<Scalars['ID']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  pending?: Maybe<Scalars['Boolean']['output']>;
 };
 
 /** How to enforce uniqueness for a field */

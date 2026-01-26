@@ -1068,7 +1068,7 @@ type RootMutationType {
 
   createAgentRun(runtimeId: ID!, attributes: AgentRunAttributes!): AgentRun
 
-  shareAgentRun(id: ID!): AgentRun
+  shareAgentRun(id: ID!, shared: Boolean!): AgentRun
 
   agentPullRequest(runId: ID!, attributes: AgentPullRequestAttributes!): PullRequest
 
@@ -10527,6 +10527,7 @@ type ToolDelta {
   id: ID
   name: String
   arguments: Map
+  pending: Boolean
 }
 
 type AiDelta {

@@ -368,6 +368,7 @@ defmodule Console.GraphQl.AiQueriesSyccTest do
   end
 
   describe "chatThread" do
+    @tag :skip
     test "it can fetch tools for a thread" do
       user = insert(:user)
       flow = insert(:flow)

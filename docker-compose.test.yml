@@ -77,6 +77,32 @@ services:
       - "--verbose"
     depends_on:
       - localstack
+  console:
+    build:
+      context: .
+      dockerfile: dockerfiles/Dockerfile.test
+    working_dir: /app
+    volumes:
+      - .:/app
+      - mix_deps:/app/deps
+      - mix_build:/app/_build
+      - ./data:/app/data
+      - ./config/secrets:/app/config/secrets
+    environment:
+      MIX_ENV: test
+      DB_HOST: db
+      ELASTICSEARCH_HOST: http://es:9200
+      OPENSEARCH_HOST: http://localstack:4566
+    depends_on:
+      - db
+      - es
+      - opensearch
+      - localstack
+      - sigv4-proxy
+    entrypoint:
+      - "/bin/sh"
+      - "-c"
+    command: ${CONSOLE_CMD:-"MIX_ENV=test mix deps.get && mix compile"}
 
 volumes:
   database_data:
@@ -86,4 +112,8 @@ volumes:
   opensearch_data:
     driver: local
   localstack_data:
+    driver: local
+  mix_deps:
+    driver: local
+  mix_build:
     driver: local

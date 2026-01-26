@@ -19,6 +19,7 @@ defmodule Console.Deployments.Agents do
     AgentMessage,
     AgentRunRepository
   }
+  require EEx
 
   @type error :: Console.error
   @type agent_run_resp :: {:ok, AgentRun.t} | error
@@ -114,12 +115,12 @@ defmodule Console.Deployments.Agents do
   end
 
   @doc """
-  Shares an agent run, can only be performed by the user who initiated it
+  Shares or unshares an agent run, can only be performed by the user who initiated it
   """
-  @spec share_agent_run(binary, User.t) :: agent_run_resp
-  def share_agent_run(run_id, %User{} = user) do
+  @spec share_agent_run(binary, boolean, User.t) :: agent_run_resp
+  def share_agent_run(run_id, shared, %User{} = user) when is_boolean(shared) do
     get_agent_run!(run_id)
-    |> AgentRun.changeset(%{shared: true})
+    |> AgentRun.changeset(%{shared: shared})
     |> allow(user, :share)
     |> when_ok(:update)
   end
@@ -206,19 +207,20 @@ defmodule Console.Deployments.Agents do
   """
   @spec agent_pull_request(map, binary, User.t) :: Git.pr_resp
   def agent_pull_request(%{title: t, body: b, base: ba, head: he} = attrs, run_id, %User{} = user) do
-    run = get_agent_run!(run_id)
+    run = get_agent_run!(run_id) |> Repo.preload([:runtime])
     shas = Map.new(attrs[:commit_shas] || [], & {&1[:branch], &1[:sha]})
     with {:ok, run} <- allow(run, user, :creds),
          %ScmConnection{} = conn <- Tool.scm_connection(),
          {:ok, conn} <- backfill_token(conn),
          conn = %{conn | commit_shas: shas},
-         {:ok, pr_info} <- Dispatcher.pr(conn, t, b, run.repository, ba, he) do
+         {:ok, pr_info} <- Dispatcher.pr(conn, t, b, repository_url(run), ba, he) do
       %PullRequest{}
       |> PullRequest.changeset(
         Map.merge(pr_info, Map.take(run, ~w(flow_id session_id)a))
         |> Map.put(:agent_run_id, run.id)
       )
       |> Repo.insert()
+      |> notify(:create)
     else
       nil -> {:error, "no scm connection found"}
       err -> err
@@ -319,8 +321,25 @@ defmodule Console.Deployments.Agents do
     end
   end
 
+  @doc """
+  Creates a review for a given pull request explaining the ai's thought process for a given agent run pr.
+  """
+  @spec pr_review(PullRequest.t) :: {:ok, binary} | Console.error
+  def pr_review(%PullRequest{agent_run_id: run_id} = pr) when is_binary(run_id) do
+    run = get_agent_run!(run_id) |> Repo.preload([:runtime])
+    with %ScmConnection{} = conn <- Tool.scm_connection(),
+         {:ok, conn} <- backfill_token(conn) do
+      Dispatcher.review(conn, pr, pr_blob(pr: pr, run: run))
+    end
+  end
+  def pr_review(_), do: {:error, "no agent run id found"}
+
+  EEx.function_from_file(:defp, :pr_blob, Path.join([:code.priv_dir(:console), "pr", "agent_review.md.eex"]), [:assigns])
+
   defp notify({:ok, %AgentRun{} = run}, :create),
     do: handle_notify(PubSub.AgentRunCreated, run)
+  defp notify({:ok, %PullRequest{} = pr}, :create),
+    do: handle_notify(PubSub.PullRequestCreated, pr)
   defp notify({:ok, %AgentRun{} = run}, :update),
     do: handle_notify(PubSub.AgentRunUpdated, run)
   defp notify({:ok, %AgentMessage{} = msg}, :create),

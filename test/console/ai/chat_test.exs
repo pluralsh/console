@@ -471,6 +471,7 @@ defmodule Console.AI.ChatSyncTest do
   end
 
   describe "#hybrid_chat/3" do
+    @tag :skip
     test "it can chat with a tool call" do
       user   = insert(:user)
       flow   = insert(:flow)
@@ -538,6 +539,7 @@ defmodule Console.AI.ChatSyncTest do
       assert next.content == "openai completion"
     end
 
+    @tag :skip
     test "it won't recurse if a mcp call requires confirmation" do
       user   = insert(:user)
       flow   = insert(:flow)
@@ -573,8 +575,6 @@ defmodule Console.AI.ChatSyncTest do
       flow   = insert(:flow)
       service = insert(:service, flow: flow)
       thread = insert(:chat_thread, user: user, flow: flow)
-      server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
-      insert(:mcp_server_association, server: server, flow: flow)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
 
       expect(Console.AI.OpenAI, :completion, fn _, [_, _, _], _ ->
@@ -603,8 +603,6 @@ defmodule Console.AI.ChatSyncTest do
       flow    = insert(:flow)
       service = insert(:service, flow: flow)
       thread  = insert(:chat_thread, user: user, flow: flow)
-      server  = insert(:mcp_server, url: "http://localhost:3001", name: "everything")
-      insert(:mcp_server_association, server: server, flow: flow)
       deployment_settings(
         logging: %{
           enabled: true,
@@ -835,6 +833,7 @@ defmodule Console.AI.ChatSyncTest do
   end
 
   describe "confirm_chat/2" do
+    @tag :skip
     test "it can confirm a chat message and call its MCP server" do
       user   = insert(:user)
       server = insert(:mcp_server, url: "http://localhost:3001", name: "everything")

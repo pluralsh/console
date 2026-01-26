@@ -403,6 +403,7 @@ defmodule Console.GraphQl.Deployments.Agent do
         resource: :agent,
         action: :write
       arg :id, non_null(:id)
+      arg :shared, non_null(:boolean)
 
       resolve &Deployments.share_agent_run/2
     end

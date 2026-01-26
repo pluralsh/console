@@ -96,8 +96,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
   def update_agent_run_todos(%{id: id, todos: todos}, %{context: %{current_user: user}}),
     do: Agents.update_todos(todos, id, user)
 
-  def share_agent_run(%{id: id}, %{context: %{current_user: user}}),
-    do: Agents.share_agent_run(id, user)
+  def share_agent_run(%{id: id, shared: shared}, %{context: %{current_user: user}}),
+    do: Agents.share_agent_run(id, shared, user)
 
   def create_agent_message(%{run_id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Agents.create_agent_message(attrs, id, cluster)

@@ -114,6 +114,7 @@ defmodule Console.AI.Chat.Engine do
     by_name = Map.new(impls, & {&1.name(), &1})
     stream = Stream.stream(:user)
     Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args}, acc ->
+      publish_tool_progress(stream, id, name)
       with {:ok, impl}    <- Map.fetch(by_name, name),
            {:ok, parsed}  <- Tool.validate(impl, args),
            {:ok, content} <- impl.implement(parsed) do
@@ -131,6 +132,7 @@ defmodule Console.AI.Chat.Engine do
         :error ->
           {:halt, {:error, "failed to call tool: #{name}, tool not found", Enum.reverse(acc)}}
         {:error, %Ecto.Changeset{} = cs} ->
+          Stream.offset(1)
           {:cont, [tool_msg("failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", id, nil, name, args) | acc]}
         err ->
           {:halt, {:error, "failed to call tool: #{name}, result: #{inspect(err)}", Enum.reverse(acc)}}
@@ -240,8 +242,13 @@ defmodule Console.AI.Chat.Engine do
     |> trim_messages(msgs, Provider.context_window())
   end
 
+  defp publish_tool_progress(stream, id, name) do
+    Stream.tool(id, name, true)
+    publish_to_stream(stream, "Tool is running...")
+  end
+
   defp publish_tool(stream, content, id, name) do
-    Stream.tool(id, name)
+    Stream.tool(id, name, false)
     publish_to_stream(stream, content)
     Stream.offset(1)
   end
