@@ -1,11 +1,11 @@
 import { type ComponentPropsWithRef } from 'react'
-import { useTheme } from 'styled-components'
 import styled from 'styled-components'
 
-export type LoopingLogoOutlineAlternativeProps = ComponentPropsWithRef<'div'> & {
-  isDark?: boolean
-  scale?: number
-}
+export type LoopingLogoOutlineAlternativeProps =
+  ComponentPropsWithRef<'div'> & {
+    isDark?: boolean
+    scale?: number
+  }
 
 const LogoContainer = styled.div<{ $scale?: number }>`
   position: relative;
@@ -21,22 +21,22 @@ const StyledSVG = styled.svg<{ $scale?: number }>`
 
 // Static base paths - unfilled state (always visible)
 const BasePath = styled.path`
-  fill: #2A2E37;
+  fill: #2a2e37;
   stroke: none;
 `
 
 const BaseCircle = styled.circle`
-  fill: #2A2E37;
+  fill: #2a2e37;
   stroke: none;
 `
 
 // Animated fill paths - fill from bottom to top
 const FillPath = styled.path<{ $totalDuration: number }>`
-  fill: #F1F3F3;
+  fill: #f1f3f3;
   stroke: none;
   clip-path: inset(100% 0 0 0);
   animation: fillUp ${({ $totalDuration }) => $totalDuration}s linear infinite;
-  
+
   @keyframes fillUp {
     0% {
       clip-path: inset(100% 0 0 0);
@@ -57,7 +57,7 @@ const FillPath = styled.path<{ $totalDuration: number }>`
 `
 
 const FillCircle = styled.circle<{ $totalDuration: number }>`
-  fill: #F1F3F3;
+  fill: #f1f3f3;
   stroke: none;
   clip-path: inset(100% 0 0 0);
   animation: fillUp ${({ $totalDuration }) => $totalDuration}s linear infinite;
@@ -72,12 +72,13 @@ const LogoWrapper = styled.div<{ $scale?: number }>`
 `
 
 const LoadingText = styled.div<{ $scale?: number }>`
-  font-family: "Monument Semi-Mono", "Monument", "Inter", "Helvetica", "Arial", sans-serif;
+  font-family: 'Monument Semi-Mono', 'Monument', 'Inter', 'Helvetica', 'Arial',
+    sans-serif;
   font-size: ${({ $scale = 1 }) => 24 * $scale}px;
   font-weight: 400;
   white-space: nowrap;
   text-align: center;
-  
+
   @keyframes textGradient {
     0% {
       background-position: 200% 50%;
@@ -86,15 +87,15 @@ const LoadingText = styled.div<{ $scale?: number }>`
       background-position: -200% 50%;
     }
   }
-  
+
   background: linear-gradient(
     90deg,
-    #F1F3F3 0%,
-    #F1F3F3 25%,
+    #f1f3f3 0%,
+    #f1f3f3 25%,
     #505050 35%,
     #505050 65%,
-    #F1F3F3 75%,
-    #F1F3F3 100%
+    #f1f3f3 75%,
+    #f1f3f3 100%
   );
   background-size: 200% 100%;
   -webkit-background-clip: text;
@@ -113,7 +114,11 @@ function LoopingLogoOutlineAlternative({
   const totalDuration = 15
 
   return (
-    <LogoWrapper $scale={scale} {...props} ref={ref}>
+    <LogoWrapper
+      $scale={scale}
+      {...props}
+      ref={ref}
+    >
       <LogoContainer $scale={scale}>
         <StyledSVG
           $scale={scale}
@@ -127,7 +132,7 @@ function LoopingLogoOutlineAlternative({
             cy="97.4965"
             r="36.6695"
           />
-          
+
           {/* Circle - Fill (animated) */}
           <FillCircle
             $totalDuration={totalDuration}
@@ -135,23 +140,19 @@ function LoopingLogoOutlineAlternative({
             cy="97.4965"
             r="36.6695"
           />
-          
+
           {/* Right Path - Base (unfilled, static) */}
-          <BasePath
-            d="M61.1074 194.993V164.92H158.163C161.572 164.92 164.34 162.123 164.34 158.678V0H195V182.561C195 195 181.89 195 181.89 195H61.1074V194.993Z"
-          />
-          
+          <BasePath d="M61.1074 194.993V164.92H158.163C161.572 164.92 164.34 162.123 164.34 158.678V0H195V182.561C195 195 181.89 195 181.89 195H61.1074V194.993Z" />
+
           {/* Right Path - Fill (animated) */}
           <FillPath
             $totalDuration={totalDuration}
             d="M61.1074 194.993V164.92H158.163C161.572 164.92 164.34 162.123 164.34 158.678V0H195V182.561C195 195 181.89 195 181.89 195H61.1074V194.993Z"
           />
-          
+
           {/* Left Path - Base (unfilled, static) */}
-          <BasePath
-            d="M133.886 0V30.0731H36.8367C33.4278 30.0731 30.6605 32.8701 30.6605 36.3156V194.993H0V12.4393C0 -1.2494e-06 13.1106 0 13.1106 0H133.886V0Z"
-          />
-          
+          <BasePath d="M133.886 0V30.0731H36.8367C33.4278 30.0731 30.6605 32.8701 30.6605 36.3156V194.993H0V12.4393C0 -1.2494e-06 13.1106 0 13.1106 0H133.886V0Z" />
+
           {/* Left Path - Fill (animated) */}
           <FillPath
             $totalDuration={totalDuration}
