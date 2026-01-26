@@ -6,18 +6,9 @@ on:
       tag:
         description: 'Tag to deploy'
         required: true
-  pull_request:
-    branches:
-    - "master"
-    paths:
-    - ".github/workflows/nexus-cd.yaml"
-    - "go/nexus/**"
   push:
     branches:
     - "master"
-    paths:
-    - ".github/workflows/nexus-cd.yaml"
-    - "go/nexus/**"
     tags:
     - 'v*.*.*'
 
