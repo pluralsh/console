@@ -2,6 +2,7 @@ icon: https://github.com/traefik/traefik/raw/master/docs/content/assets/img/trae
 git_url: https://github.com/traefik/traefik
 release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
+eolApiSlug: traefik
 versions:
 - version: 3.6.7
   kube: ['1.35', '1.34', '1.33', '1.32']
@@ -80,6 +81,7 @@ versions:
         based on span counts may need adjustment.]
   chart_version: 37.0.0
   images: ['docker.io/traefik:v3.5.0']
+  eolAt: '2025-11-07'
 - version: 3.4.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
@@ -106,6 +108,7 @@ versions:
         are deprecated in v3.4.0 (plan to remove/avoid using them going forward).']
   chart_version: 35.4.0
   images: ['docker.io/traefik:v3.4.0']
+  eolAt: '2025-07-23'
 - version: 3.3.6
   kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
@@ -113,11 +116,13 @@ versions:
   summary: null
   chart_version: 35.2.0
   images: ['docker.io/traefik:v3.3.6']
+  eolAt: '2025-05-05'
 - version: 3.3.0
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
   summary: null
+  eolAt: '2025-05-05'
 - version: 3.2.0
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
@@ -125,11 +130,13 @@ versions:
   summary: null
   chart_version: 33.0.0
   images: ['docker.io/traefik:v3.2.0']
+  eolAt: '2025-01-06'
 - version: 3.1.7
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
   summary: null
+  eolAt: '2024-10-28'
 - version: 3.1.4
   kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
@@ -143,6 +150,7 @@ versions:
     breaking_changes: []
   chart_version: 31.1.1
   images: ['docker.io/traefik:v3.1.4']
+  eolAt: '2024-10-28'
 - version: 3.1.3
   kube: ['1.31', '1.30', '1.29']
   requirements: []
@@ -169,6 +177,7 @@ versions:
         v3 (commonly traefik.io/v1alpha1 depending on resource).']
   chart_version: 31.1.0
   images: ['docker.io/traefik:v3.1.3']
+  eolAt: '2024-10-28'
 - version: 3.0.2
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
@@ -176,23 +185,29 @@ versions:
   summary: null
   chart_version: 28.3.0
   images: ['docker.io/traefik:v3.0.2']
+  eolAt: '2024-07-15'
 - version: 2.11.13
   kube: ['1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
   summary: null
+  eolAt: '2026-02-01'
 - version: 2.11.10
   kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary: null
+  eolAt: '2026-02-01'
 - version: 2.11.4
   kube: ['1.31', '1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
   summary: null
+  eolAt: '2026-02-01'
 - version: 2.10.3
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
   summary: null
+  eolAt: '2024-02-12'
+name: traefik

@@ -3,6 +3,7 @@ git_url: https://github.com/projectcalico/calico
 release_url: https://github.com/projectcalico/calico/releases/tag/v{vsn}
 helm_repository_url: https://docs.tigera.io/calico/charts
 chart_name: tigera-operator
+eolApiSlug: calico
 versions:
 - version: 3.31.3
   kube: ['1.30', '1.29', '1.28', '1.27']
@@ -32,6 +33,7 @@ versions:
   summary: null
   chart_version: 3.29.0
   images: ['quay.io/tigera/operator:v1.36.0']
+  eolAt: '2025-10-21'
 - version: 3.28.0
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
@@ -39,6 +41,7 @@ versions:
   summary: null
   chart_version: 3.28.0
   images: ['quay.io/tigera/operator:v1.34.0']
+  eolAt: '2025-05-05'
 - version: 3.27.0
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
@@ -46,6 +49,7 @@ versions:
   summary: null
   chart_version: 3.27.0
   images: ['quay.io/tigera/operator:v1.32.3']
+  eolAt: '2024-10-29'
 - version: 3.26.0
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
@@ -53,6 +57,7 @@ versions:
   summary: null
   chart_version: 3.26.0
   images: ['quay.io/tigera/operator:v1.30.0']
+  eolAt: '2024-05-11'
 - version: 3.25.0
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
@@ -60,6 +65,7 @@ versions:
   summary: null
   chart_version: 3.25.0
   images: ['quay.io/tigera/operator:v1.29.0']
+  eolAt: '2023-12-15'
 - version: 3.24.1
   kube: ['1.30', '1.29', '1.28', '1.27']
   requirements: []
@@ -88,3 +94,4 @@ versions:
   summary: null
   chart_version: 3.20.6
   images: ['quay.io/tigera/operator:v1.20.9']
+name: calico

@@ -2,6 +2,7 @@ icon: https://avatars.githubusercontent.com/u/54918165?s=48&v=4
 git_url: https://github.com/projectcontour/contour
 release_url: https://github.com/projectcontour/contour/releases/tag/v{vsn}
 helm_repository_url: https://charts.bitnami.com/bitnami
+eolApiSlug: contour
 versions:
 - version: 1.32.1
   kube: ['1.33', '1.32', '1.31']
@@ -88,6 +89,7 @@ versions:
         (along with the legacy `contour` xDS implementation).']
   chart_version: 19.2.1
   images: ['docker.io/bitnami/contour:1.30.0-debian-12-r6', 'docker.io/bitnami/envoy:1.31.2-debian-12-r0']
+  eolAt: '2025-09-08'
 - version: 1.29.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
@@ -95,11 +97,13 @@ versions:
   summary: null
   chart_version: 18.2.3
   images: ['docker.io/bitnami/contour:1.29.0-debian-12-r1', 'docker.io/bitnami/envoy:1.29.5-debian-12-r0']
+  eolAt: '2025-05-15'
 - version: 1.28.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
   summary: null
+  eolAt: '2025-05-06'
 - version: 1.27.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
@@ -129,6 +133,7 @@ versions:
         before/after upgrade.]
   chart_version: 15.4.0
   images: ['docker.io/bitnami/contour:1.27.0-debian-11-r9', 'docker.io/bitnami/envoy:1.27.2-debian-11-r8']
+  eolAt: '2024-07-31'
 - version: 1.26.0
   kube: ['1.28', '1.27', '1.26']
   requirements: []
@@ -162,6 +167,7 @@ versions:
         assumed only one HTTP and one HTTPS port.']
   chart_version: 13.1.4
   images: ['docker.io/bitnami/contour:1.26.0-debian-11-r17', 'docker.io/bitnami/envoy:1.26.5-debian-11-r0']
+  eolAt: '2024-05-07'
 - version: 1.25.0
   kube: ['1.27', '1.26', '1.25']
   requirements: []
@@ -169,11 +175,13 @@ versions:
   summary: null
   chart_version: 12.2.2
   images: ['docker.io/bitnami/contour:1.25.0-debian-11-r73', 'docker.io/bitnami/envoy:1.26.3-debian-11-r10']
+  eolAt: '2024-02-12'
 - version: 1.24.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
   summary: null
+  eolAt: '2023-10-30'
 - version: 1.23.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
@@ -293,3 +301,4 @@ versions:
   summary: null
   chart_version: 7.10.2
   images: ['docker.io/bitnami/contour:1.20.1-debian-11-r0', 'docker.io/bitnami/envoy:1.21.2-debian-11-r0']
+name: contour

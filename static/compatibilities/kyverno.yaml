@@ -2,6 +2,7 @@ icon: https://avatars.githubusercontent.com/u/68448710?s=48&v=4
 git_url: https://github.com/kyverno/kyverno
 release_url: https://github.com/kyverno/kyverno/releases/tag/v{vsn}
 helm_repository_url: https://kyverno.github.io/kyverno/
+eolApiSlug: kyverno
 versions:
 - version: 1.16.0
   kube: ['1.34', '1.33', '1.32', '1.31']
@@ -258,6 +259,7 @@ versions:
   images: ['bitnami/kubectl:1.30.2', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.13.0',
     'ghcr.io/kyverno/cleanup-controller:v1.13.0', 'ghcr.io/kyverno/kyverno-cli:v1.13.0',
     'ghcr.io/kyverno/kyverno:v1.13.0', 'ghcr.io/kyverno/kyvernopre:v1.13.0', 'ghcr.io/kyverno/reports-controller:v1.13.0']
+  eolAt: '2025-11-10'
 - version: 1.12.0
   kube: ['1.29', '1.28', '1.27', '1.26']
   requirements: []
@@ -318,6 +320,7 @@ versions:
   images: ['bitnami/kubectl:1.28.5', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.12.0',
     'ghcr.io/kyverno/cleanup-controller:v1.12.0', 'ghcr.io/kyverno/kyverno-cli:v1.12.0',
     'ghcr.io/kyverno/kyverno:v1.12.0', 'ghcr.io/kyverno/kyvernopre:v1.12.0', 'ghcr.io/kyverno/reports-controller:v1.12.0']
+  eolAt: '2025-07-31'
 - version: 1.11.0
   kube: ['1.28', '1.27', '1.26', '1.25']
   requirements: []
@@ -384,6 +387,7 @@ versions:
   images: ['bitnami/kubectl:1.26.10', 'bitnami/kubectl:1.26.4', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.11.0',
     'ghcr.io/kyverno/cleanup-controller:v1.11.0', 'ghcr.io/kyverno/kyverno:v1.11.0',
     'ghcr.io/kyverno/kyvernopre:v1.11.0', 'ghcr.io/kyverno/reports-controller:v1.11.0']
+  eolAt: '2025-04-25'
 - version: 1.10.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
@@ -459,6 +463,7 @@ versions:
   images: ['bitnami/kubectl:1.26.4', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.10.0',
     'ghcr.io/kyverno/cleanup-controller:v1.10.0', 'ghcr.io/kyverno/kyverno:v1.10.0',
     'ghcr.io/kyverno/kyvernopre:v1.10.0', 'ghcr.io/kyverno/reports-controller:v1.10.0']
+  eolAt: '2024-10-29'
 - version: 1.9.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
@@ -526,6 +531,7 @@ versions:
   chart_version: 2.7.0
   images: ['busybox:1.35', 'ghcr.io/kyverno/cleanup-controller:v1.9.0', 'ghcr.io/kyverno/kyverno:v1.9.0',
     'ghcr.io/kyverno/kyvernopre:v1.9.0']
+  eolAt: '2024-04-26'
 - version: 1.8.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
@@ -572,6 +578,7 @@ versions:
         old CRDs must be updated.]
   chart_version: 2.6.0
   images: [busybox, 'ghcr.io/kyverno/kyverno:v1.8.0', 'ghcr.io/kyverno/kyvernopre:v1.8.0']
+  eolAt: '2023-11-10'
 - version: 1.7.0
   kube: ['1.23', '1.22', '1.21']
   requirements: []
@@ -625,3 +632,4 @@ versions:
   summary: null
   chart_version: 2.2.0
   images: [busybox, 'ghcr.io/kyverno/kyverno:v1.6.0', 'ghcr.io/kyverno/kyvernopre:v1.6.0']
+name: kyverno

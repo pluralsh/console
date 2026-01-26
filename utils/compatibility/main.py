@@ -3,7 +3,7 @@ import os
 import time
 import importlib
 from colorama import Fore, Style
-from utils import read_yaml, write_yaml, print_error, print_warning, latest_kube_version
+from utils import read_yaml, write_yaml, print_error, print_warning, latest_kube_version, enrich_addon_with_eol
 from kube_versions import generate_kube_changelog
 
 def call_scraper(scraper):
@@ -57,8 +57,14 @@ addons = []
 for name in manifest["names"]:
     addon = read_yaml(f"../../static/compatibilities/{name}.yaml")
     addon["name"] = name
+    slug = addon.get("eolApiSlug")
+    if slug:
+        enrich_addon_with_eol(addon, slug)
+        # Persist per-addon EOL data back into its YAML when present.
+        write_yaml(f"../../static/compatibilities/{name}.yaml", addon)
+    
     addons.append(addon)
-
+    
 write_yaml("../../static/compatibilities.yaml", {"addons": addons})
 
 generate_kube_changelog()
