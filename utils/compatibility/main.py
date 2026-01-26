@@ -64,5 +64,7 @@ for name in manifest["names"]:
         write_yaml(f"../../static/compatibilities/{name}.yaml", addon)
     
     addons.append(addon)
+    
+write_yaml("../../static/compatibilities.yaml", {"addons": addons})
 
 generate_kube_changelog()
