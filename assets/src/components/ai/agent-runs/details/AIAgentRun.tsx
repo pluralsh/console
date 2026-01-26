@@ -29,6 +29,7 @@ import {
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import { getAIBreadcrumbs } from '../../AI.tsx'
+import { AgentRunAnalysis } from './AIAgentRunAnalysis.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
 import { PullRequestCallout } from './PullRequestCallout.tsx'
@@ -130,6 +131,7 @@ export function AIAgentRun() {
                 pullRequest={pr}
               />
             ))}
+            {run?.analysis && <AgentRunAnalysis analysis={run.analysis} />}
             <StackedText
               first="Agent activity"
               firstPartialType="body2Bold"

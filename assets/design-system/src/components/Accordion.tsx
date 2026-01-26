@@ -58,7 +58,7 @@ function AccordionItem({
   padding?: 'none' | 'compact' | 'relaxed'
   paddingArea?: 'trigger-only' | 'all'
   paddedCaret?: boolean
-  caret?: 'none' | 'left' | 'right'
+  caret?: 'none' | 'left' | 'right' | 'right-quarter'
   trigger: ReactNode
   children: ReactNode
   additionalContentStyles?: CSSObject
@@ -135,7 +135,7 @@ const ItemSC = styled(RadixAccordion.Item)({
 })
 
 const TriggerSC = styled(RadixAccordion.Trigger)<{
-  $caret: 'none' | 'left' | 'right'
+  $caret: 'none' | 'left' | 'right' | 'right-quarter'
   $padding?: number
 }>(({ theme, $caret, $padding }) => ({
   ...theme.partials.reset.button,
@@ -152,12 +152,21 @@ const TriggerSC = styled(RadixAccordion.Trigger)<{
   '&:focus-visible': { ...theme.partials.focus.default },
   // if the icon is on the left, it should rotate a quarter from -90deg to 0deg on open
   // if it's on the right, it should act like a normal dropdown and flip from up to down
+  // right-quarter keeps on the right but with similar behavior to left
   '.icon': {
     color: theme.colors['icon-xlight'],
-    rotate: $caret === 'left' ? '-90deg' : '0deg',
+    rotate:
+      $caret === 'left'
+        ? '-90deg'
+        : $caret === 'right-quarter'
+          ? '90deg'
+          : '0deg',
     transition: 'rotate 0.3s ease, scale 0.3s ease',
   },
-  '&:not([data-disabled]):hover': { '.icon': { scale: '1.16' } },
+  '&:not([data-disabled]):hover': {
+    filter: 'brightness(1.16)',
+    '.icon': { scale: '1.16' },
+  },
   '&[data-state="open"] .icon': {
     rotate: '0deg',
     scale: $caret === 'right' ? '-1' : '1',

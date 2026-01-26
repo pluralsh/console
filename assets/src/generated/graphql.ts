@@ -13363,6 +13363,10 @@ export type AgentRuntimeFragment = { __typename?: 'AgentRuntime', id: string, na
 
 export type AgentRunRepositoryFragment = { __typename?: 'AgentRunRepository', id: string, url: string, lastUsedAt?: string | null };
 
+export type AgentAnalysisFragment = { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null };
+
+export type AgentTodoFragment = { __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null };
+
 export type AgentMessageFragment = { __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null };
 
 export type AgentMessageMetadataFragment = { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null };
@@ -16801,6 +16805,20 @@ export const AgentMessageFragmentDoc = gql`
 }
     ${AgentMessageCostFragmentDoc}
 ${AgentMessageMetadataFragmentDoc}`;
+export const AgentTodoFragmentDoc = gql`
+    fragment AgentTodo on AgentTodo {
+  title
+  description
+  done
+}
+    `;
+export const AgentAnalysisFragmentDoc = gql`
+    fragment AgentAnalysis on AgentAnalysis {
+  summary
+  analysis
+  bullets
+}
+    `;
 export const AgentRunFragmentDoc = gql`
     fragment AgentRun on AgentRun {
   ...AgentRunTiny
@@ -16808,14 +16826,10 @@ export const AgentRunFragmentDoc = gql`
     ...AgentMessage
   }
   todos {
-    title
-    description
-    done
+    ...AgentTodo
   }
   analysis {
-    summary
-    analysis
-    bullets
+    ...AgentAnalysis
   }
   podReference {
     name
@@ -16823,7 +16837,9 @@ export const AgentRunFragmentDoc = gql`
   }
 }
     ${AgentRunTinyFragmentDoc}
-${AgentMessageFragmentDoc}`;
+${AgentMessageFragmentDoc}
+${AgentTodoFragmentDoc}
+${AgentAnalysisFragmentDoc}`;
 export const ClusterMinimalFragmentDoc = gql`
     fragment ClusterMinimal on Cluster {
   id
@@ -21721,9 +21737,7 @@ export const AgentRunDeltaDocument = gql`
         done
       }
       analysis {
-        summary
-        analysis
-        bullets
+        ...AgentAnalysis
       }
       podReference {
         name
@@ -21732,7 +21746,8 @@ export const AgentRunDeltaDocument = gql`
     }
   }
 }
-    ${AgentRunTinyFragmentDoc}`;
+    ${AgentRunTinyFragmentDoc}
+${AgentAnalysisFragmentDoc}`;
 
 /**
  * __useAgentRunDeltaSubscription__
@@ -36005,6 +36020,8 @@ export const namedOperations = {
     AgentRun: 'AgentRun',
     AgentRuntime: 'AgentRuntime',
     AgentRunRepository: 'AgentRunRepository',
+    AgentAnalysis: 'AgentAnalysis',
+    AgentTodo: 'AgentTodo',
     AgentMessage: 'AgentMessage',
     AgentMessageMetadata: 'AgentMessageMetadata',
     AgentMessageCost: 'AgentMessageCost',
