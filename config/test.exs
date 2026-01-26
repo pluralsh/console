@@ -4,7 +4,7 @@ config :console, Console.Repo,
   username: "postgres",
   password: "postgres",
   database: "watchman_test",
-  hostname: "localhost",
+  hostname: System.get_env("DB_HOST", "localhost"),
   queue_target: 1000,
   pool: Ecto.Adapters.SQL.Sandbox
 
@@ -502,13 +502,17 @@ config :console, Console.Deployments.Metrics.Provider.NewRelic,
 config :bamboo, :refute_timeout, 10
 
 config :elasticsearch,
-  host: "http://localhost:9200",
+  host: System.get_env("ELASTICSEARCH_HOST", "http://localhost:9200"),
   index: "testindex",
   vector_index: "plrl-vector-testindex"
 
 config :opensearch,
   # create-domain endpoint done through localstack is always in format http://<domain>.<region>.opensearch.localhost.localstack.cloud:<localstack-port>
-  host: "http://opensearch-local.us-east-1.opensearch.localhost.localstack.cloud:4566",
+  host:
+    System.get_env(
+      "OPENSEARCH_HOST",
+      "http://opensearch-local.us-east-1.opensearch.localhost.localstack.cloud:4566"
+    ),
   index: "plrl-testindex",
   vector_index: "plrl-vector-testindex",
   # aws access key id, secret access key, session token must be the same values as in Makefile

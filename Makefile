@@ -13,6 +13,7 @@ TARGETARCH ?= amd64
 ERLANG_VERSION ?= `grep erlang .tool-versions | cut -d' ' -f2`
 REPO_ROOT ?= `pwd`
 GIT_HOOKS_PATH = .githooks
+TEST_CMD ?= mix deps.get && mix compile && mix test
 
 help:
 	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -113,6 +114,12 @@ testup: secrets data ## sets up dependent services for test
 
 testdown: ## tear down test dependencies
 	docker compose down
+
+test-full: ## run test suite in docker (TEST_CMD=...)
+	@docker compose -f docker-compose.test.yml up --attach=console --build --abort-on-container-exit --exit-code-from console; \
+	status=$$?; \
+	docker compose -f docker-compose.test.yml down; \
+	exit $$status
 
 migration:
 	MIX_ENV=test mix ecto.gen.migration $(name)

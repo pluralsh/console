@@ -1,0 +1,18 @@
+ARG ELIXIR_VERSION=1.18.3
+ARG OTP_VERSION=27.3.2
+ARG OS_VARIANT=alpine
+ARG OS_VERSION=3.21.3
+
+FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-${OS_VARIANT}-${OS_VERSION}
+
+ARG OS_VARIANT=alpine
+
+WORKDIR /app
+
+RUN if [ "$OS_VARIANT" = "alpine" ]; then \
+      apk update && apk add git build-base; \
+    else \
+      apt-get update && apt-get install -y git build-essential; \
+    fi && \
+  mix local.rebar --force && \
+  mix local.hex --force
