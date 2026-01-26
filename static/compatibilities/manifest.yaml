@@ -36,3 +36,4 @@ names:
 - elastic-agent
 - rabbitmq-cluster-operator
 - kserve
+- kubescape-operator
