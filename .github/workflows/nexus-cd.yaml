@@ -185,7 +185,7 @@ jobs:
           type=ref,event=pr
           type=sha
           type=semver,pattern={{version}},value=${{ steps.tag_version.outputs.version }},enable=${{ steps.tag_version.outputs.version != '' }}
-          type=raw,value=${{ github.event.inputs.version }},enable=${{ github.event.inputs.version != '' }}
+          type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event.inputs.tag != '' }}
     - name: Create manifest list and push
       working-directory: ${{ runner.temp }}/digests
       run: |
