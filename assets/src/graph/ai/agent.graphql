@@ -193,6 +193,12 @@ mutation UpsertAgentRuntime($attributes: AgentRuntimeAttributes!) {
   }
 }
 
+mutation ShareAgentRun($id: ID!, $shared: Boolean!) {
+  shareAgentRun(id: $id, shared: $shared) {
+    ...AgentRunTiny
+  }
+}
+
 subscription AgentRunChat($runId: ID!) {
   agentMessageDelta(runId: $runId) {
     delta

@@ -33,7 +33,6 @@ import LogsLegend from '../../logs/LogsLegend.tsx'
 import { getClusterBreadcrumbs } from '../Cluster'
 import PodSidecar from './PodSidecar.tsx'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
-import { getAgentRunBreadcrumbs } from 'components/ai/agent-runs/AIAgentRun.tsx'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -101,16 +100,10 @@ export default function Pod() {
                 cluster: clusterData?.cluster,
                 tab: 'pods',
               })
-            : type === 'agent-run'
-              ? getAgentRunBreadcrumbs(
-                  runId ?? '',
-                  agentRunData?.agentRun?.prompt ?? '',
-                  'pod'
-                )
-              : getClusterBreadcrumbs({
-                  cluster: clusterData?.cluster || { id: clusterId ?? '' },
-                  tab: 'pods',
-                })),
+            : getClusterBreadcrumbs({
+                cluster: clusterData?.cluster || { id: clusterId ?? '' },
+                tab: 'pods',
+              })),
         ...(name && namespace
           ? [
               {

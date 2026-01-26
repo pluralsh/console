@@ -1,10 +1,4 @@
-import {
-  AgentRunAnalysis,
-  AgentRunLogs,
-  AgentRunMessages,
-  AgentRunPullRequests,
-  AIAgentRun,
-} from 'components/ai/agent-runs/AIAgentRun.tsx'
+import { AIAgentRun } from 'components/ai/agent-runs/details/AIAgentRun.tsx'
 import { AIAgentRuns } from 'components/ai/agent-runs/AIAgentRuns.tsx'
 import { AI } from 'components/ai/AI.tsx'
 import { AIThreads } from 'components/ai/AIThreads.tsx'
@@ -23,11 +17,7 @@ import { AIAgentSessions } from '../components/ai/AIAgentSessions.tsx'
 import {
   AI_ABS_PATH,
   AI_AGENT_RUNS_ABS_PATH,
-  AI_AGENT_RUNS_ANALYSIS_REL_PATH,
-  AI_AGENT_RUNS_LOGS_REL_PATH,
   AI_AGENT_RUNS_PARAM_RUN_ID,
-  AI_AGENT_RUNS_PROGRESS_REL_PATH,
-  AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH,
   AI_AGENT_RUNS_REL_PATH,
   AI_AGENT_SESSIONS_REL_PATH,
   AI_INFRA_RESEARCH_ABS_PATH,
@@ -44,7 +34,6 @@ import {
   getSentinelRunAbsPath,
   getSentinelRunJobAbsPath,
 } from './aiRoutesConsts'
-import { getPodDetailsRoutes } from './cdRoutes.tsx'
 import { jobRoutes } from './jobRoutes.tsx'
 
 export const aiRoutes = [
@@ -85,34 +74,7 @@ export const aiRoutes = [
   <Route
     path={`${AI_AGENT_RUNS_ABS_PATH}/:${AI_AGENT_RUNS_PARAM_RUN_ID}`}
     element={<AIAgentRun />}
-  >
-    <Route
-      index
-      element={
-        <Navigate
-          replace
-          to={AI_AGENT_RUNS_PROGRESS_REL_PATH}
-        />
-      }
-    />
-    <Route
-      path={AI_AGENT_RUNS_PROGRESS_REL_PATH}
-      element={<AgentRunMessages />}
-    />
-    <Route
-      path={AI_AGENT_RUNS_ANALYSIS_REL_PATH}
-      element={<AgentRunAnalysis />}
-    />
-    <Route
-      path={AI_AGENT_RUNS_PULL_REQUESTS_REL_PATH}
-      element={<AgentRunPullRequests />}
-    />
-    <Route
-      path={AI_AGENT_RUNS_LOGS_REL_PATH}
-      element={<AgentRunLogs />}
-    />
-    {getPodDetailsRoutes('agent-run')}
-  </Route>,
+  />,
   // other sentinel routes
   <Route
     path={getSentinelAbsPath(`:${AI_SENTINELS_RUNS_PARAM_SENTINEL_ID}`)}

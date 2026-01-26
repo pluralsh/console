@@ -15,6 +15,7 @@ import {
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { useChatbot } from 'components/ai/AIContext'
+import { RunShareMenu } from 'components/ai/RunShareMenu'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
@@ -29,6 +30,7 @@ import {
   useCreateInfraResearchMutation,
   useFixResearchDiagramMutation,
   useInfraResearchQuery,
+  useUpdateInfraResearchMutation,
 } from 'generated/graphql'
 import { capitalize, truncate } from 'lodash'
 import { ReactNode, useMemo, useState } from 'react'
@@ -42,7 +44,6 @@ import styled, { useTheme } from 'styled-components'
 import { getInfraResearchesBreadcrumbs } from '../InfraResearches'
 import { InfraResearchAnalysis } from './InfraResearchAnalysis'
 import { InfraResearchDiagram } from './InfraResearchDiagram'
-import { InfraResearchShareMenu } from './InfraResearchShareMenu'
 import { InfraResearchSidecar } from './InfraResearchSidecar'
 
 function getBreadcrumbs(infraResearch: Nullable<InfraResearchFragment>) {
@@ -77,6 +78,10 @@ export function InfraResearch() {
     pollInterval: POLL_INTERVAL,
   })
   const infraResearch = data?.infraResearch
+  const isLoading = !data && loading
+
+  const [updateResearch, { loading: updateLoading, error: updateError }] =
+    useUpdateInfraResearchMutation()
 
   const [
     fixResearchDiagram,
@@ -113,7 +118,7 @@ export function InfraResearch() {
   if (!(infraResearch || loading))
     return <EmptyState message="Infra research not found." />
 
-  const { status, analysis, diagram, threads } = infraResearch ?? {}
+  const { status, analysis, diagram, threads, published } = infraResearch ?? {}
   const isRunning = status === InfraResearchStatus.Running
 
   const headerButtons =
@@ -159,6 +164,7 @@ export function InfraResearch() {
       >
         <StretchedFlex>
           <StackedText
+            loading={isLoading}
             first="Prompt"
             firstPartialType="subtitle1"
             firstColor="text"
@@ -166,7 +172,10 @@ export function InfraResearch() {
             secondPartialType="body2"
             secondColor="text-xlight"
           />
-          <Flex gap="small">
+          <Flex
+            gap="small"
+            flexShrink={0}
+          >
             {status && (
               <RunStatusChip
                 size="large"
@@ -180,7 +189,17 @@ export function InfraResearch() {
             )}
             {!isChatbotOpen && headerButtons}
             {status !== InfraResearchStatus.Failed && (
-              <InfraResearchShareMenu infraResearch={infraResearch} />
+              <RunShareMenu
+                isShared={published}
+                setIsShared={(published) =>
+                  updateResearch({
+                    variables: { id, attributes: { published } },
+                  })
+                }
+                loading={updateLoading}
+                error={updateError}
+                label="Share research"
+              />
             )}
           </Flex>
         </StretchedFlex>
@@ -242,7 +261,7 @@ export function InfraResearch() {
                   free to leave the page while the agent runs in the background.
                 </Body1P>
               )}
-              {isRunning || loading ? (
+              {isRunning || isLoading ? (
                 <RectangleSkeleton
                   $width="100%"
                   $height={300}
@@ -255,7 +274,7 @@ export function InfraResearch() {
               )}
             </Flex>
             <Body2BoldP $color="text">Analysis</Body2BoldP>
-            {isRunning || loading ? (
+            {isRunning || isLoading ? (
               <Flex
                 direction="column"
                 gap="medium"
@@ -277,7 +296,7 @@ export function InfraResearch() {
       <ResponsiveLayoutSidecarContainer $breakpointWidth={768}>
         <InfraResearchSidecar
           infraResearch={infraResearch}
-          loading={!infraResearch && loading}
+          loading={isLoading}
         />
       </ResponsiveLayoutSidecarContainer>
     </WrapperSC>

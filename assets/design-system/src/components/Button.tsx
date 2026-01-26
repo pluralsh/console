@@ -180,7 +180,7 @@ const Button = memo(
   }
 )
 
-const ButtonBaseSC = styled.button<{
+export const ButtonBaseSC = styled.button<{
   $size: ButtonSize
   $type: ButtonType
   $noPadding: boolean
