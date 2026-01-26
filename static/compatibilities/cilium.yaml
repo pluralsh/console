@@ -487,6 +487,7 @@ versions:
   chart_version: 1.15.17
   images: ['quay.io/cilium/cilium:v1.15.17@sha256:8824313a6f17d934b4e63902fee71e6ca36be6f69d68ae174df28f1b0705e587',
     'quay.io/cilium/operator-generic:v1.15.17@sha256:a0f5b5dc8cecd4e5ead7d3bddb3756e4b34beba8e7aa089e7e2fb761725defe1']
+  eolAt: '2025-07-29'
 - version: 1.15.12
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -529,6 +530,7 @@ versions:
   chart_version: 1.15.12
   images: ['quay.io/cilium/cilium:v1.15.12@sha256:d1793b67d976e1bc0a4ab01b34c94adfcd35a8be7612d04c6d618bf25f50f0d1',
     'quay.io/cilium/operator-generic:v1.15.12@sha256:e48d863367bfd39843917400aa7454ca6a4af74f995cf29a2edb81d7d13c7277']
+  eolAt: '2025-07-29'
 - version: 1.15.8
   kube: ['1.31', '1.30', '1.29']
   requirements: []
@@ -561,6 +563,7 @@ versions:
   chart_version: 1.15.8
   images: ['quay.io/cilium/cilium:v1.15.8@sha256:3b5b0477f696502c449eaddff30019a7d399f077b7814bcafabc636829d194c7',
     'quay.io/cilium/operator-generic:v1.15.8@sha256:e77ae6fc8a978f98363cf74d3c883dfaa6454c6e23ec417a60952f29408e2f18']
+  eolAt: '2025-07-29'
 - version: 1.15.5
   kube: ['1.30', '1.29', '1.28']
   requirements: []
@@ -622,6 +625,7 @@ versions:
   chart_version: 1.15.5
   images: ['quay.io/cilium/cilium:v1.15.5@sha256:4ce1666a73815101ec9a4d360af6c5b7f1193ab00d89b7124f8505dee147ca40',
     'quay.io/cilium/operator-generic:v1.15.5@sha256:f5d3d19754074ca052be6aac5d1ffb1de1eb5f2d947222b5f10f6d97ad4383e8']
+  eolAt: '2025-07-29'
 - version: 1.15.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
@@ -690,6 +694,7 @@ versions:
   chart_version: 1.15.0
   images: ['quay.io/cilium/cilium:v1.15.0@sha256:9cfd6a0a3a964780e73a11159f93cc363e616f7d9783608f62af6cfdf3759619',
     'quay.io/cilium/operator-generic:v1.15.0@sha256:e26ecd316e742e4c8aa1e302ba8b577c2d37d114583d6c4cdd2b638493546a79']
+  eolAt: '2025-07-29'
 - version: 1.14.18
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -716,6 +721,7 @@ versions:
   chart_version: 1.14.18
   images: ['quay.io/cilium/cilium:v1.14.18@sha256:a09bd4ee7345ccdb42679985bf3e5a696ad8416e31a70a3609129bc745804123',
     'quay.io/cilium/operator-generic:v1.14.18@sha256:f41a9f3d899e14ba34a9696e7327147cd9811fc563c255668d59658ad90aa69e']
+  eolAt: '2025-02-04'
 - version: 1.14.14
   kube: ['1.31', '1.30', '1.29']
   requirements: []
@@ -739,6 +745,7 @@ versions:
   chart_version: 1.14.14
   images: ['quay.io/cilium/cilium:v1.14.14@sha256:43d664501afbf35496e494dae0c5a7f8680a51ed9084997bea9c64bf4451a637',
     'quay.io/cilium/operator-generic:v1.14.14@sha256:0f2c8178bd20189fc9aeaa71224e6becdf71b42642209610b57390f7b798aae2']
+  eolAt: '2025-02-04'
 - version: 1.14.11
   kube: ['1.30', '1.29', '1.28']
   requirements: []
@@ -761,6 +768,7 @@ versions:
   chart_version: 1.14.11
   images: ['quay.io/cilium/cilium:v1.14.11@sha256:2b2118042dc6efe88dbc40c78909b6afd72b369896782ce38d132435724ee269',
     'quay.io/cilium/operator-generic:v1.14.11@sha256:df76f71a06f1c681848bfa86fdd99243af593d33034c9e2057c6af969bc25109']
+  eolAt: '2025-02-04'
 - version: 1.14.6
   kube: ['1.29', '1.28', '1.27']
   requirements: []
@@ -792,6 +800,7 @@ versions:
   chart_version: 1.14.6
   images: ['quay.io/cilium/cilium:v1.14.6@sha256:37a49f1abb333279a9b802ee8a21c61cde9dd9138b5ac55f77bdfca733ba852a',
     'quay.io/cilium/operator-generic:v1.14.6@sha256:2f0bf8fb8362c7379f3bf95036b90ad5b67378ed05cd8eb0410c1afc13423848']
+  eolAt: '2025-02-04'
 - version: 1.14.2
   kube: ['1.28', '1.27', '1.26']
   requirements: []
@@ -842,6 +851,7 @@ versions:
   chart_version: 1.14.2
   images: ['quay.io/cilium/cilium:v1.14.2@sha256:6263f3a3d5d63b267b538298dbeb5ae87da3efacf09a2c620446c873ba807d35',
     'quay.io/cilium/operator-generic:v1.14.2@sha256:52f70250dea22e506959439a7c4ea31b10fe8375db62f5c27ab746e3a2af866d']
+  eolAt: '2025-02-04'
 - version: 1.14.0
   kube: ['1.27', '1.26', '1.25']
   requirements: []
@@ -927,6 +937,7 @@ versions:
   chart_version: 1.14.0
   images: ['quay.io/cilium/cilium:v1.14.0@sha256:5a94b561f4651fcfd85970a50bc78b201cfbd6e2ab1a03848eab25a82832653a',
     'quay.io/cilium/operator-generic:v1.14.0@sha256:3014d4bcb8352f0ddef90fa3b5eb1bbf179b91024813a90a0066eb4517ba93c9']
+  eolAt: '2025-02-04'
 - version: 1.13.16
   kube: ['1.30', '1.29', '1.28']
   requirements: []
@@ -946,6 +957,7 @@ versions:
   chart_version: 1.13.16
   images: ['quay.io/cilium/cilium:v1.13.16@sha256:f1f26a973419ba449a47a08e8c4c8e280d8941bb4fd77d1e992e2721425c0629',
     'quay.io/cilium/operator-generic:v1.13.16@sha256:a2711d5b891da9fd66c2116b77782b58a1a428eb4abdab2dd3ac1221937d846b']
+  eolAt: '2024-07-24'
 - version: 1.13.11
   kube: ['1.29', '1.28', '1.27']
   requirements: []
@@ -965,6 +977,7 @@ versions:
   chart_version: 1.13.11
   images: ['quay.io/cilium/cilium:v1.13.11@sha256:3b117c7a6be212e2723813b44b909c757b76943cb0e9fdd0ec2aa4475bfcadb5',
     'quay.io/cilium/operator-generic:v1.13.11@sha256:730e2209b8777f1525186c602f77d5f22259ec4f1f6a2e923f4c03809ab7b0b1']
+  eolAt: '2024-07-24'
 - version: 1.13.7
   kube: ['1.28', '1.27', '1.26']
   requirements: []
@@ -988,6 +1001,7 @@ versions:
   chart_version: 1.13.7
   images: ['quay.io/cilium/cilium:v1.13.7@sha256:3b084617febd708aa9d88de2472c6faf9aee71884112725e8511bca628ce5cf1',
     'quay.io/cilium/operator-generic:v1.13.7@sha256:0ec1bc5d9ecc444a890aaa2e0f397e77d15f1832910f1c20be3adc535688baba']
+  eolAt: '2024-07-24'
 - version: 1.13.2
   kube: ['1.27', '1.26', '1.25']
   requirements: []
@@ -1024,6 +1038,7 @@ versions:
   chart_version: 1.13.2
   images: ['quay.io/cilium/cilium:v1.13.2@sha256:85708b11d45647c35b9288e0de0706d24a5ce8a378166cadc700f756cc1a38d6',
     'quay.io/cilium/operator-generic:v1.13.2@sha256:a1982c0a22297aaac3563e428c330e17668305a41865a842dec53d241c5490ab']
+  eolAt: '2024-07-24'
 - version: 1.13.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
@@ -1075,6 +1090,7 @@ versions:
   chart_version: 1.13.0
   images: ['quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68',
     'quay.io/cilium/operator-generic:v1.13.0@sha256:4b58d5b33e53378355f6e8ceb525ccf938b7b6f5384b35373f1f46787467ebf5']
+  eolAt: '2024-07-24'
 - version: 1.12.18
   kube: ['1.29', '1.28', '1.27']
   requirements: []
@@ -1663,3 +1679,4 @@ versions:
   summary: null
   chart_version: 1.9.0
   images: ['quay.io/cilium/cilium:v1.9.0', 'quay.io/cilium/operator-generic:v1.9.0']
+name: cilium

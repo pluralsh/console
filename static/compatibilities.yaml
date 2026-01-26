@@ -1158,7 +1158,6 @@ addons:
   release_url: https://github.com/projectcalico/calico/releases/tag/v{vsn}
   helm_repository_url: https://docs.tigera.io/calico/charts
   chart_name: tigera-operator
-  eolApiSlug: calico
   versions:
   - version: 3.31.3
     kube: ['1.30', '1.29', '1.28', '1.27']
@@ -1188,7 +1187,6 @@ addons:
     summary: null
     chart_version: 3.29.0
     images: ['quay.io/tigera/operator:v1.36.0']
-    eolAt: '2025-10-21'
   - version: 3.28.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -1196,7 +1194,6 @@ addons:
     summary: null
     chart_version: 3.28.0
     images: ['quay.io/tigera/operator:v1.34.0']
-    eolAt: '2025-05-05'
   - version: 3.27.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -1204,7 +1201,6 @@ addons:
     summary: null
     chart_version: 3.27.0
     images: ['quay.io/tigera/operator:v1.32.3']
-    eolAt: '2024-10-29'
   - version: 3.26.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -1212,7 +1208,6 @@ addons:
     summary: null
     chart_version: 3.26.0
     images: ['quay.io/tigera/operator:v1.30.0']
-    eolAt: '2024-05-11'
   - version: 3.25.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -1220,7 +1215,6 @@ addons:
     summary: null
     chart_version: 3.25.0
     images: ['quay.io/tigera/operator:v1.29.0']
-    eolAt: '2023-12-15'
   - version: 3.24.1
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -1254,7 +1248,6 @@ addons:
   git_url: https://github.com/cert-manager/cert-manager
   release_url: https://github.com/cert-manager/cert-manager/releases/tag/v{vsn}
   helm_repository_url: https://charts.jetstack.io
-  eolApiSlug: cert-manager
   versions:
   - version: 1.19.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
@@ -1404,7 +1397,6 @@ addons:
     chart_version: 1.17.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.17.0', 'quay.io/jetstack/cert-manager-controller:v1.17.0',
       'quay.io/jetstack/cert-manager-startupapicheck:v1.17.0', 'quay.io/jetstack/cert-manager-webhook:v1.17.0']
-    eolAt: '2025-10-07'
   - version: 1.16.0
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
     requirements: []
@@ -1455,7 +1447,6 @@ addons:
     chart_version: 1.16.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.16.0', 'quay.io/jetstack/cert-manager-controller:v1.16.0',
       'quay.io/jetstack/cert-manager-startupapicheck:v1.16.0', 'quay.io/jetstack/cert-manager-webhook:v1.16.0']
-    eolAt: '2025-06-10'
   - version: 1.15.0
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
     requirements: []
@@ -1507,7 +1498,6 @@ addons:
     chart_version: 1.15.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.15.0', 'quay.io/jetstack/cert-manager-controller:v1.15.0',
       'quay.io/jetstack/cert-manager-startupapicheck:v1.15.0', 'quay.io/jetstack/cert-manager-webhook:v1.15.0']
-    eolAt: '2025-02-03'
   - version: 1.14.0
     kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
     requirements: []
@@ -1561,7 +1551,6 @@ addons:
     chart_version: 1.14.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.14.0', 'quay.io/jetstack/cert-manager-controller:v1.14.0',
       'quay.io/jetstack/cert-manager-startupapicheck:v1.14.0', 'quay.io/jetstack/cert-manager-webhook:v1.14.0']
-    eolAt: '2024-10-03'
   - version: 1.13.0
     kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
@@ -1615,7 +1604,6 @@ addons:
     chart_version: 1.13.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.13.0', 'quay.io/jetstack/cert-manager-controller:v1.13.0',
       'quay.io/jetstack/cert-manager-ctl:v1.13.0', 'quay.io/jetstack/cert-manager-webhook:v1.13.0']
-    eolAt: '2024-06-05'
   - version: 1.12.0
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
       '1.23', '1.22']
@@ -1671,7 +1659,6 @@ addons:
     chart_version: 1.12.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.12.0', 'quay.io/jetstack/cert-manager-controller:v1.12.0',
       'quay.io/jetstack/cert-manager-ctl:v1.12.0', 'quay.io/jetstack/cert-manager-webhook:v1.12.0']
-    eolAt: '2025-05-19'
   - version: 1.11.0
     kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
@@ -1723,7 +1710,6 @@ addons:
     chart_version: 1.11.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.11.0', 'quay.io/jetstack/cert-manager-controller:v1.11.0',
       'quay.io/jetstack/cert-manager-ctl:v1.11.0', 'quay.io/jetstack/cert-manager-webhook:v1.11.0']
-    eolAt: '2023-09-12'
   - version: 1.10.0
     kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
@@ -2423,7 +2409,6 @@ addons:
   release_url: https://github.com/cilium/cilium/releases/tag/v{vsn}
   helm_repository_url: https://helm.cilium.io/
   helm_values: debug.verbose=flow
-  eolApiSlug: cilium
   versions:
   - version: 1.18.6
     kube: ['1.35', '1.34', '1.33']
@@ -2915,7 +2900,6 @@ addons:
     chart_version: 1.15.17
     images: ['quay.io/cilium/cilium:v1.15.17@sha256:8824313a6f17d934b4e63902fee71e6ca36be6f69d68ae174df28f1b0705e587',
       'quay.io/cilium/operator-generic:v1.15.17@sha256:a0f5b5dc8cecd4e5ead7d3bddb3756e4b34beba8e7aa089e7e2fb761725defe1']
-    eolAt: '2025-07-29'
   - version: 1.15.12
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -2958,7 +2942,6 @@ addons:
     chart_version: 1.15.12
     images: ['quay.io/cilium/cilium:v1.15.12@sha256:d1793b67d976e1bc0a4ab01b34c94adfcd35a8be7612d04c6d618bf25f50f0d1',
       'quay.io/cilium/operator-generic:v1.15.12@sha256:e48d863367bfd39843917400aa7454ca6a4af74f995cf29a2edb81d7d13c7277']
-    eolAt: '2025-07-29'
   - version: 1.15.8
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -2991,7 +2974,6 @@ addons:
     chart_version: 1.15.8
     images: ['quay.io/cilium/cilium:v1.15.8@sha256:3b5b0477f696502c449eaddff30019a7d399f077b7814bcafabc636829d194c7',
       'quay.io/cilium/operator-generic:v1.15.8@sha256:e77ae6fc8a978f98363cf74d3c883dfaa6454c6e23ec417a60952f29408e2f18']
-    eolAt: '2025-07-29'
   - version: 1.15.5
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -3054,7 +3036,6 @@ addons:
     chart_version: 1.15.5
     images: ['quay.io/cilium/cilium:v1.15.5@sha256:4ce1666a73815101ec9a4d360af6c5b7f1193ab00d89b7124f8505dee147ca40',
       'quay.io/cilium/operator-generic:v1.15.5@sha256:f5d3d19754074ca052be6aac5d1ffb1de1eb5f2d947222b5f10f6d97ad4383e8']
-    eolAt: '2025-07-29'
   - version: 1.15.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -3124,7 +3105,6 @@ addons:
     chart_version: 1.15.0
     images: ['quay.io/cilium/cilium:v1.15.0@sha256:9cfd6a0a3a964780e73a11159f93cc363e616f7d9783608f62af6cfdf3759619',
       'quay.io/cilium/operator-generic:v1.15.0@sha256:e26ecd316e742e4c8aa1e302ba8b577c2d37d114583d6c4cdd2b638493546a79']
-    eolAt: '2025-07-29'
   - version: 1.14.18
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -3151,7 +3131,6 @@ addons:
     chart_version: 1.14.18
     images: ['quay.io/cilium/cilium:v1.14.18@sha256:a09bd4ee7345ccdb42679985bf3e5a696ad8416e31a70a3609129bc745804123',
       'quay.io/cilium/operator-generic:v1.14.18@sha256:f41a9f3d899e14ba34a9696e7327147cd9811fc563c255668d59658ad90aa69e']
-    eolAt: '2025-02-04'
   - version: 1.14.14
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -3175,7 +3154,6 @@ addons:
     chart_version: 1.14.14
     images: ['quay.io/cilium/cilium:v1.14.14@sha256:43d664501afbf35496e494dae0c5a7f8680a51ed9084997bea9c64bf4451a637',
       'quay.io/cilium/operator-generic:v1.14.14@sha256:0f2c8178bd20189fc9aeaa71224e6becdf71b42642209610b57390f7b798aae2']
-    eolAt: '2025-02-04'
   - version: 1.14.11
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -3198,7 +3176,6 @@ addons:
     chart_version: 1.14.11
     images: ['quay.io/cilium/cilium:v1.14.11@sha256:2b2118042dc6efe88dbc40c78909b6afd72b369896782ce38d132435724ee269',
       'quay.io/cilium/operator-generic:v1.14.11@sha256:df76f71a06f1c681848bfa86fdd99243af593d33034c9e2057c6af969bc25109']
-    eolAt: '2025-02-04'
   - version: 1.14.6
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -3230,7 +3207,6 @@ addons:
     chart_version: 1.14.6
     images: ['quay.io/cilium/cilium:v1.14.6@sha256:37a49f1abb333279a9b802ee8a21c61cde9dd9138b5ac55f77bdfca733ba852a',
       'quay.io/cilium/operator-generic:v1.14.6@sha256:2f0bf8fb8362c7379f3bf95036b90ad5b67378ed05cd8eb0410c1afc13423848']
-    eolAt: '2025-02-04'
   - version: 1.14.2
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -3282,7 +3258,6 @@ addons:
     chart_version: 1.14.2
     images: ['quay.io/cilium/cilium:v1.14.2@sha256:6263f3a3d5d63b267b538298dbeb5ae87da3efacf09a2c620446c873ba807d35',
       'quay.io/cilium/operator-generic:v1.14.2@sha256:52f70250dea22e506959439a7c4ea31b10fe8375db62f5c27ab746e3a2af866d']
-    eolAt: '2025-02-04'
   - version: 1.14.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -3370,7 +3345,6 @@ addons:
     chart_version: 1.14.0
     images: ['quay.io/cilium/cilium:v1.14.0@sha256:5a94b561f4651fcfd85970a50bc78b201cfbd6e2ab1a03848eab25a82832653a',
       'quay.io/cilium/operator-generic:v1.14.0@sha256:3014d4bcb8352f0ddef90fa3b5eb1bbf179b91024813a90a0066eb4517ba93c9']
-    eolAt: '2025-02-04'
   - version: 1.13.16
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -3390,7 +3364,6 @@ addons:
     chart_version: 1.13.16
     images: ['quay.io/cilium/cilium:v1.13.16@sha256:f1f26a973419ba449a47a08e8c4c8e280d8941bb4fd77d1e992e2721425c0629',
       'quay.io/cilium/operator-generic:v1.13.16@sha256:a2711d5b891da9fd66c2116b77782b58a1a428eb4abdab2dd3ac1221937d846b']
-    eolAt: '2024-07-24'
   - version: 1.13.11
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -3410,7 +3383,6 @@ addons:
     chart_version: 1.13.11
     images: ['quay.io/cilium/cilium:v1.13.11@sha256:3b117c7a6be212e2723813b44b909c757b76943cb0e9fdd0ec2aa4475bfcadb5',
       'quay.io/cilium/operator-generic:v1.13.11@sha256:730e2209b8777f1525186c602f77d5f22259ec4f1f6a2e923f4c03809ab7b0b1']
-    eolAt: '2024-07-24'
   - version: 1.13.7
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -3434,7 +3406,6 @@ addons:
     chart_version: 1.13.7
     images: ['quay.io/cilium/cilium:v1.13.7@sha256:3b084617febd708aa9d88de2472c6faf9aee71884112725e8511bca628ce5cf1',
       'quay.io/cilium/operator-generic:v1.13.7@sha256:0ec1bc5d9ecc444a890aaa2e0f397e77d15f1832910f1c20be3adc535688baba']
-    eolAt: '2024-07-24'
   - version: 1.13.2
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -3473,7 +3444,6 @@ addons:
     chart_version: 1.13.2
     images: ['quay.io/cilium/cilium:v1.13.2@sha256:85708b11d45647c35b9288e0de0706d24a5ce8a378166cadc700f756cc1a38d6',
       'quay.io/cilium/operator-generic:v1.13.2@sha256:a1982c0a22297aaac3563e428c330e17668305a41865a842dec53d241c5490ab']
-    eolAt: '2024-07-24'
   - version: 1.13.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -3526,7 +3496,6 @@ addons:
     chart_version: 1.13.0
     images: ['quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68',
       'quay.io/cilium/operator-generic:v1.13.0@sha256:4b58d5b33e53378355f6e8ceb525ccf938b7b6f5384b35373f1f46787467ebf5']
-    eolAt: '2024-07-24'
   - version: 1.12.18
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -4133,7 +4102,6 @@ addons:
   git_url: https://github.com/projectcontour/contour
   release_url: https://github.com/projectcontour/contour/releases/tag/v{vsn}
   helm_repository_url: https://charts.bitnami.com/bitnami
-  eolApiSlug: contour
   versions:
   - version: 1.32.1
     kube: ['1.33', '1.32', '1.31']
@@ -4221,7 +4189,6 @@ addons:
           and planned for removal in 1.31 (along with the legacy `contour` xDS implementation).']
     chart_version: 19.2.1
     images: ['docker.io/bitnami/contour:1.30.0-debian-12-r6', 'docker.io/bitnami/envoy:1.31.2-debian-12-r0']
-    eolAt: '2025-09-08'
   - version: 1.29.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -4229,13 +4196,11 @@ addons:
     summary: null
     chart_version: 18.2.3
     images: ['docker.io/bitnami/contour:1.29.0-debian-12-r1', 'docker.io/bitnami/envoy:1.29.5-debian-12-r0']
-    eolAt: '2025-05-15'
   - version: 1.28.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2025-05-06'
   - version: 1.27.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -4265,7 +4230,6 @@ addons:
           behavior before/after upgrade.]
     chart_version: 15.4.0
     images: ['docker.io/bitnami/contour:1.27.0-debian-11-r9', 'docker.io/bitnami/envoy:1.27.2-debian-11-r8']
-    eolAt: '2024-07-31'
   - version: 1.26.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -4299,7 +4263,6 @@ addons:
           have assumed only one HTTP and one HTTPS port.']
     chart_version: 13.1.4
     images: ['docker.io/bitnami/contour:1.26.0-debian-11-r17', 'docker.io/bitnami/envoy:1.26.5-debian-11-r0']
-    eolAt: '2024-05-07'
   - version: 1.25.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -4307,13 +4270,11 @@ addons:
     summary: null
     chart_version: 12.2.2
     images: ['docker.io/bitnami/contour:1.25.0-debian-11-r73', 'docker.io/bitnami/envoy:1.26.3-debian-11-r10']
-    eolAt: '2024-02-12'
   - version: 1.24.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2023-10-30'
   - version: 1.23.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
@@ -5279,7 +5240,6 @@ addons:
   release_url: https://github.com/fluxcd/flux2/releases/tag/v{vsn}
   helm_repository_url: https://fluxcd-community.github.io/helm-charts
   chart_name: flux2
-  eolApiSlug: flux
   versions:
   - version: 2.7.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -5924,7 +5884,6 @@ addons:
   release_url: https://github.com/istio/istio/releases/tag/{vsn}
   helm_repository_url: https://istio-release.storage.googleapis.com/charts
   chart_name: istiod
-  eolApiSlug: istio
   versions:
   - version: 1.28.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
@@ -5933,7 +5892,6 @@ addons:
     summary: null
     chart_version: 1.28.0
     images: ['docker.io/istio/pilot:1.28.0']
-    eolAt: '2026-07-31'
   - version: 1.27.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
@@ -5941,7 +5899,6 @@ addons:
     summary: null
     chart_version: 1.27.0
     images: ['docker.io/istio/pilot:1.27.0']
-    eolAt: '2026-04-30'
   - version: 1.26.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
@@ -5949,7 +5906,6 @@ addons:
     summary: null
     chart_version: 1.26.0
     images: ['docker.io/istio/pilot:1.26.0']
-    eolAt: '2025-12-22'
   - version: 1.25.0
     kube: ['1.32', '1.31', '1.30', '1.29']
     requirements: []
@@ -5957,7 +5913,6 @@ addons:
     summary: null
     chart_version: 1.25.0
     images: ['docker.io/istio/pilot:1.25.0']
-    eolAt: '2025-09-30'
   - version: 1.24.0
     kube: ['1.31', '1.30', '1.29', '1.28']
     requirements: []
@@ -5965,7 +5920,6 @@ addons:
     summary: null
     chart_version: 1.24.0
     images: ['docker.io/istio/pilot:1.24.0']
-    eolAt: '2025-06-24'
   - version: 1.23.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -5973,7 +5927,6 @@ addons:
     summary: null
     chart_version: 1.23.0
     images: ['docker.io/istio/pilot:1.23.0']
-    eolAt: '2025-04-16'
   - version: 1.22.0
     kube: ['1.30', '1.29', 1.28', '1.27']
     requirements: []
@@ -5981,7 +5934,6 @@ addons:
     summary: null
     chart_version: 1.22.0
     images: ['docker.io/istio/pilot:1.22.0']
-    eolAt: '2025-01-22'
   - version: 1.21.0
     kube: ['1.29', 1.28', '1.27', '1.26']
     requirements: []
@@ -5989,7 +5941,6 @@ addons:
     summary: null
     chart_version: 1.21.0
     images: ['docker.io/istio/pilot:1.21.0']
-    eolAt: '2024-09-27'
   - version: 1.20.0
     kube: ['1.28', '1.27', '1.26', '1.25']
     requirements: []
@@ -5997,7 +5948,6 @@ addons:
     summary: null
     chart_version: 1.20.0
     images: ['docker.io/istio/pilot:1.20.0']
-    eolAt: '2024-06-25'
   - version: 1.18.0
     kube: ['1.27', '1.26', '1.25', '1.24']
     requirements: []
@@ -6005,7 +5955,6 @@ addons:
     summary: null
     chart_version: 1.18.0
     images: ['docker.io/istio/pilot:1.18.0']
-    eolAt: '2024-01-04'
   - version: 1.17.0
     kube: ['1.26', '1.25', '1.24', '1.23']
     requirements: []
@@ -6013,7 +5962,6 @@ addons:
     summary: null
     chart_version: 1.17.0
     images: ['docker.io/istio/pilot:1.17.0']
-    eolAt: '2023-10-27'
   - version: 1.16.0
     kube: ['1.25', '1.24', '1.23', '1.22']
     requirements: []
@@ -6021,7 +5969,6 @@ addons:
     summary: null
     chart_version: 1.16.0
     images: ['docker.io/istio/pilot:1.16.0']
-    eolAt: '2023-07-25'
   - version: 1.14.0
     kube: ['1.24', '1.23', '1.22', '1.21']
     requirements: []
@@ -6029,7 +5976,6 @@ addons:
     summary: null
     chart_version: 1.14.0
     images: ['docker.io/istio/pilot:1.14.0']
-    eolAt: '2022-12-27'
   - version: 1.13.0
     kube: ['1.23', '1.22', '1.21', '1.20']
     requirements: []
@@ -6037,7 +5983,6 @@ addons:
     summary: null
     chart_version: 1.13.0
     images: ['docker.io/istio/pilot:1.13.0']
-    eolAt: '2022-10-12'
   - version: 1.12.0
     kube: ['1.22', '1.21', '1.20', '1.19']
     requirements: []
@@ -6045,31 +5990,26 @@ addons:
     summary: null
     chart_version: 1.12.0
     images: ['docker.io/istio/pilot:1.12.0']
-    eolAt: '2022-07-12'
   - version: 1.11.0
     kube: ['1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2022-03-25'
   - version: 1.9.0
     kube: ['1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2021-10-08'
   - version: 1.8.0
     kube: ['1.19', '1.18', '1.17', '1.16']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2021-05-12'
   - version: 1.7.0
     kube: ['1.18', '1.17', '1.16']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2021-02-25'
   - version: 1.1.0
     kube: ['1.21', '1.20', '1.19', '1.18']
     requirements: []
@@ -6080,7 +6020,6 @@ addons:
   git_url: https://github.com/jaegertracing/jaeger
   release_url: https://github.com/jaegertracing/jaeger/releases/tag/v{vsn}
   helm_repository_url: https://jaegertracing.github.io/helm-charts
-  eolApiSlug: jaeger
   versions:
   - version: 1.62.0
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
@@ -6400,7 +6339,6 @@ addons:
   git_url: https://github.com/kedacore/keda
   release_url: https://github.com/kedacore/keda/releases/tag/v{vsn}
   helm_repository_url: https://kedacore.github.io/charts
-  eolApiSlug: keda
   versions:
   - version: 2.18.0
     kube: ['1.33', '1.32', '1.31']
@@ -6420,70 +6358,60 @@ addons:
     incompatibilities: []
     summary: null
     chart_version: 2.16.0
-    eolAt: '2025-10-08'
   - version: 2.15.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.15.0
-    eolAt: '2025-04-07'
   - version: 2.14.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.14.2
-    eolAt: '2024-11-07'
   - version: 2.13.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.13.1
-    eolAt: '2024-08-01'
   - version: 2.12.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.12.0
-    eolAt: '2024-04-25'
   - version: 2.11.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.11.0
-    eolAt: '2024-01-18'
   - version: 2.10.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.10.1
-    eolAt: '2023-09-28'
   - version: 2.9.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.9.0
-    eolAt: '2023-06-22'
   - version: 2.8.0
     kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.8.1
-    eolAt: '2023-03-09'
   - version: 2.7.0
     kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.7.0
-    eolAt: '2022-12-09'
   name: keda
 - icon: https://github.com/pluralsh/plural-artifacts/blob/main/monitoring/plural/icons/monitoring.png?raw=true
   git_url: https://github.com/prometheus-community/helm-charts
@@ -7296,7 +7224,6 @@ addons:
   git_url: https://github.com/kyverno/kyverno
   release_url: https://github.com/kyverno/kyverno/releases/tag/v{vsn}
   helm_repository_url: https://kyverno.github.io/kyverno/
-  eolApiSlug: kyverno
   versions:
   - version: 1.16.0
     kube: ['1.34', '1.33', '1.32', '1.31']
@@ -7556,7 +7483,6 @@ addons:
     images: ['bitnami/kubectl:1.30.2', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.13.0',
       'ghcr.io/kyverno/cleanup-controller:v1.13.0', 'ghcr.io/kyverno/kyverno-cli:v1.13.0',
       'ghcr.io/kyverno/kyverno:v1.13.0', 'ghcr.io/kyverno/kyvernopre:v1.13.0', 'ghcr.io/kyverno/reports-controller:v1.13.0']
-    eolAt: '2025-11-10'
   - version: 1.12.0
     kube: ['1.29', '1.28', '1.27', '1.26']
     requirements: []
@@ -7617,7 +7543,6 @@ addons:
     images: ['bitnami/kubectl:1.28.5', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.12.0',
       'ghcr.io/kyverno/cleanup-controller:v1.12.0', 'ghcr.io/kyverno/kyverno-cli:v1.12.0',
       'ghcr.io/kyverno/kyverno:v1.12.0', 'ghcr.io/kyverno/kyvernopre:v1.12.0', 'ghcr.io/kyverno/reports-controller:v1.12.0']
-    eolAt: '2025-07-31'
   - version: 1.11.0
     kube: ['1.28', '1.27', '1.26', '1.25']
     requirements: []
@@ -7684,7 +7609,6 @@ addons:
     images: ['bitnami/kubectl:1.26.10', 'bitnami/kubectl:1.26.4', 'busybox:1.35',
       'ghcr.io/kyverno/background-controller:v1.11.0', 'ghcr.io/kyverno/cleanup-controller:v1.11.0',
       'ghcr.io/kyverno/kyverno:v1.11.0', 'ghcr.io/kyverno/kyvernopre:v1.11.0', 'ghcr.io/kyverno/reports-controller:v1.11.0']
-    eolAt: '2025-04-25'
   - version: 1.10.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -7762,7 +7686,6 @@ addons:
     images: ['bitnami/kubectl:1.26.4', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.10.0',
       'ghcr.io/kyverno/cleanup-controller:v1.10.0', 'ghcr.io/kyverno/kyverno:v1.10.0',
       'ghcr.io/kyverno/kyvernopre:v1.10.0', 'ghcr.io/kyverno/reports-controller:v1.10.0']
-    eolAt: '2024-10-29'
   - version: 1.9.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -7830,7 +7753,6 @@ addons:
     chart_version: 2.7.0
     images: ['busybox:1.35', 'ghcr.io/kyverno/cleanup-controller:v1.9.0', 'ghcr.io/kyverno/kyverno:v1.9.0',
       'ghcr.io/kyverno/kyvernopre:v1.9.0']
-    eolAt: '2024-04-26'
   - version: 1.8.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
@@ -7877,7 +7799,6 @@ addons:
           on the old CRDs must be updated.]
     chart_version: 2.6.0
     images: [busybox, 'ghcr.io/kyverno/kyverno:v1.8.0', 'ghcr.io/kyverno/kyvernopre:v1.8.0']
-    eolAt: '2023-11-10'
   - version: 1.7.0
     kube: ['1.23', '1.22', '1.21']
     requirements: []
@@ -9431,7 +9352,6 @@ addons:
   git_url: https://github.com/traefik/traefik
   release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
   helm_repository_url: https://traefik.github.io/charts
-  eolApiSlug: traefik
   versions:
   - version: 3.6.6
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -9452,7 +9372,7 @@ addons:
           \ migration guide\u2014treat that as a potential source of breaking/config\
           \ behavior changes and validate against your current config."]
     chart_version: 38.0.2
-    images: ['docker.io/traefik:v3.6.6']
+    images: []
   - version: 3.6.0
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
@@ -9508,7 +9428,6 @@ addons:
           behavior; dashboards/alerts based on span counts may need adjustment.]
     chart_version: 37.0.0
     images: ['docker.io/traefik:v3.5.0']
-    eolAt: '2025-11-07'
   - version: 3.4.0
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
@@ -9536,7 +9455,6 @@ addons:
           going forward).']
     chart_version: 35.4.0
     images: ['docker.io/traefik:v3.4.0']
-    eolAt: '2025-07-23'
   - version: 3.3.6
     kube: ['1.34', '1.33', '1.32', '1.31']
     requirements: []
@@ -9544,13 +9462,11 @@ addons:
     summary: null
     chart_version: 35.2.0
     images: ['docker.io/traefik:v3.3.6']
-    eolAt: '2025-05-05'
   - version: 3.3.0
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2025-05-05'
   - version: 3.2.0
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []
@@ -9558,13 +9474,11 @@ addons:
     summary: null
     chart_version: 33.0.0
     images: ['docker.io/traefik:v3.2.0']
-    eolAt: '2025-01-06'
   - version: 3.1.7
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2024-10-28'
   - version: 3.1.4
     kube: ['1.32', '1.31', '1.30', '1.29']
     requirements: []
@@ -9578,7 +9492,6 @@ addons:
       breaking_changes: []
     chart_version: 31.1.1
     images: ['docker.io/traefik:v3.1.4']
-    eolAt: '2024-10-28'
   - version: 3.1.3
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -9605,7 +9518,6 @@ addons:
           v3 (commonly traefik.io/v1alpha1 depending on resource).']
     chart_version: 31.1.0
     images: ['docker.io/traefik:v3.1.3']
-    eolAt: '2024-10-28'
   - version: 3.0.2
     kube: ['1.31', '1.30', '1.29', '1.28']
     requirements: []
@@ -9613,31 +9525,26 @@ addons:
     summary: null
     chart_version: 28.3.0
     images: ['docker.io/traefik:v3.0.2']
-    eolAt: '2024-07-15'
   - version: 2.11.13
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2026-02-01'
   - version: 2.11.10
     kube: ['1.32', '1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2026-02-01'
   - version: 2.11.4
     kube: ['1.31', '1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2026-02-01'
   - version: 2.10.3
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary: null
-    eolAt: '2024-02-12'
   name: traefik
 - icon: https://velero.io/img/Velero.svg
   git_url: https://github.com/vmware-tanzu/velero
@@ -9962,7 +9869,6 @@ addons:
 - icon: https://avatars.githubusercontent.com/u/33043890?s=48&v=4
   git_url: https://github.com/vitessio/vitess
   release_url: https://github.com/vitessio/vitess/releases/tag/v{vsn}
-  eolApiSlug: vitess
   versions:
   - version: 23.0.0
     kube: ['1.34', '1.33', '1.32', '1.31']
@@ -10055,7 +9961,6 @@ addons:
   release_url: https://github.com/open-policy-agent/gatekeeper/releases/tag/v{vsn}
   helm_repository_url: https://open-policy-agent.github.io/gatekeeper/charts
   chart_name: gatekeeper
-  eolApiSlug: gatekeeper
   versions:
   - version: 3.21.0
     kube: ['1.34', '1.33', '1.32']
@@ -10198,7 +10103,6 @@ addons:
     chart_version: 3.19.1
     images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.1',
       'openpolicyagent/gatekeeper:v3.19.1']
-    eolAt: '2025-11-19'
   - version: 3.19.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -10222,7 +10126,6 @@ addons:
     chart_version: 3.19.0
     images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.0',
       'openpolicyagent/gatekeeper:v3.19.0']
-    eolAt: '2025-11-19'
   - version: 3.18.3
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -10254,7 +10157,6 @@ addons:
     chart_version: 3.18.3
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.18.3',
       'openpolicyagent/gatekeeper:v3.18.3']
-    eolAt: '2025-07-24'
   - version: 3.18.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -10303,7 +10205,6 @@ addons:
     chart_version: 3.18.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.18.0',
       'openpolicyagent/gatekeeper:v3.18.0']
-    eolAt: '2025-07-24'
   - version: 3.17.2
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -10344,7 +10245,6 @@ addons:
     chart_version: 3.17.2
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.17.2',
       'openpolicyagent/gatekeeper:v3.17.2']
-    eolAt: '2025-04-09'
   - version: 3.17.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -10391,7 +10291,6 @@ addons:
     chart_version: 3.17.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.17.0',
       'openpolicyagent/gatekeeper:v3.17.0']
-    eolAt: '2025-04-09'
   - version: 3.16.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -10439,7 +10338,6 @@ addons:
     chart_version: 3.16.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.16.0',
       'openpolicyagent/gatekeeper:v3.16.0']
-    eolAt: '2024-12-12'
   - version: 3.15.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -10479,7 +10377,6 @@ addons:
     chart_version: 3.15.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.15.0',
       'openpolicyagent/gatekeeper:v3.15.0']
-    eolAt: '2024-08-21'
   - version: 3.14.2
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -10495,7 +10392,6 @@ addons:
     chart_version: 3.14.2
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.2',
       'openpolicyagent/gatekeeper:v3.14.2']
-    eolAt: '2024-05-09'
   - version: 3.14.1
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -10545,7 +10441,6 @@ addons:
     chart_version: 3.14.1
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.1',
       'openpolicyagent/gatekeeper:v3.14.1']
-    eolAt: '2024-05-09'
   - version: 3.14.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -10583,7 +10478,6 @@ addons:
     chart_version: 3.14.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.0',
       'openpolicyagent/gatekeeper:v3.14.0']
-    eolAt: '2024-05-09'
   - version: 3.13.2
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -10611,7 +10505,6 @@ addons:
     chart_version: 3.13.2
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.2',
       'openpolicyagent/gatekeeper:v3.13.2']
-    eolAt: '2024-02-05'
   - version: 3.13.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -10654,7 +10547,6 @@ addons:
     chart_version: 3.13.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.0',
       'openpolicyagent/gatekeeper:v3.13.0']
-    eolAt: '2024-02-05'
   - version: 3.12.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -10692,7 +10584,6 @@ addons:
     chart_version: 3.12.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.12.0',
       'openpolicyagent/gatekeeper:v3.12.0']
-    eolAt: '2023-11-01'
   - version: 3.11.1
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -10722,7 +10613,6 @@ addons:
     chart_version: 3.11.1
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.11.1',
       'openpolicyagent/gatekeeper:v3.11.1']
-    eolAt: '2023-08-08'
   - version: 3.11.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
@@ -10774,7 +10664,6 @@ addons:
     chart_version: 3.11.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.11.0',
       'openpolicyagent/gatekeeper:v3.11.0']
-    eolAt: '2023-08-08'
   - version: 3.10.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
@@ -11169,7 +11058,6 @@ addons:
   release_url: https://github.com/projectcalico/calico/releases/tag/v{vsn}
   helm_repository_url: https://docs.tigera.io/calico/charts
   chart_name: tigera-operator
-  eolApiSlug: calico
   versions:
   - version: 3.31.3
     kube: ['1.30', '1.29', '1.28', '1.27']
@@ -11199,7 +11087,6 @@ addons:
     summary: null
     chart_version: 3.29.0
     images: ['quay.io/tigera/operator:v1.36.0']
-    eolAt: '2025-10-21'
   - version: 3.28.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11207,7 +11094,6 @@ addons:
     summary: null
     chart_version: 3.28.0
     images: ['quay.io/tigera/operator:v1.34.0']
-    eolAt: '2025-05-05'
   - version: 3.27.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11215,7 +11101,6 @@ addons:
     summary: null
     chart_version: 3.27.0
     images: ['quay.io/tigera/operator:v1.32.3']
-    eolAt: '2024-10-29'
   - version: 3.26.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11223,7 +11108,6 @@ addons:
     summary: null
     chart_version: 3.26.0
     images: ['quay.io/tigera/operator:v1.30.0']
-    eolAt: '2024-05-11'
   - version: 3.25.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11231,7 +11115,6 @@ addons:
     summary: null
     chart_version: 3.25.0
     images: ['quay.io/tigera/operator:v1.29.0']
-    eolAt: '2023-12-15'
   - version: 3.24.1
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11265,7 +11148,6 @@ addons:
   git_url: https://github.com/argoproj/argo-cd
   release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
   helm_repository_url: https://argoproj.github.io/argo-helm
-  eolApiSlug: argocd
   versions:
   - version: 3.2.5
     kube: ['1.35', '1.34', '1.33']
@@ -11432,7 +11314,6 @@ addons:
     chart_version: 7.9.1
     images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
       'quay.io/argoproj/argocd:v2.14.11']
-    eolAt: '2025-11-04'
   - version: 2.14.1
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -11441,7 +11322,6 @@ addons:
     chart_version: 7.8.0
     images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.2-alpine',
       'quay.io/argoproj/argocd:v2.14.1']
-    eolAt: '2025-11-04'
   - version: 2.13.2
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -11458,7 +11338,6 @@ addons:
     chart_version: 7.7.12
     images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
       'quay.io/argoproj/argocd:v2.13.2']
-    eolAt: '2025-08-13'
   - version: 2.13.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -11476,7 +11355,6 @@ addons:
     chart_version: 7.7.3
     images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
       'quay.io/argoproj/argocd:v2.13.0']
-    eolAt: '2025-08-13'
   - version: 2.12.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -11494,7 +11372,6 @@ addons:
     chart_version: 7.4.3
     images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
       'quay.io/argoproj/argocd:v2.12.0']
-    eolAt: '2025-05-06'
   - version: 2.11.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -11503,7 +11380,6 @@ addons:
     chart_version: 6.9.3
     images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
       'quay.io/argoproj/argocd:v2.11.0']
-    eolAt: '2025-02-03'
   - version: 2.10.7
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -11533,7 +11409,6 @@ addons:
     chart_version: 6.7.15
     images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
       'quay.io/argoproj/argocd:v2.10.7']
-    eolAt: '2024-11-04'
   - version: 2.10.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -11568,7 +11443,6 @@ addons:
     chart_version: 6.0.13
     images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.0.15-alpine',
       'quay.io/argoproj/argocd:v2.10.0']
-    eolAt: '2024-11-04'
   - version: 2.9.4
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -11594,7 +11468,6 @@ addons:
     chart_version: 5.53.1
     images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
       'quay.io/argoproj/argocd:v2.9.4']
-    eolAt: '2024-08-05'
   - version: 2.9.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -11625,7 +11498,6 @@ addons:
     chart_version: 5.51.1
     images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
       'quay.io/argoproj/argocd:v2.9.0']
-    eolAt: '2024-08-05'
   - version: 2.8.4
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -11646,7 +11518,6 @@ addons:
     chart_version: 5.47.0
     images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
       'quay.io/argoproj/argocd:v2.8.4']
-    eolAt: '2024-05-07'
   - version: 2.8.3
     kube: ['1.28', '1.27', '1.24']
     requirements: []
@@ -11655,7 +11526,6 @@ addons:
     chart_version: 5.46.2
     images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.11-alpine',
       'quay.io/argoproj/argocd:v2.8.3']
-    eolAt: '2024-05-07'
   name: argo-cd
 - icon: https://avatars.githubusercontent.com/u/16866914
   git_url: https://github.com/vectordotdev/vector/

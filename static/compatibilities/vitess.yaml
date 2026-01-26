@@ -88,3 +88,4 @@ versions:
   requirements: []
   incompatibilities: []
   summary: null
+name: vitess

@@ -60,9 +60,9 @@ for name in manifest["names"]:
     slug = addon.get("eolApiSlug")
     if slug:
         enrich_addon_with_eol(addon, slug)
+        # Persist per-addon EOL data back into its YAML when present.
+        write_yaml(f"../../static/compatibilities/{name}.yaml", addon)
     
     addons.append(addon)
-
-write_yaml("../../static/compatibilities.yaml", {"addons": addons})
 
 generate_kube_changelog()
