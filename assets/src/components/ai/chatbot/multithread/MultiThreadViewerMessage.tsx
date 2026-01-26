@@ -14,16 +14,27 @@ export function MultiThreadViewerMessage({
 }) {
   switch (message.type) {
     case ChatType.Tool:
-      return <ToolCallLabel message={message} />
+      return (
+        <SimpleToolCall
+          content={message.content ?? ''}
+          attributes={message.attributes}
+        />
+      )
     case ChatType.Text:
     default:
       return <SimplifiedMarkdown text={message.content ?? ''} />
   }
 }
 
-function ToolCallLabel({ message }: { message: ChatFragment }) {
+export function SimpleToolCall({
+  content,
+  attributes,
+}: {
+  content: ChatFragment['content']
+  attributes: ChatFragment['attributes']
+}) {
   const [isOpen, setIsOpen] = useState(false)
-  const toolName = message.attributes?.tool?.name ?? ''
+  const toolName = attributes?.tool?.name ?? ''
 
   return (
     <>
@@ -37,8 +48,8 @@ function ToolCallLabel({ message }: { message: ChatFragment }) {
         size="large"
       >
         <ToolCallContent
-          content={message.content ?? ''}
-          attributes={message.attributes}
+          content={content ?? ''}
+          attributes={attributes}
         />
       </Modal>
     </>
@@ -148,7 +159,7 @@ const SimpleMarkdownSC = styled.div(({ theme }) => ({
   color: theme.colors['text-light'],
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
+  gap: theme.spacing.small,
 }))
 
 const ParagraphSC = styled.p(() => ({

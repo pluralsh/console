@@ -65,4 +65,5 @@ const CardSC = styled(Card)(({ theme }) => ({
   alignItems: 'flex-start',
   gap: theme.spacing.medium,
   padding: theme.spacing.large,
+  borderColor: theme.colors['border-fill-two'],
 }))

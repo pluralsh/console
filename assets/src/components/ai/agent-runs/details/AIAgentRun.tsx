@@ -9,6 +9,7 @@ import {
 import { RunShareMenu } from 'components/ai/RunShareMenu.tsx'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
@@ -26,9 +27,10 @@ import {
   getAgentRunAbsPath,
 } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
-import { getAIBreadcrumbs } from '../../AI.tsx'
-import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
 import { isNonNullable } from 'utils/isNonNullable.ts'
+import { getAIBreadcrumbs } from '../../AI.tsx'
+import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
+import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
 import { PullRequestCallout } from './PullRequestCallout.tsx'
 
 const getAgentRunBreadcrumbs = (runId: string, prompt: string) => [
@@ -80,8 +82,9 @@ export function AIAgentRun() {
         paddingRight={spacing.xsmall}
         overflow="auto"
       >
-        <StretchedFlex>
+        <StretchedFlex gap="xxxxxxlarge">
           <StackedText
+            truncate
             loading={runLoading}
             first={run?.prompt}
             firstPartialType="subtitle1"
@@ -105,7 +108,7 @@ export function AIAgentRun() {
           </Flex>
         </StretchedFlex>
         <Divider backgroundColor="border" />
-        {run?.error && (
+        {run?.error ? (
           <GqlError
             header="There was an error during this run."
             error={run.error}
@@ -119,13 +122,32 @@ export function AIAgentRun() {
               </Button>
             }
           />
+        ) : (
+          <>
+            {run?.pullRequests?.filter(isNonNullable)?.map((pr) => (
+              <PullRequestCallout
+                key={pr.id}
+                pullRequest={pr}
+              />
+            ))}
+            <StackedText
+              first="Agent activity"
+              firstPartialType="body2Bold"
+              firstColor="text"
+              second="Trace agent progress during this run"
+              secondPartialType="body2"
+              secondColor="text-light"
+            />
+            {!!run ? (
+              <AIAgentRunMessages run={run} />
+            ) : runLoading ? (
+              <RectangleSkeleton
+                $width="100%"
+                $height={400}
+              />
+            ) : null}
+          </>
         )}
-        {run?.pullRequests?.filter(isNonNullable)?.map((pr) => (
-          <PullRequestCallout
-            key={pr.id}
-            pullRequest={pr}
-          />
-        ))}
       </Flex>
       <AgentRunSidecar
         run={run}
@@ -141,6 +163,4 @@ const WrapperSC = styled.div(({ theme }) => ({
   maxWidth: theme.breakpoints.desktopLarge,
   alignSelf: 'center',
   width: '100%',
-  height: '100%',
-  minHeight: 0,
 }))

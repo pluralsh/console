@@ -37,10 +37,11 @@ import { ReactElement, useState } from 'react'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { ToolCallContent } from './ToolCallContent'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
-import styled, { useTheme } from 'styled-components'
+import styled, { StyledObject, useTheme } from 'styled-components'
 import { iconUrl as getIconUrl } from 'utils/icon'
 import { ChatMessageActions } from './ChatMessage'
 import CloudObjectsCard from './tools/CloudObjectsCard.tsx'
+import { SimpleToolCall } from './multithread/MultiThreadViewerMessage.tsx'
 
 type ChatMessageContentProps = {
   id?: string
@@ -58,6 +59,8 @@ type ChatMessageContentProps = {
   highlightToolContent?: boolean
   session?: Nullable<AgentSessionFragment>
   isStreaming?: boolean
+  toolDisplayType?: 'accordion' | 'simple'
+  userMsgWrapperStyle?: StyledObject
 }
 
 export function ChatMessageContent({
@@ -76,6 +79,8 @@ export function ChatMessageContent({
   highlightToolContent = true,
   session,
   isStreaming = false,
+  toolDisplayType,
+  userMsgWrapperStyle,
 }: ChatMessageContentProps) {
   switch (type) {
     case ChatType.File:
@@ -90,7 +95,7 @@ export function ChatMessageContent({
         />
       )
     case ChatType.Tool:
-      return (
+      return toolDisplayType === 'accordion' ? (
         <ToolMessageContent
           id={id}
           content={content}
@@ -99,6 +104,11 @@ export function ChatMessageContent({
           confirmedAt={confirmedAt}
           serverName={serverName}
           highlightToolContent={highlightToolContent}
+        />
+      ) : (
+        <SimpleToolCall
+          content={content ?? ''}
+          attributes={attributes}
         />
       )
     case ChatType.ImplementationPlan:
@@ -121,7 +131,10 @@ export function ChatMessageContent({
     case ChatType.Text:
     default:
       return (
-        <DefaultWrapperSC $role={role ?? AiRole.User}>
+        <DefaultWrapperSC
+          $role={role ?? AiRole.User}
+          css={role === AiRole.User ? userMsgWrapperStyle : undefined}
+        >
           <Markdown
             text={content ?? ''}
             isStreaming={isStreaming}
@@ -541,7 +554,7 @@ function ToolMessageDetails({ content, attributes }): ReactElement | null {
 const DefaultWrapperSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
   maxWidth: '100%',
   overflow: 'auto',
-  ...(!($role === AiRole.Assistant || $role === AiRole.System) && {
+  ...($role === AiRole.User && {
     backgroundColor: theme.colors['fill-zero'],
     border: theme.borders.default,
     borderRadius: theme.borderRadiuses.large,

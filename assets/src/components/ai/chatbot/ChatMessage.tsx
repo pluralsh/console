@@ -27,7 +27,7 @@ import {
 
 import { ComponentPropsWithRef, useRef, useState } from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
-import styled, { useTheme } from 'styled-components'
+import styled, { StyledObject, useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { useChatbot } from '../AIContext'
 import { ChatMessageContent } from './ChatMessageContent'
@@ -50,6 +50,8 @@ export function ChatMessage({
   updatedAt,
   session,
   isStreaming = false,
+  toolDisplayType = 'accordion',
+  userMsgWrapperStyle,
   ...props
 }: {
   id?: string
@@ -64,11 +66,13 @@ export function ChatMessage({
   confirm?: Nullable<boolean>
   confirmedAt?: Nullable<string>
   serverName?: Nullable<string>
-  disableActions?: boolean
+  disableActions?: false | 'keep-spacing' | 'no-spacing'
   highlightToolContent?: boolean
   updatedAt?: Nullable<string>
   session?: Nullable<AgentSessionFragment>
   isStreaming?: boolean
+  toolDisplayType?: 'accordion' | 'simple'
+  userMsgWrapperStyle?: StyledObject
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
   const actionsTimeoutRef = useRef<NodeJS.Timeout>(undefined)
@@ -111,8 +115,10 @@ export function ChatMessage({
         prAutomation={prAutomation}
         session={session}
         isStreaming={isStreaming}
+        toolDisplayType={toolDisplayType}
+        userMsgWrapperStyle={userMsgWrapperStyle}
       />
-      {type !== ChatType.File && (
+      {type !== ChatType.File && disableActions !== 'no-spacing' && (
         <ChatMessageActions
           id={id ?? ''}
           seq={seq}

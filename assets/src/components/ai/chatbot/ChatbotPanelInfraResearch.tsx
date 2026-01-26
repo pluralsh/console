@@ -40,7 +40,7 @@ export function ChatbotPanelInfraResearch() {
     )
 
   return (
-    <WrapperSC>
+    <GradientWrapperSC>
       {isLoading ? (
         <RectangleSkeleton
           $width="100%"
@@ -71,11 +71,11 @@ export function ChatbotPanelInfraResearch() {
         threads={threads}
         isExpectingStream={isRunning}
       />
-    </WrapperSC>
+    </GradientWrapperSC>
   )
 }
 
-const WrapperSC = styled.div(({ theme }) => ({
+const GradientWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.small,
   flexDirection: 'column',

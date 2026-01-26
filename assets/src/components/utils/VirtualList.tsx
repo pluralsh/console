@@ -1,6 +1,12 @@
-import { Flex, Spinner, VirtualSlice } from '@pluralsh/design-system'
+import {
+  Flex,
+  SemanticSpacingKey,
+  Spinner,
+  VirtualSlice,
+} from '@pluralsh/design-system'
 import type { VirtualItem } from '@tanstack/react-virtual'
 import {
+  ComponentPropsWithoutRef,
   ReactNode,
   RefObject,
   useCallback,
@@ -9,7 +15,7 @@ import {
 } from 'react'
 import { mergeRefs } from 'react-merge-refs'
 import styled, { useTheme } from 'styled-components'
-import { VirtualizerProps, VList, VListHandle } from 'virtua'
+import { VList, VListHandle } from 'virtua'
 
 type BaseProps<T> = {
   data: T[]
@@ -20,10 +26,11 @@ type BaseProps<T> = {
   getRowId?: (row: T) => string
   topContent?: ReactNode
   bottomContent?: ReactNode
+  itemGap?: SemanticSpacingKey
   // if true, scroll will start at bottom on mount, and fetches will be triggered at the top
   isReversed?: boolean
   onVirtualSliceChange?: (slice: VirtualSlice) => void
-} & Omit<VirtualizerProps, 'ref' | 'children'>
+} & Omit<ComponentPropsWithoutRef<typeof VList>, 'children'>
 
 type Renderer<T, M> = (props: {
   rowData: T
@@ -50,9 +57,11 @@ export function VirtualList<T, M>({
   meta,
   topContent,
   bottomContent,
+  itemGap = 'none',
   onVirtualSliceChange,
   ...props
 }: BaseProps<T> & { renderer: Renderer<T, M | undefined>; meta?: M }) {
+  const { spacing } = useTheme()
   const internalRef = useRef<VListHandle>(null)
   const hasInitiallyAligned = useRef(false)
   const shouldStickToBottom = useRef(true)
@@ -60,8 +69,13 @@ export function VirtualList<T, M>({
   // for doing slice polling similar to our table component
   const emitVirtualSlice = useCallback(() => {
     if (!onVirtualSliceChange || !internalRef.current) return
-    const { findStartIndex, findEndIndex, getItemOffset, getItemSize } =
-      internalRef.current
+    const {
+      findItemIndex,
+      getItemOffset,
+      getItemSize,
+      scrollOffset,
+      viewportSize,
+    } = internalRef.current
 
     const toVirtualItem = (index: number): VirtualItem => {
       const [start, size] = [getItemOffset(index), getItemSize(index)]
@@ -70,8 +84,8 @@ export function VirtualList<T, M>({
     }
 
     onVirtualSliceChange({
-      start: toVirtualItem(findStartIndex()),
-      end: toVirtualItem(findEndIndex()),
+      start: toVirtualItem(findItemIndex(scrollOffset)),
+      end: toVirtualItem(findItemIndex(scrollOffset + viewportSize)),
     })
   }, [onVirtualSliceChange])
 
@@ -94,8 +108,11 @@ export function VirtualList<T, M>({
   const onScroll = (offset: number) => {
     if (!internalRef.current) return
     emitVirtualSlice()
-    const { viewportSize, scrollSize, findStartIndex, findEndIndex } =
-      internalRef.current
+    const { viewportSize, scrollSize, findItemIndex } = internalRef.current
+    const [startIndex, endIndex] = [
+      findItemIndex(offset),
+      findItemIndex(offset + viewportSize),
+    ]
 
     // enable sticky bottom when scrolled there (within 5px buffer), otherwise disable
     if (scrollSize - (offset + viewportSize) < 5)
@@ -105,8 +122,7 @@ export function VirtualList<T, M>({
     // infinite scroll (weird indices add a buffer and account for top/bottom content)
     if (!hasNextPage || !hasInitiallyAligned.current || isLoadingNextPage)
       return
-    if (isReversed ? findStartIndex() <= 1 : findEndIndex() >= data.length)
-      loadNextPage?.()
+    if (isReversed ? startIndex <= 1 : endIndex >= data.length) loadNextPage?.()
   }
 
   return (
@@ -117,12 +133,14 @@ export function VirtualList<T, M>({
         (internalRef.current?.scrollOffset ?? Infinity) < 50 &&
         !shouldStickToBottom.current
       }
-      css={{ height: '100%', width: '100%' }}
       onScroll={onScroll}
       {...props}
       ref={mergeRefs([listRef, internalRef])}
     >
-      <div key="topContent">
+      <div
+        key="topContent"
+        style={{ paddingBottom: spacing[!!topContent ? itemGap : 'none'] }}
+      >
         {isLoadingNextPage && isReversed && <LoaderRow />}
         {topContent}
       </div>
@@ -134,6 +152,7 @@ export function VirtualList<T, M>({
             (rowData as any).node?.id ||
             index
           }
+          $gap={itemGap}
         >
           {renderer({ rowData, meta, index })}
         </ItemSC>
@@ -146,8 +165,9 @@ export function VirtualList<T, M>({
   )
 }
 
-const ItemSC = styled.div((_) => ({
+const ItemSC = styled.div<{ $gap?: SemanticSpacingKey }>(({ theme, $gap }) => ({
   width: '100%',
+  ...($gap ? { paddingBottom: theme.spacing[$gap] } : {}),
 }))
 
 function LoaderRow() {

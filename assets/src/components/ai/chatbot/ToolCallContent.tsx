@@ -4,11 +4,6 @@ import { ChatTypeAttributes } from 'generated/graphql'
 import isJson from 'is-json'
 import styled, { useTheme } from 'styled-components'
 
-type ToolCallContentProps = {
-  content: string
-  attributes?: Nullable<ChatTypeAttributes>
-}
-
 export enum MessageFormat {
   Json = 'json',
   Markdown = 'markdown',
@@ -27,7 +22,13 @@ export function prettifyJson(message: string): string {
   }
 }
 
-export function ToolCallContent({ content, attributes }: ToolCallContentProps) {
+export function ToolCallContent({
+  content,
+  attributes,
+}: {
+  content: string
+  attributes: Nullable<ChatTypeAttributes>
+}) {
   const { spacing } = useTheme()
   const format = messageFormat(content)
 
