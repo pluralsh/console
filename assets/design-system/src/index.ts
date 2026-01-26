@@ -76,6 +76,8 @@ export {
 export { default as ListBoxItemChipList } from './components/ListBoxItemChipList'
 export { default as LoadingSpinner } from './components/LoadingSpinner'
 export { default as LoopingLogo } from './components/LoopingLogo'
+export { default as LoopingLogoAlternative } from './components/LoopingLogoAlternative'
+export { default as LoopingLogoOutlineAlternative } from './components/LoopingLogoOutlineAlternative'
 export { default as Markdown, getLastStringChild } from './components/Markdown'
 export {
   downloadMermaidSvg,
