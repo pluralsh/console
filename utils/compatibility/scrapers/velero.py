@@ -62,7 +62,7 @@ def extract_table_data(target_tables, chart_versions):
                             break
                 
                 version_info = OrderedDict([
-                    ("version", velero_version),
+                    ("version", velero_version.strip()),
                     ("kube", kube_versions),
                     ("requirements", []),
                     ("incompatibilities", [])
