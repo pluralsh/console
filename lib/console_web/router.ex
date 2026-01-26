@@ -13,6 +13,7 @@ defmodule ConsoleWeb.Router do
 
   pipeline :openapi do
     plug :accepts, ["json"]
+    plug ConsoleWeb.Plugs.EnsureAuthenticated
     plug Oaskit.Plugs.SpecProvider, spec: Console.OpenAPI
   end
 
@@ -101,10 +102,10 @@ defmodule ConsoleWeb.Router do
       get "/git/sentinels/tarballs", GitController, :sentinel_tarball
     end
 
-    scope "/api", ConsoleWeb do
+    scope "/v1", ConsoleWeb do
       pipe_through [:openapi]
 
-      scope "/v1", OpenAPI do
+      scope "/api", OpenAPI do
         get "/me", UserController, :me
 
         scope "/cd", CD do
@@ -150,6 +151,20 @@ defmodule ConsoleWeb.Router do
           get "/connections/:id",    ConnectionController, :show
           put "/connections/:id",    ConnectionController, :update
           delete "/connections/:id", ConnectionController, :delete
+
+          get "/pullrequests",     PullRequestController, :index
+          get "/pullrequests/:id", PullRequestController, :show
+
+          post "/catalogs",       CatalogController, :create
+          get "/catalogs",        CatalogController, :index
+          get "/catalogs/:id",    CatalogController, :show
+          put "/catalogs/:id",    CatalogController, :update
+          delete "/catalogs/:id", CatalogController, :delete
+
+          get "/catalogs/:catalog_id/prautomations",  PrAutomationController, :index_for_catalog
+          get "/prautomations",                       PrAutomationController, :index
+          get "/prautomations/:id",                   PrAutomationController, :show
+          post "/prautomations/:id/invoke",           PrAutomationController, :invoke
         end
 
         post "/stacks", StackController, :create
@@ -163,6 +178,25 @@ defmodule ConsoleWeb.Router do
 
         get "/projects", ProjectController, :index
         get "/projects/:id", ProjectController, :show
+
+        scope "/ai", AI do
+          get "/runtimes",     AgentRuntimeController, :index
+          get "/runtimes/:id", AgentRuntimeController, :show
+
+          post "/runs",       AgentRunController, :create
+          get "/runs",        AgentRunController, :index
+          get "/runs/:id",    AgentRunController, :show
+
+          post "/sessions",    AgentSessionController, :create
+          get "/sessions",     AgentSessionController, :index
+          get "/sessions/:id", AgentSessionController, :show
+
+          get "/sentinels",                   SentinelController, :index
+          get "/sentinels/:id",               SentinelController, :show
+          post "/sentinels/:id/trigger",      SentinelController, :trigger
+          get "/sentinels/:sentinel_id/runs", SentinelRunController, :index
+          get "/sentinelruns/:id",            SentinelRunController, :show
+        end
       end
     end
 

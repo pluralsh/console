@@ -10,7 +10,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/git/repositories/#{repo.id}")
+        |> get("/v1/api/cd/git/repositories/#{repo.id}")
         |> json_response(200)
 
       assert result["id"] == repo.id
@@ -26,7 +26,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/git/repositories/url", url: repo.url)
+        |> get("/v1/api/cd/git/repositories/url", url: repo.url)
         |> json_response(200)
 
       assert result["id"] == repo.id
@@ -39,7 +39,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
       assert_raise Ecto.NoResultsError, fn ->
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/git/repositories/url", url: "https://github.com/nonexistent/repo.git")
+        |> get("/v1/api/cd/git/repositories/url", url: "https://github.com/nonexistent/repo.git")
         |> json_response(404)
       end
     end
@@ -53,7 +53,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/git/repositories")
+        |> get("/v1/api/cd/git/repositories")
         |> json_response(200)
 
       assert ids_equal(results, repos)
@@ -65,7 +65,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/cd/git/repositories", %{url: "https://github.com/pluralsh/test.git"})
+        |> json_post("/v1/api/cd/git/repositories", %{url: "https://github.com/pluralsh/test.git"})
         |> json_response(200)
 
       assert result["id"]
@@ -79,7 +79,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_post("/api/v1/cd/git/repositories", %{url: "https://github.com/pluralsh/test.git"})
+        |> json_post("/v1/api/cd/git/repositories", %{url: "https://github.com/pluralsh/test.git"})
         |> json_response(200)
 
       assert result["id"]
@@ -89,7 +89,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
     test "non-authorized users cannot create a git repository", %{conn: conn} do
       conn
       |> add_auth_headers(insert(:user))
-      |> json_post("/api/v1/cd/git/repositories", %{url: "https://github.com/pluralsh/test.git"})
+      |> json_post("/v1/api/cd/git/repositories", %{url: "https://github.com/pluralsh/test.git"})
       |> json_response(403)
     end
   end
@@ -101,7 +101,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_put("/api/v1/cd/git/repositories/#{repo.id}", %{url: "https://github.com/pluralsh/updated.git"})
+        |> json_put("/v1/api/cd/git/repositories/#{repo.id}", %{url: "https://github.com/pluralsh/updated.git"})
         |> json_response(200)
 
       assert result["id"] == repo.id
@@ -116,7 +116,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_put("/api/v1/cd/git/repositories/#{repo.id}", %{url: "https://github.com/pluralsh/updated.git"})
+        |> json_put("/v1/api/cd/git/repositories/#{repo.id}", %{url: "https://github.com/pluralsh/updated.git"})
         |> json_response(200)
 
       assert result["id"] == repo.id
@@ -128,7 +128,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
 
       conn
       |> add_auth_headers(insert(:user))
-      |> json_put("/api/v1/cd/git/repositories/#{repo.id}", %{url: "https://github.com/pluralsh/updated.git"})
+      |> json_put("/v1/api/cd/git/repositories/#{repo.id}", %{url: "https://github.com/pluralsh/updated.git"})
       |> json_response(403)
     end
   end
@@ -140,7 +140,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> delete("/api/v1/cd/git/repositories/#{repo.id}")
+        |> delete("/v1/api/cd/git/repositories/#{repo.id}")
         |> json_response(200)
 
       assert result["id"] == repo.id
@@ -155,7 +155,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> delete("/api/v1/cd/git/repositories/#{repo.id}")
+        |> delete("/v1/api/cd/git/repositories/#{repo.id}")
         |> json_response(200)
 
       assert result["id"] == repo.id
@@ -167,7 +167,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
 
       conn
       |> add_auth_headers(insert(:user))
-      |> delete("/api/v1/cd/git/repositories/#{repo.id}")
+      |> delete("/v1/api/cd/git/repositories/#{repo.id}")
       |> json_response(403)
     end
   end

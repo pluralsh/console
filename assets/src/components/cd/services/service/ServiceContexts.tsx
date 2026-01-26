@@ -5,7 +5,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { Body2P } from 'components/utils/typography/Text'
 import { ServiceContextFragment } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
-import { useServiceContext } from './ServiceDetails'
+import { useServiceContext } from './ServiceDetailsContext'
 
 const columnHelper = createColumnHelper<ServiceContextFragment>()
 

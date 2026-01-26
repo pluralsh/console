@@ -26,11 +26,15 @@ spec:
         prometheus.io/path: "/metrics"
         prometheus.io/port: "9090"
         checksum/config: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- if .Values.aiProxy.enabled }}
+        checksum/nexus-config: {{ include (print $.Template.BasePath "/nexus-secret.yaml") . | sha256sum }}
+        {{- end }}
+
     spec:
       serviceAccountName: console
     {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+        {{ toYaml . | nindent 8 }}
     {{- end }}
       {{ if .Values.console.securityContext }}
       securityContext:
@@ -72,11 +76,11 @@ spec:
         - secretRef:
             name: console-env
         env:
-        {{ include "console.env" . | nindent 8 }}
         - name: REPLICAS
           value: {{ .Values.replicaCount | quote }}
+        {{ include "console.env" . | nindent 8 }}
         {{- if  .Values.extraEnv }}
-        {{- toYaml .Values.extraEnv | nindent 8 }}
+        {{ toYaml .Values.extraEnv | nindent 8 }}
         {{- end }}
         volumeMounts:
         - name: temp-dir
@@ -119,6 +123,27 @@ spec:
         {{ toYaml .Values.readinessProbe | nindent 10 }}
         resources:
         {{- toYaml .Values.resources | nindent 10 }}
+      {{- if .Values.aiProxy.enabled }}
+      - name: nexus
+        {{ if .Values.console.containerSecurityContext }}
+        securityContext:
+        {{- toYaml .Values.console.containerSecurityContext | nindent 10 }}
+        {{ end }}
+        image: "{{ .Values.global.registry }}/{{ .Values.aiProxy.image.repository }}:{{ .Values.aiProxy.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.aiProxy.image.pullPolicy }}
+        args:
+        - --config=/home/nexus/config.yaml
+        {{ if .Values.aiProxy.image.extraArgs }}
+        {{ toYaml .Values.aiProxy.image.extraArgs | nindent 8 }}
+        {{ end }}
+        ports:
+        - name: nexus-http
+          containerPort: 8080
+        volumeMounts:
+        - name: nexus-config
+          mountPath: /home/nexus
+          readOnly: true
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -133,11 +158,11 @@ spec:
       {{- end }}
       volumes:
       - name: temp-dir
-        emptyDir: {}
+        emptyDir: { }
       - name: conf-dir
-        emptyDir: {}
+        emptyDir: { }
       - name: home-cache-dir
-        emptyDir: {}
+        emptyDir: { }
       {{ if .Values.cloud.pgRootCert }}
       - name: pg-cert
         secret:
@@ -145,12 +170,17 @@ spec:
       {{ end }}
       {{ if .Values.cliContainer.enabled }}
       - name: cli-override
-        emptyDir: {}
+        emptyDir: { }
       {{ end }}
       {{- if or .Values.secrets.identity .Values.secrets.key }}
       - name: console-conf
         secret:
           secretName: console-conf
+      {{- end }}
+      {{- if .Values.aiProxy.enabled }}
+      - name: nexus-config
+        secret:
+          secretName: nexus-config
       {{- end }}
       {{ if .Values.global.additionalVolumes }}
       {{ toYaml .Values.global.additionalVolumes | nindent 6 }}

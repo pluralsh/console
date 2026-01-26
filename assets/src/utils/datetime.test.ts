@@ -7,7 +7,12 @@ import {
   fromNow,
   toDateOrUndef,
   formatLocalizedDateTime,
+  sortDatesAsc,
+  sortDatesDesc,
+  type DateParam,
+  filterValidDates,
 } from './datetime'
+import dayjs from 'dayjs'
 
 describe('datetime utils', () => {
   beforeEach(() => {
@@ -108,6 +113,42 @@ describe('datetime utils', () => {
       expect(formatLocalizedDateTime('2024-01-15T12:00:00Z')).toMatch(
         /Jan 15, 2024/
       )
+    })
+  })
+
+  describe('sortDatesAsc/sortDatesDesc', () => {
+    const mixedDates: DateParam[] = [
+      '2024-01-15T12:00:00Z',
+      '2024-01-15T10:00:00',
+      new Date('2024-01-14T12:00:00Z'),
+      null,
+      'invalid',
+      undefined,
+      '2024-01-15T12:00:00+02:00',
+    ]
+    const assertSorted = (values: DateParam[], direction: 'asc' | 'desc') => {
+      const validValues = filterValidDates(values)
+      for (let i = 1; i < validValues.length; i += 1) {
+        const prev = dayjs(validValues[i - 1]).valueOf()
+        const current = dayjs(validValues[i]).valueOf()
+        if (direction === 'asc') expect(prev).toBeLessThanOrEqual(current)
+        else expect(prev).toBeGreaterThanOrEqual(current)
+      }
+    }
+
+    it('should sort increasing with mixed ISO formats and invalids', () => {
+      const sorted = mixedDates.toSorted(sortDatesAsc)
+      assertSorted(sorted, 'asc')
+      expect(sorted).toContain(null)
+      expect(sorted).toContain('invalid')
+      expect(sorted).toContain(undefined)
+    })
+    it('should sort decreasing with mixed ISO formats and invalids', () => {
+      const sorted = mixedDates.toSorted(sortDatesDesc)
+      assertSorted(sorted, 'desc')
+      expect(sorted).toContain(null)
+      expect(sorted).toContain('invalid')
+      expect(sorted).toContain(undefined)
     })
   })
 })

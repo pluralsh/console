@@ -58,6 +58,12 @@ fragment AgentRuntime on AgentRuntime {
   }
 }
 
+fragment AgentRunRepository on AgentRunRepository {
+  id
+  url
+  lastUsedAt
+}
+
 fragment AgentMessage on AgentMessage {
   id
   seq
@@ -154,6 +160,27 @@ query AgentRuntime($id: ID!) {
   }
 }
 
+query AgentRunPodLogs($runId: ID!, $container: String!, $sinceSeconds: Int!) {
+  agentRun(id: $runId) {
+    pod {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
+    }
+  }
+}
+
+query AgentRunRepositories($after: String, $first: Int = 100, $q: String) {
+  agentRunRepositories(after: $after, first: $first, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AgentRunRepository
+      }
+    }
+  }
+}
+
 mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {
   createAgentRun(runtimeId: $runtimeId, attributes: $attributes) {
     ...AgentRun
@@ -194,14 +221,6 @@ subscription AgentRunDelta($runId: ID!) {
         name
         namespace
       }
-    }
-  }
-}
-
-query AgentRunPodLogs($runId: ID!, $container: String!, $sinceSeconds: Int!) {
-  agentRun(id: $runId) {
-    pod {
-      logs(container: $container, sinceSeconds: $sinceSeconds)
     }
   }
 }

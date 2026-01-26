@@ -17,7 +17,7 @@ import { isEmpty } from 'lodash'
 
 import DiffViewer from '../../../utils/DiffViewer'
 
-import { useServiceContext } from './ServiceDetails'
+import { useServiceContext } from './ServiceDetailsContext'
 
 const SEPARATOR = '\n---\n'
 const NEW_LINE_REGEXP = /^\s+|\s+$/g

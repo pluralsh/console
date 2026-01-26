@@ -36,9 +36,9 @@ replicaCount: 2
 homeDir: /home/console
 
 # podLabels is the set of pod labels to apply to spec.template.metadata.labels
-podLabels: {}
+podLabels: { }
 # podAnnotations is the set of pod annotations to apply to spec.template.metadata.annotations
-podAnnotations: {}
+podAnnotations: { }
 
 # migrator is used to configure the console migration Job defined in migration.yaml, specifically the migrator container
 migrator:
@@ -74,7 +74,7 @@ console:
   containerSecurityContext:
     capabilities:
       drop:
-        - ALL
+      - ALL
     allowPrivilegeEscalation: false
     runAsNonRoot: false
     readOnlyRootFilesystem: true
@@ -122,6 +122,30 @@ ociAuth:
   tag: ~
   imagePullPolicy: IfNotPresent
 
+aiProxy:
+  enabled: false
+  image:
+    repository: nexus
+    tag: ~
+    pullPolicy: IfNotPresent
+    extraArgs: []
+  config:
+    server:
+      address: ":8080"
+      path: /ext/ai
+      readTimeout: "30s"
+      idleTimeout: "120s"
+    console:
+      grpcEndpoint: "localhost:50051"
+      configTTL: "60s"
+      requestTimeout: "10s"
+      connectionRetry:
+        maxAttempts: 5
+        initialBackoff: "1s"
+        maxBackoff: "30s"
+    observability:
+      logLevel: info
+
 # initContainers is used to create a list of init containers for your console deployment
 initContainers: []
 
@@ -136,7 +160,7 @@ cliContainer:
 # serviceAccount is used to determine if a service account should be created. If create is set to true, a service account will be created with the name of console
 serviceAccount:
   create: true
-  annotations: {}
+  annotations: { }
 
 # extraEnv is used to add environment variables to the console container
 extraEnv: ~
@@ -269,7 +293,7 @@ resources:
   #   memory: 128Mi
 
 # nodeSelector for console deployment and git-server deployment, see https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
-nodeSelector: {}
+nodeSelector: { }
 
 # tolerations for console deployment and git-server deployment, see https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
 tolerations: []
@@ -278,15 +302,15 @@ tolerations: []
 affinity:
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-      - weight: 100
-        podAffinityTerm:
-          labelSelector:
-            matchExpressions:
-              - key: 'app.kubernetes.io/name'
-                operator: In
-                values:
-                  - console
-          topologyKey: "kubernetes.io/hostname"
+    - weight: 100
+      podAffinityTerm:
+        labelSelector:
+          matchExpressions:
+          - key: 'app.kubernetes.io/name'
+            operator: In
+            values:
+            - console
+        topologyKey: "kubernetes.io/hostname"
 
 monitoring:
   # enabled determines if the monitor.yaml and prometheusrule.yaml templates should be used
@@ -370,8 +394,8 @@ kas:
 
   fullnameOverride: ""
 
-  podAnnotations: {}
-  podLabels: {}
+  podAnnotations: { }
+  podLabels: { }
 
   podSecurityContext:
     runAsUser: 65532
@@ -387,9 +411,9 @@ kas:
 
   extraArgs: []
 
-  nodeSelector: {}
+  nodeSelector: { }
 
-  affinity: {}
+  affinity: { }
 
   tolerations: []
 
@@ -416,7 +440,7 @@ kas:
     # Specifies whether a service account should be created.
     create: true
     # Annotations to add to the service account.
-    annotations: {}
+    annotations: { }
     # The name of the service account to use.
     # If not set and create is true, a name is generated using the fullname template.
     name: ""
@@ -426,8 +450,8 @@ kas:
     path: /metrics
     serviceMonitor:
       enabled: false
-      additionalLabels: {}
-      endpointConfig: {}
+      additionalLabels: { }
+      endpointConfig: { }
 
   replicCount: 1
 
@@ -504,16 +528,16 @@ cloudQuery:
   serviceAccount:
     create: true
     automount: true
-    annotations: {}
+    annotations: { }
 
-  podAnnotations: {}
-  podLabels: {}
+  podAnnotations: { }
+  podLabels: { }
 
-  podSecurityContext: {}
+  podSecurityContext: { }
   # fsGroup: 2000
 
-  securityContext: {}
-    # capabilities:
+  securityContext: { }
+  # capabilities:
   #   drop:
   #   - ALL
   # readOnlyRootFilesystem: true
@@ -567,16 +591,16 @@ cloudQuery:
   #   mountPath: "/etc/foo"
   #   readOnly: true
 
-  nodeSelector: {}
+  nodeSelector: { }
   tolerations: []
-  affinity: {}
+  affinity: { }
 
 dex:
   enabled: false
 
   clientSecret: ~
 
-  additionalDexSecrets: {}
+  additionalDexSecrets: { }
 
   config:
     # Set it to a valid URL
@@ -621,12 +645,11 @@ dex:
       cert-manager.io/cluster-issuer: letsencrypt-prod
 
     hosts:
-      - host: <your-console-fqdn>
-        paths:
-          - path: /dex
-            pathType: Prefix
+    - host: <your-console-fqdn>
+      paths:
+      - path: /dex
+        pathType: Prefix
 
     tls:
-      - hosts:
-          - <your-console-fqdn>
-        secretName: dex-cert
+    - hosts:
+      - <your-console-fqdn>

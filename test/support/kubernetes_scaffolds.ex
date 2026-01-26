@@ -416,4 +416,17 @@ defmodule KubernetesScaffolds do
       provisioner: provisioner
     }
   end
+
+  def event() do
+    %Core.Event{
+      api_version: "v1",
+      kind: "Event",
+      metadata: %ObjectMeta{name: "test", namespace: "default"},
+      event_time: "2021-01-01T00:00:00Z",
+      last_timestamp: "2021-01-01T00:00:00Z",
+      message: "message",
+      reason: "reason",
+      type: "type"
+    }
+  end
 end

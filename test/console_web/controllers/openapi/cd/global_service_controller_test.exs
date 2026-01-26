@@ -11,7 +11,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/globalservices/#{global.id}")
+        |> get("/v1/api/cd/globalservices/#{global.id}")
         |> json_response(200)
 
       assert result["id"] == global.id
@@ -25,7 +25,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> get("/api/v1/cd/globalservices/#{global.id}")
+      |> get("/v1/api/cd/globalservices/#{global.id}")
       |> json_response(403)
     end
   end
@@ -39,7 +39,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/globalservices")
+        |> get("/v1/api/cd/globalservices")
         |> json_response(200)
 
       assert ids_equal(results, globals)
@@ -55,7 +55,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/globalservices?project_id=#{project1.id}")
+        |> get("/v1/api/cd/globalservices?project_id=#{project1.id}")
         |> json_response(200)
 
       assert ids_equal(results, globals1)
@@ -70,7 +70,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/globalservices?q=matching")
+        |> get("/v1/api/cd/globalservices?q=matching")
         |> json_response(200)
 
       assert length(results) == 1
@@ -85,7 +85,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/globalservices?page=1&per_page=2")
+        |> get("/v1/api/cd/globalservices?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2
@@ -99,7 +99,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/cd/globalservices?service_id=#{service.id}", %{
+        |> json_post("/v1/api/cd/globalservices?service_id=#{service.id}", %{
           name: "test-global-service",
           distro: "eks",
           tags: [%{name: "env", value: "prod"}]
@@ -120,7 +120,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/cd/globalservices", %{
+        |> json_post("/v1/api/cd/globalservices", %{
           name: "template-global-service",
           template: %{
             name: "templated-service",
@@ -143,7 +143,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
       result =
         conn
         |> add_auth_headers(admin_user())
-        |> json_post("/api/v1/cd/globalservices?service_id=#{service.id}", %{
+        |> json_post("/v1/api/cd/globalservices?service_id=#{service.id}", %{
           name: "cascade-global-service",
           cascade: %{delete: true, detach: false}
         })
@@ -159,7 +159,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
 
       conn
       |> add_auth_headers(insert(:user))
-      |> json_post("/api/v1/cd/globalservices?service_id=#{service.id}", %{
+      |> json_post("/v1/api/cd/globalservices?service_id=#{service.id}", %{
         name: "test-global-service"
       })
       |> json_response(403)
@@ -175,7 +175,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_put("/api/v1/cd/globalservices/#{global.id}", %{
+        |> json_put("/v1/api/cd/globalservices/#{global.id}", %{
           name: global.name,
           distro: "gke",
           tags: [%{name: "env", value: "staging"}]
@@ -195,7 +195,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_put("/api/v1/cd/globalservices/#{global.id}", %{
+        |> json_put("/v1/api/cd/globalservices/#{global.id}", %{
           name: global.name,
           cascade: %{delete: false, detach: true}
         })
@@ -213,7 +213,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> json_put("/api/v1/cd/globalservices/#{global.id}", %{
+      |> json_put("/v1/api/cd/globalservices/#{global.id}", %{
         name: global.name,
         distro: "gke"
       })
@@ -230,7 +230,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> delete("/api/v1/cd/globalservices/#{global.id}")
+        |> delete("/v1/api/cd/globalservices/#{global.id}")
         |> json_response(200)
 
       assert result["id"] == global.id
@@ -244,7 +244,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> delete("/api/v1/cd/globalservices/#{global.id}")
+      |> delete("/v1/api/cd/globalservices/#{global.id}")
       |> json_response(403)
     end
   end
@@ -259,7 +259,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> post("/api/v1/cd/globalservices/#{global.id}/sync")
+        |> post("/v1/api/cd/globalservices/#{global.id}/sync")
         |> json_response(200)
 
       assert result["id"] == global.id
@@ -272,7 +272,7 @@ defmodule ConsoleWeb.OpenAPI.CD.GlobalServiceControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> post("/api/v1/cd/globalservices/#{global.id}/sync")
+      |> post("/v1/api/cd/globalservices/#{global.id}/sync")
       |> json_response(403)
     end
   end

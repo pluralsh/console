@@ -11,7 +11,7 @@ defmodule ConsoleWeb.OpenAPI.ProjectControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/projects/#{project.id}")
+        |> get("/v1/api/projects/#{project.id}")
         |> json_response(200)
 
       assert result["id"] == project.id
@@ -26,7 +26,7 @@ defmodule ConsoleWeb.OpenAPI.ProjectControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/projects/#{project.id}")
+        |> get("/v1/api/projects/#{project.id}")
         |> json_response(200)
 
       assert result["id"] == project.id
@@ -39,7 +39,7 @@ defmodule ConsoleWeb.OpenAPI.ProjectControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> get("/api/v1/projects/#{project.id}")
+      |> get("/v1/api/projects/#{project.id}")
       |> json_response(403)
     end
   end
@@ -53,7 +53,7 @@ defmodule ConsoleWeb.OpenAPI.ProjectControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/projects")
+        |> get("/v1/api/projects")
         |> json_response(200)
 
       assert ids_equal(results, projects)
@@ -66,7 +66,7 @@ defmodule ConsoleWeb.OpenAPI.ProjectControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/projects")
+        |> get("/v1/api/projects")
         |> json_response(200)
 
       assert ids_equal(results, [Settings.default_project!() | projects])
@@ -79,7 +79,7 @@ defmodule ConsoleWeb.OpenAPI.ProjectControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/projects?page=1&per_page=2")
+        |> get("/v1/api/projects?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2
@@ -92,7 +92,7 @@ defmodule ConsoleWeb.OpenAPI.ProjectControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/projects")
+        |> get("/v1/api/projects")
         |> json_response(200)
 
       assert ids_equal(results, [Settings.default_project!() | projects])

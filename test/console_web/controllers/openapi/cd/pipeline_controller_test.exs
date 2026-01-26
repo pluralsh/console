@@ -13,7 +13,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/pipelines/#{pipeline.id}")
+        |> get("/v1/api/cd/pipelines/#{pipeline.id}")
         |> json_response(200)
 
       assert result["id"] == pipeline.id
@@ -30,7 +30,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> get("/api/v1/cd/pipelines/#{pipeline.id}")
+      |> get("/v1/api/cd/pipelines/#{pipeline.id}")
       |> json_response(403)
     end
   end
@@ -44,7 +44,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/pipelines")
+        |> get("/v1/api/cd/pipelines")
         |> json_response(200)
 
       assert ids_equal(results, pipelines)
@@ -60,7 +60,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/pipelines?project_id=#{project1.id}")
+        |> get("/v1/api/cd/pipelines?project_id=#{project1.id}")
         |> json_response(200)
 
       assert ids_equal(results, pipelines1)
@@ -75,7 +75,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/pipelines?q=matching")
+        |> get("/v1/api/cd/pipelines?q=matching")
         |> json_response(200)
 
       assert length(results) == 1
@@ -90,7 +90,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineControllerTest do
       %{"data" => results} =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/cd/pipelines?page=1&per_page=2")
+        |> get("/v1/api/cd/pipelines?page=1&per_page=2")
         |> json_response(200)
 
       assert length(results) == 2
@@ -108,7 +108,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_post("/api/v1/cd/pipelines/#{pipeline.id}/trigger", %{
+        |> json_post("/v1/api/cd/pipelines/#{pipeline.id}/trigger", %{
           context: %{version: "1.0.0", environment: "production"}
         })
         |> json_response(200)
@@ -129,7 +129,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> json_post("/api/v1/cd/pipelines/#{pipeline.id}/trigger", %{
+        |> json_post("/v1/api/cd/pipelines/#{pipeline.id}/trigger", %{
           context: %{}
         })
         |> json_response(200)
@@ -145,7 +145,7 @@ defmodule ConsoleWeb.OpenAPI.CD.PipelineControllerTest do
 
       conn
       |> add_auth_headers(user)
-      |> json_post("/api/v1/cd/pipelines/#{pipeline.id}/trigger", %{
+      |> json_post("/v1/api/cd/pipelines/#{pipeline.id}/trigger", %{
         context: %{version: "1.0.0"}
       })
       |> json_response(403)

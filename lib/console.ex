@@ -368,6 +368,7 @@ defmodule Console do
     |> Map.new()
   end
   def project(l, schema) when is_list(l), do: Enum.map(l, &project(&1, schema))
+  def project(v, _), do: v
 
   @duration_regex ~r/^(?<d>([0-9]+)d)?(?<h>([0-9]+)h)?(?<ms>([0-9]+)ms)?(?<m>([0-9]+)m)?(?<s>([0-9]+)s)?$/i
 

@@ -25,7 +25,7 @@ import {
   useDeleteChatMutation,
 } from 'generated/graphql'
 
-import { ComponentPropsWithRef, useState } from 'react'
+import { ComponentPropsWithRef, useRef, useState } from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import styled, { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
@@ -71,6 +71,7 @@ export function ChatMessage({
   isStreaming?: boolean
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
+  const actionsTimeoutRef = useRef<NodeJS.Timeout>(undefined)
 
   return pullRequest ? (
     <PrChatMesssage
@@ -81,8 +82,18 @@ export function ChatMessage({
     <ChatMessageSC
       $role={role}
       {...props}
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
+      onMouseEnter={() => {
+        setShowActions(true)
+        if (type === ChatType.File)
+          actionsTimeoutRef.current = setTimeout(
+            () => setShowActions(false),
+            3000
+          )
+      }}
+      onMouseLeave={() => {
+        setShowActions(false)
+        if (actionsTimeoutRef.current) clearTimeout(actionsTimeoutRef.current)
+      }}
     >
       <ChatMessageContent
         id={id ?? ''}

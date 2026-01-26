@@ -1,0 +1,14 @@
+{
+    "type": "object",
+    "properties": {
+        "relevant": {
+            "type": "boolean",
+            "description": "Whether the summary is relevant to the prompt"
+        },
+        "summary": {
+            "type": "string",
+            "description": "The requested summary of the piece of infrastructure the user is interested in"
+        }
+    },
+    "required": ["relevant", "summary"]
+}

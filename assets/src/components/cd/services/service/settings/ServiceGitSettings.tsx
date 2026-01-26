@@ -18,7 +18,7 @@ import {
   ServiceGitRefField,
 } from '../../deployModal/DeployServiceSettingsGit'
 import { Overline } from 'components/cd/utils/PermissionsModal'
-import { useServiceContext } from '../ServiceDetails'
+import { useServiceContext } from '../ServiceDetailsContext'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   getServiceSettingsPath,

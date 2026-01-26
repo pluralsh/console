@@ -10,6 +10,7 @@ type IconBaseProps = {
   color?: string
   fullColor?: boolean
   secondaryColor?: string
+  mode?: string
 }
 
 export type IconProps = HonorableIconProps & IconBaseProps
@@ -38,6 +39,7 @@ function createIcon(render: (props: IconBaseProps) => ReactNode) {
           color: workingColor,
           secondaryColor,
           fullColor,
+          mode: theme.mode,
         })}
       </HonorableIcon>
     )

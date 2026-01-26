@@ -165,6 +165,29 @@ export const isValidDateTime = (
   return dayjs(date, format, strict).isValid()
 }
 
+export const filterValidDates = (dates: DateParam[]): DateParam[] =>
+  dates.filter((date) => isValidDateTime(date))
+
+// invalid dates will end up at the end of the array for both directions
+const compareDates = (
+  a: DateParam,
+  b: DateParam,
+  direction: 1 | -1
+): number => {
+  const isValidA = isValidDateTime(a)
+  const isValidB = isValidDateTime(b)
+  if (!isValidA && !isValidB) return 0
+  if (!isValidA) return 1
+  if (!isValidB) return -1
+  return dayjs(a).diff(dayjs(b)) * direction
+}
+
+export const sortDatesAsc = (a: DateParam, b: DateParam): number =>
+  compareDates(a, b, 1)
+
+export const sortDatesDesc = (a: DateParam, b: DateParam): number =>
+  compareDates(a, b, -1)
+
 export function addDays(date: DateParam, days: number): Date | undefined {
   if (!date || Number.isNaN(days)) return undefined
   const result = dayjs(date).add(days, 'day')
