@@ -3,6 +3,7 @@ defmodule Console.AI.Chat.System do
   System prompt for the AI chat
   """
   alias Console.Schema.{ChatThread, AgentSession, AiInsight, Service}
+  require EEx
 
   @chat Console.priv_file!("prompts/chat.md")
   @agent_pre Console.priv_file!("prompts/agent_pre.md")
@@ -17,9 +18,11 @@ defmodule Console.AI.Chat.System do
   @kubernetes_code_pr_agent Console.priv_file!("prompts/kubernetes_pr.md")
   @insight_chat Console.priv_file!("prompts/insight_chat.md")
   @research Console.priv_file!("prompts/research.md")
-  @service Console.priv_file!("prompts/service.md.eex")
+  @service_file Path.join([:code.priv_dir(:console), "prompts", "service.md.eex"])
 
-  def prompt(%ChatThread{service: %Service{} = svc}), do: EEx.eval_string(@service, svc: svc_context(svc))
+  EEx.function_from_file(:defp, :service_prompt, @service_file, [:assigns])
+
+  def prompt(%ChatThread{service: %Service{} = svc}), do: service_prompt(svc: svc_context(svc))
   def prompt(%ChatThread{research_id: id}) when is_binary(id), do: @research
   def prompt(%ChatThread{insight: %AiInsight{text: t}}),
     do: "#{@insight_chat}\n\nThis is the insight you will be working on: #{t}"
@@ -46,7 +49,7 @@ defmodule Console.AI.Chat.System do
       cluster: [:id, :name, :handle, :metadata],
       repository: [:id, :url],
       sources: [:repository_id, :path],
-      helm: [:url, :chart, :version, :values, :values_file, :lua_script, :lua_file, :lua_folder],
+      helm: [:url, :chart, :version, :values, :values_files, :lua_script, :lua_file, :lua_folder],
       imports: [stack: [:name]],
       sync_config: [
         :enforce_namespace,

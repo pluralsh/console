@@ -13,7 +13,7 @@ defmodule Console.OpenAPI do
         description: "Main HTTP API for Plural"
       },
       servers: [Server.from_config(:console, ConsoleWeb.Endpoint)],
-      paths: Paths.from_router(ConsoleWeb.Router, filter: &String.starts_with?(&1.path, "/api/v1/"))
+      paths: Paths.from_router(ConsoleWeb.Router, filter: &String.starts_with?(&1.path, "/v1/api"))
     }
   end
 end

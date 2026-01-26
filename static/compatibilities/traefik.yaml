@@ -4,26 +4,28 @@ release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
 helm_repository_url: https://traefik.github.io/charts
 eolApiSlug: traefik
 versions:
-- version: 3.6.6
+- version: 3.6.7
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['From v3.6.0: new ACME certificate resolver options to expand certificate
-        management configuration.', 'From v3.6.0: added least-time / HighestRandomWeight
-        load-balancing strategies and passive + TCP health checks for better resiliency
-        and routing behavior.', 'From v3.6.0: Kubernetes-related enhancements including
-        Knative provider, Gateway API bump to v1.4.0, support for ExternalName services,
-        and CRD weight improvements.', 'From v3.6.0: server/routing enhancements including
-        multi-layer routing and HTTP/2 HPACK table size options.']
-    breaking_changes: ["No explicit breaking changes are listed in the provided notes\
-        \ for v3.6.0 or v3.6.6, but v3.6.0 explicitly calls out to read the migration\
-        \ guide\u2014treat that as a potential source of breaking/config behavior\
-        \ changes and validate against your current config."]
-  chart_version: 38.0.2
-  images: ['docker.io/traefik:v3.6.6']
+    features: ['v3.6.0 adds multiple new capabilities: TCP health checks plus passive
+        health checks, a new least-time load-balancing strategy, a new HighestRandomWeight
+        algorithm (including CRD support), and multi-layer routing improvements.',
+      'Kubernetes-related enhancements in v3.6.0 include a new Knative provider, allowing
+        Ingress to publish ExternalName services, and a Gateway API bump to v1.4.0.',
+      'v3.6.7 includes ACME improvements (renew options, handshake timeout, updated
+        lego library) and several Kubernetes provider fixes, plus dashboard hardening
+        around X-Forwarded-Prefix.', 'v3.6.7 fixes a security issue (CVE-2026-22045)
+        and includes multiple bug fixes across ACME, k8s ingress/ingress-nginx, and
+        server behavior. ']
+    breaking_changes: ['v3.6.7 is a breaking change relative to v3.6.4+ hotfix behavior:
+        the encoded character handling change is now opt-in, restoring the pre-hotfix
+        default behavior unless you enable the feature per the migration guide.']
+  chart_version: 39.0.0
+  images: []
 - version: 3.6.0
   kube: ['1.35', '1.34', '1.33', '1.32']
   requirements: []

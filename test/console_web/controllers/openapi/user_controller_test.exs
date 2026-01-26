@@ -9,12 +9,32 @@ defmodule ConsoleWeb.OpenAPI.UserControllerTest do
       result =
         conn
         |> add_auth_headers(user)
-        |> get("/api/v1/me")
+        |> get("/v1/api/me")
         |> json_response(200)
 
       assert result["id"] == user.id
       assert result["email"] == user.email
       refute result["service_account"]
+    end
+
+    test "returns me for an admin user", %{conn: conn} do
+      user = admin_user()
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/me")
+        |> json_response(200)
+
+      assert result["id"] == user.id
+      assert result["email"] == user.email
+      assert result["roles"]["admin"]
+    end
+
+    test "it will 401 if you are not authenticated", %{conn: conn} do
+      conn
+      |> get("/v1/api/me")
+      |> json_response(401)
     end
   end
 end

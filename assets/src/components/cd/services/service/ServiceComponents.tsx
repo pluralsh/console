@@ -1,7 +1,10 @@
 import {
   ArrowScroll,
+  AiSparkleFilledIcon,
+  Button,
   Callout,
   ComponentsIcon,
+  TreeViewIcon,
   FillLevelProvider,
   Flex,
   ListIcon,
@@ -28,7 +31,7 @@ import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 
 import { getServiceComponentPath } from 'routes/cdRoutesConsts'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { ButtonGroup } from '../../../utils/ButtonGroup.tsx'
 import { ComponentList } from './component/ComponentList.tsx'
@@ -38,19 +41,34 @@ import {
 } from './component/Components.tsx'
 import { countDeprecations } from './deprecationUtils'
 import { ComponentsTreeView } from './ServiceComponentsTree.tsx'
+import { ComponentsFilesView } from './ServiceComponentsFiles.tsx'
 import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
+import { ServiceComponentsContext } from './ServiceComponentsContext'
+import { useServiceContext } from './ServiceDetailsContext'
+import { useChatbot } from 'components/ai/AIContext'
 
 const directory = [
-  { path: 'list', icon: <ListIcon />, tooltip: 'List view' },
-  { path: 'tree', icon: <NetworkInterfaceIcon />, tooltip: 'Tree view' },
+  { path: 'list', icon: <ListIcon />, tooltip: 'Component list view' },
+  {
+    path: 'tree',
+    icon: <NetworkInterfaceIcon />,
+    tooltip: 'Components tree view',
+  },
+  { path: 'files', icon: <TreeViewIcon />, tooltip: 'Files tree view' },
 ]
 
 const defaultView = 'list'
 
 export function ServiceComponents() {
+  const theme = useTheme()
+  const { service } = useServiceContext()
+  const { createNewThread, mutationLoading } = useChatbot()
   const [selectedState, setSelectedState] = useState<Key | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchParams, setSearchParams] = useSearchParams()
+  const [filtersHidden, setFiltersHidden] = useState(false)
+  const [showChatButton, setShowChatButton] = useState(false)
+  const [headingContent, setHeadingContent] = useState<ReactNode | null>(null)
   const [components, setComponents] = useState<
     ServiceDeploymentComponentFragment[]
   >([])
@@ -65,70 +83,102 @@ export function ServiceComponents() {
       width: 320,
     })
 
+  const contextValue = useMemo(
+    () => ({
+      setFiltersHidden,
+      setShowChatButton,
+      setHeadingContent,
+    }),
+    []
+  )
+
   return (
-    <ScrollablePage
-      scrollable
-      heading="Components"
-      headingContent={
-        <ArrowScroll>
-          <FiltersWrapperSC>
-            <IconExpander
-              tooltip="Search components"
-              icon={<SearchIcon />}
-              active={!!searchQuery}
-              onClear={() => setSearchQuery('')}
-            >
-              <ExpandedInput
-                width={320}
-                inputValue={searchQuery}
-                onChange={setSearchQuery}
-                placeholder="Search components"
+    <ServiceComponentsContext.Provider value={contextValue}>
+      <ScrollablePage
+        noPadding
+        contentStyles={{ paddingTop: theme.spacing.medium }}
+        scrollable
+        heading={headingContent ?? 'Components'}
+        headingContent={
+          <ArrowScroll>
+            <FiltersWrapperSC>
+              {!filtersHidden && (
+                <>
+                  <IconExpander
+                    tooltip="Search components"
+                    icon={<SearchIcon />}
+                    active={!!searchQuery}
+                    onClear={() => setSearchQuery('')}
+                  >
+                    <ExpandedInput
+                      width={320}
+                      inputValue={searchQuery}
+                      onChange={setSearchQuery}
+                      placeholder="Search components"
+                    />
+                  </IconExpander>
+                  <IconExpander
+                    tooltip="Filter by component kind"
+                    icon={<ComponentsIcon />}
+                    active={!!selectedKinds.size}
+                    onClear={() => setSelectedKinds(new Set())}
+                  >
+                    {kindSelector}
+                  </IconExpander>
+                  <IconExpander
+                    tooltip="Filter by component state"
+                    icon={<UpdatesIcon />}
+                    active={!!selectedState}
+                    onClear={() => setSelectedState(null)}
+                  >
+                    <ComponentStateFilter
+                      selectedState={selectedState}
+                      setSelectedState={setSelectedState}
+                    />
+                  </IconExpander>
+                </>
+              )}
+              <ComponentsViewSwitch
+                tab={view}
+                setTab={(view: string) => setSearchParams({ view })}
               />
-            </IconExpander>
-            <IconExpander
-              tooltip="Filter by component kind"
-              icon={<ComponentsIcon />}
-              active={!!selectedKinds.size}
-              onClear={() => setSelectedKinds(new Set())}
-            >
-              {kindSelector}
-            </IconExpander>
-            <IconExpander
-              tooltip="Filter by component state"
-              icon={<UpdatesIcon />}
-              active={!!selectedState}
-              onClear={() => setSelectedState(null)}
-            >
-              <ComponentStateFilter
-                selectedState={selectedState}
-                setSelectedState={setSelectedState}
-              />
-            </IconExpander>
-            <ComponentsViewSwitch
-              tab={view}
-              setTab={(view: string) => setSearchParams({ view })}
-            />
-          </FiltersWrapperSC>
-        </ArrowScroll>
-      }
-    >
-      {view === 'list' && (
-        <ComponentsListView
-          setComponents={setComponents}
-          selectedKinds={selectedKinds}
-          selectedState={selectedState}
-          searchQuery={searchQuery}
-        />
-      )}
-      {view === 'tree' && (
-        <ComponentsTreeView
-          setComponents={setComponents}
-          selectedKinds={selectedKinds}
-          selectedState={selectedState}
-          searchQuery={searchQuery}
-        />
-      )}
-    </ScrollablePage>
+              {showChatButton && (
+                <Button
+                  startIcon={<AiSparkleFilledIcon />}
+                  loading={mutationLoading}
+                  onClick={() =>
+                    createNewThread({
+                      serviceId: service.id,
+                      summary: `Chat with ${service.name}`,
+                    })
+                  }
+                >
+                  Chat with {service.name}
+                </Button>
+              )}
+            </FiltersWrapperSC>
+          </ArrowScroll>
+        }
+      >
+        {view === 'list' && (
+          <ComponentsListView
+            setComponents={setComponents}
+            selectedKinds={selectedKinds}
+            selectedState={selectedState}
+            searchQuery={searchQuery}
+          />
+        )}
+        {view === 'tree' && (
+          <ComponentsTreeView
+            setComponents={setComponents}
+            selectedKinds={selectedKinds}
+            selectedState={selectedState}
+            searchQuery={searchQuery}
+          />
+        )}
+        {view === 'files' && <ComponentsFilesView />}
+      </ScrollablePage>
+    </ServiceComponentsContext.Provider>
   )
 }
 

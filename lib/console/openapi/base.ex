@@ -23,6 +23,7 @@ defmodule Console.OpenAPI.Base do
       defp to_wire(%{} = map, {:__optional__, module, _}) when is_atom(module), do: to_wire(map, module.json_schema())
       defp to_wire(%{} = map, {module, _}) when is_atom(module), do: to_wire(map, module.json_schema())
       defp to_wire(%{} = map, module) when is_atom(module), do: to_wire(map, module.json_schema())
+      defp to_wire(%Ecto.Association.NotLoaded{} = assoc, _), do: nil
       defp to_wire(l, %{items: items}), do: Enum.map(l, &to_wire(&1, items))
       defp to_wire(v, _), do: v
     end
@@ -30,9 +31,9 @@ defmodule Console.OpenAPI.Base do
 
   def timestamps(props), do: Map.merge(props, %{inserted_at: datetime(), updated_at: datetime()})
 
-  def ecto_enum(type) do
+  def ecto_enum(type, opts \\ []) do
     type.__enum_map__()
     |> Enum.map(fn {key, _} -> key end)
-    |> string_enum_to_atom()
+    |> string_enum_to_atom(opts)
   end
 end

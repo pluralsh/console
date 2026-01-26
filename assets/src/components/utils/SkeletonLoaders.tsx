@@ -168,7 +168,8 @@ export function ChartSkeleton({ scale = 1 }: { scale?: number }) {
 export const RectangleSkeleton = styled.div<{
   $height?: SemanticSpacingKey | CSSProperties['height']
   $width?: CSSProperties['width']
-}>(({ theme, $height = 'small', $width }) => ({
+  $bright?: boolean
+}>(({ theme, $height = 'small', $width, $bright = false }) => ({
   '@keyframes moving-gradient': {
     '0%': { backgroundPosition: '100% 0' },
     '100%': { backgroundPosition: '-100% 0' },
@@ -181,7 +182,15 @@ export const RectangleSkeleton = styled.div<{
     width: $width ?? '150px',
     display: 'block',
     height: $height in theme.spacing ? theme.spacing[$height] : $height,
-    background: `linear-gradient(130deg, ${chroma(theme.colors.border).alpha(0.2).hex()} 20%, ${theme.colors['border-fill-one']} 50%, ${chroma(theme.colors.border).alpha(0.2).hex()} 80%)`,
+    background: `linear-gradient(130deg, ${chroma(
+      theme.colors[$bright ? 'border-fill-one' : 'border']
+    )
+      .alpha(0.2)
+      .hex()} 20%, ${theme.colors[$bright ? 'border-fill-two' : 'border-fill-one']} 50%, ${chroma(
+      theme.colors[$bright ? 'fill-zero' : 'border']
+    )
+      .alpha(0.2)
+      .hex()} 80%)`,
     backgroundSize: '200% 100%',
     animation: 'moving-gradient 3.75s linear infinite forwards',
   },

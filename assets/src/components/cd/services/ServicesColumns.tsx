@@ -54,6 +54,7 @@ const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 export const ColServiceDeployment = columnHelper.accessor(({ node }) => node, {
   id: 'deployment',
   header: 'Deployment',
+  meta: { gridTemplate: '160px' },
   cell: function Cell({ getValue }) {
     return <DecoratedServiceDeployment serviceDeployment={getValue()} />
   },
@@ -85,6 +86,7 @@ export const ColCluster = columnHelper.accessor(
   {
     id: 'clusterName',
     header: 'Cluster',
+    meta: { gridTemplate: '180px', truncate: true },
     cell: ({ row: { original } }) => {
       const cluster = original?.node?.cluster
       if (!cluster) return null
@@ -116,7 +118,7 @@ export function ClusterNameAndIcon({
 export const ColRepo = columnHelper.accessor(({ node }) => node, {
   id: 'repository',
   header: 'Repository',
-  meta: { truncate: true, gridTemplate: 'minmax(180px,0.65fr)' },
+  meta: { truncate: true, gridTemplate: '180px' },
   cell: function Cell({ getValue }) {
     const theme = useTheme()
     const svc = getValue()
@@ -151,7 +153,7 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
 export const ColRef = columnHelper.accessor(({ node }) => node, {
   id: 'gitLocation',
   header: 'Reference',
-  // meta: { truncate: true },
+  meta: { gridTemplate: 'minmax(200px,1fr)' },
   cell: ({ getValue }) => {
     const svc = getValue()
 
@@ -193,6 +195,7 @@ export const ColLastActivity = columnHelper.accessor(
     id: 'lastActivity',
     header: 'Activity ',
     sortingFn: 'datetime',
+    meta: { gridTemplate: '150px' },
     cell: ({ getValue }) => <DateTimeCol date={getValue()?.toISOString()} />,
   }
 )
@@ -200,15 +203,14 @@ export const ColLastActivity = columnHelper.accessor(
 export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
   id: 'status',
   header: 'Status',
-  meta: { gridTemplate: 'auto' },
+  meta: { gridTemplate: '192px' },
   enableColumnFilter: true,
   filterFn: 'equalsString',
-  cell: ({
+  cell: function Cell({
     row: {
       original: { node },
     },
-  }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+  }) {
     const theme = useTheme()
 
     return (
@@ -237,6 +239,7 @@ export const ColErrors = columnHelper.accessor(
     header: 'Errors',
     enableColumnFilter: true,
     filterFn: 'equalsString',
+    meta: { gridTemplate: 'minmax(65px,auto)' },
     cell: ({
       row: {
         original: { node },
@@ -246,7 +249,11 @@ export const ColErrors = columnHelper.accessor(
         direction="column"
         gap="xsmall"
       >
-        <ServicesTableErrors service={node} />
+        <ServicesTableErrors
+          service={node}
+          showText={false}
+          css={{ height: 32 }}
+        />
       </Flex>
     ),
   }
@@ -265,6 +272,7 @@ enum MenuItemKey {
 export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
   id: 'actions',
   header: '',
+  meta: { gridTemplate: 'min-content' },
   cell: function ActionColumn({
     table,
     row: {

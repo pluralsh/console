@@ -37,6 +37,7 @@ import {
   SecurityChartDatum,
   useSecurityOverviewChartsData,
 } from './useSecurityOverviewChartsData'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
 
 type PolicyQueryFilters = {
   clusters?: (string | null)[] | undefined
@@ -107,12 +108,9 @@ function SecurityPieChartCard({
   return (
     <Card
       header={{
+        outerProps: { style: { overflow: 'visible', height: 'fit-content' } },
         content: (
-          <Flex
-            width="100%"
-            justify="space-between"
-            align="center"
-          >
+          <StretchedFlex>
             <span>{title}</span>
             <Tooltip
               placement="left"
@@ -120,7 +118,7 @@ function SecurityPieChartCard({
             >
               <InfoOutlineIcon />
             </Tooltip>
-          </Flex>
+          </StretchedFlex>
         ),
       }}
       css={{ padding: theme.spacing.large, flex: 1, minWidth: 'fit-content' }}
@@ -174,12 +172,9 @@ export function SecurityOverviewHeatmapCard() {
     <TreeMapWrapperCardSC
       header={{
         size: 'large',
+        outerProps: { style: { overflow: 'visible', height: 'fit-content' } },
         content: (
-          <Flex
-            width="100%"
-            justify="space-between"
-            align="center"
-          >
+          <StretchedFlex>
             <span>clusters by vulnerability count</span>
             <Flex
               align="center"
@@ -207,7 +202,7 @@ export function SecurityOverviewHeatmapCard() {
                 ))}
               </Select>
             </Flex>
-          </Flex>
+          </StretchedFlex>
         ),
       }}
     >
@@ -251,9 +246,10 @@ function clustersByVulnCount(vulns: ClusterVulnAggregateFragment[]) {
 
 const ChartRowWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
-  overflow: 'auto',
+  overflowX: 'auto',
   gap: theme.spacing.large,
   minHeight: 'fit-content',
+  flexShrink: 0,
 }))
 
 const ChartWrapperSC = styled.div(({ theme }) => ({

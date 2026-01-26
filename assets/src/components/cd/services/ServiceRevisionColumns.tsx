@@ -21,7 +21,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 
 import { CaptionText } from 'components/cluster/TableElements'
 
-import { useServiceContext } from './service/ServiceDetails'
+import { useServiceContext } from './service/ServiceDetailsContext'
 
 const columnHelper =
   createColumnHelper<Nullable<ServiceDeploymentRevisionFragment>>()

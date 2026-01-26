@@ -2,11 +2,14 @@ syntax = "proto3";
 
 package plrl;
 
+// Configures where the generated code will be placed.
+option go_package = "internal/proto";
+
 message AiConfigRequest {}
 
 message AiConfig {
   bool enabled = 1;
-  
+
   OpenAiConfig openai = 2;
   AnthropicConfig anthropic = 3;
   VertexAiConfig vertexAi = 4;
@@ -42,13 +45,13 @@ message VertexAiConfig {
 }
 
 message BedrockConfig {
-    optional string modelId = 1;
-    optional string toolModelId = 2;
-    optional string accessToken = 3;
-    optional string region = 4;
-    optional string embeddingModelId = 5;
-    optional string awsAccessKeyId = 6;
-    optional string awsSecretAccessKey = 7;
+  optional string modelId = 1;
+  optional string toolModelId = 2;
+  optional string accessToken = 3;
+  optional string region = 4;
+  optional string embeddingModelId = 5;
+  optional string awsAccessKeyId = 6;
+  optional string awsSecretAccessKey = 7;
 }
 
 message AzureOpenAiConfig {
@@ -61,11 +64,11 @@ message AzureOpenAiConfig {
 }
 
 message ProxyAuthenticationRequest {
-    string token = 1;
+  string token = 1;
 }
 
 message ProxyAuthenticationResponse {
-    bool authenticated = 1;
+  bool authenticated = 1;
 }
 
 // The AI configuration service definition.

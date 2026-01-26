@@ -23,6 +23,7 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body1P, Body2BoldP } from 'components/utils/typography/Text'
 import {
+  AgentRunStatus,
   InfraResearchFragment,
   InfraResearchStatus,
   useCreateInfraResearchMutation,
@@ -167,8 +168,10 @@ export function InfraResearch() {
           />
           <Flex gap="small">
             {status && (
-              <InfraResearchStatusChip
+              <RunStatusChip
+                size="large"
                 status={status}
+                runningText="View progress"
                 {...((isRunning || (threads?.length ?? 0) > 1) && {
                   clickable: true,
                   onClick: () => goToInfraResearch(id),
@@ -313,18 +316,19 @@ function RegenerateButton({
   )
 }
 
-export function InfraResearchStatusChip({
+export function RunStatusChip({
   status,
-  runningText = 'View progress',
+  runningText = 'Running',
   ...props
 }: {
-  status: InfraResearchStatus
+  status: Nullable<InfraResearchStatus | AgentRunStatus>
   runningText?: string
 } & ChipProps) {
-  const isRunning = status === InfraResearchStatus.Running
+  if (!status) return null
+  const isRunning =
+    status === InfraResearchStatus.Running || status === AgentRunStatus.Running
   return (
     <Chip
-      size="large"
       fillLevel={isRunning ? 2 : 1}
       severity={statusToSeverity[status]}
       {...props}
@@ -344,11 +348,16 @@ export function InfraResearchStatusChip({
   )
 }
 
-const statusToSeverity: Record<InfraResearchStatus, ChipSeverity> = {
+const statusToSeverity: Record<
+  InfraResearchStatus | AgentRunStatus,
+  ChipSeverity
+> = {
   [InfraResearchStatus.Running]: 'neutral',
   [InfraResearchStatus.Completed]: 'success',
   [InfraResearchStatus.Failed]: 'danger',
   [InfraResearchStatus.Pending]: 'info',
+  [AgentRunStatus.Cancelled]: 'neutral',
+  [AgentRunStatus.Successful]: 'success',
 }
 
 const WrapperSC = styled.div(({ theme }) => ({

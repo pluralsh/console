@@ -8,7 +8,7 @@ import { ServiceDeploymentsRowFragment, ServiceError } from 'generated/graphql'
 
 import { useTheme } from 'styled-components'
 
-import { useServiceContext } from './ServiceDetails'
+import { useServiceContext } from './ServiceDetailsContext'
 
 const columnHelper = createColumnHelper<Nullable<ServiceError>>()
 

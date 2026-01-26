@@ -8,7 +8,7 @@ import {
 } from 'generated/graphql'
 import { capitalize } from 'lodash'
 import { isNonNullable } from 'utils/isNonNullable'
-import { useServiceContext } from './ServiceDetails'
+import { useServiceContext } from './ServiceDetailsContext'
 
 const columnHelper = createColumnHelper<ServiceDependencyFragment>()
 

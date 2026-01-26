@@ -12,30 +12,455 @@
   ],
   "components": {
     "schemas": {
+      "AgentRun": {
+        "title": "AgentRun",
+        "description": "An execution of an AI coding agent processing a prompt against a repository",
+        "properties": {
+          "branch": {
+            "description": "The git branch the agent is operating on (uses default branch if not set)",
+            "type": "string"
+          },
+          "error": {
+            "description": "Error message if the agent run failed",
+            "type": "string"
+          },
+          "flow_id": {
+            "description": "ID of the flow this agent run is associated with, if any",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the agent run",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "language": {
+            "description": "Programming language used in the agent run (javascript, python, java, cpp, csharp, go, ruby, php, terraform)",
+            "enum": [
+              "javascript",
+              "python",
+              "java",
+              "cpp",
+              "csharp",
+              "go",
+              "ruby",
+              "php",
+              "terraform"
+            ],
+            "type": "string"
+          },
+          "language_version": {
+            "description": "Specific version of the programming language to use",
+            "type": "string"
+          },
+          "mode": {
+            "description": "Mode of the agent run (analyze for read-only analysis, write for code modifications)",
+            "enum": [
+              "analyze",
+              "write"
+            ],
+            "type": "string"
+          },
+          "prompt": {
+            "description": "The prompt given to the AI agent to process",
+            "type": "string"
+          },
+          "repository": {
+            "description": "The git repository URL the agent is working on",
+            "type": "string"
+          },
+          "runtime_id": {
+            "description": "ID of the runtime executing this agent run",
+            "type": "string"
+          },
+          "shared": {
+            "description": "Whether this agent run is shared publicly",
+            "type": "boolean"
+          },
+          "status": {
+            "description": "Current status of the agent run (pending, running, successful, failed, cancelled)",
+            "enum": [
+              "pending",
+              "running",
+              "successful",
+              "failed",
+              "cancelled"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user_id": {
+            "description": "ID of the user who initiated this agent run",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AgentRunInput": {
+        "title": "AgentRunInput",
+        "description": "Input for creating a new agent run to execute an AI coding agent",
+        "properties": {
+          "flow_id": {
+            "description": "Optional flow ID to associate this agent run with",
+            "type": "string"
+          },
+          "mode": {
+            "description": "Mode of the agent run (analyze for read-only, write for modifications)",
+            "enum": [
+              "analyze",
+              "write"
+            ],
+            "type": "string"
+          },
+          "prompt": {
+            "description": "The prompt to give to the agent describing the task to perform",
+            "type": "string"
+          },
+          "repository": {
+            "description": "The git repository URL the agent will work on (https or ssh format)",
+            "type": "string"
+          },
+          "runtime_id": {
+            "description": "The runtime ID to execute the agent run on",
+            "type": "string"
+          },
+          "shared": {
+            "description": "Whether to share this agent run publicly",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "prompt",
+          "repository",
+          "mode",
+          "runtime_id"
+        ],
+        "type": "object"
+      },
+      "AgentRuntime": {
+        "title": "AgentRuntime",
+        "description": "An agent runtime configured on a cluster for executing AI coding agents",
+        "properties": {
+          "ai_proxy": {
+            "description": "Whether this runtime uses the built-in Plural AI proxy for LLM requests",
+            "type": "boolean"
+          },
+          "cluster_id": {
+            "description": "ID of the cluster this runtime is deployed on",
+            "type": "string"
+          },
+          "default": {
+            "description": "Whether this is the default runtime for coding agents",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "Unique identifier for the agent runtime",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Human-readable name of this runtime",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of agent runtime (claude, opencode, gemini, custom)",
+            "enum": [
+              "claude",
+              "opencode",
+              "gemini",
+              "custom"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AgentSession": {
+        "title": "AgentSession",
+        "description": "An autonomous AI agent session working on infrastructure tasks",
+        "properties": {
+          "agent_id": {
+            "description": "Internal agent identifier",
+            "type": "string"
+          },
+          "branch": {
+            "description": "The git branch this session's pull request is operating on",
+            "type": "string"
+          },
+          "cluster_id": {
+            "description": "ID of the cluster associated with this session",
+            "type": "string"
+          },
+          "commit_count": {
+            "description": "Number of commits made by this agent session",
+            "type": "integer"
+          },
+          "connection_id": {
+            "description": "ID of the cloud connection used by this session",
+            "type": "string"
+          },
+          "done": {
+            "description": "Whether the agent has declared the work for this session complete",
+            "type": "boolean"
+          },
+          "id": {
+            "description": "Unique identifier for the agent session",
+            "type": "string"
+          },
+          "initialized": {
+            "description": "Whether the agent session has been initialized",
+            "type": "boolean"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "plan_confirmed": {
+            "description": "Whether the provisioning plan has been confirmed by the user",
+            "type": "boolean"
+          },
+          "prompt": {
+            "description": "The prompt given to the agent",
+            "type": "string"
+          },
+          "pull_request_id": {
+            "description": "ID of the pull request created by this session",
+            "type": "string"
+          },
+          "service_id": {
+            "description": "ID of the service associated with this session",
+            "type": "string"
+          },
+          "stack_id": {
+            "description": "ID of the infrastructure stack associated with this session",
+            "type": "string"
+          },
+          "thread_id": {
+            "description": "ID of the chat thread associated with this session",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of agent session (terraform, kubernetes, provisioning, search, manifests, chat, research)",
+            "enum": [
+              "terraform",
+              "kubernetes",
+              "provisioning",
+              "search",
+              "manifests",
+              "chat",
+              "research"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AgentSessionInput": {
+        "title": "AgentSessionInput",
+        "description": "Input for creating a new agent session to execute autonomous infrastructure tasks",
+        "properties": {
+          "cluster_id": {
+            "description": "ID of the cluster to use for this session",
+            "type": "string"
+          },
+          "connection_id": {
+            "description": "ID of the cloud connection to use for this session",
+            "type": "string"
+          },
+          "done": {
+            "description": "Whether to immediately mark this session as done",
+            "type": "boolean"
+          },
+          "plan_confirmed": {
+            "description": "Whether the provisioning plan is pre-confirmed",
+            "type": "boolean"
+          },
+          "prompt": {
+            "description": "The prompt describing the task for the agent to perform",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of agent session (terraform, kubernetes)",
+            "enum": [
+              "terraform",
+              "kubernetes"
+            ]
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "type": "object"
+      },
+      "Cascade": {
+        "title": "Cascade",
+        "description": "Cascade behavior when the global service is deleted",
+        "properties": {
+          "delete": {
+            "description": "If true, cascade delete all services owned by this global service",
+            "type": "boolean"
+          },
+          "detach": {
+            "description": "If true, immediately detach services from the database without draining",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "CascadeInput": {
+        "title": "CascadeInput",
+        "description": "Input for cascade behavior when the global service is deleted",
+        "properties": {
+          "delete": {
+            "description": "If true, cascade delete all services owned by this global service",
+            "type": "boolean"
+          },
+          "detach": {
+            "description": "If true, immediately detach services from the database without draining",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "Catalog": {
+        "title": "Catalog",
+        "description": "A catalog of PR automations for self-service deployment workflows",
+        "properties": {
+          "author": {
+            "description": "Author or maintainer of the catalog",
+            "type": "string"
+          },
+          "category": {
+            "description": "Category for organizing catalogs (e.g., infrastructure, applications)",
+            "type": "string"
+          },
+          "dark_icon": {
+            "description": "URL or reference to the catalog's icon for dark mode",
+            "type": "string"
+          },
+          "description": {
+            "description": "Description of the catalog's purpose and contents",
+            "type": "string"
+          },
+          "icon": {
+            "description": "URL or reference to the catalog's icon for light mode",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the catalog",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the catalog",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this catalog belongs to",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CatalogInput": {
+        "title": "CatalogInput",
+        "description": "Input for creating or updating a catalog",
+        "properties": {
+          "author": {
+            "description": "Author or maintainer of the catalog",
+            "type": "string"
+          },
+          "category": {
+            "description": "Category for organizing the catalog",
+            "type": "string"
+          },
+          "dark_icon": {
+            "description": "URL or reference to the catalog's icon for dark mode",
+            "type": "string"
+          },
+          "description": {
+            "description": "Description of the catalog's purpose",
+            "type": "string"
+          },
+          "icon": {
+            "description": "URL or reference to the catalog's icon for light mode",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name for the catalog",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this catalog belongs to",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "author"
+        ],
+        "type": "object"
+      },
       "Cluster": {
         "title": "Cluster",
-        "description": "A cluster",
+        "description": "A Kubernetes cluster that can be deployed to and managed through the platform",
         "properties": {
           "tags": {
-            "items": "Elixir.OpenAPI.CD.Tag",
+            "description": "Key/value tags to filter and organize clusters",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
             "type": "array"
           },
           "availability_zones": {
+            "description": "The availability zones this cluster is running in",
             "items": {
               "type": "string"
             },
             "type": "array"
           },
           "cpu_total": {
+            "description": "The total CPU capacity of the cluster in cores",
             "type": "number"
           },
           "cpu_util": {
+            "description": "The current CPU utilization of the cluster as a percentage",
             "type": "number"
           },
           "current_version": {
+            "description": "Current Kubernetes version as reported by the deployment operator",
+            "type": "string"
+          },
+          "deleted_at": {
+            "description": "Timestamp when this cluster was scheduled for deletion",
+            "format": "date-time",
             "type": "string"
           },
           "distro": {
+            "description": "The distribution of kubernetes this cluster is running (generic, eks, aks, gke, rke, k3s, openshift)",
             "enum": [
               "generic",
               "eks",
@@ -48,80 +473,294 @@
             "type": "string"
           },
           "handle": {
+            "description": "A short, unique human readable name used to identify this cluster",
             "type": "string"
           },
           "id": {
+            "description": "Unique identifier for the cluster",
             "type": "string"
           },
           "inserted_at": {
             "format": "date-time",
             "type": "string"
           },
+          "installed": {
+            "description": "Whether the deploy operator has been registered for this cluster",
+            "type": "boolean"
+          },
           "kubelet_version": {
+            "description": "The lowest discovered kubelet version for all nodes in the cluster",
             "type": "string"
           },
           "memory_total": {
+            "description": "The total memory capacity of the cluster in bytes",
             "type": "number"
           },
           "memory_util": {
+            "description": "The current memory utilization of the cluster as a percentage",
             "type": "number"
           },
           "metadata": {
             "additional_properties": {
               "type": "string"
             },
+            "description": "Arbitrary JSON metadata to store user-specific state of this cluster",
             "type": "object"
           },
           "name": {
+            "description": "Human readable name of this cluster, will also translate to cloud k8s name",
             "type": "string"
           },
           "namespace_count": {
+            "description": "The number of namespaces in this cluster",
             "type": "integer"
           },
           "node_count": {
+            "description": "The number of nodes in this cluster",
             "type": "integer"
           },
           "openshift_version": {
+            "description": "The version of OpenShift this cluster is running, if applicable",
             "type": "string"
           },
           "pinged_at": {
+            "description": "Timestamp of the last ping from the deploy operator",
             "format": "date-time",
             "type": "string"
           },
           "pod_count": {
+            "description": "The number of pods in this cluster",
             "type": "integer"
+          },
+          "project_id": {
+            "description": "ID of the project this cluster belongs to",
+            "type": "string"
+          },
+          "protect": {
+            "description": "If true, this cluster cannot be deleted",
+            "type": "boolean"
+          },
+          "self": {
+            "description": "Whether this is the management cluster itself",
+            "type": "boolean"
           },
           "updated_at": {
             "format": "date-time",
             "type": "string"
+          },
+          "version": {
+            "description": "Desired Kubernetes version for the cluster",
+            "type": "string"
+          },
+          "virtual": {
+            "description": "Whether this is a virtual cluster",
+            "type": "boolean"
           }
         },
         "type": "object"
       },
       "ClusterInput": {
         "title": "ClusterInput",
-        "description": "A cluster input",
+        "description": "Input for creating or updating a cluster",
         "properties": {
+          "tags": {
+            "description": "Key/value tags to filter and organize clusters",
+            "items": {
+              "$ref": "#/components/schemas/TagInput"
+            },
+            "type": "array"
+          },
           "handle": {
+            "description": "A short, unique human readable name used to identify this cluster",
             "type": "string"
           },
           "metadata": {
             "additional_properties": {
               "type": "string"
             },
+            "description": "Arbitrary JSON metadata to store user-specific state",
             "type": "object"
           },
           "name": {
+            "description": "Human readable name for the cluster",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this cluster belongs to",
             "type": "string"
           }
         },
         "type": "object"
       },
+      "Console.OpenAPI.AI.AgentRun.List": {
+        "description": "A paginated list of agent runs",
+        "properties": {
+          "data": {
+            "items": "Elixir.AgentRun",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.AI.AgentRuntime.List": {
+        "description": "A paginated list of agent runtimes",
+        "properties": {
+          "data": {
+            "items": "Elixir.AgentRuntime",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.AI.AgentSession.List": {
+        "description": "A paginated list of agent sessions",
+        "properties": {
+          "data": {
+            "items": "Elixir.AgentSession",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.AI.Sentinel.List": {
+        "description": "A paginated list of sentinels",
+        "properties": {
+          "data": {
+            "items": "Elixir.Sentinel",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.AI.SentinelRun.List": {
+        "description": "A paginated list of sentinel runs",
+        "properties": {
+          "data": {
+            "items": "Elixir.SentinelRun",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Console.OpenAPI.CD.Cluster.List": {
-        "description": "A list of clusters",
+        "description": "A paginated list of clusters",
         "properties": {
           "data": {
             "items": "Elixir.Cluster",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.CD.GitRepository.List": {
+        "description": "A list of git repositories",
+        "properties": {
+          "data": {
+            "items": "Elixir.Console.Schema.GitRepository",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.CD.GlobalService.List": {
+        "description": "A paginated list of global services",
+        "properties": {
+          "data": {
+            "items": "Elixir.GlobalService",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.CD.HelmRepository.List": {
+        "description": "A list of helm repositories",
+        "properties": {
+          "data": {
+            "items": "Elixir.Console.Schema.HelmRepository",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.CD.Pipeline.List": {
+        "description": "A paginated list of pipelines",
+        "properties": {
+          "data": {
+            "items": "Elixir.Pipeline",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.CD.Service.List": {
+        "description": "A paginated list of service deployments",
+        "properties": {
+          "data": {
+            "items": "Elixir.Service",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.Project.List": {
+        "description": "A paginated list of projects",
+        "properties": {
+          "data": {
+            "items": "Elixir.Project",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.SCM.Catalog.List": {
+        "description": "A paginated list of catalogs",
+        "properties": {
+          "data": {
+            "items": "Elixir.Catalog",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.SCM.Connection.GithubApp": {
+        "description": "A Github App connection",
+        "properties": {
+          "app_id": {
+            "description": "The Github App ID",
+            "type": "string"
+          },
+          "installation_id": {
+            "description": "The Github App installation ID",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.SCM.Connection.List": {
+        "description": "A list of SCM connections",
+        "properties": {
+          "data": {
+            "items": "Elixir.Connection",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.SCM.PrAutomation.List": {
+        "description": "A paginated list of PR automations",
+        "properties": {
+          "data": {
+            "items": "Elixir.PrAutomation",
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.SCM.PullRequest.List": {
+        "description": "A paginated list of pull requests",
+        "properties": {
+          "data": {
+            "items": "Elixir.PullRequest",
             "type": "array"
           }
         },
@@ -137,6 +776,41 @@
         },
         "type": "object"
       },
+      "Console.OpenAPI.User.Roles": {
+        "description": "The roles of the user",
+        "properties": {
+          "admin": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "admin"
+        ],
+        "type": "object"
+      },
+      "CreatePullRequestInput": {
+        "title": "CreatePullRequestInput",
+        "description": "Input for creating a pull request using a PR automation",
+        "properties": {
+          "branch": {
+            "description": "Branch name for the pull request (overrides default)",
+            "type": "string"
+          },
+          "context": {
+            "additional_properties": true,
+            "description": "Context variables to pass to the PR automation templates",
+            "type": "object"
+          },
+          "identifier": {
+            "description": "Repository identifier (overrides default)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "context"
+        ],
+        "type": "object"
+      },
       "Git": {
         "title": "Git",
         "description": "Git reference configuration",
@@ -148,6 +822,1772 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "GitRepository": {
+        "title": "GitRepository",
+        "description": "A git repository",
+        "properties": {
+          "auth_method": {
+            "enum": [
+              "basic",
+              "ssh"
+            ],
+            "type": "string"
+          },
+          "error": {
+            "description": "The error message for the git repository's last pull attempt",
+            "type": "string"
+          },
+          "health": {
+            "enum": [
+              "pullable",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "https_path": {
+            "description": "The https url for this git repo if you need to customize it",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pulled_at": {
+            "description": "The last successful git pull timestamp",
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "description": "The url of the git repository, can be either an https or ssh url",
+            "type": "string"
+          },
+          "url_format": {
+            "description": "A format string to get the http url for a subfolder in a git repo",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GitRepositoryInput": {
+        "title": "GitRepositoryInput",
+        "description": "Input for creating or updating a git repository",
+        "properties": {
+          "connection_id": {
+            "description": "The id of the scm connection to use for authentication",
+            "type": "string"
+          },
+          "passphrase": {
+            "description": "A passphrase to decrypt the given private key",
+            "type": "string"
+          },
+          "password": {
+            "description": "The http password for http authenticated repos",
+            "type": "string"
+          },
+          "private_key": {
+            "description": "An ssh private key to use with this repo if an ssh url was given",
+            "type": "string"
+          },
+          "url": {
+            "description": "The url of the git repository, can be either an https or ssh url",
+            "type": "string"
+          },
+          "username": {
+            "description": "The http username for authenticated http repos, defaults to apiKey for github",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "type": "object"
+      },
+      "GithubAppInput": {
+        "title": "GithubAppInput",
+        "description": "Github App authentication configuration",
+        "properties": {
+          "app_id": {
+            "description": "The GitHub App ID",
+            "type": "string"
+          },
+          "installation_id": {
+            "description": "The GitHub App installation ID",
+            "type": "string"
+          },
+          "private_key": {
+            "description": "The private key for the GitHub App",
+            "type": "string"
+          }
+        },
+        "required": [
+          "app_id",
+          "installation_id",
+          "private_key"
+        ],
+        "type": "object"
+      },
+      "GlobalService": {
+        "title": "GlobalService",
+        "description": "A global service that deploys services across clusters matching specified criteria",
+        "properties": {
+          "tags": {
+            "description": "Tags used to match target clusters",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            },
+            "type": "array"
+          },
+          "cascade": {
+            "$ref": "#/components/schemas/Cascade"
+          },
+          "distro": {
+            "description": "Target cluster distribution (e.g., eks, aks, gke, generic)",
+            "enum": [
+              "generic",
+              "eks",
+              "aks",
+              "gke",
+              "rke",
+              "k3s",
+              "openshift"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the global service",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "interval": {
+            "description": "Polling interval for syncing the global service (e.g., \"5m\", \"1h\")",
+            "type": "string"
+          },
+          "mgmt": {
+            "description": "If true, the global service will target the management cluster",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "Name of the global service",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this global service belongs to",
+            "type": "string"
+          },
+          "provider_id": {
+            "description": "ID of the cluster provider to filter target clusters",
+            "type": "string"
+          },
+          "reparent": {
+            "description": "If true, allows reparenting of existing services owned by this global service",
+            "type": "boolean"
+          },
+          "service_id": {
+            "description": "ID of the source service to clone (mutually exclusive with template)",
+            "type": "string"
+          },
+          "template": {
+            "$ref": "#/components/schemas/ServiceTemplate"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GlobalServiceInput": {
+        "title": "GlobalServiceInput",
+        "description": "Input for creating or updating a global service",
+        "properties": {
+          "tags": {
+            "description": "Tags used to match target clusters",
+            "items": {
+              "$ref": "#/components/schemas/TagInput"
+            },
+            "type": "array"
+          },
+          "cascade": {
+            "$ref": "#/components/schemas/CascadeInput"
+          },
+          "distro": {
+            "description": "Target cluster distribution",
+            "enum": [
+              "generic",
+              "eks",
+              "aks",
+              "gke",
+              "rke",
+              "k3s",
+              "openshift"
+            ],
+            "type": "string"
+          },
+          "interval": {
+            "description": "Polling interval for syncing (e.g., \"5m\", \"1h\")",
+            "type": "string"
+          },
+          "mgmt": {
+            "description": "If true, target the management cluster",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "Name for the global service",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this global service belongs to",
+            "type": "string"
+          },
+          "provider_id": {
+            "description": "ID of the cluster provider to filter target clusters",
+            "type": "string"
+          },
+          "reparent": {
+            "description": "If true, allows reparenting of existing services",
+            "type": "boolean"
+          },
+          "template": {
+            "$ref": "#/components/schemas/ServiceTemplateInput"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "HelmRepository": {
+        "title": "HelmRepository",
+        "description": "A helm repository",
+        "properties": {
+          "error": {
+            "description": "The error message for the helm repository's last pull attempt",
+            "type": "string"
+          },
+          "health": {
+            "enum": [
+              "pullable",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "provider": {
+            "enum": [
+              "basic",
+              "bearer",
+              "gcp",
+              "azure",
+              "aws"
+            ],
+            "type": "string"
+          },
+          "pulled_at": {
+            "description": "The last successful pull timestamp",
+            "format": "date-time",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "description": "The url of the helm repository",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HelmRepositoryInput": {
+        "title": "HelmRepositoryInput",
+        "description": "Input for upserting a helm repository",
+        "properties": {
+          "auth": {
+            "description": "Authentication configuration for the helm repository",
+            "properties": {
+              "aws": {
+                "description": "AWS credentials for ECR",
+                "properties": {
+                  "access_key": {
+                    "description": "AWS access key ID",
+                    "type": "string"
+                  },
+                  "assume_role_arn": {
+                    "description": "ARN of the role to assume",
+                    "type": "string"
+                  },
+                  "secret_access_key": {
+                    "description": "AWS secret access key",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "azure": {
+                "description": "Azure credentials for ACR",
+                "properties": {
+                  "client_id": {
+                    "description": "Azure client ID",
+                    "type": "string"
+                  },
+                  "client_secret": {
+                    "description": "Azure client secret",
+                    "type": "string"
+                  },
+                  "subscription_id": {
+                    "description": "Azure subscription ID",
+                    "type": "string"
+                  },
+                  "tenant_id": {
+                    "description": "Azure tenant ID",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "basic": {
+                "description": "Basic auth credentials",
+                "properties": {
+                  "password": {
+                    "description": "The password for basic auth",
+                    "type": "string"
+                  },
+                  "username": {
+                    "description": "The username for basic auth",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "bearer": {
+                "description": "Bearer token auth",
+                "properties": {
+                  "token": {
+                    "description": "The bearer token",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              },
+              "gcp": {
+                "description": "GCP credentials for GCR/Artifact Registry",
+                "properties": {
+                  "application_credentials": {
+                    "description": "GCP service account JSON credentials",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "provider": {
+            "enum": [
+              "basic",
+              "bearer",
+              "gcp",
+              "azure",
+              "aws"
+            ],
+            "type": "string"
+          },
+          "url": {
+            "description": "The url of the helm repository",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HelmSpec": {
+        "title": "HelmSpec",
+        "description": "Helm chart configuration for a service",
+        "properties": {
+          "chart": {
+            "description": "Helm chart name (e.g., \"nginx\")",
+            "type": "string"
+          },
+          "release": {
+            "description": "Helm release name for the deployment",
+            "type": "string"
+          },
+          "repository_id": {
+            "description": "ID of the Helm repository for this chart",
+            "type": "string"
+          },
+          "url": {
+            "description": "URL of the Helm chart repository",
+            "type": "string"
+          },
+          "values": {
+            "description": "Inline helm values for the helm chart",
+            "type": "string"
+          },
+          "values_files": {
+            "description": "List of referenced values.yaml files",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "version": {
+            "description": "Helm chart version",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "HelmSpecInput": {
+        "title": "HelmSpecInput",
+        "description": "Helm chart configuration input",
+        "properties": {
+          "chart": {
+            "description": "Name of the Helm chart to deploy",
+            "type": "string"
+          },
+          "release": {
+            "description": "Desired Helm release name",
+            "type": "string"
+          },
+          "repository_id": {
+            "description": "ID of a GitRepository to use for sourcing this helm chart",
+            "type": "string"
+          },
+          "url": {
+            "description": "Helm chart repository URL",
+            "type": "string"
+          },
+          "values": {
+            "description": "YAML configuration values for the Helm chart",
+            "type": "string"
+          },
+          "values_files": {
+            "description": "List of referenced values.yaml files to be used with the chart",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "version": {
+            "description": "Version of the Helm chart",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Kustomize": {
+        "title": "Kustomize",
+        "description": "Kustomize configuration for a service",
+        "properties": {
+          "enable_helm": {
+            "description": "If true, Helm integration is enabled for Kustomize",
+            "type": "boolean"
+          },
+          "path": {
+            "description": "Path to the kustomization.yaml or kustomize directory relative to the repository root",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "KustomizeInput": {
+        "title": "KustomizeInput",
+        "description": "Kustomize configuration input",
+        "properties": {
+          "enable_helm": {
+            "description": "Enable Helm support within Kustomize if true",
+            "type": "boolean"
+          },
+          "path": {
+            "description": "Path to the kustomization.yaml or kustomize directory",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Pipeline": {
+        "title": "Pipeline",
+        "description": "A continuous deployment pipeline that orchestrates service promotions through stages",
+        "properties": {
+          "edges": {
+            "description": "Edges connecting stages with promotion gates",
+            "items": {
+              "$ref": "#/components/schemas/PipelineEdge"
+            },
+            "type": "array"
+          },
+          "id": {
+            "description": "Unique identifier for the pipeline",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the pipeline",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this pipeline belongs to",
+            "type": "string"
+          },
+          "stages": {
+            "description": "Ordered list of stages in this pipeline",
+            "items": {
+              "$ref": "#/components/schemas/PipelineStage"
+            },
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PipelineContext": {
+        "title": "PipelineContext",
+        "description": "A context containing data for pipeline promotions and PR automations",
+        "properties": {
+          "context": {
+            "additionalProperties": true,
+            "description": "Arbitrary key-value data map passed through the pipeline",
+            "type": "object"
+          },
+          "id": {
+            "description": "Unique identifier for the context",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pipeline_id": {
+            "description": "ID of the pipeline this context belongs to",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PipelineContextInput": {
+        "title": "PipelineContextInput",
+        "description": "Input for creating a new pipeline context to trigger a pipeline run",
+        "properties": {
+          "context": {
+            "additionalProperties": true,
+            "description": "Arbitrary key-value data map to pass through the pipeline for PR automations",
+            "type": "object"
+          }
+        },
+        "required": [
+          "context"
+        ],
+        "type": "object"
+      },
+      "PipelineEdge": {
+        "title": "PipelineEdge",
+        "description": "An edge connecting two stages with optional promotion gates",
+        "properties": {
+          "from_id": {
+            "description": "ID of the source stage",
+            "type": "string"
+          },
+          "gates": {
+            "description": "Gates that must be satisfied for promotion",
+            "items": {
+              "$ref": "#/components/schemas/PipelineGate"
+            },
+            "type": "array"
+          },
+          "id": {
+            "description": "Unique identifier for the edge",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "promoted_at": {
+            "description": "Timestamp when promotion last occurred through this edge",
+            "format": "date-time",
+            "type": "string"
+          },
+          "to_id": {
+            "description": "ID of the destination stage",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PipelineGate": {
+        "title": "PipelineGate",
+        "description": "A gate checkpoint for pipeline promotions",
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the gate",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the gate",
+            "type": "string"
+          },
+          "state": {
+            "description": "Current state of the gate (pending, open, closed, running)",
+            "enum": [
+              "pending",
+              "open",
+              "closed",
+              "running"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of gate (approval, window, job)",
+            "enum": [
+              "approval",
+              "window",
+              "job",
+              "sentinel"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PipelineStage": {
+        "title": "PipelineStage",
+        "description": "A stage in the pipeline representing a deployment environment",
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the stage",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the stage (e.g., dev, staging, production)",
+            "type": "string"
+          },
+          "services": {
+            "description": "Services deployed in this stage",
+            "items": {
+              "$ref": "#/components/schemas/StageService"
+            },
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PrAutomation": {
+        "title": "PrAutomation",
+        "description": "A PR automation template for creating infrastructure or application pull requests",
+        "properties": {
+          "title": {
+            "description": "Title template for generated pull requests",
+            "type": "string"
+          },
+          "addon": {
+            "description": "Name of the addon this PR automation is associated with, if any",
+            "type": "string"
+          },
+          "branch": {
+            "description": "Default branch name for generated pull requests",
+            "type": "string"
+          },
+          "catalog_id": {
+            "description": "ID of the catalog this PR automation belongs to",
+            "type": "string"
+          },
+          "cluster_id": {
+            "description": "ID of the cluster this PR automation is associated with, if any",
+            "type": "string"
+          },
+          "configuration": {
+            "description": "Configuration fields for the PR automation",
+            "items": {
+              "$ref": "#/components/schemas/PrConfiguration"
+            },
+            "type": "array"
+          },
+          "connection_id": {
+            "description": "ID of the SCM connection used for creating pull requests",
+            "type": "string"
+          },
+          "dark_icon": {
+            "description": "URL or reference to the PR automation's icon for dark mode",
+            "type": "string"
+          },
+          "documentation": {
+            "description": "Documentation describing the PR automation's purpose and usage",
+            "type": "string"
+          },
+          "icon": {
+            "description": "URL or reference to the PR automation's icon for light mode",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the PR automation",
+            "type": "string"
+          },
+          "identifier": {
+            "description": "Repository identifier (e.g., owner/repo) for the PR automation",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "message": {
+            "description": "Message/body template for generated pull requests",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the PR automation",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this PR automation belongs to",
+            "type": "string"
+          },
+          "service_id": {
+            "description": "ID of the service this PR automation is associated with, if any",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PrConfiguration": {
+        "title": "PrConfiguration",
+        "description": "A configuration field for a PR automation",
+        "properties": {
+          "default": {
+            "description": "Default value for the configuration field",
+            "type": "string"
+          },
+          "documentation": {
+            "description": "Documentation describing the configuration field",
+            "type": "string"
+          },
+          "longform": {
+            "description": "Extended documentation for the configuration field",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the configuration field",
+            "type": "string"
+          },
+          "optional": {
+            "description": "Whether the configuration field is optional",
+            "type": "boolean"
+          },
+          "placeholder": {
+            "description": "Placeholder text for the configuration field input",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of the configuration field (string, int, bool, domain, file, function, enum, password)",
+            "enum": [
+              "string",
+              "int",
+              "bool",
+              "domain",
+              "bucket",
+              "file",
+              "function",
+              "password",
+              "enum",
+              "cluster",
+              "project",
+              "group",
+              "user",
+              "flow",
+              "json"
+            ],
+            "type": "string"
+          },
+          "validation": {
+            "$ref": "#/components/schemas/PrConfigurationValidation"
+          }
+        },
+        "type": "object"
+      },
+      "PrConfigurationValidation": {
+        "title": "PrConfigurationValidation",
+        "description": "Validation rules for a configuration field",
+        "properties": {
+          "message": {
+            "description": "Error message to display when validation fails",
+            "type": "string"
+          },
+          "regex": {
+            "description": "Regular expression pattern for validation",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Project": {
+        "title": "Project",
+        "description": "A project is a top-level organizational unit that groups related resources such as clusters, stacks, pipelines, and services",
+        "properties": {
+          "default": {
+            "description": "Whether this is the default project for the instance",
+            "type": "boolean"
+          },
+          "description": {
+            "description": "A human-readable description of the project",
+            "type": "string"
+          },
+          "id": {
+            "description": "The unique identifier of the project",
+            "format": "uuid",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the project",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PromotionCriteria": {
+        "title": "PromotionCriteria",
+        "description": "Criteria for promoting a service to the next stage",
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the promotion criteria",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "pr_automation_id": {
+            "description": "ID of the PR automation to trigger on promotion",
+            "type": "string"
+          },
+          "repository": {
+            "description": "Repository to create PRs against for promotion",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PullRequest": {
+        "title": "PullRequest",
+        "description": "A pull request reference tracked by the platform for deployment workflows",
+        "properties": {
+          "title": {
+            "description": "Title of the pull request",
+            "type": "string"
+          },
+          "body": {
+            "description": "Body/description of the pull request",
+            "type": "string"
+          },
+          "cluster_id": {
+            "description": "ID of the cluster this pull request is associated with, if any",
+            "type": "string"
+          },
+          "creator": {
+            "description": "Username of the pull request creator in the source control provider",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the pull request record",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "labels": {
+            "description": "Labels applied to the pull request",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ref": {
+            "description": "Git ref (branch name) for the pull request",
+            "type": "string"
+          },
+          "service_id": {
+            "description": "ID of the service this pull request is associated with, if any",
+            "type": "string"
+          },
+          "sha": {
+            "description": "Git SHA of the pull request head",
+            "type": "string"
+          },
+          "stack_id": {
+            "description": "ID of the stack this pull request is associated with, if any",
+            "type": "string"
+          },
+          "status": {
+            "description": "Current status of the pull request (open, merged, closed)",
+            "enum": [
+              "open",
+              "merged",
+              "closed"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "url": {
+            "description": "URL of the pull request in the source control provider",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "RendererHelm": {
+        "title": "RendererHelm",
+        "description": "Helm-specific configuration for a renderer",
+        "properties": {
+          "ignore_hooks": {
+            "description": "Whether to ignore Helm hooks when rendering",
+            "type": "boolean"
+          },
+          "release": {
+            "description": "Helm release name to use when rendering",
+            "type": "string"
+          },
+          "values": {
+            "description": "Helm values file content to use when rendering",
+            "type": "string"
+          },
+          "values_files": {
+            "description": "List of relative paths to values files",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "RendererHelmInput": {
+        "title": "RendererHelmInput",
+        "description": "Helm-specific configuration input for a renderer",
+        "properties": {
+          "ignore_hooks": {
+            "description": "Whether to ignore Helm hooks when rendering",
+            "type": "boolean"
+          },
+          "release": {
+            "description": "Helm release name to use when rendering",
+            "type": "string"
+          },
+          "values": {
+            "description": "Helm values file content to use when rendering",
+            "type": "string"
+          },
+          "values_files": {
+            "description": "List of relative paths to values files",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ScmConnection": {
+        "title": "ScmConnection",
+        "description": "An SCM connection for integrating with source control providers",
+        "properties": {
+          "api_url": {
+            "description": "Base URL for HTTP APIs for self-hosted versions if different from base URL",
+            "type": "string"
+          },
+          "base_url": {
+            "description": "Base URL for self-hosted versions of this provider",
+            "type": "string"
+          },
+          "default": {
+            "description": "Whether this is the default SCM connection",
+            "type": "boolean"
+          },
+          "github": {
+            "$ref": "#/components/schemas/Console.OpenAPI.SCM.Connection.GithubApp"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "The name of the SCM connection",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "github",
+              "gitlab",
+              "bitbucket",
+              "azure_devops",
+              "bitbucket_datacenter"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "username": {
+            "description": "The username for authentication",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
+      "ScmConnectionInput": {
+        "title": "ScmConnectionInput",
+        "description": "Input for creating or updating an SCM connection",
+        "properties": {
+          "api_url": {
+            "description": "Base URL for HTTP APIs for self-hosted versions if different from base URL",
+            "type": "string"
+          },
+          "base_url": {
+            "description": "Base URL for Git clones for self-hosted versions",
+            "type": "string"
+          },
+          "default": {
+            "description": "Whether this is the default SCM connection",
+            "type": "boolean"
+          },
+          "github": {
+            "$ref": "#/components/schemas/GithubAppInput"
+          },
+          "name": {
+            "description": "The name of the SCM connection",
+            "type": "string"
+          },
+          "signing_private_key": {
+            "description": "A private key used for signing commits",
+            "type": "string"
+          },
+          "token": {
+            "description": "The access token for authentication",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "github",
+              "gitlab",
+              "bitbucket",
+              "azure_devops",
+              "bitbucket_datacenter"
+            ],
+            "type": "string"
+          },
+          "username": {
+            "description": "The username for authentication",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "type": "object"
+      },
+      "Sentinel": {
+        "title": "Sentinel",
+        "description": "An automated monitoring system that runs checks against your infrastructure",
+        "properties": {
+          "checks": {
+            "description": "List of checks configured for this sentinel",
+            "items": {
+              "$ref": "#/components/schemas/SentinelCheck"
+            },
+            "type": "array"
+          },
+          "description": {
+            "description": "Description of what this sentinel monitors",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the sentinel",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "last_run_at": {
+            "description": "Timestamp of when this sentinel was last executed",
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Human-readable name of this sentinel",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this sentinel belongs to",
+            "type": "string"
+          },
+          "repository_id": {
+            "description": "ID of the git repository for rule files",
+            "type": "string"
+          },
+          "status": {
+            "description": "Status of the sentinel's last run (pending, success, failed)",
+            "enum": [
+              "pending",
+              "success",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SentinelCheck": {
+        "title": "SentinelCheck",
+        "description": "A specific monitoring check within a sentinel",
+        "properties": {
+          "id": {
+            "description": "Unique identifier for the check",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of this check",
+            "type": "string"
+          },
+          "rule_file": {
+            "description": "Path to the rule file for this check within the repository",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of check (log, kubernetes, integration_test)",
+            "enum": [
+              "log",
+              "kubernetes",
+              "integration_test"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SentinelCheckResult": {
+        "title": "SentinelCheckResult",
+        "description": "The result of a single check within a sentinel run",
+        "properties": {
+          "failed_count": {
+            "description": "Number of failed jobs",
+            "type": "integer"
+          },
+          "job_count": {
+            "description": "Total number of jobs spawned for this check",
+            "type": "integer"
+          },
+          "name": {
+            "description": "Name of the check that was executed",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Reason for failure if the check failed",
+            "type": "string"
+          },
+          "status": {
+            "description": "Status of this check (pending, success, failed)",
+            "enum": [
+              "pending",
+              "success",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "successful_count": {
+            "description": "Number of successful jobs",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "SentinelRun": {
+        "title": "SentinelRun",
+        "description": "A single execution of a sentinel's monitoring checks",
+        "properties": {
+          "completed_at": {
+            "description": "Timestamp when the run completed",
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the sentinel run",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "jobs": {
+            "description": "Jobs spawned by this sentinel run for integration tests",
+            "items": {
+              "$ref": "#/components/schemas/SentinelRunJob"
+            },
+            "type": "array"
+          },
+          "results": {
+            "description": "Results of individual checks in this run",
+            "items": {
+              "$ref": "#/components/schemas/SentinelCheckResult"
+            },
+            "type": "array"
+          },
+          "sentinel_id": {
+            "description": "ID of the sentinel that was executed",
+            "type": "string"
+          },
+          "status": {
+            "description": "Current status of the run (pending, success, failed)",
+            "enum": [
+              "pending",
+              "success",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SentinelRunJob": {
+        "title": "SentinelRunJob",
+        "description": "An integration test job spawned by a sentinel run",
+        "properties": {
+          "check": {
+            "description": "Name of the check this job belongs to",
+            "type": "string"
+          },
+          "cluster_id": {
+            "description": "ID of the cluster this job ran on",
+            "type": "string"
+          },
+          "completed_at": {
+            "description": "Timestamp when the job completed",
+            "format": "date-time",
+            "type": "string"
+          },
+          "format": {
+            "description": "Output format of the job (plaintext, junit)",
+            "enum": [
+              "plaintext",
+              "junit"
+            ],
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the job",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "output": {
+            "description": "Output produced by the job",
+            "type": "string"
+          },
+          "repository_id": {
+            "description": "ID of the git repository used for the test",
+            "type": "string"
+          },
+          "sentinel_run_id": {
+            "description": "ID of the sentinel run this job belongs to",
+            "type": "string"
+          },
+          "status": {
+            "description": "Current status of the job (pending, running, success, failed)",
+            "enum": [
+              "pending",
+              "running",
+              "success",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Service": {
+        "title": "Service",
+        "description": "A service deployment reference deployed from a git repo into a cluster",
+        "properties": {
+          "cluster_id": {
+            "description": "ID of the cluster this service is deployed to",
+            "type": "string"
+          },
+          "component_status": {
+            "description": "Status message from components (e.g. unhealthy reason)",
+            "type": "string"
+          },
+          "deleted_at": {
+            "description": "Timestamp the service was marked for deletion, if deleted",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dry_run": {
+            "description": "If true, this service is running in dry-run mode",
+            "type": "boolean"
+          },
+          "errors": {
+            "description": "List of errors generated by the deployment operator",
+            "items": {
+              "$ref": "#/components/schemas/ServiceError"
+            },
+            "type": "array"
+          },
+          "git": {
+            "$ref": "#/components/schemas/Git"
+          },
+          "helm": {
+            "$ref": "#/components/schemas/HelmSpec"
+          },
+          "id": {
+            "description": "Unique identifier for the service deployment",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "interval": {
+            "description": "Polling interval for the service reconcile loop (e.g., \"5m\")",
+            "type": "string"
+          },
+          "kustomize": {
+            "$ref": "#/components/schemas/Kustomize"
+          },
+          "message": {
+            "description": "Latest commit message from the synced revision",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the service",
+            "type": "string"
+          },
+          "namespace": {
+            "description": "Kubernetes namespace where the service is deployed",
+            "type": "string"
+          },
+          "protect": {
+            "description": "If true, prevents service deletion or config edits",
+            "type": "boolean"
+          },
+          "renderers": {
+            "description": "Custom renderers for processing service manifests",
+            "items": {
+              "$ref": "#/components/schemas/ServiceRenderer"
+            },
+            "type": "array"
+          },
+          "repository_id": {
+            "description": "ID of the git or Helm repository backing this service",
+            "type": "string"
+          },
+          "sha": {
+            "description": "Git commit SHA for the current synced revision.  This will be a helm digest if a pure helm chart as well",
+            "type": "string"
+          },
+          "sources": {
+            "description": "Additional source repositories for this service",
+            "items": {
+              "$ref": "#/components/schemas/ServiceSource"
+            },
+            "type": "array"
+          },
+          "status": {
+            "description": "Current status of the service deployment (e.g., stale, synced, healthy, failed, paused)",
+            "enum": [
+              "stale",
+              "synced",
+              "healthy",
+              "failed",
+              "paused"
+            ],
+            "type": "string"
+          },
+          "templated": {
+            "description": "If true, the service was deployed using a template",
+            "type": "boolean"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceConfigurationInput": {
+        "title": "ServiceConfigurationInput",
+        "description": "A configuration key-value pair for a service deployment. These are used as templating values when rendering service manifests.",
+        "properties": {
+          "name": {
+            "description": "The name/key of the configuration value",
+            "type": "string"
+          },
+          "value": {
+            "description": "The value for this configuration key. If null, will remove this value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "ServiceError": {
+        "title": "ServiceError",
+        "description": "An error reported by the deployment operator during service sync",
+        "properties": {
+          "message": {
+            "description": "Error message describing what went wrong",
+            "type": "string"
+          },
+          "source": {
+            "description": "Source of the error (e.g., component name or sync stage)",
+            "type": "string"
+          },
+          "warning": {
+            "description": "If true, this is a warning rather than a fatal error",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceInput": {
+        "title": "ServiceInput",
+        "description": "Input for creating or updating a service deployment",
+        "properties": {
+          "configuration": {
+            "description": "Configuration values to template into the service manifests. You must pass the full list of configuration inputs",
+            "items": {
+              "$ref": "#/components/schemas/ServiceConfigurationInput"
+            },
+            "type": "array"
+          },
+          "dry_run": {
+            "description": "If true, does not actually apply any changes to the cluster",
+            "type": "boolean"
+          },
+          "git": {
+            "$ref": "#/components/schemas/Git"
+          },
+          "helm": {
+            "$ref": "#/components/schemas/HelmSpecInput"
+          },
+          "kustomize": {
+            "$ref": "#/components/schemas/KustomizeInput"
+          },
+          "name": {
+            "description": "Desired name for the service",
+            "type": "string"
+          },
+          "namespace": {
+            "description": "Target deployment namespace",
+            "type": "string"
+          },
+          "protect": {
+            "description": "If true, marks the service as protected from accidental changes",
+            "type": "boolean"
+          },
+          "renderers": {
+            "description": "Custom renderers for processing service manifests",
+            "items": {
+              "$ref": "#/components/schemas/ServiceRendererInput"
+            },
+            "type": "array"
+          },
+          "repository_id": {
+            "description": "ID of the backing repository for this service",
+            "type": "string"
+          },
+          "sources": {
+            "description": "Additional source repositories for this service",
+            "items": {
+              "$ref": "#/components/schemas/ServiceSourceInput"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "namespace"
+        ],
+        "type": "object"
+      },
+      "ServiceRenderer": {
+        "title": "ServiceRenderer",
+        "description": "A custom renderer for processing service manifests at a specific path",
+        "properties": {
+          "helm": {
+            "$ref": "#/components/schemas/RendererHelm"
+          },
+          "path": {
+            "description": "Path within the repository where this renderer applies",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of renderer (auto, raw, helm, kustomize)",
+            "enum": [
+              "auto",
+              "raw",
+              "helm",
+              "kustomize"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceRendererInput": {
+        "title": "ServiceRendererInput",
+        "description": "Input for a custom renderer configuration",
+        "properties": {
+          "helm": {
+            "$ref": "#/components/schemas/RendererHelmInput"
+          },
+          "path": {
+            "description": "Path within the repository where this renderer applies",
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of renderer (auto, raw, helm, kustomize)",
+            "enum": [
+              "auto",
+              "raw",
+              "helm",
+              "kustomize"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "type"
+        ],
+        "type": "object"
+      },
+      "ServiceSource": {
+        "title": "ServiceSource",
+        "description": "An additional source repository for a service deployment",
+        "properties": {
+          "git": {
+            "$ref": "#/components/schemas/Git"
+          },
+          "path": {
+            "description": "Subdirectory path where this source will live in the final tarball",
+            "type": "string"
+          },
+          "repository_id": {
+            "description": "ID of the git repository to source from",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceSourceInput": {
+        "title": "ServiceSourceInput",
+        "description": "Input for an additional source repository",
+        "properties": {
+          "git": {
+            "$ref": "#/components/schemas/Git"
+          },
+          "path": {
+            "description": "Subdirectory path where this source will live in the final tarball",
+            "type": "string"
+          },
+          "repository_id": {
+            "description": "ID of the git repository to source from",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTemplate": {
+        "title": "ServiceTemplate",
+        "description": "A service template that defines how services are created from a global service",
+        "properties": {
+          "contexts": {
+            "description": "List of service context names to include",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "git": {
+            "$ref": "#/components/schemas/Git"
+          },
+          "helm": {
+            "$ref": "#/components/schemas/HelmSpec"
+          },
+          "id": {
+            "description": "Unique identifier for the service template",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "kustomize": {
+            "$ref": "#/components/schemas/Kustomize"
+          },
+          "name": {
+            "description": "Name of the service to be created from this template",
+            "type": "string"
+          },
+          "namespace": {
+            "description": "Kubernetes namespace for the service",
+            "type": "string"
+          },
+          "protect": {
+            "description": "If true, prevents accidental deletion or modification of created services",
+            "type": "boolean"
+          },
+          "repository_id": {
+            "description": "ID of the git repository backing this template",
+            "type": "string"
+          },
+          "templated": {
+            "description": "If true, the service configuration supports variable interpolation",
+            "type": "boolean"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceTemplateInput": {
+        "title": "ServiceTemplateInput",
+        "description": "Input for a service template configuration",
+        "properties": {
+          "contexts": {
+            "description": "List of service context names to include",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "git": {
+            "$ref": "#/components/schemas/Git"
+          },
+          "helm": {
+            "$ref": "#/components/schemas/HelmSpecInput"
+          },
+          "kustomize": {
+            "$ref": "#/components/schemas/KustomizeInput"
+          },
+          "name": {
+            "description": "Name of the service to be created from this template",
+            "type": "string"
+          },
+          "namespace": {
+            "description": "Kubernetes namespace for the service",
+            "type": "string"
+          },
+          "protect": {
+            "description": "If true, prevent accidental deletion or modification",
+            "type": "boolean"
+          },
+          "repository_id": {
+            "description": "ID of the git repository backing this template",
+            "type": "string"
+          },
+          "templated": {
+            "description": "If true, enable variable interpolation in service configuration",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "namespace"
+        ],
         "type": "object"
       },
       "Stack": {
@@ -279,6 +2719,107 @@
         },
         "type": "object"
       },
+      "StackRun": {
+        "title": "StackRun",
+        "description": "A stack run instance",
+        "properties": {
+          "approval": {
+            "type": "boolean"
+          },
+          "approved_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "cancellation_reason": {
+            "type": "string"
+          },
+          "cluster_id": {
+            "type": "string"
+          },
+          "destroy": {
+            "type": "boolean"
+          },
+          "dry_run": {
+            "type": "boolean"
+          },
+          "git": {
+            "$ref": "#/components/schemas/Git"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "manage_state": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "repository_id": {
+            "type": "string"
+          },
+          "stack_id": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "queued",
+              "pending",
+              "running",
+              "successful",
+              "failed",
+              "cancelled",
+              "pending_approval"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "terraform",
+              "ansible",
+              "custom"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "workdir": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "StageService": {
+        "title": "StageService",
+        "description": "A service deployment within a pipeline stage",
+        "properties": {
+          "criteria": {
+            "$ref": "#/components/schemas/PromotionCriteria"
+          },
+          "id": {
+            "description": "Unique identifier for the stage service",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "service_id": {
+            "description": "ID of the deployed service",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Tag": {
         "title": "Tag",
         "description": "A tag",
@@ -290,6 +2831,25 @@
             "type": "string"
           }
         },
+        "type": "object"
+      },
+      "TagInput": {
+        "title": "TagInput",
+        "description": "A tag used for matching clusters",
+        "properties": {
+          "name": {
+            "description": "Tag name",
+            "type": "string"
+          },
+          "value": {
+            "description": "Tag value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ],
         "type": "object"
       },
       "User": {
@@ -307,7 +2867,9 @@
             "format": "date-time",
             "type": "string"
           },
-          "roles": "Elixir.Console.OpenAPI.Roles",
+          "roles": {
+            "$ref": "#/components/schemas/Console.OpenAPI.User.Roles"
+          },
           "service_account": {
             "type": "boolean"
           },
@@ -326,21 +2888,435 @@
     }
   },
   "paths": {
-    "/api/v1/cd/clusters": {
+    "/v1/api/ai/runs": {
       "get": {
+        "tags": [
+          "agent"
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Console.OpenAPI.CD.Cluster.List"
+                  "$ref": "#/components/schemas/Console.OpenAPI.AI.AgentRun.List"
                 }
               }
             },
             "description": "no description"
           }
         },
-        "operationId": "ListClusters",
+        "operationId": "ListAgentRuns",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "runtime_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRun"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateAgentRun",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentRunInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "ai.write"
+        ]
+      }
+    },
+    "/v1/api/ai/runs/{id}": {
+      "get": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRun"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetAgentRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/v1/api/ai/runtimes": {
+      "get": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.AI.AgentRuntime.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListAgentRuntimes",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "required": false,
+            "schema": {
+              "enum": [
+                "claude",
+                "opencode",
+                "gemini",
+                "custom"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/v1/api/ai/runtimes/{id}": {
+      "get": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRuntime"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetAgentRuntime",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/v1/api/ai/sentinelruns/{id}": {
+      "get": {
+        "tags": [
+          "sentinel"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SentinelRun"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetSentinelRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/v1/api/ai/sentinels": {
+      "get": {
+        "tags": [
+          "sentinel"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.AI.Sentinel.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListSentinels",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "pending",
+                "success",
+                "failed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/v1/api/ai/sentinels/{id}": {
+      "get": {
+        "tags": [
+          "sentinel"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sentinel"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetSentinel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/v1/api/ai/sentinels/{id}/trigger": {
+      "post": {
+        "tags": [
+          "sentinel"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SentinelRun"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "TriggerSentinel",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.write"
+        ]
+      }
+    },
+    "/v1/api/ai/sentinels/{sentinel_id}/runs": {
+      "get": {
+        "tags": [
+          "sentinel"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.AI.SentinelRun.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListSentinelRuns",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sentinel_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/v1/api/ai/sessions": {
+      "get": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.AI.AgentSession.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListAgentSessions",
         "parameters": [
           {
             "in": "query",
@@ -358,9 +3334,173 @@
               "type": "integer"
             }
           }
+        ],
+        "x-required-scopes": [
+          "ai.read"
         ]
       },
       "post": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSession"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateAgentSession",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AgentSessionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "ai.write"
+        ]
+      }
+    },
+    "/v1/api/ai/sessions/{id}": {
+      "get": {
+        "tags": [
+          "agent"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentSession"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetAgentSession",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/v1/api/cd/clusters": {
+      "get": {
+        "tags": [
+          "cluster"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.CD.Cluster.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListClusters",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "project_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "healthy",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tag",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upgradeable",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "compliance",
+            "required": false,
+            "schema": {
+              "enum": [
+                "latest",
+                "compliant",
+                "outdated"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "cluster.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -383,11 +3523,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "cluster.write"
+        ]
       }
     },
-    "/api/v1/cd/clusters/{id}": {
+    "/v1/api/cd/clusters/{id}": {
       "delete": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -418,9 +3564,15 @@
               "type": "boolean"
             }
           }
+        ],
+        "x-required-scopes": [
+          "cluster.write"
         ]
       },
       "get": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -443,9 +3595,15 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "cluster.read"
         ]
       },
       "put": {
+        "tags": [
+          "cluster"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -478,11 +3636,959 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "cluster.write"
+        ]
       }
     },
-    "/api/v1/me": {
+    "/v1/api/cd/git/repositories": {
       "get": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.CD.GitRepository.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListGitRepositories",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateGitRepository",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GitRepositoryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "repos.write"
+        ]
+      }
+    },
+    "/v1/api/cd/git/repositories/url": {
+      "get": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetGitRepositoryByUrl",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.read"
+        ]
+      }
+    },
+    "/v1/api/cd/git/repositories/{id}": {
+      "delete": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteGitRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.write"
+        ]
+      },
+      "get": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetGitRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.read"
+        ]
+      },
+      "put": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GitRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpdateGitRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GitRepositoryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "repos.write"
+        ]
+      }
+    },
+    "/v1/api/cd/globalservices": {
+      "get": {
+        "tags": [
+          "global"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.CD.GlobalService.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListGlobalServices",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "project_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "global.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "global"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalService"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateGlobalService",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GlobalServiceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "global.write"
+        ]
+      }
+    },
+    "/v1/api/cd/globalservices/{id}": {
+      "delete": {
+        "tags": [
+          "global"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalService"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteGlobalService",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "global.write"
+        ]
+      },
+      "get": {
+        "tags": [
+          "global"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalService"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetGlobalService",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "global.read"
+        ]
+      },
+      "put": {
+        "tags": [
+          "global"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalService"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpdateGlobalService",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GlobalServiceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "global.write"
+        ]
+      }
+    },
+    "/v1/api/cd/globalservices/{id}/sync": {
+      "post": {
+        "tags": [
+          "global"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GlobalService"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "SyncGlobalService",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "global.write"
+        ]
+      }
+    },
+    "/v1/api/cd/helm/repositories": {
+      "get": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.CD.HelmRepository.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListHelmRepositories",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpsertHelmRepository",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HelmRepositoryInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "repos.write"
+        ]
+      }
+    },
+    "/v1/api/cd/helm/repositories/url": {
+      "get": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetHelmRepositoryByUrl",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "url",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.read"
+        ]
+      }
+    },
+    "/v1/api/cd/helm/repositories/{id}": {
+      "get": {
+        "tags": [
+          "repos"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HelmRepository"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetHelmRepository",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "repos.read"
+        ]
+      }
+    },
+    "/v1/api/cd/pipelines": {
+      "get": {
+        "tags": [
+          "pipelines"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.CD.Pipeline.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "description": "Returns a paginated list of all pipelines the authenticated user has access to",
+        "operationId": "ListPipelines",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "project_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "summary": "List all pipelines",
+        "x-required-scopes": [
+          "pipelines.read"
+        ]
+      }
+    },
+    "/v1/api/cd/pipelines/{id}": {
+      "get": {
+        "tags": [
+          "pipelines"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pipeline"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "description": "Retrieves a single pipeline by its unique identifier, including its stages, edges, and gates",
+        "operationId": "GetPipeline",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "summary": "Get a pipeline by ID",
+        "x-required-scopes": [
+          "pipelines.read"
+        ]
+      }
+    },
+    "/v1/api/cd/pipelines/{id}/trigger": {
+      "post": {
+        "tags": [
+          "pipelines"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PipelineContext"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "description": "Creates a new pipeline context to trigger a pipeline run. The context data flows through stages and can be used for PR automations.",
+        "operationId": "TriggerPipeline",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PipelineContextInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "summary": "Trigger a pipeline run",
+        "x-required-scopes": [
+          "pipelines.write"
+        ]
+      }
+    },
+    "/v1/api/cd/services": {
+      "get": {
+        "tags": [
+          "service"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.CD.Service.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListServices",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cluster_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "service.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "service"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Service"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateService",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cluster_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "service.write"
+        ]
+      }
+    },
+    "/v1/api/cd/services/{id}": {
+      "delete": {
+        "tags": [
+          "service"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Service"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteService",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "detach",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "service.write"
+        ]
+      },
+      "get": {
+        "tags": [
+          "service"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Service"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetService",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "service.read"
+        ]
+      },
+      "put": {
+        "tags": [
+          "service"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Service"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpdateService",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "service.write"
+        ]
+      }
+    },
+    "/v1/api/me": {
+      "get": {
+        "tags": [
+          "user"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -498,8 +4604,772 @@
         "operationId": "Me"
       }
     },
-    "/api/v1/stacks": {
+    "/v1/api/projects": {
       "get": {
+        "tags": [
+          "projects"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.Project.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "description": "Returns a paginated list of all projects the authenticated user has access to",
+        "operationId": "ListProjects",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "summary": "List all projects",
+        "x-required-scopes": [
+          "projects.read"
+        ]
+      }
+    },
+    "/v1/api/projects/{id}": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Project"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "description": "Retrieves a single project by its unique identifier",
+        "operationId": "GetProject",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "summary": "Get a project by ID",
+        "x-required-scopes": [
+          "projects.read"
+        ]
+      }
+    },
+    "/v1/api/scm/catalogs": {
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.SCM.Catalog.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListCatalogs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "project_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "catalog"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpsertCatalog",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "catalog.write"
+        ]
+      }
+    },
+    "/v1/api/scm/catalogs/{catalog_id}/prautomations": {
+      "get": {
+        "tags": [
+          "prautomation"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.SCM.PrAutomation.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListPrAutomationsForCatalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "catalog_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/scm/catalogs/{id}": {
+      "delete": {
+        "tags": [
+          "catalog"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteCatalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.write"
+        ]
+      },
+      "get": {
+        "tags": [
+          "catalog"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetCatalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      },
+      "put": {
+        "tags": [
+          "catalog"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalog"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpdateCatalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "catalog.write"
+        ]
+      }
+    },
+    "/v1/api/scm/connections": {
+      "get": {
+        "tags": [
+          "scm"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.SCM.Connection.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListScmConnections",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "scm.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "scm"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScmConnection"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateScmConnection",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScmConnectionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "scm.write"
+        ]
+      }
+    },
+    "/v1/api/scm/connections/{id}": {
+      "delete": {
+        "tags": [
+          "scm"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScmConnection"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "DeleteScmConnection",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "scm.write"
+        ]
+      },
+      "get": {
+        "tags": [
+          "scm"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScmConnection"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetScmConnection",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "scm.read"
+        ]
+      },
+      "put": {
+        "tags": [
+          "scm"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScmConnection"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "UpdateScmConnection",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScmConnectionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "scm.write"
+        ]
+      }
+    },
+    "/v1/api/scm/prautomations": {
+      "get": {
+        "tags": [
+          "prautomation"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.SCM.PrAutomation.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListPrAutomations",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "project_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "catalog_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/scm/prautomations/{id}": {
+      "get": {
+        "tags": [
+          "prautomation"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrAutomation"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetPrAutomation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/scm/prautomations/{id}/invoke": {
+      "post": {
+        "tags": [
+          "prautomation"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PullRequest"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "InvokePrAutomation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePullRequestInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "catalog.write"
+        ]
+      }
+    },
+    "/v1/api/scm/pullrequests": {
+      "get": {
+        "tags": [
+          "pullrequest"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.SCM.PullRequest.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListPullRequests",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cluster_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stack_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "open",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/scm/pullrequests/{id}": {
+      "get": {
+        "tags": [
+          "pullrequest"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PullRequest"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetPullRequest",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/stacks": {
+      "get": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -530,9 +5400,15 @@
               "type": "integer"
             }
           }
+        ],
+        "x-required-scopes": [
+          "stacks.read"
         ]
       },
       "post": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -555,11 +5431,17 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "stacks.write"
+        ]
       }
     },
-    "/api/v1/stacks/{id}": {
+    "/v1/api/stacks/{id}": {
       "delete": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -590,9 +5472,15 @@
               "type": "boolean"
             }
           }
+        ],
+        "x-required-scopes": [
+          "stacks.write"
         ]
       },
       "get": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -615,9 +5503,15 @@
               "type": "string"
             }
           }
+        ],
+        "x-required-scopes": [
+          "stacks.read"
         ]
       },
       "put": {
+        "tags": [
+          "stacks"
+        ],
         "responses": {
           "200": {
             "content": {
@@ -650,7 +5544,109 @@
             }
           },
           "required": true
-        }
+        },
+        "x-required-scopes": [
+          "stacks.write"
+        ]
+      }
+    },
+    "/v1/api/stacks/{id}/restore": {
+      "put": {
+        "tags": [
+          "stacks"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stack"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "RestoreStack",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "stacks.write"
+        ]
+      }
+    },
+    "/v1/api/stacks/{id}/resync": {
+      "post": {
+        "tags": [
+          "stacks"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StackRun"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ResyncStack",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "stacks.write"
+        ]
+      }
+    },
+    "/v1/api/stacks/{id}/trigger": {
+      "post": {
+        "tags": [
+          "stacks"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StackRun"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "TriggerStackRun",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "stacks.write"
+        ]
       }
     }
   }

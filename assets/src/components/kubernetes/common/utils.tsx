@@ -35,6 +35,14 @@ export const DEFAULT_DATA_SELECT = {
   page: '1',
 }
 
+export function getCreationTimestampString(
+  timestamp: string | { Time?: string } | undefined
+): string | undefined {
+  if (!timestamp) return undefined
+  if (typeof timestamp === 'string') return timestamp
+  return timestamp.Time
+}
+
 export function useDefaultColumns<
   T extends { objectMeta: TypesObjectMeta; typeMeta: TypesTypeMeta } = {
     objectMeta: TypesObjectMeta
@@ -74,12 +82,14 @@ export function useDefaultColumns<
         },
       }),
       colCreationTimestamp: columnHelper.accessor(
-        (r) => r?.objectMeta.creationTimestamp?.Time,
+        (r) => getCreationTimestampString(r?.objectMeta.creationTimestamp),
         {
           id: 'creationTimestamp',
           header: 'Creation',
           enableSorting: true,
-          cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+          cell: ({ getValue }) => {
+            return <DateTimeCol date={getValue()} />
+          },
         }
       ),
       colAction: columnHelper.accessor((r) => r, {
@@ -249,7 +259,9 @@ export function MetadataSidecar({
           )}
           <SidecarItem heading="UID">{objectMeta.uid}</SidecarItem>
           <SidecarItem heading="Creation date">
-            {formatLocalizedDateTime(objectMeta.creationTimestamp?.Time)}
+            {formatLocalizedDateTime(
+              getCreationTimestampString(objectMeta.creationTimestamp)
+            )}
           </SidecarItem>
           <SidecarItem heading="Labels">
             <ChipList

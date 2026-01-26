@@ -1,7 +1,7 @@
 import { ClusterScalingRecommendationFragment } from 'generated/graphql'
 
 import { Table } from '@pluralsh/design-system'
-import { useServiceContext } from './ServiceDetails'
+import { useServiceContext } from './ServiceDetailsContext'
 
 import {
   ColContainer,

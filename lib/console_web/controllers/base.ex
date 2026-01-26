@@ -7,6 +7,8 @@ defmodule ConsoleWeb.Controllers.Base do
     |> Map.new()
   end
 
+  def successful(%{__struct__: _} = struct, conn, schema),
+    do: Controller.json(conn, schema.wire_format(struct))
   def successful({:ok, result}, conn, schema),
     do: Controller.json(conn, schema.wire_format(result))
   def successful(pass, _, _), do: pass

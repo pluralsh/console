@@ -84,6 +84,15 @@ defmodule Console.AI.Evidence.Base do
     |> ok()
   end
 
+  def some_pods(ns, selector) do
+    CoreV1.list_namespaced_pod!(ns, [label_selector: construct_label_selector(selector)] ++ k8s_page(nil, 5))
+    |> Kube.Utils.run()
+    |> case do
+      {:ok, %{items: pods}} -> {:ok, pods}
+      _ -> {:ok, []}
+    end
+  end
+
   def ready_condition?([_ | _] = conditions) do
     Enum.any?(conditions, fn
       %{type: "Ready", status: "True"} -> true
@@ -122,6 +131,7 @@ defmodule Console.AI.Evidence.Base do
 
   def meaning(:stale), do: "the resource is waiting to complete provisioning"
   def meaning(:failed), do: "kubernetes has failed to provision this resource"
+  def meaning(:running), do: "kubernetes is running this resource"
   def meaning(:pending), do: meaning(:stale)
 
   def save_kubeconfig(cluster) do
@@ -137,11 +147,11 @@ defmodule Console.AI.Evidence.Base do
     do: "#{g}/#{v} #{k}#{ns(n)} with name #{na}"
 
   def component(%{api_version: api_version, kind: kind, metadata: %{name: n} = meta}) do
-    "#{api_version} #{kind} namespace=#{ns(Map.get(meta, :namespace))} name=#{n}"
+    "#{api_version} #{kind} namespace=#{namespace(Map.get(meta, :namespace))} name=#{n}"
   end
 
   def component(%{"apiVersion" => api_version, "kind" => kind, "metadata" => %{"name" => n} = meta}) do
-    "#{api_version} #{kind} namespace=#{ns(meta["namespace"])} name=#{n}"
+    "#{api_version} #{kind} namespace=#{namespace(meta["namespace"])} name=#{n}"
   end
 
   def construct_label_selector(%MetaV1.LabelSelector{match_labels: labels, match_expressions: expressions}) do
@@ -186,8 +196,11 @@ defmodule Console.AI.Evidence.Base do
     end
   end
 
+  def namespace(ns) when is_binary(ns), do: ns
+  def namespace(_), do: "(cluster scoped)"
+
   def ns(ns) when is_binary(ns), do: " in namespace #{ns}"
-  def ns(_), do: ""
+  def ns(_), do: "(cluster scoped)"
 
   defp trim_managed({:ok, res}), do: trim_managed(res)
   defp trim_managed(%{metadata: %{managed_fields: _}} = res),

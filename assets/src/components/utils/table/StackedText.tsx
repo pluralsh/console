@@ -1,16 +1,20 @@
 import { ComponentProps, ReactNode, memo } from 'react'
 import styled, { DefaultTheme } from 'styled-components'
 
-import { Flex, SemanticColorKey, WrapWithIf } from '@pluralsh/design-system'
+import {
+  Flex,
+  SemanticColorKey,
+  SemanticSpacingKey,
+  WrapWithIf,
+} from '@pluralsh/design-system'
 import { TRUNCATE } from '../truncate'
 import { RectangleSkeleton } from '../SkeletonLoaders'
 
-type PartialType = keyof DefaultTheme['partials']['text']
-type SpacingType = keyof DefaultTheme['spacing']
+export type SemanticPartialType = keyof DefaultTheme['partials']['text']
 
 export const StackedTextSC = styled.div<{
   $truncate?: boolean
-  $gap?: SpacingType
+  $gap?: SemanticSpacingKey
 }>(({ $truncate, $gap, theme }) => ({
   display: 'flex',
   flexDirection: 'column',
@@ -19,7 +23,7 @@ export const StackedTextSC = styled.div<{
 }))
 const FirstSC = styled.div<{
   $truncate?: boolean
-  $partialType?: PartialType
+  $partialType?: SemanticPartialType
   $color?: SemanticColorKey
 }>(
   ({
@@ -35,7 +39,7 @@ const FirstSC = styled.div<{
 )
 const SecondSC = styled.div<{
   $truncate?: boolean
-  $partialType?: PartialType
+  $partialType?: SemanticPartialType
   $color?: SemanticColorKey
 }>(
   ({ theme, $truncate, $partialType = 'caption', $color = 'text-xlight' }) => ({
@@ -63,14 +67,14 @@ export const StackedText = memo(
     first: ReactNode
     second?: ReactNode
     truncate?: boolean
-    firstPartialType?: PartialType
-    secondPartialType?: PartialType
+    firstPartialType?: SemanticPartialType
+    secondPartialType?: SemanticPartialType
     firstColor?: SemanticColorKey
     secondColor?: SemanticColorKey
-    gap?: SpacingType
+    gap?: SemanticSpacingKey
     loading?: boolean
     icon?: ReactNode
-    iconGap?: SpacingType
+    iconGap?: SemanticSpacingKey
   } & ComponentProps<typeof StackedTextSC>) => {
     const first = typeof firstProp === 'number' ? `${firstProp}` : firstProp
     const second = typeof secondProp === 'number' ? `${secondProp}` : secondProp
@@ -119,7 +123,7 @@ function IconWrapper({
 }: {
   icon: ReactNode
   children?: ReactNode
-  gap?: SpacingType
+  gap?: SemanticSpacingKey
 }) {
   return (
     <Flex

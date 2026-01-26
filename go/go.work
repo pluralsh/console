@@ -1,6 +1,4 @@
-go 1.25.1
-
-toolchain go1.25.1
+go 1.25.5
 
 use (
 	./ai-proxy
@@ -11,6 +9,7 @@ use (
 	./demo/flaky-service // github.com/pluralsh/console/go/demo/flaky-service
 	./helm-test // github.com/pluralsh/console/go/helm-test
 	./helmchartutils // github.com/pluralsh/console/go/helmchartutils
+	./nexus // github.com/pluralsh/console/go/nexus
 	./oci-auth // github.com/pluralsh/console/go/oci-auth
 	./sign
 	./tools // github.com/pluralsh/console/go/tools
