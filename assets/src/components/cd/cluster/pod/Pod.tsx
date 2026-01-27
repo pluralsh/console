@@ -33,6 +33,7 @@ import LogsLegend from '../../logs/LogsLegend.tsx'
 import { getClusterBreadcrumbs } from '../Cluster'
 import PodSidecar from './PodSidecar.tsx'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
+import { getAgentRunBreadcrumbs } from 'components/ai/agent-runs/details/AIAgentRun.tsx'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -82,7 +83,7 @@ export default function Pod() {
     variables: { id: flowId ?? '' },
     skip: !flowId,
   })
-  const { data: agentRunData } = useAgentRunPodQuery({
+  const { data: agentRunData, loading: agentRunLoading } = useAgentRunPodQuery({
     variables: { id: runId ?? '' },
     skip: !runId,
   })
@@ -100,10 +101,16 @@ export default function Pod() {
                 cluster: clusterData?.cluster,
                 tab: 'pods',
               })
-            : getClusterBreadcrumbs({
-                cluster: clusterData?.cluster || { id: clusterId ?? '' },
-                tab: 'pods',
-              })),
+            : type === 'agent-run'
+              ? getAgentRunBreadcrumbs(
+                  runId ?? '',
+                  agentRunData?.agentRun?.prompt ?? '',
+                  'pods'
+                )
+              : getClusterBreadcrumbs({
+                  cluster: clusterData?.cluster || { id: clusterId ?? '' },
+                  tab: 'pods',
+                })),
         ...(name && namespace
           ? [
               {
@@ -151,9 +158,10 @@ export default function Pod() {
   const pod = type === 'agent-run' ? agentRunData?.agentRun?.pod : data?.pod
 
   if (error) return <GqlError error={error} />
-  if (!pod && loading) return <LoadingIndicator />
   if (!pod)
-    return (
+    return !!(type === 'agent-run' ? agentRunLoading : loading) ? (
+      <LoadingIndicator />
+    ) : (
       <EmptyState
         message="Pod not found"
         description="Please check the pod name and namespace"

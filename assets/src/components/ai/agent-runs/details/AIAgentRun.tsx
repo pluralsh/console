@@ -34,13 +34,18 @@ import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
 import { PullRequestCallout } from './PullRequestCallout.tsx'
 
-const getAgentRunBreadcrumbs = (runId: string, prompt: string) => [
-  ...getAIBreadcrumbs(AI_AGENT_RUNS_REL_PATH),
-  {
-    label: prompt ? truncate(prompt, { length: 20 }) : '',
-    url: `${getAgentRunAbsPath({ agentRunId: runId })}`,
-  },
-]
+export const getAgentRunBreadcrumbs = (
+  runId: string,
+  prompt: string,
+  tab?: string
+) => {
+  const prefix = getAgentRunAbsPath({ agentRunId: runId })
+  return [
+    ...getAIBreadcrumbs(AI_AGENT_RUNS_REL_PATH),
+    { label: prompt ? truncate(prompt, { length: 20 }) : '', url: prefix },
+    ...(tab ? [{ label: tab, url: `${prefix}/${tab}` }] : []),
+  ]
+}
 
 export function AIAgentRun() {
   const { spacing } = useTheme()

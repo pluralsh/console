@@ -1,5 +1,5 @@
-import { AIAgentRun } from 'components/ai/agent-runs/details/AIAgentRun.tsx'
 import { AIAgentRuns } from 'components/ai/agent-runs/AIAgentRuns.tsx'
+import { AIAgentRun } from 'components/ai/agent-runs/details/AIAgentRun.tsx'
 import { AI } from 'components/ai/AI.tsx'
 import { AIThreads } from 'components/ai/AIThreads.tsx'
 import { InfraResearch } from 'components/ai/infra-research/details/InfraResearch.tsx'
@@ -34,6 +34,7 @@ import {
   getSentinelRunAbsPath,
   getSentinelRunJobAbsPath,
 } from './aiRoutesConsts'
+import { getPodDetailsRoutes } from './cdRoutes.tsx'
 import { jobRoutes } from './jobRoutes.tsx'
 
 export const aiRoutes = [
@@ -75,6 +76,7 @@ export const aiRoutes = [
     path={`${AI_AGENT_RUNS_ABS_PATH}/:${AI_AGENT_RUNS_PARAM_RUN_ID}`}
     element={<AIAgentRun />}
   />,
+  getPodDetailsRoutes('agent-run'),
   // other sentinel routes
   <Route
     path={getSentinelAbsPath(`:${AI_SENTINELS_RUNS_PARAM_SENTINEL_ID}`)}

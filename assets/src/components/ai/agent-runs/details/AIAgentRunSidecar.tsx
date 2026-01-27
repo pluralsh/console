@@ -1,6 +1,8 @@
 import {
   Accordion,
   AccordionItem,
+  ArrowTopRightIcon,
+  Button,
   CheckOutlineIcon,
   Chip,
   CircleDashIcon,
@@ -24,6 +26,8 @@ import {
 import { produce } from 'immer'
 import { capitalize, isEmpty, uniqBy } from 'lodash'
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 
@@ -70,74 +74,91 @@ export function AgentRunSidecar({
           <SidecarSkeleton />
         ) : null
       ) : (
-        <Sidecar>
-          <SidecarItem heading="ID">{run.id}</SidecarItem>
-          {run.runtime?.name && (
-            <SidecarItem heading="Runtime">
-              <Flex
-                align="center"
-                gap="xsmall"
-              >
-                <RuntimeIcon fullColor />
-                {capitalize(run.runtime.name)}
-              </Flex>
-            </SidecarItem>
+        <>
+          {run.podReference && (
+            <Button
+              secondary
+              as={Link}
+              to={getPodDetailsPath({
+                type: 'agent-run',
+                agentRunId: run.id,
+                name: run.podReference.name,
+                namespace: run.podReference.namespace,
+              })}
+              endIcon={<ArrowTopRightIcon />}
+            >
+              View pod details
+            </Button>
           )}
-          <SidecarItem heading="Status">
-            <RunStatusChip status={run.status} />
-          </SidecarItem>
-          {run.mode && (
-            <SidecarItem heading="Mode">
-              <Chip
-                size="small"
-                severity="info"
-              >
-                {capitalize(run.mode)}
-              </Chip>
+          <Sidecar>
+            <SidecarItem heading="ID">{run.id}</SidecarItem>
+            {run.runtime?.name && (
+              <SidecarItem heading="Runtime">
+                <Flex
+                  align="center"
+                  gap="xsmall"
+                >
+                  <RuntimeIcon fullColor />
+                  {capitalize(run.runtime.name)}
+                </Flex>
+              </SidecarItem>
+            )}
+            <SidecarItem heading="Status">
+              <RunStatusChip status={run.status} />
             </SidecarItem>
-          )}
-        </Sidecar>
-      )}
-      {!isEmpty(todos) && (
-        <Sidecar>
-          <SidecarItem heading="Summary of agent activities">
-            <TodoAccordionSC type="multiple">
-              {todos.map((todo) => (
-                <AccordionItem
-                  key={todo.title}
-                  trigger={
-                    <Flex
-                      align="center"
-                      gap="xsmall"
-                      minWidth={0}
+            {run.mode && (
+              <SidecarItem heading="Mode">
+                <Chip
+                  size="small"
+                  severity="info"
+                >
+                  {capitalize(run.mode)}
+                </Chip>
+              </SidecarItem>
+            )}
+          </Sidecar>
+          {!isEmpty(todos) && (
+            <Sidecar>
+              <SidecarItem heading="Summary of agent activities">
+                <TodoAccordionSC type="multiple">
+                  {todos.map((todo) => (
+                    <AccordionItem
+                      key={todo.title}
+                      trigger={
+                        <Flex
+                          align="center"
+                          gap="xsmall"
+                          minWidth={0}
+                        >
+                          {todo.done ? (
+                            <CheckOutlineIcon color="icon-light" />
+                          ) : (
+                            <CircleDashIcon color="icon-light" />
+                          )}
+                          <CaptionP
+                            $color="text-light"
+                            css={{ fontWeight: 700, ...TRUNCATE }}
+                          >
+                            {todo.title}
+                          </CaptionP>
+                        </Flex>
+                      }
+                      padding="none"
+                      caret="right-quarter"
                     >
-                      {todo.done ? (
-                        <CheckOutlineIcon color="icon-light" />
-                      ) : (
-                        <CircleDashIcon color="icon-light" />
-                      )}
                       <CaptionP
                         $color="text-light"
-                        css={{ fontWeight: 700, ...TRUNCATE }}
+                        css={{ lineHeight: '24px', paddingLeft: spacing.large }}
                       >
-                        {todo.title}
+                        {todo.description}
                       </CaptionP>
-                    </Flex>
-                  }
-                  padding="none"
-                  caret="right-quarter"
-                >
-                  <CaptionP
-                    $color="text-light"
-                    css={{ lineHeight: '24px', paddingLeft: spacing.large }}
-                  >
-                    {todo.description}
-                  </CaptionP>
-                </AccordionItem>
-              ))}
-            </TodoAccordionSC>
-          </SidecarItem>
-        </Sidecar>
+                    </AccordionItem>
+                  ))}
+                </TodoAccordionSC>
+              </SidecarItem>
+            </Sidecar>
+          )}
+        </>
       )}
     </ContainerSC>
   )
