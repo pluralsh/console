@@ -4,5 +4,5 @@ the ai's perfomance:
 | Name        | Details |
 | ----------- | ------- |
 | :speech_balloon: Prompt | <%= @run.prompt %> |
-| :link: Run history | [View run history](<%= Console.url("ai/agent-runs/#{@run.id}/progress") %>) |
+| :link: Run history | [View run history](<%= Console.url("/ai/agent-runs/#{@run.id}") %>) |
 | :memo: Todos | <%= Enum.map_join(@run.todos || [], " ", fn todo -> (if todo.done, do: "☑️ #{todo.title}", else: "☐ #{todo.title}") end) %> |

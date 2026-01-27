@@ -214,7 +214,7 @@ defmodule Console.Deployments.Agents do
          {:ok, conn} <- backfill_token(conn),
          conn = %{conn | commit_shas: shas},
          {:ok, pr_info} <- Dispatcher.pr(conn, t, b, repository_url(run), ba, he) do
-      %PullRequest{}
+      %PullRequest{fresh: true}
       |> PullRequest.changeset(
         Map.merge(pr_info, Map.take(run, ~w(flow_id session_id)a))
         |> Map.put(:agent_run_id, run.id)
