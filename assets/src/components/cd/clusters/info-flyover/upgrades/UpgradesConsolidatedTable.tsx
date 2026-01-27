@@ -14,6 +14,7 @@ import {
   RuntimeAddon,
   RuntimeAddonUpgradeFragment,
 } from 'generated/graphql'
+import ejs from 'ejs'
 import { isEmpty } from 'lodash'
 import { ReactNode, useMemo } from 'react'
 import { Link } from 'react-router-dom'
@@ -23,6 +24,7 @@ import {
 } from 'routes/cdRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
 import { UpgradesConsolidatedTableExpander } from './UpgradesConsolidatedTableExpander'
+import markdownTemplate from './upgrades-markdown.ejs?raw'
 
 export type AddonOverview = {
   id?: Nullable<string>
@@ -239,30 +241,15 @@ const cols = [
   }),
 ]
 
-const overviewDataToMarkdown = (data: AddonOverview[], clusterId: string) =>
-  isEmpty(data)
-    ? ''
-    : `\
-  | Add-on | Type | Recommendation | Release Notes | Compatibility Table | Images |
-  | ------ | ---- | -------------- | ------------- | --------------------- | ------ |
-  ${data
-    .map((addon) => {
-      const type = addon.type === 'cloud' ? (addon.distro ?? 'Cloud') : 'Helm'
-      const recommendation = addon.fixAppVersion
-        ? `${addon.currentAppVersion ?? '--'} → ${addon.fixAppVersion}`
-        : 'No available versions found'
-
-      return `| ${addon.name} | ${type} | ${recommendation} | ${addon.releaseUrl ?? '--'} | ${
-        addon.id
-          ? `${window.location.origin}${getClusterAddOnDetailsPath({
-              clusterId,
-              addOnId: addon.id,
-              isCloudAddon: addon.type === 'cloud',
-            })}/${CLUSTER_ADDONS_COMPATIBILITY_PATH}`
-          : '--'
-      } | ${addon.images?.join('<br>') || '--'} |`
+const overviewDataToMarkdown = (addons: AddonOverview[], clusterId: string) =>
+  ejs
+    .render(markdownTemplate, {
+      addons,
+      origin: window.location.origin,
+      getCompatibilityPath: (addOnId: string, isCloudAddon: boolean) =>
+        `${getClusterAddOnDetailsPath({ clusterId, addOnId, isCloudAddon })}/${CLUSTER_ADDONS_COMPATIBILITY_PATH}`,
     })
-    .join('\n')}`
+    .trim()
 
 const isRowExpandable = ({
   original: { images, callout, summary },

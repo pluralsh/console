@@ -4,7 +4,7 @@
     { "directory": "./assets/design-system", "changeProcessCWD": true }
   ],
   "[html]": {
-    "editor.defaultFormatter": "vscode.html-language-features"
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "files.associations": {
     "**/src/archive/**/*": "plaintext"
