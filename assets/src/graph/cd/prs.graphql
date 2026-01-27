@@ -1,5 +1,15 @@
-fragment PullRequest on PullRequest {
+fragment PullRequestBasic on PullRequest {
   id
+  url
+  title
+  creator
+  status
+  insertedAt
+  updatedAt
+}
+
+fragment PullRequest on PullRequest {
+  ...PullRequestBasic
   service {
     id
     name
@@ -9,14 +19,8 @@ fragment PullRequest on PullRequest {
   cluster {
     ...ClusterBasic
   }
-  title
-  url
   labels
-  creator
-  status
   patch
-  insertedAt
-  updatedAt
 }
 
 mutation CreatePullRequest(

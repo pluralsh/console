@@ -12632,7 +12632,7 @@ __metadata:
     use-immer: 0.9.0
     usehooks-ts: 2.9.1
     uuid: 9.0.1
-    virtua: 0.46.4
+    virtua: 0.48.5
     vite: 5.4.11
     vite-bundle-visualizer: 1.2.1
     vite-plugin-rewrite-all: 1.0.2
@@ -26423,9 +26423,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"virtua@npm:0.46.4":
-  version: 0.46.4
-  resolution: "virtua@npm:0.46.4"
+"virtua@npm:0.48.5":
+  version: 0.48.5
+  resolution: "virtua@npm:0.48.5"
   peerDependencies:
     react: ">=16.14.0"
     react-dom: ">=16.14.0"
@@ -26443,7 +26443,7 @@ __metadata:
       optional: true
     vue:
       optional: true
-  checksum: c1bc6364348a7c9090413b6dbcd9dad0c941e3d7c8aeb4c6dd22528d130fe2d7aeec02d7e4a0960e0b30ff4d6cbbd22d4cd369acf891a958e8a22f33f9acb6f5
+  checksum: 8ffb42a32e5e38b6c3e0c91fad83e225361b655fed5a441dda946598a9901f08355e279b6b79957437b281d6fa2e9a40861f174bb6621a4f80b2effe929d11da
   languageName: node
   linkType: hard
 

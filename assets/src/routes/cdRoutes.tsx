@@ -159,6 +159,7 @@ import {
 import { FLOW_PARAM_ID } from './flowRoutesConsts.tsx'
 import { pipelineRoutes } from './pipelineRoutes'
 import { AI_AGENT_RUNS_PARAM_RUN_ID } from './aiRoutesConsts.tsx'
+import { AIAgentRunPodLogs } from 'components/ai/agent-runs/details/AIAgentRunPodLogs.tsx'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -516,7 +517,7 @@ export const getPodDetailsRoutes = (
     />
     <Route
       path="logs"
-      element={<Logs />}
+      element={type === 'agent-run' ? <AIAgentRunPodLogs /> : <Logs />}
     />
     <Route
       path="shell"

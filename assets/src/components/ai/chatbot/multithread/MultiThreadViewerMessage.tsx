@@ -14,21 +14,39 @@ export function MultiThreadViewerMessage({
 }) {
   switch (message.type) {
     case ChatType.Tool:
-      return <ToolCallLabel message={message} />
+      return (
+        <SimpleToolCall
+          content={message.content ?? ''}
+          attributes={message.attributes}
+        />
+      )
     case ChatType.Text:
     default:
       return <SimplifiedMarkdown text={message.content ?? ''} />
   }
 }
 
-function ToolCallLabel({ message }: { message: ChatFragment }) {
+export function SimpleToolCall({
+  content,
+  attributes,
+  isPending,
+}: {
+  content: ChatFragment['content']
+  attributes: ChatFragment['attributes']
+  isPending?: boolean
+}) {
   const [isOpen, setIsOpen] = useState(false)
-  const toolName = message.attributes?.tool?.name ?? ''
+  const toolName = attributes?.tool?.name ?? ''
 
   return (
     <>
       <ClickableLabelSC onClick={() => setIsOpen(true)}>
-        <CaptionP $color="text-xlight">CALLED TOOL {toolName}</CaptionP>
+        <CaptionP
+          $shimmer={isPending}
+          $color="text-xlight"
+        >
+          {isPending ? 'CALLING' : 'CALLED'} TOOL {toolName}
+        </CaptionP>
       </ClickableLabelSC>
       <Modal
         open={isOpen}
@@ -37,8 +55,8 @@ function ToolCallLabel({ message }: { message: ChatFragment }) {
         size="large"
       >
         <ToolCallContent
-          content={message.content ?? ''}
-          attributes={message.attributes}
+          content={content ?? ''}
+          attributes={attributes}
         />
       </Modal>
     </>
@@ -148,7 +166,7 @@ const SimpleMarkdownSC = styled.div(({ theme }) => ({
   color: theme.colors['text-light'],
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
+  gap: theme.spacing.small,
 }))
 
 const ParagraphSC = styled.p(() => ({

@@ -18,19 +18,17 @@ import {
   useCloudConnectionsQuery,
   useInfraResearchQuery,
 } from 'generated/graphql'
-import { capitalize, truncate } from 'lodash'
+import { capitalize } from 'lodash'
 import { use } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { getFlowDetailsPath } from '../../../routes/flowRoutesConsts.tsx'
 import { StackedText } from '../../utils/table/StackedText.tsx'
 import { AIViewTypes, useChatbot } from '../AIContext'
-import { getInsightPathInfo, TableEntryResourceLink } from '../AITableEntry'
+import { getResourceLinkPath, TableEntryResourceLink } from '../AITableEntry'
+import { RunStatusChip } from '../infra-research/details/InfraResearch.tsx'
 import { AgentSelect } from './AgentSelect.tsx'
 import { AgentSessionTypeSelect } from './AgentSessionTypeSelect.tsx'
 import { CHATBOT_HEADER_HEIGHT } from './Chatbot.tsx'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
-import { getInfraResearchAbsPath } from 'routes/aiRoutesConsts.tsx'
-import { RunStatusChip } from '../infra-research/details/InfraResearch.tsx'
 
 export function ChatbotHeader() {
   const { colors } = useTheme()
@@ -53,11 +51,8 @@ export function ChatbotHeader() {
     useCloudConnectionsQuery()
   const connectionId = cloudConnections?.cloudConnections?.edges?.[0]?.node?.id
 
-  const insightPathInfo = getInsightPathInfo(currentThread?.insight)
-  const flowPath = currentThread?.flow && {
-    path: [currentThread.flow.name],
-    url: getFlowDetailsPath({ flowId: currentThread.flow.id }),
-  }
+  const resourcePath = getResourceLinkPath(currentThread)
+
   const { data: researchData } = useInfraResearchQuery({
     variables: { id: currentResearchId ?? '' },
     skip: !currentResearchId || viewType !== AIViewTypes.InfraResearch,
@@ -129,16 +124,7 @@ export function ChatbotHeader() {
             firstColor="text"
             second={
               viewType === AIViewTypes.ChatThread && (
-                <TableEntryResourceLink
-                  path={[
-                    truncate(currentThread?.research?.prompt ?? '', {
-                      length: 50,
-                    }),
-                  ]}
-                  url={getInfraResearchAbsPath({
-                    infraResearchId: currentThread?.research?.id ?? '',
-                  })}
-                />
+                <TableEntryResourceLink {...resourcePath} />
               )
             }
           />
@@ -152,9 +138,7 @@ export function ChatbotHeader() {
                   : (currentThread?.summary ??
                     (currentThreadId ? '' : 'New chat with Plural AI'))
               }
-              second={
-                <TableEntryResourceLink {...(insightPathInfo || flowPath)} />
-              }
+              second={<TableEntryResourceLink {...resourcePath} />}
               firstPartialType="body2Bold"
               firstColor="text"
               secondPartialType="caption"

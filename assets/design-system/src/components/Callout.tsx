@@ -24,7 +24,7 @@ import {
   toFillLevel,
   useFillLevel,
 } from './contexts/FillLevelContext'
-import Button, { type ButtonProps } from './Button'
+import Button, { ButtonBaseSC, type ButtonProps } from './Button'
 import ErrorIcon from './icons/ErrorIcon'
 import InfoIcon from './icons/InfoIcon'
 import StatusOkIcon from './icons/StatusOkIcon'
@@ -317,7 +317,7 @@ const CalloutSC = styled.div<{
     marginBottom: '0',
   },
   '.children': {
-    '& a, & a:any-link': {
+    [`& a:not(${ButtonBaseSC}), & a:not(${ButtonBaseSC}):any-link`]: {
       ...theme.partials.text.inlineLink,
     },
   },

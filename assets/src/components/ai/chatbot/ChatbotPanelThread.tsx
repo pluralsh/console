@@ -217,7 +217,7 @@ export function ChatbotPanelThread({
                     role={AiRole.User}
                     type={ChatType.Text}
                     content={pendingMessage}
-                    disableActions
+                    disableActions="keep-spacing"
                   />
                 )}
                 {streaming && !isEmpty(streamedMessages) ? (
@@ -227,12 +227,13 @@ export function ChatbotPanelThread({
                       <ChatMessage
                         key={i}
                         isStreaming
-                        disableActions
+                        disableActions="keep-spacing"
                         role={role ?? AiRole.Assistant}
                         type={!!tool ? ChatType.Tool : ChatType.Text}
                         attributes={
                           tool ? { tool: { name: tool.name } } : undefined
                         }
+                        isPending={!!tool?.pending}
                         highlightToolContent={false}
                         content={message
                           .toSorted((a, b) => a.seq - b.seq)

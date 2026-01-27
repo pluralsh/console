@@ -4,6 +4,7 @@ import {
   IconFrame,
   Modal,
   PrOpenIcon,
+  SmallPodIcon,
   Table,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -16,14 +17,15 @@ import {
 import { AgentRuntimeIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { TRUNCATE } from 'components/utils/truncate'
 import { Body2P } from 'components/utils/typography/Text'
-import { AgentRunFragment } from 'generated/graphql'
+import { AgentRunTinyFragment } from 'generated/graphql'
 import { capitalize, isEmpty } from 'lodash'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
 import { RunStatusChip } from '../infra-research/details/InfraResearch'
 
-const columnHelper = createColumnHelper<AgentRunFragment>()
+const columnHelper = createColumnHelper<AgentRunTinyFragment>()
 
 export const agentRunsCols = [
   columnHelper.accessor((run) => run.runtime?.type, {
@@ -84,22 +86,29 @@ export const agentRunsCols = [
       )
     },
   }),
-  // columnHelper.accessor((run) => run.podReference, {
-  //   id: 'podReference',
-  //   cell: function Cell({ getValue }) {
-  //     const { name, namespace } = getValue() ?? {}
-  //     return (
-  //       <IconFrame
-  //         type="secondary"
-  //         clickable
-  //         tooltip="View pod details"
-  //         icon={<SmallPodIcon color="icon-light" />}
-  //         as={Link}
-  //         to={`TODO: add pod details path`}
-  //       />
-  //     )
-  //   },
-  // }),
+  columnHelper.accessor((run) => run, {
+    id: 'podReference',
+    cell: function Cell({ getValue }) {
+      const { id, podReference } = getValue()
+      if (!podReference) return null
+
+      return (
+        <IconFrame
+          type="secondary"
+          clickable
+          tooltip="View pod details"
+          icon={<SmallPodIcon color="icon-light" />}
+          as={Link}
+          to={getPodDetailsPath({
+            type: 'agent-run',
+            agentRunId: id,
+            name: podReference.name,
+            namespace: podReference.namespace,
+          })}
+        />
+      )
+    },
+  }),
   columnHelper.accessor((run) => run.mode, {
     id: 'mode',
     enableSorting: true,

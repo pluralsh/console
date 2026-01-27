@@ -3,7 +3,6 @@ import {
   AccordionItem,
   Button,
   Card,
-  CaretRightIcon,
   CheckIcon,
   Chip,
   Code,
@@ -35,11 +34,12 @@ import {
 import { ReactElement, useState } from 'react'
 
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
-import { ToolCallContent } from './ToolCallContent'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
-import styled, { useTheme } from 'styled-components'
+import styled, { StyledObject, useTheme } from 'styled-components'
 import { iconUrl as getIconUrl } from 'utils/icon'
 import { ChatMessageActions } from './ChatMessage'
+import { SimpleToolCall } from './multithread/MultiThreadViewerMessage.tsx'
+import { ToolCallContent } from './ToolCallContent'
 import CloudObjectsCard from './tools/CloudObjectsCard.tsx'
 
 type ChatMessageContentProps = {
@@ -58,6 +58,9 @@ type ChatMessageContentProps = {
   highlightToolContent?: boolean
   session?: Nullable<AgentSessionFragment>
   isStreaming?: boolean
+  toolDisplayType?: 'accordion' | 'simple'
+  userMsgWrapperStyle?: StyledObject
+  isPending?: boolean
 }
 
 export function ChatMessageContent({
@@ -76,6 +79,9 @@ export function ChatMessageContent({
   highlightToolContent = true,
   session,
   isStreaming = false,
+  toolDisplayType,
+  userMsgWrapperStyle,
+  isPending,
 }: ChatMessageContentProps) {
   switch (type) {
     case ChatType.File:
@@ -90,7 +96,7 @@ export function ChatMessageContent({
         />
       )
     case ChatType.Tool:
-      return (
+      return toolDisplayType === 'accordion' ? (
         <ToolMessageContent
           id={id}
           content={content}
@@ -99,6 +105,13 @@ export function ChatMessageContent({
           confirmedAt={confirmedAt}
           serverName={serverName}
           highlightToolContent={highlightToolContent}
+          isPending={isPending}
+        />
+      ) : (
+        <SimpleToolCall
+          content={content ?? ''}
+          attributes={attributes}
+          isPending={isPending}
         />
       )
     case ChatType.ImplementationPlan:
@@ -121,7 +134,10 @@ export function ChatMessageContent({
     case ChatType.Text:
     default:
       return (
-        <DefaultWrapperSC $role={role ?? AiRole.User}>
+        <DefaultWrapperSC
+          $role={role ?? AiRole.User}
+          css={role === AiRole.User ? userMsgWrapperStyle : undefined}
+        >
           <Markdown
             text={content ?? ''}
             isStreaming={isStreaming}
@@ -396,6 +412,7 @@ function ToolMessageContent({
   confirm,
   confirmedAt,
   serverName,
+  isPending,
 }: ChatMessageContentProps) {
   const { spacing } = useTheme()
   const [openValue, setOpenValue] = useState('')
@@ -436,34 +453,21 @@ function ToolMessageContent({
           <AccordionItem
             value={ARBITRARY_VALUE_NAME}
             padding="none"
-            caret="none"
+            caret="left"
             trigger={
               <Flex
                 justify="space-between"
                 align="center"
                 width="100%"
               >
-                <Flex
-                  gap="small"
-                  align="center"
-                  wordBreak="break-word"
+                <CaptionP
+                  $shimmer={isPending}
+                  $color="text-light"
+                  css={{ wordBreak: 'break-word' }}
                 >
-                  <CaretRightIcon
-                    color="icon-light"
-                    style={{
-                      transition: 'transform 0.2s ease-in-out',
-                      transform:
-                        openValue === ARBITRARY_VALUE_NAME
-                          ? 'rotate(90deg)'
-                          : 'none',
-                    }}
-                  />
-                  <CaptionP $color="text-light">
-                    {serverName
-                      ? `Called MCP tool for ${serverName}.${attributes?.tool?.name}`
-                      : `Called tool ${attributes?.tool?.name ? attributes?.tool?.name : ''}`}
-                  </CaptionP>
-                </Flex>
+                  {`${isPending ? 'Calling' : 'Called'} ${serverName ? `MCP tool for ${serverName}.` : 'tool '}${attributes?.tool?.name}`}
+                </CaptionP>
+
                 {serverName && <Chip size="small">{serverName}</Chip>}
               </Flex>
             }
@@ -541,7 +545,7 @@ function ToolMessageDetails({ content, attributes }): ReactElement | null {
 const DefaultWrapperSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
   maxWidth: '100%',
   overflow: 'auto',
-  ...(!($role === AiRole.Assistant || $role === AiRole.System) && {
+  ...($role === AiRole.User && {
     backgroundColor: theme.colors['fill-zero'],
     border: theme.borders.default,
     borderRadius: theme.borderRadiuses.large,

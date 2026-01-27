@@ -13,13 +13,11 @@ fragment AgentRunTiny on AgentRun {
   repository
   branch
   pullRequests {
-    id
-    creator
-    insertedAt
-    status
-    title
-    updatedAt
-    url
+    ...PullRequestBasic
+  }
+  podReference {
+    name
+    namespace
   }
 }
 
@@ -29,18 +27,10 @@ fragment AgentRun on AgentRun {
     ...AgentMessage
   }
   todos {
-    title
-    description
-    done
+    ...AgentTodo
   }
   analysis {
-    summary
-    analysis
-    bullets
-  }
-  podReference {
-    name
-    namespace
+    ...AgentAnalysis
   }
 }
 
@@ -62,6 +52,18 @@ fragment AgentRunRepository on AgentRunRepository {
   id
   url
   lastUsedAt
+}
+
+fragment AgentAnalysis on AgentAnalysis {
+  summary
+  analysis
+  bullets
+}
+
+fragment AgentTodo on AgentTodo {
+  title
+  description
+  done
 }
 
 fragment AgentMessage on AgentMessage {
@@ -193,6 +195,12 @@ mutation UpsertAgentRuntime($attributes: AgentRuntimeAttributes!) {
   }
 }
 
+mutation ShareAgentRun($id: ID!, $shared: Boolean!) {
+  shareAgentRun(id: $id, shared: $shared) {
+    ...AgentRunTiny
+  }
+}
+
 subscription AgentRunChat($runId: ID!) {
   agentMessageDelta(runId: $runId) {
     delta
@@ -213,9 +221,7 @@ subscription AgentRunDelta($runId: ID!) {
         done
       }
       analysis {
-        summary
-        analysis
-        bullets
+        ...AgentAnalysis
       }
       podReference {
         name

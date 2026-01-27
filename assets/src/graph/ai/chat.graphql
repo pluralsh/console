@@ -58,6 +58,10 @@ fragment ChatThreadTiny on ChatThread {
     id
     prompt
   }
+  service {
+    id
+    name
+  }
 }
 
 fragment ChatThreadDetails on ChatThread {
@@ -159,6 +163,8 @@ fragment AiDelta on AiDelta {
   tool {
     id
     name
+    arguments
+    pending
   }
 }
 
