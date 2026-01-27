@@ -2,6 +2,9 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
   use ConsoleWeb.ConnCase, async: true
   use Mimic
 
+  alias Console.Schema.{UpgradeInsight, UpgradeInsightDetail}
+  alias Console.Repo
+
   describe "#show/2" do
     test "returns the cluster if you can read", %{conn: conn} do
       user = insert(:user)
@@ -16,6 +19,31 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       assert result["id"] == cluster.id
       assert result["name"] == cluster.name
       assert result["distro"] == to_string(cluster.distro)
+    end
+
+    test "returns upgrade_plan when present", %{conn: conn} do
+      user = insert(:user)
+      cluster = insert(:cluster,
+        read_bindings: [%{user_id: user.id}],
+        upgrade_plan: %{
+          compatibilities: true,
+          incompatibilities: true,
+          deprecations: false,
+          kubelet_skew: true
+        }
+      )
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/cd/clusters/#{cluster.id}")
+        |> json_response(200)
+
+      assert result["id"] == cluster.id
+      assert result["upgrade_plan"]["compatibilities"] == true
+      assert result["upgrade_plan"]["incompatibilities"] == true
+      assert result["upgrade_plan"]["deprecations"] == false
+      assert result["upgrade_plan"]["kubelet_skew"] == true
     end
 
     test "it 403s if you cannot read", %{conn: conn} do
@@ -218,6 +246,76 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterControllerTest do
       conn
       |> add_auth_headers(user)
       |> delete("/v1/api/cd/clusters/#{cluster.id}")
+      |> json_response(403)
+    end
+  end
+
+  describe "#upgrade_summary/2" do
+    test "returns upgrade summary for a cluster", %{conn: conn} do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/cd/clusters/#{cluster.id}/upgradesummary")
+        |> json_response(200)
+
+      assert is_list(result["failed_insights"])
+      assert is_list(result["blocking_addons"])
+      assert is_list(result["blocking_cloud_addons"])
+    end
+
+    test "returns failed insights when present", %{conn: conn} do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+
+      # Create a failed upgrade insight
+      {:ok, insight} =
+        %UpgradeInsight{}
+        |> UpgradeInsight.changeset(%{
+          name: "deprecated-api-test",
+          version: "1.29",
+          description: "Test deprecated API",
+          status: :failed,
+          cluster_id: cluster.id
+        })
+        |> Repo.insert()
+
+      # Create an insight detail
+      {:ok, _detail} =
+        %UpgradeInsightDetail{}
+        |> UpgradeInsightDetail.changeset(%{
+          status: :failed,
+          used: "/apis/networking.k8s.io/v1beta1/ingress",
+          replacement: "/apis/networking.k8s.io/v1/ingress",
+          replaced_in: "1.25",
+          removed_in: "1.28",
+          insight_id: insight.id
+        })
+        |> Repo.insert()
+
+      result =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/cd/clusters/#{cluster.id}/upgradesummary")
+        |> json_response(200)
+
+      assert length(result["failed_insights"]) == 1
+      [failed_insight] = result["failed_insights"]
+      assert failed_insight["name"] == "deprecated-api-test"
+      assert failed_insight["status"] == "failed"
+      assert failed_insight["version"] == "1.29"
+      assert length(failed_insight["details"]) == 1
+    end
+
+    test "it 403s if you cannot read", %{conn: conn} do
+      user = insert(:user)
+      cluster = insert(:cluster)
+
+      conn
+      |> add_auth_headers(user)
+      |> get("/v1/api/cd/clusters/#{cluster.id}/upgradesummary")
       |> json_response(403)
     end
   end

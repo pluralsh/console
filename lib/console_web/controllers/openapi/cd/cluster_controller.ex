@@ -10,7 +10,7 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
   alias Console.Deployments.Clusters
   alias Console.Schema.Cluster
 
-  plug Scope, [resource: :cluster, action: :read] when action in [:show, :index]
+  plug Scope, [resource: :cluster, action: :read] when action in [:show, :index, :upgrade_summary]
   plug Scope, [resource: :cluster, action: :write] when action in [:create, :update, :delete]
 
   @doc """
@@ -145,5 +145,87 @@ defmodule ConsoleWeb.OpenAPI.CD.ClusterController do
     end
     |> when_ok(&Repo.preload(&1, [:tags]))
     |> successful(conn, OpenAPI.CD.Cluster)
+  end
+
+  @doc """
+  Returns the upgrade summary for a cluster.
+
+  This provides a consolidated view of all changes needed to upgrade a cluster, including
+  failed upgrade insights and blocking addons (both runtime and cloud-managed) that need
+  to be updated before the Kubernetes version can be upgraded.
+  """
+  operation :upgrade_summary,
+    operation_id: "GetClusterUpgradeSummary",
+    tags: ["cluster"],
+    "x-required-scopes": ["cluster.read"],
+    parameters: [
+      id: [in: :path, schema: %{type: :string}, required: true, description: "The cluster id"]
+    ],
+    responses: [ok: OpenAPI.CD.ClusterUpgradeSummary]
+  def upgrade_summary(conn, %{"id" => id}) do
+    user = Console.Guardian.Plug.current_resource(conn)
+
+    with {:ok, cluster} <- Clusters.get_cluster!(id) |> allow(user, :read) do
+      summary = Clusters.upgrade_plan(cluster)
+
+      # Transform the summary to match the OpenAPI schema format
+      result = %{
+        failed_insights: preload_insight_details(summary.failed_insights),
+        blocking_addons: Enum.map(summary.blocking_addons, &transform_runtime_addon/1),
+        blocking_cloud_addons: Enum.map(summary.blocking_cloud_addons, &transform_cloud_addon/1)
+      }
+
+      successful(result, conn, OpenAPI.CD.ClusterUpgradeSummary)
+    end
+  end
+
+  defp preload_insight_details(insights) do
+    Repo.preload(insights, [:details])
+  end
+
+  defp transform_runtime_addon(%{current: current, addon: addon} = upgrade) do
+    %{
+      addon: addon && %{
+        name: addon.name,
+        icon: addon.icon,
+        git_url: addon.git_url,
+        release_url: addon.release_url
+      },
+      current: current && %{
+        version: current.version,
+        kube: current.kube,
+        chart_version: current.chart_version,
+        release_url: current[:release_url]
+      },
+      fix: upgrade[:fix] && %{
+        version: upgrade.fix.version,
+        kube: upgrade.fix.kube,
+        chart_version: upgrade.fix.chart_version,
+        release_url: upgrade.fix[:release_url]
+      },
+      callout: upgrade[:callout]
+    }
+  end
+
+  defp transform_cloud_addon(%{current: current, addon: addon} = upgrade) do
+    %{
+      addon: addon && %{
+        id: addon.id,
+        distro: addon.distro,
+        name: addon.name,
+        version: addon.version,
+        inserted_at: addon.inserted_at,
+        updated_at: addon.updated_at
+      },
+      current: current && %{
+        version: current.version,
+        compatibilities: current.compatibilities
+      },
+      fix: upgrade[:fix] && %{
+        version: upgrade.fix.version,
+        compatibilities: upgrade.fix.compatibilities
+      },
+      callout: upgrade[:callout]
+    }
   end
 end
