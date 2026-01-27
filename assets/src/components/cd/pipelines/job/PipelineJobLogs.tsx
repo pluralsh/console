@@ -24,7 +24,7 @@ import { ContainerLogsTable } from 'components/cd/cluster/pod/logs/ContainerLogs
 import {
   SinceSecondsOptions,
   SinceSecondsSelectOptions,
-} from 'components/cd/cluster/pod/logs/Logs'
+} from 'components/cd/cluster/pod/logs/PodLogs'
 
 import { isNonNullable } from 'utils/isNonNullable'
 

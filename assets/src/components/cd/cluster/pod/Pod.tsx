@@ -29,7 +29,7 @@ import {
 } from '../../../../generated/graphql'
 import { getPodDetailsPath } from '../../../../routes/cdRoutesConsts'
 import { LinkTabWrap } from '../../../utils/Tabs'
-import LogsLegend from '../../logs/LogsLegend.tsx'
+import { LogsLegend } from '../../logs/LogsLegend.tsx'
 import { getClusterBreadcrumbs } from '../Cluster'
 import PodSidecar from './PodSidecar.tsx'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
@@ -171,7 +171,7 @@ export default function Pod() {
   return (
     <ResponsiveLayoutPage>
       <ResponsiveLayoutSidenavContainer
-        css={{ paddingTop: 40 + theme.spacing.medium }}
+        css={{ paddingTop: theme.spacing.medium }}
       >
         <TabList
           stateRef={tabStateRef}
@@ -197,6 +197,15 @@ export default function Pod() {
         stateRef={tabStateRef}
       >
         <Outlet context={{ pod }} />
+        {tab === 'logs' && (
+          <div
+            css={{
+              padding: `${theme.spacing.small}px 0 ${theme.spacing.xlarge}px`,
+            }}
+          >
+            <LogsLegend />
+          </div>
+        )}
       </TabPanel>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer
@@ -210,7 +219,6 @@ export default function Pod() {
           pod={pod}
           clusterId={clusterId}
         />
-        {tab === 'logs' && <LogsLegend />}
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>
   )

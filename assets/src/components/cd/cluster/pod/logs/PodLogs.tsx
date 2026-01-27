@@ -1,5 +1,5 @@
 import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
-import { ReactElement, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { Pod } from 'generated/graphql'
@@ -27,7 +27,7 @@ export const SinceSecondsSelectOptions: Array<{ key: Key; label: string }> = [
   { key: SinceSecondsOptions.Week, label: '7 days' },
 ]
 
-function Logs(): ReactElement<any> {
+export function PodLogs() {
   const { pod } = useOutletContext() as { pod: Pod }
 
   if (!pod) {
@@ -51,8 +51,8 @@ function Logs(): ReactElement<any> {
 
   return (
     <ScrollablePage
-      heading="Logs"
       scrollable={false}
+      noPadding
     >
       <div
         css={{
@@ -107,5 +107,3 @@ function Logs(): ReactElement<any> {
     </ScrollablePage>
   )
 }
-
-export default Logs

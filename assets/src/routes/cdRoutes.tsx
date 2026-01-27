@@ -55,7 +55,7 @@ import ClusterPods from '../components/cd/cluster/ClusterPods'
 import ClusterPRs from '../components/cd/cluster/ClusterPRs'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 
-import Logs from '../components/cd/cluster/pod/logs/Logs'
+import { PodLogs } from '../components/cd/cluster/pod/logs/PodLogs.tsx'
 
 import Pod from '../components/cd/cluster/pod/Pod'
 import PodInfo from '../components/cd/cluster/pod/PodInfo'
@@ -517,7 +517,7 @@ export const getPodDetailsRoutes = (
     />
     <Route
       path="logs"
-      element={type === 'agent-run' ? <AIAgentRunPodLogs /> : <Logs />}
+      element={type === 'agent-run' ? <AIAgentRunPodLogs /> : <PodLogs />}
     />
     <Route
       path="shell"

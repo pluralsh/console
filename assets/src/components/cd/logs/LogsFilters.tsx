@@ -18,7 +18,7 @@ import { DateParam, formatDateTime } from 'utils/datetime'
 import {
   SinceSecondsOptions,
   SinceSecondsSelectOptions,
-} from '../cluster/pod/logs/Logs'
+} from '../cluster/pod/logs/PodLogs'
 import { DateTimeFormInput } from './DateTimeFormInput'
 import { LogsLabels } from './LogsLabels'
 

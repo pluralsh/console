@@ -1,11 +1,13 @@
-import { EmptyState, Table } from '@pluralsh/design-system'
+import { Card, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import isEmpty from 'lodash/isEmpty'
 import { ComponentProps } from 'react'
 
-import { DateTimeCol } from './table/DateTimeCol'
 import { EventFragment } from 'generated/graphql'
+import styled from 'styled-components'
+import { DateTimeCol } from './table/DateTimeCol'
+import { StackedText } from './table/StackedText'
 
 const COLUMN_HELPER = createColumnHelper<EventFragment>()
 
@@ -44,7 +46,20 @@ export default function EventsTable({
   ComponentProps<typeof Table>
 >) {
   if (!events || isEmpty(events))
-    return <EmptyState message="No events available." />
+    return (
+      <EmptyStateCardSC>
+        <StackedText
+          css={{ textAlign: 'center', width: 480 }}
+          gap="xxsmall"
+          first="No events recorded yet"
+          firstPartialType="body1Bold"
+          firstColor="text"
+          secondPartialType="body2"
+          secondColor="text-light"
+          second="This pod hasn't generated any events. As soon as events occur, they'll be listed here with details like timestamps and statuses."
+        />
+      </EmptyStateCardSC>
+    )
 
   return (
     <Table
@@ -55,3 +70,12 @@ export default function EventsTable({
     />
   )
 }
+
+const EmptyStateCardSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.xlarge,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  height: '100%',
+}))

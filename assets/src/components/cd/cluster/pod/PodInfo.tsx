@@ -1,10 +1,12 @@
-import { Button, Flex, LogsIcon } from '@pluralsh/design-system'
+import { Flex } from '@pluralsh/design-system'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { ContainerStatus, Maybe, Pod } from 'generated/graphql'
-import { Link, useOutletContext, useParams } from 'react-router-dom'
+import { useOutletContext, useParams } from 'react-router-dom'
 
 import { SubTitle } from '../../../utils/SubTitle'
 
+import { getPodDetailsPath } from 'routes/cdRoutesConsts.tsx'
+import { useTheme } from 'styled-components'
 import { Readiness } from '../../../../utils/status'
 import { PodConditions } from './PodConditions.tsx'
 import {
@@ -20,8 +22,6 @@ import {
   ShellLink,
 } from './PodContainers.tsx'
 import { PodMetadata } from './PodMetadata.tsx'
-import { useTheme } from 'styled-components'
-import { getPodDetailsPath } from 'routes/cdRoutesConsts.tsx'
 
 export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) =>
   (statuses || []).reduce(
@@ -33,19 +33,6 @@ export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) =>
     }),
     {} as Record<string, Maybe<ContainerStatus>>
   )
-
-function ViewLogsButton() {
-  return (
-    <Button
-      secondary
-      startIcon={<LogsIcon />}
-      as={Link}
-      to="logs"
-    >
-      View logs
-    </Button>
-  )
-}
 
 export const ColActions = columnHelper.display({
   id: 'actions',
@@ -106,10 +93,7 @@ export default function PodInfo() {
   const conditions = pod?.status?.conditions || []
 
   return (
-    <ScrollablePage
-      heading="Info"
-      headingContent={<ViewLogsButton />}
-    >
+    <ScrollablePage>
       <Flex
         direction="column"
         gap="xlarge"
