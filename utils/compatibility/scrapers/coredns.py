@@ -1,4 +1,3 @@
-from bs4 import BeautifulSoup
 from utils import (
     print_error,
     fetch_page,
@@ -9,22 +8,34 @@ from collections import OrderedDict
 import re
 
 app_name = "coredns"
-compatibility_url = "https://github.com/coredns/deployment/blob/master/kubernetes/CoreDNS-k8s_version.md"  # noqa
+compatibility_url = (
+    "https://raw.githubusercontent.com/coredns/deployment/master/kubernetes/CoreDNS-k8s_version.md"
+)
 
 
-def parse_page(content):
-    soup = BeautifulSoup(content, "html.parser")
-    table = soup.find("table")
-    return table
+def parse_markdown_table(markdown: str) -> list[tuple[str, str]]:
+    rows: list[tuple[str, str]] = []
+    for line in markdown.splitlines():
+        line = line.strip()
+        if not line.startswith("|"):
+            continue
+        cols = [c.strip() for c in line.strip("|").split("|")]
+        if len(cols) < 2:
+            continue
+        header = cols[0].lower()
+        if header.startswith("kubernetes version"):
+            continue
+        if re.fullmatch(r":?-+:?", cols[0]):
+            continue
+        rows.append((cols[0], cols[1]))
+    return rows
 
 
-def extract_table_data(table, chart_versions):
-    rows = []
-    table_rows = table.find_all("tr")
-    for row in table_rows[1:]:  # Skip header row
-        cols = row.find_all("td")
-        kubernetes_versions = cols[0].text.strip()
-        coredns_version = cols[1].text.strip()
+def extract_table_data(table_rows: list[tuple[str, str]], chart_versions):
+    combined: dict[str, dict[str, object]] = {}
+    for kube_cell, coredns_cell in table_rows:
+        kubernetes_versions = kube_cell.strip()
+        coredns_version = coredns_cell.strip()
 
         # Remove leading 'v' from CoreDNS version
         coredns_match = re.search(r"\d+\.\d+\.\d+", coredns_version)
@@ -45,16 +56,24 @@ def extract_table_data(table, chart_versions):
         if not chart_version:
             continue
 
+        entry = combined.setdefault(
+            coredns_version,
+            {"kube": set(), "chart_version": chart_version},
+        )
+        entry["kube"].update(kubernetes_versions_list)
+
+    rows: list[OrderedDict] = []
+    for version, entry in combined.items():
         rows.append(
-            rows.append(
-                OrderedDict([
-                    ("version", coredns_version),
-                    ("kube", kubernetes_versions_list),
-                    ("chart_version", chart_version),
+            OrderedDict(
+                [
+                    ("version", version),
+                    ("kube", sorted(entry["kube"])),
+                    ("chart_version", entry["chart_version"]),
                     ("images", []),
                     ("requirements", []),
                     ("incompatibilities", []),
-                ])
+                ]
             )
         )
     return rows
@@ -66,13 +85,14 @@ def scrape():
         print_error("Failed to fetch page content.")
         return
 
-    tables = parse_page(page_content)
-    if not tables:
+    markdown = page_content.decode("utf-8", errors="replace")
+    table_rows = parse_markdown_table(markdown)
+    if not table_rows:
         print_error("No tables found in the page content.")
         return
 
     chart_versions = get_chart_versions(app_name)
-    rows = extract_table_data(tables, chart_versions)
+    rows = extract_table_data(table_rows, chart_versions)
     if not rows:
         print_error("No compatibility information found.")
         return
@@ -80,4 +100,3 @@ def scrape():
     update_compatibility_info(
         f"../../static/compatibilities/{app_name}.yaml", rows
     )
-
