@@ -52,6 +52,7 @@ export function ChatMessage({
   isStreaming = false,
   toolDisplayType = 'accordion',
   userMsgWrapperStyle,
+  isPending,
   ...props
 }: {
   id?: string
@@ -73,6 +74,7 @@ export function ChatMessage({
   isStreaming?: boolean
   toolDisplayType?: 'accordion' | 'simple'
   userMsgWrapperStyle?: StyledObject
+  isPending?: boolean
 } & Omit<ComponentPropsWithRef<typeof ChatMessageSC>, '$role' | 'content'>) {
   const [showActions, setShowActions] = useState(false)
   const actionsTimeoutRef = useRef<NodeJS.Timeout>(undefined)
@@ -117,6 +119,7 @@ export function ChatMessage({
         isStreaming={isStreaming}
         toolDisplayType={toolDisplayType}
         userMsgWrapperStyle={userMsgWrapperStyle}
+        isPending={isPending}
       />
       {type !== ChatType.File && disableActions !== 'no-spacing' && (
         <ChatMessageActions

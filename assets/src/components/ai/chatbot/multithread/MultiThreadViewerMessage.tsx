@@ -29,9 +29,11 @@ export function MultiThreadViewerMessage({
 export function SimpleToolCall({
   content,
   attributes,
+  isPending,
 }: {
   content: ChatFragment['content']
   attributes: ChatFragment['attributes']
+  isPending?: boolean
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
@@ -39,7 +41,12 @@ export function SimpleToolCall({
   return (
     <>
       <ClickableLabelSC onClick={() => setIsOpen(true)}>
-        <CaptionP $color="text-xlight">CALLED TOOL {toolName}</CaptionP>
+        <CaptionP
+          $shimmer={isPending}
+          $color="text-xlight"
+        >
+          {isPending ? 'CALLING' : 'CALLED'} TOOL {toolName}
+        </CaptionP>
       </ClickableLabelSC>
       <Modal
         open={isOpen}

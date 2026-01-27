@@ -163,6 +163,8 @@ fragment AiDelta on AiDelta {
   tool {
     id
     name
+    arguments
+    pending
   }
 }
 

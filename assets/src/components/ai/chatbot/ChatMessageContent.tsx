@@ -3,7 +3,6 @@ import {
   AccordionItem,
   Button,
   Card,
-  CaretRightIcon,
   CheckIcon,
   Chip,
   Code,
@@ -35,13 +34,13 @@ import {
 import { ReactElement, useState } from 'react'
 
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
-import { ToolCallContent } from './ToolCallContent'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
 import styled, { StyledObject, useTheme } from 'styled-components'
 import { iconUrl as getIconUrl } from 'utils/icon'
 import { ChatMessageActions } from './ChatMessage'
-import CloudObjectsCard from './tools/CloudObjectsCard.tsx'
 import { SimpleToolCall } from './multithread/MultiThreadViewerMessage.tsx'
+import { ToolCallContent } from './ToolCallContent'
+import CloudObjectsCard from './tools/CloudObjectsCard.tsx'
 
 type ChatMessageContentProps = {
   id?: string
@@ -61,6 +60,7 @@ type ChatMessageContentProps = {
   isStreaming?: boolean
   toolDisplayType?: 'accordion' | 'simple'
   userMsgWrapperStyle?: StyledObject
+  isPending?: boolean
 }
 
 export function ChatMessageContent({
@@ -81,6 +81,7 @@ export function ChatMessageContent({
   isStreaming = false,
   toolDisplayType,
   userMsgWrapperStyle,
+  isPending,
 }: ChatMessageContentProps) {
   switch (type) {
     case ChatType.File:
@@ -104,11 +105,13 @@ export function ChatMessageContent({
           confirmedAt={confirmedAt}
           serverName={serverName}
           highlightToolContent={highlightToolContent}
+          isPending={isPending}
         />
       ) : (
         <SimpleToolCall
           content={content ?? ''}
           attributes={attributes}
+          isPending={isPending}
         />
       )
     case ChatType.ImplementationPlan:
@@ -409,6 +412,7 @@ function ToolMessageContent({
   confirm,
   confirmedAt,
   serverName,
+  isPending,
 }: ChatMessageContentProps) {
   const { spacing } = useTheme()
   const [openValue, setOpenValue] = useState('')
@@ -449,34 +453,21 @@ function ToolMessageContent({
           <AccordionItem
             value={ARBITRARY_VALUE_NAME}
             padding="none"
-            caret="none"
+            caret="left"
             trigger={
               <Flex
                 justify="space-between"
                 align="center"
                 width="100%"
               >
-                <Flex
-                  gap="small"
-                  align="center"
-                  wordBreak="break-word"
+                <CaptionP
+                  $shimmer={isPending}
+                  $color="text-light"
+                  css={{ wordBreak: 'break-word' }}
                 >
-                  <CaretRightIcon
-                    color="icon-light"
-                    style={{
-                      transition: 'transform 0.2s ease-in-out',
-                      transform:
-                        openValue === ARBITRARY_VALUE_NAME
-                          ? 'rotate(90deg)'
-                          : 'none',
-                    }}
-                  />
-                  <CaptionP $color="text-light">
-                    {serverName
-                      ? `Called MCP tool for ${serverName}.${attributes?.tool?.name}`
-                      : `Called tool ${attributes?.tool?.name ? attributes?.tool?.name : ''}`}
-                  </CaptionP>
-                </Flex>
+                  {`${isPending ? 'Calling' : 'Called'} ${serverName ? `MCP tool for ${serverName}.` : 'tool '}${attributes?.tool?.name}`}
+                </CaptionP>
+
                 {serverName && <Chip size="small">{serverName}</Chip>}
               </Flex>
             }

@@ -233,6 +233,7 @@ export function ChatbotPanelThread({
                         attributes={
                           tool ? { tool: { name: tool.name } } : undefined
                         }
+                        isPending={!!tool?.pending}
                         highlightToolContent={false}
                         content={message
                           .toSorted((a, b) => a.seq - b.seq)
