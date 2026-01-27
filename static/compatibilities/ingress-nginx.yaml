@@ -3,30 +3,27 @@ git_url: https://github.com/kubernetes/ingress-nginx
 release_url: https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v{vsn}
 helm_repository_url: https://kubernetes.github.io/ingress-nginx
 versions:
-- version: 1.14.1
+- version: 1.14.2
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: "### Helm values / chart behavior changes (1.14.0 \u2192 1.14.1)\n\
-      No Helm values changes are called out in the provided notes for **controller-v1.14.1**.\n\
-      \n> Reminder: **v1.14.0** introduced a chart change: `controller.extraInitContainers`\
-      \ became **templatable**. If you set `controller.extraInitContainers`, verify\
-      \ your values still render correctly (they may now support templating functions/`tpl`).\n"
-    chart_updates: [No chart-specific updates are mentioned for controller-v1.14.1
-        in the provided release notes; changes are primarily image/dependency/CI updates.,
-      (Context from v1.14.0) Chart added `controller.metrics.serviceMonitor.scrapeTimeout`
-        and made `controller.extraInitContainers` templatable; ensure your values
-        file accounts for these if you use ServiceMonitor or extra init containers.]
-    features: ['Custom error pages: fix to avoid writing the status code too early
-        (improves correctness of custom error responses).', 'Controller: improved
-        host/path overlap detection when multiple rules are present (reduces incorrect
-        overlap warnings/behavior in complex Ingresses).']
-    breaking_changes: [No explicit breaking changes are documented for controller-v1.14.1
-        in the provided notes. (Most changes are image and dependency bumps.)]
-  chart_version: 4.14.1
-  images: ['registry.k8s.io/ingress-nginx/controller:v1.14.1@sha256:f95a79b85fb93ac3de752c71a5c27d5ceae10a18b61904dec224c1c6a4581e47',
-    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.5@sha256:03a00eb0e255e8a25fa49926c24cde0f7e12e8d072c445cdf5136ec78b546285']
+    helm_changes: ''
+    chart_updates: ['No explicit Helm chart release notes provided in the supplied
+        text. The app notes mention some chart-related commits present in v1.14.0
+        (e.g., extra init containers templatable; ServiceMonitor scrapeTimeout; resize
+        policy; webhook patch job volumes; OCI push), but nothing indicates new chart
+        changes specifically between 1.14.0 and 1.14.2 in the provided excerpts.']
+    features: ['v1.14.2 is primarily a maintenance release: rebuilt controller and
+        ancillary images, updated dependencies, and refreshed CI/test tooling.', Documentation
+        updates highlight that the project is retiring (adds retirement blog post
+        and related docs changes).]
+    breaking_changes: [No breaking changes are called out in the provided v1.14.2
+        notes; changes appear to be image/dependency/CI refreshes and documentation
+        updates.]
+  chart_version: 4.14.2
+  images: ['registry.k8s.io/ingress-nginx/controller:v1.14.2@sha256:fb3e5c0bdff6a498dd5192b11a09ace0739baa9fe6ba519bf5b22425871ce490',
+    'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.6@sha256:b28e0688be7d1e15fe385053bd4c6b631bc7708c9220632de1b95867e5e7da11']
 - version: 1.14.0
   kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
   requirements: []

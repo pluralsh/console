@@ -1177,6 +1177,7 @@ addons:
   release_url: https://github.com/projectcalico/calico/releases/tag/v{vsn}
   helm_repository_url: https://docs.tigera.io/calico/charts
   chart_name: tigera-operator
+  eolApiSlug: calico
   versions:
   - version: 3.31.3
     kube: ['1.30', '1.29', '1.28', '1.27']
@@ -1206,6 +1207,7 @@ addons:
     summary: null
     chart_version: 3.29.0
     images: ['quay.io/tigera/operator:v1.36.0']
+    eolAt: '2025-10-21'
   - version: 3.28.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -1213,6 +1215,7 @@ addons:
     summary: null
     chart_version: 3.28.0
     images: ['quay.io/tigera/operator:v1.34.0']
+    eolAt: '2025-05-05'
   - version: 3.27.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -1220,6 +1223,7 @@ addons:
     summary: null
     chart_version: 3.27.0
     images: ['quay.io/tigera/operator:v1.32.3']
+    eolAt: '2024-10-29'
   - version: 3.26.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -1227,6 +1231,7 @@ addons:
     summary: null
     chart_version: 3.26.0
     images: ['quay.io/tigera/operator:v1.30.0']
+    eolAt: '2024-05-11'
   - version: 3.25.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -1234,6 +1239,7 @@ addons:
     summary: null
     chart_version: 3.25.0
     images: ['quay.io/tigera/operator:v1.29.0']
+    eolAt: '2023-12-15'
   - version: 3.24.1
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -1267,6 +1273,7 @@ addons:
   git_url: https://github.com/cert-manager/cert-manager
   release_url: https://github.com/cert-manager/cert-manager/releases/tag/v{vsn}
   helm_repository_url: https://charts.jetstack.io
+  eolApiSlug: cert-manager
   versions:
   - version: 1.19.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31']
@@ -1416,6 +1423,7 @@ addons:
     chart_version: 1.17.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.17.0', 'quay.io/jetstack/cert-manager-controller:v1.17.0',
       'quay.io/jetstack/cert-manager-startupapicheck:v1.17.0', 'quay.io/jetstack/cert-manager-webhook:v1.17.0']
+    eolAt: '2025-10-07'
   - version: 1.16.0
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
     requirements: []
@@ -1466,6 +1474,7 @@ addons:
     chart_version: 1.16.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.16.0', 'quay.io/jetstack/cert-manager-controller:v1.16.0',
       'quay.io/jetstack/cert-manager-startupapicheck:v1.16.0', 'quay.io/jetstack/cert-manager-webhook:v1.16.0']
+    eolAt: '2025-06-10'
   - version: 1.15.0
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25']
     requirements: []
@@ -1517,6 +1526,7 @@ addons:
     chart_version: 1.15.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.15.0', 'quay.io/jetstack/cert-manager-controller:v1.15.0',
       'quay.io/jetstack/cert-manager-startupapicheck:v1.15.0', 'quay.io/jetstack/cert-manager-webhook:v1.15.0']
+    eolAt: '2025-02-03'
   - version: 1.14.0
     kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']
     requirements: []
@@ -1570,6 +1580,7 @@ addons:
     chart_version: 1.14.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.14.0', 'quay.io/jetstack/cert-manager-controller:v1.14.0',
       'quay.io/jetstack/cert-manager-startupapicheck:v1.14.0', 'quay.io/jetstack/cert-manager-webhook:v1.14.0']
+    eolAt: '2024-10-03'
   - version: 1.13.0
     kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
@@ -1623,6 +1634,7 @@ addons:
     chart_version: 1.13.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.13.0', 'quay.io/jetstack/cert-manager-controller:v1.13.0',
       'quay.io/jetstack/cert-manager-ctl:v1.13.0', 'quay.io/jetstack/cert-manager-webhook:v1.13.0']
+    eolAt: '2024-06-05'
   - version: 1.12.0
     kube: ['1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24',
       '1.23', '1.22']
@@ -1678,6 +1690,7 @@ addons:
     chart_version: 1.12.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.12.0', 'quay.io/jetstack/cert-manager-controller:v1.12.0',
       'quay.io/jetstack/cert-manager-ctl:v1.12.0', 'quay.io/jetstack/cert-manager-webhook:v1.12.0']
+    eolAt: '2025-05-19'
   - version: 1.11.0
     kube: ['1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
     requirements: []
@@ -1729,6 +1742,7 @@ addons:
     chart_version: 1.11.0
     images: ['quay.io/jetstack/cert-manager-cainjector:v1.11.0', 'quay.io/jetstack/cert-manager-controller:v1.11.0',
       'quay.io/jetstack/cert-manager-ctl:v1.11.0', 'quay.io/jetstack/cert-manager-webhook:v1.11.0']
+    eolAt: '2023-09-12'
   - version: 1.10.0
     kube: ['1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
     requirements: []
@@ -2428,6 +2442,7 @@ addons:
   release_url: https://github.com/cilium/cilium/releases/tag/v{vsn}
   helm_repository_url: https://helm.cilium.io/
   helm_values: debug.verbose=flow
+  eolApiSlug: cilium
   versions:
   - version: 1.18.6
     kube: ['1.35', '1.34', '1.33']
@@ -2919,6 +2934,7 @@ addons:
     chart_version: 1.15.17
     images: ['quay.io/cilium/cilium:v1.15.17@sha256:8824313a6f17d934b4e63902fee71e6ca36be6f69d68ae174df28f1b0705e587',
       'quay.io/cilium/operator-generic:v1.15.17@sha256:a0f5b5dc8cecd4e5ead7d3bddb3756e4b34beba8e7aa089e7e2fb761725defe1']
+    eolAt: '2025-07-29'
   - version: 1.15.12
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -2961,6 +2977,7 @@ addons:
     chart_version: 1.15.12
     images: ['quay.io/cilium/cilium:v1.15.12@sha256:d1793b67d976e1bc0a4ab01b34c94adfcd35a8be7612d04c6d618bf25f50f0d1',
       'quay.io/cilium/operator-generic:v1.15.12@sha256:e48d863367bfd39843917400aa7454ca6a4af74f995cf29a2edb81d7d13c7277']
+    eolAt: '2025-07-29'
   - version: 1.15.8
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -2993,6 +3010,7 @@ addons:
     chart_version: 1.15.8
     images: ['quay.io/cilium/cilium:v1.15.8@sha256:3b5b0477f696502c449eaddff30019a7d399f077b7814bcafabc636829d194c7',
       'quay.io/cilium/operator-generic:v1.15.8@sha256:e77ae6fc8a978f98363cf74d3c883dfaa6454c6e23ec417a60952f29408e2f18']
+    eolAt: '2025-07-29'
   - version: 1.15.5
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -3055,6 +3073,7 @@ addons:
     chart_version: 1.15.5
     images: ['quay.io/cilium/cilium:v1.15.5@sha256:4ce1666a73815101ec9a4d360af6c5b7f1193ab00d89b7124f8505dee147ca40',
       'quay.io/cilium/operator-generic:v1.15.5@sha256:f5d3d19754074ca052be6aac5d1ffb1de1eb5f2d947222b5f10f6d97ad4383e8']
+    eolAt: '2025-07-29'
   - version: 1.15.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -3124,6 +3143,7 @@ addons:
     chart_version: 1.15.0
     images: ['quay.io/cilium/cilium:v1.15.0@sha256:9cfd6a0a3a964780e73a11159f93cc363e616f7d9783608f62af6cfdf3759619',
       'quay.io/cilium/operator-generic:v1.15.0@sha256:e26ecd316e742e4c8aa1e302ba8b577c2d37d114583d6c4cdd2b638493546a79']
+    eolAt: '2025-07-29'
   - version: 1.14.18
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -3150,6 +3170,7 @@ addons:
     chart_version: 1.14.18
     images: ['quay.io/cilium/cilium:v1.14.18@sha256:a09bd4ee7345ccdb42679985bf3e5a696ad8416e31a70a3609129bc745804123',
       'quay.io/cilium/operator-generic:v1.14.18@sha256:f41a9f3d899e14ba34a9696e7327147cd9811fc563c255668d59658ad90aa69e']
+    eolAt: '2025-02-04'
   - version: 1.14.14
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -3173,6 +3194,7 @@ addons:
     chart_version: 1.14.14
     images: ['quay.io/cilium/cilium:v1.14.14@sha256:43d664501afbf35496e494dae0c5a7f8680a51ed9084997bea9c64bf4451a637',
       'quay.io/cilium/operator-generic:v1.14.14@sha256:0f2c8178bd20189fc9aeaa71224e6becdf71b42642209610b57390f7b798aae2']
+    eolAt: '2025-02-04'
   - version: 1.14.11
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -3195,6 +3217,7 @@ addons:
     chart_version: 1.14.11
     images: ['quay.io/cilium/cilium:v1.14.11@sha256:2b2118042dc6efe88dbc40c78909b6afd72b369896782ce38d132435724ee269',
       'quay.io/cilium/operator-generic:v1.14.11@sha256:df76f71a06f1c681848bfa86fdd99243af593d33034c9e2057c6af969bc25109']
+    eolAt: '2025-02-04'
   - version: 1.14.6
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -3226,6 +3249,7 @@ addons:
     chart_version: 1.14.6
     images: ['quay.io/cilium/cilium:v1.14.6@sha256:37a49f1abb333279a9b802ee8a21c61cde9dd9138b5ac55f77bdfca733ba852a',
       'quay.io/cilium/operator-generic:v1.14.6@sha256:2f0bf8fb8362c7379f3bf95036b90ad5b67378ed05cd8eb0410c1afc13423848']
+    eolAt: '2025-02-04'
   - version: 1.14.2
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -3277,6 +3301,7 @@ addons:
     chart_version: 1.14.2
     images: ['quay.io/cilium/cilium:v1.14.2@sha256:6263f3a3d5d63b267b538298dbeb5ae87da3efacf09a2c620446c873ba807d35',
       'quay.io/cilium/operator-generic:v1.14.2@sha256:52f70250dea22e506959439a7c4ea31b10fe8375db62f5c27ab746e3a2af866d']
+    eolAt: '2025-02-04'
   - version: 1.14.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -3364,6 +3389,7 @@ addons:
     chart_version: 1.14.0
     images: ['quay.io/cilium/cilium:v1.14.0@sha256:5a94b561f4651fcfd85970a50bc78b201cfbd6e2ab1a03848eab25a82832653a',
       'quay.io/cilium/operator-generic:v1.14.0@sha256:3014d4bcb8352f0ddef90fa3b5eb1bbf179b91024813a90a0066eb4517ba93c9']
+    eolAt: '2025-02-04'
   - version: 1.13.16
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -3383,6 +3409,7 @@ addons:
     chart_version: 1.13.16
     images: ['quay.io/cilium/cilium:v1.13.16@sha256:f1f26a973419ba449a47a08e8c4c8e280d8941bb4fd77d1e992e2721425c0629',
       'quay.io/cilium/operator-generic:v1.13.16@sha256:a2711d5b891da9fd66c2116b77782b58a1a428eb4abdab2dd3ac1221937d846b']
+    eolAt: '2024-07-24'
   - version: 1.13.11
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -3402,6 +3429,7 @@ addons:
     chart_version: 1.13.11
     images: ['quay.io/cilium/cilium:v1.13.11@sha256:3b117c7a6be212e2723813b44b909c757b76943cb0e9fdd0ec2aa4475bfcadb5',
       'quay.io/cilium/operator-generic:v1.13.11@sha256:730e2209b8777f1525186c602f77d5f22259ec4f1f6a2e923f4c03809ab7b0b1']
+    eolAt: '2024-07-24'
   - version: 1.13.7
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -3425,6 +3453,7 @@ addons:
     chart_version: 1.13.7
     images: ['quay.io/cilium/cilium:v1.13.7@sha256:3b084617febd708aa9d88de2472c6faf9aee71884112725e8511bca628ce5cf1',
       'quay.io/cilium/operator-generic:v1.13.7@sha256:0ec1bc5d9ecc444a890aaa2e0f397e77d15f1832910f1c20be3adc535688baba']
+    eolAt: '2024-07-24'
   - version: 1.13.2
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -3463,6 +3492,7 @@ addons:
     chart_version: 1.13.2
     images: ['quay.io/cilium/cilium:v1.13.2@sha256:85708b11d45647c35b9288e0de0706d24a5ce8a378166cadc700f756cc1a38d6',
       'quay.io/cilium/operator-generic:v1.13.2@sha256:a1982c0a22297aaac3563e428c330e17668305a41865a842dec53d241c5490ab']
+    eolAt: '2024-07-24'
   - version: 1.13.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -3515,6 +3545,7 @@ addons:
     chart_version: 1.13.0
     images: ['quay.io/cilium/cilium:v1.13.0@sha256:6544a3441b086a2e09005d3e21d1a4afb216fae19c5a60b35793c8a9438f8f68',
       'quay.io/cilium/operator-generic:v1.13.0@sha256:4b58d5b33e53378355f6e8ceb525ccf938b7b6f5384b35373f1f46787467ebf5']
+    eolAt: '2024-07-24'
   - version: 1.12.18
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -4121,6 +4152,7 @@ addons:
   git_url: https://github.com/projectcontour/contour
   release_url: https://github.com/projectcontour/contour/releases/tag/v{vsn}
   helm_repository_url: https://charts.bitnami.com/bitnami
+  eolApiSlug: contour
   versions:
   - version: 1.32.1
     kube: ['1.33', '1.32', '1.31']
@@ -4208,6 +4240,7 @@ addons:
           and planned for removal in 1.31 (along with the legacy `contour` xDS implementation).']
     chart_version: 19.2.1
     images: ['docker.io/bitnami/contour:1.30.0-debian-12-r6', 'docker.io/bitnami/envoy:1.31.2-debian-12-r0']
+    eolAt: '2025-09-08'
   - version: 1.29.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -4215,11 +4248,13 @@ addons:
     summary: null
     chart_version: 18.2.3
     images: ['docker.io/bitnami/contour:1.29.0-debian-12-r1', 'docker.io/bitnami/envoy:1.29.5-debian-12-r0']
+    eolAt: '2025-05-15'
   - version: 1.28.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
+    eolAt: '2025-05-06'
   - version: 1.27.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -4249,6 +4284,7 @@ addons:
           behavior before/after upgrade.]
     chart_version: 15.4.0
     images: ['docker.io/bitnami/contour:1.27.0-debian-11-r9', 'docker.io/bitnami/envoy:1.27.2-debian-11-r8']
+    eolAt: '2024-07-31'
   - version: 1.26.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -4282,6 +4318,7 @@ addons:
           have assumed only one HTTP and one HTTPS port.']
     chart_version: 13.1.4
     images: ['docker.io/bitnami/contour:1.26.0-debian-11-r17', 'docker.io/bitnami/envoy:1.26.5-debian-11-r0']
+    eolAt: '2024-05-07'
   - version: 1.25.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -4289,11 +4326,13 @@ addons:
     summary: null
     chart_version: 12.2.2
     images: ['docker.io/bitnami/contour:1.25.0-debian-11-r73', 'docker.io/bitnami/envoy:1.26.3-debian-11-r10']
+    eolAt: '2024-02-12'
   - version: 1.24.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary: null
+    eolAt: '2023-10-30'
   - version: 1.23.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
@@ -5259,6 +5298,7 @@ addons:
   release_url: https://github.com/fluxcd/flux2/releases/tag/v{vsn}
   helm_repository_url: https://fluxcd-community.github.io/helm-charts
   chart_name: flux2
+  eolApiSlug: flux
   versions:
   - version: 2.7.0
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -5281,30 +5321,28 @@ addons:
   release_url: https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v{vsn}
   helm_repository_url: https://kubernetes.github.io/ingress-nginx
   versions:
-  - version: 1.14.1
+  - version: 1.14.2
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "### Helm values / chart behavior changes (1.14.0 \u2192 1.14.1)\n\
-        No Helm values changes are called out in the provided notes for **controller-v1.14.1**.\n\
-        \n> Reminder: **v1.14.0** introduced a chart change: `controller.extraInitContainers`\
-        \ became **templatable**. If you set `controller.extraInitContainers`, verify\
-        \ your values still render correctly (they may now support templating functions/`tpl`).\n"
-      chart_updates: [No chart-specific updates are mentioned for controller-v1.14.1
-          in the provided release notes; changes are primarily image/dependency/CI
-          updates., (Context from v1.14.0) Chart added `controller.metrics.serviceMonitor.scrapeTimeout`
-          and made `controller.extraInitContainers` templatable; ensure your values
-          file accounts for these if you use ServiceMonitor or extra init containers.]
-      features: ['Custom error pages: fix to avoid writing the status code too early
-          (improves correctness of custom error responses).', 'Controller: improved
-          host/path overlap detection when multiple rules are present (reduces incorrect
-          overlap warnings/behavior in complex Ingresses).']
-      breaking_changes: [No explicit breaking changes are documented for controller-v1.14.1
-          in the provided notes. (Most changes are image and dependency bumps.)]
-    chart_version: 4.14.1
-    images: ['registry.k8s.io/ingress-nginx/controller:v1.14.1@sha256:f95a79b85fb93ac3de752c71a5c27d5ceae10a18b61904dec224c1c6a4581e47',
-      'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.5@sha256:03a00eb0e255e8a25fa49926c24cde0f7e12e8d072c445cdf5136ec78b546285']
+      helm_changes: ''
+      chart_updates: ['No explicit Helm chart release notes provided in the supplied
+          text. The app notes mention some chart-related commits present in v1.14.0
+          (e.g., extra init containers templatable; ServiceMonitor scrapeTimeout;
+          resize policy; webhook patch job volumes; OCI push), but nothing indicates
+          new chart changes specifically between 1.14.0 and 1.14.2 in the provided
+          excerpts.']
+      features: ['v1.14.2 is primarily a maintenance release: rebuilt controller and
+          ancillary images, updated dependencies, and refreshed CI/test tooling.',
+        Documentation updates highlight that the project is retiring (adds retirement
+          blog post and related docs changes).]
+      breaking_changes: [No breaking changes are called out in the provided v1.14.2
+          notes; changes appear to be image/dependency/CI refreshes and documentation
+          updates.]
+    chart_version: 4.14.2
+    images: ['registry.k8s.io/ingress-nginx/controller:v1.14.2@sha256:fb3e5c0bdff6a498dd5192b11a09ace0739baa9fe6ba519bf5b22425871ce490',
+      'registry.k8s.io/ingress-nginx/kube-webhook-certgen:v1.6.6@sha256:b28e0688be7d1e15fe385053bd4c6b631bc7708c9220632de1b95867e5e7da11']
   - version: 1.14.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
     requirements: []
@@ -5903,6 +5941,7 @@ addons:
   release_url: https://github.com/istio/istio/releases/tag/{vsn}
   helm_repository_url: https://istio-release.storage.googleapis.com/charts
   chart_name: istiod
+  eolApiSlug: istio
   versions:
   - version: 1.28.0
     kube: ['1.34', '1.33', '1.32', '1.31', '1.30']
@@ -5911,6 +5950,7 @@ addons:
     summary: null
     chart_version: 1.28.0
     images: ['docker.io/istio/pilot:1.28.0']
+    eolAt: '2026-07-31'
   - version: 1.27.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
@@ -5918,6 +5958,7 @@ addons:
     summary: null
     chart_version: 1.27.0
     images: ['docker.io/istio/pilot:1.27.0']
+    eolAt: '2026-04-30'
   - version: 1.26.0
     kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
     requirements: []
@@ -5925,6 +5966,7 @@ addons:
     summary: null
     chart_version: 1.26.0
     images: ['docker.io/istio/pilot:1.26.0']
+    eolAt: '2025-12-22'
   - version: 1.25.0
     kube: ['1.32', '1.31', '1.30', '1.29']
     requirements: []
@@ -5932,6 +5974,7 @@ addons:
     summary: null
     chart_version: 1.25.0
     images: ['docker.io/istio/pilot:1.25.0']
+    eolAt: '2025-09-30'
   - version: 1.24.0
     kube: ['1.31', '1.30', '1.29', '1.28']
     requirements: []
@@ -5939,6 +5982,7 @@ addons:
     summary: null
     chart_version: 1.24.0
     images: ['docker.io/istio/pilot:1.24.0']
+    eolAt: '2025-06-24'
   - version: 1.23.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -5946,6 +5990,7 @@ addons:
     summary: null
     chart_version: 1.23.0
     images: ['docker.io/istio/pilot:1.23.0']
+    eolAt: '2025-04-16'
   - version: 1.22.0
     kube: ['1.30', '1.29', 1.28', '1.27']
     requirements: []
@@ -5953,6 +5998,7 @@ addons:
     summary: null
     chart_version: 1.22.0
     images: ['docker.io/istio/pilot:1.22.0']
+    eolAt: '2025-01-22'
   - version: 1.21.0
     kube: ['1.29', 1.28', '1.27', '1.26']
     requirements: []
@@ -5960,6 +6006,7 @@ addons:
     summary: null
     chart_version: 1.21.0
     images: ['docker.io/istio/pilot:1.21.0']
+    eolAt: '2024-09-27'
   - version: 1.20.0
     kube: ['1.28', '1.27', '1.26', '1.25']
     requirements: []
@@ -5967,6 +6014,7 @@ addons:
     summary: null
     chart_version: 1.20.0
     images: ['docker.io/istio/pilot:1.20.0']
+    eolAt: '2024-06-25'
   - version: 1.18.0
     kube: ['1.27', '1.26', '1.25', '1.24']
     requirements: []
@@ -5974,6 +6022,7 @@ addons:
     summary: null
     chart_version: 1.18.0
     images: ['docker.io/istio/pilot:1.18.0']
+    eolAt: '2024-01-04'
   - version: 1.17.0
     kube: ['1.26', '1.25', '1.24', '1.23']
     requirements: []
@@ -5981,6 +6030,7 @@ addons:
     summary: null
     chart_version: 1.17.0
     images: ['docker.io/istio/pilot:1.17.0']
+    eolAt: '2023-10-27'
   - version: 1.16.0
     kube: ['1.25', '1.24', '1.23', '1.22']
     requirements: []
@@ -5988,6 +6038,7 @@ addons:
     summary: null
     chart_version: 1.16.0
     images: ['docker.io/istio/pilot:1.16.0']
+    eolAt: '2023-07-25'
   - version: 1.14.0
     kube: ['1.24', '1.23', '1.22', '1.21']
     requirements: []
@@ -5995,6 +6046,7 @@ addons:
     summary: null
     chart_version: 1.14.0
     images: ['docker.io/istio/pilot:1.14.0']
+    eolAt: '2022-12-27'
   - version: 1.13.0
     kube: ['1.23', '1.22', '1.21', '1.20']
     requirements: []
@@ -6002,6 +6054,7 @@ addons:
     summary: null
     chart_version: 1.13.0
     images: ['docker.io/istio/pilot:1.13.0']
+    eolAt: '2022-10-12'
   - version: 1.12.0
     kube: ['1.22', '1.21', '1.20', '1.19']
     requirements: []
@@ -6009,26 +6062,31 @@ addons:
     summary: null
     chart_version: 1.12.0
     images: ['docker.io/istio/pilot:1.12.0']
+    eolAt: '2022-07-12'
   - version: 1.11.0
     kube: ['1.22', '1.21', '1.20', '1.19', '1.18']
     requirements: []
     incompatibilities: []
     summary: null
+    eolAt: '2022-03-25'
   - version: 1.9.0
     kube: ['1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
     summary: null
+    eolAt: '2021-10-08'
   - version: 1.8.0
     kube: ['1.19', '1.18', '1.17', '1.16']
     requirements: []
     incompatibilities: []
     summary: null
+    eolAt: '2021-05-12'
   - version: 1.7.0
     kube: ['1.18', '1.17', '1.16']
     requirements: []
     incompatibilities: []
     summary: null
+    eolAt: '2021-02-25'
   - version: 1.1.0
     kube: ['1.21', '1.20', '1.19', '1.18']
     requirements: []
@@ -6039,6 +6097,7 @@ addons:
   git_url: https://github.com/jaegertracing/jaeger
   release_url: https://github.com/jaegertracing/jaeger/releases/tag/v{vsn}
   helm_repository_url: https://jaegertracing.github.io/helm-charts
+  eolApiSlug: jaeger
   versions:
   - version: 1.62.0
     kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
@@ -6373,6 +6432,7 @@ addons:
   git_url: https://github.com/kedacore/keda
   release_url: https://github.com/kedacore/keda/releases/tag/v{vsn}
   helm_repository_url: https://kedacore.github.io/charts
+  eolApiSlug: keda
   versions:
   - version: 2.18.0
     kube: ['1.33', '1.32', '1.31']
@@ -6392,60 +6452,70 @@ addons:
     incompatibilities: []
     summary: null
     chart_version: 2.16.0
+    eolAt: '2025-10-08'
   - version: 2.15.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.15.0
+    eolAt: '2025-04-07'
   - version: 2.14.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.14.2
+    eolAt: '2024-11-07'
   - version: 2.13.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.13.1
+    eolAt: '2024-08-01'
   - version: 2.12.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.12.0
+    eolAt: '2024-04-25'
   - version: 2.11.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.11.0
+    eolAt: '2024-01-18'
   - version: 2.10.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.10.1
+    eolAt: '2023-09-28'
   - version: 2.9.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.9.0
+    eolAt: '2023-06-22'
   - version: 2.8.0
     kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.8.1
+    eolAt: '2023-03-09'
   - version: 2.7.0
     kube: ['1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
     requirements: []
     incompatibilities: []
     summary: null
     chart_version: 2.7.0
+    eolAt: '2022-12-09'
   name: keda
 - icon: https://github.com/pluralsh/plural-artifacts/blob/main/monitoring/plural/icons/monitoring.png?raw=true
   git_url: https://github.com/prometheus-community/helm-charts
@@ -7276,6 +7346,7 @@ addons:
   git_url: https://github.com/kyverno/kyverno
   release_url: https://github.com/kyverno/kyverno/releases/tag/v{vsn}
   helm_repository_url: https://kyverno.github.io/kyverno/
+  eolApiSlug: kyverno
   versions:
   - version: 1.16.0
     kube: ['1.34', '1.33', '1.32', '1.31']
@@ -7535,6 +7606,7 @@ addons:
     images: ['bitnami/kubectl:1.30.2', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.13.0',
       'ghcr.io/kyverno/cleanup-controller:v1.13.0', 'ghcr.io/kyverno/kyverno-cli:v1.13.0',
       'ghcr.io/kyverno/kyverno:v1.13.0', 'ghcr.io/kyverno/kyvernopre:v1.13.0', 'ghcr.io/kyverno/reports-controller:v1.13.0']
+    eolAt: '2025-11-10'
   - version: 1.12.0
     kube: ['1.29', '1.28', '1.27', '1.26']
     requirements: []
@@ -7595,6 +7667,7 @@ addons:
     images: ['bitnami/kubectl:1.28.5', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.12.0',
       'ghcr.io/kyverno/cleanup-controller:v1.12.0', 'ghcr.io/kyverno/kyverno-cli:v1.12.0',
       'ghcr.io/kyverno/kyverno:v1.12.0', 'ghcr.io/kyverno/kyvernopre:v1.12.0', 'ghcr.io/kyverno/reports-controller:v1.12.0']
+    eolAt: '2025-07-31'
   - version: 1.11.0
     kube: ['1.28', '1.27', '1.26', '1.25']
     requirements: []
@@ -7661,6 +7734,7 @@ addons:
     images: ['bitnami/kubectl:1.26.10', 'bitnami/kubectl:1.26.4', 'busybox:1.35',
       'ghcr.io/kyverno/background-controller:v1.11.0', 'ghcr.io/kyverno/cleanup-controller:v1.11.0',
       'ghcr.io/kyverno/kyverno:v1.11.0', 'ghcr.io/kyverno/kyvernopre:v1.11.0', 'ghcr.io/kyverno/reports-controller:v1.11.0']
+    eolAt: '2025-04-25'
   - version: 1.10.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -7738,6 +7812,7 @@ addons:
     images: ['bitnami/kubectl:1.26.4', 'busybox:1.35', 'ghcr.io/kyverno/background-controller:v1.10.0',
       'ghcr.io/kyverno/cleanup-controller:v1.10.0', 'ghcr.io/kyverno/kyverno:v1.10.0',
       'ghcr.io/kyverno/kyvernopre:v1.10.0', 'ghcr.io/kyverno/reports-controller:v1.10.0']
+    eolAt: '2024-10-29'
   - version: 1.9.0
     kube: ['1.26', '1.25', '1.24']
     requirements: []
@@ -7805,6 +7880,7 @@ addons:
     chart_version: 2.7.0
     images: ['busybox:1.35', 'ghcr.io/kyverno/cleanup-controller:v1.9.0', 'ghcr.io/kyverno/kyverno:v1.9.0',
       'ghcr.io/kyverno/kyvernopre:v1.9.0']
+    eolAt: '2024-04-26'
   - version: 1.8.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
@@ -7851,6 +7927,7 @@ addons:
           on the old CRDs must be updated.]
     chart_version: 2.6.0
     images: [busybox, 'ghcr.io/kyverno/kyverno:v1.8.0', 'ghcr.io/kyverno/kyvernopre:v1.8.0']
+    eolAt: '2023-11-10'
   - version: 1.7.0
     kube: ['1.23', '1.22', '1.21']
     requirements: []
@@ -8549,6 +8626,12 @@ addons:
   git_url: https://github.com/open-telemetry/opentelemetry-operator
   release_url: https://github.com/open-telemetry/opentelemetry-operator/releases/tag/v{vsn}
   versions:
+  - version: 0.144.0
+    kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
+      '1.26', '1.25']
+    requirements: []
+    incompatibilities: []
+    summary: null
   - version: 0.143.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
       '1.26', '1.25']
@@ -9404,6 +9487,7 @@ addons:
   git_url: https://github.com/traefik/traefik
   release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
   helm_repository_url: https://traefik.github.io/charts
+  eolApiSlug: traefik
   versions:
   - version: 3.6.7
     kube: ['1.35', '1.34', '1.33', '1.32']
@@ -9482,6 +9566,7 @@ addons:
           behavior; dashboards/alerts based on span counts may need adjustment.]
     chart_version: 37.0.0
     images: ['docker.io/traefik:v3.5.0']
+    eolAt: '2025-11-07'
   - version: 3.4.0
     kube: ['1.35', '1.34', '1.33', '1.32']
     requirements: []
@@ -9509,6 +9594,7 @@ addons:
           going forward).']
     chart_version: 35.4.0
     images: ['docker.io/traefik:v3.4.0']
+    eolAt: '2025-07-23'
   - version: 3.3.6
     kube: ['1.34', '1.33', '1.32', '1.31']
     requirements: []
@@ -9516,11 +9602,13 @@ addons:
     summary: null
     chart_version: 35.2.0
     images: ['docker.io/traefik:v3.3.6']
+    eolAt: '2025-05-05'
   - version: 3.3.0
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     summary: null
+    eolAt: '2025-05-05'
   - version: 3.2.0
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []
@@ -9528,11 +9616,13 @@ addons:
     summary: null
     chart_version: 33.0.0
     images: ['docker.io/traefik:v3.2.0']
+    eolAt: '2025-01-06'
   - version: 3.1.7
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     summary: null
+    eolAt: '2024-10-28'
   - version: 3.1.4
     kube: ['1.32', '1.31', '1.30', '1.29']
     requirements: []
@@ -9546,6 +9636,7 @@ addons:
       breaking_changes: []
     chart_version: 31.1.1
     images: ['docker.io/traefik:v3.1.4']
+    eolAt: '2024-10-28'
   - version: 3.1.3
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -9572,6 +9663,7 @@ addons:
           v3 (commonly traefik.io/v1alpha1 depending on resource).']
     chart_version: 31.1.0
     images: ['docker.io/traefik:v3.1.3']
+    eolAt: '2024-10-28'
   - version: 3.0.2
     kube: ['1.31', '1.30', '1.29', '1.28']
     requirements: []
@@ -9579,26 +9671,31 @@ addons:
     summary: null
     chart_version: 28.3.0
     images: ['docker.io/traefik:v3.0.2']
+    eolAt: '2024-07-15'
   - version: 2.11.13
     kube: ['1.33', '1.32', '1.31', '1.30']
     requirements: []
     incompatibilities: []
     summary: null
+    eolAt: '2026-02-01'
   - version: 2.11.10
     kube: ['1.32', '1.31', '1.30', '1.29']
     requirements: []
     incompatibilities: []
     summary: null
+    eolAt: '2026-02-01'
   - version: 2.11.4
     kube: ['1.31', '1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary: null
+    eolAt: '2026-02-01'
   - version: 2.10.3
     kube: ['1.30', '1.29', '1.28']
     requirements: []
     incompatibilities: []
     summary: null
+    eolAt: '2024-02-12'
   name: traefik
 - icon: https://velero.io/img/Velero.svg
   git_url: https://github.com/vmware-tanzu/velero
@@ -9647,65 +9744,40 @@ addons:
     requirements: []
     incompatibilities: []
     summary:
-      helm_changes: "## Helm values / install-time config changes to check\n\n###\
-        \ 1) **Restic uploader removed (breaking)**\n* `--uploader-type=restic` is\
-        \ **no longer valid** in v1.17.\n  * If your Helm chart values set anything\
-        \ equivalent (commonly `configuration.uploaderType`, `uploaderType`, `deployRestic`,\
-        \ `deployNodeAgent`/`restic` toggles, etc.), remove/disable Restic and use\
-        \ the current fs-backup path.\n  * You can **still restore old Restic-based\
-        \ backups until v1.19**, but you cannot create new ones.\n\n### 2) **Repository\
-        \ maintenance job flags removed from velero server (breaking)**\nThe following\
-        \ server parameters were removed and must be configured via the **repository\
-        \ maintenance job ConfigMap** instead:\n* `--keep-latest-maintenance-jobs`\n\
-        * `--maintenance-job-cpu-request`\n* `--maintenance-job-mem-request`\n* `--maintenance-job-cpu-limit`\n\
-        * `--maintenance-job-mem-limit`\n\nIf you previously set these via chart values\
-        \ that map to `server.extraArgs`, move them to the chart\u2019s maintenance-job\
-        \ configmap values (name varies by chart).\n\n### 3) New/updated **node-agent**\
-        \ configuration knobs worth reviewing\nThese are additive but may require\
-        \ Helm values if you want to use them:\n* `PrepareQueueLength` (node-agent):\
-        \ throttles creation of data mover pods to avoid large numbers stuck Pending.\n\
-        * `priorityClassName` support across modules (server, node-agent, data mover\
-        \ pods, maintenance jobs): you may want to set these explicitly.\n* Parameterized\
-        \ kubelet mount path for node-agent install (only if you run non-standard\
-        \ kubelet paths).\n\n### 4) Modernized fs-backup (architecture change)\nfs-backup\
-        \ is now micro-service based. In Helm terms this may translate into:\n* more/changed\
-        \ pod templates for data mover / fs-backup components,\n* potential new configmaps/args\
-        \ for concurrency/cancel/resume behavior.\n\n(Exact value keys depend on your\
-        \ chart; validate rendered manifests before applying.)"
-      chart_updates: ['fs-backup moved to a micro-service architecture (better concurrency
-          control, cancel/resume, and resiliency across node-agent restarts).', 'Windows
-          support expands: fs-backup now supports Windows workloads; data mover pods
-          can run on Windows nodes with required tolerations.', Volume Group Snapshots
-          support added (Kubernetes beta feature) for CSI snapshot backup and CSI
-          snapshot data movement., 'PriorityClass support added across Velero components
-          (server, node-agent, data mover pods, maintenance jobs).', 'Data mover scalability
-          improvements: throttled pod creation via node-agent `PrepareQueueLength`,
-          improved restart/orphan handling, expanded node-selection for restore and
-          per-storageclass node-selection.', Resource policy enhanced with reusable
-          include/exclude filters via `includeExcludePolicy`., 'Operational changes:
-          repository maintenance job configuration moved from server flags to a ConfigMap;
-          additional config validation added for install CLI and server start.']
-      features: [Modernized fs-backup into a micro-service architecture with concurrency
-          control plus cancel/resume and improved resiliency across node-agent restarts.,
-        'fs-backup now supports Windows workloads, enabling full Windows backup/restore
-          scenarios (with CSI data movement support introduced earlier).', Adds support
-          for Kubernetes Volume Group Snapshots to take point-in-time consistent snapshots
-          across multiple related volumes., 'Adds PriorityClass support so you can
-          control scheduling priority for server, node-agent, data movers, and maintenance
-          jobs.', 'Improves data mover scalability with a node-agent prepare queue
-          to avoid flooding the cluster with Pending pods, plus better restart/orphan
-          handling and node-selection (including per-storageclass).', Adds reusable
-          resource include/exclude filtering via `includeExcludePolicy` in resource
-          policies.]
-      breaking_changes: ["Restic uploader path is removed: `--uploader-type=restic`\
-          \ is no longer a valid install configuration; you can\u2019t create new\
-          \ Restic-based backups (restores remain supported until v1.19).", Repository
-          maintenance job settings are no longer configured via Velero server flags;
-          the maintenance job CPU/memory and keep-latest settings must be moved to
-          the repository maintenance job ConfigMap., 'PVC restore behavior change:
-          selected-node annotation is now removed during PVC restore when no node
-          mapping exists (previously it could be preserved in some cases).']
-    chart_version: 11.2.0
+      helm_changes: ''
+      chart_updates: ['No Helm chart changelog/values were provided in the notes you
+          pasted, so chart-specific changes (values, manifests, hooks) cannot be authoritatively
+          summarized from this input.', 'For this upgrade, focus on the application-level
+          changes (Velero flags/configmaps/behavior) and then validate against the
+          Velero Helm chart release notes for the chart version you plan to bump to
+          (chart may rename values, change defaults, or introduce new templates for
+          node-agent/data movers/maintenance configmaps).']
+      features: ['Modernized fs-backup to a micro-service architecture with concurrency
+          control, cancel/resume, better isolation, and improved resilience to node-agent
+          restarts.', 'fs-backup now supports Windows workloads end-to-end (data mover
+          pods can run on Windows nodes), complementing the Windows CSI snapshot data
+          movement added in 1.16.', 'Beta support for Kubernetes Volume Group Snapshots
+          (VGS) for CSI snapshot backups and CSI snapshot data movement, enabling
+          crash-consistent point-in-time snapshots across multiple volumes.', 'PriorityClassName
+          support across Velero components (server, node-agent, data mover pods, and
+          maintenance jobs) to influence scheduling priority.', 'Scalability/resiliency
+          improvements for data movers: throttled creation via PrepareQueueLength,
+          improved restart/orphan handling, and restore node-selection plus per-storage-class
+          node-selection capabilities.', Resource policies gain reusable include/exclude
+          filters (includeExcludePolicy) in addition to volumePolicy., 'Operational
+          improvements: BSL availability gauge metric, imagePullSecrets inheritance
+          for VGDP pods/maintenance jobs, parameter validation for install/server
+          configmap, and better logging for backends.']
+      breaking_changes: ["Restic uploader removal: `--uploader-type=restic` is no\
+          \ longer valid in v1.17; you can\u2019t create new restic-path backups,\
+          \ though restores from existing restic backups remain supported until v1.19.",
+        'Repository maintenance job settings are removed from Velero server flags
+          and moved to a maintenance-job ConfigMap; the server flags `--keep-latest-maintenance-jobs`,
+          `--maintenance-job-{cpu,mem}-{request,limit}` are removed.', 'PVC restore
+          behavior change: Velero now always removes the `selected-node` annotation
+          when no node mapping exists (previously it might be preserved if the node
+          existed), which can affect scheduling/binding expectations in some restores.']
+    chart_version: 11.3.2
     images: ['docker.io/bitnamilegacy/kubectl:1.35', 'velero/velero:v1.17.1']
   - version: 1.16.0
     kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27',
@@ -9715,36 +9787,30 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Windows cluster support: Velero components (server/node-agent/data
-          mover/maintenance jobs) can run on Windows and back up/restore Windows workloads;
-          includes a hybrid multi-arch, all-in-one image build.', 'Parallel Item Block
-          backup: item blocks (and pre/post hooks) can now be processed concurrently
-          via a worker pool; configurable with `--item-block-worker-count` (default
-          1).', 'Data mover restore scalability: new node-agent config `ignoreDelayBinding`
-          allows spreading restores for WaitForFirstConsumer volumes across nodes
-          rather than being pinned to the attached node.', 'Improved data mover observability:
-          node-agent logs include more intermediate-object status and cleanup failure
-          errors for data mover workflows (enabled by default).', 'CSI snapshot usability
-          improvement: unnecessary retained `VolumeSnapshotContent` objects are no
-          longer included in backups/restores, reducing noise and cross-cluster syncing.',
-        'Backup repository maintenance improvements: `RecentMaintenance` history on
-          BackupRepository CRs; maintenance jobs recaptured after server restart;
-          skip maintenance/init for readOnly BSL; configurable `fullMaintenanceInterval`
-          for kopia (normalGC/fastGC/eagerGC).', 'Volume Policy enhancement: filter
-          volumes by PVC labels.', 'Per-object resource status restore control: annotation
-          `velero.io/restore-status` lets you decide whether to restore status for
-          individual objects.', 'Velero restore helper merged into main image: `velero`,
-          `velero-helper`, and `velero-restore-helper` binaries ship in the same velero
-          image.']
-      breaking_changes: [Restic fs-backup is deprecated starting in v1.15; using `--uploader-type=restic`
-          or restic-based fs-backup will succeed but emit warnings and will be removed
-          in a future release., Repository maintenance job settings moved from server
-          flags to a repository-maintenance ConfigMap in v1.15 (flags still work but
-          ConfigMap takes precedence if both are set)., Node-agent configuration ConfigMap
-          name is no longer fixed (v1.15); you must set `--node-agent-configmap` if
-          you use a non-default name or rely on the old fixed lookup., PVC selected-node
-          changing feature is deprecated in v1.15 and should not be used; removal
-          is planned in a future release.]
+      features: ['Windows cluster support: Velero components (node-agent, data mover
+          pods, maintenance jobs) can run on Windows nodes and can back up/restore
+          Windows workloads; hybrid multi-arch/all-in-one images are available.',
+        'Parallel ItemBlock backup: item blocks can now be processed in parallel to
+          increase backup throughput; controlled by the new `--item-block-worker-count`
+          server flag (default 1).', 'Data mover restore scalability: for WaitForFirstConsumer
+          volumes, restores can be spread across nodes by setting `ignoreDelayBinding`
+          in node-agent configuration.', 'Improved data mover observability: more
+          status/error logging for intermediate objects and cleanup failures, enabled
+          by default in node-agent logs.', 'CSI snapshot usability improvement: retained
+          `VolumeSnapshotContent` objects are no longer included in backups, reducing
+          unnecessary CSI objects synced/restored.', 'BackupRepository maintenance
+          improvements: `RecentMaintenance` history in BackupRepository CR, maintenance
+          jobs are recaptured after server restart, and readOnly BSLs no longer initialize/run
+          maintenance; maintenance interval is configurable via `fullMaintenanceInterval`
+          (normalGC/fastGC/eagerGC).', 'Volume Policy enhancement: can now filter
+          volumes by PVC labels.', 'Per-object resource status restore: control restoring
+          status per object via `velero.io/restore-status` annotation.', 'Restore
+          helper merged: `velero`, `velero-helper`, and `velero-restore-helper` binaries
+          are now included in the single Velero image.']
+      breaking_changes: ['Windows support has limitations: fs-backup is not supported
+          for Windows workloads, and Security Descriptors/NTFS extended attributes
+          are not backed up/restored; non-admin privilege workloads may not be supported
+          as a result.']
     chart_version: 10.1.3
     images: ['docker.io/bitnamilegacy/kubectl:1.35', 'velero/velero:v1.16.2']
   - version: 1.15.0
@@ -9755,33 +9821,27 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Data mover micro service: CSI Snapshot Data Movement transfers move
-          from node-agent pods into dedicated per-volume/per-operation backupPods/restorePods,
-          improving security (no hostPath), resource isolation, and resiliency.',
-        "Item Block + ItemBlockAction (IBA) plugin framework: introduces a way to\
-          \ group related Kubernetes resources into \u201Citem blocks\u201D and categorize\
-          \ them via built-in or custom IBA plugins; groundwork for future multi-threaded\
-          \ backups.", 'Repository maintenance node selection: allows pinning repository
-          maintenance jobs to specific nodes via a new repository maintenance configMap.',
-        'BackupPVC configuration for data mover: supports read-only mounting of backupPVCs
-          (can speed up expose on some storage like Ceph) and selecting a specific
-          StorageClass for backupPVCs via a configMap.', 'Backup repository cache
-          limit: allows configuring per-repository client-side cache size to reduce
-          risk of eviction due to ephemeral-storage exhaustion during repo operations.',
-        'Performance improvements: fixes a server memory leak after plugin calls;
-          propagates velero server client-qps/burst settings to plugins; pulls in
-          upstream Kopia improvements to reduce memory use during maintenance on large
-          repos.']
-      breaking_changes: [Restic uploader path for filesystem backups is deprecated
-          starting in 1.15; backups/restores still succeed but you will see warnings
-          when using --uploader-type=restic or otherwise using the Restic path., Node-agent
-          configuration ConfigMap name is no longer fixed; you must set the node-agent
-          server parameter node-agent-configmap if you use a non-default name., Repository
-          maintenance job settings are moving from Velero server flags to a dedicated
-          repository maintenance configMap; configMap values take precedence when
-          both are set (flags kept for backwards compatibility)., "The \u201CChanging\
-          \ PVC selected-node\u201D feature is now deprecated and will be removed\
-          \ in a future release; avoid relying on it."]
+      features: ['Data mover micro service moves CSI snapshot data movement from node-agent
+          pods to dedicated per-activity backup/restore pods, improving security (no
+          hostPath), resource control, and isolation/resilience.', Item Block concepts
+          and the ItemBlockAction (IBA) plugin type were introduced to group related
+          resources for future concurrent backup processing; Velero ships built-in
+          IBAs for Pods and PVCs., New ConfigMaps were added to tune repository maintenance
+          job node placement and to configure backupPVC behavior (read-only mount
+          and storageClass selection) for data mover backups., Backup repository cache
+          size can now be limited per repository via a configuration ConfigMap to
+          avoid running out of ephemeral storage., Performance improvements include
+          fixing a server memory leak after plugin calls and inheriting client QPS/burst
+          settings to plugins; Kopia maintenance memory usage is improved via upstream
+          fixes.]
+      breaking_changes: [Restic uploader path for fs-backup is now deprecated; backups/restores
+          still work but emit warnings when restic is selected or used., Node-agent
+          configuration ConfigMap name is no longer fixed; you must set `--node-agent-configmap`
+          if you use a non-default name., 'Repository maintenance job resource flags
+          are effectively replaced by a repository maintenance job configuration ConfigMap
+          (flags still work for backwards compatibility, but the ConfigMap takes precedence).',
+        The 'Changing PVC selected-node' feature is deprecated and should not be relied
+          on going forward.]
     chart_version: 8.7.2
     images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.15.2']
   - version: 1.14.0
@@ -9792,31 +9852,29 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: [Repository maintenance for kopia/restic is moved into Kubernetes
-          Jobs to avoid Velero server OOM during maintenance; install can set job
-          resource requests., "VolumePolicy is extended beyond \u201Cskip\u201D to\
-          \ allow selecting the per-volume backup method (e.g., `fs-backup` vs `snapshot`)\
-          \ for finer-grained control.", 'Data mover backup node selection: you can
-          constrain which nodes datamover pods may run on via a ConfigMap.', 'Restore
-          VolumeInfo metadata is now persisted and shown in `velero restore describe`,
-          similar to backup VolumeInfo introduced in 1.13.', 'A new Restore phase
-          `Finalizing` improves correctness (e.g., PV label restoration after data
-          restore; post-restore hooks after data movement).', 'Azure: adds certificate-based
-          service principal authentication; also updates Azure SDK components and
-          credential handling.', 'Runtime/deps bumped (Go 1.22.x, Kopia 0.17.0) and
-          various performance/concurrency improvements (e.g., configurable parallel
-          restore, higher client QPS/burst).']
-      breaking_changes: [CSI plugin is now built-in and installed by default; do not
-          install it via `--plugins` during `velero install` (remove any external
-          CSI plugin references)., 'Default resource requests/limits for node-agent
-          are removed, making node-agent pods BestEffort by default; you may need
-          to set your own requests/limits if you relied on prior defaults.', 'Namespace
-          filtering behavior changes when `includedNamespaces`/`excludedNamespaces`
-          are unset but label selectors are used: only namespaces containing matching
-          resources are included (previously all namespaces were included).', 'PV
-          patching during the new `Finalizing` phase can cause restores to end `PartiallyFailed`
-          when PVs are stuck `Pending`, whereas previously the restore might have
-          been marked `Complete`.']
+      features: [Repository maintenance for kopia/restic backup repositories is moved
+          out of the Velero server pod into separate Kubernetes Jobs to avoid Velero
+          server OOMs; resource requests can be configured at install time., 'VolumePolicies
+          now support explicit per-volume backup actions (e.g., `fs-backup` vs `snapshot`),
+          enabling opt-in/opt-out style control without modifying workloads.', Data
+          movement (datamover) pods can be constrained to eligible nodes via a ConfigMap-based
+          node selection mechanism., Restore operations now persist VolumeInfo metadata
+          for restored volumes and `velero restore describe` surfaces more detail.,
+        Restore workflow introduces a new `Finalizing` phase to ensure PV label patching
+          and post-restore hooks occur after data movement completes., 'Azure plugin
+          adds certificate-based authentication for service principals (in addition
+          to secret-based auth), improving phishing resistance and alignment with
+          Azure recommendations.']
+      breaking_changes: [CSI plugin is now merged into the Velero repo and installed
+          by default as an internal plugin; do not install the external CSI plugin
+          via `velero install --plugins` anymore., 'Default resource requests/limits
+          for the node-agent are removed, making node-agent pods BestEffort QoS unless
+          you set resources explicitly.', 'Backup namespace filtering behavior changes:
+          if `includedNamespaces`/`excludedNamespaces` are unset but `labelSelector`/`orLabelSelectors`
+          are set, only namespaces containing matching resources are included (previously
+          all namespaces were included).', 'Because restores patch PVs during the
+          new `Finalizing` phase, PVs stuck in `Pending` can cause the restore to
+          end as `PartiallyFailed` instead of `Complete` in some cases.']
     chart_version: 7.2.2
     images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.14.1']
   - version: 1.13.0
@@ -9827,37 +9885,34 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['Resource Modifiers now support JSON Merge Patch and Strategic Merge
-          Patch in addition to JSON Patch, enabling more flexible restore-time transformations.',
-        'Node-agent can be configured with concurrency limits for data movement (fs-backups
-          and CSI snapshot data movement), globally or per-node, to control resource
-          usage and throughput.', Kopia parallel file upload options are now configurable
-          to speed up fs-backups and CSI snapshot data movement uploads., Restores
-          can optionally write sparse files for fs-restore and CSI snapshot data movement
-          restores., "`velero backup describe` includes a new \u201CBackup Volumes\u201D\
-          \ section summarizing volume handling across native snapshots, fs-backup,\
-          \ CSI snapshots, and CSI snapshot data movement; it also shows CSI volume\
-          \ info regardless of the client-side EnableCSI feature gate.", Backups now
-          write a new VolumeInfo metadata file in the backup repository containing
-          PVC/PV method and snapshot/status details to drive PV restore behavior and
-          enable downstream tooling summaries., 'Improved resilience for CSI snapshot
-          data movement when the velero server pod or node-agent restarts, reducing
-          stuck/interrupted operations.', Hook execution details are surfaced in Backup/Restore
-          CR status (HooksAttempted/HooksFailed) and shown in describe output., Upgraded
-          to AWS SDK for Go v2 for improved CPU/memory performance., Expanded Azure
-          AD/Workload Identity support to include Kopia operations (filesystem backup/data
-          mover) in addition to prior Azure plugin capabilities., 'Runtime/dependencies
-          updated: Go 1.21.6, Kopia 0.15.0, plus various library bumps for CVEs and
-          compatibility.']
-      breaking_changes: ["`velero backup describe` output format changed: several\
-          \ existing fields for native snapshot/CSI snapshot/fs-backup moved under\
-          \ the new \u201CBackup Volumes\u201D section, which can break scripts parsing\
-          \ the old format.", 'API type change: `DataUploadSpec.DataMoverConfig` changed
-          from `*map[string][string]` to `map[string]string`, impacting clients/controllers
-          built against the old type.', '`velero install` now enables the informer
-          cache by default (previously disabled), changing runtime behavior and potentially
-          increasing memory usage; you can disable with `--disable-informer-cache`
-          if needed.']
+      features: ['Resource Modifiers enhanced: in addition to JSON Patch, restores
+          can now apply JSON Merge Patch and Strategic Merge Patch via the same ConfigMap
+          rules, covering more use cases.', "Node-agent concurrency controls: you\
+          \ can cap how many data-movement \u201Cloads\u201D (fs-backups and CSI snapshot\
+          \ data mover) run per node globally and/or per-node, helping manage CPU/memory/network\
+          \ usage.", 'Kopia performance/behavior knobs: configurable parallel file
+          upload and an option to write sparse files during restore for fs-restore
+          and CSI snapshot data movement restores.', 'Improved observability: `velero
+          backup describe` adds a Backup Volumes section (including CSI snapshot data
+          movement details) and backup/restore CRs now include hook execution status
+          fields (hooks attempted/failed).', 'New backup VolumeInfo metadata file
+          stored with the backup, recording PVC/PV backup method and snapshot/status
+          details to drive PV restore behavior; enables downstream tools to summarize
+          volume backup data.', 'Resilience improvements for CSI snapshot data movement
+          when the Velero server pod or node-agent restarts, reducing chances of stuck/abandoned
+          operations.', 'Azure AD/Workload Identity support expanded to Kopia operations
+          (filesystem backup/data mover), not just native snapshots.', 'Dependency
+          updates: Go runtime bumped to 1.21.6; Kopia bumped to 0.15.0; AWS SDK for
+          Go moved to v2 for better CPU/memory performance.']
+      breaking_changes: ['`velero backup describe` output format changed: some existing
+          snapshot/fs-backup information moved into the new Backup Volumes section;
+          any scripts parsing the old output will need updates.', 'API change: `DataUploadSpec.DataMoverConfig`
+          type changed from `*map[string]string` to `map[string]string`; custom tooling/controllers
+          must be updated and manifests regenerated if applicable.', 'Installer behavior
+          change: informer cache is now enabled by default (the `--disable-informer-cache`
+          flag defaults to false). This can increase memory usage and may require
+          raising Velero pod memory limits or explicitly disabling the cache if you
+          hit OOMs.']
     chart_version: 6.7.0
     images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.13.2']
   - version: 1.12.0
@@ -9868,27 +9923,26 @@ addons:
     summary:
       helm_changes: ''
       chart_updates: []
-      features: ['CSI Snapshot Data Movement: ability to move CSI snapshot data from
-          ephemeral storage snapshots into durable backup storage and restore across
-          environments/clouds.', 'Resource Modifiers (JSON substitutions): apply JSONPatch-style
-          modifications to selected resources during restore without writing a custom
-          RestoreItemAction plugin.', 'Multiple VolumeSnapshotClasses support in the
-          Velero CSI plugin, allowing selecting a specific VolumeSnapshotClass per
-          backup instead of a single label-based choice.', 'Restore finalizer: ensures
-          restore-associated artifacts in backup storage are cleaned up when running
-          `velero restore delete`.', 'Runtime/dependency updates: Go bumped to 1.20.7
-          and Kopia bumped to 0.13.x, plus various library upgrades and fixes.']
-      breaking_changes: ['Default `uploader-type` changes from `restic` to `kopia`,
-          affecting filesystem backup behavior and potentially repository/backing
-          storage requirements.', 'CSI snapshot timing behavior changes: sync wait
-          for snapshot handle becomes `backup.spec.csiSnapshotTimeout`; async wait
-          for VolumeSnapshot/Content `ReadyToUse` uses operation timeout (default
-          4h).', 'Helm chart v4.0.0 change (referenced in 1.12 notes): BackupStorageLocation
-          (BSL) and VolumeSnapshotLocation (VSL) values change from maps to slices
-          to support multiple locations; not backwards compatible.', Finalizers added
-          to Velero CRs (restore/dataupload/datadownload) can cause namespace deletion
-          to hang; use `velero uninstall` or handle finalizers before deleting the
-          namespace.]
+      features: ['**CSI Snapshot Data Movement**: Ability to move CSI snapshot data
+          into durable backup storage and restore it later/elsewhere (helps on-prem
+          durable retention and cross-cloud restores).', '**Resource Modifiers (JSON
+          substitutions)**: Apply JSON patches to selected resources during restore
+          without writing a custom RestoreItemAction plugin.', '**Multiple VolumeSnapshotClasses
+          support**: Choose a specific VolumeSnapshotClass per backup rather than
+          relying on driver-name + label heuristics.', '**Restore finalizer cleanup**:
+          `velero restore delete` now cleans up associated external/backup-storage
+          data, not just the Kubernetes Restore resources.']
+      breaking_changes: ['**Default uploader-type changed to Kopia**: installs now
+          default to `uploader-type=kopia` instead of `restic`, changing the default
+          filesystem-backup path and operational characteristics.', '**CSI snapshot
+          timeout behavior changed**: snapshot wait timings are now configurable via
+          `backup.spec.csiSnapshotTimeout`, and async readiness waits use the operation
+          timeout (default 4h).', '**Helm chart values structure change (v4.0.0)**:
+          BackupStorageLocations (BSL) and VolumeSnapshotLocations (VSL) changed from
+          map to slice; update values before upgrading to avoid incompatible config.',
+        '**Finalizers can block namespace deletion**: deleting the `velero` namespace
+          directly may hang because Restore/DataUpload/DataDownload CRs have finalizers;
+          use `velero uninstall` or clear finalizers safely first.']
     chart_version: 5.2.2
     images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.12.3']
   - version: 1.11.0
@@ -9921,6 +9975,7 @@ addons:
 - icon: https://avatars.githubusercontent.com/u/33043890?s=48&v=4
   git_url: https://github.com/vitessio/vitess
   release_url: https://github.com/vitessio/vitess/releases/tag/v{vsn}
+  eolApiSlug: vitess
   versions:
   - version: 23.0.0
     kube: ['1.34', '1.33', '1.32', '1.31']
@@ -10013,6 +10068,7 @@ addons:
   release_url: https://github.com/open-policy-agent/gatekeeper/releases/tag/v{vsn}
   helm_repository_url: https://open-policy-agent.github.io/gatekeeper/charts
   chart_name: gatekeeper
+  eolApiSlug: gatekeeper
   versions:
   - version: 3.21.0
     kube: ['1.34', '1.33', '1.32']
@@ -10155,6 +10211,7 @@ addons:
     chart_version: 3.19.1
     images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.1',
       'openpolicyagent/gatekeeper:v3.19.1']
+    eolAt: '2025-11-19'
   - version: 3.19.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -10178,6 +10235,7 @@ addons:
     chart_version: 3.19.0
     images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.19.0',
       'openpolicyagent/gatekeeper:v3.19.0']
+    eolAt: '2025-11-19'
   - version: 3.18.3
     kube: ['1.33', '1.32', '1.31']
     requirements: []
@@ -10209,6 +10267,7 @@ addons:
     chart_version: 3.18.3
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.18.3',
       'openpolicyagent/gatekeeper:v3.18.3']
+    eolAt: '2025-07-24'
   - version: 3.18.0
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -10257,6 +10316,7 @@ addons:
     chart_version: 3.18.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.18.0',
       'openpolicyagent/gatekeeper:v3.18.0']
+    eolAt: '2025-07-24'
   - version: 3.17.2
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -10297,6 +10357,7 @@ addons:
     chart_version: 3.17.2
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.17.2',
       'openpolicyagent/gatekeeper:v3.17.2']
+    eolAt: '2025-04-09'
   - version: 3.17.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -10343,6 +10404,7 @@ addons:
     chart_version: 3.17.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.17.0',
       'openpolicyagent/gatekeeper:v3.17.0']
+    eolAt: '2025-04-09'
   - version: 3.16.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -10390,6 +10452,7 @@ addons:
     chart_version: 3.16.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.16.0',
       'openpolicyagent/gatekeeper:v3.16.0']
+    eolAt: '2024-12-12'
   - version: 3.15.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -10429,6 +10492,7 @@ addons:
     chart_version: 3.15.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.15.0',
       'openpolicyagent/gatekeeper:v3.15.0']
+    eolAt: '2024-08-21'
   - version: 3.14.2
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -10444,6 +10508,7 @@ addons:
     chart_version: 3.14.2
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.2',
       'openpolicyagent/gatekeeper:v3.14.2']
+    eolAt: '2024-05-09'
   - version: 3.14.1
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -10493,6 +10558,7 @@ addons:
     chart_version: 3.14.1
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.1',
       'openpolicyagent/gatekeeper:v3.14.1']
+    eolAt: '2024-05-09'
   - version: 3.14.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -10530,6 +10596,7 @@ addons:
     chart_version: 3.14.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.14.0',
       'openpolicyagent/gatekeeper:v3.14.0']
+    eolAt: '2024-05-09'
   - version: 3.13.2
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -10557,6 +10624,7 @@ addons:
     chart_version: 3.13.2
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.2',
       'openpolicyagent/gatekeeper:v3.13.2']
+    eolAt: '2024-02-05'
   - version: 3.13.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -10599,6 +10667,7 @@ addons:
     chart_version: 3.13.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.13.0',
       'openpolicyagent/gatekeeper:v3.13.0']
+    eolAt: '2024-02-05'
   - version: 3.12.0
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -10636,6 +10705,7 @@ addons:
     chart_version: 3.12.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.12.0',
       'openpolicyagent/gatekeeper:v3.12.0']
+    eolAt: '2023-11-01'
   - version: 3.11.1
     kube: ['1.27', '1.26', '1.25']
     requirements: []
@@ -10665,6 +10735,7 @@ addons:
     chart_version: 3.11.1
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.11.1',
       'openpolicyagent/gatekeeper:v3.11.1']
+    eolAt: '2023-08-08'
   - version: 3.11.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
@@ -10716,6 +10787,7 @@ addons:
     chart_version: 3.11.0
     images: ['curlimages/curl:7.83.1', 'openpolicyagent/gatekeeper-crds:v3.11.0',
       'openpolicyagent/gatekeeper:v3.11.0']
+    eolAt: '2023-08-08'
   - version: 3.10.0
     kube: ['1.25', '1.24', '1.23']
     requirements: []
@@ -11110,6 +11182,7 @@ addons:
   release_url: https://github.com/projectcalico/calico/releases/tag/v{vsn}
   helm_repository_url: https://docs.tigera.io/calico/charts
   chart_name: tigera-operator
+  eolApiSlug: calico
   versions:
   - version: 3.31.3
     kube: ['1.30', '1.29', '1.28', '1.27']
@@ -11139,6 +11212,7 @@ addons:
     summary: null
     chart_version: 3.29.0
     images: ['quay.io/tigera/operator:v1.36.0']
+    eolAt: '2025-10-21'
   - version: 3.28.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11146,6 +11220,7 @@ addons:
     summary: null
     chart_version: 3.28.0
     images: ['quay.io/tigera/operator:v1.34.0']
+    eolAt: '2025-05-05'
   - version: 3.27.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11153,6 +11228,7 @@ addons:
     summary: null
     chart_version: 3.27.0
     images: ['quay.io/tigera/operator:v1.32.3']
+    eolAt: '2024-10-29'
   - version: 3.26.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11160,6 +11236,7 @@ addons:
     summary: null
     chart_version: 3.26.0
     images: ['quay.io/tigera/operator:v1.30.0']
+    eolAt: '2024-05-11'
   - version: 3.25.0
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11167,6 +11244,7 @@ addons:
     summary: null
     chart_version: 3.25.0
     images: ['quay.io/tigera/operator:v1.29.0']
+    eolAt: '2023-12-15'
   - version: 3.24.1
     kube: ['1.30', '1.29', '1.28', '1.27']
     requirements: []
@@ -11200,6 +11278,7 @@ addons:
   git_url: https://github.com/argoproj/argo-cd
   release_url: https://github.com/argoproj/argo-cd/releases/tag/v{vsn}
   helm_repository_url: https://argoproj.github.io/argo-helm
+  eolApiSlug: argocd
   versions:
   - version: 3.2.6
     kube: ['1.35', '1.34', '1.33']
@@ -11210,7 +11289,7 @@ addons:
       chart_updates: []
       features: []
       breaking_changes: []
-    chart_version: 9.3.5
+    chart_version: 9.3.6
     images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
       'quay.io/argoproj/argocd:v3.2.6']
   - version: 3.2.1
@@ -11370,6 +11449,7 @@ addons:
     chart_version: 7.9.1
     images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
       'quay.io/argoproj/argocd:v2.14.11']
+    eolAt: '2025-11-04'
   - version: 2.14.1
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -11378,6 +11458,7 @@ addons:
     chart_version: 7.8.0
     images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.2-alpine',
       'quay.io/argoproj/argocd:v2.14.1']
+    eolAt: '2025-11-04'
   - version: 2.13.2
     kube: ['1.32', '1.31', '1.30']
     requirements: []
@@ -11394,6 +11475,7 @@ addons:
     chart_version: 7.7.12
     images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
       'quay.io/argoproj/argocd:v2.13.2']
+    eolAt: '2025-08-13'
   - version: 2.13.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -11411,6 +11493,7 @@ addons:
     chart_version: 7.7.3
     images: ['ghcr.io/dexidp/dex:v2.41.1', 'public.ecr.aws/docker/library/redis:7.4.1-alpine',
       'quay.io/argoproj/argocd:v2.13.0']
+    eolAt: '2025-08-13'
   - version: 2.12.0
     kube: ['1.31', '1.30', '1.29']
     requirements: []
@@ -11428,6 +11511,7 @@ addons:
     chart_version: 7.4.3
     images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
       'quay.io/argoproj/argocd:v2.12.0']
+    eolAt: '2025-05-06'
   - version: 2.11.0
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -11436,6 +11520,7 @@ addons:
     chart_version: 6.9.3
     images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
       'quay.io/argoproj/argocd:v2.11.0']
+    eolAt: '2025-02-03'
   - version: 2.10.7
     kube: ['1.30', '1.29', '1.28']
     requirements: []
@@ -11465,6 +11550,7 @@ addons:
     chart_version: 6.7.15
     images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.2.4-alpine',
       'quay.io/argoproj/argocd:v2.10.7']
+    eolAt: '2024-11-04'
   - version: 2.10.0
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -11499,6 +11585,7 @@ addons:
     chart_version: 6.0.13
     images: ['ghcr.io/dexidp/dex:v2.38.0', 'public.ecr.aws/docker/library/redis:7.0.15-alpine',
       'quay.io/argoproj/argocd:v2.10.0']
+    eolAt: '2024-11-04'
   - version: 2.9.4
     kube: ['1.29', '1.28', '1.27']
     requirements: []
@@ -11524,6 +11611,7 @@ addons:
     chart_version: 5.53.1
     images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
       'quay.io/argoproj/argocd:v2.9.4']
+    eolAt: '2024-08-05'
   - version: 2.9.0
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -11554,6 +11642,7 @@ addons:
     chart_version: 5.51.1
     images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
       'quay.io/argoproj/argocd:v2.9.0']
+    eolAt: '2024-08-05'
   - version: 2.8.4
     kube: ['1.28', '1.27', '1.26']
     requirements: []
@@ -11574,6 +11663,7 @@ addons:
     chart_version: 5.47.0
     images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.13-alpine',
       'quay.io/argoproj/argocd:v2.8.4']
+    eolAt: '2024-05-07'
   - version: 2.8.3
     kube: ['1.28', '1.27', '1.24']
     requirements: []
@@ -11582,6 +11672,7 @@ addons:
     chart_version: 5.46.2
     images: ['ghcr.io/dexidp/dex:v2.37.0', 'public.ecr.aws/docker/library/redis:7.0.11-alpine',
       'quay.io/argoproj/argocd:v2.8.3']
+    eolAt: '2024-05-07'
   name: argo-cd
 - icon: https://avatars.githubusercontent.com/u/16866914
   git_url: https://github.com/vectordotdev/vector/

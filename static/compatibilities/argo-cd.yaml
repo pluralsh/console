@@ -13,7 +13,7 @@ versions:
     chart_updates: []
     features: []
     breaking_changes: []
-  chart_version: 9.3.5
+  chart_version: 9.3.6
   images: ['ecr-public.aws.com/docker/library/redis:8.2.2-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.2.6']
 - version: 3.2.1
