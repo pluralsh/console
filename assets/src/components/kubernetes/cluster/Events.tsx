@@ -20,7 +20,6 @@ import { Kind } from '../common/types'
 import { getClusterBreadcrumbs } from './Cluster'
 
 import { EventTypeChip } from './utils'
-import { getCreationTimestampString } from '../common/utils'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getClusterBreadcrumbs(cluster),
@@ -93,23 +92,17 @@ const colCount = columnHelper.accessor((event) => event.count, {
   cell: ({ getValue }) => getValue(),
 })
 
-const colFirstSeen = columnHelper.accessor(
-  (event) => getCreationTimestampString(event.firstSeen),
-  {
-    id: 'firstSeen',
-    header: 'First seen',
-    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
-  }
-)
+const colFirstSeen = columnHelper.accessor((event) => event.firstSeen, {
+  id: 'firstSeen',
+  header: 'First seen',
+  cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+})
 
-const colLastSeen = columnHelper.accessor(
-  (event) => getCreationTimestampString(event.lastSeen),
-  {
-    id: 'lastSeen',
-    header: 'Last seen',
-    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
-  }
-)
+const colLastSeen = columnHelper.accessor((event) => event.lastSeen, {
+  id: 'lastSeen',
+  header: 'Last seen',
+  cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+})
 
 export function useEventsColumns(): Array<object> {
   return useMemo(

@@ -43,7 +43,7 @@ import ResourceInfoCard, {
 import ResourceLink from '../common/ResourceLink'
 import { ResourceList } from '../common/ResourceList.tsx'
 import { fromResource, Kind, Resource } from '../common/types'
-import { getCreationTimestampString, MetadataSidecar } from '../common/utils'
+import { MetadataSidecar } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 
 import { getBreadcrumbs } from './Deployments'
@@ -189,11 +189,7 @@ function NewReplicaSet(): ReactElement<any> {
           />
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Creation date">
-          {formatLocalizedDateTime(
-            getCreationTimestampString(
-              replicaSet?.objectMeta?.creationTimestamp
-            )
-          )}{' '}
+          {formatLocalizedDateTime(replicaSet?.objectMeta?.creationTimestamp)}{' '}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Pods">
           <PodInfo info={replicaSet?.podInfo} />

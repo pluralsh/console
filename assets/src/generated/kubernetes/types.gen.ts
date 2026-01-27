@@ -3614,9 +3614,7 @@ export type V1Taint = {
     value?: string;
 };
 
-export type V1Time = {
-    Time: string;
-};
+export type V1Time = string;
 
 /**
  * TypeMeta describes an individual object in an API response or request with strings representing the type of the object and its API schema version. Structures that are versioned or persisted should inline TypeMeta.
