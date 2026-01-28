@@ -19,8 +19,9 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o flaky-service .
 # Step 2: Create a smaller image to run the application
 FROM alpine:latest  
 
+# Upgrade busybox to fix CVE in tar (terminal escape sequence vulnerability)
 # Install necessary dependencies to run Go binaries
-RUN apk --no-cache add ca-certificates
+RUN apk --no-cache upgrade busybox busybox-binsh && apk --no-cache add ca-certificates
 
 # Set the Current Working Directory inside the container
 WORKDIR /root/

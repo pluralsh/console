@@ -12,7 +12,8 @@ EXPOSE 23233
 EXPOSE 9418
 
 # basics, in case need to access shell to debug/troubleshoot
-RUN apk update --no-cache
+# Upgrade busybox to fix CVE in tar (terminal escape sequence vulnerability)
+RUN apk update --no-cache && apk upgrade --no-cache busybox busybox-binsh
 RUN apk add sudo git vim curl
 
 # create keys
@@ -44,7 +45,8 @@ EXPOSE 23233
 EXPOSE 9418
 
 # needs git for repos to be accessible
-RUN apk update --no-cache
+# Upgrade busybox to fix CVE in tar (terminal escape sequence vulnerability)
+RUN apk update --no-cache && apk upgrade --no-cache busybox busybox-binsh
 RUN apk add git
 
 COPY --from=builder /usr/bin/soft /usr/bin/

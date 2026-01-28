@@ -1,8 +1,9 @@
 # Use an appropriate base image for your sidecar (you can adjust this as needed)
 FROM alpine:3.18
 
+# Upgrade busybox to fix CVE in tar (terminal escape sequence vulnerability)
 # Install any dependencies your shell script might need (e.g., bash, curl, etc.)
-RUN apk update && apk add --no-cache bash curl
+RUN apk update && apk upgrade --no-cache busybox busybox-binsh && apk add --no-cache bash curl
 
 # Copy the shell script from the host to the container
 COPY api_caller.sh ./api_caller.sh
