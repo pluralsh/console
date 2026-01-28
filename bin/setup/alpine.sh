@@ -1,4 +1,5 @@
 apk update
+apk upgrade busybox busybox-binsh ssl_client
 apk add openssh-client libgcc libstdc++ ncurses-libs openssl-dev ca-certificates git gnupg bash
 apk add --no-cache --update --virtual=build gcc musl-dev libffi-dev openssl-dev make
 apk del build
