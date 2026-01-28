@@ -3,6 +3,7 @@ defmodule Console.Deployments.Stacks do
   import Console.Deployments.Pr.Utils, only: [render_solid_raw: 2]
   import Console.Deployments.Policies
   import Console.Deployments.Stacks.Commands
+  import Console.AI.Fixer.Base, only: [blacklist: 1]
   alias Console.PubSub
   alias Console.Deployments.{Services, Clusters, Settings, Git, Stacks.Stability, Tar}
   alias Console.Deployments.Git.Discovery
@@ -799,6 +800,22 @@ defmodule Console.Deployments.Stacks do
     case Repo.preload(run, [:repository]) do
       %{repository: %GitRepository{} = repo, git: git} -> Discovery.fetch(repo, git)
       _ -> {:error, "could not resolve repository for run"}
+    end
+  end
+
+  @doc """
+  Fetches the contents of all files in a stack's git tarball
+  """
+  @spec stack_files(binary, User.t) :: {:ok, [%{path: binary, content: binary}]} | error
+  def stack_files(id, %User{} = user) do
+    stack = get_stack!(id)
+    with {:ok, stack} <- allow(stack, user, :write),
+         %{repository: %GitRepository{} = repo} <- Repo.preload(stack, [:repository]),
+         {:ok, f} <- Discovery.fetch(repo, stack.git),
+         {:ok, contents} <- Tar.tar_stream(f) do
+      Enum.filter(contents, fn {k, _} -> !blacklist(k) end)
+      |> Enum.map(fn {k, v} -> %{path: k, content: v} end)
+      |> ok()
     end
   end
 

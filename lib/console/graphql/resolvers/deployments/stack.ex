@@ -208,5 +208,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
 
   def stack_tarball(%{id: id}, _, _), do: {:ok, Services.api_url("v1/git/stacks/tarballs?id=#{id}")}
 
+  def stack_files(%{id: id}, %{context: %{current_user: user}}),
+    do: Stacks.stack_files(id, user)
+
   def plural_creds(run, _, ctx), do: Stacks.plural_creds(run, actor(ctx))
 end

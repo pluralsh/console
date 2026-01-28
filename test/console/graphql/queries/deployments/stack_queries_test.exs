@@ -1,5 +1,8 @@
 defmodule Console.GraphQl.Deployments.StackQueriesTest do
   use Console.DataCase, async: true
+  use Mimic
+  alias Console.Deployments.{Tar}
+  alias Console.Deployments.Git.Discovery
 
   describe "infrastructureStack" do
     test "it can fetch a stack by id" do
@@ -519,6 +522,58 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
 
       assert from_connection(found)
              |> ids_equal(defs)
+    end
+  end
+
+  describe "stackTarball" do
+    test "writers can fetch stack files from git tarball" do
+      user = insert(:user)
+      repo = insert(:git_repository)
+      stack = insert(:stack,
+        repository: repo,
+        git: %{ref: "main", folder: "terraform"},
+        write_bindings: [%{user_id: user.id}]
+      )
+
+      {:ok, tarball} = Tar.tarball([
+        {"main.tf", "resource \"aws_instance\" \"example\" {}"},
+        {"variables.tf", "variable \"name\" {}"}
+      ])
+
+      expect(Discovery, :fetch, fn ^repo, _ -> {:ok, tarball} end)
+
+      {:ok, %{data: %{"stackTarball" => files}}} = run_query("""
+        query StackTarball($id: ID!) {
+          stackTarball(id: $id) {
+            path
+            content
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: user})
+
+      assert length(files) == 2
+      assert Enum.find(files, & &1["path"] == "main.tf")
+      assert Enum.find(files, & &1["path"] == "variables.tf")
+
+      main_tf = Enum.find(files, & &1["path"] == "main.tf")
+      assert main_tf["content"] == "resource \"aws_instance\" \"example\" {}"
+    end
+
+    test "non-writers cannot fetch stack files" do
+      repo = insert(:git_repository)
+      stack = insert(:stack,
+        repository: repo,
+        git: %{ref: "main", folder: "terraform"}
+      )
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query StackTarball($id: ID!) {
+          stackTarball(id: $id) {
+            path
+            content
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: insert(:user)})
     end
   end
 end
