@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "kas.deploymentName" . }}
+  annotations:
+    platform.plural.sh/repository-url: https://github.com/pluralsh/kubernetes-agent.git
   labels:
     {{- include "kas.labels" . | nindent 4 }}
 spec:

@@ -109,6 +109,7 @@ defmodule Console.Schema.Sentinel do
     |> cast(attrs, @valid)
     |> cast_embed(:git)
     |> cast_embed(:checks, with: &check_changeset/2)
+    |> unique_constraint(:name, message: "a sentinel with this name already exists")
     |> validate_length(:name, max: 255)
     |> validate_required([:name, :status])
   end

@@ -3,6 +3,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cloud-query
+  annotations:
+{{ include "console.annotations" . | nindent 4 }}
   labels:
     helm.sh/chart: {{ include "console.chart" . }}
     app.kubernetes.io/name: cloud-query
