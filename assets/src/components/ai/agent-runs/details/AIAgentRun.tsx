@@ -109,10 +109,12 @@ export function AIAgentRun() {
             secondColor="text-xlight"
           />
           <Flex gap="small">
-            {run?.status !== AgentRunStatus.Cancelled && (
+            {(run?.status == AgentRunStatus.Running ||
+              run?.status == AgentRunStatus.Pending) && (
               <Button
                 onClick={() => cancelAgentRun()}
                 loading={cancelling}
+                secondary
               >
                 Cancel agent run
               </Button>
