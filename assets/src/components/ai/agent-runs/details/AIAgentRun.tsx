@@ -4,6 +4,7 @@ import {
   Divider,
   Flex,
   prettifyRepoUrl,
+  SpinnerAlt,
   Toast,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -113,6 +114,7 @@ export function AIAgentRun() {
               run?.status == AgentRunStatus.Pending) && (
               <Button
                 onClick={() => cancelAgentRun()}
+                startIcon={<SpinnerAlt />}
                 loading={cancelling}
                 secondary
               >
