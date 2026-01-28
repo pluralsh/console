@@ -99,6 +99,7 @@ export function Flow() {
             size="large"
             type="secondary"
             to={FLOWS_ABS_PATH}
+            tooltip="Return to flows"
           />
           <Flex
             gap="small"

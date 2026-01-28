@@ -8,12 +8,14 @@ export function SimplePopupMenu({
   isOpen,
   setIsOpen,
   type = 'header',
+  linkStyles = true,
   children,
   ...props
 }: {
   isOpen: boolean
   setIsOpen: Dispatch<SetStateAction<boolean>>
   type?: 'header' | 'sidebar' | 'fromTopLeft'
+  linkStyles?: boolean
   children: ReactNode
 } & CardProps) {
   useKeyDown(['Escape'], () => setIsOpen(false))
@@ -35,6 +37,7 @@ export function SimplePopupMenu({
       <MenuCardSC
         fillLevel={2}
         {...props}
+        $linkStyles={linkStyles}
       >
         {children}
       </MenuCardSC>
@@ -42,21 +45,25 @@ export function SimplePopupMenu({
   ))
 }
 
-const MenuCardSC = styled(Card)(({ theme }) => ({
-  width: 230,
-  padding: `${theme.spacing.xsmall}px 0`,
-  borderRadius: theme.borderRadiuses.medium,
-  display: 'flex',
-  flexDirection: 'column',
-  [`& a, & button`]: {
-    ...theme.partials.text.body2,
-    color: theme.colors.text,
-    textDecoration: 'none',
-    paddingTop: 0,
-    paddingBottom: 0,
-    height: 40,
-  },
-}))
+const MenuCardSC = styled(Card)<{ $linkStyles?: boolean }>(
+  ({ theme, $linkStyles }) => ({
+    width: 230,
+    padding: `${theme.spacing.xsmall}px 0`,
+    borderRadius: theme.borderRadiuses.medium,
+    display: 'flex',
+    flexDirection: 'column',
+    ...($linkStyles && {
+      [`& a, & button`]: {
+        ...theme.partials.text.body2,
+        color: theme.colors.text,
+        textDecoration: 'none',
+        paddingTop: 0,
+        paddingBottom: 0,
+        height: 40,
+      },
+    }),
+  })
+)
 
 const AnimatedWrapperSC = styled(animated.div)<{
   $type: 'header' | 'sidebar' | 'fromTopLeft'

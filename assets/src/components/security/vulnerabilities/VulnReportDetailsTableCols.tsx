@@ -1,20 +1,20 @@
-import { ArrowTopRightIcon, Chip, ChipProps } from '@pluralsh/design-system'
-import { createColumnHelper, Row } from '@tanstack/react-table'
+import { Chip, ChipProps, Tooltip, WrapWithIf } from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
 import { VulnerabilityFragment, VulnSeverity } from 'generated/graphql'
+import { truncate } from 'lodash'
 import { useTheme } from 'styled-components'
-import { VulnDetailExpanded } from './VulnDetailExpanded'
 
 const columnHelper = createColumnHelper<VulnerabilityFragment>()
 
 export const ColID = columnHelper.accessor((report) => report, {
   id: 'id',
   header: 'ID',
-  meta: { gridTemplate: 'max(250px)' },
+  meta: { gridTemplate: 'max(30%)', truncate: true },
   cell: function Cell({ getValue }) {
     const theme = useTheme()
     const report = getValue()
-
-    return report?.primaryLink ? (
+    if (!report?.primaryLink) return '--'
+    return (
       <a
         onClick={(e) => e.stopPropagation()}
         href={
@@ -31,10 +31,8 @@ export const ColID = columnHelper.accessor((report) => report, {
           },
         }}
       >
-        {report?.title} <ArrowTopRightIcon />
+        {report?.title}
       </a>
-    ) : (
-      '--'
     )
   },
 })
@@ -43,11 +41,6 @@ export const ColPackage = columnHelper.accessor((report) => report?.resource, {
   id: 'package',
   header: 'Package',
   enableSorting: true,
-  cell: function Cell({ getValue }) {
-    const pkg = getValue()
-
-    return <span>{pkg}</span>
-  },
 })
 
 export const ColInstalledVersion = columnHelper.accessor(
@@ -57,9 +50,7 @@ export const ColInstalledVersion = columnHelper.accessor(
     header: 'Version',
     enableSorting: true,
     cell: function Cell({ getValue }) {
-      const version = getValue()
-
-      return <span>{version}</span>
+      return <TruncatedVersionCell version={getValue() ?? ''} />
     },
   }
 )
@@ -68,15 +59,31 @@ export const ColFixedVersion = columnHelper.accessor(
   (report) => report?.fixedVersion,
   {
     id: 'fixedVersion',
-    header: 'Fixed version',
+    header: 'Fixed version(s)',
     enableSorting: true,
     cell: function Cell({ getValue }) {
-      const version = getValue()
-
-      return <span>{version}</span>
+      return <TruncatedVersionCell version={getValue() ?? ''} />
     },
   }
 )
+
+function TruncatedVersionCell({ version }: { version: string }) {
+  return (
+    <WrapWithIf
+      condition={version?.length > 20}
+      wrapper={
+        <Tooltip
+          placement="top"
+          label={version}
+        />
+      }
+    >
+      <span css={{ wordBreak: 'break-all' }}>
+        {truncate(version, { length: 20 })}
+      </span>
+    </WrapWithIf>
+  )
+}
 
 export const vulnSeverityToChipSeverity: Record<
   VulnSeverity,
@@ -102,17 +109,3 @@ export const ColSeverity = columnHelper.accessor((report) => report?.severity, {
     )
   },
 })
-
-export function VulnerabilityExpansionPanel({
-  row,
-}: {
-  row: Row<VulnerabilityFragment>
-}) {
-  const { original: vulnerability } = row
-
-  return (
-    <div css={{ maxWidth: 920 }}>
-      <VulnDetailExpanded v={vulnerability} />
-    </div>
-  )
-}
