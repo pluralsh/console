@@ -3,7 +3,7 @@ defmodule Console.Deployments.StacksTest do
   use Mimic
   alias Console.PubSub
   alias Console.Schema.{StackRun}
-  alias Console.Deployments.{Stacks, Settings}
+  alias Console.Deployments.{Stacks, Settings, Tar}
   alias Console.Deployments.Git.Discovery
 
   describe "#create_stack/2" do
@@ -1145,6 +1145,71 @@ defmodule Console.Deployments.StacksTest do
       def = insert(:stack_definition)
 
       {:error, _} = Stacks.delete_stack_definition(def.id, insert(:user))
+    end
+  end
+
+  describe "#stack_files/2" do
+    test "writers can fetch stack files from git tarball" do
+      user = insert(:user)
+      repo = insert(:git_repository)
+      stack = insert(:stack,
+        repository: repo,
+        git: %{ref: "main", folder: "terraform"},
+        write_bindings: [%{user_id: user.id}]
+      )
+
+      {:ok, tarball} = Tar.tarball([
+        {"main.tf", "resource \"aws_instance\" \"example\" {}"},
+        {"variables.tf", "variable \"name\" {}"},
+        {"outputs.tf", "output \"id\" {}"}
+      ])
+
+      expect(Discovery, :fetch, fn ^repo, _ -> {:ok, tarball} end)
+
+      {:ok, files} = Stacks.stack_files(stack.id, user)
+
+      assert length(files) == 3
+      assert Enum.find(files, & &1.path == "main.tf")
+      assert Enum.find(files, & &1.path == "variables.tf")
+      assert Enum.find(files, & &1.path == "outputs.tf")
+
+      main_tf = Enum.find(files, & &1.path == "main.tf")
+      assert main_tf.content == "resource \"aws_instance\" \"example\" {}"
+    end
+
+    test "it filters out blacklisted files" do
+      user = insert(:user)
+      repo = insert(:git_repository)
+      stack = insert(:stack,
+        repository: repo,
+        git: %{ref: "main", folder: "terraform"},
+        write_bindings: [%{user_id: user.id}]
+      )
+
+      {:ok, tarball} = Tar.tarball([
+        {"main.tf", "resource \"aws_instance\" \"example\" {}"},
+        {"secret.png", "binary data"},
+        {"values.yaml.static", "some values"}
+      ])
+
+      expect(Discovery, :fetch, fn ^repo, _ -> {:ok, tarball} end)
+
+      {:ok, files} = Stacks.stack_files(stack.id, user)
+
+      assert length(files) == 1
+      assert Enum.find(files, & &1.path == "main.tf")
+      refute Enum.find(files, & &1.path == "secret.png")
+      refute Enum.find(files, & &1.path == "values.yaml.static")
+    end
+
+    test "non-writers cannot fetch stack files" do
+      repo = insert(:git_repository)
+      stack = insert(:stack,
+        repository: repo,
+        git: %{ref: "main", folder: "terraform"}
+      )
+
+      {:error, _} = Stacks.stack_files(stack.id, insert(:user))
     end
   end
 end
