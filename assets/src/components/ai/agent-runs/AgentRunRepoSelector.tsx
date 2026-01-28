@@ -25,11 +25,13 @@ export function AgentRunRepoSelector({
   selectedRepository,
   setSelectedRepository,
   outerStyles,
+  defaultMostRecent = true,
   ...props
 }: {
   selectedRepository: Nullable<string>
   setSelectedRepository: (repository: Nullable<string>) => void
   outerStyles?: StyledObject
+  defaultMostRecent?: boolean
 } & Omit<SelectPropsSingle, 'onSelectionChange' | 'selectedKey' | 'children'>) {
   const { colors, borders } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
@@ -53,7 +55,7 @@ export function AgentRunRepoSelector({
 
   const setRepositoryToMostRecent = useEffectEvent(() => {
     const { url } = repositories[0] ?? {}
-    if (url) setSelectedRepository(url)
+    if (url && !!defaultMostRecent) setSelectedRepository(url)
   })
   useLayoutEffect(() => {
     if (data && !selectedRepository) setRepositoryToMostRecent()

@@ -17,6 +17,7 @@ fragment VulnerabilityReportTiny on VulnerabilityReport {
     unknownCount
     noneCount
   }
+  artifactRepoUrl
 }
 
 fragment VulnerabilityReport on VulnerabilityReport {

@@ -10,13 +10,16 @@ import {
   CvssBundle,
   VulnAttackVector,
   VulnerabilityFragment,
+  VulnerabilityReportFragment,
 } from 'generated/graphql'
 import { FixVulnerabilityButton } from './FixVulnerabilityButton'
 
 export function VulnDetailExpanded({
   row,
+  parentReport,
 }: {
   row: Row<VulnerabilityFragment>
+  parentReport: Nullable<VulnerabilityReportFragment>
 }) {
   const { original: v } = row
 
@@ -34,7 +37,10 @@ export function VulnDetailExpanded({
           secondPartialType="body2"
           css={{ maxWidth: 900 }}
         />
-        <FixVulnerabilityButton vuln={v} />
+        <FixVulnerabilityButton
+          vuln={v}
+          parentReport={parentReport}
+        />
       </StretchedFlex>
       <CVSSSection
         bundle={v.cvss}
