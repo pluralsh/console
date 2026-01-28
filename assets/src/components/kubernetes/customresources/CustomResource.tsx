@@ -32,7 +32,7 @@ const directory: Array<TabEntry> = [
 
 export default function CustomResource(): ReactElement<any> {
   const cluster = useCluster()
-  const { clusterId = '', name = '', namespace = '', crd = '' } = useParams()
+  const { clusterId = '', name = '', namespace, crd = '' } = useParams()
   const {
     data: cr,
     isLoading,
@@ -40,7 +40,11 @@ export default function CustomResource(): ReactElement<any> {
   } = useQuery({
     ...getCustomResourceObjectOptions({
       client: AxiosInstance(clusterId),
-      path: { object: name, namespace, crd },
+      path: {
+        object: name,
+        namespace,
+        crd,
+      } as any, // Using any to avoid type errors since namespace is optional.
     }),
     refetchInterval: 30_000,
   })
