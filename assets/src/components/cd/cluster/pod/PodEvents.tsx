@@ -9,7 +9,7 @@ export default function PodEvents() {
   const { pod } = useOutletContext() as { pod: Pod }
 
   return (
-    <ScrollablePage heading="Events">
+    <ScrollablePage>
       <EventsTable events={pod.events || []} />
     </ScrollablePage>
   )

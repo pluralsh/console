@@ -10,6 +10,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { AgentRuntimeType, useAgentRuntimesQuery } from 'generated/graphql'
 import { capitalize } from 'lodash'
 import { useEffectEvent, useLayoutEffect, useState } from 'react'
+import { StyledObject } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { ChatOptionPill } from '../chatbot/input/ChatInput'
 
@@ -20,6 +21,7 @@ export function AIAgentRuntimesSelector({
   allowDeselect = false,
   autoSelectDefault = false,
   type = 'standard',
+  outerStyles,
   ...props
 }: {
   selectedRuntimeId: Nullable<string>
@@ -28,6 +30,7 @@ export function AIAgentRuntimesSelector({
   allowDeselect?: boolean
   autoSelectDefault?: boolean
   type?: 'standard' | 'pill'
+  outerStyles?: StyledObject
 } & Omit<SelectPropsSingle, 'onSelectionChange' | 'selectedKey' | 'children'>) {
   const [isOpen, setIsOpen] = useState(false)
   const { data, loading } = useAgentRuntimesQuery({
@@ -50,7 +53,7 @@ export function AIAgentRuntimesSelector({
     if (data && !selectedRuntimeId) setRuntimeToDefault()
   }, [data, selectedRuntimeId])
   return (
-    <div css={{ width: type === 'standard' ? 240 : undefined }}>
+    <div css={{ width: type === 'standard' ? 240 : undefined, ...outerStyles }}>
       <Select
         transparent
         isOpen={isOpen}

@@ -9,7 +9,7 @@ import { Pod, usePodLogsQuery } from '../../../../../generated/graphql'
 import LoadingIndicator from '../../../../utils/LoadingIndicator'
 import { determineLevel, logLevelToColor } from '../../../logs/LogLine'
 
-import { SinceSecondsOptions } from './Logs'
+import { SinceSecondsOptions } from './PodLogs'
 
 const columnHelper = createColumnHelper<string>()
 

@@ -76,10 +76,10 @@ export default function ResourceDetails({
   const { data, error } = namespace ? namespacedQuery : clusterQuery
 
   const prompt = useMemo(() => {
-    return data?.Object
-      ? `Describe the following Kubernetes ${kind} resource: ${JSON.stringify(data?.Object)}`
+    return data
+      ? `Describe the following Kubernetes ${kind} resource: ${JSON.stringify(data)}`
       : undefined
-  }, [data?.Object, kind])
+  }, [data, kind])
 
   useExplainWithAI(prompt)
 

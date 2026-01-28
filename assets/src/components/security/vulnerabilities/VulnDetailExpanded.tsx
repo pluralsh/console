@@ -1,7 +1,9 @@
 import { Chip, ChipProps, Flex } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
 
+import { Row } from '@tanstack/react-table'
 import { Overline } from 'components/cd/utils/PermissionsModal'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import {
@@ -9,21 +11,31 @@ import {
   VulnAttackVector,
   VulnerabilityFragment,
 } from 'generated/graphql'
+import { FixVulnerabilityButton } from './FixVulnerabilityButton'
 
-export function VulnDetailExpanded({ v }: { v: VulnerabilityFragment }) {
-  if (!v.title && !v.description && !v.cvssSource && !v.score && !v.cvss) {
+export function VulnDetailExpanded({
+  row,
+}: {
+  row: Row<VulnerabilityFragment>
+}) {
+  const { original: v } = row
+
+  if (!v.title && !v.description && !v.cvssSource && !v.score && !v.cvss)
     return <VulnerabilityDetailSC>No details available.</VulnerabilityDetailSC>
-  }
 
   return (
     <VulnerabilityDetailSC>
-      <StackedText
-        first={v.title}
-        firstPartialType="body2Bold"
-        firstColor="text"
-        second={v.description}
-        secondPartialType="body2"
-      />
+      <StretchedFlex gap="xlarge">
+        <StackedText
+          first={v.title}
+          firstPartialType="body2Bold"
+          firstColor="text"
+          second={v.description}
+          secondPartialType="body2"
+          css={{ maxWidth: 900 }}
+        />
+        <FixVulnerabilityButton vuln={v} />
+      </StretchedFlex>
       <CVSSSection
         bundle={v.cvss}
         source={v.cvssSource}
@@ -237,5 +249,8 @@ const VulnerabilityDetailSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  padding: `0 ${theme.spacing.medium}px`,
+  padding: theme.spacing.large,
+  borderTop: theme.borders.default,
+  width: '100%',
+  minWidth: 0,
 }))

@@ -1,10 +1,8 @@
 import {
-  ClusterIcon,
-  Flex,
-  FlowIcon,
   IconFrame,
   ReturnIcon,
   Table,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
 import { GqlError } from 'components/utils/Alert'
@@ -16,19 +14,25 @@ import {
   useVulnerabilityReportQuery,
 } from 'generated/graphql'
 import { Link, useParams } from 'react-router-dom'
-import { getVulnerabilityReportsPath } from 'routes/securityRoutesConsts'
-import styled, { useTheme } from 'styled-components'
+import {
+  getVulnerabilityReportsPath,
+  VULNERABILITY_REPORTS_REL_PATH,
+} from 'routes/securityRoutesConsts'
+import styled from 'styled-components'
+import { VulnDetailExpanded } from './VulnDetailExpanded'
 import {
   ColFixedVersion,
   ColID,
   ColInstalledVersion,
   ColPackage,
   ColSeverity,
-  VulnerabilityExpansionPanel,
 } from './VulnReportDetailsTableCols'
+import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
+import { securityVulnReportsCrumbs } from './VulnReports'
+import { useMemo } from 'react'
+import { FixVulnFormSC } from './FixVulnerabilityButton'
 
 export function VulnerabilityReportDetails() {
-  const theme = useTheme()
   const { vulnerabilityReportId, clusterId, flowId } = useParams()
 
   const { data: clusterData, loading: clusterLoading } = useClusterQuery({
@@ -54,62 +58,60 @@ export function VulnerabilityReportDetails() {
 
   const loading = clusterLoading || flowLoading || reportLoading
 
+  useSetBreadcrumbs(
+    useMemo(
+      () =>
+        flowId
+          ? getFlowBreadcrumbs(
+              flowId,
+              flowData?.flow?.name ?? '',
+              VULNERABILITY_REPORTS_REL_PATH
+            )
+          : securityVulnReportsCrumbs,
+      [flowId, flowData?.flow?.name]
+    )
+  )
+
   if (error) return <GqlError error={error} />
 
   return (
     <WrapperSC>
-      <HeaderWrapperSC>
-        <IconFrame
-          as={Link}
-          size="large"
-          clickable
-          type="secondary"
-          to={getVulnerabilityReportsPath({ clusterId, flowId })}
-          icon={<ReturnIcon css={{ width: 16 }} />}
-        />
-        <Flex
-          gap="xsmall"
-          align="center"
-        >
+      <StackedText
+        loading={loading && !data}
+        first={data?.vulnerabilityReport?.artifactUrl}
+        firstPartialType="body2Bold"
+        second={
+          flowData
+            ? `flow: ${flowData.flow?.name ?? ''}`
+            : `cluster: ${cluster?.name} (${cluster?.handle})`
+        }
+        icon={
           <IconFrame
+            as={Link}
             size="large"
-            type="floating"
-            icon={
-              flowData ? (
-                <FlowIcon color="icon-light" />
-              ) : (
-                <ClusterIcon color="icon-light" />
-              )
-            }
+            clickable
+            type="secondary"
+            to={getVulnerabilityReportsPath({ clusterId, flowId })}
+            tooltip={`Return to ${flowId ? 'flow' : 'security'}`}
+            icon={<ReturnIcon />}
+            style={{ flexShrink: 0 }}
           />
-          <StackedText
-            loading={loading && !data}
-            first={data?.vulnerabilityReport?.artifactUrl}
-            firstPartialType="body2Bold"
-            second={
-              flowData
-                ? `flow: ${flowData.flow?.name ?? ''}`
-                : `cluster: ${cluster?.name} (${cluster?.handle})`
-            }
-          />
-        </Flex>
-      </HeaderWrapperSC>
+        }
+      />
       <Table
         fullHeightWrap
         virtualizeRows
-        fillLevel={1}
-        rowBg="base"
         data={data?.vulnerabilityReport?.vulnerabilities ?? []}
         columns={columns}
         loading={loading && !data}
         getRowCanExpand={() => true}
-        renderExpanded={VulnerabilityExpansionPanel}
+        renderExpanded={({ row }) => <VulnDetailExpanded row={row} />}
         onRowClick={(_, row) => row.getToggleExpandedHandler()()}
         emptyStateProps={{ message: 'No vulnerabilities found.' }}
-        css={{
-          // hacky, for targeting the expander row. should build this into table
-          'tr:has(td[colspan]) td': { background: theme.colors['fill-two'] },
-        }}
+        expandedBgColor="fill-zero"
+        expandedRowType="custom"
+        // should probably find a better DS solution for this
+        {...{ [`td:has(${FixVulnFormSC})`]: { overflow: 'visible' } }}
       />
     </WrapperSC>
   )
@@ -134,11 +136,4 @@ const WrapperSC = styled.div(({ theme }) => ({
   margin: 'auto',
   overflow: 'hidden',
   padding: `${theme.spacing.large}px ${theme.spacing.xxlarge}px`,
-}))
-
-const HeaderWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.small,
-  width: '100%',
 }))

@@ -6,6 +6,7 @@ import {
   ListBoxItem,
   LogsIcon,
   Select,
+  SelectPropsSingle,
   Toast,
   isValidRepoUrl,
   prettifyRepoUrl,
@@ -16,17 +17,20 @@ import { TRUNCATE, TRUNCATE_LEFT } from 'components/utils/truncate'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useAgentRunRepositoriesQuery } from 'generated/graphql'
 import { useEffectEvent, useLayoutEffect, useMemo, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled, { StyledObject, useTheme } from 'styled-components'
 import { sortDatesDesc } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 
 export function AgentRunRepoSelector({
   selectedRepository,
   setSelectedRepository,
+  outerStyles,
+  ...props
 }: {
   selectedRepository: Nullable<string>
   setSelectedRepository: (repository: Nullable<string>) => void
-}) {
+  outerStyles?: StyledObject
+} & Omit<SelectPropsSingle, 'onSelectionChange' | 'selectedKey' | 'children'>) {
   const { colors, borders } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const [showToast, setShowToast] = useState(false)
@@ -58,7 +62,7 @@ export function AgentRunRepoSelector({
   const isLoading = !curData && loading
 
   return (
-    <div css={{ minWidth: 0 }}>
+    <div css={{ minWidth: 0, ...outerStyles }}>
       <Select
         isOpen={isOpen}
         onOpenChange={setIsOpen}
@@ -133,6 +137,7 @@ export function AgentRunRepoSelector({
             <DropdownInputDividerSC backgroundColor={colors['border-input']} />
           </>
         }
+        {...props}
       >
         {repositories
           .map(({ url }) => {

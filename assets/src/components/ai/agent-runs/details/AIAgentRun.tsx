@@ -43,7 +43,9 @@ export const getAgentRunBreadcrumbs = (
   return [
     ...getAIBreadcrumbs(AI_AGENT_RUNS_REL_PATH),
     { label: prompt ? truncate(prompt, { length: 20 }) : '', url: prefix },
-    ...(tab ? [{ label: tab, url: `${prefix}/${tab}` }] : []),
+    ...(tab
+      ? [{ label: tab, url: tab === 'pods' ? undefined : `${prefix}/${tab}` }]
+      : []),
   ]
 }
 

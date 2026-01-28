@@ -1,12 +1,12 @@
+import { Flex } from '@pluralsh/design-system'
+import { ContainerLogsTable } from 'components/cd/cluster/pod/logs/ContainerLogs.tsx'
+import { SinceSecondsOptions } from 'components/cd/cluster/pod/logs/PodLogs.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
 import { useAgentRunPodLogsQuery } from 'generated/graphql'
+import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { AI_AGENT_RUNS_PARAM_RUN_ID } from 'routes/aiRoutesConsts.tsx'
 import { isNonNullable } from 'utils/isNonNullable'
-import { ContainerLogsTable } from '../../../cd/cluster/pod/logs/ContainerLogs.tsx'
-import { SinceSecondsOptions } from '../../../cd/cluster/pod/logs/Logs.tsx'
-import { useMemo } from 'react'
-import { GqlError } from 'components/utils/Alert.tsx'
-import { Flex } from '@pluralsh/design-system'
 
 export function AIAgentRunPodLogs() {
   const runId = useParams()[AI_AGENT_RUNS_PARAM_RUN_ID] ?? ''
@@ -32,10 +32,7 @@ export function AIAgentRunPodLogs() {
       <ContainerLogsTable
         logs={logs}
         loading={loading}
-        refetch={() => {
-          console.log('refetching')
-          refetch()
-        }}
+        refetch={() => refetch()}
         container={defaultContainer}
       />
     </Flex>

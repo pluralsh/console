@@ -341,7 +341,7 @@ const EditableContentWrapperSC = styled.div<{
 
 const ChatSubmitButtonSC = styled(Button)<{ $bgColor: SemanticColorKey }>(
   ({ theme, $bgColor }) => ({
-    ...theme.partials.reset.button,
+    padding: 0,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -350,7 +350,6 @@ const ChatSubmitButtonSC = styled(Button)<{ $bgColor: SemanticColorKey }>(
     minHeight: 0,
     borderRadius: 25,
     background: theme.colors[$bgColor],
-    color: theme.colors['icon-light'],
   })
 )
 

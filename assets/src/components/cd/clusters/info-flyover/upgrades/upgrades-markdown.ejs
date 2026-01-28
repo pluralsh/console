@@ -1,0 +1,11 @@
+| Add-on | Type | Recommendation | Release Notes | Compatibility Table | Images |
+| ------ | ---- | -------------- | ------------- | ------------------- | ------ |
+<% for (let i = 0; i < addons.length; i++) {
+  const addon = addons[i]
+  const recommendation = addon.fixAppVersion
+    ? `${addon.currentAppVersion ?? '--'} → ${addon.fixAppVersion}`
+    : 'No available versions found'
+  const tableUrl = addon.id ? `${origin}${getCompatibilityPath(addon.id, addon.type === 'cloud')}` : '--'
+-%>
+| <%= addon.name %> | <%= addon.type === 'cloud' ? (addon.distro ?? 'Cloud') : 'Helm' %> | <%= recommendation %> | <%- addon.releaseUrl ?? '--' %> | <%- tableUrl %> | <%- addon.images?.join('<br/>') || '--' %> |
+<% } -%>

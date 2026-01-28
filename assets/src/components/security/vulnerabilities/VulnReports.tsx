@@ -27,16 +27,13 @@ import styled, { useTheme } from 'styled-components'
 import { VulneratbilityReportsTable } from './VulnReportsTable'
 import { gradeToSeverityMap } from './VulnReportsTableCols'
 
-const breadcrumbs = [
+export const securityVulnReportsCrumbs = [
   { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
-  {
-    label: 'vulnerability reports',
-    url: VULNERABILITY_REPORTS_ABS_PATH,
-  },
+  { label: 'vulnerability reports', url: VULNERABILITY_REPORTS_ABS_PATH },
 ]
 
 export function VulnerabilityReports() {
-  useSetBreadcrumbs(breadcrumbs)
+  useSetBreadcrumbs(securityVulnReportsCrumbs)
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const { clusterId = '' } = useParams()
