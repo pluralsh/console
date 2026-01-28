@@ -334,6 +334,17 @@ defmodule Console.Deployments.Agents do
   end
   def pr_review(_), do: {:error, "no agent run id found"}
 
+  @doc """
+  Sanitizes a prompt by truncating it to 500 characters and returning the first line
+  """
+  @spec sanitize_prompt(binary) :: binary
+  def sanitize_prompt(prompt) do
+    case String.split(prompt, ~r/\n/) do
+      [first | _] -> "#{String.trim_trailing(Console.truncate(first, 500), "...")}..."
+      _ -> Console.truncate(prompt, 500)
+    end
+  end
+
   EEx.function_from_file(:defp, :pr_blob, Path.join([:code.priv_dir(:console), "pr", "agent_review.md.eex"]), [:assigns])
 
   defp notify({:ok, %AgentRun{} = run}, :create),
