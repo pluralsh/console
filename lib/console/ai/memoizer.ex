@@ -22,10 +22,6 @@ defmodule Console.AI.Memoizer do
   # Contextual Observations
 
   {bulleted list of contextual information that also could be helpful}
-
-  # Debugging Steps
-
-  {suggestions for how to debug the issue}
   """}
 
   @spec generate(struct) :: {:ok, AiInsight.t} | {:error, binary}

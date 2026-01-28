@@ -3,11 +3,16 @@
     { "directory": "./assets", "changeProcessCWD": true },
     { "directory": "./assets/design-system", "changeProcessCWD": true }
   ],
-  "[html]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
   "files.associations": {
-    "**/src/archive/**/*": "plaintext"
+    "**/src/archive/**/*": "plaintext",
+    "*.ejs": "handlebars"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "[handlebars]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": false
   },
   "editor.formatOnSave": true
 }

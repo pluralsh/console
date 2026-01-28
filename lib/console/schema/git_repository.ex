@@ -44,7 +44,7 @@ defmodule Console.Schema.GitRepository do
     |> foreign_key_constraint(:id, name: :stacks, match: :prefix, message: "there is an active stack using this repository")
     |> foreign_key_constraint(:id, name: :deployment_settings, match: :prefix, message: "This git repository is currently used in your global deployment settings")
     |> foreign_key_constraint(:connection_id)
-    |> validate_format(:url, ~r/((git|ssh|http(s)?)|(git@[\w\.-]+))(:(\/\/)?)([\w\.@\:\/\-~]+)(\.git)(\/)?/, message: "must provide a valid git url")
+    |> validate_format(:url, ~r/((git|ssh|http(s)?)|(git@[\w\.-]+))(:(\/\/)?)([\w\.@\:\/\-~]+)(\.git)?(\/)?/, message: "must provide a valid git url")
     |> add_auth_method()
     |> validate_required([:url])
     |> add_https_path()

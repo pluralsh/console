@@ -214,7 +214,7 @@ defmodule Console.Deployments.Agents do
          {:ok, conn} <- backfill_token(conn),
          conn = %{conn | commit_shas: shas},
          {:ok, pr_info} <- Dispatcher.pr(conn, t, b, repository_url(run), ba, he) do
-      %PullRequest{}
+      %PullRequest{fresh: true}
       |> PullRequest.changeset(
         Map.merge(pr_info, Map.take(run, ~w(flow_id session_id)a))
         |> Map.put(:agent_run_id, run.id)
@@ -333,6 +333,17 @@ defmodule Console.Deployments.Agents do
     end
   end
   def pr_review(_), do: {:error, "no agent run id found"}
+
+  @doc """
+  Sanitizes a prompt by truncating it to 500 characters and returning the first line
+  """
+  @spec sanitize_prompt(binary) :: binary
+  def sanitize_prompt(prompt) do
+    case String.split(prompt, ~r/\n/) do
+      [first | _] -> "#{String.trim_trailing(Console.truncate(first, 500), "...")}..."
+      _ -> Console.truncate(prompt, 500)
+    end
+  end
 
   EEx.function_from_file(:defp, :pr_blob, Path.join([:code.priv_dir(:console), "pr", "agent_review.md.eex"]), [:assigns])
 

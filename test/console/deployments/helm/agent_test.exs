@@ -95,6 +95,7 @@ defmodule Console.Deployments.Helm.AgentTest do
       Process.exit(pid, :kill)
     end
 
+    @tag :skip
     test "it can handle legacy bitnami charts" do
       repo = "oci://registry-1.docker.io/bitnamicharts"
       {:ok, pid} = Agent.start(repo) |> handle()

@@ -135,7 +135,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console
     end, ttl: :timer.seconds(30))
   end
 
-  def process(%@for{item: %PullRequest{agent_run_id: id} = pr}) when is_binary(id),
+  def process(%@for{item: %PullRequest{agent_run_id: id, fresh: true} = pr}) when is_binary(id),
     do: Agents.pr_review(pr)
 
   def process(_), do: :ok

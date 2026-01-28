@@ -8959,6 +8959,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/ejs@npm:3.1.5":
+  version: 3.1.5
+  resolution: "@types/ejs@npm:3.1.5"
+  checksum: e142266283051f27a7f79329871b311687dede19ae20268d882e4de218c65e1311d28a300b85579ca67157a8d601b7234daa50c2f99b252b121d27b4e5b21468
+  languageName: node
+  linkType: hard
+
 "@types/estree-jsx@npm:^1.0.0":
   version: 1.0.5
   resolution: "@types/estree-jsx@npm:1.0.5"
@@ -12548,6 +12555,7 @@ __metadata:
     "@testing-library/react": 16.0.1
     "@testing-library/user-event": 14.4.3
     "@types/content-disposition": 0.5.8
+    "@types/ejs": 3.1.5
     "@types/humanize-duration": 3.27.4
     "@types/jsdom": 21.1.5
     "@types/lodash": 4.17.13

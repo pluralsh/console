@@ -31,6 +31,11 @@ Create chart name and version as used by the chart label.
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+
+{{- define "console.annotations" -}}
+platform.plural.sh/repository-url: https://github.com/pluralsh/console.git
+{{- end -}}
+
 {{/*
 Common labels
 */}}

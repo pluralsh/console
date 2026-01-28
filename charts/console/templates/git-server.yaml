@@ -3,6 +3,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: git-server
+  annotations:
+{{ include "console.annotations" . | nindent 4 }}
   labels:
 {{ include "console.labels" . | indent 4 }}
 spec:

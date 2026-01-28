@@ -38,7 +38,8 @@ defmodule Console.Schema.PullRequest do
 
     field :notifications_policy_id, :binary_id
 
-    field :comment_id, :string, virtual: true
+    field :comment_id, :string,  virtual: true
+    field :fresh,      :boolean, virtual: true, default: false
 
     belongs_to :cluster,    Cluster
     belongs_to :service,    Service

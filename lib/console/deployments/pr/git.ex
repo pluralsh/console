@@ -72,6 +72,7 @@ defmodule Console.Deployments.Pr.Git do
     end
   end
 
+  def to_http(%ScmConnection{type: :azure_devops} = conn, url), do: String.trim_trailing(_to_http(conn, url), ".git")
   def to_http(conn, url), do: "#{String.trim_trailing(_to_http(conn, url), ".git")}.git"
 
   def backfill_token(%ScmConnection{api_url: api_url, base_url: url, github: %{app_id: app_id, installation_id: inst_id, private_key: pk}} = conn) when is_binary(pk) do
