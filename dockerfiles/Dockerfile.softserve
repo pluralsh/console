@@ -4,7 +4,7 @@
 # 2. run "soft serve" to start the server (done inside the shellscript)
 # 3. import the repos (also done inside the shellscript)
 # This is all done in builder image since we want our actual soft-serve image to not require github interaction for imports
-FROM golang:alpine3.20 AS builder
+FROM golang:1.25.5-alpine3.20 AS builder
 
 EXPOSE 23231
 EXPOSE 23232
@@ -36,7 +36,7 @@ ENTRYPOINT [ "soft", "serve" ]
 
 # soft-serve server which will actually run indefinitely
 # we want to copy the /data folder from the builder image since that contains all the files used by soft-serve
-FROM golang:alpine3.20 AS server
+FROM golang:1.25.5-alpine3.20 AS server
 
 EXPOSE 23231
 EXPOSE 23232
