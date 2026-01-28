@@ -189,6 +189,12 @@ mutation CreateAgentRun($runtimeId: ID!, $attributes: AgentRunAttributes!) {
   }
 }
 
+mutation CancelAgentRun($id: ID!) {
+  cancelAgentRun(id: $id) {
+    ...AgentRunTiny
+  }
+}
+
 mutation UpsertAgentRuntime($attributes: AgentRuntimeAttributes!) {
   upsertAgentRuntime(attributes: $attributes) {
     ...AgentRuntime

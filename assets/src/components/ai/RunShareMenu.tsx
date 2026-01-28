@@ -40,6 +40,7 @@ export function RunShareMenu({
         }
         triggerProps={{
           iconFrameType: 'secondary',
+          size: 'large',
           ...(loading && { icon: <SpinnerAlt /> }),
         }}
       >

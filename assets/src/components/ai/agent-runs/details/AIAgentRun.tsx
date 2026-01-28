@@ -4,6 +4,8 @@ import {
   Divider,
   Flex,
   prettifyRepoUrl,
+  SpinnerAlt,
+  Toast,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { RunShareMenu } from 'components/ai/RunShareMenu.tsx'
@@ -15,6 +17,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import {
   AgentRunStatus,
   useAgentRunQuery,
+  useCancelAgentRunMutation,
   useShareAgentRunMutation,
 } from 'generated/graphql'
 import { truncate } from 'lodash'
@@ -52,6 +55,11 @@ export const getAgentRunBreadcrumbs = (
 export function AIAgentRun() {
   const { spacing } = useTheme()
   const id = useParams()[AI_AGENT_RUNS_PARAM_RUN_ID] ?? ''
+
+  const [cancelAgentRun, { loading: cancelling, error: cancellingError }] =
+    useCancelAgentRunMutation({
+      variables: { id },
+    })
 
   const { data, error, loading } = useAgentRunQuery({
     variables: { id },
@@ -102,6 +110,17 @@ export function AIAgentRun() {
             secondColor="text-xlight"
           />
           <Flex gap="small">
+            {(run?.status == AgentRunStatus.Running ||
+              run?.status == AgentRunStatus.Pending) && (
+              <Button
+                onClick={() => cancelAgentRun()}
+                startIcon={<SpinnerAlt />}
+                loading={cancelling}
+                secondary
+              >
+                Cancel agent run
+              </Button>
+            )}
             {run?.status !== AgentRunStatus.Failed && (
               <RunShareMenu
                 isShared={run?.shared}
@@ -162,6 +181,16 @@ export function AIAgentRun() {
         run={run}
         loading={loading}
       />
+      <Toast
+        error={'Cancelling agent run failed'}
+        show={!!cancellingError}
+        closeTimeout={5000}
+        severity="danger"
+        position="bottom"
+        marginBottom="medium"
+      >
+        {cancellingError?.message}
+      </Toast>
     </WrapperSC>
   )
 }
