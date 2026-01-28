@@ -34,10 +34,7 @@ export function VulnDetailExpanded({
           secondPartialType="body2"
           css={{ maxWidth: 900 }}
         />
-        <FixVulnerabilityButton
-          vuln={v}
-          report={r}
-        />
+        <FixVulnerabilityButton vuln={v} />
       </StretchedFlex>
       <CVSSSection
         bundle={v.cvss}
