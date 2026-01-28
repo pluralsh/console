@@ -13439,6 +13439,13 @@ export type CreateAgentRunMutationVariables = Exact<{
 
 export type CreateAgentRunMutation = { __typename?: 'RootMutationType', createAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
 
+export type CancelAgentRunMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CancelAgentRunMutation = { __typename?: 'RootMutationType', cancelAgentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
+
 export type UpsertAgentRuntimeMutationVariables = Exact<{
   attributes: AgentRuntimeAttributes;
 }>;
@@ -21627,6 +21634,39 @@ export function useCreateAgentRunMutation(baseOptions?: Apollo.MutationHookOptio
 export type CreateAgentRunMutationHookResult = ReturnType<typeof useCreateAgentRunMutation>;
 export type CreateAgentRunMutationResult = Apollo.MutationResult<CreateAgentRunMutation>;
 export type CreateAgentRunMutationOptions = Apollo.BaseMutationOptions<CreateAgentRunMutation, CreateAgentRunMutationVariables>;
+export const CancelAgentRunDocument = gql`
+    mutation CancelAgentRun($id: ID!) {
+  cancelAgentRun(id: $id) {
+    ...AgentRunTiny
+  }
+}
+    ${AgentRunTinyFragmentDoc}`;
+export type CancelAgentRunMutationFn = Apollo.MutationFunction<CancelAgentRunMutation, CancelAgentRunMutationVariables>;
+
+/**
+ * __useCancelAgentRunMutation__
+ *
+ * To run a mutation, you first call `useCancelAgentRunMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCancelAgentRunMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cancelAgentRunMutation, { data, loading, error }] = useCancelAgentRunMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCancelAgentRunMutation(baseOptions?: Apollo.MutationHookOptions<CancelAgentRunMutation, CancelAgentRunMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CancelAgentRunMutation, CancelAgentRunMutationVariables>(CancelAgentRunDocument, options);
+      }
+export type CancelAgentRunMutationHookResult = ReturnType<typeof useCancelAgentRunMutation>;
+export type CancelAgentRunMutationResult = Apollo.MutationResult<CancelAgentRunMutation>;
+export type CancelAgentRunMutationOptions = Apollo.BaseMutationOptions<CancelAgentRunMutation, CancelAgentRunMutationVariables>;
 export const UpsertAgentRuntimeDocument = gql`
     mutation UpsertAgentRuntime($attributes: AgentRuntimeAttributes!) {
   upsertAgentRuntime(attributes: $attributes) {
@@ -35869,6 +35909,7 @@ export const namedOperations = {
   },
   Mutation: {
     CreateAgentRun: 'CreateAgentRun',
+    CancelAgentRun: 'CancelAgentRun',
     UpsertAgentRuntime: 'UpsertAgentRuntime',
     ShareAgentRun: 'ShareAgentRun',
     HybridChat: 'HybridChat',
