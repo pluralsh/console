@@ -106,6 +106,7 @@ export function AIAgentRun() {
             second={prettifyRepoUrl(run?.repository ?? '')}
             secondPartialType="body2"
             secondColor="text-xlight"
+            css={{ flex: 1 }}
           />
           <Flex gap="small">
             {(run?.status == AgentRunStatus.Running ||

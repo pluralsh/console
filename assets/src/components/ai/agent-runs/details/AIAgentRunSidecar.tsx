@@ -90,7 +90,6 @@ export function AgentRunSidecar({
             />
           ))}
           <Sidecar>
-            <SidecarItem heading="ID">{run.id}</SidecarItem>
             {run.runtime?.name && (
               <SidecarItem heading="Runtime">
                 <Flex
