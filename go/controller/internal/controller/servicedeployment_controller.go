@@ -204,7 +204,7 @@ func (r *ServiceDeploymentReconciler) Process(ctx context.Context, req ctrl.Requ
 	}
 
 	if service.Status.HasSHA() && !service.Status.IsSHAEqual(sha) {
-		if err := r.ConsoleClient.UpdateService(existingService.ID, updater); err != nil {
+		if err := r.ConsoleClient.UpdateService(existingService.ServiceDeploymentFragment.ServiceDeploymentBaseFragment.ID, updater); err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 			return ctrl.Result{}, err
 		}
@@ -241,7 +241,7 @@ func (r *ServiceDeploymentReconciler) getClusterID(ctx context.Context, service 
 }
 
 func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.ServiceDeploymentExtended, sha string) {
-	r.Status.ID = &existingService.ID
+	r.Status.ID = &existingService.ServiceDeploymentFragment.ServiceDeploymentBaseFragment.ID
 	r.Status.SHA = &sha
 	if existingService.Errors != nil {
 		r.Status.Errors = algorithms.Map(existingService.Errors,
@@ -253,7 +253,7 @@ func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.Servic
 			})
 	}
 	r.Status.Components = make([]v1alpha1.ServiceComponent, 0)
-	for _, c := range existingService.Components {
+	for _, c := range existingService.ServiceDeploymentFragment.Components {
 		sc := v1alpha1.ServiceComponent{
 			ID:        c.ID,
 			Name:      c.Name,
