@@ -96,6 +96,7 @@ type IconFrameBaseProps = {
   type?: Type
   selected?: boolean
   background?: SemanticColorKey
+  circle?: boolean
 }
 
 type IconFrameProps<E extends ElementType = 'div'> = PolymorphicComponentProps<
@@ -109,7 +110,8 @@ const IconFrameSC = styled.div<{
   $selected: boolean
   $size: Size
   $background?: SemanticColorKey
-}>(({ theme, $type, $clickable, $selected, $size, $background }) => ({
+  $circle?: boolean
+}>(({ theme, $type, $clickable, $selected, $size, $background, $circle }) => ({
   display: 'flex',
   alignItems: 'center',
   alignContent: 'center',
@@ -122,7 +124,7 @@ const IconFrameSC = styled.div<{
       ? typeToSelectedBG(theme)[$type]
       : typeToBG(theme)[$type],
   border: typeToBorder(theme)[$type],
-  borderRadius: theme.borderRadiuses.medium,
+  borderRadius: $circle ? '50%' : theme.borderRadiuses.medium,
   '&:focus,&:focus-visible': { outline: 'none' },
   '&:focus-visible,&:hover:focus-visible': {
     ...theme.partials.focus.default,
@@ -162,6 +164,7 @@ function IconFrame<E extends ElementType = 'div'>({
   tooltipProps,
   type = 'tertiary',
   background,
+  circle = false,
   as,
   ...props
 }: IconFrameProps<E>) {
@@ -176,6 +179,7 @@ function IconFrame<E extends ElementType = 'div'>({
       $type={type}
       $size={size}
       $background={background}
+      $circle={circle}
       aria-label={textValue}
       disabled={(clickable && disabled) || undefined}
       as={as || (clickable ? 'button' : undefined)}

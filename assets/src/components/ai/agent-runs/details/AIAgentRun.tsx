@@ -30,12 +30,10 @@ import {
   getAgentRunAbsPath,
 } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable.ts'
 import { getAIBreadcrumbs } from '../../AI.tsx'
 import { AgentRunAnalysis } from './AIAgentRunAnalysis.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
-import { PullRequestCallout } from './PullRequestCallout.tsx'
 
 export const getAgentRunBreadcrumbs = (
   runId: string,
@@ -95,7 +93,7 @@ export function AIAgentRun() {
         gap="large"
         flex={1}
         minWidth={0}
-        paddingRight={spacing.xsmall}
+        paddingRight={spacing.medium}
         overflow="auto"
       >
         <StretchedFlex gap="xxxxxxlarge">
@@ -151,21 +149,19 @@ export function AIAgentRun() {
           />
         ) : (
           <>
-            {run?.pullRequests?.filter(isNonNullable)?.map((pr) => (
-              <PullRequestCallout
-                key={pr.id}
-                pullRequest={pr}
-              />
-            ))}
-            {run?.analysis && <AgentRunAnalysis analysis={run.analysis} />}
-            <StackedText
-              first="Agent activity"
-              firstPartialType="body2Bold"
-              firstColor="text"
-              second="Trace agent progress during this run"
-              secondPartialType="body2"
-              secondColor="text-light"
-            />
+            {run?.analysis && (
+              <>
+                <AgentRunAnalysis analysis={run.analysis} />
+                <StackedText
+                  first="Agent activity"
+                  firstPartialType="body2Bold"
+                  firstColor="text"
+                  second="Trace agent progress during this run"
+                  secondPartialType="body2"
+                  secondColor="text-light"
+                />
+              </>
+            )}
             {!!run ? (
               <AIAgentRunMessages run={run} />
             ) : runLoading ? (
@@ -201,4 +197,6 @@ const WrapperSC = styled.div(({ theme }) => ({
   maxWidth: theme.breakpoints.desktopLarge,
   alignSelf: 'center',
   width: '100%',
+  height: '100%',
+  minHeight: 0,
 }))
