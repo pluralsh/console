@@ -27,6 +27,8 @@ defmodule Console.Deployments.Agents do
   @type agent_msg_resp :: {:ok, AgentMessage.t} | error
   @type history_resp :: {:ok, AgentPromptHistory.t} | error
 
+  def default_runtime(), do: Repo.get_by(AgentRuntime, default: true)
+
   def get_agent_runtime!(id), do: Repo.get!(AgentRuntime, id)
 
   def get_agent_runtime(cluster_id, name),

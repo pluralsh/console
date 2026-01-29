@@ -23,7 +23,8 @@ defmodule Console.Schema.Cluster do
     CloudAddon,
     OperationalLayout,
     DeprecatedCustomResource,
-    NodeStatistic
+    NodeStatistic,
+    ClusterUpgrade,
   }
 
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5, openshift: 6
@@ -135,13 +136,14 @@ defmodule Console.Schema.Cluster do
     embeds_one :kubeconfig,     Kubeconfig, on_replace: :update
     embeds_one :cloud_settings, CloudSettings, on_replace: :update
 
-    belongs_to :provider,       ClusterProvider
-    belongs_to :service,        Service
-    belongs_to :credential,     ProviderCredential
-    belongs_to :object_store,   ObjectStore
-    belongs_to :restore,        ClusterRestore
-    belongs_to :project,        Project
-    belongs_to :insight,        AiInsight, on_replace: :update
+    belongs_to :provider,        ClusterProvider
+    belongs_to :service,         Service
+    belongs_to :credential,      ProviderCredential
+    belongs_to :object_store,    ObjectStore
+    belongs_to :restore,         ClusterRestore
+    belongs_to :project,         Project
+    belongs_to :insight,         AiInsight, on_replace: :update
+    belongs_to :current_upgrade, ClusterUpgrade
     belongs_to :parent_cluster, __MODULE__
 
     has_one :operational_layout, OperationalLayout, on_replace: :update

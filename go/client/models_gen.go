@@ -1644,6 +1644,8 @@ type Cluster struct {
 	ParentCluster *Cluster `json:"parentCluster,omitempty"`
 	// an ai insight generated about issues discovered which might impact the health of this cluster
 	Insight *AiInsight `json:"insight,omitempty"`
+	// the current upgrade attempt for this cluster
+	CurrentUpgrade *ClusterUpgrade `json:"currentUpgrade,omitempty"`
 	// a high level description of the setup of common resources in a cluster
 	OperationalLayout *OperationalLayout `json:"operationalLayout,omitempty"`
 	// a set of kubernetes resources used to generate the ai insight for this cluster
@@ -2228,6 +2230,26 @@ type ClusterUpdateAttributes struct {
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
+// A representation of an agentic attempt to upgrade this cluster
+type ClusterUpgrade struct {
+	ID         string                `json:"id"`
+	Version    *string               `json:"version,omitempty"`
+	Status     ClusterUpgradeStatus  `json:"status"`
+	Steps      []*ClusterUpgradeStep `json:"steps,omitempty"`
+	Runtime    *AgentRuntime         `json:"runtime,omitempty"`
+	Cluster    *Cluster              `json:"cluster,omitempty"`
+	User       *User                 `json:"user,omitempty"`
+	InsertedAt *string               `json:"insertedAt,omitempty"`
+	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+}
+
+type ClusterUpgradeAttributes struct {
+	// the prompt for the upgrade
+	Prompt *string `json:"prompt,omitempty"`
+	// the runtime to use for the upgrade
+	RuntimeID *string `json:"runtimeId,omitempty"`
+}
+
 // A consolidated checklist of tasks that need to be completed to upgrade this cluster
 type ClusterUpgradePlan struct {
 	// whether api compatibilities with all addons and kubernetes are satisfied
@@ -2238,6 +2260,25 @@ type ClusterUpgradePlan struct {
 	Deprecations *bool `json:"deprecations,omitempty"`
 	// whether the kubelet version is in line with the current version
 	KubeletSkew *bool `json:"kubeletSkew,omitempty"`
+}
+
+// A step in an agentic attempt to upgrade a specific component or piece of infrastructure in this kubernetes cluster
+type ClusterUpgradeStep struct {
+	ID string `json:"id"`
+	// the name of the step
+	Name string `json:"name"`
+	// the prompt used to generate the step
+	Prompt string `json:"prompt"`
+	// the status of the step
+	Status ClusterUpgradeStatus `json:"status"`
+	// the type of step
+	Type ClusterUpgradeStepType `json:"type"`
+	// the error message for the step if present
+	Error      *string         `json:"error,omitempty"`
+	AgentRun   *AgentRun       `json:"agentRun,omitempty"`
+	Upgrade    *ClusterUpgrade `json:"upgrade,omitempty"`
+	InsertedAt *string         `json:"insertedAt,omitempty"`
+	UpdatedAt  *string         `json:"updatedAt,omitempty"`
 }
 
 type ClusterUsage struct {
@@ -3553,6 +3594,8 @@ type HelmConfigAttributes struct {
 	Set         *HelmValueAttributes `json:"set,omitempty"`
 	Repository  *NamespacedName      `json:"repository,omitempty"`
 	Git         *GitRefAttributes    `json:"git,omitempty"`
+	// a folder containing a kustomization to apply to the result of rendering this service's manifests
+	KustomizePostrender *string `json:"kustomizePostrender,omitempty"`
 	// pointer to a Plural GitRepository
 	RepositoryID *string `json:"repositoryId,omitempty"`
 }
@@ -3651,6 +3694,8 @@ type HelmSpec struct {
 	LuaFile *string `json:"luaFile,omitempty"`
 	// a folder of lua files to include in the final script used
 	LuaFolder *string `json:"luaFolder,omitempty"`
+	// a folder containing a kustomization to apply to the result of rendering this service's manifests
+	KustomizePostrender *string `json:"kustomizePostrender,omitempty"`
 }
 
 // a (possibly nested) helm value pair
@@ -9699,6 +9744,122 @@ func (e *ClusterDistro) UnmarshalJSON(b []byte) error {
 }
 
 func (e ClusterDistro) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ClusterUpgradeStatus string
+
+const (
+	ClusterUpgradeStatusPending    ClusterUpgradeStatus = "PENDING"
+	ClusterUpgradeStatusInProgress ClusterUpgradeStatus = "IN_PROGRESS"
+	ClusterUpgradeStatusCompleted  ClusterUpgradeStatus = "COMPLETED"
+	ClusterUpgradeStatusFailed     ClusterUpgradeStatus = "FAILED"
+)
+
+var AllClusterUpgradeStatus = []ClusterUpgradeStatus{
+	ClusterUpgradeStatusPending,
+	ClusterUpgradeStatusInProgress,
+	ClusterUpgradeStatusCompleted,
+	ClusterUpgradeStatusFailed,
+}
+
+func (e ClusterUpgradeStatus) IsValid() bool {
+	switch e {
+	case ClusterUpgradeStatusPending, ClusterUpgradeStatusInProgress, ClusterUpgradeStatusCompleted, ClusterUpgradeStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e ClusterUpgradeStatus) String() string {
+	return string(e)
+}
+
+func (e *ClusterUpgradeStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ClusterUpgradeStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ClusterUpgradeStatus", str)
+	}
+	return nil
+}
+
+func (e ClusterUpgradeStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ClusterUpgradeStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ClusterUpgradeStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type ClusterUpgradeStepType string
+
+const (
+	ClusterUpgradeStepTypeAddon          ClusterUpgradeStepType = "ADDON"
+	ClusterUpgradeStepTypeCloudAddon     ClusterUpgradeStepType = "CLOUD_ADDON"
+	ClusterUpgradeStepTypeInfrastructure ClusterUpgradeStepType = "INFRASTRUCTURE"
+)
+
+var AllClusterUpgradeStepType = []ClusterUpgradeStepType{
+	ClusterUpgradeStepTypeAddon,
+	ClusterUpgradeStepTypeCloudAddon,
+	ClusterUpgradeStepTypeInfrastructure,
+}
+
+func (e ClusterUpgradeStepType) IsValid() bool {
+	switch e {
+	case ClusterUpgradeStepTypeAddon, ClusterUpgradeStepTypeCloudAddon, ClusterUpgradeStepTypeInfrastructure:
+		return true
+	}
+	return false
+}
+
+func (e ClusterUpgradeStepType) String() string {
+	return string(e)
+}
+
+func (e *ClusterUpgradeStepType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ClusterUpgradeStepType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ClusterUpgradeStepType", str)
+	}
+	return nil
+}
+
+func (e ClusterUpgradeStepType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ClusterUpgradeStepType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ClusterUpgradeStepType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

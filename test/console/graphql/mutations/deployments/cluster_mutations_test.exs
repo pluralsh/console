@@ -492,6 +492,29 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
     end
   end
 
+  describe "createClusterUpgrade" do
+    test "it can create a cluster upgrade" do
+      user = insert(:user)
+      cluster = insert(:cluster, current_version: "1.24.0", write_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"createClusterUpgrade" => upgrade}}} = run_query("""
+        mutation Upgrade($id: ID!) {
+          createClusterUpgrade(id: $id) {
+            id
+            version
+            status
+            steps { name status type }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert upgrade["id"]
+      assert upgrade["version"] == "1.25"
+      assert upgrade["status"] == "PENDING"
+      assert length(upgrade["steps"]) > 0
+    end
+  end
+
   describe "addClusterAuditLog" do
     test "it enqueues an audit log" do
       cluster = insert(:cluster)

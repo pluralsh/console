@@ -65,15 +65,16 @@ func ServiceTemplateAttributes(ctx context.Context, c runtimeclient.Client, name
 
 	if srv.Helm != nil {
 		serviceTemplate.Helm = &console.HelmConfigAttributes{
-			ValuesFiles: srv.Helm.ValuesFiles,
-			Version:     srv.Helm.Version,
-			URL:         srv.Helm.URL,
-			IgnoreHooks: srv.Helm.IgnoreHooks,
-			IgnoreCrds:  srv.Helm.IgnoreCrds,
-			LuaScript:   srv.Helm.LuaScript,
-			LuaFile:     srv.Helm.LuaFile,
-			LuaFolder:   srv.Helm.LuaFolder,
-			Git:         srv.Helm.Git.Attributes(),
+			ValuesFiles:         srv.Helm.ValuesFiles,
+			Version:             srv.Helm.Version,
+			URL:                 srv.Helm.URL,
+			IgnoreHooks:         srv.Helm.IgnoreHooks,
+			IgnoreCrds:          srv.Helm.IgnoreCrds,
+			LuaScript:           srv.Helm.LuaScript,
+			LuaFile:             srv.Helm.LuaFile,
+			LuaFolder:           srv.Helm.LuaFolder,
+			KustomizePostrender: srv.Helm.KustomizePostrender,
+			Git:                 srv.Helm.Git.Attributes(),
 		}
 
 		if srv.Helm.Repository != nil {

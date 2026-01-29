@@ -373,17 +373,18 @@ func (r *ServiceDeploymentReconciler) genServiceAttributes(ctx context.Context, 
 
 func (r *ServiceDeploymentReconciler) getHelmAttr(ctx context.Context, service *v1alpha1.ServiceDeployment) (*console.HelmConfigAttributes, *ctrl.Result, error) {
 	attr := &console.HelmConfigAttributes{
-		Release:     service.Spec.Helm.Release,
-		ValuesFiles: service.Spec.Helm.ValuesFiles,
-		Version:     service.Spec.Helm.Version,
-		Chart:       service.Spec.Helm.Chart,
-		URL:         service.Spec.Helm.URL,
-		IgnoreHooks: service.Spec.Helm.IgnoreHooks,
-		IgnoreCrds:  service.Spec.Helm.IgnoreCrds,
-		LuaScript:   service.Spec.Helm.LuaScript,
-		LuaFile:     service.Spec.Helm.LuaFile,
-		LuaFolder:   service.Spec.Helm.LuaFolder,
-		Git:         service.Spec.Helm.Git.Attributes(),
+		Release:             service.Spec.Helm.Release,
+		ValuesFiles:         service.Spec.Helm.ValuesFiles,
+		Version:             service.Spec.Helm.Version,
+		Chart:               service.Spec.Helm.Chart,
+		URL:                 service.Spec.Helm.URL,
+		IgnoreHooks:         service.Spec.Helm.IgnoreHooks,
+		IgnoreCrds:          service.Spec.Helm.IgnoreCrds,
+		LuaScript:           service.Spec.Helm.LuaScript,
+		LuaFile:             service.Spec.Helm.LuaFile,
+		LuaFolder:           service.Spec.Helm.LuaFolder,
+		KustomizePostrender: service.Spec.Helm.KustomizePostrender,
+		Git:                 service.Spec.Helm.Git.Attributes(),
 	}
 
 	if service.Spec.Helm.Repository != nil {
