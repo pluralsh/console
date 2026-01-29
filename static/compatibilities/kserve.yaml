@@ -142,7 +142,13 @@ versions:
   kube: ['1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Performance fix in KServe Python server by switching back to standard
+        sockets (v0.10.2)., Security hardening via cherry-picks related to CVE-2023-44487
+        (v0.11.2).]
+    breaking_changes: []
   chart_version: v0.11.2
   images: []
 - version: 0.10.2
