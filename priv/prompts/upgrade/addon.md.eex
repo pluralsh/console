@@ -12,7 +12,7 @@ Here is the prompt we've been given about the component to upgrade:
 
 <%= @prompt %>
 
-<%= if byte_size(@upgrade.prompt) > 0 do %>
+<%= if is_binary(@upgrade.prompt) do %>
 We've also been given some high level guidance about this upgrade that could be helpful for you:
 
 <%= @upgrade.prompt %>

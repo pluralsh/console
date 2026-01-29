@@ -639,6 +639,10 @@ defmodule Console.Deployments.Clusters do
       }))
       |> Repo.insert()
     end)
+    |> add_operation(:current_upgrade, fn %{upgrade: upgrade, cluster: cluster} ->
+      Ecto.Changeset.change(cluster, %{current_upgrade_id: upgrade.id})
+      |> Repo.update()
+    end)
     |> execute(extract: :upgrade)
     |> notify(:create, user)
   end

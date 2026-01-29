@@ -34,11 +34,11 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp loop(%__MODULE__{max_iterations: max, iterations: iter, messages: [_ | _] = messages, system_prompt: preface, acc: acc} = engine, iter) when iter < max do
     messages
     |> Engine.fit_context_window(preface)
-    |> Provider.completion([preface: preface, plural: engine.tools])
+    |> Provider.completion(preface: preface, plural: engine.tools)
     |> case do
       {:ok, content} -> [{:assistant, content}]
       {:ok, content, tools} ->
-        case call_tools(engine, tools, engine.tools) do
+        case call_tools(engine, tools, engine.tools) |> IO.inspect(label: "tool messages") do
           {:ok, tool_msgs} -> maybe_prepend(content, tool_msgs)
           err -> err
         end
@@ -47,7 +47,7 @@ defmodule Console.AI.Chat.MemoryEngine do
     |> then(fn
       l when is_list(l) ->
         case engine.reducer.(l, acc) do
-          {:halt, res} -> res
+          {:halt, res} -> {:ok, res}
           acc -> loop(%{engine | acc: acc, messages: messages ++ l}, iter + 1)
         end
       err -> err

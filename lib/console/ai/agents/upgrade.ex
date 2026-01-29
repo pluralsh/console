@@ -53,6 +53,7 @@ defmodule Console.AI.Agents.Upgrade do
   end
 
   defp last_message(messages) do
+    IO.inspect(length(messages), label: "messages length")
     Enum.reverse(messages)
     |> Enum.find(&match?({:assistant, content} when is_binary(content), &1))
     |> case do
