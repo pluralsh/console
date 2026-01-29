@@ -167,6 +167,25 @@ defmodule Console.Factory do
     }
   end
 
+  def cluster_upgrade_factory do
+    %Schema.ClusterUpgrade{
+      version: "1.25",
+      status: :pending,
+      cluster: build(:cluster, current_version: "1.24"),
+      user: build(:user)
+    }
+  end
+
+  def cluster_upgrade_step_factory do
+    %Schema.ClusterUpgradeStep{
+      name: "Upgrade addon",
+      prompt: "Upgrade addon prompt",
+      status: :pending,
+      type: :addon,
+      upgrade: build(:cluster_upgrade)
+    }
+  end
+
   def git_repository_factory do
     %Schema.GitRepository{
       url: sequence(:git_repo, & "https://github.com/pluralsh/repo-#{&1}.git")

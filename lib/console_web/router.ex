@@ -114,6 +114,8 @@ defmodule ConsoleWeb.Router do
           get "/clusters/:id",    ClusterController, :show
           put "/clusters/:id",    ClusterController, :update
           delete "/clusters/:id", ClusterController, :delete
+          post "/clusters/:id/upgrade", ClusterUpgradeController, :create
+          get "/clusterupgrade/:id",    ClusterUpgradeController, :show
 
           post "/git/repositories",       GitRepositoryController, :create
           get "/git/repositories",        GitRepositoryController, :index

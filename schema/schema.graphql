@@ -1551,6 +1551,9 @@ input AgentMessageToolAttributes {
   "the state of the tool"
   state: AgentMessageToolState
 
+  "the input of the tool"
+  input: String
+
   "the output of the tool"
   output: String
 }
@@ -1782,6 +1785,9 @@ type AgentMessageTool {
 
   "the state of the tool"
   state: AgentMessageToolState
+
+  "the input of the tool"
+  input: String
 
   "the output of the tool"
   output: String

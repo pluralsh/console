@@ -328,6 +328,8 @@ export type AgentMessageTokensAttributes = {
 
 export type AgentMessageTool = {
   __typename?: 'AgentMessageTool';
+  /** the input of the tool */
+  input?: Maybe<Scalars['String']['output']>;
   /** the name of the tool */
   name?: Maybe<Scalars['String']['output']>;
   /** the output of the tool */
@@ -337,6 +339,8 @@ export type AgentMessageTool = {
 };
 
 export type AgentMessageToolAttributes = {
+  /** the input of the tool */
+  input?: InputMaybe<Scalars['String']['input']>;
   /** the name of the tool */
   name?: InputMaybe<Scalars['String']['input']>;
   /** the output of the tool */
