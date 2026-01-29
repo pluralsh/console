@@ -8,7 +8,6 @@ import {
   Toast,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { RunShareMenu } from 'components/ai/RunShareMenu.tsx'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
@@ -18,7 +17,6 @@ import {
   AgentRunStatus,
   useAgentRunQuery,
   useCancelAgentRunMutation,
-  useShareAgentRunMutation,
 } from 'generated/graphql'
 import { truncate } from 'lodash'
 import { useMemo } from 'react'
@@ -33,6 +31,7 @@ import styled, { useTheme } from 'styled-components'
 import { getAIBreadcrumbs } from '../../AI.tsx'
 import { AgentRunAnalysis } from './AIAgentRunAnalysis.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
+import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
 
 export const getAgentRunBreadcrumbs = (
@@ -65,11 +64,12 @@ export function AIAgentRun() {
     pollInterval: POLL_INTERVAL,
     skip: !id,
   })
-  const [shareAgentRun, { loading: shareLoading, error: shareError }] =
-    useShareAgentRunMutation()
 
   const runLoading = !data && loading
   const run = data?.agentRun
+  const isRunning =
+    run?.status == AgentRunStatus.Running ||
+    run?.status == AgentRunStatus.Pending
 
   useSetBreadcrumbs(
     useMemo(
@@ -96,7 +96,7 @@ export function AIAgentRun() {
         paddingRight={spacing.medium}
         overflow="auto"
       >
-        <StretchedFlex gap="xxxxxxlarge">
+        <StretchedFlex gap="xxxxlarge">
           <StackedText
             truncate
             loading={runLoading}
@@ -109,32 +109,21 @@ export function AIAgentRun() {
             css={{ flex: 1 }}
           />
           <Flex gap="small">
-            {(run?.status == AgentRunStatus.Running ||
-              run?.status == AgentRunStatus.Pending) && (
+            {isRunning && (
               <Button
+                secondary
                 onClick={() => cancelAgentRun()}
                 startIcon={<SpinnerAlt />}
                 loading={cancelling}
-                secondary
               >
                 Cancel agent run
               </Button>
             )}
-            {run?.status !== AgentRunStatus.Failed && (
-              <RunShareMenu
-                isShared={run?.shared}
-                setIsShared={(shared) =>
-                  shareAgentRun({ variables: { id, shared } })
-                }
-                loading={shareLoading}
-                error={shareError}
-                label="Share run"
-              />
-            )}
+            {run && <AIAgentRunShareButton runId={run?.id} />}
           </Flex>
         </StretchedFlex>
         <Divider backgroundColor="border" />
-        {run?.error ? (
+        {run?.error && (
           <GqlError
             header="There was an error during this run."
             error={run.error}
@@ -148,31 +137,26 @@ export function AIAgentRun() {
               </Button>
             }
           />
-        ) : (
-          <>
-            {run?.analysis && (
-              <>
-                <AgentRunAnalysis analysis={run.analysis} />
-                <StackedText
-                  first="Agent activity"
-                  firstPartialType="body2Bold"
-                  firstColor="text"
-                  second="Trace agent progress during this run"
-                  secondPartialType="body2"
-                  secondColor="text-light"
-                />
-              </>
-            )}
-            {!!run ? (
-              <AIAgentRunMessages run={run} />
-            ) : runLoading ? (
-              <RectangleSkeleton
-                $width="100%"
-                $height={400}
-              />
-            ) : null}
-          </>
         )}
+        {run?.analysis && <AgentRunAnalysis analysis={run.analysis} />}
+        {!isRunning && (
+          <StackedText
+            first="Agent activity"
+            firstPartialType="body2Bold"
+            firstColor="text"
+            second="Trace agent progress during this run"
+            secondPartialType="body2"
+            secondColor="text-light"
+          />
+        )}
+        {!!run ? (
+          <AIAgentRunMessages run={run} />
+        ) : runLoading ? (
+          <RectangleSkeleton
+            $width="100%"
+            $height={400}
+          />
+        ) : null}
       </Flex>
       <AgentRunSidecar
         run={run}

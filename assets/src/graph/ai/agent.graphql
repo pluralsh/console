@@ -127,6 +127,12 @@ query AgentRuns($after: String, $first: Int = 100, $runtimeId: ID) {
   }
 }
 
+query AgentRunTiny($id: ID!) {
+  agentRun(id: $id) {
+    ...AgentRunTiny
+  }
+}
+
 query AgentRun($id: ID!) {
   agentRun(id: $id) {
     ...AgentRun

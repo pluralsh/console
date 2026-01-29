@@ -4,7 +4,7 @@ import { Overline } from 'components/cd/utils/PermissionsModal'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { useTheme } from 'styled-components'
 
-export function RunShareMenu({
+export function InfraResearchPublishMenu({
   isShared,
   setIsShared,
   loading,
