@@ -277,6 +277,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   def delete_virtual_cluster(%{id: id}, %{context: %{current_user: user}}),
     do: Clusters.delete_virtual_cluster(id, user)
 
+  def create_cluster_upgrade(%{id: id} = args, %{context: %{current_user: user}}),
+    do: Clusters.create_cluster_upgrade(args[:attributes] || %{}, id, user)
+
   def create_provider(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.create_provider(attrs, user)
 

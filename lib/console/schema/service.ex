@@ -53,18 +53,19 @@ defmodule Console.Schema.Service do
     alias Console.Schema.{NamespacedName, Service.Git}
 
     embedded_schema do
-      field :values,        Piazza.Ecto.EncryptedString
-      field :chart,         :string
-      field :version,       :string
-      field :release,       :string
-      field :url,           :string
-      field :values_files,  {:array, :string}
-      field :repository_id, :binary_id
-      field :ignore_hooks,  :boolean
-      field :ignore_crds,   :boolean
-      field :lua_script,    :string
-      field :lua_file,      :string
-      field :lua_folder,    :string
+      field :values,               Piazza.Ecto.EncryptedString
+      field :chart,                :string
+      field :version,              :string
+      field :release,              :string
+      field :url,                  :string
+      field :values_files,         {:array, :string}
+      field :repository_id,        :binary_id
+      field :ignore_hooks,         :boolean
+      field :ignore_crds,          :boolean
+      field :lua_script,           :string
+      field :lua_file,             :string
+      field :lua_folder,           :string
+      field :kustomize_postrender, :string
 
       embeds_many :set, HelmValue, on_replace: :delete do
         field :name, :string
@@ -77,7 +78,7 @@ defmodule Console.Schema.Service do
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(values ignore_hooks ignore_crds release url chart version repository_id values_files lua_script lua_folder lua_file)a)
+      |> cast(attrs, ~w(values ignore_hooks ignore_crds release url chart version repository_id kustomize_postrender values_files lua_script lua_folder lua_file)a)
       |> cast_embed(:repository)
       |> cast_embed(:set, with: &set_changeset/2)
       |> helm_url(:url)

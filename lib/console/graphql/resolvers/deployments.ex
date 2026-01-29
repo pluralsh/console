@@ -103,7 +103,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     AgentMessage,
     SentinelRun,
     SentinelRunJob,
-    ChatConnection
+    ChatConnection,
+    ClusterUpgrade,
+    ClusterUpgradeStep
   }
 
   def query(Project, _), do: Project
@@ -196,6 +198,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(AgentPrompt, _), do: AgentPrompt.ordered()
   def query(AgentMessage, _), do: AgentMessage.ordered()
   def query(ChatConnection, _), do: ChatConnection
+  def query(ClusterUpgrade, _), do: ClusterUpgrade
+  def query(ClusterUpgradeStep, _), do: ClusterUpgradeStep
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

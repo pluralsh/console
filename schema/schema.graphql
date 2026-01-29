@@ -723,6 +723,8 @@ type RootMutationType {
   "soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects"
   detachCluster(id: ID!): Cluster
 
+  createClusterUpgrade(id: ID!, attributes: ClusterUpgradeAttributes): ClusterUpgrade
+
   createClusterProvider(attributes: ClusterProviderAttributes!): ClusterProvider
 
   updateClusterProvider(id: ID!, attributes: ClusterProviderUpdateAttributes!): ClusterProvider
@@ -5999,6 +6001,9 @@ input HelmConfigAttributes {
 
   git: GitRefAttributes
 
+  "a folder containing a kustomization to apply to the result of rendering this service's manifests"
+  kustomizePostrender: String
+
   "pointer to a Plural GitRepository"
   repositoryId: ID
 }
@@ -6434,6 +6439,9 @@ type HelmSpec {
 
   "a folder of lua files to include in the final script used"
   luaFolder: String
+
+  "a folder containing a kustomization to apply to the result of rendering this service's manifests"
+  kustomizePostrender: String
 }
 
 "a configuration item k\/v pair"
@@ -6797,6 +6805,19 @@ enum NodeStatisticHealth {
   HEALTHY
   WARNING
   FAILED
+}
+
+enum ClusterUpgradeStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+}
+
+enum ClusterUpgradeStepType {
+  ADDON
+  CLOUD_ADDON
+  INFRASTRUCTURE
 }
 
 enum Conjunction {
@@ -7378,6 +7399,14 @@ input CompatibilityMatrixSummaryAttributes {
   breakingChanges: [String!]
 }
 
+input ClusterUpgradeAttributes {
+  "the prompt for the upgrade"
+  prompt: String
+
+  "the runtime to use for the upgrade"
+  runtimeId: ID
+}
+
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
   "the id of this provider"
@@ -7602,6 +7631,9 @@ type Cluster {
 
   "an ai insight generated about issues discovered which might impact the health of this cluster"
   insight: AiInsight
+
+  "the current upgrade attempt for this cluster"
+  currentUpgrade: ClusterUpgrade
 
   "a high level description of the setup of common resources in a cluster"
   operationalLayout: OperationalLayout
@@ -8157,6 +8189,47 @@ type InsightClientInfo {
   userAgent: String
   count: String
   lastRequestAt: DateTime
+}
+
+"A representation of an agentic attempt to upgrade this cluster"
+type ClusterUpgrade {
+  id: ID!
+  version: String
+  status: ClusterUpgradeStatus!
+  steps: [ClusterUpgradeStep]
+  runtime: AgentRuntime
+  cluster: Cluster
+  user: User
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"A step in an agentic attempt to upgrade a specific component or piece of infrastructure in this kubernetes cluster"
+type ClusterUpgradeStep {
+  id: ID!
+
+  "the name of the step"
+  name: String!
+
+  "the prompt used to generate the step"
+  prompt: String!
+
+  "the status of the step"
+  status: ClusterUpgradeStatus!
+
+  "the type of step"
+  type: ClusterUpgradeStepType!
+
+  "the error message for the step if present"
+  error: String
+
+  agentRun: AgentRun
+
+  upgrade: ClusterUpgrade
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 type ClusterUsage {

@@ -35,10 +35,12 @@ defmodule Console.Deployments.Clusters do
     DeploymentSettings,
     DeprecatedCustomResource,
     UpgradePlanCallout,
-    CustomCompatibilityMatrix
+    CustomCompatibilityMatrix,
+    ClusterUpgrade
   }
   alias Console.Deployments.Compatibilities
   require Logger
+  require EEx
 
   @cache_adapter Console.conf(:cache_adapter)
   @local_adapter Console.conf(:local_cache)
@@ -55,6 +57,7 @@ defmodule Console.Deployments.Clusters do
   @type iso_resp :: {:ok, ClusterISOImage.t} | Console.error
   @type upgrade_plan_callout_resp :: {:ok, UpgradePlanCallout.t} | Console.error
   @type custom_compatibility_matrix_resp :: {:ok, CustomCompatibilityMatrix.t} | Console.error
+  @type cluster_upgrade_resp :: {:ok, ClusterUpgrade.t} | Console.error
 
   @spec count() :: integer
   def count(), do: Repo.aggregate(Cluster, :count)
@@ -587,10 +590,67 @@ defmodule Console.Deployments.Clusters do
   end
   def kubelet_skew?(_), do: true
 
+  @doc """
+  Creates a new cluster upgrade workflow for a given cluster.  Will then enqueue and execute it agentically in the background.
+  """
+  @spec create_cluster_upgrade(binary, User.t) :: cluster_upgrade_resp
+  @spec create_cluster_upgrade(map, binary, User.t) :: cluster_upgrade_resp
+  def create_cluster_upgrade(attrs \\ %{}, cluster_id, %User{id: user_id} = user) when is_map(attrs) do
+    start_transaction()
+    |> add_operation(:cluster, fn _ ->
+      get_cluster!(cluster_id)
+      |> allow(user, :write)
+    end)
+    |> add_operation(:version, fn %{cluster: cluster} -> Compatibilities.Utils.next_version(cluster.current_version) end)
+    |> add_operation(:plan, fn %{cluster: cluster} ->
+      plan = upgrade_plan(cluster)
+      Enum.concat(plan.blocking_addons, plan.blocking_cloud_addons)
+      |> Enum.filter(fn %{fix: fix} -> is_nil(fix) end)
+      |> case do
+        [_ | _] = blocking ->
+          {:error, "upgrade plan is not ready, the following components have no known fix: #{Enum.map(blocking, fn %{addon: addon} -> addon.name end) |> Enum.join(", ")}"}
+        _ -> {:ok, plan}
+      end
+    end)
+    |> add_operation(:upgrade, fn %{cluster: cluster, version: next_version, plan: plan} ->
+      addon_steps = Enum.map(plan.blocking_addons, fn %{current: curr, fix: fix, addon: addon} = blocker -> %{
+        name: "Upgrade #{addon.name} from #{curr.version} to #{fix.version}",
+        prompt: addon_prompt(addon: addon, curr: curr, fix: fix, cluster: cluster, callout: blocker[:callout]) |> String.trim(),
+        type: :addon,
+        status: :pending
+      } end)
+
+      cloud_addon_steps = Enum.map(plan.blocking_cloud_addons, fn %{current: curr, fix: fix, addon: addon} = blocker -> %{
+        name: "Upgrade #{addon.name} from #{curr.version} to #{fix.version}",
+        prompt: cloud_addon_prompt(addon: addon, curr: curr, fix: fix, cluster: cluster, callout: blocker[:callout]) |> String.trim(),
+        type: :cloud_addon
+      } end)
+
+      infrastructure_step =  %{
+          name: "Upgrade Kubernetes from #{cluster.current_version} to #{next_version} for cluster #{cluster.name}",
+          prompt: upgrade_prompt(cluster: cluster, next_version: next_version, failed_insights: plan.failed_insights) |> String.trim(),
+          type: :infrastructure
+      }
+
+      %ClusterUpgrade{cluster_id: cluster.id, user_id: user_id}
+      |> ClusterUpgrade.changeset(Map.merge(attrs, %{
+        version: next_version,
+        steps: addon_steps ++ cloud_addon_steps ++ [infrastructure_step]
+      }))
+      |> Repo.insert()
+    end)
+    |> execute(extract: :upgrade)
+    |> notify(:create, user)
+  end
+
+  EEx.function_from_file(:defp, :upgrade_prompt, Console.priv_filename(["prompts", "cluster_upgrade.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :addon_prompt, Console.priv_filename(["prompts", "upgrade", "addon_inline.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :cloud_addon_prompt, Console.priv_filename(["prompts", "upgrade", "cloud_addon_inline.md.eex"]), [:assigns])
+
   @spec upgrade_plan(Cluster.t) :: %{
     failed_insights: [UpgradeInsight.t],
-    blocking_addons: [%{current: Version.t, fix: Version.t | nil}],
-    blocking_cloud_addons: [%{current: CloudAddOnVersion.t, fix: CloudAddOnVersion.t | nil}]
+    blocking_addons: [%{current: Version.t, fix: Version.t | nil, addon: AddOn.t}],
+    blocking_cloud_addons: [%{current: CloudAddOnVersion.t, fix: CloudAddOnVersion.t | nil, addon: CloudAddon.t}]
   }
   def upgrade_plan(%Cluster{} = cluster) do
     cluster = Repo.preload(cluster, [:upgrade_insights])
@@ -1539,6 +1599,9 @@ defmodule Console.Deployments.Clusters do
     do: handle_notify(PubSub.ProviderCredentialCreated, prov, actor: user)
   defp notify({:ok, %ProviderCredential{} = prov}, :delete, user),
     do: handle_notify(PubSub.ProviderCredentialDeleted, prov, actor: user)
+
+  defp notify({:ok, %ClusterUpgrade{} = upgrade}, :create, user),
+    do: handle_notify(PubSub.ClusterUpgradeCreated, upgrade, actor: user)
 
   defp notify({:ok, %AgentMigration{} = migration}, :create, user),
     do: handle_notify(PubSub.AgentMigrationCreated, migration, actor: user)

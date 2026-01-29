@@ -1,0 +1,12 @@
+Upgrade the Kubernetes component from <%= @cluster.distro %> to <%= @next_version %> for the <%= @cluster.distro %> cluster <%= @cluster.name %>.
+
+<%= if !Enum.empty?(@failed_insights) do %>
+In addition, there are a few EKS insights you'll also want to address as part of this upgrade process, here are the details:
+
+<%= Enum.map(@failed_insights, fn failed_insight -> %>
+Name: <%= failed_insight.name %>
+Description: <%= failed_insight.description %>
+<% end) %>
+
+(You can ignore deprecated api usage insights, those are handled in a separate process entirely)
+<% end %>

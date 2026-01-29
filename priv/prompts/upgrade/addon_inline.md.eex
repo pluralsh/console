@@ -1,0 +1,9 @@
+Upgrade the <%= @addon.name %> kubernetes component from <%= @curr.version %> to <%= @fix.version %>.
+
+This will likely be modeled as either a Plural Service or Plural GlobalService, and is currently deployed to the <%= @cluster.name %> <%= @cluster.distro %> cluster.
+
+<%= if is_binary(@callout) do %>
+There's also some custom guidance about this specific addon:
+
+<%= @callout %>
+<% end %>

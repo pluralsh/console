@@ -56,6 +56,13 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterPinged do
   def process(_), do: :ok
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterUpgradeCreated do
+  alias Console.Deployments.Clusters
+
+  def process(%{item: upgrade}),
+    do: Task.Supervisor.async(Console.AI.TaskSupervisor, Console.AI.Agents.Upgrade, :exec, [upgrade])
+end
+
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.GlobalServiceCreated, Console.PubSub.GlobalServiceUpdated] do
   alias Console.Deployments.Global
 

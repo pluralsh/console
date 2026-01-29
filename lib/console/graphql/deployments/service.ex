@@ -57,21 +57,22 @@ defmodule Console.GraphQl.Deployments.Service do
   end
 
   input_object :helm_config_attributes do
-    field :values,        :string
-    field :values_files,  list_of(:string)
-    field :chart,         :string
-    field :version,       :string
-    field :release,       :string
-    field :url,           :string
-    field :ignore_hooks,  :boolean
-    field :ignore_crds,   :boolean
-    field :lua_script,    :string
-    field :lua_file,      :string
-    field :lua_folder,    :string
-    field :set,           :helm_value_attributes
-    field :repository,    :namespaced_name
-    field :git,           :git_ref_attributes
-    field :repository_id, :id, description: "pointer to a Plural GitRepository"
+    field :values,               :string
+    field :values_files,         list_of(:string)
+    field :chart,                :string
+    field :version,              :string
+    field :release,              :string
+    field :url,                  :string
+    field :ignore_hooks,         :boolean
+    field :ignore_crds,          :boolean
+    field :lua_script,           :string
+    field :lua_file,             :string
+    field :lua_folder,           :string
+    field :set,                  :helm_value_attributes
+    field :repository,           :namespaced_name
+    field :git,                  :git_ref_attributes
+    field :kustomize_postrender, :string, description: "a folder containing a kustomization to apply to the result of rendering this service's manifests"
+    field :repository_id,        :id, description: "pointer to a Plural GitRepository"
   end
 
   input_object :metadata_attributes do
@@ -353,23 +354,24 @@ defmodule Console.GraphQl.Deployments.Service do
   end
 
   object :helm_spec do
-    field :chart,         :string, description: "the name of the chart this service is using"
-    field :url,           :string, description: "the helm repository url to use"
-    field :values,        :string,
+    field :chart,                :string, description: "the name of the chart this service is using"
+    field :url,                  :string, description: "the helm repository url to use"
+    field :values,               :string,
       description: "a helm values file to use with this service, requires auth and so is heavy to query",
       resolve: &Deployments.helm_values/3
-    field :release,       :string
-    field :ignore_hooks,  :boolean
-    field :ignore_crds,   :boolean
-    field :git,           :git_ref, description: "spec of where to find the chart in git"
-    field :repository_id, :id, description: "a git repository in Plural to use as a source"
-    field :repository,    :object_reference, description: "pointer to the flux helm repository resource used for this chart"
-    field :version,       :string, description: "the chart version in use currently"
-    field :set,           list_of(:helm_value), description: "a list of helm name/value pairs to precisely set individual values"
-    field :values_files,  list_of(:string), description: "a list of relative paths to values files to use for helm applies"
-    field :lua_script,    :string, description: "a lua script to use for helm applies"
-    field :lua_file,      :string, description: "a lua file to use for helm applies"
-    field :lua_folder,    :string, description: "a folder of lua files to include in the final script used"
+    field :release,              :string
+    field :ignore_hooks,         :boolean
+    field :ignore_crds,          :boolean
+    field :git,                  :git_ref, description: "spec of where to find the chart in git"
+    field :repository_id,        :id, description: "a git repository in Plural to use as a source"
+    field :repository,           :object_reference, description: "pointer to the flux helm repository resource used for this chart"
+    field :version,              :string, description: "the chart version in use currently"
+    field :set,                  list_of(:helm_value), description: "a list of helm name/value pairs to precisely set individual values"
+    field :values_files,         list_of(:string), description: "a list of relative paths to values files to use for helm applies"
+    field :lua_script,           :string, description: "a lua script to use for helm applies"
+    field :lua_file,             :string, description: "a lua file to use for helm applies"
+    field :lua_folder,           :string, description: "a folder of lua files to include in the final script used"
+    field :kustomize_postrender, :string, description: "a folder containing a kustomization to apply to the result of rendering this service's manifests"
   end
 
   @desc "a configuration item k/v pair"

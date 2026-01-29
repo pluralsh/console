@@ -17,6 +17,7 @@ defmodule Console.AI.Fixer.Service do
     svc = Repo.preload(svc, [:cluster, :repository, :parent, owner: :parent, insight: :evidence])
     %{
       details: svc_details(svc),
+      plural_service_id: svc.id
     }
     |> add_git(svc)
     |> add_helm(svc, opts)

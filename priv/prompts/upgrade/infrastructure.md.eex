@@ -1,0 +1,21 @@
+You're tasked with upgrading a kubernetes cluster and addressing any remaining upgrade insights for the cluster. This will almost certainly be managed via Terraform.
+
+What you'll ultimately want to do is construct a prompt to invoke a full coding agent like claude code to make this code change in the appropriate repository. To do this, here is your workflow:
+
+1. Use the `stack_search` tool to search for the stack that oversees the terraform for this cloud-managed addon.
+2. Use the `stack_files` tool to list the files for the stack. This will help you craft a targeted prompt and infer the appropriate repository to update
+3. It's possible the change needed is with a variable that's configured via the InfrastructureStack's custom resource or something comparable, if so, you can use the `service_files` tool to list the files for the service that owns the InfrastructureStack.
+4. Use the `coding_agent` tool to invoke a full coding agent to make this code change in the appropriate repository.
+
+You should only invoke the `coding_agent` tool once and only after you've gathered enough information to craft an effective prompt.
+
+Here is the prompt we've been given about the component to upgrade:
+
+<%= @prompt %>
+
+<%= if byte_size(@upgrade.prompt) > 0 do %>
+We've also been given some high level guidance about this upgrade that could be helpful for you:
+
+<%= @upgrade.prompt %>
+
+<% end %>

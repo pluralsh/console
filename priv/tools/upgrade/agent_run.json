@@ -1,0 +1,14 @@
+{
+    "type": "object",
+    "properties": {
+        "repository": {
+            "type": "string",
+            "description": "The repository to update.  This can be either a https or ssh url."
+        },
+        "prompt": {
+            "type": "string",
+            "description": "The prompt to give to the agent.  This should be a detailed description of the changes you want to make to the repository."
+        }
+    },
+    "required": ["repository", "prompt"]
+}
