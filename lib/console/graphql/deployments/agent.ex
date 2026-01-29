@@ -105,6 +105,7 @@ defmodule Console.GraphQl.Deployments.Agent do
   input_object :agent_message_tool_attributes do
     field :name,   :string, description: "the name of the tool"
     field :state,  :agent_message_tool_state, description: "the state of the tool"
+    field :input,  :string, description: "the input of the tool"
     field :output, :string, description: "the output of the tool"
   end
 
@@ -248,6 +249,7 @@ defmodule Console.GraphQl.Deployments.Agent do
   object :agent_message_tool do
     field :name,   :string, description: "the name of the tool"
     field :state,  :agent_message_tool_state, description: "the state of the tool"
+    field :input,  :string, description: "the input of the tool"
     field :output, :string, description: "the output of the tool"
   end
 

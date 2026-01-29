@@ -44,7 +44,9 @@ defmodule Console.Deployments.Policies.Rbac do
     SentinelRun,
     SentinelRunJob,
     AgentRuntime,
-    AgentRun
+    AgentRun,
+    ClusterUpgrade,
+    ClusterUpgradeStep
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -118,6 +120,10 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(run, user, action, & &1.sentinel)
   def evaluate(%SentinelRunJob{} = job, user, action),
     do: recurse(job, user, action, & &1.sentinel_run)
+  def evaluate(%ClusterUpgrade{} = upgrade, %User{} = user, action),
+    do: recurse(upgrade, user, action, & &1.cluster)
+  def evaluate(%ClusterUpgradeStep{} = step, %User{} = user, action),
+    do: recurse(step, user, action, & &1.upgrade)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
       %{project: %Project{} = project} -> project
@@ -239,6 +245,10 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(run, [sentinel: [project: @bindings]])
   def preload(%SentinelRunJob{} = job),
     do: Repo.preload(job, [sentinel_run: [sentinel: [project: @bindings]]])
+  def preload(%ClusterUpgrade{} = upgrade),
+    do: Repo.preload(upgrade, [cluster: @top_preloads])
+  def preload(%ClusterUpgradeStep{} = step),
+    do: Repo.preload(step, [upgrade: [cluster: @top_preloads]])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)

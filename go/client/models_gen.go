@@ -271,6 +271,8 @@ type AgentMessageTool struct {
 	Name *string `json:"name,omitempty"`
 	// the state of the tool
 	State *AgentMessageToolState `json:"state,omitempty"`
+	// the input of the tool
+	Input *string `json:"input,omitempty"`
 	// the output of the tool
 	Output *string `json:"output,omitempty"`
 }
@@ -280,6 +282,8 @@ type AgentMessageToolAttributes struct {
 	Name *string `json:"name,omitempty"`
 	// the state of the tool
 	State *AgentMessageToolState `json:"state,omitempty"`
+	// the input of the tool
+	Input *string `json:"input,omitempty"`
 	// the output of the tool
 	Output *string `json:"output,omitempty"`
 }

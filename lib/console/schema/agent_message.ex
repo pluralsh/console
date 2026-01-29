@@ -35,6 +35,7 @@ defmodule Console.Schema.AgentMessage do
       embeds_one :tool, Tool, on_replace: :update do
         field :name,   :string
         field :state,  ToolState
+        field :input,  :string
         field :output, :string
       end
     end
@@ -94,7 +95,7 @@ defmodule Console.Schema.AgentMessage do
 
   defp tool_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(name state output)a)
+    |> cast(attrs, ~w(name state input output)a)
     |> validate_required(~w(name state)a)
   end
 end

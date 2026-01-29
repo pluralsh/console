@@ -592,6 +592,144 @@
         },
         "type": "object"
       },
+      "ClusterUpgrade": {
+        "title": "ClusterUpgrade",
+        "description": "An agentic workflow for upgrading a cluster",
+        "properties": {
+          "cluster_id": {
+            "description": "ID of the cluster being upgraded",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the cluster upgrade",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "prompt": {
+            "description": "Prompt used to generate the upgrade workflow",
+            "type": "string"
+          },
+          "runtime": {
+            "$ref": "#/components/schemas/AgentRuntime"
+          },
+          "runtime_id": {
+            "description": "ID of the agent runtime executing the upgrade",
+            "type": "string"
+          },
+          "status": {
+            "description": "Status of the upgrade (pending, in_progress, completed, failed)",
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "steps": {
+            "description": "Steps that make up this upgrade workflow",
+            "items": {
+              "$ref": "#/components/schemas/ClusterUpgradeStep"
+            },
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "user_id": {
+            "description": "ID of the user who initiated the upgrade",
+            "type": "string"
+          },
+          "version": {
+            "description": "Target Kubernetes version for this upgrade",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterUpgradeInput": {
+        "title": "ClusterUpgradeInput",
+        "description": "Input for creating a cluster upgrade workflow",
+        "properties": {
+          "prompt": {
+            "description": "Optional prompt to guide the upgrade workflow",
+            "type": "string"
+          },
+          "runtime_id": {
+            "description": "Optional agent runtime ID to execute the upgrade",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterUpgradeStep": {
+        "title": "ClusterUpgradeStep",
+        "description": "A step in an agentic cluster upgrade workflow",
+        "properties": {
+          "agent_run": {
+            "$ref": "#/components/schemas/AgentRun"
+          },
+          "agent_run_id": {
+            "description": "ID of the agent run associated with this step, if any",
+            "type": "string"
+          },
+          "error": {
+            "description": "Error message if the step failed",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the upgrade step",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the upgrade step",
+            "type": "string"
+          },
+          "prompt": {
+            "description": "Prompt used to generate the upgrade step",
+            "type": "string"
+          },
+          "status": {
+            "description": "Status of the step (pending, in_progress, completed, failed)",
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "failed"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "description": "Type of step (addon, cloud_addon, infrastructure)",
+            "enum": [
+              "addon",
+              "cloud_addon",
+              "infrastructure"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "upgrade_id": {
+            "description": "ID of the cluster upgrade this step belongs to",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
       "Console.OpenAPI.AI.AgentRun.List": {
         "description": "A paginated list of agent runs",
         "properties": {
@@ -3639,6 +3777,82 @@
         },
         "x-required-scopes": [
           "cluster.write"
+        ]
+      }
+    },
+    "/v1/api/cd/clusters/{id}/upgrade": {
+      "post": {
+        "tags": [
+          "cluster-upgrade"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterUpgrade"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateClusterUpgrade",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClusterUpgradeInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "cluster.write"
+        ]
+      }
+    },
+    "/v1/api/cd/clusterupgrade/{id}": {
+      "get": {
+        "tags": [
+          "cluster-upgrade"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterUpgrade"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetClusterUpgrade",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "cluster.read"
         ]
       }
     },
