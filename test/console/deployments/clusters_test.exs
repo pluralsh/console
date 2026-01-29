@@ -1378,6 +1378,47 @@ defmodule Console.Deployments.ClustersTest do
     end
   end
 
+  describe "#create_cluster_upgrade/2" do
+    test "it can create an upgrade with addon and cloud addon steps" do
+      user = admin_user()
+      cluster = insert(:cluster, current_version: "1.31.1", write_bindings: [%{user_id: user.id}])
+      insert(:runtime_service, cluster: cluster, name: "ingress-nginx", version: "1.11.0")
+      insert(:cloud_addon, cluster: cluster, name: "coredns", version: "v1.10.1-eksbuild.38", distro: :eks)
+
+      {:ok, upgrade} = Clusters.create_cluster_upgrade(cluster.id, user)
+
+      assert upgrade.cluster_id == cluster.id
+      assert upgrade.user_id == user.id
+      assert upgrade.version == "1.32"
+
+      assert_receive {:event, %PubSub.ClusterUpgradeCreated{item: ^upgrade}}
+
+      types = Enum.frequencies_by(upgrade.steps, & &1.type)
+
+      assert types[:addon] == 1
+      assert types[:cloud_addon] == 1
+      assert types[:infrastructure] == 1
+    end
+
+    test "it does not allow creation of cluster upgrade if user cannot read the cluster" do
+      user = insert(:user)
+      cluster = insert(:cluster, current_version: "1.30.1")
+
+      {:error, _} = Clusters.create_cluster_upgrade(cluster.id, user)
+    end
+
+    test "it errors if the upgrade plan is not ready" do
+      user = admin_user()
+      cluster = insert(:cluster, current_version: "1.35.1", write_bindings: [%{user_id: user.id}])
+      insert(:cloud_addon, cluster: cluster, name: "coredns", version: "v1.13.1-eksbuild.1", distro: :eks)
+
+      {:error, msg} = Clusters.create_cluster_upgrade(cluster.id, user)
+
+      assert msg =~ "upgrade plan is not ready"
+      assert msg =~ "coredns"
+    end
+  end
+
   describe "#create_cluster_registration/2" do
     test "project writers can create registrations" do
       user = insert(:user)

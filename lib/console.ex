@@ -414,5 +414,8 @@ defmodule Console do
 
   def priv_file!(name), do: Path.join([:code.priv_dir(:console), name]) |> File.read!()
 
+  def priv_filename(name) when is_binary(name), do: Path.join([:code.priv_dir(:console), name])
+  def priv_filename(path) when is_list(path), do: Path.join([:code.priv_dir(:console) | path])
+
   def storage, do: Console.Storage.Git
 end

@@ -11,6 +11,8 @@ defmodule Console.PubSub.ClusterUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ClusterDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ClusterPinged, do: use Piazza.PubSub.Event
 
+defmodule Console.PubSub.ClusterUpgradeCreated, do: use Piazza.PubSub.Event
+
 defmodule Console.PubSub.ProviderCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ProviderUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ProviderDeleted, do: use Piazza.PubSub.Event

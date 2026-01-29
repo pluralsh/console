@@ -9,15 +9,16 @@ defmodule Console.AI.Tool do
     AiInsight,
     AgentSession,
     ChatThread,
-    InfraResearch
+    InfraResearch,
+    AgentRuntime
   }
   alias Console.AI.Chat.Knowledge
-  alias Console.Deployments.{Git, Settings}
+  alias Console.Deployments.{Git, Settings, Agents}
 
   @type t :: %__MODULE__{}
 
   defmodule Context do
-    alias Console.Schema.{AgentSession, Flow, User, AiInsight, Stack, Cluster, Service, InfraResearch}
+    alias Console.Schema.{AgentSession, Flow, User, AiInsight, Stack, Cluster, Service, InfraResearch, AgentRuntime}
     @type t :: %__MODULE__{
       flow: Flow.t,
       user: User.t,
@@ -27,10 +28,11 @@ defmodule Console.AI.Tool do
       service: Service.t,
       session: AgentSession.t,
       thread: ChatThread.t,
-      research: InfraResearch.t
+      research: InfraResearch.t,
+      runtime: AgentRuntime.t
     }
 
-    defstruct [:flow, :user, :insight, :stack, :cluster, :service, :session, :thread, :research]
+    defstruct [:flow, :user, :insight, :stack, :cluster, :service, :session, :thread, :research, :runtime]
 
     def new(args), do: struct(__MODULE__, args)
   end
@@ -118,6 +120,13 @@ defmodule Console.AI.Tool do
       %DeploymentSettings{ai: %{tools: %{create_pr: %{connection_id: id}}}} when is_binary(id) ->
         Git.get_scm_connection(id)
       _ -> Git.default_scm_connection()
+    end
+  end
+
+  def agent_runtime() do
+    case Process.get(@ctx) do
+      %Context{runtime: %AgentRuntime{} = runtime} -> runtime
+      _ -> Agents.default_runtime()
     end
   end
 end

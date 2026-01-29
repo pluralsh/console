@@ -19,6 +19,11 @@ defmodule Console.AI.Chat.MemoryEngine do
     |> loop()
   end
 
+  @doc """
+  Reduces the engine by running a completion and then calling the reducer function with the result.
+
+  The reducer function is a two-arity function of messages and accumulator.  It should return a tuple of {:halt, result} if the reduction should halt, or the new accumulator if the reduction should continue.
+  """
   def reduce(%__MODULE__{} = engine, [_ | _] = messages, reducer) when is_function(reducer, 2) do
     engine = %__MODULE__{engine | reducer: reducer}
     put_in(engine.messages, engine.messages ++ messages)
