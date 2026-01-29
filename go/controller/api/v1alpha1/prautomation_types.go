@@ -479,7 +479,7 @@ type PrAutomationConfiguration struct {
 	// Condition defines when this field should be displayed based on the values
 	// of other fields, enabling dynamic forms that adapt to user input.
 	// +kubebuilder:validation:Optional
-	*Condition `json:"condition,omitempty"`
+	Condition *Condition `json:"condition,omitempty"`
 
 	// Default provides a default value for this field.
 	// +kubebuilder:validation:Optional
