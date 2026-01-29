@@ -1,6 +1,6 @@
 import {
   Button,
-  DropdownArrowIcon,
+  CaretDownIcon,
   Flex,
   Input,
   ListBoxItem,
@@ -108,7 +108,7 @@ export function LogsDateDropdown({
         small
         secondary
         onClick={() => toggleDropdown()}
-        endIcon={<DropdownArrowIcon />}
+        endIcon={<CaretDownIcon />}
         disabled={disabled}
         style={{
           background: colors['fill-three'],

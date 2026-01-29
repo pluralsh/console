@@ -1,6 +1,6 @@
 import {
   Chip,
-  DropdownArrowIcon,
+  CaretDownIcon,
   Flex,
   IconFrame,
   Table,
@@ -75,9 +75,7 @@ const runChecksCols = [
       return (
         <IconFrame
           icon={
-            <DropdownArrowIcon
-              style={{ rotate: isExpanded ? '0deg' : '-90deg' }}
-            />
+            <CaretDownIcon style={{ rotate: isExpanded ? '0deg' : '-90deg' }} />
           }
           tooltip={isExpanded ? 'Collapse details' : 'View details'}
         />

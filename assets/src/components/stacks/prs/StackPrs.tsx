@@ -1,6 +1,6 @@
 import {
   ArrowTopRightIcon,
-  DropdownArrowIcon,
+  CaretDownIcon,
   IconFrame,
   ReloadIcon,
   Table,
@@ -177,7 +177,7 @@ const TriggerWrapperSC = styled.div(({ theme }) => ({
   },
 }))
 
-const TriggerArrowSC = styled(DropdownArrowIcon)(({ theme }) => ({
+const TriggerArrowSC = styled(CaretDownIcon)(({ theme }) => ({
   transition: 'transform 0.25s ease',
   transform: 'rotate(-90deg)',
   width: theme.spacing.medium,

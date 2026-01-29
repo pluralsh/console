@@ -33,8 +33,8 @@ import {
 } from './contexts/FillLevelContext'
 import CheckIcon from './icons/CheckIcon'
 import CopyIcon from './icons/CopyIcon'
-import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import FileIcon from './icons/FileIcon'
+import CaretDownIcon from './icons/CaretDownIcon'
 
 type CodeProps = Omit<CardProps, 'children'> & {
   children?: string
@@ -177,7 +177,7 @@ const TabsDropdownButton = styled(({ ref, ...props }) => {
       ref={ref}
       small
       tertiary
-      endIcon={<DropdownArrowIcon className="dropdownIcon" />}
+      endIcon={<CaretDownIcon className="dropdownIcon" />}
       {...{
         '&, &:hover, &:focus, &:focus-visible': {
           backgroundColor:

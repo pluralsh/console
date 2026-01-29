@@ -1,5 +1,5 @@
 import {
-  DropdownArrowIcon,
+  CaretDownIcon,
   IconFrame,
   ListBoxItem,
   Spinner,
@@ -12,11 +12,11 @@ import {
   useKickStackMutation,
   useTriggerStackRunMutation,
 } from '../../generated/graphql'
-import StackCustomRunModal from './customrun/StackCustomRunModal'
 import KickButton from '../utils/KickButton'
-import RestoreStackButton from './RestoreStackButton'
 import { MoreMenu } from '../utils/MoreMenu'
 import StackCustomRun from './customrun/StackCustomRun'
+import StackCustomRunModal from './customrun/StackCustomRunModal'
+import RestoreStackButton from './RestoreStackButton'
 
 enum MenuItemKey {
   None = '',
@@ -121,13 +121,10 @@ export default function StackActions({
             width={350}
             triggerButton={
               <IconFrame
-                css={{
-                  borderTopLeftRadius: 0,
-                  borderBottomLeftRadius: 0,
-                }}
+                css={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
                 type="floating"
                 size="large"
-                icon={<DropdownArrowIcon />}
+                icon={<CaretDownIcon />}
                 clickable
               />
             }
