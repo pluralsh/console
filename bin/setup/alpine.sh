@@ -1,4 +1,6 @@
 apk update
+# Upgrade busybox and ssl_client to fix CVE in BusyBox tar (terminal escape sequence vulnerability)
+apk upgrade --no-cache busybox busybox-binsh ssl_client
 apk add openssh-client libgcc libstdc++ ncurses-libs openssl-dev ca-certificates git gnupg bash
 apk add --no-cache --update --virtual=build gcc musl-dev libffi-dev openssl-dev make
 apk del build
