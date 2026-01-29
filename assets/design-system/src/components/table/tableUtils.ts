@@ -40,7 +40,6 @@ export type TableBaseProps = {
   renderExpanded?: any
   loose?: boolean
   stickyColumn?: boolean
-  scrollTopMargin?: number
   flush?: boolean
   virtualizeRows?: boolean
   lockColumnsOnScroll?: boolean

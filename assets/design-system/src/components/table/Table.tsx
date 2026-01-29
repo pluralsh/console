@@ -25,9 +25,7 @@ import {
   useResizeObserver,
   WrapWithIf,
 } from '../../index'
-import Button from '../Button'
 import EmptyState from '../EmptyState'
-import CaretUpIcon from '../icons/CaretUpIcon'
 import { Spinner } from '../Spinner'
 
 import {
@@ -73,7 +71,6 @@ function Table({
   fillLevel = 0,
   rowBg = 'stripes',
   stickyColumn = false,
-  scrollTopMargin = 500,
   flush = false,
   width,
   virtualizeRows = false,
@@ -98,8 +95,6 @@ function Table({
   const [tableWidth, setTableWidth] = useState(0)
   useResizeObserver(tableContainerRef, (entry) => setTableWidth(entry.width))
 
-  const [hover, setHover] = useState(false)
-  const [scrollTop, setScrollTop] = useState(0)
   const [expanded, setExpanded] = useState({})
 
   const columns = useMemo(() => {
@@ -244,13 +239,10 @@ function Table({
     >
       <TableWrapSC
         ref={forwardedRef}
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
         $width={width}
       >
         <TableSC
           ref={tableContainerRef}
-          onScroll={(e) => setScrollTop(e.currentTarget?.scrollTop)}
           onScrollCapture={onScrollCapture}
           $fillLevel={fillLevel}
           $flush={flush}
@@ -491,23 +483,6 @@ function Table({
             />
           )}
         </TableSC>
-        {hover && scrollTop > scrollTopMargin && (
-          <Button
-            small
-            floating
-            width={140}
-            css={{ position: 'absolute', right: 24, bottom: 24, zIndex: 1 }}
-            endIcon={<CaretUpIcon />}
-            onClick={() =>
-              tableContainerRef?.current?.scrollTo({
-                top: 0,
-                behavior: virtualizeRows ? 'instant' : 'smooth',
-              })
-            }
-          >
-            Back to top
-          </Button>
-        )}
       </TableWrapSC>
     </WrapWithIf>
   )
