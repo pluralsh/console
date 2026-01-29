@@ -1928,6 +1928,8 @@ export type Cluster = {
   cpuUtil?: Maybe<Scalars['Float']['output']>;
   /** a custom credential to use when provisioning this cluster */
   credential?: Maybe<ProviderCredential>;
+  /** the current upgrade attempt for this cluster */
+  currentUpgrade?: Maybe<ClusterUpgrade>;
   /** current k8s version as told to us by the deployment operator */
   currentVersion?: Maybe<Scalars['String']['output']>;
   /** when this cluster was scheduled for deletion */
@@ -2744,6 +2746,27 @@ export type ClusterUpdateAttributes = {
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
+/** A representation of an agentic attempt to upgrade this cluster */
+export type ClusterUpgrade = {
+  __typename?: 'ClusterUpgrade';
+  cluster?: Maybe<Cluster>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  runtime?: Maybe<AgentRuntime>;
+  status: ClusterUpgradeStatus;
+  steps?: Maybe<Array<Maybe<ClusterUpgradeStep>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  user?: Maybe<User>;
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+export type ClusterUpgradeAttributes = {
+  /** the prompt for the upgrade */
+  prompt?: InputMaybe<Scalars['String']['input']>;
+  /** the runtime to use for the upgrade */
+  runtimeId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 /** A consolidated checklist of tasks that need to be completed to upgrade this cluster */
 export type ClusterUpgradePlan = {
   __typename?: 'ClusterUpgradePlan';
@@ -2756,6 +2779,39 @@ export type ClusterUpgradePlan = {
   /** whether the kubelet version is in line with the current version */
   kubeletSkew?: Maybe<Scalars['Boolean']['output']>;
 };
+
+export enum ClusterUpgradeStatus {
+  Completed = 'COMPLETED',
+  Failed = 'FAILED',
+  InProgress = 'IN_PROGRESS',
+  Pending = 'PENDING'
+}
+
+/** A step in an agentic attempt to upgrade a specific component or piece of infrastructure in this kubernetes cluster */
+export type ClusterUpgradeStep = {
+  __typename?: 'ClusterUpgradeStep';
+  agentRun?: Maybe<AgentRun>;
+  /** the error message for the step if present */
+  error?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of the step */
+  name: Scalars['String']['output'];
+  /** the prompt used to generate the step */
+  prompt: Scalars['String']['output'];
+  /** the status of the step */
+  status: ClusterUpgradeStatus;
+  /** the type of step */
+  type: ClusterUpgradeStepType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  upgrade?: Maybe<ClusterUpgrade>;
+};
+
+export enum ClusterUpgradeStepType {
+  Addon = 'ADDON',
+  CloudAddon = 'CLOUD_ADDON',
+  Infrastructure = 'INFRASTRUCTURE'
+}
 
 export type ClusterUsage = {
   __typename?: 'ClusterUsage';
@@ -4352,6 +4408,8 @@ export type HelmConfigAttributes = {
   git?: InputMaybe<GitRefAttributes>;
   ignoreCrds?: InputMaybe<Scalars['Boolean']['input']>;
   ignoreHooks?: InputMaybe<Scalars['Boolean']['input']>;
+  /** a folder containing a kustomization to apply to the result of rendering this service's manifests */
+  kustomizePostrender?: InputMaybe<Scalars['String']['input']>;
   luaFile?: InputMaybe<Scalars['String']['input']>;
   luaFolder?: InputMaybe<Scalars['String']['input']>;
   luaScript?: InputMaybe<Scalars['String']['input']>;
@@ -4446,6 +4504,8 @@ export type HelmSpec = {
   git?: Maybe<GitRef>;
   ignoreCrds?: Maybe<Scalars['Boolean']['output']>;
   ignoreHooks?: Maybe<Scalars['Boolean']['output']>;
+  /** a folder containing a kustomization to apply to the result of rendering this service's manifests */
+  kustomizePostrender?: Maybe<Scalars['String']['output']>;
   /** a lua file to use for helm applies */
   luaFile?: Maybe<Scalars['String']['output']>;
   /** a folder of lua files to include in the final script used */
@@ -7856,6 +7916,7 @@ export type RootMutationType = {
   createClusterProvider?: Maybe<ClusterProvider>;
   createClusterRegistration?: Maybe<ClusterRegistration>;
   createClusterRestore?: Maybe<ClusterRestore>;
+  createClusterUpgrade?: Maybe<ClusterUpgrade>;
   createCustomStackRun?: Maybe<CustomStackRun>;
   createFederatedCredential?: Maybe<FederatedCredential>;
   createGitRepository?: Maybe<GitRepository>;
@@ -8268,6 +8329,12 @@ export type RootMutationTypeCreateClusterRegistrationArgs = {
 
 export type RootMutationTypeCreateClusterRestoreArgs = {
   backupId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateClusterUpgradeArgs = {
+  attributes?: InputMaybe<ClusterUpgradeAttributes>;
+  id: Scalars['ID']['input'];
 };
 
 
@@ -9535,6 +9602,8 @@ export type RootQueryType = {
   stackDefinition?: Maybe<StackDefinition>;
   stackDefinitions?: Maybe<StackDefinitionConnection>;
   stackRun?: Maybe<StackRun>;
+  /** fetches the files from a stack's git tarball */
+  stackTarball?: Maybe<Array<Maybe<StackFile>>>;
   statefulSet?: Maybe<StatefulSet>;
   /** adds the ability to search/filter through all tag name/value pairs */
   tagPairs?: Maybe<TagConnection>;
@@ -10753,6 +10822,11 @@ export type RootQueryTypeStackDefinitionsArgs = {
 
 
 export type RootQueryTypeStackRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeStackTarballArgs = {
   id: Scalars['ID']['input'];
 };
 

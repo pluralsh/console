@@ -455,6 +455,11 @@ spec:
                         description: IgnoreHooks indicates whether to completely ignore
                           Helm hooks when actualizing this service.
                         type: boolean
+                      kustomizePostrender:
+                        description: KustomizePostrender is a folder containing a
+                          kustomization to apply to the result of rendering this service's
+                          manifests.
+                        type: string
                       luaFile:
                         description: |-
                           LuaFile to use to generate Helm configuration.

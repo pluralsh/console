@@ -10,6 +10,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
   ecto_enum :service_mesh, Console.Schema.OperationalLayout.ServiceMesh
   ecto_enum :insight_component_priority, Console.Schema.ClusterInsightComponent.Priority
   ecto_enum :node_statistic_health, Console.Schema.NodeStatistic.Health
+  ecto_enum :cluster_upgrade_status, Console.Schema.ClusterUpgrade.Status
+  ecto_enum :cluster_upgrade_step_type, Console.Schema.ClusterUpgradeStep.Type
+
   enum :conjunction do
     value :and
     value :or
@@ -414,6 +417,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :breaking_changes, list_of(non_null(:string)), description: "the breaking changes for this version"
   end
 
+  input_object :cluster_upgrade_attributes do
+    field :prompt,     :string, description: "the prompt for the upgrade"
+    field :runtime_id, :id, description: "the runtime to use for the upgrade"
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -542,6 +550,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :object_store,     :object_store, resolve: dataloader(Deployments), description: "the object store connection bound to this cluster for backup/restore"
     field :parent_cluster,   :cluster, resolve: dataloader(Deployments), description: "the parent of this virtual cluster"
     field :insight,          :ai_insight, resolve: dataloader(Deployments), description: "an ai insight generated about issues discovered which might impact the health of this cluster"
+    field :current_upgrade,  :cluster_upgrade, resolve: dataloader(Deployments), description: "the current upgrade attempt for this cluster"
 
     field :operational_layout, :operational_layout, resolve: dataloader(Deployments), description: "a high level description of the setup of common resources in a cluster"
     field :insight_components, list_of(:cluster_insight_component), resolve: dataloader(Deployments), description: "a set of kubernetes resources used to generate the ai insight for this cluster"
@@ -999,6 +1008,35 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :user_agent,      :string
     field :count,           :string
     field :last_request_at, :datetime
+  end
+
+  @desc "A representation of an agentic attempt to upgrade this cluster"
+  object :cluster_upgrade do
+    field :id,        non_null(:id)
+    field :version,   :string
+    field :status,    non_null(:cluster_upgrade_status)
+    field :steps,     list_of(:cluster_upgrade_step), resolve: dataloader(Deployments)
+    field :runtime,   :agent_runtime, resolve: dataloader(Deployments)
+
+    field :cluster, :cluster, resolve: dataloader(Deployments)
+    field :user,    :user,    resolve: dataloader(User)
+
+    timestamps()
+  end
+
+  @desc "A step in an agentic attempt to upgrade a specific component or piece of infrastructure in this kubernetes cluster"
+  object :cluster_upgrade_step do
+    field :id,        non_null(:id)
+    field :name,      non_null(:string), description: "the name of the step"
+    field :prompt,    non_null(:string), description: "the prompt used to generate the step"
+    field :status,    non_null(:cluster_upgrade_status), description: "the status of the step"
+    field :type,      non_null(:cluster_upgrade_step_type), description: "the type of step"
+    field :error,     :string, description: "the error message for the step if present"
+
+    field :agent_run, :agent_run, resolve: dataloader(Deployments)
+    field :upgrade,   :cluster_upgrade, resolve: dataloader(Deployments)
+
+    timestamps()
   end
 
   object :cluster_usage do
@@ -1618,6 +1656,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :id, non_null(:id)
 
       resolve &Deployments.detach_cluster/2
+    end
+
+    field :create_cluster_upgrade, :cluster_upgrade do
+      middleware Authenticated
+      middleware Scope,
+        resource: :cluster,
+        action: :write
+      arg :id,         non_null(:id)
+      arg :attributes, :cluster_upgrade_attributes
+
+      safe_resolve &Deployments.create_cluster_upgrade/2
     end
 
     field :create_cluster_provider, :cluster_provider do

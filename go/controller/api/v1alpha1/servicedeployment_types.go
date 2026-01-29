@@ -108,6 +108,10 @@ type ServiceHelm struct {
 	// a folder of lua files to include in the final script used
 	// +kubebuilder:validation:Optional
 	LuaFolder *string `json:"luaFolder,omitempty"`
+
+	// KustomizePostrender is a folder containing a kustomization to apply to the result of rendering this service's manifests.
+	// +kubebuilder:validation:Optional
+	KustomizePostrender *string `json:"kustomizePostrender,omitempty"`
 }
 
 type ServiceDependency struct {

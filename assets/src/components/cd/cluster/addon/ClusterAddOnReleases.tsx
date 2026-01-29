@@ -7,10 +7,7 @@ import isEmpty from 'lodash/isEmpty'
 import { useOutletContext } from 'react-router-dom'
 
 import { InlineLink } from '../../../utils/typography/InlineLink'
-import {
-  ClusterAddOnOutletContextT,
-  versionPlaceholder,
-} from '../ClusterAddon.tsx'
+import { ClusterAddOnOutletContextT } from '../ClusterAddon.tsx'
 
 type Release = {
   version: string
@@ -44,7 +41,7 @@ export default function ClusterAddOnReleases() {
 
     return (addOn?.addon?.versions || []).map((addonVersion) => ({
       version: addonVersion?.version ?? '',
-      url: template.replace(versionPlaceholder, addonVersion?.version ?? ''),
+      url: template.replace('{vsn}', addonVersion?.version ?? ''),
     }))
   }, [addOn])
 
