@@ -87,7 +87,7 @@ const GradientWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.small,
   flexDirection: 'column',
-  height: 750,
+  minHeight: 625,
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
   background: `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, rgba(74, 81, 242, 0.13) 100%)`,

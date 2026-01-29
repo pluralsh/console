@@ -3,24 +3,31 @@ import {
   AccordionItem,
   ArrowTopRightIcon,
   Button,
+  Card,
   CheckOutlineIcon,
   Chip,
   CircleDashIcon,
   Flex,
+  IconFrame,
+  PrIcon,
   Sidecar,
   SidecarItem,
 } from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
+import { PrStatusChip } from 'components/self-service/pr/queue/PrQueueColumns'
 import { runtimeToIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 import { SidecarSkeleton } from 'components/utils/SkeletonLoaders'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { StackedText } from 'components/utils/table/StackedText'
 import { TRUNCATE } from 'components/utils/truncate'
-import { CaptionP } from 'components/utils/typography/Text'
+import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import {
   AgentRunFragment,
   AgentRunStatus,
   AgentRuntimeType,
   AgentTodoFragment,
+  PullRequestBasicFragment,
   useAgentRunDeltaSubscription,
 } from 'generated/graphql'
 import { produce } from 'immer'
@@ -29,6 +36,7 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getPodDetailsPath } from 'routes/cdRoutesConsts'
 import styled, { useTheme } from 'styled-components'
+import { formatDateTime } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 
 export function AgentRunSidecar({
@@ -75,21 +83,12 @@ export function AgentRunSidecar({
         ) : null
       ) : (
         <>
-          {run.podReference && (
-            <Button
-              secondary
-              as={Link}
-              to={getPodDetailsPath({
-                type: 'agent-run',
-                agentRunId: run.id,
-                name: run.podReference.name,
-                namespace: run.podReference.namespace,
-              })}
-              endIcon={<ArrowTopRightIcon />}
-            >
-              View pod details
-            </Button>
-          )}
+          {run?.pullRequests?.filter(isNonNullable)?.map((pr) => (
+            <PullRequestCard
+              key={pr.id}
+              pullRequest={pr}
+            />
+          ))}
           <Sidecar>
             <SidecarItem heading="ID">{run.id}</SidecarItem>
             {run.runtime?.name && (
@@ -158,9 +157,67 @@ export function AgentRunSidecar({
               </SidecarItem>
             </Sidecar>
           )}
+          {run.podReference && (
+            <Button
+              secondary
+              as={Link}
+              to={getPodDetailsPath({
+                type: 'agent-run',
+                agentRunId: run.id,
+                name: run.podReference.name,
+                namespace: run.podReference.namespace,
+              })}
+              endIcon={<ArrowTopRightIcon />}
+            >
+              View pod details
+            </Button>
+          )}
         </>
       )}
     </ContainerSC>
+  )
+}
+
+function PullRequestCard({
+  pullRequest,
+}: {
+  pullRequest: PullRequestBasicFragment
+}) {
+  const { colors } = useTheme()
+  return (
+    <PRCardSC>
+      <StackedText
+        first="Pull request"
+        firstPartialType="body2Bold"
+        firstColor="text"
+        second={formatDateTime(pullRequest.insertedAt)}
+        gap="xxsmall"
+        icon={
+          <IconFrame
+            circle
+            type="secondary"
+            icon={<PrIcon color={colors['icon-light']} />}
+          />
+        }
+      />
+      <Body2P $color="text-xlight">{pullRequest.title}</Body2P>
+      <StretchedFlex>
+        <PrStatusChip
+          size="small"
+          status={pullRequest.status}
+        />
+        <Button
+          small
+          as={Link}
+          to={pullRequest.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          endIcon={<ArrowTopRightIcon />}
+        >
+          View PR
+        </Button>
+      </StretchedFlex>
+    </PRCardSC>
   )
 }
 
@@ -177,5 +234,21 @@ const ContainerSC = styled(ResponsiveLayoutSidecarContainer)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
-  width: 268,
+  width: 304,
+  marginLeft: theme.spacing.xsmall,
+}))
+
+const PR_CARD_GRADIENT =
+  'linear-gradient(316deg, #E3A966 4.06%, #7751C7 34.47%, #747AF6 71.29%, #606ECD 98.54%)'
+
+const PRCardSC = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  padding: theme.spacing.large,
+  // gradient border styles
+  backgroundImage: `linear-gradient(${theme.colors['fill-zero']}, ${theme.colors['fill-zero']}), ${PR_CARD_GRADIENT}`,
+  backgroundClip: 'padding-box, border-box',
+  backgroundOrigin: 'border-box',
+  border: '1px solid transparent',
 }))
