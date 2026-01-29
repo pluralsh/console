@@ -87,6 +87,7 @@ const GradientWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.small,
   flexDirection: 'column',
+  flex: 1,
   minHeight: 625,
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,

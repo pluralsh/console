@@ -202,12 +202,17 @@ const MdHr = styled.hr.withConfig(commonCfg)(({ theme }) => ({
   margin: `${theme.spacing.medium}px ${theme.spacing.large}px 0`,
 }))
 
-const MdTable = styled.table(({ theme }) => ({
+const MdTableWrapper = styled.div(({ theme }) => ({
   paddingTop: theme.spacing.medium,
+  overflowX: 'auto',
+  maxWidth: '100%',
+}))
+
+const MdTable = styled.table((_p) => ({
   borderCollapse: 'separate',
   borderSpacing: 0,
-  tableLayout: 'fixed',
-  width: '100%',
+  minWidth: '100%',
+  width: 'max-content',
 }))
 
 const MdTh = styled.th(({ theme }) => ({
@@ -359,7 +364,11 @@ function Markdown({
           hr: (props) => <MdHr {...props} />,
           th: (props) => <MdTh {...props} />,
           td: (props) => <MdTd {...props} />,
-          table: (props) => <MdTable {...props} />,
+          table: (props) => (
+            <MdTableWrapper>
+              <MdTable {...props} />
+            </MdTableWrapper>
+          ),
           ...props.components,
         }}
       >
