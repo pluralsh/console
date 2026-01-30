@@ -13462,6 +13462,13 @@ export type AgentRunsQueryVariables = Exact<{
 
 export type AgentRunsQuery = { __typename?: 'RootQueryType', agentRuns?: { __typename?: 'AgentRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AgentRunEdge', node?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null> | null } | null };
 
+export type AgentRunTinyQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AgentRunTinyQuery = { __typename?: 'RootQueryType', agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null };
+
 export type AgentRunQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -21412,6 +21419,46 @@ export type AgentRunsQueryHookResult = ReturnType<typeof useAgentRunsQuery>;
 export type AgentRunsLazyQueryHookResult = ReturnType<typeof useAgentRunsLazyQuery>;
 export type AgentRunsSuspenseQueryHookResult = ReturnType<typeof useAgentRunsSuspenseQuery>;
 export type AgentRunsQueryResult = Apollo.QueryResult<AgentRunsQuery, AgentRunsQueryVariables>;
+export const AgentRunTinyDocument = gql`
+    query AgentRunTiny($id: ID!) {
+  agentRun(id: $id) {
+    ...AgentRunTiny
+  }
+}
+    ${AgentRunTinyFragmentDoc}`;
+
+/**
+ * __useAgentRunTinyQuery__
+ *
+ * To run a query within a React component, call `useAgentRunTinyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentRunTinyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentRunTinyQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAgentRunTinyQuery(baseOptions: Apollo.QueryHookOptions<AgentRunTinyQuery, AgentRunTinyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AgentRunTinyQuery, AgentRunTinyQueryVariables>(AgentRunTinyDocument, options);
+      }
+export function useAgentRunTinyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentRunTinyQuery, AgentRunTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AgentRunTinyQuery, AgentRunTinyQueryVariables>(AgentRunTinyDocument, options);
+        }
+export function useAgentRunTinySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentRunTinyQuery, AgentRunTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AgentRunTinyQuery, AgentRunTinyQueryVariables>(AgentRunTinyDocument, options);
+        }
+export type AgentRunTinyQueryHookResult = ReturnType<typeof useAgentRunTinyQuery>;
+export type AgentRunTinyLazyQueryHookResult = ReturnType<typeof useAgentRunTinyLazyQuery>;
+export type AgentRunTinySuspenseQueryHookResult = ReturnType<typeof useAgentRunTinySuspenseQuery>;
+export type AgentRunTinyQueryResult = Apollo.QueryResult<AgentRunTinyQuery, AgentRunTinyQueryVariables>;
 export const AgentRunDocument = gql`
     query AgentRun($id: ID!) {
   agentRun(id: $id) {
@@ -35785,6 +35832,7 @@ export type ClusterVulnerabilityAggregateQueryResult = Apollo.QueryResult<Cluste
 export const namedOperations = {
   Query: {
     AgentRuns: 'AgentRuns',
+    AgentRunTiny: 'AgentRunTiny',
     AgentRun: 'AgentRun',
     AgentRunPod: 'AgentRunPod',
     AgentRuntimes: 'AgentRuntimes',

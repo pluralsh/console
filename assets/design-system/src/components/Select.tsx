@@ -1,3 +1,4 @@
+import { type AriaSelectProps } from '@react-types/select'
 import {
   type ComponentProps,
   type HTMLAttributes,
@@ -10,7 +11,6 @@ import {
 } from 'react'
 import { HiddenSelect, useButton, useSelect } from 'react-aria'
 import styled, { useTheme } from 'styled-components'
-import { type AriaSelectProps } from '@react-types/select'
 
 import { type Placement } from '@floating-ui/react-dom-interactions'
 
@@ -25,13 +25,13 @@ import {
 import { useFloatingDropdown } from '../hooks/useFloatingDropdown'
 
 import { type ListBoxItemBaseProps } from './ListBoxItem'
-import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import { PopoverListBox } from './PopoverListBox'
 import {
   setNextFocusedKey,
   useSelectComboStateProps,
 } from './SelectComboShared'
 import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
+import CaretDownIcon from './icons/CaretDownIcon'
 
 const parentFillLevelToBackground = {
   0: 'fill-one',
@@ -240,7 +240,7 @@ function SelectButton({
         {rightContent && <div className="rightContent">{rightContent}</div>}
         {showArrow && (
           <div className="arrow">
-            <DropdownArrowIcon size={16} />
+            <CaretDownIcon size={16} />
           </div>
         )}
       </div>

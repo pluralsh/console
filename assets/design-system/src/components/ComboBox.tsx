@@ -28,7 +28,6 @@ import { type Key } from '@react-types/shared'
 
 import { useFloatingDropdown } from '../hooks/useFloatingDropdown'
 
-import DropdownArrowIcon from './icons/DropdownArrowIcon'
 import SearchIcon from './icons/SearchIcon'
 import { type InputProps } from './Input'
 import { Spinner } from './Spinner'
@@ -42,6 +41,7 @@ import {
 } from './SelectComboShared'
 import Input2 from './Input2'
 import Chip, { CHIP_CLOSE_ATTR_KEY } from './Chip'
+import CaretDownIcon from './icons/CaretDownIcon'
 
 type Placement = 'left' | 'right'
 const CHIP_ATTR_KEY = 'data-chip-key' as const
@@ -124,7 +124,7 @@ function OpenButton({
       {...props}
       {...useButtonProps}
     >
-      <DropdownArrowIcon />
+      <CaretDownIcon />
     </OpenButtonSC>
   )
 }

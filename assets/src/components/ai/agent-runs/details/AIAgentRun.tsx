@@ -1,14 +1,15 @@
 import {
   ArrowTopRightIcon,
+  ArrowUpIcon,
   Button,
   Divider,
   Flex,
   prettifyRepoUrl,
   SpinnerAlt,
   Toast,
+  usePrevious,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { RunShareMenu } from 'components/ai/RunShareMenu.tsx'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
@@ -18,10 +19,9 @@ import {
   AgentRunStatus,
   useAgentRunQuery,
   useCancelAgentRunMutation,
-  useShareAgentRunMutation,
 } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { useMemo } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   AI_AGENT_RUNS_ABS_PATH,
@@ -30,12 +30,13 @@ import {
   getAgentRunAbsPath,
 } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
-import { isNonNullable } from 'utils/isNonNullable.ts'
 import { getAIBreadcrumbs } from '../../AI.tsx'
 import { AgentRunAnalysis } from './AIAgentRunAnalysis.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
+import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
-import { PullRequestCallout } from './PullRequestCallout.tsx'
+import { SimpleToastChip } from 'components/utils/SimpleToastChip.tsx'
+import { useIntersectionObserver } from '@react-hooks-library/core'
 
 export const getAgentRunBreadcrumbs = (
   runId: string,
@@ -55,6 +56,10 @@ export const getAgentRunBreadcrumbs = (
 export function AIAgentRun() {
   const { spacing } = useTheme()
   const id = useParams()[AI_AGENT_RUNS_PARAM_RUN_ID] ?? ''
+  const [showAnalysisToast, setShowAnalysisToast] = useState(false)
+
+  const analysisRef = useRef<HTMLDivElement>(null)
+  const { inView: isAnalysisInView } = useIntersectionObserver(analysisRef)
 
   const [cancelAgentRun, { loading: cancelling, error: cancellingError }] =
     useCancelAgentRunMutation({
@@ -67,11 +72,16 @@ export function AIAgentRun() {
     pollInterval: POLL_INTERVAL,
     skip: !id,
   })
-  const [shareAgentRun, { loading: shareLoading, error: shareError }] =
-    useShareAgentRunMutation()
 
   const runLoading = !data && loading
   const run = data?.agentRun
+  const isRunning =
+    run?.status == AgentRunStatus.Running ||
+    run?.status == AgentRunStatus.Pending
+  const prevIsRunning = usePrevious(isRunning)
+
+  if (prevIsRunning && !isRunning && !showAnalysisToast && !isAnalysisInView)
+    setShowAnalysisToast(true)
 
   useSetBreadcrumbs(
     useMemo(
@@ -95,10 +105,13 @@ export function AIAgentRun() {
         gap="large"
         flex={1}
         minWidth={0}
-        paddingRight={spacing.xsmall}
+        paddingRight={spacing.medium}
         overflow="auto"
       >
-        <StretchedFlex gap="xxxxxxlarge">
+        <StretchedFlex
+          gap="xxxxlarge"
+          alignItems="start"
+        >
           <StackedText
             truncate
             loading={runLoading}
@@ -108,34 +121,25 @@ export function AIAgentRun() {
             second={prettifyRepoUrl(run?.repository ?? '')}
             secondPartialType="body2"
             secondColor="text-xlight"
+            css={{ flex: 1 }}
           />
           <Flex gap="small">
-            {(run?.status == AgentRunStatus.Running ||
-              run?.status == AgentRunStatus.Pending) && (
+            {isRunning && (
               <Button
+                small
+                secondary
                 onClick={() => cancelAgentRun()}
                 startIcon={<SpinnerAlt />}
                 loading={cancelling}
-                secondary
               >
                 Cancel agent run
               </Button>
             )}
-            {run?.status !== AgentRunStatus.Failed && (
-              <RunShareMenu
-                isShared={run?.shared}
-                setIsShared={(shared) =>
-                  shareAgentRun({ variables: { id, shared } })
-                }
-                loading={shareLoading}
-                error={shareError}
-                label="Share run"
-              />
-            )}
+            {run && <AIAgentRunShareButton runId={run?.id} />}
           </Flex>
         </StretchedFlex>
         <Divider backgroundColor="border" />
-        {run?.error ? (
+        {run?.error && (
           <GqlError
             header="There was an error during this run."
             error={run.error}
@@ -149,33 +153,31 @@ export function AIAgentRun() {
               </Button>
             }
           />
-        ) : (
-          <>
-            {run?.pullRequests?.filter(isNonNullable)?.map((pr) => (
-              <PullRequestCallout
-                key={pr.id}
-                pullRequest={pr}
-              />
-            ))}
-            {run?.analysis && <AgentRunAnalysis analysis={run.analysis} />}
-            <StackedText
-              first="Agent activity"
-              firstPartialType="body2Bold"
-              firstColor="text"
-              second="Trace agent progress during this run"
-              secondPartialType="body2"
-              secondColor="text-light"
-            />
-            {!!run ? (
-              <AIAgentRunMessages run={run} />
-            ) : runLoading ? (
-              <RectangleSkeleton
-                $width="100%"
-                $height={400}
-              />
-            ) : null}
-          </>
         )}
+        {run?.analysis && (
+          <AgentRunAnalysis
+            ref={analysisRef}
+            analysis={run.analysis}
+          />
+        )}
+        {!isRunning && (
+          <StackedText
+            first="Agent activity"
+            firstPartialType="body2Bold"
+            firstColor="text"
+            second="Trace agent progress during this run"
+            secondPartialType="body2"
+            secondColor="text-light"
+          />
+        )}
+        {!!run ? (
+          <AIAgentRunMessages run={run} />
+        ) : runLoading ? (
+          <RectangleSkeleton
+            $width="100%"
+            $height={400}
+          />
+        ) : null}
       </Flex>
       <AgentRunSidecar
         run={run}
@@ -191,6 +193,24 @@ export function AIAgentRun() {
       >
         {cancellingError?.message}
       </Toast>
+      <SimpleToastChip
+        clickable
+        show={showAnalysisToast && !isAnalysisInView}
+        onClose={() => setShowAnalysisToast(false)}
+        onClick={() => {
+          analysisRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          })
+          setShowAnalysisToast(false)
+        }}
+        delayTimeout="none"
+      >
+        <Flex gap="xsmall">
+          <span>Scroll up to view analysis</span>
+          <ArrowUpIcon />
+        </Flex>
+      </SimpleToastChip>
     </WrapperSC>
   )
 }
@@ -201,4 +221,6 @@ const WrapperSC = styled.div(({ theme }) => ({
   maxWidth: theme.breakpoints.desktopLarge,
   alignSelf: 'center',
   width: '100%',
+  height: '100%',
+  minHeight: 0,
 }))

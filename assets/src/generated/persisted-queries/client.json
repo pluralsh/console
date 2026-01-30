@@ -7,6 +7,11 @@
          "name": "AgentRuns",
          "body": "query AgentRuns($after: String, $first: Int = 100, $runtimeId: ID) {\n  agentRuns(after: $after, first: $first, runtimeId: $runtimeId) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...AgentRunTiny\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment AgentRunTiny on AgentRun {\n  id\n  status\n  mode\n  prompt\n  shared\n  error\n  runtime {\n    id\n    name\n    type\n    __typename\n  }\n  repository\n  branch\n  pullRequests {\n    ...PullRequestBasic\n    __typename\n  }\n  podReference {\n    name\n    namespace\n    __typename\n  }\n  __typename\n}\n\nfragment PullRequestBasic on PullRequest {\n  id\n  url\n  title\n  creator\n  status\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
+      "sha256:e045b877104e284c5b92f3490e5cc09936a842d8a79b49c6b3018f6aafb7786f": {
+         "type": "query",
+         "name": "AgentRunTiny",
+         "body": "query AgentRunTiny($id: ID!) {\n  agentRun(id: $id) {\n    ...AgentRunTiny\n    __typename\n  }\n}\n\nfragment AgentRunTiny on AgentRun {\n  id\n  status\n  mode\n  prompt\n  shared\n  error\n  runtime {\n    id\n    name\n    type\n    __typename\n  }\n  repository\n  branch\n  pullRequests {\n    ...PullRequestBasic\n    __typename\n  }\n  podReference {\n    name\n    namespace\n    __typename\n  }\n  __typename\n}\n\nfragment PullRequestBasic on PullRequest {\n  id\n  url\n  title\n  creator\n  status\n  insertedAt\n  updatedAt\n  __typename\n}"
+      },
       "sha256:f5490b937745b0cf2a9bef1be2b6511d4c76931a251e7e2e633600f533a1357e": {
          "type": "query",
          "name": "AgentRun",

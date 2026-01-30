@@ -8,9 +8,9 @@ import {
   BrowseAppsIcon,
   Button,
   Card,
+  CaretDownIcon,
   CheckIcon,
   Chip,
-  DropdownArrowIcon,
   HamburgerMenuIcon,
   IconFrame,
   InfoIcon,
@@ -182,7 +182,7 @@ const CustomTriggerButton = styled(({ ref, ...props }) => (
     ref={ref}
     medium
     primary
-    endIcon={<DropdownArrowIcon className="dropdownIcon" />}
+    endIcon={<CaretDownIcon className="dropdownIcon" />}
     {...props}
   >
     Click me!

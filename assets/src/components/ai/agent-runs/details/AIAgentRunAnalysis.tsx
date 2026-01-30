@@ -1,10 +1,13 @@
 import { Accordion, AccordionItem, Markdown } from '@pluralsh/design-system'
 import { AgentAnalysisFragment } from 'generated/graphql'
+import { RefObject } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 export function AgentRunAnalysis({
+  ref,
   analysis,
 }: {
+  ref: RefObject<HTMLDivElement | null>
   analysis: AgentAnalysisFragment
 }) {
   const { partials, colors } = useTheme()
@@ -18,6 +21,7 @@ export function AgentRunAnalysis({
   }
   return (
     <Accordion
+      ref={ref}
       type="multiple"
       defaultValue={['summary']}
       css={{ background: colors['fill-zero'] }}

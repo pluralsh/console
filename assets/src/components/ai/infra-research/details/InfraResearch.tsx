@@ -15,7 +15,7 @@ import {
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { useChatbot } from 'components/ai/AIContext'
-import { RunShareMenu } from 'components/ai/RunShareMenu'
+import { InfraResearchPublishMenu } from 'components/ai/InfraResearchPublishMenu'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
@@ -189,7 +189,7 @@ export function InfraResearch() {
             )}
             {!isChatbotOpen && headerButtons}
             {status !== InfraResearchStatus.Failed && (
-              <RunShareMenu
+              <InfraResearchPublishMenu
                 isShared={published}
                 setIsShared={(published) =>
                   updateResearch({

@@ -2,7 +2,7 @@ import {
   Accordion,
   AccordionItem,
   CloseIcon,
-  DropdownArrowIcon,
+  CaretDownIcon,
   FileIcon,
   Flex,
   IconFrame,
@@ -130,7 +130,7 @@ const ItemHeaderSC = styled.div(({ theme }) => ({
   padding: theme.spacing.medium,
 }))
 
-const AccordionCaretSC = styled(DropdownArrowIcon)({
+const AccordionCaretSC = styled(CaretDownIcon)({
   transition: 'transform 0.3s ease-in-out',
   'button[data-state="open"] &': { transform: 'scaleY(-1)' },
 })

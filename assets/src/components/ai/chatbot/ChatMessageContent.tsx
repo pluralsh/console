@@ -544,7 +544,6 @@ function ToolMessageDetails({ content, attributes }): ReactElement | null {
 
 const DefaultWrapperSC = styled.div<{ $role: AiRole }>(({ theme, $role }) => ({
   maxWidth: '100%',
-  overflow: 'auto',
   ...($role === AiRole.User && {
     backgroundColor: theme.colors['fill-zero'],
     border: theme.borders.default,
