@@ -46,7 +46,10 @@ export function ToolCallContent({
           fillLevel={2}
           css={{ padding: spacing.medium, overflow: 'auto', maxHeight: 324 }}
         >
-          <Markdown text={content} />
+          <Markdown
+            text={content}
+            css={{ whiteSpace: 'pre-line', margin: 0 }}
+          />
         </Card>
       )}
     </Flex>
