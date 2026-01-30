@@ -188,7 +188,8 @@ def get_chart_images(url, chart, version, values=None):
         print_error(f"Failed to template helm chart: {result.stderr}")
         return None
 
-    objects = list(yaml.safe_load_all(result.stdout))
+    sanitized = re.sub(r"\t", "  ", result.stdout)
+    objects = list(yaml.safe_load_all(sanitized))
     return sorted(list(set(find_nested_images(objects))))
 
 _IMAGE_RE = re.compile(
