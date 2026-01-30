@@ -84,7 +84,7 @@ func (c *client) IsServiceDeleting(id string) bool {
 		return false
 	}
 
-	return service != nil && service.ServiceDeploymentFragment.DeletedAt != nil
+	return service != nil && service.DeletedAt != nil
 }
 
 func (c *client) CreateService(clusterId *string, attributes console.ServiceDeploymentAttributes) (*console.ServiceDeploymentExtended, error) {
