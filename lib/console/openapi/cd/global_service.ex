@@ -11,7 +11,7 @@ defmodule Console.OpenAPI.CD.GlobalService do
     type: :object,
     description: "A paginated list of global services",
     properties: %{
-      data: array_of(GlobalService)
+      data: array_of(Console.OpenAPI.CD.GlobalService)
     }
   }
 

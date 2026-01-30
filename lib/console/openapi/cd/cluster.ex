@@ -10,7 +10,7 @@ defmodule Console.OpenAPI.CD.Cluster do
     type: :object,
     description: "A paginated list of clusters",
     properties: %{
-      data: array_of(Cluster)
+      data: array_of(Console.OpenAPI.CD.Cluster)
     }
   }
 

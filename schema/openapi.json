@@ -734,7 +734,9 @@
         "description": "A paginated list of agent runs",
         "properties": {
           "data": {
-            "items": "Elixir.AgentRun",
+            "items": {
+              "$ref": "#/components/schemas/AgentRun"
+            },
             "type": "array"
           }
         },
@@ -744,7 +746,9 @@
         "description": "A paginated list of agent runtimes",
         "properties": {
           "data": {
-            "items": "Elixir.AgentRuntime",
+            "items": {
+              "$ref": "#/components/schemas/AgentRuntime"
+            },
             "type": "array"
           }
         },
@@ -754,7 +758,9 @@
         "description": "A paginated list of agent sessions",
         "properties": {
           "data": {
-            "items": "Elixir.AgentSession",
+            "items": {
+              "$ref": "#/components/schemas/AgentSession"
+            },
             "type": "array"
           }
         },
@@ -764,7 +770,9 @@
         "description": "A paginated list of sentinels",
         "properties": {
           "data": {
-            "items": "Elixir.Sentinel",
+            "items": {
+              "$ref": "#/components/schemas/Sentinel"
+            },
             "type": "array"
           }
         },
@@ -774,7 +782,9 @@
         "description": "A paginated list of sentinel runs",
         "properties": {
           "data": {
-            "items": "Elixir.SentinelRun",
+            "items": {
+              "$ref": "#/components/schemas/SentinelRun"
+            },
             "type": "array"
           }
         },
@@ -784,7 +794,9 @@
         "description": "A paginated list of clusters",
         "properties": {
           "data": {
-            "items": "Elixir.Cluster",
+            "items": {
+              "$ref": "#/components/schemas/Cluster"
+            },
             "type": "array"
           }
         },
@@ -794,7 +806,9 @@
         "description": "A list of git repositories",
         "properties": {
           "data": {
-            "items": "Elixir.Console.Schema.GitRepository",
+            "items": {
+              "$ref": "#/components/schemas/GitRepository"
+            },
             "type": "array"
           }
         },
@@ -804,7 +818,9 @@
         "description": "A paginated list of global services",
         "properties": {
           "data": {
-            "items": "Elixir.GlobalService",
+            "items": {
+              "$ref": "#/components/schemas/GlobalService"
+            },
             "type": "array"
           }
         },
@@ -814,7 +830,9 @@
         "description": "A list of helm repositories",
         "properties": {
           "data": {
-            "items": "Elixir.Console.Schema.HelmRepository",
+            "items": {
+              "$ref": "#/components/schemas/HelmRepository"
+            },
             "type": "array"
           }
         },
@@ -824,7 +842,9 @@
         "description": "A paginated list of pipelines",
         "properties": {
           "data": {
-            "items": "Elixir.Pipeline",
+            "items": {
+              "$ref": "#/components/schemas/Pipeline"
+            },
             "type": "array"
           }
         },
@@ -834,7 +854,9 @@
         "description": "A paginated list of service deployments",
         "properties": {
           "data": {
-            "items": "Elixir.Service",
+            "items": {
+              "$ref": "#/components/schemas/Service"
+            },
             "type": "array"
           }
         },
@@ -844,7 +866,9 @@
         "description": "A paginated list of projects",
         "properties": {
           "data": {
-            "items": "Elixir.Project",
+            "items": {
+              "$ref": "#/components/schemas/Project"
+            },
             "type": "array"
           }
         },
@@ -854,7 +878,9 @@
         "description": "A paginated list of catalogs",
         "properties": {
           "data": {
-            "items": "Elixir.Catalog",
+            "items": {
+              "$ref": "#/components/schemas/Catalog"
+            },
             "type": "array"
           }
         },
@@ -878,7 +904,9 @@
         "description": "A list of SCM connections",
         "properties": {
           "data": {
-            "items": "Elixir.Connection",
+            "items": {
+              "$ref": "#/components/schemas/ScmConnection"
+            },
             "type": "array"
           }
         },
@@ -888,7 +916,9 @@
         "description": "A paginated list of PR automations",
         "properties": {
           "data": {
-            "items": "Elixir.PrAutomation",
+            "items": {
+              "$ref": "#/components/schemas/PrAutomation"
+            },
             "type": "array"
           }
         },
@@ -898,7 +928,9 @@
         "description": "A paginated list of pull requests",
         "properties": {
           "data": {
-            "items": "Elixir.PullRequest",
+            "items": {
+              "$ref": "#/components/schemas/PullRequest"
+            },
             "type": "array"
           }
         },
@@ -908,7 +940,9 @@
         "description": "A list of stacks",
         "properties": {
           "data": {
-            "items": "Elixir.Stack",
+            "items": {
+              "$ref": "#/components/schemas/Stack"
+            },
             "type": "array"
           }
         },

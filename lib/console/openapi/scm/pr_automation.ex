@@ -11,7 +11,7 @@ defmodule Console.OpenAPI.SCM.PrAutomation do
     type: :object,
     description: "A paginated list of PR automations",
     properties: %{
-      data: array_of(PrAutomation)
+      data: array_of(Console.OpenAPI.SCM.PrAutomation)
     }
   }
 

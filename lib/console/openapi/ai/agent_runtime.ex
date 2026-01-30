@@ -11,7 +11,7 @@ defmodule Console.OpenAPI.AI.AgentRuntime do
     type: :object,
     description: "A paginated list of agent runtimes",
     properties: %{
-      data: array_of(AgentRuntime)
+      data: array_of(Console.OpenAPI.AI.AgentRuntime)
     }
   }
 

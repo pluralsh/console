@@ -5,7 +5,7 @@ defmodule Console.OpenAPI.Project do
     type: :object,
     description: "A paginated list of projects",
     properties: %{
-      data: array_of(Project)
+      data: array_of(Console.OpenAPI.Project)
     }
   }
 

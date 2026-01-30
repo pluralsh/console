@@ -10,7 +10,7 @@ defmodule Console.OpenAPI.CD.Service do
     type: :object,
     description: "A paginated list of service deployments",
     properties: %{
-      data: array_of(Service)
+      data: array_of(Console.OpenAPI.CD.Service)
     }
   }
 

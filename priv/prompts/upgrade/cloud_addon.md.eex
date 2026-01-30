@@ -10,6 +10,11 @@ What you'll ultimately want to do is construct a prompt to invoke a full coding 
 
 You should only invoke the `coding_agent` tool once and only after you've gathered enough information to craft an effective prompt.
 
+Some guidance on what is useful for the coding agent to know:
+
+1. Location of the code that is used to deploy this addon.  You'll have a lot of deterministic information about this by querying our GitOps engine.
+2. Whether it's managed by a heirarchy of plural resources (eg infrastructure stack -> service (or more services)).
+
 Here is the prompt we've been given about the component to upgrade:
 
 <%= @prompt %>

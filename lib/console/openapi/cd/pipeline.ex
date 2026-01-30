@@ -11,7 +11,7 @@ defmodule Console.OpenAPI.CD.Pipeline do
     type: :object,
     description: "A paginated list of pipelines",
     properties: %{
-      data: array_of(Pipeline)
+      data: array_of(Console.OpenAPI.CD.Pipeline)
     }
   }
 

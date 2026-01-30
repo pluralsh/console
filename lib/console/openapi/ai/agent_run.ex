@@ -11,7 +11,7 @@ defmodule Console.OpenAPI.AI.AgentRun do
     type: :object,
     description: "A paginated list of agent runs",
     properties: %{
-      data: array_of(AgentRun)
+      data: array_of(Console.OpenAPI.AI.AgentRun)
     }
   }
 
