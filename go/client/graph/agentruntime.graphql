@@ -174,7 +174,15 @@ fragment AgentRunBaseFragment on AgentRun {
 }
 
 fragment AgentRunFragment on AgentRun {
-    ...AgentRunBaseFragment
+    id
+    prompt
+    repository
+    mode
+    language
+    languageVersion
+    todos {
+        ...AgentTodoFragment
+    }
     status
     podReference {
         ...AgentPodReferenceFragment

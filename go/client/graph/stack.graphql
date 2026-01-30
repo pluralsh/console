@@ -56,7 +56,41 @@ fragment StackRunIdFragment on StackRun {
 }
 
 fragment StackRunFragment on StackRun {
-    ...StackRunBaseFragment
+    id
+    type
+    status
+    approval
+    approvedAt
+    tarball
+    workdir
+    manageState
+    variables
+    dryRun
+    stateUrls {
+        terraform {
+            address
+            lock
+            unlock
+        }
+    }
+    pluralCreds {
+        url
+        token
+    }
+    actor { ...UserFragment }
+    stack { ...InfrastructureStackFragment }
+    state { ...StackStateFragment}
+    steps { ...RunStepFragment}
+    files { ...StackFileFragment}
+    git { ...GitRefFragment }
+    repository { ...GitRepositoryFragment}
+    jobSpec { ...JobSpecFragment}
+    configuration { ...StackConfigurationFragment}
+    environment { ...StackEnvironmentFragment}
+    output { ...StackOutputFragment}
+    errors { ...ServiceErrorFragment}
+    violations { ...StackPolicyViolationFragment }
+    policyEngine { ...PolicyEngineFragment }
     approver { ...UserFragment}
 }
 

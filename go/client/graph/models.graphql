@@ -50,7 +50,15 @@ fragment ComponentContentFragment on ComponentContent {
 }
 
 fragment ServiceDeploymentFragment on ServiceDeployment {
-    ...ServiceDeploymentBaseFragment
+    id
+    name
+    namespace
+    version
+    status
+    kustomize {...KustomizeFragment}
+    git { ...GitRefFragment }
+    helm { ...HelmSpecFragment }
+    repository { ... GitRepositoryFragment }
     components {
         id
         uid
@@ -95,7 +103,52 @@ fragment ServiceDeploymentExtended on ServiceDeployment {
     errors { ...ErrorFragment }
     revision { ...RevisionFragment }
     contexts { ...ServiceContextFragment }
-    ...ServiceDeploymentFragment
+    id
+    name
+    namespace
+    version
+    status
+    kustomize {...KustomizeFragment}
+    git { ...GitRefFragment }
+    helm { ...HelmSpecFragment }
+    repository { ... GitRepositoryFragment }
+    components {
+        id
+        uid
+        name
+        group
+        kind
+        namespace
+        state
+        synced
+        version
+        content {... ComponentContentFragment}
+    }
+    protect
+    deletedAt
+    sha
+    tarball
+    dryRun
+    templated
+    configuration { name value }
+    flow {
+        id
+    }
+    syncConfig {
+        createNamespace
+        enforceNamespace
+        namespaceMetadata {
+            labels
+            annotations
+        }
+        diffNormalizers {
+            ...DiffNormalizerFragment
+        }
+    }
+    metadata {
+        images
+        fqdns
+    }
 }
 
 fragment ErrorFragment on ServiceError {
