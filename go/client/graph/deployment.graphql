@@ -163,6 +163,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
         version
         pingedAt
         metadata
+        tags {
+          ...ClusterTags
+        }
         currentVersion
         kasUrl
         distro

@@ -6725,6 +6725,7 @@ type ServiceDeploymentForAgent_Cluster struct {
 	Name           string         "json:\"name\" graphql:\"name\""
 	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
 	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
+	Tags           []*ClusterTags "json:\"tags,omitempty\" graphql:\"tags\""
 	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
 }
 
@@ -6781,6 +6782,12 @@ func (t *ServiceDeploymentForAgent_Cluster) GetSelf() *bool {
 		t = &ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.Self
+}
+func (t *ServiceDeploymentForAgent_Cluster) GetTags() []*ClusterTags {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Tags
 }
 func (t *ServiceDeploymentForAgent_Cluster) GetVersion() *string {
 	if t == nil {
@@ -7876,6 +7883,7 @@ type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluste
 	Name           string         "json:\"name\" graphql:\"name\""
 	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
 	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
+	Tags           []*ClusterTags "json:\"tags,omitempty\" graphql:\"tags\""
 	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
 }
 
@@ -7932,6 +7940,12 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cl
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.Self
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetTags() []*ClusterTags {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Tags
 }
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetVersion() *string {
 	if t == nil {
@@ -15985,6 +15999,7 @@ type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cl
 	Name           string         "json:\"name\" graphql:\"name\""
 	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
 	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
+	Tags           []*ClusterTags "json:\"tags,omitempty\" graphql:\"tags\""
 	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
 }
 
@@ -16041,6 +16056,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.Self
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetTags() []*ClusterTags {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Tags
 }
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Cluster) GetVersion() *string {
 	if t == nil {
@@ -16509,6 +16530,7 @@ type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEd
 	Name           string         "json:\"name\" graphql:\"name\""
 	PingedAt       *string        "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
 	Self           *bool          "json:\"self,omitempty\" graphql:\"self\""
+	Tags           []*ClusterTags "json:\"tags,omitempty\" graphql:\"tags\""
 	Version        *string        "json:\"version,omitempty\" graphql:\"version\""
 }
 
@@ -16565,6 +16587,12 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
 	}
 	return t.Self
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetTags() []*ClusterTags {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster{}
+	}
+	return t.Tags
 }
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cluster) GetVersion() *string {
 	if t == nil {
@@ -32769,6 +32797,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		version
 		pingedAt
 		metadata
+		tags {
+			... ClusterTags
+		}
 		currentVersion
 		kasUrl
 		distro
@@ -32827,6 +32858,10 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 	dependencies {
 		... ServiceDependencyFragment
 	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
 }
 fragment KustomizeFragment on Kustomize {
 	path
@@ -33270,6 +33305,9 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		version
 		pingedAt
 		metadata
+		tags {
+			... ClusterTags
+		}
 		currentVersion
 		kasUrl
 		distro
@@ -33328,6 +33366,10 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 	dependencies {
 		... ServiceDependencyFragment
 	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
 }
 fragment KustomizeFragment on Kustomize {
 	path
