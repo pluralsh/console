@@ -48,7 +48,7 @@ export function ToolCallContent({
         >
           <Markdown
             text={content}
-            css={{ whiteSpace: 'pre-line', margin: 0 }}
+            css={{ whiteSpace: 'pre-line' }}
           />
         </Card>
       )}
