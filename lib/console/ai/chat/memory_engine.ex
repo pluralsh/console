@@ -7,14 +7,14 @@ defmodule Console.AI.Chat.MemoryEngine do
   alias Console.AI.{Provider, Tool}
   alias Console.AI.Chat.Engine
 
-  defstruct [:tools, :system_prompt, :max_iterations, :reducer, iterations: 0, messages: [], acc: []]
+  defstruct [:tools, :system_prompt, :max_iterations, :reducer, messages: [], acc: []]
 
   def new(tools, max_iterations, opts \\ []) when is_integer(max_iterations) and max_iterations > 0 do
     struct(__MODULE__, Keyword.merge(opts, [tools: tools, max_iterations: max_iterations]))
   end
 
   def run(%__MODULE__{} = engine, [_ | _] = messages) do
-    engine = %__MODULE__{engine | reducer: fn l, acc -> l ++ acc end}
+    engine = %__MODULE__{engine | reducer: fn l, acc -> {:cont, l ++ acc} end}
     put_in(engine.messages, engine.messages ++ messages)
     |> loop()
   end
@@ -30,15 +30,15 @@ defmodule Console.AI.Chat.MemoryEngine do
     |> loop()
   end
 
-  defp loop(enginer, iter \\ 0)
-  defp loop(%__MODULE__{max_iterations: max, iterations: iter, messages: [_ | _] = messages, system_prompt: preface, acc: acc} = engine, iter) when iter < max do
+  defp loop(engine, iter \\ 0)
+  defp loop(%__MODULE__{max_iterations: max, messages: [_ | _] = messages, system_prompt: preface, acc: acc} = engine, iter) when iter < max do
     messages
     |> Engine.fit_context_window(preface)
     |> Provider.completion(preface: preface, plural: engine.tools)
     |> case do
       {:ok, content} -> [{:assistant, content}]
       {:ok, content, tools} ->
-        case call_tools(engine, tools, engine.tools) |> IO.inspect(label: "tool messages") do
+        case call_tools(engine, tools, engine.tools) do
           {:ok, tool_msgs} -> maybe_prepend(content, tool_msgs)
           err -> err
         end
@@ -48,7 +48,7 @@ defmodule Console.AI.Chat.MemoryEngine do
       l when is_list(l) ->
         case engine.reducer.(l, acc) do
           {:halt, res} -> {:ok, res}
-          acc -> loop(%{engine | acc: acc, messages: messages ++ l}, iter + 1)
+          {:cont, acc} -> loop(%{engine | acc: acc, messages: messages ++ l}, iter + 1)
         end
       err -> err
     end)
@@ -83,6 +83,7 @@ defmodule Console.AI.Chat.MemoryEngine do
     do: {:tool, content, %{call_id: id, name: name, arguments: args, attributes: attrs}}
   defp tool_msg(%{content: content} = msg, id, name, args, _),
     do: {:tool, content, %{call_id: id, name: name, arguments: args, attributes: Map.delete(msg, :content)}}
+  defp tool_msg(result, _, _, _, _), do: result
 
   defp maybe_prepend(msg, messages) when is_binary(msg) and byte_size(msg) > 0, do: [{:assistant, msg} | messages]
   defp maybe_prepend(_, messages), do: messages
