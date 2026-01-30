@@ -10,63 +10,70 @@ versions:
   incompatibilities: []
   summary: null
   chart_version: 1.30.2
-  images: ['quay.io/kubescape/http-request:v0.2.16', 'quay.io/kubescape/kubescape:v3.0.47',
-    'quay.io/kubescape/kubevuln:v0.3.98', 'quay.io/kubescape/node-agent:v0.3.11',
-    'quay.io/kubescape/operator:v0.2.121', 'quay.io/kubescape/storage:v0.0.237']
+  images: []
 - version: 1.30.0
   kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Fix otel-collector deployment so an external OTEL URL works even
+        when no cloud provider is set (#766)., Fix NetworkPolicy for prometheus-exporter
+        egress and storage ingress (#768)., Fix NetworkPolicy to allow Prometheus
+        ServiceMonitor traffic for Kubescape (#767)., 'Add feature: image-based mode/support
+        (#770).']
+    features: [Adds image-based functionality (image-based scanning/mode) to the operator.]
+    breaking_changes: []
   chart_version: 1.30.0
-  images: ['quay.io/kubescape/http-request:v0.2.16', 'quay.io/kubescape/kubescape:v3.0.47',
-    'quay.io/kubescape/kubevuln:v0.3.98', 'quay.io/kubescape/node-agent:v0.3.3', 'quay.io/kubescape/operator:v0.2.119',
-    'quay.io/kubescape/storage:v0.0.233']
+  images: []
 - version: 1.29.12
   kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.29.12
-  images: ['quay.io/kubescape/http-request:v0.2.15', 'quay.io/kubescape/kubescape:v3.0.45',
-    'quay.io/kubescape/kubevuln:v0.3.97', 'quay.io/kubescape/node-agent:v0.2.398',
-    'quay.io/kubescape/operator:v0.2.114', 'quay.io/kubescape/storage:v0.0.224']
+  images: []
 - version: 1.29.1
   kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Bumps bundled component versions across the Kubescape stack (kubescape
+        core, operator, kubevuln, storage, node-agent, synchronizer).', General stability/performance
+        tweaks in node-agent; improved startup behavior in operator; logging noise
+        reduction in storage. No chart-structure changes mentioned in provided notes.]
+    features: ['Kubescape core: image scanning can now return an error when the configured
+        severity threshold is exceeded (enables fail-fast/CI-style enforcement behavior).',
+      'Operator: on startup, it processes existing ApplicationProfiles (APs) and SBOMs
+        instead of only handling newly created ones.', 'Kubevuln: supports non-image
+        source types (broader input support beyond container images).', 'Node-agent:
+        adds Prometheus-related work and introduces configurable worker pool behavior
+        for tuning throughput/resource usage.']
+    breaking_changes: []
   chart_version: 1.29.1
-  images: ['quay.io/kubescape/http-request:v0.2.14', 'quay.io/kubescape/kubescape:v3.0.38',
-    'quay.io/kubescape/kubevuln:v0.3.84', 'quay.io/kubescape/node-agent:v0.2.377',
-    'quay.io/kubescape/operator:v0.2.99', 'quay.io/kubescape/storage:v0.0.208']
+  images: []
 - version: 1.29.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.29.0
-  images: ['quay.io/kubescape/http-request:v0.2.12', 'quay.io/kubescape/kubescape:v3.0.37',
-    'quay.io/kubescape/kubevuln:v0.3.82', 'quay.io/kubescape/node-agent:v0.2.357',
-    'quay.io/kubescape/operator:v0.2.97', 'quay.io/kubescape/storage:v0.0.206']
+  images: []
 - version: 1.28.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.28.0
-  images: ['quay.io/kubescape/http-request:v0.2.11', 'quay.io/kubescape/kubescape:v3.0.34',
-    'quay.io/kubescape/kubevuln:v0.3.80', 'quay.io/kubescape/node-agent:v0.2.345',
-    'quay.io/kubescape/operator:v0.2.91', 'quay.io/kubescape/storage:v0.0.185']
+  images: []
 - version: 1.27.3
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.27.3
-  images: ['quay.io/kubescape/kubescape:v3.0.34', 'quay.io/kubescape/kubevuln:v0.3.72',
-    'quay.io/kubescape/node-agent:v0.2.298', 'quay.io/kubescape/operator:v0.2.84',
-    'quay.io/kubescape/storage:v0.0.172']
+  images: []
 - version: 1.27.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -80,7 +87,31 @@ versions:
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: '### Helm values / behavior changes
+
+      - **Defaults changed**: the chart changes default settings for **node SBOM**,
+      **mTLS**, **Admission Controller**, and **HTTP**. Review your current overrides
+      and compare to the new defaults to avoid unintended enable/disable changes.
+
+      - **Host sensor configuration support**: new/expanded configuration options
+      are available for the host sensor; verify whether you need to explicitly set
+      values instead of relying on defaults.
+
+      - **nodeSelector fix**: a missing `nodeSelector` for `kubernetes.io/os: linux`
+      was added; if you previously added this manually, you may be able to remove
+      your custom patch/override.
+
+      '
+    chart_updates: [Enabled/configured host sensor options in the chart., 'Adjusted
+        default chart settings affecting node SBOM, mTLS, admission controller, and
+        HTTP.', Added missing `nodeSelector` for Linux OS scheduling.]
+    features: [Host sensor configurations are now enabled/configurable via the chart.,
+      Improved correctness around continuous scanning setting validation (operator
+        change).]
+    breaking_changes: ['Default behavior changes for node SBOM, mTLS, admission controller,
+        and HTTP may alter runtime behavior after upgrade if you relied on prior defaults.
+        Treat as potentially breaking unless you pin explicit values.']
   chart_version: 1.26.0
   images: ['quay.io/kubescape/kubescape:v3.0.30', 'quay.io/kubescape/kubevuln:v0.3.62',
     'quay.io/kubescape/node-agent:v0.2.259', 'quay.io/kubescape/operator:v0.2.74',
@@ -89,7 +120,22 @@ versions:
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Added support for air-gapped scans., Made recurring scan request
+        body configurable., Expanded ClusterRole permissions when workload metrics
+        are enabled., Updated/filled missing test values and refreshed E2E tests.,
+      Synchronizer no longer retries on invalid credentials., Fixed node-agent annotation
+        to use a dynamic name., Added node-agent mounts., Fixed whitespace issue affecting
+        `serviceScanConfig.enabled`., Deprecated the gateway component.]
+    features: [Air-gapped scans can now be enabled for environments without external
+        network access., Recurring scan request body is now configurable., 'When workload
+        metrics are enabled, required RBAC resources are added automatically.', Node-agent
+        has additional mounts and uses a dynamic annotation name for better correctness
+        across installs.]
+    breaking_changes: ['Gateway is deprecated; plan to remove/disable it and ensure
+        your deployment works without it (e.g., route traffic directly to the recommended
+        component).']
   chart_version: 1.25.0
   images: ['quay.io/kubescape/kubescape:v3.0.23', 'quay.io/kubescape/kubevuln:v0.3.52',
     'quay.io/kubescape/node-agent:v0.2.210', 'quay.io/kubescape/operator:v0.2.63',
@@ -134,7 +180,14 @@ versions:
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Added standard Kubernetes labels to chart resources (#486)., Added
+        a new rule to the operator/chart configuration (#489).]
+    features: [Standardized labels across deployed Kubernetes resources to align with
+        common labeling conventions., Introduced an additional security/scanning rule
+        (details not included in the provided notes).]
+    breaking_changes: []
   chart_version: 1.21.0
   images: ['docker.io/bitnami/kubectl:1.30.3', 'quay.io/kubescape/kubescape:v3.0.16',
     'quay.io/kubescape/kubevuln:v0.3.30', 'quay.io/kubescape/node-agent:v0.2.130',
@@ -152,7 +205,17 @@ versions:
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Fixed the include/exclude namespace feature behavior., Added a
+        `skipKernelVersionCheck` capability to the node-agent., Fixed Harbor image
+        scanning., Renamed CRDs generated by CronJobs.]
+    features: [Added `skipKernelVersionCheck` feature to node-agent to allow bypassing
+        kernel version validation in environments with non-standard or unsupported
+        kernels.]
+    breaking_changes: ['CRDs generated by CronJobs were renamed; any existing references,
+        RBAC rules, scripts, or automation targeting the old CRD names may need updating
+        and resources may be recreated on upgrade.']
   chart_version: 1.20.1
   images: ['quay.io/kubescape/kubescape:v3.0.15', 'quay.io/kubescape/kubevuln:v0.3.25',
     'quay.io/kubescape/node-agent:v0.2.105', 'quay.io/kubescape/operator:v0.2.20',
@@ -170,7 +233,13 @@ versions:
   kube: ['1.30', '1.29', '1.28']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: [Adds beta (release-candidate) rule-based alerting support. Enable by
+        setting `runtimeDetection` (unexpected file exec/open) and `malwareDetection`
+        (anti-virus) during install.]
+    breaking_changes: []
   chart_version: 1.18.11
   images: ['quay.io/kubescape/kubescape:v3.0.8', 'quay.io/kubescape/kubevuln:v0.3.14',
     'quay.io/kubescape/node-agent:v0.2.50', 'quay.io/kubescape/operator:v0.2.9', 'quay.io/kubescape/storage:v0.0.81']
@@ -216,6 +285,4 @@ versions:
   incompatibilities: []
   summary: null
   chart_version: 0.29.6
-  images: ['quay.io/kubescape/http-request:v0.2.14', 'quay.io/kubescape/kubescape:v3.0.40',
-    'quay.io/kubescape/kubevuln:v0.3.86', 'quay.io/kubescape/node-agent:test-0a5ff33',
-    'quay.io/kubescape/operator:v0.2.103', 'quay.io/kubescape/storage:v0.0.212']
+  images: []
