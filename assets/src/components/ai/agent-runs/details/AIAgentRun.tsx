@@ -1,11 +1,13 @@
 import {
   ArrowTopRightIcon,
+  ArrowUpIcon,
   Button,
   Divider,
   Flex,
   prettifyRepoUrl,
   SpinnerAlt,
   Toast,
+  usePrevious,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
@@ -19,7 +21,7 @@ import {
   useCancelAgentRunMutation,
 } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { useMemo } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   AI_AGENT_RUNS_ABS_PATH,
@@ -33,6 +35,8 @@ import { AgentRunAnalysis } from './AIAgentRunAnalysis.tsx'
 import { AIAgentRunMessages } from './AIAgentRunMessages.tsx'
 import { AIAgentRunShareButton } from './AIAgentRunShareButton.tsx'
 import { AgentRunSidecar } from './AIAgentRunSidecar.tsx'
+import { SimpleToastChip } from 'components/utils/SimpleToastChip.tsx'
+import { useIntersectionObserver } from '@react-hooks-library/core'
 
 export const getAgentRunBreadcrumbs = (
   runId: string,
@@ -52,6 +56,10 @@ export const getAgentRunBreadcrumbs = (
 export function AIAgentRun() {
   const { spacing } = useTheme()
   const id = useParams()[AI_AGENT_RUNS_PARAM_RUN_ID] ?? ''
+  const [showAnalysisToast, setShowAnalysisToast] = useState(false)
+
+  const analysisRef = useRef<HTMLDivElement>(null)
+  const { inView: isAnalysisInView } = useIntersectionObserver(analysisRef)
 
   const [cancelAgentRun, { loading: cancelling, error: cancellingError }] =
     useCancelAgentRunMutation({
@@ -70,6 +78,10 @@ export function AIAgentRun() {
   const isRunning =
     run?.status == AgentRunStatus.Running ||
     run?.status == AgentRunStatus.Pending
+  const prevIsRunning = usePrevious(isRunning)
+
+  if (prevIsRunning && !isRunning && !showAnalysisToast && !isAnalysisInView)
+    setShowAnalysisToast(true)
 
   useSetBreadcrumbs(
     useMemo(
@@ -96,7 +108,10 @@ export function AIAgentRun() {
         paddingRight={spacing.medium}
         overflow="auto"
       >
-        <StretchedFlex gap="xxxxlarge">
+        <StretchedFlex
+          gap="xxxxlarge"
+          alignItems="start"
+        >
           <StackedText
             truncate
             loading={runLoading}
@@ -111,6 +126,7 @@ export function AIAgentRun() {
           <Flex gap="small">
             {isRunning && (
               <Button
+                small
                 secondary
                 onClick={() => cancelAgentRun()}
                 startIcon={<SpinnerAlt />}
@@ -138,7 +154,12 @@ export function AIAgentRun() {
             }
           />
         )}
-        {run?.analysis && <AgentRunAnalysis analysis={run.analysis} />}
+        {run?.analysis && (
+          <AgentRunAnalysis
+            ref={analysisRef}
+            analysis={run.analysis}
+          />
+        )}
         {!isRunning && (
           <StackedText
             first="Agent activity"
@@ -172,6 +193,24 @@ export function AIAgentRun() {
       >
         {cancellingError?.message}
       </Toast>
+      <SimpleToastChip
+        clickable
+        show={showAnalysisToast && !isAnalysisInView}
+        onClose={() => setShowAnalysisToast(false)}
+        onClick={() => {
+          analysisRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+          })
+          setShowAnalysisToast(false)
+        }}
+        delayTimeout="none"
+      >
+        <Flex gap="xsmall">
+          <span>Scroll up to view analysis</span>
+          <ArrowUpIcon />
+        </Flex>
+      </SimpleToastChip>
     </WrapperSC>
   )
 }

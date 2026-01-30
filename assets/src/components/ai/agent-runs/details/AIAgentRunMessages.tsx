@@ -74,7 +74,7 @@ export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
         bottomContent={
           isRunning && (
             <TypingIndicator
-              css={{ marginRight: spacing.small, justifyContent: 'flex-end' }}
+              css={{ marginRight: spacing.small, justifyContent: 'flex-start' }}
             />
           )
         }
