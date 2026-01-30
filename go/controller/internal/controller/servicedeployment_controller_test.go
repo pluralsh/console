@@ -150,11 +150,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 					},
 				},
 				returnGetService: &gqlclient.ServiceDeploymentExtended{
-					ServiceDeploymentFragment: gqlclient.ServiceDeploymentFragment{
-						ServiceDeploymentBaseFragment: gqlclient.ServiceDeploymentBaseFragment{
-							ID: "123",
-						},
-					},
+					ID: "123",
 				},
 			}
 
@@ -214,11 +210,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 					},
 				},
 				returnGetService: &gqlclient.ServiceDeploymentExtended{
-					ServiceDeploymentFragment: gqlclient.ServiceDeploymentFragment{
-						ServiceDeploymentBaseFragment: gqlclient.ServiceDeploymentBaseFragment{
-							ID: "123",
-						},
-					},
+					ID: "123",
 				},
 			}
 
@@ -284,11 +276,7 @@ var _ = Describe("Service Controller", Ordered, func() {
 					},
 				},
 				returnGetService: &gqlclient.ServiceDeploymentExtended{
-					ServiceDeploymentFragment: gqlclient.ServiceDeploymentFragment{
-						ServiceDeploymentBaseFragment: gqlclient.ServiceDeploymentBaseFragment{
-							ID: "123",
-						},
-					},
+					ID: "123",
 				},
 			}
 			dep1 := "dep-1"
@@ -475,11 +463,7 @@ var _ = Describe("wait for resources", Ordered, func() {
 					},
 				},
 				returnGetService: &gqlclient.ServiceDeploymentExtended{
-					ServiceDeploymentFragment: gqlclient.ServiceDeploymentFragment{
-						ServiceDeploymentBaseFragment: gqlclient.ServiceDeploymentBaseFragment{
-							ID: "123",
-						},
-					},
+					ID: "123",
 				},
 			}
 
@@ -825,11 +809,7 @@ var _ = Describe("Get DiffNormalizerAttributes", Ordered, func() {
 					},
 				},
 				returnGetService: &gqlclient.ServiceDeploymentExtended{
-					ServiceDeploymentFragment: gqlclient.ServiceDeploymentFragment{
-						ServiceDeploymentBaseFragment: gqlclient.ServiceDeploymentBaseFragment{
-							ID: "123",
-						},
-					},
+					ID: "123",
 				},
 			}
 
