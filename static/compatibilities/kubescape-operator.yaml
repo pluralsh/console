@@ -64,21 +64,74 @@ versions:
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: '- **Node agent config:** New support for specifying the kubelet
+      directory in the node-agent configuration (introduced in chart/app `1.28.0`).
+      Review your `values.yaml` for node-agent settings and add/override the kubelet
+      directory path if your kubelet uses a non-default location.
+
+      '
+    chart_updates: [Bumped kubescape-operator chart/app version to **1.28.0**., Added
+        kubelet directory support in node-agent configuration.]
+    features: ['Node-agent can now be configured with an explicit kubelet directory
+        path, improving compatibility with clusters where kubelet uses non-standard
+        directories.']
+    breaking_changes: []
   chart_version: 1.28.0
   images: []
 - version: 1.27.3
   kube: ['1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Added Kubernetes recommended labels and other additional labels
+        across resources., Added additional labels for ServiceMonitor resources.,
+      Enabled node SBOM generation (nodeSbomGeneration)., Migrated AppArmor configuration
+        from annotations to native AppArmor fields., Fixed HTTP detection flag wiring/behavior.,
+      "Bumped subcomponents: operator v0.2.82\u2192v0.2.84, kubevuln v0.3.69\u2192\
+        v0.3.72, node-agent v0.2.287\u2192v0.2.298, inspektor-gadget to v0.39.0, and\
+        \ registryx to address a panic."]
+    features: [Consistent Kubernetes recommended labels (and extra chart labels) are
+        applied to resources; ServiceMonitor now supports additional labels., Node
+        SBOM generation can be enabled to produce SBOMs at the node level., Generated
+        SBOMs include an artifact type label for better identification.]
+    breaking_changes: [AppArmor moved from pod annotations to the newer Kubernetes
+        AppArmor fields; clusters relying on legacy annotation-based AppArmor need
+        to validate their policies/manifests still apply.]
   chart_version: 1.27.3
   images: []
 - version: 1.27.0
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "### Helm values / chart behavior changes to verify\nFrom **1.26.0**\
+      \ notes (since you\u2019re upgrading past it):\n- **Host sensor configuration\
+      \ enabled**: verify any `hostScanner` / host-sensor related values and whether\
+      \ this changes what gets deployed by default.\n- **Default chart settings changed**:\
+      \ specifically called out are **node SBOM**, **mTLS**, **Admission Controller**,\
+      \ and **HTTP** defaults. You should diff your current `values.yaml` vs the new\
+      \ chart defaults and explicitly set any behavior you rely on (don\u2019t assume\
+      \ old defaults).\n- **nodeSelector `kubernetes.io/os: linux` added** (missing\
+      \ before): if you run mixed OS clusters, confirm scheduling behavior matches\
+      \ expectations.\n\nFor **1.27.0** notes provided: no explicit Helm values changes\
+      \ are called out in the snippet (mostly component bumps and internal changes),\
+      \ but still run a `helm diff upgrade` to catch template/value drift."
+    chart_updates: ['1.26.0: Enable host sensor configurations (#624).', '1.26.0:
+        Change default chart settings for node SBOM, mTLS, Admission Controller, and
+        HTTP (#625).', '1.26.0: Add missing nodeSelector for linux OS (#626).', '1.27.0:
+        Bump referenced component versions across kubescape, operator, kubevuln, storage,
+        node-agent, synchronizer, prometheus-exporter (various PRs).']
+    features: [Prerequisites UI enhanced with new review-values flow and improved
+        prerequisites experience (kubescape v3.0.34 range)., Prerequisites updated
+        to support custom kubeconfig (kubescape)., 'Operator: added process tree information
+        for exec-to-pod events (operator).', 'Node-agent: added task-based enricher
+        and additional alert/enrichment improvements (node-agent).', 'Storage: reduced
+        SQLite connection lock contention (storage).']
+    breaking_changes: ['Storage: **NetworkNeighbors deprecated and removed** (storage).
+        If you have any downstream tooling/queries relying on this data/model, validate
+        compatibility before upgrading.']
   chart_version: 1.27.0
   images: ['quay.io/kubescape/kubescape:v3.0.34', 'quay.io/kubescape/kubevuln:v0.3.69',
     'quay.io/kubescape/node-agent:v0.2.282', 'quay.io/kubescape/operator:v0.2.81',
@@ -144,7 +197,22 @@ versions:
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Node-agent: switched to using the released node-agent image and
+        updated the chart in preparation for the 1.24.0 release.', 'Node-agent: added
+        SBOM generation capability (introduced in 1.23.4).', 'Image pull secrets:
+        chart can now generate an imagePullSecret when registry credentials are provided.',
+      "Relevancy logic: switched from SBOM-based relevancy (\u201Csbomp\u201D) to\
+        \ using Application Profile for relevancy in 1.24.0.", 'Release engineering
+        updates: pre-release image bumps and general release prep changes in 1.24.0.']
+    features: [Node-agent SBOM generation support (added in 1.23.4)., Automatic creation
+        of imagePullSecret from provided registry credentials (added in 1.23.4).,
+      "Relevancy now uses Application Profile instead of SBOM (\u201Csbomp\u201D)\
+        \ (changed in 1.24.0)."]
+    breaking_changes: ["Relevancy mechanism changed from SBOM (\u201Csbomp\u201D)\
+        \ to Application Profile in 1.24.0; any workflows or expectations tied to\
+        \ SBOM-based relevancy may change and should be validated post-upgrade."]
   chart_version: 1.24.0
   images: ['quay.io/kubescape/kubescape:v3.0.22', 'quay.io/kubescape/kubevuln:v0.3.48',
     'quay.io/kubescape/node-agent:v0.2.204', 'quay.io/kubescape/operator:v0.2.55',
@@ -162,7 +230,14 @@ versions:
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Fixed node-agent Service selector so it correctly selects the
+        intended pods., Fixed inspektor-gadget access to the Kubernetes node proxy
+        endpoint `api/v1/nodes/<NODE_NAME>/proxy/configz`., Release prep/version bump
+        for kubescape-operator 1.23.0.]
+    features: []
+    breaking_changes: []
   chart_version: 1.23.0
   images: ['quay.io/kubescape/kubescape:v3.0.21', 'quay.io/kubescape/kubevuln:v0.3.36',
     'quay.io/kubescape/node-agent:v0.2.178', 'quay.io/kubescape/operator:v0.2.41',
@@ -255,7 +330,16 @@ versions:
   kube: ['1.29', '1.28', '1.27']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ["Release notes provided don\u2019t include Helm chart values/templating\
+        \ changes between 1.16.5 and 1.17.0 (the 1.16.5 notes failed to load). Treat\
+        \ this as an application-focused upgrade and review the chart diff/`values.yaml`\
+        \ between tags before upgrading."]
+    features: [Application profiles are enabled in 1.17.0., Application activities
+        are enabled by default., A Synchronizer component is enabled to support future
+        developments., Automatic generation of NetworkPolicies is enabled.]
+    breaking_changes: []
   chart_version: 1.17.0
   images: []
 - version: 1.16.5
