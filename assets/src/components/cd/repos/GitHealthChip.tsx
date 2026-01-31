@@ -1,37 +1,24 @@
 import { Chip, Tooltip } from '@pluralsh/design-system'
 import { GitHealth } from 'generated/graphql'
+import { capitalize } from 'lodash'
 import { ComponentProps } from 'react'
 import { createMapperWithFallback } from 'utils/mapping'
-
-export const gitHealthToLabel = createMapperWithFallback<GitHealth, string>(
-  {
-    PULLABLE: 'Pullable',
-    FAILED: 'Failed',
-  },
-  'Unknown'
-)
 
 export const gitHealthToSeverity = createMapperWithFallback<
   GitHealth,
   ComponentProps<typeof Chip>['severity']
->(
-  {
-    PULLABLE: 'success',
-    FAILED: 'critical',
-  },
-  'neutral'
-)
+>({ PULLABLE: 'success', FAILED: 'critical' }, 'neutral')
 
 export function GitHealthChip({
   health,
   error,
 }: {
-  health: GitHealth | null | undefined
-  error?: string | null | undefined
+  health: Nullable<GitHealth>
+  error?: Nullable<string>
 }) {
   const chip = (
     <Chip severity={gitHealthToSeverity(health)}>
-      {gitHealthToLabel(health)}
+      {capitalize(health ?? 'Unknown')}
     </Chip>
   )
 

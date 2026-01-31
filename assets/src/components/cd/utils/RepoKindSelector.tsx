@@ -113,7 +113,7 @@ export function RepoKindSelector({
                 borderTop: theme.borders.default,
                 paddingTop: theme.spacing.large,
               }
-            : {}
+            : { display: 'none' }
         }
       >
         {children}

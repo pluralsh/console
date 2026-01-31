@@ -28,7 +28,7 @@ import ModalAlt, { StepH } from '../ModalAlt'
 import { PrepareGitStep } from '../PrepareGitStep'
 import SshKeyUpload from '../utils/SshKeyUpload'
 
-export function ImportGit({ refetch }: { refetch: () => void }) {
+export function ImportGit() {
   const [isOpen, setIsOpen] = useState(false)
   const closeModal = useCallback(() => setIsOpen(false), [])
 
@@ -36,9 +36,7 @@ export function ImportGit({ refetch }: { refetch: () => void }) {
     <>
       <Button
         primary
-        onClick={() => {
-          setIsOpen(true)
-        }}
+        onClick={() => setIsOpen(true)}
       >
         Import Git
       </Button>
@@ -46,7 +44,6 @@ export function ImportGit({ refetch }: { refetch: () => void }) {
         <ImportGitModal
           open={isOpen}
           onClose={closeModal}
-          refetch={refetch}
         />
       </ModalMountTransition>
     </>
@@ -59,11 +56,9 @@ export const getAuthMethodFromGitUrl = (gitUrl: string | null | undefined) =>
 export function ImportGitModal({
   open,
   onClose,
-  refetch,
 }: {
   open: boolean
   onClose: () => void
-  refetch: () => void
 }) {
   const theme = useTheme()
   const [gitUrl, setGitUrl] = useState('')
@@ -85,10 +80,13 @@ export function ImportGitModal({
           : {}),
       },
     },
-    onCompleted: () => {
-      refetch?.()
-      onClose()
-    },
+    onCompleted: () => onClose(),
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      'GitRepositories',
+      'HelmRepositories',
+      'FluxHelmRepositories',
+    ],
   })
 
   const disabled =

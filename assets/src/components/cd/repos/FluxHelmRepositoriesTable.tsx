@@ -1,11 +1,12 @@
-import { FluxHelmRepositoriesQuery } from 'generated/graphql'
+import { useFluxHelmRepositoriesQuery } from 'generated/graphql'
 
-import { ComponentProps } from 'react'
+import { ComponentProps, useEffect, useMemo } from 'react'
 
-import { EmptyState, Table } from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
 
-import { isEmpty } from 'lodash'
-
+import { POLL_INTERVAL } from 'components/cluster/constants'
+import { GqlError } from 'components/utils/Alert'
+import { isNonNullable } from 'utils/isNonNullable'
 import {
   ColName,
   ColNamespace,
@@ -14,25 +15,51 @@ import {
   ColType,
   ColUrl,
 } from './FluxHelmRepositoriesColumns'
+import {
+  countsFromFluxHelmRepos,
+  RepoStatusFilterKey,
+} from './RepositoriesFilters'
+import { isEmpty } from 'lodash'
 
 export function FluxHelmRepositoriesTable({
-  data,
-  reactTableOptions,
+  setStatusCounts,
+  tableFilterOptions,
 }: {
-  data: FluxHelmRepositoriesQuery
-  reactTableOptions?: ComponentProps<typeof Table>['reactTableOptions']
+  setStatusCounts: (counts: Record<RepoStatusFilterKey, number>) => void
+  tableFilterOptions: ComponentProps<typeof Table>['reactTableOptions']
 }) {
-  const repos = data?.fluxHelmRepositories
+  const hasFilters =
+    !!tableFilterOptions?.state?.globalFilter ||
+    !isEmpty(tableFilterOptions?.state?.columnFilters)
+  const { data, loading, error } = useFluxHelmRepositoriesQuery({
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
+  const repos = useMemo(
+    () => data?.fluxHelmRepositories?.filter(isNonNullable) ?? [],
+    [data]
+  )
 
-  return !isEmpty(repos) ? (
+  useEffect(() => {
+    setStatusCounts(countsFromFluxHelmRepos(repos))
+  }, [repos, setStatusCounts])
+
+  if (error) return <GqlError error={error} />
+
+  return (
     <Table
       fullHeightWrap
-      data={data?.fluxHelmRepositories || []}
+      virtualizeRows
+      loading={!data && loading}
+      data={repos}
       columns={fluxHelmRepoColumns}
-      reactTableOptions={reactTableOptions}
+      reactTableOptions={tableFilterOptions}
+      emptyStateProps={{
+        message: hasFilters
+          ? 'No results found. Try adjusting your filters.'
+          : "Looks like you don't have any Flux Helm repositories yet.",
+      }}
     />
-  ) : (
-    <EmptyState message="Looks like you don't have any Flux repositories yet." />
   )
 }
 
