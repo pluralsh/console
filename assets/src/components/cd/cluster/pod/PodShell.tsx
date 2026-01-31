@@ -6,7 +6,6 @@ import { Pod, useServiceDeploymentTinyQuery } from 'generated/graphql'
 import { useMemo, useRef } from 'react'
 import { useTheme } from 'styled-components'
 
-import { Key } from '@react-types/shared'
 import { ShellWithContext } from '../../../cluster/containers/ContainerShell'
 import { ShellContext, TerminalActions } from '../../../terminal/Terminal'
 
@@ -14,7 +13,6 @@ export default function PodShell() {
   const { pod } = useOutletContext() as { pod: Pod }
   const { serviceId } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
-  const container = searchParams.get('container')
   const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
 
   if (!pod) {
@@ -29,6 +27,8 @@ export default function PodShell() {
     ],
     [pod]
   )
+  const selectedContainer =
+    searchParams.get('container') ?? containers.at(0) ?? ''
 
   const { data: serviceData } = useServiceDeploymentTinyQuery({
     variables: { id: serviceId ?? '' },
@@ -48,7 +48,7 @@ export default function PodShell() {
       >
         <FormField label="Container">
           <Select
-            selectedKey={container ?? (containers.at(0) as Key)}
+            selectedKey={selectedContainer}
             onSelectionChange={(key) =>
               setSearchParams({ container: `${key}` })
             }
@@ -66,7 +66,7 @@ export default function PodShell() {
             clusterId={clusterId}
             name={pod.metadata.name}
             namespace={pod.metadata.namespace || ''}
-            container={container ?? ''}
+            container={selectedContainer}
           />
         </ShellContext.Provider>
       </div>

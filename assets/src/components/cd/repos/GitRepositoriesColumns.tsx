@@ -1,20 +1,25 @@
-import { Chip, GitHubLogoIcon } from '@pluralsh/design-system'
+import { Chip, Flex, GitHubLogoIcon } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import {
+  AuthMethod,
   type GitRepositoryFragment,
   HelmAuthProvider,
   HelmRepositoryFragment,
+  useDeleteGitRepositoryMutation,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 import { Edge } from 'utils/graphql'
 
 import { CHART_ICON_DARK } from 'components/utils/Provider'
 
-import { GitHealthChip, gitHealthToLabel } from './GitHealthChip'
+import { Confirm } from 'components/utils/Confirm'
+import { DeleteIconButton } from 'components/utils/IconButtons'
+import { capitalize } from 'lodash'
+import { useState } from 'react'
+import { GitHealthChip } from './GitHealthChip'
 import { UpdateGitRepository } from './GitRepositoriesUpdateGit'
-import { AuthMethodChip, DeleteGitRepository } from './Repositories'
 
 const columnHelper =
   createColumnHelper<Edge<GitRepositoryFragment | HelmRepositoryFragment>>()
@@ -63,11 +68,24 @@ export const ColAuthMethod = columnHelper.accessor(
     id: 'authMethod',
     header: 'Auth method',
     enableSorting: true,
-    cell: ({ getValue }) => <AuthMethodChip authMethod={getValue()} />,
+    cell: ({ getValue }) => {
+      const authMethod = getValue()
+      return (
+        <Chip severity="neutral">
+          {authMethod ? authMethodToLabel[authMethod] : 'Unknown'}
+        </Chip>
+      )
+    },
   }
 )
+
+const authMethodToLabel: Record<AuthMethod, string> = {
+  [AuthMethod.Basic]: 'Basic',
+  [AuthMethod.Ssh]: 'SSH',
+}
+
 export const ColStatus = columnHelper.accessor(
-  ({ node }) => gitHealthToLabel(node?.health),
+  ({ node }) => capitalize(node?.health ?? 'Unknown'),
   {
     id: 'status',
     header: 'Status',
@@ -132,52 +150,69 @@ export const ColPulledAt = columnHelper.accessor(
   }
 )
 
-/* Update later when API is updated */
-export const ColOwner = columnHelper.accessor(
-  ({ node }) => (node as any)?.owner,
-  {
-    id: 'owner',
-    header: 'Owner',
-    enableSorting: true,
-    cell: ({ getValue }) => getValue() || 'Need API',
-  }
-)
-
 export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
   id: 'actions',
   header: '',
   cell: function Cell({
-    table,
     row: {
       original: { node },
     },
   }) {
-    const theme = useTheme()
-    const { refetch } = table.options.meta as { refetch?: () => void }
-
-    if (!(node as GitNode)?.editable) {
-      return null
-    }
+    if (!(node as GitNode)?.editable) return null
 
     return (
       node && (
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.large,
-            alignItems: 'center',
-          }}
+        <Flex
+          gap="large"
+          align="center"
         >
-          <UpdateGitRepository
-            repo={node as GitRepositoryFragment}
-            refetch={refetch}
-          />
-          <DeleteGitRepository
-            repo={node as GitRepositoryFragment}
-            refetch={refetch}
-          />
-        </div>
+          <UpdateGitRepository repo={node as GitRepositoryFragment} />
+          <DeleteGitRepository repo={node as GitRepositoryFragment} />
+        </Flex>
       )
     )
   },
 })
+
+function DeleteGitRepository({
+  repo,
+}: {
+  repo: Pick<GitRepositoryFragment, 'id' | 'url'>
+}) {
+  const { spacing } = useTheme()
+  const [confirm, setConfirm] = useState(false)
+
+  const [mutation, { loading, error }] = useDeleteGitRepositoryMutation({
+    variables: { id: repo.id ?? '' },
+    onCompleted: () => setConfirm(false),
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      'GitRepositories',
+      'HelmRepositories',
+      'FluxHelmRepositories',
+    ],
+  })
+
+  return (
+    <>
+      <DeleteIconButton
+        tooltip
+        onClick={() => setConfirm(true)}
+      />
+      <Confirm
+        open={confirm}
+        title="Delete Git Repository"
+        text="Are you sure you want to delete this Git repository?"
+        extraContent={
+          <span css={{ marginTop: spacing.medium }}>{repo.url}</span>
+        }
+        confirmationText="Delete"
+        close={() => setConfirm(false)}
+        submit={() => mutation()}
+        loading={loading}
+        destructive
+        error={error}
+      />
+    </>
+  )
+}

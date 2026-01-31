@@ -24,13 +24,7 @@ import {
   getAuthMethodFromGitUrl,
 } from './GitRepositoriesImportGit'
 
-export function UpdateGitRepository({
-  repo,
-  refetch,
-}: {
-  repo: GitRepositoryFragment
-  refetch: Nullable<() => void>
-}) {
+export function UpdateGitRepository({ repo }: { repo: GitRepositoryFragment }) {
   const [isOpen, setIsOpen] = useState(false)
   const closeModal = useCallback(() => setIsOpen(false), [])
 
@@ -39,9 +33,7 @@ export function UpdateGitRepository({
       <Button
         secondary
         small
-        onClick={() => {
-          setIsOpen(true)
-        }}
+        onClick={() => setIsOpen(true)}
       >
         Update
       </Button>
@@ -49,7 +41,6 @@ export function UpdateGitRepository({
         <ModalForm
           open={isOpen}
           repo={repo}
-          refetch={refetch}
           onClose={closeModal}
         />
       </ModalMountTransition>
@@ -61,12 +52,10 @@ export function ModalForm({
   open,
   repo,
   onClose,
-  refetch,
 }: {
   open: boolean
   repo: GitRepositoryFragment
   onClose: () => void
-  refetch: Nullable<() => void>
 }) {
   const theme = useTheme()
   const [gitUrl, setGitUrl] = useState(repo.url)
@@ -89,10 +78,13 @@ export function ModalForm({
           : {}),
       },
     },
-    onCompleted: () => {
-      refetch?.()
-      onClose()
-    },
+    onCompleted: () => onClose(),
+    awaitRefetchQueries: true,
+    refetchQueries: [
+      'GitRepositories',
+      'HelmRepositories',
+      'FluxHelmRepositories',
+    ],
   })
 
   const disabled =

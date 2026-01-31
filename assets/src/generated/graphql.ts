@@ -14621,12 +14621,18 @@ export type FluxHelmRepositoryFragment = { __typename?: 'FluxHelmRepository', me
 
 export type HelmChartVersionFragment = { __typename?: 'HelmChartVersion', name?: string | null, appVersion?: string | null, version?: string | null, digest?: string | null };
 
-export type GitRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
+export type GitRepositoriesQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 
 export type GitRepositoriesQuery = { __typename?: 'RootQueryType', gitRepositories?: { __typename?: 'GitRepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'GitRepositoryEdge', node?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null } | null> | null } | null };
 
-export type HelmRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
+export type HelmRepositoriesQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
 
 
 export type HelmRepositoriesQuery = { __typename?: 'RootQueryType', helmRepositories?: { __typename?: 'HelmRepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'HelmRepositoryEdge', node?: { __typename?: 'HelmRepository', id: string, url: string, health?: GitHealth | null, provider?: HelmAuthProvider | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
@@ -26316,8 +26322,8 @@ export type ServiceTarballLazyQueryHookResult = ReturnType<typeof useServiceTarb
 export type ServiceTarballSuspenseQueryHookResult = ReturnType<typeof useServiceTarballSuspenseQuery>;
 export type ServiceTarballQueryResult = Apollo.QueryResult<ServiceTarballQuery, ServiceTarballQueryVariables>;
 export const GitRepositoriesDocument = gql`
-    query GitRepositories {
-  gitRepositories(first: 100) {
+    query GitRepositories($first: Int, $after: String) {
+  gitRepositories(first: $first, after: $after) {
     pageInfo {
       ...PageInfo
     }
@@ -26343,6 +26349,8 @@ ${GitRepositoryFragmentDoc}`;
  * @example
  * const { data, loading, error } = useGitRepositoriesQuery({
  *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *   },
  * });
  */
@@ -26363,8 +26371,8 @@ export type GitRepositoriesLazyQueryHookResult = ReturnType<typeof useGitReposit
 export type GitRepositoriesSuspenseQueryHookResult = ReturnType<typeof useGitRepositoriesSuspenseQuery>;
 export type GitRepositoriesQueryResult = Apollo.QueryResult<GitRepositoriesQuery, GitRepositoriesQueryVariables>;
 export const HelmRepositoriesDocument = gql`
-    query HelmRepositories {
-  helmRepositories(first: 100) {
+    query HelmRepositories($first: Int, $after: String) {
+  helmRepositories(first: $first, after: $after) {
     pageInfo {
       ...PageInfo
     }
@@ -26390,6 +26398,8 @@ ${HelmRepositoryFragmentDoc}`;
  * @example
  * const { data, loading, error } = useHelmRepositoriesQuery({
  *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *   },
  * });
  */

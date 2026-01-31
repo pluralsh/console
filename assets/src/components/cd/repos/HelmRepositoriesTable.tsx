@@ -1,9 +1,9 @@
-import { EmptyState, Table } from '@pluralsh/design-system'
-import { HelmRepositoriesQuery } from 'generated/graphql'
-import { ComponentProps } from 'react'
+import { Table } from '@pluralsh/design-system'
+import { useHelmRepositoriesQuery } from 'generated/graphql'
+import { ComponentProps, useEffect } from 'react'
 
-import { isEmpty } from 'lodash'
-
+import { GqlError } from 'components/utils/Alert'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   ColCreatedAt,
   ColProvider,
@@ -12,25 +12,54 @@ import {
   ColStatus,
   ColUpdatedAt,
 } from './GitRepositoriesColumns'
+import {
+  countsFromGitOrHelmRepos,
+  RepoStatusFilterKey,
+} from './RepositoriesFilters'
+import { isEmpty } from 'lodash'
 
 export function HelmRepositoriesTable({
-  data,
-  reactTableOptions,
+  tableFilterOptions,
+  setStatusCounts,
 }: {
-  data: HelmRepositoriesQuery
-  reactTableOptions?: ComponentProps<typeof Table>['reactTableOptions']
+  tableFilterOptions: ComponentProps<typeof Table>['reactTableOptions']
+  setStatusCounts: (counts: Record<RepoStatusFilterKey, number>) => void
 }) {
-  const edges = data?.helmRepositories?.edges
+  const hasFilters =
+    !!tableFilterOptions?.state?.globalFilter ||
+    !isEmpty(tableFilterOptions?.state?.columnFilters)
 
-  return !isEmpty(edges) ? (
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData({
+      queryHook: useHelmRepositoriesQuery,
+      keyPath: ['helmRepositories'],
+    })
+  useEffect(() => {
+    setStatusCounts(
+      countsFromGitOrHelmRepos(data?.helmRepositories?.edges ?? [])
+    )
+  }, [data, setStatusCounts])
+
+  if (error) return <GqlError error={error} />
+
+  return (
     <Table
       fullHeightWrap
-      data={edges || []}
+      virtualizeRows
+      loading={!data && loading}
+      data={data?.helmRepositories?.edges ?? []}
       columns={helmRepoColumns}
-      reactTableOptions={reactTableOptions}
+      reactTableOptions={tableFilterOptions}
+      emptyStateProps={{
+        message: hasFilters
+          ? 'No results found. Try adjusting your filters.'
+          : "Looks like you don't have any Helm repositories yet.",
+      }}
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
     />
-  ) : (
-    <EmptyState message="Looks like you don't have any Helm repositories yet." />
   )
 }
 

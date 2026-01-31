@@ -9,7 +9,7 @@ import GlobalServices from 'components/cd/globalServices/GlobalServices.tsx'
 import Namespaces from 'components/cd/namespaces/Namespaces'
 
 import Pipelines from 'components/cd/pipelines/Pipelines'
-import Repositories from 'components/cd/repos/Repositories'
+import { Repositories } from 'components/cd/repos/Repositories'
 
 import { ServiceComponent } from 'components/cd/services/component/ServiceComponent'
 import { ServiceComponents } from 'components/cd/services/service/ServiceComponents'

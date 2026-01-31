@@ -1,9 +1,9 @@
-import { EmptyState, Table } from '@pluralsh/design-system'
-import { GitRepositoriesQuery } from 'generated/graphql'
-import { ComponentProps } from 'react'
+import { Table } from '@pluralsh/design-system'
+import { useGitRepositoriesQuery } from 'generated/graphql'
+import { ComponentProps, useEffect } from 'react'
 
-import { isEmpty } from 'lodash'
-
+import { GqlError } from 'components/utils/Alert'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   ColActions,
   ColAuthMethod,
@@ -13,8 +13,57 @@ import {
   ColStatus,
   ColUpdatedAt,
 } from './GitRepositoriesColumns'
+import {
+  countsFromGitOrHelmRepos,
+  RepoStatusFilterKey,
+} from './RepositoriesFilters'
+import { isEmpty } from 'lodash'
 
-export const gitRepoColumns = [
+export function GitRepositoriesTable({
+  tableFilterOptions,
+  setStatusCounts,
+}: {
+  tableFilterOptions: ComponentProps<typeof Table>['reactTableOptions']
+  setStatusCounts: (counts: Record<RepoStatusFilterKey, number>) => void
+}) {
+  const hasFilters =
+    !!tableFilterOptions?.state?.globalFilter ||
+    !isEmpty(tableFilterOptions?.state?.columnFilters)
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData({
+      queryHook: useGitRepositoriesQuery,
+      keyPath: ['gitRepositories'],
+    })
+  useEffect(() => {
+    setStatusCounts(
+      countsFromGitOrHelmRepos(data?.gitRepositories?.edges ?? [])
+    )
+  }, [data, setStatusCounts])
+
+  if (error) return <GqlError error={error} />
+
+  return (
+    <Table
+      fullHeightWrap
+      virtualizeRows
+      loading={!data && loading}
+      data={data?.gitRepositories?.edges ?? []}
+      columns={gitRepoColumns}
+      reactTableOptions={tableFilterOptions}
+      emptyStateProps={{
+        message: hasFilters
+          ? 'No results found. Try adjusting your filters.'
+          : "Looks like you don't have any Git repositories yet.",
+      }}
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
+    />
+  )
+}
+
+const gitRepoColumns = [
   ColRepo,
   ColAuthMethod,
   ColStatus,
@@ -23,23 +72,3 @@ export const gitRepoColumns = [
   ColPulledAt,
   ColActions,
 ]
-export function GitRepositoriesTable({
-  data,
-  reactTableOptions,
-}: {
-  data: GitRepositoriesQuery
-  reactTableOptions?: ComponentProps<typeof Table>['reactTableOptions']
-}) {
-  const edges = data?.gitRepositories?.edges
-
-  return !isEmpty(edges) ? (
-    <Table
-      fullHeightWrap
-      data={edges || []}
-      columns={gitRepoColumns}
-      reactTableOptions={reactTableOptions}
-    />
-  ) : (
-    <EmptyState message="Looks like you don't have any Git repositories yet." />
-  )
-}
