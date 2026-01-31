@@ -1391,6 +1391,8 @@ defmodule Console.Deployments.ClustersTest do
       assert upgrade.user_id == user.id
       assert upgrade.version == "1.32"
 
+      assert refetch(cluster).current_upgrade_id == upgrade.id
+
       assert_receive {:event, %PubSub.ClusterUpgradeCreated{item: ^upgrade}}
 
       types = Enum.frequencies_by(upgrade.steps, & &1.type)

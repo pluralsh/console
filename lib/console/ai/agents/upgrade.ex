@@ -5,13 +5,12 @@ defmodule Console.AI.Agents.Upgrade do
     ClusterUpgrade,
     ClusterUpgradeStep,
     User,
-    AgentRun
   }
   alias Console.AI.Tools.{
     Agent.ServiceComponent,
     Agent.Stack,
-    Agent.Coding.ServiceFiles,
-    Agent.Coding.StackFiles,
+    Upgrade.Coding.ServiceFiles,
+    Upgrade.Coding.StackFiles,
     Upgrade.AgentRun
   }
   require EEx
@@ -46,8 +45,8 @@ defmodule Console.AI.Agents.Upgrade do
   end
 
   defp reducer(messages, _) do
-    case Enum.find(messages, &match?(%AgentRun{}, &1)) do
-      %AgentRun{} = run -> {:halt, %{status: :completed, agent_run_id: run.id}}
+    case Enum.find(messages, &match?(%Console.Schema.AgentRun{}, &1)) do
+      %Console.Schema.AgentRun{id: id} -> {:halt, %{status: :completed, agent_run_id: id}}
       _ -> last_message(messages)
     end
   end
@@ -59,6 +58,7 @@ defmodule Console.AI.Agents.Upgrade do
       {:assistant, content} when is_binary(content) -> %{status: :failed, error: content}
       _ -> %{status: :failed, error: "no reason given for failure"}
     end
+    |> then(& {:cont, &1})
   end
 
   defp prompt(%ClusterUpgradeStep{type: :addon, prompt: prompt}, upgrade), do: addon_prompt(prompt: prompt, upgrade: upgrade) |> String.trim()

@@ -463,6 +463,12 @@ defmodule Console.GraphQl.Deployments.Git do
     timestamps()
   end
 
+  @desc "a rollup count of repository pullability"
+  object :pullability_statistic do
+    field :health, :git_health
+    field :count,  non_null(:integer)
+  end
+
   @desc "A direct Plural representation of a Helm repository"
   object :helm_repository do
     field :id,        non_null(:id)
@@ -941,6 +947,16 @@ defmodule Console.GraphQl.Deployments.Git do
       resolve &Deployments.resolve_git/2
     end
 
+    @desc "gets summary information for git repository pullability"
+    field :git_pullability_statistics, list_of(:pullability_statistic) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :repos,
+        action: :read
+
+      resolve &Deployments.git_pullability_statistics/2
+    end
+
     connection field :git_repositories, node_type: :git_repository do
       middleware Authenticated
       middleware Scope,
@@ -948,6 +964,16 @@ defmodule Console.GraphQl.Deployments.Git do
         action: :read
 
       resolve &Deployments.list_git_repositories/2
+    end
+
+    @desc "gets summary information for helm repository pullability"
+    field :helm_pullability_statistics, list_of(:pullability_statistic) do
+      middleware Authenticated
+      middleware Scope,
+        resource: :repos,
+        action: :read
+
+      resolve &Deployments.helm_pullability_statistics/2
     end
 
     connection field :helm_repositories, node_type: :helm_repository do

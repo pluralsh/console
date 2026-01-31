@@ -12,7 +12,7 @@ defmodule Console.OpenAPI.AI.AgentSession do
     type: :object,
     description: "A paginated list of agent sessions",
     properties: %{
-      data: array_of(AgentSession)
+      data: array_of(Console.OpenAPI.AI.AgentSession)
     }
   }
 

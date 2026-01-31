@@ -1,3 +1,48 @@
+<% if (kubernetesChangelog) {
+  const majorChanges = (kubernetesChangelog.majorChanges ?? []).filter(Boolean)
+  const breakingChanges = (kubernetesChangelog.breakingChanges ?? []).filter(Boolean)
+  const deprecations = (kubernetesChangelog.deprecations ?? []).filter(Boolean)
+-%>
+## Kubernetes Changes (v<%= kubernetesChangelog.version ?? 'Unknown' %>)
+
+### Major Changes
+<% if (majorChanges.length) { -%>
+<% for (let i = 0; i < majorChanges.length; i++) { -%>
+<%= majorChanges[i] %>
+
+<% } -%>
+<% } else { -%>
+None reported.
+<% } -%>
+
+### Breaking Changes
+<% if (breakingChanges.length) { -%>
+<% for (let i = 0; i < breakingChanges.length; i++) { -%>
+- <%= breakingChanges[i] %>
+<% } -%>
+<% } else { -%>
+None reported.
+<% } -%>
+
+### Deprecations
+<% if (deprecations.length) { -%>
+<% for (let i = 0; i < deprecations.length; i++) { -%>
+- <%= deprecations[i] %>
+<% } -%>
+<% } else { -%>
+None reported.
+<% } -%>
+
+<% } else { -%>
+## Kubernetes Changes
+- No changelog available for this version.
+
+<% } -%>
+
+## Kubernetes Add-On Update Matrix
+ 
+These are the specific updates recommended for each add-on in the current cluster SBOM.
+
 | Add-on | Type | Recommendation | Release Notes | Compatibility Table | Images |
 | ------ | ---- | -------------- | ------------- | ------------------- | ------ |
 <% for (let i = 0; i < addons.length; i++) {
@@ -8,4 +53,48 @@
   const tableUrl = addon.id ? `${origin}${getCompatibilityPath(addon.id, addon.type === 'cloud')}` : '--'
 -%>
 | <%= addon.name %> | <%= addon.type === 'cloud' ? (addon.distro ?? 'Cloud') : 'Helm' %> | <%= recommendation %> | <%- addon.releaseUrl ?? '--' %> | <%- tableUrl %> | <%- addon.images?.join('<br/>') || '--' %> |
+<% } -%>
+
+## Component Updates
+
+The following is a breakdown of changes involved in the component updates to support the upgrade to Kubernetes v<%= nextKubeVersion %>.
+
+<% for (let i = 0; i < addons.length; i++) {
+  const addon = addons[i]
+  const summary = addon.summary ?? {}
+  const features = (summary.features ?? []).filter(Boolean)
+  const breakingChanges = (summary.breakingChanges ?? []).filter(Boolean)
+  const chartUpdates = (summary.chartUpdates ?? []).filter(Boolean)
+  const helmChanges = summary.helmChanges ? [summary.helmChanges] : []
+  const helmUpdates = [...chartUpdates, ...helmChanges]
+-%>
+
+### <%= addon.name %>
+
+#### New Features
+<% if (features.length) { -%>
+<% for (let j = 0; j < features.length; j++) { -%>
+- <%= features[j] %>
+<% } -%>
+<% } else { -%>
+- None reported.
+<% } -%>
+
+#### Breaking Changes
+<% if (breakingChanges.length) { -%>
+<% for (let j = 0; j < breakingChanges.length; j++) { -%>
+- <%= breakingChanges[j] %>
+<% } -%>
+<% } else { -%>
+- None reported.
+<% } -%>
+
+#### Helm Updates
+<% if (helmUpdates.length) { -%>
+<% for (let j = 0; j < helmUpdates.length; j++) { -%>
+- <%= helmUpdates[j] %>
+<% } -%>
+<% } else { -%>
+- None reported.
+<% } -%>
 <% } -%>

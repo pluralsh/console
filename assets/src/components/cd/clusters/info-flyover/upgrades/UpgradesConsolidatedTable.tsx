@@ -11,6 +11,7 @@ import {
   CloudAddonFragment,
   CloudAddonUpgradeFragment,
   ClusterOverviewDetailsFragment,
+  KubernetesChangelog,
   RuntimeAddon,
   RuntimeAddonUpgradeFragment,
 } from 'generated/graphql'
@@ -48,19 +49,24 @@ type CloudOrHelmAddon =
     })
   | (CloudAddonUpgradeFragment & { addon: CloudAddonFragment })
 
-type TableMeta = { clusterId: string }
+type TableMeta = {
+  clusterId: string
+  kubernetesChangelog?: Nullable<KubernetesChangelog>
+}
 
 export function UpgradesConsolidatedTable({
   cluster,
+  kubernetesChangelog,
 }: {
   cluster: ClusterOverviewDetailsFragment
+  kubernetesChangelog?: Nullable<KubernetesChangelog>
 }) {
   const { blockingAddons, blockingCloudAddons } =
     cluster?.upgradePlanSummary ?? {}
 
   const reactTableOptions: { meta: TableMeta } = useMemo(
-    () => ({ meta: { clusterId: cluster.id } }),
-    [cluster.id]
+    () => ({ meta: { clusterId: cluster.id, kubernetesChangelog } }),
+    [cluster.id, kubernetesChangelog]
   )
 
   const data: AddonOverview[] = useMemo(
@@ -227,25 +233,35 @@ const cols = [
   }),
   columnHelper.accessor((row) => row, {
     id: 'copy',
-    header: (ctx) => (
-      <CopyButton
-        type="tertiary"
-        tooltip="Copy table as markdown"
-        text={overviewDataToMarkdown(
-          ctx.table.options.data,
-          (ctx.table.options.meta as Nullable<TableMeta>)?.clusterId ?? ''
-        )}
-      />
-    ),
+    header: (ctx) => {
+      const { clusterId, kubernetesChangelog } =
+        (ctx.table.options.meta as Nullable<TableMeta>) ?? {}
+      return (
+        <CopyButton
+          type="tertiary"
+          tooltip="Copy table as markdown"
+          text={overviewDataToMarkdown(
+            ctx.table.options.data,
+            clusterId ?? '',
+            kubernetesChangelog
+          )}
+        />
+      )
+    },
     cell: () => null,
   }),
 ]
 
-const overviewDataToMarkdown = (addons: AddonOverview[], clusterId: string) =>
+const overviewDataToMarkdown = (
+  addons: AddonOverview[],
+  clusterId: string,
+  kubernetesChangelog?: Nullable<KubernetesChangelog>
+) =>
   ejs
     .render(markdownTemplate, {
       addons,
       origin: window.location.origin,
+      kubernetesChangelog,
       getCompatibilityPath: (addOnId: string, isCloudAddon: boolean) =>
         `${getClusterAddOnDetailsPath({ clusterId, addOnId, isCloudAddon })}/${CLUSTER_ADDONS_COMPATIBILITY_PATH}`,
     })

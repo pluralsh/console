@@ -67,6 +67,23 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
     end
   end
 
+  describe "gitPullabilityStatistics" do
+    test "it can list the pullability counts for git repositories" do
+      insert_list(2, :git_repository, health: :pullable)
+      insert_list(1, :git_repository, health: :failed)
+
+      {:ok, %{data: %{"gitPullabilityStatistics" => stats}}} = run_query("""
+        query {
+          gitPullabilityStatistics { health count }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      stats = Map.new(stats, & {&1["health"], &1["count"]})
+      assert stats["PULLABLE"] == 2
+      assert stats["FAILED"] == 1
+    end
+  end
+
   describe "helmRepository" do
     test "it can fetch a helm repository by url" do
       repo = insert(:helm_repository)
@@ -78,6 +95,23 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
       """, %{"url" => repo.url}, %{current_user: admin_user()})
 
       assert found["id"] == repo.id
+    end
+  end
+
+  describe "helmPullabilityStatistics" do
+    test "it can list the pullability counts for helm repositories" do
+      insert_list(2, :helm_repository, health: :pullable)
+      insert_list(1, :helm_repository, health: :failed)
+
+      {:ok, %{data: %{"helmPullabilityStatistics" => stats}}} = run_query("""
+        query {
+          helmPullabilityStatistics { health count }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      stats = Map.new(stats, & {&1["health"], &1["count"]})
+      assert stats["PULLABLE"] == 2
+      assert stats["FAILED"] == 1
     end
   end
 

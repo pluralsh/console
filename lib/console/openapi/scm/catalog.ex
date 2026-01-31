@@ -12,7 +12,7 @@ defmodule Console.OpenAPI.SCM.Catalog do
     type: :object,
     description: "A paginated list of catalogs",
     properties: %{
-      data: array_of(Catalog)
+      data: array_of(Console.OpenAPI.SCM.Catalog)
     }
   }
 

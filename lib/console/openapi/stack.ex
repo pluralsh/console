@@ -5,7 +5,7 @@ defmodule Console.OpenAPI.Stack do
     type: :object,
     description: "A list of stacks",
     properties: %{
-      data: array_of(Stack)
+      data: array_of(Console.OpenAPI.Stack)
     }
   }
 

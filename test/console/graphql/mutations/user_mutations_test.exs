@@ -464,6 +464,33 @@ defmodule Console.GraphQl.UserMutationsTest do
     end
   end
 
+  describe "serviceAccountAccessToken" do
+    test "it can create a new access token" do
+      user = insert(:user)
+      sa = insert(:user, service_account: true, assume_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"serviceAccountAccessToken" => token}}} = run_query("""
+        mutation Create($id: ID!, $attributes: AccessTokenAttributes!) {
+          serviceAccountAccessToken(id: $id, attributes: $attributes) {
+            id
+            token
+            scopes { api }
+          }
+        }
+      """, %{
+        "id" => sa.id,
+        "attributes" => %{
+          "scopes" => [%{"api" => "cluster.read"}],
+          "expiry" => "1h"
+        }
+      }, %{current_user: user})
+
+      assert token["id"]
+      assert token["token"]
+      assert token["scopes"] == [%{"api" => "cluster.read"}]
+    end
+  end
+
   describe "deleteAccessToken" do
     test "it can delete a user's access token" do
       token = insert(:access_token)

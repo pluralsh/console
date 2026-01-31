@@ -6,7 +6,7 @@ defmodule Console.OpenAPI.CD.HelmRepository do
     type: :object,
     description: "A list of helm repositories",
     properties: %{
-      data: array_of(HelmRepository)
+      data: array_of(Console.OpenAPI.CD.HelmRepository)
     }
   }
 

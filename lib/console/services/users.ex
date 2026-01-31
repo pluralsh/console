@@ -311,6 +311,29 @@ defmodule Console.Services.Users do
     |> Repo.insert()
   end
 
+  @doc """
+  Creates an access token for a service account, only possible if the acting user can assume the service account
+  """
+  @spec create_service_account_token(map, boolean, binary, User.t) :: token_resp
+  def create_service_account_token(args \\ %{}, refresh \\ false, sa_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:sa, fn _ ->
+      get_user!(sa_id)
+      |> allow(user, :assume)
+    end)
+    |> add_operation(:wipe, fn %{sa: sa} ->
+      case refresh do
+        true ->
+          AccessToken.for_user(sa.id)
+          |> Repo.delete_all()
+          |> ok()
+        _ -> {:ok, []}
+      end
+    end)
+    |> add_operation(:token, fn %{sa: sa} -> create_access_token(args, sa) end)
+    |> execute(extract: :token)
+  end
+
   @spec delete_access_token(binary, User.t) :: token_resp
   @decorate cache_evict(cache: Console.Cache, keys: [{:access, token}])
   def delete_access_token(token, %User{id: id}) do

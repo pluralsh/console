@@ -18,6 +18,13 @@ type AccessToken struct {
 	UpdatedAt  *string                     `json:"updatedAt,omitempty"`
 }
 
+// The attributes of an access token
+type AccessTokenAttributes struct {
+	Scopes []*ScopeAttributes `json:"scopes,omitempty"`
+	// the ttl of the access token, e.g. 1h, 1d, 1w
+	Expiry *string `json:"expiry,omitempty"`
+}
+
 type AccessTokenAudit struct {
 	ID         *string `json:"id,omitempty"`
 	IP         *string `json:"ip,omitempty"`
@@ -6346,6 +6353,12 @@ type PullRequestUpdateAttributes struct {
 	ClusterID *string         `json:"clusterId,omitempty"`
 	Service   *NamespacedName `json:"service,omitempty"`
 	Cluster   *NamespacedName `json:"cluster,omitempty"`
+}
+
+// a rollup count of repository pullability
+type PullabilityStatistic struct {
+	Health *GitHealth `json:"health,omitempty"`
+	Count  int64      `json:"count"`
 }
 
 type RbacAttributes struct {

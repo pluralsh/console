@@ -26,6 +26,10 @@ defmodule Console.Schema.HelmRepository do
     from(h in query, order_by: ^order)
   end
 
+  def statistics(query \\ __MODULE__) do
+    from(h in query, group_by: h.health, select: %{health: h.health, count: count(h.id, :distinct)})
+  end
+
   @valid ~w(url provider health error pulled_at)a
 
   def changeset(model, attrs \\ %{}) do

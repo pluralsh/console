@@ -5,4 +5,3 @@ the ai's perfomance:
 | ----------- | ------- |
 | :speech_balloon: Prompt | <%= Console.Deployments.Agents.sanitize_prompt(@run.prompt) %> |
 | :link: Run history | [View run history](<%= Console.url("/ai/agent-runs/#{@run.id}") %>) |
-| :memo: Todos | <%= Enum.map_join(@run.todos || [], " ", fn todo -> (if todo.done, do: "☑️ #{todo.title}", else: "☐ #{todo.title}") end) %> |

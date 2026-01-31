@@ -11,7 +11,7 @@ defmodule Console.OpenAPI.SCM.PullRequest do
     type: :object,
     description: "A paginated list of pull requests",
     properties: %{
-      data: array_of(PullRequest)
+      data: array_of(Console.OpenAPI.SCM.PullRequest)
     }
   }
 

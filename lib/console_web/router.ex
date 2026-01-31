@@ -107,6 +107,10 @@ defmodule ConsoleWeb.Router do
 
       scope "/api", OpenAPI do
         get "/me", UserController, :me
+        get "/serviceaccounts", ServiceAccountController, :index
+        get "/serviceaccounts/email/:email", ServiceAccountController, :show_by_email
+        get "/serviceaccounts/:id", ServiceAccountController, :show
+        post "/serviceaccounts/:id/token", ServiceAccountController, :token
 
         scope "/cd", CD do
           post "/clusters",       ClusterController, :create

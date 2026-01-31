@@ -71,6 +71,20 @@ query HelmRepositories($first: Int, $after: String) {
   }
 }
 
+query GitPullabilityStatistics {
+  gitPullabilityStatistics {
+    health
+    count
+  }
+}
+
+query HelmPullabilityStatistics {
+  helmPullabilityStatistics {
+    health
+    count
+  }
+}
+
 query FluxHelmRepositories {
   fluxHelmRepositories {
     ...FluxHelmRepository

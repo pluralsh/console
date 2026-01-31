@@ -6,7 +6,7 @@ defmodule Console.OpenAPI.CD.GitRepository do
     type: :object,
     description: "A list of git repositories",
     properties: %{
-      data: array_of(GitRepository)
+      data: array_of(Console.OpenAPI.CD.GitRepository)
     }
   }
 

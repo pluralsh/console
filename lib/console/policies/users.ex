@@ -2,6 +2,7 @@ defmodule Console.Policies.Users do
   use Piazza.Policy
   alias Console.{Repo, Deployments}
   alias Console.Schema.{User, BootstrapToken, Project}
+  alias Console.Deployments.Policies, as: DeploymentPolicies
 
   def can?(%User{bootstrap: %BootstrapToken{}}, _, _), do: {:error, :forbidden}
 
@@ -10,6 +11,9 @@ defmodule Console.Policies.Users do
   def can?(_, %User{roles_updated: true}, :update), do: {:error, :forbidden}
 
   def can?(%User{id: id}, %User{id: id}, :update), do: :pass
+
+  def can?(%User{} = user, %User{service_account: true} = sa, :assume),
+    do: DeploymentPolicies.can?(user, sa, :assume)
 
   def can?(%User{} = user, %BootstrapToken{} = token, _) do
      case Repo.preload(token, [:project]) do

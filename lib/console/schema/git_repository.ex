@@ -33,6 +33,10 @@ defmodule Console.Schema.GitRepository do
     from(g in query, order_by: ^order)
   end
 
+  def statistics(query \\ __MODULE__) do
+    from(g in query, group_by: g.health, select: %{health: g.health, count: count(g.id, :distinct)})
+  end
+
   @valid ~w(url pulled_at private_key connection_id decrypt passphrase username password https_path url_format)a
 
   def changeset(model, attrs \\ %{}) do

@@ -6,7 +6,7 @@ defmodule Console.OpenAPI.SCM.Connection do
     type: :object,
     description: "A list of SCM connections",
     properties: %{
-      data: array_of(Connection)
+      data: array_of(Console.OpenAPI.SCM.Connection)
     }
   }
 

@@ -12,7 +12,7 @@ defmodule Console.OpenAPI.AI.Sentinel do
     type: :object,
     description: "A paginated list of sentinels",
     properties: %{
-      data: array_of(Sentinel)
+      data: array_of(Console.OpenAPI.AI.Sentinel)
     }
   }
 
@@ -67,7 +67,7 @@ defmodule Console.OpenAPI.AI.SentinelRun do
     type: :object,
     description: "A paginated list of sentinel runs",
     properties: %{
-      data: array_of(SentinelRun)
+      data: array_of(Console.OpenAPI.AI.SentinelRun)
     }
   }
 

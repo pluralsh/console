@@ -12,6 +12,63 @@
   ],
   "components": {
     "schemas": {
+      "AccessToken": {
+        "title": "AccessToken",
+        "description": "An access token",
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "last_used_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/Console.OpenAPI.AccessToken.Scope"
+            },
+            "type": "array"
+          },
+          "token": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "token",
+          "inserted_at"
+        ],
+        "type": "object"
+      },
+      "AccessTokenInput": {
+        "title": "AccessTokenInput",
+        "description": "Input for creating a service account access token",
+        "properties": {
+          "expiry": {
+            "description": "Token TTL, e.g. 1h, 1d, 1w",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/Console.OpenAPI.AccessToken.Scope"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "AgentRun": {
         "title": "AgentRun",
         "description": "An execution of an AI coding agent processing a prompt against a repository",
@@ -734,7 +791,9 @@
         "description": "A paginated list of agent runs",
         "properties": {
           "data": {
-            "items": "Elixir.AgentRun",
+            "items": {
+              "$ref": "#/components/schemas/AgentRun"
+            },
             "type": "array"
           }
         },
@@ -744,7 +803,9 @@
         "description": "A paginated list of agent runtimes",
         "properties": {
           "data": {
-            "items": "Elixir.AgentRuntime",
+            "items": {
+              "$ref": "#/components/schemas/AgentRuntime"
+            },
             "type": "array"
           }
         },
@@ -754,7 +815,9 @@
         "description": "A paginated list of agent sessions",
         "properties": {
           "data": {
-            "items": "Elixir.AgentSession",
+            "items": {
+              "$ref": "#/components/schemas/AgentSession"
+            },
             "type": "array"
           }
         },
@@ -764,7 +827,9 @@
         "description": "A paginated list of sentinels",
         "properties": {
           "data": {
-            "items": "Elixir.Sentinel",
+            "items": {
+              "$ref": "#/components/schemas/Sentinel"
+            },
             "type": "array"
           }
         },
@@ -774,7 +839,37 @@
         "description": "A paginated list of sentinel runs",
         "properties": {
           "data": {
-            "items": "Elixir.SentinelRun",
+            "items": {
+              "$ref": "#/components/schemas/SentinelRun"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.AccessToken.Scope": {
+        "description": "A scope entry for an access token",
+        "properties": {
+          "api": {
+            "description": "A single API name",
+            "type": "string"
+          },
+          "apis": {
+            "description": "API name",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "identifier": {
+            "description": "Identifier for scoped access",
+            "type": "string"
+          },
+          "ids": {
+            "description": "Scoped resource ids",
+            "items": {
+              "type": "string"
+            },
             "type": "array"
           }
         },
@@ -784,7 +879,9 @@
         "description": "A paginated list of clusters",
         "properties": {
           "data": {
-            "items": "Elixir.Cluster",
+            "items": {
+              "$ref": "#/components/schemas/Cluster"
+            },
             "type": "array"
           }
         },
@@ -794,7 +891,9 @@
         "description": "A list of git repositories",
         "properties": {
           "data": {
-            "items": "Elixir.Console.Schema.GitRepository",
+            "items": {
+              "$ref": "#/components/schemas/GitRepository"
+            },
             "type": "array"
           }
         },
@@ -804,7 +903,9 @@
         "description": "A paginated list of global services",
         "properties": {
           "data": {
-            "items": "Elixir.GlobalService",
+            "items": {
+              "$ref": "#/components/schemas/GlobalService"
+            },
             "type": "array"
           }
         },
@@ -814,7 +915,9 @@
         "description": "A list of helm repositories",
         "properties": {
           "data": {
-            "items": "Elixir.Console.Schema.HelmRepository",
+            "items": {
+              "$ref": "#/components/schemas/HelmRepository"
+            },
             "type": "array"
           }
         },
@@ -824,7 +927,9 @@
         "description": "A paginated list of pipelines",
         "properties": {
           "data": {
-            "items": "Elixir.Pipeline",
+            "items": {
+              "$ref": "#/components/schemas/Pipeline"
+            },
             "type": "array"
           }
         },
@@ -834,7 +939,9 @@
         "description": "A paginated list of service deployments",
         "properties": {
           "data": {
-            "items": "Elixir.Service",
+            "items": {
+              "$ref": "#/components/schemas/Service"
+            },
             "type": "array"
           }
         },
@@ -844,7 +951,9 @@
         "description": "A paginated list of projects",
         "properties": {
           "data": {
-            "items": "Elixir.Project",
+            "items": {
+              "$ref": "#/components/schemas/Project"
+            },
             "type": "array"
           }
         },
@@ -854,7 +963,9 @@
         "description": "A paginated list of catalogs",
         "properties": {
           "data": {
-            "items": "Elixir.Catalog",
+            "items": {
+              "$ref": "#/components/schemas/Catalog"
+            },
             "type": "array"
           }
         },
@@ -878,7 +989,9 @@
         "description": "A list of SCM connections",
         "properties": {
           "data": {
-            "items": "Elixir.Connection",
+            "items": {
+              "$ref": "#/components/schemas/ScmConnection"
+            },
             "type": "array"
           }
         },
@@ -888,7 +1001,9 @@
         "description": "A paginated list of PR automations",
         "properties": {
           "data": {
-            "items": "Elixir.PrAutomation",
+            "items": {
+              "$ref": "#/components/schemas/PrAutomation"
+            },
             "type": "array"
           }
         },
@@ -898,7 +1013,9 @@
         "description": "A paginated list of pull requests",
         "properties": {
           "data": {
-            "items": "Elixir.PullRequest",
+            "items": {
+              "$ref": "#/components/schemas/PullRequest"
+            },
             "type": "array"
           }
         },
@@ -908,7 +1025,21 @@
         "description": "A list of stacks",
         "properties": {
           "data": {
-            "items": "Elixir.Stack",
+            "items": {
+              "$ref": "#/components/schemas/Stack"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.User.List": {
+        "description": "A list of users",
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/User"
+            },
             "type": "array"
           }
         },
@@ -5576,6 +5707,173 @@
         ],
         "x-required-scopes": [
           "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/serviceaccounts": {
+      "get": {
+        "tags": [
+          "service-accounts"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.User.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListServiceAccounts",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "user.read"
+        ]
+      }
+    },
+    "/v1/api/serviceaccounts/email/{email}": {
+      "get": {
+        "tags": [
+          "service-accounts"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetServiceAccountByEmail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "format": "email",
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "user.read"
+        ]
+      }
+    },
+    "/v1/api/serviceaccounts/{id}": {
+      "get": {
+        "tags": [
+          "service-accounts"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetServiceAccount",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "user.read"
+        ]
+      }
+    },
+    "/v1/api/serviceaccounts/{id}/token": {
+      "post": {
+        "tags": [
+          "service-accounts"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessToken"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateServiceAccountAccessToken",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "refresh",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessTokenInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "user.write"
         ]
       }
     },
