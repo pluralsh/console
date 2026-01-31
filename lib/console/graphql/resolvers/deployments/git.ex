@@ -43,9 +43,21 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     |> paginate(args)
   end
 
+  def git_pullability_statistics(_, _) do
+    GitRepository.statistics()
+    |> Console.Repo.all()
+    |> ok()
+  end
+
   def list_helm_repositories(args, _) do
     HelmRepository.ordered()
     |> paginate(args)
+  end
+
+  def helm_pullability_statistics(_, _) do
+    HelmRepository.statistics()
+    |> Console.Repo.all()
+    |> ok()
   end
 
   def list_scm_connections(args, _) do

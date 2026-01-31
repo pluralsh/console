@@ -6355,6 +6355,12 @@ type PullRequestUpdateAttributes struct {
 	Cluster   *NamespacedName `json:"cluster,omitempty"`
 }
 
+// a rollup count of repository pullability
+type PullabilityStatistic struct {
+	Health *GitHealth `json:"health,omitempty"`
+	Count  int64      `json:"count"`
+}
+
 type RbacAttributes struct {
 	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`

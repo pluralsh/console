@@ -7649,6 +7649,13 @@ export type PullRequestUpdateAttributes = {
   title: Scalars['String']['input'];
 };
 
+/** a rollup count of repository pullability */
+export type PullabilityStatistic = {
+  __typename?: 'PullabilityStatistic';
+  count: Scalars['Int']['output'];
+  health?: Maybe<GitHealth>;
+};
+
 export type RbacAttributes = {
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -9515,6 +9522,8 @@ export type RootQueryType = {
   flows?: Maybe<FlowConnection>;
   fluxHelmRepositories?: Maybe<Array<Maybe<FluxHelmRepository>>>;
   fluxHelmRepository?: Maybe<FluxHelmRepository>;
+  /** gets summary information for git repository pullability */
+  gitPullabilityStatistics?: Maybe<Array<Maybe<PullabilityStatistic>>>;
   gitRepositories?: Maybe<GitRepositoryConnection>;
   gitRepository?: Maybe<GitRepository>;
   globalService?: Maybe<GlobalService>;
@@ -9522,6 +9531,8 @@ export type RootQueryType = {
   group?: Maybe<Group>;
   groupMembers?: Maybe<GroupMemberConnection>;
   groups?: Maybe<GroupConnection>;
+  /** gets summary information for helm repository pullability */
+  helmPullabilityStatistics?: Maybe<Array<Maybe<PullabilityStatistic>>>;
   helmRepositories?: Maybe<HelmRepositoryConnection>;
   helmRepository?: Maybe<HelmRepository>;
   infraResearch?: Maybe<InfraResearch>;

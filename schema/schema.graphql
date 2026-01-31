@@ -119,7 +119,13 @@ type RootQueryType {
 
   gitRepository(id: ID, url: String): GitRepository
 
+  "gets summary information for git repository pullability"
+  gitPullabilityStatistics: [PullabilityStatistic]
+
   gitRepositories(after: String, first: Int, before: String, last: Int): GitRepositoryConnection
+
+  "gets summary information for helm repository pullability"
+  helmPullabilityStatistics: [PullabilityStatistic]
 
   helmRepositories(after: String, first: Int, before: String, last: Int): HelmRepositoryConnection
 
@@ -9464,6 +9470,12 @@ type GitRepository {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"a rollup count of repository pullability"
+type PullabilityStatistic {
+  health: GitHealth
+  count: Int!
 }
 
 "A direct Plural representation of a Helm repository"
