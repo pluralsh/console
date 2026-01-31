@@ -1,7 +1,11 @@
 import { Table } from '@pluralsh/design-system'
-import { useGitRepositoriesQuery } from 'generated/graphql'
+import {
+  useGitPullabilityStatisticsQuery,
+  useGitRepositoriesQuery,
+} from 'generated/graphql'
 import { ComponentProps, useEffect } from 'react'
 
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
@@ -34,11 +38,15 @@ export function GitRepositoriesTable({
       queryHook: useGitRepositoriesQuery,
       keyPath: ['gitRepositories'],
     })
+  const { data: statsData } = useGitPullabilityStatisticsQuery({
+    pollInterval: POLL_INTERVAL,
+  })
+
   useEffect(() => {
     setStatusCounts(
-      countsFromGitOrHelmRepos(data?.gitRepositories?.edges ?? [])
+      countsFromGitOrHelmRepos(statsData?.gitPullabilityStatistics)
     )
-  }, [data, setStatusCounts])
+  }, [setStatusCounts, statsData?.gitPullabilityStatistics])
 
   if (error) return <GqlError error={error} />
 

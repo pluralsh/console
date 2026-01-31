@@ -9,14 +9,12 @@ import { useDebounce } from '@react-hooks-library/core'
 import {
   FluxHelmRepositoryFragment,
   GitHealth,
-  GitRepositoryFragment,
-  HelmRepositoryFragment,
+  PullabilityStatistic,
 } from 'generated/graphql'
 import { useEffect, useRef, useState } from 'react'
 import styled from 'styled-components'
 
-import { capitalize, countBy } from 'lodash'
-import { Edge } from 'utils/graphql'
+import { capitalize } from 'lodash'
 import { gitHealthToSeverity } from './GitHealthChip'
 
 export const RepoStatusFilterKey = {
@@ -45,12 +43,27 @@ const GitRepositoryFiltersSC = styled.div(({ theme }) => ({
 }))
 
 export const countsFromGitOrHelmRepos = (
-  data: Nullable<Edge<GitRepositoryFragment | HelmRepositoryFragment>>[]
-): Record<RepoStatusFilterKey, number> => ({
-  ...EMPTY_REPO_STATUS_COUNTS,
-  ALL: data.length,
-  ...countBy(data, (edge) => edge?.node?.health),
-})
+  stats: Nullable<PullabilityStatistic>[] | null | undefined
+): Record<RepoStatusFilterKey, number> => {
+  const counts: Record<RepoStatusFilterKey, number> = {
+    ...EMPTY_REPO_STATUS_COUNTS,
+  }
+  if (!stats) return counts
+
+  let total = 0
+
+  stats.forEach((stat) => {
+    if (!stat) return
+    if (stat.health) {
+      counts[stat.health as RepoStatusFilterKey] = stat.count
+    }
+    total += stat.count
+  })
+
+  counts.ALL = total
+
+  return counts
+}
 
 export function countsFromFluxHelmRepos(data: FluxHelmRepositoryFragment[]) {
   const c: Record<RepoStatusFilterKey, number> = {

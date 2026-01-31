@@ -1,7 +1,11 @@
 import { Table } from '@pluralsh/design-system'
-import { useHelmRepositoriesQuery } from 'generated/graphql'
+import {
+  useHelmPullabilityStatisticsQuery,
+  useHelmRepositoriesQuery,
+} from 'generated/graphql'
 import { ComponentProps, useEffect } from 'react'
 
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
@@ -34,11 +38,15 @@ export function HelmRepositoriesTable({
       queryHook: useHelmRepositoriesQuery,
       keyPath: ['helmRepositories'],
     })
+  const { data: statsData } = useHelmPullabilityStatisticsQuery({
+    pollInterval: POLL_INTERVAL,
+  })
+
   useEffect(() => {
     setStatusCounts(
-      countsFromGitOrHelmRepos(data?.helmRepositories?.edges ?? [])
+      countsFromGitOrHelmRepos(statsData?.helmPullabilityStatistics)
     )
-  }, [data, setStatusCounts])
+  }, [setStatusCounts, statsData?.helmPullabilityStatistics])
 
   if (error) return <GqlError error={error} />
 

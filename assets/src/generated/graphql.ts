@@ -14664,6 +14664,16 @@ export type HelmRepositoriesQueryVariables = Exact<{
 
 export type HelmRepositoriesQuery = { __typename?: 'RootQueryType', helmRepositories?: { __typename?: 'HelmRepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'HelmRepositoryEdge', node?: { __typename?: 'HelmRepository', id: string, url: string, health?: GitHealth | null, provider?: HelmAuthProvider | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
 
+export type GitPullabilityStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GitPullabilityStatisticsQuery = { __typename?: 'RootQueryType', gitPullabilityStatistics?: Array<{ __typename?: 'PullabilityStatistic', health?: GitHealth | null, count: number } | null> | null };
+
+export type HelmPullabilityStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type HelmPullabilityStatisticsQuery = { __typename?: 'RootQueryType', helmPullabilityStatistics?: Array<{ __typename?: 'PullabilityStatistic', health?: GitHealth | null, count: number } | null> | null };
+
 export type FluxHelmRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -26447,6 +26457,86 @@ export type HelmRepositoriesQueryHookResult = ReturnType<typeof useHelmRepositor
 export type HelmRepositoriesLazyQueryHookResult = ReturnType<typeof useHelmRepositoriesLazyQuery>;
 export type HelmRepositoriesSuspenseQueryHookResult = ReturnType<typeof useHelmRepositoriesSuspenseQuery>;
 export type HelmRepositoriesQueryResult = Apollo.QueryResult<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>;
+export const GitPullabilityStatisticsDocument = gql`
+    query GitPullabilityStatistics {
+  gitPullabilityStatistics {
+    health
+    count
+  }
+}
+    `;
+
+/**
+ * __useGitPullabilityStatisticsQuery__
+ *
+ * To run a query within a React component, call `useGitPullabilityStatisticsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGitPullabilityStatisticsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGitPullabilityStatisticsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGitPullabilityStatisticsQuery(baseOptions?: Apollo.QueryHookOptions<GitPullabilityStatisticsQuery, GitPullabilityStatisticsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GitPullabilityStatisticsQuery, GitPullabilityStatisticsQueryVariables>(GitPullabilityStatisticsDocument, options);
+      }
+export function useGitPullabilityStatisticsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GitPullabilityStatisticsQuery, GitPullabilityStatisticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GitPullabilityStatisticsQuery, GitPullabilityStatisticsQueryVariables>(GitPullabilityStatisticsDocument, options);
+        }
+export function useGitPullabilityStatisticsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GitPullabilityStatisticsQuery, GitPullabilityStatisticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GitPullabilityStatisticsQuery, GitPullabilityStatisticsQueryVariables>(GitPullabilityStatisticsDocument, options);
+        }
+export type GitPullabilityStatisticsQueryHookResult = ReturnType<typeof useGitPullabilityStatisticsQuery>;
+export type GitPullabilityStatisticsLazyQueryHookResult = ReturnType<typeof useGitPullabilityStatisticsLazyQuery>;
+export type GitPullabilityStatisticsSuspenseQueryHookResult = ReturnType<typeof useGitPullabilityStatisticsSuspenseQuery>;
+export type GitPullabilityStatisticsQueryResult = Apollo.QueryResult<GitPullabilityStatisticsQuery, GitPullabilityStatisticsQueryVariables>;
+export const HelmPullabilityStatisticsDocument = gql`
+    query HelmPullabilityStatistics {
+  helmPullabilityStatistics {
+    health
+    count
+  }
+}
+    `;
+
+/**
+ * __useHelmPullabilityStatisticsQuery__
+ *
+ * To run a query within a React component, call `useHelmPullabilityStatisticsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHelmPullabilityStatisticsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHelmPullabilityStatisticsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useHelmPullabilityStatisticsQuery(baseOptions?: Apollo.QueryHookOptions<HelmPullabilityStatisticsQuery, HelmPullabilityStatisticsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HelmPullabilityStatisticsQuery, HelmPullabilityStatisticsQueryVariables>(HelmPullabilityStatisticsDocument, options);
+      }
+export function useHelmPullabilityStatisticsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HelmPullabilityStatisticsQuery, HelmPullabilityStatisticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HelmPullabilityStatisticsQuery, HelmPullabilityStatisticsQueryVariables>(HelmPullabilityStatisticsDocument, options);
+        }
+export function useHelmPullabilityStatisticsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HelmPullabilityStatisticsQuery, HelmPullabilityStatisticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HelmPullabilityStatisticsQuery, HelmPullabilityStatisticsQueryVariables>(HelmPullabilityStatisticsDocument, options);
+        }
+export type HelmPullabilityStatisticsQueryHookResult = ReturnType<typeof useHelmPullabilityStatisticsQuery>;
+export type HelmPullabilityStatisticsLazyQueryHookResult = ReturnType<typeof useHelmPullabilityStatisticsLazyQuery>;
+export type HelmPullabilityStatisticsSuspenseQueryHookResult = ReturnType<typeof useHelmPullabilityStatisticsSuspenseQuery>;
+export type HelmPullabilityStatisticsQueryResult = Apollo.QueryResult<HelmPullabilityStatisticsQuery, HelmPullabilityStatisticsQueryVariables>;
 export const FluxHelmRepositoriesDocument = gql`
     query FluxHelmRepositories {
   fluxHelmRepositories {
@@ -35947,6 +36037,8 @@ export const namedOperations = {
     ServiceTarball: 'ServiceTarball',
     GitRepositories: 'GitRepositories',
     HelmRepositories: 'HelmRepositories',
+    GitPullabilityStatistics: 'GitPullabilityStatistics',
+    HelmPullabilityStatistics: 'HelmPullabilityStatistics',
     FluxHelmRepositories: 'FluxHelmRepositories',
     FluxHelmRepository: 'FluxHelmRepository',
     GitRepository: 'GitRepository',
