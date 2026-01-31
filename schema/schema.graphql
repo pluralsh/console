@@ -610,6 +610,16 @@ type RootMutationType {
     expiry: String
   ): AccessToken
 
+  "This deprecates the `createServiceAccountToken` field, allowing for more options, like refreshing the token."
+  serviceAccountAccessToken(
+    id: ID!
+
+    "whether to wipe all old tokens for this service account transactionally"
+    refresh: Boolean
+
+    attributes: AccessTokenAttributes!
+  ): AccessToken
+
   deleteAccessToken(id: ID, token: String): AccessToken
 
   createBootstrapToken(attributes: BootstrapTokenAttributes!): BootstrapToken
@@ -11624,6 +11634,14 @@ input BootstrapTokenAttributes {
 
   "the project all clusters spawned by this bootstrap token are put into"
   projectId: ID!
+}
+
+"The attributes of an access token"
+input AccessTokenAttributes {
+  scopes: [ScopeAttributes]
+
+  "the ttl of the access token, e.g. 1h, 1d, 1w"
+  expiry: String
 }
 
 type User {

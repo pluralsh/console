@@ -47,6 +47,13 @@ export type AccessTokenAuditsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 
+/** The attributes of an access token */
+export type AccessTokenAttributes = {
+  /** the ttl of the access token, e.g. 1h, 1d, 1w */
+  expiry?: InputMaybe<Scalars['String']['input']>;
+  scopes?: InputMaybe<Array<InputMaybe<ScopeAttributes>>>;
+};
+
 export type AccessTokenAudit = {
   __typename?: 'AccessTokenAudit';
   city?: Maybe<Scalars['String']['output']>;
@@ -8075,6 +8082,8 @@ export type RootMutationType = {
   /** agent api to persist upgrade insights for its cluster */
   saveUpgradeInsights?: Maybe<Array<Maybe<UpgradeInsight>>>;
   selfManage?: Maybe<ServiceDeployment>;
+  /** This deprecates the `createServiceAccountToken` field, allowing for more options, like refreshing the token. */
+  serviceAccountAccessToken?: Maybe<AccessToken>;
   /** creates the service to enable self-hosted renovate in one pass */
   setupRenovate?: Maybe<ServiceDeployment>;
   shareAgentRun?: Maybe<AgentRun>;
@@ -9012,6 +9021,13 @@ export type RootMutationTypeSaveUpgradeInsightsArgs = {
 
 export type RootMutationTypeSelfManageArgs = {
   values: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeServiceAccountAccessTokenArgs = {
+  attributes: AccessTokenAttributes;
+  id: Scalars['ID']['input'];
+  refresh?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 

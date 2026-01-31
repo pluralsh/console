@@ -126,6 +126,12 @@ defmodule Console.GraphQl.Users do
     field :project_id, non_null(:id), description: "the project all clusters spawned by this bootstrap token are put into"
   end
 
+  @desc "The attributes of an access token"
+  input_object :access_token_attributes do
+    field :scopes, list_of(:scope_attributes)
+    field :expiry, :string, description: "the ttl of the access token, e.g. 1h, 1d, 1w"
+  end
+
   object :user do
     field :id,              non_null(:id)
     field :name,            non_null(:string)
@@ -751,6 +757,18 @@ defmodule Console.GraphQl.Users do
       arg :expiry, :string, description: "the ttl of the access token, e.g. 1h, 1d, 1w"
 
       resolve &User.create_access_token/2
+    end
+
+    @desc """
+    This deprecates the `createServiceAccountToken` field, allowing for more options, like refreshing the token.
+    """
+    field :service_account_access_token, :access_token do
+      middleware Authenticated
+      arg :id,         non_null(:id)
+      arg :refresh,    :boolean, description: "whether to wipe all old tokens for this service account transactionally"
+      arg :attributes, non_null(:access_token_attributes)
+
+      resolve &User.create_service_account_token/2
     end
 
     field :delete_access_token, :access_token do

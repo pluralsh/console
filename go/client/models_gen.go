@@ -18,6 +18,13 @@ type AccessToken struct {
 	UpdatedAt  *string                     `json:"updatedAt,omitempty"`
 }
 
+// The attributes of an access token
+type AccessTokenAttributes struct {
+	Scopes []*ScopeAttributes `json:"scopes,omitempty"`
+	// the ttl of the access token, e.g. 1h, 1d, 1w
+	Expiry *string `json:"expiry,omitempty"`
+}
+
 type AccessTokenAudit struct {
 	ID         *string `json:"id,omitempty"`
 	IP         *string `json:"ip,omitempty"`

@@ -12,6 +12,63 @@
   ],
   "components": {
     "schemas": {
+      "AccessToken": {
+        "title": "AccessToken",
+        "description": "An access token",
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "last_used_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/Console.OpenAPI.AccessToken.Scope"
+            },
+            "type": "array"
+          },
+          "token": {
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "token",
+          "inserted_at"
+        ],
+        "type": "object"
+      },
+      "AccessTokenInput": {
+        "title": "AccessTokenInput",
+        "description": "Input for creating a service account access token",
+        "properties": {
+          "expiry": {
+            "description": "Token TTL, e.g. 1h, 1d, 1w",
+            "type": "string"
+          },
+          "scopes": {
+            "items": {
+              "$ref": "#/components/schemas/Console.OpenAPI.AccessToken.Scope"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "AgentRun": {
         "title": "AgentRun",
         "description": "An execution of an AI coding agent processing a prompt against a repository",
@@ -790,6 +847,34 @@
         },
         "type": "object"
       },
+      "Console.OpenAPI.AccessToken.Scope": {
+        "description": "A scope entry for an access token",
+        "properties": {
+          "api": {
+            "description": "A single API name",
+            "type": "string"
+          },
+          "apis": {
+            "description": "API name",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "identifier": {
+            "description": "Identifier for scoped access",
+            "type": "string"
+          },
+          "ids": {
+            "description": "Scoped resource ids",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Console.OpenAPI.CD.Cluster.List": {
         "description": "A paginated list of clusters",
         "properties": {
@@ -942,6 +1027,18 @@
           "data": {
             "items": {
               "$ref": "#/components/schemas/Stack"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.User.List": {
+        "description": "A list of users",
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/User"
             },
             "type": "array"
           }
@@ -5610,6 +5707,173 @@
         ],
         "x-required-scopes": [
           "catalog.read"
+        ]
+      }
+    },
+    "/v1/api/serviceaccounts": {
+      "get": {
+        "tags": [
+          "service-accounts"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.User.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListServiceAccounts",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "user.read"
+        ]
+      }
+    },
+    "/v1/api/serviceaccounts/email/{email}": {
+      "get": {
+        "tags": [
+          "service-accounts"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetServiceAccountByEmail",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "email",
+            "required": true,
+            "schema": {
+              "format": "email",
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "user.read"
+        ]
+      }
+    },
+    "/v1/api/serviceaccounts/{id}": {
+      "get": {
+        "tags": [
+          "service-accounts"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetServiceAccount",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "user.read"
+        ]
+      }
+    },
+    "/v1/api/serviceaccounts/{id}/token": {
+      "post": {
+        "tags": [
+          "service-accounts"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessToken"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateServiceAccountAccessToken",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "refresh",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccessTokenInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "user.write"
         ]
       }
     },

@@ -426,6 +426,72 @@ defmodule Console.Services.UsersTest do
     end
   end
 
+  describe "#create_service_account_token/4" do
+    test "a user can create an access token for a service account" do
+      user = insert(:user)
+      sa = insert(:user, service_account: true, assume_bindings: [%{user_id: user.id}])
+
+      {:ok, token} = Users.create_service_account_token(%{
+        scopes: [%{api: "updateServiceDeployment", identifier: Ecto.UUID.generate()}],
+        expiry: "1h"
+      }, false, sa.id, user)
+
+      assert token.token
+      assert token.user_id == sa.id
+      assert token.expires_at
+
+      [scope] = token.scopes
+      assert scope.api == "updateServiceDeployment"
+    end
+
+    test "it can wipe old access tokens if refresh is true" do
+      user = insert(:user)
+      sa = insert(:user, service_account: true, assume_bindings: [%{user_id: user.id}])
+      token = insert(:access_token, user: sa)
+
+      {:ok, new_token} = Users.create_service_account_token(%{
+        scopes: [%{api: "updateServiceDeployment", identifier: Ecto.UUID.generate()}],
+        expiry: "1h"
+      }, true, sa.id, user)
+
+      assert new_token.token
+      assert new_token.user_id == sa.id
+      assert new_token.expires_at
+
+      [scope] = new_token.scopes
+      assert scope.api == "updateServiceDeployment"
+
+      refute refetch(token)
+    end
+
+    test "admins can create an access token for a service account" do
+      admin = admin_user()
+      sa = insert(:user, service_account: true)
+
+      {:ok, token} = Users.create_service_account_token(%{
+        scopes: [%{api: "updateServiceDeployment", identifier: Ecto.UUID.generate()}],
+        expiry: "1h"
+      }, false, sa.id, admin)
+
+      assert token.token
+      assert token.user_id == sa.id
+      assert token.expires_at
+
+      [scope] = token.scopes
+      assert scope.api == "updateServiceDeployment"
+    end
+
+    test "nonadmins cannot create an access token for a service account" do
+      user = insert(:user)
+      sa = insert(:user, service_account: true)
+
+      {:error, _} = Users.create_service_account_token(%{
+        scopes: [%{api: "updateServiceDeployment", identifier: Ecto.UUID.generate()}],
+        expiry: "1h"
+      }, false, sa.id, user)
+    end
+  end
+
   describe "#delete_access_token/2" do
     test "a user can delete their token" do
       token = insert(:access_token)
