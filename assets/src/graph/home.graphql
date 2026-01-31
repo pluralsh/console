@@ -116,10 +116,17 @@ fragment ClusterHealthScore on Cluster {
 query ClusterOverviewDetails(
   $id: ID!
   $kubeVersion: String!
+  $nextKubeVersion: String!
   $hasKubeVersion: Boolean!
 ) {
   cluster(id: $id) {
     ...ClusterOverviewDetails
+  }
+  kubernetesChangelog(version: $nextKubeVersion) @include(if: $hasKubeVersion) {
+    version
+    majorChanges
+    breakingChanges
+    deprecations
   }
 }
 

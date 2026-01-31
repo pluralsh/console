@@ -21,6 +21,7 @@ import {
   ClusterOverviewDetailsFragment,
   ClusterUpgradeDeprecatedCustomResourceFragment,
   ClusterUpgradePlanFragment,
+  KubernetesChangelog,
   UpgradeInsight,
   UpgradeInsightStatus,
 } from 'generated/graphql'
@@ -105,10 +106,12 @@ export function UpgradesTab({
   cluster,
   refetch,
   initialOpen,
+  kubernetesChangelog,
 }: {
   cluster: ClusterOverviewDetailsFragment
   refetch: Nullable<() => void>
   initialOpen?: UpgradeAccordionName | undefined
+  kubernetesChangelog?: Nullable<KubernetesChangelog>
 }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
@@ -176,7 +179,10 @@ export function UpgradesTab({
         />
       )}
       {hasBlockingAddons(cluster) && (
-        <UpgradesConsolidatedTable cluster={cluster} />
+        <UpgradesConsolidatedTable
+          cluster={cluster}
+          kubernetesChangelog={kubernetesChangelog}
+        />
       )}
       {upgradeError && (
         <GqlError

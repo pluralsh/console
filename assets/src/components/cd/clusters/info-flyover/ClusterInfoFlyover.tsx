@@ -9,6 +9,7 @@ import {
   useClusterOverviewDetailsQuery,
 } from 'generated/graphql'
 
+import semver from 'semver'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { ButtonGroup } from 'components/utils/ButtonGroup.tsx'
@@ -111,10 +112,14 @@ function ClusterInfoFlyoverContent({
   const [upgradesInitialOpen, setUpgradesInitialOpen] =
     useState<UpgradeAccordionName>()
   const kubeVersion = getClusterKubeVersion(clusterBasic)
+  const parsedKubeVersion =
+    semver.coerce(kubeVersion) ?? semver.coerce('1.21.0')
+  const nextKubeVersion = `${parsedKubeVersion.major}.${parsedKubeVersion.minor + 1}`
 
   const { data, loading, error } = useClusterOverviewDetailsQuery({
     variables: {
       kubeVersion,
+      nextKubeVersion,
       hasKubeVersion: true,
       id: clusterBasic?.id ?? '',
     },
@@ -123,6 +128,7 @@ function ClusterInfoFlyoverContent({
   })
 
   const cluster = data?.cluster
+  const kubernetesChangelog = data?.kubernetesChangelog
 
   if (!cluster) return loading ? <LoadingIndicator /> : null
   if (error) return <GqlError error={error} />
@@ -158,6 +164,7 @@ function ClusterInfoFlyoverContent({
             cluster={cluster}
             refetch={refetch}
             initialOpen={upgradesInitialOpen}
+            kubernetesChangelog={kubernetesChangelog}
           />
         )}
       </Flex>
