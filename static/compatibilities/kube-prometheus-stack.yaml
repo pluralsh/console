@@ -10,7 +10,15 @@ versions:
     '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Patch/upgrade job now handles `IgnoreOnInstallOnly` `failurePolicy`
+        correctly when patching resources (fix for install/upgrade edge cases)., 81.3.0
+        included non-major dependency bumps via Renovate (exact sub-chart/component
+        versions not listed in the provided notes).]
+    features: ['Improved robustness of the patch job when encountering `failurePolicy:
+        IgnoreOnInstallOnly`, reducing upgrade/install failures in some clusters.']
+    breaking_changes: []
   chart_version: 81.4.2
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.4',
     'quay.io/kiwigrid/k8s-sidecar:2.5.0', 'quay.io/prometheus-operator/prometheus-operator:v0.88.1',
@@ -578,7 +586,20 @@ versions:
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['64.0.0: Reverted the change "Add downward compat for Prom CRD"
+        (#4883). This affects how Prometheus CRD compatibility logic is handled in
+        the chart/templates.', '65.8.1: Improved selector information for `additionalPodMonitors`
+        and `additionalServiceMonitors` (#4974), making selectors more explicit/verbose
+        in rendered resources.']
+    features: ['More detailed/explicit selector fields for `additionalPodMonitors`
+        and `additionalServiceMonitors`, which can make monitor selection behavior
+        easier to understand and troubleshoot.']
+    breaking_changes: ['Potential behavioral change around Prometheus CRD "downward
+        compatibility" due to the revert in 64.0.0; if you relied on the previously-added
+        compatibility behavior, verify CRD versions/fields against your cluster and
+        Prometheus Operator expectations before upgrading.']
   chart_version: 65.8.1
   images: []
 - version: 64.0.0
