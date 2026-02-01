@@ -221,7 +221,16 @@ versions:
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Fix node-agent Service selector (was not working)., Fix inspektor-gadget
+        access to Kubernetes node proxy endpoint `api/v1/nodes/<node>/proxy/configz`.,
+      Use released node-agent image (align chart to released node-agent for 1.23.4).,
+      Add imagePullSecret generation capability when registry credentials are provided.]
+    features: [Node-agent can generate SBOMs (new optional feature introduced in 1.23.4).,
+      Chart can generate an imagePullSecret from provided registry credentials to
+        simplify pulling images from private registries.]
+    breaking_changes: []
   chart_version: 1.23.4
   images: ['quay.io/kubescape/kubescape:v3.0.21', 'quay.io/kubescape/kubevuln:v0.3.41',
     'quay.io/kubescape/node-agent:v0.2.197', 'quay.io/kubescape/operator:v0.2.51',
