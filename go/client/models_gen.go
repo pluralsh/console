@@ -458,6 +458,8 @@ type AgentRuntime struct {
 	AiProxy *bool `json:"aiProxy,omitempty"`
 	// whether this is the default runtime for coding agents
 	Default *bool `json:"default,omitempty"`
+	// the git repositories allowed to be used with this runtime
+	AllowedRepositories []*string `json:"allowedRepositories,omitempty"`
 	// the cluster this runtime is running on
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// the policy for creating runs on this runtime
@@ -478,6 +480,8 @@ type AgentRuntimeAttributes struct {
 	AiProxy *bool `json:"aiProxy,omitempty"`
 	// whether this is the default runtime for coding agents
 	Default *bool `json:"default,omitempty"`
+	// the git repositories allowed to be used with this runtime
+	AllowedRepositories []*string `json:"allowedRepositories,omitempty"`
 }
 
 type AgentRuntimeConnection struct {

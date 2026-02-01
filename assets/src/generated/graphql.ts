@@ -555,6 +555,8 @@ export type AgentRuntime = {
   __typename?: 'AgentRuntime';
   /** whether this runtime uses the built-in Plural AI proxy */
   aiProxy?: Maybe<Scalars['Boolean']['output']>;
+  /** the git repositories allowed to be used with this runtime */
+  allowedRepositories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the cluster this runtime is running on */
   cluster?: Maybe<Cluster>;
   /** the policy for creating runs on this runtime */
@@ -582,6 +584,8 @@ export type AgentRuntimePendingRunsArgs = {
 export type AgentRuntimeAttributes = {
   /** whether this runtime uses the built-in Plural AI proxy */
   aiProxy?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the git repositories allowed to be used with this runtime */
+  allowedRepositories?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the policy for creating runs on this runtime */
   createBindings?: InputMaybe<Array<InputMaybe<AgentBindingAttributes>>>;
   /** whether this is the default runtime for coding agents */

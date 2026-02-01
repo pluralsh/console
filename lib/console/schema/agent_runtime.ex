@@ -1,19 +1,21 @@
 defmodule Console.Schema.AgentRuntime do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, PolicyBinding}
+  alias Console.Schema.{Cluster, PolicyBinding, ScmConnection}
   alias Console.Deployments.Policies.Rbac
 
   defenum Type, claude: 0, opencode: 1, gemini: 3, custom: 4
 
   schema "agent_runtimes" do
-    field :name,             :string
-    field :type,             Type
-    field :default,          :boolean, default: false
-    field :create_policy_id, :binary_id
+    field :name,                 :string
+    field :type,                 Type
+    field :default,              :boolean, default: false
+    field :create_policy_id,     :binary_id
+    field :allowed_repositories, {:array, :string}
 
     field :ai_proxy, :boolean, default: false
 
-    belongs_to :cluster, Cluster
+    belongs_to :cluster,    Cluster
+    belongs_to :connection, ScmConnection
 
     has_many :create_bindings, PolicyBinding,
       on_replace: :delete,
@@ -22,6 +24,9 @@ defmodule Console.Schema.AgentRuntime do
 
     timestamps()
   end
+
+  def allowed_repository?(%__MODULE__{allowed_repositories: [_ | _] = allowed}, repo), do: Enum.member?(allowed, repo)
+  def allowed_repository?(_, _), do: true
 
   def for_type(query \\ __MODULE__, type) do
     from(ar in query, where: ar.type == ^type)
@@ -46,7 +51,7 @@ defmodule Console.Schema.AgentRuntime do
     from(ar in query, order_by: ^order)
   end
 
-  @valid ~w(name type ai_proxy default)a
+  @valid ~w(name type ai_proxy default allowed_repositories connection_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -54,7 +59,7 @@ defmodule Console.Schema.AgentRuntime do
     |> unique_constraint(:default, message: "only one default runtime can be set at once")
     |> unique_constraint(:name, name: :agent_runtimes_cluster_id_name_uniq_index, message: "a runtime with this name already exists for this cluster")
     |> validate_length(:name, max: 255)
-    |> validate_required(@valid)
+    |> validate_required([:name, :type])
     |> put_new_change(:create_policy_id, &Ecto.UUID.generate/0)
     |> cast_assoc(:create_bindings)
   end

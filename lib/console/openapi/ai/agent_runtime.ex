@@ -26,6 +26,7 @@ defmodule Console.OpenAPI.AI.AgentRuntime do
       ai_proxy: boolean(description: "Whether this runtime uses the built-in Plural AI proxy for LLM requests"),
       default: boolean(description: "Whether this is the default runtime for coding agents"),
       cluster_id: string(description: "ID of the cluster this runtime is deployed on"),
+      allowed_repositories: array_of(string(), description: "The git repositories allowed to be used with this runtime"),
     })
   }
 end

@@ -112,6 +112,12 @@ defmodule Console.Deployments.Agents do
       |> AgentRun.changeset(Map.put(attrs, :status, :pending))
       |> Repo.insert()
     end)
+    |> add_operation(:repo, fn %{run: %AgentRun{} = run, runtime: runtime} ->
+      case AgentRuntime.allowed_repository?(runtime, repository_url(run)) do
+        true -> {:ok, run}
+        false -> {:error, "repository is not allowed for this runtime, allowed repositories: #{inspect(runtime.allowed_repositories || [])}"}
+      end
+    end)
     |> execute(extract: :run)
     |> notify(:create)
   end
