@@ -65,7 +65,9 @@ export function UpgradesConsolidatedTable({
     cluster?.upgradePlanSummary ?? {}
 
   const reactTableOptions: { meta: TableMeta } = useMemo(
-    () => ({ meta: { clusterId: cluster.id, kubernetesChangelog } }),
+    () => ({
+      meta: { clusterId: cluster.id, kubernetesChangelog },
+    }),
     [cluster.id, kubernetesChangelog]
   )
 
