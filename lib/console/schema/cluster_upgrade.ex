@@ -18,6 +18,14 @@ defmodule Console.Schema.ClusterUpgrade do
     timestamps()
   end
 
+  def expired(query \\ __MODULE__) do
+    from(cu in query, where: cu.inserted_at < ago(7, "day"))
+  end
+
+  def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
+    from(cu in query, order_by: ^order)
+  end
+
   @valid ~w(version status cluster_id user_id runtime_id prompt)a
 
   def changeset(model, attrs \\ %{}) do

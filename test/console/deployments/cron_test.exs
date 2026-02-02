@@ -259,6 +259,18 @@ defmodule Console.Deployments.CronTest do
     end
   end
 
+  describe "#prune_cluster_upgrades/0" do
+    test "it will prune expired cluster upgrades" do
+      remove = insert_list(2, :cluster_upgrade, inserted_at: Timex.now() |> Timex.shift(days: -8))
+      keep = insert(:cluster_upgrade, inserted_at: Timex.now() |> Timex.shift(days: -2))
+
+      {2, _} = Cron.prune_cluster_upgrades()
+
+      for upgrade <- remove, do: refute refetch(upgrade)
+      assert refetch(keep)
+    end
+  end
+
   describe "#add_ignore_crds/0" do
     test "it will add ignore crds to all matching services" do
       valid = for i <- 1..3 do

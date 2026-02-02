@@ -22,7 +22,8 @@ defmodule Console.Deployments.Cron do
     VulnerabilityReport,
     ServiceTemplate,
     Revision,
-    ClusterInsightComponent
+    ClusterInsightComponent,
+    ClusterUpgrade
   }
   alias Console.Deployments.Pipelines.Discovery
 
@@ -273,6 +274,11 @@ defmodule Console.Deployments.Cron do
 
   def prune_insight_components() do
     ClusterInsightComponent.expired()
+    |> Repo.delete_all(timeout: 300_000)
+  end
+
+  def prune_cluster_upgrades() do
+    ClusterUpgrade.expired()
     |> Repo.delete_all(timeout: 300_000)
   end
 
