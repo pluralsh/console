@@ -28,6 +28,14 @@ defmodule Console.Schema.AgentRuntime do
   def allowed_repository?(%__MODULE__{allowed_repositories: [_ | _] = allowed}, repo), do: Enum.member?(allowed, repo)
   def allowed_repository?(_, _), do: true
 
+  def for_name(query \\ __MODULE__, name) do
+    from(ar in query, where: ar.name == ^name)
+  end
+
+  def limit(query \\ __MODULE__, limit) do
+    from(ar in query, limit: ^limit)
+  end
+
   def for_type(query \\ __MODULE__, type) do
     from(ar in query, where: ar.type == ^type)
   end

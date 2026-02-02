@@ -1,10 +1,17 @@
 defmodule Console.Deployments.Observer.Action do
   import Console.Deployments.Pr.Utils, only: [render_solid: 2]
-  alias Console.Schema.{Observer, PrAutomation, Pipeline, User}
-  alias Console.Deployments.{Git, Pipelines}
+  alias Console.Schema.{Observer, PrAutomation, Pipeline, User, AgentRuntime, AgentRun}
+  alias Console.Deployments.{Git, Pipelines, Agents}
   alias Console.Services.{Users, Rbac}
   alias Console.Deployments.Observer.Attributes
 
+  @doc """
+  Executes an observer action, the return types are expected as follows:
+  - {:ok, term} - the action was successful and the term is the value to be used for the next action
+  - {:ok, {:keep, map}} - the action was successful and the map is a set of attributes to add to the observer on success
+  - {:error, any} - the action was not successful and the any is the error
+  """
+  @spec act(Observer.t, Observer.ObserverAction.t, any, map) :: {:ok, term} | {:ok, {:keep, map}} | {:error, any}
   def act(observer, %Observer.ObserverAction{type: :pr, configuration: %{pr: %{} = pr}}, input, attrs) do
     tpl = pr.branch_template || "plrl/auto/#{observer.name}-$value-#{Console.rand_alphanum(6)}"
     branch = String.replace(tpl, "$value", input)
@@ -21,6 +28,18 @@ defmodule Console.Deployments.Observer.Action do
       %Pipeline{} = p ->
         Pipelines.create_pipeline_context(%{context: ctx}, p.id, bot())
       nil -> {:error, "could not find pipeline #{pipe.pipeline_id}"}
+    end
+  end
+
+  def act(_, %Observer.ObserverAction{type: :agent, configuration: %{agent: %{prompt: prompt, repository: repository} = agent}}, input, attrs)
+    when is_binary(prompt) and is_binary(repository) do
+    with prompt when is_binary(prompt) <- replace_solid(prompt, Map.put(attrs, :value, input)),
+         {:ok, %AgentRuntime{id: id}} <- Agents.find_runtime(agent.runtime, agent.cluster_id),
+         {:ok, %AgentRun{id: run_id}} <- Agents.create_agent_run(%{prompt: prompt, repository: repository}, id, bot()) do
+      {:ok, {:keep, %{agent_run_id: run_id}}}
+    else
+      nil -> {:error, "could not find agent runtime #{agent.runtime}"}
+      err -> err
     end
   end
 

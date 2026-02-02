@@ -399,6 +399,7 @@ defmodule Console.GraphQl.Deployments.Git do
   input_object :observer_action_configuration_attributes do
     field :pr,       :observer_pr_action_attributes
     field :pipeline, :observer_pipeline_action_attributes
+    field :agent,    :observer_agent_action_attributes
   end
 
   @desc "Configuration for sending a pr in response to an observer"
@@ -414,6 +415,14 @@ defmodule Console.GraphQl.Deployments.Git do
   input_object :observer_pipeline_action_attributes do
     field :pipeline_id, non_null(:id)
     field :context,     non_null(:json), description: "the context to apply, use $value to interject the observed value"
+  end
+
+  @desc "Configuration for setting an agent context in an observer"
+  input_object :observer_agent_action_attributes do
+    field :runtime,    non_null(:string), description: "the agent runtime to use."
+    field :cluster_id, :id, description: "the cluster the agent runtime is hosted on (needed to uniquely identify the runtime)."
+    field :prompt,     :string, description: "the prompt to give the agent to explain how to handle the observed value (templating is supported)."
+    field :repository, :string, description: "the repository url to use for the agent run."
   end
 
   @desc "The settings for configuring add-on scraping"
@@ -772,8 +781,9 @@ defmodule Console.GraphQl.Deployments.Git do
     field :target,      non_null(:observer_target)
     field :actions,     list_of(:observer_action)
 
-    field :project, :project, resolve: dataloader(Deployments)
-    field :errors,  list_of(:service_error), resolve: dataloader(Deployments)
+    field :agent_run, :agent_run, resolve: dataloader(Deployments)
+    field :project,   :project, resolve: dataloader(Deployments)
+    field :errors,    list_of(:service_error), resolve: dataloader(Deployments)
 
     timestamps()
   end
@@ -833,6 +843,7 @@ defmodule Console.GraphQl.Deployments.Git do
   object :observer_action_configuration do
     field :pr,       :observer_pr_action
     field :pipeline, :observer_pipeline_action
+    field :agent,    :observer_agent_action
   end
 
   @desc "Configuration for sending a pr in response to an observer"
@@ -848,6 +859,13 @@ defmodule Console.GraphQl.Deployments.Git do
   object :observer_pipeline_action do
     field :pipeline_id, non_null(:id)
     field :context,     non_null(:map), description: "the context to apply, use $value to interject the observed value"
+  end
+
+  object :observer_agent_action do
+    field :runtime,    non_null(:string), description: "the agent runtime to use."
+    field :cluster_id, :id, description: "the cluster the agent runtime is hosted on (needed to uniquely identify the runtime)."
+    field :prompt,     :string, description: "the prompt to give the agent to explain how to handle the observed value (templating is supported)."
+    field :repository, :string, description: "the repository url to use for the agent run."
   end
 
   @desc "Configuration for http proxy usage in connections to Git or SCM providers"

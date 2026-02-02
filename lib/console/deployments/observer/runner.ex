@@ -9,8 +9,8 @@ defmodule Console.Deployments.Observer.Runner do
     observer = Repo.preload(observer, [:errors])
     {:ok, observer} = mark(observer)
     with {:poll, {:ok, val, attrs}} <- {:poll, Poller.poll(observer)},
-         {:act, {:ok, _}} <- {:act, actions(observer, val, attrs)} do
-      finish(observer, val)
+         {:act, {:ok, attrs}} <- {:act, actions(observer, val, attrs)} do
+      finish(observer, val, attrs)
     else
       {:poll, {:error, err}} -> add_error(observer, "poll", err)
       {:poll, :ignore} -> safe(observer)
@@ -21,22 +21,27 @@ defmodule Console.Deployments.Observer.Runner do
   end
 
   defp actions(%Observer{actions: [_ | _] = actions} = obs, value, attrs) do
-    Enum.reduce_while(actions, {:ok, nil}, fn act, _ ->
+    Enum.reduce_while(actions, %{}, fn act, acc ->
       case Action.act(obs, act, value, attrs) do
-        {:ok, _} = res -> {:cont, res}
+        {:ok, {:keep, attrs}} -> {:cont, Map.merge(acc, attrs)}
+        {:ok, _} -> {:cont, acc}
         err -> {:halt, err}
       end
     end)
+    |> case do
+      %{} = attrs -> {:ok, attrs}
+      err -> err
+    end
   end
-  defp actions(_, _, _), do: {:ok, nil}
+  defp actions(_, _, _), do: {:ok, %{}}
 
   defp mark(%Observer{} = observer) do
     Observer.changeset(observer, %{last_run_at: Timex.now()})
     |> Repo.update()
   end
 
-  defp finish(%Observer{} = observer, val) do
-    Observer.changeset(observer, %{errors: [], last_value: val})
+  defp finish(%Observer{} = observer, val, attrs) do
+    Observer.changeset(observer, Map.merge(attrs, %{errors: [], last_value: val}))
     |> Repo.update()
   end
 

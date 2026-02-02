@@ -135,6 +135,35 @@ defmodule Console.Deployments.Observer.RunnerTest do
 
       assert_receive {:event, %PubSub.PullRequestCreated{}}
     end
+
+    test "it can poll a helm repo and execute an agent run" do
+      bot("console")
+      runtime = insert(:agent_runtime, name: "coding")
+      observer = insert(:observer,
+        name: "observer",
+        target: %{type: :helm, helm: %{url: "https://pluralsh.github.io/console", chart: "console"}},
+        actions: [
+          %{type: :agent, configuration: %{
+            agent: %{
+              runtime: "coding",
+              prompt: "some prompt",
+              repository: "https://github.com/pluralsh/console.git"
+            }
+          }}
+        ],
+        crontab: "*/5 * * *"
+      )
+
+      {:ok, obs} = Runner.run(observer)
+
+      assert obs.id == observer.id
+      assert obs.last_value
+
+      agent_run = Console.Repo.get(Console.Schema.AgentRun, obs.agent_run_id)
+      assert agent_run.runtime_id == runtime.id
+      assert agent_run.prompt == "some prompt"
+      assert agent_run.repository == "https://github.com/pluralsh/console.git"
+    end
   end
 end
 

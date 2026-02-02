@@ -8813,6 +8813,7 @@ enum ValidationUniqScope {
 enum ObserverActionType {
   PIPELINE
   PR
+  AGENT
 }
 
 enum ObserverTargetType {
@@ -9384,6 +9385,7 @@ input ObserverGitFilterAttributes {
 input ObserverActionConfigurationAttributes {
   pr: ObserverPrActionAttributes
   pipeline: ObserverPipelineActionAttributes
+  agent: ObserverAgentActionAttributes
 }
 
 "Configuration for sending a pr in response to an observer"
@@ -9408,6 +9410,21 @@ input ObserverPipelineActionAttributes {
 
   "the context to apply, use $value to interject the observed value"
   context: Json!
+}
+
+"Configuration for setting an agent context in an observer"
+input ObserverAgentActionAttributes {
+  "the agent runtime to use."
+  runtime: String!
+
+  "the cluster the agent runtime is hosted on (needed to uniquely identify the runtime)."
+  clusterId: ID
+
+  "the prompt to give the agent to explain how to handle the observed value (templating is supported)."
+  prompt: String
+
+  "the repository url to use for the agent run."
+  repository: String
 }
 
 "The settings for configuring add-on scraping"
@@ -9918,6 +9935,7 @@ type Observer {
   nextRunAt: DateTime!
   target: ObserverTarget!
   actions: [ObserverAction]
+  agentRun: AgentRun
   project: Project
   errors: [ServiceError]
   insertedAt: DateTime
@@ -9986,6 +10004,7 @@ type ObserverGitFilter {
 type ObserverActionConfiguration {
   pr: ObserverPrAction
   pipeline: ObserverPipelineAction
+  agent: ObserverAgentAction
 }
 
 "Configuration for sending a pr in response to an observer"
@@ -10010,6 +10029,20 @@ type ObserverPipelineAction {
 
   "the context to apply, use $value to interject the observed value"
   context: Map!
+}
+
+type ObserverAgentAction {
+  "the agent runtime to use."
+  runtime: String!
+
+  "the cluster the agent runtime is hosted on (needed to uniquely identify the runtime)."
+  clusterId: ID
+
+  "the prompt to give the agent to explain how to handle the observed value (templating is supported)."
+  prompt: String
+
+  "the repository url to use for the agent run."
+  repository: String
 }
 
 "Configuration for http proxy usage in connections to Git or SCM providers"

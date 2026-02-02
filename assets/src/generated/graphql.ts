@@ -5855,6 +5855,7 @@ export type ObservableMetricAttributes = {
 export type Observer = {
   __typename?: 'Observer';
   actions?: Maybe<Array<Maybe<ObserverAction>>>;
+  agentRun?: Maybe<AgentRun>;
   crontab: Scalars['String']['output'];
   errors?: Maybe<Array<Maybe<ServiceError>>>;
   id: Scalars['ID']['output'];
@@ -5885,17 +5886,20 @@ export type ObserverActionAttributes = {
 /** configuration for an observer action */
 export type ObserverActionConfiguration = {
   __typename?: 'ObserverActionConfiguration';
+  agent?: Maybe<ObserverAgentAction>;
   pipeline?: Maybe<ObserverPipelineAction>;
   pr?: Maybe<ObserverPrAction>;
 };
 
 /** configuration for an observer action */
 export type ObserverActionConfigurationAttributes = {
+  agent?: InputMaybe<ObserverAgentActionAttributes>;
   pipeline?: InputMaybe<ObserverPipelineActionAttributes>;
   pr?: InputMaybe<ObserverPrActionAttributes>;
 };
 
 export enum ObserverActionType {
+  Agent = 'AGENT',
   Pipeline = 'PIPELINE',
   Pr = 'PR'
 }
@@ -5905,6 +5909,30 @@ export type ObserverAddonAttributes = {
   kubernetesVersion?: InputMaybe<Scalars['String']['input']>;
   kubernetesVersions?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
+};
+
+export type ObserverAgentAction = {
+  __typename?: 'ObserverAgentAction';
+  /** the cluster the agent runtime is hosted on (needed to uniquely identify the runtime). */
+  clusterId?: Maybe<Scalars['ID']['output']>;
+  /** the prompt to give the agent to explain how to handle the observed value (templating is supported). */
+  prompt?: Maybe<Scalars['String']['output']>;
+  /** the repository url to use for the agent run. */
+  repository?: Maybe<Scalars['String']['output']>;
+  /** the agent runtime to use. */
+  runtime: Scalars['String']['output'];
+};
+
+/** Configuration for setting an agent context in an observer */
+export type ObserverAgentActionAttributes = {
+  /** the cluster the agent runtime is hosted on (needed to uniquely identify the runtime). */
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  /** the prompt to give the agent to explain how to handle the observed value (templating is supported). */
+  prompt?: InputMaybe<Scalars['String']['input']>;
+  /** the repository url to use for the agent run. */
+  repository?: InputMaybe<Scalars['String']['input']>;
+  /** the agent runtime to use. */
+  runtime: Scalars['String']['input'];
 };
 
 /** An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response */
