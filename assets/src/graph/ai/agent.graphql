@@ -94,6 +94,7 @@ fragment AgentMessageMetadata on AgentMessageMetadata {
   tool {
     name
     state
+    input
     output
   }
 }

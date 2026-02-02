@@ -110,7 +110,10 @@ const agentMsgToChatMsg = (msg: AgentMessageFragment): ChatFragment => ({
       : ChatType.Text,
   attributes: {
     file: { name: msg.metadata?.file?.name },
-    tool: { name: msg.metadata?.tool?.name },
+    tool: {
+      name: msg.metadata?.tool?.name,
+      arguments: safeJsonParse(msg.metadata?.tool?.input),
+    },
   },
 })
 
@@ -121,3 +124,12 @@ const getMockUserChat = (msg: string): ChatFragment => ({
   type: ChatType.Text,
   content: msg,
 })
+
+const safeJsonParse = (str: Nullable<string>) => {
+  if (!str) return undefined
+  try {
+    return JSON.parse(str)
+  } catch {
+    return undefined
+  }
+}
