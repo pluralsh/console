@@ -39,13 +39,25 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryController do
     tags: ["repos"],
     "x-required-scopes": ["repos.read"],
     parameters: [
+      q: [in: :query, schema: %{type: :string}, required: false, description: "Search helm repositories by url"],
       page: [in: :query, schema: %{type: :integer}, required: false],
       per_page: [in: :query, schema: %{type: :integer}, required: false]
     ],
     responses: [ok: OpenAPI.CD.HelmRepository.List]
   def index(conn, _params) do
+    query_params = conn.private.oaskit.query_params
+
     HelmRepository.ordered()
+    |> apply_filters(query_params)
     |> paginate(conn, OpenAPI.CD.HelmRepository)
+  end
+
+  defp apply_filters(query, params) do
+    Enum.reduce(params, query, fn
+      {:q, search}, q when is_binary(search) and byte_size(search) > 0 ->
+        HelmRepository.search(q, search)
+      _, q -> q
+    end)
   end
 
   operation :upsert,

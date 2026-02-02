@@ -120,14 +120,14 @@ type RootQueryType {
   gitRepository(id: ID, url: String): GitRepository
 
   "gets summary information for git repository pullability"
-  gitPullabilityStatistics: [PullabilityStatistic]
+  gitPullabilityStatistics(q: String): [PullabilityStatistic]
 
-  gitRepositories(after: String, first: Int, before: String, last: Int): GitRepositoryConnection
+  gitRepositories(after: String, first: Int, before: String, last: Int, q: String): GitRepositoryConnection
 
   "gets summary information for helm repository pullability"
-  helmPullabilityStatistics: [PullabilityStatistic]
+  helmPullabilityStatistics(q: String): [PullabilityStatistic]
 
-  helmRepositories(after: String, first: Int, before: String, last: Int): HelmRepositoryConnection
+  helmRepositories(after: String, first: Int, before: String, last: Int, q: String): HelmRepositoryConnection
 
   helmRepository(url: String!): HelmRepository
 

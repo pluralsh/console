@@ -29,6 +29,10 @@ defmodule Console.Schema.GitRepository do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, search) do
+    from(g in query, where: ilike(g.url, ^"%#{search}%"))
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :url]) do
     from(g in query, order_by: ^order)
   end

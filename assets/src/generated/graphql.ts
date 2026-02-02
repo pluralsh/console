@@ -10145,11 +10145,17 @@ export type RootQueryTypeFluxHelmRepositoryArgs = {
 };
 
 
+export type RootQueryTypeGitPullabilityStatisticsArgs = {
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypeGitRepositoriesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -10198,11 +10204,17 @@ export type RootQueryTypeGroupsArgs = {
 };
 
 
+export type RootQueryTypeHelmPullabilityStatisticsArgs = {
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypeHelmRepositoriesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 

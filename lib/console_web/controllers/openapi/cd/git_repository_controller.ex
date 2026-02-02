@@ -39,13 +39,25 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryController do
     tags: ["repos"],
     "x-required-scopes": ["repos.read"],
     parameters: [
+      q: [in: :query, schema: %{type: :string}, required: false, description: "Search git repositories by url"],
       page: [in: :query, schema: %{type: :integer}, required: false],
       per_page: [in: :query, schema: %{type: :integer}, required: false]
     ],
     responses: [ok: OpenAPI.CD.GitRepository.List]
   def index(conn, _params) do
+    query_params = conn.private.oaskit.query_params
+
     GitRepository.ordered()
+    |> apply_filters(query_params)
     |> paginate(conn, OpenAPI.CD.GitRepository)
+  end
+
+  defp apply_filters(query, params) do
+    Enum.reduce(params, query, fn
+      {:q, search}, q when is_binary(search) and byte_size(search) > 0 ->
+        GitRepository.search(q, search)
+      _, q -> q
+    end)
   end
 
   operation :create,

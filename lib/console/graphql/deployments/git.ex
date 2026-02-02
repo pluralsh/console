@@ -950,9 +950,8 @@ defmodule Console.GraphQl.Deployments.Git do
     @desc "gets summary information for git repository pullability"
     field :git_pullability_statistics, list_of(:pullability_statistic) do
       middleware Authenticated
-      middleware Scope,
-        resource: :repos,
-        action: :read
+      middleware Scope, resource: :repos, action: :read
+      arg :q, :string
 
       resolve &Deployments.git_pullability_statistics/2
     end
@@ -962,6 +961,7 @@ defmodule Console.GraphQl.Deployments.Git do
       middleware Scope,
         resource: :repos,
         action: :read
+      arg :q, :string
 
       resolve &Deployments.list_git_repositories/2
     end
@@ -969,9 +969,8 @@ defmodule Console.GraphQl.Deployments.Git do
     @desc "gets summary information for helm repository pullability"
     field :helm_pullability_statistics, list_of(:pullability_statistic) do
       middleware Authenticated
-      middleware Scope,
-        resource: :repos,
-        action: :read
+      middleware Scope, resource: :repos, action: :read
+      arg :q, :string
 
       resolve &Deployments.helm_pullability_statistics/2
     end
@@ -981,6 +980,7 @@ defmodule Console.GraphQl.Deployments.Git do
       middleware Scope,
         resource: :repos,
         action: :read
+      arg :q, :string
 
       resolve &Deployments.list_helm_repositories/2
     end
