@@ -2583,7 +2583,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `type` _[ObserverActionType](#observeractiontype)_ | Type specifies the kind of action to perform when changes are detected.<br />PIPELINE actions trigger pipeline context updates, while PR actions create pull requests<br />using PR automation templates with the discovered values. |  | Enum: [PIPELINE PR] <br />Required: \{\} <br />Type: string <br /> |
+| `type` _[ObserverActionType](#observeractiontype)_ | Type specifies the kind of action to perform when changes are detected.<br />PIPELINE actions trigger pipeline context updates, while PR actions create pull requests<br />using PR automation templates with the discovered values. |  | Enum: [PIPELINE PR AGENT] <br />Required: \{\} <br />Type: string <br /> |
 | `configuration` _[ObserverConfiguration](#observerconfiguration)_ | Configuration contains the specific settings for this action type.<br />The structure depends on the Type field - PR actions use PR configuration,<br />while PIPELINE actions use pipeline configuration. |  | Required: \{\} <br /> |
 
 
@@ -2607,6 +2607,25 @@ _Appears in:_
 | `kubernetesVersions` _string array_ | KubernetesVersions specifies multiple Kubernetes versions for compatibility checking.<br />Useful when managing clusters with different Kubernetes versions or during upgrade periods.<br />The observer will only suggest add-on versions compatible with all specified versions. |  | Optional: \{\} <br /> |
 
 
+#### ObserverAgentAction
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverConfiguration](#observerconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `runtime` _string_ | Runtime specifies the runtime to use for the agent run. |  | Required: \{\} <br /> |
+| `prompt` _string_ | Prompt specifies the prompt to give the agent to explain how to handle the observed value. |  | Required: \{\} <br /> |
+| `repository` _string_ | Repository specifies the repository to use for the agent run. |  | Required: \{\} <br /> |
+| `cluster` _string_ | Cluster references the cluster handle associated with the agent runtime, used to uniquely identify the runtime if needed. |  |  |
+
+
 #### ObserverConfiguration
 
 
@@ -2624,6 +2643,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `pr` _[ObserverPrAction](#observerpraction)_ | Pr contains configuration for pull request actions.<br />Used when the action type is PR to automatically create pull requests<br />when new versions are detected by the observer. |  | Optional: \{\} <br /> |
 | `pipeline` _[ObserverPipelineAction](#observerpipelineaction)_ | Pipeline contains configuration for pipeline actions.<br />Used when the action type is PIPELINE to trigger pipeline context updates<br />when new versions are detected by the observer. |  | Optional: \{\} <br /> |
+| `agent` _[ObserverAgentAction](#observeragentaction)_ | Agent contains configuration for agent actions.<br />Used when the action type is AGENT to execute coding agent runs when new versions are detected by the observer. |  | Optional: \{\} <br /> |
 
 
 #### ObserverGit

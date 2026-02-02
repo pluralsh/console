@@ -510,6 +510,7 @@ type AgentSession struct {
 	Service     *ServiceDeployment   `json:"service,omitempty"`
 	Stack       *InfrastructureStack `json:"stack,omitempty"`
 	PullRequest *PullRequest         `json:"pullRequest,omitempty"`
+	Runtime     *AgentRuntime        `json:"runtime,omitempty"`
 	Cluster     *Cluster             `json:"cluster,omitempty"`
 	// the services associated with this chat, usually from an agentic workflow
 	ServiceDeployments *ServiceDeploymentConnection `json:"serviceDeployments,omitempty"`
@@ -533,6 +534,8 @@ type AgentSessionAttributes struct {
 	ConnectionID *string `json:"connectionId,omitempty"`
 	// the id of the cluster to use for this session
 	ClusterID *string `json:"clusterId,omitempty"`
+	// the id of the runtime to use for this session
+	RuntimeID *string `json:"runtimeId,omitempty"`
 	// whether to immediately mark this session in a done state, eg no backgroud work
 	Done *bool `json:"done,omitempty"`
 }
@@ -1308,6 +1311,7 @@ type Chat struct {
 	Thread       *ChatThread         `json:"thread,omitempty"`
 	Server       *McpServer          `json:"server,omitempty"`
 	PrAutomation *PrAutomation       `json:"prAutomation,omitempty"`
+	AgentRun     *AgentRun           `json:"agentRun,omitempty"`
 	InsertedAt   *string             `json:"insertedAt,omitempty"`
 	UpdatedAt    *string             `json:"updatedAt,omitempty"`
 }
@@ -4869,9 +4873,9 @@ type ObserverAgentActionAttributes struct {
 	// the cluster the agent runtime is hosted on (needed to uniquely identify the runtime).
 	ClusterID *string `json:"clusterId,omitempty"`
 	// the prompt to give the agent to explain how to handle the observed value (templating is supported).
-	Prompt *string `json:"prompt,omitempty"`
+	Prompt string `json:"prompt"`
 	// the repository url to use for the agent run.
-	Repository *string `json:"repository,omitempty"`
+	Repository string `json:"repository"`
 }
 
 // An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response

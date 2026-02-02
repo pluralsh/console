@@ -32,7 +32,7 @@ defmodule Console.AI.Tools.Agent.ApiSpec do
       |> Map.new()
       |> Jason.encode()
     else
-      {:session, _} -> {:error, "No cluster bound to this session"}
+      {:session, _} -> {:error, "No cluster bound to this session, you need to manually specify this in the chat context menu"}
       err -> err
     end
   end

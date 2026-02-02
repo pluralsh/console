@@ -9421,10 +9421,10 @@ input ObserverAgentActionAttributes {
   clusterId: ID
 
   "the prompt to give the agent to explain how to handle the observed value (templating is supported)."
-  prompt: String
+  prompt: String!
 
   "the repository url to use for the agent run."
-  repository: String
+  repository: String!
 }
 
 "The settings for configuring add-on scraping"
@@ -10299,6 +10299,9 @@ input AgentSessionAttributes {
   "the id of the cluster to use for this session"
   clusterId: ID
 
+  "the id of the runtime to use for this session"
+  runtimeId: ID
+
   "whether to immediately mark this session in a done state, eg no backgroud work"
   done: Boolean
 }
@@ -10348,6 +10351,8 @@ type Chat {
   server: McpServer
 
   prAutomation: PrAutomation
+
+  agentRun: AgentRun
 
   insertedAt: DateTime
 
@@ -10454,6 +10459,8 @@ type AgentSession {
   stack: InfrastructureStack
 
   pullRequest: PullRequest
+
+  runtime: AgentRuntime
 
   cluster: Cluster
 

@@ -632,6 +632,7 @@ export type AgentSession = {
   /** the pull requests associated with this chat, usually from an agentic workflow */
   pullRequests?: Maybe<PullRequestConnection>;
   runs?: Maybe<AgentRunConnection>;
+  runtime?: Maybe<AgentRuntime>;
   service?: Maybe<ServiceDeployment>;
   /** the services associated with this chat, usually from an agentic workflow */
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
@@ -697,6 +698,8 @@ export type AgentSessionAttributes = {
   planConfirmed?: InputMaybe<Scalars['Boolean']['input']>;
   /** the prompt to use for this session */
   prompt?: InputMaybe<Scalars['String']['input']>;
+  /** the id of the runtime to use for this session */
+  runtimeId?: InputMaybe<Scalars['ID']['input']>;
   /** the type of agent this session is for */
   type?: InputMaybe<AgentSessionType>;
 };
@@ -1607,6 +1610,7 @@ export type CertificateStatus = {
 
 export type Chat = {
   __typename?: 'Chat';
+  agentRun?: Maybe<AgentRun>;
   attributes?: Maybe<ChatTypeAttributes>;
   /** whether this chat requires confirmation */
   confirm?: Maybe<Scalars['Boolean']['output']>;
@@ -5928,9 +5932,9 @@ export type ObserverAgentActionAttributes = {
   /** the cluster the agent runtime is hosted on (needed to uniquely identify the runtime). */
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   /** the prompt to give the agent to explain how to handle the observed value (templating is supported). */
-  prompt?: InputMaybe<Scalars['String']['input']>;
+  prompt: Scalars['String']['input'];
   /** the repository url to use for the agent run. */
-  repository?: InputMaybe<Scalars['String']['input']>;
+  repository: Scalars['String']['input'];
   /** the agent runtime to use. */
   runtime: Scalars['String']['input'];
 };

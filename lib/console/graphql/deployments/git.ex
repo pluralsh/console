@@ -421,8 +421,8 @@ defmodule Console.GraphQl.Deployments.Git do
   input_object :observer_agent_action_attributes do
     field :runtime,    non_null(:string), description: "the agent runtime to use."
     field :cluster_id, :id, description: "the cluster the agent runtime is hosted on (needed to uniquely identify the runtime)."
-    field :prompt,     :string, description: "the prompt to give the agent to explain how to handle the observed value (templating is supported)."
-    field :repository, :string, description: "the repository url to use for the agent run."
+    field :prompt,     non_null(:string), description: "the prompt to give the agent to explain how to handle the observed value (templating is supported)."
+    field :repository, non_null(:string), description: "the repository url to use for the agent run."
   end
 
   @desc "The settings for configuring add-on scraping"

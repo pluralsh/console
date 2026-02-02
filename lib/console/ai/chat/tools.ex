@@ -90,6 +90,8 @@ defmodule Console.AI.Chat.Tools do
     Explain.Read
   ]
 
+  @search_code_tools [Agent.CodingAgent, Agent.Coding.ServiceFiles, Agent.Coding.StackFiles]
+
   @service_insight_tools [Explain.ListComponents, Explain.SummarizeComponent]
 
   def tools(%ChatThread{} = t) do
@@ -133,7 +135,7 @@ defmodule Console.AI.Chat.Tools do
 
   defp agent_tools(%ChatThread{session: %AgentSession{prompt: p}}) when is_binary(p), do: @code_post_tools
 
-  defp agent_tools(%ChatThread{session: %AgentSession{type: :search}}), do: @agent_search_tools ++ cloudquery_tools()
+  defp agent_tools(%ChatThread{session: %AgentSession{type: :search} = session}), do: @agent_search_tools ++ cloudquery_tools() ++ coding_tools(session)
   defp agent_tools(%ChatThread{session: %AgentSession{type: :provisioning, plan_confirmed: true}}), do: @agent_planned_tools
   defp agent_tools(%ChatThread{session: %AgentSession{type: :provisioning}}), do: @agent_provisioning_tools
   defp agent_tools(%ChatThread{session: %AgentSession{type: :manifests}}), do: @agent_manifests_tools
@@ -160,6 +162,9 @@ defmodule Console.AI.Chat.Tools do
   defp cluster_tools(%ChatThread{session: %AgentSession{cluster: %Cluster{}}}),
     do: @cluster_tools
   defp cluster_tools(_), do: []
+
+  defp coding_tools(%AgentSession{type: :search, runtime_id: id}) when is_binary(id), do: @search_code_tools
+  defp coding_tools(_), do: []
 
   defp cloudquery_tools() do
     case Console.conf(:cloudquery) do
