@@ -9,6 +9,7 @@ fragment Job on Job {
     backoffLimit
     parallelism
     activeDeadlineSeconds
+    completions
   }
   pods {
     ...Pod

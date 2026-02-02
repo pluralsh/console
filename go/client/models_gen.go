@@ -4035,14 +4035,16 @@ type JobSpec struct {
 	BackoffLimit          *int64 `json:"backoffLimit,omitempty"`
 	Parallelism           *int64 `json:"parallelism,omitempty"`
 	ActiveDeadlineSeconds *int64 `json:"activeDeadlineSeconds,omitempty"`
+	Completions           *int64 `json:"completions,omitempty"`
 }
 
 type JobStatus struct {
-	Active         *int64  `json:"active,omitempty"`
-	CompletionTime *string `json:"completionTime,omitempty"`
-	StartTime      *string `json:"startTime,omitempty"`
-	Succeeded      *int64  `json:"succeeded,omitempty"`
-	Failed         *int64  `json:"failed,omitempty"`
+	Active         *int64             `json:"active,omitempty"`
+	CompletionTime *string            `json:"completionTime,omitempty"`
+	StartTime      *string            `json:"startTime,omitempty"`
+	Succeeded      *int64             `json:"succeeded,omitempty"`
+	Failed         *int64             `json:"failed,omitempty"`
+	Conditions     []*StatusCondition `json:"conditions,omitempty"`
 }
 
 type KnowledgeEvidence struct {

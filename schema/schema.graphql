@@ -11323,12 +11323,14 @@ type JobStatus {
   startTime: String
   succeeded: Int
   failed: Int
+  conditions: [StatusCondition]
 }
 
 type JobSpec {
   backoffLimit: Int
   parallelism: Int
   activeDeadlineSeconds: Int
+  completions: Int
 }
 
 type CronJob {
