@@ -582,7 +582,7 @@ type Condition struct {
 
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum=NOT;GT;LT;EQ;GTE;LTE;PREFIX;SUFFIX
-	console.Operation `json:"operation"`
+	Operation console.Operation `json:"operation"`
 
 	// +kubebuilder:validation:Optional
 	Value *string `json:"value,omitempty"`
