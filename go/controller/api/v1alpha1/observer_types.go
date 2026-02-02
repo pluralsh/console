@@ -156,7 +156,7 @@ type ObserverAction struct {
 	// using PR automation templates with the discovered values.
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
-	// +kubebuilder:validation:Enum:=PIPELINE;PR
+	// +kubebuilder:validation:Enum:=PIPELINE;PR;AGENT
 	Type console.ObserverActionType `json:"type"`
 
 	// Configuration contains the specific settings for this action type.
@@ -181,6 +181,11 @@ type ObserverConfiguration struct {
 	// when new versions are detected by the observer.
 	// +kubebuilder:validation:Optional
 	Pipeline *ObserverPipelineAction `json:"pipeline,omitempty"`
+
+	// Agent contains configuration for agent actions.
+	// Used when the action type is AGENT to execute coding agent runs when new versions are detected by the observer.
+	// +kubebuilder:validation:Optional
+	Agent *ObserverAgentAction `json:"agent,omitempty"`
 }
 
 // ObserverPrAction defines configuration for automatically creating pull requests.
@@ -231,6 +236,23 @@ type ObserverPipelineAction struct {
 	// This context is applied to the pipeline to trigger appropriate actions.
 	// +kubebuilder:validation:Optional
 	Context runtime.RawExtension `json:"context,omitempty"`
+}
+
+type ObserverAgentAction struct {
+	// Runtime specifies the runtime to use for the agent run.
+	// +kubebuilder:validation:Required
+	Runtime string `json:"runtime"`
+
+	// Prompt specifies the prompt to give the agent to explain how to handle the observed value.
+	// +kubebuilder:validation:Required
+	Prompt string `json:"prompt"`
+
+	// Repository specifies the repository to use for the agent run.
+	// +kubebuilder:validation:Required
+	Repository string `json:"repository"`
+
+	// Cluster references the cluster handle associated with the agent runtime, used to uniquely identify the runtime if needed.
+	Cluster *string `json:"cluster,omitempty"`
 }
 
 // ObserverTarget defines the external source to monitor for changes.

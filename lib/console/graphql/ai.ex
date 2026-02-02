@@ -61,6 +61,7 @@ defmodule Console.GraphQl.AI do
     field :prompt,         :string, description: "the prompt to use for this session"
     field :connection_id,  :id, description: "the id of the cloud connection to use for this session"
     field :cluster_id,     :id, description: "the id of the cluster to use for this session"
+    field :runtime_id,     :id, description: "the id of the runtime to use for this session"
     field :done,           :boolean, description: "whether to immediately mark this session in a done state, eg no backgroud work"
   end
 
@@ -90,10 +91,11 @@ defmodule Console.GraphQl.AI do
     field :confirmed_at, :datetime, description: "when the chat was confirmed"
     field :attributes,   :chat_type_attributes
 
-    field :pull_request,  :pull_request, resolve: dataloader(Deployments)
-    field :thread,        :chat_thread,  resolve: dataloader(AI)
-    field :server,        :mcp_server,   resolve: dataloader(Deployments)
+    field :pull_request,  :pull_request,  resolve: dataloader(Deployments)
+    field :thread,        :chat_thread,   resolve: dataloader(AI)
+    field :server,        :mcp_server,    resolve: dataloader(Deployments)
     field :pr_automation, :pr_automation, resolve: dataloader(Deployments)
+    field :agent_run,     :agent_run,     resolve: dataloader(Deployments)
 
     timestamps()
   end
@@ -169,6 +171,7 @@ defmodule Console.GraphQl.AI do
     field :service,      :service_deployment, resolve: dataloader(Deployments)
     field :stack,        :infrastructure_stack, resolve: dataloader(Deployments)
     field :pull_request, :pull_request, resolve: dataloader(Deployments)
+    field :runtime,      :agent_runtime, resolve: dataloader(Deployments)
     field :cluster,      :cluster, resolve: dataloader(Deployments)
 
     @desc "the services associated with this chat, usually from an agentic workflow"

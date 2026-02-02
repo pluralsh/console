@@ -22,6 +22,7 @@ defmodule Console.Schema.AgentSession do
     belongs_to :service,      Service
     belongs_to :pull_request, PullRequest
     belongs_to :cluster,      Cluster
+    belongs_to :runtime,      AgentRuntime
 
     timestamps()
   end
@@ -43,7 +44,7 @@ defmodule Console.Schema.AgentSession do
     from(s in query, order_by: ^order)
   end
 
-  @valid ~w(type done plan_confirmed connection_id thread_id stack_id service_id cluster_id pull_request_id prompt branch initialized commit_count)a
+  @valid ~w(type done plan_confirmed connection_id thread_id stack_id service_id cluster_id runtime_id pull_request_id prompt branch initialized commit_count)a
 
   def changeset(model, attrs \\ %{}) do
     model
