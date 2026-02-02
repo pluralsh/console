@@ -29,7 +29,6 @@ jobs:
           helm repo add vmware https://vmware-tanzu.github.io/helm-charts
           helm repo add radar https://radar-base.github.io/radar-helm-charts
           helm repo add fluxcd-community https://fluxcd-community.github.io/helm-charts
-          helm repo add dashboard https://kubernetes.github.io/dashboard
           helm repo add dexidp https://charts.dexidp.io
       - name: Run chart-releaser
         id: release
