@@ -156,7 +156,9 @@ export function DeployServiceModal({
       },
     })
 
-  const { data: reposData } = useGitRepositoriesQuery()
+  const { data: reposData } = useGitRepositoriesQuery({
+    variables: { first: 500 },
+  })
 
   const allowDeploy =
     formState === FormState.Secrets &&
@@ -241,6 +243,7 @@ export function DeployServiceModal({
   const repos = mapExistingNodes(reposData?.gitRepositories).filter(
     (repo) => repo.health === 'PULLABLE'
   )
+
   const finalStepperSteps = hasHelmRepo
     ? stepperSteps
     : stepperSteps.filter((step) => step.key !== FormState.HelmValues)
