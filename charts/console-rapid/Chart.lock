@@ -4,12 +4,12 @@ dependencies:
   version: 0.3.1
 - name: controller
   repository: file://../controller
-  version: 0.0.167
+  version: 0.0.168
 - name: flux2
   repository: https://fluxcd-community.github.io/helm-charts
   version: 2.14.1
 - name: dex
   repository: https://charts.dexidp.io
   version: 0.24.0
-digest: sha256:06532b2e6d3f97c7ea6f76f557f16d6cb4c1929ed1f0e0e32c6dc405d41191c2
-generated: "2026-02-01T18:48:33.83388327Z"
+digest: sha256:1eb09b02d63b1ac30a3e70272cff9830c5d02b0282255cfe26182a033aa73ef7
+generated: "2026-02-02T16:02:16.583235592Z"
