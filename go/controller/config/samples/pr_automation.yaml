@@ -40,6 +40,22 @@ spec:
         - "yes"
         - "no"
         - "unknown"
+    - name: "Conditional field"
+      type: STRING
+      placeholder: "This only shows when Test is 'yes'"
+      optional: true
+      condition:
+        field: "Test"
+        operation: EQ
+        value: "yes"
+    - name: "Version"
+      type: STRING
+      placeholder: "Enter version number"
+      optional: true
+      condition:
+        field: "Required value"
+        operation: PREFIX
+        value: "y"
     - name: "Required value"
       type: ENUM
       placeholder: "Select one value"
