@@ -207,6 +207,13 @@
             "description": "Whether this runtime uses the built-in Plural AI proxy for LLM requests",
             "type": "boolean"
           },
+          "allowed_repositories": {
+            "description": "The git repositories allowed to be used with this runtime",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "cluster_id": {
             "description": "ID of the cluster this runtime is deployed on",
             "type": "string"

@@ -1402,6 +1402,9 @@ input AgentRuntimeAttributes {
 
   "whether this is the default runtime for coding agents"
   default: Boolean
+
+  "the git repositories allowed to be used with this runtime"
+  allowedRepositories: [String]
 }
 
 input AgentBindingAttributes {
@@ -1588,6 +1591,9 @@ type AgentRuntime {
 
   "whether this is the default runtime for coding agents"
   default: Boolean
+
+  "the git repositories allowed to be used with this runtime"
+  allowedRepositories: [String]
 
   "the cluster this runtime is running on"
   cluster: Cluster
