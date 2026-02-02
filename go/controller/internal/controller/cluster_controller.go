@@ -47,7 +47,7 @@ func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=clusters/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=clusters/finalizers,verbs=update
 
-func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
+func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request) (result reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	cluster := &v1alpha1.Cluster{}
@@ -63,6 +63,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	}
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
+			result = ctrl.Result{}
 			reterr = err
 		}
 	}()
