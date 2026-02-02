@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { getUserManagementBreadcrumbs } from '../UserManagement'
 
 import ServiceAccountCreate from './ServiceAccountCreate'
-import ServiceAccountsList from './ServiceAccountsList'
+import { ServiceAccountsList } from './ServiceAccountsList'
 
 const breadcrumbs = getUserManagementBreadcrumbs('service-accounts')
 

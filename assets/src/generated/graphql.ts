@@ -16474,6 +16474,15 @@ export type UpdateServiceAccountMutationVariables = Exact<{
 
 export type UpdateServiceAccountMutation = { __typename?: 'RootMutationType', updateServiceAccount?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null, services?: { __typename?: 'PersonaServices', configuration?: boolean | null, secrets?: boolean | null } | null, ai?: { __typename?: 'PersonaAi', pr?: boolean | null } | null } | null } | null> | null } | null };
 
+export type ServiceAccountAccessTokenMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: AccessTokenAttributes;
+  refresh?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type ServiceAccountAccessTokenMutation = { __typename?: 'RootMutationType', serviceAccountAccessToken?: { __typename?: 'AccessToken', token?: string | null, id?: string | null, insertedAt?: string | null, updatedAt?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
+
 export type StackPolicyViolationFragment = { __typename?: 'StackPolicyViolation', id: string, insertedAt?: string | null, resolution?: string | null, severity: VulnSeverity, policyUrl?: string | null, policyModule?: string | null, policyId: string, description?: string | null, title: string, causes?: Array<{ __typename?: 'StackViolationCause', filename?: string | null, resource: string, start: number, end: number, lines?: Array<{ __typename?: 'StackViolationCauseLine', line: number, content: string, first?: boolean | null, last?: boolean | null } | null> | null } | null> | null };
 
 export type StackMinimalFragment = { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType, status: StackStatus, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null };
@@ -34273,6 +34282,42 @@ export function useUpdateServiceAccountMutation(baseOptions?: Apollo.MutationHoo
 export type UpdateServiceAccountMutationHookResult = ReturnType<typeof useUpdateServiceAccountMutation>;
 export type UpdateServiceAccountMutationResult = Apollo.MutationResult<UpdateServiceAccountMutation>;
 export type UpdateServiceAccountMutationOptions = Apollo.BaseMutationOptions<UpdateServiceAccountMutation, UpdateServiceAccountMutationVariables>;
+export const ServiceAccountAccessTokenDocument = gql`
+    mutation ServiceAccountAccessToken($id: ID!, $attributes: AccessTokenAttributes!, $refresh: Boolean) {
+  serviceAccountAccessToken(id: $id, attributes: $attributes, refresh: $refresh) {
+    ...AccessToken
+    token
+  }
+}
+    ${AccessTokenFragmentDoc}`;
+export type ServiceAccountAccessTokenMutationFn = Apollo.MutationFunction<ServiceAccountAccessTokenMutation, ServiceAccountAccessTokenMutationVariables>;
+
+/**
+ * __useServiceAccountAccessTokenMutation__
+ *
+ * To run a mutation, you first call `useServiceAccountAccessTokenMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useServiceAccountAccessTokenMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [serviceAccountAccessTokenMutation, { data, loading, error }] = useServiceAccountAccessTokenMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *      refresh: // value for 'refresh'
+ *   },
+ * });
+ */
+export function useServiceAccountAccessTokenMutation(baseOptions?: Apollo.MutationHookOptions<ServiceAccountAccessTokenMutation, ServiceAccountAccessTokenMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ServiceAccountAccessTokenMutation, ServiceAccountAccessTokenMutationVariables>(ServiceAccountAccessTokenDocument, options);
+      }
+export type ServiceAccountAccessTokenMutationHookResult = ReturnType<typeof useServiceAccountAccessTokenMutation>;
+export type ServiceAccountAccessTokenMutationResult = Apollo.MutationResult<ServiceAccountAccessTokenMutation>;
+export type ServiceAccountAccessTokenMutationOptions = Apollo.BaseMutationOptions<ServiceAccountAccessTokenMutation, ServiceAccountAccessTokenMutationVariables>;
 export const StackPrsDocument = gql`
     query StackPrs($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
   infrastructureStack(id: $id) {
@@ -36300,6 +36345,7 @@ export const namedOperations = {
     UpdateRbac: 'UpdateRbac',
     CreateServiceAccount: 'CreateServiceAccount',
     UpdateServiceAccount: 'UpdateServiceAccount',
+    ServiceAccountAccessToken: 'ServiceAccountAccessToken',
     CreateStack: 'CreateStack',
     CreateOnDemandRun: 'CreateOnDemandRun',
     UpdateStack: 'UpdateStack',
