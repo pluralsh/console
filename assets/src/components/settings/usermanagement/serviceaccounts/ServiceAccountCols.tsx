@@ -56,13 +56,18 @@ const ColActions = columnHelper.accessor((user) => user, {
     if (!isAdmin) return null
 
     return (
-      <Flex gap="xsmall">
-        <IconFrame
-          clickable
-          icon={<KeyIcon />}
+      <Flex
+        gap="xsmall"
+        align="center"
+      >
+        <Button
+          small
+          secondary
+          startIcon={<KeyIcon />}
           onClick={() => setCreateTokenOpen(true)}
-          tooltip="Create access token"
-        />
+        >
+          Create access token
+        </Button>
         <IconFrame
           clickable
           icon={<TrashCanIcon color="icon-danger" />}
