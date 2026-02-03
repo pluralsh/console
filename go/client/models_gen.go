@@ -3027,6 +3027,7 @@ type DeploymentSettingsAttributes struct {
 
 type DeploymentSpec struct {
 	Replicas *int64              `json:"replicas,omitempty"`
+	Selector map[string]any      `json:"selector,omitempty"`
 	Strategy *DeploymentStrategy `json:"strategy,omitempty"`
 }
 

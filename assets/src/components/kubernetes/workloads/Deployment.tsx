@@ -4,7 +4,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { Outlet, useParams } from 'react-router-dom'
 import { formatLocalizedDateTime } from 'utils/datetime'
 import { useQuery } from '@tanstack/react-query'
 import { AxiosInstance } from '../../../helpers/axios.ts'
@@ -12,7 +12,6 @@ import { AxiosInstance } from '../../../helpers/axios.ts'
 import {
   CommonEvent,
   CommonEventList,
-  DeploymentDeploymentDetail,
   PodPod,
   PodPodList,
   ReplicasetReplicaSet,

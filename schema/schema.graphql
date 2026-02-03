@@ -11524,6 +11524,7 @@ type DeploymentStatus {
 
 type DeploymentSpec {
   replicas: Int
+  selector: Map
   strategy: DeploymentStrategy
 }
 
