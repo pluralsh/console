@@ -1,6 +1,6 @@
 import { useFluxHelmRepositoriesQuery } from 'generated/graphql'
 
-import { ComponentProps, useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { Table } from '@pluralsh/design-system'
 
@@ -19,18 +19,17 @@ import {
   countsFromFluxHelmRepos,
   RepoStatusFilterKey,
 } from './RepositoriesFilters'
-import { isEmpty } from 'lodash'
 
 export function FluxHelmRepositoriesTable({
+  status,
+  searchStr,
   setStatusCounts,
-  tableFilterOptions,
 }: {
+  status: Nullable<RepoStatusFilterKey>
+  searchStr: Nullable<string>
   setStatusCounts: (counts: Record<RepoStatusFilterKey, number>) => void
-  tableFilterOptions: ComponentProps<typeof Table>['reactTableOptions']
 }) {
-  const hasFilters =
-    !!tableFilterOptions?.state?.globalFilter ||
-    !isEmpty(tableFilterOptions?.state?.columnFilters)
+  const hasFilters = !!searchStr || !!status
   const { data, loading, error } = useFluxHelmRepositoriesQuery({
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
@@ -44,6 +43,18 @@ export function FluxHelmRepositoriesTable({
     setStatusCounts(countsFromFluxHelmRepos(repos))
   }, [repos, setStatusCounts])
 
+  const tableOptions = useMemo(
+    () => ({
+      state: {
+        globalFilter: searchStr,
+        columnFilters: [
+          ...(status !== 'ALL' ? [{ id: 'status', value: status }] : []),
+        ],
+      },
+    }),
+    [searchStr, status]
+  )
+
   if (error) return <GqlError error={error} />
 
   return (
@@ -53,7 +64,7 @@ export function FluxHelmRepositoriesTable({
       loading={!data && loading}
       data={repos}
       columns={fluxHelmRepoColumns}
-      reactTableOptions={tableFilterOptions}
+      reactTableOptions={tableOptions}
       emptyStateProps={{
         message: hasFilters
           ? 'No results found. Try adjusting your filters.'
