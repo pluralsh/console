@@ -1,4 +1,4 @@
-import { Chip, IconFrame, TrashCanIcon } from '@pluralsh/design-system'
+import { Chip, Flex, IconFrame, TrashCanIcon } from '@pluralsh/design-system'
 import { Confirm } from 'components/utils/Confirm'
 import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
@@ -8,6 +8,7 @@ import { toLower } from 'lodash'
 import { InfoSection, PaddedCard, PropWideBold } from './common'
 import { JobStatus, useDeleteJobMutation } from '../../../generated/graphql.ts'
 import { ComponentDetailsContext } from '../ComponentDetails.tsx'
+import { ConditionsTable } from './Conditions.tsx'
 
 const JOB_COMPLETE = 'complete'
 const JOB_FAILED = 'failed'
@@ -95,41 +96,57 @@ export default function Job() {
   const status = getJobStatus(job)
 
   return (
-    <>
-      <InfoSection title="Status">
-        <PaddedCard>
-          <PropWideBold title="Status">
-            <JobStatusChip status={status} />
-          </PropWideBold>
-          <PropWideBold title="Active">{job.status?.active || 0}</PropWideBold>
-          <PropWideBold title="Succeeded">
-            {job.status?.succeeded || 0}
-          </PropWideBold>
-          <PropWideBold title="Failed">{job.status?.failed || 0}</PropWideBold>
-          <PropWideBold title="Completions">
-            {job.spec?.completions || 0}
-          </PropWideBold>
-          <PropWideBold title="Completion time">
-            {job.status?.completionTime || '-'}
-          </PropWideBold>
-          <PropWideBold title="Start time">
-            {job.status?.startTime || '-'}
-          </PropWideBold>
-        </PaddedCard>
+    <Flex
+      direction="column"
+      gap="large"
+      grow={1}
+    >
+      <InfoSection title="Conditions">
+        <ConditionsTable conditions={job.status?.conditions ?? []} />
       </InfoSection>
-      <InfoSection title="Spec">
-        <PaddedCard>
-          <PropWideBold title="Backoff limit">
-            {job.spec?.backoffLimit || 0}
-          </PropWideBold>
-          <PropWideBold title="Parallelism">
-            {job.spec?.parallelism || 0}
-          </PropWideBold>
-          <PropWideBold title="Deadline">
-            {job.spec?.activeDeadlineSeconds || 0}
-          </PropWideBold>
-        </PaddedCard>
-      </InfoSection>
-    </>
+      <Flex
+        direction="row"
+        gap="large"
+      >
+        <InfoSection title="Status">
+          <PaddedCard>
+            <PropWideBold title="Status">
+              <JobStatusChip status={status} />
+            </PropWideBold>
+            <PropWideBold title="Active">
+              {job.status?.active || 0}
+            </PropWideBold>
+            <PropWideBold title="Succeeded">
+              {job.status?.succeeded || 0}
+            </PropWideBold>
+            <PropWideBold title="Failed">
+              {job.status?.failed || 0}
+            </PropWideBold>
+            <PropWideBold title="Completions">
+              {job.spec?.completions || 0}
+            </PropWideBold>
+            <PropWideBold title="Completion time">
+              {job.status?.completionTime || '-'}
+            </PropWideBold>
+            <PropWideBold title="Start time">
+              {job.status?.startTime || '-'}
+            </PropWideBold>
+          </PaddedCard>
+        </InfoSection>
+        <InfoSection title="Spec">
+          <PaddedCard>
+            <PropWideBold title="Backoff limit">
+              {job.spec?.backoffLimit || 0}
+            </PropWideBold>
+            <PropWideBold title="Parallelism">
+              {job.spec?.parallelism || 0}
+            </PropWideBold>
+            <PropWideBold title="Deadline">
+              {job.spec?.activeDeadlineSeconds || 0}
+            </PropWideBold>
+          </PaddedCard>
+        </InfoSection>
+      </Flex>
+    </Flex>
   )
 }
