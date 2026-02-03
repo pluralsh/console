@@ -2,6 +2,7 @@ import {
   AiSparkleFilledIcon,
   ArrowTopRightIcon,
   Button,
+  ButtonProps,
   Card,
   CloseIcon,
   DiscoverIcon,
@@ -21,37 +22,34 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { Body2BoldP } from 'components/utils/typography/Text'
-import ejs from 'ejs'
 import {
   AgentRunFragment,
   AgentRunMode,
   AgentRunStatus,
   useAgentRunQuery,
   useCreateAgentRunMutation,
-  VulnerabilityFragment,
-  VulnerabilityReportFragment,
 } from 'generated/graphql'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { AI_SETTINGS_AGENT_RUNTIMES_ABS_PATH } from 'routes/settingsRoutesConst'
 import styled, { useTheme } from 'styled-components'
-import { AIAgentRuntimesSelector } from '../../ai/agent-runs/AIAgentRuntimesSelector'
-import { AgentRunRepoSelector } from '../../ai/agent-runs/AgentRunRepoSelector'
-import vulnPromptTemplate from './vulnerability-prompt.ejs?raw'
+import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
+import { AgentRunRepoSelector } from './AgentRunRepoSelector'
 
-export function FixVulnerabilityButton({
-  vuln,
-  parentReport,
+export function AgentRunFixButton({
+  headerTitle,
+  initialRepo,
+  initialPrompt,
+  ...props
 }: {
-  vuln: VulnerabilityFragment
-  parentReport: Nullable<VulnerabilityReportFragment>
-}) {
+  headerTitle: string
+  initialPrompt: string
+  initialRepo?: Nullable<string>
+} & ButtonProps) {
   const { colors } = useTheme()
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [prompt, setPrompt] = useState(() =>
-    ejs.render(vulnPromptTemplate, { vuln, report: parentReport })
-  )
+  const [prompt, setPrompt] = useState(initialPrompt)
 
   const menuBtnRef = useRef<HTMLButtonElement>(null)
   useOutsideClick(menuBtnRef, () => setDropdownOpen(false))
@@ -65,10 +63,9 @@ export function FixVulnerabilityButton({
         onClick={() => setDropdownOpen((prev) => !prev)}
         startIcon={<AiSparkleFilledIcon />}
         disabled={!!dropdownOpen}
-      >
-        Fix vulnerability
-      </Button>
-      <FixVulnFormSC
+        {...props}
+      />
+      <AgentRunFormPopupSC
         type="header"
         linkStyles={false}
         isOpen={dropdownOpen}
@@ -77,7 +74,7 @@ export function FixVulnerabilityButton({
       >
         <StretchedFlex>
           <StackedText
-            first="Fix vulnerability"
+            first={headerTitle}
             firstPartialType="body1"
             firstColor="text-light"
             icon={<DiscoverIcon />}
@@ -110,19 +107,19 @@ export function FixVulnerabilityButton({
             </Button>
           </>
         ) : (
-          <FixVulnerabilityForm
-            initialRepo={parentReport?.artifactRepoUrl}
+          <AgentRunForm
+            initialRepo={initialRepo}
             prompt={prompt}
             setPrompt={setPrompt}
             setAgentRun={setAgentRun}
           />
         )}
-      </FixVulnFormSC>
+      </AgentRunFormPopupSC>
     </div>
   )
 }
 
-function FixVulnerabilityForm({
+function AgentRunForm({
   initialRepo,
   prompt,
   setPrompt,
@@ -191,7 +188,7 @@ function FixVulnerabilityForm({
         <EditableDiv
           initialValue={prompt}
           setValue={setPrompt}
-          placeholder="Create a PR to fix this vulnerability"
+          placeholder="Enter a prompt for the AI agent"
           disabled={loading}
           css={{ height: 140 }}
         />
@@ -240,12 +237,13 @@ function AgentRunInfoCard({ agentRun }: { agentRun: AgentRunFragment }) {
   )
 }
 
-export const FixVulnFormSC = styled(SimplePopupMenu)(({ theme }) => ({
+export const AgentRunFormPopupSC = styled(SimplePopupMenu)(({ theme }) => ({
   width: 578,
   padding: theme.spacing.medium,
   gap: theme.spacing.large,
   transform: 'translateY(20px)',
   marginBottom: theme.spacing.xxlarge,
+  boxShadow: theme.boxShadows.moderate,
 }))
 
 const PromptInputBoxSC = styled(Card)(({ theme }) => ({

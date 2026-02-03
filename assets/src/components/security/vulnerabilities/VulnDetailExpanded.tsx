@@ -12,7 +12,10 @@ import {
   VulnerabilityFragment,
   VulnerabilityReportFragment,
 } from 'generated/graphql'
-import { FixVulnerabilityButton } from './FixVulnerabilityButton'
+import { AgentRunFixButton } from 'components/ai/agent-runs/AgentRunFixButton'
+import { useMemo } from 'react'
+import ejs from 'ejs'
+import vulnPromptTemplate from './vulnerability-prompt.ejs?raw'
 
 export function VulnDetailExpanded({
   row,
@@ -22,6 +25,11 @@ export function VulnDetailExpanded({
   parentReport: Nullable<VulnerabilityReportFragment>
 }) {
   const { original: v } = row
+
+  const initialPrompt = useMemo(
+    () => ejs.render(vulnPromptTemplate, { vuln: v, report: parentReport }),
+    [v, parentReport]
+  )
 
   if (!v.title && !v.description && !v.cvssSource && !v.score && !v.cvss)
     return <VulnerabilityDetailSC>No details available.</VulnerabilityDetailSC>
@@ -37,10 +45,13 @@ export function VulnDetailExpanded({
           secondPartialType="body2"
           css={{ maxWidth: 900 }}
         />
-        <FixVulnerabilityButton
-          vuln={v}
-          parentReport={parentReport}
-        />
+        <AgentRunFixButton
+          headerTitle="Fix vulnerability"
+          initialPrompt={initialPrompt}
+          initialRepo={parentReport?.artifactRepoUrl}
+        >
+          Fix vulnerability
+        </AgentRunFixButton>
       </StretchedFlex>
       <CVSSSection
         bundle={v.cvss}
