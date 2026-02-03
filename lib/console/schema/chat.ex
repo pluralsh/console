@@ -44,6 +44,7 @@ defmodule Console.Schema.Chat do
     belongs_to :user,          User
     belongs_to :thread,        ChatThread
     belongs_to :pr_automation, PrAutomation
+    belongs_to :agent_run,     AgentRun
 
     timestamps()
   end
@@ -105,7 +106,7 @@ defmodule Console.Schema.Chat do
 
   defp expiry(), do: Timex.now() |> Timex.shift(days: -5)
 
-  @valid ~w(user_id type thread_id role content seq confirm confirmed_at server_id pull_request_id pr_automation_id)a
+  @valid ~w(user_id type thread_id role content seq confirm confirmed_at server_id pull_request_id pr_automation_id agent_run_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -114,6 +115,9 @@ defmodule Console.Schema.Chat do
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:thread_id)
     |> foreign_key_constraint(:server_id)
+    |> foreign_key_constraint(:pull_request_id)
+    |> foreign_key_constraint(:pr_automation_id)
+    |> foreign_key_constraint(:agent_run_id)
     |> validate_required(~w(type user_id thread_id role seq)a)
   end
 

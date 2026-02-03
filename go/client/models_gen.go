@@ -510,6 +510,7 @@ type AgentSession struct {
 	Service     *ServiceDeployment   `json:"service,omitempty"`
 	Stack       *InfrastructureStack `json:"stack,omitempty"`
 	PullRequest *PullRequest         `json:"pullRequest,omitempty"`
+	Runtime     *AgentRuntime        `json:"runtime,omitempty"`
 	Cluster     *Cluster             `json:"cluster,omitempty"`
 	// the services associated with this chat, usually from an agentic workflow
 	ServiceDeployments *ServiceDeploymentConnection `json:"serviceDeployments,omitempty"`
@@ -533,6 +534,8 @@ type AgentSessionAttributes struct {
 	ConnectionID *string `json:"connectionId,omitempty"`
 	// the id of the cluster to use for this session
 	ClusterID *string `json:"clusterId,omitempty"`
+	// the id of the runtime to use for this session
+	RuntimeID *string `json:"runtimeId,omitempty"`
 	// whether to immediately mark this session in a done state, eg no backgroud work
 	Done *bool `json:"done,omitempty"`
 }
@@ -1308,6 +1311,7 @@ type Chat struct {
 	Thread       *ChatThread         `json:"thread,omitempty"`
 	Server       *McpServer          `json:"server,omitempty"`
 	PrAutomation *PrAutomation       `json:"prAutomation,omitempty"`
+	AgentRun     *AgentRun           `json:"agentRun,omitempty"`
 	InsertedAt   *string             `json:"insertedAt,omitempty"`
 	UpdatedAt    *string             `json:"updatedAt,omitempty"`
 }
@@ -4811,6 +4815,7 @@ type Observer struct {
 	NextRunAt  string            `json:"nextRunAt"`
 	Target     ObserverTarget    `json:"target"`
 	Actions    []*ObserverAction `json:"actions,omitempty"`
+	AgentRun   *AgentRun         `json:"agentRun,omitempty"`
 	Project    *Project          `json:"project,omitempty"`
 	Errors     []*ServiceError   `json:"errors,omitempty"`
 	InsertedAt *string           `json:"insertedAt,omitempty"`
@@ -4833,12 +4838,14 @@ type ObserverActionAttributes struct {
 type ObserverActionConfiguration struct {
 	Pr       *ObserverPrAction       `json:"pr,omitempty"`
 	Pipeline *ObserverPipelineAction `json:"pipeline,omitempty"`
+	Agent    *ObserverAgentAction    `json:"agent,omitempty"`
 }
 
 // configuration for an observer action
 type ObserverActionConfigurationAttributes struct {
 	Pr       *ObserverPrActionAttributes       `json:"pr,omitempty"`
 	Pipeline *ObserverPipelineActionAttributes `json:"pipeline,omitempty"`
+	Agent    *ObserverAgentActionAttributes    `json:"agent,omitempty"`
 }
 
 // The settings for configuring add-on scraping
@@ -4846,6 +4853,29 @@ type ObserverAddonAttributes struct {
 	Name               string   `json:"name"`
 	KubernetesVersion  *string  `json:"kubernetesVersion,omitempty"`
 	KubernetesVersions []string `json:"kubernetesVersions,omitempty"`
+}
+
+type ObserverAgentAction struct {
+	// the agent runtime to use.
+	Runtime string `json:"runtime"`
+	// the cluster the agent runtime is hosted on (needed to uniquely identify the runtime).
+	ClusterID *string `json:"clusterId,omitempty"`
+	// the prompt to give the agent to explain how to handle the observed value (templating is supported).
+	Prompt *string `json:"prompt,omitempty"`
+	// the repository url to use for the agent run.
+	Repository *string `json:"repository,omitempty"`
+}
+
+// Configuration for setting an agent context in an observer
+type ObserverAgentActionAttributes struct {
+	// the agent runtime to use.
+	Runtime string `json:"runtime"`
+	// the cluster the agent runtime is hosted on (needed to uniquely identify the runtime).
+	ClusterID *string `json:"clusterId,omitempty"`
+	// the prompt to give the agent to explain how to handle the observed value (templating is supported).
+	Prompt string `json:"prompt"`
+	// the repository url to use for the agent run.
+	Repository string `json:"repository"`
 }
 
 // An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response
@@ -11346,16 +11376,18 @@ type ObserverActionType string
 const (
 	ObserverActionTypePipeline ObserverActionType = "PIPELINE"
 	ObserverActionTypePr       ObserverActionType = "PR"
+	ObserverActionTypeAgent    ObserverActionType = "AGENT"
 )
 
 var AllObserverActionType = []ObserverActionType{
 	ObserverActionTypePipeline,
 	ObserverActionTypePr,
+	ObserverActionTypeAgent,
 }
 
 func (e ObserverActionType) IsValid() bool {
 	switch e {
-	case ObserverActionTypePipeline, ObserverActionTypePr:
+	case ObserverActionTypePipeline, ObserverActionTypePr, ObserverActionTypeAgent:
 		return true
 	}
 	return false

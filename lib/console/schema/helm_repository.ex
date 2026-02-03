@@ -18,6 +18,10 @@ defmodule Console.Schema.HelmRepository do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, search) do
+    from(h in query, where: ilike(h.url, ^"%#{search}%"))
+  end
+
   def without_urls(query \\ __MODULE__, urls) when is_list(urls) do
     from(h in query, where: h.url not in ^urls)
   end

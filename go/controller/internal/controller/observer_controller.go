@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -276,6 +277,23 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 					a.Configuration.Pipeline.Context = string(p.Context.Raw)
 				}
 			}
+
+			if agent := action.Configuration.Agent; agent != nil {
+				a.Configuration.Agent = &console.ObserverAgentActionAttributes{
+					Runtime:    agent.Runtime,
+					Prompt:     agent.Prompt,
+					Repository: agent.Repository,
+				}
+
+				if agent.Cluster != nil {
+					id, err := plural.Cache().GetClusterID(*agent.Cluster)
+					if err != nil {
+						return target, actions, lo.ToPtr(common.Wait()), err
+					}
+					a.Configuration.Agent.ClusterID = id
+				}
+			}
+
 			actions[i] = a
 		}
 

@@ -632,6 +632,7 @@ export type AgentSession = {
   /** the pull requests associated with this chat, usually from an agentic workflow */
   pullRequests?: Maybe<PullRequestConnection>;
   runs?: Maybe<AgentRunConnection>;
+  runtime?: Maybe<AgentRuntime>;
   service?: Maybe<ServiceDeployment>;
   /** the services associated with this chat, usually from an agentic workflow */
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
@@ -697,6 +698,8 @@ export type AgentSessionAttributes = {
   planConfirmed?: InputMaybe<Scalars['Boolean']['input']>;
   /** the prompt to use for this session */
   prompt?: InputMaybe<Scalars['String']['input']>;
+  /** the id of the runtime to use for this session */
+  runtimeId?: InputMaybe<Scalars['ID']['input']>;
   /** the type of agent this session is for */
   type?: InputMaybe<AgentSessionType>;
 };
@@ -1607,6 +1610,7 @@ export type CertificateStatus = {
 
 export type Chat = {
   __typename?: 'Chat';
+  agentRun?: Maybe<AgentRun>;
   attributes?: Maybe<ChatTypeAttributes>;
   /** whether this chat requires confirmation */
   confirm?: Maybe<Scalars['Boolean']['output']>;
@@ -5855,6 +5859,7 @@ export type ObservableMetricAttributes = {
 export type Observer = {
   __typename?: 'Observer';
   actions?: Maybe<Array<Maybe<ObserverAction>>>;
+  agentRun?: Maybe<AgentRun>;
   crontab: Scalars['String']['output'];
   errors?: Maybe<Array<Maybe<ServiceError>>>;
   id: Scalars['ID']['output'];
@@ -5885,17 +5890,20 @@ export type ObserverActionAttributes = {
 /** configuration for an observer action */
 export type ObserverActionConfiguration = {
   __typename?: 'ObserverActionConfiguration';
+  agent?: Maybe<ObserverAgentAction>;
   pipeline?: Maybe<ObserverPipelineAction>;
   pr?: Maybe<ObserverPrAction>;
 };
 
 /** configuration for an observer action */
 export type ObserverActionConfigurationAttributes = {
+  agent?: InputMaybe<ObserverAgentActionAttributes>;
   pipeline?: InputMaybe<ObserverPipelineActionAttributes>;
   pr?: InputMaybe<ObserverPrActionAttributes>;
 };
 
 export enum ObserverActionType {
+  Agent = 'AGENT',
   Pipeline = 'PIPELINE',
   Pr = 'PR'
 }
@@ -5905,6 +5913,30 @@ export type ObserverAddonAttributes = {
   kubernetesVersion?: InputMaybe<Scalars['String']['input']>;
   kubernetesVersions?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
+};
+
+export type ObserverAgentAction = {
+  __typename?: 'ObserverAgentAction';
+  /** the cluster the agent runtime is hosted on (needed to uniquely identify the runtime). */
+  clusterId?: Maybe<Scalars['ID']['output']>;
+  /** the prompt to give the agent to explain how to handle the observed value (templating is supported). */
+  prompt?: Maybe<Scalars['String']['output']>;
+  /** the repository url to use for the agent run. */
+  repository?: Maybe<Scalars['String']['output']>;
+  /** the agent runtime to use. */
+  runtime: Scalars['String']['output'];
+};
+
+/** Configuration for setting an agent context in an observer */
+export type ObserverAgentActionAttributes = {
+  /** the cluster the agent runtime is hosted on (needed to uniquely identify the runtime). */
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  /** the prompt to give the agent to explain how to handle the observed value (templating is supported). */
+  prompt: Scalars['String']['input'];
+  /** the repository url to use for the agent run. */
+  repository: Scalars['String']['input'];
+  /** the agent runtime to use. */
+  runtime: Scalars['String']['input'];
 };
 
 /** An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response */
@@ -10145,11 +10177,17 @@ export type RootQueryTypeFluxHelmRepositoryArgs = {
 };
 
 
+export type RootQueryTypeGitPullabilityStatisticsArgs = {
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypeGitRepositoriesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -10198,11 +10236,17 @@ export type RootQueryTypeGroupsArgs = {
 };
 
 
+export type RootQueryTypeHelmPullabilityStatisticsArgs = {
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypeHelmRepositoriesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 

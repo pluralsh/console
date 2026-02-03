@@ -40,22 +40,26 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def list_git_repositories(args, _) do
     GitRepository.ordered()
+    |> maybe_search(GitRepository, args)
     |> paginate(args)
   end
 
-  def git_pullability_statistics(_, _) do
+  def git_pullability_statistics(args, _) do
     GitRepository.statistics()
+    |> maybe_search(GitRepository, args)
     |> Console.Repo.all()
     |> ok()
   end
 
   def list_helm_repositories(args, _) do
     HelmRepository.ordered()
+    |> maybe_search(HelmRepository, args)
     |> paginate(args)
   end
 
-  def helm_pullability_statistics(_, _) do
+  def helm_pullability_statistics(args, _) do
     HelmRepository.statistics()
+    |> maybe_search(HelmRepository, args)
     |> Console.Repo.all()
     |> ok()
   end

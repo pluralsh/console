@@ -40,6 +40,29 @@ defmodule Console.Deployments.Agents do
   def get_agent_run!(id), do: Repo.get!(AgentRun, id)
 
   @doc """
+  Finds an agent runtime by name and cluster id (with the latter being optional)
+  """
+  @spec find_runtime(binary, binary) :: agent_runtime_resp
+  def find_runtime(runtime, cid) when is_binary(runtime) and is_binary(cid) do
+    case get_agent_runtime(cid, runtime) do
+      %AgentRuntime{} = runtime -> {:ok, runtime}
+      nil -> {:error, "could not find agent runtime #{runtime}"}
+    end
+  end
+
+  def find_runtime(runtime, _) when is_binary(runtime) do
+    AgentRuntime.for_name(runtime)
+    |> AgentRuntime.limit(1)
+    |> Repo.one()
+    |> case do
+      %AgentRuntime{} = runtime -> {:ok, runtime}
+      nil -> {:error, "could not find agent runtime #{runtime}"}
+    end
+  end
+
+  def find_runtime(_, _), do: {:error, "must at least specify runtime to generate an agent run"}
+
+  @doc """
   Checks if an agent runtime exists for a cluster
   """
   @spec has_runtime?(Cluster.t) :: boolean

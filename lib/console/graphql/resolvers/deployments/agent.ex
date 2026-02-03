@@ -37,6 +37,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
 
   def session_runs(%{id: id}, args, _) do
     AgentRun.for_session(id)
+    |> run_filters(args)
     |> paginate(args)
   end
 

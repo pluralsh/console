@@ -67,6 +67,33 @@ spec:
                         The structure depends on the Type field - PR actions use PR configuration,
                         while PIPELINE actions use pipeline configuration.
                       properties:
+                        agent:
+                          description: |-
+                            Agent contains configuration for agent actions.
+                            Used when the action type is AGENT to execute coding agent runs when new versions are detected by the observer.
+                          properties:
+                            cluster:
+                              description: Cluster references the cluster handle associated
+                                with the agent runtime, used to uniquely identify
+                                the runtime if needed.
+                              type: string
+                            prompt:
+                              description: Prompt specifies the prompt to give the
+                                agent to explain how to handle the observed value.
+                              type: string
+                            repository:
+                              description: Repository specifies the repository to
+                                use for the agent run.
+                              type: string
+                            runtime:
+                              description: Runtime specifies the runtime to use for
+                                the agent run.
+                              type: string
+                          required:
+                          - prompt
+                          - repository
+                          - runtime
+                          type: object
                         pipeline:
                           description: |-
                             Pipeline contains configuration for pipeline actions.
@@ -216,6 +243,7 @@ spec:
                       enum:
                       - PIPELINE
                       - PR
+                      - AGENT
                       type: string
                   required:
                   - configuration

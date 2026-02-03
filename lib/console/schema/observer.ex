@@ -1,8 +1,8 @@
 defmodule Console.Schema.Observer do
   use Console.Schema.Base
-  alias Console.Schema.{Project, OCIAuth, HelmRepository, ServiceError}
+  alias Console.Schema.{Project, OCIAuth, HelmRepository, ServiceError, AgentRun}
 
-  defenum Action,        pipeline: 0, pr: 1
+  defenum Action,        pipeline: 0, pr: 1, agent: 2
   defenum Status,        healthy: 0, failed: 1
   defenum TargetType,    oci: 0, helm: 1, git: 2, eks_addon: 3, addon: 4
   defenum GitTargetType, tags: 0
@@ -74,10 +74,19 @@ defmodule Console.Schema.Observer do
           field :pipeline_id, :binary_id
           field :context,     :map
         end
+
+        embeds_one :agent, AgentAction, on_replace: :update do
+          field :runtime,    :string
+          field :prompt,     :string
+          field :repository, :string
+          field :cluster_id, :binary_id
+        end
       end
     end
 
-    belongs_to :project, Project
+    belongs_to :project,   Project
+    belongs_to :agent_run, AgentRun
+
     has_many   :errors,  ServiceError, on_replace: :delete
 
     timestamps()
@@ -96,7 +105,7 @@ defmodule Console.Schema.Observer do
     from(o in query, order_by: ^order)
   end
 
-  @valid ~w(name status project_id last_value crontab last_run_at next_run_at initial)a
+  @valid ~w(name status project_id agent_run_id last_value crontab last_run_at next_run_at initial)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -177,6 +186,7 @@ defmodule Console.Schema.Observer do
     |> cast(attrs, [])
     |> cast_embed(:pr, with: &pr_changeset/2)
     |> cast_embed(:pipeline, with: &pipeline_changeset/2)
+    |> cast_embed(:agent, with: &agent_changeset/2)
   end
 
   defp pr_changeset(model, attrs) do
@@ -189,6 +199,12 @@ defmodule Console.Schema.Observer do
     model
     |> cast(attrs, ~w(pipeline_id context)a)
     |> validate_required(~w(pipeline_id context)a)
+  end
+
+  defp agent_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(runtime prompt repository cluster_id)a)
+    |> validate_required(~w(runtime prompt repository)a)
   end
 
   defp determine_next_run(cs) do
