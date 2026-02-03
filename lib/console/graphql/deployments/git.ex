@@ -980,6 +980,7 @@ defmodule Console.GraphQl.Deployments.Git do
         resource: :repos,
         action: :read
       arg :q, :string
+      arg :health, :git_health
 
       resolve &Deployments.list_git_repositories/2
     end
@@ -999,6 +1000,7 @@ defmodule Console.GraphQl.Deployments.Git do
         resource: :repos,
         action: :read
       arg :q, :string
+      arg :health, :git_health
 
       resolve &Deployments.list_helm_repositories/2
     end

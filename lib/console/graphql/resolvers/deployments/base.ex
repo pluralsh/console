@@ -30,6 +30,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Base do
   def maybe_search(query, module, %{q: q}) when is_binary(q), do: module.search(query, q)
   def maybe_search(query, _, _), do: query
 
+  def maybe_filter_health(query, module, %{health: health}) when not is_nil(health), do: module.for_health(query, health)
+  def maybe_filter_health(query, _, _), do: query
+
   def tag_filters(query, args) do
     Enum.reduce(args, query, fn
       {:tag, t}, q -> Tag.for_name(q, t)

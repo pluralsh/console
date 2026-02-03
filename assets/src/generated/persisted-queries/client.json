@@ -597,15 +597,15 @@
          "name": "ServiceTarball",
          "body": "query ServiceTarball($id: ID!) {\n  serviceTarball(id: $id) {\n    ...ServiceFile\n    __typename\n  }\n}\n\nfragment ServiceFile on ServiceFile {\n  path\n  content\n  __typename\n}"
       },
-      "sha256:dca3a9c296988b5153c8627cdfc022daa01d1219933b37b2ccb652bbab1530c4": {
+      "sha256:c8ea004893d22d5f3563295623376d4fa91cf4c02b6f9da96ae140cb06db8d79": {
          "type": "query",
          "name": "GitRepositories",
-         "body": "query GitRepositories($first: Int, $after: String) {\n  gitRepositories(first: $first, after: $after) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...GitRepository\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment GitRepository on GitRepository {\n  id\n  url\n  health\n  authMethod\n  editable\n  error\n  insertedAt\n  pulledAt\n  updatedAt\n  urlFormat\n  httpsPath\n  __typename\n}"
+         "body": "query GitRepositories($first: Int = 200, $after: String, $q: String, $health: GitHealth) {\n  gitRepositories(first: $first, after: $after, q: $q, health: $health) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...GitRepository\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment GitRepository on GitRepository {\n  id\n  url\n  health\n  authMethod\n  editable\n  error\n  insertedAt\n  pulledAt\n  updatedAt\n  urlFormat\n  httpsPath\n  __typename\n}"
       },
-      "sha256:c6f7f3c77d73379edabf6148e18a87f12a6104dfdd84b5a1f47d401e93ebefce": {
+      "sha256:37b8209f8d4c28f4c0620c757eec3b42c8c126dfaddabacde97c79794ae6dd7d": {
          "type": "query",
          "name": "HelmRepositories",
-         "body": "query HelmRepositories($first: Int, $after: String) {\n  helmRepositories(first: $first, after: $after) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...HelmRepository\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment HelmRepository on HelmRepository {\n  id\n  url\n  health\n  provider\n  insertedAt\n  pulledAt\n  updatedAt\n  __typename\n}"
+         "body": "query HelmRepositories($first: Int = 200, $after: String, $q: String, $health: GitHealth) {\n  helmRepositories(first: $first, after: $after, q: $q, health: $health) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...HelmRepository\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment HelmRepository on HelmRepository {\n  id\n  url\n  health\n  provider\n  insertedAt\n  pulledAt\n  updatedAt\n  __typename\n}"
       },
       "sha256:10be6a4b7602a9826dd76f11408522c24fc403587c0d15f89781289fb096afd1": {
          "type": "query",

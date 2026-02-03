@@ -33,6 +33,10 @@ defmodule Console.Schema.GitRepository do
     from(g in query, where: ilike(g.url, ^"%#{search}%"))
   end
 
+  def for_health(query \\ __MODULE__, health) do
+    from(g in query, where: g.health == ^health)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :url]) do
     from(g in query, order_by: ^order)
   end

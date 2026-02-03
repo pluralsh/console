@@ -10187,6 +10187,7 @@ export type RootQueryTypeGitRepositoriesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  health?: InputMaybe<GitHealth>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
 };
@@ -10246,6 +10247,7 @@ export type RootQueryTypeHelmRepositoriesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  health?: InputMaybe<GitHealth>;
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
 };
@@ -14700,6 +14702,8 @@ export type HelmChartVersionFragment = { __typename?: 'HelmChartVersion', name?:
 export type GitRepositoriesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  health?: InputMaybe<GitHealth>;
 }>;
 
 
@@ -14708,6 +14712,8 @@ export type GitRepositoriesQuery = { __typename?: 'RootQueryType', gitRepositori
 export type HelmRepositoriesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  health?: InputMaybe<GitHealth>;
 }>;
 
 
@@ -26427,8 +26433,8 @@ export type ServiceTarballLazyQueryHookResult = ReturnType<typeof useServiceTarb
 export type ServiceTarballSuspenseQueryHookResult = ReturnType<typeof useServiceTarballSuspenseQuery>;
 export type ServiceTarballQueryResult = Apollo.QueryResult<ServiceTarballQuery, ServiceTarballQueryVariables>;
 export const GitRepositoriesDocument = gql`
-    query GitRepositories($first: Int, $after: String) {
-  gitRepositories(first: $first, after: $after) {
+    query GitRepositories($first: Int = 200, $after: String, $q: String, $health: GitHealth) {
+  gitRepositories(first: $first, after: $after, q: $q, health: $health) {
     pageInfo {
       ...PageInfo
     }
@@ -26456,6 +26462,8 @@ ${GitRepositoryFragmentDoc}`;
  *   variables: {
  *      first: // value for 'first'
  *      after: // value for 'after'
+ *      q: // value for 'q'
+ *      health: // value for 'health'
  *   },
  * });
  */
@@ -26476,8 +26484,8 @@ export type GitRepositoriesLazyQueryHookResult = ReturnType<typeof useGitReposit
 export type GitRepositoriesSuspenseQueryHookResult = ReturnType<typeof useGitRepositoriesSuspenseQuery>;
 export type GitRepositoriesQueryResult = Apollo.QueryResult<GitRepositoriesQuery, GitRepositoriesQueryVariables>;
 export const HelmRepositoriesDocument = gql`
-    query HelmRepositories($first: Int, $after: String) {
-  helmRepositories(first: $first, after: $after) {
+    query HelmRepositories($first: Int = 200, $after: String, $q: String, $health: GitHealth) {
+  helmRepositories(first: $first, after: $after, q: $q, health: $health) {
     pageInfo {
       ...PageInfo
     }
@@ -26505,6 +26513,8 @@ ${HelmRepositoryFragmentDoc}`;
  *   variables: {
  *      first: // value for 'first'
  *      after: // value for 'after'
+ *      q: // value for 'q'
+ *      health: // value for 'health'
  *   },
  * });
  */

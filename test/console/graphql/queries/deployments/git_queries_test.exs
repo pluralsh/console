@@ -20,6 +20,22 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
       assert from_connection(found)
              |> Enum.all?(& &1["url"])
     end
+
+    test "it can filter git repositories by health" do
+      pullable = insert_list(2, :git_repository, health: :pullable)
+      insert_list(3, :git_repository, health: :failed)
+
+      {:ok, %{data: %{"gitRepositories" => found}}} = run_query("""
+        query {
+          gitRepositories(first: 10, health: PULLABLE) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal(pullable)
+    end
   end
 
   describe "helmRepositories" do
@@ -38,6 +54,22 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
              |> ids_equal(repos)
       assert from_connection(found)
              |> Enum.all?(& &1["url"])
+    end
+
+    test "it can filter helm repositories by health" do
+      pullable = insert_list(2, :helm_repository, health: :pullable)
+      insert_list(3, :helm_repository, health: :failed)
+
+      {:ok, %{data: %{"helmRepositories" => found}}} = run_query("""
+        query {
+          helmRepositories(first: 10, health: PULLABLE) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal(pullable)
     end
   end
 

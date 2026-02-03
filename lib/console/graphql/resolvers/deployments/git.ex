@@ -41,6 +41,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def list_git_repositories(args, _) do
     GitRepository.ordered()
     |> maybe_search(GitRepository, args)
+    |> maybe_filter_health(GitRepository, args)
     |> paginate(args)
   end
 
@@ -54,6 +55,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def list_helm_repositories(args, _) do
     HelmRepository.ordered()
     |> maybe_search(HelmRepository, args)
+    |> maybe_filter_health(HelmRepository, args)
     |> paginate(args)
   end
 
