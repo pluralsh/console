@@ -1,6 +1,14 @@
 defmodule Console.Schema.AgentSession do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{CloudConnection, ChatThread, Stack, PullRequest, Service, Cluster}
+  alias Console.Schema.{
+    CloudConnection,
+    ChatThread,
+    Stack,
+    PullRequest,
+    Service,
+    Cluster,
+    AgentRuntime
+  }
 
   defenum Type, terraform: 0, kubernetes: 1, provisioning: 2, search: 3, manifests: 4, chat: 5, research: 6
 

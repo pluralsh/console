@@ -1,7 +1,7 @@
 defmodule Console.AI.Tools.Agent.CodingAgent do
   use Console.AI.Tools.Agent.Base
   import Console.AI.Tools.Utils
-  alias Console.Schema.{User, AgentRuntime}
+  alias Console.Schema.{User, AgentRuntime, AgentSession}
   alias Console.Deployments.Agents
 
   embedded_schema do
@@ -24,8 +24,8 @@ defmodule Console.AI.Tools.Agent.CodingAgent do
 
   def implement(%__MODULE__{repository: repo, prompt: prompt}) do
     with {:user, %User{} = user} <- {:user, Tool.actor()},
-         {:session, %AgentSession{runtime: %AgentRuntime{id: rid}}} <- session(),
-         {:run, {:ok, agent_run}} <- {:run, Agents.create_agent_run(%{repository: repo, prompt: prompt}, rid, user)} do
+         {:session, %AgentSession{runtime: %AgentRuntime{id: rid}, id: id}} <- session(),
+         {:run, {:ok, agent_run}} <- {:run, Agents.create_agent_run(%{mode: :write, repository: repo, prompt: prompt, session_id: id}, rid, user)} do
       {:ok, %{
         agent_run_id: agent_run.id,
         content: "Coding agent run created with id #{agent_run.id}, see progress at #{Console.url("/ai/agent-runs/#{agent_run.id}")}"
