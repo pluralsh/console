@@ -64,7 +64,19 @@ versions:
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['ModelCache/LocalModelCache enhancements (LocalModelNode CR, node agent,
+        admission webhook), including support for multiple node groups, configurable
+        reconciliation frequency, safer PVC naming, and automatic redownload when
+        models are missing.', 'ModelCar is enabled by default in 0.15.2, changing
+        the default model packaging/serving behavior unless explicitly disabled.',
+      'Improved protocol/response handling: datetime object serialization for v1/v2
+        responses; additional test coverage for streaming requests and HF output correctness.',
+      'Controller reconciliation behavior updated: Knative autoscaler configmap read
+        order reworked; ModelServer init accepts a new predictor_config parameter.']
+    breaking_changes: []
   chart_version: v0.15.2
   images: ['docker.io/seldonio/mlserver:1.5.0', 'kserve/huggingfaceserver:v0.15.2',
     'kserve/huggingfaceserver:v0.15.2-gpu', 'kserve/kserve-controller:v0.15.2', 'kserve/lgbserver:v0.15.2',

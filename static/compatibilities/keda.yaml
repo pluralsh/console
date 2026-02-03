@@ -4,6 +4,12 @@ release_url: https://github.com/kedacore/keda/releases/tag/v{vsn}
 helm_repository_url: https://kedacore.github.io/charts
 eolApiSlug: keda
 versions:
+- version: 2.19.0
+  kube: ['1.34', '1.33', '1.32']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.19.0
 - version: 2.18.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []

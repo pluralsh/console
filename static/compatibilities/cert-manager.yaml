@@ -514,6 +514,7 @@ versions:
   chart_version: 1.10.0
   images: ['quay.io/jetstack/cert-manager-cainjector:v1.10.0', 'quay.io/jetstack/cert-manager-controller:v1.10.0',
     'quay.io/jetstack/cert-manager-ctl:v1.10.0', 'quay.io/jetstack/cert-manager-webhook:v1.10.0']
+  eolAt: '2023-05-19'
 - version: 1.9.0
   kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []

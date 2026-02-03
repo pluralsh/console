@@ -266,7 +266,16 @@ versions:
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Bumped the synchronizer component version., Jobs now include the
+        (previously missing) ServiceAccount reference., Prometheus exporter endpoints
+        issue fixed., Added/updated RBAC permissions for the application profile.,
+      'Standardized chart labels (introduced in 1.21.0, remains relevant when upgrading
+        from 1.21.0).']
+    features: ['Configurable endpoint detection was added, allowing you to tune how
+        endpoints are discovered/selected in your environment.']
+    breaking_changes: []
   chart_version: 1.22.0
   images: ['quay.io/kubescape/kubescape:v3.0.17', 'quay.io/kubescape/kubevuln:v0.3.33',
     'quay.io/kubescape/node-agent:v0.2.141', 'quay.io/kubescape/operator:v0.2.31',
