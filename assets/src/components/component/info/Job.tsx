@@ -9,6 +9,7 @@ import { InfoSection, PaddedCard, PropWideBold } from './common'
 import { JobStatus, useDeleteJobMutation } from '../../../generated/graphql.ts'
 import { ComponentDetailsContext } from '../ComponentDetails.tsx'
 import { ConditionsTable } from './Conditions.tsx'
+import { Severity } from '../../../../design-system/dist/types'
 
 const JOB_COMPLETE = 'complete'
 const JOB_FAILED = 'failed'
@@ -36,10 +37,10 @@ export function getJobStatus(job: { status?: JobStatus | null }): string {
   return 'Running'
 }
 
-const JOB_STATUS_SEVERITY: Record<string, 'success' | 'error'> = {
+const JOB_STATUS_SEVERITY: Record<string, Severity> = {
   Running: 'success',
   Complete: 'success',
-  Failed: 'error',
+  Failed: 'danger',
 }
 
 export function JobStatusChip({ status }: { status: string }) {
@@ -143,9 +144,6 @@ export default function Job() {
             </PropWideBold>
             <PropWideBold title="Deadline">
               {job.spec?.activeDeadlineSeconds || 0}
-            </PropWideBold>
-            <PropWideBold title="Starting deadline seconds">
-              {job.spec?.startingDeadlineSeconds || 0}
             </PropWideBold>
           </PaddedCard>
         </InfoSection>
