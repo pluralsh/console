@@ -101,6 +101,35 @@ defmodule Console.GraphQl.AiQueriesAsyncTest do
       assert found["session"]["connection"]["id"] == session.connection_id
     end
 
+    test "it can sideload agent runs on thread chats" do
+      user = insert(:user)
+      thread = insert(:chat_thread, user: user)
+      run = insert(:agent_run, user: user)
+      chat = insert(:chat, thread: thread, user: user, type: :agent_run, agent_run: run)
+
+      {:ok, %{data: %{"chatThread" => found}}} = run_query("""
+        query Thread($id: ID!) {
+          chatThread(id: $id) {
+            id
+            chats(first: 5) {
+              edges {
+                node {
+                  id
+                  type
+                  agentRun { id }
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => thread.id}, %{current_user: user})
+
+      [chat_node] = from_connection(found["chats"])
+      assert chat_node["id"] == chat.id
+      assert chat_node["type"] == "AGENT_RUN"
+      assert chat_node["agentRun"]["id"] == run.id
+    end
+
     test "you cannot view other users threads" do
       user = insert(:user)
       thread = insert(:chat_thread)

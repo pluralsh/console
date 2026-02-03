@@ -10195,6 +10195,7 @@ enum ChatType {
   ERROR
   IMPLEMENTATION_PLAN
   PR_CALL
+  AGENT_RUN
 }
 
 enum EvidenceType {

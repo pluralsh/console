@@ -27,6 +27,7 @@ defmodule Console.AI.Tools.Agent.CodingAgent do
          {:session, %AgentSession{runtime: %AgentRuntime{id: rid}, id: id}} <- session(),
          {:run, {:ok, agent_run}} <- {:run, Agents.create_agent_run(%{mode: :write, repository: repo, prompt: prompt, session_id: id}, rid, user)} do
       {:ok, %{
+        type: :agent_run,
         agent_run_id: agent_run.id,
         content: "Coding agent run created with id #{agent_run.id}, see progress at #{Console.url("/ai/agent-runs/#{agent_run.id}")}"
       }}

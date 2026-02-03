@@ -1,13 +1,20 @@
 defmodule Console.Schema.Chat do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{User, ChatThread, PullRequest, McpServer, PrAutomation}
+  alias Console.Schema.{
+    User,
+    ChatThread,
+    PullRequest,
+    McpServer,
+    PrAutomation,
+    AgentRun
+  }
   alias Console.AI.Provider
 
   @type msg :: t | %{role: Provider.sender, content: binary} | Provider.message
   @type history :: [msg]
 
   defenum Role, user: 0, assistant: 1, system: 2
-  defenum Type, text: 0, file: 1, tool: 2, error: 3, implementation_plan: 4, pr_call: 5
+  defenum Type, text: 0, file: 1, tool: 2, error: 3, implementation_plan: 4, pr_call: 5, agent_run: 6
 
   schema "chats" do
     field :type,         Type, default: :text

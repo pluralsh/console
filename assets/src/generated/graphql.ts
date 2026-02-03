@@ -1788,6 +1788,7 @@ export type ChatTool = {
 };
 
 export enum ChatType {
+  AgentRun = 'AGENT_RUN',
   Error = 'ERROR',
   File = 'FILE',
   ImplementationPlan = 'IMPLEMENTATION_PLAN',
