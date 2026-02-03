@@ -1,4 +1,4 @@
-import { IconFrame, TrashCanIcon } from '@pluralsh/design-system'
+import { Chip, IconFrame, TrashCanIcon } from '@pluralsh/design-system'
 import { Confirm } from 'components/utils/Confirm'
 import { useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
@@ -33,6 +33,25 @@ export function getJobStatus(job: { status?: JobStatus | null }): string {
   }
 
   return 'Running'
+}
+
+const JOB_STATUS_SEVERITY: Record<string, 'success' | 'error'> = {
+  Running: 'success',
+  Complete: 'success',
+  Failed: 'error',
+}
+
+export function JobStatusChip({ status }: { status: string }) {
+  const severity = JOB_STATUS_SEVERITY[status] ?? 'neutral'
+
+  return (
+    <Chip
+      severity={severity}
+      size="small"
+    >
+      {status}
+    </Chip>
+  )
 }
 
 export function DeleteJob({ name, namespace, refetch }) {
@@ -79,7 +98,9 @@ export default function Job() {
     <>
       <InfoSection title="Status">
         <PaddedCard>
-          <PropWideBold title="Status">{status}</PropWideBold>
+          <PropWideBold title="Status">
+            <JobStatusChip status={status} />
+          </PropWideBold>
           <PropWideBold title="Active">{job.status?.active || 0}</PropWideBold>
           <PropWideBold title="Succeeded">
             {job.status?.succeeded || 0}

@@ -15,7 +15,12 @@ export const InfoSectionH4 = styled.h4(({ theme }) => ({
 }))
 
 export const PaddedCard = styled(Card)(({ theme }) => ({
-  '&&': { padding: theme.spacing.large },
+  '&&': {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.xxsmall,
+    padding: theme.spacing.large,
+  },
 }))
 
 export const PropWideBold = styled(PropWide)({
