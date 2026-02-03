@@ -25,6 +25,9 @@ fragment Chat on Chat {
   prAutomation {
     ...PrAutomation
   }
+  agentRun {
+    ...AgentRunTiny
+  }
   server {
     id
     name
@@ -122,6 +125,10 @@ fragment AgentSession on AgentSession {
   }
   cluster {
     id
+  }
+  runtime {
+    id
+    name
   }
   pullRequest {
     id

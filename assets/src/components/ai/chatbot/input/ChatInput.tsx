@@ -39,6 +39,7 @@ import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputCloudSelect } from './ChatInputCloudSelect.tsx'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
+import { ChatInputRuntimeSelect } from './ChatInputRuntimeSelect.tsx'
 
 export function ChatInput({
   ref,
@@ -192,6 +193,9 @@ export function ChatInput({
             )}
             {!selectedAgent && !!currentThread?.session?.id && (
               <ChatInputClusterSelect currentThread={currentThread} />
+            )}
+            {!selectedAgent && !!currentThread?.session?.id && (
+              <ChatInputRuntimeSelect currentThread={currentThread} />
             )}
           </Flex>
           <Button

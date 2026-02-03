@@ -18,7 +18,7 @@ import { ChatInputSelectButton } from './ChatInputSelectButton.tsx'
 import { useTheme } from 'styled-components'
 import { useCallback, useMemo, useState } from 'react'
 import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData.tsx'
-import { isEmpty } from 'lodash'
+import { isEmpty, truncate } from 'lodash'
 import ProviderIcon from '../../../utils/Provider.tsx'
 import { TRUNCATE } from '../../../utils/truncate.ts'
 import { useThrottle } from '../../../hooks/useThrottle.tsx'
@@ -146,7 +146,7 @@ export function ChatInputCloudSelect({
               <CloudIcon size={12} />
             )}
             <span css={{ ...TRUNCATE }}>
-              {currentConnection?.name || 'cloud'}
+              {truncate(currentConnection?.name || 'cloud', { length: 12 })}
             </span>
           </ChatInputSelectButton>
         }
