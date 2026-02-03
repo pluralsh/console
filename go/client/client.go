@@ -6797,14 +6797,15 @@ func (t *ServiceDeploymentForAgent_Cluster) GetVersion() *string {
 }
 
 type ServiceDeploymentForAgent_Helm struct {
-	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
-	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
-	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
-	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
-	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
-	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
-	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
-	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	IgnoreCrds          *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
+	IgnoreHooks         *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+	KustomizePostrender *string   "json:\"kustomizePostrender,omitempty\" graphql:\"kustomizePostrender\""
+	LuaFile             *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder           *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
+	LuaScript           *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	Release             *string   "json:\"release,omitempty\" graphql:\"release\""
+	Values              *string   "json:\"values,omitempty\" graphql:\"values\""
+	ValuesFiles         []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 }
 
 func (t *ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
@@ -6818,6 +6819,12 @@ func (t *ServiceDeploymentForAgent_Helm) GetIgnoreHooks() *bool {
 		t = &ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
+}
+func (t *ServiceDeploymentForAgent_Helm) GetKustomizePostrender() *string {
+	if t == nil {
+		t = &ServiceDeploymentForAgent_Helm{}
+	}
+	return t.KustomizePostrender
 }
 func (t *ServiceDeploymentForAgent_Helm) GetLuaFile() *string {
 	if t == nil {
@@ -7955,14 +7962,15 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Cl
 }
 
 type ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm struct {
-	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
-	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
-	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
-	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
-	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
-	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
-	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
-	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	IgnoreCrds          *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
+	IgnoreHooks         *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+	KustomizePostrender *string   "json:\"kustomizePostrender,omitempty\" graphql:\"kustomizePostrender\""
+	LuaFile             *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder           *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
+	LuaScript           *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	Release             *string   "json:\"release,omitempty\" graphql:\"release\""
+	Values              *string   "json:\"values,omitempty\" graphql:\"values\""
+	ValuesFiles         []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 }
 
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
@@ -7976,6 +7984,12 @@ func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_He
 		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
+}
+func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetKustomizePostrender() *string {
+	if t == nil {
+		t = &ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.KustomizePostrender
 }
 func (t *ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaFile() *string {
 	if t == nil {
@@ -16071,14 +16085,15 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm struct {
-	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
-	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
-	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
-	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
-	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
-	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
-	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
-	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	IgnoreCrds          *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
+	IgnoreHooks         *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+	KustomizePostrender *string   "json:\"kustomizePostrender,omitempty\" graphql:\"kustomizePostrender\""
+	LuaFile             *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder           *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
+	LuaScript           *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	Release             *string   "json:\"release,omitempty\" graphql:\"release\""
+	Values              *string   "json:\"values,omitempty\" graphql:\"values\""
+	ValuesFiles         []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
@@ -16092,6 +16107,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgen
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetKustomizePostrender() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.KustomizePostrender
 }
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_ServiceDeploymentForAgent_Helm) GetLuaFile() *string {
 	if t == nil {
@@ -16602,14 +16623,15 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 }
 
 type PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm struct {
-	IgnoreCrds  *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
-	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
-	LuaFile     *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
-	LuaFolder   *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
-	LuaScript   *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
-	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
-	Values      *string   "json:\"values,omitempty\" graphql:\"values\""
-	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	IgnoreCrds          *bool     "json:\"ignoreCrds,omitempty\" graphql:\"ignoreCrds\""
+	IgnoreHooks         *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
+	KustomizePostrender *string   "json:\"kustomizePostrender,omitempty\" graphql:\"kustomizePostrender\""
+	LuaFile             *string   "json:\"luaFile,omitempty\" graphql:\"luaFile\""
+	LuaFolder           *string   "json:\"luaFolder,omitempty\" graphql:\"luaFolder\""
+	LuaScript           *string   "json:\"luaScript,omitempty\" graphql:\"luaScript\""
+	Release             *string   "json:\"release,omitempty\" graphql:\"release\""
+	Values              *string   "json:\"values,omitempty\" graphql:\"values\""
+	ValuesFiles         []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
 }
 
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetIgnoreCrds() *bool {
@@ -16623,6 +16645,12 @@ func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeployme
 		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
 	}
 	return t.IgnoreHooks
+}
+func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetKustomizePostrender() *string {
+	if t == nil {
+		t = &PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm{}
+	}
+	return t.KustomizePostrender
 }
 func (t *PagedClusterServicesForAgent_PagedClusterServices_Edges_ServiceDeploymentEdgeFragmentForAgent_Node_ServiceDeploymentForAgent_Helm) GetLuaFile() *string {
 	if t == nil {
@@ -32816,6 +32844,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		luaScript
 		luaFile
 		luaFolder
+		kustomizePostrender
 	}
 	configuration {
 		name
@@ -33324,6 +33353,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
 		luaScript
 		luaFile
 		luaFolder
+		kustomizePostrender
 	}
 	configuration {
 		name

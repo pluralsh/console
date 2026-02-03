@@ -182,6 +182,7 @@ fragment ServiceDeploymentForAgent on ServiceDeployment {
         luaScript
         luaFile
         luaFolder
+        kustomizePostrender
     }
     configuration {
         name
