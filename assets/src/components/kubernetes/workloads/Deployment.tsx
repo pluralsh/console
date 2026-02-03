@@ -4,7 +4,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ReactElement, useMemo } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { formatLocalizedDateTime } from 'utils/datetime'
 import { useQuery } from '@tanstack/react-query'
 import { AxiosInstance } from '../../../helpers/axios.ts'
@@ -12,6 +12,9 @@ import { AxiosInstance } from '../../../helpers/axios.ts'
 import {
   CommonEvent,
   CommonEventList,
+  DeploymentDeploymentDetail,
+  PodPod,
+  PodPodList,
   ReplicasetReplicaSet,
   ReplicasetReplicaSetList,
 } from '../../../generated/kubernetes'
@@ -20,6 +23,7 @@ import {
   getDeploymentNewReplicaSetOptions,
   getDeploymentOldReplicaSetsInfiniteOptions,
   getDeploymentOptions,
+  getReplicaSetPodsInfiniteOptions,
 } from '../../../generated/kubernetes/@tanstack/react-query.gen.ts'
 import {
   DEPLOYMENTS_REL_PATH,
@@ -49,8 +53,10 @@ import { NAMESPACE_PARAM } from '../Navigation'
 import { getBreadcrumbs } from './Deployments'
 import { useReplicaSetsColumns } from './ReplicaSets'
 import { WorkloadStatusChip } from './utils'
+import { usePodsColumns } from './Pods.tsx'
 
 const directory: Array<TabEntry> = [
+  { path: 'pods', label: 'Pods' },
   { path: 'replicasets', label: 'Replica Sets' },
   { path: 'hpas', label: 'Horizontal Pod Autoscalers' },
   { path: 'events', label: 'Events' },
@@ -133,6 +139,36 @@ export default function Deployment(): ReactElement<any> {
     >
       <Outlet context={deployment} />
     </ResourceDetails>
+  )
+}
+
+export function DeploymentPods(): ReactElement<any> {
+  const { name = '', namespace = '', clusterId = '' } = useParams()
+  const columns = usePodsColumns()
+
+  const { data: replicaSet, isLoading } = useQuery({
+    ...getDeploymentNewReplicaSetOptions({
+      client: AxiosInstance(clusterId),
+      path: { deployment: name, namespace },
+    }),
+    refetchInterval: 30_000,
+  })
+
+  if (isLoading) {
+    return <LoadingIndicator />
+  }
+
+  return (
+    <ResourceList<PodPodList, PodPod>
+      namespaced
+      columns={columns}
+      queryOptions={getReplicaSetPodsInfiniteOptions}
+      pathParams={{
+        replicaSet: replicaSet?.objectMeta?.name,
+        namespace: replicaSet?.objectMeta?.namespace,
+      }}
+      itemsKey="pods"
+    />
   )
 }
 
