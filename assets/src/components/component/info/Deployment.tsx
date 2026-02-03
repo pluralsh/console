@@ -122,6 +122,9 @@ export function DeploymentBase({
       </InfoSection>
       <InfoSection title="Spec">
         <PaddedCard>
+          <PropWideBold title="Selector">
+            {JSON.stringify(spec?.selector) || '-'}
+          </PropWideBold>
           <PropWideBold title="Strategy">
             {spec?.strategy?.type || '-'}
           </PropWideBold>
