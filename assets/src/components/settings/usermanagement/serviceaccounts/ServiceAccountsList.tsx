@@ -1,10 +1,8 @@
-import { EmptyState, Input, SearchIcon, Table } from '@pluralsh/design-system'
+import { Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 import { ComponentProps, useMemo } from 'react'
 
 import { useServiceAccountsQuery } from 'generated/graphql'
-
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
@@ -16,12 +14,13 @@ import { useDebounce } from '@react-hooks-library/core'
 
 import { ListWrapperSC } from '../users/UsersList'
 
-import { serviceAccountsCols } from './ServiceAccountCols'
 import { useLogin } from 'components/contexts'
 import { mapExistingNodes } from 'utils/graphql'
+import { serviceAccountsCols } from './ServiceAccountCols'
 
 export const SERVICE_ACCOUNTS_QUERY_PAGE_SIZE = 100
-export default function ServiceAccountsList({
+
+export function ServiceAccountsList({
   q,
   setQ,
 }: {
@@ -48,7 +47,6 @@ export default function ServiceAccountsList({
   )
 
   if (error) return <GqlError error={error} />
-  if (!serviceAccounts) return <LoadingIndicator />
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
     meta: { isAdmin },
@@ -63,31 +61,26 @@ export default function ServiceAccountsList({
         onChange={({ target: { value } }) => setQ(value)}
         backgroundColor="fill-one"
       />
-      {!isEmpty(serviceAccounts) ? (
-        <GridTableWrapper>
-          <Table
-            virtualizeRows
-            rowBg="raised"
-            data={serviceAccounts || []}
-            columns={serviceAccountsCols}
-            hideHeader
-            hasNextPage={pageInfo?.hasNextPage}
-            fetchNextPage={fetchNextPage}
-            isFetchingNextPage={loading}
-            onVirtualSliceChange={setVirtualSlice}
-            reactTableOptions={reactTableOptions}
-            css={{ height: '100%' }}
-          />
-        </GridTableWrapper>
-      ) : (
-        <EmptyState
-          message={
-            isEmpty(q)
+      <GridTableWrapper>
+        <Table
+          hideHeader
+          virtualizeRows
+          rowBg="raised"
+          loading={!data && loading}
+          data={serviceAccounts}
+          columns={serviceAccountsCols}
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
+          reactTableOptions={reactTableOptions}
+          emptyStateProps={{
+            message: isEmpty(q)
               ? "Looks like you don't have any service accounts yet."
-              : `No service accounts found for ${q}`
-          }
+              : `No service accounts found for ${q}`,
+          }}
         />
-      )}
+      </GridTableWrapper>
     </ListWrapperSC>
   )
 }

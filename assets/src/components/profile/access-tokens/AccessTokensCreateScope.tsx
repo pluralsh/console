@@ -1,5 +1,3 @@
-import { useTheme } from 'styled-components'
-import { useCallback, useState } from 'react'
 import {
   Button,
   Card,
@@ -10,10 +8,13 @@ import {
   Input,
 } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
+import { useState } from 'react'
+import { useTheme } from 'styled-components'
 
 import { ChipList } from 'components/cd/services/CreateGlobalService'
 
-import { Scope } from './AccessTokensCreateModal'
+import { ScopeAttributes } from 'generated/graphql'
+import { produce } from 'immer'
 
 export function AccessTokensCreateScope({
   scope,
@@ -21,9 +22,9 @@ export function AccessTokensCreateScope({
   remove,
   canRemove,
 }: {
-  scope: Scope
-  setScope: any
-  remove: any
+  scope: ScopeAttributes
+  setScope: (s: ScopeAttributes) => void
+  remove: () => void
   canRemove: boolean
 }) {
   const theme = useTheme()
@@ -31,38 +32,20 @@ export function AccessTokensCreateScope({
   const [api, setApi] = useState('')
   const [id, setId] = useState('')
 
-  const addApi = useCallback(() => {
-    const next = scope
+  const updateScope = (updater: (draft: ScopeAttributes) => void) =>
+    setScope(produce(scope, updater))
 
-    next.apis = [...next.apis, api]
-    setScope(next)
-    setApi('')
-  }, [scope, setScope, api, setApi])
-  const removeApi = useCallback(
-    (i: number) => {
-      const next = scope
-
-      next.apis.splice(i, 1)
-      setScope(next)
-    },
-    [scope, setScope]
-  )
-  const addId = useCallback(() => {
-    const next = scope
-
-    next.ids = [...next.ids, id]
-    setScope(next)
-    setId('')
-  }, [scope, setScope, id, setId])
-  const removeId = useCallback(
-    (i: number) => {
-      const next = scope
-
-      next.ids.splice(i, 1)
-      setScope(next)
-    },
-    [scope, setScope]
-  )
+  const addItem = (field: 'apis' | 'ids', value: string) => {
+    updateScope((draft) => {
+      draft[field]?.push(value)
+    })
+    if (field === 'apis') setApi('')
+    else if (field === 'ids') setId('')
+  }
+  const removeItem = (field: 'apis' | 'ids', i: number) =>
+    updateScope((draft) => {
+      draft[field]?.splice(i, 1)
+    })
 
   return (
     <Card
@@ -111,7 +94,7 @@ export function AccessTokensCreateScope({
           <Button
             secondary
             disabled={isEmpty(api)}
-            onClick={addApi}
+            onClick={() => addItem('apis', api)}
           >
             Add
           </Button>
@@ -120,16 +103,18 @@ export function AccessTokensCreateScope({
       {!isEmpty(scope.apis) && (
         <ChipList
           maxVisible={Infinity}
-          chips={scope.apis.map((a, idx) => (
-            <Chip
-              size="small"
-              clickable
-              onClick={() => removeApi(idx)}
-              closeButton
-            >
-              {a}
-            </Chip>
-          ))}
+          chips={
+            scope.apis?.map((a, idx) => (
+              <Chip
+                size="small"
+                clickable
+                onClick={() => removeItem('apis', idx)}
+                closeButton
+              >
+                {a}
+              </Chip>
+            )) ?? []
+          }
         />
       )}
       <FormField
@@ -141,14 +126,13 @@ export function AccessTokensCreateScope({
           <Input
             flexGrow={1}
             value={id}
-            onChange={(e) => {
-              setId(e.currentTarget.value)
-            }}
+            onChange={(e) => setId(e.currentTarget.value)}
           />
           <Button
             secondary
+            type="button"
             disabled={isEmpty(id)}
-            onClick={addId}
+            onClick={() => addItem('ids', id)}
           >
             Add
           </Button>
@@ -157,16 +141,18 @@ export function AccessTokensCreateScope({
       {!isEmpty(scope.ids) && (
         <ChipList
           maxVisible={Infinity}
-          chips={scope.ids.map((i, idx) => (
-            <Chip
-              size="small"
-              clickable
-              onClick={() => removeId(idx)}
-              closeButton
-            >
-              {i}
-            </Chip>
-          ))}
+          chips={
+            scope.ids?.map((i, idx) => (
+              <Chip
+                size="small"
+                clickable
+                onClick={() => removeItem('ids', idx)}
+                closeButton
+              >
+                {i}
+              </Chip>
+            )) ?? []
+          }
         />
       )}
     </Card>

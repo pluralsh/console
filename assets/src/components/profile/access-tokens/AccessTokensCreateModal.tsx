@@ -5,18 +5,16 @@ import { isEmpty } from 'lodash'
 
 import {
   AccessTokensDocument,
+  ScopeAttributes,
   useCreateAccessTokenMutation,
 } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import { appendConnection, updateCache } from 'utils/graphql'
 
 import { AccessTokensCreateScope } from './AccessTokensCreateScope'
+import { produce } from 'immer'
 
-export type Scope = {
-  apis: string[]
-  ids: string[]
-  valid?: boolean
-}
+export const EMPTY_SCOPE: ScopeAttributes = { apis: [], ids: [] }
 
 export function AccessTokensCreateModal({
   open,
@@ -27,20 +25,16 @@ export function AccessTokensCreateModal({
 }) {
   const theme = useTheme()
   const [addScopes, setAddScopes] = useState(false)
-  const [scopes, setScopes] = useState<Scope[]>([{ apis: [], ids: [] }])
+  const [scopes, setScopes] = useState<ScopeAttributes[]>([EMPTY_SCOPE])
 
   const close = useCallback(() => {
     setOpen(false)
     setAddScopes(false)
-    setScopes([{ apis: [], ids: [] }])
+    setScopes([EMPTY_SCOPE])
   }, [setOpen, setAddScopes, setScopes])
 
   const [mutation, { data, loading, error }] = useCreateAccessTokenMutation({
-    variables: {
-      scopes: addScopes
-        ? scopes.map(({ apis, ids }) => ({ apis, ids }))
-        : undefined,
-    },
+    variables: { ...(addScopes && { scopes }) },
     update: (cache, { data }) =>
       updateCache(cache, {
         query: AccessTokensDocument,
@@ -49,32 +43,24 @@ export function AccessTokensCreateModal({
       }),
   })
 
-  const addScope = useCallback(() => {
-    setScopes([...scopes, { apis: [], ids: [] }])
-  }, [scopes, setScopes])
-  const setScope = useCallback(
-    (s: Scope, i: number) => {
-      const nextScopes = [...scopes]
-
-      nextScopes[i] = s
-      nextScopes[i].valid = !isEmpty(nextScopes[i].apis)
-
-      setScopes(nextScopes)
-    },
-    [scopes, setScopes]
-  )
-  const canRemoveScope = scopes.length > 1
-  const removeScope = useCallback(
-    (idx: number) => {
-      if (scopes.length < 2) return
-
-      setScopes(scopes.filter((_, i) => i !== idx))
-    },
-    [scopes, setScopes]
-  )
+  const addScope = () => {
+    setScopes([...scopes, EMPTY_SCOPE])
+  }
+  const setScope = (s: ScopeAttributes, i: number) => {
+    // clones the array because apollo seems to have a bug with nested immer updates
+    setScopes([
+      ...produce(scopes, (draft) => {
+        draft[i] = s
+      }),
+    ])
+  }
+  const removeScope = (idx: number) => {
+    if (scopes.length < 2) return
+    setScopes(scopes.filter((_, i) => i !== idx))
+  }
 
   const valid = useMemo(
-    () => !addScopes || scopes.every((s) => !!s.valid),
+    () => !addScopes || scopes.every((s) => !isEmpty(s.apis)),
     [addScopes, scopes]
   )
   const onSubmit = useCallback(
@@ -123,11 +109,19 @@ export function AccessTokensCreateModal({
             {addScopes && (
               <Button
                 secondary
+                type="button"
                 onClick={addScope}
               >
                 Add scope
               </Button>
             )}
+            <Button
+              secondary
+              type="button"
+              onClick={close}
+            >
+              Cancel
+            </Button>
             <Button
               type="submit"
               disabled={!valid}
@@ -135,13 +129,6 @@ export function AccessTokensCreateModal({
               primary
             >
               Create
-            </Button>
-            <Button
-              type="button"
-              secondary
-              onClick={close}
-            >
-              Cancel
             </Button>
           </div>
         )
@@ -176,8 +163,8 @@ export function AccessTokensCreateModal({
               {scopes.map((scope, index) => (
                 <AccessTokensCreateScope
                   scope={scope}
-                  setScope={(s: Scope) => setScope(s, index)}
-                  canRemove={canRemoveScope}
+                  setScope={(s: ScopeAttributes) => setScope(s, index)}
+                  canRemove={scopes.length > 1}
                   remove={() => removeScope(index)}
                 />
               ))}
