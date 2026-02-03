@@ -559,7 +559,7 @@ export const kubernetesRoutes = (
         element={
           <Navigate
             replace
-            to="conditions"
+            to="pods"
           />
         }
       />
