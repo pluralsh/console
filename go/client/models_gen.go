@@ -9681,6 +9681,7 @@ const (
 	ChatTypeError              ChatType = "ERROR"
 	ChatTypeImplementationPlan ChatType = "IMPLEMENTATION_PLAN"
 	ChatTypePrCall             ChatType = "PR_CALL"
+	ChatTypeAgentRun           ChatType = "AGENT_RUN"
 )
 
 var AllChatType = []ChatType{
@@ -9690,11 +9691,12 @@ var AllChatType = []ChatType{
 	ChatTypeError,
 	ChatTypeImplementationPlan,
 	ChatTypePrCall,
+	ChatTypeAgentRun,
 }
 
 func (e ChatType) IsValid() bool {
 	switch e {
-	case ChatTypeText, ChatTypeFile, ChatTypeTool, ChatTypeError, ChatTypeImplementationPlan, ChatTypePrCall:
+	case ChatTypeText, ChatTypeFile, ChatTypeTool, ChatTypeError, ChatTypeImplementationPlan, ChatTypePrCall, ChatTypeAgentRun:
 		return true
 	}
 	return false

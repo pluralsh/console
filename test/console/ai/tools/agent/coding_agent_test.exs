@@ -17,7 +17,7 @@ defmodule Console.AI.Tools.Agent.CodingAgentTest do
           prompt: "update the readme with a quickstart"
         })
 
-      assert %{agent_run_id: run_id, content: content} = result
+      assert %{type: :agent_run, agent_run_id: run_id, content: content} = result
       assert String.contains?(content, run_id)
 
       run = Console.Repo.get!(AgentRun, run_id)

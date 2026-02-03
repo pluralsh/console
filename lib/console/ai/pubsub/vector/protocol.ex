@@ -99,20 +99,22 @@ end
 defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ServiceComponentsUpdated do
   alias Console.Schema.{ServiceComponent, Service}
   alias Console.AI.PubSub.Vector.Indexable
+  require Logger
 
   def resource(%@for{item: %Service{} = service}) do
-    case Console.Repo.preload(service, [:repository, :cluster, :components]) do
-      %Service{components: [_ | _] = components} = service ->
-        minis = Enum.map(components, &ServiceComponent.Mini.new(%{&1 | service: service}))
-                |> Enum.sort_by(& {&1.group, &1.version, &1.kind, &1.namespace, &1.name})
-        Console.debounce({:vectorizer, :components, :erlang.phash2(minis)}, fn ->
+    Console.debounce({:vectorizer, :components, service.id}, fn ->
+      Logger.info("vectorizing service component update #{service.id}")
+      case Console.Repo.preload(service, [:repository, :cluster, :components]) do
+        %Service{components: [_ | _] = components} = service ->
+          minis = Enum.map(components, &ServiceComponent.Mini.new(%{&1 | service: service}))
+                  |> Enum.sort_by(& {&1.group, &1.version, &1.kind, &1.namespace, &1.name})
           [
             %Indexable{delete: true, force: true, filters: [service_id: service.id, datatype: {:raw, :service_component}]},
             %Indexable{data: minis, filters: [service_id: service.id], force: true}
           ]
-        end)
-      _ -> :ok
-    end
+        _ -> :ok
+      end
+    end, ttl: :timer.minutes(10))
   end
   def resource(_), do: :ok
 end
