@@ -28,8 +28,9 @@ defmodule Console.GraphQl.Kubernetes.CronJob do
   end
 
   object :cron_spec do
-    field :schedule,           non_null(:string)
-    field :suspend,            :boolean
-    field :concurrency_policy, :string
+    field :schedule,                   non_null(:string)
+    field :suspend,                    :boolean
+    field :concurrency_policy,         :string
+    field :starting_deadline_seconds, :integer
   end
 end

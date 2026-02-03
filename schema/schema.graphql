@@ -11356,6 +11356,7 @@ type CronSpec {
   schedule: String!
   suspend: Boolean
   concurrencyPolicy: String
+  startingDeadlineSeconds: Int
 }
 
 type Node {

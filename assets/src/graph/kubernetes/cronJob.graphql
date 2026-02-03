@@ -9,6 +9,7 @@ fragment CronJob on CronJob {
     schedule
     suspend
     concurrencyPolicy
+    startingDeadlineSeconds
   }
   raw
   events {

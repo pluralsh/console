@@ -125,7 +125,8 @@ defmodule KubernetesScaffolds do
       spec: %Batch.CronJobSpec{
         concurrency_policy: "Forbid",
         schedule: "* * * * *",
-        suspend: false
+        suspend: false,
+        starting_deadline_seconds: 10
       }
     }
   end

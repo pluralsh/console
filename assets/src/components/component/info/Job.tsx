@@ -144,6 +144,9 @@ export default function Job() {
             <PropWideBold title="Deadline">
               {job.spec?.activeDeadlineSeconds || 0}
             </PropWideBold>
+            <PropWideBold title="Starting deadline seconds">
+              {job.spec?.startingDeadlineSeconds || 0}
+            </PropWideBold>
           </PaddedCard>
         </InfoSection>
       </Flex>

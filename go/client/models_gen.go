@@ -2720,9 +2720,10 @@ type CronJob struct {
 }
 
 type CronSpec struct {
-	Schedule          string  `json:"schedule"`
-	Suspend           *bool   `json:"suspend,omitempty"`
-	ConcurrencyPolicy *string `json:"concurrencyPolicy,omitempty"`
+	Schedule                string  `json:"schedule"`
+	Suspend                 *bool   `json:"suspend,omitempty"`
+	ConcurrencyPolicy       *string `json:"concurrencyPolicy,omitempty"`
+	StartingDeadlineSeconds *int64  `json:"startingDeadlineSeconds,omitempty"`
 }
 
 type CronStatus struct {

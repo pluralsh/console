@@ -151,6 +151,9 @@ export default function CronJob() {
           <PropWideBold title="Suspended">
             {cronJob?.spec?.suspend ? 'Yes' : 'No'}
           </PropWideBold>
+          <PropWideBold title="Starting deadline seconds">
+            {cronJob?.spec?.startingDeadlineSeconds ?? '-'}
+          </PropWideBold>
         </PaddedCard>
       </InfoSection>
     </>
