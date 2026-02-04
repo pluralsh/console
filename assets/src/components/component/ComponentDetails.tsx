@@ -32,8 +32,9 @@ import {
   useFetchComponentDetails,
 } from './useFetchComponentDetails.tsx'
 import {
-  getCustomResourceDetailsAbsPath,
+  getKubernetesCustomResourceDetailsPath,
   getResourceDetailsAbsPath,
+  isCRD,
 } from 'routes/kubernetesRoutesConsts.tsx'
 import { Kind } from 'components/kubernetes/common/types.ts'
 
@@ -228,31 +229,44 @@ function ViewInDashboardButton({
   clusterId: string
   component: ServiceDeploymentComponentFragment
 }) {
+  const { name, kind, namespace, group } = component
+
   const supportedResourceKind = useMemo(
-    () => Object.values(Kind).find((k) => k === component.kind?.toLowerCase()),
-    [component.kind]
+    () => Object.values(Kind).find((k) => k === kind?.toLowerCase()),
+    [kind]
   )
 
-  console.log('component', component) // TODO: Remove this.
+  const to = useMemo(() => {
+    // Supported core resources.
+    if (supportedResourceKind) {
+      return getResourceDetailsAbsPath(
+        clusterId,
+        supportedResourceKind,
+        name,
+        namespace
+      )
+    }
+
+    // Custom resources.
+    if (kind && group && isCRD(group)) {
+      return getKubernetesCustomResourceDetailsPath({
+        clusterId,
+        group,
+        kind,
+        name,
+        namespace,
+      })
+    }
+
+    return undefined
+  }, [clusterId, group, kind, name, namespace, supportedResourceKind])
+
+  if (!to) return undefined
 
   return (
     <Button
       as={Link}
-      to={
-        supportedResourceKind
-          ? getResourceDetailsAbsPath(
-              clusterId,
-              supportedResourceKind,
-              component.name,
-              component.namespace
-            )
-          : getCustomResourceDetailsAbsPath(
-              clusterId,
-              component.kind, // FIXME: This is not the correct kind.
-              component.name,
-              component.namespace
-            )
-      }
+      to={to}
     >
       View in Dashboard
     </Button>
