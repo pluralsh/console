@@ -6,7 +6,7 @@ import { useOutletContext } from 'react-router-dom'
 
 import { useTheme } from 'styled-components'
 
-import { IngressFragment } from 'generated/graphql'
+import { IngressFragment, IngressPath, IngressRule } from 'generated/graphql'
 
 import IngressCertificates from './IngressCertificates'
 
@@ -31,6 +31,11 @@ const columns = [
     cell: (prop) => prop.getValue(),
     header: 'Path',
   }),
+  COLUMN_HELPER.accessor((row) => row.pathType, {
+    id: 'pathType',
+    cell: (prop) => prop.getValue(),
+    header: 'Path type',
+  }),
   COLUMN_HELPER.accessor((row) => row.backend, {
     id: 'backend',
     cell: (prop) => prop.getValue(),
@@ -46,11 +51,14 @@ function Routes({ rules }) {
         const paths = rule.http?.paths
 
         return accumulator.concat(
-          paths?.map(({ path, backend: { serviceName, servicePort } }) => ({
-            host: rule.host,
-            path: path || '*',
-            backend: `${serviceName || '-'}:${servicePort || '-'}`,
-          }))
+          paths?.map(
+            ({ path, pathType, backend: { serviceName, servicePort } }) => ({
+              host: rule.host,
+              path: path || '*',
+              pathType: pathType,
+              backend: `${serviceName || '-'}:${servicePort || '-'}`,
+            })
+          )
         )
       }, []),
     [rules]
