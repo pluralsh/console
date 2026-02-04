@@ -182,7 +182,6 @@ export function Home() {
             <ClustersTable
               fullHeightWrap
               rowBg="raised"
-              rowClickAction="flyover"
               selectedCluster={selectedCluster}
               setSelectedCluster={setSelectedCluster}
               data={tableData?.clusters?.edges?.filter(isNonNullable) ?? []}
