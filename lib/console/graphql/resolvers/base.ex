@@ -15,6 +15,7 @@ defmodule Console.GraphQl.Resolvers.Base do
   defmacro __using__(model: model) do
     quote do
       import Console.GraphQl.Resolvers.Base
+      import Console.Services.Base, only: [when_ok: 2]
       alias unquote(model)
       def data(args \\ %{}),
         do: Dataloader.Ecto.new(Console.Repo, query: &query/2, default_params: filter_context(args))

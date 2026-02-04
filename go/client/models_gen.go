@@ -1392,10 +1392,12 @@ type ChatThread struct {
 	Session       *AgentSession       `json:"session,omitempty"`
 	Research      *InfraResearch      `json:"research,omitempty"`
 	// the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists
-	Tools      []*McpServerTool `json:"tools,omitempty"`
-	Chats      *ChatConnection  `json:"chats,omitempty"`
-	InsertedAt *string          `json:"insertedAt,omitempty"`
-	UpdatedAt  *string          `json:"updatedAt,omitempty"`
+	Tools []*McpServerTool `json:"tools,omitempty"`
+	// the plural-native tools associated with this chat.
+	NativeTools []*NativeTool   `json:"nativeTools,omitempty"`
+	Chats       *ChatConnection `json:"chats,omitempty"`
+	InsertedAt  *string         `json:"insertedAt,omitempty"`
+	UpdatedAt   *string         `json:"updatedAt,omitempty"`
 }
 
 // basic user-supplied input for creating an AI chat thread
@@ -4456,6 +4458,16 @@ type NamespaceVulnAttributes struct {
 type NamespacedName struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
+}
+
+// A native tool available to Plural AI for use in a chat thread
+type NativeTool struct {
+	// the name of the tool
+	Name *string `json:"name,omitempty"`
+	// the description of the tool, used to guide the LLM to know when to use this tool
+	Description *string `json:"description,omitempty"`
+	// the json schema of the tool
+	Schema map[string]any `json:"schema,omitempty"`
 }
 
 // An edge representing traffic statistics between two workloads in a service mesh

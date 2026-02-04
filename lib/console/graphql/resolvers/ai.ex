@@ -49,8 +49,10 @@ defmodule Console.GraphQl.Resolvers.AI do
     |> paginate(args)
   end
 
-  def thread(%{id: id}, %{context: %{current_user: user}}),
-    do: ChatSvc.thread_access(id, user)
+  def thread(%{id: id}, %{context: %{current_user: user}}) do
+    ChatSvc.thread_access(id, user)
+    |> when_ok(&ChatSvc.preloaded/1)
+  end
 
   def chats(args, %{context: %{current_user: user}}) do
     with {:ok, q} <- maybe_thread(args, user) do
@@ -58,6 +60,8 @@ defmodule Console.GraphQl.Resolvers.AI do
       |> paginate(args)
     end
   end
+
+  def native_tools(thread, _, _), do: {:ok, ChatSvc.native_tools(thread)}
 
   defp chat_order(%{reverse: true}), do: [desc: :seq, desc: :inserted_at]
   defp chat_order(_), do: [asc: :seq, asc: :inserted_at]

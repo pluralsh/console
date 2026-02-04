@@ -1713,6 +1713,8 @@ export type ChatThread = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   insight?: Maybe<AiInsight>;
   lastMessageAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the plural-native tools associated with this chat. */
+  nativeTools?: Maybe<Array<Maybe<NativeTool>>>;
   research?: Maybe<InfraResearch>;
   service?: Maybe<ServiceDeployment>;
   session?: Maybe<AgentSession>;
@@ -5443,6 +5445,17 @@ export type NamespaceVulnAttributes = {
 export type NamespacedName = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+/** A native tool available to Plural AI for use in a chat thread */
+export type NativeTool = {
+  __typename?: 'NativeTool';
+  /** the description of the tool, used to guide the LLM to know when to use this tool */
+  description?: Maybe<Scalars['String']['output']>;
+  /** the name of the tool */
+  name?: Maybe<Scalars['String']['output']>;
+  /** the json schema of the tool */
+  schema?: Maybe<Scalars['Map']['output']>;
 };
 
 /** An edge representing traffic statistics between two workloads in a service mesh */

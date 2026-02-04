@@ -145,6 +145,11 @@ defmodule Console.GraphQl.AI do
       resolve &AI.chat_tools/3
     end
 
+    @desc "the plural-native tools associated with this chat."
+    field :native_tools, list_of(:native_tool) do
+      resolve &AI.native_tools/3
+    end
+
     connection field :chats, node_type: :chat do
       arg :reverse, :boolean, description: "reverse the order of the chats"
       resolve &AI.list_chats/3
@@ -282,6 +287,13 @@ defmodule Console.GraphQl.AI do
     field :name, :string
     field :type, :string
     field :observations, list_of(:string)
+  end
+
+  @desc "A native tool available to Plural AI for use in a chat thread"
+  object :native_tool do
+    field :name,        :string, description: "the name of the tool"
+    field :description, :string, description: "the description of the tool, used to guide the LLM to know when to use this tool"
+    field :schema,      :map, description: "the json schema of the tool"
   end
 
   @desc "A kubernetes object used in the course of generating a cluster insight"
