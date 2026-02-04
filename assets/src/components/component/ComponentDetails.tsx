@@ -1,4 +1,10 @@
-import { Button, SubTab, TabList, TabPanel } from '@pluralsh/design-system'
+import {
+  Button,
+  KubernetesAltIcon,
+  SubTab,
+  TabList,
+  TabPanel,
+} from '@pluralsh/design-system'
 import { ViewLogsButton } from 'components/component/ViewLogsButton'
 import { useLogin } from 'components/contexts'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
@@ -266,6 +272,8 @@ function ViewInDashboardButton({
   return (
     <Button
       as={Link}
+      secondary
+      startIcon={<KubernetesAltIcon />}
       to={to}
     >
       View in Dashboard
