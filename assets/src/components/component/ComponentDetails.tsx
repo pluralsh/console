@@ -175,12 +175,12 @@ export function ComponentDetails({
                   </LinkTabWrap>
                 ))}
               </TabList>
-              <ViewInDashboardButton
-                clusterId={service?.cluster?.id}
-                componentKind={componentKind}
-                componentName={component.name}
-                componentNamespace={component.namespace}
-              />
+              {service?.cluster?.id && (
+                <ViewInDashboardButton
+                  clusterId={service.cluster.id}
+                  component={component}
+                />
+              )}
               {pluralServiceDeploymentRef?.id &&
                 pluralServiceDeploymentRef?.cluster?.id && (
                   <Button
@@ -223,37 +223,34 @@ export function ComponentDetails({
 
 function ViewInDashboardButton({
   clusterId,
-  componentKind,
-  componentName,
-  componentNamespace,
+  component,
 }: {
-  clusterId: string | undefined
-  componentKind: string
-  componentName: string | null | undefined
-  componentNamespace: string | null | undefined
+  clusterId: string
+  component: ServiceDeploymentComponentFragment
 }) {
-  if (!clusterId) return null
-
-  const knownKind = Object.values(Kind).find(
-    (k) => k === componentKind?.toLowerCase()
+  const supportedResourceKind = useMemo(
+    () => Object.values(Kind).find((k) => k === component.kind?.toLowerCase()),
+    [component.kind]
   )
+
+  console.log('component', component) // TODO: Remove this.
 
   return (
     <Button
       as={Link}
       to={
-        knownKind
+        supportedResourceKind
           ? getResourceDetailsAbsPath(
               clusterId,
-              knownKind,
-              componentName,
-              componentNamespace
+              supportedResourceKind,
+              component.name,
+              component.namespace
             )
           : getCustomResourceDetailsAbsPath(
               clusterId,
-              componentKind, // FIXME: This is not the correct kind.
-              componentName,
-              componentNamespace
+              component.kind, // FIXME: This is not the correct kind.
+              component.name,
+              component.namespace
             )
       }
     >
