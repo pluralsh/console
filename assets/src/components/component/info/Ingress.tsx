@@ -6,7 +6,7 @@ import { useOutletContext } from 'react-router-dom'
 
 import { useTheme } from 'styled-components'
 
-import { IngressFragment, IngressPath, IngressRule } from 'generated/graphql'
+import { IngressFragment } from 'generated/graphql'
 
 import IngressCertificates from './IngressCertificates'
 
@@ -18,7 +18,15 @@ import {
 } from './common'
 import { ComponentDetailsContext } from '../ComponentDetails'
 
-const COLUMN_HELPER = createColumnHelper<any>()
+type IngressRuleFlatT = {
+  host?: string
+  path: string
+  pathType: string
+  serviceName: string
+  servicePort: string
+}
+
+const COLUMN_HELPER = createColumnHelper<IngressRuleFlatT>()
 
 const columns = [
   COLUMN_HELPER.accessor((row) => row.host, {
@@ -36,10 +44,16 @@ const columns = [
     cell: (prop) => prop.getValue(),
     header: 'Path type',
   }),
-  COLUMN_HELPER.accessor((row) => row.backend, {
+  COLUMN_HELPER.accessor((row) => row, {
     id: 'backend',
-    cell: (prop) => prop.getValue(),
     header: 'Backend',
+    cell: function Cell({
+      row: {
+        original: { serviceName, servicePort },
+      },
+    }) {
+      return `${serviceName || '-'}:${servicePort || '-'}`
+    },
   }),
 ]
 
@@ -52,12 +66,14 @@ function Routes({ rules }) {
 
         return accumulator.concat(
           paths?.map(
-            ({ path, pathType, backend: { serviceName, servicePort } }) => ({
-              host: rule.host,
-              path: path || '*',
-              pathType: pathType,
-              backend: `${serviceName || '-'}:${servicePort || '-'}`,
-            })
+            ({ path, pathType, backend: { serviceName, servicePort } }) =>
+              ({
+                host: rule.host,
+                path: path || '*',
+                pathType: pathType,
+                serviceName: serviceName,
+                servicePort: servicePort,
+              }) as IngressRuleFlatT
           )
         )
       }, []),
