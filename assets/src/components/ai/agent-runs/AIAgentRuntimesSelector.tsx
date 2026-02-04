@@ -13,6 +13,8 @@ import { useEffectEvent, useLayoutEffect, useState } from 'react'
 import { StyledObject } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { ChatOptionPill } from '../chatbot/input/ChatInput'
+import { ChatInputSelectButton } from '../chatbot/input/ChatInputSelectButton'
+import { TRUNCATE } from 'components/utils/truncate'
 
 export function AIAgentRuntimesSelector({
   selectedRuntimeId,
@@ -21,6 +23,7 @@ export function AIAgentRuntimesSelector({
   allowDeselect = false,
   autoSelectDefault = false,
   type = 'standard',
+  updateLoading = false,
   outerStyles,
   ...props
 }: {
@@ -29,7 +32,8 @@ export function AIAgentRuntimesSelector({
   placeholder?: string
   allowDeselect?: boolean
   autoSelectDefault?: boolean
-  type?: 'standard' | 'pill'
+  type?: 'standard' | 'pill' | 'minimal'
+  updateLoading?: boolean
   outerStyles?: StyledObject
 } & Omit<SelectPropsSingle, 'onSelectionChange' | 'selectedKey' | 'children'>) {
   const [isOpen, setIsOpen] = useState(false)
@@ -43,7 +47,7 @@ export function AIAgentRuntimesSelector({
   const SelectedIcon =
     runtimeToIcon[selectedRuntime?.type ?? AgentRuntimeType.Custom]
 
-  const isLoading = !data && loading
+  const isLoading = (!data && loading) || updateLoading
 
   const setRuntimeToDefault = useEffectEvent(() => {
     const { id } = runtimes.find((runtime) => !!runtime.default) ?? {}
@@ -78,7 +82,7 @@ export function AIAgentRuntimesSelector({
           )
         }
         triggerButton={
-          type === 'standard' ? undefined : (
+          type === 'pill' ? (
             <ChatOptionPill isOpen={isOpen}>
               {!isLoading && <SelectedIcon size={12} />}
               {isLoading ? (
@@ -90,7 +94,26 @@ export function AIAgentRuntimesSelector({
                 <span>{capitalize(selectedRuntime?.name ?? 'Runtime')}</span>
               )}
             </ChatOptionPill>
-          )
+          ) : type === 'minimal' ? (
+            <ChatInputSelectButton>
+              {!isLoading && (
+                <SelectedIcon
+                  fullColor
+                  size={12}
+                />
+              )}
+              {isLoading ? (
+                <RectangleSkeleton
+                  $bright
+                  $width={70}
+                />
+              ) : (
+                <span css={{ ...TRUNCATE }}>
+                  {selectedRuntime?.name || 'runtime'}
+                </span>
+              )}
+            </ChatInputSelectButton>
+          ) : undefined
         }
         {...props}
       >

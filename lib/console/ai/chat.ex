@@ -4,7 +4,7 @@ defmodule Console.AI.Chat do
   import Console.AI.Evidence.Base, only: [prepend: 2]
   alias Console.AI.{Provider, Fixer}
   alias Console.AI.Tools.Pr
-  alias Console.AI.Chat.Engine
+  alias Console.AI.Chat.{Engine, Tools}
   alias Console.AI.MCP.{Discovery, Agent}
   alias Console.AI.MCP.Tool, as: MCPTool
   alias Console.Deployments.{Services, Stacks}
@@ -53,7 +53,12 @@ defmodule Console.AI.Chat do
   fix the issue, avoid any extraneous changes as they will potentially break additional functionality upon application.
   """
 
+  @thread_preloads [:service, :research, session: [:connection, :cluster, :runtime], user: :groups, flow: :servers, insight: [:cluster, :service, :stack]]
+
   def get_thread!(id), do: Repo.get!(ChatThread, id)
+
+  def preloaded(%ChatThread{} = thread), do: Repo.preload(thread, @thread_preloads)
+  def preloaded(pass), do: pass
 
   def get_pin!(id), do: Repo.get!(AiPin, id)
 
@@ -283,6 +288,12 @@ defmodule Console.AI.Chat do
     |> execute(extract: :msg, timeout: 300_000)
   end
 
+  def native_tools(%ChatThread{} = thread) do
+    preloaded(thread)
+    |> Tools.tools()
+    |> Enum.map(& %{tool: &1.name(), description: &1.description(), schema: &1.json_schema()})
+  end
+
   @doc """
   Finds all tools associated with servers in a given flow
   """
@@ -308,8 +319,6 @@ defmodule Console.AI.Chat do
       err -> err
     end
   end
-
-  @thread_preloads [:service, :research, session: [:connection, :cluster, :runtime], user: :groups, flow: :servers, insight: [:cluster, :service, :stack]]
 
   @doc """
   Generates a context map for a PR associated with a chat thread

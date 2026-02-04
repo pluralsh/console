@@ -30,7 +30,7 @@ import {
 import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { securityVulnReportsCrumbs } from './VulnReports'
 import { useMemo } from 'react'
-import { FixVulnFormSC } from './FixVulnerabilityButton'
+import { AgentRunFormPopupSC } from 'components/ai/agent-runs/AgentRunFixButton'
 
 export function VulnerabilityReportDetails() {
   const { vulnerabilityReportId, clusterId, flowId } = useParams()
@@ -116,7 +116,7 @@ export function VulnerabilityReportDetails() {
         expandedBgColor="fill-zero"
         expandedRowType="custom"
         // should probably find a better DS solution for this
-        {...{ [`td:has(${FixVulnFormSC})`]: { overflow: 'visible' } }}
+        {...{ [`td:has(${AgentRunFormPopupSC})`]: { overflow: 'visible' } }}
       />
     </WrapperSC>
   )

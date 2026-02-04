@@ -1,16 +1,15 @@
 import {
   Breadcrumb,
+  Flex,
   GearTrainIcon,
   IconFrame,
   TabPanel,
   Table,
-  useSetBreadcrumbs,
-  WrapWithIf,
   TableProps,
-  Flex,
+  WrapWithIf,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
-import { Row } from '@tanstack/react-table'
 import chroma from 'chroma-js'
 import {
   ComponentProps,
@@ -20,7 +19,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 
 import {
@@ -64,20 +63,20 @@ import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
+import { isNonNullable } from 'utils/isNonNullable.ts'
+import {
+  dayjsExtended as dayjs,
+  dayjsExtended,
+} from '../../../utils/datetime.ts'
+import { useOnboarded } from '../../contexts/DeploymentSettingsContext.tsx'
+import { GettingStartedBlock } from '../../home/GettingStarted.tsx'
 import { cdClustersColumns } from './ClustersColumns'
 import { DemoTable } from './ClustersDemoTable'
 import CreateCluster from './create/CreateCluster'
-import { GettingStartedBlock } from '../../home/GettingStarted.tsx'
-import { useOnboarded } from '../../contexts/DeploymentSettingsContext.tsx'
 import {
   ClusterInfoFlyover,
   ClusterInfoFlyoverTab,
 } from './info-flyover/ClusterInfoFlyover.tsx'
-import { isNonNullable } from 'utils/isNonNullable.ts'
-import {
-  dayjsExtended,
-  dayjsExtended as dayjs,
-} from '../../../utils/datetime.ts'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
@@ -129,7 +128,6 @@ export const TableWrapperSC = styled.div<TableWrapperSCProps>(
 
 export default function Clusters() {
   const theme = useTheme()
-  const navigate = useNavigate()
   const projectId = useProjectId()
   const cdIsEnabled = useCDEnabled()
   const onboarded = useOnboarded()
@@ -212,12 +210,13 @@ export default function Clusters() {
             tooltip="Global settings"
             clickable
             icon={<GearTrainIcon />}
-            onClick={() => navigate(GLOBAL_SETTINGS_ABS_PATH)}
+            as={Link}
+            to={GLOBAL_SETTINGS_ABS_PATH}
           />
           <CreateCluster />
         </div>
       ) : null,
-    [cdIsEnabled, navigate, theme.spacing.medium]
+    [cdIsEnabled, theme.spacing.medium]
   )
 
   useSetPageHeaderContent(headerActions)
@@ -301,7 +300,6 @@ export function ClustersTable({
   data,
   refetch,
   columns = cdClustersColumns,
-  rowClickAction = 'navigate',
   selectedCluster: selectedClusterProp,
   setSelectedCluster: setSelectedClusterProp,
   ...props
@@ -309,13 +307,10 @@ export function ClustersTable({
   data: Edge<ClustersRowFragment>[]
   refetch: () => void
   columns?: TableProps['columns']
-  rowClickAction?: 'navigate' | 'flyover'
   // for cases when parent wants to control the selected cluster
   selectedCluster?: Nullable<ClustersRowFragment>
   setSelectedCluster?: (cluster: Nullable<ClustersRowFragment>) => void
 } & Omit<TableProps, 'data' | 'columns'>) {
-  const navigate = useNavigate()
-
   const [selectedClusterInternal, setSelectedClusterInternal] =
     useState<Nullable<ClustersRowFragment>>(null)
   const [flyoverTab, setFlyoverTab] = useState(ClusterInfoFlyoverTab.Overview)
@@ -342,13 +337,9 @@ export function ClustersTable({
         data={data || []}
         columns={columns}
         reactTableOptions={reactTableOptions}
-        onRowClick={(_e, { original }: Row<Edge<ClustersRowFragment>>) => {
-          if (rowClickAction === 'navigate')
-            navigate(getClusterDetailsPath({ clusterId: original.node?.id }))
-          else {
-            setSelectedCluster(original.node)
-            setFlyoverTab(ClusterInfoFlyoverTab.Overview)
-          }
+        getRowLink={({ original }) => {
+          const { node } = original as Edge<ClustersRowFragment>
+          return <Link to={getClusterDetailsPath({ clusterId: node?.id })} />
         }}
         {...props}
       />

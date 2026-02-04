@@ -20,6 +20,7 @@ import { GqlError } from 'components/utils/Alert'
 import { ARBITRARY_VALUE_NAME } from 'components/utils/IconExpander'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
+  AgentRunTinyFragment,
   AgentSessionFragment,
   AiRole,
   ChatType,
@@ -37,6 +38,7 @@ import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
 import styled, { StyledObject, useTheme } from 'styled-components'
 import { iconUrl as getIconUrl } from 'utils/icon'
+import { AgentRunInfoCard } from '../agent-runs/AgentRunFixButton.tsx'
 import { ChatMessageActions } from './ChatMessage'
 import { SimpleToolCall } from './multithread/MultiThreadViewerMessage.tsx'
 import { ToolCallContent } from './ToolCallContent'
@@ -52,6 +54,7 @@ type ChatMessageContentProps = {
   type?: ChatType
   attributes?: Nullable<ChatTypeAttributes>
   prAutomation?: Nullable<PrAutomationFragment>
+  agentRun?: Nullable<AgentRunTinyFragment>
   confirm?: Nullable<boolean>
   confirmedAt?: Nullable<string>
   serverName?: Nullable<string>
@@ -73,6 +76,7 @@ export function ChatMessageContent({
   type = ChatType.Text,
   attributes,
   prAutomation,
+  agentRun,
   confirm,
   confirmedAt,
   serverName,
@@ -83,6 +87,7 @@ export function ChatMessageContent({
   userMsgWrapperStyle,
   isPending,
 }: ChatMessageContentProps) {
+  const { colors } = useTheme()
   switch (type) {
     case ChatType.File:
       return (
@@ -131,6 +136,14 @@ export function ChatMessageContent({
           attributes={attributes?.prCall}
         />
       )
+    case ChatType.AgentRun:
+      return agentRun ? (
+        <AgentRunInfoCard
+          showLinkButton
+          agentRun={agentRun}
+          css={{ background: colors['fill-one'] }}
+        />
+      ) : null
     case ChatType.Text:
     default:
       return (

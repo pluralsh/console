@@ -60,7 +60,7 @@ export function InfraResearchSidecar({
       }}
     >
       <ActionItemSC
-        css={{ borderBottom: 'none', paddingBottom: spacing.large }}
+        style={{ borderBottom: 'none', paddingBottom: spacing.large }}
       >
         <OverlineH3 $color="text-xlight">Associated resources</OverlineH3>
       </ActionItemSC>

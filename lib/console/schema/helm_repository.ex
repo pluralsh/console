@@ -22,6 +22,10 @@ defmodule Console.Schema.HelmRepository do
     from(h in query, where: ilike(h.url, ^"%#{search}%"))
   end
 
+  def for_health(query \\ __MODULE__, health) do
+    from(h in query, where: h.health == ^health)
+  end
+
   def without_urls(query \\ __MODULE__, urls) when is_list(urls) do
     from(h in query, where: h.url not in ^urls)
   end

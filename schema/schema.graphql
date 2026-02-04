@@ -122,12 +122,12 @@ type RootQueryType {
   "gets summary information for git repository pullability"
   gitPullabilityStatistics(q: String): [PullabilityStatistic]
 
-  gitRepositories(after: String, first: Int, before: String, last: Int, q: String): GitRepositoryConnection
+  gitRepositories(after: String, first: Int, before: String, last: Int, q: String, health: GitHealth): GitRepositoryConnection
 
   "gets summary information for helm repository pullability"
   helmPullabilityStatistics(q: String): [PullabilityStatistic]
 
-  helmRepositories(after: String, first: Int, before: String, last: Int, q: String): HelmRepositoryConnection
+  helmRepositories(after: String, first: Int, before: String, last: Int, q: String, health: GitHealth): HelmRepositoryConnection
 
   helmRepository(url: String!): HelmRepository
 
@@ -1353,6 +1353,7 @@ enum AgentRuntimeType {
   OPENCODE
   GEMINI
   CUSTOM
+  CODEX
 }
 
 enum AgentRunStatus {
@@ -10411,6 +10412,9 @@ type ChatThread {
   "the tools associated with this chat.  This is a complex operation that requires querying associated mcp servers, do not use in lists"
   tools: [McpServerTool]
 
+  "the plural-native tools associated with this chat."
+  nativeTools: [NativeTool]
+
   chats(
     after: String
 
@@ -10573,6 +10577,18 @@ type KnowledgeEvidence {
   name: String
   type: String
   observations: [String]
+}
+
+"A native tool available to Plural AI for use in a chat thread"
+type NativeTool {
+  "the name of the tool"
+  name: String
+
+  "the description of the tool, used to guide the LLM to know when to use this tool"
+  description: String
+
+  "the json schema of the tool"
+  schema: Map
 }
 
 "A kubernetes object used in the course of generating a cluster insight"

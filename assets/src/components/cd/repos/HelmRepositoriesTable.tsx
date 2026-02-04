@@ -1,9 +1,10 @@
 import { Table } from '@pluralsh/design-system'
 import {
+  GitHealth,
   useHelmPullabilityStatisticsQuery,
   useHelmRepositoriesQuery,
 } from 'generated/graphql'
-import { ComponentProps, useEffect } from 'react'
+import { useEffect } from 'react'
 
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import { GqlError } from 'components/utils/Alert'
@@ -20,27 +21,26 @@ import {
   countsFromGitOrHelmRepos,
   RepoStatusFilterKey,
 } from './RepositoriesFilters'
-import { isEmpty } from 'lodash'
 
 export function HelmRepositoriesTable({
-  tableFilterOptions,
+  status,
+  searchStr,
   setStatusCounts,
 }: {
-  tableFilterOptions: ComponentProps<typeof Table>['reactTableOptions']
+  status: RepoStatusFilterKey
+  searchStr: string
   setStatusCounts: (counts: Record<RepoStatusFilterKey, number>) => void
 }) {
-  const hasFilters =
-    !!tableFilterOptions?.state?.globalFilter ||
-    !isEmpty(tableFilterOptions?.state?.columnFilters)
-
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData({
-      queryHook: useHelmRepositoriesQuery,
-      keyPath: ['helmRepositories'],
-    })
+    useFetchPaginatedData(
+      { queryHook: useHelmRepositoriesQuery, keyPath: ['helmRepositories'] },
+      { q: searchStr, health: statusFilterKeyToGitHealth(status) }
+    )
   const { data: statsData } = useHelmPullabilityStatisticsQuery({
     pollInterval: POLL_INTERVAL,
   })
+
+  const hasFilters = !!status || !!searchStr
 
   useEffect(() => {
     setStatusCounts(
@@ -57,7 +57,6 @@ export function HelmRepositoriesTable({
       loading={!data && loading}
       data={data?.helmRepositories?.edges ?? []}
       columns={helmRepoColumns}
-      reactTableOptions={tableFilterOptions}
       emptyStateProps={{
         message: hasFilters
           ? 'No results found. Try adjusting your filters.'
@@ -69,6 +68,18 @@ export function HelmRepositoriesTable({
       onVirtualSliceChange={setVirtualSlice}
     />
   )
+}
+
+export function statusFilterKeyToGitHealth(
+  status: RepoStatusFilterKey
+): GitHealth | undefined {
+  switch (status) {
+    case RepoStatusFilterKey.Pullable:
+      return GitHealth.Pullable
+    case RepoStatusFilterKey.Failed:
+      return GitHealth.Failed
+  }
+  return undefined
 }
 
 const helmRepoColumns = [

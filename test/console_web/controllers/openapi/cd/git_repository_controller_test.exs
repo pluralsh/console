@@ -58,6 +58,20 @@ defmodule ConsoleWeb.OpenAPI.CD.GitRepositoryControllerTest do
 
       assert ids_equal(results, repos)
     end
+
+    test "can filter by health", %{conn: conn} do
+      user = insert(:user)
+      pullable = insert_list(2, :git_repository, health: :pullable)
+      insert_list(3, :git_repository, health: :failed)
+
+      %{"data" => results} =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/cd/git/repositories", health: "pullable")
+        |> json_response(200)
+
+      assert ids_equal(results, pullable)
+    end
   end
 
   describe "#create/2" do

@@ -45,8 +45,13 @@ fragment HelmChartVersion on HelmChartVersion {
   digest
 }
 
-query GitRepositories($first: Int, $after: String) {
-  gitRepositories(first: $first, after: $after) {
+query GitRepositories(
+  $first: Int = 200
+  $after: String
+  $q: String
+  $health: GitHealth
+) {
+  gitRepositories(first: $first, after: $after, q: $q, health: $health) {
     pageInfo {
       ...PageInfo
     }
@@ -58,8 +63,13 @@ query GitRepositories($first: Int, $after: String) {
   }
 }
 
-query HelmRepositories($first: Int, $after: String) {
-  helmRepositories(first: $first, after: $after) {
+query HelmRepositories(
+  $first: Int = 200
+  $after: String
+  $q: String
+  $health: GitHealth
+) {
+  helmRepositories(first: $first, after: $after, q: $q, health: $health) {
     pageInfo {
       ...PageInfo
     }

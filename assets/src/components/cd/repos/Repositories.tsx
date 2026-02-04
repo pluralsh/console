@@ -35,22 +35,8 @@ export function Repositories() {
   const [statusCounts, setStatusCounts] = useState<
     Record<RepoStatusFilterKey, number>
   >(EMPTY_REPO_STATUS_COUNTS)
+
   useSetBreadcrumbs(crumbs)
-
-  const tableOptions = useMemo(
-    () => ({
-      state: {
-        globalFilter: filterString,
-        columnFilters: [
-          ...(statusFilterKey !== 'ALL'
-            ? [{ id: 'status', value: statusFilterKey }]
-            : []),
-        ],
-      },
-    }),
-    [filterString, statusFilterKey]
-  )
-
   useSetPageHeaderContent(useMemo(() => <ImportGit />, []))
 
   return (
@@ -74,18 +60,21 @@ export function Repositories() {
       </Flex>
       {repoKind === RepoKind.Git ? (
         <GitRepositoriesTable
+          status={statusFilterKey}
+          searchStr={filterString}
           setStatusCounts={setStatusCounts}
-          tableFilterOptions={tableOptions}
         />
       ) : repoKind === RepoKind.Helm ? (
         <HelmRepositoriesTable
+          status={statusFilterKey}
+          searchStr={filterString}
           setStatusCounts={setStatusCounts}
-          tableFilterOptions={tableOptions}
         />
       ) : (
         <FluxHelmRepositoriesTable
+          status={statusFilterKey}
+          searchStr={filterString}
           setStatusCounts={setStatusCounts}
-          tableFilterOptions={tableOptions}
         />
       )}
     </Flex>

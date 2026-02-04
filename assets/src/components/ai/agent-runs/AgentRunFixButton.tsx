@@ -2,7 +2,9 @@ import {
   AiSparkleFilledIcon,
   ArrowTopRightIcon,
   Button,
+  ButtonProps,
   Card,
+  CardProps,
   CloseIcon,
   DiscoverIcon,
   Flex,
@@ -21,37 +23,34 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { Body2BoldP } from 'components/utils/typography/Text'
-import ejs from 'ejs'
 import {
   AgentRunFragment,
   AgentRunMode,
   AgentRunStatus,
-  useAgentRunQuery,
+  useAgentRunTinyQuery,
   useCreateAgentRunMutation,
-  VulnerabilityFragment,
-  VulnerabilityReportFragment,
 } from 'generated/graphql'
 import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import { AI_SETTINGS_AGENT_RUNTIMES_ABS_PATH } from 'routes/settingsRoutesConst'
 import styled, { useTheme } from 'styled-components'
-import { AIAgentRuntimesSelector } from '../../ai/agent-runs/AIAgentRuntimesSelector'
-import { AgentRunRepoSelector } from '../../ai/agent-runs/AgentRunRepoSelector'
-import vulnPromptTemplate from './vulnerability-prompt.ejs?raw'
+import { AIAgentRuntimesSelector } from './AIAgentRuntimesSelector'
+import { AgentRunRepoSelector } from './AgentRunRepoSelector'
 
-export function FixVulnerabilityButton({
-  vuln,
-  parentReport,
+export function AgentRunFixButton({
+  headerTitle,
+  initialRepo,
+  initialPrompt,
+  ...props
 }: {
-  vuln: VulnerabilityFragment
-  parentReport: Nullable<VulnerabilityReportFragment>
-}) {
+  headerTitle: string
+  initialPrompt: string
+  initialRepo?: Nullable<string>
+} & ButtonProps) {
   const { colors } = useTheme()
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [prompt, setPrompt] = useState(() =>
-    ejs.render(vulnPromptTemplate, { vuln, report: parentReport })
-  )
+  const [prompt, setPrompt] = useState(initialPrompt)
 
   const menuBtnRef = useRef<HTMLButtonElement>(null)
   useOutsideClick(menuBtnRef, () => setDropdownOpen(false))
@@ -65,10 +64,9 @@ export function FixVulnerabilityButton({
         onClick={() => setDropdownOpen((prev) => !prev)}
         startIcon={<AiSparkleFilledIcon />}
         disabled={!!dropdownOpen}
-      >
-        Fix vulnerability
-      </Button>
-      <FixVulnFormSC
+        {...props}
+      />
+      <AgentRunFormPopupSC
         type="header"
         linkStyles={false}
         isOpen={dropdownOpen}
@@ -77,7 +75,7 @@ export function FixVulnerabilityButton({
       >
         <StretchedFlex>
           <StackedText
-            first="Fix vulnerability"
+            first={headerTitle}
             firstPartialType="body1"
             firstColor="text-light"
             icon={<DiscoverIcon />}
@@ -110,19 +108,19 @@ export function FixVulnerabilityButton({
             </Button>
           </>
         ) : (
-          <FixVulnerabilityForm
-            initialRepo={parentReport?.artifactRepoUrl}
+          <AgentRunForm
+            initialRepo={initialRepo}
             prompt={prompt}
             setPrompt={setPrompt}
             setAgentRun={setAgentRun}
           />
         )}
-      </FixVulnFormSC>
+      </AgentRunFormPopupSC>
     </div>
   )
 }
 
-function FixVulnerabilityForm({
+function AgentRunForm({
   initialRepo,
   prompt,
   setPrompt,
@@ -191,7 +189,7 @@ function FixVulnerabilityForm({
         <EditableDiv
           initialValue={prompt}
           setValue={setPrompt}
-          placeholder="Create a PR to fix this vulnerability"
+          placeholder="Enter a prompt for the AI agent"
           disabled={loading}
           css={{ height: 140 }}
         />
@@ -208,44 +206,65 @@ function FixVulnerabilityForm({
   )
 }
 
-function AgentRunInfoCard({ agentRun }: { agentRun: AgentRunFragment }) {
+export function AgentRunInfoCard({
+  agentRun: { id, status },
+  showLinkButton = false,
+  ...props
+}: {
+  agentRun: AgentRunFragment
+  showLinkButton?: boolean
+} & CardProps) {
   const { colors } = useTheme()
-  const { data } = useAgentRunQuery({
-    variables: { id: agentRun.id },
-    skip: !(
-      agentRun.status === AgentRunStatus.Pending ||
-      agentRun.status === AgentRunStatus.Running
-    ),
+  const isRunning =
+    status === AgentRunStatus.Running || status === AgentRunStatus.Pending
+  const { data } = useAgentRunTinyQuery({
+    variables: { id },
+    skip: !isRunning,
     fetchPolicy: 'cache-and-network',
     pollInterval: 5000,
   })
-
   return (
-    <AgentRunStatusBoxSC>
+    <AgentRunStatusBoxSC {...props}>
       <Flex
         align="center"
         gap="small"
+        flex={1}
       >
         <DiscoverIcon
           size={16}
           color={colors['icon-default']}
         />
-        <Body2BoldP>Started agent run</Body2BoldP>
+        <Body2BoldP $shimmer={isRunning}>
+          {status === AgentRunStatus.Successful
+            ? 'Run complete'
+            : 'Started agent run'}
+        </Body2BoldP>
       </Flex>
       <RunStatusChip
-        status={data?.agentRun?.status ?? agentRun.status}
+        status={data?.agentRun?.status ?? status}
         fillLevel={2}
       />
+      {showLinkButton && (
+        <Button
+          small
+          as={Link}
+          to={getAgentRunAbsPath({ agentRunId: id })}
+          endIcon={<ArrowTopRightIcon />}
+        >
+          View details
+        </Button>
+      )}
     </AgentRunStatusBoxSC>
   )
 }
 
-export const FixVulnFormSC = styled(SimplePopupMenu)(({ theme }) => ({
+export const AgentRunFormPopupSC = styled(SimplePopupMenu)(({ theme }) => ({
   width: 578,
   padding: theme.spacing.medium,
   gap: theme.spacing.large,
   transform: 'translateY(20px)',
   marginBottom: theme.spacing.xxlarge,
+  boxShadow: theme.boxShadows.moderate,
 }))
 
 const PromptInputBoxSC = styled(Card)(({ theme }) => ({
@@ -258,6 +277,8 @@ const PromptInputBoxSC = styled(Card)(({ theme }) => ({
 const AgentRunStatusBoxSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
+  gap: theme.spacing.small,
   justifyContent: 'space-between',
   padding: theme.spacing.medium,
+  width: '100%',
 }))

@@ -240,7 +240,8 @@
               "claude",
               "opencode",
               "gemini",
-              "custom"
+              "custom",
+              "codex"
             ],
             "type": "string"
           },
@@ -4023,6 +4024,18 @@
           },
           {
             "in": "query",
+            "name": "health",
+            "required": false,
+            "schema": {
+              "enum": [
+                "pullable",
+                "failed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "page",
             "required": false,
             "schema": {
@@ -4472,6 +4485,18 @@
             "name": "q",
             "required": false,
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "health",
+            "required": false,
+            "schema": {
+              "enum": [
+                "pullable",
+                "failed"
+              ],
               "type": "string"
             }
           },

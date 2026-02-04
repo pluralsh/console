@@ -85,7 +85,7 @@ const cols = [
   columnHelper.accessor((alert) => alert.title, {
     id: 'title',
     header: 'Title',
-    meta: { gridTemplate: 'minmax(220px, 1fr)', truncate: true },
+    meta: { gridTemplate: 'minmax(200px, 1fr)', truncate: true },
     cell: function Cell({ getValue, row }) {
       return (
         <StackedText
@@ -162,6 +162,7 @@ const cols = [
   columnHelper.accessor((alert) => alert, {
     id: 'resolution',
     header: '',
+    meta: { gridTemplate: 'max-content' },
     cell: function Cell({ getValue }) {
       const { id, resolution } = getValue()
       const [isOpen, setIsOpen] = useState(false)

@@ -20,7 +20,6 @@ import {
   AiInsightFragment,
   AiRole,
   ChatMessage,
-  PersonaConfiguration,
   useAiChatStreamSubscription,
   useAiFixPrMutation,
   useAiSuggestedFixLazyQuery,
@@ -118,7 +117,7 @@ function FixPr({
         >
           View PR
         </Button>
-      ) : hasAccess(personaConfiguration as PersonaConfiguration, 'ai.pr') ? (
+      ) : hasAccess(personaConfiguration, 'ai.pr') ? (
         <Button
           startIcon={<PrOpenIcon />}
           onClick={() => mutation()}

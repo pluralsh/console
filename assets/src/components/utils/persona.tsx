@@ -1,4 +1,4 @@
-import { PersonaConfiguration } from '../../generated/graphql.ts'
+import { PersonaConfigurationFragment } from '../../generated/graphql.ts'
 
 type Keys<T> = T extends object
   ? {
@@ -7,8 +7,8 @@ type Keys<T> = T extends object
   : never
 
 export function hasAccess(
-  persona: PersonaConfiguration,
-  feature: Keys<Omit<PersonaConfiguration, '__typename' | 'all'>>
+  persona: Nullable<PersonaConfigurationFragment>,
+  feature: Keys<Omit<PersonaConfigurationFragment, 'all'>>
 ): boolean {
   const keys = feature.split('.')
   let current: any = persona

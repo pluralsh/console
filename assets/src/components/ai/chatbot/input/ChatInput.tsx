@@ -36,9 +36,9 @@ import { mergeRefs } from 'react-merge-refs'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from '../../AIContext.tsx'
 import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
-import { ChatInputCloudSelect } from './ChatInputCloudSelect.tsx'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
 import { ChatInputIconFrame } from './ChatInputIconFrame.tsx'
+import { ChatInputRuntimeSelect } from './ChatInputRuntimeSelect.tsx'
 
 export function ChatInput({
   ref,
@@ -187,8 +187,11 @@ export function ChatInput({
                 onClick={() => setMcpPanelOpen(!mcpPanelOpen)}
               />
             )}
-            {!selectedAgent && currentThread && (
+            {/* {!selectedAgent && currentThread && (
               <ChatInputCloudSelect currentThread={currentThread} />
+            )} */}
+            {!selectedAgent && !!currentThread?.session?.id && (
+              <ChatInputRuntimeSelect currentThread={currentThread} />
             )}
             {!selectedAgent && !!currentThread?.session?.id && (
               <ChatInputClusterSelect currentThread={currentThread} />

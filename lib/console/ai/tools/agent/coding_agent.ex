@@ -20,7 +20,7 @@ defmodule Console.AI.Tools.Agent.CodingAgent do
 
   def json_schema(), do: @json_schema
   def name(), do: plrl_tool("coding_agent")
-  def description(), do: "Invokes a coding agent to make a code change with the given prompt and repository.  Only use this once you've gathered enough information to craft an effective prompt"
+  def description(), do: "Invokes a coding agent to make a code change with the given prompt and repository.  Use this if the user wants to create a PR or reconfigure something defined in Git. Only use this once you've gathered enough information to craft an effective prompt"
 
   def implement(%__MODULE__{repository: repo, prompt: prompt}) do
     with {:user, %User{} = user} <- {:user, Tool.actor()},

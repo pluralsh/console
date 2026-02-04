@@ -58,6 +58,20 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryControllerTest do
 
       assert ids_equal(results, repos)
     end
+
+    test "can filter by health", %{conn: conn} do
+      user = insert(:user)
+      pullable = insert_list(2, :helm_repository, health: :pullable)
+      insert_list(3, :helm_repository, health: :failed)
+
+      %{"data" => results} =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/cd/helm/repositories", health: "pullable")
+        |> json_response(200)
+
+      assert ids_equal(results, pullable)
+    end
   end
 
   describe "#upsert/2" do

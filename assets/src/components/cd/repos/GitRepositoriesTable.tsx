@@ -3,7 +3,7 @@ import {
   useGitPullabilityStatisticsQuery,
   useGitRepositoriesQuery,
 } from 'generated/graphql'
-import { ComponentProps, useEffect } from 'react'
+import { useEffect } from 'react'
 
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import { GqlError } from 'components/utils/Alert'
@@ -17,30 +17,31 @@ import {
   ColStatus,
   ColUpdatedAt,
 } from './GitRepositoriesColumns'
+import { statusFilterKeyToGitHealth } from './HelmRepositoriesTable'
 import {
   countsFromGitOrHelmRepos,
   RepoStatusFilterKey,
 } from './RepositoriesFilters'
-import { isEmpty } from 'lodash'
 
 export function GitRepositoriesTable({
-  tableFilterOptions,
+  status,
+  searchStr,
   setStatusCounts,
 }: {
-  tableFilterOptions: ComponentProps<typeof Table>['reactTableOptions']
+  status: RepoStatusFilterKey
+  searchStr: string
   setStatusCounts: (counts: Record<RepoStatusFilterKey, number>) => void
 }) {
-  const hasFilters =
-    !!tableFilterOptions?.state?.globalFilter ||
-    !isEmpty(tableFilterOptions?.state?.columnFilters)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData({
-      queryHook: useGitRepositoriesQuery,
-      keyPath: ['gitRepositories'],
-    })
+    useFetchPaginatedData(
+      { queryHook: useGitRepositoriesQuery, keyPath: ['gitRepositories'] },
+      { q: searchStr, health: statusFilterKeyToGitHealth(status) }
+    )
   const { data: statsData } = useGitPullabilityStatisticsQuery({
     pollInterval: POLL_INTERVAL,
   })
+
+  const hasFilters = !!status || !!searchStr
 
   useEffect(() => {
     setStatusCounts(
@@ -57,7 +58,6 @@ export function GitRepositoriesTable({
       loading={!data && loading}
       data={data?.gitRepositories?.edges ?? []}
       columns={gitRepoColumns}
-      reactTableOptions={tableFilterOptions}
       emptyStateProps={{
         message: hasFilters
           ? 'No results found. Try adjusting your filters.'

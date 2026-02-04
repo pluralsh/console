@@ -1,7 +1,8 @@
 defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryController do
   use ConsoleWeb, :api_controller
+  import Console.OpenAPI.Base, only: [ecto_enum: 1]
   alias Console.Deployments.Git
-  alias Console.Schema.HelmRepository
+  alias Console.Schema.{GitRepository, HelmRepository}
 
   plug Scope, [resource: :repos, action: :read] when action in [:show, :index, :show_by_url]
   plug Scope, [resource: :repos, action: :write] when action in [:upsert]
@@ -40,6 +41,7 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryController do
     "x-required-scopes": ["repos.read"],
     parameters: [
       q: [in: :query, schema: %{type: :string}, required: false, description: "Search helm repositories by url"],
+      health: [in: :query, schema: ecto_enum(GitRepository.Health), required: false, description: "Filter by health (pullable, failed)"],
       page: [in: :query, schema: %{type: :integer}, required: false],
       per_page: [in: :query, schema: %{type: :integer}, required: false]
     ],
@@ -56,6 +58,8 @@ defmodule ConsoleWeb.OpenAPI.CD.HelmRepositoryController do
     Enum.reduce(params, query, fn
       {:q, search}, q when is_binary(search) and byte_size(search) > 0 ->
         HelmRepository.search(q, search)
+      {:health, health}, q when not is_nil(health) ->
+        HelmRepository.for_health(q, health)
       _, q -> q
     end)
   end
