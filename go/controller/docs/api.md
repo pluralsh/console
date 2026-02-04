@@ -4147,6 +4147,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this Sentinel.<br />If not provided, the name from Sentinel.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `description` _string_ | Description provides a human-readable explanation of what this Sentinel. |  |  |
+| `crontab` _string_ | Crontab defines a schedule at which sentinels will automatically run. Can be left empty to run manually or via the API.<br />Examples: "0 */6 * * *" (every 6 hours), "*/15 * * * *" (every 15 minutes). |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this object belongs to, enabling<br />project-scoped organization and access control. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | The git location to use for this sentinel. |  |  |

@@ -235,7 +235,7 @@ defmodule Console.Deployments.Settings do
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def vector_store_initialized() do
     fetch_consistent()
-    |> Ecto.Changeset.change(%{ai: %{vector_store: %{initialized: true}}})
+    |> Ecto.Changeset.change(%{ai: %{vector_store: %{initialized: true, version: 2}}})
     |> Repo.update()
   end
 

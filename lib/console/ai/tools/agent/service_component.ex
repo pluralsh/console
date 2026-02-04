@@ -21,11 +21,11 @@ defmodule Console.AI.Tools.Agent.ServiceComponent do
   def name(), do: plrl_tool("service_search")
   def description(), do: "Execute a semantic search for a kubernetes resource deployed through a Plural Service.  Use this if a user is searching specifically for a plural service or for a resource that would likely be deployed to a kubernetes cluster, eg a stateless service or kubernetes operator"
 
-  @opts [filters: [datatype: {:raw, :service_component}], count: 15]
+  @opts [count: 15, filters: [datatype: {:raw, :service_component}]]
 
   def implement(%__MODULE__{query: query}) do
     with true <- VectorStore.enabled?(),
-         {:ok, results} <- VectorStore.fetch(query, @opts) do
+         {:ok, results} <- VectorStore.fetch(query, [{:user, Tool.actor()} | @opts]) do
       Enum.map(results, &format/1)
       |> Enum.filter(& &1)
       |> Enum.map(&Map.from_struct/1)

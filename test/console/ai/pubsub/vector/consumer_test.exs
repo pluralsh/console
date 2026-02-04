@@ -343,13 +343,18 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
 
       Console.AI.VectorStore.init()
 
-      stack = insert(:stack, status: :successful)
+      assert Console.Deployments.Settings.fetch_consistent().ai.vector_store.version == 2
+
+      group = insert(:group)
+      user = insert(:user)
+
+      stack = insert(:stack, read_bindings: [%{group_id: group.id}], write_bindings: [%{user_id: user.id}], status: :successful)
       insert(:stack_state, stack: stack, state: [
         %{identifier: "1", resource: "resource", name: "name", configuration: %{"key" => "value"}},
         %{identifier: "2", resource: "resource", name: "name", configuration: %{"key" => "value"}},
       ])
 
-      expect(Console.AI.OpenAI, :embeddings, 2, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+      expect(Console.AI.OpenAI, :embeddings, 4, fn _, text -> {:ok, [{text, ES.vector()}]} end)
 
       event = %PubSub.StackUpdated{item: stack}
       Consumer.handle_event(event)
@@ -357,6 +362,11 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
 
       {:ok, c} = ES.count_index(ES.vector_index())
       assert c > 0
+
+      # test auth works properly
+      {:ok, [_, _]} = Console.AI.VectorStore.fetch("stack", count: 5, filters: [datatype: {:raw, :stack_state}], user: Console.Services.Rbac.preload(user))
+
+      {:ok, []} = Console.AI.VectorStore.fetch("stack", count: 5, filters: [datatype: {:raw, :stack_state}], user: Console.Services.Rbac.preload(insert(:user)))
     end
   end
 
@@ -449,9 +459,13 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
 
       Console.AI.VectorStore.init()
 
-      expect(Console.AI.OpenAI, :embeddings, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+      assert Console.Deployments.Settings.fetch_consistent().ai.vector_store.version == 2
 
-      service = insert(:service)
+      expect(Console.AI.OpenAI, :embeddings, 3, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+      group = insert(:group)
+      user = insert(:user)
+
+      service = insert(:service, read_bindings: [%{group_id: group.id}], write_bindings: [%{user_id: user.id}])
       insert(:service_component, service: service)
 
       event = %PubSub.ServiceComponentsUpdated{item: service}
@@ -460,6 +474,14 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
 
       {:ok, c} = ES.count_index(ES.vector_index())
       assert c > 0
+
+      # test auth works properly
+      {:ok, [_]} = Console.AI.VectorStore.fetch("service", count: 5, filters: [datatype: {:raw, :service_component}], user: Console.Services.Rbac.preload(user))
+      {:ok, []} = Console.AI.VectorStore.fetch("service",
+        count: 5,
+        filters: [datatype: {:raw, :service_component}],
+        user: Console.Services.Rbac.preload(insert(:user))
+      )
     end
   end
 

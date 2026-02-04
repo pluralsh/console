@@ -27,11 +27,14 @@ defmodule Console.AI.VectorStore do
     defstruct [:pr_file, :alert_resolution, :stack_state, :service_component, :pr_automation, :catalog, :cluster, :type]
   end
 
+  @latest_version 2
+
   @type store :: Console.AI.Vector.Elastic.t
   @type data :: Response.t
   @type error :: Console.error
 
   @callback init(store) :: :ok | error
+  @callback recreate(store) :: :ok | error
   @callback insert(store, struct, keyword) :: :ok | error
   @callback fetch(store, [float], keyword) :: {:ok, [data]} | error
   @callback delete(store, keyword) :: :ok | error
@@ -43,6 +46,12 @@ defmodule Console.AI.VectorStore do
       %DeploymentSettings{ai: %{vector_store: %{enabled: enabled}}} -> enabled
       _ -> false
     end
+  end
+
+  def recreate() do
+    settings = Settings.cached()
+    with {:ok, %{__struct__: mod} = store} <- store(settings),
+      do: mod.recreate(store)
   end
 
   def init() do
@@ -77,12 +86,15 @@ defmodule Console.AI.VectorStore do
       do: mod.expire(store, opts)
   end
 
-  defp maybe_init(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{initialized: true}}}, _), do: :ok
+  defp maybe_init(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{initialized: true, version: version}}}, _)
+    when is_integer(version) and version >= @latest_version, do: :ok
+  defp maybe_init(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{initialized: true, version: version}}}, %{__struct__: mod} = store)
+    when is_nil(version) or (is_integer(version) and version < @latest_version), do: mod.recreate(store)
   defp maybe_init(_, %{__struct__: mod} = store), do: mod.init(store)
 
-  defp store(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{store: :elastic, elastic: elastic}}}),
-    do: {:ok, Elastic.new(elastic)}
-  defp store(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{store: :opensearch, opensearch: opensearch}}}),
-    do: {:ok, Opensearch.new(opensearch)}
+  defp store(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{store: :elastic, elastic: elastic, version: version} = vs}}),
+    do: {:ok, Elastic.new(elastic, version: version, settings: vs)}
+  defp store(%DeploymentSettings{ai: %AI{vector_store: %VectorStore{store: :opensearch, opensearch: opensearch, version: version} = vs}}),
+    do: {:ok, Opensearch.new(opensearch, version: version, settings: vs)}
   defp store(_), do: {:error, "AI vector store not yet configured"}
 end

@@ -14,12 +14,15 @@ defmodule Console.Schema.Sentinel do
   alias Console.Deployments.Policies.Rbac
 
   defenum CheckType, log: 0, kubernetes: 1, integration_test: 2
+  defenum IntegrationTestCaseType, coredns: 0, loadbalancer: 1, raw: 2
 
   schema "sentinels" do
     field :name,        :string
     field :status,      SentinelRun.Status, default: :pending
     field :description, :string
     field :last_run_at, :utc_datetime_usec
+    field :crontab,     :string
+    field :next_run_at, :utc_datetime_usec
 
     belongs_to :repository, GitRepository
     belongs_to :project,    Project
@@ -61,6 +64,26 @@ defmodule Console.Schema.Sentinel do
             field :parallel, :string
           end
 
+          embeds_many :cases, IntegrationTestCase, on_replace: :delete do
+            field :type, IntegrationTestCaseType
+            field :name, :string
+
+            embeds_one :coredns, CoreDNSConfiguration, on_replace: :update do
+              field :dial_fqdns, {:array, :string}
+            end
+
+            embeds_one :loadbalancer, LoadBalancerConfiguration, on_replace: :update do
+              field :namespace,   :string
+              field :name_prefix, :string
+              field :annotations, :map
+              field :labels,      :map
+            end
+
+            embeds_one :raw, RawConfiguration, on_replace: :update do
+              field :yaml, :string
+            end
+          end
+
           embeds_one :git, Service.Git, on_replace: :update
           field :repository_id, :binary_id
 
@@ -90,6 +113,10 @@ defmodule Console.Schema.Sentinel do
     end)
   end
 
+  def pollable(query \\ __MODULE__) do
+    from(s in query, where: not is_nil(s.next_run_at) or s.next_run_at < ^DateTime.utc_now())
+  end
+
   def search(query \\ __MODULE__, search) do
     from(s in query, where: ilike(s.name, ^"%#{search}%"))
   end
@@ -109,6 +136,7 @@ defmodule Console.Schema.Sentinel do
     |> cast(attrs, @valid)
     |> cast_embed(:git)
     |> cast_embed(:checks, with: &check_changeset/2)
+    |> determine_next_run()
     |> unique_constraint(:name, message: "a sentinel with this name already exists")
     |> validate_length(:name, max: 255)
     |> validate_required([:name, :status])
@@ -153,11 +181,39 @@ defmodule Console.Schema.Sentinel do
     |> cast_embed(:job)
     |> cast_embed(:git)
     |> cast_embed(:gotestsum, with: &gotestsum_changeset/2)
+    |> cast_embed(:cases, with: &integration_test_case_changeset/2)
     |> validate_required(~w(format)a)
   end
 
   defp gotestsum_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(p parallel)a)
+  end
+
+  defp integration_test_case_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(type name)a)
+    |> cast_embed(:coredns, with: &coredns_changeset/2)
+    |> cast_embed(:loadbalancer, with: &loadbalancer_changeset/2)
+    |> cast_embed(:raw, with: &raw_changeset/2)
+    |> validate_required(~w(type name)a)
+  end
+
+  defp coredns_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(dial_fqdns)a)
+    |> validate_required(~w(dial_fqdns)a)
+  end
+
+  defp loadbalancer_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(namespace name_prefix annotations labels)a)
+    |> validate_required(~w(namespace name_prefix)a)
+  end
+
+  defp raw_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(yaml)a)
+    |> validate_required(~w(yaml)a)
   end
 end

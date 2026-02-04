@@ -15,7 +15,7 @@ defmodule Console.Bootstrapper do
     if Console.conf(:initialize) do
       :timer.send_interval(:timer.minutes(30), :migrate)
       send self(), :migrate
-      send self(), :kick_git
+      send self(), :kick
     end
 
     write_token_file!()

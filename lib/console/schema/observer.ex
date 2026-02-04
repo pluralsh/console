@@ -206,23 +206,4 @@ defmodule Console.Schema.Observer do
     |> cast(attrs, ~w(runtime prompt repository cluster_id)a)
     |> validate_required(~w(runtime prompt repository)a)
   end
-
-  defp determine_next_run(cs) do
-    crontab = get_field(cs, :crontab)
-    with run when not is_nil(run) <- get_change(cs, :last_run_at),
-         {:ok, cron} <- Crontab.CronExpression.Parser.parse(crontab),
-         {:ok, next} <- Crontab.Scheduler.get_next_run_date(cron, Timex.to_naive_datetime(run)) do
-      put_change(cs, :next_run_at, next_run(next))
-    else
-      {:error, _} = err ->
-        add_error(cs, :crontab, "Failed to generate next run date: #{inspect(err)}")
-      _ -> cs
-    end
-  end
-
-  defp next_run(ndt) do
-    DateTime.from_naive!(ndt, "Etc/UTC")
-    |> Map.put(:microsecond, {0, 6})
-    |> Timex.shift(seconds: Console.jitter(60))
-  end
 end

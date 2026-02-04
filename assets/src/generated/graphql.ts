@@ -11309,6 +11309,8 @@ export type Sentinel = {
   __typename?: 'Sentinel';
   /** the checks to run for this sentinel */
   checks?: Maybe<Array<Maybe<SentinelCheck>>>;
+  /** the crontab schedule for the sentinel */
+  crontab?: Maybe<Scalars['String']['output']>;
   /** the description of the sentinel */
   description?: Maybe<Scalars['String']['output']>;
   /** the git location for rules files from the associated repository */
@@ -11320,6 +11322,8 @@ export type Sentinel = {
   lastRunAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of the sentinel */
   name: Scalars['String']['output'];
+  /** the next time this sentinel will run */
+  nextRunAt?: Maybe<Scalars['DateTime']['output']>;
   /** the project of this sentinel */
   project?: Maybe<Project>;
   /** the git repository to use for fetching rules files for AI enabled analysis */
@@ -11342,6 +11346,8 @@ export type SentinelRunsArgs = {
 export type SentinelAttributes = {
   /** the checks to run for this sentinel */
   checks?: InputMaybe<Array<InputMaybe<SentinelCheckAttributes>>>;
+  /** the crontab schedule for the sentinel */
+  crontab?: InputMaybe<Scalars['String']['input']>;
   /** the description of the sentinel */
   description?: InputMaybe<Scalars['String']['input']>;
   /** the git repository to use for this sentinel */

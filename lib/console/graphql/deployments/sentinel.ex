@@ -7,6 +7,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   ecto_enum :sentinel_run_status, Console.Schema.SentinelRun.Status
   ecto_enum :sentinel_run_job_status, Console.Schema.SentinelRunJob.Status
   ecto_enum :sentinel_run_job_format, Console.Schema.SentinelRunJob.Format
+  ecto_enum :sentinel_integration_test_case_type, Console.Schema.Sentinel.IntegrationTestCaseType
 
   input_object :sentinel_attributes do
     field :name,          :string, description: "the name of the sentinel"
@@ -14,6 +15,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :repository_id, :id, description: "the repository to use for this sentinel"
     field :project_id,    :id, description: "the project to use for this sentinel"
     field :git,           :git_ref_attributes, description: "the git repository to use for this sentinel"
+    field :crontab,       :string, description: "the crontab schedule for the sentinel"
     field :checks,        list_of(:sentinel_check_attributes), description: "the checks to run for this sentinel"
   end
 
@@ -70,11 +72,36 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :parallel, :string, description: "the value of the parallel flag for gotestsum"
   end
 
+  input_object :sentinel_check_integration_test_case_attributes do
+    field :type,          non_null(:sentinel_integration_test_case_type), description: "the type of test case to run"
+    field :name,          non_null(:string), description: "the name of the test case"
+    field :coredns,       :sentinel_check_integration_test_case_coredns_attributes, description: "the coredns configuration to use for this test case"
+    field :loadbalancer,  :sentinel_check_integration_test_case_loadbalancer_attributes, description: "the loadbalancer configuration to use for this test case"
+    field :raw,           :sentinel_check_integration_test_case_raw_attributes, description: "the raw configuration to use for this test case"
+  end
+
+  input_object :sentinel_check_integration_test_case_coredns_attributes do
+    field :dial_fqdns, list_of(:string), description: "the fqdns to dial for this test case"
+  end
+
+  input_object :sentinel_check_integration_test_case_loadbalancer_attributes do
+    field :namespace,   non_null(:string), description: "the namespace to use for this test case"
+    field :name_prefix, non_null(:string), description: "the name prefix to use for this test case"
+    field :annotations, :json, description: "the annotations to use for this test case"
+    field :labels,      :json, description: "the labels to use for this test case"
+  end
+
+  input_object :sentinel_check_integration_test_case_raw_attributes do
+    field :yaml, :string, description: "the yaml to use for this test case"
+  end
+
   object :sentinel do
     field :id,           non_null(:string), description: "the id of the sentinel"
     field :name,         non_null(:string), description: "the name of the sentinel"
     field :description, :string, description: "the description of the sentinel"
     field :status,      :sentinel_run_status, description: "the status of the sentinel's last run"
+    field :crontab,     :string, description: "the crontab schedule for the sentinel"
+    field :next_run_at, :datetime, description: "the next time this sentinel will run"
     field :git,         :git_ref, description: "the git location for rules files from the associated repository"
     field :repository,  :git_repository, resolve: dataloader(Deployments), description: "the git repository to use for fetching rules files for AI enabled analysis"
     field :project,     :project, resolve: dataloader(Deployments), description: "the project of this sentinel"
@@ -132,6 +159,32 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   object :sentinel_check_gotestsum_configuration do
     field :p,        :string, description: "the value of the p flag for gotestsum"
     field :parallel, :string, description: "the value of the parallel flag for gotestsum"
+  end
+
+  object :sentinel_check_integration_test_case_configuration do
+    field :type,          non_null(:sentinel_integration_test_case_type), description: "the type of test case to run"
+    field :name,          non_null(:string), description: "the name of the test case"
+    field :coredns,       :sentinel_check_integration_test_case_coredns_configuration, description: "the coredns configuration to use for this test case"
+    field :loadbalancer,  :sentinel_check_integration_test_case_loadbalancer_configuration, description: "the loadbalancer configuration to use for this test case"
+    field :raw,           :sentinel_check_integration_test_case_raw_configuration, description: "the raw configuration to use for this test case"
+  end
+
+  @desc "test internal kubernetes dns resolution"
+  object :sentinel_check_integration_test_case_coredns_configuration do
+    field :dial_fqdns, list_of(:string), description: "the fqdns to dial for this test case"
+  end
+
+  @desc "test provisioning a load balancer service"
+  object :sentinel_check_integration_test_case_loadbalancer_configuration do
+    field :namespace,   non_null(:string), description: "the namespace to use for this test case"
+    field :name_prefix, non_null(:string), description: "the name prefix to use for this test case"
+    field :annotations, :json, description: "the annotations to use for this test case"
+    field :labels,      :json, description: "the labels to use for this test case"
+  end
+
+  @desc "test provisioning a raw resource"
+  object :sentinel_check_integration_test_case_raw_configuration do
+    field :yaml, :string, description: "the yaml to use for this test case"
   end
 
   object :sentinel_run do

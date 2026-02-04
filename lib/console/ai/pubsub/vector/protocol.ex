@@ -50,9 +50,11 @@ defmodule Console.AI.PubSub.Vectorizable.Stack do
     minis =
       Enum.reject(items, &String.starts_with?(&1.identifier, "data."))
       |> Enum.map(&StackState.Mini.new(%{state | stack: stack}, &1))
+    {users, groups} = Console.AI.Authorizable.authorize(stack)
+
     [
       %Indexable{delete: true, force: true, filters: [stack_id: stack.id, datatype: {:raw, :stack_state}]},
-      %Indexable{data: minis, filters: [stack_id: stack.id], force: true}
+      %Indexable{data: minis, filters: [stack_id: stack.id, user_ids: users, group_ids: groups], force: true}
     ]
   end
 
@@ -108,9 +110,10 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ServiceComponentsUpd
         %Service{components: [_ | _] = components} = service ->
           minis = Enum.map(components, &ServiceComponent.Mini.new(%{&1 | service: service}))
                   |> Enum.sort_by(& {&1.group, &1.version, &1.kind, &1.namespace, &1.name})
+          {users, groups} = Console.AI.Authorizable.authorize(service)
           [
             %Indexable{delete: true, force: true, filters: [service_id: service.id, datatype: {:raw, :service_component}]},
-            %Indexable{data: minis, filters: [service_id: service.id], force: true}
+            %Indexable{data: minis, filters: [service_id: service.id, user_ids: users, group_ids: groups], force: true}
           ]
         _ -> :ok
       end
@@ -133,9 +136,10 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ClusterPinged do
     cluster_with_data = Map.put(cluster, :runtime_services, runtime_services)
 
     Console.debounce({:vectorizer, :cluster, cluster.id}, fn ->
+      {users, groups} = Console.AI.Authorizable.authorize(cluster)
       [
         %Indexable{delete: true, force: true, filters: [cluster_id: cluster.id, datatype: {:raw, :cluster}]},
-        %Indexable{data: Cluster.Mini.new(cluster_with_data), filters: [cluster_id: cluster.id], force: true}
+        %Indexable{data: Cluster.Mini.new(cluster_with_data), filters: [cluster_id: cluster.id, user_ids: users, group_ids: groups], force: true}
       ]
     end)
   end
@@ -147,7 +151,8 @@ defimpl Console.AI.PubSub.Vectorizable, for: [Console.PubSub.PrAutomationCreated
   alias Console.AI.PubSub.Vector.Indexable
 
   def resource(%@for{item: %PrAutomation{} = pr}) do
-    %Indexable{data: PrAutomation.Mini.new(pr), filters: [pr_automation_id: pr.id]}
+    {users, groups} = Console.AI.Authorizable.authorize(pr)
+    %Indexable{data: PrAutomation.Mini.new(pr), filters: [pr_automation_id: pr.id, user_ids: users, group_ids: groups]}
   end
   def resource(_), do: :ok
 end
@@ -167,7 +172,8 @@ defimpl Console.AI.PubSub.Vectorizable, for: [Console.PubSub.CatalogCreated, Con
   alias Console.AI.PubSub.Vector.Indexable
 
   def resource(%@for{item: %Catalog{} = catalog}) do
-    %Indexable{data: Catalog.Mini.new(catalog), filters: [catalog_id: catalog.id]}
+    {users, groups} = Console.AI.Authorizable.authorize(catalog)
+    %Indexable{data: Catalog.Mini.new(catalog), filters: [catalog_id: catalog.id, user_ids: users, group_ids: groups]}
   end
   def resource(_), do: :ok
 end

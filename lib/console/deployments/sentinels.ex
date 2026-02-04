@@ -79,25 +79,37 @@ defmodule Console.Deployments.Sentinels do
   end
 
   @doc """
-  Runs a sentinel
+  Runs a sentinel if the user has write access to the sentinel
   """
   @spec run_sentinel(binary, User.t) :: sentinel_run_resp
   def run_sentinel(id, %User{} = user) do
     start_transaction()
     |> add_operation(:fetch, fn _ ->
       get_sentinel!(id)
-      |> Sentinel.changeset(%{last_run_at: DateTime.utc_now(), status: :pending})
       |> allow(user, :write)
-      |> when_ok(:update)
     end)
-    |> add_operation(:run, fn %{fetch: sentinel} ->
+    |> add_operation(:run, fn %{fetch: sentinel} -> run_sentinel(sentinel) end)
+    |> execute(extract: :run)
+  end
+
+  @doc """
+  Runs a sentinel directly
+  """
+  @spec run_sentinel(Sentinel.t) :: sentinel_run_resp
+  def run_sentinel(%Sentinel{} = sentinel) do
+    start_transaction()
+    |> add_operation(:update, fn _ ->
+      sentinel
+      |> Sentinel.changeset(%{last_run_at: DateTime.utc_now(), status: :pending})
+      |> Repo.update()
+    end)
+    |> add_operation(:run, fn %{update: sentinel} ->
       %SentinelRun{sentinel_id: sentinel.id, status: :pending}
       |> SentinelRun.changeset(%{checks: Console.mapify(sentinel.checks)})
       |> Repo.insert()
     end)
     |> execute(extract: :run)
   end
-
 
   @doc """
   Fetches a file handle to the tarball for a stack run
