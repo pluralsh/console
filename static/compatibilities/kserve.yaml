@@ -64,7 +64,20 @@ versions:
   kube: ['1.32', '1.31', '1.30']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Model caching enhancements in 0.14.1: introduced LocalModelNode/LocalModelCache
+        resources, node agent, multi node-group support, redownload on missing models,
+        and an annotation to disable model cache.', 'In 0.15.2, ModelCar is enabled
+        by default and ModelServer init adds predictor_config support.', Autoscaler
+        reconciliation behavior updated by changing the order the Knative autoscaler
+        ConfigMap is read.]
+    breaking_changes: ['Potential behavior change: ModelCar is enabled by default
+        in 0.15.2, which may affect storage/runtime expectations and should be validated
+        in your environment.', 'Potential operational change: autoscaler settings
+        may be applied differently due to the changed ConfigMap read order during
+        reconciliation.']
   chart_version: v0.15.2
   images: ['docker.io/seldonio/mlserver:1.5.0', 'kserve/huggingfaceserver:v0.15.2',
     'kserve/huggingfaceserver:v0.15.2-gpu', 'kserve/kserve-controller:v0.15.2', 'kserve/lgbserver:v0.15.2',

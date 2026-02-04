@@ -4,6 +4,13 @@ release_url: https://github.com/elastic/elasticsearch/releases/tag/{vsn}
 helm_repository_url: https://helm.elastic.co
 readme_url: https://github.com/elastic/elasticsearch/blob/main/README.asciidoc
 versions:
+- version: 9.3.0
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 9.3.0
+  images: ['docker.elastic.co/elastic-agent/elastic-agent:9.3.0', 'registry.k8s.io/kube-state-metrics/kube-state-metrics:v2.16.0']
 - version: 9.2.4
   kube: ['1.35', '1.34', '1.33']
   requirements: []
