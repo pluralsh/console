@@ -482,7 +482,7 @@ export function DeployService({
         primary
         onClick={() => setIsOpen(true)}
       >
-        Deploy service
+        Deploy Service
       </Button>
       <ModalMountTransition open={isOpen}>
         <DeployServiceModal

@@ -31,6 +31,11 @@ import {
   isUnstructured,
   useFetchComponentDetails,
 } from './useFetchComponentDetails.tsx'
+import {
+  getCustomResourceDetailsAbsPath,
+  getResourceDetailsAbsPath,
+} from 'routes/kubernetesRoutesConsts.tsx'
+import { Kind } from 'components/kubernetes/common/types.ts'
 
 export type ComponentDetailsContext = {
   component: ServiceDeploymentComponentFragment
@@ -170,6 +175,12 @@ export function ComponentDetails({
                   </LinkTabWrap>
                 ))}
               </TabList>
+              <ViewInDashboardButton
+                clusterId={service?.cluster?.id}
+                componentKind={componentKind}
+                componentName={component.name}
+                componentNamespace={component.namespace}
+              />
               {pluralServiceDeploymentRef?.id &&
                 pluralServiceDeploymentRef?.cluster?.id && (
                   <Button
@@ -180,7 +191,7 @@ export function ComponentDetails({
                       clusterId: pluralServiceDeploymentRef?.cluster.id,
                     })}
                   >
-                    View service
+                    View Service
                   </Button>
                 )}
               {!service?.id && (
@@ -207,5 +218,46 @@ export function ComponentDetails({
         </TabPanel>
       </ResponsivePageFullWidth>
     </PageHeaderContext.Provider>
+  )
+}
+
+function ViewInDashboardButton({
+  clusterId,
+  componentKind,
+  componentName,
+  componentNamespace,
+}: {
+  clusterId: string | undefined
+  componentKind: string
+  componentName: string | null | undefined
+  componentNamespace: string | null | undefined
+}) {
+  if (!clusterId) return null
+
+  const knownKind = Object.values(Kind).find(
+    (k) => k === componentKind?.toLowerCase()
+  )
+
+  return (
+    <Button
+      as={Link}
+      to={
+        knownKind
+          ? getResourceDetailsAbsPath(
+              clusterId,
+              knownKind,
+              componentName,
+              componentNamespace
+            )
+          : getCustomResourceDetailsAbsPath(
+              clusterId,
+              componentKind, // FIXME: This is not the correct kind.
+              componentName,
+              componentNamespace
+            )
+      }
+    >
+      View in Dashboard
+    </Button>
   )
 }
