@@ -610,6 +610,7 @@ export type AgentRuntimeEdge = {
 
 export enum AgentRuntimeType {
   Claude = 'CLAUDE',
+  Codex = 'CODEX',
   Custom = 'CUSTOM',
   Gemini = 'GEMINI',
   Opencode = 'OPENCODE'

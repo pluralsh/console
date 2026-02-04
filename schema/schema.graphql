@@ -1353,6 +1353,7 @@ enum AgentRuntimeType {
   OPENCODE
   GEMINI
   CUSTOM
+  CODEX
 }
 
 enum AgentRunStatus {

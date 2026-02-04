@@ -240,7 +240,8 @@
               "claude",
               "opencode",
               "gemini",
-              "custom"
+              "custom",
+              "codex"
             ],
             "type": "string"
           },
