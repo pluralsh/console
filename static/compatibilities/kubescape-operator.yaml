@@ -266,7 +266,14 @@ versions:
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Fix prometheus-exporter missing endpoints., Add permissions to
+        application profile., Add configurable endpoint detection., Add missing service
+        account to jobs., Bump synchronizer component.]
+    features: [Configurable endpoint detection was added., Application profile permissions
+        were extended to support required access.]
+    breaking_changes: []
   chart_version: 1.22.0
   images: ['quay.io/kubescape/kubescape:v3.0.17', 'quay.io/kubescape/kubevuln:v0.3.33',
     'quay.io/kubescape/node-agent:v0.2.141', 'quay.io/kubescape/operator:v0.2.31',
