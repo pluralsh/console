@@ -93,6 +93,28 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       assert deployment["status"]["readyReplicas"] == 3
       assert deployment["spec"]["replicas"] == 3
     end
+
+    test "deployment spec includes selector (used by deployments view)" do
+      user = insert(:user)
+      svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])
+      insert(:service_component, service: svc, group: "apps", version: "v1", kind: "Deployment", namespace: "namespace", name: "name")
+      expect(Kazan, :run, fn _, _ -> {:ok, deployment("namespace", "name")} end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
+      {:ok, %{data: %{"deployment" => deployment}}} = run_query("""
+        query deployment($serviceId: ID!) {
+          deployment(serviceId: $serviceId, namespace: "namespace", name: "name") {
+            spec {
+              replicas
+              selector
+            }
+          }
+        }
+      """, %{"serviceId" => svc.id}, %{current_user: user})
+
+      assert deployment["spec"]["replicas"] == 3
+      assert deployment["spec"]["selector"] == %{"matchLabels" => %{"label" => "value"}}
+    end
   end
 
   describe "service" do
