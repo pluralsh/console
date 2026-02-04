@@ -106,6 +106,7 @@ const columns = [
         <>
           <Flex gap="small">
             <Button
+              small
               secondary
               onClick={() => setOpen(true)}
             >
@@ -113,6 +114,7 @@ const columns = [
             </Button>
             <Button
               secondary
+              small
               endIcon={<ArrowTopRightIcon />}
               as="a"
               target="_blank"
