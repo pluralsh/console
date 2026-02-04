@@ -16,6 +16,7 @@ import {
 
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import {
+  AgentRunTinyFragment,
   AgentSessionFragment,
   AiRole,
   ChatType,
@@ -42,6 +43,7 @@ export function ChatMessage({
   attributes,
   pullRequest,
   prAutomation,
+  agentRun,
   confirm,
   confirmedAt,
   serverName,
@@ -64,6 +66,7 @@ export function ChatMessage({
   attributes?: Nullable<ChatTypeAttributes>
   pullRequest?: Nullable<PullRequestFragment>
   prAutomation?: Nullable<PrAutomationFragment>
+  agentRun?: Nullable<AgentRunTinyFragment>
   confirm?: Nullable<boolean>
   confirmedAt?: Nullable<string>
   serverName?: Nullable<string>
@@ -115,6 +118,7 @@ export function ChatMessage({
         serverName={serverName}
         highlightToolContent={highlightToolContent}
         prAutomation={prAutomation}
+        agentRun={agentRun}
         session={session}
         isStreaming={isStreaming}
         toolDisplayType={toolDisplayType}

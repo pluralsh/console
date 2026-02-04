@@ -5,6 +5,7 @@ import {
   GeminiLogoIcon,
   IconProps,
   OpenCodeLogoIcon,
+  OpenAILogoIcon,
 } from '@pluralsh/design-system'
 import { AgentRuntimeType } from 'generated/graphql'
 import { ComponentPropsWithRef, type ComponentType } from 'react'
@@ -32,4 +33,5 @@ export const runtimeToIcon = {
   [AgentRuntimeType.Gemini]: GeminiLogoIcon,
   [AgentRuntimeType.Opencode]: OpenCodeLogoIcon,
   [AgentRuntimeType.Custom]: AiSparkleFilledIcon,
+  [AgentRuntimeType.Codex]: OpenAILogoIcon,
 } as const satisfies Record<AgentRuntimeType, ComponentType<IconProps>>

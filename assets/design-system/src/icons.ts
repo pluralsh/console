@@ -165,6 +165,7 @@ export { default as NetworkInterfaceIcon } from './components/icons/NetworkInter
 export { default as NewMailIcon } from './components/icons/NewMailIcon'
 export { default as NewrelicLogoIcon } from './components/icons/NewrelicLogoIcon'
 export { default as OAuthIcon } from './components/icons/OAuthIcon'
+export { default as OpenAILogoIcon } from './components/icons/OpenAILogoIcon'
 export { default as OpenCodeLogoIcon } from './components/icons/OpenCodeLogoIcon'
 export { default as OwnerIcon } from './components/icons/OwnerIcon'
 export { default as PackageIcon } from './components/icons/PackageIcon'

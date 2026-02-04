@@ -4,6 +4,7 @@ import {
   Button,
   ButtonProps,
   Card,
+  CardProps,
   CloseIcon,
   DiscoverIcon,
   Flex,
@@ -26,7 +27,7 @@ import {
   AgentRunFragment,
   AgentRunMode,
   AgentRunStatus,
-  useAgentRunQuery,
+  useAgentRunTinyQuery,
   useCreateAgentRunMutation,
 } from 'generated/graphql'
 import { useRef, useState } from 'react'
@@ -205,34 +206,54 @@ function AgentRunForm({
   )
 }
 
-function AgentRunInfoCard({ agentRun }: { agentRun: AgentRunFragment }) {
+export function AgentRunInfoCard({
+  agentRun: { id, status },
+  showLinkButton = false,
+  ...props
+}: {
+  agentRun: AgentRunFragment
+  showLinkButton?: boolean
+} & CardProps) {
   const { colors } = useTheme()
-  const { data } = useAgentRunQuery({
-    variables: { id: agentRun.id },
-    skip: !(
-      agentRun.status === AgentRunStatus.Pending ||
-      agentRun.status === AgentRunStatus.Running
-    ),
+  const isRunning =
+    status === AgentRunStatus.Running || status === AgentRunStatus.Pending
+  const { data } = useAgentRunTinyQuery({
+    variables: { id },
+    skip: !isRunning,
     fetchPolicy: 'cache-and-network',
     pollInterval: 5000,
   })
-
   return (
-    <AgentRunStatusBoxSC>
+    <AgentRunStatusBoxSC {...props}>
       <Flex
         align="center"
         gap="small"
+        flex={1}
       >
         <DiscoverIcon
           size={16}
           color={colors['icon-default']}
         />
-        <Body2BoldP>Started agent run</Body2BoldP>
+        <Body2BoldP $shimmer={isRunning}>
+          {status === AgentRunStatus.Successful
+            ? 'Run complete'
+            : 'Started agent run'}
+        </Body2BoldP>
       </Flex>
       <RunStatusChip
-        status={data?.agentRun?.status ?? agentRun.status}
+        status={data?.agentRun?.status ?? status}
         fillLevel={2}
       />
+      {showLinkButton && (
+        <Button
+          small
+          as={Link}
+          to={getAgentRunAbsPath({ agentRunId: id })}
+          endIcon={<ArrowTopRightIcon />}
+        >
+          View details
+        </Button>
+      )}
     </AgentRunStatusBoxSC>
   )
 }
@@ -256,6 +277,8 @@ const PromptInputBoxSC = styled(Card)(({ theme }) => ({
 const AgentRunStatusBoxSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
+  gap: theme.spacing.small,
   justifyContent: 'space-between',
   padding: theme.spacing.medium,
+  width: '100%',
 }))
