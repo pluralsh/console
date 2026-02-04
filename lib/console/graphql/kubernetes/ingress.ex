@@ -33,8 +33,9 @@ defmodule Console.GraphQl.Kubernetes.Ingress do
   end
 
   object :ingress_path do
-    field :backend, :ingress_backend
-    field :path,    :string
+    field :backend,    :ingress_backend
+    field :path,       :string
+    field :path_type,  :string
   end
 
   object :ingress_backend do

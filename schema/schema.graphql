@@ -11427,6 +11427,7 @@ type HttpIngressRule {
 type IngressPath {
   backend: IngressBackend
   path: String
+  pathType: String
 }
 
 type IngressBackend {

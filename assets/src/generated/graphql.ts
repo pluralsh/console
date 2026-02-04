@@ -4833,6 +4833,7 @@ export type IngressPath = {
   __typename?: 'IngressPath';
   backend?: Maybe<IngressBackend>;
   path?: Maybe<Scalars['String']['output']>;
+  pathType?: Maybe<Scalars['String']['output']>;
 };
 
 export type IngressRule = {
