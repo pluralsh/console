@@ -41,7 +41,7 @@ defmodule Console.GraphQl.Kubernetes.Deployment do
 
   object :deployment_spec do
     field :replicas, :integer
-    field :selector, :map, resolve: fn spec, _, _ -> selector_to_map(spec.selector) end
+    field :selector, :map, resolve: fn spec, _, _ -> {:ok, selector_to_map(spec.selector)} end
     field :strategy, :deployment_strategy
   end
 
