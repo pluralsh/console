@@ -83,6 +83,57 @@ defmodule KubernetesScaffolds do
     }
   end
 
+  def ingress_with_v1_backends(namespace, name) do
+    # v1 Ingress backend: backend.service.name, backend.service.port.number | .name
+    paths_with_v1_backends = [
+      %Networking.HTTPIngressPath{
+        path: "/ext/kas",
+        path_type: "Prefix",
+        backend: %{
+          service: %{name: "console-kas-service", port: %{number: 8180}}
+        }
+      },
+      %Networking.HTTPIngressPath{
+        path: "/api",
+        path_type: "Prefix",
+        backend: %{
+          service: %{name: "console-kas-service", port: %{number: 8000}}
+        }
+      },
+      %Networking.HTTPIngressPath{
+        path: "/ext/ai",
+        path_type: "Prefix",
+        backend: %{
+          service: %{name: "console", port: %{name: "nexus-http"}}
+        }
+      },
+      %Networking.HTTPIngressPath{
+        path: "/",
+        path_type: "Prefix",
+        backend: %{
+          service: %{name: "console", port: %{name: "http"}}
+        }
+      }
+    ]
+
+    %Networking.Ingress{
+      api_version: "networking.k8s.io/v1",
+      kind: "Ingress",
+      metadata: %ObjectMeta{name: name, namespace: namespace},
+      status: %Networking.IngressStatus{load_balancer: %{ingress: [%{ip: "1.2.3.4"}]}},
+      spec: %Networking.IngressSpec{
+        ingress_class_name: "nginx",
+        tls: [%Networking.IngressTLS{hosts: ["example.com"]}],
+        rules: [
+          %Networking.IngressRule{
+            host: "example.com",
+            http: %Networking.HTTPIngressRuleValue{paths: paths_with_v1_backends}
+          }
+        ]
+      }
+    }
+  end
+
   def status() do
     %Kazan.Models.Apimachinery.Meta.V1.Status{
       message: "succeeded",

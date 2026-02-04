@@ -178,6 +178,59 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       assert ingress["spec"]["tls"] == [%{"hosts" => ["example.com"]}]
       assert ingress["spec"]["rules"] == [%{"host" => "example.com", "http" => %{"paths" => [%{"path" => "*"}]}}]
     end
+
+    test "resolves v1 ingress backend service name and port (service.port.number and service.port.name)" do
+      user = insert(:user)
+      svc = insert(:service, namespace: "ns", read_bindings: [%{user_id: user.id}])
+      insert(:service_component, service: svc, group: "networking.k8s.io", version: "v1", kind: "Ingress", namespace: "ns", name: "ing")
+      expect(Kazan, :run, fn _, _ -> {:ok, ingress_with_v1_backends("ns", "ing")} end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
+      {:ok, %{data: %{"ingress" => ingress}}} = run_query("""
+        query ingress($serviceId: ID!) {
+          ingress(serviceId: $serviceId, namespace: "ns", name: "ing") {
+            spec {
+              rules {
+                host
+                http {
+                  paths {
+                    path
+                    pathType
+                    backend {
+                      serviceName
+                      servicePort
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      """, %{"serviceId" => svc.id}, %{current_user: user})
+
+      paths = ingress["spec"]["rules"] |> List.first() |> get_in(["http", "paths"])
+
+      assert Enum.find(paths, &(&1["path"] == "/ext/kas")) == %{
+               "path" => "/ext/kas",
+               "pathType" => "Prefix",
+               "backend" => %{"serviceName" => "console-kas-service", "servicePort" => "8180"}
+             }
+      assert Enum.find(paths, &(&1["path"] == "/api")) == %{
+               "path" => "/api",
+               "pathType" => "Prefix",
+               "backend" => %{"serviceName" => "console-kas-service", "servicePort" => "8000"}
+             }
+      assert Enum.find(paths, &(&1["path"] == "/ext/ai")) == %{
+               "path" => "/ext/ai",
+               "pathType" => "Prefix",
+               "backend" => %{"serviceName" => "console", "servicePort" => "nexus-http"}
+             }
+      assert Enum.find(paths, &(&1["path"] == "/")) == %{
+               "path" => "/",
+               "pathType" => "Prefix",
+               "backend" => %{"serviceName" => "console", "servicePort" => "http"}
+             }
+    end
   end
 
 

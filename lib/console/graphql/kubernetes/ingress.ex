@@ -39,9 +39,33 @@ defmodule Console.GraphQl.Kubernetes.Ingress do
   end
 
   object :ingress_backend do
-    field :service_name, :string
-    field :service_port, :string
+    field :service_name, :string do
+      resolve fn backend, _, _ ->
+        name =
+          get_in(backend, [:service, :name]) ||
+            Map.get(backend, :service_name)
+        {:ok, name}
+      end
+    end
+
+    field :service_port, :string do
+      resolve fn backend, _, _ ->
+        port =
+          case get_in(backend, [:service, :port]) do
+            port when is_map(port) -> backend_port_to_string(port)
+            _ -> Map.get(backend, :service_port) |> to_string_if_present()
+          end
+        {:ok, port}
+      end
+    end
   end
+
+  defp backend_port_to_string(%{number: n}) when is_integer(n), do: to_string(n)
+  defp backend_port_to_string(%{name: name}) when is_binary(name), do: name
+  defp backend_port_to_string(_), do: nil
+
+  defp to_string_if_present(nil), do: nil
+  defp to_string_if_present(v), do: to_string(v)
 
   object :ingress_tls do
     field :hosts, list_of(:string)
