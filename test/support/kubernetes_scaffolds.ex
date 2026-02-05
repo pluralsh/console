@@ -139,6 +139,32 @@ defmodule KubernetesScaffolds do
     }
   end
 
+  def ingress_with_legacy_backend(namespace, name) do
+    # Legacy/v1beta1 Ingress backend: backend.serviceName, backend.servicePort
+    paths = [
+      %Networking.HTTPIngressPath{
+        path: "/",
+        path_type: "Prefix",
+        backend: %{service_name: "legacy-web-svc", service_port: 8080}
+      }
+    ]
+
+    %Networking.Ingress{
+      api_version: "networking.k8s.io/v1",
+      kind: "Ingress",
+      metadata: %ObjectMeta{name: name, namespace: namespace},
+      status: %Networking.IngressStatus{load_balancer: %{ingress: [%{ip: "1.2.3.4"}]}},
+      spec: %Networking.IngressSpec{
+        rules: [
+          %Networking.IngressRule{
+            host: "example.com",
+            http: %Networking.HTTPIngressRuleValue{paths: paths}
+          }
+        ]
+      }
+    }
+  end
+
   def status() do
     %Kazan.Models.Apimachinery.Meta.V1.Status{
       message: "succeeded",

@@ -372,6 +372,96 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
                "backend" => %{"serviceName" => "console", "servicePort" => "http"}
              }
     end
+
+    test "resolves legacy ingress backend service name (service_name key)" do
+      user = insert(:user)
+      svc = insert(:service, namespace: "ns", read_bindings: [%{user_id: user.id}])
+
+      insert(:service_component,
+        service: svc,
+        group: "networking.k8s.io",
+        version: "v1",
+        kind: "Ingress",
+        namespace: "ns",
+        name: "ing"
+      )
+
+      expect(Kazan, :run, fn _, _ -> {:ok, ingress_with_legacy_backend("ns", "ing")} end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
+      {:ok, %{data: %{"ingress" => ingress}}} =
+        run_query(
+          """
+            query ingress($serviceId: ID!) {
+              ingress(serviceId: $serviceId, namespace: "ns", name: "ing") {
+                spec {
+                  rules {
+                    http {
+                      paths {
+                        path
+                        backend { serviceName servicePort }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
+
+      [path] =
+        ingress["spec"]["rules"]
+        |> List.first()
+        |> get_in(["http", "paths"])
+
+      assert path["backend"]["serviceName"] == "legacy-web-svc"
+      assert path["backend"]["servicePort"] == "8080"
+    end
+
+    test "resolves legacy ingress backend service port (service_port key)" do
+      user = insert(:user)
+      svc = insert(:service, namespace: "ns", read_bindings: [%{user_id: user.id}])
+
+      insert(:service_component,
+        service: svc,
+        group: "networking.k8s.io",
+        version: "v1",
+        kind: "Ingress",
+        namespace: "ns",
+        name: "ing"
+      )
+
+      expect(Kazan, :run, fn _, _ -> {:ok, ingress_with_legacy_backend("ns", "ing")} end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
+      {:ok, %{data: %{"ingress" => ingress}}} =
+        run_query(
+          """
+            query ingress($serviceId: ID!) {
+              ingress(serviceId: $serviceId, namespace: "ns", name: "ing") {
+                spec {
+                  rules {
+                    http {
+                      paths { backend { servicePort } }
+                    }
+                  }
+                }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
+
+      [path] =
+        ingress["spec"]["rules"]
+        |> List.first()
+        |> get_in(["http", "paths"])
+
+      assert path["backend"]["servicePort"] == "8080"
+    end
   end
 
   describe "node" do
