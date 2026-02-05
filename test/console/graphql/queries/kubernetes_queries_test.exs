@@ -158,7 +158,14 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
               deployment(serviceId: $serviceId, namespace: "namespace", name: "name") {
                 spec {
                   replicas
-                  selector
+                  selector {
+                    matchLabels
+                    matchExpressions {
+                      key
+                      operator
+                      values
+                    }
+                  }
                 }
               }
             }
@@ -168,7 +175,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
         )
 
       assert deployment["spec"]["replicas"] == 3
-      assert deployment["spec"]["selector"] == %{"matchLabels" => %{"label" => "value"}}
+      assert deployment["spec"]["selector"] == %{"matchLabels" => %{"label" => "value"}, "matchExpressions" => nil}
     end
   end
 

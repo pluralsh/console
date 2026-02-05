@@ -11526,8 +11526,19 @@ type DeploymentStatus {
 
 type DeploymentSpec {
   replicas: Int
-  selector: Map
+  selector: LabelSelector
   strategy: DeploymentStrategy
+}
+
+type LabelSelector {
+  matchLabels: Map
+  matchExpressions: [LabelSelectorRequirement]
+}
+
+type LabelSelectorRequirement {
+  key: String
+  operator: String
+  values: [String]
 }
 
 type ReplicaSetSpec {

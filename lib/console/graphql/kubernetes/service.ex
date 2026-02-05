@@ -37,16 +37,12 @@ defmodule Console.GraphQl.Kubernetes.Service do
     field(:type, :string)
     field(:cluster_ip, :string)
     field(:session_affinity, :string)
-    field(:selector, :map, resolve: fn spec, _, _ -> {:ok, selector_to_map(spec.selector)} end)
+    field(:selector, :map, resolve: fn
+      %{selector: %{} = selector}, _, _ -> {:ok, Map.new(selector, fn {k, v} -> {to_string(k), to_string(v)} end)}
+      _, _, _ -> {:ok, nil}
+    end)
     field(:ports, list_of(:service_port))
   end
-
-  defp selector_to_map(nil), do: nil
-
-  defp selector_to_map(selector) when is_map(selector),
-    do: Map.new(selector, fn {k, v} -> {to_string(k), to_string(v)} end)
-
-  defp selector_to_map(_), do: nil
 
   object :service_port do
     field(:name, :string)

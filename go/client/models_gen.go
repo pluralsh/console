@@ -3027,7 +3027,7 @@ type DeploymentSettingsAttributes struct {
 
 type DeploymentSpec struct {
 	Replicas *int64              `json:"replicas,omitempty"`
-	Selector map[string]any      `json:"selector,omitempty"`
+	Selector *LabelSelector      `json:"selector,omitempty"`
 	Strategy *DeploymentStrategy `json:"strategy,omitempty"`
 }
 
@@ -4122,6 +4122,17 @@ type LabelInput struct {
 type LabelPair struct {
 	Name  *string `json:"name,omitempty"`
 	Value *string `json:"value,omitempty"`
+}
+
+type LabelSelector struct {
+	MatchLabels      map[string]any              `json:"matchLabels,omitempty"`
+	MatchExpressions []*LabelSelectorRequirement `json:"matchExpressions,omitempty"`
+}
+
+type LabelSelectorRequirement struct {
+	Key      *string   `json:"key,omitempty"`
+	Operator *string   `json:"operator,omitempty"`
+	Values   []*string `json:"values,omitempty"`
 }
 
 type LoadBalancerIngressStatus struct {

@@ -2,7 +2,6 @@ defmodule Console.GraphQl.Kubernetes.Deployment do
   use Console.GraphQl.Schema.Base
   import Console.GraphQl.Kubernetes.Base
   alias Console.GraphQl.Resolvers.Kubernetes
-  alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, LabelSelectorRequirement}
 
   object :deployment do
     field :metadata, non_null(:metadata)
@@ -41,34 +40,20 @@ defmodule Console.GraphQl.Kubernetes.Deployment do
 
   object :deployment_spec do
     field :replicas, :integer
-    field :selector, :map, resolve: fn spec, _, _ -> {:ok, selector_to_map(spec.selector)} end
+    field :selector, :label_selector
     field :strategy, :deployment_strategy
   end
 
-  defp selector_to_map(nil), do: nil
-
-  defp selector_to_map(%LabelSelector{match_labels: labels, match_expressions: exprs}) do
-    %{}
-    |> maybe_put("matchLabels", labels && stringify_keys(labels))
-    |> maybe_put("matchExpressions", exprs && Enum.map(exprs, &requirement_to_map/1))
-    |> case do
-      %{} = m when map_size(m) == 0 -> nil
-      m -> m
-    end
+  object :label_selector do
+    field :match_labels,      :map
+    field :match_expressions, list_of(:label_selector_requirement)
   end
 
-  defp maybe_put(map, _key, nil), do: map
-  defp maybe_put(map, _key, []), do: map
-  defp maybe_put(map, key, value), do: Map.put(map, key, value)
-
-  defp requirement_to_map(%LabelSelectorRequirement{key: key, operator: op, values: values}) do
-    %{"key" => key, "operator" => op}
-    |> maybe_put("values", values)
+  object :label_selector_requirement do
+    field :key, :string
+    field :operator, :string
+    field :values, list_of(:string)
   end
-
-  defp stringify_keys(nil), do: nil
-  defp stringify_keys(map) when is_map(map),
-    do: Map.new(map, fn {k, v} -> {to_string(k), v} end)
 
   object :replica_set_spec do
     field :replicas, :integer

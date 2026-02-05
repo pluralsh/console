@@ -30,18 +30,9 @@ defmodule Console.GraphQl.Kubernetes.Job do
     field :active,          :integer
     field :completion_time, :string
     field :start_time,      :string
-    field :succeeded,      :integer
+    field :succeeded,       :integer
     field :failed,          :integer
-    field :conditions,      list_of(:status_condition), resolve: fn
-      status, _, _ when is_map(status) ->
-        conditions =
-          Map.get(status, :conditions) ||
-            Map.get(status, "conditions") ||
-            []
-        {:ok, List.wrap(conditions)}
-      _, _, _ ->
-        {:ok, []}
-    end
+    field :conditions,      list_of(:status_condition)
   end
 
   object :job_spec do
