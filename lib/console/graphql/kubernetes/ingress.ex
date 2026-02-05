@@ -40,16 +40,20 @@ defmodule Console.GraphQl.Kubernetes.Ingress do
 
   object :ingress_backend do
     field :service_name, :string do
-      resolve(fn
-        %{service: %{name: n}} when is_binary(n) -> {:ok, n}
-        backend -> {:ok, Map.get(backend, :service_name)}
+      resolve(fn backend, _, _ ->
+        case backend do
+          %{service: %{name: n}} when is_binary(n) -> {:ok, n}
+          _ -> {:ok, Map.get(backend, :service_name)}
+        end
       end)
     end
 
     field :service_port, :string do
-      resolve(fn
-        %{service: %{port: p}} when is_map(p) -> {:ok, backend_port_to_string(p)}
-        backend -> {:ok, Map.get(backend, :service_port) |> to_string_if_present()}
+      resolve(fn backend, _, _ ->
+        case backend do
+          %{service: %{port: p}} when is_map(p) -> {:ok, backend_port_to_string(p)}
+          _ -> {:ok, Map.get(backend, :service_port) |> to_string_if_present()}
+        end
       end)
     end
   end
