@@ -137,6 +137,26 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
     job {
         ...JobSpecFragment
     }
+    cases {
+        ...TestCaseConfigurationFragment
+    }
+}
+
+fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfiguration {
+    name
+    type
+    coredns {
+        dialFqdns
+    }
+    loadbalancer {
+        annotations
+        labels
+        namePrefix
+        namespace
+    }
+    raw {
+        yaml
+    }
 }
 
 fragment SentinelCheckLogConfigurationFragment on SentinelCheckLogConfiguration {
