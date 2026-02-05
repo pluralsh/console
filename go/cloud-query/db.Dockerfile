@@ -45,9 +45,9 @@ FROM postgres:${POSTGRES_VERSION}
 ARG POSTGRES_MAJOR_VERSION
 
 # Install CA certificates and upgrade packages to fix CVEs:
-# - openssl: PKCS#7 type confusion DoS
+# - openssl/libssl3t64: PKCS#12 NULL pointer dereference DoS (CVE in PKCS12_item_decrypt_d2i_ex)
 # - gpg: GnuPG out-of-bounds write (CVE in armor_filter, fixed in 2.4.7-21+deb13u1)
-RUN apt-get update && apt-get install -y ca-certificates openssl gpg && rm -rf /var/lib/apt/lists/* \
+RUN apt-get update && apt-get install -y ca-certificates openssl libssl3t64 gpg && rm -rf /var/lib/apt/lists/* \
     && update-ca-certificates
 
 COPY hack/init.sh /usr/local/bin/startup.sh
