@@ -1,13 +1,39 @@
+import { Flex, Table } from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { useOutletContext } from 'react-router-dom'
-import { useTheme } from 'styled-components'
 
 import { isNonNullable } from 'utils/isNonNullable'
 import { ComponentDetailsContext } from '../ComponentDetails'
-import { InfoSection, PaddedCard, PropWideBold } from './common'
+import { InfoSection, InfoSectionH3, PaddedCard, PropWideBold } from './common'
+import { ServicePort } from 'generated/graphql'
+
+const COLUMN_HELPER = createColumnHelper<ServicePort>()
+
+const PORT_COLUMNS = [
+  COLUMN_HELPER.accessor((row) => row.name, {
+    id: 'name',
+    cell: (prop) => prop.getValue() || '-',
+    header: 'Name',
+  }),
+  COLUMN_HELPER.accessor((row) => row.protocol, {
+    id: 'protocol',
+    cell: (prop) => prop.getValue(),
+    header: 'Protocol',
+  }),
+  COLUMN_HELPER.accessor((row) => row.port, {
+    id: 'port',
+    cell: (prop) => prop.getValue(),
+    header: 'Port',
+  }),
+  COLUMN_HELPER.accessor((row) => row.targetPort, {
+    id: 'targetPort',
+    cell: (prop) => prop.getValue(),
+    header: 'Target port',
+  }),
+]
 
 export default function Service() {
-  const theme = useTheme()
   const { componentDetails: service } =
     useOutletContext<ComponentDetailsContext>()
 
@@ -16,10 +42,22 @@ export default function Service() {
   const loadBalancer = service.status?.loadBalancer
   const hasIngress = !!loadBalancer?.ingress && !isEmpty(loadBalancer.ingress)
   const ports = service.spec?.ports?.filter(isNonNullable) ?? []
-  const hasPorts = !isEmpty(ports)
 
   return (
-    <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+    <Flex
+      direction="column"
+      gap="large"
+      grow={1}
+    >
+      {!isEmpty(ports) && (
+        <>
+          <InfoSectionH3>Ports</InfoSectionH3>
+          <Table
+            data={ports}
+            columns={PORT_COLUMNS}
+          />
+        </>
+      )}
       {hasIngress && (
         <InfoSection title="Status">
           <PaddedCard>
@@ -30,31 +68,13 @@ export default function Service() {
         </InfoSection>
       )}
       <InfoSection title="Spec">
-        <PaddedCard css={{ width: '70%' }}>
+        <PaddedCard>
           <PropWideBold title="Type">{service.spec?.type}</PropWideBold>
           <PropWideBold title="Cluster IP">
             {service.spec?.clusterIp || '-'}
           </PropWideBold>
-          {hasPorts && (
-            <InfoSection
-              title="Ports"
-              headerSize={4}
-              css={{
-                marginTop: theme.spacing.medium,
-              }}
-            >
-              {ports.map(({ name, protocol, port, targetPort }, i) => (
-                <PropWideBold
-                  key={i}
-                  title={name || '-'}
-                >
-                  {protocol} {port} → {targetPort}
-                </PropWideBold>
-              ))}
-            </InfoSection>
-          )}
         </PaddedCard>
       </InfoSection>
-    </div>
+    </Flex>
   )
 }
