@@ -53,6 +53,8 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :repository_id, :id, description: "the repository to use for this check"
     field :git,           :git_ref_attributes, description: "the git repository to use for this check"
 
+    field :cases, list_of(:sentinel_check_integration_test_case_attributes), description: "a list of custom test cases to run for this check"
+
 
     field :job,       :gate_job_attributes, description: "the job to run for this check"
     field :distro,    :cluster_distro, description: "the distro to run the check on"
@@ -154,6 +156,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :tags,          :map, description: "the cluster tags to select where to run this job"
     field :format,        non_null(:sentinel_run_job_format), description: "the format of the job"
     field :gotestsum,     :sentinel_check_gotestsum_configuration, description: "the gotestsum configuration to use for this check"
+    field :cases,         list_of(:sentinel_check_integration_test_case_configuration), description: "a list of custom test cases to run for this check"
   end
 
   object :sentinel_check_gotestsum_configuration do

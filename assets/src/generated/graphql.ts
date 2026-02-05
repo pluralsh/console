@@ -11419,8 +11419,85 @@ export type SentinelCheckGotestsumConfiguration = {
   parallel?: Maybe<Scalars['String']['output']>;
 };
 
+export type SentinelCheckIntegrationTestCaseAttributes = {
+  /** the coredns configuration to use for this test case */
+  coredns?: InputMaybe<SentinelCheckIntegrationTestCaseCorednsAttributes>;
+  /** the loadbalancer configuration to use for this test case */
+  loadbalancer?: InputMaybe<SentinelCheckIntegrationTestCaseLoadbalancerAttributes>;
+  /** the name of the test case */
+  name: Scalars['String']['input'];
+  /** the raw configuration to use for this test case */
+  raw?: InputMaybe<SentinelCheckIntegrationTestCaseRawAttributes>;
+  /** the type of test case to run */
+  type: SentinelIntegrationTestCaseType;
+};
+
+export type SentinelCheckIntegrationTestCaseConfiguration = {
+  __typename?: 'SentinelCheckIntegrationTestCaseConfiguration';
+  /** the coredns configuration to use for this test case */
+  coredns?: Maybe<SentinelCheckIntegrationTestCaseCorednsConfiguration>;
+  /** the loadbalancer configuration to use for this test case */
+  loadbalancer?: Maybe<SentinelCheckIntegrationTestCaseLoadbalancerConfiguration>;
+  /** the name of the test case */
+  name: Scalars['String']['output'];
+  /** the raw configuration to use for this test case */
+  raw?: Maybe<SentinelCheckIntegrationTestCaseRawConfiguration>;
+  /** the type of test case to run */
+  type: SentinelIntegrationTestCaseType;
+};
+
+export type SentinelCheckIntegrationTestCaseCorednsAttributes = {
+  /** the fqdns to dial for this test case */
+  dialFqdns?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+/** test internal kubernetes dns resolution */
+export type SentinelCheckIntegrationTestCaseCorednsConfiguration = {
+  __typename?: 'SentinelCheckIntegrationTestCaseCorednsConfiguration';
+  /** the fqdns to dial for this test case */
+  dialFqdns?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
+export type SentinelCheckIntegrationTestCaseLoadbalancerAttributes = {
+  /** the annotations to use for this test case */
+  annotations?: InputMaybe<Scalars['Json']['input']>;
+  /** the labels to use for this test case */
+  labels?: InputMaybe<Scalars['Json']['input']>;
+  /** the name prefix to use for this test case */
+  namePrefix: Scalars['String']['input'];
+  /** the namespace to use for this test case */
+  namespace: Scalars['String']['input'];
+};
+
+/** test provisioning a load balancer service */
+export type SentinelCheckIntegrationTestCaseLoadbalancerConfiguration = {
+  __typename?: 'SentinelCheckIntegrationTestCaseLoadbalancerConfiguration';
+  /** the annotations to use for this test case */
+  annotations?: Maybe<Scalars['Json']['output']>;
+  /** the labels to use for this test case */
+  labels?: Maybe<Scalars['Json']['output']>;
+  /** the name prefix to use for this test case */
+  namePrefix: Scalars['String']['output'];
+  /** the namespace to use for this test case */
+  namespace: Scalars['String']['output'];
+};
+
+export type SentinelCheckIntegrationTestCaseRawAttributes = {
+  /** the yaml to use for this test case */
+  yaml?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** test provisioning a raw resource */
+export type SentinelCheckIntegrationTestCaseRawConfiguration = {
+  __typename?: 'SentinelCheckIntegrationTestCaseRawConfiguration';
+  /** the yaml to use for this test case */
+  yaml?: Maybe<Scalars['String']['output']>;
+};
+
 export type SentinelCheckIntegrationTestConfiguration = {
   __typename?: 'SentinelCheckIntegrationTestConfiguration';
+  /** a list of custom test cases to run for this check */
+  cases?: Maybe<Array<Maybe<SentinelCheckIntegrationTestCaseConfiguration>>>;
   /** the distro to run the check on */
   distro?: Maybe<ClusterDistro>;
   /** the format of the job */
@@ -11438,6 +11515,8 @@ export type SentinelCheckIntegrationTestConfiguration = {
 };
 
 export type SentinelCheckIntegrationTestConfigurationAttributes = {
+  /** a list of custom test cases to run for this check */
+  cases?: InputMaybe<Array<InputMaybe<SentinelCheckIntegrationTestCaseAttributes>>>;
   /** the distro to run the check on */
   distro?: InputMaybe<ClusterDistro>;
   /** the format of the job output */
@@ -11527,6 +11606,12 @@ export type SentinelEdge = {
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<Sentinel>;
 };
+
+export enum SentinelIntegrationTestCaseType {
+  Coredns = 'COREDNS',
+  Loadbalancer = 'LOADBALANCER',
+  Raw = 'RAW'
+}
 
 export type SentinelRun = {
   __typename?: 'SentinelRun';

@@ -1880,6 +1880,12 @@ enum SentinelRunJobFormat {
   JUNIT
 }
 
+enum SentinelIntegrationTestCaseType {
+  COREDNS
+  LOADBALANCER
+  RAW
+}
+
 input SentinelAttributes {
   "the name of the sentinel"
   name: String
@@ -1972,6 +1978,9 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
   "the git repository to use for this check"
   git: GitRefAttributes
 
+  "a list of custom test cases to run for this check"
+  cases: [SentinelCheckIntegrationTestCaseAttributes]
+
   "the job to run for this check"
   job: GateJobAttributes
 
@@ -2005,6 +2014,47 @@ input SentinelCheckGotestsumAttributes {
 
   "the value of the parallel flag for gotestsum"
   parallel: String
+}
+
+input SentinelCheckIntegrationTestCaseAttributes {
+  "the type of test case to run"
+  type: SentinelIntegrationTestCaseType!
+
+  "the name of the test case"
+  name: String!
+
+  "the coredns configuration to use for this test case"
+  coredns: SentinelCheckIntegrationTestCaseCorednsAttributes
+
+  "the loadbalancer configuration to use for this test case"
+  loadbalancer: SentinelCheckIntegrationTestCaseLoadbalancerAttributes
+
+  "the raw configuration to use for this test case"
+  raw: SentinelCheckIntegrationTestCaseRawAttributes
+}
+
+input SentinelCheckIntegrationTestCaseCorednsAttributes {
+  "the fqdns to dial for this test case"
+  dialFqdns: [String]
+}
+
+input SentinelCheckIntegrationTestCaseLoadbalancerAttributes {
+  "the namespace to use for this test case"
+  namespace: String!
+
+  "the name prefix to use for this test case"
+  namePrefix: String!
+
+  "the annotations to use for this test case"
+  annotations: Json
+
+  "the labels to use for this test case"
+  labels: Json
+}
+
+input SentinelCheckIntegrationTestCaseRawAttributes {
+  "the yaml to use for this test case"
+  yaml: String
 }
 
 type Sentinel {
@@ -2132,6 +2182,9 @@ type SentinelCheckIntegrationTestConfiguration {
 
   "the gotestsum configuration to use for this check"
   gotestsum: SentinelCheckGotestsumConfiguration
+
+  "a list of custom test cases to run for this check"
+  cases: [SentinelCheckIntegrationTestCaseConfiguration]
 }
 
 type SentinelCheckGotestsumConfiguration {
@@ -2140,6 +2193,50 @@ type SentinelCheckGotestsumConfiguration {
 
   "the value of the parallel flag for gotestsum"
   parallel: String
+}
+
+type SentinelCheckIntegrationTestCaseConfiguration {
+  "the type of test case to run"
+  type: SentinelIntegrationTestCaseType!
+
+  "the name of the test case"
+  name: String!
+
+  "the coredns configuration to use for this test case"
+  coredns: SentinelCheckIntegrationTestCaseCorednsConfiguration
+
+  "the loadbalancer configuration to use for this test case"
+  loadbalancer: SentinelCheckIntegrationTestCaseLoadbalancerConfiguration
+
+  "the raw configuration to use for this test case"
+  raw: SentinelCheckIntegrationTestCaseRawConfiguration
+}
+
+"test internal kubernetes dns resolution"
+type SentinelCheckIntegrationTestCaseCorednsConfiguration {
+  "the fqdns to dial for this test case"
+  dialFqdns: [String]
+}
+
+"test provisioning a load balancer service"
+type SentinelCheckIntegrationTestCaseLoadbalancerConfiguration {
+  "the namespace to use for this test case"
+  namespace: String!
+
+  "the name prefix to use for this test case"
+  namePrefix: String!
+
+  "the annotations to use for this test case"
+  annotations: Json
+
+  "the labels to use for this test case"
+  labels: Json
+}
+
+"test provisioning a raw resource"
+type SentinelCheckIntegrationTestCaseRawConfiguration {
+  "the yaml to use for this test case"
+  yaml: String
 }
 
 type SentinelRun {
