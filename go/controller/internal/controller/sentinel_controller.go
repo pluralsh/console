@@ -22,6 +22,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/yaml"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 )
@@ -292,6 +293,55 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 					configuration.IntegrationTest.Git = &console.GitRefAttributes{
 						Ref:    check.Configuration.IntegrationTest.Git.Ref,
 						Folder: check.Configuration.IntegrationTest.Git.Folder,
+					}
+				}
+				if len(check.Configuration.IntegrationTest.Cases) > 0 {
+					configuration.IntegrationTest.Cases = make([]*console.SentinelCheckIntegrationTestCaseAttributes, len(check.Configuration.IntegrationTest.Cases))
+					for j, c := range check.Configuration.IntegrationTest.Cases {
+						integrationTestCase := &console.SentinelCheckIntegrationTestCaseAttributes{
+							Type: c.Type,
+							Name: c.Name,
+						}
+						if c.Type == console.SentinelIntegrationTestCaseTypeRaw && c.Raw != nil {
+							var obj runtime.Object
+							if err := runtime.Convert_runtime_RawExtension_To_runtime_Object(c.Raw, &obj, nil); err != nil {
+								return nil, err
+							}
+							rawYaml, err := yaml.Marshal(obj)
+							if err != nil {
+								return nil, err
+							}
+							integrationTestCase.Raw = &console.SentinelCheckIntegrationTestCaseRawAttributes{
+								Yaml: lo.ToPtr(string(rawYaml)),
+							}
+						}
+						if c.Type == console.SentinelIntegrationTestCaseTypeCoredns && c.Coredns != nil {
+							integrationTestCase.Coredns = &console.SentinelCheckIntegrationTestCaseCorednsAttributes{
+								DialFqdns: lo.ToSlicePtr(c.Coredns.DialFqdns),
+							}
+						}
+						if c.Type == console.SentinelIntegrationTestCaseTypeLoadbalancer && c.Loadbalancer != nil {
+							integrationTestCase.Loadbalancer = &console.SentinelCheckIntegrationTestCaseLoadbalancerAttributes{
+								Namespace:  c.Loadbalancer.Namespace,
+								NamePrefix: c.Loadbalancer.NamePrefix,
+							}
+							if len(c.Loadbalancer.Labels) > 0 {
+								jsonLabels, err := json.Marshal(c.Loadbalancer.Labels)
+								if err != nil {
+									return nil, err
+								}
+								integrationTestCase.Loadbalancer.Labels = lo.ToPtr(string(jsonLabels))
+							}
+							if len(c.Loadbalancer.Annotations) > 0 {
+								jsonAnnotations, err := json.Marshal(c.Loadbalancer.Annotations)
+								if err != nil {
+									return nil, err
+								}
+								integrationTestCase.Loadbalancer.Annotations = lo.ToPtr(string(jsonAnnotations))
+							}
+						}
+
+						configuration.IntegrationTest.Cases[j] = integrationTestCase
 					}
 				}
 			}
