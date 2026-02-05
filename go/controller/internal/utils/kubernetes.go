@@ -360,3 +360,37 @@ func TryRemoveOwnerRef(ctx context.Context, client ctrlruntimeclient.Client, own
 		return client.Patch(ctx, controlled, ctrlruntimeclient.MergeFromWithOptions(original, ctrlruntimeclient.MergeFromWithOptimisticLock{}))
 	})
 }
+
+// RemoveOwnerRefsByGVK removes all owner references matching the specified API version and Kind from the object.
+// This modifies the object in-place without patching. The caller is responsible for persisting the changes.
+// This is useful for cleanup when migrating away from owner references for a specific resource type.
+func RemoveOwnerRefsByGVK(obj ctrlruntimeclient.Object, apiVersion, kind string) bool {
+	if obj.GetDeletionTimestamp() != nil {
+		return false
+	}
+
+	ownerRefs := obj.GetOwnerReferences()
+	if len(ownerRefs) == 0 {
+		return false
+	}
+
+	newOwnerRefs := make([]metav1.OwnerReference, 0, len(ownerRefs))
+
+	// Filter out owner references matching the specified API version and Kind
+	for _, ref := range ownerRefs {
+		if ref.APIVersion == apiVersion && ref.Kind == kind {
+			klog.V(log.LogLevelDebug).InfoS("removing owner reference by GVK", "object", obj.GetName(), "kind", ref.Kind, "name", ref.Name)
+			continue
+		}
+		newOwnerRefs = append(newOwnerRefs, ref)
+	}
+
+	// If no changes, return false
+	if len(newOwnerRefs) == len(ownerRefs) {
+		return false
+	}
+
+	obj.SetOwnerReferences(newOwnerRefs)
+	klog.V(log.LogLevelDebug).InfoS("removed owner references by GVK", "object", obj.GetName(), "removed", len(ownerRefs)-len(newOwnerRefs))
+	return true
+}

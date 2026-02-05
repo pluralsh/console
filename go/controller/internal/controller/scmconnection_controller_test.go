@@ -391,6 +391,176 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 	})
 })
 
+var _ = Describe("GitRepository owner reference cleanup", Ordered, func() {
+	Context("when reconciling a resource with GitRepository owner refs", func() {
+		const (
+			scmName    = "scm-with-owner-refs"
+			scmType    = gqlclient.ScmTypeGithub
+			namespace  = "default"
+			id         = "456"
+			sha        = "OFJASGL6S4CGH6LQPLJ4XZZPM6MEAGV3ZZ5UE6GYKYLREJEEAHZA===="
+			secretName = "test-secret-owner-refs"
+		)
+
+		ctx := context.Background()
+
+		typeNamespacedName := types.NamespacedName{
+			Name:      scmName,
+			Namespace: namespace,
+		}
+
+		secretNamespacedName := types.NamespacedName{
+			Name:      secretName,
+			Namespace: namespace,
+		}
+
+		BeforeAll(func() {
+			By("creating the secret")
+			secret := &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      secretName,
+					Namespace: namespace,
+				},
+				StringData: map[string]string{
+					"token": "test-token",
+				},
+			}
+			Expect(k8sClient.Create(ctx, secret)).To(Succeed())
+
+			By("creating the custom resource for the Kind ScmConnection with GitRepository owner refs")
+			scm := &v1alpha1.ScmConnection{}
+			if err := k8sClient.Get(ctx, typeNamespacedName, scm); err == nil {
+				Expect(k8sClient.Delete(ctx, scm)).To(Succeed())
+			}
+			resource := &v1alpha1.ScmConnection{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      scmName,
+					Namespace: namespace,
+					OwnerReferences: []metav1.OwnerReference{
+						{
+							APIVersion: "deployments.plural.sh/v1alpha1",
+							Kind:       "GitRepository",
+							Name:       "test-repo-1",
+							UID:        "11111111-1111-1111-1111-111111111111",
+						},
+						{
+							APIVersion: "deployments.plural.sh/v1alpha1",
+							Kind:       "GitRepository",
+							Name:       "test-repo-2",
+							UID:        "22222222-2222-2222-2222-222222222222",
+						},
+						{
+							APIVersion: "apps/v1",
+							Kind:       "Deployment",
+							Name:       "some-deployment",
+							UID:        "33333333-3333-3333-3333-333333333333",
+						},
+					},
+				},
+				Spec: v1alpha1.ScmConnectionSpec{
+					Name: scmName,
+					Type: scmType,
+					TokenSecretRef: &corev1.SecretReference{
+						Name:      secretName,
+						Namespace: namespace,
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+		})
+
+		AfterAll(func() {
+			secret := &corev1.Secret{}
+			if err := k8sClient.Get(ctx, secretNamespacedName, secret); err == nil {
+				Expect(k8sClient.Delete(ctx, secret)).To(Succeed())
+			}
+
+			scm := &v1alpha1.ScmConnection{}
+			if err := k8sClient.Get(ctx, typeNamespacedName, scm); err == nil {
+				By("Cleanup the specific resource instance ScmConnection")
+				Expect(k8sClient.Delete(ctx, scm)).To(Succeed())
+			}
+		})
+
+		It("should remove GitRepository owner references but keep other owner refs", func() {
+			By("Reconciling the resource")
+			test := struct {
+				returnGetScmConnection *gqlclient.ScmConnectionFragment
+				expectedStatus         v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					ID:  lo.ToPtr(id),
+					SHA: lo.ToPtr(sha),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadonlyConditionType.String(),
+							Message: "",
+						},
+						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionTrue,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "",
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
+					},
+				},
+				returnGetScmConnection: &gqlclient.ScmConnectionFragment{
+					ID: id,
+				},
+			}
+
+			// Verify the SCMConnection has owner references before reconciliation
+			scmBefore := &v1alpha1.ScmConnection{}
+			err := k8sClient.Get(ctx, typeNamespacedName, scmBefore)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(scmBefore.GetOwnerReferences()).To(HaveLen(3))
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetScmConnectionByName", mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, scmName)).Once()
+			fakeConsoleClient.On("IsScmConnectionExists", mock.Anything, mock.Anything).Return(false, nil).Once()
+			fakeConsoleClient.On("CreateScmConnection", mock.Anything, mock.Anything).Return(test.returnGetScmConnection, nil)
+			scmReconciler := &controller.ScmConnectionReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err = scmReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			scm := &v1alpha1.ScmConnection{}
+			err = k8sClient.Get(ctx, typeNamespacedName, scm)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+
+			// Verify that GitRepository owner references were removed
+			ownerRefs := scm.GetOwnerReferences()
+			Expect(ownerRefs).To(HaveLen(1), "Should only have 1 owner reference left (the Deployment)")
+
+			// Verify that non-GitRepository owner reference is still present
+			Expect(ownerRefs[0].Kind).To(Equal("Deployment"))
+			Expect(ownerRefs[0].Name).To(Equal("some-deployment"))
+			Expect(ownerRefs[0].APIVersion).To(Equal("apps/v1"))
+
+			// Verify that GitRepository owner references were actually removed
+			for _, ref := range ownerRefs {
+				Expect(ref.Kind).NotTo(Equal("GitRepository"))
+			}
+		})
+	})
+})
+
 var _ = Describe("waiting for Secret", Ordered, func() {
 	Context("when reconciling a resource", func() {
 		const (
