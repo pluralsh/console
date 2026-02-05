@@ -1896,6 +1896,9 @@ input SentinelAttributes {
   "the git repository to use for this sentinel"
   git: GitRefAttributes
 
+  "the crontab schedule for the sentinel"
+  crontab: String
+
   "the checks to run for this sentinel"
   checks: [SentinelCheckAttributes]
 }
@@ -2016,6 +2019,12 @@ type Sentinel {
 
   "the status of the sentinel's last run"
   status: SentinelRunStatus
+
+  "the crontab schedule for the sentinel"
+  crontab: String
+
+  "the next time this sentinel will run"
+  nextRunAt: DateTime
 
   "the git location for rules files from the associated repository"
   git: GitRef

@@ -163,6 +163,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :enabled,     :boolean, default: false
         field :initialized, :boolean, default: false
         field :store,       VectorStore, default: :elastic
+        field :version,     :integer, default: 1
 
         embeds_one :elastic, Elastic, on_replace: :update
         embeds_one :opensearch, Opensearch, on_replace: :update
@@ -382,7 +383,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp vector_store_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(enabled store)a)
+    |> cast(attrs, ~w(enabled store version)a)
     |> cast_embed(:elastic)
     |> cast_embed(:opensearch)
     |> set_initialized()

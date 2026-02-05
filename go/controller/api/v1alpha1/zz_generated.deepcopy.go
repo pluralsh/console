@@ -7469,6 +7469,11 @@ func (in *SentinelSpec) DeepCopyInto(out *SentinelSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Crontab != nil {
+		in, out := &in.Crontab, &out.Crontab
+		*out = new(string)
+		**out = **in
+	}
 	if in.RepositoryRef != nil {
 		in, out := &in.RepositoryRef, &out.RepositoryRef
 		*out = new(v1.ObjectReference)

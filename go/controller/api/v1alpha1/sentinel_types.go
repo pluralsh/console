@@ -17,6 +17,11 @@ type SentinelSpec struct {
 	// Description provides a human-readable explanation of what this Sentinel.
 	Description *string `json:"description,omitempty"`
 
+	// Crontab defines a schedule at which sentinels will automatically run. Can be left empty to run manually or via the API.
+	// Examples: "0 */6 * * *" (every 6 hours), "*/15 * * * *" (every 15 minutes).
+	// +kubebuilder:validation:Optional
+	Crontab *string `json:"crontab,omitempty"`
+
 	// RepositoryRef references a Git repository.
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`

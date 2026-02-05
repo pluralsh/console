@@ -1,6 +1,6 @@
-defmodule Console.Pipelines.Sentinel.ProducerTest do
+defmodule Console.Pipelines.SentinelRun.ProducerTest do
   use Console.DataCase, async: true
-  alias Console.Pipelines.Sentinel.Producer
+  alias Console.Pipelines.SentinelRun.Producer
 
   describe "poll/1" do
     test "returns a list of unpolled sentinel runs" do

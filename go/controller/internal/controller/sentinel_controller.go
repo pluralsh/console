@@ -167,6 +167,7 @@ func (r *SentinelReconciler) attributes(ctx context.Context, sentinel *v1alpha1.
 	attr := &console.SentinelAttributes{
 		Name:        lo.ToPtr(sentinel.ConsoleName()),
 		Description: sentinel.Spec.Description,
+		Crontab:     sentinel.Spec.Crontab,
 	}
 	if repositoryId != nil {
 		attr.RepositoryID = repositoryId

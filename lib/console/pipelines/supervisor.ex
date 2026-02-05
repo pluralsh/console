@@ -5,6 +5,7 @@ defmodule Console.Pipelines.Supervisor do
     Stack,
     AI,
     Sentinel,
+    SentinelRun,
     Observer,
     PullRequest
   }
@@ -23,6 +24,7 @@ defmodule Console.Pipelines.Supervisor do
       AI.Alert.Producer,
       AI.Stack.Producer,
       Sentinel.Producer,
+      SentinelRun.Producer,
       Observer.Producer,
       PullRequest.Producer,
       {GlobalService.Pipeline, GlobalService.Producer},
@@ -32,6 +34,7 @@ defmodule Console.Pipelines.Supervisor do
       {AI.Alert.Pipeline, AI.Alert.Producer},
       {AI.Stack.Pipeline, AI.Stack.Producer},
       {Sentinel.Pipeline, Sentinel.Producer},
+      {SentinelRun.Pipeline, SentinelRun.Producer},
       {Observer.Pipeline, Observer.Producer},
       {PullRequest.Pipeline, PullRequest.Producer},
     ]

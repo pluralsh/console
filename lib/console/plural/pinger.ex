@@ -51,6 +51,7 @@ defmodule Console.Plural.Pinger do
 
   defp start_timers(%State{poll_timer: nil} = state) do
     Logger.info "Assuming plural ping leadership, pid=#{inspect(self())}"
+    send self(), :poll
     {:ok, ref}  = :timer.send_interval(@resource_interval, :svcs)
     {:ok, pref} = :timer.send_interval(@poll_interval, :poll)
     add_cluster(%{state  | poll_timer: pref, resource_timer: ref})

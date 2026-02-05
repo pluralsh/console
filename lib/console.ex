@@ -5,6 +5,7 @@ defmodule Console do
 
   @type error :: {:error, term}
   @cache Application.compile_env(:console, :cache_adapter)
+  @local_cache Application.compile_env(:console, :local_cache)
 
   def version(), do: conf(:version)
 
@@ -17,11 +18,18 @@ defmodule Console do
   def coalesce(val, _), do: val
 
   def debounce(scope, fun, opts \\ []) do
-    case @cache.get({:plrl_debounce, scope}) do
-      nil ->
-        @cache.put({:plrl_debounce, scope}, opts[:placeholder] || :ok, opts ++ [ttl: @ttl])
-        fun.()
-      res -> res
+    opts = opts ++ [ttl: @ttl]
+    key = {:plrl_debounce, scope}
+    with {:local, nil} <- {:local, @local_cache.get(key)},
+         {:remote, nil} <- {:remote, @cache.get(key)} do
+      @cache.put(key, opts[:placeholder] || :ok, opts)
+      @local_cache.put(key, opts[:placeholder] || :ok, opts)
+      fun.()
+    else
+      {:local, res} -> res
+      {:remote, res} ->
+        @local_cache.put(key, res, opts)
+        res
     end
   end
 

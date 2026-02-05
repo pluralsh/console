@@ -6829,6 +6829,10 @@ type Sentinel struct {
 	Description *string `json:"description,omitempty"`
 	// the status of the sentinel's last run
 	Status *SentinelRunStatus `json:"status,omitempty"`
+	// the crontab schedule for the sentinel
+	Crontab *string `json:"crontab,omitempty"`
+	// the next time this sentinel will run
+	NextRunAt *string `json:"nextRunAt,omitempty"`
 	// the git location for rules files from the associated repository
 	Git *GitRef `json:"git,omitempty"`
 	// the git repository to use for fetching rules files for AI enabled analysis
@@ -6856,6 +6860,8 @@ type SentinelAttributes struct {
 	ProjectID *string `json:"projectId,omitempty"`
 	// the git repository to use for this sentinel
 	Git *GitRefAttributes `json:"git,omitempty"`
+	// the crontab schedule for the sentinel
+	Crontab *string `json:"crontab,omitempty"`
 	// the checks to run for this sentinel
 	Checks []*SentinelCheckAttributes `json:"checks,omitempty"`
 }
