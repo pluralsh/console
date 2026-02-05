@@ -37,20 +37,9 @@ defmodule Console.Schema.GroupMember do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
-    |> validate_uuid(:group_id)
-    |> validate_uuid(:user_id)
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:group_id)
     |> unique_constraint([:group_id, :user_id])
     |> validate_required([:group_id, :user_id])
-  end
-
-  defp validate_uuid(changeset, field) do
-    validate_change(changeset, field, fn _, value ->
-      case Ecto.UUID.cast(value) do
-        {:ok, _} -> []
-        :error -> [{field, "invalid uuid"}]
-      end
-    end)
   end
 end
