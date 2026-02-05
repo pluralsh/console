@@ -58,23 +58,28 @@ export default function Service() {
           />
         </>
       )}
-      {hasIngress && (
-        <InfoSection title="Status">
+      <Flex
+        direction="row"
+        gap="large"
+      >
+        {hasIngress && (
+          <InfoSection title="Status">
+            <PaddedCard>
+              <PropWideBold title="IP">
+                {loadBalancer?.ingress?.[0]?.ip}
+              </PropWideBold>
+            </PaddedCard>
+          </InfoSection>
+        )}
+        <InfoSection title="Spec">
           <PaddedCard>
-            <PropWideBold title="IP">
-              {loadBalancer?.ingress?.[0]?.ip}
+            <PropWideBold title="Type">{service.spec?.type}</PropWideBold>
+            <PropWideBold title="Cluster IP">
+              {service.spec?.clusterIp || '-'}
             </PropWideBold>
           </PaddedCard>
         </InfoSection>
-      )}
-      <InfoSection title="Spec">
-        <PaddedCard>
-          <PropWideBold title="Type">{service.spec?.type}</PropWideBold>
-          <PropWideBold title="Cluster IP">
-            {service.spec?.clusterIp || '-'}
-          </PropWideBold>
-        </PaddedCard>
-      </InfoSection>
+      </Flex>
     </Flex>
   )
 }
