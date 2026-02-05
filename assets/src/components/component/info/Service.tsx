@@ -7,6 +7,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { ComponentDetailsContext } from '../ComponentDetails'
 import { InfoSection, InfoSectionH3, PaddedCard, PropWideBold } from './common'
 import { ServicePort } from 'generated/graphql'
+import { LabelSelector } from 'components/kubernetes/common/LabelSelector'
 
 const COLUMN_HELPER = createColumnHelper<ServicePort>()
 
@@ -43,6 +44,8 @@ export default function Service() {
   const hasIngress = !!loadBalancer?.ingress && !isEmpty(loadBalancer.ingress)
   const ports = service.spec?.ports?.filter(isNonNullable) ?? []
 
+  console.log(service.spec)
+
   return (
     <Flex
       direction="column"
@@ -76,6 +79,16 @@ export default function Service() {
             <PropWideBold title="Type">{service.spec?.type}</PropWideBold>
             <PropWideBold title="Cluster IP">
               {service.spec?.clusterIp || '-'}
+            </PropWideBold>
+            <PropWideBold title="Session Affinity">
+              {service.spec?.sessionAffinity || '-'}
+            </PropWideBold>
+            <PropWideBold title="Selector">
+              <LabelSelector
+                selector={{
+                  matchLabels: service.spec?.selector as Record<string, string>,
+                }}
+              />
             </PropWideBold>
           </PaddedCard>
         </InfoSection>
