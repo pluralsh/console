@@ -6922,6 +6922,77 @@ type SentinelCheckGotestsumConfiguration struct {
 	Parallel *string `json:"parallel,omitempty"`
 }
 
+type SentinelCheckIntegrationTestCaseAttributes struct {
+	// the type of test case to run
+	Type SentinelIntegrationTestCaseType `json:"type"`
+	// the name of the test case
+	Name string `json:"name"`
+	// the coredns configuration to use for this test case
+	Coredns *SentinelCheckIntegrationTestCaseCorednsAttributes `json:"coredns,omitempty"`
+	// the loadbalancer configuration to use for this test case
+	Loadbalancer *SentinelCheckIntegrationTestCaseLoadbalancerAttributes `json:"loadbalancer,omitempty"`
+	// the raw configuration to use for this test case
+	Raw *SentinelCheckIntegrationTestCaseRawAttributes `json:"raw,omitempty"`
+}
+
+type SentinelCheckIntegrationTestCaseConfiguration struct {
+	// the type of test case to run
+	Type SentinelIntegrationTestCaseType `json:"type"`
+	// the name of the test case
+	Name string `json:"name"`
+	// the coredns configuration to use for this test case
+	Coredns *SentinelCheckIntegrationTestCaseCorednsConfiguration `json:"coredns,omitempty"`
+	// the loadbalancer configuration to use for this test case
+	Loadbalancer *SentinelCheckIntegrationTestCaseLoadbalancerConfiguration `json:"loadbalancer,omitempty"`
+	// the raw configuration to use for this test case
+	Raw *SentinelCheckIntegrationTestCaseRawConfiguration `json:"raw,omitempty"`
+}
+
+type SentinelCheckIntegrationTestCaseCorednsAttributes struct {
+	// the fqdns to dial for this test case
+	DialFqdns []*string `json:"dialFqdns,omitempty"`
+}
+
+// test internal kubernetes dns resolution
+type SentinelCheckIntegrationTestCaseCorednsConfiguration struct {
+	// the fqdns to dial for this test case
+	DialFqdns []*string `json:"dialFqdns,omitempty"`
+}
+
+type SentinelCheckIntegrationTestCaseLoadbalancerAttributes struct {
+	// the namespace to use for this test case
+	Namespace string `json:"namespace"`
+	// the name prefix to use for this test case
+	NamePrefix string `json:"namePrefix"`
+	// the annotations to use for this test case
+	Annotations *string `json:"annotations,omitempty"`
+	// the labels to use for this test case
+	Labels *string `json:"labels,omitempty"`
+}
+
+// test provisioning a load balancer service
+type SentinelCheckIntegrationTestCaseLoadbalancerConfiguration struct {
+	// the namespace to use for this test case
+	Namespace string `json:"namespace"`
+	// the name prefix to use for this test case
+	NamePrefix string `json:"namePrefix"`
+	// the annotations to use for this test case
+	Annotations *string `json:"annotations,omitempty"`
+	// the labels to use for this test case
+	Labels *string `json:"labels,omitempty"`
+}
+
+type SentinelCheckIntegrationTestCaseRawAttributes struct {
+	// the yaml to use for this test case
+	Yaml *string `json:"yaml,omitempty"`
+}
+
+// test provisioning a raw resource
+type SentinelCheckIntegrationTestCaseRawConfiguration struct {
+	// the yaml to use for this test case
+	Yaml *string `json:"yaml,omitempty"`
+}
+
 type SentinelCheckIntegrationTestConfiguration struct {
 	// the repository to use for this check
 	RepositoryID *string `json:"repositoryId,omitempty"`
@@ -6937,6 +7008,8 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	Format SentinelRunJobFormat `json:"format"`
 	// the gotestsum configuration to use for this check
 	Gotestsum *SentinelCheckGotestsumConfiguration `json:"gotestsum,omitempty"`
+	// a list of custom test cases to run for this check
+	Cases []*SentinelCheckIntegrationTestCaseConfiguration `json:"cases,omitempty"`
 }
 
 type SentinelCheckIntegrationTestConfigurationAttributes struct {
@@ -6944,6 +7017,8 @@ type SentinelCheckIntegrationTestConfigurationAttributes struct {
 	RepositoryID *string `json:"repositoryId,omitempty"`
 	// the git repository to use for this check
 	Git *GitRefAttributes `json:"git,omitempty"`
+	// a list of custom test cases to run for this check
+	Cases []*SentinelCheckIntegrationTestCaseAttributes `json:"cases,omitempty"`
 	// the job to run for this check
 	Job *GateJobAttributes `json:"job,omitempty"`
 	// the distro to run the check on
@@ -12605,6 +12680,63 @@ func (e *SentinelCheckType) UnmarshalJSON(b []byte) error {
 }
 
 func (e SentinelCheckType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type SentinelIntegrationTestCaseType string
+
+const (
+	SentinelIntegrationTestCaseTypeCoredns      SentinelIntegrationTestCaseType = "COREDNS"
+	SentinelIntegrationTestCaseTypeLoadbalancer SentinelIntegrationTestCaseType = "LOADBALANCER"
+	SentinelIntegrationTestCaseTypeRaw          SentinelIntegrationTestCaseType = "RAW"
+)
+
+var AllSentinelIntegrationTestCaseType = []SentinelIntegrationTestCaseType{
+	SentinelIntegrationTestCaseTypeCoredns,
+	SentinelIntegrationTestCaseTypeLoadbalancer,
+	SentinelIntegrationTestCaseTypeRaw,
+}
+
+func (e SentinelIntegrationTestCaseType) IsValid() bool {
+	switch e {
+	case SentinelIntegrationTestCaseTypeCoredns, SentinelIntegrationTestCaseTypeLoadbalancer, SentinelIntegrationTestCaseTypeRaw:
+		return true
+	}
+	return false
+}
+
+func (e SentinelIntegrationTestCaseType) String() string {
+	return string(e)
+}
+
+func (e *SentinelIntegrationTestCaseType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SentinelIntegrationTestCaseType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SentinelIntegrationTestCaseType", str)
+	}
+	return nil
+}
+
+func (e SentinelIntegrationTestCaseType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SentinelIntegrationTestCaseType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SentinelIntegrationTestCaseType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
