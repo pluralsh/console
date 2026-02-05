@@ -479,8 +479,8 @@ defmodule Console.Services.Users do
     end
   end
 
-  @spec create_group(map) :: group_resp
-  def create_group(attrs) do
+  @spec create_group(map, list(binary) | nil) :: group_resp
+  def create_group(attrs, user_ids \\ nil) do
     start_transaction()
     |> add_operation(:group, fn _ ->
       %Group{}
@@ -489,13 +489,13 @@ defmodule Console.Services.Users do
     end)
     |> add_operation(:members, fn
       %{group: %Group{id: id, global: true}} ->
-        members = Repo.all(User)
-                 |> Enum.map(&timestamped(%{user_id: &1.id, group_id: id}))
-
-        Repo.insert_all(GroupMember, members)
+        Repo.all(User)
+        |> Enum.map(&timestamped(%{user_id: &1.id, group_id: id}))
+        |> then(&Repo.insert_all(GroupMember, &1))
         |> ok()
-      _ -> {:ok, []}
+      %{group: %Group{}} -> {:ok, []}
     end)
+    |> add_user_ids_to_group(user_ids)
     |> execute(extract: :group)
   end
 
@@ -507,9 +507,22 @@ defmodule Console.Services.Users do
 
   @spec update_group(map, binary) :: group_resp
   def update_group(attrs, group_id) do
-    get_group!(group_id)
-    |> Group.changeset(attrs)
-    |> Repo.update()
+    start_transaction()
+    |> add_operation(:group, fn _ ->
+      get_group!(group_id)
+      |> Group.changeset(attrs)
+      |> Repo.update()
+    end)
+    |> add_operation(:members, fn
+      %{group: %Group{id: id, global: true, global_changed: true}} ->
+        User.not_in_group(id)
+        |> Repo.all()
+        |> Enum.map(&timestamped(%{user_id: &1.id, group_id: id}))
+        |> then(&Repo.insert_all(GroupMember, &1))
+        |> ok()
+      _ -> {:ok, []}
+    end)
+    |> execute(extract: :group)
   end
 
   @spec create_group_member(map, binary) :: group_member_resp
@@ -527,6 +540,19 @@ defmodule Console.Services.Users do
     get_group_member!(group_id, user_id)
     |> Repo.delete()
   end
+
+  defp add_user_ids_to_group(transaction, [_ | _] = user_ids) do
+    Enum.reduce(user_ids, transaction, fn user_id, xaction ->
+      add_operation(xaction, {:member, user_id}, fn
+        %{group: %Group{global: true}} -> {:ok, :skipped}
+        %{group: %Group{id: group_id}} ->
+          %GroupMember{}
+          |> GroupMember.changeset(%{user_id: user_id, group_id: group_id})
+          |> Repo.insert()
+      end)
+    end)
+  end
+  defp add_user_ids_to_group(transaction, _), do: transaction
 
   @spec create_user(map, binary | Invite.t) :: user_resp
   def create_user(attrs, %Invite{email: email}),

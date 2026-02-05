@@ -67,6 +67,18 @@ defmodule Console.Schema.User do
     from(u in query, where: u.email in ^emails)
   end
 
+  def with_ids(query \\ __MODULE__, ids) do
+    from(u in query, where: u.id in ^ids)
+  end
+
+  def not_in_group(query \\ __MODULE__, group_id) do
+    from(u in query,
+      left_join: gm in GroupMember,
+        on: gm.user_id == u.id and gm.group_id == ^group_id,
+      where: is_nil(gm.id)
+    )
+  end
+
   def with_chats(query \\ __MODULE__) do
     from(u in query,
       left_join: c in Chat,

@@ -191,6 +191,8 @@ defmodule Console.GraphQl.Resolvers.User do
   def create_invite(%{attributes: attrs}, _),
     do: Users.create_invite(attrs)
 
+  def create_group(%{attributes: attrs, user_ids: user_ids}, _),
+    do: Users.create_group(attrs, user_ids)
   def create_group(%{attributes: attrs}, _),
     do: Users.create_group(attrs)
 

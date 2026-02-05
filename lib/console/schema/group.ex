@@ -7,6 +7,8 @@ defmodule Console.Schema.Group do
     field :description, :string
     field :global,      :boolean
 
+    field :global_changed, :boolean, virtual: true
+
     has_many :members, GroupMember
     has_many :role_bindings, RoleBinding
 
@@ -36,5 +38,6 @@ defmodule Console.Schema.Group do
     |> cast(attrs, @valid)
     |> unique_constraint(:name)
     |> validate_required([:name])
+    |> change_markers(global: :global_changed)
   end
 end
