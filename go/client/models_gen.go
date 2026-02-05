@@ -7543,10 +7543,11 @@ type ServiceSourceAttributes struct {
 }
 
 type ServiceSpec struct {
-	Type      *string        `json:"type,omitempty"`
-	ClusterIP *string        `json:"clusterIp,omitempty"`
-	Selector  map[string]any `json:"selector,omitempty"`
-	Ports     []*ServicePort `json:"ports,omitempty"`
+	Type            *string        `json:"type,omitempty"`
+	ClusterIP       *string        `json:"clusterIp,omitempty"`
+	SessionAffinity *string        `json:"sessionAffinity,omitempty"`
+	Selector        map[string]any `json:"selector,omitempty"`
+	Ports           []*ServicePort `json:"ports,omitempty"`
 }
 
 type ServiceStatus struct {

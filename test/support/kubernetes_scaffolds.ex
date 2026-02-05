@@ -56,11 +56,14 @@ defmodule KubernetesScaffolds do
       metadata: %ObjectMeta{name: name, namespace: namespace},
       status: %Core.ServiceStatus{load_balancer: %{ingress: [%{ip: "1.2.3.4"}]}},
       spec: %Core.ServiceSpec{
-        selector: %{"label" => "value"},
+        selector: %{"label" => "value", "app" => "myapp"},
+        session_affinity: "ClientIP",
         load_balancer_ip: "1.2.3.4",
         cluster_ip: "1.2.3.4",
         type: "LoadBalancer",
-        ports: [%Core.ServicePort{name: "example", protocol: "TCP", port: 8080, target_port: 8080}]
+        ports: [
+          %Core.ServicePort{name: "example", protocol: "TCP", port: 8080, target_port: 8080}
+        ]
       }
     }
   end
@@ -73,12 +76,14 @@ defmodule KubernetesScaffolds do
       status: %Networking.IngressStatus{load_balancer: %{ingress: [%{ip: "1.2.3.4"}]}},
       spec: %Networking.IngressSpec{
         tls: [%Networking.IngressTLS{hosts: ["example.com"]}],
-        rules: [%Networking.IngressRule{
-          host: "example.com",
-          http: %Networking.HTTPIngressRuleValue{
-            paths: [%Networking.HTTPIngressPath{path: "*"}]
+        rules: [
+          %Networking.IngressRule{
+            host: "example.com",
+            http: %Networking.HTTPIngressRuleValue{
+              paths: [%Networking.HTTPIngressPath{path: "*"}]
+            }
           }
-        }]
+        ]
       }
     }
   end
@@ -259,17 +264,19 @@ defmodule KubernetesScaffolds do
       spec: %Kube.Runbook.Spec{
         name: name,
         datasources: datasources,
-        actions: [%Kube.Runbook.Spec.Actions{
-          name: "action",
-          configuration: %Kube.Runbook.Spec.Actions.Configuration{
-            updates: [
-              %Kube.Runbook.Spec.Actions.Configuration.Updates{
-                path: ["some", "path"],
-                value_from: "path"
-              }
-            ]
+        actions: [
+          %Kube.Runbook.Spec.Actions{
+            name: "action",
+            configuration: %Kube.Runbook.Spec.Actions.Configuration{
+              updates: [
+                %Kube.Runbook.Spec.Actions.Configuration.Updates{
+                  path: ["some", "path"],
+                  value_from: "path"
+                }
+              ]
+            }
           }
-        }],
+        ],
         display: """
         <root>
           <box>
@@ -282,17 +289,18 @@ defmodule KubernetesScaffolds do
   end
 
   def runbook_datasource(type, name, opts \\ [])
+
   def runbook_datasource(:prometheus, name, _) do
     %Kube.Runbook.Spec.Datasources{
       name: name,
-      prometheus: %Kube.Runbook.Spec.Datasources.Prometheus{query: "query"},
+      prometheus: %Kube.Runbook.Spec.Datasources.Prometheus{query: "query"}
     }
   end
 
   def runbook_datasource(:kubernetes, name, opts) do
     %Kube.Runbook.Spec.Datasources{
       name: name,
-      kubernetes: struct(Kube.Runbook.Spec.Datasources.Kubernetes, opts),
+      kubernetes: struct(Kube.Runbook.Spec.Datasources.Kubernetes, opts)
     }
   end
 
@@ -306,7 +314,9 @@ defmodule KubernetesScaffolds do
       status: %Kube.License.Status{
         policy: %Kube.License.Status.Policy{
           free: true,
-          features: [%Kube.License.Status.Policy.Features{name: "feature", description: "description"}]
+          features: [
+            %Kube.License.Status.Policy.Features{name: "feature", description: "description"}
+          ]
         }
       }
     }
@@ -315,7 +325,7 @@ defmodule KubernetesScaffolds do
   def configuration_overlay(name, opts \\ []) do
     %Kube.ConfigurationOverlay{
       metadata: %ObjectMeta{name: name, namespace: name},
-      spec: struct(Kube.ConfigurationOverlay.Spec, opts),
+      spec: struct(Kube.ConfigurationOverlay.Spec, opts)
     }
   end
 
@@ -362,7 +372,10 @@ defmodule KubernetesScaffolds do
     %Kube.WireguardPeer{
       metadata: %ObjectMeta{name: name, namespace: "wireguard", annotations: %{}},
       spec: %Kube.WireguardPeer.Spec{wireguard_ref: "wireguard"},
-      status: %Kube.WireguardPeer.Status{ready: true, config_ref: %Kube.WireguardPeer.Status.ConfigRef{name: "n", key: "k"}}
+      status: %Kube.WireguardPeer.Status{
+        ready: true,
+        config_ref: %Kube.WireguardPeer.Status.ConfigRef{name: "n", key: "k"}
+      }
     }
   end
 

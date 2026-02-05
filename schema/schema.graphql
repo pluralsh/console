@@ -11465,6 +11465,7 @@ type LoadBalancerIngressStatus {
 type ServiceSpec {
   type: String
   clusterIp: String
+  sessionAffinity: String
   selector: Map
   ports: [ServicePort]
 }
