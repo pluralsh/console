@@ -71,6 +71,10 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Mark resource as not ready. This will be overridden in the end.
 	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
+	// Cleanup: Remove any GitRepository owner references from this SCMConnection.
+	// This is for backward compatibility as we're moving away from owner references between these resources.
+	utils.RemoveOwnerRefsByGVK(scm, "deployments.plural.sh/v1alpha1", "GitRepository")
+
 	// Handle proper resource deletion via finalizer
 	result, err := r.addOrRemoveFinalizer(ctx, scm)
 	if result != nil {
