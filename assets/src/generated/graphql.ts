@@ -12301,6 +12301,7 @@ export type ServiceUpdateAttributes = {
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   renderers?: InputMaybe<Array<InputMaybe<RendererAttributes>>>;
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
   sources?: InputMaybe<Array<InputMaybe<ServiceSourceAttributes>>>;
   syncConfig?: InputMaybe<SyncConfigAttributes>;
   /** if you should apply liquid templating to raw yaml files, defaults to true */

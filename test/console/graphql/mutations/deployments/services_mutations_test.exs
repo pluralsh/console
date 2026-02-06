@@ -155,6 +155,41 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
              |> Enum.sort() == ["deploy-operator", "rbac"]
     end
 
+    test "updates the service repository" do
+      expect(Console.Features, :available?, fn :cd -> true end)
+      cluster = insert(:cluster)
+      user = admin_user()
+      git = insert(:git_repository)
+      new_git = insert(:git_repository)
+      {:ok, service} = create_service(cluster, user, [
+        name: "test",
+        namespace: "test",
+        git: %{ref: "master", folder: "k8s"},
+        repository_id: git.id,
+        configuration: [%{name: "name", value: "value"}]
+      ])
+
+      {:ok, %{data: %{"updateServiceDeployment" => updated}}} = run_query("""
+        mutation update($id: ID!, $attributes: ServiceUpdateAttributes!) {
+          updateServiceDeployment(id: $id, attributes: $attributes) {
+            name
+            namespace
+            git { ref folder }
+            repository { id }
+          }
+        }
+      """, %{
+        "attributes" => %{
+          "repositoryId" => new_git.id,
+        },
+        "id" => service.id,
+      }, %{current_user: user})
+
+      assert updated["repository"]["id"] == new_git.id
+      assert updated["git"]["ref"] == "master"
+      assert updated["git"]["folder"] == "k8s"
+    end
+
     test "updates the service by handle" do
       cluster = insert(:cluster, handle: "test")
       user = admin_user()

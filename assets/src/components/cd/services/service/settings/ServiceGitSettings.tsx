@@ -2,18 +2,21 @@ import {
   Button,
   Card,
   Flex,
+  FormField,
   Switch,
   usePrevious,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import {
   ServiceUpdateAttributes,
+  useGitRepositoriesQuery,
   useUpdateServiceDeploymentMutation,
 } from 'generated/graphql'
 import { useEffect, useMemo } from 'react'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import styled from 'styled-components'
 import {
+  RepositorySelector,
   ServiceGitFolderField,
   ServiceGitRefField,
 } from '../../deployModal/DeployServiceSettingsGit'
@@ -24,12 +27,23 @@ import {
   getServiceSettingsPath,
   SERVICE_SETTINGS_HELM_REL_PATH,
 } from '../../../../../routes/cdRoutesConsts.tsx'
+import { mapExistingNodes } from 'utils/graphql'
+import { FillLevelDiv } from 'components/utils/FillLevelDiv.tsx'
 
 export function ServiceGitSettings() {
   const { service } = useServiceContext()
   const prevServiceId = usePrevious(service.id)
   const { flowId } = useParams()
   const navigate = useNavigate()
+
+  const { data: reposData } = useGitRepositoriesQuery({
+    variables: { first: 500 },
+    fetchPolicy: 'cache-and-network',
+  })
+  const repos = useMemo(
+    () => mapExistingNodes(reposData?.gitRepositories),
+    [reposData]
+  )
 
   const {
     state,
@@ -40,6 +54,7 @@ export function ServiceGitSettings() {
     protect: !!service.protect,
     gitRef: service.git?.ref,
     gitFolder: service.git?.folder,
+    repositoryId: service.repository?.id ?? '',
   })
 
   useEffect(() => {
@@ -51,8 +66,10 @@ export function ServiceGitSettings() {
       state.gitRef && state.gitFolder
         ? { folder: state.gitFolder, ref: state.gitRef }
         : null
-    let attributes: ServiceUpdateAttributes = { protect: state.protect }
-
+    let attributes: ServiceUpdateAttributes = {
+      protect: state.protect,
+      repositoryId: state.repositoryId,
+    }
     if (git) attributes = { git, ...attributes }
 
     return attributes
@@ -64,11 +81,12 @@ export function ServiceGitSettings() {
       attributes,
     },
     onCompleted: ({ updateServiceDeployment }) => {
-      const { git, protect } = updateServiceDeployment ?? {}
+      const { git, protect, repository } = updateServiceDeployment ?? {}
       updateState({
         protect: !!protect,
         gitRef: git?.ref,
         gitFolder: git?.folder,
+        repositoryId: repository?.id ?? '',
       })
     },
   })
@@ -133,6 +151,15 @@ export function ServiceGitSettings() {
                   updateState({ gitFolder: e.currentTarget.value })
                 }}
               />
+              <FormField label="Git repository">
+                <FillLevelDiv fillLevel={2}>
+                  <RepositorySelector
+                    repositories={repos}
+                    repositoryId={state.repositoryId}
+                    setRepositoryId={(id) => updateState({ repositoryId: id })}
+                  />
+                </FillLevelDiv>
+              </FormField>
             </>
           )}
         </Flex>
