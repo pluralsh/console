@@ -67,8 +67,8 @@ mutation DeleteGroupMember($groupId: ID!, $userId: ID!) {
   }
 }
 
-mutation CreateGroup($attributes: GroupAttributes!) {
-  createGroup(attributes: $attributes) {
+mutation CreateGroup($attributes: GroupAttributes!, $userIds: [ID!]) {
+  createGroup(attributes: $attributes, userIds: $userIds) {
     ...Group
   }
 }

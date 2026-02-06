@@ -1,6 +1,7 @@
 defmodule Console.Services.UsersTest do
   use Console.DataCase, async: true
   alias Console.PubSub
+  alias Console.Schema.User
   alias Console.Services.{Users}
 
   describe "#login_user/2" do
@@ -269,6 +270,60 @@ defmodule Console.Services.UsersTest do
       for user <- users,
         do: assert Users.get_group_member(group.id, user.id)
     end
+
+    test "it can create a group with initial user ids" do
+      users = insert_list(2, :user)
+      other = insert(:user)
+
+      {:ok, group} = Users.create_group(%{name: "with-users"}, Enum.map(users, & &1.id))
+
+      assert group.name == "with-users"
+      for user <- users,
+        do: assert Users.get_group_member(group.id, user.id)
+      refute Users.get_group_member(group.id, other.id)
+    end
+
+    test "it fails if any user id does not exist" do
+      user = insert(:user)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Users.create_group(%{name: "missing"}, [user.id, Ecto.UUID.generate()])
+      end
+
+      refute Users.get_group_by_name("missing")
+    end
+
+    test "it fails if any user id is not a UUID" do
+      user = insert(:user)
+
+      assert_raise Ecto.Query.CastError, fn ->
+        Users.create_group(%{name: "invalid"}, [user.id, "bad"])
+      end
+
+      refute Users.get_group_by_name("invalid")
+    end
+
+    test "it handles empty user_ids list" do
+      {:ok, group} = Users.create_group(%{name: "empty"}, [])
+
+      assert group.name == "empty"
+    end
+
+    test "it handles nil user_ids" do
+      {:ok, group} = Users.create_group(%{name: "nil"}, nil)
+
+      assert group.name == "nil"
+    end
+
+    test "global groups add all users plus any specified user_ids" do
+      users = insert_list(3, :user)
+
+      {:ok, group} = Users.create_group(%{name: "global-with-ids", global: true}, [hd(users).id])
+
+      assert group.global
+      for user <- users,
+        do: assert Users.get_group_member(group.id, user.id)
+    end
   end
 
   describe "#delete_group/2" do
@@ -282,12 +337,59 @@ defmodule Console.Services.UsersTest do
   end
 
   describe "#update_group/2" do
-    test "it can create a new group" do
+    test "it can update a group's name" do
       group = insert(:group)
-      {:ok, del} = Users.update_group(%{name: "update"}, group.id)
+      {:ok, updated} = Users.update_group(%{name: "update"}, group.id)
 
-      assert del.name == "update"
+      assert updated.name == "update"
     end
+
+    test "it adds all users when a group becomes global" do
+      group = insert(:group, global: false)
+      user1 = insert(:user)
+      user2 = insert(:user)
+
+      refute Users.get_group_member(group.id, user1.id)
+      refute Users.get_group_member(group.id, user2.id)
+
+      {:ok, updated} = Users.update_group(%{global: true}, group.id)
+
+      assert updated.global
+      assert Users.get_group_member(group.id, user1.id)
+      assert Users.get_group_member(group.id, user2.id)
+    end
+
+    test "it does not duplicate members when a group with existing members becomes global" do
+      group = insert(:group, global: false)
+      users = insert_list(2, :user)
+      {:ok, _} = Users.create_group_member(%{user_id: hd(users).id}, group.id)
+
+      {:ok, updated} = Users.update_group(%{global: true}, group.id)
+
+      assert updated.global
+      for user <- users,
+        do: assert Users.get_group_member(group.id, user.id)
+
+      member_count = Console.Schema.GroupMember
+                    |> Console.Schema.GroupMember.for_group(group.id)
+                    |> Console.Repo.aggregate(:count)
+      assert member_count == 2
+    end
+
+    test "it does nothing when updating a group that is already global" do
+      users = insert_list(2, :user)
+      {:ok, group} = Users.create_group(%{name: "already-global", global: true})
+
+      for user <- users,
+        do: assert Users.get_group_member(group.id, user.id)
+
+      {:ok, updated} = Users.update_group(%{description: "updated"}, group.id)
+
+      assert updated.description == "updated"
+      assert updated.global
+    end
+
+
   end
 
   describe "#create_group_member/2" do
@@ -298,6 +400,16 @@ defmodule Console.Services.UsersTest do
 
       assert member.user_id == user.id
       assert member.group_id == group.id
+    end
+
+    test "it is idempotent" do
+      group = insert(:group)
+      user = insert(:user)
+
+      {:ok, member1} = Users.create_group_member(%{user_id: user.id}, group.id)
+      {:ok, member2} = Users.create_group_member(%{user_id: user.id}, group.id)
+
+      assert member1.id == member2.id
     end
   end
 
@@ -622,6 +734,31 @@ defmodule Console.Services.UsersTest do
       token = insert(:access_token, user: sa)
 
       {:error, _} = Users.introspect_access_token(token.token, user)
+    end
+  end
+
+  describe "User.not_in_group/1" do
+    test "returns each user at most once when multiple groups exist" do
+      user = insert(:user)
+      {:ok, group1} = Users.create_group(%{name: "g1"}, nil)
+      {:ok, _} = Users.create_group(%{name: "g2"}, nil)
+      {:ok, _} = Users.create_group(%{name: "g3"}, nil)
+
+      result = User.not_in_group(group1.id) |> Repo.all()
+
+      assert length(result) == 1
+      assert hd(result).id == user.id
+    end
+
+    test "returns users who are in other groups but not the given group" do
+      user = insert(:user)
+      insert(:user)
+      {:ok, group1} = Users.create_group(%{name: "g1"}, nil)
+      {:ok, _} = Users.create_group(%{name: "g2"}, [user.id])
+
+      result = User.not_in_group(group1.id) |> Repo.all()
+
+      assert user.id in Enum.map(result, & &1.id)
     end
   end
 end

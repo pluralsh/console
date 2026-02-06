@@ -584,7 +584,12 @@ type RootMutationType {
 
   markRead(type: ReadType): User
 
-  createGroup(attributes: GroupAttributes!): Group
+  createGroup(
+    attributes: GroupAttributes!
+
+    "optional list of user ids to add as initial members"
+    userIds: [ID!]
+  ): Group
 
   deleteGroup(groupId: ID!): Group
 

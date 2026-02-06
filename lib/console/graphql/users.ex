@@ -658,6 +658,7 @@ defmodule Console.GraphQl.Users do
         resource: :user,
         action: :write
       arg :attributes, non_null(:group_attributes)
+      arg :user_ids,   list_of(non_null(:id)), description: "optional list of user ids to add as initial members"
 
       safe_resolve &User.create_group/2
     end

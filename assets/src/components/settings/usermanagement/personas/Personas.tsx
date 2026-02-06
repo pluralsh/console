@@ -1,5 +1,4 @@
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
-import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 import { useContext } from 'react'
 
@@ -29,7 +28,6 @@ export function Personas() {
       </SettingsPageHeader>
 
       <ListWrapperSC>
-        <BillingLegacyUserBanner feature="personas" />
         {isAvailable ? (
           <PersonasList />
         ) : (

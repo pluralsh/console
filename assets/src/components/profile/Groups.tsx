@@ -49,6 +49,7 @@ export function Groups() {
               <Tooltip
                 key={i}
                 label={group?.description}
+                placement="top"
               >
                 <Chip
                   clickable

@@ -1127,10 +1127,10 @@
          "name": "DeleteGroupMember",
          "body": "mutation DeleteGroupMember($groupId: ID!, $userId: ID!) {\n  deleteGroupMember(groupId: $groupId, userId: $userId) {\n    ...GroupMember\n    __typename\n  }\n}\n\nfragment GroupMember on GroupMember {\n  user {\n    ...User\n    __typename\n  }\n  group {\n    ...Group\n    __typename\n  }\n  __typename\n}\n\nfragment User on User {\n  id\n  pluralId\n  name\n  email\n  emailSettings {\n    digest\n    __typename\n  }\n  profile\n  backgroundColor\n  readTimestamp\n  roles {\n    admin\n    __typename\n  }\n  personas {\n    ...Persona\n    __typename\n  }\n  __typename\n}\n\nfragment Persona on Persona {\n  id\n  name\n  description\n  bindings {\n    ...PolicyBinding\n    __typename\n  }\n  configuration {\n    ...PersonaConfiguration\n    __typename\n  }\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}\n\nfragment PersonaConfiguration on PersonaConfiguration {\n  all\n  deployments {\n    addOns\n    clusters\n    pipelines\n    providers\n    repositories\n    services\n    __typename\n  }\n  home {\n    manager\n    security\n    __typename\n  }\n  sidebar {\n    audits\n    kubernetes\n    pullRequests\n    settings\n    backups\n    stacks\n    __typename\n  }\n  services {\n    configuration\n    secrets\n    __typename\n  }\n  ai {\n    pr\n    __typename\n  }\n  __typename\n}\n\nfragment Group on Group {\n  id\n  name\n  description\n  global\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
-      "sha256:4ec0f67a2cdb9d2b01a0eb85829389a5b5a34f6dc883358c396e690ddab5cee7": {
+      "sha256:ca15d3c4ce39147cdfc4689d9585298aa7cd8a7743eb7f22e13b1c428922b70b": {
          "type": "mutation",
          "name": "CreateGroup",
-         "body": "mutation CreateGroup($attributes: GroupAttributes!) {\n  createGroup(attributes: $attributes) {\n    ...Group\n    __typename\n  }\n}\n\nfragment Group on Group {\n  id\n  name\n  description\n  global\n  insertedAt\n  updatedAt\n  __typename\n}"
+         "body": "mutation CreateGroup($attributes: GroupAttributes!, $userIds: [ID!]) {\n  createGroup(attributes: $attributes, userIds: $userIds) {\n    ...Group\n    __typename\n  }\n}\n\nfragment Group on Group {\n  id\n  name\n  description\n  global\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
       "sha256:68f384f6de6390c2fd8e4b424633bb4a5b6b8ddc31fd256d28131e5ca42612ba": {
          "type": "mutation",

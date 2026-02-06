@@ -1,15 +1,17 @@
 import {
-  GroupFragment,
   GroupMemberFragment,
   useDeleteGroupMemberMutation,
   useGroupMembersQuery,
+  UserFragment,
 } from 'generated/graphql'
 import { useMemo } from 'react'
 
 import { mapExistingNodes } from '../../../../utils/graphql'
 
 import {
+  GraphQLToast,
   IconFrame,
+  SemanticColorKey,
   Spinner,
   Table,
   TrashCanIcon,
@@ -20,48 +22,66 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import UserInfo from 'components/utils/UserInfo'
 
-export default function GroupMembers({
-  group,
-  edit = false,
-  skip = false,
+type GroupMembersMeta = {
+  viewOnly?: boolean
+  removeMember: Nullable<(user: UserFragment) => void>
+  popToast?: (name: string, action: string, color: SemanticColorKey) => void
+}
+
+export function GroupMembers({
+  groupId,
+  viewOnly,
+  removeMember,
+  newGroupUsers,
+  popToast,
 }: {
-  group: GroupFragment
-  edit?: boolean
-  skip?: boolean
+  groupId: Nullable<string>
+  viewOnly?: boolean
+  addMember?: (user: UserFragment) => void
+  removeMember?: Nullable<(user: UserFragment) => void>
+  newGroupUsers?: UserFragment[]
+  popToast?: (name: string, action: string, color: SemanticColorKey) => void
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
         queryHook: useGroupMembersQuery,
         keyPath: ['groupMembers'],
-        fetchPolicy: 'network-only',
-        skip,
+        skip: !groupId,
       },
-      { id: group.id }
+      { id: groupId ?? '' }
     )
 
   const members = useMemo(
-    () => mapExistingNodes(data?.groupMembers),
-    [data?.groupMembers]
+    () =>
+      groupId
+        ? mapExistingNodes(data?.groupMembers)
+        : (newGroupUsers?.map((user) => ({ user })) ?? []),
+    [data?.groupMembers, groupId, newGroupUsers]
   )
+  const meta: GroupMembersMeta = {
+    viewOnly,
+    removeMember,
+    popToast,
+  }
 
   if (error) return <GqlError error={error} />
 
   return (
     <Table
-      fullHeightWrap
       hideHeader
-      rowBg="base"
-      fillLevel={2}
+      fullHeightWrap
+      fillLevel={1}
       data={members}
       loading={!data && loading}
+      loadingSkeletonRows={4}
       columns={cols}
-      reactTableOptions={{ meta: { edit } }}
+      reactTableOptions={{ meta }}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
-      emptyStateProps={{ message: 'This group has no members.' }}
+      emptyStateProps={{ message: 'Add members to this group.' }}
     />
   )
 }
@@ -72,12 +92,20 @@ const cols = [
     id: 'user',
     cell: function Cell({ getValue, table: { options } }) {
       const { user, group } = getValue()
-      const edit = options.meta?.edit
-      const [mutation, { loading }] = useDeleteGroupMemberMutation({
+      const { viewOnly, removeMember, popToast } =
+        options.meta as GroupMembersMeta
+      const [mutation, { loading, error }] = useDeleteGroupMemberMutation({
         refetchQueries: ['GroupMembers'],
+        awaitRefetchQueries: true,
+        onCompleted: ({ deleteGroupMember }) =>
+          popToast?.(
+            deleteGroupMember?.user?.name ?? '',
+            'removed',
+            'icon-danger'
+          ),
       })
 
-      if (!user || !group) return null
+      if (!user) return null
 
       return (
         <StretchedFlex>
@@ -85,7 +113,7 @@ const cols = [
             user={user}
             css={{ width: '100%' }}
           />
-          {edit && (
+          {!viewOnly && (
             <IconFrame
               size="medium"
               clickable
@@ -98,10 +126,21 @@ const cols = [
                 </span>
               }
               onClick={() =>
-                mutation({ variables: { groupId: group.id, userId: user.id } })
+                !!removeMember
+                  ? removeMember(user)
+                  : mutation({
+                      variables: { groupId: group?.id ?? '', userId: user.id },
+                    })
               }
             />
           )}
+          <GraphQLToast
+            show={!!error}
+            closeTimeout={6000}
+            error={error}
+            header="Error removing user from group"
+            margin="xxlarge"
+          />
         </StretchedFlex>
       )
     },

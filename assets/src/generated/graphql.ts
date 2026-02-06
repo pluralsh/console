@@ -8452,6 +8452,7 @@ export type RootMutationTypeCreateGlobalServiceArgs = {
 
 export type RootMutationTypeCreateGroupArgs = {
   attributes: GroupAttributes;
+  userIds?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
 
 
@@ -15813,6 +15814,7 @@ export type DeleteGroupMemberMutation = { __typename?: 'RootMutationType', delet
 
 export type CreateGroupMutationVariables = Exact<{
   attributes: GroupAttributes;
+  userIds?: InputMaybe<Array<Scalars['ID']['input']> | Scalars['ID']['input']>;
 }>;
 
 
@@ -30983,8 +30985,8 @@ export type DeleteGroupMemberMutationHookResult = ReturnType<typeof useDeleteGro
 export type DeleteGroupMemberMutationResult = Apollo.MutationResult<DeleteGroupMemberMutation>;
 export type DeleteGroupMemberMutationOptions = Apollo.BaseMutationOptions<DeleteGroupMemberMutation, DeleteGroupMemberMutationVariables>;
 export const CreateGroupDocument = gql`
-    mutation CreateGroup($attributes: GroupAttributes!) {
-  createGroup(attributes: $attributes) {
+    mutation CreateGroup($attributes: GroupAttributes!, $userIds: [ID!]) {
+  createGroup(attributes: $attributes, userIds: $userIds) {
     ...Group
   }
 }
@@ -31005,6 +31007,7 @@ export type CreateGroupMutationFn = Apollo.MutationFunction<CreateGroupMutation,
  * const [createGroupMutation, { data, loading, error }] = useCreateGroupMutation({
  *   variables: {
  *      attributes: // value for 'attributes'
+ *      userIds: // value for 'userIds'
  *   },
  * });
  */
