@@ -6175,6 +6175,8 @@ input ServiceUpdateAttributes {
   "if you should apply liquid templating to raw yaml files, defaults to true"
   templated: Boolean
 
+  repositoryId: ID
+
   git: GitRefAttributes
 
   helm: HelmConfigAttributes

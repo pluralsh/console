@@ -7640,6 +7640,7 @@ type ServiceUpdateAttributes struct {
 	SyncConfig *SyncConfigAttributes `json:"syncConfig,omitempty"`
 	// if you should apply liquid templating to raw yaml files, defaults to true
 	Templated       *bool                          `json:"templated,omitempty"`
+	RepositoryID    *string                        `json:"repositoryId,omitempty"`
 	Git             *GitRefAttributes              `json:"git,omitempty"`
 	Helm            *HelmConfigAttributes          `json:"helm,omitempty"`
 	Configuration   []*ConfigAttributes            `json:"configuration,omitempty"`

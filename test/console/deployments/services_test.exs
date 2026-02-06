@@ -250,6 +250,34 @@ defmodule Console.Deployments.ServicesTest do
       assert second.git.folder == "k8s"
     end
 
+    test "it can update the repository_id of a service" do
+      cluster = insert(:cluster)
+      user = admin_user()
+      git = insert(:git_repository)
+      new_git = insert(:git_repository)
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        repository_id: git.id,
+        git: %{
+          ref: "main",
+          folder: "k8s"
+        },
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      assert service.repository_id == git.id
+
+      {:ok, updated} = Services.update_service(%{
+        repository_id: new_git.id,
+      }, service.id, user)
+
+      assert updated.repository_id == new_git.id
+      assert updated.status == :stale
+    end
+
     test "services still persist correct revisions on sparse updates" do
       cluster = insert(:cluster)
       user = admin_user()
