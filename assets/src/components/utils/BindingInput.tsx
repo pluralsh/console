@@ -111,6 +111,8 @@ export function BindingInput({
   hint,
   placeholder = TEXT[type]?.placeholder,
   label = TEXT[type]?.label,
+  inputProps,
+  icon,
 }: any) {
   const client = useApolloClient()
   const [suggestions, setSuggestions] = useState([])
@@ -121,7 +123,7 @@ export function BindingInput({
       noborder
       placeholder={placeholder}
       hint={hint}
-      icon={type ? ICONS[type] : null}
+      icon={icon || (type ? ICONS[type] : null)}
       label={label}
       width="100%"
       suggestions={suggestions}
@@ -129,6 +131,7 @@ export function BindingInput({
       onRemove={remove}
       onAdd={({ value }) => add(value)}
       onChange={({ target: { value } }) => fetch(client, value, setSuggestions)}
+      inputProps={inputProps}
     />
   )
 }
@@ -146,6 +149,7 @@ function TagInput({
   onAdd,
   width,
   onChange,
+  inputProps,
 }: any) {
   const [inputValue, setInputValue] = useState('')
 
@@ -173,9 +177,7 @@ function TagInput({
             onChange({ target: { value } })
           }}
           startIcon={icon}
-          inputProps={{
-            placeholder,
-          }}
+          inputProps={{ placeholder, ...inputProps }}
         >
           {suggestions.map(({ label }) => label)}
         </ComboBox>

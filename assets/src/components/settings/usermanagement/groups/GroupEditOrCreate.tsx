@@ -10,13 +10,17 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 
 import {
   GroupAttributes,
+  useCreateGroupMemberMutation,
   useCreateGroupMutation,
+  UserFragment,
   useUpdateGroupMutation,
 } from 'generated/graphql'
 
 import { GqlError } from '../../../utils/Alert'
 
+import { useState } from 'react'
 import { useTheme } from 'styled-components'
+import { GroupMembers } from './GroupMembers'
 import { GROUP_CREATE_ID_KEY, GroupEditT } from './Groups'
 
 export function GroupEditOrCreate({
@@ -28,6 +32,8 @@ export function GroupEditOrCreate({
 }) {
   const { colors } = useTheme()
   const isCreating = group === GROUP_CREATE_ID_KEY
+  const [newGroupUsers, setNewGroupUsers] = useState<UserFragment[]>([])
+
   const { state, update, hasUpdates } = useUpdateState(
     isCreating
       ? BLANK_GROUP_ATTRIBUTES
@@ -45,12 +51,31 @@ export function GroupEditOrCreate({
     createGroup,
     { loading: createGroupLoading, error: createGroupError },
   ] = useCreateGroupMutation({
-    variables: { attributes: state },
+    variables: {
+      attributes: state,
+      userIds: newGroupUsers.map((user) => user.id),
+    },
   })
   const [
     updateGroup,
     { loading: updateGroupLoading, error: updateGroupError },
   ] = useUpdateGroupMutation()
+  const [
+    addUserToExistingGroup,
+    // { loading: createGroupMemberLoading, error: createGroupMemberError },
+  ] = useCreateGroupMemberMutation()
+
+  const addMember = (user: UserFragment) =>
+    isCreating
+      ? setNewGroupUsers([...newGroupUsers, user])
+      : addUserToExistingGroup({
+          variables: { groupId: group.id, userId: user.id },
+        })
+
+  const removeMember = isCreating
+    ? (user: UserFragment) =>
+        setNewGroupUsers(newGroupUsers.filter((u) => u.id !== user.id))
+    : undefined
 
   const loading = createGroupLoading || updateGroupLoading
   const error = createGroupError || updateGroupError
@@ -59,6 +84,7 @@ export function GroupEditOrCreate({
     <Flex
       direction="column"
       gap="medium"
+      minHeight={0}
     >
       {error && <GqlError error={error} />}
       <ValidatedInput
@@ -81,7 +107,14 @@ export function GroupEditOrCreate({
       >
         Add all users to this group (also adds future users on account creation)
       </Switch>
-      {!(isCreating && !!global) && <div>users table</div>}
+      {!(isCreating && !!global) && (
+        <GroupMembers
+          groupId={isCreating ? undefined : group.id}
+          addMember={addMember}
+          removeMember={removeMember}
+          newGroupUsers={newGroupUsers}
+        />
+      )}
       <Flex
         gap="medium"
         alignSelf="flex-end"

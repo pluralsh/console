@@ -12,7 +12,7 @@ import { Info } from 'components/utils/Info'
 import { Group, useDeleteGroupMutation } from 'generated/graphql'
 import { useState } from 'react'
 
-import GroupMembers from './GroupMembers'
+import { GroupMembers } from './GroupMembers'
 import { GroupsListMeta } from './GroupsList'
 
 const columnHelper = createColumnHelper<Group>()
@@ -67,8 +67,8 @@ const ColActions = columnHelper.accessor((group) => group, {
             onClose={() => setDialogKey('')}
           >
             <GroupMembers
-              group={group}
-              skip={dialogKey !== 'viewGroup'}
+              viewOnly
+              groupId={group.id}
             />
           </Modal>
         </>
