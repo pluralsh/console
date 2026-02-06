@@ -231,6 +231,7 @@ export function ClusterUpgradePlan() {
         />
         <div css={{ flex: 1 }} />
         <ClusterSelector
+          fillLevel={0}
           allowDeselect={false}
           clusterId={clusterId}
           onClusterChange={(cluster) => {
@@ -267,6 +268,7 @@ export function ClusterUpgradePlan() {
             columns={clusterUpgradeColumns}
             reactTableOptions={{ meta: { refetch, setError } }}
             padding={theme.spacing.medium}
+            overflow="visible"
           />
           {hasBlockingAddons(cluster) && (
             <UpgradesConsolidatedTable
