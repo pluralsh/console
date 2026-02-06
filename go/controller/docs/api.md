@@ -4069,6 +4069,52 @@ _Appears in:_
 | `parallel` _string_ | the value of the parallel flag for gotestsum |  | Optional: \{\} <br /> |
 
 
+#### SentinelCheckIntegrationTestCase
+
+
+
+
+
+
+
+_Appears in:_
+- [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `type` _[SentinelIntegrationTestCaseType](#sentinelintegrationtestcasetype)_ | Type the type of test case to run |  | Enum: [COREDNS LOADBALANCER RAW] <br /> |
+| `name` _string_ | Name the name of the test case |  |  |
+| `coredns` _[SentinelCheckIntegrationTestCaseCoredns](#sentinelcheckintegrationtestcasecoredns)_ | Coredns the coredns configuration to use for this test case |  |  |
+| `loadbalancer` _[SentinelCheckIntegrationTestCaseLoadbalancer](#sentinelcheckintegrationtestcaseloadbalancer)_ | Loadbalancer the load balancer configuration to use for this test case |  |  |
+| `raw` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Raw the raw configuration to use for this test case |  |  |
+
+
+#### SentinelCheckIntegrationTestCaseCoredns
+
+_Underlying type:_ _[struct{DialFqdns []string "json:\"dialFqdns,omitempty\""}](#struct{dialfqdns-[]string-"json:\"dialfqdns,omitempty\""})_
+
+
+
+
+
+_Appears in:_
+- [SentinelCheckIntegrationTestCase](#sentinelcheckintegrationtestcase)
+
+
+
+#### SentinelCheckIntegrationTestCaseLoadbalancer
+
+_Underlying type:_ _[struct{Namespace string "json:\"namespace\""; NamePrefix string "json:\"namePrefix\""; Annotations map[string]string "json:\"annotations,omitempty\""; Labels map[string]string "json:\"labels,omitempty\""}](#struct{namespace-string-"json:\"namespace\"";-nameprefix-string-"json:\"nameprefix\"";-annotations-map[string]string-"json:\"annotations,omitempty\"";-labels-map[string]string-"json:\"labels,omitempty\""})_
+
+
+
+
+
+_Appears in:_
+- [SentinelCheckIntegrationTestCase](#sentinelcheckintegrationtestcase)
+
+
+
 #### SentinelCheckIntegrationTestConfiguration
 
 
@@ -4089,6 +4135,7 @@ _Appears in:_
 | `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  |  |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository to use for this integration test. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | The git location to use for this integration test. |  |  |
+| `cases` _[SentinelCheckIntegrationTestCase](#sentinelcheckintegrationtestcase) array_ |  |  |  |
 
 
 #### SentinelCheckKubernetesConfiguration
