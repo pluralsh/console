@@ -29,7 +29,7 @@ var _ = Describe("Sentinel Controller", Ordered, func() {
 			id          = "123"
 			clusterName = "cluster-test-sentinel"
 			repoName    = "repo-test-sentinel"
-			projectName = "default"
+			projectName = "default-project-sentinel"
 			secretName  = "secret-test-sentinel"
 			repoUrl     = "https://test"
 		)
