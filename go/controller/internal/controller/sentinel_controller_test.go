@@ -27,10 +27,10 @@ var _ = Describe("Sentinel Controller", Ordered, func() {
 			name        = "test"
 			namespace   = "default"
 			id          = "123"
-			clusterName = "cluster-test"
-			repoName    = "repo-test"
+			clusterName = "cluster-test-sentinel"
+			repoName    = "repo-test-sentinel"
 			projectName = "default"
-			secretName  = "secret-test"
+			secretName  = "secret-test-sentinel"
 			repoUrl     = "https://test"
 		)
 
