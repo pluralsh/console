@@ -546,6 +546,7 @@ defmodule Console.Services.Users do
       add_operation(xaction, {:member, user_id}, fn
         %{group: %Group{global: true}} -> {:ok, :skipped}
         %{group: %Group{id: group_id}} ->
+          get_user!(user_id)
           %GroupMember{}
           |> GroupMember.changeset(%{user_id: user_id, group_id: group_id})
           |> Repo.insert()

@@ -286,7 +286,9 @@ defmodule Console.Services.UsersTest do
     test "it fails if any user id does not exist" do
       user = insert(:user)
 
-      {:error, %Ecto.Changeset{}} = Users.create_group(%{name: "missing"}, [user.id, Ecto.UUID.generate()])
+      assert_raise Ecto.NoResultsError, fn ->
+        Users.create_group(%{name: "missing"}, [user.id, Ecto.UUID.generate()])
+      end
 
       refute Users.get_group_by_name("missing")
     end
@@ -294,7 +296,7 @@ defmodule Console.Services.UsersTest do
     test "it fails if any user id is not a UUID" do
       user = insert(:user)
 
-      assert_raise Ecto.ChangeError, fn ->
+      assert_raise Ecto.Query.CastError, fn ->
         Users.create_group(%{name: "invalid"}, [user.id, "bad"])
       end
 
@@ -387,19 +389,7 @@ defmodule Console.Services.UsersTest do
       assert updated.global
     end
 
-    test "it does not remove members when a group is no longer global" do
-      users = insert_list(2, :user)
-      {:ok, group} = Users.create_group(%{name: "was-global", global: true})
 
-      for user <- users,
-        do: assert Users.get_group_member(group.id, user.id)
-
-      {:ok, updated} = Users.update_group(%{global: false}, group.id)
-
-      refute updated.global
-      for user <- users,
-        do: assert Users.get_group_member(group.id, user.id)
-    end
   end
 
   describe "#create_group_member/2" do

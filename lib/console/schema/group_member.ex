@@ -13,9 +13,6 @@ defmodule Console.Schema.GroupMember do
     from(m in query, where: m.group_id == ^group_id)
   end
 
-  def user_ids(query \\ __MODULE__) do
-    from(m in query, select: m.user_id)
-  end
 
   def without_names(query \\ __MODULE__, names) do
     from(m in query,

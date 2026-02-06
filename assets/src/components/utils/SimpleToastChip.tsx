@@ -1,5 +1,6 @@
-import { Chip, ChipProps, usePrevious } from '@pluralsh/design-system'
+import { Chip, ChipProps } from '@pluralsh/design-system'
 import { animated, useTransition } from '@react-spring/web'
+import { useEffect } from 'react'
 import styled from 'styled-components'
 
 export function SimpleToastChip({
@@ -8,11 +9,6 @@ export function SimpleToastChip({
   delayTimeout = 5000,
   ...props
 }: { show: boolean; delayTimeout?: number | 'none' } & ChipProps) {
-  const prevShow = usePrevious(!!show)
-
-  if (!!show && !prevShow && delayTimeout !== 'none')
-    setTimeout(() => onClose?.(), delayTimeout)
-
   const transitions = useTransition(show ? [true] : [], {
     from: { transform: 'translateX(-50%) translateY(100%)' },
     enter: { transform: 'translateX(-50%) translateY(0)' },
@@ -20,6 +16,12 @@ export function SimpleToastChip({
     config: { tension: 300, friction: 20 },
     expires: 0,
   })
+
+  useEffect(() => {
+    if (!show || delayTimeout === 'none') return
+    const timeoutId = setTimeout(() => onClose?.(), delayTimeout)
+    return () => clearTimeout(timeoutId)
+  }, [show, delayTimeout, onClose])
 
   if (!open || !show) return null
 

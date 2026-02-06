@@ -11,38 +11,37 @@ import { mapExistingNodes } from '../../../../utils/graphql'
 import {
   GraphQLToast,
   IconFrame,
-  SearchIcon,
+  SemanticColorKey,
   Spinner,
   Table,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
-import { BindingInput } from 'components/utils/BindingInput'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import UserInfo from 'components/utils/UserInfo'
-import { useTheme } from 'styled-components'
 
 type GroupMembersMeta = {
   viewOnly?: boolean
   removeMember: Nullable<(user: UserFragment) => void>
+  popToast?: (name: string, action: string, color: SemanticColorKey) => void
 }
 
 export function GroupMembers({
   groupId,
   viewOnly,
-  addMember,
   removeMember,
   newGroupUsers,
+  popToast,
 }: {
   groupId: Nullable<string>
   viewOnly?: boolean
   addMember?: (user: UserFragment) => void
   removeMember?: Nullable<(user: UserFragment) => void>
   newGroupUsers?: UserFragment[]
+  popToast?: (name: string, action: string, color: SemanticColorKey) => void
 }) {
-  const { colors } = useTheme()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
@@ -63,37 +62,27 @@ export function GroupMembers({
   const meta: GroupMembersMeta = {
     viewOnly,
     removeMember,
+    popToast,
   }
 
   if (error) return <GqlError error={error} />
 
   return (
-    <>
-      <BindingInput
-        type="user"
-        add={(user) => addMember?.(user)}
-        placeholder="Add a user to group"
-        inputProps={{
-          style: { background: colors['fill-one'] },
-        }}
-        icon={<SearchIcon />}
-      />
-      <Table
-        hideHeader
-        fullHeightWrap
-        fillLevel={1}
-        data={members}
-        loading={!data && loading}
-        loadingSkeletonRows={4}
-        columns={cols}
-        reactTableOptions={{ meta }}
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
-        emptyStateProps={{ message: 'Add members to this group.' }}
-      />
-    </>
+    <Table
+      hideHeader
+      fullHeightWrap
+      fillLevel={1}
+      data={members}
+      loading={!data && loading}
+      loadingSkeletonRows={4}
+      columns={cols}
+      reactTableOptions={{ meta }}
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
+      emptyStateProps={{ message: 'Add members to this group.' }}
+    />
   )
 }
 
@@ -103,10 +92,17 @@ const cols = [
     id: 'user',
     cell: function Cell({ getValue, table: { options } }) {
       const { user, group } = getValue()
-      const { viewOnly, removeMember } = options.meta as GroupMembersMeta
+      const { viewOnly, removeMember, popToast } =
+        options.meta as GroupMembersMeta
       const [mutation, { loading, error }] = useDeleteGroupMemberMutation({
         refetchQueries: ['GroupMembers'],
         awaitRefetchQueries: true,
+        onCompleted: ({ deleteGroupMember }) =>
+          popToast?.(
+            deleteGroupMember?.user?.name ?? '',
+            'removed',
+            'icon-danger'
+          ),
       })
 
       if (!user) return null
