@@ -8,8 +8,40 @@ versions:
   kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
-  summary: null
-  chart_version: 9.4.0
+  summary:
+    helm_changes: ''
+    chart_updates: ['Argo CD 3.3.0 is a new minor release compared to 3.2.1, with
+        a major internal shift toward server-side apply (SSA) support and related
+        migration logic (e.g., client-side apply migration, server-side diffs).',
+      'Install/upgrade guidance now recommends (or requires in some scenarios) `kubectl
+        apply --server-side --force-conflicts`, which hints at increased reliance
+        on SSA semantics and field ownership/managedFields.', 'Large volume of improvements
+        across sync engine behavior (ordering of Namespace/CRD creation, pruning order),
+        cluster cache scalability, UI enhancements, and additional built-in health
+        checks and custom actions.', 'If you are coming from 3.2.1 specifically, note
+        that 3.2.1 was primarily bugfixes (UI null-safety, repo-server git detached
+        concurrency fix) and docs tweaks; the big behavioral changes arrive in 3.3.0.']
+    features: ['Server-Side Apply and Server-Side Diffs: adds SSA manager configuration,
+        SSA support, and server-side diffing to improve accuracy and scalability of
+        diffs.', 'Self-managed Argo CD upgrade improvements: auto-migration logic
+        exists for kubectl client-side apply fields when moving to SSA workflows.',
+      'Sync behavior enhancements: create Namespaces/CRDs earlier (before PreSync),
+        prune in reverse sync-wave order, and new/expanded sync options like ApplyOutOfSyncOnly
+        and Force via annotation.', 'Operational additions: many new/expanded custom
+        actions (e.g., CloudNativePG actions, PR merge action, KEDA pause) and more
+        health checks (Ceph, Crossplane updates, HPA v2, KEDA, ServiceBinding/Instance,
+        etc.).', 'Repo/credentials improvements: GitHub App auth support without installation
+        ID; Redis secret credentials can be provided via volume mounts; shallow clone
+        option for repos.', 'UX/CLI improvements: custom icons support, better sync
+        warnings, richer CLI completion (including PowerShell) and new CLI flags/filters.']
+    breaking_changes: ['If Argo CD manages itself (an Application deploys Argo CD),
+        you must set `ServerSideApply=true` on that Application or the upgrade can
+        fail.', 'In some self-managed setups (notably Kustomize), you may also need
+        `ClientSideApplyMigration=false` to avoid client-side apply migration errors
+        during sync.', 'The move toward SSA/managedFields can change diff/apply behavior
+        (field ownership conflicts, need for `--force-conflicts`), so expect potential
+        one-time reconciliation noise and conflict resolution work during/after upgrade.']
+  chart_version: 9.4.1
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.3.0']
 - version: 3.2.1

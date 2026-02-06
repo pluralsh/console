@@ -4,23 +4,38 @@ release_url: https://github.com/kubescape/helm-charts/releases/tag/kubescape-ope
 helm_repository_url: https://kubescape.github.io/helm-charts
 helm_values: clusterName=example,account=example
 versions:
-- version: 1.30.2
+- version: 1.30.3
   kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
   summary:
-    helm_changes: ''
-    chart_updates: ['1.30.0: Fixed otel-collector deployment to support using an external
-        OTEL URL without requiring a cloud provider configuration.', '1.30.0: Adjusted
-        NetworkPolicies to (a) allow prometheus-exporter egress and storage ingress,
-        and (b) allow Prometheus ServiceMonitor traffic for kubescape.', '1.30.0:
-        Added/introduced an image-based feature (per release note: "Feat/image based").',
-      '1.30.2: No specific chart changes listed in the provided release notes (release
-        page content did not include a "What''s Changed" section in the excerpt).']
-    features: ['1.30.0: Introduced an image-based capability/feature (release note:
-        "Feat/image based").']
-    breaking_changes: []
-  chart_version: 1.30.2
+    helm_changes: "- **New/updated Helm values:**\n  - **Busybox image source is now\
+      \ configurable** (PR #784). If you pin/airgap images, review your values and\
+      \ set the new busybox image/repository override accordingly.\n  - **Startup\
+      \ probe added** (PR #793). Verify any custom `livenessProbe`/`readinessProbe`\
+      \ tuning still makes sense; the new startup probe may change initial rollout\
+      \ timing.\n  - **Kubernetes context tag support** (PR #785). If you rely on\
+      \ tagging/metadata, you may want to set/confirm the new tag value in your values.\n\
+      \n*(No explicit breaking Helm values removals were indicated in the provided\
+      \ notes.)*"
+    chart_updates: ['Adds ability to configure the busybox image source (PR #784).',
+      'Adds a Kubernetes context tag in chart metadata/config (PR #785).', 'Adds a
+        startupProbe to improve pod startup behavior (PR #793).', "Multiple CI/e2e\
+        \ workflow changes (PRs #786-#792, #787-#789, #791) \u2014 should not affect\
+        \ runtime but may affect contributors\u2019 pipelines."]
+    features: ["Configurable busybox image source to better support restricted registries/air\u2011\
+        gapped setups.", Ability to attach a Kubernetes context tag for improved identification/metadata.,
+      Improved startup stability via an added startup probe., 'Node-agent includes
+        a significant rule engine redesign and enhanced runtime-alert enrichment (e.g.,
+        ClusterUID, Azure RG, IsTriggerAlert propagation).', Storage improves handling
+        of large objects by clearing spec and updating annotations.]
+    breaking_changes: ['Potential operational impact: node-agent introduces a redesigned
+        rule engine and sensing changes (replacing host sensor with node-agent sensing).
+        While not explicitly called out as breaking, it can change runtime detection
+        behavior and should be validated in staging.', 'Kubevuln base image moves
+        from Debian 12 to Debian 13, which can affect compliance baselines, CVE profiles,
+        or custom hardening expectations.']
+  chart_version: 1.30.3
   images: []
 - version: 1.30.0
   kube: ['1.35', '1.34', '1.33']
@@ -41,7 +56,18 @@ versions:
   kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Bumps component images/versions across the stack (operator and
+        synchronizer) between chart 1.29.1 and 1.29.12., 'Includes dependency refreshes
+        in operator (armoapi-go, registryx) and synchronizer (jose2go v1.7.0).']
+    features: [No new user-facing features called out in the provided 1.29.12 notes;
+        changes appear to be dependency/version bumps for operator and synchronizer.,
+      'From 1.29.1 notes (baseline), notable functional behavior includes improved
+        handling on startup (process existing APs/SBOMs) and vulnerability scanning
+        behavior (error when severity threshold exceeded), plus node-agent performance/robustness
+        improvements and Prometheus support.']
+    breaking_changes: []
   chart_version: 1.29.12
   images: []
 - version: 1.29.1
