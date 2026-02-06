@@ -5,6 +5,22 @@ helm_repository_url: https://open-policy-agent.github.io/gatekeeper/charts
 chart_name: gatekeeper
 eolApiSlug: gatekeeper
 versions:
+- version: 3.21.1
+  kube: ['1.35', '1.34', '1.33']
+  requirements: []
+  incompatibilities: []
+  summary:
+    helm_changes: ''
+    chart_updates: [Adds a timeout enforcement for External Data provider requests
+        (bug fix)., "Dependency/security bumps: containerd 1.7.28\u21921.7.29, golang.org/x/crypto\
+        \ 0.43.0\u21920.45.0, kubectl bumped to resolve a CVE, and Go toolchain bump\
+        \ (commit 7534a62\u219204741b0)."]
+    features: [No new user-facing features in 3.21.1; it is primarily a bugfix and
+        dependency/security update release.]
+    breaking_changes: [No breaking changes called out in the 3.21.1 application release
+        notes compared to 3.21.0.]
+  chart_version: 3.21.1
+  images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.21.1', 'openpolicyagent/gatekeeper:v3.21.1']
 - version: 3.21.0
   kube: ['1.34', '1.33', '1.32']
   requirements: []

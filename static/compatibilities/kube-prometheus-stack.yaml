@@ -10,7 +10,13 @@ versions:
     '1.25']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['81.4.2: Patch job now handles `IgnoreOnInstallOnly` `failurePolicy`
+        correctly (fix in admission/patching logic).', '81.5.0: Bumps kube-prometheus-stack
+        chart dependencies with non-major updates (Renovate).']
+    features: []
+    breaking_changes: []
   chart_version: 81.5.0
   images: ['docker.io/bats/bats:v1.4.1', 'docker.io/grafana/grafana:12.3.1', 'ghcr.io/jkroepke/kube-webhook-certgen:1.7.4',
     'quay.io/kiwigrid/k8s-sidecar:2.5.0', 'quay.io/prometheus-operator/prometheus-operator:v0.88.1',
