@@ -1,47 +1,54 @@
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
-import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
-import { useContext, useState } from 'react'
+import { use, useState } from 'react'
 
-import { Input, SearchIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
-
-import { SettingsPageHeader } from 'components/settings/Settings'
+import { Button, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { getUserManagementBreadcrumbs } from '../UserManagement'
 
-import { ListWrapperSC } from '../users/UsersList'
-
-import GroupCreate from './GroupCreate'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { Body1P } from 'components/utils/typography/Text'
+import styled from 'styled-components'
 import { GroupsList } from './GroupsList'
+import { GroupFragment } from 'generated/graphql'
+import { GroupEditOrCreate } from './GroupEditOrCreate'
 
-export const GROUPS_QUERY_PAGE_SIZE = 100
+export const GROUP_CREATE_ID_KEY = 'create-group' as const
+export type GroupEditT = GroupFragment | typeof GROUP_CREATE_ID_KEY
 
 const breadcrumbs = getUserManagementBreadcrumbs('groups')
 
 export function Groups() {
-  const [q, setQ] = useState('')
-  const { availableFeatures } = useContext(SubscriptionContext)
+  const { availableFeatures } = use(SubscriptionContext)
+
+  const [groupEdit, setGroupEdit] = useState<Nullable<GroupEditT>>(null)
+
   const isAvailable = !!availableFeatures?.userManagement
 
   useSetBreadcrumbs(breadcrumbs)
 
+  if (groupEdit)
+    return (
+      <GroupEditOrCreate
+        group={groupEdit}
+        setGroupEdit={setGroupEdit}
+      />
+    )
   return (
-    <>
-      <SettingsPageHeader heading="Groups">
-        <GroupCreate q={q} />
-      </SettingsPageHeader>
-      <BillingLegacyUserBanner feature="groups" />
+    <WrapperSC>
+      <StretchedFlex>
+        <Body1P $color="text-light">
+          Create and manage permission groups.
+        </Body1P>
+        <Button
+          floating
+          onClick={() => setGroupEdit(GROUP_CREATE_ID_KEY)}
+        >
+          Create group
+        </Button>
+      </StretchedFlex>
       {isAvailable ? (
-        <ListWrapperSC>
-          <Input
-            value={q}
-            placeholder="Search a group"
-            startIcon={<SearchIcon color="text-light" />}
-            onChange={({ target: { value } }) => setQ(value)}
-            backgroundColor="fill-one"
-          />
-          <GroupsList q={q} />
-        </ListWrapperSC>
+        <GroupsList setGroupEdit={setGroupEdit} />
       ) : (
         <BillingFeatureBlockBanner
           feature="groups"
@@ -49,6 +56,14 @@ export function Groups() {
           placeholderImageURL="/placeholder-groups.png"
         />
       )}
-    </>
+    </WrapperSC>
   )
 }
+
+const WrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  minHeight: 0,
+  height: '100%',
+}))

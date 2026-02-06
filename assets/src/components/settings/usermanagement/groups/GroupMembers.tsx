@@ -31,12 +31,7 @@ export default function GroupMembers({
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      {
-        queryHook: useGroupMembersQuery,
-        keyPath: ['groupMembers'],
-        fetchPolicy: 'network-only',
-        skip,
-      },
+      { queryHook: useGroupMembersQuery, keyPath: ['groupMembers'], skip },
       { id: group.id }
     )
 
@@ -49,12 +44,13 @@ export default function GroupMembers({
 
   return (
     <Table
-      fullHeightWrap
       hideHeader
+      fullHeightWrap
       rowBg="base"
       fillLevel={2}
       data={members}
       loading={!data && loading}
+      loadingSkeletonRows={4}
       columns={cols}
       reactTableOptions={{ meta: { edit } }}
       hasNextPage={pageInfo?.hasNextPage}

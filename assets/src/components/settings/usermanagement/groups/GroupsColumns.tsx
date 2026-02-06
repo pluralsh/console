@@ -1,26 +1,19 @@
 import {
-  Button,
-  GearTrainIcon,
+  EyeIcon,
+  Flex,
   IconFrame,
-  PeopleIcon,
+  Modal,
+  PencilIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Confirm } from 'components/utils/Confirm'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 import { Info } from 'components/utils/Info'
-import {
-  Group,
-  GroupsDocument,
-  useDeleteGroupMutation,
-} from 'generated/graphql'
+import { Group, useDeleteGroupMutation } from 'generated/graphql'
 import { useState } from 'react'
-import { useTheme } from 'styled-components'
 
-import { removeConnection, updateCache } from 'utils/graphql'
-
-import { EditGroupAttributes, EditGroupMembers } from './GroupEdit'
-import GroupView from './GroupView'
-import { GROUPS_QUERY_PAGE_SIZE } from './Groups'
+import GroupMembers from './GroupMembers'
+import { GroupsListMeta } from './GroupsList'
 
 const columnHelper = createColumnHelper<Group>()
 const ColGroupInfo = columnHelper.accessor((group) => group, {
@@ -38,62 +31,60 @@ const ColGroupInfo = columnHelper.accessor((group) => group, {
   },
 })
 
-const ColEditableActions = columnHelper.accessor((group) => group, {
+const ColActions = columnHelper.accessor((group) => group, {
   id: 'actions',
-  meta: { gridTemplate: 'auto' },
-  cell: function Cell({ getValue, table }) {
+  cell: function Cell({ getValue, table: { options } }) {
     const group = getValue()
-
-    const theme = useTheme()
+    const { editable, setGroupDeletedToast, setGroupEdit } =
+      options.meta as GroupsListMeta
     const [dialogKey, setDialogKey] = useState<
-      'confirmDelete' | 'editAttrs' | 'editMembers' | ''
+      'viewGroup' | 'confirmDelete' | ''
     >('')
 
     const [mutation, { loading, error }] = useDeleteGroupMutation({
       variables: { id: group.id },
-      onCompleted: () => dialogKey === 'confirmDelete' && setDialogKey(''),
-      update: (cache, { data }) =>
-        updateCache(cache, {
-          query: GroupsDocument,
-          variables: {
-            q: table.options.meta?.q,
-            first: GROUPS_QUERY_PAGE_SIZE,
-          },
-          update: (prev) => removeConnection(prev, data?.deleteGroup, 'groups'),
-        }),
+      onCompleted: () => {
+        setGroupDeletedToast(true, group.name)
+        setDialogKey('')
+      },
+      refetchQueries: ['Groups'],
+      awaitRefetchQueries: true,
     })
+
+    if (!editable)
+      return (
+        <>
+          <IconFrame
+            clickable
+            size="medium"
+            onClick={() => setDialogKey('viewGroup')}
+            tooltip="View group"
+            icon={<EyeIcon />}
+          />
+          <Modal
+            header={group.name}
+            open={dialogKey === 'viewGroup'}
+            onClose={() => setDialogKey('')}
+          >
+            <GroupMembers
+              group={group}
+              skip={dialogKey !== 'viewGroup'}
+            />
+          </Modal>
+        </>
+      )
 
     return (
       <>
-        <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+        <Flex gap="xsmall">
           <IconFrame
             clickable
-            size="medium"
-            onClick={() => dialogKey === '' && setDialogKey('editAttrs')}
-            tooltip="Edit attributes"
-            icon={<GearTrainIcon />}
+            tooltip="Edit group settings"
+            icon={<PencilIcon />}
+            onClick={() => setGroupEdit(group)}
           />
-          <IconFrame
-            clickable
-            size="medium"
-            onClick={() => dialogKey === '' && setDialogKey('editMembers')}
-            tooltip="Edit members"
-            icon={<PeopleIcon />}
-          />
-          <DeleteIconButton
-            onClick={() => dialogKey === '' && setDialogKey('confirmDelete')}
-          />
-        </div>
-        <EditGroupAttributes
-          group={group}
-          open={dialogKey === 'editAttrs'}
-          onClose={() => dialogKey === 'editAttrs' && setDialogKey('')}
-        />
-        <EditGroupMembers
-          group={group}
-          open={dialogKey === 'editMembers'}
-          onClose={() => dialogKey === 'editMembers' && setDialogKey('')}
-        />
+          <DeleteIconButton onClick={() => setDialogKey('confirmDelete')} />
+        </Flex>
         <Confirm
           open={dialogKey === 'confirmDelete'}
           text={
@@ -103,7 +94,7 @@ const ColEditableActions = columnHelper.accessor((group) => group, {
               their roles.
             </>
           }
-          close={() => dialogKey === 'confirmDelete' && setDialogKey('')}
+          close={() => setDialogKey('')}
           label="Delete group"
           submit={() => mutation()}
           loading={loading}
@@ -115,31 +106,4 @@ const ColEditableActions = columnHelper.accessor((group) => group, {
   },
 })
 
-const ColViewActions = columnHelper.accessor((group) => group, {
-  id: 'actions',
-  meta: { gridTemplate: 'auto' },
-  cell: function Cell({ getValue }) {
-    const group = getValue()
-    const [dialogKey, setDialogKey] = useState<'viewGroup' | ''>('')
-
-    return (
-      <>
-        <Button
-          secondary
-          small
-          onClick={() => dialogKey === '' && setDialogKey('viewGroup')}
-        >
-          View
-        </Button>
-        <GroupView
-          open={dialogKey === 'viewGroup'}
-          onClose={() => dialogKey === 'viewGroup' && setDialogKey('')}
-          group={group}
-        />
-      </>
-    )
-  },
-})
-
-export const groupsColsEditable = [ColGroupInfo, ColEditableActions]
-export const groupsColsView = [ColGroupInfo, ColViewActions]
+export const groupsCols = [ColGroupInfo, ColActions]

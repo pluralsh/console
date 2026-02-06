@@ -495,7 +495,7 @@ defmodule Console.Services.Users do
         |> ok()
       %{group: %Group{}} -> {:ok, []}
     end)
-    |> add_user_ids_to_group(user_ids)
+    |> add_user_ids_to_new_group(user_ids)
     |> execute(extract: :group)
   end
 
@@ -541,7 +541,7 @@ defmodule Console.Services.Users do
     |> Repo.delete()
   end
 
-  defp add_user_ids_to_group(transaction, [_ | _] = user_ids) do
+  defp add_user_ids_to_new_group(transaction, [_ | _] = user_ids) do
     Enum.reduce(user_ids, transaction, fn user_id, xaction ->
       add_operation(xaction, {:member, user_id}, fn
         %{group: %Group{global: true}} -> {:ok, :skipped}
@@ -552,7 +552,7 @@ defmodule Console.Services.Users do
       end)
     end)
   end
-  defp add_user_ids_to_group(transaction, _), do: transaction
+  defp add_user_ids_to_new_group(transaction, _), do: transaction
 
   @spec create_user(map, binary | Invite.t) :: user_resp
   def create_user(attrs, %Invite{email: email}),
