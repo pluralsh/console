@@ -4,7 +4,7 @@ release_url: https://github.com/argoproj/argo-rollouts/releases/tag/v{vsn}
 helm_repository_url: https://argoproj.github.io/argo-helm
 versions:
 - version: 1.8.3
-  kube: ['1.33', '1.32', '1.31']
+  kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary:
@@ -27,16 +27,9 @@ versions:
         new Prometheus `build_info` metric is emitted.']
     breaking_changes: []
   chart_version: 2.40.5
-  images: []
-- version: 1.8.2
-  kube: ['1.33', '1.32', '1.31']
-  requirements: []
-  incompatibilities: []
-  summary: null
-  chart_version: 2.39.5
-  images: []
+  images: ['quay.io/argoproj/argo-rollouts:v1.8.3']
 - version: 1.8.0
-  kube: ['1.32', '1.31', '1.30']
+  kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary:
@@ -55,23 +48,9 @@ versions:
         adds a new Prometheus build_info metric to expose version/build metadata.']
     breaking_changes: []
   chart_version: 2.39.1
-  images: []
-- version: 1.7.2
-  kube: ['1.32', '1.31', '1.30']
-  requirements: []
-  incompatibilities: []
-  summary: null
-  chart_version: 2.38.2
-  images: []
-- version: 1.7.1
-  kube: ['1.31', '1.30', '1.29']
-  requirements: []
-  incompatibilities: []
-  summary: null
-  chart_version: 2.37.4
-  images: []
+  images: ['quay.io/argoproj/argo-rollouts:v1.8.0']
 - version: 1.7.0
-  kube: ['1.30', '1.29', '1.28']
+  kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary:
@@ -91,23 +70,9 @@ versions:
         configuration fields against your current manifests because several ALB-related
         behaviors changed in 1.7.0.']
   chart_version: 2.36.2
-  images: []
-- version: 1.6.6
-  kube: ['1.30', '1.29', '1.28']
-  requirements: []
-  incompatibilities: []
-  summary: null
-  chart_version: 2.35.3
-  images: []
-- version: 1.6.4
-  kube: ['1.29', '1.28', '1.27']
-  requirements: []
-  incompatibilities: []
-  summary: null
-  chart_version: 2.34.1
-  images: []
+  images: ['quay.io/argoproj/argo-rollouts:v1.7.0']
 - version: 1.6.0
-  kube: ['1.28', '1.27', '1.26']
+  kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary:
@@ -131,42 +96,35 @@ versions:
         if you use trafficrouter plugins (or custom plugins), verify plugin names/identifiers
         and update any references accordingly.']
   chart_version: 2.32.2
-  images: []
-- version: 1.5.1
-  kube: ['1.28', '1.27', '1.26']
-  requirements: []
-  incompatibilities: []
-  summary: null
-  chart_version: 2.31.6
-  images: []
+  images: ['quay.io/argoproj/argo-rollouts:v1.6.0']
 - version: 1.5.0
-  kube: ['1.27', '1.26', '1.25']
+  kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 2.31.0
-  images: []
-- version: 1.4.1
-  kube: ['1.27', '1.26', '1.25']
-  requirements: []
-  incompatibilities: []
-  summary: null
-  chart_version: 2.27.0
-  images: []
+  images: ['quay.io/argoproj/argo-rollouts:v1.5.0']
 - version: 1.4.0
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.34', '1.33', '1.32', '1.31']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 2.22.2
-  images: []
+  images: ['quay.io/argoproj/argo-rollouts:v1.4.0']
+- version: 1.3.1
+  kube: ['1.34', '1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 2.21.3
+  images: ['quay.io/argoproj/argo-rollouts:v1.3.1']
 - version: 1.3.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 2.21.0
-  images: []
+  images: ['quay.io/argoproj/argo-rollouts:v1.3.0']
 - version: 1.2.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
@@ -199,39 +157,39 @@ versions:
         release notes). This can change how many pods are created at each step compared
         to v1.1, so watch capacity and rollout pacing during the first upgrades.']
   chart_version: 2.19.0
-  images: []
+  images: ['quay.io/argoproj/argo-rollouts:v1.2.0']
 - version: 1.1.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 2.8.0
-  images: []
+  images: ['quay.io/argoproj/argo-rollouts:v1.1.0']
 - version: 1.0.1
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.0.1
-  images: []
+  images: ['quay.io/argoproj/argo-rollouts:v1.0.1']
 - version: 0.10.2
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.5.5
-  images: []
+  images: ['argoproj/argo-rollouts:v0.10.2']
 - version: 0.9.1
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.3.10
-  images: []
+  images: ['argoproj/argo-rollouts:v0.9.1']
 - version: 0.8.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 0.3.3
-  images: []
+  images: ['argoproj/argo-rollouts:v0.8.0']

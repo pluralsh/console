@@ -169,7 +169,13 @@ def get_chart_images(url, chart, version, values=None):
     # Add repo with a temp name
     oci_repo = url.startswith("oci://")
     if (chart, url) not in IMPORTED_REPOS and not oci_repo:
-        subprocess.run(["helm", "repo", "add", chart, url, "--force-update"], check=True)
+        try:
+            subprocess.run(["helm", "repo", "add", chart, url, "--force-update"], check=True)
+        except subprocess.CalledProcessError:
+            subprocess.run(
+                ["helm", "repo", "add", chart, url, "--force-update", "--insecure-skip-tls-verify"],
+                check=True,
+            )
         subprocess.run(["helm", "repo", "update"], check=True)
         IMPORTED_REPOS.add((chart, url))
     cmd = ["helm", "template", f"{chart}/{chart}", "--version", version, "--kube-version", current_kube_version()]
@@ -226,7 +232,10 @@ def find_nested_images(objs: Any) -> List[str]:
         if isinstance(x, dict):
             for k, v in x.items():
                 if k == "image":
-                    images.add(v)
+                    if isinstance(v, str) and _looks_like_image(v):
+                        images.add(v)
+                    else:
+                        walk(v)
                     continue
                 walk(v)
 
