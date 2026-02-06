@@ -1,13 +1,5 @@
 import { keyframes } from '@emotion/react'
-import {
-  Div,
-  type DivProps,
-  Flex,
-  H1,
-  Img,
-  type ImgProps,
-  Span,
-} from 'honorable'
+import { Div, type DivProps, Flex, Img, type ImgProps } from 'honorable'
 import {
   type ReactNode,
   useCallback,
@@ -61,18 +53,6 @@ const logoEnterStyles = {
   },
   '.enter-active &': {
     transition: 'all 0.3s cubic-bezier(.37,1.4,.62,1)',
-  },
-}
-
-const textEnterStyles = {
-  '.enter &': {
-    opacity: 0,
-  },
-  '.enter-active &, .enter-done &': {
-    opacity: 1,
-  },
-  '.enter-active &': {
-    transition: 'all 0.3s ease',
   },
 }
 
@@ -318,19 +298,6 @@ function LoadingSpinner({
             <ScrollingBGImage height={spinnerWidth} />
           </Flex>
         </Div>
-        <H1
-          body1
-          bold
-          color="text"
-          marginTop="large"
-          textAlign="center"
-          {...textEnterStyles}
-        >
-          Loading Plural
-          <Span opacity={tickCount >= 1 ? 1 : 0}>.</Span>
-          <Span opacity={tickCount >= 2 ? 1 : 0}>.</Span>
-          <Span opacity={tickCount >= 3 ? 1 : 0}>.</Span>
-        </H1>
       </Wrapper>
     </CSSTransition>
   )

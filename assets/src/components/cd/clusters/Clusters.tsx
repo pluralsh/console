@@ -347,7 +347,6 @@ export function ClustersTable({
         open={isNonNullable(selectedCluster)}
         onClose={() => setSelectedCluster(null)}
         cluster={selectedCluster}
-        refetch={refetch}
         initialTab={flyoverTab}
       />
     </>

@@ -6,6 +6,7 @@ import CopyButton from 'components/utils/CopyButton'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { Body2P } from 'components/utils/typography/Text'
+import ejs from 'ejs'
 import {
   AddonVersionSummaryFragment,
   CloudAddonFragment,
@@ -15,7 +16,6 @@ import {
   RuntimeAddon,
   RuntimeAddonUpgradeFragment,
 } from 'generated/graphql'
-import ejs from 'ejs'
 import { isEmpty } from 'lodash'
 import { ReactNode, useMemo } from 'react'
 import { Link } from 'react-router-dom'
@@ -114,7 +114,6 @@ export function UpgradesConsolidatedTable({
 
   return (
     <Table
-      fullHeightWrap
       data={data}
       columns={cols}
       reactTableOptions={reactTableOptions}
@@ -125,6 +124,7 @@ export function UpgradesConsolidatedTable({
         <UpgradesConsolidatedTableExpander row={row} />
       )}
       expandedRowType="custom"
+      maxHeight={330}
     />
   )
 }

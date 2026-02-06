@@ -83,9 +83,11 @@ import ComponentDryRun from '../components/component/ComponentDryRun'
 
 import { ClusterAlerts } from 'components/cd/cluster/ClusterAlerts.tsx'
 
+import { AIAgentRunPodLogs } from 'components/ai/agent-runs/details/AIAgentRunPodLogs.tsx'
 import { ClusterDetails } from 'components/cd/cluster/ClusterDetails'
 import { ClusterMetrics } from 'components/cd/cluster/ClusterMetrics.tsx'
 import { ClusterNetwork } from 'components/cd/cluster/ClusterNetwork'
+import { ClusterUpgradePlan } from 'components/cd/cluster/upgrade-plan/ClusterUpgradePlan.tsx'
 import { ServiceAlerts } from 'components/cd/services/service/ServiceAlerts.tsx'
 import { ServiceContexts } from 'components/cd/services/service/ServiceContexts.tsx'
 import { ServiceMetrics } from 'components/cd/services/service/ServiceMetrics.tsx'
@@ -103,6 +105,7 @@ import ClusterAddon from '../components/cd/cluster/ClusterAddon.tsx'
 import ClusterCloudAddon from '../components/cd/cluster/ClusterCloudAddon.tsx'
 import PodEvents from '../components/cd/cluster/pod/PodEvents.tsx'
 import PodRaw from '../components/cd/cluster/pod/PodRaw.tsx'
+import { AI_AGENT_RUNS_PARAM_RUN_ID } from './aiRoutesConsts.tsx'
 import {
   ALERT_INSIGHT_REL_PATH,
   CD_REL_PATH,
@@ -125,6 +128,7 @@ import {
   CLUSTER_PRS_REL_PATH,
   CLUSTER_REL_PATH,
   CLUSTER_SERVICES_PATH,
+  CLUSTER_UPGRADES_REL_PATH,
   CLUSTER_VCLUSTERS_REL_PATH,
   CLUSTERS_REL_PATH,
   COMPONENT_PARAM_ID,
@@ -146,20 +150,18 @@ import {
   SERVICE_COMPONENTS_PATH,
   SERVICE_PARAM_ID,
   SERVICE_PRS_PATH,
+  SERVICE_SETTINGS_CONTEXTS_REL_PATH,
+  SERVICE_SETTINGS_DEPENDENCIES_REL_PATH,
   SERVICE_SETTINGS_GIT_REL_PATH,
   SERVICE_SETTINGS_HELM_REL_PATH,
   SERVICE_SETTINGS_REVISIONS_REL_PATH,
   SERVICE_SETTINGS_SECRETS_REL_PATH,
+  SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH,
   SERVICES_REL_PATH,
   SERVICES_TREE_REL_PATH,
-  SERVICE_SETTINGS_DEPENDENCIES_REL_PATH,
-  SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH,
-  SERVICE_SETTINGS_CONTEXTS_REL_PATH,
 } from './cdRoutesConsts'
 import { FLOW_PARAM_ID } from './flowRoutesConsts.tsx'
 import { pipelineRoutes } from './pipelineRoutes'
-import { AI_AGENT_RUNS_PARAM_RUN_ID } from './aiRoutesConsts.tsx'
-import { AIAgentRunPodLogs } from 'components/ai/agent-runs/details/AIAgentRunPodLogs.tsx'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -485,6 +487,11 @@ const clusterDetailsRoutes = [
     key="cluster-alert-insight"
     path={`${CLUSTER_REL_PATH}/${CLUSTER_ALERTS_REL_PATH}/insight/:insightId`}
     element={<FullPageAlertInsight type="cluster" />}
+  />,
+  <Route
+    key="cluster-upgrades"
+    path={`${CLUSTER_REL_PATH}/${CLUSTER_UPGRADES_REL_PATH}`}
+    element={<ClusterUpgradePlan />}
   />,
 ]
 

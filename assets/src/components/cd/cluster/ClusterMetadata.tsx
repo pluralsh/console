@@ -20,12 +20,7 @@ import { ClusterProviderIcon } from '../../utils/Provider'
 import { SubTitle } from '../../utils/SubTitle'
 import { InlineLink } from '../../utils/typography/InlineLink'
 
-import { useState } from 'react'
 import { ClusterUpgradeButton } from '../clusters/ClusterUpgradeButton'
-import {
-  ClusterInfoFlyover,
-  ClusterInfoFlyoverTab,
-} from '../clusters/info-flyover/ClusterInfoFlyover'
 import { useClusterContext } from './Cluster'
 import { ClusterMetadataEditor } from './ClusterMetadataEditor'
 import { NodePoolsSection } from './ClusterNodePools'
@@ -58,7 +53,6 @@ function MetadataCard({
   refetch: ClusterQueryHookResult['refetch']
 }) {
   const theme = useTheme()
-  const [flyoverOpen, setFlyoverOpen] = useState(false)
   const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
   const upgradeVersion = nextSupportedVersion(
     cluster?.version,
@@ -113,19 +107,7 @@ function MetadataCard({
           )}
           <MetadataPropSC heading="Warnings">
             {upgradeVersion || hasDeprecations ? (
-              <>
-                <ClusterUpgradeButton
-                  cluster={cluster}
-                  onClick={() => setFlyoverOpen(true)}
-                />
-                <ClusterInfoFlyover
-                  cluster={flyoverOpen ? cluster : null}
-                  open={flyoverOpen}
-                  initialTab={ClusterInfoFlyoverTab.Upgrades}
-                  onClose={() => setFlyoverOpen(false)}
-                  refetch={refetch}
-                />
-              </>
+              <ClusterUpgradeButton cluster={cluster} />
             ) : (
               '-'
             )}
