@@ -87,7 +87,6 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	if exists && !repo.Spec.Reconciliation.DriftDetect() {
-		utils.MarkReadOnly(repo)
 		logger.V(9).Info("repository already exists, running in read-only mode", "name", repo.Name, "namespace", repo.Namespace)
 		return r.handleExistingRepo(repo)
 	}
@@ -218,9 +217,6 @@ func (r *GitRepositoryReconciler) getRepository(url string) (*console.GitReposit
 }
 
 func (r *GitRepositoryReconciler) isAlreadyExists(repository *v1alpha1.GitRepository) (bool, error) {
-	if controllerutil.ContainsFinalizer(repository, RepoFinalizer) {
-		return false, nil
-	}
 	if repository.Status.HasReadonlyCondition() {
 		return repository.Status.IsReadonly(), nil
 	}

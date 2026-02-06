@@ -153,7 +153,7 @@ var _ = Describe("Repository Controller", Ordered, func() {
 
 	Context("When reconciling a resource", func() {
 		const (
-			repoName   = "test-repo"
+			repoName   = "test-repo-create"
 			repoUrl    = "https://test"
 			secretName = "test-secret"
 			namespace  = "default"
@@ -204,10 +204,10 @@ var _ = Describe("Repository Controller", Ordered, func() {
 		AfterAll(func() {
 			resource := &v1alpha1.GitRepository{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
-			Expect(err).NotTo(HaveOccurred())
-
-			By("Cleanup the specific resource instance Repository")
-			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
+			if err == nil {
+				By("Cleanup the specific resource instance Repository")
+				Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
+			}
 
 			err = k8sClient.Get(ctx, types.NamespacedName{Name: secretName, Namespace: namespace}, secret)
 			Expect(err).NotTo(HaveOccurred())
