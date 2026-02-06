@@ -1,3 +1,5 @@
+# scrapers/cert_manager.py
+
 from collections import OrderedDict
 
 import requests
@@ -5,6 +7,7 @@ import yaml
 
 from utils import (
     print_error,
+    fetch_page,
     update_compatibility_info,
     get_chart_versions,
     print_success,
@@ -12,9 +15,6 @@ from utils import (
 
 app_name = "argo-rollouts"
 github_api_tags_url = "https://api.github.com/repos/argoproj/argo-rollouts/tags"
-workflow_url_template = (
-    "https://raw.githubusercontent.com/argoproj/argo-rollouts/{ref}/.github/workflows/testing.yaml"
-)
 
 
 def fetch_github_tags():
@@ -42,13 +42,12 @@ def scrape():
         if not chart_version:
             continue
 
-        workflow_ref = "master" if tag_version == "1.8.3" else tag # argo-rollouts release is stale
-        workflow_url = workflow_url_template.format(ref=workflow_ref)
-        response = requests.get(workflow_url)
+        workflow_ref = "master" if tag_version == "1.8.3" else f"refs/tags/{tag}"
+        response = requests.get(
+            f"https://raw.githubusercontent.com/argoproj/argo-rollouts/{workflow_ref}/.github/workflows/testing.yaml"
+        )
         if response.status_code != 200:
-            print_error(
-                f"Failed to fetch compatibility info for tag {tag}. Status code: {response.status_code}"
-            )
+            print_error(f"Failed to fetch compatibility info for tag {tag}. Status code: {response.status_code}")
             continue
 
         content = yaml.safe_load(response.text)
@@ -56,26 +55,18 @@ def scrape():
             print_error(f"Failed to parse compatibility info for {tag}")
             return
 
-        matrix = (
-            content.get("jobs", {})
-            .get("test-e2e", {})
-            .get("strategy", {})
-            .get("matrix", {})
-            .get("kubernetes", [])
-        )
+        matrix = content.get("jobs", {}).get("test-e2e", {}).get("strategy", {}).get("matrix", {}).get("kubernetes", [])
         kube_versions = [str(entry["version"]) for entry in matrix]
-        rows.append(
-            OrderedDict(
-                [
-                    ("version", tag_version),
-                    ("kube", kube_versions),
-                    ("chart_version", chart_version),
-                    ("images", []),
-                    ("requirements", []),
-                    ("incompatibilities", []),
-                ]
-            )
-        )
+        rows.append(OrderedDict(
+            [
+                ("version", tag_version),
+                ("kube", kube_versions),
+                ("chart_version", chart_version),
+                ("images", []),
+                ("requirements", []),
+                ("incompatibilities", []),
+            ]
+        ))
         print_success(f"Fetched compatibility info for tag: {tag}")
 
     update_compatibility_info(f"../../static/compatibilities/{app_name}.yaml", rows)
