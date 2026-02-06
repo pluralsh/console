@@ -55,6 +55,68 @@ spec:
                           description: the integration test configuration to use for
                             this check
                           properties:
+                            cases:
+                              items:
+                                properties:
+                                  coredns:
+                                    description: Coredns the coredns configuration
+                                      to use for this test case
+                                    properties:
+                                      dialFqdns:
+                                        description: DialFqdns the fqdns to dial for
+                                          this test case
+                                        items:
+                                          type: string
+                                        type: array
+                                    type: object
+                                  loadbalancer:
+                                    description: Loadbalancer the load balancer configuration
+                                      to use for this test case
+                                    properties:
+                                      annotations:
+                                        additionalProperties:
+                                          type: string
+                                        description: the annotations to use for this
+                                          test case
+                                        type: object
+                                      labels:
+                                        additionalProperties:
+                                          type: string
+                                        description: the labels to use for this test
+                                          case
+                                        type: object
+                                      namePrefix:
+                                        description: NamePrefix the name prefix to
+                                          use for this test case
+                                        type: string
+                                      namespace:
+                                        description: the namespace to use for this
+                                          test case
+                                        type: string
+                                    required:
+                                    - namePrefix
+                                    - namespace
+                                    type: object
+                                  name:
+                                    description: Name the name of the test case
+                                    type: string
+                                  raw:
+                                    description: Raw the raw configuration to use
+                                      for this test case
+                                    type: object
+                                    x-kubernetes-preserve-unknown-fields: true
+                                  type:
+                                    description: Type the type of test case to run
+                                    enum:
+                                    - COREDNS
+                                    - LOADBALANCER
+                                    - RAW
+                                    type: string
+                                required:
+                                - name
+                                - type
+                                type: object
+                              type: array
                             distro:
                               description: the distro to run the check on
                               enum:

@@ -84,6 +84,9 @@ fragment SentinelRunFragment on SentinelRun {
     sentinel {
         id
     }
+    checks {
+        ...SentinelCheckFragment
+    }
 }
 
 fragment SentinelFragment on Sentinel {
@@ -136,6 +139,26 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
     }
     job {
         ...JobSpecFragment
+    }
+    cases {
+        ...TestCaseConfigurationFragment
+    }
+}
+
+fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfiguration {
+    name
+    type
+    coredns {
+        dialFqdns
+    }
+    loadbalancer {
+        annotations
+        labels
+        namePrefix
+        namespace
+    }
+    raw {
+        yaml
     }
 }
 

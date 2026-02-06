@@ -5,6 +5,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // SentinelSpec defines the desired state of Sentinel
@@ -90,6 +91,38 @@ type SentinelCheckIntegrationTestConfiguration struct {
 
 	// The git location to use for this integration test.
 	Git *GitRef `json:"git,omitempty"`
+
+	Cases []SentinelCheckIntegrationTestCase `json:"cases,omitempty"`
+}
+
+type SentinelCheckIntegrationTestCase struct {
+	// Type the type of test case to run
+	//+kubebuilder:validation:Enum=COREDNS;LOADBALANCER;RAW
+	Type console.SentinelIntegrationTestCaseType `json:"type"`
+	// Name the name of the test case
+	Name string `json:"name"`
+	// Coredns the coredns configuration to use for this test case
+	Coredns *SentinelCheckIntegrationTestCaseCoredns `json:"coredns,omitempty"`
+	// Loadbalancer the load balancer configuration to use for this test case
+	Loadbalancer *SentinelCheckIntegrationTestCaseLoadbalancer `json:"loadbalancer,omitempty"`
+	// Raw the raw configuration to use for this test case
+	Raw *runtime.RawExtension `json:"raw,omitempty"`
+}
+
+type SentinelCheckIntegrationTestCaseCoredns struct {
+	// DialFqdns the fqdns to dial for this test case
+	DialFqdns []string `json:"dialFqdns,omitempty"`
+}
+
+type SentinelCheckIntegrationTestCaseLoadbalancer struct {
+	// the namespace to use for this test case
+	Namespace string `json:"namespace"`
+	// NamePrefix the name prefix to use for this test case
+	NamePrefix string `json:"namePrefix"`
+	// the annotations to use for this test case
+	Annotations map[string]string `json:"annotations,omitempty"`
+	// the labels to use for this test case
+	Labels map[string]string `json:"labels,omitempty"`
 }
 
 type SentinelCheckGotestsumConfiguration struct {
