@@ -12,7 +12,9 @@ from utils import (
 
 app_name = "argo-rollouts"
 github_api_tags_url = "https://api.github.com/repos/argoproj/argo-rollouts/tags"
-workflow_url = "https://raw.githubusercontent.com/argoproj/argo-rollouts/master/.github/workflows/testing.yaml"
+workflow_url_template = (
+    "https://raw.githubusercontent.com/argoproj/argo-rollouts/{ref}/.github/workflows/testing.yaml"
+)
 
 
 def fetch_github_tags():
@@ -40,6 +42,8 @@ def scrape():
         if not chart_version:
             continue
 
+        workflow_ref = "master" if tag_version == "1.8.3" else tag # argo-rollouts release is stale
+        workflow_url = workflow_url_template.format(ref=workflow_ref)
         response = requests.get(workflow_url)
         if response.status_code != 200:
             print_error(
