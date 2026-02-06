@@ -5,11 +5,16 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/pluralsh/console/go/controller/internal/controller"
+	"github.com/pluralsh/console/go/controller/internal/test/mocks"
 	"github.com/samber/lo"
+	"github.com/stretchr/testify/mock"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	gqlclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
@@ -143,63 +148,211 @@ var _ = Describe("Sentinel Controller", Ordered, func() {
 			}
 		})
 
-		// It("should successfully reconcile the resource", func() {
-		// 	By("Create resource")
-		// 	test := struct {
-		// 		fragment       *gqlclient.SentinelFragment
-		// 		expectedStatus v1alpha1.Status
-		// 	}{
-		// 		expectedStatus: v1alpha1.Status{
-		// 			ID:  lo.ToPtr("123"),
-		// 			SHA: lo.ToPtr("N2UMSD4B3USHMOL2GK4CLDM4NRQPKQ5CKV5DIBOL7UZ4QZYNNG6A===="),
-		// 			Conditions: []metav1.Condition{
-		// 				{
-		// 					Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
-		// 					Status:  metav1.ConditionFalse,
-		// 					Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
-		// 					Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
-		// 				},
-		// 				{
-		// 					Type:    v1alpha1.ReadyConditionType.String(),
-		// 					Status:  metav1.ConditionTrue,
-		// 					Reason:  v1alpha1.ReadyConditionReason.String(),
-		// 					Message: "",
-		// 				},
-		// 				{
-		// 					Type:   v1alpha1.SynchronizedConditionType.String(),
-		// 					Status: metav1.ConditionTrue,
-		// 					Reason: v1alpha1.SynchronizedConditionReason.String(),
-		// 				},
-		// 			},
-		// 		},
-		// 		fragment: &gqlclient.SentinelFragment{
-		// 			ID: id,
-		// 		},
-		// 	}
+		It("should successfully reconcile the resource", func() {
+			By("Create resource")
+			test := struct {
+				fragment       *gqlclient.SentinelFragment
+				expectedStatus v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					ID:  lo.ToPtr("123"),
+					SHA: lo.ToPtr("OJQLAC2NZOG6F6V3BD22JYEJGPNG3PH2MZJ6OURS44C3D3KJKJLQ===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+						},
+						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionTrue,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "",
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
+					},
+				},
+				fragment: &gqlclient.SentinelFragment{
+					ID: id,
+				},
+			}
 
-		// 	fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-		// 	fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-		// 	fakeConsoleClient.On("CreateSentinel", mock.Anything, mock.Anything).Return(test.fragment, nil)
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("CreateSentinel", mock.Anything, mock.Anything).Return(test.fragment, nil)
 
-		// 	nr := &controller.SentinelReconciler{
-		// 		Client:        k8sClient,
-		// 		Scheme:        k8sClient.Scheme(),
-		// 		ConsoleClient: fakeConsoleClient,
-		// 	}
+			nr := &controller.SentinelReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
 
-		// 	_, err := nr.Reconcile(ctx, reconcile.Request{
-		// 		NamespacedName: typeNamespacedName,
-		// 	})
+			_, err := nr.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
 
-		// 	Expect(err).NotTo(HaveOccurred())
+			Expect(err).NotTo(HaveOccurred())
 
-		// 	f := &v1alpha1.Sentinel{}
-		// 	err = k8sClient.Get(ctx, typeNamespacedName, f)
+			f := &v1alpha1.Sentinel{}
+			err = k8sClient.Get(ctx, typeNamespacedName, f)
 
-		// 	Expect(err).NotTo(HaveOccurred())
-		// 	Expect(common.SanitizeStatusConditions(f.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
-		// })
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(f.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+		})
 
+		It("should successfully reconcile the resource with integration test cases", func() {
+			By("Create resource with integration test cases")
+			const (
+				integrationTestName      = "test-integration"
+				integrationTestNamespace = "default"
+			)
+
+			integrationTestTypeNamespacedName := types.NamespacedName{
+				Name:      integrationTestName,
+				Namespace: integrationTestNamespace,
+			}
+
+			By("creating the custom resource for the Kind Sentinel with integration test cases")
+			sc := &v1alpha1.Sentinel{}
+			err := k8sClient.Get(ctx, integrationTestTypeNamespacedName, sc)
+			if err != nil && errors.IsNotFound(err) {
+				resource := &v1alpha1.Sentinel{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      integrationTestName,
+						Namespace: integrationTestNamespace,
+					},
+					Spec: v1alpha1.SentinelSpec{
+						Name:        lo.ToPtr(integrationTestName),
+						Description: lo.ToPtr("A test sentinel with integration test cases"),
+						RepositoryRef: &v1.ObjectReference{
+							Name:      repoName,
+							Namespace: namespace,
+						},
+						ProjectRef: &v1.ObjectReference{
+							Name:      projectName,
+							Namespace: namespace,
+						},
+						Git: &v1alpha1.GitRef{
+							Ref:    "main",
+							Folder: "sentinels/integration-test",
+						},
+						Checks: []v1alpha1.SentinelCheck{
+							{
+								Type: gqlclient.SentinelCheckTypeIntegrationTest,
+								Name: "integration-test-check",
+								Configuration: &v1alpha1.SentinelCheckConfiguration{
+									IntegrationTest: &v1alpha1.SentinelCheckIntegrationTestConfiguration{
+										Format: gqlclient.SentinelRunJobFormatJunit,
+										Distro: lo.ToPtr(gqlclient.ClusterDistroEks),
+										Tags:   map[string]string{"env": "test", "region": "us-east-1"},
+										RepositoryRef: &v1.ObjectReference{
+											Name:      repoName,
+											Namespace: namespace,
+										},
+										Git: &v1alpha1.GitRef{
+											Ref:    "main",
+											Folder: "tests",
+										},
+										Gotestsum: &v1alpha1.SentinelCheckGotestsumConfiguration{
+											P:        lo.ToPtr("4"),
+											Parallel: lo.ToPtr("8"),
+										},
+										Cases: []v1alpha1.SentinelCheckIntegrationTestCase{
+											{
+												Type: gqlclient.SentinelIntegrationTestCaseTypeCoredns,
+												Name: "coredns-test",
+												Coredns: &v1alpha1.SentinelCheckIntegrationTestCaseCoredns{
+													DialFqdns: []string{"kubernetes.default.svc.cluster.local", "google.com"},
+												},
+											},
+											{
+												Type: gqlclient.SentinelIntegrationTestCaseTypeLoadbalancer,
+												Name: "loadbalancer-test",
+												Loadbalancer: &v1alpha1.SentinelCheckIntegrationTestCaseLoadbalancer{
+													Namespace:   "default",
+													NamePrefix:  "test-lb",
+													Labels:      map[string]string{"app": "test", "tier": "frontend"},
+													Annotations: map[string]string{"service.beta.kubernetes.io/aws-load-balancer-type": "nlb"},
+												},
+											},
+											{
+												Type: gqlclient.SentinelIntegrationTestCaseTypeRaw,
+												Name: "raw-test",
+												Raw: &runtime.RawExtension{
+													Raw: []byte(`{"apiVersion":"v1","kind":"ConfigMap","metadata":{"name":"test-config"},"data":{"key":"value"}}`),
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				}
+				Expect(common.MaybeCreate(k8sClient, resource, nil)).To(Succeed())
+			}
+
+			test := struct {
+				fragment       *gqlclient.SentinelFragment
+				expectedStatus v1alpha1.Status
+			}{
+				expectedStatus: v1alpha1.Status{
+					ID:  lo.ToPtr("456"),
+					SHA: lo.ToPtr("WBF5EFZQ5I6IITKQD7VEIGYDM3I4V6QKWMPSFZJKW7VJVQN7GJSQ===="),
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+						},
+						{
+							Type:    v1alpha1.ReadyConditionType.String(),
+							Status:  metav1.ConditionTrue,
+							Reason:  v1alpha1.ReadyConditionReason.String(),
+							Message: "",
+						},
+						{
+							Type:   v1alpha1.SynchronizedConditionType.String(),
+							Status: metav1.ConditionTrue,
+							Reason: v1alpha1.SynchronizedConditionReason.String(),
+						},
+					},
+				},
+				fragment: &gqlclient.SentinelFragment{
+					ID: "456",
+				},
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("CreateSentinel", mock.Anything, mock.Anything).Return(test.fragment, nil)
+
+			nr := &controller.SentinelReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err = nr.Reconcile(ctx, reconcile.Request{
+				NamespacedName: integrationTestTypeNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			f := &v1alpha1.Sentinel{}
+			err = k8sClient.Get(ctx, integrationTestTypeNamespacedName, f)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(f.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+
+			By("Cleanup the specific resource instance Sentinel")
+			Expect(k8sClient.Delete(ctx, f)).To(Succeed())
+		})
 	})
-
 })

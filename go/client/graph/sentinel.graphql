@@ -84,6 +84,9 @@ fragment SentinelRunFragment on SentinelRun {
     sentinel {
         id
     }
+    checks {
+        ...SentinelCheckFragment
+    }
 }
 
 fragment SentinelFragment on Sentinel {

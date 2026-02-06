@@ -200,156 +200,246 @@ func (r *SentinelReconciler) getSentinelCheckAttributes(ctx context.Context, sen
 			RuleFile: check.RuleFile,
 		}
 		if check.Configuration != nil {
-			configuration := &console.SentinelCheckConfigurationAttributes{}
-			if check.Configuration.Log != nil {
-				configuration.Log = &console.SentinelCheckLogConfigurationAttributes{
-					Namespaces: check.Configuration.Log.Namespaces,
-					Query:      check.Configuration.Log.Query,
-					Duration:   check.Configuration.Log.Duration,
-				}
-				if len(check.Configuration.Log.Facets) > 0 {
-					configuration.Log.Facets = make([]*console.LogFacetInput, 0, len(check.Configuration.Log.Facets))
-					for k, v := range check.Configuration.Log.Facets {
-						configuration.Log.Facets = append(configuration.Log.Facets, &console.LogFacetInput{
-							Key:   k,
-							Value: v,
-						})
-					}
-				}
-				if check.Configuration.Log.ClusterRef != nil {
-					helper := utils.NewConsoleHelper(ctx, r.Client)
-					clusterID, err := helper.IDFromRef(check.Configuration.Log.ClusterRef, &v1alpha1.Cluster{})
-					if err != nil {
-						return nil, err
-					}
-					configuration.Log.ClusterID = clusterID
-				}
-			}
-			if check.Configuration.Kubernetes != nil {
-				configuration.Kubernetes = &console.SentinelCheckKubernetesConfigurationAttributes{
-					Group:     check.Configuration.Kubernetes.Group,
-					Version:   check.Configuration.Kubernetes.Version,
-					Kind:      check.Configuration.Kubernetes.Kind,
-					Name:      check.Configuration.Kubernetes.Name,
-					Namespace: check.Configuration.Kubernetes.Namespace,
-				}
-				helper := utils.NewConsoleHelper(ctx, r.Client)
-				clusterID, err := helper.IDFromRef(&check.Configuration.Kubernetes.ClusterRef, &v1alpha1.Cluster{})
-				if err != nil {
-					return nil, err
-				}
-				configuration.Kubernetes.ClusterID = lo.FromPtr(clusterID)
-			}
-			if check.Configuration.IntegrationTest != nil {
-				configuration.IntegrationTest = &console.SentinelCheckIntegrationTestConfigurationAttributes{
-					Distro: check.Configuration.IntegrationTest.Distro,
-					Format: check.Configuration.IntegrationTest.Format,
-				}
-
-				if check.Configuration.IntegrationTest.Gotestsum != nil {
-					configuration.IntegrationTest.Gotestsum = &console.SentinelCheckGotestsumAttributes{
-						P:        check.Configuration.IntegrationTest.Gotestsum.P,
-						Parallel: check.Configuration.IntegrationTest.Gotestsum.Parallel,
-					}
-				}
-
-				if check.Configuration.IntegrationTest.Job != nil {
-					jobSpec, err := common.GateJobAttributes(check.Configuration.IntegrationTest.Job)
-					if err != nil {
-						return nil, err
-					}
-					configuration.IntegrationTest.Job = jobSpec
-				}
-				if len(check.Configuration.IntegrationTest.Tags) > 0 {
-					jsonTags, err := json.Marshal(check.Configuration.IntegrationTest.Tags)
-					if err != nil {
-						return nil, err
-					}
-					configuration.IntegrationTest.Tags = lo.ToPtr(string(jsonTags))
-				}
-				if check.Configuration.IntegrationTest.RepositoryRef != nil {
-					repository := &v1alpha1.GitRepository{}
-					if err := r.Get(ctx, client.ObjectKey{Name: check.Configuration.IntegrationTest.RepositoryRef.Name, Namespace: check.Configuration.IntegrationTest.RepositoryRef.Namespace}, repository); err != nil {
-						return nil, ErrGetRepository
-					}
-					if !repository.Status.HasID() {
-						utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-						return nil, ErrWaitRepository
-					}
-					if repository.Status.Health == v1alpha1.GitHealthFailed {
-						utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
-						return nil, ErrWaitRepository
-					}
-					configuration.IntegrationTest.RepositoryID = repository.Status.ID
-				}
-				if check.Configuration.IntegrationTest.Git.HasUrl() {
-					id, err := plural.Cache().GetGitRepoID(lo.FromPtr(check.Configuration.IntegrationTest.Git.Url))
-					if err != nil {
-						return nil, err
-					}
-					configuration.IntegrationTest.RepositoryID = id
-				}
-				if check.Configuration.IntegrationTest.Git != nil {
-					configuration.IntegrationTest.Git = &console.GitRefAttributes{
-						Ref:    check.Configuration.IntegrationTest.Git.Ref,
-						Folder: check.Configuration.IntegrationTest.Git.Folder,
-					}
-				}
-				if len(check.Configuration.IntegrationTest.Cases) > 0 {
-					configuration.IntegrationTest.Cases = make([]*console.SentinelCheckIntegrationTestCaseAttributes, len(check.Configuration.IntegrationTest.Cases))
-					for j, c := range check.Configuration.IntegrationTest.Cases {
-						integrationTestCase := &console.SentinelCheckIntegrationTestCaseAttributes{
-							Type: c.Type,
-							Name: c.Name,
-						}
-						if c.Type == console.SentinelIntegrationTestCaseTypeRaw && c.Raw != nil {
-							var obj runtime.Object
-							if err := runtime.Convert_runtime_RawExtension_To_runtime_Object(c.Raw, &obj, nil); err != nil {
-								return nil, err
-							}
-							rawYaml, err := yaml.Marshal(obj)
-							if err != nil {
-								return nil, err
-							}
-							integrationTestCase.Raw = &console.SentinelCheckIntegrationTestCaseRawAttributes{
-								Yaml: lo.ToPtr(string(rawYaml)),
-							}
-						}
-						if c.Type == console.SentinelIntegrationTestCaseTypeCoredns && c.Coredns != nil {
-							integrationTestCase.Coredns = &console.SentinelCheckIntegrationTestCaseCorednsAttributes{
-								DialFqdns: lo.ToSlicePtr(c.Coredns.DialFqdns),
-							}
-						}
-						if c.Type == console.SentinelIntegrationTestCaseTypeLoadbalancer && c.Loadbalancer != nil {
-							integrationTestCase.Loadbalancer = &console.SentinelCheckIntegrationTestCaseLoadbalancerAttributes{
-								Namespace:  c.Loadbalancer.Namespace,
-								NamePrefix: c.Loadbalancer.NamePrefix,
-							}
-							if len(c.Loadbalancer.Labels) > 0 {
-								jsonLabels, err := json.Marshal(c.Loadbalancer.Labels)
-								if err != nil {
-									return nil, err
-								}
-								integrationTestCase.Loadbalancer.Labels = lo.ToPtr(string(jsonLabels))
-							}
-							if len(c.Loadbalancer.Annotations) > 0 {
-								jsonAnnotations, err := json.Marshal(c.Loadbalancer.Annotations)
-								if err != nil {
-									return nil, err
-								}
-								integrationTestCase.Loadbalancer.Annotations = lo.ToPtr(string(jsonAnnotations))
-							}
-						}
-
-						configuration.IntegrationTest.Cases[j] = integrationTestCase
-					}
-				}
+			configuration, err := r.buildCheckConfiguration(ctx, sentinel, check.Configuration)
+			if err != nil {
+				return nil, err
 			}
 			checks[i].Configuration = configuration
 		}
 	}
 
 	return checks, nil
+}
+
+func (r *SentinelReconciler) buildCheckConfiguration(ctx context.Context, sentinel *v1alpha1.Sentinel, config *v1alpha1.SentinelCheckConfiguration) (*console.SentinelCheckConfigurationAttributes, error) {
+	configuration := &console.SentinelCheckConfigurationAttributes{}
+
+	if config.Log != nil {
+		logConfig, err := r.buildLogConfiguration(ctx, config.Log)
+		if err != nil {
+			return nil, err
+		}
+		configuration.Log = logConfig
+	}
+
+	if config.Kubernetes != nil {
+		k8sConfig, err := r.buildKubernetesConfiguration(ctx, config.Kubernetes)
+		if err != nil {
+			return nil, err
+		}
+		configuration.Kubernetes = k8sConfig
+	}
+
+	if config.IntegrationTest != nil {
+		integrationTestConfig, err := r.buildIntegrationTestConfiguration(ctx, sentinel, config.IntegrationTest)
+		if err != nil {
+			return nil, err
+		}
+		configuration.IntegrationTest = integrationTestConfig
+	}
+
+	return configuration, nil
+}
+
+func (r *SentinelReconciler) buildLogConfiguration(ctx context.Context, log *v1alpha1.SentinelCheckLogConfiguration) (*console.SentinelCheckLogConfigurationAttributes, error) {
+	logConfig := &console.SentinelCheckLogConfigurationAttributes{
+		Namespaces: log.Namespaces,
+		Query:      log.Query,
+		Duration:   log.Duration,
+	}
+
+	if len(log.Facets) > 0 {
+		logConfig.Facets = make([]*console.LogFacetInput, 0, len(log.Facets))
+		for k, v := range log.Facets {
+			logConfig.Facets = append(logConfig.Facets, &console.LogFacetInput{
+				Key:   k,
+				Value: v,
+			})
+		}
+	}
+
+	if log.ClusterRef != nil {
+		helper := utils.NewConsoleHelper(ctx, r.Client)
+		clusterID, err := helper.IDFromRef(log.ClusterRef, &v1alpha1.Cluster{})
+		if err != nil {
+			return nil, err
+		}
+		logConfig.ClusterID = clusterID
+	}
+
+	return logConfig, nil
+}
+
+func (r *SentinelReconciler) buildKubernetesConfiguration(ctx context.Context, k8s *v1alpha1.SentinelCheckKubernetesConfiguration) (*console.SentinelCheckKubernetesConfigurationAttributes, error) {
+	k8sConfig := &console.SentinelCheckKubernetesConfigurationAttributes{
+		Group:     k8s.Group,
+		Version:   k8s.Version,
+		Kind:      k8s.Kind,
+		Name:      k8s.Name,
+		Namespace: k8s.Namespace,
+	}
+
+	helper := utils.NewConsoleHelper(ctx, r.Client)
+	clusterID, err := helper.IDFromRef(&k8s.ClusterRef, &v1alpha1.Cluster{})
+	if err != nil {
+		return nil, err
+	}
+	k8sConfig.ClusterID = lo.FromPtr(clusterID)
+
+	return k8sConfig, nil
+}
+
+func (r *SentinelReconciler) buildIntegrationTestConfiguration(ctx context.Context, sentinel *v1alpha1.Sentinel, integrationTest *v1alpha1.SentinelCheckIntegrationTestConfiguration) (*console.SentinelCheckIntegrationTestConfigurationAttributes, error) {
+	config := &console.SentinelCheckIntegrationTestConfigurationAttributes{
+		Distro: integrationTest.Distro,
+		Format: integrationTest.Format,
+	}
+
+	if integrationTest.Gotestsum != nil {
+		config.Gotestsum = &console.SentinelCheckGotestsumAttributes{
+			P:        integrationTest.Gotestsum.P,
+			Parallel: integrationTest.Gotestsum.Parallel,
+		}
+	}
+
+	if integrationTest.Job != nil {
+		jobSpec, err := common.GateJobAttributes(integrationTest.Job)
+		if err != nil {
+			return nil, err
+		}
+		config.Job = jobSpec
+	}
+
+	if len(integrationTest.Tags) > 0 {
+		jsonTags, err := json.Marshal(integrationTest.Tags)
+		if err != nil {
+			return nil, err
+		}
+		config.Tags = lo.ToPtr(string(jsonTags))
+	}
+
+	if integrationTest.RepositoryRef != nil {
+		repositoryID, err := r.getRepositoryID(ctx, sentinel, integrationTest.RepositoryRef)
+		if err != nil {
+			return nil, err
+		}
+		config.RepositoryID = repositoryID
+	}
+
+	if integrationTest.Git.HasUrl() {
+		id, err := plural.Cache().GetGitRepoID(lo.FromPtr(integrationTest.Git.Url))
+		if err != nil {
+			return nil, err
+		}
+		config.RepositoryID = id
+	}
+
+	if integrationTest.Git != nil {
+		config.Git = &console.GitRefAttributes{
+			Ref:    integrationTest.Git.Ref,
+			Folder: integrationTest.Git.Folder,
+		}
+	}
+
+	if len(integrationTest.Cases) > 0 {
+		cases, err := r.buildIntegrationTestCases(integrationTest.Cases)
+		if err != nil {
+			return nil, err
+		}
+		config.Cases = cases
+	}
+
+	return config, nil
+}
+
+func (r *SentinelReconciler) getRepositoryID(ctx context.Context, sentinel *v1alpha1.Sentinel, repositoryRef *corev1.ObjectReference) (*string, error) {
+	repository := &v1alpha1.GitRepository{}
+	if err := r.Get(ctx, client.ObjectKey{Name: repositoryRef.Name, Namespace: repositoryRef.Namespace}, repository); err != nil {
+		return nil, ErrGetRepository
+	}
+	if !repository.Status.HasID() {
+		utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
+		return nil, ErrWaitRepository
+	}
+	if repository.Status.Health == v1alpha1.GitHealthFailed {
+		utils.MarkCondition(sentinel.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not healthy")
+		return nil, ErrWaitRepository
+	}
+	return repository.Status.ID, nil
+}
+
+func (r *SentinelReconciler) buildIntegrationTestCases(cases []v1alpha1.SentinelCheckIntegrationTestCase) ([]*console.SentinelCheckIntegrationTestCaseAttributes, error) {
+	result := make([]*console.SentinelCheckIntegrationTestCaseAttributes, len(cases))
+	for j, c := range cases {
+		caseAttr := &console.SentinelCheckIntegrationTestCaseAttributes{
+			Type: c.Type,
+			Name: c.Name,
+		}
+
+		if c.Type == console.SentinelIntegrationTestCaseTypeRaw && c.Raw != nil {
+			rawAttr, err := r.buildRawTestCaseAttributes(c.Raw)
+			if err != nil {
+				return nil, err
+			}
+			caseAttr.Raw = rawAttr
+		}
+
+		if c.Type == console.SentinelIntegrationTestCaseTypeCoredns && c.Coredns != nil {
+			caseAttr.Coredns = &console.SentinelCheckIntegrationTestCaseCorednsAttributes{
+				DialFqdns: lo.ToSlicePtr(c.Coredns.DialFqdns),
+			}
+		}
+
+		if c.Type == console.SentinelIntegrationTestCaseTypeLoadbalancer && c.Loadbalancer != nil {
+			lbAttr, err := r.buildLoadbalancerTestCaseAttributes(c.Loadbalancer)
+			if err != nil {
+				return nil, err
+			}
+			caseAttr.Loadbalancer = lbAttr
+		}
+
+		result[j] = caseAttr
+	}
+	return result, nil
+}
+
+func (r *SentinelReconciler) buildRawTestCaseAttributes(raw *runtime.RawExtension) (*console.SentinelCheckIntegrationTestCaseRawAttributes, error) {
+	var obj runtime.Object
+	if err := runtime.Convert_runtime_RawExtension_To_runtime_Object(raw, &obj, nil); err != nil {
+		return nil, err
+	}
+	rawYaml, err := yaml.Marshal(obj)
+	if err != nil {
+		return nil, err
+	}
+	return &console.SentinelCheckIntegrationTestCaseRawAttributes{
+		Yaml: lo.ToPtr(string(rawYaml)),
+	}, nil
+}
+
+func (r *SentinelReconciler) buildLoadbalancerTestCaseAttributes(lb *v1alpha1.SentinelCheckIntegrationTestCaseLoadbalancer) (*console.SentinelCheckIntegrationTestCaseLoadbalancerAttributes, error) {
+	lbAttr := &console.SentinelCheckIntegrationTestCaseLoadbalancerAttributes{
+		Namespace:  lb.Namespace,
+		NamePrefix: lb.NamePrefix,
+	}
+
+	if len(lb.Labels) > 0 {
+		jsonLabels, err := json.Marshal(lb.Labels)
+		if err != nil {
+			return nil, err
+		}
+		lbAttr.Labels = lo.ToPtr(string(jsonLabels))
+	}
+
+	if len(lb.Annotations) > 0 {
+		jsonAnnotations, err := json.Marshal(lb.Annotations)
+		if err != nil {
+			return nil, err
+		}
+		lbAttr.Annotations = lo.ToPtr(string(jsonAnnotations))
+	}
+
+	return lbAttr, nil
 }
 
 func (r *SentinelReconciler) getGitAttributes(sentinel *v1alpha1.Sentinel) *console.GitRefAttributes {
