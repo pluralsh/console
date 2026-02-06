@@ -42,8 +42,10 @@ def scrape():
         if not chart_version:
             continue
 
+        workflow_ref = "master" if tag_version == "1.8.3" else f"refs/tags/{tag}"
         response = requests.get(
-            f"https://raw.githubusercontent.com/argoproj/argo-rollouts/refs/tags/{tag}/.github/workflows/testing.yaml")
+            f"https://raw.githubusercontent.com/argoproj/argo-rollouts/{workflow_ref}/.github/workflows/testing.yaml"
+        )
         if response.status_code != 200:
             print_error(f"Failed to fetch compatibility info for tag {tag}. Status code: {response.status_code}")
             continue
