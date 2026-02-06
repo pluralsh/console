@@ -33,6 +33,7 @@ names:
 - vector
 - victoria-metrics-operator
 - gpu-operator
+- harbor
 - elastic-agent
 - rabbitmq-cluster-operator
 - kserve
