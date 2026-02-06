@@ -8,6 +8,7 @@ import { DeploymentFragment } from 'generated/graphql'
 import { InfoSection, PaddedCard, PropGroup, PropWideBold } from './common'
 import { ConditionsTable } from './Conditions'
 import { ComponentDetailsContext } from '../ComponentDetails'
+import { LabelSelector } from 'components/kubernetes/common/LabelSelector'
 
 export function StatusChart({
   green,
@@ -122,6 +123,9 @@ export function DeploymentBase({
       </InfoSection>
       <InfoSection title="Spec">
         <PaddedCard>
+          <PropWideBold title="Selector">
+            <LabelSelector selector={spec?.selector} />
+          </PropWideBold>
           <PropWideBold title="Strategy">
             {spec?.strategy?.type || '-'}
           </PropWideBold>

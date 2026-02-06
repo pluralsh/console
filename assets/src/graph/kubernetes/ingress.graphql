@@ -20,6 +20,7 @@ fragment Ingress on Ingress {
       http {
         paths {
           path
+          pathType
           backend {
             serviceName
             servicePort

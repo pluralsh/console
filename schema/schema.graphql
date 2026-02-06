@@ -11323,12 +11323,14 @@ type JobStatus {
   startTime: String
   succeeded: Int
   failed: Int
+  conditions: [StatusCondition]
 }
 
 type JobSpec {
   backoffLimit: Int
   parallelism: Int
   activeDeadlineSeconds: Int
+  completions: Int
 }
 
 type CronJob {
@@ -11354,6 +11356,7 @@ type CronSpec {
   schedule: String!
   suspend: Boolean
   concurrencyPolicy: String
+  startingDeadlineSeconds: Int
 }
 
 type Node {
@@ -11424,6 +11427,7 @@ type HttpIngressRule {
 type IngressPath {
   backend: IngressBackend
   path: String
+  pathType: String
 }
 
 type IngressBackend {
@@ -11461,6 +11465,7 @@ type LoadBalancerIngressStatus {
 type ServiceSpec {
   type: String
   clusterIp: String
+  sessionAffinity: String
   selector: Map
   ports: [ServicePort]
 }
@@ -11521,7 +11526,19 @@ type DeploymentStatus {
 
 type DeploymentSpec {
   replicas: Int
+  selector: LabelSelector
   strategy: DeploymentStrategy
+}
+
+type LabelSelector {
+  matchLabels: Map
+  matchExpressions: [LabelSelectorRequirement]
+}
+
+type LabelSelectorRequirement {
+  key: String
+  operator: String
+  values: [String]
 }
 
 type ReplicaSetSpec {

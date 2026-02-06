@@ -12,6 +12,8 @@ fragment Service on Service {
   spec {
     type
     clusterIp
+    sessionAffinity
+    selector
     ports {
       name
       protocol

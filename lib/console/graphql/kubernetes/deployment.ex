@@ -40,7 +40,19 @@ defmodule Console.GraphQl.Kubernetes.Deployment do
 
   object :deployment_spec do
     field :replicas, :integer
+    field :selector, :label_selector
     field :strategy, :deployment_strategy
+  end
+
+  object :label_selector do
+    field :match_labels,      :map
+    field :match_expressions, list_of(:label_selector_requirement)
+  end
+
+  object :label_selector_requirement do
+    field :key, :string
+    field :operator, :string
+    field :values, list_of(:string)
   end
 
   object :replica_set_spec do

@@ -110,4 +110,10 @@ fragment JobStatus on JobStatus {
   succeeded
   failed
   startTime
+  conditions {
+    type
+    status
+    reason
+    message
+  }
 }

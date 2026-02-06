@@ -1,12 +1,14 @@
-import { Table } from '@pluralsh/design-system'
+import { Flex, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 
 import { useTheme } from 'styled-components'
 
 import { IngressFragment } from 'generated/graphql'
+import { Kind } from 'components/kubernetes/common/types'
+import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts'
 
 import IngressCertificates from './IngressCertificates'
 
@@ -18,9 +20,22 @@ import {
 } from './common'
 import { ComponentDetailsContext } from '../ComponentDetails'
 
-const COLUMN_HELPER = createColumnHelper<any>()
+type IngressRuleFlatT = {
+  host?: string
+  path: string
+  pathType: string
+  serviceName: string
+  servicePort: string
+}
 
-const columns = [
+const COLUMN_HELPER = createColumnHelper<IngressRuleFlatT>()
+
+type IngressRoutesTableMeta = {
+  clusterId?: Nullable<string>
+  namespace?: Nullable<string>
+}
+
+const COLUMNS = [
   COLUMN_HELPER.accessor((row) => row.host, {
     id: 'host',
     cell: (prop) => prop.getValue(),
@@ -31,31 +46,84 @@ const columns = [
     cell: (prop) => prop.getValue(),
     header: 'Path',
   }),
-  COLUMN_HELPER.accessor((row) => row.backend, {
-    id: 'backend',
+  COLUMN_HELPER.accessor((row) => row.pathType, {
+    id: 'pathType',
     cell: (prop) => prop.getValue(),
+    header: 'Path type',
+  }),
+  COLUMN_HELPER.accessor((row) => row, {
+    id: 'backend',
     header: 'Backend',
+    cell: function Cell({
+      table,
+      row: {
+        original: { serviceName, servicePort },
+      },
+    }) {
+      const theme = useTheme()
+      const meta = table.options.meta as IngressRoutesTableMeta | undefined
+      const { clusterId, namespace } = meta ?? {}
+      const portPart = `${servicePort || '-'}`
+
+      if (serviceName && clusterId && namespace) {
+        return (
+          <Flex>
+            <Link
+              to={getResourceDetailsAbsPath(
+                clusterId,
+                Kind.Service,
+                serviceName,
+                namespace
+              )}
+              css={{
+                ...theme.partials.text.inlineLink,
+              }}
+            >
+              {serviceName}
+            </Link>
+            <span>:</span>
+            <span>{portPart}</span>
+          </Flex>
+        )
+      }
+
+      return `${serviceName || '-'}:${portPart}`
+    },
   }),
 ]
 
-function Routes({ rules }) {
+function Routes({
+  rules,
+  clusterId,
+  namespace,
+}: {
+  rules: IngressFragment['spec']['rules']
+  clusterId: Nullable<string>
+  namespace: Nullable<string>
+}) {
   const theme = useTheme()
   const data = useMemo(
     () =>
-      rules.reduce((accumulator, rule) => {
-        const paths = rule.http?.paths
+      (rules ?? []).reduce<IngressRuleFlatT[]>((accumulator, rule) => {
+        const paths = rule?.http?.paths ?? []
 
         return accumulator.concat(
-          paths?.map(({ path, backend: { serviceName, servicePort } }) => ({
-            host: rule.host,
-            path: path || '*',
-            backend: `${serviceName || '-'}:${servicePort || '-'}`,
-          }))
+          paths.map((p) => {
+            const path = p?.path
+            const pathType = p?.pathType
+            const backend = p?.backend
+            return {
+              host: rule?.host,
+              path: path || '*',
+              pathType: pathType ?? '',
+              serviceName: backend?.serviceName ?? '',
+              servicePort: backend?.servicePort ?? '',
+            } as IngressRuleFlatT
+          })
         )
       }, []),
     [rules]
   )
-
   return (
     <>
       <InfoSectionH3
@@ -68,21 +136,35 @@ function Routes({ rules }) {
       </InfoSectionH3>
       <Table
         data={data}
-        columns={columns}
+        columns={COLUMNS}
+        reactTableOptions={{ meta: { clusterId, namespace } }}
       />
     </>
   )
 }
 
 export default function IngressOutlet() {
-  const { componentDetails } = useOutletContext<ComponentDetailsContext>()
+  const { componentDetails, cluster } =
+    useOutletContext<ComponentDetailsContext>()
 
   return componentDetails?.__typename === 'Ingress' ? (
-    <IngressBase ingress={componentDetails} />
+    <IngressBase
+      ingress={componentDetails}
+      clusterId={cluster?.id}
+      namespace={componentDetails.metadata?.namespace}
+    />
   ) : null
 }
 
-export function IngressBase({ ingress }: { ingress: IngressFragment }) {
+export function IngressBase({
+  ingress,
+  clusterId,
+  namespace,
+}: {
+  ingress: IngressFragment
+  clusterId?: Nullable<string>
+  namespace?: Nullable<string>
+}) {
   const theme = useTheme()
   const loadBalancer = ingress.status?.loadBalancer
   const balancerIngress =
@@ -114,7 +196,11 @@ export function IngressBase({ ingress }: { ingress: IngressFragment }) {
       <InfoSectionH2 css={{ marginTop: theme.spacing.large }}>
         Spec
       </InfoSectionH2>
-      <Routes rules={rules} />
+      <Routes
+        rules={rules}
+        clusterId={clusterId}
+        namespace={namespace}
+      />
       <IngressCertificates certificates={ingress.certificates} />
     </div>
   )

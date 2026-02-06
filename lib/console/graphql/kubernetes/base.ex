@@ -6,6 +6,11 @@ defmodule Console.GraphQl.Kubernetes.Base do
     Jason.encode(data)
   end
 
+  def safe_to_string(nil), do: nil
+  def safe_to_string(v), do: to_string(v)
+
+  def multi_get(map, keys), do: Enum.find_value(keys, &Map.get(map, &1))
+
   defp prune(%{metadata: %MetaV1.ObjectMeta{}} = object),
     do: put_in(object.metadata.managed_fields, [])
   defp prune(obj), do: obj

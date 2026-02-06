@@ -38,8 +38,8 @@ import { AxiosInstance } from 'helpers/axios'
 import { GqlError } from 'components/utils/Alert'
 
 const directory: Array<TabEntry> = [
-  { path: 'conditions', label: 'Conditions' },
   { path: 'pods', label: 'Pods' },
+  { path: 'conditions', label: 'Conditions' },
   { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
 ] as const

@@ -13,25 +13,39 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     test "it can fetch statefulsets by namespace/name" do
       user = insert(:user)
       svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])
-      insert(:service_component, service: svc, group: "apps", version: "v1", kind: "StatefulSet", namespace: "namespace", name: "name")
+
+      insert(:service_component,
+        service: svc,
+        group: "apps",
+        version: "v1",
+        kind: "StatefulSet",
+        namespace: "namespace",
+        name: "name"
+      )
+
       expect(Kazan, :run, fn _, _ -> {:ok, stateful_set("name", "namespace", 3, [])} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"statefulSet" => stateful}}} = run_query("""
-        query statefulSet($serviceId: ID!) {
-          statefulSet(serviceId: $serviceId, namespace: "namespace", name: "name") {
-            metadata { name }
-            status {
-              replicas
-              currentReplicas
+      {:ok, %{data: %{"statefulSet" => stateful}}} =
+        run_query(
+          """
+            query statefulSet($serviceId: ID!) {
+              statefulSet(serviceId: $serviceId, namespace: "namespace", name: "name") {
+                metadata { name }
+                status {
+                  replicas
+                  currentReplicas
+                }
+                spec {
+                  replicas
+                  serviceName
+                }
+              }
             }
-            spec {
-              replicas
-              serviceName
-            }
-          }
-        }
-      """, %{"serviceId" => svc.id}, %{current_user: user})
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
 
       assert stateful["metadata"]["name"] == "name"
       assert stateful["status"]["replicas"] == 3
@@ -42,25 +56,39 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     test "it won't choke on errors" do
       user = insert(:user)
       svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])
-      insert(:service_component, service: svc, group: "apps", version: "v1", kind: "StatefulSet", namespace: "namespace", name: "name")
+
+      insert(:service_component,
+        service: svc,
+        group: "apps",
+        version: "v1",
+        kind: "StatefulSet",
+        namespace: "namespace",
+        name: "name"
+      )
+
       expect(Kazan, :run, fn _, _ -> {:error, {:http_error, 404, "an error"}} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{errors: [_ | _]}} = run_query("""
-        query statefulSet($serviceId: ID!) {
-          statefulSet(serviceId: $serviceId, namespace: "namespace", name: "name") {
-            metadata { name }
-            status {
-              replicas
-              currentReplicas
+      {:ok, %{errors: [_ | _]}} =
+        run_query(
+          """
+            query statefulSet($serviceId: ID!) {
+              statefulSet(serviceId: $serviceId, namespace: "namespace", name: "name") {
+                metadata { name }
+                status {
+                  replicas
+                  currentReplicas
+                }
+                spec {
+                  replicas
+                  serviceName
+                }
+              }
             }
-            spec {
-              replicas
-              serviceName
-            }
-          }
-        }
-      """, %{"serviceId" => svc.id}, %{current_user: user})
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
     end
   end
 
@@ -68,30 +96,86 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     test "it can fetch deployments by namespace/name" do
       user = insert(:user)
       svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])
-      insert(:service_component, service: svc, group: "apps", version: "v1", kind: "Deployment", namespace: "namespace", name: "name")
+
+      insert(:service_component,
+        service: svc,
+        group: "apps",
+        version: "v1",
+        kind: "Deployment",
+        namespace: "namespace",
+        name: "name"
+      )
+
       expect(Kazan, :run, fn _, _ -> {:ok, deployment("namespace", "name")} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"deployment" => deployment}}} = run_query("""
-        query deployment($serviceId: ID!) {
-          deployment(serviceId: $serviceId, namespace: "namespace", name: "name") {
-            metadata { name }
-            status {
-              replicas
-              readyReplicas
+      {:ok, %{data: %{"deployment" => deployment}}} =
+        run_query(
+          """
+            query deployment($serviceId: ID!) {
+              deployment(serviceId: $serviceId, namespace: "namespace", name: "name") {
+                metadata { name }
+                status {
+                  replicas
+                  readyReplicas
+                }
+                spec {
+                  replicas
+                }
+              }
             }
-            spec {
-              replicas
-            }
-          }
-        }
-      """, %{"serviceId" => svc.id}, %{current_user: user})
-
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
 
       assert deployment["metadata"]["name"] == "name"
       assert deployment["status"]["replicas"] == 3
       assert deployment["status"]["readyReplicas"] == 3
       assert deployment["spec"]["replicas"] == 3
+    end
+
+    test "deployment spec includes selector (used by deployments view)" do
+      user = insert(:user)
+      svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])
+
+      insert(:service_component,
+        service: svc,
+        group: "apps",
+        version: "v1",
+        kind: "Deployment",
+        namespace: "namespace",
+        name: "name"
+      )
+
+      expect(Kazan, :run, fn _, _ -> {:ok, deployment("namespace", "name")} end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
+      {:ok, %{data: %{"deployment" => deployment}}} =
+        run_query(
+          """
+            query deployment($serviceId: ID!) {
+              deployment(serviceId: $serviceId, namespace: "namespace", name: "name") {
+                spec {
+                  replicas
+                  selector {
+                    matchLabels
+                    matchExpressions {
+                      key
+                      operator
+                      values
+                    }
+                  }
+                }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
+
+      assert deployment["spec"]["replicas"] == 3
+      assert deployment["spec"]["selector"] == %{"matchLabels" => %{"label" => "value"}, "matchExpressions" => nil}
     end
   end
 
@@ -99,27 +183,79 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     test "it can fetch services by namespace/name" do
       user = insert(:user)
       svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])
-      insert(:service_component, service: svc, group: nil, version: "v1", kind: "Service", namespace: "namespace", name: "name")
+
+      insert(:service_component,
+        service: svc,
+        group: nil,
+        version: "v1",
+        kind: "Service",
+        namespace: "namespace",
+        name: "name"
+      )
+
       expect(Kazan, :run, fn _, _ -> {:ok, service("namespace", "name")} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"service" => service}}} = run_query("""
-        query service($serviceId: ID!) {
-          service(serviceId: $serviceId, namespace: "namespace", name: "name") {
-            metadata { name }
-            status {
-              loadBalancer { ingress { ip } }
+      {:ok, %{data: %{"service" => service}}} =
+        run_query(
+          """
+            query service($serviceId: ID!) {
+              service(serviceId: $serviceId, namespace: "namespace", name: "name") {
+                metadata { name }
+                status {
+                  loadBalancer { ingress { ip } }
+                }
+                spec {
+                  type
+                }
+              }
             }
-            spec {
-              type
-            }
-          }
-        }
-      """, %{"serviceId" => svc.id}, %{current_user: user})
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
 
       assert service["metadata"]["name"] == "name"
       assert service["status"]["loadBalancer"]["ingress"] == [%{"ip" => "1.2.3.4"}]
       assert service["spec"]["type"] == "LoadBalancer"
+    end
+
+    test "service spec includes sessionAffinity and selector (used by component info view)" do
+      user = insert(:user)
+      svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])
+
+      insert(:service_component,
+        service: svc,
+        group: nil,
+        version: "v1",
+        kind: "Service",
+        namespace: "namespace",
+        name: "name"
+      )
+
+      expect(Kazan, :run, fn _, _ -> {:ok, service("namespace", "name")} end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
+      {:ok, %{data: %{"service" => service}}} =
+        run_query(
+          """
+            query service($serviceId: ID!) {
+              service(serviceId: $serviceId, namespace: "namespace", name: "name") {
+                spec {
+                  type
+                  sessionAffinity
+                  selector
+                }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
+
+      assert service["spec"]["type"] == "LoadBalancer"
+      assert service["spec"]["sessionAffinity"] == "ClientIP"
+      assert service["spec"]["selector"] == %{"label" => "value", "app" => "myapp"}
     end
   end
 
@@ -127,37 +263,213 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     test "it can fetch ingresses by namespace/name" do
       user = insert(:user)
       svc = insert(:service, namespace: "namespace", read_bindings: [%{user_id: user.id}])
-      insert(:service_component, service: svc, group: "networking.k8s.io", version: "v1", kind: "Ingress", namespace: "namespace", name: "name")
+
+      insert(:service_component,
+        service: svc,
+        group: "networking.k8s.io",
+        version: "v1",
+        kind: "Ingress",
+        namespace: "namespace",
+        name: "name"
+      )
+
       expect(Kazan, :run, fn _, _ -> {:ok, ingress("namespace", "name")} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"ingress" => ingress}}} = run_query("""
-        query ingress($serviceId: ID!) {
-          ingress(serviceId: $serviceId, namespace: "namespace", name: "name") {
-            metadata { name }
-            status {
-              loadBalancer { ingress { ip } }
-            }
-            spec {
-              tls { hosts }
-              rules {
-                host
-                http {
-                  paths { path }
+      {:ok, %{data: %{"ingress" => ingress}}} =
+        run_query(
+          """
+            query ingress($serviceId: ID!) {
+              ingress(serviceId: $serviceId, namespace: "namespace", name: "name") {
+                metadata { name }
+                status {
+                  loadBalancer { ingress { ip } }
+                }
+                spec {
+                  tls { hosts }
+                  rules {
+                    host
+                    http {
+                      paths { path }
+                    }
+                  }
                 }
               }
             }
-          }
-        }
-      """, %{"serviceId" => svc.id}, %{current_user: user})
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
 
       assert ingress["metadata"]["name"] == "name"
       assert ingress["status"]["loadBalancer"]["ingress"] == [%{"ip" => "1.2.3.4"}]
       assert ingress["spec"]["tls"] == [%{"hosts" => ["example.com"]}]
-      assert ingress["spec"]["rules"] == [%{"host" => "example.com", "http" => %{"paths" => [%{"path" => "*"}]}}]
+
+      assert ingress["spec"]["rules"] == [
+               %{"host" => "example.com", "http" => %{"paths" => [%{"path" => "*"}]}}
+             ]
+    end
+
+    test "resolves v1 ingress backend service name and port (service.port.number and service.port.name)" do
+      user = insert(:user)
+      svc = insert(:service, namespace: "ns", read_bindings: [%{user_id: user.id}])
+
+      insert(:service_component,
+        service: svc,
+        group: "networking.k8s.io",
+        version: "v1",
+        kind: "Ingress",
+        namespace: "ns",
+        name: "ing"
+      )
+
+      expect(Kazan, :run, fn _, _ -> {:ok, ingress_with_v1_backends("ns", "ing")} end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
+      {:ok, %{data: %{"ingress" => ingress}}} =
+        run_query(
+          """
+            query ingress($serviceId: ID!) {
+              ingress(serviceId: $serviceId, namespace: "ns", name: "ing") {
+                spec {
+                  rules {
+                    host
+                    http {
+                      paths {
+                        path
+                        pathType
+                        backend {
+                          serviceName
+                          servicePort
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
+
+      paths = ingress["spec"]["rules"] |> List.first() |> get_in(["http", "paths"])
+
+      assert Enum.find(paths, &(&1["path"] == "/ext/kas")) == %{
+               "path" => "/ext/kas",
+               "pathType" => "Prefix",
+               "backend" => %{"serviceName" => "console-kas-service", "servicePort" => "8180"}
+             }
+
+      assert Enum.find(paths, &(&1["path"] == "/api")) == %{
+               "path" => "/api",
+               "pathType" => "Prefix",
+               "backend" => %{"serviceName" => "console-kas-service", "servicePort" => "8000"}
+             }
+
+      assert Enum.find(paths, &(&1["path"] == "/ext/ai")) == %{
+               "path" => "/ext/ai",
+               "pathType" => "Prefix",
+               "backend" => %{"serviceName" => "console", "servicePort" => "nexus-http"}
+             }
+
+      assert Enum.find(paths, &(&1["path"] == "/")) == %{
+               "path" => "/",
+               "pathType" => "Prefix",
+               "backend" => %{"serviceName" => "console", "servicePort" => "http"}
+             }
+    end
+
+    test "resolves legacy ingress backend service name (service_name key)" do
+      user = insert(:user)
+      svc = insert(:service, namespace: "ns", read_bindings: [%{user_id: user.id}])
+
+      insert(:service_component,
+        service: svc,
+        group: "networking.k8s.io",
+        version: "v1",
+        kind: "Ingress",
+        namespace: "ns",
+        name: "ing"
+      )
+
+      expect(Kazan, :run, fn _, _ -> {:ok, ingress_with_legacy_backend("ns", "ing")} end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
+      {:ok, %{data: %{"ingress" => ingress}}} =
+        run_query(
+          """
+            query ingress($serviceId: ID!) {
+              ingress(serviceId: $serviceId, namespace: "ns", name: "ing") {
+                spec {
+                  rules {
+                    http {
+                      paths {
+                        path
+                        backend { serviceName servicePort }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
+
+      [path] =
+        ingress["spec"]["rules"]
+        |> List.first()
+        |> get_in(["http", "paths"])
+
+      assert path["backend"]["serviceName"] == "legacy-web-svc"
+      assert path["backend"]["servicePort"] == "8080"
+    end
+
+    test "resolves legacy ingress backend service port (service_port key)" do
+      user = insert(:user)
+      svc = insert(:service, namespace: "ns", read_bindings: [%{user_id: user.id}])
+
+      insert(:service_component,
+        service: svc,
+        group: "networking.k8s.io",
+        version: "v1",
+        kind: "Ingress",
+        namespace: "ns",
+        name: "ing"
+      )
+
+      expect(Kazan, :run, fn _, _ -> {:ok, ingress_with_legacy_backend("ns", "ing")} end)
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
+      {:ok, %{data: %{"ingress" => ingress}}} =
+        run_query(
+          """
+            query ingress($serviceId: ID!) {
+              ingress(serviceId: $serviceId, namespace: "ns", name: "ing") {
+                spec {
+                  rules {
+                    http {
+                      paths { backend { servicePort } }
+                    }
+                  }
+                }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id},
+          %{current_user: user}
+        )
+
+      [path] =
+        ingress["spec"]["rules"]
+        |> List.first()
+        |> get_in(["http", "paths"])
+
+      assert path["backend"]["servicePort"] == "8080"
     end
   end
-
 
   describe "node" do
     test "it can resolve a node in the cluster" do
@@ -165,18 +477,23 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       expect(Kazan, :run, fn _, _ -> {:ok, kube_node()} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"node" => node}}} = run_query("""
-        query Node($clusterId: ID!, $name: String!) {
-          node(clusterId: $clusterId, name: $name) {
-            metadata { name }
-            status {
-              allocatable
-              capacity
+      {:ok, %{data: %{"node" => node}}} =
+        run_query(
+          """
+            query Node($clusterId: ID!, $name: String!) {
+              node(clusterId: $clusterId, name: $name) {
+                metadata { name }
+                status {
+                  allocatable
+                  capacity
+                }
+                spec { providerId }
+              }
             }
-            spec { providerId }
-          }
-        }
-      """, %{"clusterId" => cluster.id, "name" => "node"}, %{current_user: admin_user()})
+          """,
+          %{"clusterId" => cluster.id, "name" => "node"},
+          %{current_user: admin_user()}
+        )
 
       assert node["metadata"]["name"]
       assert node["status"]["allocatable"]["cpu"]
@@ -191,19 +508,33 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     test "it can read a cron job" do
       user = insert(:user)
       svc = insert(:service, namespace: "cron", read_bindings: [%{user_id: user.id}])
-      insert(:service_component, service: svc, group: "batch", version: "v1", kind: "CronJob", namespace: "cron", name: "cron")
+
+      insert(:service_component,
+        service: svc,
+        group: "batch",
+        version: "v1",
+        kind: "CronJob",
+        namespace: "cron",
+        name: "cron"
+      )
+
       expect(Kazan, :run, fn _, _ -> {:ok, cron("cron")} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"cronJob" => cron}}} = run_query("""
-        query Cron($serviceId: ID!, $name: String!) {
-          cronJob(serviceId: $serviceId, name: $name, namespace: $name) {
-            metadata { name }
-            status { lastScheduleTime }
-            spec { schedule suspend concurrencyPolicy }
-          }
-        }
-      """, %{"name" => "cron", "serviceId" => svc.id}, %{current_user: user})
+      {:ok, %{data: %{"cronJob" => cron}}} =
+        run_query(
+          """
+            query Cron($serviceId: ID!, $name: String!) {
+              cronJob(serviceId: $serviceId, name: $name, namespace: $name) {
+                metadata { name }
+                status { lastScheduleTime }
+                spec { schedule suspend concurrencyPolicy }
+              }
+            }
+          """,
+          %{"name" => "cron", "serviceId" => svc.id},
+          %{current_user: user}
+        )
 
       assert cron["metadata"]["name"] == "cron"
       assert cron["status"]["lastScheduleTime"]
@@ -217,19 +548,33 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     test "it can read a job" do
       user = insert(:user)
       svc = insert(:service, namespace: "job", read_bindings: [%{user_id: user.id}])
-      insert(:service_component, service: svc, group: "batch", version: "v1", kind: "Job", namespace: "job", name: "job")
+
+      insert(:service_component,
+        service: svc,
+        group: "batch",
+        version: "v1",
+        kind: "Job",
+        namespace: "job",
+        name: "job"
+      )
+
       expect(Kazan, :run, fn _, _ -> {:ok, job("job")} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"job" => job}}} = run_query("""
-        query Cron($serviceId: ID!, $name: String!) {
-          job(serviceId: $serviceId, name: $name, namespace: $name) {
-            metadata { name }
-            status { active }
-            spec { parallelism backoffLimit }
-          }
-        }
-      """, %{"serviceId" => svc.id, "name" => "job"}, %{current_user: user})
+      {:ok, %{data: %{"job" => job}}} =
+        run_query(
+          """
+            query Cron($serviceId: ID!, $name: String!) {
+              job(serviceId: $serviceId, name: $name, namespace: $name) {
+                metadata { name }
+                status { active }
+                spec { parallelism backoffLimit }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id, "name" => "job"},
+          %{current_user: user}
+        )
 
       assert job["metadata"]["name"] == "job"
       assert job["status"]["active"]
@@ -245,16 +590,21 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("certificate")} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"certificate" => certificate}}} = run_query("""
-        query Cron($name: String!) {
-          certificate(name: $name, namespace: $name) {
-            metadata { name }
-            status { renewalTime }
-            spec { dnsNames secretName }
-            raw
-          }
-        }
-      """, %{"name" => "certificate"}, %{current_user: user})
+      {:ok, %{data: %{"certificate" => certificate}}} =
+        run_query(
+          """
+            query Cron($name: String!) {
+              certificate(name: $name, namespace: $name) {
+                metadata { name }
+                status { renewalTime }
+                spec { dnsNames secretName }
+                raw
+              }
+            }
+          """,
+          %{"name" => "certificate"},
+          %{current_user: user}
+        )
 
       assert certificate["metadata"]["name"] == "certificate"
       assert certificate["status"]["renewalTime"]
@@ -271,15 +621,20 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kazan, :run, fn _, _ -> {:ok, pod("name")} end)
 
-      {:ok, %{data: %{"pod" => pod}}} = run_query("""
-        query Pod($serviceId: ID!, $name: String!) {
-          pod(serviceId: $serviceId, name: $name, namespace: $name) {
-            metadata { name }
-            status { podIp }
-            spec { nodeName }
-          }
-        }
-      """, %{"serviceId" => svc.id, "name" => "name"}, %{current_user: user})
+      {:ok, %{data: %{"pod" => pod}}} =
+        run_query(
+          """
+            query Pod($serviceId: ID!, $name: String!) {
+              pod(serviceId: $serviceId, name: $name, namespace: $name) {
+                metadata { name }
+                status { podIp }
+                spec { nodeName }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id, "name" => "name"},
+          %{current_user: user}
+        )
 
       assert pod["metadata"]["name"] == "name"
       assert pod["status"]["podIp"]
@@ -289,22 +644,29 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     test "it can query logs for a pod" do
       user = insert(:user)
       svc = insert(:service, namespace: "name", read_bindings: [%{user_id: user.id}])
+
       expect(Kazan, :run, 2, fn
         %{path: "/api/v1/namespaces/name/pods/name/log"}, _ -> {:ok, "some logs\nreturned"}
         _, _ -> {:ok, pod("name")}
       end)
+
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"pod" => pod}}} = run_query("""
-        query Pod($serviceId: ID!, $name: String!) {
-          pod(serviceId: $serviceId, name: $name, namespace: $name) {
-            metadata { name }
-            status { podIp }
-            spec { nodeName }
-            logs(container: "test", sinceSeconds: 5)
-          }
-        }
-      """, %{"serviceId" => svc.id, "name" => "name"}, %{current_user: user})
+      {:ok, %{data: %{"pod" => pod}}} =
+        run_query(
+          """
+            query Pod($serviceId: ID!, $name: String!) {
+              pod(serviceId: $serviceId, name: $name, namespace: $name) {
+                metadata { name }
+                status { podIp }
+                spec { nodeName }
+                logs(container: "test", sinceSeconds: 5)
+              }
+            }
+          """,
+          %{"serviceId" => svc.id, "name" => "name"},
+          %{current_user: user}
+        )
 
       assert pod["metadata"]["name"] == "name"
       assert pod["status"]["podIp"]
@@ -318,21 +680,27 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       user = insert(:user)
       cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
       expect(Kube.Utils, :run, 2, fn
         %{path: "/api/v1/namespaces/name/pods/name/log"} -> {:ok, "some logs\nreturned"}
         _ -> {:ok, pod("name")}
       end)
 
-      {:ok, %{data: %{"pod" => pod}}} = run_query("""
-        query Pod($name: String!, $clusterId: ID!) {
-          pod(name: $name, namespace: $name, clusterId: $clusterId) {
-            metadata { name }
-            status { podIp }
-            spec { nodeName }
-            logs(container: "test", sinceSeconds: 5)
-          }
-        }
-      """, %{"name" => "name", "clusterId" => cluster.id}, %{current_user: user})
+      {:ok, %{data: %{"pod" => pod}}} =
+        run_query(
+          """
+            query Pod($name: String!, $clusterId: ID!) {
+              pod(name: $name, namespace: $name, clusterId: $clusterId) {
+                metadata { name }
+                status { podIp }
+                spec { nodeName }
+                logs(container: "test", sinceSeconds: 5)
+              }
+            }
+          """,
+          %{"name" => "name", "clusterId" => cluster.id},
+          %{current_user: user}
+        )
 
       assert pod["metadata"]["name"] == "name"
       assert pod["status"]["podIp"]
@@ -348,9 +716,14 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       user = insert(:user)
       expect(Kazan, :run, fn _ -> {:ok, version_info()} end)
 
-      {:ok, %{data: %{"clusterInfo" => info}}} = run_query("""
-        query { clusterInfo { gitCommit version platform } }
-      """, %{}, %{current_user: user})
+      {:ok, %{data: %{"clusterInfo" => info}}} =
+        run_query(
+          """
+            query { clusterInfo { gitCommit version platform } }
+          """,
+          %{},
+          %{current_user: user}
+        )
 
       assert info["gitCommit"]
       assert info["version"] == "12.01"
@@ -365,13 +738,18 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       expect(Kazan, :run, fn _, _ -> {:ok, %{items: [node_metrics("node-1")]}} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"nodeMetrics" => [node]}}} = run_query("""
-        query nodeMetrics($clusterId: ID!) {
-          nodeMetrics(clusterId: $clusterId) {
-            usage { cpu memory }
-          }
-        }
-      """, %{"clusterId" => cluster.id}, %{current_user: user})
+      {:ok, %{data: %{"nodeMetrics" => [node]}}} =
+        run_query(
+          """
+            query nodeMetrics($clusterId: ID!) {
+              nodeMetrics(clusterId: $clusterId) {
+                usage { cpu memory }
+              }
+            }
+          """,
+          %{"clusterId" => cluster.id},
+          %{current_user: user}
+        )
 
       assert node["usage"]["cpu"] == "1"
       assert node["usage"]["memory"] == "2M"
@@ -385,13 +763,18 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       expect(Kazan, :run, fn _, _ -> {:ok, node_metrics("node-1")} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"nodeMetric" => node}}} = run_query("""
-        query nodeMetric($clusterId: ID!) {
-          nodeMetric(clusterId: $clusterId, name: "node-1") {
-            usage { cpu memory }
-          }
-        }
-      """, %{"clusterId" => cluster.id}, %{current_user: user})
+      {:ok, %{data: %{"nodeMetric" => node}}} =
+        run_query(
+          """
+            query nodeMetric($clusterId: ID!) {
+              nodeMetric(clusterId: $clusterId, name: "node-1") {
+                usage { cpu memory }
+              }
+            }
+          """,
+          %{"clusterId" => cluster.id},
+          %{current_user: user}
+        )
 
       assert node["usage"]["cpu"] == "1"
       assert node["usage"]["memory"] == "2M"
@@ -404,15 +787,20 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       expect(Kazan, :run, fn _, _ -> {:ok, %{items: [namespace_scaffold("test")]}} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"namespaces" => [namespace]}}} = run_query("""
-        query namespaces($clusterId: ID!) {
-          namespaces(clusterId: $clusterId) {
-            metadata { name }
-            status { phase }
-            spec { finalizers }
-          }
-        }
-      """, %{"clusterId" => cluster.id}, %{current_user: admin_user()})
+      {:ok, %{data: %{"namespaces" => [namespace]}}} =
+        run_query(
+          """
+            query namespaces($clusterId: ID!) {
+              namespaces(clusterId: $clusterId) {
+                metadata { name }
+                status { phase }
+                spec { finalizers }
+              }
+            }
+          """,
+          %{"clusterId" => cluster.id},
+          %{current_user: admin_user()}
+        )
 
       assert namespace["metadata"]["name"] == "test"
       assert namespace["status"]["phase"] == "Created"
@@ -424,18 +812,32 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     test "users can view config maps" do
       user = admin_user()
       svc = insert(:service, namespace: "name", read_bindings: [%{user_id: user.id}])
-      insert(:service_component, service: svc, group: nil, version: "v1", kind: "ConfigMap", namespace: "name", name: "name")
+
+      insert(:service_component,
+        service: svc,
+        group: nil,
+        version: "v1",
+        kind: "ConfigMap",
+        namespace: "name",
+        name: "name"
+      )
+
       expect(Kazan, :run, fn _, _ -> {:ok, config_map("name")} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"configMap" => conf}}} = run_query("""
-        query Conf($serviceId: ID!, $name: String!) {
-          configMap(serviceId: $serviceId, namespace: $name, name: $name) {
-            metadata { name }
-            data
-          }
-        }
-      """, %{"serviceId" => svc.id, "name" => "name"}, %{current_user: user})
+      {:ok, %{data: %{"configMap" => conf}}} =
+        run_query(
+          """
+            query Conf($serviceId: ID!, $name: String!) {
+              configMap(serviceId: $serviceId, namespace: $name, name: $name) {
+                metadata { name }
+                data
+              }
+            }
+          """,
+          %{"serviceId" => svc.id, "name" => "name"},
+          %{current_user: user}
+        )
 
       assert conf["metadata"]["name"] == "name"
       assert conf["data"]["some"] == "config"
@@ -446,18 +848,32 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
     test "admins can view secrets" do
       user = admin_user()
       svc = insert(:service, namespace: "name", read_bindings: [%{user_id: user.id}])
-      insert(:service_component, service: svc, group: nil, version: "v1", kind: "Secret", namespace: "name", name: "name")
+
+      insert(:service_component,
+        service: svc,
+        group: nil,
+        version: "v1",
+        kind: "Secret",
+        namespace: "name",
+        name: "name"
+      )
+
       expect(Kazan, :run, fn _, _ -> {:ok, secret("name")} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"secret" => conf}}} = run_query("""
-        query Conf($serviceId: ID!, $name: String!) {
-          secret(serviceId: $serviceId, namespace: $name, name: $name) {
-            metadata { name }
-            data
-          }
-        }
-      """, %{"serviceId" => svc.id, "name" => "name"}, %{current_user: user})
+      {:ok, %{data: %{"secret" => conf}}} =
+        run_query(
+          """
+            query Conf($serviceId: ID!, $name: String!) {
+              secret(serviceId: $serviceId, namespace: $name, name: $name) {
+                metadata { name }
+                data
+              }
+            }
+          """,
+          %{"serviceId" => svc.id, "name" => "name"},
+          %{current_user: user}
+        )
 
       assert conf["metadata"]["name"] == "name"
       assert conf["data"]["some"] == "secret"
@@ -467,14 +883,19 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       user = insert(:user)
       svc = insert(:service, namespace: "name")
 
-      {:ok, %{errors: [_ | _]}} = run_query("""
-        query Conf($serviceId: ID!, $name: String!) {
-          secret(serviceId: $serviceId, namespace: $name, name: $name) {
-            metadata { name }
-            data
-          }
-        }
-      """, %{"serviceId" => svc.id, "name" => "name"}, %{current_user: user})
+      {:ok, %{errors: [_ | _]}} =
+        run_query(
+          """
+            query Conf($serviceId: ID!, $name: String!) {
+              secret(serviceId: $serviceId, namespace: $name, name: $name) {
+                metadata { name }
+                data
+              }
+            }
+          """,
+          %{"serviceId" => svc.id, "name" => "name"},
+          %{current_user: user}
+        )
     end
   end
 
@@ -483,21 +904,36 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       user = insert(:user)
       cluster = insert(:cluster, self: true)
       svc = insert(:service, cluster: cluster, read_bindings: [%{user_id: user.id}])
-      insert(:service_component, group: nil, namespace: nil, service: svc, kind: "Namespace", name: "test", version: "v1")
+
+      insert(:service_component,
+        group: nil,
+        namespace: nil,
+        service: svc,
+        kind: "Namespace",
+        name: "test",
+        version: "v1"
+      )
+
       expect(Clusters, :api_discovery, fn _ -> %{} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+
       expect(Kube.Utils, :run, fn
         %{path: "/api/v1/namespaces/test"} ->
           {:ok, %{"apiVersion" => "v1", "kind" => "Namespace", "metadata" => %{"name" => "test"}}}
       end)
 
-      {:ok, %{data: %{"unstructuredResource" => found}}} = run_query("""
-        query Unstructured($svc: ID!) {
-          unstructuredResource(name: "test", kind: "Namespace", version: "v1", serviceId: $svc) {
-            raw
-          }
-        }
-      """, %{"svc" => svc.id}, %{current_user: user})
+      {:ok, %{data: %{"unstructuredResource" => found}}} =
+        run_query(
+          """
+            query Unstructured($svc: ID!) {
+              unstructuredResource(name: "test", kind: "Namespace", version: "v1", serviceId: $svc) {
+                raw
+              }
+            }
+          """,
+          %{"svc" => svc.id},
+          %{current_user: user}
+        )
 
       assert found["raw"]["apiVersion"] == "v1"
     end
@@ -507,18 +943,25 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       cluster = insert(:cluster, self: true)
       svc = insert(:service, cluster: cluster, read_bindings: [%{user_id: user.id}])
       expect(Clusters, :api_discovery, fn _ -> %{} end)
+
       expect(Kube.Utils, :run, fn %{path: "/api/v1/namespaces/test"} ->
         {:ok, %{"apiVersion" => "v1", "kind" => "Namespace", "metadata" => %{"name" => "test"}}}
       end)
+
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{errors: [_ | _]}} = run_query("""
-        query Unstructured($svc: ID!) {
-          unstructuredResource(name: "test", kind: "Namespace", version: "v1", serviceId: $svc) {
-            raw
-          }
-        }
-      """, %{"svc" => svc.id}, %{current_user: user})
+      {:ok, %{errors: [_ | _]}} =
+        run_query(
+          """
+            query Unstructured($svc: ID!) {
+              unstructuredResource(name: "test", kind: "Namespace", version: "v1", serviceId: $svc) {
+                raw
+              }
+            }
+          """,
+          %{"svc" => svc.id},
+          %{current_user: user}
+        )
     end
   end
 
@@ -527,19 +970,33 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       admin = admin_user()
       cluster = insert(:cluster)
       svc = insert(:service, namespace: "name", read_bindings: [%{user_id: admin.id}])
-      insert(:service_component, service: svc, group: "deployments.plural.sh", version: "v1alpha1", kind: "Cluster", namespace: "name", name: "name")
+
+      insert(:service_component,
+        service: svc,
+        group: "deployments.plural.sh",
+        version: "v1alpha1",
+        kind: "Cluster",
+        namespace: "name",
+        name: "name"
+      )
+
       expect(Kube.Utils, :run, fn _ -> {:ok, plural_cluster("name", cluster.id)} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"pluralCluster" => found}}} = run_query("""
-        query Cluster($serviceId: ID!, $name: String!) {
-          pluralCluster(serviceId: $serviceId, name: $name, namespace: $name) {
-            metadata { name namespace }
-            reference { id }
-            status { id }
-          }
-        }
-      """, %{"serviceId" => svc.id, "name" => "name"}, %{current_user: admin})
+      {:ok, %{data: %{"pluralCluster" => found}}} =
+        run_query(
+          """
+            query Cluster($serviceId: ID!, $name: String!) {
+              pluralCluster(serviceId: $serviceId, name: $name, namespace: $name) {
+                metadata { name namespace }
+                reference { id }
+                status { id }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id, "name" => "name"},
+          %{current_user: admin}
+        )
 
       assert found["metadata"]["name"] == "name"
       assert found["reference"]["id"] == cluster.id
@@ -552,19 +1009,33 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       admin = admin_user()
       service = insert(:service)
       svc = insert(:service, namespace: "name", read_bindings: [%{user_id: admin.id}])
-      insert(:service_component, service: svc, group: "deployments.plural.sh", version: "v1alpha1", kind: "ServiceDeployment", namespace: "name", name: "name")
+
+      insert(:service_component,
+        service: svc,
+        group: "deployments.plural.sh",
+        version: "v1alpha1",
+        kind: "ServiceDeployment",
+        namespace: "name",
+        name: "name"
+      )
+
       expect(Kube.Utils, :run, fn _ -> {:ok, service_deployment("name", service.id)} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"pluralServiceDeployment" => found}}} = run_query("""
-        query service($serviceId: ID!, $name: String!) {
-          pluralServiceDeployment(name: $name, namespace: $name, serviceId: $serviceId) {
-            metadata { name namespace }
-            reference { id }
-            status { id }
-          }
-        }
-      """, %{"serviceId" => svc.id, "name" => "name"}, %{current_user: admin})
+      {:ok, %{data: %{"pluralServiceDeployment" => found}}} =
+        run_query(
+          """
+            query service($serviceId: ID!, $name: String!) {
+              pluralServiceDeployment(name: $name, namespace: $name, serviceId: $serviceId) {
+                metadata { name namespace }
+                reference { id }
+                status { id }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id, "name" => "name"},
+          %{current_user: admin}
+        )
 
       assert found["metadata"]["name"] == "name"
       assert found["reference"]["id"] == service.id
@@ -577,19 +1048,33 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       admin = admin_user()
       git_repository = insert(:git_repository)
       svc = insert(:service, namespace: "name", read_bindings: [%{user_id: admin.id}])
-      insert(:service_component, service: svc, group: "deployments.plural.sh", version: "v1alpha1", kind: "GitRepository", namespace: "name", name: "name")
+
+      insert(:service_component,
+        service: svc,
+        group: "deployments.plural.sh",
+        version: "v1alpha1",
+        kind: "GitRepository",
+        namespace: "name",
+        name: "name"
+      )
+
       expect(Kube.Utils, :run, fn _ -> {:ok, git_repository("name", git_repository.id)} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
 
-      {:ok, %{data: %{"pluralGitRepository" => found}}} = run_query("""
-        query service($serviceId: ID!, $name: String!) {
-          pluralGitRepository(serviceId: $serviceId, name: $name, namespace: $name) {
-            metadata { name namespace }
-            reference { id }
-            status { id }
-          }
-        }
-      """, %{"serviceId" => svc.id, "name" => "name"}, %{current_user: admin})
+      {:ok, %{data: %{"pluralGitRepository" => found}}} =
+        run_query(
+          """
+            query service($serviceId: ID!, $name: String!) {
+              pluralGitRepository(serviceId: $serviceId, name: $name, namespace: $name) {
+                metadata { name namespace }
+                reference { id }
+                status { id }
+              }
+            }
+          """,
+          %{"serviceId" => svc.id, "name" => "name"},
+          %{current_user: admin}
+        )
 
       assert found["metadata"]["name"] == "name"
       assert found["reference"]["id"] == git_repository.id

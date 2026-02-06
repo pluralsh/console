@@ -2720,9 +2720,10 @@ type CronJob struct {
 }
 
 type CronSpec struct {
-	Schedule          string  `json:"schedule"`
-	Suspend           *bool   `json:"suspend,omitempty"`
-	ConcurrencyPolicy *string `json:"concurrencyPolicy,omitempty"`
+	Schedule                string  `json:"schedule"`
+	Suspend                 *bool   `json:"suspend,omitempty"`
+	ConcurrencyPolicy       *string `json:"concurrencyPolicy,omitempty"`
+	StartingDeadlineSeconds *int64  `json:"startingDeadlineSeconds,omitempty"`
 }
 
 type CronStatus struct {
@@ -3026,6 +3027,7 @@ type DeploymentSettingsAttributes struct {
 
 type DeploymentSpec struct {
 	Replicas *int64              `json:"replicas,omitempty"`
+	Selector *LabelSelector      `json:"selector,omitempty"`
 	Strategy *DeploymentStrategy `json:"strategy,omitempty"`
 }
 
@@ -3946,8 +3948,9 @@ type IngressBackend struct {
 }
 
 type IngressPath struct {
-	Backend *IngressBackend `json:"backend,omitempty"`
-	Path    *string         `json:"path,omitempty"`
+	Backend  *IngressBackend `json:"backend,omitempty"`
+	Path     *string         `json:"path,omitempty"`
+	PathType *string         `json:"pathType,omitempty"`
 }
 
 type IngressRule struct {
@@ -4035,14 +4038,16 @@ type JobSpec struct {
 	BackoffLimit          *int64 `json:"backoffLimit,omitempty"`
 	Parallelism           *int64 `json:"parallelism,omitempty"`
 	ActiveDeadlineSeconds *int64 `json:"activeDeadlineSeconds,omitempty"`
+	Completions           *int64 `json:"completions,omitempty"`
 }
 
 type JobStatus struct {
-	Active         *int64  `json:"active,omitempty"`
-	CompletionTime *string `json:"completionTime,omitempty"`
-	StartTime      *string `json:"startTime,omitempty"`
-	Succeeded      *int64  `json:"succeeded,omitempty"`
-	Failed         *int64  `json:"failed,omitempty"`
+	Active         *int64             `json:"active,omitempty"`
+	CompletionTime *string            `json:"completionTime,omitempty"`
+	StartTime      *string            `json:"startTime,omitempty"`
+	Succeeded      *int64             `json:"succeeded,omitempty"`
+	Failed         *int64             `json:"failed,omitempty"`
+	Conditions     []*StatusCondition `json:"conditions,omitempty"`
 }
 
 type KnowledgeEvidence struct {
@@ -4117,6 +4122,17 @@ type LabelInput struct {
 type LabelPair struct {
 	Name  *string `json:"name,omitempty"`
 	Value *string `json:"value,omitempty"`
+}
+
+type LabelSelector struct {
+	MatchLabels      map[string]any              `json:"matchLabels,omitempty"`
+	MatchExpressions []*LabelSelectorRequirement `json:"matchExpressions,omitempty"`
+}
+
+type LabelSelectorRequirement struct {
+	Key      *string   `json:"key,omitempty"`
+	Operator *string   `json:"operator,omitempty"`
+	Values   []*string `json:"values,omitempty"`
 }
 
 type LoadBalancerIngressStatus struct {
@@ -7538,10 +7554,11 @@ type ServiceSourceAttributes struct {
 }
 
 type ServiceSpec struct {
-	Type      *string        `json:"type,omitempty"`
-	ClusterIP *string        `json:"clusterIp,omitempty"`
-	Selector  map[string]any `json:"selector,omitempty"`
-	Ports     []*ServicePort `json:"ports,omitempty"`
+	Type            *string        `json:"type,omitempty"`
+	ClusterIP       *string        `json:"clusterIp,omitempty"`
+	SessionAffinity *string        `json:"sessionAffinity,omitempty"`
+	Selector        map[string]any `json:"selector,omitempty"`
+	Ports           []*ServicePort `json:"ports,omitempty"`
 }
 
 type ServiceStatus struct {

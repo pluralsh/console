@@ -1,4 +1,10 @@
-import { Button, SubTab, TabList, TabPanel } from '@pluralsh/design-system'
+import {
+  Button,
+  KubernetesAltIcon,
+  SubTab,
+  TabList,
+  TabPanel,
+} from '@pluralsh/design-system'
 import { ViewLogsButton } from 'components/component/ViewLogsButton'
 import { useLogin } from 'components/contexts'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
@@ -31,6 +37,12 @@ import {
   isUnstructured,
   useFetchComponentDetails,
 } from './useFetchComponentDetails.tsx'
+import {
+  getKubernetesCustomResourceDetailsPath,
+  getResourceDetailsAbsPath,
+  isCRD,
+} from 'routes/kubernetesRoutesConsts.tsx'
+import { Kind } from 'components/kubernetes/common/types.ts'
 
 export type ComponentDetailsContext = {
   component: ServiceDeploymentComponentFragment
@@ -170,6 +182,12 @@ export function ComponentDetails({
                   </LinkTabWrap>
                 ))}
               </TabList>
+              {service?.cluster?.id && (
+                <ViewInDashboardButton
+                  clusterId={service.cluster.id}
+                  component={component}
+                />
+              )}
               {pluralServiceDeploymentRef?.id &&
                 pluralServiceDeploymentRef?.cluster?.id && (
                   <Button
@@ -180,7 +198,7 @@ export function ComponentDetails({
                       clusterId: pluralServiceDeploymentRef?.cluster.id,
                     })}
                   >
-                    View service
+                    View Service
                   </Button>
                 )}
               {!service?.id && (
@@ -207,5 +225,58 @@ export function ComponentDetails({
         </TabPanel>
       </ResponsivePageFullWidth>
     </PageHeaderContext.Provider>
+  )
+}
+
+function ViewInDashboardButton({
+  clusterId,
+  component,
+}: {
+  clusterId: string
+  component: ServiceDeploymentComponentFragment
+}) {
+  const { name, kind, namespace, group } = component
+
+  const supportedResourceKind = useMemo(
+    () => Object.values(Kind).find((k) => k === kind?.toLowerCase()),
+    [kind]
+  )
+
+  const to = useMemo(() => {
+    // Supported core resources.
+    if (supportedResourceKind) {
+      return getResourceDetailsAbsPath(
+        clusterId,
+        supportedResourceKind,
+        name,
+        namespace
+      )
+    }
+
+    // Custom resources.
+    if (kind && group && isCRD(group)) {
+      return getKubernetesCustomResourceDetailsPath({
+        clusterId,
+        group,
+        kind,
+        name,
+        namespace,
+      })
+    }
+
+    return undefined
+  }, [clusterId, group, kind, name, namespace, supportedResourceKind])
+
+  if (!to) return undefined
+
+  return (
+    <Button
+      as={Link}
+      secondary
+      startIcon={<KubernetesAltIcon />}
+      to={to}
+    >
+      View in Dashboard
+    </Button>
   )
 }

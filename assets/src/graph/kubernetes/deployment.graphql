@@ -12,6 +12,14 @@ fragment Deployment on Deployment {
   }
   spec {
     replicas
+    selector {
+      matchLabels
+      matchExpressions {
+        key
+        operator
+        values
+      }
+    }
     strategy {
       type
     }

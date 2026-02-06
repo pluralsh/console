@@ -99,6 +99,7 @@ import DaemonSets from '../components/kubernetes/workloads/DaemonSets'
 import Deployment, {
   DeploymentEvents,
   DeploymentHorizontalPodAutoscalers,
+  DeploymentPods,
   DeploymentReplicaSets,
 } from '../components/kubernetes/workloads/Deployment'
 import Deployments from '../components/kubernetes/workloads/Deployments'
@@ -439,9 +440,13 @@ export const kubernetesRoutes = (
         element={
           <Navigate
             replace
-            to="replicasets"
+            to="pods"
           />
         }
+      />
+      <Route
+        path="pods"
+        element={<DeploymentPods />}
       />
       <Route
         path="replicasets"
@@ -559,7 +564,7 @@ export const kubernetesRoutes = (
         element={
           <Navigate
             replace
-            to="conditions"
+            to="pods"
           />
         }
       />

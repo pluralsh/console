@@ -1,4 +1,4 @@
-import { Table, Tooltip } from '@pluralsh/design-system'
+import { Flex, Table, Tooltip } from '@pluralsh/design-system'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 import { TableText } from 'components/cluster/TableElements'
 import { useMemo } from 'react'
@@ -125,7 +125,11 @@ export default function CronJob() {
   if (cronJob?.__typename !== 'CronJob') return null
 
   return (
-    <>
+    <Flex
+      direction="column"
+      gap="large"
+      grow={1}
+    >
       <InfoSection title="Jobs">
         <CronJobJobs
           jobs={cronJob?.jobs ?? []}
@@ -133,26 +137,34 @@ export default function CronJob() {
           refetch={refetch}
         />
       </InfoSection>
-      <InfoSection title="Status">
-        <PaddedCard>
-          <PropWideBold title="Last scheduled">
-            {cronJob?.status?.lastScheduleTime || 0}
-          </PropWideBold>
-        </PaddedCard>
-      </InfoSection>
-      <InfoSection title="Spec">
-        <PaddedCard>
-          <PropWideBold title="Schedule">
-            {cronJob?.spec?.schedule || '-'}
-          </PropWideBold>
-          <PropWideBold title="Concurrency">
-            {cronJob?.spec?.concurrencyPolicy || '-'}
-          </PropWideBold>
-          <PropWideBold title="Suspended">
-            {cronJob?.spec?.suspend ? 'Yes' : 'No'}
-          </PropWideBold>
-        </PaddedCard>
-      </InfoSection>
-    </>
+      <Flex
+        direction="row"
+        gap="large"
+      >
+        <InfoSection title="Status">
+          <PaddedCard>
+            <PropWideBold title="Last scheduled">
+              {cronJob?.status?.lastScheduleTime || 0}
+            </PropWideBold>
+          </PaddedCard>
+        </InfoSection>
+        <InfoSection title="Spec">
+          <PaddedCard>
+            <PropWideBold title="Schedule">
+              {cronJob?.spec?.schedule || '-'}
+            </PropWideBold>
+            <PropWideBold title="Concurrency">
+              {cronJob?.spec?.concurrencyPolicy || '-'}
+            </PropWideBold>
+            <PropWideBold title="Suspended">
+              {cronJob?.spec?.suspend ? 'Yes' : 'No'}
+            </PropWideBold>
+            <PropWideBold title="Starting deadline seconds">
+              {cronJob?.spec?.startingDeadlineSeconds ?? '-'}
+            </PropWideBold>
+          </PaddedCard>
+        </InfoSection>
+      </Flex>
+    </Flex>
   )
 }

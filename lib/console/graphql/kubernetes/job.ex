@@ -32,11 +32,13 @@ defmodule Console.GraphQl.Kubernetes.Job do
     field :start_time,      :string
     field :succeeded,       :integer
     field :failed,          :integer
+    field :conditions,      list_of(:status_condition)
   end
 
   object :job_spec do
     field :backoff_limit,           :integer
     field :parallelism,             :integer
     field :active_deadline_seconds, :integer
+    field :completions,             :integer
   end
 end
