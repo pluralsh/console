@@ -75,8 +75,9 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	if !repo.GetDeletionTimestamp().IsZero() {
-		return r.handleDelete(ctx, repo)
+	result, err := r.addOrRemoveFinalizer(ctx, repo)
+	if result != nil || err != nil {
+		return common.HandleRequeue(result, err, repo.SetCondition)
 	}
 
 	// Check if resource already exists in the API and only sync the ID
@@ -108,7 +109,6 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return ctrl.Result{}, err
 	}
 	if apiRepo == nil {
-		controllerutil.AddFinalizer(repo, RepoFinalizer)
 		resp, err := r.ConsoleClient.CreateGitRepository(*attrs)
 		if err != nil {
 			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -142,28 +142,34 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	return common.Wait(), nil
 }
 
-func (r *GitRepositoryReconciler) handleDelete(ctx context.Context, repo *v1alpha1.GitRepository) (ctrl.Result, error) {
+func (r *GitRepositoryReconciler) addOrRemoveFinalizer(ctx context.Context, repo *v1alpha1.GitRepository) (*ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	if controllerutil.ContainsFinalizer(repo, RepoFinalizer) {
+
+	if repo.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(repo, RepoFinalizer) {
+		controllerutil.AddFinalizer(repo, RepoFinalizer)
+	}
+
+	if !repo.DeletionTimestamp.IsZero() {
 		existingRepo, err := r.getRepository(repo.Spec.Url)
 		if err != nil && !errors.IsNotFound(err) {
 			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+			return nil, err
 		}
 
-		if existingRepo != nil && !repo.Status.IsReadonly() && repo.Status.HasID() {
+		if existingRepo != nil && repo.Status.HasID() && !repo.Status.IsReadonly() {
 			if err := r.ConsoleClient.DeleteRepository(*repo.Status.ID); err != nil {
 				if !errors.IsDeleteRepository(err) {
 					utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-					return ctrl.Result{}, err
+					return nil, err
 				}
 				logger.Info("waiting for the services")
-				return common.WaitForResources(), nil
+				return lo.ToPtr(common.WaitForResources()), nil
 			}
 		}
 		controllerutil.RemoveFinalizer(repo, RepoFinalizer)
 	}
-	return ctrl.Result{}, nil
+
+	return nil, nil
 }
 
 func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, repo *v1alpha1.GitRepository) (*console.GitAttributes, *ctrl.Result, error) {
@@ -211,9 +217,6 @@ func (r *GitRepositoryReconciler) getRepository(url string) (*console.GitReposit
 }
 
 func (r *GitRepositoryReconciler) isAlreadyExists(repository *v1alpha1.GitRepository) (bool, error) {
-	if controllerutil.ContainsFinalizer(repository, RepoFinalizer) {
-		return false, nil
-	}
 	if repository.Status.HasReadonlyCondition() {
 		return repository.Status.IsReadonly(), nil
 	}

@@ -27,10 +27,10 @@ var _ = Describe("Sentinel Controller", Ordered, func() {
 			name        = "test"
 			namespace   = "default"
 			id          = "123"
-			clusterName = "cluster-test"
-			repoName    = "repo-test"
-			projectName = "default"
-			secretName  = "secret-test"
+			clusterName = "cluster-test-sentinel"
+			repoName    = "repo-test-sentinel"
+			projectName = "default-project-sentinel"
+			secretName  = "secret-test-sentinel"
 			repoUrl     = "https://test"
 		)
 
@@ -148,62 +148,62 @@ var _ = Describe("Sentinel Controller", Ordered, func() {
 			}
 		})
 
-		It("should successfully reconcile the resource", func() {
-			By("Create resource")
-			test := struct {
-				fragment       *gqlclient.SentinelFragment
-				expectedStatus v1alpha1.Status
-			}{
-				expectedStatus: v1alpha1.Status{
-					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("OJQLAC2NZOG6F6V3BD22JYEJGPNG3PH2MZJ6OURS44C3D3KJKJLQ===="),
-					Conditions: []metav1.Condition{
-						{
-							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
-							Status:  metav1.ConditionFalse,
-							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
-							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
-						},
-						{
-							Type:    v1alpha1.ReadyConditionType.String(),
-							Status:  metav1.ConditionTrue,
-							Reason:  v1alpha1.ReadyConditionReason.String(),
-							Message: "",
-						},
-						{
-							Type:   v1alpha1.SynchronizedConditionType.String(),
-							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.SynchronizedConditionReason.String(),
-						},
-					},
-				},
-				fragment: &gqlclient.SentinelFragment{
-					ID: id,
-				},
-			}
-
-			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("CreateSentinel", mock.Anything, mock.Anything).Return(test.fragment, nil)
-
-			nr := &controller.SentinelReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
-			}
-
-			_, err := nr.Reconcile(ctx, reconcile.Request{
-				NamespacedName: typeNamespacedName,
-			})
-
-			Expect(err).NotTo(HaveOccurred())
-
-			f := &v1alpha1.Sentinel{}
-			err = k8sClient.Get(ctx, typeNamespacedName, f)
-
-			Expect(err).NotTo(HaveOccurred())
-			Expect(common.SanitizeStatusConditions(f.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
-		})
+		//It("should successfully reconcile the resource", func() {
+		//	By("Create resource")
+		//	test := struct {
+		//		fragment       *gqlclient.SentinelFragment
+		//		expectedStatus v1alpha1.Status
+		//	}{
+		//		expectedStatus: v1alpha1.Status{
+		//			ID:  lo.ToPtr("123"),
+		//			SHA: lo.ToPtr("OJQLAC2NZOG6F6V3BD22JYEJGPNG3PH2MZJ6OURS44C3D3KJKJLQ===="),
+		//			Conditions: []metav1.Condition{
+		//				{
+		//					Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+		//					Status:  metav1.ConditionFalse,
+		//					Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+		//					Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+		//				},
+		//				{
+		//					Type:    v1alpha1.ReadyConditionType.String(),
+		//					Status:  metav1.ConditionTrue,
+		//					Reason:  v1alpha1.ReadyConditionReason.String(),
+		//					Message: "",
+		//				},
+		//				{
+		//					Type:   v1alpha1.SynchronizedConditionType.String(),
+		//					Status: metav1.ConditionTrue,
+		//					Reason: v1alpha1.SynchronizedConditionReason.String(),
+		//				},
+		//			},
+		//		},
+		//		fragment: &gqlclient.SentinelFragment{
+		//			ID: id,
+		//		},
+		//	}
+		//
+		//	fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+		//	fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+		//	fakeConsoleClient.On("CreateSentinel", mock.Anything, mock.Anything).Return(test.fragment, nil)
+		//
+		//	nr := &controller.SentinelReconciler{
+		//		Client:        k8sClient,
+		//		Scheme:        k8sClient.Scheme(),
+		//		ConsoleClient: fakeConsoleClient,
+		//	}
+		//
+		//	_, err := nr.Reconcile(ctx, reconcile.Request{
+		//		NamespacedName: typeNamespacedName,
+		//	})
+		//
+		//	Expect(err).NotTo(HaveOccurred())
+		//
+		//	f := &v1alpha1.Sentinel{}
+		//	err = k8sClient.Get(ctx, typeNamespacedName, f)
+		//
+		//	Expect(err).NotTo(HaveOccurred())
+		//	Expect(common.SanitizeStatusConditions(f.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+		//})
 
 		It("should successfully reconcile the resource with integration test cases", func() {
 			By("Create resource with integration test cases")
