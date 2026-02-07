@@ -26,6 +26,7 @@ import { InlineLink } from 'components/utils/typography/InlineLink'
 import ejs from 'ejs'
 import {
   ClusterOverviewDetailsFragment,
+  ClusterUpgradeFragment,
   ClusterUpgradeStatus,
   useCreateClusterUpgradeMutation,
 } from 'generated/graphql'
@@ -34,6 +35,7 @@ import { Link } from 'react-router-dom'
 import { AI_SETTINGS_AGENT_RUNTIMES_ABS_PATH } from 'routes/settingsRoutesConst'
 import { useTheme } from 'styled-components'
 import clusterUpgradePrompt from './cluster-upgrade-prompt.ejs?raw'
+import { ClusterUpgradeAgentFlyover } from './ClusterUpgradeAgentFlyover'
 
 type CurUpgradeStatus = 'none' | 'running' | 'completed' | 'failed'
 
@@ -43,6 +45,7 @@ export function ClusterUpgradeAgentButton({
   cluster: ClusterOverviewDetailsFragment
 }) {
   const { colors } = useTheme()
+  const [flyoverOpen, setFlyoverOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [prompt, setPrompt] = useState(() =>
     ejs.render(clusterUpgradePrompt, { cluster })
@@ -58,27 +61,15 @@ export function ClusterUpgradeAgentButton({
         id: cluster.id,
         attributes: { prompt, runtimeId },
       },
+      onCompleted: () => setFlyoverOpen(true),
+      refetchQueries: ['ClusterOverviewDetails'],
+      awaitRefetchQueries: true,
     })
 
-  const curUpgradeStatus = getCurUpgradeStatus(cluster)
-
-  if (curUpgradeStatus === 'running' || curUpgradeStatus === 'completed')
-    return curUpgradeStatus === 'running' ? (
-      <Button
-        floating
-        startIcon={<SpinnerAlt />}
-      >
-        View upgrade progress
-      </Button>
-    ) : (
-      <Chip
-        clickable
-        size="large"
-        icon={<PrOpenIcon />}
-      >
-        Review upgrade plan
-      </Chip>
-    )
+  const curUpgrade = cluster.currentUpgrade
+  const curUpgradeStatus = getCurUpgradeStatus(curUpgrade)
+  const renderPopupForm =
+    curUpgradeStatus === 'none' || curUpgradeStatus === 'failed'
 
   const canSubmit = !!runtimeId && !!prompt && !loading
   return (
@@ -96,92 +87,118 @@ export function ClusterUpgradeAgentButton({
             Upgrade plan failed
           </Chip>
         )}
-        <Button
-          ref={menuBtnRef}
-          onClick={() => setDropdownOpen((prev) => !prev)}
-          startIcon={<AiSparkleFilledIcon />}
-          disabled={!!dropdownOpen}
-        >
-          Attempt upgrade
-        </Button>
-      </Flex>
-      <AgentRunFormPopupSC
-        type="header"
-        linkStyles={false}
-        isOpen={dropdownOpen}
-        setIsOpen={setDropdownOpen}
-        fillLevel={1}
-        css={{ transform: 'translateY(-10px)' }}
-      >
-        {error && <GqlError error={error} />}
-        <StretchedFlex>
-          <StackedText
-            first="Cluster upgrade"
-            firstPartialType="body1"
-            firstColor="text-light"
-            icon={<DiscoverIcon />}
-            iconGap="xsmall"
-          />
-          <IconFrame
+        {curUpgradeStatus === 'completed' ? (
+          <Chip
             clickable
-            size="small"
-            icon={<CloseIcon color={colors['icon-light']} />}
-            onClick={() => setDropdownOpen(false)}
-          />
-        </StretchedFlex>
-        <FormField
-          label="Select a runtime"
-          caption={
-            <InlineLink
-              as={Link}
-              to={AI_SETTINGS_AGENT_RUNTIMES_ABS_PATH}
-              target="_blank"
-            >
-              Runtime settings
-            </InlineLink>
-          }
+            size="large"
+            icon={<PrOpenIcon />}
+            onClick={() => setFlyoverOpen(true)}
+          >
+            Review upgrade plan
+          </Chip>
+        ) : curUpgradeStatus === 'running' ? (
+          <Button
+            floating
+            startIcon={<SpinnerAlt />}
+            onClick={() => setFlyoverOpen(true)}
+          >
+            View upgrade progress
+          </Button>
+        ) : (
+          <Button
+            ref={menuBtnRef}
+            onClick={() => setDropdownOpen((prev) => !prev)}
+            startIcon={<AiSparkleFilledIcon />}
+            disabled={!!dropdownOpen}
+          >
+            Attempt upgrade
+          </Button>
+        )}
+      </Flex>
+      {renderPopupForm && (
+        <AgentRunFormPopupSC
+          type="header"
+          linkStyles={false}
+          isOpen={dropdownOpen}
+          setIsOpen={setDropdownOpen}
+          fillLevel={1}
+          css={{ transform: 'translateY(-10px)' }}
         >
-          <FillLevelDiv fillLevel={2}>
-            <AIAgentRuntimesSelector
-              autoSelectDefault
-              allowDeselect={false}
-              selectedRuntimeId={runtimeId}
-              setSelectedRuntimeId={(runtimeId) =>
-                runtimeId && setRuntimeId(runtimeId)
-              }
-              outerStyles={{ width: '100%' }}
+          {error && <GqlError error={error} />}
+          <StretchedFlex>
+            <StackedText
+              first="Cluster upgrade"
+              firstPartialType="body1"
+              firstColor="text-light"
+              icon={<DiscoverIcon />}
+              iconGap="xsmall"
             />
-          </FillLevelDiv>
-        </FormField>
-        <PromptInputBoxSC>
-          <EditableDiv
-            initialValue={prompt}
-            setValue={setPrompt}
-            placeholder="Enter a prompt for the AI agent"
-            disabled={loading}
-            css={{ height: 140 }}
-          />
-        </PromptInputBoxSC>
-        <Button
-          disabled={!canSubmit}
-          loading={loading}
-          onClick={() => createClusterUpgrade()}
-          alignSelf="end"
-        >
-          Attempt upgrade
-        </Button>
-      </AgentRunFormPopupSC>
+            <IconFrame
+              clickable
+              size="small"
+              icon={<CloseIcon color={colors['icon-light']} />}
+              onClick={() => setDropdownOpen(false)}
+            />
+          </StretchedFlex>
+          <FormField
+            label="Select a runtime"
+            caption={
+              <InlineLink
+                as={Link}
+                to={AI_SETTINGS_AGENT_RUNTIMES_ABS_PATH}
+                target="_blank"
+              >
+                Runtime settings
+              </InlineLink>
+            }
+          >
+            <FillLevelDiv fillLevel={2}>
+              <AIAgentRuntimesSelector
+                autoSelectDefault
+                allowDeselect={false}
+                selectedRuntimeId={runtimeId}
+                setSelectedRuntimeId={(runtimeId) =>
+                  runtimeId && setRuntimeId(runtimeId)
+                }
+                outerStyles={{ width: '100%' }}
+              />
+            </FillLevelDiv>
+          </FormField>
+          <PromptInputBoxSC>
+            <EditableDiv
+              initialValue={prompt}
+              setValue={setPrompt}
+              placeholder="Enter a prompt for the AI agent"
+              disabled={loading}
+              css={{ height: 140 }}
+            />
+          </PromptInputBoxSC>
+          <Button
+            disabled={!canSubmit}
+            loading={loading}
+            onClick={() => createClusterUpgrade()}
+            alignSelf="end"
+          >
+            Attempt upgrade
+          </Button>
+        </AgentRunFormPopupSC>
+      )}
+      {curUpgrade && (
+        <ClusterUpgradeAgentFlyover
+          clusterUpgrade={curUpgrade}
+          open={flyoverOpen}
+          onClose={() => setFlyoverOpen(false)}
+        />
+      )}
     </div>
   )
 }
 
 const getCurUpgradeStatus = (
-  cluster: ClusterOverviewDetailsFragment
+  clusterUpgrade: Nullable<ClusterUpgradeFragment>
 ): CurUpgradeStatus => {
-  const curUpgrade = cluster.currentUpgrade
-
-  if (!curUpgrade) return 'none'
-  switch (curUpgrade.status) {
+  if (!clusterUpgrade) return 'none'
+  switch (clusterUpgrade.status) {
     case ClusterUpgradeStatus.Pending:
     case ClusterUpgradeStatus.InProgress:
       return 'running'

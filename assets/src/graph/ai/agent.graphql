@@ -133,6 +133,13 @@ fragment ClusterUpgrade on ClusterUpgrade {
   steps {
     ...ClusterUpgradeStep
   }
+  cluster {
+    ...ClusterMinimal
+  }
+  runtime {
+    type
+    name
+  }
   version
 }
 
