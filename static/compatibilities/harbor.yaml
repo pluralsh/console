@@ -8,26 +8,64 @@ versions:
   kube: ['1.34', '1.33', '1.32']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: [Introduces a replication adapter whitelist to explicitly define
+        which replication adapters are actively supported (and therefore allowed).,
+      "Replication: optional \u201CSingle Active Replication\u201D mode to prevent\
+        \ parallel executions under the same policy.", Proxy-cache behavior improved
+        to better synchronize with upstream registries (purges local cache when upstream
+        artifacts are deleted; can serve local manifests when digests match upstream).,
+      'Artifact scanning enhancements: CVE reports can include fixVersion; vulnerability
+        checking behavior improved for non-scannable artifacts.', 'Garbage collection
+        UX improvement: shows GC progress while a run is in progress.', 'CNAI (CloudNativeAI)
+        integration enhanced: supports raw CNAI model format.', 'Jobservice enhancement:
+        retention count for job executions can be customized via environment variable
+        (new configurability).', Various component/dependency updates and UI fixes;
+        adds Russian language support.]
+    features: ["Enhanced proxy-cache: Harbor can delete local cached artifacts when\
+        \ they\u2019re removed upstream and can serve a local manifest when its digest\
+        \ matches upstream.", Single Active Replication option to ensure only one
+        replication execution runs at a time per policy (prevents overlapping parallel
+        runs)., 'Enhanced artifact scanning: CVE reports can include fixVersion and
+        Harbor can better handle/skip checks for non-scannable artifacts.', 'Enhanced
+        garbage collection visibility: GC progress is displayed while GC is running.',
+      'Enhanced CNAI model support: raw CNAI model format is now supported.']
+    breaking_changes: ['Replication adapter whitelist introduced: deployments may
+        need to explicitly allow the replication adapters they use; unsupported/unlisted
+        adapters may no longer work until permitted.']
   chart_version: 1.18.0
-  images: ['goharbor/harbor-core:v2.14.0', 'goharbor/harbor-db:v2.14.0', 'goharbor/harbor-jobservice:v2.14.0',
-    'goharbor/harbor-portal:v2.14.0', 'goharbor/harbor-registryctl:v2.14.0', 'goharbor/redis-photon:v2.14.0',
-    'goharbor/registry-photon:v2.14.0', 'goharbor/trivy-adapter-photon:v2.14.0']
+  images: []
 - version: 2.13.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['Audit log extension: adds a new audit_log_ext table plus API/filtering
+        to provide more granular and performant audit event tracking (including login/logout/config/user
+        events).', 'Enhanced OIDC: adds PKCE support and improves logout/session handling
+        and related audit logging.', 'Redis TLS support: Harbor core/jobservice can
+        now connect to Redis over TLS (including external Redis TLS options).', 'CloudNativeAI
+        integration: introduces a CNAI model processor and a new AI Model artifact
+        type for managing AI model artifacts.', 'Enhanced Dragonfly/P2P preheating:
+        extends preheat policies with new parameters, scope customization, and targeting
+        (useful for large AI model images).']
+    breaking_changes: [CSRF key generation changed; existing deployments may need
+        to regenerate/rotate CSRF-related secrets to avoid login/session issues after
+        upgrade., Removed the with_signature option; any automation or integrations
+        relying on it must be updated/removed., 'RBAC change: Project maintainers/developers/guests
+        can no longer list project logs; only higher-privilege roles can access those
+        logs now.', robotV1 removed from the codebase (deprecation realized); any
+        clients/scripts using legacy robot APIs must migrate to the newer robot account
+        model.]
   chart_version: 1.17.0
-  images: ['goharbor/harbor-core:v2.13.0', 'goharbor/harbor-db:v2.13.0', 'goharbor/harbor-jobservice:v2.13.0',
-    'goharbor/harbor-portal:v2.13.0', 'goharbor/harbor-registryctl:v2.13.0', 'goharbor/redis-photon:v2.13.0',
-    'goharbor/registry-photon:v2.13.0', 'goharbor/trivy-adapter-photon:v2.13.0']
+  images: []
 - version: 2.12.0
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.16.0
-  images: ['goharbor/harbor-core:v2.12.0', 'goharbor/harbor-db:v2.12.0', 'goharbor/harbor-jobservice:v2.12.0',
-    'goharbor/harbor-portal:v2.12.0', 'goharbor/harbor-registryctl:v2.12.0', 'goharbor/redis-photon:v2.12.0',
-    'goharbor/registry-photon:v2.12.0', 'goharbor/trivy-adapter-photon:v2.12.0']
+  images: []

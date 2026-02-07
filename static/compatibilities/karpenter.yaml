@@ -27,7 +27,7 @@ versions:
   chart_version: 1.8.0
   images: ['public.ecr.aws/karpenter/controller:1.8.0@sha256:f913075cdd31cfcdfaa9726ca7a0b264832fc42e8a48eb573a2a0f454b38b112']
 - version: 1.6.0
-  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
+  kube: ['1.34', '1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary:
@@ -64,7 +64,7 @@ versions:
   chart_version: 1.6.0
   images: ['public.ecr.aws/karpenter/controller:1.6.0@sha256:37c761a3a0b485fd34db1390317ef6149141f532c5a699c528b98fb8f9cc722a']
 - version: 1.5.0
-  kube: ['1.33', '1.32', '1.31', '1.30', '1.29', '1.28']
+  kube: ['1.33', '1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary:
@@ -97,7 +97,7 @@ versions:
   chart_version: 1.5.0
   images: ['public.ecr.aws/karpenter/controller:1.5.0@sha256:339aef3f5ecdf6f94d1c7cc9d0e1d359c281b4f9b842877bdbf2acd3fa360521']
 - version: 1.2.0
-  kube: ['1.32', '1.31', '1.30', '1.29', '1.28']
+  kube: ['1.32', '1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary:
@@ -111,14 +111,14 @@ versions:
   chart_version: 1.2.0
   images: ['public.ecr.aws/karpenter/controller:1.2.0@sha256:24b8fe57f02b70fc4ab3cd6d5aa0d73a6f3d0c62ca5d23d7ffc8853eac01e324']
 - version: 1.0.5
-  kube: ['1.31', '1.30', '1.29', '1.28']
+  kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary: null
   chart_version: 1.0.5
   images: ['public.ecr.aws/karpenter/controller:1.0.5@sha256:f2df98735b232b143d37f0c6819a6cae2be4740e3c8b38297bceb365cf3f668b']
 - version: 0.37.0
-  kube: ['1.30', '1.29', '1.28']
+  kube: ['1.30', '1.29']
   requirements: []
   incompatibilities: []
   summary:
@@ -163,7 +163,7 @@ versions:
   chart_version: 0.37.0
   images: ['public.ecr.aws/karpenter/controller:0.37.0@sha256:157f478f5db1fe999f5e2d27badcc742bf51cc470508b3cebe78224d0947674f']
 - version: 0.34.0
-  kube: ['1.29', '1.28']
+  kube: ['1.29']
   requirements: []
   incompatibilities: []
   summary: null
