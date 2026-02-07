@@ -1,6 +1,7 @@
 import {
   ClusterIcon,
   ComboBox,
+  FillLevel,
   Input2,
   ListBoxFooter,
   ListBoxFooterPlus,
@@ -32,6 +33,7 @@ export default function ClusterSelector({
   placeholder = 'Filter by cluster',
   deselectLabel = 'Show all clusters',
   inputProps,
+  fillLevel = 1,
   ...props
 }: {
   onClusterChange: (cluster: ClusterTinyFragment | null) => void
@@ -42,6 +44,7 @@ export default function ClusterSelector({
   placeholder?: string
   deselectLabel?: string
   inputProps?: ComponentPropsWithRef<typeof Input2>
+  fillLevel?: FillLevel
 } & Omit<ComponentPropsWithRef<typeof ComboBox>, 'children'>) {
   const theme = useTheme()
   const projectId = useProjectId()
@@ -83,7 +86,7 @@ export default function ClusterSelector({
   )
 
   return (
-    <FillLevelDiv fillLevel={1}>
+    <FillLevelDiv fillLevel={fillLevel}>
       <ComboBox
         inputProps={{
           placeholder: selectedCluster ? selectedCluster.name : placeholder,

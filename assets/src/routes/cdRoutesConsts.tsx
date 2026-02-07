@@ -45,6 +45,7 @@ export const CLUSTER_PRS_REL_PATH = 'prs' as const
 export const CLUSTER_VCLUSTERS_REL_PATH = 'vclusters' as const
 export const CLUSTER_LOGS_PATH = 'logs' as const
 export const CLUSTER_ALERTS_REL_PATH = 'alerts' as const
+export const CLUSTER_UPGRADES_REL_PATH = 'upgrades' as const
 export const SERVICE_SETTINGS_GIT_REL_PATH = 'git' as const
 export const SERVICE_SETTINGS_HELM_REL_PATH = 'helm' as const
 export const SERVICE_SETTINGS_SECRETS_REL_PATH = 'secrets' as const

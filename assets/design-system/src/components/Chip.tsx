@@ -11,7 +11,7 @@ import Card, { type CardFillLevel, useDecideFillLevel } from './Card'
 import CloseIcon from './icons/CloseIcon'
 import { Spinner } from './Spinner'
 import Tooltip from './Tooltip'
-import { SemanticColorKey } from 'src/theme/colors'
+import { type SemanticColorKey } from '../theme/colors'
 
 export const CHIP_CLOSE_ATTR_KEY = 'data-close-button' as const
 export type ChipSize = 'small' | 'medium' | 'large'

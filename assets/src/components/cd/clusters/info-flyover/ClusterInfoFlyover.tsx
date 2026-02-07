@@ -22,27 +22,23 @@ import { getKubernetesAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
 import { getClusterKubeVersion } from '../runtime/RuntimeServices.tsx'
 import { HealthScoreTab } from './health/HealthScoreTab.tsx'
 import { OverviewTab } from './overview/OverviewTab.tsx'
-import { UpgradeAccordionName, UpgradesTab } from './upgrades/UpgradesTab.tsx'
 
 const MIN_WIDTH = 920
 
 export enum ClusterInfoFlyoverTab {
   Overview = 'Overview',
   HealthScore = 'Health score',
-  Upgrades = 'Upgrades',
 }
 
 export function ClusterInfoFlyover({
   open,
   onClose,
   cluster,
-  refetch,
   initialTab,
 }: {
   open: boolean
   onClose: () => void
   cluster: Nullable<ClustersRowFragment>
-  refetch: Nullable<() => void>
   initialTab: ClusterInfoFlyoverTab
 }) {
   return (
@@ -93,7 +89,6 @@ export function ClusterInfoFlyover({
       <ClusterInfoFlyoverContent
         initialTab={initialTab}
         clusterBasic={cluster}
-        refetch={refetch}
       />
     </Flyover>
   )
@@ -102,15 +97,12 @@ export function ClusterInfoFlyover({
 function ClusterInfoFlyoverContent({
   initialTab,
   clusterBasic,
-  refetch,
 }: {
   initialTab: ClusterInfoFlyoverTab
   clusterBasic: Nullable<ClustersRowFragment>
-  refetch: Nullable<() => void>
 }) {
   const [tab, setTab] = useState(initialTab)
-  const [upgradesInitialOpen, setUpgradesInitialOpen] =
-    useState<UpgradeAccordionName>()
+
   const kubeVersion = getClusterKubeVersion(clusterBasic)
   const parsedKubeVersion =
     semver.coerce(kubeVersion) ?? semver.coerce('1.21.0')
@@ -128,7 +120,6 @@ function ClusterInfoFlyoverContent({
   })
 
   const cluster = data?.cluster
-  const kubernetesChangelog = data?.kubernetesChangelog
 
   if (!cluster) return loading ? <LoadingIndicator /> : null
   if (error) return <GqlError error={error} />
@@ -153,19 +144,10 @@ function ClusterInfoFlyoverContent({
           <OverviewTab
             cluster={cluster}
             setTab={setTab}
-            setUpgradesInitialOpen={setUpgradesInitialOpen}
           />
         )}
         {tab === ClusterInfoFlyoverTab.HealthScore && (
           <HealthScoreTab cluster={cluster} />
-        )}
-        {tab === ClusterInfoFlyoverTab.Upgrades && (
-          <UpgradesTab
-            cluster={cluster}
-            refetch={refetch}
-            initialOpen={upgradesInitialOpen}
-            kubernetesChangelog={kubernetesChangelog}
-          />
         )}
       </Flex>
     </FillLevelProvider>

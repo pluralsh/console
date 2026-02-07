@@ -440,22 +440,12 @@ export const ColUpgradeable = columnHelper.accessor(
     id: 'upgradeable',
     header: 'Upgradeable',
     meta: { gridTemplate: 'min-content' },
-    cell: ({ table, row: { original } }) => {
+    cell: ({ row: { original } }) => {
       const cluster = original.node
-      const { setFlyoverTab, setSelectedCluster } = table.options
-        .meta as ClustersTableMeta
 
       if (!cluster) return null
 
-      return (
-        <ClusterUpgradeButton
-          cluster={cluster}
-          onClick={() => {
-            setSelectedCluster?.(cluster)
-            setFlyoverTab?.(ClusterInfoFlyoverTab.Upgrades)
-          }}
-        />
-      )
+      return <ClusterUpgradeButton cluster={cluster} />
     },
   }
 )

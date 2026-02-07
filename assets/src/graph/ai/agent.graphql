@@ -115,6 +115,34 @@ fragment AgentMessageDelta on AgentMessageDelta {
   }
 }
 
+fragment ClusterUpgradeStep on ClusterUpgradeStep {
+  id
+  name
+  prompt
+  status
+  type
+  error
+  agentRun {
+    ...AgentRunTiny
+  }
+}
+
+fragment ClusterUpgrade on ClusterUpgrade {
+  id
+  status
+  steps {
+    ...ClusterUpgradeStep
+  }
+  cluster {
+    ...ClusterMinimal
+  }
+  runtime {
+    type
+    name
+  }
+  version
+}
+
 query AgentRuns($after: String, $first: Int = 100, $runtimeId: ID) {
   agentRuns(after: $after, first: $first, runtimeId: $runtimeId) {
     pageInfo {
@@ -211,6 +239,15 @@ mutation UpsertAgentRuntime($attributes: AgentRuntimeAttributes!) {
 mutation ShareAgentRun($id: ID!, $shared: Boolean!) {
   shareAgentRun(id: $id, shared: $shared) {
     ...AgentRunTiny
+  }
+}
+
+mutation CreateClusterUpgrade(
+  $id: ID!
+  $attributes: ClusterUpgradeAttributes!
+) {
+  createClusterUpgrade(id: $id, attributes: $attributes) {
+    ...ClusterUpgrade
   }
 }
 

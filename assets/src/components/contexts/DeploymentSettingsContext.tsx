@@ -43,6 +43,12 @@ export function useAIEnabled() {
   return ctx.ai?.enabled
 }
 
+export function useLatestK8sVsn() {
+  const ctx = useDeploymentSettings()
+
+  return ctx.latestK8sVsn
+}
+
 export function useOnboarded() {
   const { data, loading } = use(DeploymentSettingsContext)
   return data?.onboarded === true || loading // don't show popup if still loading settings

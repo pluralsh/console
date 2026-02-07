@@ -80,7 +80,7 @@ fragment CloudAddonUpgrade on CloudAddonUpgrade {
   }
 }
 
-fragment ClusterUpgrade on Cluster {
+fragment ClusterWithUpgrade on Cluster {
   ...ClusterRuntimeServices
   prAutomations {
     id
@@ -100,8 +100,11 @@ fragment ClusterUpgrade on Cluster {
 
 fragment ClusterOverviewDetails on Cluster {
   ...ClustersRow
-  ...ClusterUpgrade
+  ...ClusterWithUpgrade
   ...ClusterInsight
+  currentUpgrade {
+    ...ClusterUpgrade
+  }
   nodeStatistics {
     ...NodeStatistic
   }

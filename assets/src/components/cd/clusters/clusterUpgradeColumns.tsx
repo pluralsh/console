@@ -4,7 +4,14 @@ import { CheckIcon, Chip, ListBoxItem, Select } from '@pluralsh/design-system'
 
 import { ApolloError } from '@apollo/client'
 import isEmpty from 'lodash/isEmpty'
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from 'react'
+import {
+  Dispatch,
+  SetStateAction,
+  use,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 import { useTheme } from 'styled-components'
 
 import { coerce } from 'semver'
@@ -25,8 +32,11 @@ import { TabularNumbers } from '../../cluster/TableElements'
 
 import { ClusterUpgradePR } from './ClusterUpgradePR'
 
+import { useLatestK8sVsn } from 'components/contexts/DeploymentSettingsContext'
+import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { StackedText } from 'components/utils/table/StackedText'
 import { ClustersUpgradeNow } from './ClustersUpgradeNow'
+import { ClusterUpgradeAgentButton } from './ClusterUpgradeAgentButton'
 
 type PreFlightChecklistItem = {
   key: keyof ClusterUpgradePlanFragment
@@ -75,6 +85,9 @@ export const clusterUpgradeColumns = [
     cell: function Cell({ table, getValue, row: { original } }) {
       const theme = useTheme()
       const cluster = getValue()
+      const latestK8sVsn = useLatestK8sVsn()
+      const agentEnabled = use(FeatureFlagContext).featureFlags.Agent
+
       const upgrades = useMemo(
         () => supportedUpgrades(cluster.version, supportedVersions(cluster)),
         [cluster]
@@ -103,6 +116,8 @@ export const clusterUpgradeColumns = [
             setError={setError}
           />
         )
+      if (latestK8sVsn && cluster.version !== latestK8sVsn && agentEnabled)
+        return <ClusterUpgradeAgentButton cluster={cluster} />
 
       if (isEmpty(upgrades) || original.self) return null
 
