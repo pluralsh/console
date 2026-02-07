@@ -1,4 +1,6 @@
 import {
+  Accordion,
+  AccordionItem,
   AiSparkleFilledIcon,
   Button,
   Chip,
@@ -23,7 +25,6 @@ import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import ejs from 'ejs'
 import {
   ClusterOverviewDetailsFragment,
   ClusterUpgradeFragment,
@@ -34,7 +35,6 @@ import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_SETTINGS_AGENT_RUNTIMES_ABS_PATH } from 'routes/settingsRoutesConst'
 import { useTheme } from 'styled-components'
-import clusterUpgradePrompt from './cluster-upgrade-prompt.ejs?raw'
 import { ClusterUpgradeAgentFlyover } from './ClusterUpgradeAgentFlyover'
 
 type CurUpgradeStatus = 'none' | 'running' | 'completed' | 'failed'
@@ -47,9 +47,7 @@ export function ClusterUpgradeAgentButton({
   const { colors } = useTheme()
   const [flyoverOpen, setFlyoverOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
-  const [prompt, setPrompt] = useState(() =>
-    ejs.render(clusterUpgradePrompt, { cluster })
-  )
+  const [prompt, setPrompt] = useState<Nullable<string>>(null)
   const [runtimeId, setRuntimeId] = useState<string>('')
 
   const menuBtnRef = useRef<HTMLButtonElement>(null)
@@ -71,7 +69,7 @@ export function ClusterUpgradeAgentButton({
   const renderPopupForm =
     curUpgradeStatus === 'none' || curUpgradeStatus === 'failed'
 
-  const canSubmit = !!runtimeId && !!prompt && !loading
+  const canSubmit = !!runtimeId && !loading
   return (
     <div css={{ position: 'relative', whiteSpace: 'nowrap' }}>
       <Flex
@@ -164,15 +162,18 @@ export function ClusterUpgradeAgentButton({
               />
             </FillLevelDiv>
           </FormField>
-          <PromptInputBoxSC>
-            <EditableDiv
-              initialValue={prompt}
-              setValue={setPrompt}
-              placeholder="Enter a prompt for the AI agent"
-              disabled={loading}
-              css={{ height: 140 }}
-            />
-          </PromptInputBoxSC>
+          <Accordion type="single">
+            <AccordionItem trigger="Customize agent prompt">
+              <PromptInputBoxSC>
+                <EditableDiv
+                  setValue={setPrompt}
+                  placeholder="Enter a custom prompt for the AI agent (useful for handling legacy setups that Plural doesn't natively know about)"
+                  disabled={loading}
+                  css={{ height: 140 }}
+                />
+              </PromptInputBoxSC>
+            </AccordionItem>
+          </Accordion>
           <Button
             disabled={!canSubmit}
             loading={loading}

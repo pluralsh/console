@@ -15,6 +15,8 @@ Some guidance on what is useful for the coding agent to know:
 1. Location of the code that is used to deploy this addon.  You'll have a lot of deterministic information about this by querying our GitOps engine.
 2. Whether it's managed by a heirarchy of plural resources (eg infrastructure stack -> service (or more services)).
 3. The agent should be made aware of that heirarchy when planning changes, for instance if a ServiceDeployment is wiring in variables for an InfrastructureStack, a local terraform change will be overridden.
+4. If a variable is set in an InfrastructureStack custom resource, then updating terraform variable defaults will not be respected.  You must make a kubernetes yaml change instead.
+
 
 Here is the prompt we've been given about the component to upgrade:
 
