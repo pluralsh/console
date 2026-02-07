@@ -9,6 +9,12 @@ versions:
   requirements: []
   incompatibilities: []
   summary: null
+- version: 1.18.0
+  kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
+    '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
+  requirements: []
+  incompatibilities: []
+  summary: null
 - version: 1.17.0
   kube: ['1.35', '1.34', '1.33', '1.32', '1.31', '1.30', '1.29', '1.28', '1.27', '1.26',
     '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18']
@@ -17,35 +23,34 @@ versions:
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['Modernized fs-backup to a micro-service architecture, improving robustness
-        (survives node-agent restarts), adding cancel/resume, and enabling concurrency/load
-        control with steadier node-agent resource usage.', 'fs-backup now supports
-        Windows workloads by running data mover pods on Windows nodes, completing
-        Windows backup/restore coverage alongside CSI snapshot data movement.', Adds
-        (beta) Kubernetes VolumeGroupSnapshot support for CSI snapshot backup and
-        CSI snapshot data movement to take point-in-time consistent snapshots across
-        multiple volumes., 'PriorityClass is now supported across Velero components
-        (server, node-agent, data mover pods, repository maintenance jobs) so you
-        can control scheduling priority per module.', 'Data mover scalability/resiliency
-        improvements: throttle creation with node-agent PrepareQueueLength to avoid
-        many Pending pods, and better recovery/cancel behavior across node-agent restarts.',
-      CSI snapshot data movement restore gains node selection (including per storage
-        class) to control where data mover pods run during restore., Resource policies
-        gain reusable include/exclude filters (includeExcludePolicy) in addition to
-        volumePolicy., 'Operational/UX improvements: adds BSL availability gauge metric,
-        BSL status checks during backup/restore, imagePullSecrets inheritance for
-        data mover and maintenance jobs, and CLI auto-discovers CA cert from BSL for
-        download requests.', 'Platform/runtime updates: Golang 1.24.6 and kopia 0.21.1;
-        adds s390x binary support.']
-    breaking_changes: ['Restic uploader is removed for fs-backup: `--uploader-type=restic`
-        is no longer a valid install config, and you cannot create new restic-path
-        fs-backups (restores of existing restic backups remain supported until v1.19).',
-      'Repository maintenance job configuration flags are removed from the velero
-        server (`--keep-latest-maintenance-jobs`, `--maintenance-job-*-request/limit`);
-        these must be configured via the repository maintenance job ConfigMap instead.',
+    features: ['Modernized fs-backup into a micro-service architecture, adding concurrency
+        control, cancel/resume behavior, and improved robustness across node-agent
+        restarts with steadier resource usage.', "fs-backup now supports Windows workloads,\
+        \ enabling full Windows backup/restore scenarios when combined with 1.16\u2019\
+        s CSI snapshot data movement for Windows.", 'Adds VolumeGroupSnapshot support
+        (Kubernetes beta) for CSI snapshot backup and CSI snapshot data movement to
+        provide crash-consistent, write-order-consistent point-in-time snapshots across
+        multiple volumes.', 'Adds PriorityClass support across Velero components (server,
+        node-agent, data mover pods, and backup-repository maintenance jobs) so you
+        can prioritize Velero workloads in the cluster scheduler.', 'Data mover scalability
+        improvements via node-agent PrepareQueueLength to throttle creation of data
+        mover pods until capacity is available, reducing large numbers of Pending
+        pods in big environments.', 'Improved resiliency for data movements (fs-backup
+        and CSI data movement): operations can resume after node-agent restarts and
+        can be canceled appropriately when orphaned.', CSI snapshot data movement
+        restore gains node-selection controls (matching backup) and allows node-selection
+        per StorageClass for environments where not all nodes can use a given StorageClass.,
+      Resource policy gains includeExcludePolicy so reusable include/exclude resource
+        filters can be defined in a policy ConfigMap and referenced by multiple backups.]
+    breaking_changes: ["Restic uploader path for fs-backup is removed: --uploader-type=restic\
+        \ is no longer valid for installation and you can\u2019t create new Restic-path\
+        \ backups; restores from existing Restic backups are supported only until\
+        \ v1.19.", 'Repository maintenance job configuration flags were removed from
+        Velero server (--keep-latest-maintenance-jobs, --maintenance-job-*-request/limit);
+        configuration is now expected via the repository maintenance job ConfigMap.',
       'PVC restore behavior change: selected-node annotation is now always removed
-        when no node mapping exists (previously it could be preserved if the node
-        existed).']
+        during PVC restore when no node mapping exists; previously it could be preserved
+        if the node existed.']
   chart_version: 11.3.2
   images: ['docker.io/bitnamilegacy/kubectl:1.35', 'velero/velero:v1.17.1']
 - version: 1.16.0
@@ -56,24 +61,27 @@ versions:
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['Windows cluster support: Velero can run on Windows clusters and back
-        up/restore Windows workloads; node-agent, data mover pods, and maintenance
-        jobs can run on Linux or Windows nodes.', 'Parallel Item Block backup: the
-        backup engine can process correlated resource groups (item blocks) concurrently;
-        parallelism is configurable via `--item-block-worker-count` (default 1).',
-      'Data mover restore scalability: optional spreading of restore work across nodes
-        even for WaitForFirstConsumer volumes via node-agent `ignoreDelayBinding`
-        setting.', 'Improved observability for data mover: node-agent logs now include
-        more intermediate object status and cleanup/deletion errors automatically.',
-      'CSI snapshot usability: VolumeSnapshotContent is no longer retained in backups,
-        reducing cross-cluster sync/restore noise.', 'Backup repository maintenance
-        improvements: maintenance history (`RecentMaintenance`) recorded on BackupRepository
-        CR; jobs are recaptured after server restarts; maintenance/init skipped for
-        readOnly BSLs; configurable maintenance intervals via `fullMaintenanceInterval`
-        (normalGC/fastGC/eagerGC).', Volume Policy can filter volumes by PVC labels.,
-      Per-object resource status restore controlled via `velero.io/restore-status`
-        annotation on objects., Velero restore helper binaries are now included in
-        the single `velero/velero` image.]
+    features: ['Windows cluster support: Velero components (node-agent, data mover
+        pods, maintenance jobs) can run on Windows nodes and Velero can back up/restore
+        Windows workloads with built-in data mover (with noted limitations).', "Parallel\
+        \ ItemBlock backups: backup engine can process grouped resource \u201Citem\
+        \ blocks\u201D concurrently, configurable via the new server flag `--item-block-worker-count`\
+        \ (default 1), improving throughput at scale.", 'More scalable data mover
+        restores for WaitForFirstConsumer volumes: new node-agent setting `ignoreDelayBinding`
+        allows restores to be spread across nodes instead of being pinned to the attachment
+        node.', 'Improved observability for data mover: node-agent logs include intermediate-object
+        statuses on failure and cleanup deletion errors automatically.', "CSI snapshot\
+        \ usability improvement: removes unnecessary retained `VolumeSnapshotContent`\
+        \ objects from backups so they aren\u2019t synced/restored across clusters.",
+      'BackupRepository maintenance improvements: adds `RecentMaintenance` history
+        to BackupRepository CRs, recaptures running maintenance after server restart,
+        avoids maintenance/init on readOnly BSLs, and introduces configurable maintenance
+        cadence via `fullMaintenanceInterval` (normalGC/fastGC/eagerGC).', 'Volume
+        Policy enhancement: can filter volumes by PVC labels in resource policies.',
+      'Object-level resource status restore control: per-object annotation `velero.io/restore-status`
+        to choose whether to restore status.', 'Images streamlined: velero, velero-helper,
+        and velero-restore-helper binaries are included in the single `velero/velero`
+        image.']
     breaking_changes: []
   chart_version: 10.1.3
   images: ['docker.io/bitnamilegacy/kubectl:1.35', 'velero/velero:v1.16.2']
@@ -85,28 +93,33 @@ versions:
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['Data mover micro service: CSI snapshot data movement shifts from node-agent
-        pods to per-backup/restore pods, improving security (no hostPath), resiliency,
-        and allowing per-operation resource controls.', 'Item Block + ItemBlockAction
-        (IBA) plugin type introduced to categorize related resources (e.g., Pods/PVCs)
-        into blocks to enable future parallelized backups; single-threaded processing
-        remains in v1.15.', Repository maintenance jobs can be scheduled onto selected
-        nodes via a new repository maintenance ConfigMap; maintenance job pod labeling
-        added., 'Backup PVC configuration added for data mover backup pods, including
-        read-only mounts (can speed up expose for some storage) and ability to choose
-        a different StorageClass for backupPVCs.', Backup repository client-side cache
-        size can be limited via a new backup repository configuration ConfigMap to
-        avoid ephemeral storage eviction., 'Performance improvements: fix plugin-call
-        memory leak; propagate client QPS/burst to plugins; include upstream Kopia
-        improvements reducing memory during maintenance of large repos.']
-    breaking_changes: [Restic filesystem-backup path is deprecated starting in v1.15;
-        backups/restores still succeed but emit warnings when restic is selected/used.,
-      node-agent configuration ConfigMap name is no longer fixed; must be provided
-        via the node-agent server parameter `--node-agent-configmap` when customized.,
-      Repository maintenance configuration moved from velero server flags to a new
-        repository maintenance ConfigMap; ConfigMap values take precedence though
-        flags remain for backward compatibility., Changing PVC selected-node feature
-        is deprecated and will be removed in a future release; avoid relying on it.]
+    features: ['Data mover micro service: CSI snapshot data movement now runs in dedicated
+        backup/restore pods instead of node-agent, improving security (no hostPath),
+        resource control per operation, and resilience.', Item Block concepts + ItemBlockAction
+        (IBA) plugin type introduced to group related resources for future multi-threaded
+        backups (single-thread processing in 1.15)., Configurable node selection for
+        repository maintenance jobs via a new repository maintenance ConfigMap., 'Backup
+        PVC configuration via ConfigMap: support read-only mounting (can speed up
+        expose on some storage like Ceph) and choosing the StorageClass used for backupPVCs.',
+      Backup repository client-side cache limit configurable per repository via a
+        new backup repository ConfigMap to avoid ephemeral-storage eviction., 'Performance
+        fixes: server memory leak after plugin calls fixed; client QPS/burst args
+        inherited by plugins; Kopia maintenance memory usage improved via upstream
+        changes.', 'Misc UX/ops improvements: labels added to maintenance job pods;
+        restore describe can include resource modifiers; time zone support via cron/v3
+        upgrade.']
+    breaking_changes: ['Restic uploader path for filesystem backups is deprecated
+        starting in 1.15: backups/restores still succeed but warnings are emitted
+        when using --uploader-type=restic or Restic-based fs-backup flows.', Node-agent
+        configuration ConfigMap name is no longer fixed; if you rely on a non-default
+        name you must set the node-agent server parameter node-agent-configmap accordingly.,
+      Repository maintenance job knobs are moving from server flags to a repository
+        maintenance ConfigMap; flags still work but ConfigMap values take precedence
+        when both are set., Changing PVC selected-node feature is deprecated (will
+        be removed in a future release); avoid new usage and plan to remove dependencies.,
+      'Known issue: read-only backupPVC may fail on SELinux clusters unless using
+        a highly privileged container option; this may conflict with PSA/security
+        policies.']
   chart_version: 8.7.2
   images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.15.2']
 - version: 1.14.0
@@ -117,33 +130,50 @@ versions:
   summary:
     helm_changes: ''
     chart_updates: []
-    features: ['Repository maintenance for kopia/restic backup repositories is moved
-        out of the Velero server pod into separate Kubernetes Jobs, reducing risk
-        of Velero pod OOMs and allowing explicit resource requests for maintenance
-        via install/values.', 'VolumePolicies now support explicit volume backup actions
-        (e.g., force "fs-backup" or "snapshot" per volume), enabling fine-grained
-        opt-in/opt-out control without changing workloads.', 'Data mover node selection:
-        new ConfigMap-based mechanism to constrain which nodes Velero schedules data
-        mover pods onto, helping manage resource-heavy long-running pods.', 'Restore
-        VolumeInfo metadata is now persisted (similar to backup VolumeInfo added in
-        1.13), and `velero restore describe` shows richer per-volume restore details.',
-      Restore workflow adds a new "Finalizing" phase to ensure PV label patching and
-        post-restore hooks occur after volume restore/data movement completes., Azure
-        service principal certificate-based authentication support added (in addition
-        to client-secret based auth).]
-    breaking_changes: [CSI plugin is now built-in/merged into the main Velero repo
-        and is installed by default as an internal plugin; you must stop installing
-        it via the `--plugins` flag (or Helm plugin list) to avoid conflicts/duplication.,
-      'Default CPU/memory requests and limits for the node-agent are removed, making
-        node-agent pods BestEffort; clusters that relied on the old defaults should
-        set explicit resources to avoid starvation/evictions.', 'Namespace filtering
-        behavior changed: when include/exclude namespaces are unset but labelSelector/orLabelSelectors
-        are set, Velero now backs up only namespaces that actually contain matching
-        resources (previously all namespaces were included). This can reduce what
-        gets backed up if you relied on implicit namespace inclusion.', PV patching
-        during the new Finalizing phase can cause restores to end PartiallyFailed
-        when a PV is stuck Pending; previously the restore might report Complete even
-        though PV updates were deferred.]
+    features: ['Resource Modifiers enhancements: in 1.13, resource modifier rules
+        can now use JSON Merge Patch and Strategic Merge Patch in addition to JSON
+        Patch, enabling more flexible restore-time mutations.', 'Node-agent concurrency
+        controls (1.13): you can cap data-movement workloads per node globally or
+        per-node to balance performance vs. resource usage.', 'Kopia performance/behavior
+        options (1.13): configurable parallel file uploads and optional sparse-file
+        writing during restore to improve speed and storage efficiency.', 'Backup/restore
+        observability improvements (1.13): backup describe now includes a Backup Volumes
+        section (including CSI snapshot data movement), and hook execution status
+        (attempted/failed) is surfaced in CR status and CLI output.', 'New VolumeInfo
+        metadata persisted with backups (1.13) and restores (1.14) to record PVC/PV
+        backup/restore method, snapshot info, and status; restore describe outputs
+        more volume detail.', Repo maintenance moved to Kubernetes Jobs (1.14) to
+        reduce Velero server pod OOM risk; resource requests can be set at install
+        time for these jobs., 'VolumePolicies extended (1.14): can now drive volume
+        handling with actions like "fs-backup" or "snapshot" for fine-grained, opt-in/out
+        volume backup behavior without editing workloads.', 'Data-mover node selection
+        (1.14): configmap-based control over which nodes datamover pods can run on
+        to manage long-running, resource-heavy data movement.', 'Restore workflow
+        improvement (1.14): introduces a "Finalizing" phase so PV label patching and
+        post-restore hooks occur after snapshot/data movement completion.', 'Azure
+        auth improvements (1.14): adds service principal certificate-based auth; earlier
+        1.13 also expanded Azure AD/Workload Identity support to Kopia operations.',
+      'Dependency/runtime updates: Go 1.21.6 and Kopia 0.15.0 in 1.13; Go 1.22.2 and
+        Kopia 0.17.0 in 1.14; AWS SDK migrated to aws-sdk-go-v2 in 1.13 and further
+        updated in 1.14 for identity features.']
+    breaking_changes: ["CLI output change (1.13): `velero backup describe` output\
+        \ reorganized\u2014some info moved into a new \"Backup Volumes\" section with\
+        \ format changes; any scripts that parse output may break.", 'API type change
+        (1.13): DataUploadSpec.DataMoverConfig changes from `*map[string][string]`
+        to `map[string]string`, which can break code/plugins compiled against the
+        old type.', 'Install behavior change (1.13): informer cache is enabled by
+        default; may increase memory usage and can cause OOM unless you raise limits
+        or disable via `--disable-informer-cache`.', 'Plugin packaging change (1.14):
+        CSI plugin is now built-in and installed by default; do not install it via
+        `--plugins` during `velero install` or Helm values that add the CSI plugin.',
+      'Node-agent resources change (1.14): default requests/limits removed so node-agent
+        pods become BestEffort; you may need to explicitly set resources to avoid
+        eviction or noisy-neighbor issues.', 'Backup namespace filtering change (1.14):
+        if include/exclude namespaces are unset but labelSelector/orLabelSelectors
+        are set, only namespaces with matching resources are included (previously
+        all namespaces were included).', 'Restore outcome change (1.14): PV patching
+        during the new Finalizing state can cause restores to end PartiallyFailed
+        when PV is stuck Pending; earlier versions might report Complete.']
   chart_version: 7.2.2
   images: ['docker.io/bitnami/kubectl:1.35', 'velero/velero:v1.14.1']
 - version: 1.13.0

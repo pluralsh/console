@@ -8,7 +8,43 @@ versions:
   kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Helm charts are now published to OCI registries, including `quay.io/cilium/charts/cilium`
+        (in addition to prior distribution methods).', 'Cilium CLI/Helm preflight
+        no longer includes Envoy ConfigMaps, which may change what preflight validates
+        in upgrades.']
+    features: ['Helm charts are available via OCI registry (`quay.io/cilium/charts/cilium`),
+        aligning with the 1.18.6 change to publish charts to OCI registries.', 'NetworkPolicy
+        enhancements: multi-level DNS wildcard prefixes (`**.`), new host firewall
+        protocol matches (VRRP/IGMP), optional ICMP unreachable on denies, and defaulting
+        unspecified cluster selectors to local cluster only.', 'Encryption additions:
+        strict modes for IPsec/WireGuard (drop unencrypted inter-node traffic), Ztunnel
+        namespace enrollment (beta) for transparent TCP encryption/authentication,
+        and IPsec support for BPF host routing.', 'Networking improvements: BIG TCP
+        over UDP tunnels (VXLAN/Geneve), TCP-based PLPMTUD, IPv6 tunnel underlay,
+        Multi-Pool IPAM promoted to Stable and extended to more modes, and more configurable
+        masquerade (exclude IPAM pools, cross-subnet options).', 'Services/Gateway:
+        IPv6 ND advertisements for L2 announcements, IPv6 service loopback, and Gateway
+        API GAMMA support for GRPCRoute plus HTTPRoute.', 'BGP updates: new interface-based
+        advertisements, optional withdraw of routes with 0 endpoints, configurable
+        source IP via `sourceInterface`, and migration to v2 APIs.', 'Observability:
+        trace packets using IP Options, hubble CLI filters for encrypted/unencrypted
+        flows, and policy-name tagging for drop events.', 'Operations: TLS/mTLS for
+        operator Prometheus metrics, auto-install MCS CRDs, and streamlined cert generation
+        for Cluster Mesh/Hubble; core deps updated (Kubernetes v1.35, Envoy v1.35,
+        Gateway API v1.4, GoBGP v3.37).']
+    breaking_changes: ['BGP: `CiliumBGPPeeringPolicy` v1 API support is removed; manifests
+        must be migrated to the v2 (`cilium.io/v2`) APIs.', 'NetworkPolicy behavior
+        change: selectors that do not explicitly specify a cluster now default to
+        allow only the local cluster, which can reduce previously-allowed cross-cluster
+        traffic in Cluster Mesh setups.', 'NetworkPolicy deprecations: Kafka protocol
+        match fields (beta) and `ToRequires`/`FromRequires` fields are deprecated;
+        plan to remove/replace usage before they are dropped in a future release.',
+      Mutual Authentication is now disabled by default; environments relying on it
+        for mTLS must explicitly re-enable it or migrate to Ztunnel., Encryption strict
+        mode (if enabled) will drop unencrypted inter-node traffic; ensure all nodes
+        are correctly enrolled/compatible before turning it on.]
   chart_version: 1.19.0
   images: []
 - version: 1.18.6
