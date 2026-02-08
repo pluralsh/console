@@ -13,7 +13,6 @@ import {
   PrClosedIcon,
   PrMergedIcon,
   PrOpenIcon,
-  SidecarItem,
   SpinnerAlt,
 } from '@pluralsh/design-system'
 import { AgentRuntimeIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
@@ -66,30 +65,45 @@ export function ClusterUpgradeAgentFlyover({
       css={{ display: 'flex', flexDirection: 'column', gap: spacing.medium }}
     >
       <TopCardSC>
-        <SidecarItem heading="Runtime">
-          <Flex
-            align="center"
-            gap="xsmall"
-          >
-            <AgentRuntimeIcon
-              wrapInFrame={false}
-              type={clusterUpgrade.runtime?.type}
-            />
-            {capitalize(clusterUpgrade.runtime?.name)}
-          </Flex>
-        </SidecarItem>
-        <SidecarItem heading="Status">
-          <Chip
-            fillLevel={2}
-            severity={statusToChipSeverity[clusterUpgrade.status]}
-            loading={
-              clusterUpgrade.status == ClusterUpgradeStatus.InProgress ||
-              clusterUpgrade.status === ClusterUpgradeStatus.Pending
-            }
-          >
-            {statusToChipLabel[clusterUpgrade.status]}
-          </Chip>
-        </SidecarItem>
+        <StackedText
+          first="Runtime"
+          firstPartialType="caption"
+          firstColor="text-xlight"
+          second={
+            <Flex
+              align="center"
+              gap="xsmall"
+            >
+              <AgentRuntimeIcon
+                wrapInFrame={false}
+                type={clusterUpgrade.runtime?.type}
+              />
+              {capitalize(clusterUpgrade.runtime?.name)}
+            </Flex>
+          }
+          secondPartialType="body2"
+          secondColor="text"
+          css={{ height: '100%', justifyContent: 'space-around' }}
+        />
+        <StackedText
+          first="Status"
+          firstPartialType="caption"
+          firstColor="text-xlight"
+          gap="xxsmall"
+          second={
+            <Chip
+              fillLevel={2}
+              severity={statusToChipSeverity[clusterUpgrade.status]}
+              loading={
+                clusterUpgrade.status == ClusterUpgradeStatus.InProgress ||
+                clusterUpgrade.status === ClusterUpgradeStatus.Pending
+              }
+            >
+              {statusToChipLabel[clusterUpgrade.status]}
+            </Chip>
+          }
+          css={{}}
+        />
       </TopCardSC>
       {steps.map((step) => (
         <ClusterUpgradeStep
@@ -106,6 +120,7 @@ function ClusterUpgradeStep({ step }: { step: ClusterUpgradeStepFragment }) {
   return (
     <StepCardSC key={step?.id}>
       <StackedText
+        truncate
         gap="xxsmall"
         first={step.name}
         firstPartialType="body1Bold"
