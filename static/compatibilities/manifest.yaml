@@ -11,6 +11,7 @@ names:
 - coredns
 - cloudnative-pg
 - external-dns
+- external-secrets
 - flux
 - ingress-nginx
 - istio
