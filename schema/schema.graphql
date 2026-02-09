@@ -455,6 +455,42 @@ type RootQueryType {
 
   sentinelStatistics(q: String): [SentinelStatistic]
 
+  workbench(id: ID, name: String): Workbench
+
+  workbenchTool(id: ID, name: String): WorkbenchTool
+
+  workbenches(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    q: String
+
+    "filter workbenches by project"
+    projectId: ID
+  ): WorkbenchConnection
+
+  workbenchTools(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    q: String
+
+    "filter tools by project"
+    projectId: ID
+  ): WorkbenchToolConnection
+
+  workbenchJob(id: ID!): WorkbenchJob
+
   sharedAgentRun(id: ID!): AgentRun
 
   agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
@@ -1089,6 +1125,27 @@ type RootMutationType {
   deleteSentinel(id: ID!): Sentinel
 
   runSentinel(id: ID, name: String): SentinelRun
+
+  createWorkbench(attributes: WorkbenchAttributes): Workbench
+
+  updateWorkbench(id: ID!, attributes: WorkbenchAttributes): Workbench
+
+  deleteWorkbench(id: ID!): Workbench
+
+  createWorkbenchTool(attributes: WorkbenchToolAttributes): WorkbenchTool
+
+  updateWorkbenchTool(id: ID!, attributes: WorkbenchToolAttributes): WorkbenchTool
+
+  deleteWorkbenchTool(id: ID!): WorkbenchTool
+
+  "Creates a new workbench job. Requires read access to the workbench."
+  createWorkbenchJob(
+    "the workbench to create a job for"
+    workbenchId: ID!
+
+    "job attributes (e.g. prompt)"
+    attributes: WorkbenchJobAttributes!
+  ): WorkbenchJob
 
   cancelAgentRun(id: ID!): AgentRun
 
@@ -1859,6 +1916,438 @@ type AgentMessageDelta {
 type AgentRunDelta {
   delta: Delta
   payload: AgentRun
+}
+
+enum WorkbenchToolType {
+  HTTP
+}
+
+enum WorkbenchToolCategory {
+  METRICS
+  LOGS
+  INTEGRATION
+  TICKETING
+}
+
+enum WorkbenchToolHttpMethod {
+  GET
+  POST
+  PUT
+  DELETE
+  PATCH
+}
+
+enum WorkbenchJobStatus {
+  PENDING
+  RUNNING
+  SUCCESSFUL
+  FAILED
+  CANCELLED
+}
+
+enum WorkbenchJobActivityStatus {
+  PENDING
+  RUNNING
+  SUCCESSFUL
+  FAILED
+  CANCELLED
+}
+
+enum WorkbenchJobActivityType {
+  CODING
+  OBSERVABILITY
+  INTEGRATIONS
+  TICKETING
+  INFRASTRUCTURE
+  MEMO
+  PLAN
+}
+
+enum WorkbenchJobResultTodoStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+input WorkbenchJobAttributes {
+  "the prompt for this job"
+  prompt: String
+}
+
+input WorkbenchAttributes {
+  "the name of the workbench"
+  name: String
+
+  "the description of the workbench"
+  description: String
+
+  "the system prompt for the workbench"
+  systemPrompt: String
+
+  "the project for this workbench"
+  projectId: ID
+
+  "the git repository for this workbench"
+  repositoryId: ID
+
+  "the agent runtime for this workbench"
+  agentRuntimeId: ID
+
+  "workbench configuration"
+  configuration: WorkbenchConfigurationAttributes
+
+  "skills configuration (ref and files)"
+  skills: WorkbenchSkillsAttributes
+
+  "tool ids to associate with this workbench"
+  toolAssociations: [WorkbenchToolAssociationAttributes]
+}
+
+input WorkbenchConfigurationAttributes {
+  "infrastructure capabilities (services, stacks, kubernetes)"
+  infrastructure: WorkbenchInfrastructureAttributes
+
+  "coding capabilities (mode, repositories)"
+  coding: WorkbenchCodingAttributes
+}
+
+input WorkbenchInfrastructureAttributes {
+  "enable services capability"
+  services: Boolean
+
+  "enable stacks capability"
+  stacks: Boolean
+
+  "enable kubernetes capability"
+  kubernetes: Boolean
+}
+
+input WorkbenchCodingAttributes {
+  "the mode of the coding agent (e.g. analyze, write)"
+  mode: AgentRunMode
+
+  "allowed repository identifiers"
+  repositories: [String]
+}
+
+input WorkbenchSkillsAttributes {
+  "git reference for skills"
+  ref: GitRefAttributes
+
+  "files to include"
+  files: [String]
+}
+
+input WorkbenchToolAssociationAttributes {
+  "the workbench tool id to associate"
+  toolId: ID!
+}
+
+input WorkbenchToolAttributes {
+  "the name of the tool (a-z, 0-9, underscores)"
+  name: String!
+
+  "the type of tool"
+  tool: WorkbenchToolType!
+
+  "categories for the tool"
+  categories: [WorkbenchToolCategory]
+
+  "the project for this tool"
+  projectId: ID
+
+  "tool configuration (e.g. http)"
+  configuration: WorkbenchToolConfigurationAttributes
+}
+
+input WorkbenchToolConfigurationAttributes {
+  "http tool configuration"
+  http: WorkbenchToolHttpConfigurationAttributes
+}
+
+input WorkbenchToolHttpConfigurationAttributes {
+  "the request url"
+  url: String!
+
+  "the http method"
+  method: WorkbenchToolHttpMethod!
+
+  "request headers"
+  headers: [WorkbenchToolHttpHeaderAttributes]
+
+  "request body"
+  body: String
+
+  "JSON schema for the tool input"
+  inputSchema: Json
+}
+
+input WorkbenchToolHttpHeaderAttributes {
+  name: String
+  value: String
+}
+
+type Workbench {
+  "the id of the workbench"
+  id: String!
+
+  "the name of the workbench"
+  name: String!
+
+  "the description of the workbench"
+  description: String
+
+  "the system prompt for the workbench"
+  systemPrompt: String
+
+  "the project of this workbench"
+  project: Project
+
+  "the git repository for this workbench"
+  repository: GitRepository
+
+  "the agent runtime for this workbench"
+  agentRuntime: AgentRuntime
+
+  "workbench configuration"
+  configuration: WorkbenchConfiguration
+
+  "skills configuration"
+  skills: WorkbenchSkills
+
+  "tools associated with this workbench"
+  tools: [WorkbenchTool]
+
+  runs(after: String, first: Int, before: String, last: Int): WorkbenchJobConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchJob {
+  "the id of the run"
+  id: String!
+
+  "the status of the run"
+  status: WorkbenchJobStatus!
+
+  "the prompt for this run"
+  prompt: String
+
+  "when the run started"
+  startedAt: DateTime
+
+  "when the run completed"
+  completedAt: DateTime
+
+  "the workbench this run belongs to"
+  workbench: Workbench
+
+  "the user who created this run"
+  user: User
+
+  "the result for this job (sideloadable)"
+  result: WorkbenchJobResult
+
+  activities(after: String, first: Int, before: String, last: Int): WorkbenchJobActivityConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchJobActivity {
+  "the id of the activity"
+  id: String!
+
+  "the status of the activity"
+  status: WorkbenchJobActivityStatus!
+
+  "the type of the activity"
+  type: WorkbenchJobActivityType
+
+  "the prompt for this activity"
+  prompt: String
+
+  "embedded result (output, metrics, logs) when present"
+  result: WorkbenchJobActivityResult
+
+  "the job this activity belongs to"
+  workbenchJob: WorkbenchJob
+
+  "the agent run that executed this activity"
+  agentRun: AgentRun
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchJobActivityResult {
+  "output from the activity"
+  output: String
+
+  "job update (diff, theory, conclusion) when present"
+  jobUpdate: WorkbenchJobActivityJobUpdate
+
+  "metrics emitted by the activity"
+  metrics: [WorkbenchJobActivityMetric]
+
+  "logs emitted by the activity"
+  logs: [WorkbenchJobActivityLog]
+}
+
+type WorkbenchJobActivityJobUpdate {
+  diff: String
+  workingTheory: String
+  conclusion: String
+}
+
+type WorkbenchJobActivityMetric {
+  timestamp: DateTime
+  name: String
+  value: Float
+  labels: Map
+}
+
+type WorkbenchJobActivityLog {
+  timestamp: DateTime
+  message: String
+  labels: Map
+}
+
+type WorkbenchJobResult {
+  "the id of the result"
+  id: String!
+
+  "the working theory for this result"
+  workingTheory: String
+
+  "the conclusion for this result"
+  conclusion: String
+
+  "todos for this result"
+  todos: [WorkbenchJobResultTodo]
+
+  "the job this result belongs to"
+  workbenchJob: WorkbenchJob
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchJobResultTodo {
+  name: String
+  description: String
+  status: WorkbenchJobResultTodoStatus
+}
+
+type WorkbenchConfiguration {
+  "infrastructure capabilities"
+  infrastructure: WorkbenchInfrastructure
+
+  "coding capabilities"
+  coding: WorkbenchCoding
+}
+
+type WorkbenchInfrastructure {
+  "services capability enabled"
+  services: Boolean
+
+  "stacks capability enabled"
+  stacks: Boolean
+
+  "kubernetes capability enabled"
+  kubernetes: Boolean
+}
+
+type WorkbenchCoding {
+  "the mode of the coding agent"
+  mode: AgentRunMode
+
+  "allowed repository identifiers"
+  repositories: [String]
+}
+
+type WorkbenchSkills {
+  "git reference for skills"
+  ref: GitRef
+
+  "files to include"
+  files: [String]
+}
+
+type WorkbenchTool {
+  "the id of the tool"
+  id: String!
+
+  "the name of the tool"
+  name: String!
+
+  "the type of tool"
+  tool: WorkbenchToolType!
+
+  "categories for the tool"
+  categories: [WorkbenchToolCategory]
+
+  "the project of this tool"
+  project: Project
+
+  "tool configuration"
+  configuration: WorkbenchToolConfiguration
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchToolConfiguration {
+  "http tool configuration"
+  http: WorkbenchToolHttpConfiguration
+}
+
+type WorkbenchToolHttpConfiguration {
+  "the request url"
+  url: String
+
+  "the http method"
+  method: String
+
+  "request headers"
+  headers: [WorkbenchToolHttpHeader]
+
+  "request body"
+  body: String
+
+  "JSON schema for the tool input"
+  inputSchema: Map
+}
+
+type WorkbenchToolHttpHeader {
+  name: String
+  value: String
+}
+
+type WorkbenchConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchEdge]
+}
+
+type WorkbenchToolConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchToolEdge]
+}
+
+type WorkbenchJobConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchJobEdge]
+}
+
+type WorkbenchJobActivityConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchJobActivityEdge]
 }
 
 enum SentinelCheckType {
@@ -12673,6 +13162,26 @@ type SentinelRunEdge {
 
 type SentinelEdge {
   node: Sentinel
+  cursor: String
+}
+
+type WorkbenchJobActivityEdge {
+  node: WorkbenchJobActivity
+  cursor: String
+}
+
+type WorkbenchJobEdge {
+  node: WorkbenchJob
+  cursor: String
+}
+
+type WorkbenchToolEdge {
+  node: WorkbenchTool
+  cursor: String
+}
+
+type WorkbenchEdge {
+  node: Workbench
   cursor: String
 }
 

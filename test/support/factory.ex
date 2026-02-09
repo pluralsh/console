@@ -1128,6 +1128,58 @@ defmodule Console.Factory do
     }
   end
 
+  def workbench_factory do
+    %Schema.Workbench{
+      name: sequence(:workbench, & "workbench-#{&1}"),
+      description: "A test workbench",
+      project: Settings.default_project!(),
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+    }
+  end
+
+  def workbench_job_factory do
+    %Schema.WorkbenchJob{
+      status: :pending,
+      prompt: "test prompt",
+      workbench: build(:workbench),
+      result: build(:workbench_job_result),
+      user: build(:user)
+    }
+  end
+
+  def workbench_job_result_factory do
+    %Schema.WorkbenchJobResult{
+      working_theory: "working theory",
+      conclusion: "conclusion"
+    }
+  end
+
+  def workbench_job_activity_factory do
+    %Schema.WorkbenchJobActivity{
+      status: :pending,
+      type: :plan,
+      workbench_job: build(:workbench_job)
+    }
+  end
+
+  def workbench_tool_factory do
+    %Schema.WorkbenchTool{
+      name: sequence(:workbench_tool, & "workbench_tool_#{&1}"),
+      tool: :http,
+      project: Settings.default_project!(),
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
+    }
+  end
+
+  def workbench_tool_association_factory do
+    %Schema.WorkbenchToolAssociation{
+      workbench: build(:workbench),
+      tool: build(:workbench_tool)
+    }
+  end
+
   def deprecated_custom_resource_factory do
     %Schema.DeprecatedCustomResource{
       cluster: build(:cluster),

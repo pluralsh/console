@@ -105,7 +105,12 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     SentinelRunJob,
     ChatConnection,
     ClusterUpgrade,
-    ClusterUpgradeStep
+    ClusterUpgradeStep,
+    Workbench,
+    WorkbenchJob,
+    WorkbenchJobActivity,
+    WorkbenchJobResult,
+    WorkbenchTool
   }
 
   def query(Project, _), do: Project
@@ -200,6 +205,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ChatConnection, _), do: ChatConnection
   def query(ClusterUpgrade, _), do: ClusterUpgrade
   def query(ClusterUpgradeStep, _), do: ClusterUpgradeStep
+  def query(Workbench, _), do: Workbench
+  def query(WorkbenchJob, _), do: WorkbenchJob
+  def query(WorkbenchJobActivity, _), do: WorkbenchJobActivity.ordered()
+  def query(WorkbenchJobResult, _), do: WorkbenchJobResult.ordered()
+  def query(WorkbenchTool, _), do: WorkbenchTool
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
@@ -216,6 +226,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.OAuth
   delegates Console.GraphQl.Resolvers.Deployments.Flow
   delegates Console.GraphQl.Resolvers.Deployments.Sentinel
+  delegates Console.GraphQl.Resolvers.Deployments.Workbench
   delegates Console.GraphQl.Resolvers.Deployments.Agent
   delegates Console.GraphQl.Resolvers.Deployments.Integration
 

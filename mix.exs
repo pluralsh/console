@@ -96,6 +96,8 @@ defmodule Console.MixProject do
       {:phoenix_ecto, "~> 4.0"},
       {:ecto_sql, "~> 3.12.0"},
       {:ex_aws_rds, "~> 2.0"},
+      {:ex_json_schema, "~> 0.11.2"},
+      {:text_diff, "~> 0.1"},
 
       # {:ecto_sqlite3, "~> 0.17"},
       {:yajwt, "~> 1.4"},

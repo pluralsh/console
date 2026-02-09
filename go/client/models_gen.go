@@ -8836,6 +8836,331 @@ type WaitingState struct {
 	Reason  *string `json:"reason,omitempty"`
 }
 
+type Workbench struct {
+	// the id of the workbench
+	ID string `json:"id"`
+	// the name of the workbench
+	Name string `json:"name"`
+	// the description of the workbench
+	Description *string `json:"description,omitempty"`
+	// the system prompt for the workbench
+	SystemPrompt *string `json:"systemPrompt,omitempty"`
+	// the project of this workbench
+	Project *Project `json:"project,omitempty"`
+	// the git repository for this workbench
+	Repository *GitRepository `json:"repository,omitempty"`
+	// the agent runtime for this workbench
+	AgentRuntime *AgentRuntime `json:"agentRuntime,omitempty"`
+	// workbench configuration
+	Configuration *WorkbenchConfiguration `json:"configuration,omitempty"`
+	// skills configuration
+	Skills *WorkbenchSkills `json:"skills,omitempty"`
+	// tools associated with this workbench
+	Tools      []*WorkbenchTool        `json:"tools,omitempty"`
+	Runs       *WorkbenchJobConnection `json:"runs,omitempty"`
+	InsertedAt *string                 `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                 `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchAttributes struct {
+	// the name of the workbench
+	Name *string `json:"name,omitempty"`
+	// the description of the workbench
+	Description *string `json:"description,omitempty"`
+	// the system prompt for the workbench
+	SystemPrompt *string `json:"systemPrompt,omitempty"`
+	// the project for this workbench
+	ProjectID *string `json:"projectId,omitempty"`
+	// the git repository for this workbench
+	RepositoryID *string `json:"repositoryId,omitempty"`
+	// the agent runtime for this workbench
+	AgentRuntimeID *string `json:"agentRuntimeId,omitempty"`
+	// workbench configuration
+	Configuration *WorkbenchConfigurationAttributes `json:"configuration,omitempty"`
+	// skills configuration (ref and files)
+	Skills *WorkbenchSkillsAttributes `json:"skills,omitempty"`
+	// tool ids to associate with this workbench
+	ToolAssociations []*WorkbenchToolAssociationAttributes `json:"toolAssociations,omitempty"`
+}
+
+type WorkbenchCoding struct {
+	// the mode of the coding agent
+	Mode *AgentRunMode `json:"mode,omitempty"`
+	// allowed repository identifiers
+	Repositories []*string `json:"repositories,omitempty"`
+}
+
+type WorkbenchCodingAttributes struct {
+	// the mode of the coding agent (e.g. analyze, write)
+	Mode *AgentRunMode `json:"mode,omitempty"`
+	// allowed repository identifiers
+	Repositories []*string `json:"repositories,omitempty"`
+}
+
+type WorkbenchConfiguration struct {
+	// infrastructure capabilities
+	Infrastructure *WorkbenchInfrastructure `json:"infrastructure,omitempty"`
+	// coding capabilities
+	Coding *WorkbenchCoding `json:"coding,omitempty"`
+}
+
+type WorkbenchConfigurationAttributes struct {
+	// infrastructure capabilities (services, stacks, kubernetes)
+	Infrastructure *WorkbenchInfrastructureAttributes `json:"infrastructure,omitempty"`
+	// coding capabilities (mode, repositories)
+	Coding *WorkbenchCodingAttributes `json:"coding,omitempty"`
+}
+
+type WorkbenchConnection struct {
+	PageInfo PageInfo         `json:"pageInfo"`
+	Edges    []*WorkbenchEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchEdge struct {
+	Node   *Workbench `json:"node,omitempty"`
+	Cursor *string    `json:"cursor,omitempty"`
+}
+
+type WorkbenchInfrastructure struct {
+	// services capability enabled
+	Services *bool `json:"services,omitempty"`
+	// stacks capability enabled
+	Stacks *bool `json:"stacks,omitempty"`
+	// kubernetes capability enabled
+	Kubernetes *bool `json:"kubernetes,omitempty"`
+}
+
+type WorkbenchInfrastructureAttributes struct {
+	// enable services capability
+	Services *bool `json:"services,omitempty"`
+	// enable stacks capability
+	Stacks *bool `json:"stacks,omitempty"`
+	// enable kubernetes capability
+	Kubernetes *bool `json:"kubernetes,omitempty"`
+}
+
+type WorkbenchJob struct {
+	// the id of the run
+	ID string `json:"id"`
+	// the status of the run
+	Status WorkbenchJobStatus `json:"status"`
+	// the prompt for this run
+	Prompt *string `json:"prompt,omitempty"`
+	// when the run started
+	StartedAt *string `json:"startedAt,omitempty"`
+	// when the run completed
+	CompletedAt *string `json:"completedAt,omitempty"`
+	// the workbench this run belongs to
+	Workbench *Workbench `json:"workbench,omitempty"`
+	// the user who created this run
+	User *User `json:"user,omitempty"`
+	// the result for this job (sideloadable)
+	Result     *WorkbenchJobResult             `json:"result,omitempty"`
+	Activities *WorkbenchJobActivityConnection `json:"activities,omitempty"`
+	InsertedAt *string                         `json:"insertedAt,omitempty"`
+	UpdatedAt  *string                         `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchJobActivity struct {
+	// the id of the activity
+	ID string `json:"id"`
+	// the status of the activity
+	Status WorkbenchJobActivityStatus `json:"status"`
+	// the type of the activity
+	Type *WorkbenchJobActivityType `json:"type,omitempty"`
+	// the prompt for this activity
+	Prompt *string `json:"prompt,omitempty"`
+	// embedded result (output, metrics, logs) when present
+	Result *WorkbenchJobActivityResult `json:"result,omitempty"`
+	// the job this activity belongs to
+	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
+	// the agent run that executed this activity
+	AgentRun   *AgentRun `json:"agentRun,omitempty"`
+	InsertedAt *string   `json:"insertedAt,omitempty"`
+	UpdatedAt  *string   `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchJobActivityConnection struct {
+	PageInfo PageInfo                    `json:"pageInfo"`
+	Edges    []*WorkbenchJobActivityEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchJobActivityEdge struct {
+	Node   *WorkbenchJobActivity `json:"node,omitempty"`
+	Cursor *string               `json:"cursor,omitempty"`
+}
+
+type WorkbenchJobActivityJobUpdate struct {
+	Diff          *string `json:"diff,omitempty"`
+	WorkingTheory *string `json:"workingTheory,omitempty"`
+	Conclusion    *string `json:"conclusion,omitempty"`
+}
+
+type WorkbenchJobActivityLog struct {
+	Timestamp *string        `json:"timestamp,omitempty"`
+	Message   *string        `json:"message,omitempty"`
+	Labels    map[string]any `json:"labels,omitempty"`
+}
+
+type WorkbenchJobActivityMetric struct {
+	Timestamp *string        `json:"timestamp,omitempty"`
+	Name      *string        `json:"name,omitempty"`
+	Value     *float64       `json:"value,omitempty"`
+	Labels    map[string]any `json:"labels,omitempty"`
+}
+
+type WorkbenchJobActivityResult struct {
+	// output from the activity
+	Output *string `json:"output,omitempty"`
+	// job update (diff, theory, conclusion) when present
+	JobUpdate *WorkbenchJobActivityJobUpdate `json:"jobUpdate,omitempty"`
+	// metrics emitted by the activity
+	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
+	// logs emitted by the activity
+	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+}
+
+type WorkbenchJobAttributes struct {
+	// the prompt for this job
+	Prompt *string `json:"prompt,omitempty"`
+}
+
+type WorkbenchJobConnection struct {
+	PageInfo PageInfo            `json:"pageInfo"`
+	Edges    []*WorkbenchJobEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchJobEdge struct {
+	Node   *WorkbenchJob `json:"node,omitempty"`
+	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type WorkbenchJobResult struct {
+	// the id of the result
+	ID string `json:"id"`
+	// the working theory for this result
+	WorkingTheory *string `json:"workingTheory,omitempty"`
+	// the conclusion for this result
+	Conclusion *string `json:"conclusion,omitempty"`
+	// todos for this result
+	Todos []*WorkbenchJobResultTodo `json:"todos,omitempty"`
+	// the job this result belongs to
+	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
+	InsertedAt   *string       `json:"insertedAt,omitempty"`
+	UpdatedAt    *string       `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchJobResultTodo struct {
+	Name        *string                       `json:"name,omitempty"`
+	Description *string                       `json:"description,omitempty"`
+	Status      *WorkbenchJobResultTodoStatus `json:"status,omitempty"`
+}
+
+type WorkbenchSkills struct {
+	// git reference for skills
+	Ref *GitRef `json:"ref,omitempty"`
+	// files to include
+	Files []*string `json:"files,omitempty"`
+}
+
+type WorkbenchSkillsAttributes struct {
+	// git reference for skills
+	Ref *GitRefAttributes `json:"ref,omitempty"`
+	// files to include
+	Files []*string `json:"files,omitempty"`
+}
+
+type WorkbenchTool struct {
+	// the id of the tool
+	ID string `json:"id"`
+	// the name of the tool
+	Name string `json:"name"`
+	// the type of tool
+	Tool WorkbenchToolType `json:"tool"`
+	// categories for the tool
+	Categories []*WorkbenchToolCategory `json:"categories,omitempty"`
+	// the project of this tool
+	Project *Project `json:"project,omitempty"`
+	// tool configuration
+	Configuration *WorkbenchToolConfiguration `json:"configuration,omitempty"`
+	InsertedAt    *string                     `json:"insertedAt,omitempty"`
+	UpdatedAt     *string                     `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchToolAssociationAttributes struct {
+	// the workbench tool id to associate
+	ToolID string `json:"toolId"`
+}
+
+type WorkbenchToolAttributes struct {
+	// the name of the tool (a-z, 0-9, underscores)
+	Name string `json:"name"`
+	// the type of tool
+	Tool WorkbenchToolType `json:"tool"`
+	// categories for the tool
+	Categories []*WorkbenchToolCategory `json:"categories,omitempty"`
+	// the project for this tool
+	ProjectID *string `json:"projectId,omitempty"`
+	// tool configuration (e.g. http)
+	Configuration *WorkbenchToolConfigurationAttributes `json:"configuration,omitempty"`
+}
+
+type WorkbenchToolConfiguration struct {
+	// http tool configuration
+	HTTP *WorkbenchToolHTTPConfiguration `json:"http,omitempty"`
+}
+
+type WorkbenchToolConfigurationAttributes struct {
+	// http tool configuration
+	HTTP *WorkbenchToolHTTPConfigurationAttributes `json:"http,omitempty"`
+}
+
+type WorkbenchToolConnection struct {
+	PageInfo PageInfo             `json:"pageInfo"`
+	Edges    []*WorkbenchToolEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchToolEdge struct {
+	Node   *WorkbenchTool `json:"node,omitempty"`
+	Cursor *string        `json:"cursor,omitempty"`
+}
+
+type WorkbenchToolHTTPConfiguration struct {
+	// the request url
+	URL *string `json:"url,omitempty"`
+	// the http method
+	Method *string `json:"method,omitempty"`
+	// request headers
+	Headers []*WorkbenchToolHTTPHeader `json:"headers,omitempty"`
+	// request body
+	Body *string `json:"body,omitempty"`
+	// JSON schema for the tool input
+	InputSchema map[string]any `json:"inputSchema,omitempty"`
+}
+
+type WorkbenchToolHTTPConfigurationAttributes struct {
+	// the request url
+	URL string `json:"url"`
+	// the http method
+	Method WorkbenchToolHTTPMethod `json:"method"`
+	// request headers
+	Headers []*WorkbenchToolHTTPHeaderAttributes `json:"headers,omitempty"`
+	// request body
+	Body *string `json:"body,omitempty"`
+	// JSON schema for the tool input
+	InputSchema *string `json:"inputSchema,omitempty"`
+}
+
+type WorkbenchToolHTTPHeader struct {
+	Name  *string `json:"name,omitempty"`
+	Value *string `json:"value,omitempty"`
+}
+
+type WorkbenchToolHTTPHeaderAttributes struct {
+	Name  *string `json:"name,omitempty"`
+	Value *string `json:"value,omitempty"`
+}
+
 // a description of a yaml-merge operation on a file
 type YamlOverlay struct {
 	Yaml string `json:"yaml"`
@@ -14036,6 +14361,423 @@ func (e *VulnUserInteraction) UnmarshalJSON(b []byte) error {
 }
 
 func (e VulnUserInteraction) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchJobActivityStatus string
+
+const (
+	WorkbenchJobActivityStatusPending    WorkbenchJobActivityStatus = "PENDING"
+	WorkbenchJobActivityStatusRunning    WorkbenchJobActivityStatus = "RUNNING"
+	WorkbenchJobActivityStatusSuccessful WorkbenchJobActivityStatus = "SUCCESSFUL"
+	WorkbenchJobActivityStatusFailed     WorkbenchJobActivityStatus = "FAILED"
+	WorkbenchJobActivityStatusCancelled  WorkbenchJobActivityStatus = "CANCELLED"
+)
+
+var AllWorkbenchJobActivityStatus = []WorkbenchJobActivityStatus{
+	WorkbenchJobActivityStatusPending,
+	WorkbenchJobActivityStatusRunning,
+	WorkbenchJobActivityStatusSuccessful,
+	WorkbenchJobActivityStatusFailed,
+	WorkbenchJobActivityStatusCancelled,
+}
+
+func (e WorkbenchJobActivityStatus) IsValid() bool {
+	switch e {
+	case WorkbenchJobActivityStatusPending, WorkbenchJobActivityStatusRunning, WorkbenchJobActivityStatusSuccessful, WorkbenchJobActivityStatusFailed, WorkbenchJobActivityStatusCancelled:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchJobActivityStatus) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchJobActivityStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchJobActivityStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchJobActivityStatus", str)
+	}
+	return nil
+}
+
+func (e WorkbenchJobActivityStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchJobActivityStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchJobActivityStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchJobActivityType string
+
+const (
+	WorkbenchJobActivityTypeCoding         WorkbenchJobActivityType = "CODING"
+	WorkbenchJobActivityTypeObservability  WorkbenchJobActivityType = "OBSERVABILITY"
+	WorkbenchJobActivityTypeIntegrations   WorkbenchJobActivityType = "INTEGRATIONS"
+	WorkbenchJobActivityTypeTicketing      WorkbenchJobActivityType = "TICKETING"
+	WorkbenchJobActivityTypeInfrastructure WorkbenchJobActivityType = "INFRASTRUCTURE"
+	WorkbenchJobActivityTypeMemo           WorkbenchJobActivityType = "MEMO"
+	WorkbenchJobActivityTypePlan           WorkbenchJobActivityType = "PLAN"
+)
+
+var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
+	WorkbenchJobActivityTypeCoding,
+	WorkbenchJobActivityTypeObservability,
+	WorkbenchJobActivityTypeIntegrations,
+	WorkbenchJobActivityTypeTicketing,
+	WorkbenchJobActivityTypeInfrastructure,
+	WorkbenchJobActivityTypeMemo,
+	WorkbenchJobActivityTypePlan,
+}
+
+func (e WorkbenchJobActivityType) IsValid() bool {
+	switch e {
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegrations, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchJobActivityType) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchJobActivityType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchJobActivityType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchJobActivityType", str)
+	}
+	return nil
+}
+
+func (e WorkbenchJobActivityType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchJobActivityType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchJobActivityType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchJobResultTodoStatus string
+
+const (
+	WorkbenchJobResultTodoStatusPending    WorkbenchJobResultTodoStatus = "PENDING"
+	WorkbenchJobResultTodoStatusInProgress WorkbenchJobResultTodoStatus = "IN_PROGRESS"
+	WorkbenchJobResultTodoStatusCompleted  WorkbenchJobResultTodoStatus = "COMPLETED"
+)
+
+var AllWorkbenchJobResultTodoStatus = []WorkbenchJobResultTodoStatus{
+	WorkbenchJobResultTodoStatusPending,
+	WorkbenchJobResultTodoStatusInProgress,
+	WorkbenchJobResultTodoStatusCompleted,
+}
+
+func (e WorkbenchJobResultTodoStatus) IsValid() bool {
+	switch e {
+	case WorkbenchJobResultTodoStatusPending, WorkbenchJobResultTodoStatusInProgress, WorkbenchJobResultTodoStatusCompleted:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchJobResultTodoStatus) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchJobResultTodoStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchJobResultTodoStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchJobResultTodoStatus", str)
+	}
+	return nil
+}
+
+func (e WorkbenchJobResultTodoStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchJobResultTodoStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchJobResultTodoStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchJobStatus string
+
+const (
+	WorkbenchJobStatusPending    WorkbenchJobStatus = "PENDING"
+	WorkbenchJobStatusRunning    WorkbenchJobStatus = "RUNNING"
+	WorkbenchJobStatusSuccessful WorkbenchJobStatus = "SUCCESSFUL"
+	WorkbenchJobStatusFailed     WorkbenchJobStatus = "FAILED"
+	WorkbenchJobStatusCancelled  WorkbenchJobStatus = "CANCELLED"
+)
+
+var AllWorkbenchJobStatus = []WorkbenchJobStatus{
+	WorkbenchJobStatusPending,
+	WorkbenchJobStatusRunning,
+	WorkbenchJobStatusSuccessful,
+	WorkbenchJobStatusFailed,
+	WorkbenchJobStatusCancelled,
+}
+
+func (e WorkbenchJobStatus) IsValid() bool {
+	switch e {
+	case WorkbenchJobStatusPending, WorkbenchJobStatusRunning, WorkbenchJobStatusSuccessful, WorkbenchJobStatusFailed, WorkbenchJobStatusCancelled:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchJobStatus) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchJobStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchJobStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchJobStatus", str)
+	}
+	return nil
+}
+
+func (e WorkbenchJobStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchJobStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchJobStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchToolCategory string
+
+const (
+	WorkbenchToolCategoryMetrics     WorkbenchToolCategory = "METRICS"
+	WorkbenchToolCategoryLogs        WorkbenchToolCategory = "LOGS"
+	WorkbenchToolCategoryIntegration WorkbenchToolCategory = "INTEGRATION"
+	WorkbenchToolCategoryTicketing   WorkbenchToolCategory = "TICKETING"
+)
+
+var AllWorkbenchToolCategory = []WorkbenchToolCategory{
+	WorkbenchToolCategoryMetrics,
+	WorkbenchToolCategoryLogs,
+	WorkbenchToolCategoryIntegration,
+	WorkbenchToolCategoryTicketing,
+}
+
+func (e WorkbenchToolCategory) IsValid() bool {
+	switch e {
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchToolCategory) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchToolCategory) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchToolCategory(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchToolCategory", str)
+	}
+	return nil
+}
+
+func (e WorkbenchToolCategory) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchToolCategory) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchToolCategory) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchToolHTTPMethod string
+
+const (
+	WorkbenchToolHTTPMethodGet    WorkbenchToolHTTPMethod = "GET"
+	WorkbenchToolHTTPMethodPost   WorkbenchToolHTTPMethod = "POST"
+	WorkbenchToolHTTPMethodPut    WorkbenchToolHTTPMethod = "PUT"
+	WorkbenchToolHTTPMethodDelete WorkbenchToolHTTPMethod = "DELETE"
+	WorkbenchToolHTTPMethodPatch  WorkbenchToolHTTPMethod = "PATCH"
+)
+
+var AllWorkbenchToolHTTPMethod = []WorkbenchToolHTTPMethod{
+	WorkbenchToolHTTPMethodGet,
+	WorkbenchToolHTTPMethodPost,
+	WorkbenchToolHTTPMethodPut,
+	WorkbenchToolHTTPMethodDelete,
+	WorkbenchToolHTTPMethodPatch,
+}
+
+func (e WorkbenchToolHTTPMethod) IsValid() bool {
+	switch e {
+	case WorkbenchToolHTTPMethodGet, WorkbenchToolHTTPMethodPost, WorkbenchToolHTTPMethodPut, WorkbenchToolHTTPMethodDelete, WorkbenchToolHTTPMethodPatch:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchToolHTTPMethod) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchToolHTTPMethod) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchToolHTTPMethod(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchToolHttpMethod", str)
+	}
+	return nil
+}
+
+func (e WorkbenchToolHTTPMethod) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchToolHTTPMethod) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchToolHTTPMethod) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type WorkbenchToolType string
+
+const (
+	WorkbenchToolTypeHTTP WorkbenchToolType = "HTTP"
+)
+
+var AllWorkbenchToolType = []WorkbenchToolType{
+	WorkbenchToolTypeHTTP,
+}
+
+func (e WorkbenchToolType) IsValid() bool {
+	switch e {
+	case WorkbenchToolTypeHTTP:
+		return true
+	}
+	return false
+}
+
+func (e WorkbenchToolType) String() string {
+	return string(e)
+}
+
+func (e *WorkbenchToolType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WorkbenchToolType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WorkbenchToolType", str)
+	}
+	return nil
+}
+
+func (e WorkbenchToolType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *WorkbenchToolType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e WorkbenchToolType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

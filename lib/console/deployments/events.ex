@@ -112,3 +112,13 @@ defmodule Console.PubSub.CatalogDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.SentinelRunCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.SentinelRunUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.SentinelRunDeleted, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.WorkbenchCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchJobCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchJobUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchJobDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchToolCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchToolUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchToolDeleted, do: use Piazza.PubSub.Event
