@@ -48,7 +48,8 @@ ARG POSTGRES_MAJOR_VERSION
 # - openssl/libssl3t64: PKCS#12 NULL pointer dereference DoS (CVE in PKCS12_item_decrypt_d2i_ex)
 # - gpg: GnuPG out-of-bounds write (CVE in armor_filter, fixed in 2.4.7-21+deb13u1)
 # - libxml2: Uncontrolled recursion in XPath evaluation (CVE in xmlXPathRunEval, fixed in 2.12.7+dfsg+really2.9.14-2.1+deb13u2)
-RUN apt-get update && apt-get install -y ca-certificates openssl libssl3t64 gpg libxml2 && rm -rf /var/lib/apt/lists/* \
+# - libpcre2-8-0: PCRE2 heap-buffer-overflow read in match_ref (CVE in SCS verb handling, fixed in 10.46-1~deb13u1)
+RUN apt-get update && apt-get install -y ca-certificates openssl libssl3t64 gpg libxml2 libpcre2-8-0 && rm -rf /var/lib/apt/lists/* \
     && update-ca-certificates
 
 COPY hack/init.sh /usr/local/bin/startup.sh
