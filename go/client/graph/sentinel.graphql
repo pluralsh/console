@@ -150,12 +150,24 @@ fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfig
     type
     coredns {
         dialFqdns
+        delay
+        retries
     }
     loadbalancer {
         annotations
         labels
         namePrefix
         namespace
+        dnsProbe {
+            fqdn
+            delay
+            retries
+        }
+    }
+    pvc {
+        namePrefix
+        storageClass
+        size
     }
     raw {
         yaml
