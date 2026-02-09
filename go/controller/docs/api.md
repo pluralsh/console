@@ -4086,12 +4086,13 @@ _Appears in:_
 | `name` _string_ | Name the name of the test case |  |  |
 | `coredns` _[SentinelCheckIntegrationTestCaseCoredns](#sentinelcheckintegrationtestcasecoredns)_ | Coredns the coredns configuration to use for this test case |  |  |
 | `loadbalancer` _[SentinelCheckIntegrationTestCaseLoadbalancer](#sentinelcheckintegrationtestcaseloadbalancer)_ | Loadbalancer the load balancer configuration to use for this test case |  |  |
+| `pvc` _[SentinelCheckIntegrationTestCasePVC](#sentinelcheckintegrationtestcasepvc)_ | PVC the pvc configuration to use for this test case |  |  |
 | `raw` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Raw the raw configuration to use for this test case |  |  |
 
 
 #### SentinelCheckIntegrationTestCaseCoredns
 
-_Underlying type:_ _[struct{DialFqdns []string "json:\"dialFqdns,omitempty\""}](#struct{dialfqdns-[]string-"json:\"dialfqdns,omitempty\""})_
+_Underlying type:_ _[struct{DialFqdns []string "json:\"dialFqdns,omitempty\""; Delay *string "json:\"delay,omitempty\""; Retries *int64 "json:\"retries,omitempty\""}](#struct{dialfqdns-[]string-"json:\"dialfqdns,omitempty\"";-delay-*string-"json:\"delay,omitempty\"";-retries-*int64-"json:\"retries,omitempty\""})_
 
 
 
@@ -4102,9 +4103,24 @@ _Appears in:_
 
 
 
+
+
 #### SentinelCheckIntegrationTestCaseLoadbalancer
 
-_Underlying type:_ _[struct{Namespace string "json:\"namespace\""; NamePrefix string "json:\"namePrefix\""; Annotations map[string]string "json:\"annotations,omitempty\""; Labels map[string]string "json:\"labels,omitempty\""}](#struct{namespace-string-"json:\"namespace\"";-nameprefix-string-"json:\"nameprefix\"";-annotations-map[string]string-"json:\"annotations,omitempty\"";-labels-map[string]string-"json:\"labels,omitempty\""})_
+_Underlying type:_ _[struct{Namespace string "json:\"namespace\""; NamePrefix string "json:\"namePrefix\""; Annotations map[string]string "json:\"annotations,omitempty\""; Labels map[string]string "json:\"labels,omitempty\""; DNSProbe *SentinelCheckIntegrationTestCaseDNSProbe "json:\"dnsProbe,omitempty\""}](#struct{namespace-string-"json:\"namespace\"";-nameprefix-string-"json:\"nameprefix\"";-annotations-map[string]string-"json:\"annotations,omitempty\"";-labels-map[string]string-"json:\"labels,omitempty\"";-dnsprobe-*sentinelcheckintegrationtestcasednsprobe-"json:\"dnsprobe,omitempty\""})_
+
+
+
+
+
+_Appears in:_
+- [SentinelCheckIntegrationTestCase](#sentinelcheckintegrationtestcase)
+
+
+
+#### SentinelCheckIntegrationTestCasePVC
+
+_Underlying type:_ _[struct{NamePrefix string "json:\"namePrefix\""; Size string "json:\"size\""; StorageClass string "json:\"storageClass\""}](#struct{nameprefix-string-"json:\"nameprefix\"";-size-string-"json:\"size\"";-storageclass-string-"json:\"storageclass\""})_
 
 
 

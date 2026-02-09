@@ -14,7 +14,7 @@ defmodule Console.Schema.Sentinel do
   alias Console.Deployments.Policies.Rbac
 
   defenum CheckType, log: 0, kubernetes: 1, integration_test: 2
-  defenum IntegrationTestCaseType, coredns: 0, loadbalancer: 1, raw: 2
+  defenum IntegrationTestCaseType, coredns: 0, loadbalancer: 1, raw: 2, pvc: 3
 
   schema "sentinels" do
     field :name,        :string
@@ -70,6 +70,8 @@ defmodule Console.Schema.Sentinel do
 
             embeds_one :coredns, CoreDNSConfiguration, on_replace: :update do
               field :dial_fqdns, {:array, :string}
+              field :delay,      :string
+              field :retries,    :integer
             end
 
             embeds_one :loadbalancer, LoadBalancerConfiguration, on_replace: :update do
@@ -77,6 +79,18 @@ defmodule Console.Schema.Sentinel do
               field :name_prefix, :string
               field :annotations, :map
               field :labels,      :map
+
+              embeds_one :dns_probe, DNSProbeConfiguration, on_replace: :update do
+                field :fqdn,    :string
+                field :delay,   :string
+                field :retries, :integer
+              end
+            end
+
+            embeds_one :pvc, PVCConfiguration, on_replace: :update do
+              field :name_prefix,   :string
+              field :size,          :string
+              field :storage_class, :string
             end
 
             embeds_one :raw, RawConfiguration, on_replace: :update do
@@ -196,24 +210,40 @@ defmodule Console.Schema.Sentinel do
     |> cast_embed(:coredns, with: &coredns_changeset/2)
     |> cast_embed(:loadbalancer, with: &loadbalancer_changeset/2)
     |> cast_embed(:raw, with: &raw_changeset/2)
+    |> cast_embed(:pvc, with: &pvc_changeset/2)
     |> validate_required(~w(type name)a)
   end
 
   defp coredns_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(dial_fqdns)a)
+    |> cast(attrs, ~w(dial_fqdns delay retries)a)
     |> validate_required(~w(dial_fqdns)a)
+    |> kubernetes_duration(:delay)
   end
 
   defp loadbalancer_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(namespace name_prefix annotations labels)a)
     |> validate_required(~w(namespace name_prefix)a)
+    |> cast_embed(:dns_probe, with: &dns_probe_changeset/2)
   end
 
   defp raw_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(yaml)a)
     |> validate_required(~w(yaml)a)
+  end
+
+  defp dns_probe_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(fqdn delay retries)a)
+    |> validate_required(~w(fqdn delay retries)a)
+    |> kubernetes_duration(:delay)
+  end
+
+  defp pvc_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(name_prefix size storage_class)a)
+    |> validate_required(~w(name_prefix size storage_class)a)
   end
 end

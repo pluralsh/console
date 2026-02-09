@@ -58,6 +58,7 @@ fragment DeploymentSettings on DeploymentSettings {
     enabled
     driver
   }
+  latestK8sVsn
   lokiConnection {
     ...HttpConnection
   }

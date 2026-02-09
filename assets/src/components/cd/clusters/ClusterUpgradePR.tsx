@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction, useEffect } from 'react'
 import { Button } from '@pluralsh/design-system'
 
 import {
-  ClusterUpgradeFragment,
+  ClusterWithUpgradeFragment,
   useCreatePullRequestMutation,
 } from '../../../generated/graphql'
 import { ApolloError } from '@apollo/client'
@@ -11,7 +11,7 @@ export function ClusterUpgradePR({
   prs,
   setError,
 }: {
-  prs: Exclude<ClusterUpgradeFragment['prAutomations'], null | undefined>
+  prs: Exclude<ClusterWithUpgradeFragment['prAutomations'], null | undefined>
   setError: Nullable<Dispatch<SetStateAction<Nullable<ApolloError>>>>
 }) {
   const pr = prs[0]

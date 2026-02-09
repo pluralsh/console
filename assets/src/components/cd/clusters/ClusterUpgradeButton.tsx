@@ -6,14 +6,18 @@ import {
   WarningIcon,
 } from '@pluralsh/design-system'
 import { ClusterTinyFragment, ClustersRowFragment } from 'generated/graphql'
+import { useNavigate } from 'react-router-dom'
+import {
+  CLUSTER_UPGRADES_REL_PATH,
+  getClusterDetailsPath,
+} from 'routes/cdRoutesConsts'
 
 export function ClusterUpgradeButton({
   cluster,
-  onClick,
 }: {
   cluster?: Nullable<ClustersRowFragment>
-  onClick: () => void
 }) {
+  const navigate = useNavigate()
   const { chipLabel, severity } = getClusterUpgradeInfo(cluster)
 
   return (
@@ -31,10 +35,11 @@ export function ClusterUpgradeButton({
           <ErrorIcon />
         )
       }
-      onClick={(e) => {
-        e.stopPropagation()
-        onClick()
-      }}
+      onClick={() =>
+        navigate(
+          `${getClusterDetailsPath({ clusterId: cluster?.id })}/${CLUSTER_UPGRADES_REL_PATH}`
+        )
+      }
     >
       {chipLabel}
     </Chip>

@@ -79,11 +79,14 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :name,          non_null(:string), description: "the name of the test case"
     field :coredns,       :sentinel_check_integration_test_case_coredns_attributes, description: "the coredns configuration to use for this test case"
     field :loadbalancer,  :sentinel_check_integration_test_case_loadbalancer_attributes, description: "the loadbalancer configuration to use for this test case"
+    field :pvc,           :sentinel_check_integration_test_case_pvc_attributes, description: "the pvc configuration to use for this test case"
     field :raw,           :sentinel_check_integration_test_case_raw_attributes, description: "the raw configuration to use for this test case"
   end
 
   input_object :sentinel_check_integration_test_case_coredns_attributes do
     field :dial_fqdns, list_of(:string), description: "the fqdns to dial for this test case"
+    field :delay,      :string, description: "the delay to use before dialing the fqdns for this test case"
+    field :retries,    :integer, description: "the retries to use for this test case"
   end
 
   input_object :sentinel_check_integration_test_case_loadbalancer_attributes do
@@ -91,6 +94,19 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :name_prefix, non_null(:string), description: "the name prefix to use for this test case"
     field :annotations, :json, description: "the annotations to use for this test case"
     field :labels,      :json, description: "the labels to use for this test case"
+    field :dns_probe,   :sentinel_check_integration_test_case_dns_probe_attributes, description: "the dns probe configuration to use for this test case"
+  end
+
+  input_object :sentinel_check_integration_test_case_dns_probe_attributes do
+    field :fqdn,    non_null(:string), description: "the fqdn to probe for this test case"
+    field :delay,   :string, description: "the delay to use before probing the fqdn for this test case"
+    field :retries, :integer, description: "the retries to use for this test case"
+  end
+
+  input_object :sentinel_check_integration_test_case_pvc_attributes do
+    field :name_prefix,   non_null(:string), description: "the name prefix to use for this test case"
+    field :size,          non_null(:string), description: "the size of the pvc to use for this test case"
+    field :storage_class, non_null(:string), description: "the storage class to use for this test case"
   end
 
   input_object :sentinel_check_integration_test_case_raw_attributes do
@@ -169,12 +185,15 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :name,          non_null(:string), description: "the name of the test case"
     field :coredns,       :sentinel_check_integration_test_case_coredns_configuration, description: "the coredns configuration to use for this test case"
     field :loadbalancer,  :sentinel_check_integration_test_case_loadbalancer_configuration, description: "the loadbalancer configuration to use for this test case"
+    field :pvc,           :sentinel_check_integration_test_case_pvc_configuration, description: "the pvc configuration to use for this test case"
     field :raw,           :sentinel_check_integration_test_case_raw_configuration, description: "the raw configuration to use for this test case"
   end
 
   @desc "test internal kubernetes dns resolution"
   object :sentinel_check_integration_test_case_coredns_configuration do
     field :dial_fqdns, list_of(:string), description: "the fqdns to dial for this test case"
+    field :delay,      :string, description: "the delay to use before dialing the fqdns for this test case"
+    field :retries,    :integer, description: "the retries to use for this test case"
   end
 
   @desc "test provisioning a load balancer service"
@@ -183,6 +202,20 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :name_prefix, non_null(:string), description: "the name prefix to use for this test case"
     field :annotations, :json, description: "the annotations to use for this test case"
     field :labels,      :json, description: "the labels to use for this test case"
+
+    field :dns_probe,   :sentinel_check_integration_test_case_dns_probe_configuration, description: "the dns probe configuration to use for this test case"
+  end
+
+  object :sentinel_check_integration_test_case_dns_probe_configuration do
+    field :fqdn,    non_null(:string), description: "the fqdn to probe for this test case"
+    field :delay,   :string, description: "the delay to use before probing the fqdn for this test case"
+    field :retries, :integer, description: "the retries to use for this test case"
+  end
+
+  object :sentinel_check_integration_test_case_pvc_configuration do
+    field :name_prefix,   non_null(:string), description: "the name prefix to use for this test case"
+    field :size,          non_null(:string), description: "the size of the pvc to use for this test case"
+    field :storage_class, non_null(:string), description: "the storage class to use for this test case"
   end
 
   @desc "test provisioning a raw resource"

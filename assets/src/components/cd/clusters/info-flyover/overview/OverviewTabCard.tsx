@@ -11,7 +11,8 @@ import {
 } from '@pluralsh/design-system'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P } from 'components/utils/typography/Text'
-import { ReactNode, useState } from 'react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
 type OverviewCardEntryStatus = 'success' | 'warning' | 'pending'
@@ -20,6 +21,7 @@ type OverviewCardEntry = {
   label: string
   status: OverviewCardEntryStatus
   onClick?: () => void
+  link?: string
 }
 
 export function OverviewTabCard({
@@ -61,9 +63,7 @@ export function OverviewTabCard({
         {entries.map((entry) => (
           <OverviewCardEntry
             key={entry.label}
-            status={entry.status}
-            label={entry.label}
-            onClick={entry.onClick}
+            {...entry}
           />
         ))}
       </Flex>
@@ -73,19 +73,16 @@ export function OverviewTabCard({
 
 function OverviewCardEntry({
   status,
-  onClick,
   label,
-}: {
-  status: OverviewCardEntryStatus
-  label: ReactNode
-  onClick: Nullable<() => void>
-}) {
+  onClick,
+  link,
+}: OverviewCardEntry) {
   const [isHovered, setIsHovered] = useState(false)
 
   return (
     <OverviewCardEntrySC
       {...(status === 'success' ? { tertiary: true } : { secondary: true })}
-      onClick={onClick}
+      {...(link ? { forwardedAs: Link, to: link } : { onClick })}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       endIcon={

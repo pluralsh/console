@@ -6947,6 +6947,8 @@ type SentinelCheckIntegrationTestCaseAttributes struct {
 	Coredns *SentinelCheckIntegrationTestCaseCorednsAttributes `json:"coredns,omitempty"`
 	// the loadbalancer configuration to use for this test case
 	Loadbalancer *SentinelCheckIntegrationTestCaseLoadbalancerAttributes `json:"loadbalancer,omitempty"`
+	// the pvc configuration to use for this test case
+	Pvc *SentinelCheckIntegrationTestCasePvcAttributes `json:"pvc,omitempty"`
 	// the raw configuration to use for this test case
 	Raw *SentinelCheckIntegrationTestCaseRawAttributes `json:"raw,omitempty"`
 }
@@ -6960,6 +6962,8 @@ type SentinelCheckIntegrationTestCaseConfiguration struct {
 	Coredns *SentinelCheckIntegrationTestCaseCorednsConfiguration `json:"coredns,omitempty"`
 	// the loadbalancer configuration to use for this test case
 	Loadbalancer *SentinelCheckIntegrationTestCaseLoadbalancerConfiguration `json:"loadbalancer,omitempty"`
+	// the pvc configuration to use for this test case
+	Pvc *SentinelCheckIntegrationTestCasePvcConfiguration `json:"pvc,omitempty"`
 	// the raw configuration to use for this test case
 	Raw *SentinelCheckIntegrationTestCaseRawConfiguration `json:"raw,omitempty"`
 }
@@ -6967,12 +6971,38 @@ type SentinelCheckIntegrationTestCaseConfiguration struct {
 type SentinelCheckIntegrationTestCaseCorednsAttributes struct {
 	// the fqdns to dial for this test case
 	DialFqdns []*string `json:"dialFqdns,omitempty"`
+	// the delay to use before dialing the fqdns for this test case
+	Delay *string `json:"delay,omitempty"`
+	// the retries to use for this test case
+	Retries *int64 `json:"retries,omitempty"`
 }
 
 // test internal kubernetes dns resolution
 type SentinelCheckIntegrationTestCaseCorednsConfiguration struct {
 	// the fqdns to dial for this test case
 	DialFqdns []*string `json:"dialFqdns,omitempty"`
+	// the delay to use before dialing the fqdns for this test case
+	Delay *string `json:"delay,omitempty"`
+	// the retries to use for this test case
+	Retries *int64 `json:"retries,omitempty"`
+}
+
+type SentinelCheckIntegrationTestCaseDNSProbeAttributes struct {
+	// the fqdn to probe for this test case
+	Fqdn string `json:"fqdn"`
+	// the delay to use before probing the fqdn for this test case
+	Delay *string `json:"delay,omitempty"`
+	// the retries to use for this test case
+	Retries *int64 `json:"retries,omitempty"`
+}
+
+type SentinelCheckIntegrationTestCaseDNSProbeConfiguration struct {
+	// the fqdn to probe for this test case
+	Fqdn string `json:"fqdn"`
+	// the delay to use before probing the fqdn for this test case
+	Delay *string `json:"delay,omitempty"`
+	// the retries to use for this test case
+	Retries *int64 `json:"retries,omitempty"`
 }
 
 type SentinelCheckIntegrationTestCaseLoadbalancerAttributes struct {
@@ -6984,6 +7014,8 @@ type SentinelCheckIntegrationTestCaseLoadbalancerAttributes struct {
 	Annotations *string `json:"annotations,omitempty"`
 	// the labels to use for this test case
 	Labels *string `json:"labels,omitempty"`
+	// the dns probe configuration to use for this test case
+	DNSProbe *SentinelCheckIntegrationTestCaseDNSProbeAttributes `json:"dnsProbe,omitempty"`
 }
 
 // test provisioning a load balancer service
@@ -6996,6 +7028,26 @@ type SentinelCheckIntegrationTestCaseLoadbalancerConfiguration struct {
 	Annotations *string `json:"annotations,omitempty"`
 	// the labels to use for this test case
 	Labels *string `json:"labels,omitempty"`
+	// the dns probe configuration to use for this test case
+	DNSProbe *SentinelCheckIntegrationTestCaseDNSProbeConfiguration `json:"dnsProbe,omitempty"`
+}
+
+type SentinelCheckIntegrationTestCasePvcAttributes struct {
+	// the name prefix to use for this test case
+	NamePrefix string `json:"namePrefix"`
+	// the size of the pvc to use for this test case
+	Size string `json:"size"`
+	// the storage class to use for this test case
+	StorageClass string `json:"storageClass"`
+}
+
+type SentinelCheckIntegrationTestCasePvcConfiguration struct {
+	// the name prefix to use for this test case
+	NamePrefix string `json:"namePrefix"`
+	// the size of the pvc to use for this test case
+	Size string `json:"size"`
+	// the storage class to use for this test case
+	StorageClass string `json:"storageClass"`
 }
 
 type SentinelCheckIntegrationTestCaseRawAttributes struct {
@@ -12709,17 +12761,19 @@ const (
 	SentinelIntegrationTestCaseTypeCoredns      SentinelIntegrationTestCaseType = "COREDNS"
 	SentinelIntegrationTestCaseTypeLoadbalancer SentinelIntegrationTestCaseType = "LOADBALANCER"
 	SentinelIntegrationTestCaseTypeRaw          SentinelIntegrationTestCaseType = "RAW"
+	SentinelIntegrationTestCaseTypePvc          SentinelIntegrationTestCaseType = "PVC"
 )
 
 var AllSentinelIntegrationTestCaseType = []SentinelIntegrationTestCaseType{
 	SentinelIntegrationTestCaseTypeCoredns,
 	SentinelIntegrationTestCaseTypeLoadbalancer,
 	SentinelIntegrationTestCaseTypeRaw,
+	SentinelIntegrationTestCaseTypePvc,
 }
 
 func (e SentinelIntegrationTestCaseType) IsValid() bool {
 	switch e {
-	case SentinelIntegrationTestCaseTypeCoredns, SentinelIntegrationTestCaseTypeLoadbalancer, SentinelIntegrationTestCaseTypeRaw:
+	case SentinelIntegrationTestCaseTypeCoredns, SentinelIntegrationTestCaseTypeLoadbalancer, SentinelIntegrationTestCaseTypeRaw, SentinelIntegrationTestCaseTypePvc:
 		return true
 	}
 	return false

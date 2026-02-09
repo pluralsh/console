@@ -18,21 +18,24 @@ import { componentHasInsight } from '../health/ConfigurationIssuesSection'
 import {
   getPreFlightChecklist,
   UpgradeAccordionName,
-} from '../upgrades/UpgradesTab'
+} from '../../../cluster/upgrade-plan/ClusterUpgradePlan'
 import { OverviewHeatmaps } from './OverviewHeatmaps'
 import { OverviewTabCard } from './OverviewTabCard'
+import {
+  CLUSTER_UPGRADES_REL_PATH,
+  getClusterDetailsPath,
+} from 'routes/cdRoutesConsts'
 export function OverviewTab({
   cluster,
   setTab,
-  setUpgradesInitialOpen,
 }: {
   cluster: ClusterOverviewDetailsFragment
   setTab: (tab: ClusterInfoFlyoverTab) => void
-  setUpgradesInitialOpen: (open: UpgradeAccordionName) => void
 }) {
   const { chipLabel, severity } = getClusterUpgradeInfo(cluster)
   const upgradePlan = cluster.upgradePlan
   const metricsEnabled = useMetricsEnabled()
+  const clusterUpgradesPath = `${getClusterDetailsPath({ clusterId: cluster.id })}/${CLUSTER_UPGRADES_REL_PATH}`
 
   return (
     <WrapperSC>
@@ -75,36 +78,24 @@ export function OverviewTab({
               status: getPreFlightChecklist(upgradePlan).every((i) => !!i.value)
                 ? 'success'
                 : 'warning',
-              onClick: () => {
-                setTab(ClusterInfoFlyoverTab.Upgrades)
-                setUpgradesInitialOpen(UpgradeAccordionName.Preflight)
-              },
+              link: `${clusterUpgradesPath}?view=${UpgradeAccordionName.Preflight}`,
             },
             {
               label: 'API deprecations',
               status: upgradePlan?.deprecations ? 'success' : 'warning',
-              onClick: () => {
-                setTab(ClusterInfoFlyoverTab.Upgrades)
-                setUpgradesInitialOpen(UpgradeAccordionName.Deprecations)
-              },
+              link: `${clusterUpgradesPath}?view=${UpgradeAccordionName.Deprecations}`,
             },
             {
               label: 'Add-on compatibilities',
               status: upgradePlan?.compatibilities ? 'success' : 'warning',
-              onClick: () => {
-                setTab(ClusterInfoFlyoverTab.Upgrades)
-                setUpgradesInitialOpen(UpgradeAccordionName.AddOns)
-              },
+              link: `${clusterUpgradesPath}?view=${UpgradeAccordionName.AddOns}`,
             },
             {
               label: 'Deprecated custom resources (optional)',
               status: isEmpty(cluster.deprecatedCustomResources)
                 ? 'success'
                 : 'pending',
-              onClick: () => {
-                setTab(ClusterInfoFlyoverTab.Upgrades)
-                setUpgradesInitialOpen(UpgradeAccordionName.CustomResources)
-              },
+              link: `${clusterUpgradesPath}?view=${UpgradeAccordionName.CustomResources}`,
             },
           ]}
         />

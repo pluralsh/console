@@ -13,12 +13,16 @@ import { ComponentPropsWithRef, type ComponentType } from 'react'
 export function AgentRuntimeIcon({
   type,
   fullColor = true,
+  wrapInFrame = true,
   ...props
 }: {
   type: Nullable<AgentRuntimeType>
   fullColor?: boolean
+  wrapInFrame?: boolean
 } & ComponentPropsWithRef<typeof AppIcon>) {
   const Icon = runtimeToIcon[type ?? AgentRuntimeType.Custom]
+
+  if (!wrapInFrame) return <Icon fullColor={fullColor} />
   return (
     <AppIcon
       icon={<Icon fullColor={fullColor} />}

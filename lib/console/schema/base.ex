@@ -65,6 +65,11 @@ defmodule Console.Schema.Base do
     end)
   end
 
+
+  def kubernetes_duration(cs, field) do
+    validate_format(cs, field, ~r/^\d+[mhsd]/, message: "invalid kubernetes duration")
+  end
+
   def jitter(%Duration{} = duration) do
     Console.jitter(floor(seconds(duration) / 2))
   end
