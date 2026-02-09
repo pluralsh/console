@@ -114,7 +114,17 @@ versions:
   kube: ['1.31', '1.30', '1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['v0.37.0 introduces a readiness condition on the EC2NodeClass,
+        requiring a CRD upgrade; follow the upstream upgrade guide.', 'v1.0.5 is a
+        patch release primarily with a bug fix: migration controllers are enabled
+        when webhooks are enabled.']
+    features: ['v0.37.0: Ability to select instances by EBS Maximum Bandwidth.', 'v0.37.0:
+        Adds nodepool label to the karpenter_interruption_actions_performed metric.',
+      'v0.37.0: Adds extra fields to the Bottlerocket Kubernetes configuration.']
+    breaking_changes: ['v0.37.0: EC2NodeClass gains a readiness condition, which requires
+        upgrading CRDs as part of the upgrade.']
   chart_version: 1.0.5
   images: ['public.ecr.aws/karpenter/controller:1.0.5@sha256:f2df98735b232b143d37f0c6819a6cae2be4740e3c8b38297bceb365cf3f668b']
 - version: 0.37.0
@@ -166,7 +176,22 @@ versions:
   kube: ['1.29']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ['Introduced container-level default `securityContext` (previously
+        pod-level), which is a potential breaking change for how the controller pod
+        runs/PSA compliance is handled.', Helm chart generation fixes were made after
+        v0.33.0 (chart packaging/build pipeline reliability improvements)., 'RBAC
+        tightened: removed `create node` permission from the controller ClusterRole;
+        additional scoping around launch template access and list calls tagged with
+        `EC2NodeClass`.']
+    features: [Mounted instance-store (ephemeral) storage is now supported for nodes
+        that have instance-store volumes., 'A new `build_info` Prometheus metric is
+        added that exposes version, git SHA, and Go version labels for easier observability
+        and debugging.']
+    breaking_changes: ['Default `securityContext` moved from the Pod spec to the container
+        spec, which can affect pod security admission/override behavior and may require
+        updating custom manifests/Helm values if you were relying on the old placement.']
   chart_version: 0.34.0
   images: []
 - version: 0.31.0

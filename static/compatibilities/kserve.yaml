@@ -168,7 +168,25 @@ versions:
   kube: ['1.25', '1.24', '1.23', '1.22']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: ["KServe manager/controller was converted from a StatefulSet to\
+        \ a Deployment to support HA; the StatefulSet is slated for removal in 0.10\
+        \ (so on 0.10.x you should expect/ensure you\u2019re running the Deployment\
+        \ form)."]
+    features: [InferenceGraph introduced (initial API + Python SDK) for advanced routing/composition
+        of inference steps., ModelMesh became fully compatible with the KServe InferenceService
+        API; transformers can work with ModelMesh., 'New/expanded model serving integrations
+        and knobs: MLflow support, configurable ingress class name, configurable URL
+        scheme, and autoscaling target/metric configuration per InferenceService component.',
+      'Storage spec was unified and expanded (new storage spec, webhdfs support, Azure
+        file share support).', 'ServingRuntime spec expanded (protocolVersion, volumes
+        in pod spec, more container fields, env for built-in adapters).', Model Status
+        API added to InferenceService with controller logic to update it.]
+    breaking_changes: ['Operational change: controller/manager moved from StatefulSet
+        to Deployment (HA); if you had StatefulSet-specific overrides or relied on
+        stable pod identity/PVCs, you must adapt. The StatefulSet is removed in 0.10
+        per the 0.9.0 notes.']
   chart_version: v0.10.2
   images: []
 - version: 0.9.0
