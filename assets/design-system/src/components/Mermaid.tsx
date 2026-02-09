@@ -8,6 +8,7 @@ import {
   useLayoutEffect,
   useState,
 } from 'react'
+import { grey } from '../theme/colors-base'
 import styled from 'styled-components'
 import {
   CheckIcon,
@@ -25,11 +26,27 @@ import { ModalWrapper } from './ModalWrapper'
 import { PanZoomWrapper } from './PanZoomWrapper'
 import WrapWithIf from './WrapWithIf'
 
-export const MERMAID_BG_COLOR = '#f7f8fa'
+export const MERMAID_BG_COLOR = grey[900]
 
 mermaid.initialize({
   startOnLoad: false,
+  theme: 'base',
   flowchart: { defaultRenderer: 'elk' },
+  fontFamily: '"Inter", "Helvetica", "Arial", "sans-serif"',
+  themeVariables: {
+    darkMode: true,
+    background: '#171A21',
+    primaryColor: '#171A21',
+    primaryTextColor: '#EEF0F1',
+    primaryBorderColor: '#5D626F',
+    lineColor: '#A1A5B0',
+    secondaryColor: '#21242C',
+    tertiaryColor: '#171A21',
+    clusterBkg: '#171A21',
+    clusterBorder: '#5D626F',
+    defaultLinkColor: '#A1A5B0',
+    fontFamily: '"Inter", "Helvetica", "Arial", "sans-serif"',
+  },
 })
 
 try {
