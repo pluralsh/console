@@ -376,7 +376,7 @@ func (r *SentinelReconciler) buildIntegrationTestCases(cases []v1alpha1.Sentinel
 			Name: c.Name,
 		}
 
-		if c.Type == console.SentinelIntegrationTestCaseTypeRaw && c.Raw != nil {
+		if c.Raw != nil {
 			rawAttr, err := r.buildRawTestCaseAttributes(c.Raw)
 			if err != nil {
 				return nil, err
@@ -384,13 +384,23 @@ func (r *SentinelReconciler) buildIntegrationTestCases(cases []v1alpha1.Sentinel
 			caseAttr.Raw = rawAttr
 		}
 
-		if c.Type == console.SentinelIntegrationTestCaseTypeCoredns && c.Coredns != nil {
+		if c.Coredns != nil {
 			caseAttr.Coredns = &console.SentinelCheckIntegrationTestCaseCorednsAttributes{
 				DialFqdns: lo.ToSlicePtr(c.Coredns.DialFqdns),
+				Delay:     c.Coredns.Delay,
+				Retries:   c.Coredns.Retries,
 			}
 		}
 
-		if c.Type == console.SentinelIntegrationTestCaseTypeLoadbalancer && c.Loadbalancer != nil {
+		if c.PVC != nil {
+			caseAttr.Pvc = &console.SentinelCheckIntegrationTestCasePvcAttributes{
+				NamePrefix:   c.PVC.NamePrefix,
+				Size:         c.PVC.Size,
+				StorageClass: c.PVC.StorageClass,
+			}
+		}
+
+		if c.Loadbalancer != nil {
 			lbAttr, err := r.buildLoadbalancerTestCaseAttributes(c.Loadbalancer)
 			if err != nil {
 				return nil, err
@@ -437,6 +447,14 @@ func (r *SentinelReconciler) buildLoadbalancerTestCaseAttributes(lb *v1alpha1.Se
 			return nil, err
 		}
 		lbAttr.Annotations = lo.ToPtr(string(jsonAnnotations))
+	}
+
+	if lb.DNSProbe != nil {
+		lbAttr.DNSProbe = &console.SentinelCheckIntegrationTestCaseDNSProbeAttributes{
+			Fqdn:    lb.DNSProbe.Fqdn,
+			Delay:   lb.DNSProbe.Delay,
+			Retries: lb.DNSProbe.Retries,
+		}
 	}
 
 	return lbAttr, nil

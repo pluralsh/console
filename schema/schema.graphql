@@ -1889,6 +1889,7 @@ enum SentinelIntegrationTestCaseType {
   COREDNS
   LOADBALANCER
   RAW
+  PVC
 }
 
 input SentinelAttributes {
@@ -2034,6 +2035,9 @@ input SentinelCheckIntegrationTestCaseAttributes {
   "the loadbalancer configuration to use for this test case"
   loadbalancer: SentinelCheckIntegrationTestCaseLoadbalancerAttributes
 
+  "the pvc configuration to use for this test case"
+  pvc: SentinelCheckIntegrationTestCasePvcAttributes
+
   "the raw configuration to use for this test case"
   raw: SentinelCheckIntegrationTestCaseRawAttributes
 }
@@ -2041,6 +2045,12 @@ input SentinelCheckIntegrationTestCaseAttributes {
 input SentinelCheckIntegrationTestCaseCorednsAttributes {
   "the fqdns to dial for this test case"
   dialFqdns: [String]
+
+  "the delay to use before dialing the fqdns for this test case"
+  delay: String
+
+  "the retries to use for this test case"
+  retries: Int
 }
 
 input SentinelCheckIntegrationTestCaseLoadbalancerAttributes {
@@ -2055,6 +2065,31 @@ input SentinelCheckIntegrationTestCaseLoadbalancerAttributes {
 
   "the labels to use for this test case"
   labels: Json
+
+  "the dns probe configuration to use for this test case"
+  dnsProbe: SentinelCheckIntegrationTestCaseDnsProbeAttributes
+}
+
+input SentinelCheckIntegrationTestCaseDnsProbeAttributes {
+  "the fqdn to probe for this test case"
+  fqdn: String!
+
+  "the delay to use before probing the fqdn for this test case"
+  delay: String
+
+  "the retries to use for this test case"
+  retries: Int
+}
+
+input SentinelCheckIntegrationTestCasePvcAttributes {
+  "the name prefix to use for this test case"
+  namePrefix: String!
+
+  "the size of the pvc to use for this test case"
+  size: String!
+
+  "the storage class to use for this test case"
+  storageClass: String!
 }
 
 input SentinelCheckIntegrationTestCaseRawAttributes {
@@ -2213,6 +2248,9 @@ type SentinelCheckIntegrationTestCaseConfiguration {
   "the loadbalancer configuration to use for this test case"
   loadbalancer: SentinelCheckIntegrationTestCaseLoadbalancerConfiguration
 
+  "the pvc configuration to use for this test case"
+  pvc: SentinelCheckIntegrationTestCasePvcConfiguration
+
   "the raw configuration to use for this test case"
   raw: SentinelCheckIntegrationTestCaseRawConfiguration
 }
@@ -2221,6 +2259,12 @@ type SentinelCheckIntegrationTestCaseConfiguration {
 type SentinelCheckIntegrationTestCaseCorednsConfiguration {
   "the fqdns to dial for this test case"
   dialFqdns: [String]
+
+  "the delay to use before dialing the fqdns for this test case"
+  delay: String
+
+  "the retries to use for this test case"
+  retries: Int
 }
 
 "test provisioning a load balancer service"
@@ -2236,6 +2280,31 @@ type SentinelCheckIntegrationTestCaseLoadbalancerConfiguration {
 
   "the labels to use for this test case"
   labels: Json
+
+  "the dns probe configuration to use for this test case"
+  dnsProbe: SentinelCheckIntegrationTestCaseDnsProbeConfiguration
+}
+
+type SentinelCheckIntegrationTestCaseDnsProbeConfiguration {
+  "the fqdn to probe for this test case"
+  fqdn: String!
+
+  "the delay to use before probing the fqdn for this test case"
+  delay: String
+
+  "the retries to use for this test case"
+  retries: Int
+}
+
+type SentinelCheckIntegrationTestCasePvcConfiguration {
+  "the name prefix to use for this test case"
+  namePrefix: String!
+
+  "the size of the pvc to use for this test case"
+  size: String!
+
+  "the storage class to use for this test case"
+  storageClass: String!
 }
 
 "test provisioning a raw resource"

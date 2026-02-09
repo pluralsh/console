@@ -62,12 +62,23 @@ spec:
                                     description: Coredns the coredns configuration
                                       to use for this test case
                                     properties:
+                                      delay:
+                                        description: Delay the delay to use before
+                                          dialing the fqdns for this test case (should
+                                          be a duration string like "10s", "1m", "1h",
+                                          "1d")
+                                        type: string
                                       dialFqdns:
                                         description: DialFqdns the fqdns to dial for
                                           this test case
                                         items:
                                           type: string
                                         type: array
+                                      retries:
+                                        description: Retries the retries to use for
+                                          this test case
+                                        format: int64
+                                        type: integer
                                     type: object
                                   loadbalancer:
                                     description: Loadbalancer the load balancer configuration
@@ -78,6 +89,30 @@ spec:
                                           type: string
                                         description: the annotations to use for this
                                           test case
+                                        type: object
+                                      dnsProbe:
+                                        description: DNSProbe the dns probe configuration
+                                          to use for this test case.  Useful if you
+                                          want to verify extenal dns behavior attached
+                                          to this load balancer service.
+                                        properties:
+                                          delay:
+                                            description: Delay the delay to use before
+                                              probing the fqdn for this test case
+                                              (should be a duration string like "10s",
+                                              "1m", "1h", "1d")
+                                            type: string
+                                          fqdn:
+                                            description: Fqdn the fqdn to probe for
+                                              this test case
+                                            type: string
+                                          retries:
+                                            description: Retries the retries to use
+                                              for this test case
+                                            format: int64
+                                            type: integer
+                                        required:
+                                        - fqdn
                                         type: object
                                       labels:
                                         additionalProperties:
@@ -100,6 +135,27 @@ spec:
                                   name:
                                     description: Name the name of the test case
                                     type: string
+                                  pvc:
+                                    description: PVC the pvc configuration to use
+                                      for this test case
+                                    properties:
+                                      namePrefix:
+                                        description: NamePrefix the name prefix to
+                                          use for this test case
+                                        type: string
+                                      size:
+                                        description: Size the size of the pvc to use
+                                          for this test case
+                                        type: string
+                                      storageClass:
+                                        description: StorageClass the storage class
+                                          to use for this test case
+                                        type: string
+                                    required:
+                                    - namePrefix
+                                    - size
+                                    - storageClass
+                                    type: object
                                   raw:
                                     description: Raw the raw configuration to use
                                       for this test case

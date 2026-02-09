@@ -105,6 +105,10 @@ type SentinelCheckIntegrationTestCase struct {
 	Coredns *SentinelCheckIntegrationTestCaseCoredns `json:"coredns,omitempty"`
 	// Loadbalancer the load balancer configuration to use for this test case
 	Loadbalancer *SentinelCheckIntegrationTestCaseLoadbalancer `json:"loadbalancer,omitempty"`
+
+	// PVC the pvc configuration to use for this test case
+	PVC *SentinelCheckIntegrationTestCasePVC `json:"pvc,omitempty"`
+
 	// Raw the raw configuration to use for this test case
 	Raw *runtime.RawExtension `json:"raw,omitempty"`
 }
@@ -112,6 +116,23 @@ type SentinelCheckIntegrationTestCase struct {
 type SentinelCheckIntegrationTestCaseCoredns struct {
 	// DialFqdns the fqdns to dial for this test case
 	DialFqdns []string `json:"dialFqdns,omitempty"`
+
+	// Delay the delay to use before dialing the fqdns for this test case (should be a duration string like "10s", "1m", "1h", "1d")
+	//+kubebuilder:validation:Optional
+	Delay *string `json:"delay,omitempty"`
+
+	// Retries the retries to use for this test case
+	//+kubebuilder:validation:Optional
+	Retries *int64 `json:"retries,omitempty"`
+}
+
+type SentinelCheckIntegrationTestCasePVC struct {
+	// NamePrefix the name prefix to use for this test case
+	NamePrefix string `json:"namePrefix"`
+	// Size the size of the pvc to use for this test case
+	Size string `json:"size"`
+	// StorageClass the storage class to use for this test case
+	StorageClass string `json:"storageClass"`
 }
 
 type SentinelCheckIntegrationTestCaseLoadbalancer struct {
@@ -123,6 +144,23 @@ type SentinelCheckIntegrationTestCaseLoadbalancer struct {
 	Annotations map[string]string `json:"annotations,omitempty"`
 	// the labels to use for this test case
 	Labels map[string]string `json:"labels,omitempty"`
+
+	// DNSProbe the dns probe configuration to use for this test case.  Useful if you want to verify extenal dns behavior attached to this load balancer service.
+	//+kubebuilder:validation:Optional
+	DNSProbe *SentinelCheckIntegrationTestCaseDNSProbe `json:"dnsProbe,omitempty"`
+}
+
+type SentinelCheckIntegrationTestCaseDNSProbe struct {
+	// Fqdn the fqdn to probe for this test case
+	Fqdn string `json:"fqdn"`
+
+	// Delay the delay to use before probing the fqdn for this test case (should be a duration string like "10s", "1m", "1h", "1d")
+	//+kubebuilder:validation:Optional
+	Delay *string `json:"delay,omitempty"`
+
+	// Retries the retries to use for this test case
+	//+kubebuilder:validation:Optional
+	Retries *int64 `json:"retries,omitempty"`
 }
 
 type SentinelCheckGotestsumConfiguration struct {

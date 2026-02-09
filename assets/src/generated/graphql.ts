@@ -11445,6 +11445,8 @@ export type SentinelCheckIntegrationTestCaseAttributes = {
   loadbalancer?: InputMaybe<SentinelCheckIntegrationTestCaseLoadbalancerAttributes>;
   /** the name of the test case */
   name: Scalars['String']['input'];
+  /** the pvc configuration to use for this test case */
+  pvc?: InputMaybe<SentinelCheckIntegrationTestCasePvcAttributes>;
   /** the raw configuration to use for this test case */
   raw?: InputMaybe<SentinelCheckIntegrationTestCaseRawAttributes>;
   /** the type of test case to run */
@@ -11459,6 +11461,8 @@ export type SentinelCheckIntegrationTestCaseConfiguration = {
   loadbalancer?: Maybe<SentinelCheckIntegrationTestCaseLoadbalancerConfiguration>;
   /** the name of the test case */
   name: Scalars['String']['output'];
+  /** the pvc configuration to use for this test case */
+  pvc?: Maybe<SentinelCheckIntegrationTestCasePvcConfiguration>;
   /** the raw configuration to use for this test case */
   raw?: Maybe<SentinelCheckIntegrationTestCaseRawConfiguration>;
   /** the type of test case to run */
@@ -11466,20 +11470,49 @@ export type SentinelCheckIntegrationTestCaseConfiguration = {
 };
 
 export type SentinelCheckIntegrationTestCaseCorednsAttributes = {
+  /** the delay to use before dialing the fqdns for this test case */
+  delay?: InputMaybe<Scalars['String']['input']>;
   /** the fqdns to dial for this test case */
   dialFqdns?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** the retries to use for this test case */
+  retries?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** test internal kubernetes dns resolution */
 export type SentinelCheckIntegrationTestCaseCorednsConfiguration = {
   __typename?: 'SentinelCheckIntegrationTestCaseCorednsConfiguration';
+  /** the delay to use before dialing the fqdns for this test case */
+  delay?: Maybe<Scalars['String']['output']>;
   /** the fqdns to dial for this test case */
   dialFqdns?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the retries to use for this test case */
+  retries?: Maybe<Scalars['Int']['output']>;
+};
+
+export type SentinelCheckIntegrationTestCaseDnsProbeAttributes = {
+  /** the delay to use before probing the fqdn for this test case */
+  delay?: InputMaybe<Scalars['String']['input']>;
+  /** the fqdn to probe for this test case */
+  fqdn: Scalars['String']['input'];
+  /** the retries to use for this test case */
+  retries?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type SentinelCheckIntegrationTestCaseDnsProbeConfiguration = {
+  __typename?: 'SentinelCheckIntegrationTestCaseDnsProbeConfiguration';
+  /** the delay to use before probing the fqdn for this test case */
+  delay?: Maybe<Scalars['String']['output']>;
+  /** the fqdn to probe for this test case */
+  fqdn: Scalars['String']['output'];
+  /** the retries to use for this test case */
+  retries?: Maybe<Scalars['Int']['output']>;
 };
 
 export type SentinelCheckIntegrationTestCaseLoadbalancerAttributes = {
   /** the annotations to use for this test case */
   annotations?: InputMaybe<Scalars['Json']['input']>;
+  /** the dns probe configuration to use for this test case */
+  dnsProbe?: InputMaybe<SentinelCheckIntegrationTestCaseDnsProbeAttributes>;
   /** the labels to use for this test case */
   labels?: InputMaybe<Scalars['Json']['input']>;
   /** the name prefix to use for this test case */
@@ -11493,12 +11526,33 @@ export type SentinelCheckIntegrationTestCaseLoadbalancerConfiguration = {
   __typename?: 'SentinelCheckIntegrationTestCaseLoadbalancerConfiguration';
   /** the annotations to use for this test case */
   annotations?: Maybe<Scalars['Json']['output']>;
+  /** the dns probe configuration to use for this test case */
+  dnsProbe?: Maybe<SentinelCheckIntegrationTestCaseDnsProbeConfiguration>;
   /** the labels to use for this test case */
   labels?: Maybe<Scalars['Json']['output']>;
   /** the name prefix to use for this test case */
   namePrefix: Scalars['String']['output'];
   /** the namespace to use for this test case */
   namespace: Scalars['String']['output'];
+};
+
+export type SentinelCheckIntegrationTestCasePvcAttributes = {
+  /** the name prefix to use for this test case */
+  namePrefix: Scalars['String']['input'];
+  /** the size of the pvc to use for this test case */
+  size: Scalars['String']['input'];
+  /** the storage class to use for this test case */
+  storageClass: Scalars['String']['input'];
+};
+
+export type SentinelCheckIntegrationTestCasePvcConfiguration = {
+  __typename?: 'SentinelCheckIntegrationTestCasePvcConfiguration';
+  /** the name prefix to use for this test case */
+  namePrefix: Scalars['String']['output'];
+  /** the size of the pvc to use for this test case */
+  size: Scalars['String']['output'];
+  /** the storage class to use for this test case */
+  storageClass: Scalars['String']['output'];
 };
 
 export type SentinelCheckIntegrationTestCaseRawAttributes = {
@@ -11629,6 +11683,7 @@ export type SentinelEdge = {
 export enum SentinelIntegrationTestCaseType {
   Coredns = 'COREDNS',
   Loadbalancer = 'LOADBALANCER',
+  Pvc = 'PVC',
   Raw = 'RAW'
 }
 
