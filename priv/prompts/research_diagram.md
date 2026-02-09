@@ -43,6 +43,20 @@ Mermaid format guidelines:
   - eg if you want to use a label like `plural-mgmt (mgmt)` for an eks cluster, enclose it with quotes like `"plural-mgmt (mgmt)"`
 * **Do not include newline or `\n` characters in node names, they cannot be rendered properly. Use <br> tags instead as mermaid can format them properly**
 * Styling should always be applied via mermaid classes, not inline on specific graph nodes or edges
+* **Always use dark mode colors for all classDef statements, aligned with the design system palette:**
+  - Base backgrounds: #171A21 (grey-900), #21242C (grey-850), #2A2E37 (grey-800)
+  - Text colors: #EEF0F1 (grey-50), #E3E4E7 (grey-100), #C5C9D2 (grey-200)
+  - Cluster/Primary (purple): fill #050847 (purple-850), stroke #4A51F2 (purple-400), color #EEF0F1 (grey-50)
+  - Namespace (purple): fill #050847 (purple-850), stroke #747AF6 (purple-300), color #EEF0F1 (grey-50)
+  - Deployment (yellow): fill #574500 (yellow-850), stroke #FFCF33 (yellow-400), color #FFF9C2 (yellow-100)
+  - Service (green): fill #074F37 (green-850), stroke #99F5D5 (green-200), color #C7FAE8 (green-100)
+  - Ingress (purple): fill #070A5F (purple-800), stroke #747AF6 (purple-300), color #EEF0F1 (grey-50)
+  - RDS/Database (red): fill #38060E (red-850), stroke #F599A8 (red-200), color #FAC7D0 (red-100)
+  - OIDC Provider (blue): fill #00304D (blue-850), stroke #99DAFF (blue-200), color #C2E9FF (blue-100)
+  - Subnet (green): fill #0A6B4A (green-800), stroke #6AF1C2 (green-300), color #C7FAE8 (green-100)
+  - Security Group (red): fill #660A19 (red-800), stroke #F2788D (red-300), color #FAC7D0 (red-100)
+  - VPC (grey): fill #21242C (grey-850), stroke #A1A5B0 (grey-400), color #EEF0F1 (grey-50)
+  Avoid light/white backgrounds - all fills must be dark colors suitable for dark mode displays.
 * Make different node types different colors and descriptive shapes to improve differentiation.  Networks should be container boxes with resources within them, datastores should be volume-like shapes, and kubernetes objects can be differentiated as well.
 * Ensure the heirarchical ownership of the infrastructure is preserved in the diagram (eg network contains kubernetes cluster and database which contains kubernetes workloads)
 * Use accurate labelling related to the infrastructure being diagrammed (eg make sure names match kubernetes or cloud infra names on the diagram)
