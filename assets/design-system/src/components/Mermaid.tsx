@@ -1,5 +1,5 @@
 import elkLayouts from '@mermaid-js/layout-elk'
-import mermaid from 'mermaid'
+import mermaid, { MermaidConfig } from 'mermaid'
 import {
   ComponentPropsWithoutRef,
   Ref,
@@ -8,8 +8,7 @@ import {
   useLayoutEffect,
   useState,
 } from 'react'
-import { grey } from '../theme/colors-base'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import {
   CheckIcon,
   CloseIcon,
@@ -20,34 +19,18 @@ import {
   ReloadIcon,
   styledTheme,
 } from '..'
+import { grey } from '../theme/colors-base'
+import { semanticColorsDark } from '../theme/colors-semantic-dark'
 import { useCopyText } from './Code'
 import Highlight from './Highlight'
 import { ModalWrapper } from './ModalWrapper'
 import { PanZoomWrapper } from './PanZoomWrapper'
 import WrapWithIf from './WrapWithIf'
 
-export const MERMAID_BG_COLOR = grey[900]
+export const MERMAID_BG_COLOR_DARK = grey[900]
+export const MERMAID_BG_COLOR_LIGHT = '#f7faff'
 
-mermaid.initialize({
-  startOnLoad: false,
-  theme: 'base',
-  flowchart: { defaultRenderer: 'elk' },
-  fontFamily: '"Inter", "Helvetica", "Arial", "sans-serif"',
-  themeVariables: {
-    darkMode: true,
-    background: '#171A21',
-    primaryColor: '#171A21',
-    primaryTextColor: '#EEF0F1',
-    primaryBorderColor: '#5D626F',
-    lineColor: '#A1A5B0',
-    secondaryColor: '#21242C',
-    tertiaryColor: '#171A21',
-    clusterBkg: '#171A21',
-    clusterBorder: '#5D626F',
-    defaultLinkColor: '#A1A5B0',
-    fontFamily: '"Inter", "Helvetica", "Arial", "sans-serif"',
-  },
-})
+let configuredMermaidMode: Nullable<string> = null
 
 try {
   mermaid.registerLayoutLoaders(elkLayouts)
@@ -73,6 +56,8 @@ export function Mermaid({
   ref?: Ref<MermaidRefHandle>
   setError?: (error: Nullable<Error>) => void
 }) {
+  const { mode } = useTheme()
+
   const [svgStr, setSvgStr] = useState<Nullable<string>>()
   const [isLoading, setIsLoading] = useState(true)
   const [error, setErrorState] = useState<Nullable<Error>>(null)
@@ -91,7 +76,17 @@ export function Mermaid({
   useImperativeHandle(ref, () => ({ svgStr }))
 
   useLayoutEffect(() => {
-    const id = getMermaidId(diagram)
+    if (configuredMermaidMode !== mode) {
+      mermaid.initialize({
+        ...MERMAID_BASE_CONFIG,
+        themeVariables: { ...(mode === 'dark' && MERMAID_DARK_THEME) },
+      })
+      configuredMermaidMode = mode
+    }
+  }, [mode])
+
+  useLayoutEffect(() => {
+    const id = getMermaidId(`${mode}:${diagram}`)
     const cached = cachedRenders[id]
     if (cached) {
       setIsLoading(false)
@@ -127,7 +122,7 @@ export function Mermaid({
     return () => {
       isMounted = false
     }
-  }, [diagram, setError])
+  }, [diagram, setError, mode])
 
   if (error)
     return (
@@ -207,7 +202,8 @@ export function Mermaid({
 const FullscreenWrapperSC = styled(ModalWrapper)(({ theme }) => ({
   width: 'calc(100vw - 80px)',
   height: 'calc(100vh - 80px)',
-  backgroundColor: MERMAID_BG_COLOR,
+  backgroundColor:
+    theme.mode === 'dark' ? MERMAID_BG_COLOR_DARK : MERMAID_BG_COLOR_LIGHT,
   borderRadius: theme.borderRadiuses.large,
   overflow: 'hidden',
 }))
@@ -272,4 +268,25 @@ export const getMermaidId = (str: string) => {
   for (let i = 0; i < str.length; i++)
     hash = (hash << 5) + hash + str.charCodeAt(i)
   return `mermaid-${hash >>> 0}`
+}
+
+const MERMAID_DARK_THEME = {
+  primaryColor: semanticColorsDark['code-block-dark-lilac'],
+  mainBkg: grey[850],
+  primaryBorderColor: grey[700],
+  primaryTextColor: grey[125],
+  secondaryColor: grey[900],
+  tertiaryColor: grey[800],
+  tertiaryTextColor: grey[125],
+  lineColor: '#7B7FD1',
+  textColor: grey[125],
+  clusterBkg: grey[900],
+  clusterBorder: grey[600],
+}
+
+const MERMAID_BASE_CONFIG: MermaidConfig = {
+  startOnLoad: false,
+  theme: 'base',
+  flowchart: { defaultRenderer: 'elk' },
+  fontFamily: '"Inter", "Helvetica", "Arial", "sans-serif"',
 }
