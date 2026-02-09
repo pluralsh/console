@@ -188,6 +188,7 @@ versions:
   chart_version: 8.0.1
   images: ['ghcr.io/dexidp/dex:v2.42.1', 'public.ecr.aws/docker/library/redis:7.2.8-alpine',
     'quay.io/argoproj/argocd:v3.0.0']
+  eolAt: '2026-02-02'
 - version: 2.14.11
   kube: ['1.33', '1.32', '1.31']
   requirements: []
