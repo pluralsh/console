@@ -80,12 +80,6 @@ export const GLOBAL_SERVICE_PARAM_ID = 'globalServiceId' as const
 export const GLOBAL_SERVICE_INFO_PATH = 'info' as const
 export const GLOBAL_SERVICE_SERVICES_PATH = 'services' as const
 
-export const NAMESPACES_REL_PATH = 'namespaces'
-export const NAMESPACES_ABS_PATH = `${CD_ABS_PATH}/${NAMESPACES_REL_PATH}`
-export const NAMESPACES_PARAM_ID = 'namespaceId' as const
-export const NAMESPACE_INFO_PATH = 'info' as const
-export const NAMESPACE_SERVICES_PATH = 'services' as const
-
 export const PODS_REL_PATH = 'pods' as const
 export const POD_PARAM_NAME = 'name' as const
 export const POD_PARAM_NAMESPACE = 'namespace' as const
@@ -138,16 +132,6 @@ export function getGlobalServiceDetailsPath({
 }) {
   return `${CD_ABS_PATH}/${GLOBAL_SERVICES_REL_PATH}/${encodeSlashes(
     serviceId || ''
-  )}`
-}
-
-export function getNamespacesDetailsPath({
-  namespaceId,
-}: {
-  namespaceId: string | null | undefined
-}) {
-  return `${CD_ABS_PATH}/${NAMESPACES_REL_PATH}/${encodeSlashes(
-    namespaceId || ''
   )}`
 }
 
