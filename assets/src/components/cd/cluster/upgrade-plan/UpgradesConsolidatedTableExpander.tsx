@@ -24,9 +24,8 @@ export function UpgradesConsolidatedTableExpander({
   const tabStateRef = useRef<any>(null)
   const { callout, images, summary } = row.original
   const [selectedTab, setSelectedTab] = useState<ExpanderTab>(
-    isEmpty(images) ? ExpanderTab.Images : ExpanderTab.HelmChanges
+    isEmpty(images) ? ExpanderTab.HelmChanges : ExpanderTab.Images
   )
-
   return (
     <div>
       {callout && (
