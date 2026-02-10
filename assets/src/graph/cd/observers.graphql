@@ -8,6 +8,9 @@ fragment Observer on Observer {
   lastRunAt
   nextRunAt
   lastValue
+  agentRun {
+    id
+  }
   project {
     ...ProjectTiny
   }

@@ -15099,43 +15099,7 @@ export type DissmissOnboardingMutationVariables = Exact<{ [key: string]: never; 
 
 export type DissmissOnboardingMutation = { __typename?: 'RootMutationType', dismissOnboarding?: { __typename?: 'DeploymentSettings', onboarded?: boolean | null } | null };
 
-export type ManagedNamespaceFragment = { __typename?: 'ManagedNamespace', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, description?: string | null, labels?: Record<string, unknown> | null, annotations?: Record<string, unknown> | null, pullSecrets?: Array<string | null> | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: Record<string, unknown> | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, service?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null };
-
-export type ServiceTemplateFragment = { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null };
-
-export type ManagedNamespacesQueryVariables = Exact<{
-  first?: InputMaybe<Scalars['Int']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-  projectId?: InputMaybe<Scalars['ID']['input']>;
-}>;
-
-
-export type ManagedNamespacesQuery = { __typename?: 'RootQueryType', managedNamespaces?: { __typename?: 'ManagedNamespaceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ManagedNamespaceEdge', node?: { __typename?: 'ManagedNamespace', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, description?: string | null, labels?: Record<string, unknown> | null, annotations?: Record<string, unknown> | null, pullSecrets?: Array<string | null> | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: Record<string, unknown> | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, service?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null } | null } | null> | null } | null };
-
-export type GetManagedNamespaceNameQueryVariables = Exact<{
-  namespaceId: Scalars['ID']['input'];
-}>;
-
-
-export type GetManagedNamespaceNameQuery = { __typename?: 'RootQueryType', managedNamespace?: { __typename?: 'ManagedNamespace', name: string } | null };
-
-export type GetManagedNamespaceQueryVariables = Exact<{
-  namespaceId: Scalars['ID']['input'];
-}>;
-
-
-export type GetManagedNamespaceQuery = { __typename?: 'RootQueryType', managedNamespace?: { __typename?: 'ManagedNamespace', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, description?: string | null, labels?: Record<string, unknown> | null, annotations?: Record<string, unknown> | null, pullSecrets?: Array<string | null> | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: Record<string, unknown> | null } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, service?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, dependencies?: Array<{ __typename?: 'ServiceDependency', id: string, name: string, status?: ServiceDeploymentStatus | null } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, ignoreCrds?: boolean | null, ignoreHooks?: boolean | null, release?: string | null, url?: string | null, values?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string, enableHelm?: boolean | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, enforceNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null } | null };
-
-export type GetManagedNamespaceServicesQueryVariables = Exact<{
-  namespaceId: Scalars['ID']['input'];
-  first?: InputMaybe<Scalars['Int']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type GetManagedNamespaceServicesQuery = { __typename?: 'RootQueryType', managedNamespace?: { __typename?: 'ManagedNamespace', services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string, warning?: boolean | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, evidence?: Array<{ __typename?: 'AiInsightEvidence', id: string, type: EvidenceType, insertedAt?: string | null, updatedAt?: string | null, logs?: { __typename?: 'LogsEvidence', clusterId?: string | null, serviceId?: string | null, line?: string | null, lines?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null } | null, pullRequest?: { __typename?: 'PullRequestEvidence', contents?: string | null, filename?: string | null, patch?: string | null, repo?: string | null, sha?: string | null, title?: string | null, url?: string | null } | null, alert?: { __typename?: 'AlertEvidence', alertId?: string | null, title?: string | null, resolution?: string | null } | null, knowledge?: { __typename?: 'KnowledgeEvidence', name?: string | null, observations?: Array<string | null> | null, type?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null, alert?: { __typename?: 'Alert', id: string, title?: string | null, message?: string | null } | null } | null } | null } | null> | null } | null } | null };
-
-export type ObserverFragment = { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null };
+export type ObserverFragment = { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, agentRun?: { __typename?: 'AgentRun', id: string } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null };
 
 export type ObserverTargetFragment = { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null };
 
@@ -15150,7 +15114,7 @@ export type ObserversQueryVariables = Exact<{
 }>;
 
 
-export type ObserversQuery = { __typename?: 'RootQueryType', observers?: { __typename?: 'ObserverConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ObserverEdge', node?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null } | null> | null } | null };
+export type ObserversQuery = { __typename?: 'RootQueryType', observers?: { __typename?: 'ObserverConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ObserverEdge', node?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, agentRun?: { __typename?: 'AgentRun', id: string } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null } | null> | null } | null };
 
 export type ObserverQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -15158,28 +15122,28 @@ export type ObserverQueryVariables = Exact<{
 }>;
 
 
-export type ObserverQuery = { __typename?: 'RootQueryType', observer?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
+export type ObserverQuery = { __typename?: 'RootQueryType', observer?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, agentRun?: { __typename?: 'AgentRun', id: string } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
 
 export type UpsertObserverMutationVariables = Exact<{
   attrs?: InputMaybe<ObserverAttributes>;
 }>;
 
 
-export type UpsertObserverMutation = { __typename?: 'RootMutationType', upsertObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
+export type UpsertObserverMutation = { __typename?: 'RootMutationType', upsertObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, agentRun?: { __typename?: 'AgentRun', id: string } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
 
 export type DeleteObserverMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteObserverMutation = { __typename?: 'RootMutationType', deleteObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
+export type DeleteObserverMutation = { __typename?: 'RootMutationType', deleteObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, agentRun?: { __typename?: 'AgentRun', id: string } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
 
 export type KickObserverMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type KickObserverMutation = { __typename?: 'RootMutationType', kickObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
+export type KickObserverMutation = { __typename?: 'RootMutationType', kickObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, lastValue?: string | null, agentRun?: { __typename?: 'AgentRun', id: string } | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string, warning?: boolean | null } | null> | null } | null };
 
 export type PipelineServiceDeploymentFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, revision?: { __typename?: 'Revision', id: string } | null };
 
@@ -19075,77 +19039,6 @@ export const ObservabilityWebhookFragmentDoc = gql`
   updatedAt
 }
     `;
-export const ManagedNamespaceFragmentDoc = gql`
-    fragment ManagedNamespace on ManagedNamespace {
-  id
-  name
-  insertedAt
-  updatedAt
-  deletedAt
-  description
-  labels
-  annotations
-  pullSecrets
-  cascade {
-    delete
-    detach
-  }
-  target {
-    distro
-    tags
-  }
-  project {
-    ...ProjectTiny
-  }
-  service {
-    ...ServiceTemplateWithoutConfiguration
-  }
-}
-    ${ProjectTinyFragmentDoc}
-${ServiceTemplateWithoutConfigurationFragmentDoc}`;
-export const ServiceTemplateFragmentDoc = gql`
-    fragment ServiceTemplate on ServiceTemplate {
-  configuration {
-    name
-    value
-  }
-  contexts
-  git {
-    folder
-    ref
-  }
-  helm {
-    chart
-    repository {
-      name
-      namespace
-    }
-    set {
-      name
-      value
-    }
-    valuesFiles
-    version
-  }
-  kustomize {
-    path
-  }
-  name
-  namespace
-  repository {
-    ...GitRepository
-  }
-  repositoryId
-  syncConfig {
-    createNamespace
-    namespaceMetadata {
-      annotations
-      labels
-    }
-  }
-  templated
-}
-    ${GitRepositoryFragmentDoc}`;
 export const ObserverTargetFragmentDoc = gql`
     fragment ObserverTarget on ObserverTarget {
   target
@@ -19184,6 +19077,9 @@ export const ObserverFragmentDoc = gql`
   lastRunAt
   nextRunAt
   lastValue
+  agentRun {
+    id
+  }
   project {
     ...ProjectTiny
   }
@@ -27742,188 +27638,6 @@ export function useDissmissOnboardingMutation(baseOptions?: Apollo.MutationHookO
 export type DissmissOnboardingMutationHookResult = ReturnType<typeof useDissmissOnboardingMutation>;
 export type DissmissOnboardingMutationResult = Apollo.MutationResult<DissmissOnboardingMutation>;
 export type DissmissOnboardingMutationOptions = Apollo.BaseMutationOptions<DissmissOnboardingMutation, DissmissOnboardingMutationVariables>;
-export const ManagedNamespacesDocument = gql`
-    query ManagedNamespaces($first: Int, $after: String, $projectId: ID) {
-  managedNamespaces(first: $first, after: $after, projectId: $projectId) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...ManagedNamespace
-      }
-    }
-  }
-}
-    ${PageInfoFragmentDoc}
-${ManagedNamespaceFragmentDoc}`;
-
-/**
- * __useManagedNamespacesQuery__
- *
- * To run a query within a React component, call `useManagedNamespacesQuery` and pass it any options that fit your needs.
- * When your component renders, `useManagedNamespacesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useManagedNamespacesQuery({
- *   variables: {
- *      first: // value for 'first'
- *      after: // value for 'after'
- *      projectId: // value for 'projectId'
- *   },
- * });
- */
-export function useManagedNamespacesQuery(baseOptions?: Apollo.QueryHookOptions<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>(ManagedNamespacesDocument, options);
-      }
-export function useManagedNamespacesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>(ManagedNamespacesDocument, options);
-        }
-export function useManagedNamespacesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>(ManagedNamespacesDocument, options);
-        }
-export type ManagedNamespacesQueryHookResult = ReturnType<typeof useManagedNamespacesQuery>;
-export type ManagedNamespacesLazyQueryHookResult = ReturnType<typeof useManagedNamespacesLazyQuery>;
-export type ManagedNamespacesSuspenseQueryHookResult = ReturnType<typeof useManagedNamespacesSuspenseQuery>;
-export type ManagedNamespacesQueryResult = Apollo.QueryResult<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>;
-export const GetManagedNamespaceNameDocument = gql`
-    query GetManagedNamespaceName($namespaceId: ID!) {
-  managedNamespace(id: $namespaceId) {
-    name
-  }
-}
-    `;
-
-/**
- * __useGetManagedNamespaceNameQuery__
- *
- * To run a query within a React component, call `useGetManagedNamespaceNameQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetManagedNamespaceNameQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetManagedNamespaceNameQuery({
- *   variables: {
- *      namespaceId: // value for 'namespaceId'
- *   },
- * });
- */
-export function useGetManagedNamespaceNameQuery(baseOptions: Apollo.QueryHookOptions<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>(GetManagedNamespaceNameDocument, options);
-      }
-export function useGetManagedNamespaceNameLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>(GetManagedNamespaceNameDocument, options);
-        }
-export function useGetManagedNamespaceNameSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>(GetManagedNamespaceNameDocument, options);
-        }
-export type GetManagedNamespaceNameQueryHookResult = ReturnType<typeof useGetManagedNamespaceNameQuery>;
-export type GetManagedNamespaceNameLazyQueryHookResult = ReturnType<typeof useGetManagedNamespaceNameLazyQuery>;
-export type GetManagedNamespaceNameSuspenseQueryHookResult = ReturnType<typeof useGetManagedNamespaceNameSuspenseQuery>;
-export type GetManagedNamespaceNameQueryResult = Apollo.QueryResult<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>;
-export const GetManagedNamespaceDocument = gql`
-    query GetManagedNamespace($namespaceId: ID!) {
-  managedNamespace(id: $namespaceId) {
-    ...ManagedNamespace
-  }
-}
-    ${ManagedNamespaceFragmentDoc}`;
-
-/**
- * __useGetManagedNamespaceQuery__
- *
- * To run a query within a React component, call `useGetManagedNamespaceQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetManagedNamespaceQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetManagedNamespaceQuery({
- *   variables: {
- *      namespaceId: // value for 'namespaceId'
- *   },
- * });
- */
-export function useGetManagedNamespaceQuery(baseOptions: Apollo.QueryHookOptions<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>(GetManagedNamespaceDocument, options);
-      }
-export function useGetManagedNamespaceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>(GetManagedNamespaceDocument, options);
-        }
-export function useGetManagedNamespaceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>(GetManagedNamespaceDocument, options);
-        }
-export type GetManagedNamespaceQueryHookResult = ReturnType<typeof useGetManagedNamespaceQuery>;
-export type GetManagedNamespaceLazyQueryHookResult = ReturnType<typeof useGetManagedNamespaceLazyQuery>;
-export type GetManagedNamespaceSuspenseQueryHookResult = ReturnType<typeof useGetManagedNamespaceSuspenseQuery>;
-export type GetManagedNamespaceQueryResult = Apollo.QueryResult<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>;
-export const GetManagedNamespaceServicesDocument = gql`
-    query GetManagedNamespaceServices($namespaceId: ID!, $first: Int, $after: String) {
-  managedNamespace(id: $namespaceId) {
-    services(first: $first, after: $after) {
-      pageInfo {
-        ...PageInfo
-      }
-      edges {
-        node {
-          ...ServiceDeploymentsRow
-        }
-      }
-    }
-  }
-}
-    ${PageInfoFragmentDoc}
-${ServiceDeploymentsRowFragmentDoc}`;
-
-/**
- * __useGetManagedNamespaceServicesQuery__
- *
- * To run a query within a React component, call `useGetManagedNamespaceServicesQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetManagedNamespaceServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetManagedNamespaceServicesQuery({
- *   variables: {
- *      namespaceId: // value for 'namespaceId'
- *      first: // value for 'first'
- *      after: // value for 'after'
- *   },
- * });
- */
-export function useGetManagedNamespaceServicesQuery(baseOptions: Apollo.QueryHookOptions<GetManagedNamespaceServicesQuery, GetManagedNamespaceServicesQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetManagedNamespaceServicesQuery, GetManagedNamespaceServicesQueryVariables>(GetManagedNamespaceServicesDocument, options);
-      }
-export function useGetManagedNamespaceServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetManagedNamespaceServicesQuery, GetManagedNamespaceServicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetManagedNamespaceServicesQuery, GetManagedNamespaceServicesQueryVariables>(GetManagedNamespaceServicesDocument, options);
-        }
-export function useGetManagedNamespaceServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetManagedNamespaceServicesQuery, GetManagedNamespaceServicesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetManagedNamespaceServicesQuery, GetManagedNamespaceServicesQueryVariables>(GetManagedNamespaceServicesDocument, options);
-        }
-export type GetManagedNamespaceServicesQueryHookResult = ReturnType<typeof useGetManagedNamespaceServicesQuery>;
-export type GetManagedNamespaceServicesLazyQueryHookResult = ReturnType<typeof useGetManagedNamespaceServicesLazyQuery>;
-export type GetManagedNamespaceServicesSuspenseQueryHookResult = ReturnType<typeof useGetManagedNamespaceServicesSuspenseQuery>;
-export type GetManagedNamespaceServicesQueryResult = Apollo.QueryResult<GetManagedNamespaceServicesQuery, GetManagedNamespaceServicesQueryVariables>;
 export const ObserversDocument = gql`
     query Observers($first: Int, $last: Int, $before: String, $after: String, $projectId: ID) {
   observers(
@@ -36445,10 +36159,6 @@ export const namedOperations = {
     DeploymentSettings: 'DeploymentSettings',
     ObservabilityProviders: 'ObservabilityProviders',
     ObservabilityWebhooks: 'ObservabilityWebhooks',
-    ManagedNamespaces: 'ManagedNamespaces',
-    GetManagedNamespaceName: 'GetManagedNamespaceName',
-    GetManagedNamespace: 'GetManagedNamespace',
-    GetManagedNamespaceServices: 'GetManagedNamespaceServices',
     Observers: 'Observers',
     Observer: 'Observer',
     Pipelines: 'Pipelines',
@@ -36831,8 +36541,6 @@ export const namedOperations = {
     DeploymentSettings: 'DeploymentSettings',
     ObservabilityProvider: 'ObservabilityProvider',
     ObservabilityWebhook: 'ObservabilityWebhook',
-    ManagedNamespace: 'ManagedNamespace',
-    ServiceTemplate: 'ServiceTemplate',
     Observer: 'Observer',
     ObserverTarget: 'ObserverTarget',
     ServiceError: 'ServiceError',

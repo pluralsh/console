@@ -6,8 +6,6 @@ import ContinuousDeployment, {
 
 import GlobalServices from 'components/cd/globalServices/GlobalServices.tsx'
 
-import Namespaces from 'components/cd/namespaces/Namespaces'
-
 import Pipelines from 'components/cd/pipelines/Pipelines'
 import { Repositories } from 'components/cd/repos/Repositories'
 
@@ -64,12 +62,6 @@ import PodShell from '../components/cd/cluster/pod/PodShell'
 import VClusters from '../components/cd/cluster/VClusters'
 
 import GlobalService from '../components/cd/globalServices/details/GlobalService'
-
-import ManagedNamespace from '../components/cd/namespaces/details/ManagedNamespace'
-
-import ManagedNamespaceInfo from '../components/cd/namespaces/details/ManagedNamespaceInfo'
-
-import { ManagedNamespaceServices } from '../components/cd/namespaces/details/ManagedNamespaceServices'
 
 import Observers from '../components/cd/observers/Observers'
 
@@ -137,10 +129,6 @@ import {
   getPodDetailsPath,
   GLOBAL_SERVICE_PARAM_ID,
   GLOBAL_SERVICES_REL_PATH,
-  NAMESPACE_INFO_PATH,
-  NAMESPACE_SERVICES_PATH,
-  NAMESPACES_PARAM_ID,
-  NAMESPACES_REL_PATH,
   OBSERVERS_REL_PATH,
   PIPELINES_REL_PATH,
   POD_PARAM_NAME,
@@ -278,10 +266,6 @@ const mainRoutes = (
       element={<Repositories />}
     />
     <Route
-      path={NAMESPACES_REL_PATH}
-      element={<Namespaces />}
-    />
-    <Route
       path={GLOBAL_SERVICES_REL_PATH}
       element={<GlobalServices />}
     />
@@ -293,31 +277,6 @@ const globalServiceRoutes = (
     path={`${GLOBAL_SERVICES_REL_PATH}/:${GLOBAL_SERVICE_PARAM_ID}`}
     element={<GlobalService />}
   />
-)
-
-const namespacesRoutes = (
-  <Route
-    path={`${NAMESPACES_REL_PATH}/:${NAMESPACES_PARAM_ID}`}
-    element={<ManagedNamespace />}
-  >
-    <Route
-      index
-      element={
-        <Navigate
-          replace
-          to={NAMESPACE_INFO_PATH}
-        />
-      }
-    />
-    <Route
-      path={NAMESPACE_INFO_PATH}
-      element={<ManagedNamespaceInfo />}
-    />
-    <Route
-      path={NAMESPACE_SERVICES_PATH}
-      element={<ManagedNamespaceServices />}
-    />
-  </Route>
 )
 
 const clusterDetailsRoutes = [
@@ -653,7 +612,6 @@ export const cdRoutes = [
     {getComponentRoutes('service')}
     {pipelineRoutes}
     {globalServiceRoutes}
-    {namespacesRoutes}
   </Route>,
 ]
 
