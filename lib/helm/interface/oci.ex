@@ -54,7 +54,7 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.OCI do
       {:ok, digest}
     else
       {:layer, _} -> {:error, "could not find valid helm layer from manifest"}
-      _ -> {:error, "could not fetch valid OCI manifest for #{vsn}"}
+      error -> {:error, "could not fetch valid OCI manifest for #{vsn}: #{inspect(error)}"}
     end
   end
 

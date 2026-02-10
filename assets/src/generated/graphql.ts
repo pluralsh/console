@@ -8040,6 +8040,10 @@ export type RootMutationType = {
   createStackDefinition?: Maybe<StackDefinition>;
   createThread?: Maybe<ChatThread>;
   createUser?: Maybe<User>;
+  createWorkbench?: Maybe<Workbench>;
+  /** Creates a new workbench job. Requires read access to the workbench. */
+  createWorkbenchJob?: Maybe<WorkbenchJob>;
+  createWorkbenchTool?: Maybe<WorkbenchTool>;
   deleteAccessToken?: Maybe<AccessToken>;
   deleteAgentRuntime?: Maybe<AgentRuntime>;
   deleteBootstrapToken?: Maybe<BootstrapToken>;
@@ -8097,6 +8101,8 @@ export type RootMutationType = {
   deleteUpgradePlanCallout?: Maybe<UpgradePlanCallout>;
   deleteUser?: Maybe<User>;
   deleteVirtualCluster?: Maybe<Cluster>;
+  deleteWorkbench?: Maybe<Workbench>;
+  deleteWorkbenchTool?: Maybe<WorkbenchTool>;
   delinkBackups?: Maybe<Cluster>;
   /** soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects */
   detachCluster?: Maybe<Cluster>;
@@ -8213,6 +8219,8 @@ export type RootMutationType = {
   updateStackRun?: Maybe<StackRun>;
   updateThread?: Maybe<ChatThread>;
   updateUser?: Maybe<User>;
+  updateWorkbench?: Maybe<Workbench>;
+  updateWorkbenchTool?: Maybe<WorkbenchTool>;
   upsertAgentRuntime?: Maybe<AgentRuntime>;
   upsertCatalog?: Maybe<Catalog>;
   upsertChatProviderConnection?: Maybe<ChatProviderConnection>;
@@ -8607,6 +8615,22 @@ export type RootMutationTypeCreateUserArgs = {
 };
 
 
+export type RootMutationTypeCreateWorkbenchArgs = {
+  attributes?: InputMaybe<WorkbenchAttributes>;
+};
+
+
+export type RootMutationTypeCreateWorkbenchJobArgs = {
+  attributes: WorkbenchJobAttributes;
+  workbenchId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateWorkbenchToolArgs = {
+  attributes?: InputMaybe<WorkbenchToolAttributes>;
+};
+
+
 export type RootMutationTypeDeleteAccessTokenArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   token?: InputMaybe<Scalars['String']['input']>;
@@ -8880,6 +8904,16 @@ export type RootMutationTypeDeleteUserArgs = {
 
 
 export type RootMutationTypeDeleteVirtualClusterArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteWorkbenchArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteWorkbenchToolArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -9395,6 +9429,18 @@ export type RootMutationTypeUpdateUserArgs = {
 };
 
 
+export type RootMutationTypeUpdateWorkbenchArgs = {
+  attributes?: InputMaybe<WorkbenchAttributes>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateWorkbenchToolArgs = {
+  attributes?: InputMaybe<WorkbenchToolAttributes>;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpsertAgentRuntimeArgs = {
   attributes: AgentRuntimeAttributes;
 };
@@ -9724,6 +9770,11 @@ export type RootQueryType = {
   vulnerabilityReport?: Maybe<VulnerabilityReport>;
   vulnerabilityReports?: Maybe<VulnerabilityReportConnection>;
   vulnerabilityStatistics?: Maybe<Array<Maybe<VulnerabilityStatistic>>>;
+  workbench?: Maybe<Workbench>;
+  workbenchJob?: Maybe<WorkbenchJob>;
+  workbenchTool?: Maybe<WorkbenchTool>;
+  workbenchTools?: Maybe<WorkbenchToolConnection>;
+  workbenches?: Maybe<WorkbenchConnection>;
 };
 
 
@@ -11037,6 +11088,43 @@ export type RootQueryTypeVulnerabilityReportsArgs = {
 export type RootQueryTypeVulnerabilityStatisticsArgs = {
   clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeWorkbenchArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeWorkbenchJobArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeWorkbenchToolArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeWorkbenchToolsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeWorkbenchesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -13668,6 +13756,423 @@ export type WaitingState = {
   message?: Maybe<Scalars['String']['output']>;
   reason?: Maybe<Scalars['String']['output']>;
 };
+
+export type Workbench = {
+  __typename?: 'Workbench';
+  /** the agent runtime for this workbench */
+  agentRuntime?: Maybe<AgentRuntime>;
+  /** workbench configuration */
+  configuration?: Maybe<WorkbenchConfiguration>;
+  /** the description of the workbench */
+  description?: Maybe<Scalars['String']['output']>;
+  /** the id of the workbench */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of the workbench */
+  name: Scalars['String']['output'];
+  /** the project of this workbench */
+  project?: Maybe<Project>;
+  /** the git repository for this workbench */
+  repository?: Maybe<GitRepository>;
+  runs?: Maybe<WorkbenchJobConnection>;
+  /** skills configuration */
+  skills?: Maybe<WorkbenchSkills>;
+  /** the system prompt for the workbench */
+  systemPrompt?: Maybe<Scalars['String']['output']>;
+  /** tools associated with this workbench */
+  tools?: Maybe<Array<Maybe<WorkbenchTool>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type WorkbenchRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type WorkbenchAttributes = {
+  /** the agent runtime for this workbench */
+  agentRuntimeId?: InputMaybe<Scalars['ID']['input']>;
+  /** workbench configuration */
+  configuration?: InputMaybe<WorkbenchConfigurationAttributes>;
+  /** the description of the workbench */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** the name of the workbench */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** the project for this workbench */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  /** the git repository for this workbench */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
+  /** skills configuration (ref and files) */
+  skills?: InputMaybe<WorkbenchSkillsAttributes>;
+  /** the system prompt for the workbench */
+  systemPrompt?: InputMaybe<Scalars['String']['input']>;
+  /** tool ids to associate with this workbench */
+  toolAssociations?: InputMaybe<Array<InputMaybe<WorkbenchToolAssociationAttributes>>>;
+};
+
+export type WorkbenchCoding = {
+  __typename?: 'WorkbenchCoding';
+  /** the mode of the coding agent */
+  mode?: Maybe<AgentRunMode>;
+  /** allowed repository identifiers */
+  repositories?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
+export type WorkbenchCodingAttributes = {
+  /** the mode of the coding agent (e.g. analyze, write) */
+  mode?: InputMaybe<AgentRunMode>;
+  /** allowed repository identifiers */
+  repositories?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+export type WorkbenchConfiguration = {
+  __typename?: 'WorkbenchConfiguration';
+  /** coding capabilities */
+  coding?: Maybe<WorkbenchCoding>;
+  /** infrastructure capabilities */
+  infrastructure?: Maybe<WorkbenchInfrastructure>;
+};
+
+export type WorkbenchConfigurationAttributes = {
+  /** coding capabilities (mode, repositories) */
+  coding?: InputMaybe<WorkbenchCodingAttributes>;
+  /** infrastructure capabilities (services, stacks, kubernetes) */
+  infrastructure?: InputMaybe<WorkbenchInfrastructureAttributes>;
+};
+
+export type WorkbenchConnection = {
+  __typename?: 'WorkbenchConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchEdge = {
+  __typename?: 'WorkbenchEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Workbench>;
+};
+
+export type WorkbenchInfrastructure = {
+  __typename?: 'WorkbenchInfrastructure';
+  /** kubernetes capability enabled */
+  kubernetes?: Maybe<Scalars['Boolean']['output']>;
+  /** services capability enabled */
+  services?: Maybe<Scalars['Boolean']['output']>;
+  /** stacks capability enabled */
+  stacks?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type WorkbenchInfrastructureAttributes = {
+  /** enable kubernetes capability */
+  kubernetes?: InputMaybe<Scalars['Boolean']['input']>;
+  /** enable services capability */
+  services?: InputMaybe<Scalars['Boolean']['input']>;
+  /** enable stacks capability */
+  stacks?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type WorkbenchJob = {
+  __typename?: 'WorkbenchJob';
+  activities?: Maybe<WorkbenchJobActivityConnection>;
+  /** when the run completed */
+  completedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the id of the run */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the prompt for this run */
+  prompt?: Maybe<Scalars['String']['output']>;
+  /** the result for this job (sideloadable) */
+  result?: Maybe<WorkbenchJobResult>;
+  /** when the run started */
+  startedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the status of the run */
+  status: WorkbenchJobStatus;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the user who created this run */
+  user?: Maybe<User>;
+  /** the workbench this run belongs to */
+  workbench?: Maybe<Workbench>;
+};
+
+
+export type WorkbenchJobActivitiesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type WorkbenchJobActivity = {
+  __typename?: 'WorkbenchJobActivity';
+  /** the agent run that executed this activity */
+  agentRun?: Maybe<AgentRun>;
+  /** the id of the activity */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the prompt for this activity */
+  prompt?: Maybe<Scalars['String']['output']>;
+  /** embedded result (output, metrics, logs) when present */
+  result?: Maybe<WorkbenchJobActivityResult>;
+  /** the status of the activity */
+  status: WorkbenchJobActivityStatus;
+  /** the type of the activity */
+  type?: Maybe<WorkbenchJobActivityType>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the job this activity belongs to */
+  workbenchJob?: Maybe<WorkbenchJob>;
+};
+
+export type WorkbenchJobActivityConnection = {
+  __typename?: 'WorkbenchJobActivityConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchJobActivityEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchJobActivityEdge = {
+  __typename?: 'WorkbenchJobActivityEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchJobActivity>;
+};
+
+export type WorkbenchJobActivityJobUpdate = {
+  __typename?: 'WorkbenchJobActivityJobUpdate';
+  conclusion?: Maybe<Scalars['String']['output']>;
+  diff?: Maybe<Scalars['String']['output']>;
+  workingTheory?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchJobActivityLog = {
+  __typename?: 'WorkbenchJobActivityLog';
+  labels?: Maybe<Scalars['Map']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type WorkbenchJobActivityMetric = {
+  __typename?: 'WorkbenchJobActivityMetric';
+  labels?: Maybe<Scalars['Map']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+  value?: Maybe<Scalars['Float']['output']>;
+};
+
+export type WorkbenchJobActivityResult = {
+  __typename?: 'WorkbenchJobActivityResult';
+  /** job update (diff, theory, conclusion) when present */
+  jobUpdate?: Maybe<WorkbenchJobActivityJobUpdate>;
+  /** logs emitted by the activity */
+  logs?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
+  /** metrics emitted by the activity */
+  metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
+  /** output from the activity */
+  output?: Maybe<Scalars['String']['output']>;
+};
+
+export enum WorkbenchJobActivityStatus {
+  Cancelled = 'CANCELLED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Running = 'RUNNING',
+  Successful = 'SUCCESSFUL'
+}
+
+export enum WorkbenchJobActivityType {
+  Coding = 'CODING',
+  Infrastructure = 'INFRASTRUCTURE',
+  Integrations = 'INTEGRATIONS',
+  Memo = 'MEMO',
+  Observability = 'OBSERVABILITY',
+  Plan = 'PLAN',
+  Ticketing = 'TICKETING'
+}
+
+export type WorkbenchJobAttributes = {
+  /** the prompt for this job */
+  prompt?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type WorkbenchJobConnection = {
+  __typename?: 'WorkbenchJobConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchJobEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchJobEdge = {
+  __typename?: 'WorkbenchJobEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchJob>;
+};
+
+export type WorkbenchJobResult = {
+  __typename?: 'WorkbenchJobResult';
+  /** the conclusion for this result */
+  conclusion?: Maybe<Scalars['String']['output']>;
+  /** the id of the result */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** todos for this result */
+  todos?: Maybe<Array<Maybe<WorkbenchJobResultTodo>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the job this result belongs to */
+  workbenchJob?: Maybe<WorkbenchJob>;
+  /** the working theory for this result */
+  workingTheory?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchJobResultTodo = {
+  __typename?: 'WorkbenchJobResultTodo';
+  description?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<WorkbenchJobResultTodoStatus>;
+};
+
+export enum WorkbenchJobResultTodoStatus {
+  Completed = 'COMPLETED',
+  InProgress = 'IN_PROGRESS',
+  Pending = 'PENDING'
+}
+
+export enum WorkbenchJobStatus {
+  Cancelled = 'CANCELLED',
+  Failed = 'FAILED',
+  Pending = 'PENDING',
+  Running = 'RUNNING',
+  Successful = 'SUCCESSFUL'
+}
+
+export type WorkbenchSkills = {
+  __typename?: 'WorkbenchSkills';
+  /** files to include */
+  files?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** git reference for skills */
+  ref?: Maybe<GitRef>;
+};
+
+export type WorkbenchSkillsAttributes = {
+  /** files to include */
+  files?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** git reference for skills */
+  ref?: InputMaybe<GitRefAttributes>;
+};
+
+export type WorkbenchTool = {
+  __typename?: 'WorkbenchTool';
+  /** categories for the tool */
+  categories?: Maybe<Array<Maybe<WorkbenchToolCategory>>>;
+  /** tool configuration */
+  configuration?: Maybe<WorkbenchToolConfiguration>;
+  /** the id of the tool */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the name of the tool */
+  name: Scalars['String']['output'];
+  /** the project of this tool */
+  project?: Maybe<Project>;
+  /** the type of tool */
+  tool: WorkbenchToolType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type WorkbenchToolAssociationAttributes = {
+  /** the workbench tool id to associate */
+  toolId: Scalars['ID']['input'];
+};
+
+export type WorkbenchToolAttributes = {
+  /** categories for the tool */
+  categories?: InputMaybe<Array<InputMaybe<WorkbenchToolCategory>>>;
+  /** tool configuration (e.g. http) */
+  configuration?: InputMaybe<WorkbenchToolConfigurationAttributes>;
+  /** the name of the tool (a-z, 0-9, underscores) */
+  name: Scalars['String']['input'];
+  /** the project for this tool */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  /** the type of tool */
+  tool: WorkbenchToolType;
+};
+
+export enum WorkbenchToolCategory {
+  Integration = 'INTEGRATION',
+  Logs = 'LOGS',
+  Metrics = 'METRICS',
+  Ticketing = 'TICKETING'
+}
+
+export type WorkbenchToolConfiguration = {
+  __typename?: 'WorkbenchToolConfiguration';
+  /** http tool configuration */
+  http?: Maybe<WorkbenchToolHttpConfiguration>;
+};
+
+export type WorkbenchToolConfigurationAttributes = {
+  /** http tool configuration */
+  http?: InputMaybe<WorkbenchToolHttpConfigurationAttributes>;
+};
+
+export type WorkbenchToolConnection = {
+  __typename?: 'WorkbenchToolConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchToolEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchToolEdge = {
+  __typename?: 'WorkbenchToolEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchTool>;
+};
+
+export type WorkbenchToolHttpConfiguration = {
+  __typename?: 'WorkbenchToolHttpConfiguration';
+  /** request body */
+  body?: Maybe<Scalars['String']['output']>;
+  /** request headers */
+  headers?: Maybe<Array<Maybe<WorkbenchToolHttpHeader>>>;
+  /** JSON schema for the tool input */
+  inputSchema?: Maybe<Scalars['Map']['output']>;
+  /** the http method */
+  method?: Maybe<Scalars['String']['output']>;
+  /** the request url */
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchToolHttpConfigurationAttributes = {
+  /** request body */
+  body?: InputMaybe<Scalars['String']['input']>;
+  /** request headers */
+  headers?: InputMaybe<Array<InputMaybe<WorkbenchToolHttpHeaderAttributes>>>;
+  /** JSON schema for the tool input */
+  inputSchema?: InputMaybe<Scalars['Json']['input']>;
+  /** the http method */
+  method: WorkbenchToolHttpMethod;
+  /** the request url */
+  url: Scalars['String']['input'];
+};
+
+export type WorkbenchToolHttpHeader = {
+  __typename?: 'WorkbenchToolHttpHeader';
+  name?: Maybe<Scalars['String']['output']>;
+  value?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchToolHttpHeaderAttributes = {
+  name?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum WorkbenchToolHttpMethod {
+  Delete = 'DELETE',
+  Get = 'GET',
+  Patch = 'PATCH',
+  Post = 'POST',
+  Put = 'PUT'
+}
+
+export enum WorkbenchToolType {
+  Http = 'HTTP'
+}
 
 /** a description of a yaml-merge operation on a file */
 export type YamlOverlay = {

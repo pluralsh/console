@@ -3,7 +3,8 @@ defmodule Console.Deployments.Git do
   use Nebulex.Caching
   import Console.Deployments.Policies
   alias Console.PubSub
-  alias Console.Deployments.{Settings, Services, Clusters}
+  alias Console.Deployments.{Settings, Services, Clusters, Tar}
+  alias Console.Deployments.Git.Discovery
   alias Console.Services.Users
   alias Console.Cached.ClusterNodes
   alias Console.Deployments.Pr.{Dispatcher, Validation}
@@ -121,6 +122,15 @@ defmodule Console.Deployments.Git do
       %DeploymentSettings{artifact_repository: %GitRepository{} = repo} -> repo
       _ -> get_by_url!(artifacts_url())
     end
+  end
+
+  @doc """
+  Fetches the files in a subdirectory of a git repository on demand
+  """
+  @spec fetch(GitRepository.t, Console.Schema.Service.Git.t) :: {:ok, [{binary, binary}]} | Console.error
+  def fetch(%GitRepository{} = repo, %Console.Schema.Service.Git{} = ref) do
+    with {:ok, f} <- Discovery.fetch(repo, ref),
+      do: Tar.tar_stream(f)
   end
 
   @doc """

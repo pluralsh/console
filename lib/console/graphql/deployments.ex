@@ -44,6 +44,7 @@
   import_types Console.GraphQl.Deployments.OAuth
   import_types Console.GraphQl.Deployments.Flow
   import_types Console.GraphQl.Deployments.Sentinel
+  import_types Console.GraphQl.Deployments.Workbench
   import_types Console.GraphQl.Deployments.Agent
   import_types Console.GraphQl.Deployments.Integration
 
@@ -73,6 +74,7 @@
     import_fields :flow_queries
     import_fields :oauth_queries
     import_fields :sentinel_queries
+    import_fields :workbench_queries
     import_fields :agent_queries
     import_fields :public_agent_queries
     import_fields :public_sentinel_queries
@@ -99,6 +101,7 @@
     import_fields :oauth_mutations
     import_fields :flow_mutations
     import_fields :sentinel_mutations
+    import_fields :workbench_mutations
     import_fields :agent_mutations
     import_fields :public_agent_mutations
     import_fields :public_sentinel_mutations

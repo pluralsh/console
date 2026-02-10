@@ -101,7 +101,8 @@ defmodule Console.OCI.Client do
     |> Req.get(url: "#{url}?#{URI.encode_query(%{service: svc, scope: scope})}")
     |> case do
       {:ok, %Req.Response{status: 200, body: %{"token" => token}}} -> {:ok, token}
-      {:ok, %Req.Response{body: body}} -> {:error, "authentication failure: #{inspect(body)}"}
+      {:ok, %Req.Response{status: 200, body: %{"access_token" => token}}} -> {:ok, token}
+      {:ok, %Req.Response{body: body}} -> {:error, "authentication failure: #{inspect(body)}" }
       err -> err
     end
   end
