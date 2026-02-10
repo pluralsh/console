@@ -1,5 +1,5 @@
-import { useState } from 'react'
 import {
+  DiscoverIcon,
   IconFrame,
   LoopingLogo,
   Modal,
@@ -10,7 +10,6 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { OBSERVERS_ABS_PATH } from 'routes/cdRoutesConsts'
 import { GqlError } from 'components/utils/Alert'
 import {
   ObserverFragment,
@@ -19,25 +18,29 @@ import {
   useKickObserverMutation,
   useObserversQuery,
 } from 'generated/graphql'
+import { useState } from 'react'
+import { OBSERVERS_ABS_PATH } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
 
 import styled, { useTheme } from 'styled-components'
 
-import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
-import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 import { useProjectId } from '../../contexts/ProjectsContext'
+import { Confirm } from '../../utils/Confirm'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
+import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 import {
   ServiceErrorsChip,
   ServiceErrorsModal,
 } from '../services/ServicesTableErrors'
-import { Confirm } from '../../utils/Confirm'
 import { Overline } from '../utils/PermissionsModal'
 
+import { Link } from 'react-router-dom'
+import { getAgentRunAbsPath } from 'routes/aiRoutesConsts.tsx'
+import KickButton from '../../utils/KickButton.tsx'
 import ObserverStatusChip from './ObserverStatusChip'
 import ObserverTargetChip from './ObserverTargetChip'
 import ObserverTargetOrderChip from './ObserverTargetOrderChip'
-import KickButton from '../../utils/KickButton.tsx'
 
 export const breadcrumbs = [
   ...CD_BASE_CRUMBS,
@@ -174,6 +177,7 @@ const columns = [
   columnHelper.accessor(({ node }) => node?.crontab, {
     id: 'crontab',
     header: 'Crontab',
+    meta: { gridTemplate: 'max-content' },
     cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor(({ node }) => node?.lastValue, {
@@ -199,6 +203,7 @@ const columns = [
   columnHelper.accessor(() => null, {
     id: 'errors',
     header: 'Errors',
+    meta: { gridTemplate: 'max-content' },
     cell: function Cell({
       row: {
         original: { node },
@@ -231,7 +236,6 @@ const columns = [
   columnHelper.accessor(() => null, {
     id: 'actions',
     header: '',
-    meta: { gridTemplate: 'minmax(auto, 100px)' },
     cell: function Cell({
       row: {
         original: { node },
@@ -254,6 +258,17 @@ const columns = [
           }}
           onClick={(e) => e.stopPropagation()}
         >
+          {node?.agentRun && (
+            <IconFrame
+              clickable
+              type="secondary"
+              icon={<DiscoverIcon />}
+              as={Link}
+              to={getAgentRunAbsPath({ agentRunId: node.agentRun.id })}
+              textValue="View agent run"
+              tooltip
+            />
+          )}
           <KickButton
             icon
             pulledAt={node?.lastRunAt}
