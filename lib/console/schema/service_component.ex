@@ -75,11 +75,12 @@ end
 defmodule Console.Schema.ServiceComponent.Mini do
   alias Console.Schema.{ServiceComponent, Service}
 
-  defstruct [:service_id, :service_url, :name, :kind, :namespace, :group, :version, :children, :service]
+  defstruct [:service_id, :component_id, :service_url, :name, :kind, :namespace, :group, :version, :children, :service]
 
   def new(%ServiceComponent{} = comp) do
     %__MODULE__{
       service_id: comp.service_id,
+      component_id: comp.id,
       service_url: Console.url("/cd/clusters/#{comp.service.cluster_id}/services/#{comp.service_id}"),
       name: comp.name,
       kind: comp.kind,
@@ -101,7 +102,8 @@ defmodule Console.Schema.ServiceComponent.Mini do
       children: attrs["children"],
       service: attrs["service"],
       service_id: attrs["service_id"],
-      service_url: attrs["service_url"]
+      service_url: attrs["service_url"],
+      component_id: attrs["component_id"]
     }
   end
 

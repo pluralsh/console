@@ -1,0 +1,19 @@
+{
+    "type": "object",
+    "properties": {
+        "mode": {
+            "type": "string",
+            "enum": ["analyze", "write"],
+            "description": "The mode of the coding agent (analyze or write).  If you just want to gather information about a repository, use analyze. If you want to generate a pr, use write."
+        },
+        "repository": {
+            "type": "string",
+            "description": "The url of the repository to create a PR for"
+        },
+        "prompt": {
+            "type": "string", 
+            "description": "The prompt to give to the coding agent.  This should be a detailed prompt that describes the changes you want to make to the repository."
+        }
+    },
+    "required": ["mode", "repository", "prompt"]
+}

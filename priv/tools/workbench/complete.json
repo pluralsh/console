@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "conclusion": {
+            "type": "string",
+            "description": "The conclusion to this workbench job you want to record"
+        }
+    },
+    "required": ["conclusion"]
+}

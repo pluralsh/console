@@ -109,11 +109,28 @@ defmodule Console.AI.Tool do
     end
   end
 
-  def validate(tool, input) do
+  def name(t) when is_atom(t), do: "#{t.name()}"
+  def name(%tool{} = t), do: tool.name(t)
+
+  def description(t) when is_atom(t), do: t.description()
+  def description(%tool{} = t), do: tool.description(t)
+
+  def json_schema(t) when is_atom(t), do: t.json_schema()
+  def json_schema(%tool{} = t), do: tool.json_schema(t)
+
+  def validate(tool, input) when is_atom(tool) do
     struct(tool, %{})
     |> tool.changeset(input)
     |> Ecto.Changeset.apply_action(:update)
   end
+
+  def validate(%tool{} = t, input) do
+    tool.changeset(t, input)
+    |> Ecto.Changeset.apply_action(:update)
+  end
+
+  def implement(tool, input) when is_atom(tool), do: tool.implement(input)
+  def implement(%tool{} = t, input), do: tool.implement(t, input)
 
   def scm_connection() do
     case Settings.cached() do

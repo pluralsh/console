@@ -1,6 +1,6 @@
 defmodule Console.AI.Tools.Agent.ApiSpec do
   use Console.AI.Tools.Agent.Base
-  alias Console.Schema.{Cluster}
+  alias Console.Schema.{Cluster, Service}
   alias Console.Deployments.Clusters
 
   embedded_schema do
@@ -23,17 +23,26 @@ defmodule Console.AI.Tools.Agent.ApiSpec do
     |> validate_required([:version, :query])
   end
 
-  def implement(%__MODULE__{group: nil}), do: {:ok, "Core (null) groups are not supported, use the standard definition for its kubernetes kinds"}
+  def implement(%__MODULE__{group: nil}), do: {:ok, "Core (null) groups are not supported, use the standard, well-known definition for its kubernetes group kinds"}
   def implement(%__MODULE__{group: group, version: version, query: query}) do
-    with {:session, %AgentSession{cluster: %Cluster{} = cluster}} <- session(),
+    with {:cluster, %Cluster{} = cluster} <- {:cluster, fetch_cluster()},
          {:ok, %{"components" => %{"schemas" => schemas}}} <- Clusters.api_spec(cluster, group, version) do
       Enum.filter(schemas, fn {k, _} -> String.contains?(String.downcase(k), String.downcase(query)) end)
       |> Enum.take(5)
       |> Map.new()
       |> Jason.encode()
     else
-      {:session, _} -> {:error, "No cluster bound to this session, you need to manually specify this in the chat context menu"}
+      {:cluster, _} -> {:error, "No cluster bound to this session, you need to manually specify this in the chat context menu"}
       err -> err
+    end
+  end
+
+  def fetch_cluster() do
+    case {session(), Tool.parent()} do
+      {{:session, %AgentSession{cluster: %Cluster{} = cluster}}, _} -> cluster
+      {_, %Cluster{} = cluster} -> cluster
+      {_, %Service{} = svc} -> Console.Repo.preload(svc, :cluster).cluster
+      _ -> nil
     end
   end
 end

@@ -9133,10 +9133,10 @@ func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelC
 }
 
 type SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}
@@ -9352,10 +9352,10 @@ func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_Sentinel
 }
 
 type SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}
@@ -9549,10 +9549,10 @@ func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelChe
 }
 
 type SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}
@@ -9746,10 +9746,10 @@ func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_
 }
 
 type SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}
@@ -9943,10 +9943,10 @@ func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegra
 }
 
 type SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}
@@ -10122,10 +10122,10 @@ func (t *SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigu
 }
 
 type SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}
@@ -10247,10 +10247,10 @@ func (t *TestCaseConfigurationFragment_Pvc) GetStorageClass() string {
 }
 
 type TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &TestCaseConfigurationFragment_Raw{}
 	}
@@ -20404,10 +20404,10 @@ func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRu
 }
 
 type ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}
@@ -20706,10 +20706,10 @@ func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_Sen
 }
 
 type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}
@@ -20925,10 +20925,10 @@ func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFrag
 }
 
 type GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}
@@ -21187,10 +21187,10 @@ func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_
 }
 
 type UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}
@@ -21395,10 +21395,10 @@ func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFrag
 }
 
 type CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}
@@ -21592,10 +21592,10 @@ func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFrag
 }
 
 type UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}
@@ -21800,10 +21800,10 @@ func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Conf
 }
 
 type GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw struct {
-	Yaml *string "json:\"yaml,omitempty\" graphql:\"yaml\""
+	Yaml string "json:\"yaml\" graphql:\"yaml\""
 }
 
-func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() *string {
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw) GetYaml() string {
 	if t == nil {
 		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Raw{}
 	}

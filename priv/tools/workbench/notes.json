@@ -1,0 +1,47 @@
+{
+    "type": "object",
+    "properties": {
+        "status": {
+            "type": "object",
+            "description": "The notes to update",
+            "properties": {
+                "todos": {
+                    "type": "array",
+                    "description": "The todos to update.  You can add/remove/update todos if the plan needs to change, but always pass the full list of todos",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "The name of the todo"
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "The description of the todo"
+                            },
+                            "done": {
+                                "type": "boolean",
+                                "description": "Whether the todo is done"
+                            }
+                        },
+                        "required": ["name", "description", "done"]
+                    }
+                },
+                "working_theory": {
+                    "type": "string",
+                    "description": "The current working theory you might want to update.  Pass the old theory if no changes are needed."
+                }
+            },
+            "required": []
+        },
+        "prompt": {
+            "type": "string",
+            "description": "A quick prompt to record why you're updating the notes"
+        },
+        "output": {
+            "type": "string",
+            "description": "A summary of the notes change you made"
+        }
+    },
+    "required": ["status", "prompt", "output"]
+}

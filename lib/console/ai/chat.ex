@@ -521,7 +521,7 @@ defmodule Console.AI.Chat do
     end
   end
 
-  defp handle_tool_call({:ok, [%{create_pr: %{result: pr_attrs}} | _]}, %ChatThread{} = thread, user) do
+  defp handle_tool_call({:ok, [%{"create_pr" => %{result: pr_attrs}} | _]}, %ChatThread{} = thread, user) do
     thread = Repo.preload(thread, [:insight])
     start_transaction()
     |> add_operation(:pr, fn _ ->
@@ -540,7 +540,7 @@ defmodule Console.AI.Chat do
     end)
     |> execute(extract: :msg)
   end
-  defp handle_tool_call({:ok, [%{create_pr: %{error: err}} | _]}, _, _), do: {:error, err}
+  defp handle_tool_call({:ok, [%{"create_pr" => %{error: err}} | _]}, _, _), do: {:error, err}
   defp handle_tool_call({:ok, txt}, %ChatThread{id: tid}, user), do: save_message(msg(txt), tid, user)
   defp handle_tool_call(err, _, _), do: err
 

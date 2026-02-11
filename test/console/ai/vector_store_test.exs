@@ -2,6 +2,7 @@ defmodule Console.AI.VectorStoreTest do
   use Console.DataCase, async: false
   alias Console.AI.VectorStore
   alias ElasticsearchUtils, as: ES
+  alias Console.Deployments.Settings
 
   describe "init/0" do
     test "it can migrate a vector store index" do
@@ -24,7 +25,7 @@ defmodule Console.AI.VectorStoreTest do
 
       :ok = VectorStore.recreate()
 
-      assert Console.Deployments.Settings.fetch_consistent().ai.vector_store.version == 2
+      assert Settings.fetch_consistent().ai.vector_store.version == Settings.vector_store_version()
     end
   end
 end

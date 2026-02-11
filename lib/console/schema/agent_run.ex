@@ -96,7 +96,7 @@ defmodule Console.Schema.AgentRun do
     |> validate_required(~w(status prompt repository runtime_id user_id mode)a)
   end
 
-  defp todo_changeset(model, attrs) do
+  def todo_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(title description done)a)
     |> validate_required(~w(title description)a)

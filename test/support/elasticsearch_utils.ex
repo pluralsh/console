@@ -49,6 +49,11 @@ defmodule ElasticsearchUtils do
     |> HTTPoison.post!(Jason.encode!(doc), ["Content-Type": "application/json"])
   end
 
+  def get_index(index_name \\ @index) do
+    Path.join([@host, index_name, "_mapping"])
+    |> HTTPoison.get()
+  end
+
   def refresh(index_name \\ @index) do
     Path.join([@host, index_name, "_refresh"])
     |> HTTPoison.post!("")
@@ -57,6 +62,16 @@ defmodule ElasticsearchUtils do
   def drop_index(index_name) do
     Path.join([@host, index_name])
     |> HTTPoison.delete!()
+  end
+
+  def get(index_name \\ @index, id) do
+    Path.join([@host, index_name, "_doc", id])
+    |> HTTPoison.get()
+  end
+
+  def search(index_name \\ @index) do
+    Path.join([@host, index_name, "_search"])
+    |> HTTPoison.get()
   end
 
   def count_index(index_name) do

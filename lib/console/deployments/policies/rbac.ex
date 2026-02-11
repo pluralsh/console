@@ -259,7 +259,7 @@ defmodule Console.Deployments.Policies.Rbac do
   def preload(%ClusterUpgradeStep{} = step),
     do: Repo.preload(step, [upgrade: [cluster: @top_preloads]])
   def preload(%Workbench{} = workbench),
-    do: Repo.preload(workbench, [project: @bindings])
+    do: Repo.preload(workbench, [:read_bindings, :write_bindings, project: @bindings])
   def preload(%WorkbenchTool{} = tool),
     do: Repo.preload(tool, [:read_bindings, :write_bindings, project: @bindings])
   def preload(%WorkbenchJob{} = job),

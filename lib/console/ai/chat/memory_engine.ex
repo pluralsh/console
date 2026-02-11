@@ -57,11 +57,11 @@ defmodule Console.AI.Chat.MemoryEngine do
 
   @spec call_tools(%__MODULE__{}, [Tool.t], [module]) :: {:ok, [%{role: Provider.sender, content: binary}]} | {:error, binary}
   defp call_tools(_engine, tools, impls) do
-    by_name = Map.new(impls, & {&1.name(), &1})
-    Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args}, acc ->
+    by_name = Map.new(impls, & {Tool.name(&1), &1})
+    Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args} = tool, acc ->
       with {:ok, impl}    <- Map.fetch(by_name, name),
            {:ok, parsed}  <- Tool.validate(impl, args),
-           {:ok, content} <- impl.implement(parsed) do
+           {:ok, content} <- Tool.implement(impl, Map.put(parsed, :id, tool)) do
         {:cont, [tool_msg(content, id, name, args) | acc]}
       else
         :error ->

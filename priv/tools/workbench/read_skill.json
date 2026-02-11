@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "skill": {
+            "type": "string",
+            "description": "The skill to read"
+        }
+    },
+    "required": ["skill"]
+}

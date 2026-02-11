@@ -1291,6 +1291,10 @@ type RootSubscriptionType {
   agentMessageDelta(runId: ID!): AgentMessageDelta
 
   agentRunDelta(id: ID!): AgentRunDelta
+
+  workbenchJobDelta(id: ID!): WorkbenchJobDelta
+
+  workbenchJobActivityDelta(jobId: ID!): WorkbenchJobActivityDelta
 }
 
 type OauthResponse {
@@ -1927,6 +1931,7 @@ enum WorkbenchToolCategory {
   LOGS
   INTEGRATION
   TICKETING
+  TRACES
 }
 
 enum WorkbenchToolHttpMethod {
@@ -1961,12 +1966,6 @@ enum WorkbenchJobActivityType {
   INFRASTRUCTURE
   MEMO
   PLAN
-}
-
-enum WorkbenchJobResultTodoStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
 }
 
 input WorkbenchJobAttributes {
@@ -2141,6 +2140,9 @@ type WorkbenchJob {
   "when the run completed"
   completedAt: DateTime
 
+  "error message when the job failed"
+  error: String
+
   "the workbench this run belongs to"
   workbench: Workbench
 
@@ -2241,7 +2243,7 @@ type WorkbenchJobResult {
 type WorkbenchJobResultTodo {
   name: String
   description: String
-  status: WorkbenchJobResultTodoStatus
+  done: Boolean
 }
 
 type WorkbenchConfiguration {
@@ -2350,6 +2352,16 @@ type WorkbenchJobActivityConnection {
   edges: [WorkbenchJobActivityEdge]
 }
 
+type WorkbenchJobDelta {
+  delta: Delta
+  payload: WorkbenchJob
+}
+
+type WorkbenchJobActivityDelta {
+  delta: Delta
+  payload: WorkbenchJobActivity
+}
+
 enum SentinelCheckType {
   LOG
   KUBERNETES
@@ -2379,6 +2391,11 @@ enum SentinelIntegrationTestCaseType {
   LOADBALANCER
   RAW
   PVC
+}
+
+enum SentinelRawResult {
+  SUCCESS
+  FAILED
 }
 
 input SentinelAttributes {
@@ -2583,7 +2600,10 @@ input SentinelCheckIntegrationTestCasePvcAttributes {
 
 input SentinelCheckIntegrationTestCaseRawAttributes {
   "the yaml to use for this test case"
-  yaml: String
+  yaml: String!
+
+  "the expected result of the test case"
+  expectedResult: SentinelRawResult
 }
 
 type Sentinel {
@@ -2799,7 +2819,10 @@ type SentinelCheckIntegrationTestCasePvcConfiguration {
 "test provisioning a raw resource"
 type SentinelCheckIntegrationTestCaseRawConfiguration {
   "the yaml to use for this test case"
-  yaml: String
+  yaml: String!
+
+  "the expected result of the test case"
+  expectedResult: SentinelRawResult
 }
 
 type SentinelRun {

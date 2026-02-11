@@ -235,12 +235,9 @@ defmodule Console.Deployments.Git.Cache do
 
   defp tarball(%GitRepository{dir: dir}, path, tgz_path, [_ | _] = files) do
     subpath = Path.join(dir, path)
-    additional_files = Enum.map(files, &Path.join(dir, &1))
-                       |> Enum.map(& {to_charlist(Path.basename(&1)), to_charlist(&1)})
 
-    Console.ls_r(subpath)
+    Enum.map(files, &Path.join(dir, &1))
     |> Enum.map(&tar_path(&1, subpath))
-    |> Enum.concat(additional_files)
     |> case do
       [_ | _] = files -> tar_files(files, tgz_path)
       [] -> {:error, "folder is empty"}

@@ -11137,6 +11137,8 @@ export type RootSubscriptionType = {
   notificationDelta?: Maybe<NotificationDelta>;
   podDelta?: Maybe<PodDelta>;
   runLogsDelta?: Maybe<RunLogsDelta>;
+  workbenchJobActivityDelta?: Maybe<WorkbenchJobActivityDelta>;
+  workbenchJobDelta?: Maybe<WorkbenchJobDelta>;
 };
 
 
@@ -11160,6 +11162,16 @@ export type RootSubscriptionTypeAiStreamArgs = {
 
 export type RootSubscriptionTypeRunLogsDeltaArgs = {
   stepId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeWorkbenchJobActivityDeltaArgs = {
+  jobId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeWorkbenchJobDeltaArgs = {
+  id: Scalars['ID']['input'];
 };
 
 export type RouterFilterAttributes = {
@@ -11644,15 +11656,19 @@ export type SentinelCheckIntegrationTestCasePvcConfiguration = {
 };
 
 export type SentinelCheckIntegrationTestCaseRawAttributes = {
+  /** the expected result of the test case */
+  expectedResult?: InputMaybe<SentinelRawResult>;
   /** the yaml to use for this test case */
-  yaml?: InputMaybe<Scalars['String']['input']>;
+  yaml: Scalars['String']['input'];
 };
 
 /** test provisioning a raw resource */
 export type SentinelCheckIntegrationTestCaseRawConfiguration = {
   __typename?: 'SentinelCheckIntegrationTestCaseRawConfiguration';
+  /** the expected result of the test case */
+  expectedResult?: Maybe<SentinelRawResult>;
   /** the yaml to use for this test case */
-  yaml?: Maybe<Scalars['String']['output']>;
+  yaml: Scalars['String']['output'];
 };
 
 export type SentinelCheckIntegrationTestConfiguration = {
@@ -11773,6 +11789,11 @@ export enum SentinelIntegrationTestCaseType {
   Loadbalancer = 'LOADBALANCER',
   Pvc = 'PVC',
   Raw = 'RAW'
+}
+
+export enum SentinelRawResult {
+  Failed = 'FAILED',
+  Success = 'SUCCESS'
 }
 
 export type SentinelRun = {
@@ -13879,6 +13900,8 @@ export type WorkbenchJob = {
   activities?: Maybe<WorkbenchJobActivityConnection>;
   /** when the run completed */
   completedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** error message when the job failed */
+  error?: Maybe<Scalars['String']['output']>;
   /** the id of the run */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -13929,6 +13952,12 @@ export type WorkbenchJobActivityConnection = {
   __typename?: 'WorkbenchJobActivityConnection';
   edges?: Maybe<Array<Maybe<WorkbenchJobActivityEdge>>>;
   pageInfo: PageInfo;
+};
+
+export type WorkbenchJobActivityDelta = {
+  __typename?: 'WorkbenchJobActivityDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<WorkbenchJobActivity>;
 };
 
 export type WorkbenchJobActivityEdge = {
@@ -14000,6 +14029,12 @@ export type WorkbenchJobConnection = {
   pageInfo: PageInfo;
 };
 
+export type WorkbenchJobDelta = {
+  __typename?: 'WorkbenchJobDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<WorkbenchJob>;
+};
+
 export type WorkbenchJobEdge = {
   __typename?: 'WorkbenchJobEdge';
   cursor?: Maybe<Scalars['String']['output']>;
@@ -14025,15 +14060,9 @@ export type WorkbenchJobResult = {
 export type WorkbenchJobResultTodo = {
   __typename?: 'WorkbenchJobResultTodo';
   description?: Maybe<Scalars['String']['output']>;
+  done?: Maybe<Scalars['Boolean']['output']>;
   name?: Maybe<Scalars['String']['output']>;
-  status?: Maybe<WorkbenchJobResultTodoStatus>;
 };
-
-export enum WorkbenchJobResultTodoStatus {
-  Completed = 'COMPLETED',
-  InProgress = 'IN_PROGRESS',
-  Pending = 'PENDING'
-}
 
 export enum WorkbenchJobStatus {
   Cancelled = 'CANCELLED',
@@ -14098,7 +14127,8 @@ export enum WorkbenchToolCategory {
   Integration = 'INTEGRATION',
   Logs = 'LOGS',
   Metrics = 'METRICS',
-  Ticketing = 'TICKETING'
+  Ticketing = 'TICKETING',
+  Traces = 'TRACES'
 }
 
 export type WorkbenchToolConfiguration = {

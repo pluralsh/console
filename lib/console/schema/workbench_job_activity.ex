@@ -10,6 +10,12 @@ defmodule Console.Schema.WorkbenchJobActivity do
     field :type,   Type
     field :prompt, :binary
 
+    embeds_one :tool_call, ToolCall, on_replace: :update do
+      field :call_id,   :string
+      field :name,      :string
+      field :arguments, :map
+    end
+
     embeds_one :result, WorkbenchJobResult, on_replace: :update do
       field :output,          :string
 
@@ -65,9 +71,15 @@ defmodule Console.Schema.WorkbenchJobActivity do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:result, with: &result_changeset/2)
+    |> cast_embed(:tool_call, with: &tool_call_changeset/2)
     |> foreign_key_constraint(:workbench_job_id)
     |> foreign_key_constraint(:agent_run_id)
     |> validate_required([:status, :type, :prompt, :workbench_job_id])
+  end
+
+  defp tool_call_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(call_id name arguments)a)
   end
 
   defp result_changeset(model, attrs) do

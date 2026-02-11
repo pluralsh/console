@@ -1,10 +1,10 @@
 defmodule Console.Schema.WorkbenchTool do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Project, PolicyBinding, User}
   alias Console.Deployments.Policies.Rbac
 
   defenum Tool, http: 0
-  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3
+  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
   schema "workbench_tools" do
@@ -82,7 +82,25 @@ defmodule Console.Schema.WorkbenchTool do
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :tool])
+    |> infer_categories()
   end
+
+  defp infer_categories(changeset) do
+    case get_field(changeset, :categories) do
+      nil -> put_change(changeset, :categories, categories(get_field(changeset, :tool)))
+      _ -> changeset
+    end
+  end
+
+  defp categories(:http), do: [:integration]
+  defp categories(:datadog), do: [:metrics, :logs]
+  defp categories(:newrelic), do: [:metrics, :logs]
+  defp categories(:splunk), do: [:logs]
+  defp categories(:prometheus), do: [:metrics]
+  defp categories(:loki), do: [:logs]
+  defp categories(:elastic), do: [:logs]
+  defp categories(:tempo), do: [:traces]
+  defp categories(_), do: [:integration]
 
   defp configuration_changeset(model, attrs) do
     model
