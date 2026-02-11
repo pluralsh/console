@@ -150,7 +150,7 @@ versions:
   images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v22.9.2']
   incompatibilities: []
 - version: 22.9.1
-  kube: ['1.26', '1.25', '1.24']
+  kube: ['1.25', '1.24', '1.23']
   requirements: []
   chart_version: 22.9.1
   images: ['k8s.gcr.io/nfd/node-feature-discovery:v0.10.1', 'nvcr.io/nvidia/gpu-operator:v22.9.1']
