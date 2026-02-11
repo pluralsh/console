@@ -56,7 +56,7 @@ export function PersonasList() {
     <GridTableWrapper>
       <Table
         virtualizeRows
-        rowBg="raised"
+        rowBg="base"
         data={personas || []}
         columns={columns}
         hideHeader

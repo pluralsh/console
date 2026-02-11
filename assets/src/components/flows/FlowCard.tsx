@@ -121,10 +121,16 @@ const FooterSC = styled.div<{ $parentHover: boolean }>(
     alignItems: 'center',
     padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
     borderTop: theme.borders['fill-two'],
-    backgroundColor: theme.colors['fill-two'],
+    backgroundColor:
+      theme.mode === 'light'
+        ? theme.colors['fill-one']
+        : theme.colors['fill-two'],
     ...($parentHover && {
       '&:not(:has(button:hover))': {
-        backgroundColor: theme.colors['fill-two-hover'],
+        backgroundColor:
+          theme.mode === 'light'
+            ? theme.colors['fill-one-hover']
+            : theme.colors['fill-two-hover'],
       },
     }),
   })
@@ -136,8 +142,14 @@ const CardSC = styled(Card)(({ theme }) => ({
   width: '100%',
   overflow: 'hidden',
   cursor: 'pointer',
-  backgroundColor: theme.colors['fill-one'],
+  backgroundColor:
+    theme.mode === 'light'
+      ? theme.colors['fill-zero']
+      : theme.colors['fill-one'],
   '&:hover:not(:has(button:hover))': {
-    backgroundColor: theme.colors['fill-one-hover'],
+    backgroundColor:
+      theme.mode === 'light'
+        ? theme.colors['fill-zero-hover']
+        : theme.colors['fill-one-hover'],
   },
 }))

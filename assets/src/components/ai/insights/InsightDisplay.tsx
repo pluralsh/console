@@ -100,7 +100,10 @@ const WrapperSC = styled.div(({ theme }) => ({
   overflow: 'hidden',
   border: theme.borders['fill-three'],
   borderRadius: theme.borderRadiuses.large,
-  background: theme.colors['fill-one'],
+  background:
+    theme.mode === 'light'
+      ? theme.colors['fill-zero']
+      : theme.colors['fill-one'],
 }))
 
 const ContentHeaderSC = styled.div(({ theme }) => ({
@@ -111,7 +114,10 @@ const ContentHeaderSC = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
   height: HEADER_HEIGHT,
   minWidth: 'max-content',
-  background: theme.colors['fill-two'],
+  background:
+    theme.mode === 'light'
+      ? theme.colors['fill-one']
+      : theme.colors['fill-two'],
   borderBottom: theme.borders['fill-two'],
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
 }))

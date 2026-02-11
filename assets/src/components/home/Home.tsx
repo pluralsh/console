@@ -181,7 +181,7 @@ export function Home() {
           ) : (
             <ClustersTable
               fullHeightWrap
-              rowBg="raised"
+              rowBg="base"
               selectedCluster={selectedCluster}
               setSelectedCluster={setSelectedCluster}
               data={tableData?.clusters?.edges?.filter(isNonNullable) ?? []}
@@ -223,7 +223,7 @@ const ChartSectionSC = styled.div(({ theme }) => ({
   width: '100%',
   display: 'flex',
   justifyContent: 'center',
-  backgroundColor: theme.colors['fill-accent'],
+  // backgroundColor: theme.colors['fill-one'],
 }))
 
 const TableSectionSC = styled.div(({ theme }) => ({
@@ -231,7 +231,7 @@ const TableSectionSC = styled.div(({ theme }) => ({
   justifyContent: 'center',
   flex: 1,
   minHeight: 400,
-  backgroundColor: theme.colors['fill-zero-selected'],
+  // backgroundColor: theme.colors['fill-zero'],
   padding: theme.spacing.large,
   borderTop: theme.borders.default,
   overflow: 'hidden',

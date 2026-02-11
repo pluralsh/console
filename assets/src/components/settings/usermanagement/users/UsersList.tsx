@@ -47,13 +47,13 @@ export default function UsersList() {
         placeholder="Search a user"
         startIcon={<SearchIcon color="text-light" />}
         onChange={({ target: { value } }) => setQ(value)}
-        backgroundColor="fill-one"
+        backgroundColor="fill-zero"
       />
       {!isEmpty(users) ? (
         <GridTableWrapper>
           <Table
             virtualizeRows
-            rowBg="raised"
+            rowBg="base"
             data={users || []}
             columns={usersCols}
             hideHeader

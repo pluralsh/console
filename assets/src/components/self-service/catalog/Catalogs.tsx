@@ -149,6 +149,9 @@ export function Catalogs() {
               css={{
                 flexGrow: 1,
                 padding: theme.spacing.xxlarge,
+                ...(theme.mode === 'light' && {
+                  backgroundColor: theme.colors['fill-zero'],
+                }),
               }}
             >
               <EmptyState

@@ -50,19 +50,17 @@ type ListBoxProps = Omit<
   footer?: ReactElement<any>
 }
 
-function getCardFillLevel(theme: DefaultTheme) {
-  return theme.mode === 'light' ? 1 : 2
-}
-
-const ListBoxCard = styled(Card).attrs(({ theme }) => ({
-  cornerSize: 'medium',
-  fillLevel: getCardFillLevel(theme),
-}))(({ theme }) => ({
+const ListBoxCard = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   flexShrink: 1,
   overflowX: 'visible',
   overflowY: 'hidden',
+  background:
+    theme.mode === 'light'
+      ? theme.colors['fill-zero']
+      : theme.colors['fill-two'],
+  borderRadius: theme.borderRadiuses.medium,
   '.footerFixed': {
     borderTop:
       theme.mode === 'light'
@@ -76,7 +74,7 @@ type ScrollContainerProps = {
 }
 const ScrollContainer = styled.div<ScrollContainerProps>(
   ({ theme, extendStyle }) => ({
-    ...theme.partials.scrollBar({ fillLevel: getCardFillLevel(theme) }),
+    ...theme.partials.scrollBar({ fillLevel: theme.mode === 'light' ? 0 : 2 }),
     position: 'relative',
     overflow: 'auto',
     flexShrink: 1,
@@ -245,9 +243,9 @@ function ListBoxUnmanaged({
 
   return (
     <ListBoxCard
-      className={`listBox ${className || ''}`}
-      {...extendStyle}
-      {...props}
+    // className={`listBox ${className || ''}`}
+    // {...extendStyle}
+    // {...props}
     >
       {headerFixed && <div className="headerFixed">{headerFixed}</div>}
       <ScrollContainer

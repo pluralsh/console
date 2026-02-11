@@ -59,13 +59,13 @@ export function ServiceAccountsList({
         placeholder="Search an account"
         startIcon={<SearchIcon color="text-light" />}
         onChange={({ target: { value } }) => setQ(value)}
-        backgroundColor="fill-one"
+        backgroundColor="fill-zero"
       />
       <GridTableWrapper>
         <Table
           hideHeader
           virtualizeRows
-          rowBg="raised"
+          rowBg="base"
           loading={!data && loading}
           data={serviceAccounts}
           columns={serviceAccountsCols}

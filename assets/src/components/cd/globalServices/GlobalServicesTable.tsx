@@ -24,7 +24,7 @@ function GlobalServicesTableComponent({
 }: {
   setRefetch?: (refetch: () => () => void) => void
 }) {
-  const { colors } = useTheme()
+  const theme = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()
   const [searchString, setSearchString] = useState('')
@@ -64,7 +64,12 @@ function GlobalServicesTableComponent({
         startIcon={<SearchIcon />}
         value={searchString}
         onChange={(e) => setSearchString(e.currentTarget.value)}
-        css={{ background: colors['fill-one'] }}
+        css={{
+          background:
+            theme.mode === 'light'
+              ? theme.colors['fill-zero']
+              : theme.colors['fill-one'],
+        }}
       />
       <Table
         fullHeightWrap

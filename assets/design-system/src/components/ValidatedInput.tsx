@@ -1,4 +1,4 @@
-import { Input, type InputProps } from 'honorable'
+import Input, { type InputProps } from './Input'
 import {
   type PropsWithChildren,
   type ReactNode,

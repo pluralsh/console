@@ -108,7 +108,12 @@ function SecurityPieChartCard({
   return (
     <Card
       header={{
-        outerProps: { style: { overflow: 'visible', height: 'fit-content' } },
+        outerProps: {
+          style: { overflow: 'visible', height: 'fit-content' },
+        },
+        headerProps: {
+          style: { backgroundColor: theme.colors['fill-one'] },
+        },
         content: (
           <StretchedFlex>
             <span>{title}</span>
@@ -121,7 +126,13 @@ function SecurityPieChartCard({
           </StretchedFlex>
         ),
       }}
-      css={{ padding: theme.spacing.large, flex: 1, minWidth: 'fit-content' }}
+      css={{
+        padding: theme.spacing.large,
+        flex: 1,
+        minWidth: 'fit-content',
+        backgroundColor:
+          theme.mode === 'light' ? theme.colors['fill-zero'] : undefined,
+      }}
     >
       <ChartWrapperSC>
         {data ? (
@@ -173,6 +184,9 @@ export function SecurityOverviewHeatmapCard() {
       header={{
         size: 'large',
         outerProps: { style: { overflow: 'visible', height: 'fit-content' } },
+        headerProps: {
+          style: { backgroundColor: theme.colors['fill-one'] },
+        },
         content: (
           <StretchedFlex>
             <span>clusters by vulnerability count</span>
@@ -262,6 +276,9 @@ const ChartWrapperSC = styled.div(({ theme }) => ({
 const TreeMapWrapperCardSC = styled(Card)(({ theme }) => ({
   height: HEATMAP_SIZE,
   padding: theme.spacing.large,
+  ...(theme.mode === 'light' && {
+    backgroundColor: theme.colors['fill-zero'],
+  }),
 }))
 
 function ChartLegend({ data }: { data: SecurityChartData }) {

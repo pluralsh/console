@@ -69,7 +69,7 @@ export function CostManagementTableView() {
       />
       <Table
         fullHeightWrap
-        fillLevel={1}
+        // fillLevel={1}
         virtualizeRows
         rowBg="base"
         loading={isEmpty(clusterUsages) && loading}

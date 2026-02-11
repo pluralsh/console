@@ -65,14 +65,14 @@ export function GroupsList({
         placeholder="Search groups"
         startIcon={<SearchIcon color="text-light" />}
         onChange={({ target: { value } }) => setQ(value)}
-        background="transparent"
+        background="fill-zero"
         flexShrink={0}
       />
       <Table
         hideHeader
         fullHeightWrap
         virtualizeRows
-        rowBg="raised"
+        rowBg="base"
         data={groups}
         loading={!data && loading}
         columns={groupsCols}

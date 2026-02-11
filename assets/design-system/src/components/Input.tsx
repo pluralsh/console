@@ -203,9 +203,7 @@ function Input({
             </>
           ) : undefined
         }
-        backgroundColor={
-          theme.colors[parentFillLevelToBackground[parentFillLevel]]
-        }
+        backgroundColor={theme.colors['fill-zero']}
         inputProps={inputProps}
         {...props}
       />

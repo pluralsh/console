@@ -33,7 +33,17 @@ export function LogsEvidencePanel({
       {selectedLog ? (
         <WrapWithIf
           condition={!isTable}
-          wrapper={<Card css={{ maxHeight: 300, overflow: 'auto' }} />}
+          wrapper={
+            <Card
+              css={(theme) => ({
+                maxHeight: 300,
+                overflow: 'auto',
+                ...(theme.mode === 'light' && {
+                  backgroundColor: theme.colors['fill-zero'],
+                }),
+              })}
+            />
+          }
         >
           <Flex padding="medium">
             <Button
@@ -58,7 +68,16 @@ export function LogsEvidencePanel({
           <WrapWithIf
             key={i}
             condition={!isTable}
-            wrapper={<Card clickable />}
+            wrapper={
+              <Card
+                clickable
+                css={(theme) =>
+                  theme.mode === 'light'
+                    ? { backgroundColor: theme.colors['fill-zero'] }
+                    : undefined
+                }
+              />
+            }
           >
             <BasicEvidenceLine
               key={i}
@@ -113,6 +132,9 @@ export const EvidenceWrapperSC = styled.div<{
   gap: $table ? 0 : theme.spacing.medium,
   height: '100%',
   overflow: 'auto',
+  ...(theme.mode === 'light' && {
+    backgroundColor: theme.colors['fill-zero'],
+  }),
 }))
 
 const EvidenceLineSC = styled.div<{ $table: boolean }>(({ theme, $table }) => ({
@@ -125,7 +147,14 @@ const EvidenceLineSC = styled.div<{ $table: boolean }>(({ theme, $table }) => ({
   cursor: 'pointer',
   padding: `${theme.spacing.xsmall}px ${theme.spacing.small}px`,
   borderBottom: $table ? theme.borders.input : 'none',
+  ...(theme.mode === 'light' && {
+    backgroundColor: theme.colors['fill-zero'],
+  }),
   '&:hover': {
-    backgroundColor: $table ? theme.colors['fill-one-hover'] : 'transparent',
+    backgroundColor: $table
+      ? theme.mode === 'light'
+        ? theme.colors['fill-zero-hover']
+        : theme.colors['fill-one-hover']
+      : 'transparent',
   },
 }))

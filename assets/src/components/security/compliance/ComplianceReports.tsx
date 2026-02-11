@@ -97,7 +97,7 @@ export function ComplianceReports() {
     <Table
       fullHeightWrap
       hideHeader
-      rowBg="raised"
+      rowBg="base"
       virtualizeRows
       data={data?.complianceReportGenerators?.edges || []}
       loading={!data && loading}
