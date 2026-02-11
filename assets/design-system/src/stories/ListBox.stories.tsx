@@ -181,7 +181,6 @@ function Template() {
               key={key}
               label={label}
               leftContent={smallIcon}
-              reserveSelectedIndicatorSpace
             />
           ))}
         </ListBox>
