@@ -116,7 +116,6 @@ export function InfraResearches() {
               hideHeader
               fullHeightWrap
               virtualizeRows
-              rowBg="stripes"
               loading={isLoading}
               data={infraResearches}
               columns={columns}

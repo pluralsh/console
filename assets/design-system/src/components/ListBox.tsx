@@ -1,3 +1,4 @@
+import { type AriaListBoxProps } from '@react-types/listbox'
 import {
   Children,
   type ComponentPropsWithRef,
@@ -9,12 +10,15 @@ import {
   useMemo,
   useRef,
 } from 'react'
-import { type AriaListBoxOptions, useListBox, useOption } from 'react-aria'
-import { type ListState, useListState } from 'react-stately'
-import { mergeProps } from 'react-aria'
-import { type AriaListBoxProps } from '@react-types/listbox'
+import {
+  type AriaListBoxOptions,
+  mergeProps,
+  useListBox,
+  useOption,
+} from 'react-aria'
 import { mergeRefs } from 'react-merge-refs'
-import styled, { type DefaultTheme, useTheme } from 'styled-components'
+import { type ListState, useListState } from 'react-stately'
+import styled, { useTheme } from 'styled-components'
 
 import { Item } from 'react-stately'
 
@@ -243,9 +247,9 @@ function ListBoxUnmanaged({
 
   return (
     <ListBoxCard
-    // className={`listBox ${className || ''}`}
-    // {...extendStyle}
-    // {...props}
+      className={`listBox ${className || ''}`}
+      {...extendStyle}
+      {...props}
     >
       {headerFixed && <div className="headerFixed">{headerFixed}</div>}
       <ScrollContainer
@@ -293,5 +297,5 @@ function Option({ item, state }: any) {
   return cloneElement(item.rendered, mergedProps)
 }
 
-export type { ListBoxProps, ListBoxUnmanagedProps }
 export { ListBox, ListBoxUnmanaged, useItemWrappedChildren }
+export type { ListBoxProps, ListBoxUnmanagedProps }

@@ -66,7 +66,6 @@ export function StackRunsTable({
   return (
     <Table
       loose
-      rowBg="stripes"
       fillLevel={0}
       hideHeader
       fullHeightWrap

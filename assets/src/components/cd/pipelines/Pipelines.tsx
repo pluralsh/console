@@ -32,7 +32,7 @@ export const PIPELINES_CRUMBS = [
 ]
 
 export default function PipelineList() {
-  const { spacing, colors } = useTheme()
+  const { spacing } = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()
   const [searchString, setSearchString] = useState('')
@@ -75,7 +75,7 @@ export default function PipelineList() {
           showClearButton
           value={searchString}
           onChange={(e) => setSearchString(e.currentTarget.value)}
-          css={{ flexGrow: 1, background: colors['fill-one'] }}
+          css={{ flexGrow: 1 }}
         />
       </div>
       <Table

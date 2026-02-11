@@ -73,7 +73,7 @@ export const semanticColorsLight = {
 
   // Text
   //
-  text: grey[800],
+  text: grey[700],
   'text-light': grey[600],
   'text-xlight': grey[500],
   'text-long-form': grey[700],
@@ -92,8 +92,8 @@ export const semanticColorsLight = {
 
   // Icon
   //
-  'icon-default': grey[900],
-  'icon-light': grey[700],
+  'icon-default': grey[800],
+  'icon-light': grey[600],
   'icon-xlight': grey[400],
   'icon-disabled': grey[100],
   'icon-primary': purple[300],
