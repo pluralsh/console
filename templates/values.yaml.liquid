@@ -26,10 +26,10 @@ secrets:
   plural_client_secret: {{ configuration.pluralClientSecret }}
   {% endif %}
   {% if configuration.key %}
-  key: {{ configuration.key }}
+  key: "{{ configuration.key }}"
   {% endif %}
   {% if configuration.identity %}
-  identity: {{ configuration.identity }}
+  identity: "{{ configuration.identity }}"
   {% endif %}
 
 extraSecretEnv:
