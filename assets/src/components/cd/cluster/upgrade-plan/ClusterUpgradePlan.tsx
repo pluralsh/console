@@ -5,8 +5,6 @@ import {
   ConfettiIcon,
   EmptyState,
   Flex,
-  Input,
-  SearchIcon,
   Tab,
   Table,
   TabList,
@@ -14,11 +12,9 @@ import {
   WarningIcon,
 } from '@pluralsh/design-system'
 import { Row } from '@tanstack/react-table'
-import Fuse from 'fuse.js'
 import {
   ClusterDistro,
   ClusterOverviewDetailsFragment,
-  ClusterUpgradeDeprecatedCustomResourceFragment,
   ClusterUpgradePlanFragment,
   UpgradeInsight,
   UpgradeInsightStatus,
@@ -33,7 +29,6 @@ import { GqlError } from '../../../utils/Alert.tsx'
 
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
 import ClusterSelector from 'components/cd/utils/ClusterSelector.tsx'
-import { useThrottle } from 'components/hooks/useThrottle.tsx'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { StretchedFlex } from 'components/utils/StretchedFlex.tsx'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
@@ -47,7 +42,6 @@ import {
 import semver from 'semver'
 import { isNonNullable } from 'utils/isNonNullable.ts'
 import { ClusterDistroShortNames } from '../../../utils/ClusterDistro.tsx'
-import { clusterDeprecatedCustomResourcesColumns } from '../../clusters/clusterDeprecatedCustomResourcesColumns.tsx'
 import { getClusterUpgradeInfo } from '../../clusters/ClusterUpgradeButton.tsx'
 import {
   clusterPreFlightCols,
@@ -66,6 +60,7 @@ import {
 } from '../../clusters/UpgradeInsights.tsx'
 import { getClusterBreadcrumbs } from '../Cluster.tsx'
 import { ClusterUpgradePlanAccordion } from './ClusterUpgradePlanAccordion.tsx'
+import { ClusterUpgradePlanCRAccordion } from './ClusterUpgradePlanCRTable.tsx'
 import { UpgradesConsolidatedTable } from './UpgradesConsolidatedTable.tsx'
 
 enum DeprecationType {
@@ -77,13 +72,6 @@ enum AddonType {
   All = 'all',
   Cloud = 'cloud',
 }
-
-const deprecatedCRSearchOptions: Fuse.IFuseOptions<ClusterUpgradeDeprecatedCustomResourceFragment> =
-  {
-    keys: ['name', 'namespace', 'group'],
-    threshold: 0.25,
-    ignoreLocation: true,
-  }
 
 export enum UpgradeAccordionName {
   Preflight = 'preflight',
@@ -157,8 +145,6 @@ export function ClusterUpgradePlan() {
   const [addonType, setAddonType] = useState(AddonType.All)
   const [deprecationType, setDeprecationType] = useState(DeprecationType.GitOps)
   const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
-  const [deprecatedCRSearch, setDeprecatedCRSearch] = useState('')
-  const throttledCRSearch = useThrottle(deprecatedCRSearch, 250)
 
   const { numUpgradeBlockers } = getClusterUpgradeInfo(cluster)
 
@@ -166,6 +152,8 @@ export function ClusterUpgradePlan() {
   const cloudAddons = cluster?.cloudAddons
   const apiDeprecations = cluster?.apiDeprecations
   const upgradeInsights = cluster?.upgradeInsights
+  const deprecatedCRs =
+    cluster?.deprecatedCustomResources?.filter(isNonNullable) ?? []
 
   const upgradeIssues = upgradeInsights?.filter(
     (i) => i?.status && statesWithIssues.includes(i.status)
@@ -177,16 +165,6 @@ export function ClusterUpgradePlan() {
     () => getPreFlightChecklist(cluster?.upgradePlan),
     [cluster?.upgradePlan]
   )
-
-  const filteredDeprecatedCRs = useMemo(() => {
-    const resources =
-      cluster?.deprecatedCustomResources?.filter(isNonNullable) ?? []
-    return !throttledCRSearch
-      ? resources
-      : new Fuse(resources, deprecatedCRSearchOptions)
-          .search(throttledCRSearch)
-          .map(({ item }) => item)
-  }, [cluster?.deprecatedCustomResources, throttledCRSearch])
 
   useSetBreadcrumbs(
     useMemo(
@@ -441,47 +419,18 @@ export function ClusterUpgradePlan() {
               </div>
             )}
           </ClusterUpgradePlanAccordion>
-          <Body1BoldP>
-            Warnings ({cluster?.deprecatedCustomResources?.length ?? 0})
-          </Body1BoldP>
-          <ClusterUpgradePlanAccordion
+          <Body1BoldP>Warnings ({deprecatedCRs.length})</Body1BoldP>
+          <ClusterUpgradePlanCRAccordion
+            deprecatedCRs={deprecatedCRs}
             defaultValue={initialView}
-            name={UpgradeAccordionName.CustomResources}
-            checked={isEmpty(cluster?.deprecatedCustomResources)}
-            title="Deprecated custom resources"
-            subtitle="Ensure all custom resources are updated to the version required for upgrade"
-          >
-            <div css={{ padding: theme.spacing.xsmall }}>
-              <Input
-                css={{ background: 'transparent' }}
-                placeholder="Search custom resources"
-                startIcon={<SearchIcon />}
-                value={deprecatedCRSearch}
-                onChange={(e) => setDeprecatedCRSearch(e.target.value)}
-              />
-            </div>
-            {!isEmpty(cluster?.deprecatedCustomResources) ? (
-              <Table
-                flush
-                virtualizeRows
-                data={filteredDeprecatedCRs}
-                columns={clusterDeprecatedCustomResourcesColumns}
-                maxHeight={500}
-                emptyStateProps={{
-                  message: 'No custom resources match your search.',
-                }}
-              />
-            ) : (
-              <ConfettiEmptyState description="You do not have any deprecated custom resources." />
-            )}
-          </ClusterUpgradePlanAccordion>
+          />
         </Flex>
       )}
     </Flex>
   )
 }
 
-function ConfettiEmptyState({ description }) {
+export function ConfettiEmptyState({ description }) {
   const { colors } = useTheme()
 
   return (
