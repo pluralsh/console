@@ -35,7 +35,7 @@ export function ProjectsList() {
     <GridTableWrapper>
       <Table
         virtualizeRows
-        rowBg="raised"
+        rowBg="base"
         data={projects || []}
         columns={projectSettingsCols}
         hideHeader

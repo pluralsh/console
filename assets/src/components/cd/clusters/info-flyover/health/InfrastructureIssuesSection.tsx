@@ -55,7 +55,7 @@ export function InfrastructureIssuesSection({
         <Table
           virtualizeRows
           fullHeightWrap
-          rowBg="raised"
+          rowBg="base"
           data={infrastructureIssues}
           columns={columns}
           onRowClick={(_e, { original }: Row<NodeStatisticFragment>) =>

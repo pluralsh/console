@@ -89,7 +89,7 @@ const HonorableLabelStyled = styled(Label)<{
     '&::before, &': {
       borderRadius: theme.borderRadiuses.medium,
     },
-    /* before for the border */
+    /* before for the border and empty state background */
     '&::before': {
       zIndex: 0,
       border: theme.borders.input,
@@ -98,7 +98,9 @@ const HonorableLabelStyled = styled(Label)<{
             borderColor: theme.colors['border-disabled'],
             backgroundColor: theme.colors['action-primary-disabled'],
           }
-        : {}),
+        : {
+            backgroundColor: theme.colors['fill-zero'],
+          }),
     },
     '.icon': {
       zIndex: 2,

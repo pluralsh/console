@@ -1,3 +1,4 @@
+import { type AriaListBoxProps } from '@react-types/listbox'
 import {
   Children,
   type ComponentPropsWithRef,
@@ -9,12 +10,15 @@ import {
   useMemo,
   useRef,
 } from 'react'
-import { type AriaListBoxOptions, useListBox, useOption } from 'react-aria'
-import { type ListState, useListState } from 'react-stately'
-import { mergeProps } from 'react-aria'
-import { type AriaListBoxProps } from '@react-types/listbox'
+import {
+  type AriaListBoxOptions,
+  mergeProps,
+  useListBox,
+  useOption,
+} from 'react-aria'
 import { mergeRefs } from 'react-merge-refs'
-import styled, { type DefaultTheme, useTheme } from 'styled-components'
+import { type ListState, useListState } from 'react-stately'
+import styled, { useTheme } from 'styled-components'
 
 import { Item } from 'react-stately'
 
@@ -50,19 +54,17 @@ type ListBoxProps = Omit<
   footer?: ReactElement<any>
 }
 
-function getCardFillLevel(theme: DefaultTheme) {
-  return theme.mode === 'light' ? 1 : 2
-}
-
-const ListBoxCard = styled(Card).attrs(({ theme }) => ({
-  cornerSize: 'medium',
-  fillLevel: getCardFillLevel(theme),
-}))(({ theme }) => ({
+const ListBoxCard = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   flexShrink: 1,
   overflowX: 'visible',
   overflowY: 'hidden',
+  background:
+    theme.mode === 'light'
+      ? theme.colors['fill-zero']
+      : theme.colors['fill-two'],
+  borderRadius: theme.borderRadiuses.medium,
   '.footerFixed': {
     borderTop:
       theme.mode === 'light'
@@ -76,7 +78,7 @@ type ScrollContainerProps = {
 }
 const ScrollContainer = styled.div<ScrollContainerProps>(
   ({ theme, extendStyle }) => ({
-    ...theme.partials.scrollBar({ fillLevel: getCardFillLevel(theme) }),
+    ...theme.partials.scrollBar({ fillLevel: theme.mode === 'light' ? 0 : 2 }),
     position: 'relative',
     overflow: 'auto',
     flexShrink: 1,
@@ -295,5 +297,5 @@ function Option({ item, state }: any) {
   return cloneElement(item.rendered, mergedProps)
 }
 
-export type { ListBoxProps, ListBoxUnmanagedProps }
 export { ListBox, ListBoxUnmanaged, useItemWrappedChildren }
+export type { ListBoxProps, ListBoxUnmanagedProps }

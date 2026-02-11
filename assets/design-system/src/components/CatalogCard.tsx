@@ -38,6 +38,11 @@ function CatalogCard({
         minWidth: 256,
         width: '100%',
       }}
+      css={
+        theme.mode === 'light'
+          ? { backgroundColor: theme.colors['fill-zero'] }
+          : undefined
+      }
       {...props}
     >
       <Flex

@@ -126,6 +126,7 @@ const InputRootSC = styled.div<{
   minHeight: $size === 'large' ? 48 : $size === 'small' ? 32 : 40,
   width: 'auto',
   padding: 0,
+  backgroundColor: theme.colors['fill-zero'],
   border: theme.borders.input,
   borderColor: $error
     ? theme.colors['border-danger']

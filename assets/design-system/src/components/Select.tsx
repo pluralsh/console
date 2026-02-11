@@ -110,7 +110,10 @@ export const TitleContent = styled.div<{
   return {
     ...theme.partials.text.caption,
     alignItems: 'center',
-    backgroundColor: theme.colors[parentFillLevelToBackground[parentFillLevel]],
+    backgroundColor:
+      theme.mode === 'light'
+        ? theme.colors['fill-zero']
+        : theme.colors[parentFillLevelToBackground[parentFillLevel]],
     color: theme.colors.text,
     display: 'flex',
     flexDirection: 'row',
@@ -143,7 +146,9 @@ const SelectButtonInner = styled.div<{
     ...theme.partials.text.body2,
     backgroundColor: transparent
       ? 'transparent'
-      : theme.colors[parentFillLevelToBackground[parentFillLevel]],
+      : theme.mode === 'light'
+        ? theme.colors['fill-zero']
+        : theme.colors[parentFillLevelToBackground[parentFillLevel]],
     display: 'flex',
     flexDirection: 'row',
     flexShrink: 1,

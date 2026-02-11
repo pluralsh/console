@@ -69,7 +69,7 @@ const HonorableLabelStyled = styled(Label)<{
       ? theme.colors['action-primary-disabled']
       : $isFocusVisible
         ? theme.colors['action-input-hover']
-        : 'transparent',
+        : theme.colors['fill-zero'],
     '.icon': {
       display: 'flex',
       alignItems: 'center',

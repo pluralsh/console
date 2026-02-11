@@ -60,7 +60,8 @@ const FORECASTING_RANGE_OPTIONS = [
 ]
 
 export function CostManagementChartView() {
-  const { spacing, colors } = useTheme()
+  const theme = useTheme()
+  const { spacing, colors } = theme
   const navigate = useNavigate()
   const projectId = useProjectId()
   const { tagKeysState, tagOpState } = useOutletContext<CMContextType>()
@@ -254,9 +255,15 @@ export function CostManagementChartView() {
                 padding: spacing.large,
                 height: CM_TREE_MAP_CARD_HEIGHT,
                 cursor: 'pointer',
+                ...(theme.mode === 'light' && {
+                  backgroundColor: theme.colors['fill-zero'],
+                }),
               }}
               header={{
                 outerProps: { style: { flex: 1 } },
+                headerProps: {
+                  style: { backgroundColor: theme.colors['fill-one'] },
+                },
                 content: (
                   <Flex gap="small">
                     <CpuIcon />
@@ -278,9 +285,15 @@ export function CostManagementChartView() {
                 padding: spacing.large,
                 height: CM_TREE_MAP_CARD_HEIGHT,
                 cursor: 'pointer',
+                ...(theme.mode === 'light' && {
+                  backgroundColor: theme.colors['fill-zero'],
+                }),
               }}
               header={{
                 outerProps: { style: { flex: 1 } },
+                headerProps: {
+                  style: { backgroundColor: theme.colors['fill-one'] },
+                },
                 content: (
                   <Flex gap="small">
                     <RamIcon />

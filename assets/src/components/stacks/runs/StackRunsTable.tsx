@@ -66,8 +66,7 @@ export function StackRunsTable({
   return (
     <Table
       loose
-      rowBg="base"
-      fillLevel={1}
+      fillLevel={0}
       hideHeader
       fullHeightWrap
       virtualizeRows
