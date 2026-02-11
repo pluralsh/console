@@ -124,7 +124,7 @@ export function UpgradesConsolidatedTable({
         <UpgradesConsolidatedTableExpander row={row} />
       )}
       expandedRowType="custom"
-      maxHeight={330}
+      maxHeight={360}
     />
   )
 }
