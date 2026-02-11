@@ -129,9 +129,9 @@ export function Home() {
     [tableData]
   )
 
+  const isLoading = !tableData && tableLoading
   const noClustersYet =
-    aggregatedUpgradeStats.all === 0 &&
-    !(projectId || tableLoading || upgradeLoading)
+    aggregatedUpgradeStats.all === 0 && !(projectId || isLoading)
 
   return (
     <Flex
@@ -185,7 +185,7 @@ export function Home() {
               selectedCluster={selectedCluster}
               setSelectedCluster={setSelectedCluster}
               data={tableData?.clusters?.edges?.filter(isNonNullable) ?? []}
-              loading={!tableData && tableLoading}
+              loading={isLoading}
               refetch={refetch}
               columns={homeClustersColumns}
               hasNextPage={pageInfo?.hasNextPage}

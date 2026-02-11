@@ -6,10 +6,13 @@ import {
   ChipSeverity,
   CircleDashIcon,
   DiscoverIcon,
+  ErrorIcon,
   FailedFilledIcon,
   Flex,
   Flyover,
   IconFrame,
+  Markdown,
+  Modal,
   PrClosedIcon,
   PrMergedIcon,
   PrOpenIcon,
@@ -18,6 +21,7 @@ import {
 import { AgentRuntimeIcon } from 'components/settings/ai/agent-runtimes/AIAgentRuntimeIcon'
 import { ClusterProviderIcon } from 'components/utils/Provider'
 import { StackedText } from 'components/utils/table/StackedText'
+import { Body1BoldP } from 'components/utils/typography/Text'
 import {
   AgentRunFragment,
   AgentRunStatus,
@@ -27,6 +31,7 @@ import {
   PrStatus,
 } from 'generated/graphql'
 import { capitalize } from 'lodash'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
@@ -116,7 +121,8 @@ export function ClusterUpgradeAgentFlyover({
 }
 
 function ClusterUpgradeStep({ step }: { step: ClusterUpgradeStepFragment }) {
-  const { agentRun } = step
+  const { name, status, agentRun, error } = step
+
   return (
     <StepCardSC key={step?.id}>
       <StackedText
@@ -155,10 +161,15 @@ function ClusterUpgradeStep({ step }: { step: ClusterUpgradeStepFragment }) {
           />
         )
       )}
-      {step.status === ClusterUpgradeStatus.Completed &&
-      agentRun?.pullRequests?.every(
-        (pullRequest) => pullRequest?.status === PrStatus.Merged
-      ) ? (
+      {error ? (
+        <ErrorChip
+          error={error}
+          stepName={name}
+        />
+      ) : status === ClusterUpgradeStatus.Completed &&
+        agentRun?.pullRequests?.every(
+          (pullRequest) => pullRequest?.status === PrStatus.Merged
+        ) ? (
         <CheckRoundedIcon
           color="icon-success"
           size={20}
@@ -173,26 +184,37 @@ function ClusterUpgradeStep({ step }: { step: ClusterUpgradeStepFragment }) {
   )
 }
 
-const TopCardSC = styled(Card)(({ theme }) => ({
-  padding: `${theme.spacing.large}px ${theme.spacing.xxlarge}px`,
-  background: 'transparent',
-  display: 'flex',
-  alignItems: 'flex-start',
-  gap: theme.spacing.xxxlarge,
-  border: theme.borders.default,
-  '& *': { marginBottom: 0 },
-}))
-
-const StepCardSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.medium,
-  padding: theme.spacing.medium,
-  paddingLeft: theme.spacing.large,
-  borderRadius: theme.borderRadiuses.medium,
-  borderLeft: `3px solid ${theme.colors.border}`,
-  background: theme.colors['fill-one'],
-}))
+function ErrorChip({ error, stepName }: { error: string; stepName: string }) {
+  const { spacing } = useTheme()
+  const [open, setOpen] = useState(false)
+  return (
+    <Chip
+      clickable
+      onClick={() => setOpen(true)}
+      icon={<ErrorIcon />}
+      severity="danger"
+    >
+      Error
+      <Modal
+        size="large"
+        open={open}
+        onClose={() => setOpen(false)}
+        header="Error"
+      >
+        <Flex
+          direction="column"
+          gap="small"
+          minHeight={0}
+        >
+          <Body1BoldP>{stepName}</Body1BoldP>
+          <Card css={{ padding: spacing.large, overflow: 'auto' }}>
+            <Markdown text={error} />
+          </Card>
+        </Flex>
+      </Modal>
+    </Chip>
+  )
+}
 
 function AgentRunLinkButton({
   agentRun,
@@ -248,6 +270,27 @@ function AgentRunLinkButton({
       )
   }
 }
+
+const TopCardSC = styled(Card)(({ theme }) => ({
+  padding: `${theme.spacing.large}px ${theme.spacing.xxlarge}px`,
+  background: 'transparent',
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: theme.spacing.xxxlarge,
+  border: theme.borders.default,
+  '& *': { marginBottom: 0 },
+}))
+
+const StepCardSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  gap: theme.spacing.medium,
+  padding: theme.spacing.medium,
+  paddingLeft: theme.spacing.large,
+  borderRadius: theme.borderRadiuses.medium,
+  borderLeft: `3px solid ${theme.colors.border}`,
+  background: theme.colors['fill-one'],
+}))
 
 const statusToChipSeverity: Record<ClusterUpgradeStatus, ChipSeverity> = {
   [ClusterUpgradeStatus.Pending]: 'info',
