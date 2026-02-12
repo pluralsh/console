@@ -5,7 +5,8 @@ defmodule Console.AI.PubSub.Vector.Bulk do
 
   alias Console.Schema.{
     Catalog,
-    PrAutomation
+    PrAutomation,
+    Stack
   }
 
   def insert(object) do
@@ -16,5 +17,6 @@ defmodule Console.AI.PubSub.Vector.Bulk do
 
   def to_event(%Catalog{} = catalog), do: %PubSub.CatalogCreated{item: catalog}
   def to_event(%PrAutomation{} = pr), do: %PubSub.PrAutomationCreated{item: pr}
+  def to_event(%Stack{} = stack), do: %PubSub.StackUpdated{item: stack}
   def to_event(_), do: :ok
 end
