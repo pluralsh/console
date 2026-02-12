@@ -273,7 +273,7 @@ function ListBoxUnmanaged({
   )
 }
 
-function Option({ item, state }: any) {
+function Option({ item, state }: { item: any; state: ListState<object> }) {
   // Get props for the option element
   const ref = useRef(undefined)
   const {
@@ -291,6 +291,7 @@ function Option({ item, state }: any) {
     focused: isFocused,
     labelProps,
     descriptionProps,
+    selectionMode: state.selectionManager.selectionMode,
     ref: mergeRefs([ref, item?.rendered?.props?.ref]),
   })
 

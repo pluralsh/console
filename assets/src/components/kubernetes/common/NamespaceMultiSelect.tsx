@@ -1,4 +1,4 @@
-import { ListBoxItem, NamespaceIcon, Select } from '@pluralsh/design-system'
+import { ListBoxItem, Select } from '@pluralsh/design-system'
 import {
   FilterFooter,
   FilterTrigger,
@@ -50,7 +50,6 @@ export function NamespaceMultiSelect({
       {allNamespaces.map((namespace) => (
         <ListBoxItem
           key={namespace}
-          leftContent={<NamespaceIcon />}
           label={namespace}
         />
       ))}

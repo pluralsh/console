@@ -1,17 +1,19 @@
+import { type ItemProps, type SelectionMode } from '@react-types/shared'
 import {
   type ComponentPropsWithRef,
   type ComponentPropsWithoutRef,
   type ElementType,
   type ReactNode,
 } from 'react'
-import { type ItemProps } from '@react-types/shared'
 import styled from 'styled-components'
 
 import theme from 'honorable-theme-default'
 
-import StatusOkIcon from './icons/StatusOkIcon'
+import Flex from './Flex'
+import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import PlusIcon from './icons/PlusIcon'
 import ChipList from './ListBoxItemChipList'
+import Checkbox from './Checkbox'
 
 type ListBoxItemBaseProps = {
   focused?: boolean
@@ -22,20 +24,20 @@ type ListBoxItemBaseProps = {
   key?: string
   labelProps?: ComponentPropsWithoutRef<ElementType>
   descriptionProps?: ComponentPropsWithoutRef<ElementType>
+  selectionMode?: SelectionMode
 } & ComponentPropsWithRef<'div'> &
   Omit<ItemProps<void>, 'children'>
 
 type ListBoxItemProps = {
   leftContent?: ReactNode
   rightContent?: ReactNode
-  reserveSelectedIndicatorSpace?: boolean
   destructive?: boolean
 } & ListBoxItemBaseProps
 
 const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
-  ({ theme, disabled, selected, focused, destructive }) => ({
+  ({ theme, disabled, focused, destructive }) => ({
     display: 'flex',
-    flexDirection: 'row',
+    gap: theme.spacing.small,
     alignItems: 'center',
     position: 'relative',
     width: 'auto',
@@ -65,15 +67,6 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
       ...theme.partials.focus.outline,
     },
     ...(focused ? { '&': { ...theme.partials.focus.outline } } : {}),
-    '.left-content': {
-      display: 'flex',
-      marginRight: theme.spacing.small,
-    },
-    '.right-content, .selected-indicator': {
-      display: 'flex',
-      marginLeft: theme.spacing.xsmall,
-      color: theme.colors['action-primary'],
-    },
     '.center-content': {
       flexGrow: 1,
       width: 'max-content',
@@ -90,23 +83,6 @@ const ListBoxItemInner = styled.div<Partial<ListBoxItemProps>>(
       ...theme.partials.text.caption,
       color: theme.colors['text-xlight'],
     },
-    '.selected-indicator': {
-      opacity: selected ? 1 : 0,
-      position: 'relative',
-      '& svg': {
-        zIndex: 0,
-      },
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: '2px',
-        right: '2px',
-        left: '2px',
-        bottom: '2px',
-        backgroundColor: theme.colors['text-always-white'],
-        borderRadius: '50%',
-      },
-    },
   })
 )
 
@@ -119,7 +95,7 @@ function ListBoxItem({
   descriptionProps = {},
   leftContent,
   rightContent,
-  reserveSelectedIndicatorSpace,
+  selectionMode,
   ...props
 }: ListBoxItemProps) {
   return (
@@ -128,7 +104,14 @@ function ListBoxItem({
       selected={selected}
       {...props}
     >
-      {leftContent && <div className="left-content">{leftContent}</div>}
+      {selectionMode === 'multiple' && (
+        <Checkbox
+          small
+          checked={!!selected}
+          style={{ paddingLeft: 0 }}
+        />
+      )}
+      {leftContent && <Flex>{leftContent}</Flex>}
       <div className="center-content">
         {label && (
           <div
@@ -147,13 +130,8 @@ function ListBoxItem({
           </div>
         )}
       </div>
-      {rightContent && <div className="right-content">{rightContent}</div>}
-      {(selected || reserveSelectedIndicatorSpace) && (
-        <StatusOkIcon
-          className="selected-indicator"
-          size={16}
-        />
-      )}
+      {rightContent && <Flex>{rightContent}</Flex>}
+      {selectionMode === 'single' && selected && <CheckRoundedIcon size={16} />}
     </ListBoxItemInner>
   )
 }
@@ -181,11 +159,11 @@ const ListBoxFooterInner = styled.button<{ $focused?: boolean }>(
     },
     '.leftContent': {
       display: 'flex',
-      marginRight: theme.spacing.small,
+      marginRight: theme.spacing.medium,
     },
     '.rightContent': {
       display: 'flex',
-      marginLeft: theme.spacing.small,
+      marginLeft: theme.spacing.medium,
     },
     '&:focus, &:focus-visible': {
       outline: 'none',
@@ -251,15 +229,15 @@ function ListBoxFooterPlus({
   )
 }
 
-export type {
-  ListBoxItemBaseProps,
-  ListBoxItemProps,
-  ListBoxFooterProps,
-  ListBoxFooterProps as ListBoxFooterPlusProps,
-}
 export {
-  ListBoxItem,
-  ChipList as ListBoxItemChipList,
   ListBoxFooter,
   ListBoxFooterPlus,
+  ListBoxItem,
+  ChipList as ListBoxItemChipList,
+}
+export type {
+  ListBoxFooterProps as ListBoxFooterPlusProps,
+  ListBoxFooterProps,
+  ListBoxItemBaseProps,
+  ListBoxItemProps,
 }
