@@ -7,7 +7,19 @@ versions:
   kube: ['1.35', '1.34', '1.33']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: ''
+    chart_updates: []
+    features: ['VRL gained functions to read internal Vector metrics (`get_vector_metric`,
+        `find_vector_metrics`, `aggregate_vector_metrics`), backed by snapshots refreshed
+        every `metrics_storage_refresh_period`.', '`clickhouse` sink added an `arrow_stream`
+        format option using Apache Arrow IPC for higher throughput and smaller payloads
+        than JSON.', New `doris` sink added to ship log data to Apache Doris via the
+        Stream Load API., New `syslog` codec added for encoding events as Syslog;
+        supports RFC5424 and RFC3164., 'New moving-mean (EWMA) gauges for buffer utilization
+        added: `source_buffer_utilization_mean` and `transform_buffer_utilization_mean`,
+        complementing the existing instant utilization metrics.']
+    breaking_changes: []
   chart_version: 0.50.0
   images: ['timberio/vector:0.53.0-distroless-libc']
 - version: 0.52.0
