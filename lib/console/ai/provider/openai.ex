@@ -5,8 +5,7 @@ defmodule Console.AI.OpenAI do
   @behaviour Console.AI.Provider
   import Console.AI.Provider.Base
 
-  alias Console.AI.Utils
-  alias Console.AI.Stream
+  alias Console.AI.{Utils, Tool, Stream}
 
   require Logger
 
@@ -292,9 +291,9 @@ defmodule Console.AI.OpenAI do
     %{
       type: :function,
       function: %{
-        name: tool.name(),
-        description: tool.description(),
-        parameters: tool.json_schema()
+        name: Tool.name(tool),
+        description: Tool.description(tool),
+        parameters: Tool.json_schema(tool)
       }
     }
   end

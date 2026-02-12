@@ -133,6 +133,7 @@ defmodule Console.Deployments.Workbenches do
       |> Repo.update()
     end)
     |> execute(extract: :activity)
+    |> notify(:create)
   end
 
   @doc """
@@ -151,6 +152,7 @@ defmodule Console.Deployments.Workbenches do
       |> Repo.update()
     end)
     |> execute(extract: :activity)
+    |> notify(:update)
   end
 
   @doc """
@@ -181,6 +183,7 @@ defmodule Console.Deployments.Workbenches do
       }, job)
     end)
     |> execute(extract: :activity)
+    |> notify(:update)
   end
   def update_job_status(_, _), do: {:error, "invalid input struct for job status update"}
 
@@ -193,6 +196,21 @@ defmodule Console.Deployments.Workbenches do
       result: %{conclusion: conclusion}
     })
     |> Repo.update()
+    |> notify(:update)
+  end
+
+  @doc """
+  Fails a job with an error message.
+  """
+  @spec fail_job(binary, WorkbenchJob.t()) :: job_resp
+  def fail_job(error, %WorkbenchJob{} = job) when is_binary(error) do
+    WorkbenchJob.changeset(job, %{
+      status: :failed,
+      completed_at: DateTime.utc_now(),
+      error: error
+    })
+    |> Repo.update()
+    |> notify(:update)
   end
 
   defp notify({:ok, %Workbench{} = workbench}, :create, user),
@@ -210,4 +228,10 @@ defmodule Console.Deployments.Workbenches do
   defp notify({:ok, %WorkbenchTool{} = tool}, :delete, user),
     do: handle_notify(PubSub.WorkbenchToolDeleted, tool, actor: user)
   defp notify(pass, _, _), do: pass
+
+  defp notify({:ok, %WorkbenchJobActivity{} = activity}, :create),
+    do: handle_notify(PubSub.WorkbenchJobActivityCreated, activity)
+  defp notify({:ok, %WorkbenchJobActivity{} = activity}, :update),
+    do: handle_notify(PubSub.WorkbenchJobActivityUpdated, activity)
+  defp notify(pass, _), do: pass
 end

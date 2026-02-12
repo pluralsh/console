@@ -119,6 +119,8 @@ defmodule Console.PubSub.WorkbenchDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchJobCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchJobUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchJobDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchJobActivityCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchJobActivityUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchToolCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchToolUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchToolDeleted, do: use Piazza.PubSub.Event

@@ -29,14 +29,13 @@ defmodule Console.Deployments.Git.AgentTest do
 
     test "it can checkout and tarball a subfolder of a repo with additional files" do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
-      svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin", files: ["AGENT_VERSION"]})
+      svc = insert(:service, repository: git, git: %{ref: "master", folder: ".", files: ["AGENT_VERSION"]})
 
       {:ok, pid} = Discovery.start(git)
 
       files = fetch_and_extract(svc)
-      for f <- ~w(.git-askpass .ssh-askpass ssh-add),
-        do: assert files[f] == File.read!(Path.join("bin", f))
 
+      assert map_size(files) == 1
       assert files["AGENT_VERSION"]
 
       Process.exit(pid, :kill)

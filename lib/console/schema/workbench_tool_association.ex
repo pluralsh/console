@@ -1,5 +1,5 @@
 defmodule Console.Schema.WorkbenchToolAssociation do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Workbench, WorkbenchTool}
 
   schema "workbench_tool_associations" do

@@ -5,6 +5,7 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
   alias Console.AI.PubSub.Vector.Consumer
   alias ElasticsearchUtils, as: ES
   alias OpensearchUtils, as: OS
+  alias Console.Deployments.Settings
 
   describe "PullRequestCreated" do
     test "it can vector index pr files from github" do
@@ -343,7 +344,7 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
 
       Console.AI.VectorStore.init()
 
-      assert Console.Deployments.Settings.fetch_consistent().ai.vector_store.version == 2
+      assert Settings.fetch_consistent().ai.vector_store.version == Settings.vector_store_version()
 
       group = insert(:group)
       user = insert(:user)
@@ -459,7 +460,7 @@ defmodule Console.AI.PubSub.Vector.ConsumerTest do
 
       Console.AI.VectorStore.init()
 
-      assert Console.Deployments.Settings.fetch_consistent().ai.vector_store.version == 2
+      assert Settings.fetch_consistent().ai.vector_store.version == Settings.vector_store_version()
 
       expect(Console.AI.OpenAI, :embeddings, 3, fn _, text -> {:ok, [{text, ES.vector()}]} end)
       group = insert(:group)

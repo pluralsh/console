@@ -1,5 +1,5 @@
 defmodule Console.Schema.WorkbenchJob do
-  use Piazza.Ecto.Schema
+  use Console.Schema.Base
   alias Console.Schema.{Workbench,
     WorkbenchJobResult,
     WorkbenchJobActivity,
@@ -11,6 +11,7 @@ defmodule Console.Schema.WorkbenchJob do
   schema "workbench_jobs" do
     field :status, Status, default: :pending
     field :prompt, :binary
+    field :error, :binary
 
     field :started_at,   :utc_datetime_usec
     field :completed_at, :utc_datetime_usec
@@ -22,6 +23,17 @@ defmodule Console.Schema.WorkbenchJob do
     has_many :activities, WorkbenchJobActivity, on_replace: :delete
 
     timestamps()
+  end
+
+  def pollable(query \\ __MODULE__) do
+    from(j in query,
+      where: j.status == ^:pending or (
+        j.status == ^:running
+          and is_nil(j.completed_at)
+          and (is_nil(j.updated_at) or j.updated_at < ago(15, "minute"))
+      ),
+      order_by: [asc: :inserted_at]
+    )
   end
 
   def for_workbench(query \\ __MODULE__, workbench_id) do
@@ -36,7 +48,11 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, order_by: ^order)
   end
 
-  @valid ~w(status prompt workbench_id user_id started_at completed_at)a
+  def preloaded(query \\ __MODULE__, preloads \\ [:result]) do
+    from(j in query, preload: ^preloads)
+  end
+
+  @valid ~w(status prompt workbench_id error user_id started_at completed_at)a
 
   def changeset(model, attrs \\ %{}) do
     model

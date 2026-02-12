@@ -10,6 +10,7 @@ defmodule Console.AI.Vector.Elastic do
 
   @index_mappings %{
     mappings: %{
+      dynamic: false,
       properties: %{
         passages: %{
           type: "nested",
@@ -30,6 +31,10 @@ defmodule Console.AI.Vector.Elastic do
         datatype: %{type: "keyword"},
         user_ids: %{type: "keyword"},
         group_ids: %{type: "keyword"},
+        filters: %{
+          type: "object",
+          dynamic: true,
+        }
       }
     }
   }

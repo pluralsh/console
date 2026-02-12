@@ -291,6 +291,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.status == :running
       assert activity.type == :coding
       assert activity.prompt == "analyze the repo"
+      assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
 
       job = refetch(job)
       assert job.status == :running
@@ -308,6 +309,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.workbench_job_id == job.id
       assert activity.status == :pending
       assert activity.type == :memo
+      assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
     end
   end
 
@@ -325,6 +327,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert updated.id == activity.id
       assert updated.status == :successful
       assert updated.prompt == "completed analysis"
+      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 
       job = refetch(job)
       assert job.updated_at
@@ -342,6 +345,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert updated.id == activity.id
       assert updated.status == :failed
       assert updated.type == :observability
+      assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 
       assert refetch(job).updated_at
     end
@@ -432,6 +436,19 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       assert completed.result.conclusion == "Done."
       assert completed.result.working_theory == "theory"
+    end
+  end
+
+  describe "fail_job/2" do
+    test "sets job status to failed, completed_at, and error message" do
+      job = insert(:workbench_job, status: :running)
+
+      {:ok, failed} = Workbenches.fail_job("Something went wrong.", job)
+
+      assert failed.id == job.id
+      assert failed.status == :failed
+      assert failed.completed_at
+      assert failed.error == "Something went wrong."
     end
   end
 end

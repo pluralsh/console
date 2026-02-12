@@ -106,7 +106,7 @@ defmodule Console.AI.Provider do
   end
 
   def simple_tool_call([_ | _] = history, tool, opts \\ []) when is_atom(tool) do
-    name = tool.name()
+    name = Tool.name(tool)
     case tool_call(history, [tool], opts) do
       {:ok, [%{^name => %{result: result}} | _]} -> {:ok, result}
       {:ok, [%{^name => %{error: error}} | _]} -> {:error, error}
@@ -150,18 +150,19 @@ defmodule Console.AI.Provider do
   defp client(_), do: {:error, "ai not enabled for this Plural Console instance"}
 
   defp handle_tool_calls([arg | _] = calls, tools) when is_map(arg) do
-    tools_by_name = Map.new(tools, & {"#{&1.name()}", &1})
+    tools_by_name = Map.new(tools, & {Tool.name(&1), &1})
     Enum.filter(calls, & Map.get(tools_by_name, &1.name))
     |> Enum.map(fn %Tool{name: n, arguments: args} ->
       tool = tools_by_name[n]
+      tool_name = Tool.name(tool)
       with {:ok, struct} <- Tool.validate(tool, args),
-           {:ok, result} <- tool.implement(struct) do
-        %{tool.name() => %{result: result}}
+           {:ok, result} <- Tool.implement(tool, struct) do
+        %{tool_name => %{result: result}}
       else
-        {:error, res} when is_binary(res) -> %{tool.name() => %{error: res}}
-        {:error, %Ecto.Changeset{} = cs} -> %{tool.name() => %{error: Enum.join(resolve_changeset(cs), ". ")}}
+        {:error, res} when is_binary(res) -> %{tool_name => %{error: res}}
+        {:error, %Ecto.Changeset{} = cs} -> %{tool_name => %{error: Enum.join(resolve_changeset(cs), ". ")}}
         {:error, [r | _] = errs} when is_binary(r) ->
-          %{tool.name() => %{error: Enum.join(errs, "\n")}}
+          %{tool_name => %{error: Enum.join(errs, "\n")}}
         err -> raise ArgumentError, message: "unknown tool error: #{inspect(err)}"
       end
     end)

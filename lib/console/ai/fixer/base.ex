@@ -130,6 +130,7 @@ defmodule Console.AI.Fixer.Base do
 
   def blacklist(filename) do
     cond do
+      String.starts_with?(filename, ".git/") -> true
       String.ends_with?(filename, "values.yaml.static") -> true
       Path.extname(filename) in @extension_blacklist -> true
       true -> false

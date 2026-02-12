@@ -97,22 +97,37 @@ type SentinelCheckIntegrationTestConfiguration struct {
 
 type SentinelCheckIntegrationTestCase struct {
 	// Type the type of test case to run
-	//+kubebuilder:validation:Enum=COREDNS;LOADBALANCER;RAW
+	//+kubebuilder:validation:Enum=COREDNS;LOADBALANCER;RAW;PVC
 	Type console.SentinelIntegrationTestCaseType `json:"type"`
+
 	// Name the name of the test case
 	Name string `json:"name"`
+
 	// Coredns the coredns configuration to use for this test case
+	//+kubebuilder:validation:Optional
 	Coredns *SentinelCheckIntegrationTestCaseCoredns `json:"coredns,omitempty"`
+
 	// Loadbalancer the load balancer configuration to use for this test case
+	//+kubebuilder:validation:Optional
 	Loadbalancer *SentinelCheckIntegrationTestCaseLoadbalancer `json:"loadbalancer,omitempty"`
 
 	// PVC the pvc configuration to use for this test case
+	//+kubebuilder:validation:Optional
 	PVC *SentinelCheckIntegrationTestCasePVC `json:"pvc,omitempty"`
 
 	// Raw the raw configuration to use for this test case
-	Raw *runtime.RawExtension `json:"raw,omitempty"`
+	//+kubebuilder:validation:Optional
+	Raw *SentinelCheckIntegrationTestCaseRaw `json:"raw,omitempty"`
 }
 
+type SentinelCheckIntegrationTestCaseRaw struct {
+	// Yaml the yaml to use for this test case
+	Yaml runtime.RawExtension `json:"yaml"`
+	// ExpectedResult the expected result of the test case
+	//+kubebuilder:validation:Enum=SUCCESS;FAILED
+	//+kubebuilder:validation:Optional
+	ExpectedResult *console.SentinelRawResult `json:"expectedResult,omitempty"`
+}
 type SentinelCheckIntegrationTestCaseCoredns struct {
 	// DialFqdns the fqdns to dial for this test case
 	DialFqdns []string `json:"dialFqdns,omitempty"`

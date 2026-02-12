@@ -4082,12 +4082,12 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `type` _[SentinelIntegrationTestCaseType](#sentinelintegrationtestcasetype)_ | Type the type of test case to run |  | Enum: [COREDNS LOADBALANCER RAW] <br /> |
+| `type` _[SentinelIntegrationTestCaseType](#sentinelintegrationtestcasetype)_ | Type the type of test case to run |  | Enum: [COREDNS LOADBALANCER RAW PVC] <br /> |
 | `name` _string_ | Name the name of the test case |  |  |
-| `coredns` _[SentinelCheckIntegrationTestCaseCoredns](#sentinelcheckintegrationtestcasecoredns)_ | Coredns the coredns configuration to use for this test case |  |  |
-| `loadbalancer` _[SentinelCheckIntegrationTestCaseLoadbalancer](#sentinelcheckintegrationtestcaseloadbalancer)_ | Loadbalancer the load balancer configuration to use for this test case |  |  |
-| `pvc` _[SentinelCheckIntegrationTestCasePVC](#sentinelcheckintegrationtestcasepvc)_ | PVC the pvc configuration to use for this test case |  |  |
-| `raw` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Raw the raw configuration to use for this test case |  |  |
+| `coredns` _[SentinelCheckIntegrationTestCaseCoredns](#sentinelcheckintegrationtestcasecoredns)_ | Coredns the coredns configuration to use for this test case |  | Optional: \{\} <br /> |
+| `loadbalancer` _[SentinelCheckIntegrationTestCaseLoadbalancer](#sentinelcheckintegrationtestcaseloadbalancer)_ | Loadbalancer the load balancer configuration to use for this test case |  | Optional: \{\} <br /> |
+| `pvc` _[SentinelCheckIntegrationTestCasePVC](#sentinelcheckintegrationtestcasepvc)_ | PVC the pvc configuration to use for this test case |  | Optional: \{\} <br /> |
+| `raw` _[SentinelCheckIntegrationTestCaseRaw](#sentinelcheckintegrationtestcaseraw)_ | Raw the raw configuration to use for this test case |  | Optional: \{\} <br /> |
 
 
 #### SentinelCheckIntegrationTestCaseCoredns
@@ -4121,6 +4121,19 @@ _Appears in:_
 #### SentinelCheckIntegrationTestCasePVC
 
 _Underlying type:_ _[struct{NamePrefix string "json:\"namePrefix\""; Size string "json:\"size\""; StorageClass string "json:\"storageClass\""}](#struct{nameprefix-string-"json:\"nameprefix\"";-size-string-"json:\"size\"";-storageclass-string-"json:\"storageclass\""})_
+
+
+
+
+
+_Appears in:_
+- [SentinelCheckIntegrationTestCase](#sentinelcheckintegrationtestcase)
+
+
+
+#### SentinelCheckIntegrationTestCaseRaw
+
+_Underlying type:_ _[struct{Yaml k8s.io/apimachinery/pkg/runtime.RawExtension "json:\"yaml\""; ExpectedResult *github.com/pluralsh/console/go/client.SentinelRawResult "json:\"expectedResult,omitempty\""}](#struct{yaml-k8sioapimachinerypkgruntimerawextension-"json:\"yaml\"";-expectedresult-*githubcompluralshconsolegoclientsentinelrawresult-"json:\"expectedresult,omitempty\""})_
 
 
 

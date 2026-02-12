@@ -87,7 +87,9 @@ defmodule Console.AI.Chat.Tools do
 
   @service_tools [
     Explain.Files,
-    Explain.Read
+    Explain.Read,
+    Agent.Discovery,
+    Agent.ApiSpec
   ]
 
   @search_code_tools [Agent.CodingAgent, Agent.Coding.ServiceFiles, Agent.Coding.StackFiles]

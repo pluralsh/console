@@ -21,6 +21,10 @@ defmodule Console.Deployments.Settings do
   @type cloud_connection_resp :: {:ok, CloudConnection.t} | Console.error
   @type federated_credential_resp :: {:ok, FederatedCredential.t} | Console.error
 
+  @latest_vs_version 3
+
+  def vector_store_version(), do: @latest_vs_version
+
   @preloads ~w(read_bindings write_bindings git_bindings create_bindings deployer_repository artifact_repository)a
 
   @spec get_project!(binary) :: Project.t
@@ -235,7 +239,7 @@ defmodule Console.Deployments.Settings do
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def vector_store_initialized() do
     fetch_consistent()
-    |> Ecto.Changeset.change(%{ai: %{vector_store: %{initialized: true, version: 2}}})
+    |> Ecto.Changeset.change(%{ai: %{vector_store: %{initialized: true, version: vector_store_version()}}})
     |> Repo.update()
   end
 

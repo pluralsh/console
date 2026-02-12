@@ -16,6 +16,7 @@ defmodule Console.AI.Vector.Opensearch do
       }
     },
     mappings: %{
+      dynamic: false,
       properties: %{
         passages: %{
           type: "nested",
@@ -38,6 +39,10 @@ defmodule Console.AI.Vector.Opensearch do
         datatype: %{type: "keyword"},
         user_ids: %{type: "keyword"},
         group_ids: %{type: "keyword"},
+        filters: %{
+          type: "object",
+          dynamic: true,
+        }
       }
     }
   }

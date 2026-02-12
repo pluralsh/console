@@ -101,6 +101,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt,       :string, description: "the prompt for this run"
     field :started_at,   :datetime, description: "when the run started"
     field :completed_at, :datetime, description: "when the run completed"
+    field :error,        :string, description: "error message when the job failed"
 
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
@@ -166,7 +167,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_result_todo do
     field :name,        :string
     field :description, :string
-    field :status,      :workbench_job_result_todo_status
+    field :done,        :boolean
   end
 
   object :workbench_configuration do
@@ -222,6 +223,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench_tool
   connection node_type: :workbench_job
   connection node_type: :workbench_job_activity
+
+  delta :workbench_job
+  delta :workbench_job_activity
 
   object :workbench_queries do
     field :workbench, :workbench do
@@ -352,6 +356,26 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :attributes,   non_null(:workbench_job_attributes), description: "job attributes (e.g. prompt)"
 
       resolve &Deployments.create_workbench_job/2
+    end
+  end
+
+  object :workbench_subscriptions do
+    field :workbench_job_delta, :workbench_job_delta do
+      arg :id, non_null(:id)
+
+      config fn args, ctx ->
+        with {:ok, job} <- Deployments.workbench_job(args, ctx),
+          do: {:ok, topic: "workbench_jobs:#{job.id}"}
+      end
+    end
+
+    field :workbench_job_activity_delta, :workbench_job_activity_delta do
+      arg :job_id, non_null(:id)
+
+      config fn %{job_id: job_id}, ctx ->
+        with {:ok, _job} <- Deployments.workbench_job(%{id: job_id}, ctx),
+          do: {:ok, topic: "workbench_jobs:#{job_id}:activities"}
+      end
     end
   end
 end

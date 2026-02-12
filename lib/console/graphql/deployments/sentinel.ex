@@ -8,6 +8,7 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   ecto_enum :sentinel_run_job_status, Console.Schema.SentinelRunJob.Status
   ecto_enum :sentinel_run_job_format, Console.Schema.SentinelRunJob.Format
   ecto_enum :sentinel_integration_test_case_type, Console.Schema.Sentinel.IntegrationTestCaseType
+  ecto_enum :sentinel_raw_result, Console.Schema.Sentinel.SentinelRawResult
 
   input_object :sentinel_attributes do
     field :name,          :string, description: "the name of the sentinel"
@@ -110,7 +111,8 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   end
 
   input_object :sentinel_check_integration_test_case_raw_attributes do
-    field :yaml, :string, description: "the yaml to use for this test case"
+    field :yaml,              non_null(:string), description: "the yaml to use for this test case"
+    field :expected_result,   :sentinel_raw_result, description: "the expected result of the test case"
   end
 
   object :sentinel do
@@ -220,7 +222,8 @@ defmodule Console.GraphQl.Deployments.Sentinel do
 
   @desc "test provisioning a raw resource"
   object :sentinel_check_integration_test_case_raw_configuration do
-    field :yaml, :string, description: "the yaml to use for this test case"
+    field :yaml,            non_null(:string), description: "the yaml to use for this test case"
+    field :expected_result, :sentinel_raw_result, description: "the expected result of the test case"
   end
 
   object :sentinel_run do
