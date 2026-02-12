@@ -49,7 +49,7 @@ defmodule Console.AI.Agents.UpgradeTest do
         %Tool{name: "__plrl__coding_agent", arguments: %{"prompt" => "some prompt", "repository" => "https://github.com/plural/test.git"}, id: "2"}
       ]} end)
 
-      {:ok, result} = Upgrade.exec(upgrade)
+      {:ok, result} = Upgrade.exec(refetch(upgrade))
 
       assert result.status == :completed
 

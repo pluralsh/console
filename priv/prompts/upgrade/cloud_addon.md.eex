@@ -17,6 +17,14 @@ Some guidance on what is useful for the coding agent to know:
 
 Here is the prompt we've been given about the component to upgrade:
 
+The cluster that is being upgraded is:
+
+Cluster Name: <%= @upgrade.cluster.name %>
+Cluster Distro: <%= @upgrade.cluster.distro %>
+Cluster Version: <%= @upgrade.cluster.current_version %>
+
+**IMPORTANT:** only update manifests related to the addon and cluster itself.
+
 <%= @prompt %>
 
 <%= if is_binary(@upgrade.prompt) do %>

@@ -18,7 +18,7 @@ defmodule Console.AI.Agents.Upgrade do
   @prompt "Attempt to launch the coding agent to generate the needed pr for this.  If it's not clear enough, end the conversation with an explanation as to why"
 
   def exec(%ClusterUpgrade{} = upgrade) do
-    %{steps: steps, user: user} = Repo.preload(upgrade, [:steps, :cluster, :user, :runtime])
+    %{steps: steps, user: user} = upgrade = Repo.preload(upgrade, [:steps, :cluster, :user, :runtime])
     user = Console.Services.Rbac.preload(user)
 
     Task.async_stream(steps, &exec_step(&1, upgrade, user), max_concurrency: 10, timeout: :infinity)
@@ -34,7 +34,7 @@ defmodule Console.AI.Agents.Upgrade do
     })
 
     tools(step)
-    |> MemoryEngine.new(20, system_prompt: prompt(step, upgrade), acc: %{})
+    |> MemoryEngine.new(30, system_prompt: prompt(step, upgrade), acc: %{})
     |> MemoryEngine.reduce([{:user, @prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
@@ -67,7 +67,7 @@ defmodule Console.AI.Agents.Upgrade do
 
   defp tools(%ClusterUpgradeStep{type: :addon}), do: [ServiceComponent, ServiceFiles, AgentRun]
   defp tools(%ClusterUpgradeStep{type: :cloud_addon}), do: [Stack, StackFiles, ServiceFiles, AgentRun]
-  defp tools(%ClusterUpgradeStep{type: :infrastructure}), do: [Stack, StackFiles, ServiceFiles, AgentRun]
+  defp tools(%ClusterUpgradeStep{type: :infrastructure}), do: [Stack, ServiceComponent, StackFiles, ServiceFiles, AgentRun]
 
   EEx.function_from_file(:defp, :addon_prompt, Console.priv_filename(["prompts", "upgrade", "addon.md.eex"]), [:assigns])
   EEx.function_from_file(:defp, :cloud_addon_prompt, Console.priv_filename(["prompts", "upgrade", "cloud_addon.md.eex"]), [:assigns])

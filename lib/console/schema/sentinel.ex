@@ -95,7 +95,7 @@ defmodule Console.Schema.Sentinel do
             end
 
             embeds_one :raw, RawConfiguration, on_replace: :update do
-              field :yaml, :string
+              field :yaml,            :string
               field :expected_result, SentinelRawResult, default: :success
             end
           end
