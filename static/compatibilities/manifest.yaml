@@ -39,3 +39,4 @@ names:
 - rabbitmq-cluster-operator
 - kserve
 - kubescape-operator
+- dynatrace-operator
