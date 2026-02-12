@@ -37,29 +37,29 @@ def _parse_kube_version(value: str) -> str | None:
     return f"{match.group(1)}.{match.group(2)}"
 
 
-def _parse_operator_series(value: str) -> str | None:
-    match = re.search(r"(\d+)\.(\d+)", value)
+def _parse_operator_floor(value: str):
+    match = re.search(r"(\d+\.\d+(?:\.\d+)?)", value)
     if not match:
         return None
-    return f"{match.group(1)}.{match.group(2)}"
+    return validate_semver(match.group(1))
 
 
-def _versions_by_minor() -> dict[str, list[dict[str, str]]]:
+def _helm_versions() -> list[dict[str, object]]:
     content = fetch_page(HELM_INDEX_URL)
     if not content:
         print_error("Failed to fetch Dynatrace Operator helm index.")
-        return {}
+        return []
 
     try:
         index = yaml.safe_load(content)
     except yaml.YAMLError as exc:
         print_error(f"Failed to parse Dynatrace Operator helm index: {exc}")
-        return {}
+        return []
 
     entries = index.get("entries", {}).get(APP_NAME, [])
     if not entries:
         print_error("No Dynatrace Operator chart entries found in helm index.")
-        return {}
+        return []
 
     by_app_version: dict[str, dict[str, object]] = {}
 
@@ -88,18 +88,17 @@ def _versions_by_minor() -> dict[str, list[dict[str, str]]]:
             current["chart_version"] = str(chart_semver)
             current["_chart_semver"] = chart_semver
 
-    by_minor: dict[str, list[dict[str, str]]] = {}
+    versions: list[dict[str, object]] = []
     for entry in by_app_version.values():
-        app_semver = entry["_app_semver"]
-        key = f"{app_semver.major}.{app_semver.minor}"
-        by_minor.setdefault(key, []).append(entry)
+        versions.append(
+            {
+                "version": entry["version"],
+                "chart_version": entry["chart_version"],
+                "semver": entry["_app_semver"],
+            }
+        )
 
-    for entry_list in by_minor.values():
-        for entry in entry_list:
-            entry.pop("_app_semver", None)
-            entry.pop("_chart_semver", None)
-
-    return by_minor
+    return sorted(versions, key=lambda v: v["semver"], reverse=True)
 
 
 def scrape() -> None:
@@ -121,11 +120,11 @@ def scrape() -> None:
         print_error(f"Unexpected Dynatrace table headers: {exc}")
         return
 
-    versions_by_minor = _versions_by_minor()
-    if not versions_by_minor:
+    helm_versions = _helm_versions()
+    if not helm_versions:
         return
 
-    kube_by_series: dict[str, set[str]] = {}
+    table_rows: list[dict[str, object]] = []
 
     for row in table.find_all("tr")[1:]:
         cells = [td.get_text(" ", strip=True) for td in row.find_all("td")]
@@ -136,30 +135,49 @@ def scrape() -> None:
         if not kube_version:
             continue
 
-        series = _parse_operator_series(cells[min_idx])
-        if not series:
+        min_floor = _parse_operator_floor(cells[min_idx])
+        if not min_floor:
             continue
 
-        kube_by_series.setdefault(series, set()).add(kube_version)
+        table_rows.append(
+            {
+                "kube": kube_version,
+                "min_floor": min_floor,
+            }
+        )
 
-    if not kube_by_series:
+    if not table_rows:
         print_error("No Dynatrace compatibility rows parsed.")
         return
 
     versions: list[OrderedDict] = []
-    for series, kube_set in kube_by_series.items():
-        entries = versions_by_minor.get(series, [])
-        for entry in entries:
-            version_info = OrderedDict(
-                [
-                    ("version", entry["version"]),
-                    ("kube", sorted(kube_set)),
-                    ("requirements", []),
-                    ("incompatibilities", []),
-                ]
-            )
-            if entry.get("chart_version"):
-                version_info["chart_version"] = entry["chart_version"]
-            versions.append(version_info)
+    for entry in helm_versions:
+        supported_kube = set()
+        semver = entry["semver"]
+
+        for row in table_rows:
+            kube_version = row["kube"]
+            if semver >= row["min_floor"]:
+                supported_kube.add(kube_version)
+
+        if not supported_kube:
+            continue
+
+        sorted_kube = sorted(
+            supported_kube,
+            key=lambda v: tuple(map(int, v.split("."))),
+            reverse=True,
+        )
+        version_info = OrderedDict(
+            [
+                ("version", entry["version"]),
+                ("kube", sorted_kube),
+                ("requirements", []),
+                ("incompatibilities", []),
+            ]
+        )
+        if entry.get("chart_version"):
+            version_info["chart_version"] = entry["chart_version"]
+        versions.append(version_info)
 
     update_compatibility_info(TARGET_FILE, versions)
