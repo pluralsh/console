@@ -37,11 +37,11 @@ def _parse_kube_version(value: str) -> str | None:
     return f"{match.group(1)}.{match.group(2)}"
 
 
-def _parse_operator_floor(value: str):
-    match = re.search(r"(\d+\.\d+(?:\.\d+)?)", value)
+def _parse_operator_minor(value: str) -> str | None:
+    match = re.search(r"(\d+)\.(\d+)", value)
     if not match:
         return None
-    return validate_semver(match.group(1))
+    return f"{match.group(1)}.{match.group(2)}"
 
 
 def _helm_versions() -> list[dict[str, object]]:
@@ -115,7 +115,7 @@ def scrape() -> None:
 
     try:
         kube_idx = headers.index("Kubernetes upstream version")
-        min_idx = headers.index("Minimum Dynatrace Operator version")
+        rec_idx = headers.index("Recommended Dynatrace Operator version")
     except ValueError as exc:
         print_error(f"Unexpected Dynatrace table headers: {exc}")
         return
@@ -124,41 +124,32 @@ def scrape() -> None:
     if not helm_versions:
         return
 
-    table_rows: list[dict[str, object]] = []
+    kube_by_recommended_minor: dict[str, set[str]] = {}
 
     for row in table.find_all("tr")[1:]:
         cells = [td.get_text(" ", strip=True) for td in row.find_all("td")]
-        if len(cells) <= max(kube_idx, min_idx):
+        if len(cells) <= max(kube_idx, rec_idx):
             continue
 
         kube_version = _parse_kube_version(cells[kube_idx])
         if not kube_version:
             continue
 
-        min_floor = _parse_operator_floor(cells[min_idx])
-        if not min_floor:
+        rec_minor = _parse_operator_minor(cells[rec_idx])
+        if not rec_minor:
             continue
 
-        table_rows.append(
-            {
-                "kube": kube_version,
-                "min_floor": min_floor,
-            }
-        )
+        kube_by_recommended_minor.setdefault(rec_minor, set()).add(kube_version)
 
-    if not table_rows:
+    if not kube_by_recommended_minor:
         print_error("No Dynatrace compatibility rows parsed.")
         return
 
     versions: list[OrderedDict] = []
     for entry in helm_versions:
-        supported_kube = set()
         semver = entry["semver"]
-
-        for row in table_rows:
-            kube_version = row["kube"]
-            if semver >= row["min_floor"]:
-                supported_kube.add(kube_version)
+        rec_minor = f"{semver.major}.{semver.minor}"
+        supported_kube = kube_by_recommended_minor.get(rec_minor, set())
 
         if not supported_kube:
             continue
