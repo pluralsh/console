@@ -36,12 +36,18 @@ export default function MyProfile() {
 
   return (
     <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer>
+      <ResponsiveLayoutSidenavContainer
+        css={{
+          width: 300,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.medium,
+        }}
+      >
         <PageCard
           heading={me.name}
           icon={{ name: me.name, url: me.profile, spacing: 'none' }}
           subheading={me?.email}
-          marginBottom="medium"
         />
         <TabList
           stateRef={tabStateRef}

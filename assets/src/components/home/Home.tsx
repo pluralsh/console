@@ -131,7 +131,7 @@ export function Home() {
 
   const isLoading = !tableData && tableLoading
   const noClustersYet =
-    aggregatedUpgradeStats.all === 0 && !(projectId || isLoading)
+    aggregatedUpgradeStats.all === 0 && !(projectId || upgradeLoading)
 
   return (
     <Flex
@@ -223,6 +223,7 @@ const ChartSectionSC = styled.div(({ theme }) => ({
   width: '100%',
   display: 'flex',
   justifyContent: 'center',
+  ...(theme.mode === 'dark' && { background: theme.colors['fill-accent'] }),
 }))
 
 const TableSectionSC = styled.div(({ theme }) => ({

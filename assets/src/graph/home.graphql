@@ -82,9 +82,6 @@ fragment CloudAddonUpgrade on CloudAddonUpgrade {
 
 fragment ClusterWithUpgrade on Cluster {
   ...ClusterRuntimeServices
-  prAutomations {
-    id
-  }
   deprecatedCustomResources {
     ...ClusterUpgradeDeprecatedCustomResource
   }
@@ -116,6 +113,17 @@ fragment ClusterHealthScore on Cluster {
   healthScore
 }
 
+fragment KubernetesChangelog on KubernetesChangelog {
+  version
+  apiUpdates
+  bugFixes
+  breakingChanges
+  deprecations
+  features
+  majorChanges
+  removals
+}
+
 query ClusterOverviewDetails(
   $id: ID!
   $kubeVersion: String!
@@ -126,10 +134,7 @@ query ClusterOverviewDetails(
     ...ClusterOverviewDetails
   }
   kubernetesChangelog(version: $nextKubeVersion) @include(if: $hasKubeVersion) {
-    version
-    majorChanges
-    breakingChanges
-    deprecations
+    ...KubernetesChangelog
   }
 }
 
