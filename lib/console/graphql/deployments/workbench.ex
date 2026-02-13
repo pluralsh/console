@@ -219,6 +219,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :value, :string
   end
 
+  object :workbench_job_progress do
+    field :activity_id, non_null(:id)
+    field :text,        :string
+    field :tool,        :string
+    field :arguments,   :map
+  end
+
   connection node_type: :workbench
   connection node_type: :workbench_tool
   connection node_type: :workbench_job
@@ -375,6 +382,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
       config fn %{job_id: job_id}, ctx ->
         with {:ok, _job} <- Deployments.workbench_job(%{id: job_id}, ctx),
           do: {:ok, topic: "workbench_jobs:#{job_id}:activities"}
+      end
+    end
+
+    field :workbench_job_progress, :workbench_job_progress do
+      arg :job_id, non_null(:id)
+
+      config fn %{job_id: job_id}, ctx ->
+        with {:ok, _} <- Deployments.workbench_job(%{id: job_id}, ctx),
+          do: {:ok, topic: "workbench_jobs:#{job_id}:progress"}
       end
     end
   end

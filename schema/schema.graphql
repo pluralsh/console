@@ -1295,6 +1295,10 @@ type RootSubscriptionType {
   workbenchJobDelta(id: ID!): WorkbenchJobDelta
 
   workbenchJobActivityDelta(jobId: ID!): WorkbenchJobActivityDelta
+
+  workbenchJobProgress(jobId: ID!): WorkbenchJobProgress
+
+  clusterUpgradeProgress(upgradeId: ID!): ClusterUpgradeProgress
 }
 
 type OauthResponse {
@@ -2330,6 +2334,13 @@ type WorkbenchToolHttpConfiguration {
 type WorkbenchToolHttpHeader {
   name: String
   value: String
+}
+
+type WorkbenchJobProgress {
+  activityId: ID!
+  text: String
+  tool: String
+  arguments: Map
 }
 
 type WorkbenchConnection {
@@ -9352,6 +9363,13 @@ type CompatibilityMatrixSummary {
 
   "the breaking changes for this version"
   breakingChanges: [String!]
+}
+
+type ClusterUpgradeProgress {
+  stepId: ID!
+  text: String
+  tool: String
+  arguments: Map
 }
 
 type ClusterConnection {

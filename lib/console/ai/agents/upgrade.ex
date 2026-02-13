@@ -1,4 +1,5 @@
 defmodule Console.AI.Agents.Upgrade do
+  import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Schema.{
@@ -15,7 +16,7 @@ defmodule Console.AI.Agents.Upgrade do
   }
   require EEx
 
-  @prompt "Attempt to launch the coding agent to generate the needed pr for this.  If it's not clear enough, end the conversation with an explanation as to why"
+  @prompt "Use the tools available to craft a prompt for the coding agent to execute.  You can call them multiple time if needed to fully understand the problem, and once it is cogent, delegate to the coding_agent tool provided"
 
   def exec(%ClusterUpgrade{} = upgrade) do
     %{steps: steps, user: user} = upgrade = Repo.preload(upgrade, [:steps, :cluster, :user, :runtime])
@@ -34,7 +35,7 @@ defmodule Console.AI.Agents.Upgrade do
     })
 
     tools(step)
-    |> MemoryEngine.new(30, system_prompt: prompt(step, upgrade), acc: %{})
+    |> MemoryEngine.new(30, system_prompt: prompt(step, upgrade), acc: %{}, callback: &callback(step, &1))
     |> MemoryEngine.reduce([{:user, @prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
@@ -50,6 +51,17 @@ defmodule Console.AI.Agents.Upgrade do
       _ -> last_message(messages)
     end
   end
+
+  defp callback(%ClusterUpgradeStep{id: id, upgrade_id: upgrade_id}, {:content, content}) when is_binary(content),
+    do: publish_absinthe(%{step_id: id, text: content}, cluster_upgrade_progress: "clusters:upgrades:#{upgrade_id}")
+  defp callback(%ClusterUpgradeStep{id: id, upgrade_id: upgrade_id}, {:tool, content, %{name: name, arguments: args}})
+    when is_binary(content) do
+    publish_absinthe(
+      %{step_id: id, tool: name, arguments: args, text: content},
+      cluster_upgrade_progress: "clusters:upgrades:#{upgrade_id}"
+    )
+  end
+  defp callback(_, _), do: :ok
 
   defp last_message(messages) do
     Enum.reverse(messages)

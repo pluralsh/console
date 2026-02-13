@@ -9,7 +9,7 @@ defmodule Console.AI.Workbench.Subagents.Plan do
   def run(%WorkbenchJob{status: s} = job, _) when s != :pending, do: {:ok, job}
   def run(%WorkbenchJob{prompt: prompt} = job, %Environment{} = environment) do
     tools(job, environment)
-    |> MemoryEngine.new(20, system_prompt: @system, acc: %{})
+    |> MemoryEngine.new(20, system_prompt: @system, acc: %{}, callback: &callback(%{id: nil, workbench_job_id: job.id}, &1))
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs

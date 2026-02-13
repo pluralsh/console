@@ -2803,6 +2803,14 @@ export type ClusterUpgradePlan = {
   kubeletSkew?: Maybe<Scalars['Boolean']['output']>;
 };
 
+export type ClusterUpgradeProgress = {
+  __typename?: 'ClusterUpgradeProgress';
+  arguments?: Maybe<Scalars['Map']['output']>;
+  stepId: Scalars['ID']['output'];
+  text?: Maybe<Scalars['String']['output']>;
+  tool?: Maybe<Scalars['String']['output']>;
+};
+
 export enum ClusterUpgradeStatus {
   Completed = 'COMPLETED',
   Failed = 'FAILED',
@@ -11134,11 +11142,13 @@ export type RootSubscriptionType = {
   agentRunDelta?: Maybe<AgentRunDelta>;
   /** streams chunks of ai text for a given parent scope */
   aiStream?: Maybe<AiDelta>;
+  clusterUpgradeProgress?: Maybe<ClusterUpgradeProgress>;
   notificationDelta?: Maybe<NotificationDelta>;
   podDelta?: Maybe<PodDelta>;
   runLogsDelta?: Maybe<RunLogsDelta>;
   workbenchJobActivityDelta?: Maybe<WorkbenchJobActivityDelta>;
   workbenchJobDelta?: Maybe<WorkbenchJobDelta>;
+  workbenchJobProgress?: Maybe<WorkbenchJobProgress>;
 };
 
 
@@ -11160,6 +11170,11 @@ export type RootSubscriptionTypeAiStreamArgs = {
 };
 
 
+export type RootSubscriptionTypeClusterUpgradeProgressArgs = {
+  upgradeId: Scalars['ID']['input'];
+};
+
+
 export type RootSubscriptionTypeRunLogsDeltaArgs = {
   stepId: Scalars['ID']['input'];
 };
@@ -11172,6 +11187,11 @@ export type RootSubscriptionTypeWorkbenchJobActivityDeltaArgs = {
 
 export type RootSubscriptionTypeWorkbenchJobDeltaArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeWorkbenchJobProgressArgs = {
+  jobId: Scalars['ID']['input'];
 };
 
 export type RouterFilterAttributes = {
@@ -14039,6 +14059,14 @@ export type WorkbenchJobEdge = {
   __typename?: 'WorkbenchJobEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<WorkbenchJob>;
+};
+
+export type WorkbenchJobProgress = {
+  __typename?: 'WorkbenchJobProgress';
+  activityId: Scalars['ID']['output'];
+  arguments?: Maybe<Scalars['Map']['output']>;
+  text?: Maybe<Scalars['String']['output']>;
+  tool?: Maybe<Scalars['String']['output']>;
 };
 
 export type WorkbenchJobResult = {

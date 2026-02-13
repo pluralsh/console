@@ -10,7 +10,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
     tools(environment)
-    |> MemoryEngine.new(20, system_prompt: system_prompt(prompt: jprompt), acc: %{})
+    |> MemoryEngine.new(20, system_prompt: system_prompt(prompt: jprompt), acc: %{}, callback: &callback(activity, &1))
     |> MemoryEngine.reduce([{:user, prompt}], &reducer(activity, &1, &2))
     |> case do
       {:ok, attrs} -> attrs

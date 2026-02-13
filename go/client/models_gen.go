@@ -2283,6 +2283,13 @@ type ClusterUpgradePlan struct {
 	KubeletSkew *bool `json:"kubeletSkew,omitempty"`
 }
 
+type ClusterUpgradeProgress struct {
+	StepID    string         `json:"stepId"`
+	Text      *string        `json:"text,omitempty"`
+	Tool      *string        `json:"tool,omitempty"`
+	Arguments map[string]any `json:"arguments,omitempty"`
+}
+
 // A step in an agentic attempt to upgrade a specific component or piece of infrastructure in this kubernetes cluster
 type ClusterUpgradeStep struct {
 	ID string `json:"id"`
@@ -9049,6 +9056,13 @@ type WorkbenchJobDelta struct {
 type WorkbenchJobEdge struct {
 	Node   *WorkbenchJob `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type WorkbenchJobProgress struct {
+	ActivityID string         `json:"activityId"`
+	Text       *string        `json:"text,omitempty"`
+	Tool       *string        `json:"tool,omitempty"`
+	Arguments  map[string]any `json:"arguments,omitempty"`
 }
 
 type WorkbenchJobResult struct {

@@ -7,7 +7,7 @@ defmodule Console.AI.Chat.MemoryEngine do
   alias Console.AI.{Provider, Tool}
   alias Console.AI.Chat.Engine
 
-  defstruct [:tools, :system_prompt, :max_iterations, :reducer, messages: [], acc: []]
+  defstruct [:tools, :system_prompt, :max_iterations, :reducer, :callback, messages: [], acc: []]
 
   def new(tools, max_iterations, opts \\ []) when is_integer(max_iterations) and max_iterations > 0 do
     struct(__MODULE__, Keyword.merge(opts, [tools: tools, max_iterations: max_iterations]))
@@ -34,9 +34,9 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp loop(%__MODULE__{max_iterations: max, messages: [_ | _] = messages, system_prompt: preface, acc: acc} = engine, iter) when iter < max do
     messages
     |> Engine.fit_context_window(preface)
-    |> Provider.completion(preface: preface, plural: engine.tools)
+    |> Provider.completion(preface: preface, plural: engine.tools, client: :tool)
     |> case do
-      {:ok, content} -> [{:assistant, content}]
+      {:ok, content} -> [callback(engine, {:assistant, content})]
       {:ok, content, tools} ->
         case call_tools(engine, tools, engine.tools) do
           {:ok, tool_msgs} -> maybe_prepend(content, tool_msgs)
@@ -56,20 +56,20 @@ defmodule Console.AI.Chat.MemoryEngine do
   defp loop(%__MODULE__{acc: acc}, _), do: {:ok, acc}
 
   @spec call_tools(%__MODULE__{}, [Tool.t], [module]) :: {:ok, [%{role: Provider.sender, content: binary}]} | {:error, binary}
-  defp call_tools(_engine, tools, impls) do
+  defp call_tools(engine, tools, impls) do
     by_name = Map.new(impls, & {Tool.name(&1), &1})
     Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args} = tool, acc ->
       with {:ok, impl}    <- Map.fetch(by_name, name),
            {:ok, parsed}  <- Tool.validate(impl, args),
            {:ok, content} <- Tool.implement(impl, Map.put(parsed, :id, tool)) do
-        {:cont, [tool_msg(content, id, name, args) | acc]}
+        {:cont, [callback(engine, tool_msg(content, id, name, args)) | acc]}
       else
         :error ->
-          {:halt, [tool_msg("failed to call tool: #{name}, tool not found", id, name, args) | acc]}
+          {:halt, [callback(engine, tool_msg("failed to call tool: #{name}, tool not found", id, name, args)) | acc]}
         {:error, %Ecto.Changeset{} = cs} ->
-          {:cont, [tool_msg("failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", id, name, args) | acc]}
+          {:cont, [callback(engine, tool_msg("failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", id, name, args)) | acc]}
         err ->
-          {:halt, [tool_msg("failed to call tool: #{name}, result: #{inspect(err)}", id, name, args) | acc]}
+          {:halt, [callback(engine, tool_msg("failed to call tool: #{name}, result: #{inspect(err)}", id, name, args)) | acc]}
       end
     end)
     |> then(fn
@@ -77,6 +77,12 @@ defmodule Console.AI.Chat.MemoryEngine do
       err -> err
     end)
   end
+
+  defp callback(%__MODULE__{callback: cb}, msg) when is_function(cb, 1) do
+    cb.(msg)
+    msg
+  end
+  defp callback(_, msg), do: msg
 
   defp tool_msg(content, id, name, args, attrs \\ %{})
   defp tool_msg(content, id, name, args, attrs) when is_binary(content),

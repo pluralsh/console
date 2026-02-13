@@ -144,6 +144,14 @@ defmodule Console.AI.Agents.Base do
     {thread, thread.session}
   end
 
+  def publish_absinthe(payload, topic) do
+    Absinthe.Subscription.publish(
+      ConsoleWeb.Endpoint,
+      payload,
+      topic
+    )
+  end
+
   def initialized(%AgentSession{} = session) do
     refetch(session)
     |> AgentSession.changeset(%{initialized: true})

@@ -4,14 +4,16 @@ If the resource is managed by a Plural Stack, it's important to understand the h
 
 Stack (owned by) -> InfrastructureStack Custom Resource -> Plural Service (... -> Plural Service)
 
-What you'll ultimately want to do is construct a prompt to invoke a full coding agent like claude code to make this code change in the appropriate repository. To do this, here is your workflow:
+What you'll ultimately want to do is construct a prompt to invoke a full coding agent like claude code to make this code change in the appropriate repository.
+
+To do this, here is your workflow (*you can make multiple tool calls to do this*):
 
 1. Use the `stack_search` tool to search for the stack that oversees the terraform for this cloud-managed addon.
 2. Use the `stack_files` tool to list the files for the stack. This will help you craft a targeted prompt and infer the appropriate repository to update
-3. It's possible the change needed is with a variable that's actually configured via the InfrastructureStack's custom resource or something comparable.
-4. To evaluate if the change actually needs to be made in the InfrastructureStack custom resource, you can use the `service_component` tool to search for the plural service that owns the InfrastructureStack and `service_files` to list the files for the service.
+3. It's possible the change needed is with a variable that's actually configured via the InfrastructureStack's custom resource or something comparable.  You will be able to determine that by analyzing the parent (or parent of parents) of the stack, which will provide the GitOps configuration of that stack, defining things like variable overrides and more.
+4. If you need to search additionally for the InfrastructureStack that is controlling the terraform, you can use the `service_component` tool to search for the InfrastructureStack and `service_files` to list the files for the service that is instantiating it.
 5. You might also need to do that recursively, since services can own other services.
-6. Once you're satisfied, use the `coding_agent` tool to invoke a full coding agent to make this code change in the appropriate repository.
+6. Once you're satisfied, use the `coding_agent` tool to invoke a full coding agent to make this code change in the appropriate repository. **Be sure to exhaustively search for the correct repository before doing this.**
 7. When you invoke the `coding_agent` tool, ensure to prompt the agent to add a `Plural Stack: {stack-name}` comment to the PR body.  This will auto-link the PR to the stack so terraform plans and other features are visible for a future reviewer.
 
 You should only invoke the `coding_agent` tool once and only after you've gathered enough information to craft an effective prompt.
