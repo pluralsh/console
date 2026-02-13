@@ -120,6 +120,12 @@ mutation CreateAgentMessage($runId: ID!, $attributes: AgentMessageAttributes!) {
   }
 }
 
+fragment TinyAgentRuntimeFragment on AgentRuntime {
+    id
+    name
+    type
+}
+
 fragment AgentRuntimeFragment on AgentRuntime {
     id
     name
