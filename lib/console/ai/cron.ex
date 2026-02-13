@@ -152,10 +152,7 @@ defmodule Console.AI.Cron do
       |> Stack.ordered(asc: :id)
       |> Repo.stream(method: :keyset)
       |> Console.throttle()
-      |> Stream.chunk_every(@chunk)
-      |> Stream.each(fn chunk ->
-        Enum.each(chunk, &Console.AI.PubSub.Vector.Bulk.insert/1)
-      end)
+      |> Stream.each(&Console.AI.PubSub.Vector.Bulk.insert/1)
       |> Stream.run()
     end
   end
