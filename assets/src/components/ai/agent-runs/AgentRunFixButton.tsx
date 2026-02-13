@@ -265,6 +265,7 @@ export const AgentRunFormPopupSC = styled(SimplePopupMenu)(({ theme }) => ({
   transform: 'translateY(20px)',
   marginBottom: theme.spacing.xxlarge,
   boxShadow: theme.boxShadows.moderate,
+  zIndex: theme.zIndexes.toast,
 }))
 
 export const PromptInputBoxSC = styled(Card)(({ theme }) => ({

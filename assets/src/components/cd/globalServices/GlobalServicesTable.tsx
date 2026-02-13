@@ -17,14 +17,12 @@ import { useThrottle } from 'components/hooks/useThrottle'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { columns } from './GlobalServices'
-import { useTheme } from 'styled-components'
 
 function GlobalServicesTableComponent({
   setRefetch,
 }: {
   setRefetch?: (refetch: () => () => void) => void
 }) {
-  const theme = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()
   const [searchString, setSearchString] = useState('')
@@ -64,12 +62,6 @@ function GlobalServicesTableComponent({
         startIcon={<SearchIcon />}
         value={searchString}
         onChange={(e) => setSearchString(e.currentTarget.value)}
-        css={{
-          background:
-            theme.mode === 'light'
-              ? theme.colors['fill-zero']
-              : theme.colors['fill-one'],
-        }}
       />
       <Table
         fullHeightWrap
