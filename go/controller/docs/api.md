@@ -51,6 +51,8 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ServiceDeployment](#servicedeployment)
 - [StackDefinition](#stackdefinition)
 - [UpgradePlanCallout](#upgradeplancallout)
+- [Workbench](#workbench)
+- [WorkbenchTool](#workbenchtool)
 
 
 
@@ -3869,6 +3871,8 @@ _Appears in:_
 - [ServiceSpec](#servicespec)
 - [StackDefinitionSpec](#stackdefinitionspec)
 - [UpgradePlanCalloutSpec](#upgradeplancalloutspec)
+- [WorkbenchSpec](#workbenchspec)
+- [WorkbenchToolSpec](#workbenchtoolspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -5006,6 +5010,231 @@ _Appears in:_
 | `location` _string_ | Location is the GCP region Vertex is queried from |  | Required: \{\} <br /> |
 | `endpoint` _string_ | Endpoint is a custom endpoint for self-deployed models |  | Optional: \{\} <br /> |
 | `serviceAccountJsonSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | ServiceAccountJsonSecretRef is a Service Account json file stored w/in a kubernetes secret to use for authentication to GCP |  | Optional: \{\} <br /> |
+
+
+#### Workbench
+
+
+
+Workbench represents an AI workbench in Plural Console. It defines the system prompt,
+configuration, skills, and tools available for agent runs, and can reference a project,
+Git repository, and agent runtime.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `Workbench` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[WorkbenchSpec](#workbenchspec)_ | Spec defines the desired state of the Workbench. |  | Required: \{\} <br /> |
+
+
+#### WorkbenchCodingConfig
+
+
+
+WorkbenchCodingConfig defines coding agent settings.
+
+
+
+_Appears in:_
+- [WorkbenchConfiguration](#workbenchconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `mode` _[AgentRunMode](#agentrunmode)_ | Mode is the agent run mode (e.g. analyze, write). |  | Enum: [ANALYZE WRITE] <br />Optional: \{\} <br /> |
+| `repositories` _string array_ | Repositories are allowed repository identifiers. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchConfiguration
+
+
+
+WorkbenchConfiguration defines workbench capabilities.
+
+
+
+_Appears in:_
+- [WorkbenchSpec](#workbenchspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `coding` _[WorkbenchCodingConfig](#workbenchcodingconfig)_ | Coding configures coding agent capabilities (mode, repositories). |  | Optional: \{\} <br /> |
+| `infrastructure` _[WorkbenchInfrastructureConfig](#workbenchinfrastructureconfig)_ | Infrastructure configures infrastructure capabilities (services, stacks, Kubernetes). |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchInfrastructureConfig
+
+
+
+WorkbenchInfrastructureConfig defines infrastructure capabilities.
+
+
+
+_Appears in:_
+- [WorkbenchConfiguration](#workbenchconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `services` _boolean_ | Services enables the services capability. |  | Optional: \{\} <br /> |
+| `stacks` _boolean_ | Stacks enables the stacks capability. |  | Optional: \{\} <br /> |
+| `kubernetes` _boolean_ | Kubernetes enables the Kubernetes capability. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchSkills
+
+
+
+WorkbenchSkills defines skills configuration for a workbench.
+
+
+
+_Appears in:_
+- [WorkbenchSpec](#workbenchspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `ref` _[WorkbenchSkillsRef](#workbenchskillsref)_ | Ref is the git reference for skills (ref, folder, files). |  | Optional: \{\} <br /> |
+| `files` _string array_ | Files to include. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchSkillsRef
+
+
+
+WorkbenchSkillsRef is a git reference for skills.
+
+
+
+_Appears in:_
+- [WorkbenchSkills](#workbenchskills)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `ref` _string_ | Ref is the Git reference (branch, tag, or commit)<br />understandable by `git checkout <ref>`. |  | MinLength: 1 <br />Required: \{\} <br />Type: string <br /> |
+| `folder` _string_ | Folder in the repository. |  | MinLength: 1 <br />Required: \{\} <br />Type: string <br /> |
+| `files` _string array_ | Files to include. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchSpec
+
+
+
+WorkbenchSpec defines the desired state of a Workbench.
+
+
+
+_Appears in:_
+- [Workbench](#workbench)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of the workbench. If not set, metadata.name is used. |  | Optional: \{\} <br />Type: string <br /> |
+| `description` _string_ | Description provides a human-readable explanation of the workbench's purpose. |  | Optional: \{\} <br />Type: string <br /> |
+| `systemPrompt` _string_ | SystemPrompt is the system prompt used for agent runs in this workbench. |  | Optional: \{\} <br />Type: string <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this workbench belongs to. |  | Optional: \{\} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the Git repository used for this workbench. |  | Optional: \{\} <br /> |
+| `agentRuntimeId` _string_ | AgentRuntimeID is the ID of the agent runtime in the Console API.<br />Used when no AgentRuntime CRD is available; typically resolved from a reference. |  | Optional: \{\} <br />Type: string <br /> |
+| `configuration` _[WorkbenchConfiguration](#workbenchconfiguration)_ | Configuration defines workbench capabilities (coding and infrastructure). |  | Optional: \{\} <br /> |
+| `skills` _[WorkbenchSkills](#workbenchskills)_ | Skills define skills configuration (git ref and/or files) for the workbench. |  | Optional: \{\} <br /> |
+| `toolRefs` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | ToolRefs references WorkbenchTool resources to associate with this workbench. |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchTool
+
+
+
+WorkbenchTool represents a tool that can be attached to a Workbench (e.g. HTTP tool).
+Tools are defined once and can be associated with multiple workbenches.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `WorkbenchTool` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[WorkbenchToolSpec](#workbenchtoolspec)_ | Spec defines the desired state of the WorkbenchTool. |  | Required: \{\} <br /> |
+
+
+#### WorkbenchToolConfiguration
+
+
+
+WorkbenchToolConfiguration defines tool-specific configuration.
+
+
+
+_Appears in:_
+- [WorkbenchToolSpec](#workbenchtoolspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `http` _[WorkbenchToolHTTPConfig](#workbenchtoolhttpconfig)_ | HTTP tool configuration. |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolHTTPConfig
+
+
+
+WorkbenchToolHTTPConfig defines HTTP tool configuration.
+
+
+
+_Appears in:_
+- [WorkbenchToolConfiguration](#workbenchtoolconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | URL is the request URL. |  | Format: uri <br />Required: \{\} <br />Type: string <br /> |
+| `method` _[WorkbenchToolHTTPMethod](#workbenchtoolhttpmethod)_ | Method is the HTTP method (GET, POST, PUT, DELETE, PATCH). |  | Enum: [GET POST PUT DELETE PATCH] <br />Optional: \{\} <br /> |
+| `headers` _[WorkbenchToolHTTPHeader](#workbenchtoolhttpheader) array_ | Headers are optional request headers. |  | Optional: \{\} <br /> |
+| `body` _string_ | Body is the optional request body. |  | Optional: \{\} <br />Type: string <br /> |
+| `inputSchema` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | InputSchema is the JSON schema for the tool input (arbitrary JSON). |  | Optional: \{\} <br /> |
+
+
+#### WorkbenchToolHTTPHeader
+
+
+
+WorkbenchToolHTTPHeader represents a single HTTP header.
+
+
+
+_Appears in:_
+- [WorkbenchToolHTTPConfig](#workbenchtoolhttpconfig)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name is the header name. |  | Optional: \{\} <br />Type: string <br /> |
+| `value` _string_ | Value is the header value. |  | Optional: \{\} <br />Type: string <br /> |
+
+
+#### WorkbenchToolSpec
+
+
+
+WorkbenchToolSpec defines the desired state of a WorkbenchTool.
+
+
+
+_Appears in:_
+- [WorkbenchTool](#workbenchtool)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of the tool. If not set, metadata.name is used. |  | Optional: \{\} <br />Pattern: `^[a-z0-9_]+$` <br />Type: string <br /> |
+| `tool` _[WorkbenchToolType](#workbenchtooltype)_ | Tool type (e.g. HTTP). |  | Enum: [HTTP] <br />Required: \{\} <br /> |
+| `categories` _WorkbenchToolCategory array_ | Categories for the tool (e.g. METRICS, LOGS, INTEGRATION). |  | Optional: \{\} <br />UniqueItems: true <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this tool belongs to. |  | Optional: \{\} <br /> |
+| `configuration` _[WorkbenchToolConfiguration](#workbenchtoolconfiguration)_ | Configuration is the tool-specific configuration (e.g. HTTP). |  | Optional: \{\} <br /> |
+| `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource. |  | Optional: \{\} <br /> |
 
 
 #### YamlOverlay
