@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -91,6 +92,22 @@ func (in *Workbench) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
+func (in *Workbench) Attributes(projectID, repositoryID, agentRuntimeID *string, toolIDs []string) *console.WorkbenchAttributes {
+	return &console.WorkbenchAttributes{
+		Name:           lo.ToPtr(in.ConsoleName()),
+		Description:    in.Spec.Description,
+		SystemPrompt:   in.Spec.SystemPrompt,
+		ProjectID:      projectID,
+		RepositoryID:   repositoryID,
+		AgentRuntimeID: agentRuntimeID,
+		Configuration:  in.Spec.Configuration.Attributes(),
+		Skills:         in.Spec.Skills.Attributes(),
+		ToolAssociations: lo.Map(toolIDs, func(id string, _ int) *console.WorkbenchToolAssociationAttributes {
+			return &console.WorkbenchToolAssociationAttributes{ToolID: id}
+		}),
+	}
+}
+
 // WorkbenchSpec defines the desired state of a Workbench.
 type WorkbenchSpec struct {
 	// Name of the workbench. If not set, metadata.name is used.
@@ -149,6 +166,17 @@ type WorkbenchConfiguration struct {
 	Infrastructure *WorkbenchInfrastructureConfig `json:"infrastructure,omitempty"`
 }
 
+func (c *WorkbenchConfiguration) Attributes() *console.WorkbenchConfigurationAttributes {
+	if c == nil {
+		return nil
+	}
+
+	return &console.WorkbenchConfigurationAttributes{
+		Coding:         c.Coding.Attributes(),
+		Infrastructure: c.Infrastructure.Attributes(),
+	}
+}
+
 // WorkbenchCodingConfig defines coding agent settings.
 type WorkbenchCodingConfig struct {
 	// Mode is the agent run mode (e.g. analyze, write).
@@ -159,6 +187,17 @@ type WorkbenchCodingConfig struct {
 	// Repositories are allowed repository identifiers.
 	// +kubebuilder:validation:Optional
 	Repositories []string `json:"repositories,omitempty"`
+}
+
+func (c *WorkbenchCodingConfig) Attributes() *console.WorkbenchCodingAttributes {
+	if c == nil {
+		return nil
+	}
+
+	return &console.WorkbenchCodingAttributes{
+		Mode:         c.Mode,
+		Repositories: lo.ToSlicePtr(c.Repositories),
+	}
 }
 
 // WorkbenchInfrastructureConfig defines infrastructure capabilities.
@@ -176,6 +215,18 @@ type WorkbenchInfrastructureConfig struct {
 	Kubernetes *bool `json:"kubernetes,omitempty"`
 }
 
+func (c *WorkbenchInfrastructureConfig) Attributes() *console.WorkbenchInfrastructureAttributes {
+	if c == nil {
+		return nil
+	}
+
+	return &console.WorkbenchInfrastructureAttributes{
+		Services:   c.Services,
+		Stacks:     c.Stacks,
+		Kubernetes: c.Kubernetes,
+	}
+}
+
 // WorkbenchSkills defines skills configuration for a workbench.
 type WorkbenchSkills struct {
 	// Ref is the git reference for skills (ref, folder, files).
@@ -185,6 +236,17 @@ type WorkbenchSkills struct {
 	// Files to include.
 	// +kubebuilder:validation:Optional
 	Files []string `json:"files,omitempty"`
+}
+
+func (s *WorkbenchSkills) Attributes() *console.WorkbenchSkillsAttributes {
+	if s == nil {
+		return nil
+	}
+
+	return &console.WorkbenchSkillsAttributes{
+		Ref:   s.Ref.Attributes(),
+		Files: lo.ToSlicePtr(s.Files),
+	}
 }
 
 // WorkbenchSkillsRef is a git reference for skills.
@@ -205,4 +267,16 @@ type WorkbenchSkillsRef struct {
 	// Files to include.
 	// +kubebuilder:validation:Optional
 	Files []string `json:"files,omitempty"`
+}
+
+func (r *WorkbenchSkillsRef) Attributes() *console.GitRefAttributes {
+	if r == nil {
+		return nil
+	}
+
+	return &console.GitRefAttributes{
+		Ref:    r.Ref,
+		Folder: r.Folder,
+		Files:  r.Files,
+	}
 }
