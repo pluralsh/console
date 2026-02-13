@@ -5137,7 +5137,7 @@ _Appears in:_
 | `systemPrompt` _string_ | SystemPrompt is the system prompt used for agent runs in this workbench. |  | Optional: \{\} <br />Type: string <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this workbench belongs to. |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the Git repository used for this workbench. |  | Optional: \{\} <br /> |
-| `agentRuntimeId` _string_ | AgentRuntimeID is the ID of the agent runtime in the Console API.<br />Used when no AgentRuntime CRD is available; typically resolved from a reference. |  | Optional: \{\} <br />Type: string <br /> |
+| `agentRuntime` _string_ | AgentRuntime is the name of the agent runtime in the Console. |  | Optional: \{\} <br />Type: string <br /> |
 | `configuration` _[WorkbenchConfiguration](#workbenchconfiguration)_ | Configuration defines workbench capabilities (coding and infrastructure). |  | Optional: \{\} <br /> |
 | `skills` _[WorkbenchSkills](#workbenchskills)_ | Skills define skills configuration (git ref and/or files) for the workbench. |  | Optional: \{\} <br /> |
 | `toolRefs` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | ToolRefs references WorkbenchTool resources to associate with this workbench. |  | Optional: \{\} <br /> |
@@ -5193,7 +5193,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `url` _string_ | URL is the request URL. |  | Format: uri <br />Required: \{\} <br />Type: string <br /> |
-| `method` _[WorkbenchToolHTTPMethod](#workbenchtoolhttpmethod)_ | Method is the HTTP method (GET, POST, PUT, DELETE, PATCH). |  | Enum: [GET POST PUT DELETE PATCH] <br />Optional: \{\} <br /> |
+| `method` _[WorkbenchToolHTTPMethod](#workbenchtoolhttpmethod)_ | Method is the HTTP method (GET, POST, PUT, DELETE, PATCH). |  | Enum: [GET POST PUT DELETE PATCH] <br />Required: \{\} <br /> |
 | `headers` _[WorkbenchToolHTTPHeader](#workbenchtoolhttpheader) array_ | Headers are optional request headers. |  | Optional: \{\} <br /> |
 | `body` _string_ | Body is the optional request body. |  | Optional: \{\} <br />Type: string <br /> |
 | `inputSchema` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | InputSchema is the JSON schema for the tool input (arbitrary JSON). |  | Optional: \{\} <br /> |
@@ -5231,7 +5231,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name of the tool. If not set, metadata.name is used. |  | Optional: \{\} <br />Pattern: `^[a-z0-9_]+$` <br />Type: string <br /> |
 | `tool` _[WorkbenchToolType](#workbenchtooltype)_ | Tool type (e.g. HTTP). |  | Enum: [HTTP] <br />Required: \{\} <br /> |
-| `categories` _WorkbenchToolCategory array_ | Categories for the tool (e.g. METRICS, LOGS, INTEGRATION). |  | Optional: \{\} <br />UniqueItems: true <br /> |
+| `categories` _WorkbenchToolCategory array_ | Categories for the tool (e.g. METRICS, LOGS, INTEGRATION). |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this tool belongs to. |  | Optional: \{\} <br /> |
 | `configuration` _[WorkbenchToolConfiguration](#workbenchtoolconfiguration)_ | Configuration is the tool-specific configuration (e.g. HTTP). |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource. |  | Optional: \{\} <br /> |

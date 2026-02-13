@@ -51,10 +51,9 @@ spec:
           spec:
             description: Spec defines the desired state of the Workbench.
             properties:
-              agentRuntimeId:
-                description: |-
-                  AgentRuntimeID is the ID of the agent runtime in the Console API.
-                  Used when no AgentRuntime CRD is available; typically resolved from a reference.
+              agentRuntime:
+                description: AgentRuntime is the name of the agent runtime in the
+                  Console.
                 type: string
               configuration:
                 description: Configuration defines workbench capabilities (coding
@@ -292,9 +291,6 @@ spec:
                   type: object
                   x-kubernetes-map-type: atomic
                 type: array
-                x-kubernetes-list-map-keys:
-                - name
-                x-kubernetes-list-type: map
             type: object
           status:
             description: Status represents the current state of this resource.

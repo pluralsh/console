@@ -118,7 +118,6 @@ type WorkbenchToolSpec struct {
 
 	// Categories for the tool (e.g. METRICS, LOGS, INTEGRATION).
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:UniqueItems=true
 	Categories []console.WorkbenchToolCategory `json:"categories,omitempty"`
 
 	// ProjectRef references the project this tool belongs to.

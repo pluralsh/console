@@ -116,11 +116,10 @@ type WorkbenchSpec struct {
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
-	// AgentRuntimeID is the ID of the agent runtime in the Console API.
-	// Used when no AgentRuntime CRD is available; typically resolved from a reference.
+	// AgentRuntime is the name of the agent runtime in the Console.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
-	AgentRuntimeID *string `json:"agentRuntimeId,omitempty"`
+	AgentRuntime *string `json:"agentRuntime,omitempty"`
 
 	// Configuration defines workbench capabilities (coding and infrastructure).
 	// +kubebuilder:validation:Optional
@@ -132,8 +131,6 @@ type WorkbenchSpec struct {
 
 	// ToolRefs references WorkbenchTool resources to associate with this workbench.
 	// +kubebuilder:validation:Optional
-	// +listType=map
-	// +listMapKey=name
 	ToolRefs []corev1.ObjectReference `json:"toolRefs,omitempty"`
 
 	// Reconciliation settings for this resource.
