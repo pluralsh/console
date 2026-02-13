@@ -25,7 +25,7 @@ import { Body1BoldP } from 'components/utils/typography/Text'
 import {
   AgentRunFragment,
   AgentRunStatus,
-  ClusterUpgradeFragment,
+  ClusterOverviewDetailsFragment,
   ClusterUpgradeStatus,
   ClusterUpgradeStepFragment,
   PrStatus,
@@ -36,17 +36,24 @@ import { Link } from 'react-router-dom'
 import { getAgentRunAbsPath } from 'routes/aiRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { ClusterUpgradeAgentButton } from './ClusterUpgradeAgentButton'
+
+const MIN_WIDTH = 660
 
 export function ClusterUpgradeAgentFlyover({
-  clusterUpgrade,
   open,
   onClose,
+  cluster,
 }: {
-  clusterUpgrade: ClusterUpgradeFragment
   open: boolean
   onClose: () => void
+  cluster: ClusterOverviewDetailsFragment
 }) {
   const { spacing } = useTheme()
+  const clusterUpgrade = cluster.currentUpgrade
+
+  if (!clusterUpgrade) return null
+
   const steps = clusterUpgrade.steps?.filter(isNonNullable) ?? []
 
   return (
@@ -65,7 +72,7 @@ export function ClusterUpgradeAgentFlyover({
       }
       open={open}
       onClose={onClose}
-      minWidth={650}
+      minWidth={MIN_WIDTH}
       width="50%"
       css={{ display: 'flex', flexDirection: 'column', gap: spacing.medium }}
     >
@@ -107,7 +114,11 @@ export function ClusterUpgradeAgentFlyover({
               {statusToChipLabel[clusterUpgrade.status]}
             </Chip>
           }
-          css={{}}
+          css={{ flex: 1 }}
+        />
+        <ClusterUpgradeAgentButton
+          type="retry"
+          cluster={cluster}
         />
       </TopCardSC>
       {steps.map((step) => (
@@ -122,7 +133,9 @@ export function ClusterUpgradeAgentFlyover({
 
 function ClusterUpgradeStep({ step }: { step: ClusterUpgradeStepFragment }) {
   const { name, status, agentRun, error } = step
-
+  const isAgentRunRunning =
+    agentRun?.status === AgentRunStatus.Running ||
+    agentRun?.status === AgentRunStatus.Pending
   return (
     <StepCardSC key={step?.id}>
       <StackedText
@@ -140,6 +153,7 @@ function ClusterUpgradeStep({ step }: { step: ClusterUpgradeStepFragment }) {
       {agentRun?.pullRequests?.filter(isNonNullable)?.map(({ status, url }) =>
         status === PrStatus.Open ? (
           <Button
+            key={url}
             small
             as={Link}
             to={url ?? ''}
@@ -150,6 +164,7 @@ function ClusterUpgradeStep({ step }: { step: ClusterUpgradeStepFragment }) {
           </Button>
         ) : (
           <IconFrame
+            key={url}
             as={Link}
             to={url ?? ''}
             type="floating"
@@ -167,6 +182,7 @@ function ClusterUpgradeStep({ step }: { step: ClusterUpgradeStepFragment }) {
           stepName={name}
         />
       ) : status === ClusterUpgradeStatus.Completed &&
+        !isAgentRunRunning &&
         agentRun?.pullRequests?.every(
           (pullRequest) => pullRequest?.status === PrStatus.Merged
         ) ? (
@@ -275,7 +291,8 @@ const TopCardSC = styled(Card)(({ theme }) => ({
   padding: `${theme.spacing.large}px ${theme.spacing.xxlarge}px`,
   background: 'transparent',
   display: 'flex',
-  alignItems: 'flex-start',
+  alignItems: 'flex-end',
+  minWidth: MIN_WIDTH - 49,
   gap: theme.spacing.xxxlarge,
   border: theme.borders.default,
   '& *': { marginBottom: 0 },
@@ -290,6 +307,7 @@ const StepCardSC = styled.div(({ theme }) => ({
   borderRadius: theme.borderRadiuses.medium,
   borderLeft: `3px solid ${theme.colors.border}`,
   background: theme.colors['fill-one'],
+  minWidth: MIN_WIDTH - 49,
 }))
 
 const statusToChipSeverity: Record<ClusterUpgradeStatus, ChipSeverity> = {

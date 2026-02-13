@@ -19,6 +19,7 @@ import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { toNiceVersion } from 'utils/semver'
 import changelogTemplate from './kubernetes-changelog-markdown.ejs?raw'
+import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 
 const getPublicChangelogUrl = (version: string) =>
   `https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG/CHANGELOG-${version}.md`
@@ -34,7 +35,7 @@ export function KubernetesChangelogFlyover({
   cluster: ClusterOverviewDetailsFragment
   kubernetesChangelog: KubernetesChangelogFragment
 }) {
-  const { colors, spacing } = useTheme()
+  const { colors, spacing, mode } = useTheme()
   return (
     <FlyoverSC
       open={open}
@@ -51,7 +52,7 @@ export function KubernetesChangelogFlyover({
     >
       <Table
         hideHeader
-        fillLevel={1}
+        fillLevel={mode === 'dark' ? 1 : 0}
         data={[cluster]}
         reactTableOptions={{ meta: { kubernetesChangelog } }}
         columns={headerTableCols}
@@ -84,14 +85,28 @@ const headerTableCols = [
   }),
   columnHelper.accessor((cluster) => cluster?.currentVersion, {
     id: 'version',
-    cell: ({ getValue }) => (
+    cell: ({ getValue, table: { options } }) => (
       <StackedText
         first="Current version"
         firstPartialType="caption"
         firstColor="text-xlight"
-        second={toNiceVersion(getValue())}
+        second={
+          <Flex
+            align="center"
+            gap="xsmall"
+          >
+            <Body2P>{toNiceVersion(getValue())}</Body2P>
+            <Body2P $color="text-xlight">→</Body2P>
+            <Body2BoldP $color="text">
+              {(
+                options.meta
+                  ?.kubernetesChangelog as Nullable<KubernetesChangelogFragment>
+              )?.version ?? '--'}
+            </Body2BoldP>
+          </Flex>
+        }
         secondPartialType="body2"
-        secondColor="text"
+        secondColor="text-light"
       />
     ),
   }),

@@ -17,6 +17,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { KubernetesChangelogFlyover } from '../cluster/upgrade-plan/KubernetesChangelogFlyover'
 import { ClusterUpgradeAgentButton } from './ClusterUpgradeAgentButton'
+import { ClusterUpgradeAgentFlyover } from './ClusterUpgradeAgentFlyover'
 
 type PreFlightChecklistItem = {
   key: keyof ClusterUpgradePlanFragment
@@ -97,9 +98,25 @@ export const clusterUpgradeColumns = [
       const cluster = getValue()
       const latestK8sVsn = useLatestK8sVsn()
       const agentEnabled = use(FeatureFlagContext).featureFlags.Agent
+      const [flyoverOpen, setFlyoverOpen] = useState(false)
 
       if (cluster.version !== latestK8sVsn && agentEnabled)
-        return <ClusterUpgradeAgentButton cluster={cluster} />
+        return (
+          <>
+            <ClusterUpgradeAgentButton
+              type="standard"
+              cluster={cluster}
+              openFlyover={() => setFlyoverOpen(true)}
+            />
+            {cluster.currentUpgrade && (
+              <ClusterUpgradeAgentFlyover
+                cluster={cluster}
+                open={flyoverOpen}
+                onClose={() => setFlyoverOpen(false)}
+              />
+            )}
+          </>
+        )
 
       return null
     },
