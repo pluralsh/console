@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -92,6 +93,16 @@ func (in *WorkbenchTool) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
+func (in *WorkbenchTool) Attributes(projectID *string) *console.WorkbenchToolAttributes {
+	return &console.WorkbenchToolAttributes{
+		Name:          in.ConsoleName(),
+		Tool:          in.Spec.Tool,
+		Categories:    lo.ToSlicePtr(in.Spec.Categories),
+		ProjectID:     projectID,
+		Configuration: in.Spec.Configuration.Attributes(),
+	}
+}
+
 // WorkbenchToolSpec defines the desired state of a WorkbenchTool.
 type WorkbenchToolSpec struct {
 	// Name of the tool. If not set, metadata.name is used.
@@ -130,6 +141,16 @@ type WorkbenchToolConfiguration struct {
 	HTTP *WorkbenchToolHTTPConfig `json:"http,omitempty"`
 }
 
+func (c *WorkbenchToolConfiguration) Attributes() *console.WorkbenchToolConfigurationAttributes {
+	if c == nil {
+		return nil
+	}
+
+	return &console.WorkbenchToolConfigurationAttributes{
+		HTTP: c.HTTP.Attributes(),
+	}
+}
+
 // WorkbenchToolHTTPConfig defines HTTP tool configuration.
 type WorkbenchToolHTTPConfig struct {
 	// URL is the request URL.
@@ -139,9 +160,9 @@ type WorkbenchToolHTTPConfig struct {
 	URL string `json:"url"`
 
 	// Method is the HTTP method (GET, POST, PUT, DELETE, PATCH).
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum:=GET;POST;PUT;DELETE;PATCH
-	Method *console.WorkbenchToolHTTPMethod `json:"method,omitempty"`
+	Method console.WorkbenchToolHTTPMethod `json:"method,omitempty"`
 
 	// Headers are optional request headers.
 	// +kubebuilder:validation:Optional
@@ -155,6 +176,30 @@ type WorkbenchToolHTTPConfig struct {
 	// InputSchema is the JSON schema for the tool input (arbitrary JSON).
 	// +kubebuilder:validation:Optional
 	InputSchema *runtime.RawExtension `json:"inputSchema,omitempty"`
+}
+
+func (c *WorkbenchToolHTTPConfig) Attributes() *console.WorkbenchToolHTTPConfigurationAttributes {
+	if c == nil {
+		return nil
+	}
+
+	attrs := &console.WorkbenchToolHTTPConfigurationAttributes{
+		URL:    c.URL,
+		Method: c.Method,
+		Headers: lo.Map(c.Headers, func(header WorkbenchToolHTTPHeader, _ int) *console.WorkbenchToolHTTPHeaderAttributes {
+			return &console.WorkbenchToolHTTPHeaderAttributes{
+				Name:  header.Name,
+				Value: header.Value,
+			}
+		}),
+		Body: c.Body,
+	}
+
+	if c.InputSchema != nil {
+		attrs.InputSchema = lo.ToPtr(string(c.InputSchema.Raw))
+	}
+
+	return attrs
 }
 
 // WorkbenchToolHTTPHeader represents a single HTTP header.
