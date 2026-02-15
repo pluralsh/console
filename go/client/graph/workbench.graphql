@@ -1,0 +1,151 @@
+fragment WorkbenchFragment on Workbench {
+    id
+    name
+    description
+    systemPrompt
+    project {
+        ...TinyProjectFragment
+    }
+    repository {
+        ...GitRepositoryFragment
+    }
+    agentRuntime {
+        ...TinyAgentRuntimeFragment
+    }
+    configuration {
+        coding {
+            mode
+            repositories
+        }
+        infrastructure {
+            services
+            stacks
+            kubernetes
+        }
+    }
+    skills {
+        ref {
+            ref
+            folder
+            files
+        }
+        files
+    }
+    tools {
+        ...WorkbenchToolFragment
+    }
+    insertedAt
+    updatedAt
+}
+
+fragment WorkbenchToolFragment on WorkbenchTool {
+    id
+    name
+    tool
+    categories
+    project {
+        ...TinyProjectFragment
+    }
+    configuration {
+        http {
+            url
+            method
+            headers {
+                name
+                value
+            }
+            body
+            inputSchema
+        }
+    }
+    insertedAt
+    updatedAt
+}
+
+mutation CreateWorkbench($attributes: WorkbenchAttributes!) {
+    createWorkbench(attributes: $attributes) {
+        ...WorkbenchFragment
+    }
+}
+
+mutation UpdateWorkbench($id: ID!, $attributes: WorkbenchAttributes!) {
+    updateWorkbench(id: $id, attributes: $attributes) {
+        ...WorkbenchFragment
+    }
+}
+
+mutation DeleteWorkbench($id: ID!) {
+    deleteWorkbench(id: $id) {
+        ...WorkbenchFragment
+    }
+}
+
+mutation CreateWorkbenchTool($attributes: WorkbenchToolAttributes!) {
+    createWorkbenchTool(attributes: $attributes) {
+        ...WorkbenchToolFragment
+    }
+}
+
+mutation UpdateWorkbenchTool($id: ID!, $attributes: WorkbenchToolAttributes!) {
+    updateWorkbenchTool(id: $id, attributes: $attributes) {
+        ...WorkbenchToolFragment
+    }
+}
+
+mutation DeleteWorkbenchTool($id: ID!) {
+    deleteWorkbenchTool(id: $id) {
+        ...WorkbenchToolFragment
+    }
+}
+
+query ListWorkbenches($after: String, $first: Int, $before: String, $last: Int, $q: String) {
+    workbenches(after: $after, first: $first, before: $before, last: $last, q: $q) {
+        edges {
+            node {
+                ...WorkbenchFragment
+            }
+        }
+        pageInfo {
+            ...PageInfoFragment
+        }
+    }
+}
+
+query GetWorkbench($id: ID!) {
+    workbench(id: $id) {
+        ...WorkbenchFragment
+    }
+}
+
+query GetWorkbenchTiny($id: ID!) {
+    workbench(id: $id) {
+        id
+        name
+    }
+}
+
+query ListWorkbenchTools($after: String, $first: Int, $before: String, $last: Int, $q: String) {
+    workbenchTools(after: $after, first: $first, before: $before, last: $last, q: $q) {
+        edges {
+            node {
+                ...WorkbenchToolFragment
+            }
+        }
+        pageInfo {
+            ...PageInfoFragment
+        }
+    }
+}
+
+query GetWorkbenchTool($id: ID!) {
+    workbenchTool(id: $id) {
+        ...WorkbenchToolFragment
+    }
+}
+
+query GetWorkbenchToolTiny($id: ID!) {
+    workbenchTool(id: $id) {
+        id
+        name
+    }
+}

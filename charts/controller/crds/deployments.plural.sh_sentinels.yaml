@@ -159,14 +159,29 @@ spec:
                                   raw:
                                     description: Raw the raw configuration to use
                                       for this test case
+                                    properties:
+                                      expectedResult:
+                                        description: ExpectedResult the expected result
+                                          of the test case
+                                        enum:
+                                        - SUCCESS
+                                        - FAILED
+                                        type: string
+                                      yaml:
+                                        description: Yaml the yaml to use for this
+                                          test case
+                                        type: object
+                                        x-kubernetes-preserve-unknown-fields: true
+                                    required:
+                                    - yaml
                                     type: object
-                                    x-kubernetes-preserve-unknown-fields: true
                                   type:
                                     description: Type the type of test case to run
                                     enum:
                                     - COREDNS
                                     - LOADBALANCER
                                     - RAW
+                                    - PVC
                                     type: string
                                 required:
                                 - name

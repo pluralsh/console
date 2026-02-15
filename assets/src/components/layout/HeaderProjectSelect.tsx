@@ -1,7 +1,8 @@
 import {
-  CheckRoundedIcon,
+  CloseIcon,
   ComboBox,
   ListBoxFooter,
+  ListBoxFooterPlus,
   ListBoxItem,
   SearchIcon,
   Spinner,
@@ -63,14 +64,14 @@ export default function ProjectSelect() {
           ) : undefined
         }
         dropdownFooterFixed={
-          <ListBoxFooter
-            onClick={() => setProjectId('')}
-            leftContent={<CheckRoundedIcon color="icon-info" />}
-          >
-            <span css={{ color: theme.colors['text-primary-accent'] }}>
-              Select all projects
-            </span>
-          </ListBoxFooter>
+          projectId && (
+            <ListBoxFooterPlus
+              onClick={() => setProjectId('')}
+              leftContent={<CloseIcon color="icon-info" />}
+            >
+              Clear selection
+            </ListBoxFooterPlus>
+          )
         }
         inputProps={{
           placeholder: 'All projects',
@@ -83,7 +84,6 @@ export default function ProjectSelect() {
             label={p.name}
             textValue={p.name}
             description={p.description}
-            selected={isEmpty(projectId)} // Show checkboxes next to all projects if that option is selected.
           />
         ))}
       </ComboBox>

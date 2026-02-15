@@ -17,7 +17,7 @@ import { TRUNCATE, TRUNCATE_LEFT } from 'components/utils/truncate'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useAgentRunRepositoriesQuery } from 'generated/graphql'
 import { useEffectEvent, useLayoutEffect, useMemo, useState } from 'react'
-import styled, { StyledObject, useTheme } from 'styled-components'
+import { StyledObject, useTheme } from 'styled-components'
 import { sortDatesDesc } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 
@@ -33,7 +33,7 @@ export function AgentRunRepoSelector({
   outerStyles?: StyledObject
   defaultMostRecent?: boolean
 } & Omit<SelectPropsSingle, 'onSelectionChange' | 'selectedKey' | 'children'>) {
-  const { colors, borders } = useTheme()
+  const { colors, borders, spacing } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const [query, setQuery] = useState('')
@@ -109,7 +109,7 @@ export function AgentRunRepoSelector({
           </Chip>
         }
         dropdownHeaderFixed={
-          <>
+          <div css={{ padding: spacing.xsmall }}>
             <Input2
               inputProps={{ ref: (node) => node?.focus() }}
               value={query}
@@ -136,8 +136,8 @@ export function AgentRunRepoSelector({
                 },
               }}
             />
-            <DropdownInputDividerSC backgroundColor={colors['border-input']} />
-          </>
+            <Divider backgroundColor={colors['border-input']} />
+          </div>
         }
         {...props}
       >
@@ -178,7 +178,3 @@ export function AgentRunRepoSelector({
     </div>
   )
 }
-
-const DropdownInputDividerSC = styled(Divider)(({ theme }) => ({
-  padding: `0 ${theme.spacing.xsmall}px ${theme.spacing.small}px`,
-}))

@@ -27,7 +27,7 @@ defmodule Console.AI.VectorStore do
     defstruct [:pr_file, :alert_resolution, :stack_state, :service_component, :pr_automation, :catalog, :cluster, :type]
   end
 
-  @latest_version 2
+  @latest_version Settings.vector_store_version()
 
   @type store :: Console.AI.Vector.Elastic.t
   @type data :: Response.t

@@ -1,0 +1,29 @@
+{
+    "type": "object",
+    "properties": {
+        "todos": {
+            "type": "array",
+            "description": "The todos to update.  You can add new todos if the plan needs to change, otherwise update existing todos as needed",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the todo"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "The description of the todo"
+                    },
+                    "status": {
+                        "type": "enum",
+                        "enum": ["pending", "in_progress", "completed"],
+                        "description": "The status of the todo"
+                    }
+                },
+                "required": ["name", "description", "status"]
+            }
+        }
+    },
+    "required": ["todos"]
+}

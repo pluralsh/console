@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchJobActivity do
   use Console.Schema.Base
-  alias Console.Schema.{WorkbenchJob, AgentRun}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobThought, AgentRun}
 
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
   defenum Type, coding: 0, observability: 1, integrations: 2, ticketing: 3, infrastructure: 4, memo: 5, plan: 6
@@ -9,6 +9,12 @@ defmodule Console.Schema.WorkbenchJobActivity do
     field :status, Status, default: :pending
     field :type,   Type
     field :prompt, :binary
+
+    embeds_one :tool_call, ToolCall, on_replace: :update do
+      field :call_id,   :string
+      field :name,      :string
+      field :arguments, :map
+    end
 
     embeds_one :result, WorkbenchJobResult, on_replace: :update do
       field :output,          :string
@@ -35,6 +41,10 @@ defmodule Console.Schema.WorkbenchJobActivity do
 
     belongs_to :workbench_job, WorkbenchJob
     belongs_to :agent_run, AgentRun
+
+    has_many :thoughts, WorkbenchJobThought,
+      on_replace: :delete,
+      foreign_key: :activity_id
 
     timestamps()
   end
@@ -65,9 +75,15 @@ defmodule Console.Schema.WorkbenchJobActivity do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:result, with: &result_changeset/2)
+    |> cast_embed(:tool_call, with: &tool_call_changeset/2)
     |> foreign_key_constraint(:workbench_job_id)
     |> foreign_key_constraint(:agent_run_id)
     |> validate_required([:status, :type, :prompt, :workbench_job_id])
+  end
+
+  defp tool_call_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(call_id name arguments)a)
   end
 
   defp result_changeset(model, attrs) do
@@ -83,12 +99,12 @@ defmodule Console.Schema.WorkbenchJobActivity do
     |> cast(attrs, ~w(diff working_theory conclusion)a)
   end
 
-  defp metric_changeset(model, attrs) do
+  def metric_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(timestamp name value labels)a)
   end
 
-  defp log_changeset(model, attrs) do
+  def log_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(timestamp message labels)a)
   end

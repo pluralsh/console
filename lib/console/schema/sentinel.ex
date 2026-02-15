@@ -15,6 +15,7 @@ defmodule Console.Schema.Sentinel do
 
   defenum CheckType, log: 0, kubernetes: 1, integration_test: 2
   defenum IntegrationTestCaseType, coredns: 0, loadbalancer: 1, raw: 2, pvc: 3
+  defenum SentinelRawResult, success: 0, failed: 1
 
   schema "sentinels" do
     field :name,        :string
@@ -94,7 +95,8 @@ defmodule Console.Schema.Sentinel do
             end
 
             embeds_one :raw, RawConfiguration, on_replace: :update do
-              field :yaml, :string
+              field :yaml,            :string
+              field :expected_result, SentinelRawResult, default: :success
             end
           end
 
@@ -230,8 +232,8 @@ defmodule Console.Schema.Sentinel do
 
   defp raw_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(yaml)a)
-    |> validate_required(~w(yaml)a)
+    |> cast(attrs, ~w(yaml expected_result)a)
+    |> validate_required(~w(yaml expected_result)a)
   end
 
   defp dns_probe_changeset(model, attrs) do

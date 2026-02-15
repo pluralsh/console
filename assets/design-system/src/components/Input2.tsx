@@ -88,8 +88,11 @@ const ClearButtonSC = styled.div(({ theme }) => ({
 
 function ClearButton({
   className,
+  disabled,
   ...props
-}: Omit<ComponentProps<typeof IconFrame>, 'clickable' | 'icon' | 'size'>) {
+}: Omit<ComponentProps<typeof IconFrame>, 'clickable' | 'icon' | 'size'> & {
+  disabled?: boolean
+}) {
   return (
     <ClearButtonSC className={className}>
       <Tooltip
@@ -98,8 +101,9 @@ function ClearButton({
       >
         <IconFrame
           clickable
-          icon={<CloseIcon />}
+          icon={<CloseIcon color={disabled ? 'border-disabled' : 'text'} />}
           size="small"
+          disabled={disabled}
           {...props}
         />
       </Tooltip>
@@ -126,6 +130,7 @@ const InputRootSC = styled.div<{
   minHeight: $size === 'large' ? 48 : $size === 'small' ? 32 : 40,
   width: 'auto',
   padding: 0,
+  backgroundColor: theme.colors['fill-zero'],
   border: theme.borders.input,
   borderColor: $error
     ? theme.colors['border-danger']
@@ -189,8 +194,8 @@ const EndIcon = styled(BaseIcon)<{
   paddingRight: $hasEndContent
     ? theme.spacing.small
     : $hasDropdownButton
-      ? 0
-      : theme.spacing.medium,
+    ? 0
+    : theme.spacing.medium,
   paddingLeft: $hasEndContent ? theme.spacing.xsmall : theme.spacing.medium,
 }))
 
@@ -278,7 +283,6 @@ function Input2({
 
   const hasEndContent = !!suffix
   const hasStartContent = !!prefix || !!titleContent
-  const hasClearButton = showClearButton && value
   const inputPadStart = startIcon ? null : hasStartContent ? 'small' : 'medium'
   const inputPadEnd = endIcon ? null : hasEndContent ? 'small' : 'medium'
 
@@ -353,9 +357,9 @@ function Input2({
           {...inputProps}
         />
       </InputAreaSC>
-      {hasClearButton && (
+      {showClearButton && (
         <ClearButton
-          disabled={disabled}
+          disabled={!value || disabled}
           onClick={() => {
             const input = inputRef?.current
 

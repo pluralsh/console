@@ -61,7 +61,7 @@ export function PreviewTemplatesTable({
       fullHeightWrap
       virtualizeRows
       fillLevel={1}
-      rowBg="raised"
+      rowBg="base"
       loading={!data && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}

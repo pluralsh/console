@@ -2283,6 +2283,13 @@ type ClusterUpgradePlan struct {
 	KubeletSkew *bool `json:"kubeletSkew,omitempty"`
 }
 
+type ClusterUpgradeProgress struct {
+	StepID    string         `json:"stepId"`
+	Text      *string        `json:"text,omitempty"`
+	Tool      *string        `json:"tool,omitempty"`
+	Arguments map[string]any `json:"arguments,omitempty"`
+}
+
 // A step in an agentic attempt to upgrade a specific component or piece of infrastructure in this kubernetes cluster
 type ClusterUpgradeStep struct {
 	ID string `json:"id"`
@@ -7052,13 +7059,17 @@ type SentinelCheckIntegrationTestCasePvcConfiguration struct {
 
 type SentinelCheckIntegrationTestCaseRawAttributes struct {
 	// the yaml to use for this test case
-	Yaml *string `json:"yaml,omitempty"`
+	Yaml string `json:"yaml"`
+	// the expected result of the test case
+	ExpectedResult *SentinelRawResult `json:"expectedResult,omitempty"`
 }
 
 // test provisioning a raw resource
 type SentinelCheckIntegrationTestCaseRawConfiguration struct {
 	// the yaml to use for this test case
-	Yaml *string `json:"yaml,omitempty"`
+	Yaml string `json:"yaml"`
+	// the expected result of the test case
+	ExpectedResult *SentinelRawResult `json:"expectedResult,omitempty"`
 }
 
 type SentinelCheckIntegrationTestConfiguration struct {
@@ -8950,6 +8961,8 @@ type WorkbenchJob struct {
 	StartedAt *string `json:"startedAt,omitempty"`
 	// when the run completed
 	CompletedAt *string `json:"completedAt,omitempty"`
+	// error message when the job failed
+	Error *string `json:"error,omitempty"`
 	// the workbench this run belongs to
 	Workbench *Workbench `json:"workbench,omitempty"`
 	// the user who created this run
@@ -8972,6 +8985,8 @@ type WorkbenchJobActivity struct {
 	Prompt *string `json:"prompt,omitempty"`
 	// embedded result (output, metrics, logs) when present
 	Result *WorkbenchJobActivityResult `json:"result,omitempty"`
+	// thoughts emitted during this activity
+	Thoughts []*WorkbenchJobThought `json:"thoughts,omitempty"`
 	// the job this activity belongs to
 	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
 	// the agent run that executed this activity
@@ -8983,6 +8998,11 @@ type WorkbenchJobActivity struct {
 type WorkbenchJobActivityConnection struct {
 	PageInfo PageInfo                    `json:"pageInfo"`
 	Edges    []*WorkbenchJobActivityEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchJobActivityDelta struct {
+	Delta   *Delta                `json:"delta,omitempty"`
+	Payload *WorkbenchJobActivity `json:"payload,omitempty"`
 }
 
 type WorkbenchJobActivityEdge struct {
@@ -9030,9 +9050,21 @@ type WorkbenchJobConnection struct {
 	Edges    []*WorkbenchJobEdge `json:"edges,omitempty"`
 }
 
+type WorkbenchJobDelta struct {
+	Delta   *Delta        `json:"delta,omitempty"`
+	Payload *WorkbenchJob `json:"payload,omitempty"`
+}
+
 type WorkbenchJobEdge struct {
 	Node   *WorkbenchJob `json:"node,omitempty"`
 	Cursor *string       `json:"cursor,omitempty"`
+}
+
+type WorkbenchJobProgress struct {
+	ActivityID string         `json:"activityId"`
+	Text       *string        `json:"text,omitempty"`
+	Tool       *string        `json:"tool,omitempty"`
+	Arguments  map[string]any `json:"arguments,omitempty"`
 }
 
 type WorkbenchJobResult struct {
@@ -9051,9 +9083,29 @@ type WorkbenchJobResult struct {
 }
 
 type WorkbenchJobResultTodo struct {
-	Name        *string                       `json:"name,omitempty"`
-	Description *string                       `json:"description,omitempty"`
-	Status      *WorkbenchJobResultTodoStatus `json:"status,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	Description *string `json:"description,omitempty"`
+	Done        *bool   `json:"done,omitempty"`
+}
+
+type WorkbenchJobThought struct {
+	// the id of the thought
+	ID string `json:"id"`
+	// the thought content
+	Content *string `json:"content,omitempty"`
+	// metrics and logs for the thought
+	Attributes *WorkbenchJobThoughtAttributes `json:"attributes,omitempty"`
+	// the activity this thought belongs to
+	Activity   *WorkbenchJobActivity `json:"activity,omitempty"`
+	InsertedAt *string               `json:"insertedAt,omitempty"`
+	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchJobThoughtAttributes struct {
+	// metrics for the thought
+	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
+	// logs for the thought
+	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
 }
 
 type WorkbenchSkills struct {
@@ -13139,6 +13191,61 @@ func (e SentinelIntegrationTestCaseType) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type SentinelRawResult string
+
+const (
+	SentinelRawResultSuccess SentinelRawResult = "SUCCESS"
+	SentinelRawResultFailed  SentinelRawResult = "FAILED"
+)
+
+var AllSentinelRawResult = []SentinelRawResult{
+	SentinelRawResultSuccess,
+	SentinelRawResultFailed,
+}
+
+func (e SentinelRawResult) IsValid() bool {
+	switch e {
+	case SentinelRawResultSuccess, SentinelRawResultFailed:
+		return true
+	}
+	return false
+}
+
+func (e SentinelRawResult) String() string {
+	return string(e)
+}
+
+func (e *SentinelRawResult) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SentinelRawResult(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SentinelRawResult", str)
+	}
+	return nil
+}
+
+func (e SentinelRawResult) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SentinelRawResult) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SentinelRawResult) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type SentinelRunJobFormat string
 
 const (
@@ -14492,63 +14599,6 @@ func (e WorkbenchJobActivityType) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-type WorkbenchJobResultTodoStatus string
-
-const (
-	WorkbenchJobResultTodoStatusPending    WorkbenchJobResultTodoStatus = "PENDING"
-	WorkbenchJobResultTodoStatusInProgress WorkbenchJobResultTodoStatus = "IN_PROGRESS"
-	WorkbenchJobResultTodoStatusCompleted  WorkbenchJobResultTodoStatus = "COMPLETED"
-)
-
-var AllWorkbenchJobResultTodoStatus = []WorkbenchJobResultTodoStatus{
-	WorkbenchJobResultTodoStatusPending,
-	WorkbenchJobResultTodoStatusInProgress,
-	WorkbenchJobResultTodoStatusCompleted,
-}
-
-func (e WorkbenchJobResultTodoStatus) IsValid() bool {
-	switch e {
-	case WorkbenchJobResultTodoStatusPending, WorkbenchJobResultTodoStatusInProgress, WorkbenchJobResultTodoStatusCompleted:
-		return true
-	}
-	return false
-}
-
-func (e WorkbenchJobResultTodoStatus) String() string {
-	return string(e)
-}
-
-func (e *WorkbenchJobResultTodoStatus) UnmarshalGQL(v any) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = WorkbenchJobResultTodoStatus(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid WorkbenchJobResultTodoStatus", str)
-	}
-	return nil
-}
-
-func (e WorkbenchJobResultTodoStatus) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-func (e *WorkbenchJobResultTodoStatus) UnmarshalJSON(b []byte) error {
-	s, err := strconv.Unquote(string(b))
-	if err != nil {
-		return err
-	}
-	return e.UnmarshalGQL(s)
-}
-
-func (e WorkbenchJobResultTodoStatus) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	e.MarshalGQL(&buf)
-	return buf.Bytes(), nil
-}
-
 type WorkbenchJobStatus string
 
 const (
@@ -14617,6 +14667,7 @@ const (
 	WorkbenchToolCategoryLogs        WorkbenchToolCategory = "LOGS"
 	WorkbenchToolCategoryIntegration WorkbenchToolCategory = "INTEGRATION"
 	WorkbenchToolCategoryTicketing   WorkbenchToolCategory = "TICKETING"
+	WorkbenchToolCategoryTraces      WorkbenchToolCategory = "TRACES"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -14624,11 +14675,12 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategoryLogs,
 	WorkbenchToolCategoryIntegration,
 	WorkbenchToolCategoryTicketing,
+	WorkbenchToolCategoryTraces,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces:
 		return true
 	}
 	return false

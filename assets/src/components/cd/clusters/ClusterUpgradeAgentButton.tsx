@@ -11,6 +11,7 @@ import {
   FormField,
   IconFrame,
   PrOpenIcon,
+  ReloadIcon,
   SpinnerAlt,
 } from '@pluralsh/design-system'
 import {
@@ -35,23 +36,25 @@ import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_SETTINGS_AGENT_RUNTIMES_ABS_PATH } from 'routes/settingsRoutesConst'
 import { useTheme } from 'styled-components'
-import { ClusterUpgradeAgentFlyover } from './ClusterUpgradeAgentFlyover'
 
 type CurUpgradeStatus = 'none' | 'running' | 'completed' | 'failed'
 
 export function ClusterUpgradeAgentButton({
+  type,
   cluster,
+  openFlyover,
 }: {
+  type: 'standard' | 'retry'
   cluster: ClusterOverviewDetailsFragment
+  openFlyover?: () => void
 }) {
   const { colors } = useTheme()
-  const [flyoverOpen, setFlyoverOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [prompt, setPrompt] = useState<Nullable<string>>(null)
   const [runtimeId, setRuntimeId] = useState<string>('')
 
-  const menuBtnRef = useRef<HTMLButtonElement>(null)
-  useOutsideClick(menuBtnRef, () => setDropdownOpen(false))
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  useOutsideClick(wrapperRef, () => setDropdownOpen(false), true)
 
   const [createClusterUpgrade, { loading, error }] =
     useCreateClusterUpgradeMutation({
@@ -59,7 +62,10 @@ export function ClusterUpgradeAgentButton({
         id: cluster.id,
         attributes: { prompt, runtimeId },
       },
-      onCompleted: () => setFlyoverOpen(true),
+      onCompleted: () => {
+        openFlyover?.()
+        setDropdownOpen(false)
+      },
       refetchQueries: ['ClusterOverviewDetails'],
       awaitRefetchQueries: true,
     })
@@ -67,50 +73,68 @@ export function ClusterUpgradeAgentButton({
   const curUpgrade = cluster.currentUpgrade
   const curUpgradeStatus = getCurUpgradeStatus(curUpgrade)
   const renderPopupForm =
-    curUpgradeStatus === 'none' || curUpgradeStatus === 'failed'
+    type === 'retry' ||
+    curUpgradeStatus === 'none' ||
+    curUpgradeStatus === 'failed'
 
   const canSubmit = !!runtimeId && !loading
   return (
-    <div css={{ position: 'relative', whiteSpace: 'nowrap' }}>
+    <div
+      css={{ position: 'relative', whiteSpace: 'nowrap' }}
+      ref={wrapperRef}
+    >
       <Flex
         gap="small"
         align="center"
       >
-        {curUpgradeStatus === 'failed' && (
-          <Chip
-            size="large"
-            iconColor="icon-danger"
-            icon={<FailedFilledIcon />}
-          >
-            Upgrade plan failed
-          </Chip>
-        )}
-        {curUpgradeStatus === 'completed' ? (
-          <Chip
-            clickable
-            size="large"
-            icon={<PrOpenIcon />}
-            onClick={() => setFlyoverOpen(true)}
-          >
-            Review upgrade plan
-          </Chip>
-        ) : curUpgradeStatus === 'running' ? (
+        {type === 'retry' ? (
           <Button
-            floating
-            startIcon={<SpinnerAlt />}
-            onClick={() => setFlyoverOpen(true)}
-          >
-            View upgrade progress
-          </Button>
-        ) : (
-          <Button
-            ref={menuBtnRef}
-            onClick={() => setDropdownOpen((prev) => !prev)}
-            startIcon={<AiSparkleFilledIcon />}
+            small
+            secondary
+            onClick={() => setDropdownOpen(true)}
+            startIcon={<ReloadIcon />}
             disabled={!!dropdownOpen}
           >
-            Attempt upgrade
+            Retry upgrade
           </Button>
+        ) : (
+          <>
+            {curUpgradeStatus === 'failed' && (
+              <Chip
+                size="large"
+                iconColor="icon-danger"
+                icon={<FailedFilledIcon />}
+              >
+                Upgrade plan failed
+              </Chip>
+            )}
+            {curUpgradeStatus === 'completed' ? (
+              <Chip
+                clickable
+                size="large"
+                icon={<PrOpenIcon />}
+                onClick={openFlyover}
+              >
+                Review upgrade plan
+              </Chip>
+            ) : curUpgradeStatus === 'running' ? (
+              <Button
+                floating
+                startIcon={<SpinnerAlt />}
+                onClick={openFlyover}
+              >
+                View upgrade progress
+              </Button>
+            ) : (
+              <Button
+                onClick={() => setDropdownOpen(true)}
+                startIcon={<AiSparkleFilledIcon />}
+                disabled={!!dropdownOpen}
+              >
+                Attempt upgrade
+              </Button>
+            )}
+          </>
         )}
       </Flex>
       {renderPopupForm && (
@@ -183,13 +207,6 @@ export function ClusterUpgradeAgentButton({
             Attempt upgrade
           </Button>
         </AgentRunFormPopupSC>
-      )}
-      {curUpgrade && (
-        <ClusterUpgradeAgentFlyover
-          clusterUpgrade={curUpgrade}
-          open={flyoverOpen}
-          onClose={() => setFlyoverOpen(false)}
-        />
       )}
     </div>
   )

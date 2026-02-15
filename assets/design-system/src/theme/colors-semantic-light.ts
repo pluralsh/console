@@ -10,26 +10,25 @@ export const semanticColorsLight = {
   //
   // fill-zero
   'fill-zero': '#FFFFFF',
-  'fill-zero-hover': grey[50],
-  'fill-zero-selected': grey[25],
+  'fill-zero-hover': grey[75],
+  'fill-zero-selected': '#FFFFFF',
   // fill-one
-  'fill-one': grey[25],
+  'fill-one': grey[50],
   'fill-one-hover': grey[75],
   'fill-one-selected': grey[50],
   // fill-two
-  'fill-two': grey[50],
-  'fill-two-hover': grey[100],
-  'fill-two-selected': grey[75],
+  'fill-two': grey[25],
+  'fill-two-hover': grey[125],
+  'fill-two-selected': grey[100],
   // fill-three
-  'fill-three': grey[75],
-  'fill-three-hover': grey[125],
-  'fill-three-selected': grey[100],
+  'fill-three': grey[100],
+  'fill-three-hover': grey[150],
+  'fill-three-selected': grey[175],
   // primary
   'fill-primary': purple[400],
   'fill-primary-hover': purple[350],
   // accent- used sparingly
-  'fill-accent': grey[25],
-
+  'fill-accent': '#FFFFFF',
   // Action
   //
   // primary
@@ -56,10 +55,10 @@ export const semanticColorsLight = {
 
   // Border
   //
-  border: grey[75],
-  'border-fill-one': grey[100],
+  border: grey[100],
+  'border-fill-one': grey[50],
   'border-fill-two': grey[100],
-  'border-fill-three': grey[125],
+  'border-fill-three': grey[150],
   'border-selected': grey[800],
   'border-input': grey[100],
   'border-disabled': grey[75],
@@ -74,7 +73,7 @@ export const semanticColorsLight = {
 
   // Text
   //
-  text: grey[800],
+  text: grey[700],
   'text-light': grey[600],
   'text-xlight': grey[500],
   'text-long-form': grey[700],
@@ -82,26 +81,26 @@ export const semanticColorsLight = {
   'text-input-disabled': grey[400],
   'text-primary-accent': blue[600],
   'text-primary-disabled': grey[500],
-  'text-success': green[800],
+  'text-success': green[600],
   'text-success-light': green[700],
-  'text-warning': yellow[800],
-  'text-warning-light': yellow[700],
-  'text-danger': red[700],
+  'text-warning': '#ED8936',
+  'text-warning-light': yellow[600],
+  'text-danger': '#FF0000',
   'text-danger-light': red[600],
   'text-always-white': semanticColorsDark['text-always-white'],
   'text-on-filled-bg': grey[950],
 
   // Icon
   //
-  'icon-default': grey[900],
-  'icon-light': grey[700],
+  'icon-default': grey[800],
+  'icon-light': grey[600],
   'icon-xlight': grey[400],
   'icon-disabled': grey[100],
   'icon-primary': purple[300],
   'icon-secondary': blue[400],
   'icon-info': blue[350],
   'icon-success': green[700],
-  'icon-warning': yellow[600],
+  'icon-warning': '#ED8936',
   'icon-danger': red[300],
   'icon-danger-critical': '#ED4578',
   'icon-always-white': semanticColorsDark['icon-always-white'],

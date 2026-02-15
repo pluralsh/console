@@ -22,7 +22,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"sigs.k8s.io/yaml"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 )
@@ -377,11 +376,10 @@ func (r *SentinelReconciler) buildIntegrationTestCases(cases []v1alpha1.Sentinel
 		}
 
 		if c.Raw != nil {
-			rawAttr, err := r.buildRawTestCaseAttributes(c.Raw)
-			if err != nil {
-				return nil, err
+			caseAttr.Raw = &console.SentinelCheckIntegrationTestCaseRawAttributes{
+				Yaml:           string(c.Raw.Yaml.Raw),
+				ExpectedResult: c.Raw.ExpectedResult,
 			}
-			caseAttr.Raw = rawAttr
 		}
 
 		if c.Coredns != nil {
@@ -411,20 +409,6 @@ func (r *SentinelReconciler) buildIntegrationTestCases(cases []v1alpha1.Sentinel
 		result[j] = caseAttr
 	}
 	return result, nil
-}
-
-func (r *SentinelReconciler) buildRawTestCaseAttributes(raw *runtime.RawExtension) (*console.SentinelCheckIntegrationTestCaseRawAttributes, error) {
-	var obj runtime.Object
-	if err := runtime.Convert_runtime_RawExtension_To_runtime_Object(raw, &obj, nil); err != nil {
-		return nil, err
-	}
-	rawYaml, err := yaml.Marshal(obj)
-	if err != nil {
-		return nil, err
-	}
-	return &console.SentinelCheckIntegrationTestCaseRawAttributes{
-		Yaml: lo.ToPtr(string(rawYaml)),
-	}, nil
 }
 
 func (r *SentinelReconciler) buildLoadbalancerTestCaseAttributes(lb *v1alpha1.SentinelCheckIntegrationTestCaseLoadbalancer) (*console.SentinelCheckIntegrationTestCaseLoadbalancerAttributes, error) {

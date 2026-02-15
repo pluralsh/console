@@ -140,7 +140,7 @@ function TagMultiSelectUnstyled({
             style: {
               borderTopLeftRadius: 0,
               borderBottomLeftRadius: 0,
-              backgroundColor: theme.colors['fill-one'],
+              backgroundColor: theme.colors['fill-zero'],
               ...comboBoxProps?.inputProps?.style,
             },
           }}

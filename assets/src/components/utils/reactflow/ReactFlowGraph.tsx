@@ -64,7 +64,9 @@ const ReactFlowWrapperSC = styled.div<{
 const ReactFlowAreaSC = styled.div<{ $fullscreen?: boolean }>(
   ({ theme, $fullscreen }) => ({
     backgroundColor:
-      theme.mode === 'dark' ? theme.colors.grey[950] : theme.colors['fill-one'],
+      theme.mode === 'dark'
+        ? theme.colors.grey[950]
+        : theme.colors['fill-zero'],
     width: '100%',
     height: '100%',
     position: 'relative',

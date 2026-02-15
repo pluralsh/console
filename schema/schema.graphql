@@ -1291,6 +1291,14 @@ type RootSubscriptionType {
   agentMessageDelta(runId: ID!): AgentMessageDelta
 
   agentRunDelta(id: ID!): AgentRunDelta
+
+  workbenchJobDelta(id: ID!): WorkbenchJobDelta
+
+  workbenchJobActivityDelta(jobId: ID!): WorkbenchJobActivityDelta
+
+  workbenchJobProgress(jobId: ID!): WorkbenchJobProgress
+
+  clusterUpgradeProgress(upgradeId: ID!): ClusterUpgradeProgress
 }
 
 type OauthResponse {
@@ -1927,6 +1935,7 @@ enum WorkbenchToolCategory {
   LOGS
   INTEGRATION
   TICKETING
+  TRACES
 }
 
 enum WorkbenchToolHttpMethod {
@@ -1961,12 +1970,6 @@ enum WorkbenchJobActivityType {
   INFRASTRUCTURE
   MEMO
   PLAN
-}
-
-enum WorkbenchJobResultTodoStatus {
-  PENDING
-  IN_PROGRESS
-  COMPLETED
 }
 
 input WorkbenchJobAttributes {
@@ -2141,6 +2144,9 @@ type WorkbenchJob {
   "when the run completed"
   completedAt: DateTime
 
+  "error message when the job failed"
+  error: String
+
   "the workbench this run belongs to"
   workbench: Workbench
 
@@ -2173,6 +2179,9 @@ type WorkbenchJobActivity {
   "embedded result (output, metrics, logs) when present"
   result: WorkbenchJobActivityResult
 
+  "thoughts emitted during this activity"
+  thoughts: [WorkbenchJobThought]
+
   "the job this activity belongs to"
   workbenchJob: WorkbenchJob
 
@@ -2182,6 +2191,32 @@ type WorkbenchJobActivity {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchJobThought {
+  "the id of the thought"
+  id: String!
+
+  "the thought content"
+  content: String
+
+  "metrics and logs for the thought"
+  attributes: WorkbenchJobThoughtAttributes
+
+  "the activity this thought belongs to"
+  activity: WorkbenchJobActivity
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchJobThoughtAttributes {
+  "metrics for the thought"
+  metrics: [WorkbenchJobActivityMetric]
+
+  "logs for the thought"
+  logs: [WorkbenchJobActivityLog]
 }
 
 type WorkbenchJobActivityResult {
@@ -2241,7 +2276,7 @@ type WorkbenchJobResult {
 type WorkbenchJobResultTodo {
   name: String
   description: String
-  status: WorkbenchJobResultTodoStatus
+  done: Boolean
 }
 
 type WorkbenchConfiguration {
@@ -2330,6 +2365,13 @@ type WorkbenchToolHttpHeader {
   value: String
 }
 
+type WorkbenchJobProgress {
+  activityId: ID!
+  text: String
+  tool: String
+  arguments: Map
+}
+
 type WorkbenchConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchEdge]
@@ -2348,6 +2390,16 @@ type WorkbenchJobConnection {
 type WorkbenchJobActivityConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchJobActivityEdge]
+}
+
+type WorkbenchJobDelta {
+  delta: Delta
+  payload: WorkbenchJob
+}
+
+type WorkbenchJobActivityDelta {
+  delta: Delta
+  payload: WorkbenchJobActivity
 }
 
 enum SentinelCheckType {
@@ -2379,6 +2431,11 @@ enum SentinelIntegrationTestCaseType {
   LOADBALANCER
   RAW
   PVC
+}
+
+enum SentinelRawResult {
+  SUCCESS
+  FAILED
 }
 
 input SentinelAttributes {
@@ -2583,7 +2640,10 @@ input SentinelCheckIntegrationTestCasePvcAttributes {
 
 input SentinelCheckIntegrationTestCaseRawAttributes {
   "the yaml to use for this test case"
-  yaml: String
+  yaml: String!
+
+  "the expected result of the test case"
+  expectedResult: SentinelRawResult
 }
 
 type Sentinel {
@@ -2799,7 +2859,10 @@ type SentinelCheckIntegrationTestCasePvcConfiguration {
 "test provisioning a raw resource"
 type SentinelCheckIntegrationTestCaseRawConfiguration {
   "the yaml to use for this test case"
-  yaml: String
+  yaml: String!
+
+  "the expected result of the test case"
+  expectedResult: SentinelRawResult
 }
 
 type SentinelRun {
@@ -9329,6 +9392,13 @@ type CompatibilityMatrixSummary {
 
   "the breaking changes for this version"
   breakingChanges: [String!]
+}
+
+type ClusterUpgradeProgress {
+  stepId: ID!
+  text: String
+  tool: String
+  arguments: Map
 }
 
 type ClusterConnection {

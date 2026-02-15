@@ -1,4 +1,3 @@
-import { ApolloError } from '@apollo/client'
 import {
   Chip,
   ChipProps,
@@ -125,9 +124,11 @@ export function ClusterUpgradePlan() {
   const kubeVersion = getClusterKubeVersion(clusterBasic)
   const parsedKubeVersion =
     semver.coerce(kubeVersion) ?? semver.coerce('1.21.0')
-  const nextKubeVersion = `${parsedKubeVersion.major}.${parsedKubeVersion.minor + 1}`
+  const nextKubeVersion = `${parsedKubeVersion.major}.${
+    parsedKubeVersion.minor + 1
+  }`
 
-  const { data, loading, error, refetch } = useClusterOverviewDetailsQuery({
+  const { data, loading, error } = useClusterOverviewDetailsQuery({
     variables: {
       id: clusterBasic?.id ?? '',
       kubeVersion,
@@ -144,7 +145,6 @@ export function ClusterUpgradePlan() {
 
   const [addonType, setAddonType] = useState(AddonType.All)
   const [deprecationType, setDeprecationType] = useState(DeprecationType.GitOps)
-  const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
 
   const { numUpgradeBlockers } = getClusterUpgradeInfo(cluster)
 
@@ -200,7 +200,9 @@ export function ClusterUpgradePlan() {
           onClusterChange={(cluster) => {
             if (cluster?.id)
               navigate(
-                `${getClusterDetailsPath({ clusterId: cluster.id })}/${CLUSTER_UPGRADES_REL_PATH}`
+                `${getClusterDetailsPath({
+                  clusterId: cluster.id,
+                })}/${CLUSTER_UPGRADES_REL_PATH}`
               )
           }}
           placeholder="Select a cluster"
@@ -228,8 +230,8 @@ export function ClusterUpgradePlan() {
           <Table
             hideHeader
             data={[cluster]}
+            reactTableOptions={{ meta: { kubernetesChangelog } }}
             columns={clusterUpgradeColumns}
-            reactTableOptions={{ meta: { refetch, setError } }}
             padding={theme.spacing.medium}
             overflow="visible"
           />
@@ -237,12 +239,6 @@ export function ClusterUpgradePlan() {
             <UpgradesConsolidatedTable
               cluster={cluster}
               kubernetesChangelog={kubernetesChangelog}
-            />
-          )}
-          {upgradeError && (
-            <GqlError
-              header="Could not upgrade cluster"
-              error={upgradeError}
             />
           )}
           <div css={{ ...theme.partials.text.body1Bold }}>

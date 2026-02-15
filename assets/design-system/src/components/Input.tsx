@@ -1,20 +1,20 @@
-import { ExtendTheme, Input as HonorableInput, mergeTheme } from 'honorable'
 import type {
   InputProps as HonorableInputProps,
   ThemeProviderProps,
 } from 'honorable'
+import { ExtendTheme, Input as HonorableInput, mergeTheme } from 'honorable'
 import { type ComponentProps, type FC, type ReactNode, useRef } from 'react'
-import styled, { useTheme } from 'styled-components'
-import { mergeRefs } from 'react-merge-refs'
 import { mergeProps } from 'react-aria'
+import { mergeRefs } from 'react-merge-refs'
+import styled, { useTheme } from 'styled-components'
 
 import { simulateInputChange } from '../utils/simulateInputChange'
 
-import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
-import { TitleContent } from './Select'
-import Tooltip from './Tooltip'
+import { useFillLevel } from './contexts/FillLevelContext'
 import IconFrame from './IconFrame'
 import CloseIcon from './icons/CloseIcon'
+import { TitleContent } from './Select'
+import Tooltip from './Tooltip'
 
 import { useFormField } from './FormField'
 
@@ -49,13 +49,6 @@ const startEndStyles = {
   paddingRight: 0,
   paddingLeft: 0,
 }
-
-const parentFillLevelToBackground = {
-  0: 'fill-one',
-  1: 'fill-two',
-  2: 'fill-three',
-  3: 'fill-three',
-} as const satisfies Record<FillLevel, string>
 
 const ClearButton = styled(
   ({
@@ -119,15 +112,15 @@ function Input({
           paddingLeft: prefix
             ? 'xsmall'
             : titleContent
-              ? startIcon
-                ? 'xsmall'
-                : 'small'
-              : 'medium',
+            ? startIcon
+              ? 'xsmall'
+              : 'small'
+            : 'medium',
           paddingRight: suffix
             ? 'xsmall'
             : showClearButton || endIcon
-              ? 'xsmall'
-              : 'medium',
+            ? 'xsmall'
+            : 'medium',
         },
       ],
       StartIcon: [
@@ -153,8 +146,8 @@ function Input({
   const size = (props as any).large
     ? 'large'
     : (props as any).small
-      ? 'small'
-      : 'medium'
+    ? 'small'
+    : 'medium'
 
   inputProps = mergeProps(useFormField()?.fieldProps ?? {}, inputProps)
   const hasEndIcon = (showClearButton && props.value) || endIcon || suffix
@@ -203,9 +196,7 @@ function Input({
             </>
           ) : undefined
         }
-        backgroundColor={
-          theme.colors[parentFillLevelToBackground[parentFillLevel]]
-        }
+        backgroundColor={theme.colors['fill-zero']}
         inputProps={inputProps}
         {...props}
       />

@@ -855,6 +855,30 @@
         },
         "type": "object"
       },
+      "Console.OpenAPI.AI.Workbench.List": {
+        "description": "A paginated list of workbenches",
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/Workbench"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Console.OpenAPI.AI.WorkbenchJob.List": {
+        "description": "A paginated list of workbench jobs",
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/WorkbenchJob"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
       "Console.OpenAPI.AccessToken.Scope": {
         "description": "A scope entry for an access token",
         "properties": {
@@ -3161,6 +3185,179 @@
           "inserted_at"
         ],
         "type": "object"
+      },
+      "Workbench": {
+        "title": "Workbench",
+        "description": "A workbench for running AI jobs with configurable tools and prompts",
+        "properties": {
+          "agent_runtime_id": {
+            "description": "ID of the agent runtime for this workbench",
+            "type": "string"
+          },
+          "description": {
+            "description": "Description of the workbench",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the workbench",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "description": "Human-readable name of the workbench",
+            "type": "string"
+          },
+          "project_id": {
+            "description": "ID of the project this workbench belongs to",
+            "type": "string"
+          },
+          "repository_id": {
+            "description": "ID of the git repository for this workbench",
+            "type": "string"
+          },
+          "system_prompt": {
+            "description": "The system prompt for the workbench",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkbenchJob": {
+        "title": "WorkbenchJob",
+        "description": "A single run of a workbench",
+        "properties": {
+          "completed_at": {
+            "description": "When the run completed",
+            "format": "date-time",
+            "type": "string"
+          },
+          "error": {
+            "description": "Error message when the job failed",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the job",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "prompt": {
+            "description": "The prompt for this run",
+            "type": "string"
+          },
+          "result": {
+            "$ref": "#/components/schemas/WorkbenchJobResult"
+          },
+          "started_at": {
+            "description": "When the run started",
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "description": "Current status (pending, running, successful, failed, cancelled)",
+            "enum": [
+              "pending",
+              "running",
+              "successful",
+              "failed",
+              "cancelled"
+            ],
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user_id": {
+            "description": "ID of the user who created this run",
+            "type": "string"
+          },
+          "workbench_id": {
+            "description": "ID of the workbench this job belongs to",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkbenchJobInput": {
+        "title": "WorkbenchJobInput",
+        "description": "Input for creating a new workbench job",
+        "properties": {
+          "prompt": {
+            "description": "The prompt for this job",
+            "type": "string"
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "type": "object"
+      },
+      "WorkbenchJobResult": {
+        "title": "WorkbenchJobResult",
+        "description": "The result of a workbench job run (working theory, conclusion, todos)",
+        "properties": {
+          "conclusion": {
+            "description": "The conclusion for this result",
+            "type": "string"
+          },
+          "id": {
+            "description": "Unique identifier for the result",
+            "type": "string"
+          },
+          "inserted_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "todos": {
+            "description": "Todos for this result",
+            "items": {
+              "$ref": "#/components/schemas/WorkbenchJobResultTodo"
+            },
+            "type": "array"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "workbench_job_id": {
+            "description": "ID of the job this result belongs to",
+            "type": "string"
+          },
+          "working_theory": {
+            "description": "The working theory for this result",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkbenchJobResultTodo": {
+        "title": "WorkbenchJobResultTodo",
+        "description": "A todo item on the job result",
+        "properties": {
+          "title": {
+            "description": "Title of the todo",
+            "type": "string"
+          },
+          "description": {
+            "description": "Description of the todo",
+            "type": "string"
+          },
+          "done": {
+            "description": "Whether the todo is completed",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
       }
     }
   },
@@ -3678,6 +3875,252 @@
         ],
         "x-required-scopes": [
           "ai.read"
+        ]
+      }
+    },
+    "/v1/api/ai/workbenches": {
+      "get": {
+        "tags": [
+          "workbench"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.AI.Workbench.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListWorkbenches",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "project_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "workbench.read"
+        ]
+      }
+    },
+    "/v1/api/ai/workbenches/jobs/{id}": {
+      "get": {
+        "tags": [
+          "workbench"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkbenchJob"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetWorkbenchJob",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/v1/api/ai/workbenches/name": {
+      "get": {
+        "tags": [
+          "workbench"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workbench"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetWorkbenchByName",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "workbench.read"
+        ]
+      }
+    },
+    "/v1/api/ai/workbenches/{id}": {
+      "get": {
+        "tags": [
+          "workbench"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Workbench"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "GetWorkbench",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "ai.read"
+        ]
+      }
+    },
+    "/v1/api/ai/workbenches/{id}/jobs": {
+      "get": {
+        "tags": [
+          "workbench"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Console.OpenAPI.AI.WorkbenchJob.List"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "ListWorkbenchJobs",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "x-required-scopes": [
+          "workbench.read"
+        ]
+      },
+      "post": {
+        "tags": [
+          "workbench"
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkbenchJob"
+                }
+              }
+            },
+            "description": "no description"
+          }
+        },
+        "operationId": "CreateWorkbenchJob",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkbenchJobInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "x-required-scopes": [
+          "workbench.read"
         ]
       }
     },

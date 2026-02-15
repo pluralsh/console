@@ -30,18 +30,24 @@ export default function MyProfile() {
 
   if (!me) return null
 
-  const currentTab = directory.find((tab) =>
-    pathname?.startsWith(`${pathPrefix}/${tab.path}`)
+  const currentTab = directory.find(
+    (tab) => pathname?.startsWith(`${pathPrefix}/${tab.path}`)
   )
 
   return (
     <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer>
+      <ResponsiveLayoutSidenavContainer
+        css={{
+          width: 300,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.medium,
+        }}
+      >
         <PageCard
           heading={me.name}
           icon={{ name: me.name, url: me.profile, spacing: 'none' }}
           subheading={me?.email}
-          marginBottom="medium"
         />
         <TabList
           stateRef={tabStateRef}

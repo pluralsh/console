@@ -20,7 +20,7 @@ defmodule Console.AI.Tools.Agent.Discovery do
   end
 
   def implement(%__MODULE__{}) do
-    with {:session, %AgentSession{cluster: %Cluster{} = cluster}} <- session(),
+    with {:cluster, %Cluster{} = cluster} <- {:cluster, Console.AI.Tools.Agent.ApiSpec.fetch_cluster()},
          %{} = discovery <- Clusters.api_discovery(cluster) do
       Enum.map(discovery, fn {{g, v, k}, name} -> %{
         group: g,
@@ -30,7 +30,7 @@ defmodule Console.AI.Tools.Agent.Discovery do
       } end)
       |> Jason.encode()
     else
-      {:session, _} -> {:error, "No cluster bound to this session, you need to manually specify this in the chat context menu"}
+      {:cluster, _} -> {:error, "No cluster bound to this session, you need to manually specify this in the chat context menu"}
       err -> err
     end
   end

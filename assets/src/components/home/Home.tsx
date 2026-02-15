@@ -131,7 +131,7 @@ export function Home() {
 
   const isLoading = !tableData && tableLoading
   const noClustersYet =
-    aggregatedUpgradeStats.all === 0 && !(projectId || isLoading)
+    aggregatedUpgradeStats.all === 0 && !(projectId || upgradeLoading)
 
   return (
     <Flex
@@ -181,7 +181,7 @@ export function Home() {
           ) : (
             <ClustersTable
               fullHeightWrap
-              rowBg="raised"
+              rowBg="base"
               selectedCluster={selectedCluster}
               setSelectedCluster={setSelectedCluster}
               data={tableData?.clusters?.edges?.filter(isNonNullable) ?? []}
@@ -223,7 +223,7 @@ const ChartSectionSC = styled.div(({ theme }) => ({
   width: '100%',
   display: 'flex',
   justifyContent: 'center',
-  backgroundColor: theme.colors['fill-accent'],
+  ...(theme.mode === 'dark' && { background: theme.colors['fill-accent'] }),
 }))
 
 const TableSectionSC = styled.div(({ theme }) => ({
@@ -231,7 +231,6 @@ const TableSectionSC = styled.div(({ theme }) => ({
   justifyContent: 'center',
   flex: 1,
   minHeight: 400,
-  backgroundColor: theme.colors['fill-zero-selected'],
   padding: theme.spacing.large,
   borderTop: theme.borders.default,
   overflow: 'hidden',

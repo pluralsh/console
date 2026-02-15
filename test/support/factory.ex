@@ -1159,6 +1159,7 @@ defmodule Console.Factory do
     %Schema.WorkbenchJobActivity{
       status: :pending,
       type: :plan,
+      prompt: "test prompt",
       workbench_job: build(:workbench_job)
     }
   end

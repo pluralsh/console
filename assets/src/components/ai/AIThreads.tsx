@@ -53,7 +53,7 @@ export function AIThreads() {
 
   return (
     <Table
-      rowBg="raised"
+      rowBg="base"
       hideHeader
       fullHeightWrap
       virtualizeRows

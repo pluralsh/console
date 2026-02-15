@@ -5,7 +5,7 @@ defmodule Console.AI.Anthropic do
   @behaviour Console.AI.Provider
   import Console.AI.Provider.Base
 
-  alias Console.AI.Stream
+  alias Console.AI.{Stream, Tool}
 
   require Logger
 
@@ -190,9 +190,9 @@ defmodule Console.AI.Anthropic do
 
   defp tool_args(tool) when is_atom(tool) do
     %{
-      name: tool.name(),
-      description: tool.description(),
-      input_schema: tool.json_schema()
+      name: Tool.name(tool),
+      description: Tool.description(tool),
+      input_schema: Tool.json_schema(tool)
     }
   end
 end

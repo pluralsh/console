@@ -171,6 +171,7 @@ fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfig
     }
     raw {
         yaml
+        expectedResult
     }
 }
 

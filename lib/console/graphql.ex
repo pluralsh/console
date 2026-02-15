@@ -86,6 +86,8 @@ defmodule Console.GraphQl do
     import_fields :stack_subscriptions
     import_fields :ai_subscriptions
     import_fields :agent_subscriptions
+    import_fields :workbench_subscriptions
+    import_fields :cluster_subscriptions
   end
 
   def safe_resolver(fun) do

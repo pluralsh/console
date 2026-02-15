@@ -313,6 +313,7 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.34.12-1767177245-7935d4d711cb6f8020385a50c996b90896e16a71@sha256:377175048c79d12c129d29e7a56268e1edaad37c96e649e892465c01bf2b4f8f',
     'quay.io/cilium/cilium:v1.16.19@sha256:f0c260e30ef97ce3e45e833e702ab47efbbb1dadd0a394969c0a65553e98fefb',
     'quay.io/cilium/operator-generic:v1.16.19@sha256:8879e792c5566f6349b5f2865e07c0dd690eb32638afc4417b51b0ec574fa5f0']
+  eolAt: '2026-02-03'
 - version: 1.16.15
   kube: ['1.34', '1.33', '1.32']
   requirements: []
@@ -340,6 +341,7 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.33.9-1757932127-3c04e8f2f1027d106b96f8ef4a0215e81dbaaece@sha256:06fbc4e55d926dd82ff2a0049919248dcc6be5354609b09012b01bc9c5b0ee28',
     'quay.io/cilium/cilium:v1.16.15@sha256:c0fa87d70a7ba624fbe581d40a7b7e9e8773a6efd4bb17d0bd14ff854039ec75',
     'quay.io/cilium/operator-generic:v1.16.15@sha256:fea37022f858272c27cefe6b4959d45e2ca03d957decbfa210ce35931f346ecd']
+  eolAt: '2026-02-03'
 - version: 1.16.10
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -364,6 +366,7 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.32.6-1746661844-0f602c28cb2aa57b29078195049fb257d5b5246c@sha256:a04218c6879007d60d96339a441c448565b6f86650358652da27582e0efbf182',
     'quay.io/cilium/cilium:v1.16.10@sha256:fc4ccc494c4a381439162fd3684c07ba9c26d3c2670a2b2e1623acee99097461',
     'quay.io/cilium/operator-generic:v1.16.10@sha256:05e5f5e676aa51ae5e3bf6be3594ecf52958f46f07f9f55368a7a952012a13c1']
+  eolAt: '2026-02-03'
 - version: 1.16.5
   kube: ['1.32', '1.31', '1.30']
   requirements: []
@@ -416,6 +419,7 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.30.8-1733837904-eaae5aca0fb988583e5617170a65ac5aa51c0aa8@sha256:709c08ade3d17d52da4ca2af33f431360ec26268d288d9a6cd1d98acc9a1dced',
     'quay.io/cilium/cilium:v1.16.5@sha256:758ca0793f5995bb938a2fa219dcce63dc0b3fa7fc4ce5cc851125281fb7361d',
     'quay.io/cilium/operator-generic:v1.16.5@sha256:f7884848483bbcd7b1e0ccfd34ba4546f258b460cb4b7e2f06a1bcc96ef88039']
+  eolAt: '2026-02-03'
 - version: 1.16.1
   kube: ['1.31', '1.30', '1.29']
   requirements: []
@@ -461,6 +465,7 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.29.7-39a2a56bbd5b3a591f69dbca51d3e30ef97e0e51@sha256:bd5ff8c66716080028f414ec1cb4f7dc66f40d2fb5a009fff187f4a9b90b566b',
     'quay.io/cilium/cilium:v1.16.1@sha256:0b4a3ab41a4760d86b7fc945b8783747ba27f29dac30dd434d94f2c9e3679f39',
     'quay.io/cilium/operator-generic:v1.16.1@sha256:3bc7e7a43bc4a4d8989cb7936c5d96675dd2d02c306adf925ce0a7c35aa27dc4']
+  eolAt: '2026-02-03'
 - version: 1.16.0
   kube: ['1.30', '1.29', '1.28']
   requirements: []
@@ -510,6 +515,7 @@ versions:
   images: ['quay.io/cilium/cilium-envoy:v1.29.7-39a2a56bbd5b3a591f69dbca51d3e30ef97e0e51@sha256:bd5ff8c66716080028f414ec1cb4f7dc66f40d2fb5a009fff187f4a9b90b566b',
     'quay.io/cilium/cilium:v1.16.0@sha256:46ffa4ef3cf6d8885dcc4af5963b0683f7d59daa90d49ed9fb68d3b1627fe058',
     'quay.io/cilium/operator-generic:v1.16.0@sha256:d6621c11c4e4943bf2998af7febe05be5ed6fdcf812b27ad4388f47022190316']
+  eolAt: '2026-02-03'
 - version: 1.15.17
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -1248,7 +1254,31 @@ versions:
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
-  summary: null
+  summary:
+    helm_changes: "- **Use the matching/new Helm chart version for v1.12.8.** The\
+      \ release notes explicitly call this out (chart changes are included in this\
+      \ patch release).\n- **New/changed values you may want to set (or at least review):**\n\
+      \  - Pod/container security contexts were added for Cilium components (agent/operator/hubble/etc.).\
+      \ Review any PSP/OPA/Gatekeeper policies and consider pinning securityContext\
+      \ values if you already enforce standards.\n  - ServiceAccount automount token\
+      \ support was added. If your cluster security posture disables SA token mounts\
+      \ by default, decide whether to set the new `automountServiceAccountToken`-related\
+      \ values explicitly.\n  - Hubble UI service: chart now supports setting **annotations**\
+      \ on the Hubble UI Service; add your cloud/LB/DNS annotations via the new value(s)\
+      \ if needed.\n- **Operational flag to consider after upgrade:** enable the new\
+      \ option to **preserve the CNI configuration file on agent shutdown** (helps\
+      \ with stuck Pod deletions during upgrades). This is a behavior change you should\
+      \ decide on and test in your environment."
+    chart_updates: ['Helm chart: add pod and container `securityContext` support for
+        Cilium components.', 'Helm chart: add ServiceAccount `automountServiceAccountToken`
+        configuration support.', 'Helm chart: add support for annotations on the Hubble
+        UI Service.']
+    features: ['Helm chart gained first-class knobs for pod/container security contexts
+        and ServiceAccount token automounting, making it easier to comply with cluster
+        security policies.', Hubble UI Service can now be annotated via Helm values
+        (useful for cloud load balancer / external-dns / monitoring integrations).,
+      Envoy dependency was bumped to 1.23.4 in this patch line.]
+    breaking_changes: []
   chart_version: 1.12.8
   images: ['quay.io/cilium/cilium:v1.12.8@sha256:b6c3c48b380334b8f08dba6e0c28d906c0d722b8c2beb0d506b3cea27f66f78d',
     'quay.io/cilium/operator-generic:v1.12.8@sha256:7431f0c2001fb875b1a8901e103825394c38cd6c63a1435a3273ed20ae0e7578']

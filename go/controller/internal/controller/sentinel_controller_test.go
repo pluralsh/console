@@ -283,8 +283,11 @@ var _ = Describe("Sentinel Controller", Ordered, func() {
 											{
 												Type: gqlclient.SentinelIntegrationTestCaseTypeRaw,
 												Name: "raw-test",
-												Raw: &runtime.RawExtension{
-													Raw: []byte(`{"apiVersion":"v1","kind":"ConfigMap","metadata":{"name":"test-config"},"data":{"key":"value"}}`),
+												Raw: &v1alpha1.SentinelCheckIntegrationTestCaseRaw{
+													Yaml: runtime.RawExtension{
+														Raw: []byte(`{"apiVersion":"v1","kind":"ConfigMap","metadata":{"name":"test-config"},"data":{"key":"value"}}`),
+													},
+													ExpectedResult: lo.ToPtr(gqlclient.SentinelRawResultSuccess),
 												},
 											},
 										},
@@ -303,7 +306,7 @@ var _ = Describe("Sentinel Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("456"),
-					SHA: lo.ToPtr("WBF5EFZQ5I6IITKQD7VEIGYDM3I4V6QKWMPSFZJKW7VJVQN7GJSQ===="),
+					SHA: lo.ToPtr("BQD7HX7XIBRVKFJG3LVUAJKZCIZSQWB7CRX6BN3FROVVJOXBSN3Q===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),

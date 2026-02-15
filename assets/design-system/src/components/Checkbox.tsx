@@ -1,6 +1,6 @@
 import classNames from 'classnames'
 import { type InputProps, Label } from 'honorable'
-import { memo, useId, useRef } from 'react'
+import { memo, ReactNode, useId, useRef } from 'react'
 import { VisuallyHidden, useCheckbox, useFocusRing } from 'react-aria'
 import { useToggleState } from 'react-stately'
 import styled from 'styled-components'
@@ -19,8 +19,7 @@ const CheckedIcon = memo(({ small }: { small: boolean }) => {
       <path
         d={small ? 'm11 6-4 4-2-2' : 'm17 9-6 6-3-3'}
         stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        strokeLinecap="square"
         strokeWidth="2"
       />
     </svg>
@@ -89,7 +88,7 @@ const HonorableLabelStyled = styled(Label)<{
     '&::before, &': {
       borderRadius: theme.borderRadiuses.medium,
     },
-    /* before for the border */
+    /* before for the border and empty state background */
     '&::before': {
       zIndex: 0,
       border: theme.borders.input,
@@ -98,7 +97,9 @@ const HonorableLabelStyled = styled(Label)<{
             borderColor: theme.colors['border-disabled'],
             backgroundColor: theme.colors['action-primary-disabled'],
           }
-        : {}),
+        : {
+            backgroundColor: theme.colors['fill-zero'],
+          }),
     },
     '.icon': {
       zIndex: 2,
@@ -141,6 +142,7 @@ const HonorableLabelStyled = styled(Label)<{
 
 export type CheckboxProps = {
   checked?: boolean
+  children?: ReactNode
   name?: string
   small?: boolean
   indeterminate?: boolean
@@ -164,6 +166,7 @@ function Checkbox({
   onKeyDown,
   onKeyUp,
   tabIndex,
+  children,
   ...props
 }: CheckboxProps) {
   const toggleStateProps = {
@@ -229,7 +232,7 @@ function Checkbox({
       <div className="box">
         <div className="icon">{icon}</div>
       </div>
-      <div className="label"> {props.children}</div>
+      {children && <div className="label"> {children}</div>}
     </HonorableLabelStyled>
   )
 }

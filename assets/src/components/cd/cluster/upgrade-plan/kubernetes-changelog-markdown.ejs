@@ -1,0 +1,19 @@
+<%
+const sections = [
+  { title: 'Major Changes',    items: kubernetesChangelog.majorChanges },
+  { title: 'API Updates',      items: kubernetesChangelog.apiUpdates },
+  { title: 'Breaking Changes', items: kubernetesChangelog.breakingChanges },
+  { title: 'Deprecations',     items: kubernetesChangelog.deprecations },
+  { title: 'Removals',         items: kubernetesChangelog.removals },
+  { title: 'Features',         items: kubernetesChangelog.features },
+  { title: 'Bug Fixes',        items: kubernetesChangelog.bugFixes },
+].filter(({ items }) => items?.length)
+-%>
+<% for (const { title, items } of sections) { -%>
+### <%= title %>
+---
+<% for (const item of items) { -%>
+- <%= item %>
+<% } -%>
+
+<% } -%>

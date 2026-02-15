@@ -197,6 +197,13 @@ defmodule ConsoleWeb.Router do
           get "/sessions",     AgentSessionController, :index
           get "/sessions/:id", AgentSessionController, :show
 
+          get "/workbenches",            WorkbenchController, :index
+          get "/workbenches/name",       WorkbenchController, :show_by_name
+          get "/workbenches/jobs/:id",   WorkbenchJobController, :show
+          get "/workbenches/:id",        WorkbenchController, :show
+          get "/workbenches/:id/jobs",    WorkbenchJobController, :index
+          post "/workbenches/:id/jobs",  WorkbenchJobController, :create
+
           get "/sentinels",                   SentinelController, :index
           get "/sentinels/:id",               SentinelController, :show
           post "/sentinels/:id/trigger",      SentinelController, :trigger

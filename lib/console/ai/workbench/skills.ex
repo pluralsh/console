@@ -1,7 +1,13 @@
+defmodule Console.AI.Workbench.Skill do
+  defstruct [:name, :description, :contents]
+end
+
 defmodule Console.AI.Workbench.Skills do
   alias Console.Schema.{Workbench, GitRepository}
   alias Console.Deployments.Git
+  alias Console.AI.Workbench.Skill
 
+  @spec skills(Workbench.t) :: {:ok, [Skill.t]} | Console.error
   def skills(%Workbench{repository: %GitRepository{} = repository, skills: %Workbench.Skills{ref: ref, files: [_ | _] = files}}) do
     with {:ok, contents} <- Git.fetch(repository, ref) do
       Enum.filter(contents, fn {k, _} -> k in files end)
@@ -24,7 +30,7 @@ defmodule Console.AI.Workbench.Skills do
   def parse_skill(file, skill) when is_binary(skill) do
     with {:regex, [_, meta, contents]} <- {:regex, Regex.run(@regex, skill)},
          {:yaml, {:ok, %{"name" => name, "description" => description}}} <- {:yaml, YamlElixir.read_from_string(meta)} do
-      {:ok, %{
+      {:ok, %Skill{
         name: String.trim(name),
         description: String.trim(description),
         contents: String.trim(contents)

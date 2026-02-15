@@ -35,6 +35,22 @@ defimpl Console.PubSub.Rtc, for: Console.PubSub.AgentRunUpdated do
   def deliver(%{item: run}), do: {run, :update}
 end
 
+defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchJobCreated do
+  def deliver(%{item: job}), do: {job, :create}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchJobUpdated do
+  def deliver(%{item: job}), do: {job, :update}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchJobActivityCreated do
+  def deliver(%{item: activity}), do: {activity, :create}
+end
+
+defimpl Console.PubSub.Rtc, for: Console.PubSub.WorkbenchJobActivityUpdated do
+  def deliver(%{item: activity}), do: {activity, :update}
+end
+
 # defimpl Console.PubSub.Rtc, for: [
 #   Console.PubSub.ServiceCreated,
 #   Console.PubSub.ServiceDeleted,

@@ -41,7 +41,7 @@ versions:
         during sync.', 'The move toward SSA/managedFields can change diff/apply behavior
         (field ownership conflicts, need for `--force-conflicts`), so expect potential
         one-time reconciliation noise and conflict resolution work during/after upgrade.']
-  chart_version: 9.4.1
+  chart_version: 9.4.2
   images: ['ecr-public.aws.com/docker/library/redis:8.2.3-alpine', 'ghcr.io/dexidp/dex:v2.44.0',
     'quay.io/argoproj/argocd:v3.3.0']
 - version: 3.2.1

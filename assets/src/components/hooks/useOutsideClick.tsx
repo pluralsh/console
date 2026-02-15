@@ -1,37 +1,23 @@
-import { RefObject, useEffect, useState } from 'react'
+import { RefObject, useEffect } from 'react'
 
 export function useOutsideClick(
   ref: RefObject<HTMLElement | null>,
   handler: (event: MouseEvent | TouchEvent) => void,
-  preventFirstFire = false
+  options?: Parameters<typeof addEventListener>[2]
 ) {
-  const [firstFire, setFirstFire] = useState(true)
-
   useEffect(() => {
     function handleClick(event: MouseEvent | TouchEvent) {
-      if (!ref.current && preventFirstFire && !firstFire) {
-        setFirstFire(true)
-
-        return
-      }
-
       if (!ref.current || ref.current.contains(event.target as Node)) return
-
-      if (firstFire && preventFirstFire) {
-        setFirstFire(false)
-
-        return
-      }
 
       handler(event)
     }
 
-    document.addEventListener('click', handleClick)
-    document.addEventListener('touchstart', handleClick)
+    document.addEventListener('click', handleClick, options)
+    document.addEventListener('touchstart', handleClick, options)
 
     return () => {
-      document.removeEventListener('click', handleClick)
-      document.removeEventListener('touchstart', handleClick)
+      document.removeEventListener('click', handleClick, options)
+      document.removeEventListener('touchstart', handleClick, options)
     }
-  }, [ref, firstFire, preventFirstFire, handler])
+  }, [ref, handler, options])
 }

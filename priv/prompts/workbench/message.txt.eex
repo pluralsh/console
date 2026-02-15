@@ -1,0 +1,16 @@
+We finished executing an activity for this workbench.  Here are the details:
+
+Activity type: <%= @activity.type %>
+Activity status: <%= @activity.status %>
+Initial prompt:
+
+```
+<%= @activity.prompt %>
+```
+<%= if @activity.result do %>
+Conclusion:
+
+```
+<%= @activity.result && @activity.result.output %>
+```
+<% end %>

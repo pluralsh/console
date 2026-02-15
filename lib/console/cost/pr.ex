@@ -10,11 +10,30 @@ defmodule Console.Cost.Pr do
   @pr """
   The following is the description of how a Kubernetes service is configured using Plural as a GitOps engine.  I want to reconfigure one
   of its containers resource requests to match an optimal setup determined by our cost management solution.  The manifests for
-  the service will be listed for your fully.
+  the service will be listed for you fully.
 
   General guidelines to follow:
   - Use Markdown formatting (e.g., `inline code`, ```code fences```, lists, tables).
   - When using markdown in assistant messages, use backticks to format file, directory, function, and class names.
+  """
+
+  @pr_additional """
+  The user wants you to create a PR with the given information, here are some basic PR creation guidelines:
+
+  You must always provide the following information, which will be given to you and are necessary to create the PR:
+  - The git repository url
+  - The branch name
+  - The commit message
+  - The PR title
+  - The PR body
+  - The PR description
+
+  Please spawn a Pull Request to fix the issue described above.  The code change should be the most direct
+  and straightforward way to fix the issue described.  Change only the minimal amount of lines in the original files
+  provided to successfully fix the issue, avoid any extraneous changes as they will potentially break additional
+  functionality upon application.
+
+  The necessary file updates will be easy to infer from the summary given
   """
 
   @spec suggestion(binary | ClusterScalingRecommendation.t, User.t) :: Fixer.resp
@@ -45,7 +64,7 @@ defmodule Console.Cost.Pr do
     with %{service: %Service{} = svc} = rec <- Repo.preload(rec, [:service]),
          {:ok, svc} <- allow(svc, user, :write),
          {:ok, [_ | prompt]} <- Fixer.Service.prompt(svc, "") do
-      prepend(prompt, {:user, @pr})
+      prepend(prompt, {:user, "#{@pr}\n\n#{@pr_additional}"})
       |> append({:user, cost_prompt(rec)})
       |> Provider.simple_tool_call(Pr)
       |> Fixer.handle_tool_call(%{service_id: svc.id}, user)

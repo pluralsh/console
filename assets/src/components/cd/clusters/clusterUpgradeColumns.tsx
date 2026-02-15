@@ -1,42 +1,23 @@
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { CheckIcon, Chip, ListBoxItem, Select } from '@pluralsh/design-system'
+import { CheckIcon, Chip } from '@pluralsh/design-system'
 
-import { ApolloError } from '@apollo/client'
-import isEmpty from 'lodash/isEmpty'
-import {
-  Dispatch,
-  SetStateAction,
-  use,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
-import { useTheme } from 'styled-components'
-
-import { coerce } from 'semver'
+import { use, useState } from 'react'
 
 import {
-  ApiDeprecation,
   ClusterOverviewDetailsFragment,
   ClusterUpgradePlanFragment,
+  KubernetesChangelogFragment,
 } from '../../../generated/graphql'
-import {
-  nextSupportedVersion,
-  supportedUpgrades,
-  toNiceVersion,
-  toProviderSupportedVersion,
-} from '../../../utils/semver'
-
-import { TabularNumbers } from '../../cluster/TableElements'
-
-import { ClusterUpgradePR } from './ClusterUpgradePR'
+import { toNiceVersion } from '../../../utils/semver'
 
 import { useLatestK8sVsn } from 'components/contexts/DeploymentSettingsContext'
 import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { StackedText } from 'components/utils/table/StackedText'
-import { ClustersUpgradeNow } from './ClustersUpgradeNow'
+import { InlineLink } from 'components/utils/typography/InlineLink'
+import { KubernetesChangelogFlyover } from '../cluster/upgrade-plan/KubernetesChangelogFlyover'
 import { ClusterUpgradeAgentButton } from './ClusterUpgradeAgentButton'
+import { ClusterUpgradeAgentFlyover } from './ClusterUpgradeAgentFlyover'
 
 type PreFlightChecklistItem = {
   key: keyof ClusterUpgradePlanFragment
@@ -44,9 +25,6 @@ type PreFlightChecklistItem = {
   description: string
   value?: boolean // this is set after fetching the upgrade plan data
 }
-
-const supportedVersions = (cluster: ClusterOverviewDetailsFragment | null) =>
-  cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw) ?? []
 
 const columnHelperUpgrade = createColumnHelper<ClusterOverviewDetailsFragment>()
 const columnHelperPreFlight = createColumnHelper<PreFlightChecklistItem>()
@@ -79,88 +57,68 @@ export const clusterUpgradeColumns = [
     ),
   }),
   columnHelperUpgrade.accessor((cluster) => cluster, {
+    id: 'changelog',
+    cell: function Cell({ table: { options }, getValue }) {
+      const cluster = getValue()
+      const kubernetesChangelog = options.meta
+        ?.kubernetesChangelog as Nullable<KubernetesChangelogFragment>
+
+      const [flyoverOpen, setFlyoverOpen] = useState(false)
+      if (!kubernetesChangelog) return null
+
+      return (
+        <>
+          <StackedText
+            first="Kubernetes changelog"
+            firstPartialType="caption"
+            firstColor="text-xlight"
+            second={
+              <InlineLink onClick={() => setFlyoverOpen(true)}>
+                {toNiceVersion(kubernetesChangelog?.version)}
+              </InlineLink>
+            }
+            secondPartialType="body2"
+            secondColor="text"
+          />
+
+          <KubernetesChangelogFlyover
+            open={flyoverOpen}
+            onClose={() => setFlyoverOpen(false)}
+            cluster={cluster}
+            kubernetesChangelog={kubernetesChangelog}
+          />
+        </>
+      )
+    },
+  }),
+  columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
     header: '',
-    meta: { gridTemplate: 'fit-content(500px)' },
-    cell: function Cell({ table, getValue, row: { original } }) {
-      const theme = useTheme()
+    cell: function Cell({ getValue }) {
       const cluster = getValue()
       const latestK8sVsn = useLatestK8sVsn()
       const agentEnabled = use(FeatureFlagContext).featureFlags.Agent
+      const [flyoverOpen, setFlyoverOpen] = useState(false)
 
-      const upgrades = useMemo(
-        () => supportedUpgrades(cluster.version, supportedVersions(cluster)),
-        [cluster]
-      )
-      const upgradeVersion = nextSupportedVersion(
-        cluster?.version,
-        cluster?.provider?.supportedVersions
-      )
-      const [targetVersion, setTargetVersion] =
-        useState<Nullable<string>>(upgradeVersion)
-
-      const { refetch, setError } = table.options.meta as {
-        refetch?: () => void
-        setError?: Dispatch<SetStateAction<Nullable<ApolloError>>>
-      }
-
-      useEffect(() => {
-        if (!upgrades.some((upgrade) => upgrade === targetVersion))
-          setTargetVersion(undefined)
-      }, [targetVersion, upgrades])
-
-      if (!!cluster.prAutomations && cluster.prAutomations.length > 0)
+      if (cluster.version !== latestK8sVsn && agentEnabled)
         return (
-          <ClusterUpgradePR
-            prs={cluster.prAutomations}
-            setError={setError}
-          />
+          <>
+            <ClusterUpgradeAgentButton
+              type="standard"
+              cluster={cluster}
+              openFlyover={() => setFlyoverOpen(true)}
+            />
+            {cluster.currentUpgrade && (
+              <ClusterUpgradeAgentFlyover
+                cluster={cluster}
+                open={flyoverOpen}
+                onClose={() => setFlyoverOpen(false)}
+              />
+            )}
+          </>
         )
-      if (latestK8sVsn && cluster.version !== latestK8sVsn && agentEnabled)
-        return <ClusterUpgradeAgentButton cluster={cluster} />
 
-      if (isEmpty(upgrades) || original.self) return null
-
-      return (
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.medium,
-            alignItems: 'center',
-          }}
-        >
-          <div css={{ minWidth: 170 }}>
-            <Select
-              size="small"
-              label="Select version"
-              selectedKey={targetVersion}
-              onSelectionChange={setTargetVersion as any}
-            >
-              {upgrades.map((v) => (
-                <ListBoxItem
-                  key={v}
-                  label={
-                    <TabularNumbers css={{ textAlign: 'right' }}>
-                      {toNiceVersion(
-                        toProviderSupportedVersion(v, cluster?.provider?.cloud)
-                      )}
-                    </TabularNumbers>
-                  }
-                />
-              ))}
-            </Select>
-          </div>
-          <ClustersUpgradeNow
-            cluster={cluster}
-            targetVersion={targetVersion}
-            apiDeprecations={
-              (cluster?.apiDeprecations as ApiDeprecation[]) || []
-            }
-            refetch={refetch}
-            setError={setError}
-          />
-        </div>
-      )
+      return null
     },
   }),
 ]
