@@ -1,7 +1,7 @@
 defmodule Console.AI.Workbench.Subagents.Base do
   import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   alias Console.Repo
-  alias Console.Schema.AgentRun
+  alias Console.Schema.{AgentRun, WorkbenchJobThought}
 
   defmacro __using__(_) do
     quote do
@@ -12,8 +12,9 @@ defmodule Console.AI.Workbench.Subagents.Base do
 
   def callback(%{id: id, workbench_job_id: workbench_job_id}, {:content, content}) when is_binary(content),
     do: publish_absinthe(%{activity_id: id, text: content}, workbench_job_progress: "workbench_jobs:#{workbench_job_id}:progress")
-  def callback(%{id: id, workbench_job_id: workbench_job_id}, {:tool, content, %{name: name, arguments: args}})
+  def callback(%{id: id, workbench_job_id: workbench_job_id}, {:tool, content, %{name: name, arguments: args} = tool})
     when is_binary(content) do
+    save_thought(id, content, tool)
     publish_absinthe(%{activity_id: id, tool: name, arguments: args, text: content}, workbench_job_progress: "workbench_jobs:#{workbench_job_id}:progress")
   end
   def callback(_, _), do: :ok
@@ -42,6 +43,14 @@ defmodule Console.AI.Workbench.Subagents.Base do
     |> Repo.preload([:pull_requests])
     |> poll_run(iter + 1)
   end
+
+  def save_thought(activity_id, content, %{attributes: %{} = attributes})
+      when is_binary(content) and is_binary(activity_id) do
+    %WorkbenchJobThought{activity_id: activity_id}
+    |> WorkbenchJobThought.changeset(%{content: content, attributes: attributes})
+    |> Repo.insert()
+  end
+  def save_thought(_, _, _), do: :ok
 
   defp jitter_sleep() do
     time = :timer.seconds(5)

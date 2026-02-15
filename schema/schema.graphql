@@ -2179,6 +2179,9 @@ type WorkbenchJobActivity {
   "embedded result (output, metrics, logs) when present"
   result: WorkbenchJobActivityResult
 
+  "thoughts emitted during this activity"
+  thoughts: [WorkbenchJobThought]
+
   "the job this activity belongs to"
   workbenchJob: WorkbenchJob
 
@@ -2188,6 +2191,32 @@ type WorkbenchJobActivity {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchJobThought {
+  "the id of the thought"
+  id: String!
+
+  "the thought content"
+  content: String
+
+  "metrics and logs for the thought"
+  attributes: WorkbenchJobThoughtAttributes
+
+  "the activity this thought belongs to"
+  activity: WorkbenchJobActivity
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchJobThoughtAttributes {
+  "metrics for the thought"
+  metrics: [WorkbenchJobActivityMetric]
+
+  "logs for the thought"
+  logs: [WorkbenchJobActivityLog]
 }
 
 type WorkbenchJobActivityResult {

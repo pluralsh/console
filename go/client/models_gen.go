@@ -8985,6 +8985,8 @@ type WorkbenchJobActivity struct {
 	Prompt *string `json:"prompt,omitempty"`
 	// embedded result (output, metrics, logs) when present
 	Result *WorkbenchJobActivityResult `json:"result,omitempty"`
+	// thoughts emitted during this activity
+	Thoughts []*WorkbenchJobThought `json:"thoughts,omitempty"`
 	// the job this activity belongs to
 	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
 	// the agent run that executed this activity
@@ -9084,6 +9086,26 @@ type WorkbenchJobResultTodo struct {
 	Name        *string `json:"name,omitempty"`
 	Description *string `json:"description,omitempty"`
 	Done        *bool   `json:"done,omitempty"`
+}
+
+type WorkbenchJobThought struct {
+	// the id of the thought
+	ID string `json:"id"`
+	// the thought content
+	Content *string `json:"content,omitempty"`
+	// metrics and logs for the thought
+	Attributes *WorkbenchJobThoughtAttributes `json:"attributes,omitempty"`
+	// the activity this thought belongs to
+	Activity   *WorkbenchJobActivity `json:"activity,omitempty"`
+	InsertedAt *string               `json:"insertedAt,omitempty"`
+	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchJobThoughtAttributes struct {
+	// metrics for the thought
+	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
+	// logs for the thought
+	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
 }
 
 type WorkbenchSkills struct {

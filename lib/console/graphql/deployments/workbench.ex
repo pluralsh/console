@@ -120,11 +120,27 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :type,     :workbench_job_activity_type, description: "the type of the activity"
     field :prompt,   :string, description: "the prompt for this activity"
     field :result,   :workbench_job_activity_result, description: "embedded result (output, metrics, logs) when present"
+    field :thoughts, list_of(:workbench_job_thought), resolve: dataloader(Deployments), description: "thoughts emitted during this activity"
 
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this activity belongs to"
     field :agent_run,    :agent_run, resolve: dataloader(Deployments), description: "the agent run that executed this activity"
 
     timestamps()
+  end
+
+  object :workbench_job_thought do
+    field :id,         non_null(:string), description: "the id of the thought"
+    field :content,    :string, description: "the thought content"
+    field :attributes, :workbench_job_thought_attributes, description: "metrics and logs for the thought"
+
+    field :activity, :workbench_job_activity, resolve: dataloader(Deployments), description: "the activity this thought belongs to"
+
+    timestamps()
+  end
+
+  object :workbench_job_thought_attributes do
+    field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for the thought"
+    field :logs,    list_of(:workbench_job_activity_log), description: "logs for the thought"
   end
 
   object :workbench_job_activity_result do
@@ -230,6 +246,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench_tool
   connection node_type: :workbench_job
   connection node_type: :workbench_job_activity
+  connection node_type: :workbench_job_thought
 
   delta :workbench_job
   delta :workbench_job_activity

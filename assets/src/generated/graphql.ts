@@ -13961,6 +13961,8 @@ export type WorkbenchJobActivity = {
   result?: Maybe<WorkbenchJobActivityResult>;
   /** the status of the activity */
   status: WorkbenchJobActivityStatus;
+  /** thoughts emitted during this activity */
+  thoughts?: Maybe<Array<Maybe<WorkbenchJobThought>>>;
   /** the type of the activity */
   type?: Maybe<WorkbenchJobActivityType>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -14099,6 +14101,28 @@ export enum WorkbenchJobStatus {
   Running = 'RUNNING',
   Successful = 'SUCCESSFUL'
 }
+
+export type WorkbenchJobThought = {
+  __typename?: 'WorkbenchJobThought';
+  /** the activity this thought belongs to */
+  activity?: Maybe<WorkbenchJobActivity>;
+  /** metrics and logs for the thought */
+  attributes?: Maybe<WorkbenchJobThoughtAttributes>;
+  /** the thought content */
+  content?: Maybe<Scalars['String']['output']>;
+  /** the id of the thought */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type WorkbenchJobThoughtAttributes = {
+  __typename?: 'WorkbenchJobThoughtAttributes';
+  /** logs for the thought */
+  logs?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
+  /** metrics for the thought */
+  metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
+};
 
 export type WorkbenchSkills = {
   __typename?: 'WorkbenchSkills';
