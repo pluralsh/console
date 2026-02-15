@@ -25,6 +25,16 @@ defmodule Console.AI.Fixer do
   and straightforward way to fix the issue described.  Change only the minimal amount of lines in the original files
   provided to successfully fix the issue, avoid any extraneous changes as they will potentially break additional
   functionality upon application.
+
+  You must always provide the following information, which will be given to you and are necessary to create the PR:
+  - The git repository url
+  - The branch name
+  - The commit message
+  - The PR title
+  - The PR body
+  - The PR description
+
+  The necessary file updates will be easy to infer from the summary given
   """
 
   @callback prompt(struct, binary) :: {:ok, Provider.history} | Console.error

@@ -1,12 +1,24 @@
 You're tasked with upgrading a common kubernetes addon. This will likely be managed via GitOps, usually via Plural as a GlobalService or as a standalone Plural Service.
 
-What you'll ultimately want to do is construct a prompt to invoke a full coding agent like claude code to make this code change in the appropriate repository. To do this, here is your workflow:
+** NOTE this is only relevant if the addon is managed by a Plural Service or GlobalService.**
+It's first important to understand the heirarchy of resources that are commonly used for deploying addons with Gitops.  Usually this is a tree structure like:
+
+Service (owned by) -> ServiceDeployment Custom Resource or Global Service custom resource -> Plural Service (... -> Plural Service)
+
+You'll want to potentially traverse this heirarchy to understand where the configuration change is ultimately needed.
+** END NOTE **
+
+What you'll ultimately want to do is construct a prompt to invoke a full coding agent like claude code to make this code change in the appropriate repository.
+To do this, here is your workflow:
 
 1. Use the `service_component` tool to search for the plural service component that is the addon or closely related to it.
 2. Use the `service_files` tool to list the gitops files for the service component.  This will help you craft a targeted prompt and infer the appropriate repository to update.
-3. Use the `coding_agent` tool to invoke a full coding agent to make this code change in the appropriate repository.
-4. Users will prefer to accomplish this with just a *chart update* where possible. The prompt you give should only suggest updating image versions if they were overridden, and the coding agent can usually figure this out itself.  Useful things to include in the prompt is guidance on what subfolders, k8s resources, etc to look into.
-5. The change should be carefully limited to just affect the addon and cluster itself.  Do not update prod clusters alongside dev clusters, for instance, but if it's a dev cluster managed by a dev GlobalService, that is totally fine to update.
+3. It's possible you'll need to do this recursively, since services can own other services.
+4. Use the `coding_agent` tool to invoke a full coding agent to make this code change in the appropriate repository.
+5. Users will prefer to accomplish this with just a *chart update* where possible. The prompt you give should only suggest updating image versions if they were overridden, and the coding agent can usually figure this out itself.  Useful things to include in the prompt is guidance on what subfolders, k8s resources, etc to look into.
+6. The change should be carefully limited to just affect the addon and cluster itself.  Do not update prod clusters alongside dev clusters, for instance, but if it's a dev cluster managed by a dev GlobalService, that is totally fine to update.
+7. If you cannot find a Plural Service assciated with this addon and the cluster we're talking about, it's likely baked into the kuberetes distribution or deployed in a different tool like terraform and so safe to ignore.
+8. Verify that's the case if you believe it's external to Plural.
 
 You should only invoke the `coding_agent` tool once and only after you've gathered enough information to craft an effective prompt.
 
@@ -14,6 +26,14 @@ Some guidance on what is useful for the coding agent to know:
 
 1. Location of the code that is used to deploy this addon.  You'll have a lot of deterministic information about this by querying our GitOps engine.
 2. Whether it's managed by a heirarchy of plural resources (eg service -> global service or service -> service -> global service).
+
+The cluster that is being upgraded is:
+
+Cluster Name: <%= @upgrade.cluster.name %>
+Cluster Distro: <%= @upgrade.cluster.distro %>
+Cluster Version: <%= @upgrade.cluster.current_version %>
+
+**IMPORTANT:** only update manifests related to the addon and cluster itself.
 
 
 Here is the prompt we've been given about the component to upgrade:

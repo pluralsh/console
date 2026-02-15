@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchJobActivity do
   use Console.Schema.Base
-  alias Console.Schema.{WorkbenchJob, AgentRun}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobThought, AgentRun}
 
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
   defenum Type, coding: 0, observability: 1, integrations: 2, ticketing: 3, infrastructure: 4, memo: 5, plan: 6
@@ -41,6 +41,10 @@ defmodule Console.Schema.WorkbenchJobActivity do
 
     belongs_to :workbench_job, WorkbenchJob
     belongs_to :agent_run, AgentRun
+
+    has_many :thoughts, WorkbenchJobThought,
+      on_replace: :delete,
+      foreign_key: :activity_id
 
     timestamps()
   end
@@ -95,12 +99,12 @@ defmodule Console.Schema.WorkbenchJobActivity do
     |> cast(attrs, ~w(diff working_theory conclusion)a)
   end
 
-  defp metric_changeset(model, attrs) do
+  def metric_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(timestamp name value labels)a)
   end
 
-  defp log_changeset(model, attrs) do
+  def log_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(timestamp message labels)a)
   end

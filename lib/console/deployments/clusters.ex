@@ -107,6 +107,9 @@ defmodule Console.Deployments.Clusters do
   def get_matrix_by_name(name), do: Repo.get_by(CustomCompatibilityMatrix, name: name)
   def get_matrix_by_name!(name), do: Repo.get_by!(CustomCompatibilityMatrix, name: name)
 
+  def get_cluster_upgrade!(id), do: Repo.get!(ClusterUpgrade, id)
+  def get_cluster_upgrade(id), do: Repo.get(ClusterUpgrade, id)
+
   def get_runtime_service(id) do
     Console.Repo.get(RuntimeService, id)
     |> with_addon()

@@ -785,7 +785,7 @@ defmodule Console.Deployments.Services do
 
       svc
       |> Service.changeset(stabilize(attrs, svc))
-      |> Console.Repo.update()
+      |> Console.Repo.update(allow_stale: true)
     end)
     |> add_operation(:deprecations, fn %{service: svc} -> add_deprecations(svc) end)
     |> add_operation(:updated, fn %{service: %Service{components: components} = service} ->

@@ -1,6 +1,5 @@
 defmodule Console.AI.Workbench.Subagents.Coding do
   use Console.AI.Workbench.Subagents.Base
-  alias Console.Repo
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, AgentRun}
   alias Console.AI.Tools.Workbench.{Skills, Skill, CodingAgent}
   alias Console.Deployments.Workbenches
@@ -10,7 +9,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
 
   def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
     tools(environment)
-    |> MemoryEngine.new(20, system_prompt: system_prompt(prompt: jprompt), acc: %{})
+    |> MemoryEngine.new(20, system_prompt: system_prompt(prompt: jprompt), acc: %{}, callback: &callback(activity, &1))
     |> MemoryEngine.reduce([{:user, prompt}], &reducer(activity, &1, &2))
     |> case do
       {:ok, attrs} -> attrs
@@ -31,25 +30,15 @@ defmodule Console.AI.Workbench.Subagents.Coding do
       agent_run_id: id
     }, activity)
 
-    poll_run(run)
-  end
-
-  defp poll_run(run, iter \\ 0)
-  defp poll_run(%AgentRun{id: id}, iters) when iters >= 60,
-    do: %{status: :failed, error: "agent run #{id} failed to complete within poll interval"}
-
-  defp poll_run(%AgentRun{id: id, mode: :write, pull_requests: [_ | _] = prs}, _),
-    do: %{status: :successful, agent_run_id: id, result: %{output: String.trim(analysis_prompt(analysis: nil, pull_requests: prs))}}
-
-  defp poll_run(%AgentRun{id: id, mode: :analyze, analysis: %AgentRun.Analysis{} = analysis}, _),
-    do: %{status: :successful, agent_run_id: id, result: %{output: String.trim(analysis_prompt(pull_requests: nil, analysis: analysis))}}
-
-  defp poll_run(%AgentRun{id: id}, iter) do
-    jitter_sleep()
-
-    Console.Repo.get(AgentRun, id)
-    |> Repo.preload([:pull_requests])
-    |> poll_run(iter + 1)
+    case poll_run(run) do
+      {:timeout, _} -> %{status: :failed, error: "agent run #{id} timed out"}
+      {:failed, %AgentRun{error: error}} -> %{status: :failed, error: "Agent run failed: #{error}"}
+      {:success, %AgentRun{mode: :write, pull_requests: [_ | _] = prs}} ->
+        %{status: :successful, agent_run_id: id, result: %{output: String.trim(analysis_prompt(analysis: nil, pull_requests: prs))}}
+      {:success, %AgentRun{mode: :analyze, analysis: %AgentRun.Analysis{} = analysis}} ->
+        %{status: :successful, agent_run_id: id, result: %{output: String.trim(analysis_prompt(pull_requests: nil, analysis: analysis))}}
+      {:success, _} -> %{status: :successful, agent_run_id: id, result: %{output: "Agent run completed successfully"}}
+    end
   end
 
   defp tools(%Environment{skills: skills}) do
@@ -58,11 +47,6 @@ defmodule Console.AI.Workbench.Subagents.Coding do
       %Skills{skills: skills},
       %Skill{skills: skills},
     ]
-  end
-
-  defp jitter_sleep() do
-    time = :timer.seconds(5)
-    :timer.sleep(time + Console.jitter(time))
   end
 
   EEx.function_from_file(:defp, :analysis_prompt, Console.priv_filename(["prompts", "workbench", "coding_output.md.eex"]), [:assigns])

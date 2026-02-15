@@ -88,17 +88,15 @@ export function ClusterUpgradeAgentButton({
         align="center"
       >
         {type === 'retry' ? (
-          curUpgradeStatus !== 'running' && (
-            <Button
-              small
-              secondary
-              onClick={() => setDropdownOpen(true)}
-              startIcon={<ReloadIcon />}
-              disabled={!!dropdownOpen}
-            >
-              Retry upgrade
-            </Button>
-          )
+          <Button
+            small
+            secondary
+            onClick={() => setDropdownOpen(true)}
+            startIcon={<ReloadIcon />}
+            disabled={!!dropdownOpen}
+          >
+            Retry upgrade
+          </Button>
         ) : (
           <>
             {curUpgradeStatus === 'failed' && (

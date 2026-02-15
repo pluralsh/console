@@ -2803,6 +2803,14 @@ export type ClusterUpgradePlan = {
   kubeletSkew?: Maybe<Scalars['Boolean']['output']>;
 };
 
+export type ClusterUpgradeProgress = {
+  __typename?: 'ClusterUpgradeProgress';
+  arguments?: Maybe<Scalars['Map']['output']>;
+  stepId: Scalars['ID']['output'];
+  text?: Maybe<Scalars['String']['output']>;
+  tool?: Maybe<Scalars['String']['output']>;
+};
+
 export enum ClusterUpgradeStatus {
   Completed = 'COMPLETED',
   Failed = 'FAILED',
@@ -11134,11 +11142,13 @@ export type RootSubscriptionType = {
   agentRunDelta?: Maybe<AgentRunDelta>;
   /** streams chunks of ai text for a given parent scope */
   aiStream?: Maybe<AiDelta>;
+  clusterUpgradeProgress?: Maybe<ClusterUpgradeProgress>;
   notificationDelta?: Maybe<NotificationDelta>;
   podDelta?: Maybe<PodDelta>;
   runLogsDelta?: Maybe<RunLogsDelta>;
   workbenchJobActivityDelta?: Maybe<WorkbenchJobActivityDelta>;
   workbenchJobDelta?: Maybe<WorkbenchJobDelta>;
+  workbenchJobProgress?: Maybe<WorkbenchJobProgress>;
 };
 
 
@@ -11160,6 +11170,11 @@ export type RootSubscriptionTypeAiStreamArgs = {
 };
 
 
+export type RootSubscriptionTypeClusterUpgradeProgressArgs = {
+  upgradeId: Scalars['ID']['input'];
+};
+
+
 export type RootSubscriptionTypeRunLogsDeltaArgs = {
   stepId: Scalars['ID']['input'];
 };
@@ -11172,6 +11187,11 @@ export type RootSubscriptionTypeWorkbenchJobActivityDeltaArgs = {
 
 export type RootSubscriptionTypeWorkbenchJobDeltaArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeWorkbenchJobProgressArgs = {
+  jobId: Scalars['ID']['input'];
 };
 
 export type RouterFilterAttributes = {
@@ -13941,6 +13961,8 @@ export type WorkbenchJobActivity = {
   result?: Maybe<WorkbenchJobActivityResult>;
   /** the status of the activity */
   status: WorkbenchJobActivityStatus;
+  /** thoughts emitted during this activity */
+  thoughts?: Maybe<Array<Maybe<WorkbenchJobThought>>>;
   /** the type of the activity */
   type?: Maybe<WorkbenchJobActivityType>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -14041,6 +14063,14 @@ export type WorkbenchJobEdge = {
   node?: Maybe<WorkbenchJob>;
 };
 
+export type WorkbenchJobProgress = {
+  __typename?: 'WorkbenchJobProgress';
+  activityId: Scalars['ID']['output'];
+  arguments?: Maybe<Scalars['Map']['output']>;
+  text?: Maybe<Scalars['String']['output']>;
+  tool?: Maybe<Scalars['String']['output']>;
+};
+
 export type WorkbenchJobResult = {
   __typename?: 'WorkbenchJobResult';
   /** the conclusion for this result */
@@ -14071,6 +14101,28 @@ export enum WorkbenchJobStatus {
   Running = 'RUNNING',
   Successful = 'SUCCESSFUL'
 }
+
+export type WorkbenchJobThought = {
+  __typename?: 'WorkbenchJobThought';
+  /** the activity this thought belongs to */
+  activity?: Maybe<WorkbenchJobActivity>;
+  /** metrics and logs for the thought */
+  attributes?: Maybe<WorkbenchJobThoughtAttributes>;
+  /** the thought content */
+  content?: Maybe<Scalars['String']['output']>;
+  /** the id of the thought */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type WorkbenchJobThoughtAttributes = {
+  __typename?: 'WorkbenchJobThoughtAttributes';
+  /** logs for the thought */
+  logs?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
+  /** metrics for the thought */
+  metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
+};
 
 export type WorkbenchSkills = {
   __typename?: 'WorkbenchSkills';

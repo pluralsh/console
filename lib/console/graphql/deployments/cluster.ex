@@ -1333,6 +1333,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :breaking_changes, list_of(non_null(:string)), description: "the breaking changes for this version"
   end
 
+  object :cluster_upgrade_progress do
+    field :step_id,   non_null(:id)
+    field :text,      :string
+    field :tool,      :string
+    field :arguments, :map
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -1870,6 +1877,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :name, non_null(:string)
 
       resolve &Deployments.delete_custom_compatibility_matrix/2
+    end
+  end
+
+  object :cluster_subscriptions do
+    field :cluster_upgrade_progress, :cluster_upgrade_progress do
+      arg :upgrade_id, non_null(:id)
+
+      config fn %{upgrade_id: upgrade_id}, ctx ->
+        with {:ok, upgrade} <- Deployments.resolve_cluster_upgrade(upgrade_id, ctx),
+          do: {:ok, topic: "clusters:upgrades:#{upgrade.id}"}
+      end
     end
   end
 end
