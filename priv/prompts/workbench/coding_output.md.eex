@@ -1,10 +1,12 @@
+The coding agent completed its task.  Here are the results:
+
 <%= if @analysis do %>
 # Analysis
 
 ## Summary
 <%= @analysis.summary %>
 
-## Analysis
+## Details
 <%= @analysis.analysis %>
 
 ## Bullets
