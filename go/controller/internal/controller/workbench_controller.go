@@ -258,8 +258,13 @@ func (in *WorkbenchReconciler) handleRepositoryRef(ctx context.Context, workbenc
 		return nil, nil, nil
 	}
 
+	namespace := workbench.Spec.RepositoryRef.Namespace
+	if namespace == "" {
+		namespace = workbench.Namespace
+	}
+
 	repository := &v1alpha1.GitRepository{}
-	if err := in.Get(ctx, client.ObjectKey{Name: workbench.Spec.RepositoryRef.Name, Namespace: workbench.Spec.RepositoryRef.Namespace}, repository); err != nil {
+	if err := in.Get(ctx, client.ObjectKey{Name: workbench.Spec.RepositoryRef.Name, Namespace: namespace}, repository); err != nil {
 		if errors.IsNotFound(err) {
 			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("repository not found: %s", err.Error())
 		}
@@ -302,8 +307,13 @@ func (in *WorkbenchReconciler) handleWorkbenchTools(ctx context.Context, workben
 
 	var toolIDs []string
 	for _, toolRef := range workbench.Spec.ToolRefs {
+		namespace := toolRef.Namespace
+		if namespace == "" {
+			namespace = workbench.Namespace
+		}
+
 		tool := &v1alpha1.WorkbenchTool{}
-		if err := in.Get(ctx, client.ObjectKey{Name: toolRef.Name, Namespace: toolRef.Namespace}, tool); err != nil {
+		if err := in.Get(ctx, client.ObjectKey{Name: toolRef.Name, Namespace: namespace}, tool); err != nil {
 			if errors.IsNotFound(err) {
 				return nil, lo.ToPtr(common.Wait()), fmt.Errorf("workbench tool not found: %s", err.Error())
 			}
