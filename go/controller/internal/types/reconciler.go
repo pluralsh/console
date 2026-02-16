@@ -62,6 +62,7 @@ const (
 	GroupReconciler                      Reconciler = "groups"
 	CustomCompatibilityMatrixReconciler  Reconciler = "customcompatibilitymatrix"
 	UpgradePlanCalloutReconciler         Reconciler = "upgradeplancallout"
+	WorkbenchReconciler                  Reconciler = "workbench"
 	WorkbenchToolReconciler              Reconciler = "workbenchtool"
 )
 
