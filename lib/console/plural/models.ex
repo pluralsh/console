@@ -180,7 +180,7 @@ defmodule Console.Plural.Features do
 end
 
 defmodule Console.Plural.Plan do
-  defstruct [:id, :name, :period]
+  defstruct [:id, :name, :period, :maximumClusters]
 end
 
 defmodule Console.Plural.Subscription do

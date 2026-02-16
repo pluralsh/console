@@ -3,8 +3,6 @@ defmodule ConsoleWeb.WebhookController do
   alias Console.Schema.{ScmWebhook, Cluster, ObservabilityWebhook}
   alias Console.Deployments.{Git, Clusters, Observability}
 
-  plug ConsoleWeb.Verifier when action == :webhook
-
   def cluster(conn, _) do
     with {:ok, _, token} <- ConsoleWeb.Plugs.Token.get_bearer_token(conn),
          ["plrl", id, auth] <- String.split(token, ":"),

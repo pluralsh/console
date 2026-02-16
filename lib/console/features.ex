@@ -1,7 +1,7 @@
 defmodule Console.Features do
   use GenServer
   require Logger
-  alias Console.Plural.{Accounts, Account, Features}
+  alias Console.Plural.{Accounts, Account, Features, Subscription, Plan}
 
   def start_link(_opts \\ :ok) do
     GenServer.start_link(__MODULE__, :ok, name: __MODULE__)
@@ -33,6 +33,13 @@ defmodule Console.Features do
       DateTime.from_unix(exp)
     else
       _ -> nil
+    end
+  end
+
+  def cluster_max() do
+    case account() do
+      %Account{subscription: %Subscription{plan: %Plan{maximumClusters: max}}} when is_integer(max) -> max
+      _ -> :infinity
     end
   end
 

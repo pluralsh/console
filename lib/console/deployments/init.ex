@@ -57,6 +57,7 @@ defmodule Console.Deployments.Init do
         deployer_repository_id: drepo.id,
       })
       |> maybe_observability()
+      |> maybe_agent_helm_values()
       |> Settings.create()
     end)
     |> add_operation(:context, fn _ -> maybe_setup_context(bot) end)
@@ -112,6 +113,14 @@ defmodule Console.Deployments.Init do
           openai: %{base_url: "http://ai-proxy.ai-proxy:8000/openai/v1"}
         })
       _ -> attrs
+    end
+  end
+
+  defp maybe_agent_helm_values(attrs) do
+    case Console.conf(:agent_helm_values) do
+      helm_values when is_binary(helm_values) and byte_size(helm_values) > 0 ->
+        Map.put(attrs, :agent_helm_values, helm_values)
+      nil -> attrs
     end
   end
 

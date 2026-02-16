@@ -17,7 +17,7 @@ defmodule Console.Deployments.Git.Webhooks do
   end
 
   def webhook(hook, params) do
-    with {:ok, url, params} <- Dispatcher.pr(hook, params),
+    with {:ok, url, params} <- Dispatcher.pr_data(hook, params),
          {:ok, _} <- Git.upsert_pull_request(params, url),
       do: {:ok, %{ignored: false, message: "updated pull request"}}
   end

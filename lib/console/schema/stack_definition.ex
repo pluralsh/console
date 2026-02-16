@@ -42,7 +42,8 @@ defmodule Console.Schema.StackDefinition do
     |> cast(attrs, @valid)
     |> cast_embed(:configuration)
     |> unique_constraint(:name)
-    |> cast_embed(:steps)
+    |> cast_embed(:steps, required: true)
     |> cast_embed(:delete_steps)
+    |> validate_required([:name])
   end
 end

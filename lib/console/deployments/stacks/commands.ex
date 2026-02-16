@@ -15,12 +15,13 @@ defmodule Console.Deployments.Stacks.Commands do
 
   def commands(%Stack{type: :custom}, true), do: []
   def commands(%Stack{type: :custom, deleted_at: d, definition: %StackDefinition{name: n, delete_steps: delete_steps}} = stack, _)
-    when not is_nil(d) do
+    when not is_nil(d) and is_list(delete_steps) do
     Enum.map(delete_steps, &Map.take(&1, ~w(cmd args stage require_approval)a))
     |> Enum.with_index(&Map.merge(&1, %{index: &2, name: "#{n}-#{&2}", status: :pending}))
     |> stitch_hooks(stack, false)
   end
-  def commands(%Stack{type: :custom, definition: %StackDefinition{name: n, steps: steps}} = stack, _) do
+
+  def commands(%Stack{type: :custom, definition: %StackDefinition{name: n, steps: steps}} = stack, _) when is_list(steps) do
     Enum.map(steps, &Map.take(&1, ~w(cmd args stage require_approval)a))
     |> Enum.with_index(&Map.merge(&1, %{index: &2, name: "#{n}-#{&2}", status: :pending}))
     |> stitch_hooks(stack, false)
