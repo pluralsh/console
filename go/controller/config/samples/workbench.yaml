@@ -1,0 +1,63 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-sample
+  namespace: default
+spec:
+  name: workbenchtool_sample
+  tool: HTTP
+  configuration:
+    http:
+      url: https://api.example.com/health
+      method: GET
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: WorkbenchTool
+metadata:
+  labels:
+    app.kubernetes.io/name: workbenchtool
+    app.kubernetes.io/instance: workbenchtool-metrics-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbenchtool-metrics-sample
+  namespace: default
+spec:
+  name: workbenchtool_metrics_sample
+  tool: HTTP
+  categories:
+    - METRICS
+  configuration:
+    http:
+      url: https://metrics.example.com/query
+      method: POST
+      headers:
+        - name: Content-Type
+          value: application/json
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Workbench
+metadata:
+  labels:
+    app.kubernetes.io/name: workbench
+    app.kubernetes.io/instance: workbench-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: workbench-sample
+  namespace: default
+spec:
+  name: workbench-sample
+  description: Sample AI workbench with HTTP tools
+  agentRuntime: gemini
+  toolRefs:
+    - name: workbenchtool-sample
+      namespace: default
+    - name: workbenchtool-metrics-sample
+      namespace: default
