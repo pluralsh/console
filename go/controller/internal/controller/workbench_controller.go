@@ -6,6 +6,7 @@ import (
 
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
+	"github.com/pluralsh/console/go/controller/internal/plural"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/samber/lo"
@@ -114,8 +115,20 @@ func (in *WorkbenchReconciler) Reconcile(ctx context.Context, req reconcile.Requ
 		return common.HandleRequeue(res, err, workbench.SetCondition)
 	}
 
+	// Get the repository for the workbench.
+	repository, res, err := in.handleRepositoryRef(ctx, workbench)
+	if res != nil || err != nil {
+		return common.HandleRequeue(res, err, workbench.SetCondition)
+	}
+
+	// Get the agent runtime for the workbench.
+	agentRuntimeID, res, err := in.handleAgentRuntime(ctx, workbench)
+	if res != nil || err != nil {
+		return common.HandleRequeue(res, err, workbench.SetCondition)
+	}
+
 	// Sync Workbench CRD with the Console API
-	apiWorkbench, err := in.sync(ctx, workbench, project, changed)
+	apiWorkbench, err := in.sync(ctx, workbench, project, repository, agentRuntimeID, changed)
 	if err != nil {
 		return common.HandleRequeue(nil, err, workbench.SetCondition)
 	}
@@ -213,7 +226,7 @@ func (in *WorkbenchReconciler) handleExistingWorkbench(ctx context.Context, work
 	return workbench.Spec.Reconciliation.Requeue(), nil
 }
 
-func (in *WorkbenchReconciler) sync(ctx context.Context, workbench *v1alpha1.Workbench, project *v1alpha1.Project, changed bool) (*console.WorkbenchFragment, error) {
+func (in *WorkbenchReconciler) sync(ctx context.Context, workbench *v1alpha1.Workbench, project *v1alpha1.Project, repository *v1alpha1.GitRepository, agentRuntimeID *string, changed bool) (*console.WorkbenchFragment, error) {
 	logger := log.FromContext(ctx)
 
 	existingWorkbench, err := in.ConsoleClient.GetWorkbench(ctx, nil, lo.ToPtr(workbench.ConsoleName()))
@@ -223,15 +236,52 @@ func (in *WorkbenchReconciler) sync(ctx context.Context, workbench *v1alpha1.Wor
 		}
 
 		logger.Info(fmt.Sprintf("%s workbench does not exist, creating it", workbench.ConsoleName()))
-		return in.ConsoleClient.CreateWorkbench(ctx, workbench.Attributes(project.Status.ID))
+		return in.ConsoleClient.CreateWorkbench(ctx, workbench.Attributes(project.Status.ID, repository.Status.ID, agentRuntimeID))
 	}
 
 	if changed {
 		logger.Info(fmt.Sprintf("updating workbench %s", workbench.ConsoleName()))
-		return in.ConsoleClient.UpdateWorkbench(ctx, existingWorkbench.ID, workbench.Attributes(project.Status.ID))
+		return in.ConsoleClient.UpdateWorkbench(ctx, existingWorkbench.ID, workbench.Attributes(project.Status.ID, repository.Status.ID, agentRuntimeID))
 	}
 
 	return existingWorkbench, nil
+}
+
+func (in *WorkbenchReconciler) handleRepositoryRef(ctx context.Context, workbench *v1alpha1.Workbench) (*v1alpha1.GitRepository, *ctrl.Result, error) {
+	if workbench.Spec.RepositoryRef == nil {
+		return nil, nil, nil
+	}
+
+	repository := &v1alpha1.GitRepository{}
+	if err := in.Get(ctx, client.ObjectKey{Name: workbench.Spec.RepositoryRef.Name, Namespace: workbench.Spec.RepositoryRef.Namespace}, repository); err != nil {
+		return nil, nil, err
+	}
+
+	if !repository.Status.HasID() {
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("repository is not ready")
+	}
+
+	if repository.Status.Health == v1alpha1.GitHealthFailed {
+		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("repository is not healthy")
+	}
+
+	return repository, nil, nil
+}
+
+func (in *WorkbenchReconciler) handleAgentRuntime(ctx context.Context, workbench *v1alpha1.Workbench) (*string, *ctrl.Result, error) {
+	if workbench.Spec.AgentRuntime == nil {
+		return nil, nil, nil
+	}
+
+	apiAgentRuntime, err := in.ConsoleClient.GetAgentRuntime(ctx, *workbench.Spec.AgentRuntime)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("agent runtime %s does not exist", *workbench.Spec.AgentRuntime)
+		}
+		return nil, nil, err
+	}
+
+	return &apiAgentRuntime.ID, nil, nil
 }
 
 // SetupWithManager is responsible for initializing a new reconciler within the provided ctrl.Manager.
