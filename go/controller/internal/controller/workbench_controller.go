@@ -300,6 +300,7 @@ func (in *WorkbenchReconciler) handleWorkbenchTools(ctx context.Context, workben
 		return nil, nil, nil
 	}
 
+	logger := log.FromContext(ctx)
 	var toolIDs []string
 	for _, toolRef := range workbench.Spec.ToolRefs {
 		namespace := toolRef.Namespace
@@ -320,6 +321,10 @@ func (in *WorkbenchReconciler) handleWorkbenchTools(ctx context.Context, workben
 			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("workbench tool %s is not ready", toolRef.Name)
 		}
 
+		if err := utils.TryAddOwnerRef(ctx, in.Client, workbench, tool, in.Scheme); err != nil {
+			logger.V(5).Error(err, "failed to add controller ref", "workbench", workbench, "tool", tool)
+		}
+
 		toolIDs = append(toolIDs, tool.Status.GetID())
 	}
 
@@ -332,6 +337,7 @@ func (in *WorkbenchReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(in.Client, new(v1alpha1.WorkbenchList))).
+		Owns(&v1alpha1.WorkbenchTool{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		For(&v1alpha1.Workbench{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(in)
 }
