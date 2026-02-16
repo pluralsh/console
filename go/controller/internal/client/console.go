@@ -193,7 +193,7 @@ type ConsoleClient interface {
 	GetWorkbenchTool(ctx context.Context, id, name *string) (*console.WorkbenchToolFragment, error)
 	GetWorkbenchToolTiny(ctx context.Context, id, name *string) (*console.GetWorkbenchToolTiny_WorkbenchTool, error)
 	DeleteWorkbenchTool(ctx context.Context, id string) error
-	IsWorkbenchToolExists(ctx context.Context, name string) (bool, error)
+	IsWorkbenchToolExists(ctx context.Context, id, name *string) (bool, error)
 }
 
 func New(url, token string, datadogEnabled bool) ConsoleClient {

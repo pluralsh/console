@@ -40,7 +40,7 @@ type WorkbenchToolList struct {
 }
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the WorkbenchTool in the Console API."
 // +kubebuilder:printcolumn:name="Tool",type="string",JSONPath=".spec.tool",description="Type of tool."
@@ -93,8 +93,8 @@ func (in *WorkbenchTool) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
-func (in *WorkbenchTool) Attributes(projectID *string) *console.WorkbenchToolAttributes {
-	return &console.WorkbenchToolAttributes{
+func (in *WorkbenchTool) Attributes(projectID *string) console.WorkbenchToolAttributes {
+	return console.WorkbenchToolAttributes{
 		Name:          in.ConsoleName(),
 		Tool:          in.Spec.Tool,
 		Categories:    lo.ToSlicePtr(in.Spec.Categories),

@@ -73,8 +73,11 @@ func (c *client) DeleteWorkbenchTool(ctx context.Context, id string) error {
 	return err
 }
 
-func (c *client) IsWorkbenchToolExists(ctx context.Context, name string) (bool, error) {
-	workbenchTool, err := c.GetWorkbenchToolTiny(ctx, nil, &name)
+func (c *client) IsWorkbenchToolExists(ctx context.Context, id, name *string) (bool, error) {
+	if id == nil && name == nil {
+		return false, fmt.Errorf("no id or name specified")
+	}
+	workbenchTool, err := c.GetWorkbenchToolTiny(ctx, id, name)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
