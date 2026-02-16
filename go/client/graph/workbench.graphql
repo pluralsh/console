@@ -111,14 +111,14 @@ query ListWorkbenches($after: String, $first: Int, $before: String, $last: Int, 
     }
 }
 
-query GetWorkbench($id: ID!) {
-    workbench(id: $id) {
+query GetWorkbench($id: ID, $name: String) {
+    workbench(id: $id, name: $name) {
         ...WorkbenchFragment
     }
 }
 
-query GetWorkbenchTiny($id: ID!) {
-    workbench(id: $id) {
+query GetWorkbenchTiny($id: ID, $name: String) {
+    workbench(id: $id, name: $name) {
         id
         name
     }
@@ -137,14 +137,14 @@ query ListWorkbenchTools($after: String, $first: Int, $before: String, $last: In
     }
 }
 
-query GetWorkbenchTool($id: ID!) {
-    workbenchTool(id: $id) {
+query GetWorkbenchTool($id: ID, $name: String) {
+    workbenchTool(id: $id, name: $name) {
         ...WorkbenchToolFragment
     }
 }
 
-query GetWorkbenchToolTiny($id: ID!) {
-    workbenchTool(id: $id) {
+query GetWorkbenchToolTiny($id: ID, $name: String) {
+    workbenchTool(id: $id, name: $name) {
         id
         name
     }
