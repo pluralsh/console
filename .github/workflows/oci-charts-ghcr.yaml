@@ -1,0 +1,128 @@
+name: Publish OCI Charts to GHCR
+
+on:
+  pull_request:
+    paths:
+    - "charts/**"
+  push:
+    branches:
+    - master
+    paths:
+    - "charts/**"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    name: Publish charts
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - name: console
+          dir: charts/console
+          repository: pluralsh/console-chart
+        - name: controller
+          dir: charts/controller
+          repository: pluralsh/controller-chart
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - uses: azure/setup-helm@v4
+
+    - name: Add repos
+      run: |
+        helm repo add vmware https://vmware-tanzu.github.io/helm-charts
+        helm repo add radar https://radar-base.github.io/radar-helm-charts
+        helm repo add fluxcd-community https://fluxcd-community.github.io/helm-charts
+        helm repo add dexidp https://charts.dexidp.io
+
+    - name: PR tag values
+      if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+      id: pr_tags
+      run: |
+        echo "pr_tag=pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+        echo "sha_tag=sha-${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+
+    - name: Push chart (pr-<number>)
+      if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+      uses: appany/helm-oci-chart-releaser@v0.5.0
+      with:
+        name: ${{ matrix.name }}
+        repository: ${{ matrix.repository }}
+        tag: ${{ steps.pr_tags.outputs.pr_tag }}
+        path: ${{ matrix.dir }}
+        registry: ghcr.io
+        registry_username: ${{ github.actor }}
+        registry_password: ${{ secrets.GITHUB_TOKEN }}
+        update_dependencies: "true"
+
+    - name: Push chart (sha-<sha>)
+      if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+      uses: appany/helm-oci-chart-releaser@v0.5.0
+      with:
+        name: ${{ matrix.name }}
+        repository: ${{ matrix.repository }}
+        tag: ${{ steps.pr_tags.outputs.sha_tag }}
+        path: ${{ matrix.dir }}
+        registry: ghcr.io
+        registry_username: ${{ github.actor }}
+        registry_password: ${{ secrets.GITHUB_TOKEN }}
+        update_dependencies: "true"
+
+    - name: Chart version
+      if: ${{ github.ref == 'refs/heads/master' }}
+      id: chart_version
+      run: |
+        set -euo pipefail
+        version=$(awk -F': *' '/^version:/ {print $2; exit}' "${{ matrix.dir }}/Chart.yaml")
+        if [ -z "$version" ]; then
+          echo "Missing version in ${{ matrix.dir }}/Chart.yaml" >&2
+          exit 1
+        fi
+        echo "version=$version" >> "$GITHUB_OUTPUT"
+
+    - name: Push chart (${{ steps.chart_version.outputs.version }})
+      if: ${{ github.ref == 'refs/heads/master' }}
+      uses: appany/helm-oci-chart-releaser@v0.5.0
+      with:
+        name: ${{ matrix.name }}
+        repository: ${{ matrix.repository }}
+        tag: ${{ steps.chart_version.outputs.version }}
+        path: ${{ matrix.dir }}
+        registry: ghcr.io
+        registry_username: ${{ github.actor }}
+        registry_password: ${{ secrets.GITHUB_TOKEN }}
+        update_dependencies: "true"
+
+    - name: Push chart (latest)
+      if: ${{ github.ref == 'refs/heads/master' }}
+      uses: appany/helm-oci-chart-releaser@v0.5.0
+      with:
+        name: ${{ matrix.name }}
+        repository: ${{ matrix.repository }}
+        tag: latest
+        path: ${{ matrix.dir }}
+        registry: ghcr.io
+        registry_username: ${{ github.actor }}
+        registry_password: ${{ secrets.GITHUB_TOKEN }}
+        update_dependencies: "true"
+
+    - name: Push chart (master)
+      if: ${{ github.ref == 'refs/heads/master' }}
+      uses: appany/helm-oci-chart-releaser@v0.5.0
+      with:
+        name: ${{ matrix.name }}
+        repository: ${{ matrix.repository }}
+        tag: master
+        path: ${{ matrix.dir }}
+        registry: ghcr.io
+        registry_username: ${{ github.actor }}
+        registry_password: ${{ secrets.GITHUB_TOKEN }}
+        update_dependencies: "true"
