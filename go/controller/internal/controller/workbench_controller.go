@@ -6,7 +6,6 @@ import (
 
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"github.com/pluralsh/console/go/controller/internal/plural"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	"github.com/samber/lo"
@@ -127,8 +126,14 @@ func (in *WorkbenchReconciler) Reconcile(ctx context.Context, req reconcile.Requ
 		return common.HandleRequeue(res, err, workbench.SetCondition)
 	}
 
+	// Get the workbench tools for the workbench.
+	toolIDs, res, err := in.handleWorkbenchTools(ctx, workbench)
+	if res != nil || err != nil {
+		return common.HandleRequeue(res, err, workbench.SetCondition)
+	}
+
 	// Sync Workbench CRD with the Console API
-	apiWorkbench, err := in.sync(ctx, workbench, project, repository, agentRuntimeID, changed)
+	apiWorkbench, err := in.sync(ctx, workbench, project, repository, agentRuntimeID, toolIDs, changed)
 	if err != nil {
 		return common.HandleRequeue(nil, err, workbench.SetCondition)
 	}
@@ -226,7 +231,8 @@ func (in *WorkbenchReconciler) handleExistingWorkbench(ctx context.Context, work
 	return workbench.Spec.Reconciliation.Requeue(), nil
 }
 
-func (in *WorkbenchReconciler) sync(ctx context.Context, workbench *v1alpha1.Workbench, project *v1alpha1.Project, repository *v1alpha1.GitRepository, agentRuntimeID *string, changed bool) (*console.WorkbenchFragment, error) {
+func (in *WorkbenchReconciler) sync(ctx context.Context, workbench *v1alpha1.Workbench, project *v1alpha1.Project,
+	repository *v1alpha1.GitRepository, agentRuntimeID *string, toolIDs []string, changed bool) (*console.WorkbenchFragment, error) {
 	logger := log.FromContext(ctx)
 
 	existingWorkbench, err := in.ConsoleClient.GetWorkbench(ctx, nil, lo.ToPtr(workbench.ConsoleName()))
@@ -236,12 +242,12 @@ func (in *WorkbenchReconciler) sync(ctx context.Context, workbench *v1alpha1.Wor
 		}
 
 		logger.Info(fmt.Sprintf("%s workbench does not exist, creating it", workbench.ConsoleName()))
-		return in.ConsoleClient.CreateWorkbench(ctx, workbench.Attributes(project.Status.ID, repository.Status.ID, agentRuntimeID))
+		return in.ConsoleClient.CreateWorkbench(ctx, workbench.Attributes(project.Status.ID, repository.Status.ID, agentRuntimeID, toolIDs))
 	}
 
 	if changed {
 		logger.Info(fmt.Sprintf("updating workbench %s", workbench.ConsoleName()))
-		return in.ConsoleClient.UpdateWorkbench(ctx, existingWorkbench.ID, workbench.Attributes(project.Status.ID, repository.Status.ID, agentRuntimeID))
+		return in.ConsoleClient.UpdateWorkbench(ctx, existingWorkbench.ID, workbench.Attributes(project.Status.ID, repository.Status.ID, agentRuntimeID, toolIDs))
 	}
 
 	return existingWorkbench, nil
@@ -254,7 +260,11 @@ func (in *WorkbenchReconciler) handleRepositoryRef(ctx context.Context, workbenc
 
 	repository := &v1alpha1.GitRepository{}
 	if err := in.Get(ctx, client.ObjectKey{Name: workbench.Spec.RepositoryRef.Name, Namespace: workbench.Spec.RepositoryRef.Namespace}, repository); err != nil {
-		return nil, nil, err
+		if errors.IsNotFound(err) {
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("repository not found: %s", err.Error())
+		}
+
+		return nil, nil, fmt.Errorf("failed to get repository: %s", err.Error())
 	}
 
 	if !repository.Status.HasID() {
@@ -276,12 +286,39 @@ func (in *WorkbenchReconciler) handleAgentRuntime(ctx context.Context, workbench
 	apiAgentRuntime, err := in.ConsoleClient.GetAgentRuntime(ctx, *workbench.Spec.AgentRuntime)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("agent runtime %s does not exist", *workbench.Spec.AgentRuntime)
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("agent runtime not found: %s", err.Error())
 		}
-		return nil, nil, err
+
+		return nil, nil, fmt.Errorf("failed to get agent runtime: %s", err.Error())
 	}
 
 	return &apiAgentRuntime.ID, nil, nil
+}
+
+func (in *WorkbenchReconciler) handleWorkbenchTools(ctx context.Context, workbench *v1alpha1.Workbench) ([]string, *ctrl.Result, error) {
+	if len(workbench.Spec.ToolRefs) == 0 {
+		return nil, nil, nil
+	}
+
+	var toolIDs []string
+	for _, toolRef := range workbench.Spec.ToolRefs {
+		tool := &v1alpha1.WorkbenchTool{}
+		if err := in.Get(ctx, client.ObjectKey{Name: toolRef.Name, Namespace: toolRef.Namespace}, tool); err != nil {
+			if errors.IsNotFound(err) {
+				return nil, lo.ToPtr(common.Wait()), fmt.Errorf("workbench tool not found: %s", err.Error())
+			}
+
+			return nil, nil, fmt.Errorf("failed to get workbench tool: %s", err.Error())
+		}
+
+		if !tool.Status.HasID() {
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("workbench tool %s is not ready", toolRef.Name)
+		}
+
+		toolIDs = append(toolIDs, tool.Status.GetID())
+	}
+
+	return toolIDs, nil, nil
 }
 
 // SetupWithManager is responsible for initializing a new reconciler within the provided ctrl.Manager.

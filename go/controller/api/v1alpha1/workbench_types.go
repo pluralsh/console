@@ -92,8 +92,8 @@ func (in *Workbench) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
 
-func (in *Workbench) Attributes(projectID, repositoryID, agentRuntimeID *string, toolIDs []string) *console.WorkbenchAttributes {
-	return &console.WorkbenchAttributes{
+func (in *Workbench) Attributes(projectID, repositoryID, agentRuntimeID *string, toolIDs []string) console.WorkbenchAttributes {
+	return console.WorkbenchAttributes{
 		Name:           lo.ToPtr(in.ConsoleName()),
 		Description:    in.Spec.Description,
 		SystemPrompt:   in.Spec.SystemPrompt,
