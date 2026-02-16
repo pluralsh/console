@@ -303,13 +303,11 @@ func (in *WorkbenchReconciler) handleWorkbenchTools(ctx context.Context, workben
 	logger := log.FromContext(ctx)
 	var toolIDs []string
 	for _, toolRef := range workbench.Spec.ToolRefs {
-		namespace := toolRef.Namespace
-		if namespace == "" {
-			namespace = workbench.Namespace
-		}
-
 		tool := &v1alpha1.WorkbenchTool{}
-		if err := in.Get(ctx, client.ObjectKey{Name: toolRef.Name, Namespace: namespace}, tool); err != nil {
+		if err := in.Get(ctx, client.ObjectKey{
+			Name:      toolRef.Name,
+			Namespace: lo.Ternary(toolRef.Namespace == "", workbench.Namespace, toolRef.Namespace),
+		}, tool); err != nil {
 			if errors.IsNotFound(err) {
 				return nil, lo.ToPtr(common.Wait()), fmt.Errorf("workbench tool not found: %s", err.Error())
 			}
