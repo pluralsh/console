@@ -322,7 +322,7 @@ func (in *WorkbenchReconciler) handleWorkbenchTools(ctx context.Context, workben
 		}
 
 		if err := utils.TryAddOwnerRef(ctx, in.Client, workbench, tool, in.Scheme); err != nil {
-			logger.V(5).Error(err, "failed to add controller ref", "workbench", workbench, "tool", tool)
+			logger.V(5).Error(err, "failed to add owner ref", "workbench", workbench, "tool", tool)
 		}
 
 		toolIDs = append(toolIDs, tool.Status.GetID())
