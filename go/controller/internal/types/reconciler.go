@@ -62,7 +62,7 @@ const (
 	GroupReconciler                      Reconciler = "groups"
 	CustomCompatibilityMatrixReconciler  Reconciler = "customcompatibilitymatrix"
 	UpgradePlanCalloutReconciler         Reconciler = "upgradeplancallout"
-	WorkbenchToolReconciler             Reconciler = "workbenchtool"
+	WorkbenchToolReconciler              Reconciler = "workbenchtool"
 )
 
 // ToController maps a Reconciler to its corresponding Controller.
