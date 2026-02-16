@@ -113,16 +113,3 @@ jobs:
         registry_username: ${{ github.actor }}
         registry_password: ${{ secrets.GITHUB_TOKEN }}
         update_dependencies: "true"
-
-    - name: Push chart (master)
-      if: ${{ github.ref == 'refs/heads/master' }}
-      uses: appany/helm-oci-chart-releaser@v0.5.0
-      with:
-        name: ${{ matrix.name }}
-        repository: ${{ matrix.repository }}
-        tag: master
-        path: ${{ matrix.dir }}
-        registry: ghcr.io
-        registry_username: ${{ github.actor }}
-        registry_password: ${{ secrets.GITHUB_TOKEN }}
-        update_dependencies: "true"
