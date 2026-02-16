@@ -4461,6 +4461,7 @@ input StackDefinitionAttributes {
   name: String!
   description: String
   steps: [CustomStepAttributes]
+  deleteSteps: [CustomStepAttributes]
   configuration: StackConfigurationAttributes
 }
 
@@ -4942,6 +4943,7 @@ type StackDefinition {
   description: String
   configuration: StackConfiguration!
   steps: [CustomRunStep]
+  deleteSteps: [CustomRunStep]
   insertedAt: DateTime
   updatedAt: DateTime
 }

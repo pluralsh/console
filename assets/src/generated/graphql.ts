@@ -12697,6 +12697,7 @@ export type StackCronAttributes = {
 export type StackDefinition = {
   __typename?: 'StackDefinition';
   configuration: StackConfiguration;
+  deleteSteps?: Maybe<Array<Maybe<CustomRunStep>>>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -12707,6 +12708,7 @@ export type StackDefinition = {
 
 export type StackDefinitionAttributes = {
   configuration?: InputMaybe<StackConfigurationAttributes>;
+  deleteSteps?: InputMaybe<Array<InputMaybe<CustomStepAttributes>>>;
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   steps?: InputMaybe<Array<InputMaybe<CustomStepAttributes>>>;

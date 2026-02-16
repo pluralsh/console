@@ -7904,6 +7904,7 @@ type StackDefinition struct {
 	Description   *string            `json:"description,omitempty"`
 	Configuration StackConfiguration `json:"configuration"`
 	Steps         []*CustomRunStep   `json:"steps,omitempty"`
+	DeleteSteps   []*CustomRunStep   `json:"deleteSteps,omitempty"`
 	InsertedAt    *string            `json:"insertedAt,omitempty"`
 	UpdatedAt     *string            `json:"updatedAt,omitempty"`
 }
@@ -7912,6 +7913,7 @@ type StackDefinitionAttributes struct {
 	Name          string                        `json:"name"`
 	Description   *string                       `json:"description,omitempty"`
 	Steps         []*CustomStepAttributes       `json:"steps,omitempty"`
+	DeleteSteps   []*CustomStepAttributes       `json:"deleteSteps,omitempty"`
 	Configuration *StackConfigurationAttributes `json:"configuration,omitempty"`
 }
 

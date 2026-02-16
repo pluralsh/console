@@ -6335,13 +6335,14 @@ func (t *PrConfigurationConditionFragment) GetValue() *string {
 }
 
 type StackDefinitionFragment struct {
-	ID            string                                "json:\"id\" graphql:\"id\""
-	Name          string                                "json:\"name\" graphql:\"name\""
-	Description   *string                               "json:\"description,omitempty\" graphql:\"description\""
-	InsertedAt    *string                               "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
-	UpdatedAt     *string                               "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
-	Configuration StackDefinitionFragment_Configuration "json:\"configuration\" graphql:\"configuration\""
-	Steps         []*StackDefinitionFragment_Steps      "json:\"steps,omitempty\" graphql:\"steps\""
+	ID            string                                 "json:\"id\" graphql:\"id\""
+	Name          string                                 "json:\"name\" graphql:\"name\""
+	Description   *string                                "json:\"description,omitempty\" graphql:\"description\""
+	InsertedAt    *string                                "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt     *string                                "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+	Configuration StackDefinitionFragment_Configuration  "json:\"configuration\" graphql:\"configuration\""
+	Steps         []*StackDefinitionFragment_Steps       "json:\"steps,omitempty\" graphql:\"steps\""
+	DeleteSteps   []*StackDefinitionFragment_DeleteSteps "json:\"deleteSteps,omitempty\" graphql:\"deleteSteps\""
 }
 
 func (t *StackDefinitionFragment) GetID() string {
@@ -6385,6 +6386,12 @@ func (t *StackDefinitionFragment) GetSteps() []*StackDefinitionFragment_Steps {
 		t = &StackDefinitionFragment{}
 	}
 	return t.Steps
+}
+func (t *StackDefinitionFragment) GetDeleteSteps() []*StackDefinitionFragment_DeleteSteps {
+	if t == nil {
+		t = &StackDefinitionFragment{}
+	}
+	return t.DeleteSteps
 }
 
 type AccessTokenFragment struct {
@@ -11402,6 +11409,38 @@ func (t *StackDefinitionFragment_Steps) GetRequireApproval() *bool {
 func (t *StackDefinitionFragment_Steps) GetStage() *StepStage {
 	if t == nil {
 		t = &StackDefinitionFragment_Steps{}
+	}
+	return &t.Stage
+}
+
+type StackDefinitionFragment_DeleteSteps struct {
+	Args            []*string "json:\"args,omitempty\" graphql:\"args\""
+	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
+	RequireApproval *bool     "json:\"requireApproval,omitempty\" graphql:\"requireApproval\""
+	Stage           StepStage "json:\"stage\" graphql:\"stage\""
+}
+
+func (t *StackDefinitionFragment_DeleteSteps) GetArgs() []*string {
+	if t == nil {
+		t = &StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.Args
+}
+func (t *StackDefinitionFragment_DeleteSteps) GetCmd() string {
+	if t == nil {
+		t = &StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.Cmd
+}
+func (t *StackDefinitionFragment_DeleteSteps) GetRequireApproval() *bool {
+	if t == nil {
+		t = &StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.RequireApproval
+}
+func (t *StackDefinitionFragment_DeleteSteps) GetStage() *StepStage {
+	if t == nil {
+		t = &StackDefinitionFragment_DeleteSteps{}
 	}
 	return &t.Stage
 }
@@ -24097,6 +24136,38 @@ func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Steps) GetSt
 	return &t.Stage
 }
 
+type GetStackDefinition_StackDefinition_StackDefinitionFragment_DeleteSteps struct {
+	Args            []*string "json:\"args,omitempty\" graphql:\"args\""
+	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
+	RequireApproval *bool     "json:\"requireApproval,omitempty\" graphql:\"requireApproval\""
+	Stage           StepStage "json:\"stage\" graphql:\"stage\""
+}
+
+func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_DeleteSteps) GetArgs() []*string {
+	if t == nil {
+		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.Args
+}
+func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_DeleteSteps) GetCmd() string {
+	if t == nil {
+		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.Cmd
+}
+func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_DeleteSteps) GetRequireApproval() *bool {
+	if t == nil {
+		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.RequireApproval
+}
+func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_DeleteSteps) GetStage() *StepStage {
+	if t == nil {
+		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return &t.Stage
+}
+
 type GetStackDefinitionTiny_StackDefinition struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -24200,6 +24271,38 @@ func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragmen
 func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps) GetStage() *StepStage {
 	if t == nil {
 		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Steps{}
+	}
+	return &t.Stage
+}
+
+type ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_DeleteSteps struct {
+	Args            []*string "json:\"args,omitempty\" graphql:\"args\""
+	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
+	RequireApproval *bool     "json:\"requireApproval,omitempty\" graphql:\"requireApproval\""
+	Stage           StepStage "json:\"stage\" graphql:\"stage\""
+}
+
+func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_DeleteSteps) GetArgs() []*string {
+	if t == nil {
+		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.Args
+}
+func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_DeleteSteps) GetCmd() string {
+	if t == nil {
+		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.Cmd
+}
+func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_DeleteSteps) GetRequireApproval() *bool {
+	if t == nil {
+		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.RequireApproval
+}
+func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_DeleteSteps) GetStage() *StepStage {
+	if t == nil {
+		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_DeleteSteps{}
 	}
 	return &t.Stage
 }
@@ -24322,6 +24425,38 @@ func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Ste
 	return &t.Stage
 }
 
+type CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_DeleteSteps struct {
+	Args            []*string "json:\"args,omitempty\" graphql:\"args\""
+	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
+	RequireApproval *bool     "json:\"requireApproval,omitempty\" graphql:\"requireApproval\""
+	Stage           StepStage "json:\"stage\" graphql:\"stage\""
+}
+
+func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_DeleteSteps) GetArgs() []*string {
+	if t == nil {
+		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.Args
+}
+func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_DeleteSteps) GetCmd() string {
+	if t == nil {
+		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.Cmd
+}
+func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_DeleteSteps) GetRequireApproval() *bool {
+	if t == nil {
+		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.RequireApproval
+}
+func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_DeleteSteps) GetStage() *StepStage {
+	if t == nil {
+		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return &t.Stage
+}
+
 type UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
 	AfterStage StepStage "json:\"afterStage\" graphql:\"afterStage\""
 	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
@@ -24411,6 +24546,38 @@ func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Ste
 	return &t.Stage
 }
 
+type UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_DeleteSteps struct {
+	Args            []*string "json:\"args,omitempty\" graphql:\"args\""
+	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
+	RequireApproval *bool     "json:\"requireApproval,omitempty\" graphql:\"requireApproval\""
+	Stage           StepStage "json:\"stage\" graphql:\"stage\""
+}
+
+func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_DeleteSteps) GetArgs() []*string {
+	if t == nil {
+		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.Args
+}
+func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_DeleteSteps) GetCmd() string {
+	if t == nil {
+		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.Cmd
+}
+func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_DeleteSteps) GetRequireApproval() *bool {
+	if t == nil {
+		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.RequireApproval
+}
+func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_DeleteSteps) GetStage() *StepStage {
+	if t == nil {
+		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return &t.Stage
+}
+
 type DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
 	AfterStage StepStage "json:\"afterStage\" graphql:\"afterStage\""
 	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
@@ -24496,6 +24663,38 @@ func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Ste
 func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps) GetStage() *StepStage {
 	if t == nil {
 		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Steps{}
+	}
+	return &t.Stage
+}
+
+type DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_DeleteSteps struct {
+	Args            []*string "json:\"args,omitempty\" graphql:\"args\""
+	Cmd             string    "json:\"cmd\" graphql:\"cmd\""
+	RequireApproval *bool     "json:\"requireApproval,omitempty\" graphql:\"requireApproval\""
+	Stage           StepStage "json:\"stage\" graphql:\"stage\""
+}
+
+func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_DeleteSteps) GetArgs() []*string {
+	if t == nil {
+		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.Args
+}
+func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_DeleteSteps) GetCmd() string {
+	if t == nil {
+		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.Cmd
+}
+func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_DeleteSteps) GetRequireApproval() *bool {
+	if t == nil {
+		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_DeleteSteps{}
+	}
+	return t.RequireApproval
+}
+func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_DeleteSteps) GetStage() *StepStage {
+	if t == nil {
+		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_DeleteSteps{}
 	}
 	return &t.Stage
 }
@@ -49245,6 +49444,12 @@ fragment StackDefinitionFragment on StackDefinition {
 		stage
 		requireApproval
 	}
+	deleteSteps {
+		cmd
+		args
+		stage
+		requireApproval
+	}
 }
 `
 
@@ -49328,6 +49533,12 @@ fragment StackDefinitionFragment on StackDefinition {
 		stage
 		requireApproval
 	}
+	deleteSteps {
+		cmd
+		args
+		stage
+		requireApproval
+	}
 }
 `
 
@@ -49373,6 +49584,12 @@ fragment StackDefinitionFragment on StackDefinition {
 		}
 	}
 	steps {
+		cmd
+		args
+		stage
+		requireApproval
+	}
+	deleteSteps {
 		cmd
 		args
 		stage
@@ -49425,6 +49642,12 @@ fragment StackDefinitionFragment on StackDefinition {
 		stage
 		requireApproval
 	}
+	deleteSteps {
+		cmd
+		args
+		stage
+		requireApproval
+	}
 }
 `
 
@@ -49468,6 +49691,12 @@ fragment StackDefinitionFragment on StackDefinition {
 		}
 	}
 	steps {
+		cmd
+		args
+		stage
+		requireApproval
+	}
+	deleteSteps {
 		cmd
 		args
 		stage
