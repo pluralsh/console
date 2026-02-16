@@ -1447,6 +1447,65 @@ func (_c *ConsoleClientMock_CreateStackDefinition_Call) RunAndReturn(run func(co
 	return _c
 }
 
+// CreateWorkbench provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreateWorkbench(ctx context.Context, attributes client.WorkbenchAttributes) (*client.WorkbenchFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateWorkbench")
+	}
+
+	var r0 *client.WorkbenchFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.WorkbenchAttributes) (*client.WorkbenchFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.WorkbenchAttributes) *client.WorkbenchFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.WorkbenchFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.WorkbenchAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateWorkbench_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateWorkbench'
+type ConsoleClientMock_CreateWorkbench_Call struct {
+	*mock.Call
+}
+
+// CreateWorkbench is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.WorkbenchAttributes
+func (_e *ConsoleClientMock_Expecter) CreateWorkbench(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreateWorkbench_Call {
+	return &ConsoleClientMock_CreateWorkbench_Call{Call: _e.mock.On("CreateWorkbench", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_CreateWorkbench_Call) Run(run func(ctx context.Context, attributes client.WorkbenchAttributes)) *ConsoleClientMock_CreateWorkbench_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.WorkbenchAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateWorkbench_Call) Return(_a0 *client.WorkbenchFragment, _a1 error) *ConsoleClientMock_CreateWorkbench_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateWorkbench_Call) RunAndReturn(run func(context.Context, client.WorkbenchAttributes) (*client.WorkbenchFragment, error)) *ConsoleClientMock_CreateWorkbench_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateWorkbenchTool provides a mock function with given fields: ctx, attributes
 func (_m *ConsoleClientMock) CreateWorkbenchTool(ctx context.Context, attributes client.WorkbenchToolAttributes) (*client.WorkbenchToolFragment, error) {
 	ret := _m.Called(ctx, attributes)
@@ -3084,6 +3143,53 @@ func (_c *ConsoleClientMock_DeleteUpgradePlanCallout_Call) Return(_a0 error) *Co
 }
 
 func (_c *ConsoleClientMock_DeleteUpgradePlanCallout_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteUpgradePlanCallout_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteWorkbench provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteWorkbench(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteWorkbench")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteWorkbench_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteWorkbench'
+type ConsoleClientMock_DeleteWorkbench_Call struct {
+	*mock.Call
+}
+
+// DeleteWorkbench is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteWorkbench(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteWorkbench_Call {
+	return &ConsoleClientMock_DeleteWorkbench_Call{Call: _e.mock.On("DeleteWorkbench", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteWorkbench_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteWorkbench_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteWorkbench_Call) Return(_a0 error) *ConsoleClientMock_DeleteWorkbench_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteWorkbench_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteWorkbench_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -6220,6 +6326,126 @@ func (_c *ConsoleClientMock_GetUserId_Call) RunAndReturn(run func(string) (strin
 	return _c
 }
 
+// GetWorkbench provides a mock function with given fields: ctx, id, name
+func (_m *ConsoleClientMock) GetWorkbench(ctx context.Context, id *string, name *string) (*client.WorkbenchFragment, error) {
+	ret := _m.Called(ctx, id, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetWorkbench")
+	}
+
+	var r0 *client.WorkbenchFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) (*client.WorkbenchFragment, error)); ok {
+		return rf(ctx, id, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) *client.WorkbenchFragment); ok {
+		r0 = rf(ctx, id, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.WorkbenchFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *string, *string) error); ok {
+		r1 = rf(ctx, id, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetWorkbench_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetWorkbench'
+type ConsoleClientMock_GetWorkbench_Call struct {
+	*mock.Call
+}
+
+// GetWorkbench is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id *string
+//   - name *string
+func (_e *ConsoleClientMock_Expecter) GetWorkbench(ctx interface{}, id interface{}, name interface{}) *ConsoleClientMock_GetWorkbench_Call {
+	return &ConsoleClientMock_GetWorkbench_Call{Call: _e.mock.On("GetWorkbench", ctx, id, name)}
+}
+
+func (_c *ConsoleClientMock_GetWorkbench_Call) Run(run func(ctx context.Context, id *string, name *string)) *ConsoleClientMock_GetWorkbench_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*string), args[2].(*string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetWorkbench_Call) Return(_a0 *client.WorkbenchFragment, _a1 error) *ConsoleClientMock_GetWorkbench_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetWorkbench_Call) RunAndReturn(run func(context.Context, *string, *string) (*client.WorkbenchFragment, error)) *ConsoleClientMock_GetWorkbench_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetWorkbenchTiny provides a mock function with given fields: ctx, id, name
+func (_m *ConsoleClientMock) GetWorkbenchTiny(ctx context.Context, id *string, name *string) (*client.GetWorkbenchTiny_Workbench, error) {
+	ret := _m.Called(ctx, id, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetWorkbenchTiny")
+	}
+
+	var r0 *client.GetWorkbenchTiny_Workbench
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) (*client.GetWorkbenchTiny_Workbench, error)); ok {
+		return rf(ctx, id, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) *client.GetWorkbenchTiny_Workbench); ok {
+		r0 = rf(ctx, id, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.GetWorkbenchTiny_Workbench)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *string, *string) error); ok {
+		r1 = rf(ctx, id, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetWorkbenchTiny_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetWorkbenchTiny'
+type ConsoleClientMock_GetWorkbenchTiny_Call struct {
+	*mock.Call
+}
+
+// GetWorkbenchTiny is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id *string
+//   - name *string
+func (_e *ConsoleClientMock_Expecter) GetWorkbenchTiny(ctx interface{}, id interface{}, name interface{}) *ConsoleClientMock_GetWorkbenchTiny_Call {
+	return &ConsoleClientMock_GetWorkbenchTiny_Call{Call: _e.mock.On("GetWorkbenchTiny", ctx, id, name)}
+}
+
+func (_c *ConsoleClientMock_GetWorkbenchTiny_Call) Run(run func(ctx context.Context, id *string, name *string)) *ConsoleClientMock_GetWorkbenchTiny_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*string), args[2].(*string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetWorkbenchTiny_Call) Return(_a0 *client.GetWorkbenchTiny_Workbench, _a1 error) *ConsoleClientMock_GetWorkbenchTiny_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetWorkbenchTiny_Call) RunAndReturn(run func(context.Context, *string, *string) (*client.GetWorkbenchTiny_Workbench, error)) *ConsoleClientMock_GetWorkbenchTiny_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetWorkbenchTool provides a mock function with given fields: ctx, id, name
 func (_m *ConsoleClientMock) GetWorkbenchTool(ctx context.Context, id *string, name *string) (*client.WorkbenchToolFragment, error) {
 	ret := _m.Called(ctx, id, name)
@@ -7564,6 +7790,64 @@ func (_c *ConsoleClientMock_IsStackDefinitionExists_Call) Return(_a0 bool, _a1 e
 }
 
 func (_c *ConsoleClientMock_IsStackDefinitionExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsStackDefinitionExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsWorkbenchExists provides a mock function with given fields: ctx, id, name
+func (_m *ConsoleClientMock) IsWorkbenchExists(ctx context.Context, id *string, name *string) (bool, error) {
+	ret := _m.Called(ctx, id, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsWorkbenchExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) (bool, error)); ok {
+		return rf(ctx, id, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, *string, *string) bool); ok {
+		r0 = rf(ctx, id, name)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, *string, *string) error); ok {
+		r1 = rf(ctx, id, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsWorkbenchExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsWorkbenchExists'
+type ConsoleClientMock_IsWorkbenchExists_Call struct {
+	*mock.Call
+}
+
+// IsWorkbenchExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id *string
+//   - name *string
+func (_e *ConsoleClientMock_Expecter) IsWorkbenchExists(ctx interface{}, id interface{}, name interface{}) *ConsoleClientMock_IsWorkbenchExists_Call {
+	return &ConsoleClientMock_IsWorkbenchExists_Call{Call: _e.mock.On("IsWorkbenchExists", ctx, id, name)}
+}
+
+func (_c *ConsoleClientMock_IsWorkbenchExists_Call) Run(run func(ctx context.Context, id *string, name *string)) *ConsoleClientMock_IsWorkbenchExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*string), args[2].(*string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsWorkbenchExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsWorkbenchExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsWorkbenchExists_Call) RunAndReturn(run func(context.Context, *string, *string) (bool, error)) *ConsoleClientMock_IsWorkbenchExists_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -9096,6 +9380,66 @@ func (_c *ConsoleClientMock_UpdateStackDefinition_Call) Return(_a0 *client.Stack
 }
 
 func (_c *ConsoleClientMock_UpdateStackDefinition_Call) RunAndReturn(run func(context.Context, string, client.StackDefinitionAttributes) (*client.StackDefinitionFragment, error)) *ConsoleClientMock_UpdateStackDefinition_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateWorkbench provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdateWorkbench(ctx context.Context, id string, attributes client.WorkbenchAttributes) (*client.WorkbenchFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateWorkbench")
+	}
+
+	var r0 *client.WorkbenchFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.WorkbenchAttributes) (*client.WorkbenchFragment, error)); ok {
+		return rf(ctx, id, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, client.WorkbenchAttributes) *client.WorkbenchFragment); ok {
+		r0 = rf(ctx, id, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.WorkbenchFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, client.WorkbenchAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateWorkbench_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateWorkbench'
+type ConsoleClientMock_UpdateWorkbench_Call struct {
+	*mock.Call
+}
+
+// UpdateWorkbench is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attributes client.WorkbenchAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateWorkbench(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdateWorkbench_Call {
+	return &ConsoleClientMock_UpdateWorkbench_Call{Call: _e.mock.On("UpdateWorkbench", ctx, id, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpdateWorkbench_Call) Run(run func(ctx context.Context, id string, attributes client.WorkbenchAttributes)) *ConsoleClientMock_UpdateWorkbench_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(client.WorkbenchAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateWorkbench_Call) Return(_a0 *client.WorkbenchFragment, _a1 error) *ConsoleClientMock_UpdateWorkbench_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateWorkbench_Call) RunAndReturn(run func(context.Context, string, client.WorkbenchAttributes) (*client.WorkbenchFragment, error)) *ConsoleClientMock_UpdateWorkbench_Call {
 	_c.Call.Return(run)
 	return _c
 }

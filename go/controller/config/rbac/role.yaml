@@ -69,6 +69,7 @@ rules:
   - servicedeployments
   - stackdefinitions
   - upgradeplancallouts
+  - workbenches
   - workbenchtools
   verbs:
   - create
@@ -123,6 +124,7 @@ rules:
   - servicedeployments/finalizers
   - stackdefinitions/finalizers
   - upgradeplancallouts/finalizers
+  - workbenches/finalizers
   - workbenchtools/finalizers
   verbs:
   - update
@@ -171,6 +173,7 @@ rules:
   - servicedeployments/status
   - stackdefinitions/status
   - upgradeplancallouts/status
+  - workbenches/status
   - workbenchtools/status
   verbs:
   - get

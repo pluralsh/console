@@ -12,7 +12,7 @@ spec:
     listKind: WorkbenchList
     plural: workbenches
     singular: workbench
-  scope: Cluster
+  scope: Namespaced
   versions:
   - additionalPrinterColumns:
     - description: ID of the Workbench in the Console API.
