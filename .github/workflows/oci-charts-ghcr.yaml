@@ -1,4 +1,4 @@
-name: Publish OCI Charts to GHCR
+name: Publish OCI Charts
 
 on:
   pull_request:
