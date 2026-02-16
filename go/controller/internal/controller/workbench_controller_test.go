@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -23,15 +24,56 @@ import (
 var _ = Describe("Workbench Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
-			workbenchName = "test"
-			namespace     = "default"
-			id            = "123"
+			workbenchName    = "test"
+			namespace        = "default"
+			id               = "123"
+			agentRuntimeName = "test-agent-runtime"
+			agentRuntimeID   = "agent-runtime-123"
+			tool1Name        = "workbenchtool1"
+			tool2Name        = "workbenchtool2"
+			tool1ID          = "tool-id-1"
+			tool2ID          = "tool-id-2"
 		)
 
 		ctx := context.Background()
 		typeNamespacedName := types.NamespacedName{Name: workbenchName, Namespace: namespace}
+		tool1NamespacedName := types.NamespacedName{Name: tool1Name, Namespace: namespace}
+		tool2NamespacedName := types.NamespacedName{Name: tool2Name, Namespace: namespace}
 
 		BeforeAll(func() {
+			By("creating the WorkbenchTool resources")
+			for _, tc := range []struct {
+				name string
+				id   string
+			}{
+				{tool1Name, tool1ID},
+				{tool2Name, tool2ID},
+			} {
+				tool := &v1alpha1.WorkbenchTool{}
+				err := k8sClient.Get(ctx, types.NamespacedName{Name: tc.name, Namespace: namespace}, tool)
+				if err != nil && errors.IsNotFound(err) {
+					resource := &v1alpha1.WorkbenchTool{
+						ObjectMeta: metav1.ObjectMeta{Name: tc.name, Namespace: namespace},
+						Spec: v1alpha1.WorkbenchToolSpec{
+							Name: lo.ToPtr(tc.name),
+							Tool: gqlclient.WorkbenchToolTypeHTTP,
+							Configuration: &v1alpha1.WorkbenchToolConfiguration{
+								HTTP: &v1alpha1.WorkbenchToolHTTPConfig{
+									URL:    "https://example.com",
+									Method: gqlclient.WorkbenchToolHTTPMethodGet,
+								},
+							},
+						},
+					}
+					Expect(common.MaybeCreate(k8sClient, resource, nil)).To(Succeed())
+				}
+				Expect(common.MaybePatch(k8sClient, &v1alpha1.WorkbenchTool{
+					ObjectMeta: metav1.ObjectMeta{Name: tc.name, Namespace: namespace},
+				}, func(p *v1alpha1.WorkbenchTool) {
+					p.Status.ID = lo.ToPtr(tc.id)
+				})).To(Succeed())
+			}
+
 			By("creating the custom resource for the Kind Workbench")
 			workbench := &v1alpha1.Workbench{}
 			err := k8sClient.Get(ctx, typeNamespacedName, workbench)
@@ -42,7 +84,12 @@ var _ = Describe("Workbench Controller", Ordered, func() {
 						Namespace: namespace,
 					},
 					Spec: v1alpha1.WorkbenchSpec{
-						Name: lo.ToPtr(workbenchName),
+						Name:         lo.ToPtr(workbenchName),
+						AgentRuntime: lo.ToPtr(agentRuntimeName),
+						ToolRefs: []corev1.ObjectReference{
+							{Name: tool1Name, Namespace: namespace},
+							{Name: tool2Name, Namespace: namespace},
+						},
 					},
 				}
 				Expect(common.MaybeCreate(k8sClient, resource, nil)).To(Succeed())
@@ -54,6 +101,12 @@ var _ = Describe("Workbench Controller", Ordered, func() {
 			if err := k8sClient.Get(ctx, typeNamespacedName, workbench); err == nil {
 				By("Cleanup the specific resource instance Workbench")
 				Expect(k8sClient.Delete(ctx, workbench)).To(Succeed())
+			}
+			for _, nn := range []types.NamespacedName{tool1NamespacedName, tool2NamespacedName} {
+				tool := &v1alpha1.WorkbenchTool{}
+				if err := k8sClient.Get(ctx, nn, tool); err == nil {
+					Expect(k8sClient.Delete(ctx, tool)).To(Succeed())
+				}
 			}
 		})
 
@@ -100,6 +153,7 @@ var _ = Describe("Workbench Controller", Ordered, func() {
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetWorkbenchTiny", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("GetWorkbench", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
+			fakeConsoleClient.On("GetAgentRuntime", mock.Anything, agentRuntimeName).Return(&gqlclient.AgentRuntimeFragment{ID: agentRuntimeID, Name: agentRuntimeName}, nil)
 			fakeConsoleClient.On("CreateWorkbench", mock.Anything, mock.Anything).Return(test.workbenchFragment, nil)
 
 			reconciler := &controller.WorkbenchReconciler{
