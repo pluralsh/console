@@ -258,13 +258,8 @@ func (in *WorkbenchReconciler) handleRepositoryRef(ctx context.Context, workbenc
 		return nil, nil, nil
 	}
 
-	namespace := workbench.Spec.RepositoryRef.Namespace
-	if namespace == "" {
-		namespace = workbench.Namespace
-	}
-
 	repository := &v1alpha1.GitRepository{}
-	if err := in.Get(ctx, client.ObjectKey{Name: workbench.Spec.RepositoryRef.Name, Namespace: namespace}, repository); err != nil {
+	if err := in.Get(ctx, client.ObjectKey{Name: workbench.Spec.RepositoryRef.Name, Namespace: workbench.Spec.RepositoryRef.Namespace}, repository); err != nil {
 		if errors.IsNotFound(err) {
 			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("repository not found: %s", err.Error())
 		}
