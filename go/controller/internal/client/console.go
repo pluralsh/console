@@ -188,10 +188,10 @@ type ConsoleClient interface {
 	DeleteCustomCompatibilityMatrix(ctx context.Context, name string) error
 	UpsertUpgradePlanCallout(ctx context.Context, attributes console.UpgradePlanCalloutAttributes) (*console.UpgradePlanCalloutFragment, error)
 	DeleteUpgradePlanCallout(ctx context.Context, name string) error
-	GetWorkbenchTool(ctx context.Context, id string) (*console.WorkbenchToolFragment, error)
-	GetWorkbenchToolTiny(ctx context.Context, id string) (*console.GetWorkbenchToolTiny_WorkbenchTool, error)
+	GetWorkbenchTool(ctx context.Context, id, name *string) (*console.WorkbenchToolFragment, error)
+	GetWorkbenchToolTiny(ctx context.Context, id, name *string) (*console.GetWorkbenchToolTiny_WorkbenchTool, error)
 	DeleteWorkbenchTool(ctx context.Context, id string) error
-	IsWorkbenchToolExists(ctx context.Context, id string) (bool, error)
+	IsWorkbenchToolExists(ctx context.Context, name string) (bool, error)
 }
 
 func New(url, token string, datadogEnabled bool) ConsoleClient {
