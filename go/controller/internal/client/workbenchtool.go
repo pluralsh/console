@@ -12,6 +12,26 @@ import (
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 )
 
+func (c *client) CreateWorkbenchTool(ctx context.Context, attributes console.WorkbenchToolAttributes) (*console.WorkbenchToolFragment, error) {
+	response, err := c.consoleClient.CreateWorkbenchTool(ctx, attributes)
+	if err != nil {
+		return nil, err
+	}
+	return response.CreateWorkbenchTool, nil
+}
+
+func (c *client) UpdateWorkbenchTool(ctx context.Context, id string, attr console.WorkbenchToolAttributes) (*console.WorkbenchToolFragment, error) {
+	if id == "" {
+		return nil, fmt.Errorf("no id specified")
+	}
+
+	response, err := c.consoleClient.UpdateWorkbenchTool(ctx, id, attr)
+	if err != nil {
+		return nil, err
+	}
+	return response.UpdateWorkbenchTool, nil
+}
+
 func (c *client) GetWorkbenchTool(ctx context.Context, id, name *string) (*console.WorkbenchToolFragment, error) {
 	if id == nil && name == nil {
 		return nil, fmt.Errorf("no id or name specified")

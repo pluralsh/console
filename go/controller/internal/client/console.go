@@ -188,6 +188,8 @@ type ConsoleClient interface {
 	DeleteCustomCompatibilityMatrix(ctx context.Context, name string) error
 	UpsertUpgradePlanCallout(ctx context.Context, attributes console.UpgradePlanCalloutAttributes) (*console.UpgradePlanCalloutFragment, error)
 	DeleteUpgradePlanCallout(ctx context.Context, name string) error
+	CreateWorkbenchTool(ctx context.Context, attributes console.WorkbenchToolAttributes) (*console.WorkbenchToolFragment, error)
+	UpdateWorkbenchTool(ctx context.Context, id string, attributes console.WorkbenchToolAttributes) (*console.WorkbenchToolFragment, error)
 	GetWorkbenchTool(ctx context.Context, id, name *string) (*console.WorkbenchToolFragment, error)
 	GetWorkbenchToolTiny(ctx context.Context, id, name *string) (*console.GetWorkbenchToolTiny_WorkbenchTool, error)
 	DeleteWorkbenchTool(ctx context.Context, id string) error
