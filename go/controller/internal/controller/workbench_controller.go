@@ -115,7 +115,7 @@ func (in *WorkbenchReconciler) Reconcile(ctx context.Context, req reconcile.Requ
 	}
 
 	// Get the repository for the workbench.
-	repository, res, err := in.handleRepositoryRef(ctx, workbench)
+	repositoryID, res, err := in.handleRepositoryRef(ctx, workbench)
 	if res != nil || err != nil {
 		return common.HandleRequeue(res, err, workbench.SetCondition)
 	}
@@ -133,7 +133,7 @@ func (in *WorkbenchReconciler) Reconcile(ctx context.Context, req reconcile.Requ
 	}
 
 	// Sync Workbench CRD with the Console API
-	apiWorkbench, err := in.sync(ctx, workbench, project, repository, agentRuntimeID, toolIDs, changed)
+	apiWorkbench, err := in.sync(ctx, workbench, project, repositoryID, agentRuntimeID, toolIDs, changed)
 	if err != nil {
 		return common.HandleRequeue(nil, err, workbench.SetCondition)
 	}
@@ -232,7 +232,7 @@ func (in *WorkbenchReconciler) handleExistingWorkbench(ctx context.Context, work
 }
 
 func (in *WorkbenchReconciler) sync(ctx context.Context, workbench *v1alpha1.Workbench, project *v1alpha1.Project,
-	repository *v1alpha1.GitRepository, agentRuntimeID *string, toolIDs []string, changed bool) (*console.WorkbenchFragment, error) {
+	repositoryID *string, agentRuntimeID *string, toolIDs []string, changed bool) (*console.WorkbenchFragment, error) {
 	logger := log.FromContext(ctx)
 
 	existingWorkbench, err := in.ConsoleClient.GetWorkbench(ctx, nil, lo.ToPtr(workbench.ConsoleName()))
@@ -242,18 +242,18 @@ func (in *WorkbenchReconciler) sync(ctx context.Context, workbench *v1alpha1.Wor
 		}
 
 		logger.Info(fmt.Sprintf("%s workbench does not exist, creating it", workbench.ConsoleName()))
-		return in.ConsoleClient.CreateWorkbench(ctx, workbench.Attributes(project.Status.ID, repository.Status.ID, agentRuntimeID, toolIDs))
+		return in.ConsoleClient.CreateWorkbench(ctx, workbench.Attributes(project.Status.ID, repositoryID, agentRuntimeID, toolIDs))
 	}
 
 	if changed {
 		logger.Info(fmt.Sprintf("updating workbench %s", workbench.ConsoleName()))
-		return in.ConsoleClient.UpdateWorkbench(ctx, existingWorkbench.ID, workbench.Attributes(project.Status.ID, repository.Status.ID, agentRuntimeID, toolIDs))
+		return in.ConsoleClient.UpdateWorkbench(ctx, existingWorkbench.ID, workbench.Attributes(project.Status.ID, repositoryID, agentRuntimeID, toolIDs))
 	}
 
 	return existingWorkbench, nil
 }
 
-func (in *WorkbenchReconciler) handleRepositoryRef(ctx context.Context, workbench *v1alpha1.Workbench) (*v1alpha1.GitRepository, *ctrl.Result, error) {
+func (in *WorkbenchReconciler) handleRepositoryRef(ctx context.Context, workbench *v1alpha1.Workbench) (*string, *ctrl.Result, error) {
 	if workbench.Spec.RepositoryRef == nil {
 		return nil, nil, nil
 	}
@@ -275,7 +275,7 @@ func (in *WorkbenchReconciler) handleRepositoryRef(ctx context.Context, workbenc
 		return nil, lo.ToPtr(common.Wait()), fmt.Errorf("repository is not healthy")
 	}
 
-	return repository, nil, nil
+	return repository.Status.ID, nil, nil
 }
 
 func (in *WorkbenchReconciler) handleAgentRuntime(ctx context.Context, workbench *v1alpha1.Workbench) (*string, *ctrl.Result, error) {

@@ -3334,6 +3334,65 @@ func (_c *ConsoleClientMock_DetachStack_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
+// GetAgentRuntime provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) GetAgentRuntime(ctx context.Context, name string) (*client.AgentRuntimeFragment, error) {
+	ret := _m.Called(ctx, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAgentRuntime")
+	}
+
+	var r0 *client.AgentRuntimeFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.AgentRuntimeFragment, error)); ok {
+		return rf(ctx, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.AgentRuntimeFragment); ok {
+		r0 = rf(ctx, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.AgentRuntimeFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetAgentRuntime_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetAgentRuntime'
+type ConsoleClientMock_GetAgentRuntime_Call struct {
+	*mock.Call
+}
+
+// GetAgentRuntime is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+func (_e *ConsoleClientMock_Expecter) GetAgentRuntime(ctx interface{}, name interface{}) *ConsoleClientMock_GetAgentRuntime_Call {
+	return &ConsoleClientMock_GetAgentRuntime_Call{Call: _e.mock.On("GetAgentRuntime", ctx, name)}
+}
+
+func (_c *ConsoleClientMock_GetAgentRuntime_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_GetAgentRuntime_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetAgentRuntime_Call) Return(_a0 *client.AgentRuntimeFragment, _a1 error) *ConsoleClientMock_GetAgentRuntime_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetAgentRuntime_Call) RunAndReturn(run func(context.Context, string) (*client.AgentRuntimeFragment, error)) *ConsoleClientMock_GetAgentRuntime_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetCatalog provides a mock function with given fields: ctx, id, name
 func (_m *ConsoleClientMock) GetCatalog(ctx context.Context, id *string, name *string) (*client.CatalogFragment, error) {
 	ret := _m.Called(ctx, id, name)
