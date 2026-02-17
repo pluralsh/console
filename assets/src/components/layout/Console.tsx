@@ -1,7 +1,7 @@
 import { Flex, MarkdocContextProvider } from '@pluralsh/design-system'
 import { Suspense, useRef } from 'react'
 
-import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
+import { BillingSubscriptionProvider } from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
 import { Outlet } from 'react-router-dom'

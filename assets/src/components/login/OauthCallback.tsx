@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { FullPageLoadingIndicator } from 'components/utils/LoadingIndicator'
 
 import { getChallenge, setRefreshToken, setToken } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
@@ -72,7 +72,7 @@ export function OAuthCallback() {
 
   if (!code) return <OAuthError error={oauthError} />
 
-  if (loading) return <LoadingIndicator />
+  if (loading) return <FullPageLoadingIndicator />
 
   return error ? (
     <div

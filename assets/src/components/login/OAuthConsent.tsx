@@ -1,20 +1,20 @@
-import { useLocation, useNavigate } from 'react-router-dom'
-import queryString, { ParsedQuery } from 'query-string'
 import { Button, Flex, IconFrame } from '@pluralsh/design-system'
+import queryString, { ParsedQuery } from 'query-string'
 import { useCallback } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import { isEmpty } from 'lodash'
 
-import { GqlError } from '../utils/Alert'
-import { PLURAL_MARK, PLURAL_MARK_WHITE } from './constants'
 import {
   useConsentMutation,
   useMeQuery,
   useOidcConsentQuery,
 } from '../../generated/graphql'
-import LoadingIndicator from '../utils/LoadingIndicator'
 import { clearLocalStorage } from '../../helpers/localStorage.ts'
+import { GqlError } from '../utils/Alert'
+import { FullPageLoadingIndicator } from '../utils/LoadingIndicator'
+import { PLURAL_MARK, PLURAL_MARK_WHITE } from './constants'
 import { LoginPortal } from './LoginPortal.tsx'
 
 function Icon({
@@ -77,7 +77,7 @@ export function OAuthConsent() {
     navigate('/login')
   }, [navigate])
 
-  if (!data || userLoading) return <LoadingIndicator />
+  if (!data || userLoading) return <FullPageLoadingIndicator />
 
   if (!userData?.me?.email) {
     logout()
