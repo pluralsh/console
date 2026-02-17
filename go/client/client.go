@@ -9261,14 +9261,14 @@ func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelC
 }
 
 type SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                                                                                                                                                                           "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                                                                                                                                                                                    "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                                                                                                                                                                           "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                                                                                                                                                                                    "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                                                                                                                                                                            "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                                                                                                                                                                            "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -9280,7 +9280,7 @@ func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelC
 	}
 	return t.DNSProbe
 }
-func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -9487,14 +9487,14 @@ func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_Sentinel
 }
 
 type SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                                                                                                                                        "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                                                                                                                                                 "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                                                                                                                                        "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                                                                                                                                                 "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                                                                                                                                         "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                                                                                                                                         "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -9506,7 +9506,7 @@ func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_Sentinel
 	}
 	return t.DNSProbe
 }
-func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -9691,14 +9691,14 @@ func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelChe
 }
 
 type SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                                                                                                                                     "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                                                                                                                                              "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                                                                                                                                     "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                                                                                                                                              "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                                                                                                                                      "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                                                                                                                                      "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -9710,7 +9710,7 @@ func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelChe
 	}
 	return t.DNSProbe
 }
-func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -9895,14 +9895,14 @@ func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_
 }
 
 type SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                                                                                                             "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                                                                                                                      "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                                                                                                             "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                                                                                                                      "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                                                                                                              "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                                                                                                              "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -9914,7 +9914,7 @@ func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_
 	}
 	return t.DNSProbe
 }
-func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -10099,14 +10099,14 @@ func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegra
 }
 
 type SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                                                                         "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                                                                                  "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                                                                         "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                                                                                  "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                                                                          "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                                                                          "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -10118,7 +10118,7 @@ func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegra
 	}
 	return t.DNSProbe
 }
-func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -10285,14 +10285,14 @@ func (t *SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigu
 }
 
 type SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                      "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                               "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                      "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                               "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                       "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                       "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -10304,7 +10304,7 @@ func (t *SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigu
 	}
 	return t.DNSProbe
 }
-func (t *SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -10417,14 +10417,14 @@ func (t *TestCaseConfigurationFragment_Loadbalancer_DNSProbe) GetRetries() *int6
 }
 
 type TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                              "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                       "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                              "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                       "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                               "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                               "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -10436,7 +10436,7 @@ func (t *TestCaseConfigurationFragment_Loadbalancer) GetDNSProbe() *TestCaseConf
 	}
 	return t.DNSProbe
 }
-func (t *TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -20853,14 +20853,14 @@ func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRu
 }
 
 type ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                                                                                                                                                                                                                                        "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                                                                                                                                                                                                                                                 "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                                                                                                                                                                                                                                        "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                                                                                                                                                                                                                                                 "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                                                                                                                                                                                                                                         "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                                                                                                                                                                                                                                         "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -20872,7 +20872,7 @@ func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRu
 	}
 	return t.DNSProbe
 }
-func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -21162,14 +21162,14 @@ func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_Sen
 }
 
 type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                                                                                                                                                                                                            "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                                                                                                                                                                                                                     "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                                                                                                                                                                                                            "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                                                                                                                                                                                                                     "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                                                                                                                                                                                                             "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                                                                                                                                                                                                             "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -21181,7 +21181,7 @@ func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_Sen
 	}
 	return t.DNSProbe
 }
-func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -21388,14 +21388,14 @@ func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFrag
 }
 
 type GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                                                                                                                                                                   "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                                                                                                                                                                            "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                                                                                                                                                                   "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                                                                                                                                                                            "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                                                                                                                                                                    "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                                                                                                                                                                    "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -21407,7 +21407,7 @@ func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFrag
 	}
 	return t.DNSProbe
 }
-func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -21657,14 +21657,14 @@ func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_
 }
 
 type UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                                                                                                                                                                                                                           "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                                                                                                                                                                                                                                    "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                                                                                                                                                                                                                           "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                                                                                                                                                                                                                                    "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                                                                                                                                                                                                                            "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                                                                                                                                                                                                                            "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -21676,7 +21676,7 @@ func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_
 	}
 	return t.DNSProbe
 }
-func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -21872,14 +21872,14 @@ func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFrag
 }
 
 type CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                                                                                                                                                                   "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                                                                                                                                                                            "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                                                                                                                                                                   "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                                                                                                                                                                            "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                                                                                                                                                                    "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                                                                                                                                                                    "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -21891,7 +21891,7 @@ func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFrag
 	}
 	return t.DNSProbe
 }
-func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -22076,14 +22076,14 @@ func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFrag
 }
 
 type UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                                                                                                                                                                   "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                                                                                                                                                                            "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                                                                                                                                                                   "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                                                                                                                                                                            "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                                                                                                                                                                    "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                                                                                                                                                                    "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -22095,7 +22095,7 @@ func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFrag
 	}
 	return t.DNSProbe
 }
-func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -22291,14 +22291,14 @@ func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Conf
 }
 
 type GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer struct {
-	Annotations *string                                                                                                                                                                                                                                          "json:\"annotations,omitempty\" graphql:\"annotations\""
+	Annotations map[string]any                                                                                                                                                                                                                                   "json:\"annotations,omitempty\" graphql:\"annotations\""
 	DNSProbe    *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer_DNSProbe "json:\"dnsProbe,omitempty\" graphql:\"dnsProbe\""
-	Labels      *string                                                                                                                                                                                                                                          "json:\"labels,omitempty\" graphql:\"labels\""
+	Labels      map[string]any                                                                                                                                                                                                                                   "json:\"labels,omitempty\" graphql:\"labels\""
 	NamePrefix  string                                                                                                                                                                                                                                           "json:\"namePrefix\" graphql:\"namePrefix\""
 	Namespace   string                                                                                                                                                                                                                                           "json:\"namespace\" graphql:\"namespace\""
 }
 
-func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() *string {
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetAnnotations() map[string]any {
 	if t == nil {
 		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}
@@ -22310,7 +22310,7 @@ func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Conf
 	}
 	return t.DNSProbe
 }
-func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() *string {
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer) GetLabels() map[string]any {
 	if t == nil {
 		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Loadbalancer{}
 	}

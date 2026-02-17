@@ -7032,9 +7032,9 @@ type SentinelCheckIntegrationTestCaseLoadbalancerConfiguration struct {
 	// the name prefix to use for this test case
 	NamePrefix string `json:"namePrefix"`
 	// the annotations to use for this test case
-	Annotations *string `json:"annotations,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 	// the labels to use for this test case
-	Labels *string `json:"labels,omitempty"`
+	Labels map[string]any `json:"labels,omitempty"`
 	// the dns probe configuration to use for this test case
 	DNSProbe *SentinelCheckIntegrationTestCaseDNSProbeConfiguration `json:"dnsProbe,omitempty"`
 }

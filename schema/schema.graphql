@@ -2825,10 +2825,10 @@ type SentinelCheckIntegrationTestCaseLoadbalancerConfiguration {
   namePrefix: String!
 
   "the annotations to use for this test case"
-  annotations: Json
+  annotations: Map
 
   "the labels to use for this test case"
-  labels: Json
+  labels: Map
 
   "the dns probe configuration to use for this test case"
   dnsProbe: SentinelCheckIntegrationTestCaseDnsProbeConfiguration
