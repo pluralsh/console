@@ -20,7 +20,7 @@ export function useSelectedProjectContext() {
   const ctx = useContext(SelectedProjectContext)
 
   if (!ctx)
-    throw Error('useProjectsContext() must be used within a ProjectsContext')
+    throw Error('useSelectedProjectContext() must be used within a SelectedProjectContext')
 
   return ctx
 }
