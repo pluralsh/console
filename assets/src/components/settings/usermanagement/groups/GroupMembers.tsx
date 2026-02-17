@@ -71,7 +71,6 @@ export function GroupMembers({
     <Table
       hideHeader
       fullHeightWrap
-      fillLevel={1}
       data={members}
       loading={!data && loading}
       loadingSkeletonRows={4}
