@@ -8,7 +8,7 @@ import NotificationsLauncher from '../notifications/NotificationsLauncher'
 
 import { ChatbotLauncher } from 'components/ai/chatbot/Chatbot'
 import DemoBanner from './DemoBanner'
-import { HeaderProjectSelect } from './HeaderProjectSelect.tsx'
+import { HeaderProjectSelect } from './HeaderProjectSelect'
 import { ProfileMenu } from './ProfileMenu'
 
 const APP_ICON_LIGHT = '/plural-logo.png'
