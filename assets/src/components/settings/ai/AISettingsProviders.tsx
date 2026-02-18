@@ -3,7 +3,6 @@ import { FileDrop, FileDropFile } from 'components/utils/FileDrop.tsx'
 import { isEmpty } from 'lodash'
 import { useCallback, useState } from 'react'
 import { DropzoneOptions } from 'react-dropzone'
-import { useTheme } from 'styled-components'
 import {
   AiProvider,
   AiSettings,
@@ -127,8 +126,6 @@ export function OpenAISettings({
     update: NonNullable<Partial<AiSettingsAttributes['openai']>>
   ) => void
 }) {
-  const theme = useTheme()
-
   return (
     <>
       <FormField
@@ -137,6 +134,7 @@ export function OpenAISettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.model}
           onChange={(e) => {
@@ -150,6 +148,7 @@ export function OpenAISettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.embeddingModel}
           onChange={(e) => {
@@ -163,6 +162,7 @@ export function OpenAISettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.baseUrl}
           onChange={(e) => {
@@ -176,7 +176,7 @@ export function OpenAISettings({
         flex={1}
       >
         <InputRevealer
-          css={{ background: theme.colors['fill-two'] }}
+          raised
           disabled={!enabled}
           value={settings?.accessToken ?? undefined}
           onChange={(e) => {
@@ -199,8 +199,6 @@ export function AnthropicSettings({
     update: NonNullable<Partial<AiSettingsAttributes['anthropic']>>
   ) => void
 }) {
-  const theme = useTheme()
-
   return (
     <>
       <FormField
@@ -209,6 +207,7 @@ export function AnthropicSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.model}
           onChange={(e) => {
@@ -222,7 +221,7 @@ export function AnthropicSettings({
         flex={1}
       >
         <InputRevealer
-          css={{ background: theme.colors['fill-two'] }}
+          raised
           disabled={!enabled}
           value={settings?.accessToken ?? undefined}
           onChange={(e) => {
@@ -245,8 +244,6 @@ export function OllamaSettings({
     update: NonNullable<Partial<AiSettingsAttributes['ollama']>>
   ) => void
 }) {
-  const theme = useTheme()
-
   return (
     <>
       <FormField
@@ -255,6 +252,7 @@ export function OllamaSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.model}
           onChange={(e) => {
@@ -269,6 +267,7 @@ export function OllamaSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.url}
           onChange={(e) => {
@@ -283,7 +282,7 @@ export function OllamaSettings({
         flex={1}
       >
         <InputRevealer
-          css={{ background: theme.colors['fill-two'] }}
+          raised
           disabled={!enabled}
           value={settings?.authorization ?? undefined}
           onChange={(e) => {
@@ -306,8 +305,6 @@ export function AzureSettings({
     update: NonNullable<Partial<AiSettingsAttributes['azure']>>
   ) => void
 }) {
-  const theme = useTheme()
-
   return (
     <>
       <FormField
@@ -316,6 +313,7 @@ export function AzureSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.model}
           onChange={(e) => {
@@ -330,6 +328,7 @@ export function AzureSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.apiVersion}
           onChange={(e) => {
@@ -343,6 +342,7 @@ export function AzureSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.embeddingModel}
           onChange={(e) => {
@@ -357,6 +357,7 @@ export function AzureSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.endpoint}
           onChange={(e) => {
@@ -371,7 +372,7 @@ export function AzureSettings({
         flex={1}
       >
         <InputRevealer
-          css={{ background: theme.colors['fill-two'] }}
+          raised
           disabled={!enabled}
           value={settings?.accessToken ?? undefined}
           onChange={(e) => {
@@ -394,8 +395,6 @@ export function BedrockSettings({
     update: NonNullable<Partial<AiSettingsAttributes['bedrock']>>
   ) => void
 }) {
-  const theme = useTheme()
-
   return (
     <>
       <FormField
@@ -405,6 +404,7 @@ export function BedrockSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.modelId}
           onChange={(e) => {
@@ -418,6 +418,7 @@ export function BedrockSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.embeddingModel}
           onChange={(e) => {
@@ -431,6 +432,7 @@ export function BedrockSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.accessToken}
           onChange={(e) => {
@@ -444,7 +446,7 @@ export function BedrockSettings({
         flex={1}
       >
         <InputRevealer
-          css={{ background: theme.colors['fill-two'] }}
+          raised
           disabled={!enabled}
           value={settings?.region ?? undefined}
           onChange={(e) => {
@@ -515,6 +517,7 @@ export function VertexSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.model}
           onChange={(e) => {
@@ -528,6 +531,7 @@ export function VertexSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.embeddingModel}
           onChange={(e) => {
@@ -541,6 +545,7 @@ export function VertexSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.project}
           onChange={(e) => {
@@ -554,6 +559,7 @@ export function VertexSettings({
         flex={1}
       >
         <Input
+          raised
           disabled={!enabled}
           value={settings?.location}
           onChange={(e) => {

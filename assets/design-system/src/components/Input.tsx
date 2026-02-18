@@ -2,7 +2,7 @@ import type {
   InputProps as HonorableInputProps,
   ThemeProviderProps,
 } from 'honorable'
-import { ExtendTheme, Input as HonorableInput, mergeTheme } from 'honorable'
+import { ExtendTheme, Input as HonorableInput } from 'honorable'
 import { type ComponentProps, type FC, type ReactNode, useRef } from 'react'
 import { mergeProps } from 'react-aria'
 import { mergeRefs } from 'react-merge-refs'
@@ -13,7 +13,7 @@ import { simulateInputChange } from '../utils/simulateInputChange'
 import { useFillLevel } from './contexts/FillLevelContext'
 import IconFrame from './IconFrame'
 import CloseIcon from './icons/CloseIcon'
-import { TitleContent } from './Select'
+import { parentFillLevelToBackground, TitleContent } from './Select'
 import Tooltip from './Tooltip'
 
 import { useFormField } from './FormField'
@@ -25,7 +25,7 @@ export type InputProps = HonorableInputProps & {
   prefix?: ReactNode
   titleContent?: ReactNode
   showClearButton?: boolean
-  themeExtension?: Record<string, any>
+  raised?: boolean
 }
 
 const PrefixSuffix = styled.div(({ theme }) => ({
@@ -89,17 +89,17 @@ function Input({
   showClearButton,
   titleContent,
   inputProps,
-  themeExtension: themeExtensionProp,
+  raised = false,
   ...props
 }: InputProps) {
-  const theme = useTheme()
+  const { colors, mode } = useTheme()
   const inputRef = useRef<HTMLInputElement>(null)
 
   inputProps = {
     ...(inputProps ?? {}),
     ref: mergeRefs([inputRef, ...(inputProps?.ref ? [inputProps.ref] : [])]),
   }
-  let themeExtension: any = {
+  const themeExtension: any = {
     Input: {
       Root: [
         {
@@ -139,8 +139,6 @@ function Input({
       ],
     },
   }
-
-  themeExtension = mergeTheme(themeExtension, themeExtensionProp)
 
   const parentFillLevel = useFillLevel()
   const size = (props as any).large
@@ -196,7 +194,11 @@ function Input({
             </>
           ) : undefined
         }
-        backgroundColor={theme.colors['fill-zero']}
+        backgroundColor={
+          !raised || mode === 'light'
+            ? colors['fill-zero']
+            : colors[parentFillLevelToBackground[parentFillLevel]]
+        }
         inputProps={inputProps}
         {...props}
       />

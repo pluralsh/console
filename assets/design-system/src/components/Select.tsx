@@ -33,7 +33,7 @@ import {
 import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 import CaretDownIcon from './icons/CaretDownIcon'
 
-const parentFillLevelToBackground = {
+export const parentFillLevelToBackground = {
   0: 'fill-one',
   1: 'fill-two',
   2: 'fill-three',
