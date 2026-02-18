@@ -126,6 +126,20 @@ defmodule Console.GraphQL.Queries.Deployments.AgentQueriesTest do
       """, %{"id" => runtime.id}, %{current_user: insert(:user)})
     end
 
+    test "a user can fetch a runtime by name and cluster id" do
+      user    = insert(:user)
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster, create_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"agentRuntime" => found}}} = run_query("""
+        query AgentRuntime($name: String!, $clusterId: ID!) {
+          agentRuntime(name: $name, clusterId: $clusterId) { id }
+        }
+      """, %{"name" => runtime.name, "clusterId" => cluster.id}, %{current_user: user})
+
+      assert found["id"] == runtime.id
+    end
+
     test "a cluster can fetch their own runtime" do
       cluster = insert(:cluster)
       runtime = insert(:agent_runtime, cluster: cluster)
