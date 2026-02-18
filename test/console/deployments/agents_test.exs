@@ -4,6 +4,26 @@ defmodule Console.Deployments.AgentsTest do
   alias Console.PubSub
   use Mimic
 
+  describe "get_agent_runtime_by_name!/1" do
+    test "it can fetch a runtime by name" do
+      runtime = insert(:agent_runtime, name: "gemini")
+      insert(:agent_runtime, name: "claude")
+
+      found = Agents.get_agent_runtime_by_name!("gemini")
+
+      assert found.id == runtime.id
+      assert found.name == "gemini"
+    end
+
+    test "it raises when runtime is not found" do
+      insert(:agent_runtime, name: "claude")
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Agents.get_agent_runtime_by_name!("nonexistent")
+      end
+    end
+  end
+
   describe "upsert_agent_runtime/3" do
     test "it can create a new agent run" do
       cluster = insert(:cluster)

@@ -37,6 +37,12 @@ defmodule Console.Deployments.Agents do
   def get_agent_runtime!(cluster_id, name),
     do: Repo.get_by!(AgentRuntime, cluster_id: cluster_id, name: name)
 
+  def get_agent_runtime_by_name!(name) do
+    AgentRuntime.for_name(name)
+    |> AgentRuntime.limit(1)
+    |> Repo.one!()
+  end
+
   def get_agent_run!(id), do: Repo.get!(AgentRun, id)
 
   @doc """
