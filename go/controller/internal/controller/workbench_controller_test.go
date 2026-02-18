@@ -10,6 +10,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -27,8 +28,10 @@ var _ = Describe("Workbench Controller", Ordered, func() {
 			workbenchName    = "test"
 			namespace        = "default"
 			id               = "123"
+			clusterHandle    = "test-cluster"
 			agentRuntimeName = "test-agent-runtime"
 			agentRuntimeID   = "agent-runtime-123"
+			clusterID        = "cluster-123"
 			tool1Name        = "workbenchtool1"
 			tool2Name        = "workbenchtool2"
 			tool1ID          = "tool-id-1"
@@ -61,6 +64,9 @@ var _ = Describe("Workbench Controller", Ordered, func() {
 								HTTP: &v1alpha1.WorkbenchToolHTTPConfig{
 									URL:    "https://example.com",
 									Method: gqlclient.WorkbenchToolHTTPMethodGet,
+									InputSchema: &runtime.RawExtension{
+										Raw: []byte(`{"type":"object"}`),
+									},
 								},
 							},
 						},
@@ -85,7 +91,7 @@ var _ = Describe("Workbench Controller", Ordered, func() {
 					},
 					Spec: v1alpha1.WorkbenchSpec{
 						Name:         lo.ToPtr(workbenchName),
-						AgentRuntime: lo.ToPtr(agentRuntimeName),
+						AgentRuntime: lo.ToPtr(clusterHandle + "/" + agentRuntimeName),
 						ToolRefs: []corev1.ObjectReference{
 							{Name: tool1Name, Namespace: namespace},
 							{Name: tool2Name, Namespace: namespace},
@@ -153,7 +159,8 @@ var _ = Describe("Workbench Controller", Ordered, func() {
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetWorkbenchTiny", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("GetWorkbench", mock.Anything, mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
-			fakeConsoleClient.On("GetAgentRuntime", mock.Anything, agentRuntimeName).Return(&gqlclient.AgentRuntimeFragment{ID: agentRuntimeID, Name: agentRuntimeName}, nil)
+			fakeConsoleClient.On("GetClusterByHandle", lo.ToPtr(clusterHandle)).Return(&gqlclient.ClusterFragment{ID: clusterID, Handle: lo.ToPtr(clusterHandle)}, nil)
+			fakeConsoleClient.On("GetAgentRuntime", mock.Anything, agentRuntimeName, clusterID).Return(&gqlclient.AgentRuntimeFragment{ID: agentRuntimeID, Name: agentRuntimeName}, nil)
 			fakeConsoleClient.On("CreateWorkbench", mock.Anything, mock.Anything).Return(test.workbenchFragment, nil)
 
 			reconciler := &controller.WorkbenchReconciler{
