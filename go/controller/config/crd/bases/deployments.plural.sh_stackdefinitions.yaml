@@ -173,6 +173,53 @@ spec:
                     description: Version of the IaC tool to use.
                     type: string
                 type: object
+              deleteSteps:
+                description: |-
+                  DeleteSteps defines a list of custom run steps that will be executed when
+                  deleting/destroying a stack using this definition. Each step specifies a command,
+                  arguments, execution stage, and approval requirements.
+                items:
+                  description: |-
+                    CustomRunStep defines a custom execution step within a StackDefinition template.
+                    Each step represents a discrete action that will be performed during stack execution,
+                    with control over when it runs and whether it requires manual approval.
+                  properties:
+                    args:
+                      description: |-
+                        Args provides additional command-line arguments that should be passed
+                        to the command specified in Cmd during execution.
+                      items:
+                        type: string
+                      type: array
+                    cmd:
+                      description: |-
+                        Cmd specifies the executable command that should be run as part of this
+                        custom step. This can be any command available in the execution environment.
+                      type: string
+                    requireApproval:
+                      description: |-
+                        RequireApproval determines whether this step requires manual approval
+                        before it can proceed. When true, the stack run will pause at this step
+                        until an authorized user approves its execution.
+                      type: boolean
+                    stage:
+                      description: |-
+                        Stage controls at which phase of the stack lifecycle this step should be executed.
+                        Valid stages include PLAN, VERIFY, APPLY, INIT, and DESTROY, allowing fine-grained
+                        control over when custom logic runs in relation to the main IaC operations.
+                      enum:
+                      - PLAN
+                      - VERIFY
+                      - APPLY
+                      - INIT
+                      - DESTROY
+                      type: string
+                  required:
+                  - args
+                  - cmd
+                  - stage
+                  type: object
+                type: array
               description:
                 description: |-
                   Description provides a human-readable explanation of what this StackDefinition

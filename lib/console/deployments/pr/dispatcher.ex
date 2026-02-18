@@ -78,6 +78,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
     impl = dispatcher(conn)
     with {:ok, slug} <- impl.slug(url) do
       impl.create(%PrAutomation{
+        ignore_templates: true,
         title: title,
         connection_id: conn.id,
         connection: conn,
@@ -93,7 +94,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
     impl.webhook(conn, hook)
   end
 
-  def pr(%ScmWebhook{} = hook, body) do
+  def pr_data(%ScmWebhook{} = hook, body) do
     impl = dispatcher(hook)
     impl.pr(body)
   end

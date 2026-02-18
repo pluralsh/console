@@ -297,6 +297,21 @@ defmodule Console.Deployments.ClustersTest do
       assert svc.helm.values == "bogus: values"
     end
 
+    test "it will error if the cluster limit is exceeded" do
+      user = admin_user()
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      insert(:cluster)
+
+      expect(Console.Features, :cluster_max, fn -> 1 end)
+
+      {:error, _} = Clusters.create_cluster(%{name: "test"}, user)
+
+      expect(Console.Features, :cluster_max, fn -> 2 end)
+
+      {:ok, _} = Clusters.create_cluster(%{name: "test"}, user)
+    end
+
     test "it will respect project rbac" do
       user = insert(:user)
       proj = insert(:project, write_bindings: [%{user_id: user.id}])

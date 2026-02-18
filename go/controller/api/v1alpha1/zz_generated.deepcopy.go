@@ -8728,6 +8728,13 @@ func (in *StackDefinitionSpec) DeepCopyInto(out *StackDefinitionSpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.DeleteSteps != nil {
+		in, out := &in.DeleteSteps, &out.DeleteSteps
+		*out = make([]CustomRunStep, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
 	if in.Configuration != nil {
 		in, out := &in.Configuration, &out.Configuration
 		*out = new(StackConfiguration)

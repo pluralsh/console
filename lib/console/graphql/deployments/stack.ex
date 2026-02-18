@@ -159,6 +159,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :name,          non_null(:string)
     field :description,   :string
     field :steps,         list_of(:custom_step_attributes)
+    field :delete_steps,  list_of(:custom_step_attributes)
     field :configuration, :stack_configuration_attributes
   end
 
@@ -492,7 +493,8 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     field :configuration, non_null(:stack_configuration)
 
-    field :steps, list_of(:custom_run_step)
+    field :steps,        list_of(:custom_run_step)
+    field :delete_steps, list_of(:custom_run_step)
 
     timestamps()
   end
