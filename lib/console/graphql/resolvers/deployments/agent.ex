@@ -14,15 +14,20 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
 
   def agent_runtime(%{name: name}, %{context: %{cluster: cluster}}) when is_binary(name) do
     Agents.get_agent_runtime!(cluster.id, name)
-    |> allow(cluster, :read)
+    |> allow(cluster, :create)
   end
 
-  def agent_runtime(%{id: id}, ctx) do
+  def agent_runtime(%{name: name, cluster_id: cluster_id}, ctx) when is_binary(name) and is_binary(cluster_id) do
+    Agents.get_agent_runtime!(cluster_id, name)
+    |> allow(actor(ctx), :create)
+  end
+
+  def agent_runtime(%{id: id}, ctx) when is_binary(id) do
     Agents.get_agent_runtime!(id)
     |> allow(actor(ctx), :create)
   end
 
-  def agent_runtime(_, _), do: {:error, "Must specify either name or id"}
+  def agent_runtime(_, _), do: {:error, "Must specify either name (with clusterId if using user authentication) or id"}
 
   def agent_run(%{id: id}, ctx) do
     Agents.get_agent_run!(id)

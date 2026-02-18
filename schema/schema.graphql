@@ -499,7 +499,7 @@ type RootQueryType {
 
   agentRunRepositories(after: String, first: Int, before: String, last: Int, q: String): AgentRunRepositoryConnection
 
-  agentRuntime(id: ID, name: String): AgentRuntime
+  agentRuntime(id: ID, name: String, clusterId: ID): AgentRuntime
 
   agentRun(id: ID!): AgentRun
 

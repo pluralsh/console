@@ -274,8 +274,9 @@ defmodule Console.GraphQl.Deployments.Agent do
   object :public_agent_queries do
     field :agent_runtime, :agent_runtime do
       middleware Authenticated, :cluster
-      arg :id,   :id
-      arg :name, :string
+      arg :id,         :id
+      arg :name,       :string
+      arg :cluster_id, :id
 
       resolve &Deployments.agent_runtime/2
     end

@@ -9824,6 +9824,7 @@ export type RootQueryTypeAgentRunsArgs = {
 
 
 export type RootQueryTypeAgentRuntimeArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
 };
