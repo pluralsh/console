@@ -103,6 +103,7 @@ spec:
                         format: uri
                         type: string
                     required:
+                    - inputSchema
                     - method
                     - url
                     type: object

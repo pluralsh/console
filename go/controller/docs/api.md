@@ -5197,7 +5197,7 @@ _Appears in:_
 | `method` _[WorkbenchToolHTTPMethod](#workbenchtoolhttpmethod)_ | Method is the HTTP method (GET, POST, PUT, DELETE, PATCH). |  | Enum: [GET POST PUT DELETE PATCH] <br />Required: \{\} <br /> |
 | `headers` _[WorkbenchToolHTTPHeader](#workbenchtoolhttpheader) array_ | Headers are optional request headers. |  | Optional: \{\} <br /> |
 | `body` _string_ | Body is the optional request body. |  | Optional: \{\} <br />Type: string <br /> |
-| `inputSchema` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | InputSchema is the JSON schema for the tool input (arbitrary JSON). |  | Optional: \{\} <br /> |
+| `inputSchema` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | InputSchema is the JSON schema for the tool input (arbitrary JSON). |  | Required: \{\} <br /> |
 
 
 #### WorkbenchToolHTTPHeader
