@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Outlet, RouteObject } from 'react-router-dom'
 
 import Console from 'components/layout/Console'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { FullPageLoadingIndicator } from 'components/utils/LoadingIndicator'
 
 import { PluralRouteErrorBoundary } from 'components/cd/PluralErrorBoundary.tsx'
 import Invite from 'components/login/Invite'
@@ -19,7 +19,7 @@ const Sandbox =
 
 function Root() {
   return (
-    <Suspense fallback={<LoadingIndicator />}>
+    <Suspense fallback={<FullPageLoadingIndicator />}>
       <Outlet />
     </Suspense>
   )

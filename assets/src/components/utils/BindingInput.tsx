@@ -10,7 +10,7 @@ import {
 } from '@pluralsh/design-system'
 import { useEffect, useState } from 'react'
 import { ApolloClient, useApolloClient } from '@apollo/client'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import {
   SearchGroupsDocument,
@@ -114,6 +114,7 @@ export function BindingInput({
   inputProps,
   icon,
 }: any) {
+  const { colors } = useTheme()
   const client = useApolloClient()
   const [suggestions, setSuggestions] = useState([])
   const fetch = fetcher || FETCHER[type]
@@ -131,7 +132,10 @@ export function BindingInput({
       onRemove={remove}
       onAdd={({ value }) => add(value)}
       onChange={({ target: { value } }) => fetch(client, value, setSuggestions)}
-      inputProps={inputProps}
+      inputProps={{
+        style: { background: colors['fill-two'] },
+        ...inputProps,
+      }}
     />
   )
 }

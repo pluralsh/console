@@ -176,20 +176,19 @@
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
   <div id="loading-placeholder">
-    <div class="spinner">
-      <div class="spinner-graphic">
-        <div class="bg">
-          <div class="bg-image"></div>
-          <div class="bg-image"></div>
-          <div class="bg-image"></div>
-        </div>
-      </div>
-      <h1>
-        Loading Plural Console<span data-dot-num="1" class="dot">.</span><span data-dot-num="2"
-          class="dot">.</span><span data-dot-num="3" class="dot">.</span>
-      </h1>
-    </div>
-    <script src="/page-load-spinner/page-load-spinner.js"></script>
+    <svg class="plural-logo-skeleton-shimmer" width="96" height="96" viewBox="0 0 16 16" fill="none"
+      xmlns="http://www.w3.org/2000/svg">
+      <use href="/page-load-spinner/plural-logo-skeleton-shape.svg#plural-logo-skeleton-shape"
+        fill="url(#loading-placeholder-shimmer-grad)" />
+      <defs>
+        <linearGradient id="loading-placeholder-shimmer-grad" x1="0" y1="8" x2="16" y2="8"
+          gradientUnits="userSpaceOnUse">
+          <stop offset="0%" />
+          <stop offset="50%" />
+          <stop offset="100%" />
+        </linearGradient>
+      </defs>
+    </svg>
   </div>
   <script type="module" src="/src/index.tsx"></script>
   <!--

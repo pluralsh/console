@@ -1,25 +1,23 @@
-import { EmptyState, Input, SearchIcon, Table } from '@pluralsh/design-system'
+import { Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
-import { ComponentProps, useContext, useMemo, useState } from 'react'
+import { ComponentProps, use, useMemo, useState } from 'react'
 
 import { useUsersQuery } from 'generated/graphql'
 
 import { LoginContext } from 'components/contexts'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { GqlError } from 'components/utils/Alert'
 
-import { GridTableWrapper } from 'components/utils/layout/ResponsiveGridLayouts'
-
 import styled from 'styled-components'
 
+import { mapExistingNodes } from 'utils/graphql'
 import UserInvite from './UserInvite'
 import { usersCols } from './UsersColumns'
 
-export default function UsersList() {
-  const { configuration } = useContext<any>(LoginContext)
+export function UsersList() {
+  const { configuration } = use(LoginContext)
   const [q, setQ] = useState('')
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -28,13 +26,9 @@ export default function UsersList() {
       { q }
     )
 
-  const users = useMemo(
-    () => data?.users?.edges?.map((edge) => edge?.node),
-    [data?.users?.edges]
-  )
+  const users = useMemo(() => mapExistingNodes(data?.users), [data?.users])
 
   if (error) return <GqlError error={error} />
-  if (!data?.users?.edges) return <LoadingIndicator />
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
     meta: { q, gridTemplateColumns: '1fr auto' },
@@ -48,35 +42,31 @@ export default function UsersList() {
         startIcon={<SearchIcon color="text-light" />}
         onChange={({ target: { value } }) => setQ(value)}
         backgroundColor="fill-zero"
+        flexShrink={0}
       />
-      {!isEmpty(users) ? (
-        <GridTableWrapper>
-          <Table
-            virtualizeRows
-            rowBg="base"
-            data={users || []}
-            columns={usersCols}
-            hideHeader
-            hasNextPage={pageInfo?.hasNextPage}
-            fetchNextPage={fetchNextPage}
-            isFetchingNextPage={loading}
-            onVirtualSliceChange={setVirtualSlice}
-            reactTableOptions={reactTableOptions}
-            height={'100%'}
-          />
-        </GridTableWrapper>
-      ) : (
-        <EmptyState
-          message={
-            isEmpty(q)
-              ? "Looks like you don't have any users yet."
-              : `No users found for ${q}`
-          }
-        >
-          {/* Invites are only available when not using login with Plural. */}
-          {configuration && !configuration?.pluralLogin && <UserInvite />}
-        </EmptyState>
-      )}
+      <Table
+        hideHeader
+        fullHeightWrap
+        virtualizeRows
+        rowBg="base"
+        data={users}
+        columns={usersCols}
+        loading={!data && loading}
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+        reactTableOptions={reactTableOptions}
+        emptyStateProps={{
+          message: isEmpty(q)
+            ? "Looks like you don't have any users yet."
+            : `No users found for ${q}`,
+          // invites are only available when not using login with Plural.
+          children: configuration && !configuration?.pluralLogin && (
+            <UserInvite />
+          ),
+        }}
+      />
     </ListWrapperSC>
   )
 }
@@ -86,4 +76,5 @@ export const ListWrapperSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.small,
   height: '100%',
+  minHeight: 0,
 }))

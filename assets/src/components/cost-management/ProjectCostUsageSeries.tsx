@@ -6,7 +6,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { COLORS } from 'utils/color'
 
-import { useProjectsContext } from 'components/contexts/ProjectsContext'
+import { SliceTooltip } from 'components/utils/ChartTooltip'
 import { useGraphTheme } from 'components/utils/Graph'
 import {
   ForecastingLayer,
@@ -15,16 +15,19 @@ import {
   calculateLinearRegression,
   getYScale,
 } from 'components/utils/NivoLineForecastingLayer'
-import { ProjectUsageHistoryFragment } from 'generated/graphql'
+import {
+  ProjectUsageHistoryFragment,
+  useProjectsTinyQuery,
+} from 'generated/graphql'
 import { groupBy, isEmpty, isNil, pick } from 'lodash'
 import { useMemo } from 'react'
 import { addDays, formatDateTime } from 'utils/datetime'
+import { mapExistingNodes } from 'utils/graphql'
 import { METRIC_OPTIONS, ProjectUsageMetric } from './CostManagementChartView'
 import {
   formatCpu,
   formatMemory,
 } from './details/recommendations/ClusterScalingRecsTableCols'
-import { SliceTooltip } from 'components/utils/ChartTooltip'
 
 export function ProjectUsageTimeSeries({
   data,
@@ -43,7 +46,7 @@ export function ProjectUsageTimeSeries({
   forecastingEnabled: boolean
   forecastingDays: Nullable<number>
 }) {
-  const { projects } = useProjectsContext()
+  const { data: projectsData } = useProjectsTinyQuery()
   const graphTheme = useGraphTheme()
 
   const { graphData, trendLineData, yScale } = useMemo(() => {
@@ -56,7 +59,10 @@ export function ProjectUsageTimeSeries({
       ([projectId, points], i) => {
         const timestamps = new Set() // for avoiding duplicates
         const newLineData: LineGraphData = {
-          id: projects.find((p) => p.id === projectId)?.name ?? `Unknown-${i}`,
+          id:
+            mapExistingNodes(projectsData?.projects).find(
+              (p) => p.id === projectId
+            )?.name ?? `Unknown-${i}`,
           data: [],
         }
         points.forEach((point) => {
@@ -97,7 +103,14 @@ export function ProjectUsageTimeSeries({
       trendLineData,
       yScale: getYScale(forecastingEnabled, originalData, trendLineData),
     }
-  }, [data, metric, projectId, projects, forecastingEnabled, forecastingDays])
+  }, [
+    data,
+    metric,
+    projectId,
+    projectsData,
+    forecastingEnabled,
+    forecastingDays,
+  ])
 
   if (error) return <GqlError error={error} />
   if (!graphData)
