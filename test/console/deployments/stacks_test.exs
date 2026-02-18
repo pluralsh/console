@@ -552,6 +552,50 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}, :timer.seconds(10)
     end
 
+    test "it can create a new delete run for a stack with a stack definition" do
+      definition = insert(:stack_definition, delete_steps: [
+        %{cmd: "echo", args: ["hello world"], stage: :plan},
+        %{cmd: "sleep", args: ["100"], stage: :apply}
+      ])
+
+      stack = insert(:stack,
+        definition: definition,
+        type: :custom,
+        deleted_at: Timex.now(),
+        environment: [%{name: "ENV", value: "1"}],
+        files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "terraform"}
+      )
+
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+
+      {:ok, run} = Stacks.poll(stack)
+      assert run.stack_id == stack.id
+      assert run.status == :queued
+      assert run.message == "a commit message"
+      assert run.cluster_id == stack.cluster_id
+      assert run.repository_id == stack.repository_id
+      assert run.git.ref == "new-sha"
+      assert run.git.folder == stack.git.folder
+      [first, second] = run.steps
+      assert first.cmd == "echo"
+      assert first.args == ["hello world"]
+      assert first.index == 0
+      assert first.stage == :plan
+      assert second.cmd == "sleep"
+      assert second.args == ["100"]
+      assert second.index == 1
+      assert second.stage == :apply
+
+      stack = refetch(stack)
+      assert stack.sha == "new-sha"
+      %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
+
+      [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
+      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}, :timer.seconds(10)
+    end
+
     test "it can create a new run from a pr if the sha changes" do
       stack = insert(:stack,
         environment: [%{name: "ENV", value: "1"}],

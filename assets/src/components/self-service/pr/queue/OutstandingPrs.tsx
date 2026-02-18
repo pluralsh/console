@@ -10,15 +10,12 @@ import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { prColumns } from './PrQueueColumns'
-import { useTheme } from 'styled-components'
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const PR_STATUS_TAB_KEYS = ['ALL', 'OPEN', 'CLOSED'] as const
+const _PR_STATUS_TAB_KEYS = ['ALL', 'OPEN', 'CLOSED'] as const
 
-type PrStatusTabKey = (typeof PR_STATUS_TAB_KEYS)[number]
+type PrStatusTabKey = (typeof _PR_STATUS_TAB_KEYS)[number]
 
 export function OutstandingPrs() {
-  const { colors } = useTheme()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 200)
   const [_statusFilter, _setStatusFilter] = useState<PrStatusTabKey>()
@@ -55,7 +52,7 @@ export function OutstandingPrs() {
         showClearButton
         value={searchString}
         onChange={(e) => setSearchString(e.currentTarget.value)}
-        css={{ flexGrow: 1, background: colors['fill-one'] }}
+        css={{ flexGrow: 1 }}
       />
       <Table
         virtualizeRows

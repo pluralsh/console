@@ -1,25 +1,20 @@
-import { ReactNode, useMemo } from 'react'
-import { dayjsExtended as dayjs, isBefore, toDateOrUndef } from 'utils/datetime'
 import SubscriptionContext, {
   SubscriptionContextType,
 } from 'components/contexts/SubscriptionContext'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import styled from 'styled-components'
+import { ReactNode, useMemo } from 'react'
+import { dayjsExtended as dayjs, isBefore, toDateOrUndef } from 'utils/datetime'
 
-import { useSubscriptionQuery } from '../../generated/graphql.ts'
-
-const Error = styled.div({ textAlign: 'center' })
+import { useSubscriptionSuspenseQuery } from '../../generated/graphql.ts'
 
 type BillingSubscriptionProviderPropsType = {
   children: ReactNode
 }
 
-export default function BillingSubscriptionProvider({
+export function BillingSubscriptionProvider({
   children,
 }: BillingSubscriptionProviderPropsType) {
-  const { data, loading, error, refetch } = useSubscriptionQuery({
+  const { data, refetch } = useSubscriptionSuspenseQuery({
     fetchPolicy: 'network-only',
-    pollInterval: 60_000,
   })
 
   const subscriptionContextValue = useMemo<SubscriptionContextType>(() => {
@@ -65,14 +60,6 @@ export default function BillingSubscriptionProvider({
       refetch,
     }
   }, [data, refetch])
-
-  if (error)
-    return (
-      <Error>
-        An error occured, please reload the page or contact support.
-      </Error>
-    )
-  if (loading) return <LoadingIndicator />
 
   return (
     <SubscriptionContext value={subscriptionContextValue}>

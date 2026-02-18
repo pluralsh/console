@@ -1,34 +1,24 @@
-import { ValidatedInput } from '@pluralsh/design-system'
-import { useMemo, useState } from 'react'
+import { Flex } from '@pluralsh/design-system'
 import { BindingInput } from 'components/utils/BindingInput'
-import { useTheme } from 'styled-components'
-import groupBy from 'lodash/groupBy'
 import { PolicyBindingFragment } from 'generated/graphql'
+import groupBy from 'lodash/groupBy'
+import { useMemo } from 'react'
 
 type Binding = Pick<PolicyBindingFragment, 'user' | 'group'>
 
 export function FormBindings({
-  attributes,
-  setAttributes,
   bindings,
   setBindings,
   hints,
   showUsers = true,
   showGroups = true,
 }: {
-  attributes?: any
-  setAttributes?: any
   bindings: any
   setBindings: any
   hints?: { app?: string; user?: string; group?: string }
   showUsers?: boolean
   showGroups?: boolean
 }) {
-  const theme = useTheme()
-  const [repositories, setRepositories] = useState(
-    attributes?.repositories?.join(', ')
-  )
-
   const { userBindings, groupBindings } = useMemo(() => {
     const { userBindings, groupBindings } = splitBindings(bindings)
 
@@ -39,24 +29,10 @@ export function FormBindings({
   }, [bindings])
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        rowGap: theme.spacing.medium,
-      }}
+    <Flex
+      direction="column"
+      gap="medium"
     >
-      {attributes && (
-        <ValidatedInput
-          label="App bindings"
-          hint="Target applications using a regex expression, e.g. “*” to select all."
-          value={repositories}
-          onChange={({ target: { value } }) => {
-            setRepositories(value)
-            setAttributes({ ...attributes, repositories: value.split(',') })
-          }}
-        />
-      )}
       {showUsers && (
         <BindingInput
           type="user"
@@ -83,7 +59,7 @@ export function FormBindings({
           }
         />
       )}
-    </div>
+    </Flex>
   )
 }
 

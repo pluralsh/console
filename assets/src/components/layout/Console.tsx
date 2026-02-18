@@ -1,7 +1,7 @@
 import { Flex, MarkdocContextProvider } from '@pluralsh/design-system'
 import { Suspense, useRef } from 'react'
 
-import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
+import { BillingSubscriptionProvider } from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
 import { Outlet } from 'react-router-dom'
@@ -16,7 +16,7 @@ import { EnsureLogin } from '../login/Login'
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
 import { CursorPositionProvider } from '../utils/CursorPosition'
 
-import { ProjectsProvider } from '../contexts/ProjectsContext'
+import { SelectedProjectProvider } from '../contexts/ProjectsContext'
 
 import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
 
@@ -41,7 +41,7 @@ export default function Console() {
         <ConsoleNavContextProvider>
           <EnsureLogin>
             <SentryInitializer>
-              <ProjectsProvider>
+              <SelectedProjectProvider>
                 <BillingSubscriptionProvider>
                   <BreadcrumbsProvider>
                     <TerminalThemeProvider>
@@ -63,7 +63,7 @@ export default function Console() {
                     </TerminalThemeProvider>
                   </BreadcrumbsProvider>
                 </BillingSubscriptionProvider>
-              </ProjectsProvider>
+              </SelectedProjectProvider>
             </SentryInitializer>
           </EnsureLogin>
         </ConsoleNavContextProvider>

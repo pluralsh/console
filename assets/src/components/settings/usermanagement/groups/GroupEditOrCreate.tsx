@@ -128,14 +128,12 @@ export function GroupEditOrCreate({
         value={name}
         onChange={({ target: { value } }) => update({ name: value })}
         placeholder="Enter group name"
-        css={{ background: colors['fill-one'] }}
       />
       <ValidatedInput
         label="Group description"
         value={description}
         onChange={({ target: { value } }) => update({ description: value })}
         placeholder="Enter group description"
-        css={{ background: colors['fill-one'] }}
       />
       <Switch
         checked={!!global}
@@ -149,7 +147,7 @@ export function GroupEditOrCreate({
             type="user"
             add={(user) => addMember?.(user)}
             placeholder="Add a user to group"
-            inputProps={{ style: { background: colors['fill-one'] } }}
+            inputProps={{ style: { background: colors['fill-zero'] } }}
             icon={createGroupMemberLoading ? <Spinner /> : <SearchIcon />}
           />
           <GroupMembers

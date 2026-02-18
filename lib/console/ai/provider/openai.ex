@@ -12,7 +12,7 @@ defmodule Console.AI.OpenAI do
   @model "gpt-4.1-mini"
   @embedding_model "text-embedding-3-large"
 
-  @mkdwn_prompt [%{role: :user, content: "Also please use markdown formatting in your responses as described in the original instructions."}]
+  @mkdwn_prompt [%{role: :user, content: "Also please use markdown formatting in your responses as described in the original instructions (and don't tell me that you intend to use it when doing so)."}]
 
   def default_model(), do: @model
   def default_embedding_model(), do: @embedding_model
@@ -21,7 +21,7 @@ defmodule Console.AI.OpenAI do
 
   @type t :: %__MODULE__{}
 
-  @options [recv_timeout: :infinity, timeout: :infinity]
+  @options [recv_timeout: :timer.minutes(5), timeout: :timer.minutes(5)]
 
   defmodule ToolCall do
     @type t :: %__MODULE__{}
@@ -161,7 +161,7 @@ defmodule Console.AI.OpenAI do
     |> maybe_append_mkdwn(model)
   end
 
-  defp maybe_append_mkdwn(messages, "gpt-5" <> _), do: messages ++ @mkdwn_prompt
+  defp maybe_append_mkdwn(messages, "gpt-ignore" <> _), do: messages ++ @mkdwn_prompt
   defp maybe_append_mkdwn(messages, _), do: messages
 
   defp chat(%__MODULE__{stream: %Stream{} = stream} = openai, history, opts) do
@@ -257,7 +257,7 @@ defmodule Console.AI.OpenAI do
   defp window("o" <> _), do: 1_000_000 * 4
   defp window(_), do: 128_000 * 4
 
-  defp reasoning_details("gpt-5" <> _), do: %{reasoning_effort: :minimal}
+  defp reasoning_details("gpt-5" <> _), do: %{reasoning_effort: :low}
   defp reasoning_details("o" <> _), do: %{reasoning_effort: :minimal}
   defp reasoning_details(_), do: %{}
 

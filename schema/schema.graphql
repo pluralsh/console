@@ -1295,6 +1295,10 @@ type RootSubscriptionType {
   workbenchJobDelta(id: ID!): WorkbenchJobDelta
 
   workbenchJobActivityDelta(jobId: ID!): WorkbenchJobActivityDelta
+
+  workbenchJobProgress(jobId: ID!): WorkbenchJobProgress
+
+  clusterUpgradeProgress(upgradeId: ID!): ClusterUpgradeProgress
 }
 
 type OauthResponse {
@@ -2175,6 +2179,9 @@ type WorkbenchJobActivity {
   "embedded result (output, metrics, logs) when present"
   result: WorkbenchJobActivityResult
 
+  "thoughts emitted during this activity"
+  thoughts: [WorkbenchJobThought]
+
   "the job this activity belongs to"
   workbenchJob: WorkbenchJob
 
@@ -2184,6 +2191,32 @@ type WorkbenchJobActivity {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchJobThought {
+  "the id of the thought"
+  id: String!
+
+  "the thought content"
+  content: String
+
+  "metrics and logs for the thought"
+  attributes: WorkbenchJobThoughtAttributes
+
+  "the activity this thought belongs to"
+  activity: WorkbenchJobActivity
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchJobThoughtAttributes {
+  "metrics for the thought"
+  metrics: [WorkbenchJobActivityMetric]
+
+  "logs for the thought"
+  logs: [WorkbenchJobActivityLog]
 }
 
 type WorkbenchJobActivityResult {
@@ -2330,6 +2363,13 @@ type WorkbenchToolHttpConfiguration {
 type WorkbenchToolHttpHeader {
   name: String
   value: String
+}
+
+type WorkbenchJobProgress {
+  activityId: ID!
+  text: String
+  tool: String
+  arguments: Map
 }
 
 type WorkbenchConnection {
@@ -2785,10 +2825,10 @@ type SentinelCheckIntegrationTestCaseLoadbalancerConfiguration {
   namePrefix: String!
 
   "the annotations to use for this test case"
-  annotations: Json
+  annotations: Map
 
   "the labels to use for this test case"
-  labels: Json
+  labels: Map
 
   "the dns probe configuration to use for this test case"
   dnsProbe: SentinelCheckIntegrationTestCaseDnsProbeConfiguration
@@ -4421,6 +4461,7 @@ input StackDefinitionAttributes {
   name: String!
   description: String
   steps: [CustomStepAttributes]
+  deleteSteps: [CustomStepAttributes]
   configuration: StackConfigurationAttributes
 }
 
@@ -4902,6 +4943,7 @@ type StackDefinition {
   description: String
   configuration: StackConfiguration!
   steps: [CustomRunStep]
+  deleteSteps: [CustomRunStep]
   insertedAt: DateTime
   updatedAt: DateTime
 }
@@ -9352,6 +9394,13 @@ type CompatibilityMatrixSummary {
 
   "the breaking changes for this version"
   breakingChanges: [String!]
+}
+
+type ClusterUpgradeProgress {
+  stepId: ID!
+  text: String
+  tool: String
+  arguments: Map
 }
 
 type ClusterConnection {

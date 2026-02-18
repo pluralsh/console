@@ -52,7 +52,7 @@ defimpl Console.AI.Summary.Summarizable, for: [Console.Schema.ServiceComponent] 
     |> ServiceComponentChild.with_limit(15)
     |> Console.Repo.all()
     |> Enum.map(&Map.put(&1, :component, comp))
-    |> Task.async_stream(& {&1, Console.AI.Summary.Summarizable.summarize(&1, prompt)}, timeout: :infinity, max_concurrency: 5)
+    |> Task.async_stream(& {&1, Console.AI.Summary.Summarizable.summarize(&1, prompt)}, timeout: :timer.minutes(30), max_concurrency: 5)
     |> Stream.filter(fn
       {:ok, {_, {:ok, _, relevant}}} -> relevant
       _ -> false

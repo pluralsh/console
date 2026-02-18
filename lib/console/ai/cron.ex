@@ -145,6 +145,18 @@ defmodule Console.AI.Cron do
     |> Stream.run()
   end
 
+  def vectorize_stacks() do
+    with true <- VectorStore.enabled?() do
+      Logger.info "re-vectorizing all stacks with state"
+      Stack.for_status(:successful)
+      |> Stack.ordered(asc: :id)
+      |> Repo.stream(method: :keyset)
+      |> Console.throttle()
+      |> Stream.each(&Console.AI.PubSub.Vector.Bulk.insert/1)
+      |> Stream.run()
+    end
+  end
+
   defp batch_insight(event, chunk) do
     Stream.map(chunk, & {&1, Worker.generate(&1)})
     |> Stream.map(fn {res, t} -> {res, Worker.await(t)} end)

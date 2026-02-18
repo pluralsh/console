@@ -109,6 +109,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     Workbench,
     WorkbenchJob,
     WorkbenchJobActivity,
+    WorkbenchJobThought,
     WorkbenchJobResult,
     WorkbenchTool
   }
@@ -208,6 +209,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(Workbench, _), do: Workbench
   def query(WorkbenchJob, _), do: WorkbenchJob
   def query(WorkbenchJobActivity, _), do: WorkbenchJobActivity.ordered()
+  def query(WorkbenchJobThought, _), do: WorkbenchJobThought.ordered()
   def query(WorkbenchJobResult, _), do: WorkbenchJobResult.ordered()
   def query(WorkbenchTool, _), do: WorkbenchTool
   def query(_, _), do: Cluster

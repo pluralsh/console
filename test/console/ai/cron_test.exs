@@ -520,4 +520,67 @@ defmodule Console.AI.CronTest do
       assert c > 0
     end
   end
+
+  describe "#vectorize_stacks/0" do
+    test "it will re-vectorize all successful stacks with state" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{
+          enabled: true,
+          store: :elastic,
+          elastic: ES.es_vector_settings(),
+        },
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+      ES.drop_index(ES.vector_index())
+
+      Console.AI.VectorStore.init()
+
+      # Create stacks with state that should be vectorized
+      stack1 = insert(:stack, status: :successful)
+      insert(:stack_state, stack: stack1, state: [
+        %{identifier: "aws_instance.web", resource: "aws_instance", name: "web", configuration: %{"ami" => "ami-123"}},
+        %{identifier: "aws_s3_bucket.data", resource: "aws_s3_bucket", name: "data", configuration: %{"bucket" => "my-bucket"}},
+      ])
+
+      stack2 = insert(:stack, status: :successful)
+      insert(:stack_state, stack: stack2, state: [
+        %{identifier: "google_compute_instance.app", resource: "google_compute_instance", name: "app", configuration: %{"zone" => "us-central1-a"}},
+      ])
+
+      # Create a stack without state (should be skipped)
+      insert(:stack, status: :successful)
+
+      # Create a failed stack (should be skipped since we only vectorize successful)
+      insert(:stack, status: :failed)
+
+      # 3 state items total (2 from stack1 + 1 from stack2)
+      expect(Console.AI.OpenAI, :embeddings, 3, fn _, text -> {:ok, [{text, ES.vector()}]} end)
+
+      Cron.vectorize_stacks()
+
+      ES.refresh(ES.vector_index())
+
+      {:ok, c} = ES.count_index(ES.vector_index())
+      assert c > 0
+    end
+
+    test "it does nothing when vector store is disabled" do
+      deployment_settings(ai: %{
+        enabled: true,
+        vector_store: %{enabled: false},
+        provider: :openai,
+        openai: %{access_token: "key"}
+      })
+
+      stack = insert(:stack, status: :successful)
+      insert(:stack_state, stack: stack, state: [
+        %{identifier: "aws_instance.web", resource: "aws_instance", name: "web", configuration: %{"ami" => "ami-123"}},
+      ])
+
+      # Should not call embeddings since vector store is disabled
+      Cron.vectorize_stacks()
+    end
+  end
 end

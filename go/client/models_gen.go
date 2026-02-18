@@ -2283,6 +2283,13 @@ type ClusterUpgradePlan struct {
 	KubeletSkew *bool `json:"kubeletSkew,omitempty"`
 }
 
+type ClusterUpgradeProgress struct {
+	StepID    string         `json:"stepId"`
+	Text      *string        `json:"text,omitempty"`
+	Tool      *string        `json:"tool,omitempty"`
+	Arguments map[string]any `json:"arguments,omitempty"`
+}
+
 // A step in an agentic attempt to upgrade a specific component or piece of infrastructure in this kubernetes cluster
 type ClusterUpgradeStep struct {
 	ID string `json:"id"`
@@ -7025,9 +7032,9 @@ type SentinelCheckIntegrationTestCaseLoadbalancerConfiguration struct {
 	// the name prefix to use for this test case
 	NamePrefix string `json:"namePrefix"`
 	// the annotations to use for this test case
-	Annotations *string `json:"annotations,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 	// the labels to use for this test case
-	Labels *string `json:"labels,omitempty"`
+	Labels map[string]any `json:"labels,omitempty"`
 	// the dns probe configuration to use for this test case
 	DNSProbe *SentinelCheckIntegrationTestCaseDNSProbeConfiguration `json:"dnsProbe,omitempty"`
 }
@@ -7897,6 +7904,7 @@ type StackDefinition struct {
 	Description   *string            `json:"description,omitempty"`
 	Configuration StackConfiguration `json:"configuration"`
 	Steps         []*CustomRunStep   `json:"steps,omitempty"`
+	DeleteSteps   []*CustomRunStep   `json:"deleteSteps,omitempty"`
 	InsertedAt    *string            `json:"insertedAt,omitempty"`
 	UpdatedAt     *string            `json:"updatedAt,omitempty"`
 }
@@ -7905,6 +7913,7 @@ type StackDefinitionAttributes struct {
 	Name          string                        `json:"name"`
 	Description   *string                       `json:"description,omitempty"`
 	Steps         []*CustomStepAttributes       `json:"steps,omitempty"`
+	DeleteSteps   []*CustomStepAttributes       `json:"deleteSteps,omitempty"`
 	Configuration *StackConfigurationAttributes `json:"configuration,omitempty"`
 }
 
@@ -8978,6 +8987,8 @@ type WorkbenchJobActivity struct {
 	Prompt *string `json:"prompt,omitempty"`
 	// embedded result (output, metrics, logs) when present
 	Result *WorkbenchJobActivityResult `json:"result,omitempty"`
+	// thoughts emitted during this activity
+	Thoughts []*WorkbenchJobThought `json:"thoughts,omitempty"`
 	// the job this activity belongs to
 	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
 	// the agent run that executed this activity
@@ -9051,6 +9062,13 @@ type WorkbenchJobEdge struct {
 	Cursor *string       `json:"cursor,omitempty"`
 }
 
+type WorkbenchJobProgress struct {
+	ActivityID string         `json:"activityId"`
+	Text       *string        `json:"text,omitempty"`
+	Tool       *string        `json:"tool,omitempty"`
+	Arguments  map[string]any `json:"arguments,omitempty"`
+}
+
 type WorkbenchJobResult struct {
 	// the id of the result
 	ID string `json:"id"`
@@ -9070,6 +9088,26 @@ type WorkbenchJobResultTodo struct {
 	Name        *string `json:"name,omitempty"`
 	Description *string `json:"description,omitempty"`
 	Done        *bool   `json:"done,omitempty"`
+}
+
+type WorkbenchJobThought struct {
+	// the id of the thought
+	ID string `json:"id"`
+	// the thought content
+	Content *string `json:"content,omitempty"`
+	// metrics and logs for the thought
+	Attributes *WorkbenchJobThoughtAttributes `json:"attributes,omitempty"`
+	// the activity this thought belongs to
+	Activity   *WorkbenchJobActivity `json:"activity,omitempty"`
+	InsertedAt *string               `json:"insertedAt,omitempty"`
+	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchJobThoughtAttributes struct {
+	// metrics for the thought
+	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
+	// logs for the thought
+	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
 }
 
 type WorkbenchSkills struct {

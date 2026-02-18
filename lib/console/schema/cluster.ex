@@ -172,6 +172,14 @@ defmodule Console.Schema.Cluster do
     timestamps()
   end
 
+  def physical(query \\ __MODULE__) do
+    from(c in query, where: is_nil(c.virtual) or not c.virtual)
+  end
+
+  def virtual(query \\ __MODULE__) do
+    from(c in query, where: c.virtual)
+  end
+
   def healthy?(%__MODULE__{pinged_at: nil}), do: false
 
   def healthy?(%__MODULE__{ping_interval: interval, pinged_at: pinged}) when is_integer(interval) do

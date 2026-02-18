@@ -69,6 +69,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> allow(user, :write)
   end
 
+  def resolve_cluster_upgrade(%{id: id}, %{context: %{current_user: user}}) do
+    Clusters.get_cluster_upgrade!(id)
+    |> allow(user, :read)
+  end
+
   defp get_provider(%{id: id}) when is_binary(id), do: Clusters.get_provider!(id)
   defp get_provider(%{name: name}) when is_binary(name), do: Clusters.get_provider_by_name(name)
   defp get_provider(%{cloud: cloud}) when is_binary(cloud), do: Clusters.get_provider_by_cloud(cloud)

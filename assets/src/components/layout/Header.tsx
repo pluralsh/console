@@ -8,7 +8,7 @@ import NotificationsLauncher from '../notifications/NotificationsLauncher'
 
 import { ChatbotLauncher } from 'components/ai/chatbot/Chatbot'
 import DemoBanner from './DemoBanner'
-import ProjectSelect from './HeaderProjectSelect'
+import { HeaderProjectSelect } from './HeaderProjectSelect'
 import { ProfileMenu } from './ProfileMenu'
 
 const APP_ICON_LIGHT = '/plural-logo.png'
@@ -47,7 +47,7 @@ export default function Header() {
           alt="Plural console"
           onClick={() => navigate('/')}
         />
-        <ProjectSelect />
+        <HeaderProjectSelect />
         <Flex grow={1} />
         <BillingLegacyUserMessage />
         <NotificationsLauncher />

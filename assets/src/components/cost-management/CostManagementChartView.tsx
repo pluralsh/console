@@ -15,7 +15,8 @@ import {
 import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
 import { useProjectId } from 'components/contexts/ProjectsContext'
 import { GqlError } from 'components/utils/Alert'
-import ProjectSelect, {
+import {
+  ProjectSelect,
   AllProjectsOption,
 } from 'components/utils/ProjectSelector'
 import { Body2P, OverlineH1 } from 'components/utils/typography/Text'

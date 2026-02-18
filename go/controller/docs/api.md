@@ -4714,6 +4714,7 @@ _Appears in:_
 | `name` _string_ | Name of this StackDefinition.<br />If not provided, the name from StackDefinition.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `description` _string_ | Description provides a human-readable explanation of what this StackDefinition<br />template is intended for and how it should be used. |  | Optional: \{\} <br /> |
 | `steps` _[CustomRunStep](#customrunstep) array_ | Steps defines a list of custom run steps that will be executed as part of<br />any stack run using this definition. Each step specifies a command, arguments,<br />execution stage, and approval requirements. |  | Optional: \{\} <br /> |
+| `deleteSteps` _[CustomRunStep](#customrunstep) array_ | DeleteSteps defines a list of custom run steps that will be executed when<br />deleting/destroying a stack using this definition. Each step specifies a command,<br />arguments, execution stage, and approval requirements. |  | Optional: \{\} <br /> |
 | `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration allows customization of the stack execution environment,<br />including Docker image settings, version specifications, and execution hooks. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 

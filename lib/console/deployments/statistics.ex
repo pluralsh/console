@@ -1,7 +1,13 @@
 defmodule Console.Deployments.Statistics do
   import Console.Prom.Plugin, only: [metric_scope: 1]
+  use Nebulex.Caching
   alias Console.Repo
   alias Console.Schema.{Cluster, Service, Stack}
+
+  @cache_adapter Console.conf(:cache_adapter)
+
+  @decorate cacheable(cache: @cache_adapter, key: :cluster_count, opts: [ttl: :timer.minutes(30)])
+  def clusters(), do: Repo.aggregate(Cluster.physical(), :count, :id)
 
   def info() do
     %{

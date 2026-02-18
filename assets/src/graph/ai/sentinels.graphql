@@ -50,6 +50,31 @@ fragment SentinelCheckConfiguration on SentinelCheckConfiguration {
     distro
     format
     tags
+    cases {
+      type
+      name
+      loadbalancer {
+        namePrefix
+        namespace
+        annotations
+
+        dnsProbe {
+          fqdn
+          delay
+          retries
+        }
+      }
+      pvc {
+        namePrefix
+        storageClass
+        size
+      }
+      coredns {
+        dialFqdns
+        delay
+        retries
+      }
+    }
     job {
       ...JobGateSpec
     }
