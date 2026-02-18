@@ -4350,6 +4350,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this service context.<br />If not provided, the name from ServiceContext.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `configuration` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Configuration is a reusable configuration context that can include any JSON-compatible configuration data<br />that needs to be shared across multiple services. |  |  |
+| `configMapRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ConfigMapRef references a ConfigMap containing configuration data to merge into the Configuration.<br />The keys and values from the ConfigMap will be merged into the Configuration JSON. |  | Optional: \{\} <br /> |
+| `secretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | SecretRef references a Secret containing configuration data to merge into the Configuration.<br />The keys and values from the Secret will be merged into the Configuration JSON. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this service context belongs to.<br />If not provided, it will use the default project. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 

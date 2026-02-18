@@ -7914,6 +7914,16 @@ func (in *ServiceContextSpec) DeepCopyInto(out *ServiceContextSpec) {
 		**out = **in
 	}
 	in.Configuration.DeepCopyInto(&out.Configuration)
+	if in.ConfigMapRef != nil {
+		in, out := &in.ConfigMapRef, &out.ConfigMapRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
+	if in.SecretRef != nil {
+		in, out := &in.SecretRef, &out.SecretRef
+		*out = new(v1.SecretReference)
+		**out = **in
+	}
 	if in.ProjectRef != nil {
 		in, out := &in.ProjectRef, &out.ProjectRef
 		*out = new(v1.ObjectReference)
