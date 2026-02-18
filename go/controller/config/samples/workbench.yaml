@@ -80,7 +80,7 @@ metadata:
 spec:
   name: workbench-sample
   description: Sample AI workbench with HTTP tools
-  agentRuntime: gemini
+  agentRuntime: mgmt/gemini
   toolRefs:
     - name: workbenchtool-sample
       namespace: default
