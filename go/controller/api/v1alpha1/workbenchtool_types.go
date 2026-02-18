@@ -161,7 +161,7 @@ type WorkbenchToolHTTPConfig struct {
 	// Method is the HTTP method (GET, POST, PUT, DELETE, PATCH).
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum:=GET;POST;PUT;DELETE;PATCH
-	Method console.WorkbenchToolHTTPMethod `json:"method,omitempty"`
+	Method console.WorkbenchToolHTTPMethod `json:"method"`
 
 	// Headers are optional request headers.
 	// +kubebuilder:validation:Optional
@@ -174,7 +174,7 @@ type WorkbenchToolHTTPConfig struct {
 
 	// InputSchema is the JSON schema for the tool input (arbitrary JSON).
 	// +kubebuilder:validation:Required
-	InputSchema *runtime.RawExtension `json:"inputSchema,omitempty"`
+	InputSchema *runtime.RawExtension `json:"inputSchema"`
 }
 
 func (c *WorkbenchToolHTTPConfig) Attributes() *console.WorkbenchToolHTTPConfigurationAttributes {
