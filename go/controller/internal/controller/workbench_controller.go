@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
@@ -283,7 +284,23 @@ func (in *WorkbenchReconciler) handleAgentRuntime(ctx context.Context, workbench
 		return nil, nil, nil
 	}
 
-	apiAgentRuntime, err := in.ConsoleClient.GetAgentRuntime(ctx, *workbench.Spec.AgentRuntime)
+	ref := *workbench.Spec.AgentRuntime
+	split := strings.Split(ref, "/")
+	if len(split) != 2 {
+		return nil, nil, fmt.Errorf("invalid agent runtime reference: %s", ref)
+	}
+
+	clusterHandle, runtimeName := split[0], split[1]
+	cluster, err := in.ConsoleClient.GetClusterByHandle(lo.ToPtr(clusterHandle))
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("cluster not found: %s", err.Error())
+		}
+
+		return nil, nil, fmt.Errorf("failed to get cluster: %s", err.Error())
+	}
+
+	apiAgentRuntime, err := in.ConsoleClient.GetAgentRuntime(ctx, runtimeName, cluster.ID)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return nil, lo.ToPtr(common.Wait()), fmt.Errorf("agent runtime not found: %s", err.Error())

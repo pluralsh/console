@@ -133,7 +133,7 @@ type WorkbenchSpec struct {
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
-	// AgentRuntime is the name of the agent runtime in the Console.
+	// AgentRuntime reference in the "<cluster-handle>/<runtime-name>" format.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	AgentRuntime *string `json:"agentRuntime,omitempty"`

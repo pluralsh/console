@@ -10,8 +10,8 @@ import (
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 )
 
-func (c *client) GetAgentRuntime(ctx context.Context, name string) (*console.AgentRuntimeFragment, error) {
-	response, err := c.consoleClient.GetAgentRuntimeByName(ctx, name)
+func (c *client) GetAgentRuntime(ctx context.Context, name, clusterId string) (*console.AgentRuntimeFragment, error) {
+	response, err := c.consoleClient.GetAgentRuntimeByName(ctx, name, clusterId)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, name)
 	}

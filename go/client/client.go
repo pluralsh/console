@@ -10,7 +10,7 @@ import (
 
 type ConsoleClient interface {
 	GetAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntime, error)
-	GetAgentRuntimeByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntimeByName, error)
+	GetAgentRuntimeByName(ctx context.Context, name string, clusterID string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntimeByName, error)
 	UpsertAgentRuntime(ctx context.Context, attributes AgentRuntimeAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertAgentRuntime, error)
 	DeleteAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentRuntime, error)
 	ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error)
@@ -29540,8 +29540,8 @@ func (c *Client) GetAgentRuntime(ctx context.Context, id string, interceptors ..
 	return &res, nil
 }
 
-const GetAgentRuntimeByNameDocument = `query GetAgentRuntimeByName ($name: String!) {
-	agentRuntime(name: $name) {
+const GetAgentRuntimeByNameDocument = `query GetAgentRuntimeByName ($name: String!, $clusterId: ID!) {
+	agentRuntime(name: $name, clusterId: $clusterId) {
 		... AgentRuntimeFragment
 	}
 }
@@ -29594,9 +29594,10 @@ fragment UserFragment on User {
 }
 `
 
-func (c *Client) GetAgentRuntimeByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntimeByName, error) {
+func (c *Client) GetAgentRuntimeByName(ctx context.Context, name string, clusterID string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntimeByName, error) {
 	vars := map[string]any{
-		"name": name,
+		"name":      name,
+		"clusterId": clusterID,
 	}
 
 	var res GetAgentRuntimeByName

@@ -3334,9 +3334,9 @@ func (_c *ConsoleClientMock_DetachStack_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
-// GetAgentRuntime provides a mock function with given fields: ctx, name
-func (_m *ConsoleClientMock) GetAgentRuntime(ctx context.Context, name string) (*client.AgentRuntimeFragment, error) {
-	ret := _m.Called(ctx, name)
+// GetAgentRuntime provides a mock function with given fields: ctx, name, clusterId
+func (_m *ConsoleClientMock) GetAgentRuntime(ctx context.Context, name string, clusterId string) (*client.AgentRuntimeFragment, error) {
+	ret := _m.Called(ctx, name, clusterId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAgentRuntime")
@@ -3344,19 +3344,19 @@ func (_m *ConsoleClientMock) GetAgentRuntime(ctx context.Context, name string) (
 
 	var r0 *client.AgentRuntimeFragment
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.AgentRuntimeFragment, error)); ok {
-		return rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) (*client.AgentRuntimeFragment, error)); ok {
+		return rf(ctx, name, clusterId)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) *client.AgentRuntimeFragment); ok {
-		r0 = rf(ctx, name)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) *client.AgentRuntimeFragment); ok {
+		r0 = rf(ctx, name, clusterId)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*client.AgentRuntimeFragment)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, name)
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, name, clusterId)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -3372,13 +3372,14 @@ type ConsoleClientMock_GetAgentRuntime_Call struct {
 // GetAgentRuntime is a helper method to define mock.On call
 //   - ctx context.Context
 //   - name string
-func (_e *ConsoleClientMock_Expecter) GetAgentRuntime(ctx interface{}, name interface{}) *ConsoleClientMock_GetAgentRuntime_Call {
-	return &ConsoleClientMock_GetAgentRuntime_Call{Call: _e.mock.On("GetAgentRuntime", ctx, name)}
+//   - clusterId string
+func (_e *ConsoleClientMock_Expecter) GetAgentRuntime(ctx interface{}, name interface{}, clusterId interface{}) *ConsoleClientMock_GetAgentRuntime_Call {
+	return &ConsoleClientMock_GetAgentRuntime_Call{Call: _e.mock.On("GetAgentRuntime", ctx, name, clusterId)}
 }
 
-func (_c *ConsoleClientMock_GetAgentRuntime_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_GetAgentRuntime_Call {
+func (_c *ConsoleClientMock_GetAgentRuntime_Call) Run(run func(ctx context.Context, name string, clusterId string)) *ConsoleClientMock_GetAgentRuntime_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
 	})
 	return _c
 }
@@ -3388,7 +3389,7 @@ func (_c *ConsoleClientMock_GetAgentRuntime_Call) Return(_a0 *client.AgentRuntim
 	return _c
 }
 
-func (_c *ConsoleClientMock_GetAgentRuntime_Call) RunAndReturn(run func(context.Context, string) (*client.AgentRuntimeFragment, error)) *ConsoleClientMock_GetAgentRuntime_Call {
+func (_c *ConsoleClientMock_GetAgentRuntime_Call) RunAndReturn(run func(context.Context, string, string) (*client.AgentRuntimeFragment, error)) *ConsoleClientMock_GetAgentRuntime_Call {
 	_c.Call.Return(run)
 	return _c
 }

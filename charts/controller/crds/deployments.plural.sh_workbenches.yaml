@@ -52,8 +52,8 @@ spec:
             description: Spec defines the desired state of the Workbench.
             properties:
               agentRuntime:
-                description: AgentRuntime is the name of the agent runtime in the
-                  Console.
+                description: AgentRuntime reference in the "<cluster-handle>/<runtime-name>"
+                  format.
                 type: string
               configuration:
                 description: Configuration defines workbench capabilities (coding

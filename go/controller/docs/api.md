@@ -5138,7 +5138,7 @@ _Appears in:_
 | `systemPrompt` _string_ | SystemPrompt is the system prompt used for agent runs in this workbench. |  | Optional: \{\} <br />Type: string <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this workbench belongs to. |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the Git repository used for this workbench. |  | Optional: \{\} <br /> |
-| `agentRuntime` _string_ | AgentRuntime is the name of the agent runtime in the Console. |  | Optional: \{\} <br />Type: string <br /> |
+| `agentRuntime` _string_ | AgentRuntime reference in the "<cluster-handle>/<runtime-name>" format. |  | Optional: \{\} <br />Type: string <br /> |
 | `configuration` _[WorkbenchConfiguration](#workbenchconfiguration)_ | Configuration defines workbench capabilities (coding and infrastructure). |  | Optional: \{\} <br /> |
 | `skills` _[WorkbenchSkills](#workbenchskills)_ | Skills define skills configuration (git ref and/or files) for the workbench. |  | Optional: \{\} <br /> |
 | `toolRefs` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | ToolRefs references WorkbenchTool resources to associate with this workbench. |  | Optional: \{\} <br /> |
