@@ -14,12 +14,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Agent do
 
   def agent_runtime(%{name: name}, %{context: %{cluster: cluster}}) when is_binary(name) do
     Agents.get_agent_runtime!(cluster.id, name)
-    |> allow(cluster, :create)
-  end
-
-  def agent_runtime(%{name: name}, %{context: %{current_user: user}}) when is_binary(name) do
-    Agents.get_agent_runtime_by_name!(name)
-    |> allow(user, :create)
+    |> allow(cluster, :read)
   end
 
   def agent_runtime(%{id: id}, ctx) do
