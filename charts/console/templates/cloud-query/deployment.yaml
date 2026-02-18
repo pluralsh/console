@@ -44,6 +44,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
+        {{ if .Values.cloudQuery.database.enabled }}
         - name: cloud-query-db
           image: "{{ .Values.cloudQuery.database.image.repository }}:{{ .Values.cloudQuery.database.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
           imagePullPolicy: {{ .Values.cloudQuery.database.image.pullPolicy }}
@@ -67,6 +68,7 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 30
             failureThreshold: 3
+        {{- end }}
         - name: cloud-query
           {{- with .Values.cloudQuery.securityContext }}
           securityContext:
@@ -78,6 +80,7 @@ spec:
           args:
             {{- toYaml .| nindent 12}}
           {{- end }}
+          {{ if .Values.cloudQuery.database.enabled }}
           env:
             - name: PLRL_PG_PASSWORD
               valueFrom:
@@ -89,6 +92,7 @@ spec:
                   name: {{ include "console.cloudquery.db.secret" . }}
                   key: password
                 {{- end }}
+          {{- end }}
           ports:
             - name: grpc
               containerPort: {{ .Values.cloudQuery.service.port }}

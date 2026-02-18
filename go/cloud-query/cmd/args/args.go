@@ -35,11 +35,13 @@ const (
 	defaultDatabaseHost           = "localhost"
 	defaultDatabasePort           = "5432"
 	defaultDatabaseConnectionTTL  = 3 * time.Hour
+	defaultDatabaseEnabled        = true
 	defaultServerAddress          = ":9192"
 	defaultServerEnableReflection = false
 )
 
 var (
+	argDatabaseEnabled        = pflag.Bool("database-enabled", defaultDatabaseEnabled, "enable PostgreSQL-backed CloudQuery features")
 	argDatabaseHost           = pflag.String("database-host", defaultDatabaseHost, "host of the PostgreSQL database, leave empty to use the default (localhost)")
 	argDatabasePort           = pflag.String("database-port", defaultDatabasePort, "port of the PostgreSQL database, leave empty to use the default (5432)")
 	argDatabaseUser           = pflag.String("database-user", defaultDatabaseUser, "default username for the PostgreSQL database")
@@ -51,6 +53,10 @@ var (
 	argServerTLSKeyPath       = pflag.String("server-tls-key", "", "path to the TLS key file for the gRPC server")
 	argServerEnableReflection = pflag.Bool("server-enable-reflection", defaultServerEnableReflection, "enable gRPC reflection for the server, useful for debugging and introspection")
 )
+
+func DatabaseEnabled() bool {
+	return *argDatabaseEnabled
+}
 
 func ServerEnableReflection() bool {
 	return *argServerEnableReflection

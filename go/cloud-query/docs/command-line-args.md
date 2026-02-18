@@ -15,6 +15,7 @@ cloud-query [flags]
 | `--extensions-dir` | `./bin` | Directory where extensions are stored |
 | `--database-dir` | `./bin/pg` | Path to the database |
 | `--database-version` | `V15` | Version of the embedded PostgreSQL database to use |
+| `--database-enabled` | `true` | Enable PostgreSQL-backed CloudQuery features (disables CloudQuery service when false) |
 | `--database-port` | `5432` | Port on which the embedded PostgreSQL database will listen |
 | `--database-max-connections` | `200` | Maximum number of connections to the embedded PostgreSQL database |
 | `--connection-ttl` | `15m` | Default TTL for connections in the pool, connections will be closed after this duration if not used |
@@ -55,6 +56,12 @@ cloud-query --server-tls-cert /path/to/cert.pem --server-tls-key /path/to/key.pe
 
 ```bash
 cloud-query --database-max-connections 500 --connection-ttl 30m
+```
+
+### Starting the server without the PostgreSQL sidecar
+
+```bash
+cloud-query --database-enabled=false
 ```
 
 ### Starting the server with gRPC reflection enabled

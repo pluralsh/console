@@ -2,6 +2,8 @@
 
 This document provides a detailed reference for the gRPC API exposed by the Cloud-Query service.
 
+Note: the CloudQuery service requires PostgreSQL-backed features to be enabled. If you start the server with `--database-enabled=false`, the CloudQuery service will not be registered.
+
 ## Service Definition
 
 Cloud-Query exposes a gRPC service with three main endpoints for querying, schema retrieval, and data extraction across different cloud providers.
@@ -276,3 +278,218 @@ The Cloud-Query API uses standard gRPC error codes. Based on the server implemen
 - `UNAVAILABLE`: The service is temporarily unavailable (e.g., during server startup or shutdown)
 
 Each error response includes a descriptive message explaining the specific issue encountered.
+
+---
+
+# ToolQuery API Reference
+
+ToolQuery exposes a gRPC service for querying external observability tools (metrics, logs, traces).
+
+## Service Definition
+
+```protobuf
+service ToolQuery {
+  rpc Metrics(MetricsQueryInput) returns (MetricsQueryOutput) {}
+  rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
+  rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
+}
+```
+
+## Connection Models
+
+```protobuf
+message ElasticConnection {
+  string url = 1;
+  string apiKey = 2;
+}
+
+message DatadogConnection {
+  string site = 1;
+  string apiKey = 2;
+  optional string appKey = 3;
+}
+
+message PrometheusConnection {
+  string url = 1;
+  optional string token = 2;
+  optional string username = 3;
+  optional string password = 4;
+}
+
+message LokiConnection {
+  string url = 1;
+  string token = 3;
+  optional string tenant_id = 4;
+}
+
+message TempoConnection {
+  string url = 1;
+  string token = 2;
+  optional string tenant_id = 3;
+}
+```
+
+## Common Models
+
+```protobuf
+message ToolConnection {
+  oneof connection {
+    ElasticConnection elastic = 1;
+    DatadogConnection datadog = 2;
+    PrometheusConnection prometheus = 3;
+    LokiConnection loki = 4;
+    TempoConnection tempo = 5;
+  }
+}
+
+message TimeRange {
+  google.protobuf.Timestamp start = 1;
+  google.protobuf.Timestamp end = 2;
+}
+```
+
+## Metrics
+
+#### Request
+
+```protobuf
+message MetricsQueryInput {
+  ToolConnection connection = 1;
+  string query = 2;
+  TimeRange range = 3;
+  optional string step = 4;
+}
+```
+
+#### Response
+
+```protobuf
+message MetricPoint {
+  google.protobuf.Timestamp timestamp = 1;
+  string name = 2;
+  double value = 3;
+  map<string, string> labels = 4;
+}
+
+message MetricsQueryOutput {
+  repeated MetricPoint metrics = 1;
+}
+```
+
+#### Example (Prometheus)
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "prometheus": {
+      "url": "http://prometheus:9090",
+      "token": "YOUR_TOKEN"
+    }
+  },
+  "query": "rate(http_requests_total[5m])",
+  "range": {
+    "start": "2024-01-01T00:00:00Z",
+    "end": "2024-01-01T01:00:00Z"
+  },
+  "step": "30s"
+}' -plaintext localhost:9192 toolquery.ToolQuery/Metrics
+```
+
+## Logs
+
+#### Request
+
+```protobuf
+message LogsQueryInput {
+  ToolConnection connection = 1;
+  string query = 2;
+  TimeRange range = 3;
+  optional int32 limit = 4;
+}
+```
+
+#### Response
+
+```protobuf
+message LogEntry {
+  google.protobuf.Timestamp timestamp = 1;
+  string message = 2;
+  map<string, string> labels = 3;
+}
+
+message LogsQueryOutput {
+  repeated LogEntry logs = 1;
+}
+```
+
+#### Example (Loki)
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "loki": {
+      "url": "http://loki:3100",
+      "token": "YOUR_TOKEN",
+      "tenant_id": "tenant-a"
+    }
+  },
+  "query": "{app=\"api\"} |= \"error\"",
+  "range": {
+    "start": "2024-01-01T00:00:00Z",
+    "end": "2024-01-01T01:00:00Z"
+  },
+  "limit": 100
+}' -plaintext localhost:9192 toolquery.ToolQuery/Logs
+```
+
+## Traces
+
+#### Request
+
+```protobuf
+message TracesQueryInput {
+  ToolConnection connection = 1;
+  string query = 2;
+  TimeRange range = 3;
+  optional int32 limit = 4;
+}
+```
+
+#### Response
+
+```protobuf
+message TraceSpan {
+  string trace_id = 1;
+  string span_id = 2;
+  string parent_id = 3;
+  string name = 4;
+  string service = 5;
+  google.protobuf.Timestamp start = 6;
+  google.protobuf.Timestamp end = 7;
+  map<string, string> tags = 8;
+}
+
+message TracesQueryOutput {
+  repeated TraceSpan spans = 1;
+}
+```
+
+#### Example (Tempo)
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "tempo": {
+      "url": "http://tempo:3200",
+      "token": "YOUR_TOKEN",
+      "tenant_id": "tenant-a"
+    }
+  },
+  "query": "{service.name=\"api\"}",
+  "range": {
+    "start": "2024-01-01T00:00:00Z",
+    "end": "2024-01-01T01:00:00Z"
+  },
+  "limit": 20
+}' -plaintext localhost:9192 toolquery.ToolQuery/Traces
+```
