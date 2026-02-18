@@ -51,4 +51,10 @@ fragment StackDefinitionFragment on StackDefinition {
         stage
         requireApproval
     }
+    deleteSteps {
+        cmd
+        args
+        stage
+        requireApproval
+    }
 }

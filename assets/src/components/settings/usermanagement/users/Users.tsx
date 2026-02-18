@@ -7,7 +7,7 @@ import { SettingsPageHeader } from 'components/settings/Settings'
 import { getUserManagementBreadcrumbs } from '../UserManagement'
 
 import UserInvite from './UserInvite'
-import UsersList from './UsersList'
+import { UsersList } from './UsersList'
 
 const breadcrumbs = getUserManagementBreadcrumbs('users')
 

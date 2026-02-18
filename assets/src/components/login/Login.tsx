@@ -1,5 +1,5 @@
 import { ApolloError, useApolloClient } from '@apollo/client'
-import { Button, Flex, LoopingLogo } from '@pluralsh/design-system'
+import { Button, Flex } from '@pluralsh/design-system'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 import {
   AcceptLoginDocument,
@@ -27,8 +27,7 @@ import { LoginContextProvider } from '../contexts'
 
 import { GqlError } from '../utils/Alert'
 import { LabelledInput } from '../utils/LabelledInput'
-import LoadingIndicator from '../utils/LoadingIndicator'
-import ShowAfterDelay from '../utils/ShowAfterDelay'
+import { FullPageLoadingIndicator } from '../utils/LoadingIndicator'
 
 import { Body1P } from 'components/utils/typography/Text'
 import { getLoginReturnPath, logoutWithReturnTo } from 'helpers/refreshToken'
@@ -60,11 +59,7 @@ function LoginError({
 
   console.error('Login error:', error)
 
-  return (
-    <LoginPortal>
-      <LoopingLogo />
-    </LoginPortal>
-  )
+  return <FullPageLoadingIndicator />
 }
 
 export function EnsureLogin({ children }) {
@@ -75,7 +70,7 @@ export function EnsureLogin({ children }) {
 
   const loginContextValue = data
 
-  if (error || (!loading && !data?.configuration)) {
+  if (error || (!loading && (!data?.configuration || !data?.me))) {
     return (
       <LoginError
         me={data?.me}
@@ -189,12 +184,7 @@ export default function Login() {
     if (!loginMError && data?.me) navigate(getLoginReturnPath())
   }, [loginMError, data?.me, navigate])
 
-  if (loading)
-    return (
-      <ShowAfterDelay>
-        <LoadingIndicator />
-      </ShowAfterDelay>
-    )
+  if (loading) return <FullPageLoadingIndicator />
 
   if (loginData?.loginInfo?.oidcUri) {
     return (

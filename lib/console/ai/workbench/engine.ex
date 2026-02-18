@@ -87,7 +87,7 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp spawn_activities(actions, engine) do
-    Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :infinity)
+    Task.async_stream(actions, &spawn_activity(&1, engine), max_concurrency: 10, timeout: :timer.minutes(30))
     |> Enum.reduce(engine, fn
       {:ok, {:ok, %WorkbenchJobActivity{} = activity}}, engine ->
         %{engine | activities: [activity | engine.activities]}

@@ -32,7 +32,7 @@ disableAdditionalVolumes: false
 # replicaCount is the replica count for console deployment
 replicaCount: 2
 
-# homeDir is the prefix for the mount path for console-conf volume in console container. The actual config will go in {homDir}/.plural
+# homeDir is the prefix for the mount path for console-conf volume in console container. The actual config will go in {homeDir}/.plural
 homeDir: /home/console
 
 # podLabels is the set of pod labels to apply to spec.template.metadata.labels
@@ -70,6 +70,25 @@ console:
     # rdsIamAuthentication is used to configure whether rds iam authentication should be enabled for all db connections.  Ensure your database is prepared to handle IAM authentication before enabling here.
     rdsIamAuthentication: false
 
+    # airgap is used to configure whether the console should be airgapped, which uses embedded compatibility matrices and an internal git server for plural specific git repos.
+    airgap: false
+
+    # agentHelmValues is used to configure the helm values for the agent on bootstrap. To configure them post-install, utilize the DeploymentSettings CR in our management cluster API.
+    agentHelmValues: ~
+  
+  # customOidc is used to configure custom oidc authentication for the console.
+  customOidc:
+    # enabled is used to configure whether custom oidc authentication should be enabled.
+    enabled: false
+    # clientId is used to configure the client id for the custom oidc authentication.
+    clientId: ~
+    # clientSecret is used to configure the client secret for the custom oidc authentication.
+    clientSecret: ~
+    # discoveryUrl is used to configure the discovery url for the custom oidc authentication. It is usually something like https://{your-idp-domain}/.well-known/openid-configuration
+    discoveryUrl: ~
+    # scopes is used to configure the scopes for the custom oidc authentication. (defaults to "openid email")
+    scopes: "openid email"
+
   additionalContainers: ~
   containerSecurityContext:
     capabilities:
@@ -106,8 +125,6 @@ secrets:
   plural_client_id: ~
   # plural_client_secret is used to set PLURAL_CLIENT_SECRET if not null
   plural_client_secret: ~
-  # webhook_secret is used to set WEBHOOK_SECRET if not null
-  webhook_secret: ~
 
 # image is used to configure the image for the console container as follows: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
 image:

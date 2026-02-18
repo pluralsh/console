@@ -182,7 +182,6 @@ config :console,
   branch: get_env("BRANCH_NAME") || "master",
   repo_root: get_env("REPO_ROOT") || "workspace",
   git_ssh_key: {:home, ".ssh/id_rsa"},
-  webhook_secret: get_env("WEBHOOK_SECRET"),
   git_user_name: get_env("GIT_USER", "plural"),
   git_user_email: get_env("GIT_EMAIL", "console@plural.sh"),
   url: add_https.(get_env("HOST")),
@@ -207,7 +206,8 @@ config :console,
   cloudquery: get_env("CONSOLE_CLOUDQUERY") == "true",
   airgap: get_env("CONSOLE_AIRGAP") == "true",
   nowatchers: get_env("CONSOLE_NOWATCHERS") == "true",
-  oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME")
+  oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME"),
+  agent_helm_values: get_env("CONSOLE_AGENT_HELM_VALUES")
 
 if git_url && String.starts_with?(git_url, "https") do
   config :console,

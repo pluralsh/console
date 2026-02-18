@@ -3,9 +3,9 @@ defmodule Console.Deployments.Clusters do
   use Nebulex.Caching
   import Console.Deployments.Policies
   import Console.Deployments.Ecto.Validations, only: [parse_version: 1]
-  alias Console.PubSub
+  alias Console.{PubSub, Features}
   alias Console.Commands.Tee
-  alias Console.Deployments.{Services, Git, Providers.Configuration, Settings}
+  alias Console.Deployments.{Services, Git, Providers.Configuration, Settings, Statistics}
   alias Console.Deployments.Providers.Versions
   alias Console.Deployments.Compatibilities.{Table, AddOn, Version, CloudAddOns}
   alias Console.Deployments.Compatibilities.CloudAddOn.Version, as: CloudAddOnVersion
@@ -449,9 +449,16 @@ defmodule Console.Deployments.Clusters do
   creates a new cluster and a service alongside to deploy the cluster via CAPI
   """
   @spec create_cluster(map, User.t) :: cluster_resp
+  @decorate cache_evict(cache: @cache_adapter, key: :cluster_count)
   def create_cluster(attrs, %User{} = user) do
     start_transaction()
     |> add_operation(:cloud, fn _ -> {:ok, Console.cloud?()} end)
+    |> add_operation(:limit, fn _ ->
+      case cluster_limit?() do
+        true -> {:error, "this instance is at the cluster limit for the current account"}
+        _ -> {:ok, true}
+      end
+    end)
     |> add_operation(:cluster, fn _ ->
       %Cluster{}
       |> Cluster.changeset(Settings.add_project_id(attrs, user))
@@ -493,6 +500,19 @@ defmodule Console.Deployments.Clusters do
     |> execute(extract: :rewire)
     |> when_ok(& %{&1 | token_readable: true})
     |> notify(:create, user)
+  end
+
+  @doc """
+  Determines whether this instance is at the cluster limit for the current account
+  """
+  @spec cluster_limit?() :: boolean
+  def cluster_limit?() do
+    with max when is_integer(max) <- Features.cluster_max(),
+         count when is_integer(count) <- Statistics.clusters() do
+      count >= max
+    else
+      _ -> false
+    end
   end
 
   @doc """
@@ -838,6 +858,7 @@ defmodule Console.Deployments.Clusters do
   Marks a cluster to be deleted, with hard deletes following a successful drain
   """
   @spec delete_cluster(binary, User.t) :: cluster_resp
+  @decorate cache_evict(cache: @cache_adapter, key: :cluster_count)
   def delete_cluster(id, %User{} = user) do
     start_transaction()
     |> add_operation(:cluster, fn _ ->

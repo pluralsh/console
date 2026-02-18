@@ -72,6 +72,14 @@ func (in *StackDefinition) Attributes() console.StackDefinitionAttributes {
 				RequireApproval: s.RequireApproval,
 			}
 		}),
+		DeleteSteps: algorithms.Map(in.Spec.DeleteSteps, func(s CustomRunStep) *console.CustomStepAttributes {
+			return &console.CustomStepAttributes{
+				Stage:           &s.Stage,
+				Cmd:             s.Cmd,
+				Args:            lo.ToSlicePtr(s.Args),
+				RequireApproval: s.RequireApproval,
+			}
+		}),
 	}
 
 	if in.Spec.Configuration != nil {
@@ -109,6 +117,12 @@ type StackDefinitionSpec struct {
 	// execution stage, and approval requirements.
 	// +kubebuilder:validation:Optional
 	Steps []CustomRunStep `json:"steps,omitempty"`
+
+	// DeleteSteps defines a list of custom run steps that will be executed when
+	// deleting/destroying a stack using this definition. Each step specifies a command,
+	// arguments, execution stage, and approval requirements.
+	// +kubebuilder:validation:Optional
+	DeleteSteps []CustomRunStep `json:"deleteSteps,omitempty"`
 
 	// Configuration allows customization of the stack execution environment,
 	// including Docker image settings, version specifications, and execution hooks.

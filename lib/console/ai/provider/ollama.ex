@@ -12,7 +12,7 @@ defmodule Console.AI.Ollama do
 
   @base_headers [{"content-type", "application/json"}]
 
-  @options [recv_timeout: :infinity, timeout: :infinity]
+  @options [recv_timeout: :timer.minutes(5), timeout: :timer.minutes(5)]
 
   defmodule Message do
     @type t :: %__MODULE__{}

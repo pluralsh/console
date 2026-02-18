@@ -10,7 +10,7 @@ defmodule Console.AI.Vertex do
 
   @default_model "gemini-2.5-flash"
   @embedding_model "gemini-embedding-001"
-  @options [recv_timeout: :infinity, timeout: :infinity]
+  @options [recv_timeout: :timer.minutes(5), timeout: :timer.minutes(5)]
 
   require Logger
 

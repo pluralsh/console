@@ -297,7 +297,7 @@ defmodule Console.Plural.Queries do
         availableFeatures { cd vpn userManagement audit databaseManagement }
         subscription {
           id
-          plan { id name period }
+          plan { id name period maximumClusters }
         }
       }
     }

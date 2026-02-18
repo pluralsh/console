@@ -5,7 +5,7 @@ import {
   UserSelector,
   FlowSelector,
 } from 'components/cd/utils/Selectors'
-import ProjectSelector from 'components/utils/ProjectSelector'
+import { ProjectSelect } from 'components/utils/ProjectSelector'
 import { ConfigurationType, PrConfiguration } from 'generated/graphql'
 
 import { parseToBool } from 'utils/parseToBool'
@@ -38,7 +38,7 @@ export function PrConfigurationInput({
       )
     case ConfigurationType.Project:
       return (
-        <ProjectSelector
+        <ProjectSelect
           selectedProject={value}
           setSelectedProject={setValue}
           selectionValueType="name"

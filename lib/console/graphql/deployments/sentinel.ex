@@ -202,8 +202,8 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   object :sentinel_check_integration_test_case_loadbalancer_configuration do
     field :namespace,   non_null(:string), description: "the namespace to use for this test case"
     field :name_prefix, non_null(:string), description: "the name prefix to use for this test case"
-    field :annotations, :json, description: "the annotations to use for this test case"
-    field :labels,      :json, description: "the labels to use for this test case"
+    field :annotations, :map, description: "the annotations to use for this test case"
+    field :labels,      :map, description: "the labels to use for this test case"
 
     field :dns_probe,   :sentinel_check_integration_test_case_dns_probe_configuration, description: "the dns probe configuration to use for this test case"
   end

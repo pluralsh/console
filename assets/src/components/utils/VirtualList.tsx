@@ -141,7 +141,7 @@ export function VirtualList<T, M>({
         key="topContent"
         style={{ paddingBottom: spacing[!!topContent ? itemGap : 'none'] }}
       >
-        {isLoadingNextPage && isReversed && <LoaderRow />}
+        {isLoadingNextPage && hasNextPage && isReversed && <LoaderRow />}
         {topContent}
       </div>
       {data.map((rowData, index) => (
@@ -159,7 +159,7 @@ export function VirtualList<T, M>({
       ))}
       <div key="bottomContent">
         {bottomContent}
-        {isLoadingNextPage && !isReversed && <LoaderRow />}
+        {isLoadingNextPage && hasNextPage && !isReversed && <LoaderRow />}
       </div>
     </VList>
   )

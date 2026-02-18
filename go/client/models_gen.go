@@ -7032,9 +7032,9 @@ type SentinelCheckIntegrationTestCaseLoadbalancerConfiguration struct {
 	// the name prefix to use for this test case
 	NamePrefix string `json:"namePrefix"`
 	// the annotations to use for this test case
-	Annotations *string `json:"annotations,omitempty"`
+	Annotations map[string]any `json:"annotations,omitempty"`
 	// the labels to use for this test case
-	Labels *string `json:"labels,omitempty"`
+	Labels map[string]any `json:"labels,omitempty"`
 	// the dns probe configuration to use for this test case
 	DNSProbe *SentinelCheckIntegrationTestCaseDNSProbeConfiguration `json:"dnsProbe,omitempty"`
 }
@@ -7904,6 +7904,7 @@ type StackDefinition struct {
 	Description   *string            `json:"description,omitempty"`
 	Configuration StackConfiguration `json:"configuration"`
 	Steps         []*CustomRunStep   `json:"steps,omitempty"`
+	DeleteSteps   []*CustomRunStep   `json:"deleteSteps,omitempty"`
 	InsertedAt    *string            `json:"insertedAt,omitempty"`
 	UpdatedAt     *string            `json:"updatedAt,omitempty"`
 }
@@ -7912,6 +7913,7 @@ type StackDefinitionAttributes struct {
 	Name          string                        `json:"name"`
 	Description   *string                       `json:"description,omitempty"`
 	Steps         []*CustomStepAttributes       `json:"steps,omitempty"`
+	DeleteSteps   []*CustomStepAttributes       `json:"deleteSteps,omitempty"`
 	Configuration *StackConfigurationAttributes `json:"configuration,omitempty"`
 }
 

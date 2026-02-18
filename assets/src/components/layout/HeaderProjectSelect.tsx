@@ -10,23 +10,23 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-import { useDebounce } from '@react-hooks-library/core'
+import { useThrottle } from 'components/hooks/useThrottle'
 import { useProjectsTinyQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useMemo, useState } from 'react'
 import { mapExistingNodes } from '../../utils/graphql'
-import { useProjectsContext } from '../contexts/ProjectsContext'
+import { useSelectedProjectContext } from '../contexts/ProjectsContext'
 
-export default function ProjectSelect() {
+export function HeaderProjectSelect() {
   const theme = useTheme()
-  const { projectId, setProjectId } = useProjectsContext()
+  const { projectId, setProjectId } = useSelectedProjectContext()
   const [query, setQuery] = useState('')
-  const debouncedQuery = useDebounce(query, 500)
+  const debouncedQuery = useThrottle(query, 300)
 
   const { data, loading, error } = useProjectsTinyQuery({
     pollInterval: 60_000,
     fetchPolicy: 'cache-and-network',
-    variables: { q: debouncedQuery },
+    variables: { q: debouncedQuery || undefined }, // undefined preferred over empty string
   })
 
   const projects = useMemo(

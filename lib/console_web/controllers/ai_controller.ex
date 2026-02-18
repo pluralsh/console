@@ -4,7 +4,7 @@ defmodule ConsoleWeb.AIController do
   alias Console.Schema.Cluster
   alias Console.Deployments.Agents
 
-  @options [recv_timeout: :infinity, timeout: :infinity]
+  @options [recv_timeout: :timer.minutes(5), timeout: :timer.minutes(5)]
 
   plug :verify
 

@@ -1,4 +1,4 @@
-import { Button, Flex, Input, SearchIcon, Table } from '@pluralsh/design-system'
+import { Button, Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { useGroupsQuery } from 'generated/graphql'
 import { useContext, useMemo, useState } from 'react'
 
@@ -14,6 +14,7 @@ import { useThrottle } from 'components/hooks/useThrottle'
 import { SimpleToastChip } from 'components/utils/SimpleToastChip'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import { mapExistingNodes } from 'utils/graphql'
+import { ListWrapperSC } from '../users/UsersList'
 import { GROUP_CREATE_ID_KEY, GroupEditT } from './Groups'
 import { groupsCols } from './GroupsColumns'
 
@@ -53,13 +54,8 @@ export function GroupsList({
   }
 
   if (error) return <GqlError error={error} />
-
   return (
-    <Flex
-      gap="small"
-      direction="column"
-      minHeight={0}
-    >
+    <ListWrapperSC>
       <Input
         value={q}
         placeholder="Search groups"
@@ -105,6 +101,6 @@ export function GroupsList({
         {showGroupDeletedToast.groupName}
         <Body2BoldP $color="icon-danger">deleted</Body2BoldP>
       </SimpleToastChip>
-    </Flex>
+    </ListWrapperSC>
   )
 }

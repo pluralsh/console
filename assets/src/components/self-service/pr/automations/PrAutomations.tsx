@@ -17,14 +17,12 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { useThrottle } from 'components/hooks/useThrottle'
-import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { columns } from './PrAutomationsColumns'
 
 export const PRA_DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
 
 export function PrAutomations() {
-  const { colors } = useTheme()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 300)
 
@@ -79,7 +77,6 @@ export function PrAutomations() {
         startIcon={<SearchIcon />}
         value={searchString}
         onChange={(e) => setSearchString(e.currentTarget.value)}
-        css={{ background: colors['fill-one'] }}
       />
       <Table
         fullHeightWrap

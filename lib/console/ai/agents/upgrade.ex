@@ -24,7 +24,7 @@ defmodule Console.AI.Agents.Upgrade do
     %{steps: steps, user: user} = upgrade = Repo.preload(upgrade, [:steps, :cluster, :user, :runtime])
     user = Console.Services.Rbac.preload(user)
 
-    Task.async_stream(steps, &exec_step(&1, upgrade, user), max_concurrency: 10, timeout: :infinity)
+    Task.async_stream(steps, &exec_step(&1, upgrade, user), max_concurrency: 10, timeout: :timer.minutes(30))
     |> Enum.any?(&match?({:ok, %{status: :failed}}, &1))
     |> then(&ClusterUpgrade.changeset(upgrade, %{status: if(&1, do: :failed, else: :completed)}))
     |> Repo.update()
