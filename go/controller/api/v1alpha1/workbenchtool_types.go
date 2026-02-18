@@ -173,7 +173,7 @@ type WorkbenchToolHTTPConfig struct {
 	Body *string `json:"body,omitempty"`
 
 	// InputSchema is the JSON schema for the tool input (arbitrary JSON).
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	InputSchema *runtime.RawExtension `json:"inputSchema,omitempty"`
 }
 
@@ -191,11 +191,8 @@ func (c *WorkbenchToolHTTPConfig) Attributes() *console.WorkbenchToolHTTPConfigu
 				Value: header.Value,
 			}
 		}),
-		Body: c.Body,
-	}
-
-	if c.InputSchema != nil {
-		attrs.InputSchema = lo.ToPtr(string(c.InputSchema.Raw))
+		Body:        c.Body,
+		InputSchema: lo.ToPtr(string(c.InputSchema.Raw)),
 	}
 
 	return attrs

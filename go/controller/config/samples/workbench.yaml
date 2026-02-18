@@ -16,6 +16,14 @@ spec:
     http:
       url: https://api.example.com/health
       method: GET
+      inputSchema:
+        type: object
+        properties:
+          endpoint:
+            type: string
+            description: API endpoint to check
+        required:
+          - endpoint
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: WorkbenchTool
@@ -40,6 +48,23 @@ spec:
       headers:
         - name: Content-Type
           value: application/json
+      inputSchema:
+        type: object
+        properties:
+          query:
+            type: string
+            description: Metrics query string
+          timeRange:
+            type: object
+            properties:
+              start:
+                type: string
+                format: date-time
+              end:
+                type: string
+                format: date-time
+        required:
+          - query
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: Workbench
