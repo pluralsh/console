@@ -515,6 +515,9 @@ spec:
                     items:
                       properties:
                         helm:
+                          description: Helm is the Helm configuration to use for this
+                            renderer, use if `path` points to a helm chart and you
+                            want to override the default helm configuration.
                           properties:
                             ignoreHooks:
                               description: IgnoreHooks indicates whether to ignore
@@ -536,8 +539,10 @@ spec:
                               type: array
                           type: object
                         path:
+                          description: Path is the path to the renderer works under.
                           type: string
                         type:
+                          description: Type is the type of renderer to use.
                           enum:
                           - AUTO
                           - RAW

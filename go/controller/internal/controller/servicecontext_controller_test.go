@@ -2,6 +2,7 @@ package controller_test
 
 import (
 	"context"
+	"encoding/json"
 
 	"k8s.io/apimachinery/pkg/runtime"
 
@@ -9,6 +10,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -20,6 +22,7 @@ import (
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 	common "github.com/pluralsh/console/go/controller/internal/test/common"
 	"github.com/pluralsh/console/go/controller/internal/test/mocks"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 var _ = Describe("ServiceContext Controller", Ordered, func() {
@@ -181,6 +184,115 @@ var _ = Describe("ServiceContext Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, f)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(f.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+		})
+
+		It("should successfully merge configMapRef and secretRef into configuration", func() {
+			By("Create secret and configmap")
+			secretName := "test-secret"
+			configMapName := "test-configmap"
+			secretNamespacedName := types.NamespacedName{Name: secretName, Namespace: namespace}
+			configMapNamespacedName := types.NamespacedName{Name: configMapName, Namespace: namespace}
+
+			// Create secret
+			secret := &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      secretName,
+					Namespace: namespace,
+				},
+				Data: map[string][]byte{
+					"secretKey1": []byte("secretValue1"),
+					"secretKey2": []byte("secretValue2"),
+				},
+			}
+			Expect(k8sClient.Create(ctx, secret)).To(Succeed())
+			defer func() {
+				Expect(k8sClient.Delete(ctx, secret)).To(Succeed())
+			}()
+
+			// Create configmap
+			configMap := &corev1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configMapName,
+					Namespace: namespace,
+				},
+				Data: map[string]string{
+					"configKey1": "configValue1",
+					"configKey2": "configValue2",
+				},
+			}
+			Expect(k8sClient.Create(ctx, configMap)).To(Succeed())
+			defer func() {
+				Expect(k8sClient.Delete(ctx, configMap)).To(Succeed())
+			}()
+
+			By("Create ServiceContext with configMapRef and secretRef")
+			scName := "test-with-refs"
+			scNamespacedName := types.NamespacedName{Name: scName, Namespace: namespace}
+			sc := &v1alpha1.ServiceContext{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      scName,
+					Namespace: namespace,
+				},
+				Spec: v1alpha1.ServiceContextSpec{
+					Configuration: runtime.RawExtension{Raw: []byte(`{"existingKey":"existingValue"}`)},
+					ConfigMapRef: &corev1.ObjectReference{
+						Name:      configMapName,
+						Namespace: namespace,
+					},
+					SecretRef: &corev1.SecretReference{
+						Name:      secretName,
+						Namespace: namespace,
+					},
+				},
+			}
+			Expect(k8sClient.Create(ctx, sc)).To(Succeed())
+			defer func() {
+				Expect(k8sClient.Delete(ctx, sc)).To(Succeed())
+			}()
+
+			By("Reconcile the ServiceContext")
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetServiceContext", mock.Anything).Return(nil, internalerror.NewNotFound())
+
+			// Verify that SaveServiceContext is called with merged configuration
+			fakeConsoleClient.On("SaveServiceContext", mock.Anything, mock.MatchedBy(func(attrs gqlclient.ServiceContextAttributes) bool {
+				if attrs.Configuration == nil {
+					return false
+				}
+				var config map[string]interface{}
+				if err := json.Unmarshal([]byte(*attrs.Configuration), &config); err != nil {
+					return false
+				}
+				// Check that all keys are present
+				return config["existingKey"] == "existingValue" &&
+					config["configKey1"] == "configValue1" &&
+					config["configKey2"] == "configValue2" &&
+					config["secretKey1"] == "secretValue1" &&
+					config["secretKey2"] == "secretValue2"
+			})).Return(&gqlclient.ServiceContextFragment{ID: "456"}, nil)
+
+			nr := &controller.ServiceContextReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := nr.Reconcile(ctx, reconcile.Request{
+				NamespacedName: scNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			By("Verify annotations were added to secret and configmap")
+			updatedSecret := &corev1.Secret{}
+			Expect(k8sClient.Get(ctx, secretNamespacedName, updatedSecret)).To(Succeed())
+			Expect(updatedSecret.GetAnnotations()).NotTo(BeNil())
+			Expect(updatedSecret.GetAnnotations()[utils.OwnerRefAnnotation]).To(ContainSubstring(namespace + "/" + scName))
+
+			updatedConfigMap := &corev1.ConfigMap{}
+			Expect(k8sClient.Get(ctx, configMapNamespacedName, updatedConfigMap)).To(Succeed())
+			Expect(updatedConfigMap.GetAnnotations()).NotTo(BeNil())
+			Expect(updatedConfigMap.GetAnnotations()[utils.OwnerRefAnnotation]).To(ContainSubstring(namespace + "/" + scName))
 		})
 
 	})

@@ -9955,9 +9955,7 @@ spec:
                   It is useful for projects with external modules or nested folder structures.
                 type: string
             required:
-            - clusterRef
             - git
-            - repositoryRef
             - type
             type: object
           status:

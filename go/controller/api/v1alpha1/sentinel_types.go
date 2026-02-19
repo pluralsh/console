@@ -128,6 +128,7 @@ type SentinelCheckIntegrationTestCaseRaw struct {
 	//+kubebuilder:validation:Optional
 	ExpectedResult *console.SentinelRawResult `json:"expectedResult,omitempty"`
 }
+
 type SentinelCheckIntegrationTestCaseCoredns struct {
 	// DialFqdns the fqdns to dial for this test case
 	DialFqdns []string `json:"dialFqdns,omitempty"`

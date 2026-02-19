@@ -341,21 +341,30 @@ type ServiceSpec struct {
 
 type Source struct {
 	// Path the subdirectory this source will live in the final tarball
+	// +kubebuilder:validation:Optional
 	Path *string `json:"path,omitempty"`
 
 	// RepositoryRef the reference of the Git repository to source from.
+	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
 	// Git contains a location in a Git repository to use.
+	// +kubebuilder:validation:Optional
 	Git *GitRef `json:"git,omitempty"`
 }
 
 type Renderer struct {
+	// Path is the path to the renderer works under.
+	// +kubebuilder:validation:Required
 	Path string `json:"path"`
 
+	// Type is the type of renderer to use.
+	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum=AUTO;RAW;HELM;KUSTOMIZE
 	Type console.RendererType `json:"type"`
 
+	// Helm is the Helm configuration to use for this renderer, use if `path` points to a helm chart and you want to override the default helm configuration.
+	// +kubebuilder:validation:Optional
 	Helm *HelmMinimal `json:"helm,omitempty"`
 }
 

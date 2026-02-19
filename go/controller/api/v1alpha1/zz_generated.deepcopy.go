@@ -46,6 +46,11 @@ func (in *AIProviderSettings) DeepCopyInto(out *AIProviderSettings) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ProxyModels != nil {
+		in, out := &in.ProxyModels, &out.ProxyModels
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.BaseUrl != nil {
 		in, out := &in.BaseUrl, &out.BaseUrl
 		*out = new(string)
@@ -326,6 +331,11 @@ func (in *AzureOpenAISettings) DeepCopyInto(out *AzureOpenAISettings) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ProxyModels != nil {
+		in, out := &in.ProxyModels, &out.ProxyModels
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	in.TokenSecretRef.DeepCopyInto(&out.TokenSecretRef)
 }
 
@@ -351,6 +361,11 @@ func (in *BedrockSettings) DeepCopyInto(out *BedrockSettings) {
 		in, out := &in.EmbeddingModel, &out.EmbeddingModel
 		*out = new(string)
 		**out = **in
+	}
+	if in.ProxyModels != nil {
+		in, out := &in.ProxyModels, &out.ProxyModels
+		*out = make([]string, len(*in))
+		copy(*out, *in)
 	}
 	if in.TokenSecretRef != nil {
 		in, out := &in.TokenSecretRef, &out.TokenSecretRef
@@ -7914,6 +7929,16 @@ func (in *ServiceContextSpec) DeepCopyInto(out *ServiceContextSpec) {
 		**out = **in
 	}
 	in.Configuration.DeepCopyInto(&out.Configuration)
+	if in.ConfigMapRef != nil {
+		in, out := &in.ConfigMapRef, &out.ConfigMapRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
+	if in.SecretRef != nil {
+		in, out := &in.SecretRef, &out.SecretRef
+		*out = new(v1.SecretReference)
+		**out = **in
+	}
 	if in.ProjectRef != nil {
 		in, out := &in.ProjectRef, &out.ProjectRef
 		*out = new(v1.ObjectReference)
@@ -9183,6 +9208,11 @@ func (in *VertexSettings) DeepCopyInto(out *VertexSettings) {
 		in, out := &in.EmbeddingModel, &out.EmbeddingModel
 		*out = new(string)
 		**out = **in
+	}
+	if in.ProxyModels != nil {
+		in, out := &in.ProxyModels, &out.ProxyModels
+		*out = make([]string, len(*in))
+		copy(*out, *in)
 	}
 	if in.Endpoint != nil {
 		in, out := &in.Endpoint, &out.Endpoint

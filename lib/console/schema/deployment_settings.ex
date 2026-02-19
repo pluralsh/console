@@ -188,6 +188,8 @@ defmodule Console.Schema.DeploymentSettings do
         field :model,           :string
         field :tool_model,      :string
         field :embedding_model, :string
+
+        field :proxy_models, {:array, :string}
       end
 
       embeds_one :anthropic, Anthropic, on_replace: :update do
@@ -196,6 +198,8 @@ defmodule Console.Schema.DeploymentSettings do
         field :model,           :string
         field :tool_model,      :string
         field :embedding_model, :string
+
+        field :proxy_models,    {:array, :string}
       end
 
       embeds_one :ollama, Ollama, on_replace: :update do
@@ -213,6 +217,8 @@ defmodule Console.Schema.DeploymentSettings do
         field :tool_model,      :string
         field :embedding_model, :string
         field :access_token,    EncryptedString
+
+        field :proxy_models,    {:array, :string}
       end
 
       embeds_one :bedrock, Bedrock, on_replace: :update do
@@ -223,6 +229,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :embedding_model,       :string
         field :aws_access_key_id,     :string
         field :aws_secret_access_key, EncryptedString
+        field :proxy_models,          {:array, :string}
       end
 
       embeds_one :vertex, Vertex, on_replace: :update do
@@ -233,6 +240,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :endpoint,             :string
         field :location,             :string
         field :embedding_model,      :string
+        field :proxy_models,         {:array, :string}
       end
     end
 
@@ -322,7 +330,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp ai_api_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(access_token model tool_model embedding_model base_url)a)
+    |> cast(attrs, ~w(access_token model tool_model embedding_model base_url proxy_models)a)
   end
 
   defp ollama_changeset(model, attrs) do
@@ -333,7 +341,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp azure_openai_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(endpoint api_version access_token tool_model embedding_model model)a)
+    |> cast(attrs, ~w(endpoint api_version access_token tool_model embedding_model model proxy_models)a)
     |> validate_required(~w(access_token endpoint)a)
     |> validate_change(:endpoint, fn :endpoint, endpoint ->
       with %URI{path: path, scheme: "https"} <- URI.parse(endpoint),
@@ -348,13 +356,13 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp bedrock_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model aws_access_key_id aws_secret_access_key)a)
+    |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model aws_access_key_id aws_secret_access_key proxy_models)a)
     |> validate_required(~w(model_id region)a)
   end
 
   defp vertex_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model tool_model embedding_model service_account_json project location endpoint)a)
+    |> cast(attrs, ~w(model tool_model embedding_model service_account_json project location endpoint proxy_models)a)
     |> validate_required([:project, :location])
     |> validate_change(:service_account_json, fn :service_account_json, json ->
       case Jason.decode(json) do

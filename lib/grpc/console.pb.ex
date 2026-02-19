@@ -27,6 +27,7 @@ defmodule Plrl.OpenAiConfig do
   field :embeddingModel, 3, proto3_optional: true, type: :string
   field :toolModel, 4, proto3_optional: true, type: :string
   field :baseUrl, 5, proto3_optional: true, type: :string
+  field :proxyModels, 6, repeated: true, type: :string
 end
 
 defmodule Plrl.AnthropicConfig do
@@ -39,6 +40,7 @@ defmodule Plrl.AnthropicConfig do
   field :model, 3, proto3_optional: true, type: :string
   field :embeddingModel, 4, proto3_optional: true, type: :string
   field :toolModel, 5, proto3_optional: true, type: :string
+  field :proxyModels, 6, repeated: true, type: :string
 end
 
 defmodule Plrl.VertexAiConfig do
@@ -54,6 +56,7 @@ defmodule Plrl.VertexAiConfig do
   field :toolModel, 6, proto3_optional: true, type: :string
   field :project, 7, proto3_optional: true, type: :string
   field :location, 8, proto3_optional: true, type: :string
+  field :proxyModels, 9, repeated: true, type: :string
 end
 
 defmodule Plrl.BedrockConfig do
@@ -68,6 +71,7 @@ defmodule Plrl.BedrockConfig do
   field :embeddingModelId, 5, proto3_optional: true, type: :string
   field :awsAccessKeyId, 6, proto3_optional: true, type: :string
   field :awsSecretAccessKey, 7, proto3_optional: true, type: :string
+  field :proxyModels, 8, repeated: true, type: :string
 end
 
 defmodule Plrl.AzureOpenAiConfig do
@@ -81,6 +85,7 @@ defmodule Plrl.AzureOpenAiConfig do
   field :embeddingModel, 5, proto3_optional: true, type: :string
   field :toolModel, 6, proto3_optional: true, type: :string
   field :accessToken, 7, proto3_optional: true, type: :string
+  field :proxyModels, 8, repeated: true, type: :string
 end
 
 defmodule Plrl.ProxyAuthenticationRequest do
