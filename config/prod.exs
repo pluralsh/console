@@ -2,6 +2,10 @@ import Config
 
 config :console, :initialize, true
 
+config :hackney,
+  max_connections: 150,
+  max_per_host: 20
+
 config :console, ConsoleWeb.Endpoint,
   adapter: Bandit.PhoenixAdapter,
   http: [

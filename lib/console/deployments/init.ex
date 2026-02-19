@@ -23,6 +23,16 @@ defmodule Console.Deployments.Init do
       |> Map.put(:url, Git.artifacts_url())
       |> Git.create_repository(bot)
     end)
+    |> add_operation(:settings, fn %{deploy_repo: drepo, artifacts_repo: arepo} ->
+      maybe_ai(%{
+        name: "global",
+        artifact_repository_id: arepo.id,
+        deployer_repository_id: drepo.id,
+      })
+      |> maybe_observability()
+      |> maybe_agent_helm_values()
+      |> Settings.create()
+    end)
     |> add_operation(:cluster, fn _ ->
       Clusters.create_cluster(%{
         name: Console.conf(:cluster_name),
@@ -49,16 +59,6 @@ defmodule Console.Deployments.Init do
         Ecto.Changeset.change(cluster, %{provider_id: provider.id})
         |> Repo.update()
       %{provider: provider} -> {:ok, provider}
-    end)
-    |> add_operation(:settings, fn %{deploy_repo: drepo, artifacts_repo: arepo} ->
-      maybe_ai(%{
-        name: "global",
-        artifact_repository_id: arepo.id,
-        deployer_repository_id: drepo.id,
-      })
-      |> maybe_observability()
-      |> maybe_agent_helm_values()
-      |> Settings.create()
     end)
     |> add_operation(:context, fn _ -> maybe_setup_context(bot) end)
     |> add_operation(:secret, fn _ -> ensure_secret(Console.cloud?()) end)

@@ -7105,6 +7105,8 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	Format SentinelRunJobFormat `json:"format"`
 	// the gotestsum configuration to use for this check
 	Gotestsum *SentinelCheckGotestsumConfiguration `json:"gotestsum,omitempty"`
+	// default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)
+	Default *SentinelCheckIntegrationTestDefaultConfiguration `json:"default,omitempty"`
 	// a list of custom test cases to run for this check
 	Cases []*SentinelCheckIntegrationTestCaseConfiguration `json:"cases,omitempty"`
 }
@@ -7126,6 +7128,38 @@ type SentinelCheckIntegrationTestConfigurationAttributes struct {
 	Format SentinelRunJobFormat `json:"format"`
 	// the gotestsum configuration to use for this check
 	Gotestsum *SentinelCheckGotestsumAttributes `json:"gotestsum,omitempty"`
+	// default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)
+	Default *SentinelCheckIntegrationTestDefaultAttributes `json:"default,omitempty"`
+}
+
+type SentinelCheckIntegrationTestDefaultAttributes struct {
+	// whether to ignore disable the default built-in test cases, in case you'd prefer to just use custom cases.
+	Ignore *bool `json:"ignore,omitempty"`
+	// labels to apply to created namespaces, temporary namespaces are used for all test cases
+	NamespaceLabels *string `json:"namespaceLabels,omitempty"`
+	// annotations to apply to created namespaces, temporary namespaces are used for all test cases
+	NamespaceAnnotations *string `json:"namespaceAnnotations,omitempty"`
+	// container image registry for test deployments
+	Registry *string `json:"registry,omitempty"`
+	// annotations to apply to test deployments, useful if you need to opt out of policy enforcement
+	ResourceAnnotations *string `json:"resourceAnnotations,omitempty"`
+	// labels to apply to test deployments, useful if you need to opt out of policy enforcement
+	ResourceLabels *string `json:"resourceLabels,omitempty"`
+}
+
+type SentinelCheckIntegrationTestDefaultConfiguration struct {
+	// whether to ignore default namespace/deployment labels and annotations
+	Ignore *bool `json:"ignore,omitempty"`
+	// labels to apply to created namespaces
+	NamespaceLabels map[string]any `json:"namespaceLabels,omitempty"`
+	// annotations to apply to created namespaces
+	NamespaceAnnotations map[string]any `json:"namespaceAnnotations,omitempty"`
+	// container image registry for test deployments
+	Registry *string `json:"registry,omitempty"`
+	// annotations to apply to test deployments
+	ResourceAnnotations map[string]any `json:"resourceAnnotations,omitempty"`
+	// labels to apply to test deployments
+	ResourceLabels map[string]any `json:"resourceLabels,omitempty"`
 }
 
 type SentinelCheckKubernetesConfiguration struct {

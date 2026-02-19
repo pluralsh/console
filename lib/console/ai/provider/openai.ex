@@ -21,7 +21,7 @@ defmodule Console.AI.OpenAI do
 
   @type t :: %__MODULE__{}
 
-  @options [recv_timeout: :timer.minutes(5), timeout: :timer.minutes(5)]
+  @options [recv_timeout: :timer.minutes(5), timeout: :timer.minutes(5), hackney: [pool: :ai_pool]]
 
   defmodule ToolCall do
     @type t :: %__MODULE__{}

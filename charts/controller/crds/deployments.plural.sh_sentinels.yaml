@@ -188,6 +188,52 @@ spec:
                                 - type
                                 type: object
                               type: array
+                            default:
+                              description: Default configures default test cases and
+                                global behavior (e.g. namespace labels and annotations
+                                for created resources).
+                              properties:
+                                ignore:
+                                  description: Ignore disables default integration
+                                    test cases, useful if you'd prefer to just use
+                                    custom test cases exclusively.
+                                  type: boolean
+                                namespaceAnnotations:
+                                  additionalProperties:
+                                    type: string
+                                  description: NamespaceAnnotations annotations to
+                                    apply to created namespaces (test cases run in
+                                    temporary namespaces to ensure cleanup is seamless).
+                                  type: object
+                                namespaceLabels:
+                                  additionalProperties:
+                                    type: string
+                                  description: NamespaceLabels labels to apply to
+                                    created namespaces (test cases run in temporary
+                                    namespaces to ensure cleanup is seamless).
+                                  type: object
+                                registry:
+                                  description: Registry container image registry for
+                                    test deployments.  Image names an tags will still
+                                    be preserved
+                                  type: string
+                                resourceAnnotations:
+                                  additionalProperties:
+                                    type: string
+                                  description: ResourceAnnotations annotations to
+                                    apply to test resources within a namespace (this
+                                    is useful if you need to sidestep policy enforcement
+                                    for test resources).
+                                  type: object
+                                resourceLabels:
+                                  additionalProperties:
+                                    type: string
+                                  description: ResourceLabels labels to apply to test
+                                    resources within a namespace (this is useful if
+                                    you need to sidestep policy enforcement for test
+                                    resources).
+                                  type: object
+                              type: object
                             distro:
                               description: the distro to run the check on
                               enum:
@@ -243,7 +289,10 @@ spec:
                                   type: string
                               type: object
                             jobSpec:
-                              description: the job to run for this check
+                              description: The job to run for this check. We expect
+                                there to at least be one container named `default`
+                                that includes the sentinel go test code.  It's also
+                                recommended to not allow retries on the job.
                               properties:
                                 annotations:
                                   additionalProperties:
