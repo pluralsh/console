@@ -33,7 +33,7 @@ import { FillLevelDiv } from 'components/utils/FillLevelDiv.tsx'
 export function ServiceGitSettings() {
   const { service } = useServiceContext()
   const prevServiceId = usePrevious(service.id)
-  const { flowId } = useParams()
+  const { flowIdOrName } = useParams()
   const navigate = useNavigate()
 
   const { data: reposData } = useGitRepositoriesQuery({
@@ -98,14 +98,14 @@ export function ServiceGitSettings() {
     if (hasGitRepo) return
     navigate(
       getServiceSettingsPath({
-        flowId,
+        flowIdOrName,
         clusterId: service?.cluster?.id,
         serviceId: service?.id,
         isRelative: false,
         subTab: SERVICE_SETTINGS_HELM_REL_PATH,
       })
     )
-  }, [hasGitRepo, navigate, service, flowId])
+  }, [hasGitRepo, navigate, service, flowIdOrName])
 
   return (
     <form

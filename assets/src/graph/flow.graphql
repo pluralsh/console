@@ -92,8 +92,8 @@ query Flows($first: Int = 100, $after: String, $q: String) {
   }
 }
 
-query Flow($id: ID!) {
-  flow(id: $id) {
+query Flow($id: ID, $name: String) {
+  flow(id: $id, name: $name) {
     ...FlowBasicWithBindings
   }
 }

@@ -4,6 +4,7 @@ import {
   useServiceDeploymentsTinyQuery,
   useServiceDeploymentTinySuspenseQuery,
 } from 'generated/graphql'
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { Key, useCallback, useMemo } from 'react'
 import { useMatch, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -19,8 +20,9 @@ export function ServiceSelector() {
   const theme = useTheme()
   const navigate = useNavigate()
 
-  const { flowId, serviceId } = useParams()
-  const referrer = !!flowId ? 'flow' : 'cd'
+  const { serviceId } = useParams()
+  const { flowIdOrName, flowData } = useCurrentFlow()
+  const referrer = !!flowIdOrName ? 'flow' : 'cd'
 
   const { data: serviceTiny } = useServiceDeploymentTinySuspenseQuery({
     variables: { id: serviceId ?? '' },
@@ -32,9 +34,10 @@ export function ServiceSelector() {
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
+  const flowId = flowData?.flow?.id
   const { data: flowServices } = useFlowServicesQuery({
     variables: { id: flowId ?? '' },
-    skip: referrer !== 'flow',
+    skip: referrer !== 'flow' || !flowId,
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
@@ -66,14 +69,14 @@ export function ServiceSelector() {
         )
         navigate(
           `${getServiceDetailsPath({
-            flowId,
+            flowIdOrName,
             clusterId: service?.cluster?.id,
             serviceId: service?.id,
           })}/${urlSuffix}`
         )
       }
     },
-    [flowId, navigate, serviceId, serviceList, urlSuffix]
+    [flowIdOrName, navigate, serviceId, serviceList, urlSuffix]
   )
 
   return (

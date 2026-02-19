@@ -213,7 +213,7 @@ function ComponentsListView({
   setComponents: (components: ServiceDeploymentComponentFragment[]) => void
   searchQuery: string
 }) {
-  const { serviceId, clusterId, flowId } = useParams()
+  const { serviceId, clusterId, flowIdOrName } = useParams()
   const throttledSearchQuery = useThrottle(searchQuery, 250)
   const [showDeprecations, setShowDeprecations] = useState(false)
 
@@ -269,7 +269,7 @@ function ComponentsListView({
               ? `${getServiceComponentPath({
                   clusterId,
                   serviceId,
-                  flowId,
+                  flowIdOrName,
                   componentId: c.id,
                 })}`
               : undefined

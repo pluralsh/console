@@ -148,7 +148,7 @@ import {
   SERVICES_REL_PATH,
   SERVICES_TREE_REL_PATH,
 } from './cdRoutesConsts'
-import { FLOW_PARAM_ID } from './flowRoutesConsts.tsx'
+import { FLOW_PARAM_ID_OR_NAME } from './flowRoutesConsts.tsx'
 import { pipelineRoutes } from './pipelineRoutes'
 
 function CDRootRedirect() {
@@ -462,7 +462,7 @@ export const getPodDetailsRoutes = (
       type,
       clusterId: `:${CLUSTER_PARAM_ID}`,
       serviceId: `:${SERVICE_PARAM_ID}`,
-      flowId: `:${FLOW_PARAM_ID}`,
+      flowIdOrName: `:${FLOW_PARAM_ID_OR_NAME}`,
       agentRunId: `:${AI_AGENT_RUNS_PARAM_RUN_ID}`,
       name: `:${POD_PARAM_NAME}`,
       namespace: `:${POD_PARAM_NAMESPACE}`,

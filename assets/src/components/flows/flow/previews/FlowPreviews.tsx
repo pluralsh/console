@@ -26,15 +26,16 @@ import {
   useFlowPreviewEnvironmentInstancesQuery,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
+import type { FlowOutletContext } from '../Flow'
 import { PreviewTemplatesTable } from './PreviewTemplatesTable'
 import { SpawnPreviewModal } from './SpawnPreviewModal'
 
 export function FlowPreviews() {
   const navigate = useNavigate()
-  const { flowId } = useParams()
+  const { flow } = useOutletContext<FlowOutletContext>()
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
     null
   )
@@ -60,7 +61,7 @@ export function FlowPreviews() {
         queryHook: useFlowPreviewEnvironmentInstancesQuery,
         keyPath: ['flow', 'previewEnvironmentInstances'],
       },
-      { id: flowId ?? '' }
+      { id: flow?.id ?? '' }
     )
 
   const previews = useMemo(
@@ -123,14 +124,14 @@ export function FlowPreviews() {
         onClose={onFlyoverClose}
       >
         <PreviewTemplatesTable
-          flowId={flowId ?? ''}
+          flowId={flow?.id ?? ''}
           selectedTemplateId={selectedTemplateId}
         />
       </Flyover>
       <SpawnPreviewModal
         open={showModal}
         onClose={() => setShowModal(false)}
-        flowId={flowId ?? ''}
+        flowId={flow?.id ?? ''}
       />
     </Card>
   )

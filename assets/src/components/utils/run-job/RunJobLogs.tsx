@@ -30,18 +30,17 @@ export function RunJobLogs() {
   const id = (type === 'stack' ? params.runId : params.jobId) ?? ''
 
   const pods = useJobPods()
-  const containers =
-    useMemo(
-      () =>
-        pods?.flatMap(
-          (p) =>
-            p?.spec?.containers?.flatMap?.((c) => ({
-              id: `${p.metadata.name}++${p.metadata.namespace}++${c?.name}`,
-              ...c,
-            })) ?? []
-        ),
-      [pods]
-    ) || []
+  const containers = useMemo(
+    () =>
+      pods?.flatMap(
+        (p) =>
+          p?.spec?.containers?.flatMap?.((c) => ({
+            id: `${p.metadata.name}++${p.metadata.namespace}++${c?.name}`,
+            ...c,
+          })) ?? []
+      ) ?? [],
+    [pods]
+  )
 
   const [sinceSeconds, setSinceSeconds] = useState(SinceSecondsOptions.HalfHour)
   const [selectedContainer, setSelectedContainer] = useState<string>(

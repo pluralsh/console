@@ -289,14 +289,14 @@ function ServiceComponentTreeNode({
   type,
 }: NodeProps<ServiceComponentNodeType | ServiceComponentChildNodeType>) {
   const theme = useTheme()
-  const { serviceId, clusterId, flowId } = useParams()
+  const { serviceId, clusterId, flowIdOrName } = useParams()
   const [open, setOpen] = useState(false)
 
   const componentDetailsUrl = getComponentDetailsUrl({
     component: data,
     clusterId,
     serviceId,
-    flowId,
+    flowIdOrName,
   })
 
   return (
@@ -365,7 +365,7 @@ function ServiceComponentModal({
   setOpen: Dispatch<SetStateAction<boolean>>
 }) {
   const theme = useTheme()
-  const { serviceId, clusterId, flowId } = useParams()
+  const { serviceId, clusterId, flowIdOrName } = useParams()
   const tabStateRef = useRef<any>(null)
   const [activeTab, setActiveTab] = useState<Key>('yaml')
 
@@ -374,7 +374,7 @@ function ServiceComponentModal({
     component,
     clusterId,
     serviceId,
-    flowId,
+    flowIdOrName,
   })
 
   return (
@@ -567,12 +567,12 @@ function getComponentDetailsUrl({
   component,
   clusterId,
   serviceId,
-  flowId,
+  flowIdOrName,
 }: {
   component: ServiceComponent | ServiceComponentChild
   clusterId?: string
   serviceId?: string
-  flowId?: string
+  flowIdOrName?: string
 }): string | undefined {
   const { id, group, version, kind, name, namespace } = component
   if (component.__typename === 'ServiceComponentChild')
@@ -597,7 +597,7 @@ function getComponentDetailsUrl({
     return getServiceComponentPath({
       clusterId,
       serviceId,
-      flowId,
+      flowIdOrName,
       componentId: id,
     })
   else return undefined

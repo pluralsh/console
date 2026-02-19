@@ -4,9 +4,9 @@ import { useParams } from 'react-router-dom'
 
 import {
   ServiceDeploymentComponentFragment,
-  useFlowQuery,
   useServiceDeploymentQuery,
 } from 'generated/graphql'
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 
 import {
   CD_SERVICE_COMPONENT_PATH_MATCHER_ABS,
@@ -26,6 +26,7 @@ import { getServiceDetailsBreadcrumbs } from '../service/ServiceDetails'
 const getServiceComponentBreadcrumbs = ({
   cluster,
   service,
+  flow,
   componentName,
   componentId,
   ...props
@@ -37,6 +38,7 @@ const getServiceComponentBreadcrumbs = ({
     cluster,
     service,
     tab: 'components',
+    flow,
     ...props,
   }),
   {
@@ -44,23 +46,20 @@ const getServiceComponentBreadcrumbs = ({
     url: getServiceComponentPath({
       clusterId: cluster?.id,
       serviceId: service?.id,
+      flowIdOrName: flow?.name,
       componentId,
-      ...props,
     }),
   },
 ]
 
 export function ServiceComponent() {
-  const { componentId, clusterId, serviceId, flowId } = useParams()
-  const referrer = flowId ? 'flow' : 'cd'
+  const { componentId, clusterId, serviceId } = useParams()
+  const { flowIdOrName, flowData } = useCurrentFlow()
+  const referrer = flowIdOrName ? 'flow' : 'cd'
 
   const settings = useDeploymentSettings()
   const { data, loading, error } = useServiceDeploymentQuery({
     variables: { id: serviceId || '' },
-  })
-  const { data: flowData } = useFlowQuery({
-    variables: { id: flowId || '' },
-    skip: !flowId,
   })
 
   const serviceDeployment = data?.serviceDeployment

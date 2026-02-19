@@ -76,8 +76,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     |> paginate(args)
   end
 
-  def resolve_flow(%{id: id}, %{context: %{current_user: user}}),
+  def resolve_flow(%{id: id}, %{context: %{current_user: user}}) when is_binary(id),
     do: Flows.accessible(id, user)
+
+  def resolve_flow(%{name: name}, %{context: %{current_user: user}}) when is_binary(name),
+    do: Flows.accessible_by_name(name, user)
+
+  def resolve_flow(_, _), do: {:error, "must specify either id or name"}
 
   def resolve_preview_environment_template(%{id: id}, %{context: %{current_user: user}})
     when is_binary(id) do

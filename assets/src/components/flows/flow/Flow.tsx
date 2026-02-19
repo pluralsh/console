@@ -15,13 +15,14 @@ import {
   PermissionsIdType,
   PermissionsModal,
 } from 'components/cd/utils/PermissionsModal'
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'
-import { useFlowQuery } from 'generated/graphql'
+import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import { ReactNode, useMemo, useState } from 'react'
-import { Link, Outlet, useMatch, useParams } from 'react-router-dom'
+import { Link, Outlet, useParams } from 'react-router-dom'
 import {
   FLOW_MCP_CONNECTIONS_REL_PATH,
   FLOWS_ABS_PATH,
@@ -39,41 +40,35 @@ const directory: SubtabDirectory = [
   { path: VULNERABILITY_REPORTS_REL_PATH, label: 'Vulnerabilities' },
 ]
 
-export const getFlowBreadcrumbs = (
-  flowId: string = '',
-  flowName: string = '',
-  tab: string = ''
-) =>
+export type FlowOutletContext = {
+  flow: Nullable<FlowBasicWithBindingsFragment>
+}
+
+export const getFlowBreadcrumbs = (flowName: string = '', tab: string = '') =>
   flowName
     ? [
         { label: 'flows', url: FLOWS_ABS_PATH },
-        { label: flowName, url: `${FLOWS_ABS_PATH}/${flowId}` },
-        { label: tab, url: `${FLOWS_ABS_PATH}/${flowId}/${tab}` },
+        { label: flowName, url: `${FLOWS_ABS_PATH}/${flowName}` },
+        { label: tab, url: `${FLOWS_ABS_PATH}/${flowName}/${tab}` },
       ]
     : []
 
 export function Flow() {
-  const { flowId } = useParams()
-  const tab = useMatch(`${FLOWS_ABS_PATH}/${flowId}/:tab/*`)?.params.tab
   const [showPermissions, setShowPermissions] = useState(false)
-
-  const { data, loading, error, refetch } = useFlowQuery({
-    variables: { id: flowId ?? '' },
-  })
-  const flow = data?.flow
-
-  useSetBreadcrumbs(
-    useMemo(
-      () => getFlowBreadcrumbs(flowId, flow?.name || '', tab),
-      [flowId, flow, tab]
-    )
-  )
+  const { flowData, loading, error, refetch } = useCurrentFlow()
+  const { tab } = useParams()
+  const flow = flowData?.flow
 
   const [headerContent, setHeaderContent] = useState<ReactNode | null>(null)
-  const ctx = useMemo(() => ({ setHeaderContent }), [setHeaderContent])
+  const headerCtx = useMemo(() => ({ setHeaderContent }), [setHeaderContent])
+  const outletCtx: FlowOutletContext = useMemo(() => ({ flow }), [flow])
+
+  useSetBreadcrumbs(
+    useMemo(() => getFlowBreadcrumbs(flow?.name || '', tab), [flow?.name, tab])
+  )
 
   if (error) return <GqlError error={error} />
-  if (!data && loading) return <LoadingIndicator />
+  if (!flowData && loading) return <LoadingIndicator />
   if (!flow)
     return (
       <EmptyState message="Flow not found.">
@@ -89,7 +84,7 @@ export function Flow() {
     )
 
   return (
-    <PageHeaderContext value={ctx}>
+    <PageHeaderContext value={headerCtx}>
       <WrapperSC>
         <HeaderSC>
           <IconFrame
@@ -128,7 +123,7 @@ export function Flow() {
           </Button>
           <ChatWithAIButton
             floating
-            flowId={flowId}
+            flowId={flow.id}
             bodyText="Start a Flow chat"
             summaryText={`Further questions about "${flow.name}" Flow`}
           />
@@ -138,7 +133,7 @@ export function Flow() {
           {headerContent}
         </Flex>
         <ContentSC>
-          <Outlet context={flow} />
+          <Outlet context={outletCtx} />
         </ContentSC>
       </WrapperSC>
       <PermissionsModal

@@ -11,10 +11,11 @@ import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useFlowPrsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
-import { useParams } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
+import type { FlowOutletContext } from './Flow'
 
 export function FlowPrs() {
-  const { flowId } = useParams()
+  const { flow } = useOutletContext<FlowOutletContext>()
   const {
     data,
     loading,
@@ -25,7 +26,7 @@ export function FlowPrs() {
     setVirtualSlice,
   } = useFetchPaginatedData(
     { queryHook: useFlowPrsQuery, keyPath: ['flow', 'pullRequests'] },
-    { id: flowId ?? '' }
+    { id: flow?.id ?? '' }
   )
   const reactTableOptions = useMemo(() => ({ meta: { refetch } }), [refetch])
 
