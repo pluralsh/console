@@ -1,5 +1,6 @@
 import {
   Button,
+  Flex,
   KubernetesAltIcon,
   SubTab,
   TabList,
@@ -30,6 +31,12 @@ import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 
 import { useExplainWithAI } from 'components/ai/AIContext.tsx'
+import { Kind } from 'components/kubernetes/common/types.ts'
+import {
+  getKubernetesCustomResourceDetailsPath,
+  getResourceDetailsAbsPath,
+  isCRD,
+} from 'routes/kubernetesRoutesConsts.tsx'
 import { PageHeaderContext } from '../cd/ContinuousDeployment.tsx'
 import { getDirectory } from './directory.tsx'
 import {
@@ -37,12 +44,6 @@ import {
   isUnstructured,
   useFetchComponentDetails,
 } from './useFetchComponentDetails.tsx'
-import {
-  getKubernetesCustomResourceDetailsPath,
-  getResourceDetailsAbsPath,
-  isCRD,
-} from 'routes/kubernetesRoutesConsts.tsx'
-import { Kind } from 'components/kubernetes/common/types.ts'
 
 export type ComponentDetailsContext = {
   component: ServiceDeploymentComponentFragment
@@ -163,60 +164,51 @@ export function ComponentDetails({
         }
         heading={componentName}
         headingContent={
-          <div>
-            <div
-              css={{
-                display: 'flex',
-                gap: theme.spacing.medium,
-                className: 'DELETE',
-                margin: `${theme.spacing.medium}px 0`,
+          <Flex gap="medium">
+            <TabList
+              stateRef={tabStateRef}
+              stateProps={{
+                orientation: 'horizontal',
+                selectedKey: currentTab?.path,
               }}
             >
-              <TabList
-                stateRef={tabStateRef}
-                stateProps={{
-                  orientation: 'horizontal',
-                  selectedKey: currentTab?.path,
-                }}
-              >
-                {filteredDirectory.map(({ label, path }) => (
-                  <LinkTabWrap
-                    key={path}
-                    to={path}
-                    subTab
-                  >
-                    <SubTab>{label}</SubTab>
-                  </LinkTabWrap>
-                ))}
-              </TabList>
-              {service?.cluster?.id && (
-                <ViewInDashboardButton
-                  clusterId={service.cluster.id}
-                  component={component}
-                />
+              {filteredDirectory.map(({ label, path }) => (
+                <LinkTabWrap
+                  key={path}
+                  to={path}
+                  subTab
+                >
+                  <SubTab>{label}</SubTab>
+                </LinkTabWrap>
+              ))}
+            </TabList>
+            {service?.cluster?.id && (
+              <ViewInDashboardButton
+                clusterId={service.cluster.id}
+                component={component}
+              />
+            )}
+            {pluralServiceDeploymentRef?.id &&
+              pluralServiceDeploymentRef?.cluster?.id && (
+                <Button
+                  as={Link}
+                  to={getServiceDetailsPath({
+                    flowIdOrName,
+                    serviceId: pluralServiceDeploymentRef?.id,
+                    clusterId: pluralServiceDeploymentRef?.cluster.id,
+                  })}
+                >
+                  View Service
+                </Button>
               )}
-              {pluralServiceDeploymentRef?.id &&
-                pluralServiceDeploymentRef?.cluster?.id && (
-                  <Button
-                    as={Link}
-                    to={getServiceDetailsPath({
-                      flowIdOrName,
-                      serviceId: pluralServiceDeploymentRef?.id,
-                      clusterId: pluralServiceDeploymentRef?.cluster.id,
-                    })}
-                  >
-                    View Service
-                  </Button>
-                )}
-              {!service?.id && (
-                <ViewLogsButton
-                  metadata={value?.metadata}
-                  kind={componentKind}
-                />
-              )}
-              {headerContent}
-            </div>
-          </div>
+            {!service?.id && (
+              <ViewLogsButton
+                metadata={value?.metadata}
+                kind={componentKind}
+              />
+            )}
+            {headerContent}
+          </Flex>
         }
       >
         {error && currentTab?.path !== 'dryrun' && (
@@ -278,6 +270,7 @@ function ViewInDashboardButton({
 
   return (
     <Button
+      small
       as={Link}
       secondary
       startIcon={<KubernetesAltIcon />}
