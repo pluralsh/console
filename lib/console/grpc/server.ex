@@ -42,7 +42,7 @@ defmodule Console.GRPC.Server do
       embeddingModel: openai.embedding_model,
       toolModel: openai.tool_model,
       baseUrl: openai.base_url,
-      proxyModels: openai.proxy_models || []
+      proxyModels: proxy_models(openai)
     }
   end
 
@@ -52,7 +52,7 @@ defmodule Console.GRPC.Server do
       model: anthropic.model,
       toolModel: anthropic.tool_model,
       baseUrl: anthropic.base_url,
-      proxyModels: anthropic.proxy_models || []
+      proxyModels: proxy_models(anthropic)
     }
   end
 
@@ -65,7 +65,7 @@ defmodule Console.GRPC.Server do
       embeddingModel: vertex_ai.embedding_model,
       project: vertex_ai.project,
       location: vertex_ai.location,
-      proxyModels: vertex_ai.proxy_models || []
+      proxyModels: proxy_models(vertex_ai)
     }
   end
 
@@ -77,7 +77,7 @@ defmodule Console.GRPC.Server do
       region: bedrock.region,
       awsAccessKeyId: bedrock.aws_access_key_id,
       awsSecretAccessKey: bedrock.aws_secret_access_key,
-      proxyModels: bedrock.proxy_models || []
+      proxyModels: proxy_models(bedrock)
     }
   end
 
@@ -88,9 +88,12 @@ defmodule Console.GRPC.Server do
       embeddingModel: azure.embedding_model,
       toolModel: azure.tool_model,
       accessToken: azure.access_token,
-      proxyModels: azure.proxy_models || []
+      proxyModels: proxy_models(azure)
     }
   end
 
   defp to_pb(_), do: %Plrl.AiConfig{enabled: false}
+
+  defp proxy_models(%{proxy_models: [_ | _] = models}), do: models
+  defp proxy_models(_), do: []
 end
