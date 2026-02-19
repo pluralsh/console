@@ -134,7 +134,6 @@ export function OpenAISettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.model}
           onChange={(e) => {
@@ -148,7 +147,6 @@ export function OpenAISettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.embeddingModel}
           onChange={(e) => {
@@ -162,7 +160,6 @@ export function OpenAISettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.baseUrl}
           onChange={(e) => {
@@ -176,7 +173,6 @@ export function OpenAISettings({
         flex={1}
       >
         <InputRevealer
-          raised
           disabled={!enabled}
           value={settings?.accessToken ?? undefined}
           onChange={(e) => {
@@ -207,7 +203,6 @@ export function AnthropicSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.model}
           onChange={(e) => {
@@ -221,7 +216,6 @@ export function AnthropicSettings({
         flex={1}
       >
         <InputRevealer
-          raised
           disabled={!enabled}
           value={settings?.accessToken ?? undefined}
           onChange={(e) => {
@@ -252,7 +246,6 @@ export function OllamaSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.model}
           onChange={(e) => {
@@ -267,7 +260,6 @@ export function OllamaSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.url}
           onChange={(e) => {
@@ -282,7 +274,6 @@ export function OllamaSettings({
         flex={1}
       >
         <InputRevealer
-          raised
           disabled={!enabled}
           value={settings?.authorization ?? undefined}
           onChange={(e) => {
@@ -313,7 +304,6 @@ export function AzureSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.model}
           onChange={(e) => {
@@ -328,7 +318,6 @@ export function AzureSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.apiVersion}
           onChange={(e) => {
@@ -342,7 +331,6 @@ export function AzureSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.embeddingModel}
           onChange={(e) => {
@@ -357,7 +345,6 @@ export function AzureSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.endpoint}
           onChange={(e) => {
@@ -372,7 +359,6 @@ export function AzureSettings({
         flex={1}
       >
         <InputRevealer
-          raised
           disabled={!enabled}
           value={settings?.accessToken ?? undefined}
           onChange={(e) => {
@@ -404,7 +390,6 @@ export function BedrockSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.modelId}
           onChange={(e) => {
@@ -418,7 +403,6 @@ export function BedrockSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.embeddingModel}
           onChange={(e) => {
@@ -432,7 +416,6 @@ export function BedrockSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.accessToken}
           onChange={(e) => {
@@ -446,7 +429,6 @@ export function BedrockSettings({
         flex={1}
       >
         <InputRevealer
-          raised
           disabled={!enabled}
           value={settings?.region ?? undefined}
           onChange={(e) => {
@@ -517,7 +499,6 @@ export function VertexSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.model}
           onChange={(e) => {
@@ -531,7 +512,6 @@ export function VertexSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.embeddingModel}
           onChange={(e) => {
@@ -545,7 +525,6 @@ export function VertexSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.project}
           onChange={(e) => {
@@ -559,7 +538,6 @@ export function VertexSettings({
         flex={1}
       >
         <Input
-          raised
           disabled={!enabled}
           value={settings?.location}
           onChange={(e) => {
