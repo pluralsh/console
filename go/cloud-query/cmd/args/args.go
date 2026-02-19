@@ -41,7 +41,7 @@ const (
 )
 
 var (
-	argDatabaseEnabled        = pflag.Bool("database-enabled", defaultDatabaseEnabled, "enable PostgreSQL-backed CloudQuery features")
+	argDatabaseEnabled        = pflag.Bool("database-enabled", common.GetPluralEnvBool("DATABASE_ENABLED", defaultDatabaseEnabled), "enable PostgreSQL-backed CloudQuery features")
 	argDatabaseHost           = pflag.String("database-host", defaultDatabaseHost, "host of the PostgreSQL database, leave empty to use the default (localhost)")
 	argDatabasePort           = pflag.String("database-port", defaultDatabasePort, "port of the PostgreSQL database, leave empty to use the default (5432)")
 	argDatabaseUser           = pflag.String("database-user", defaultDatabaseUser, "default username for the PostgreSQL database")
