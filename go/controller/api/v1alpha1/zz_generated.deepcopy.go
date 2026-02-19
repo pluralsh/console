@@ -46,6 +46,11 @@ func (in *AIProviderSettings) DeepCopyInto(out *AIProviderSettings) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ProxyModels != nil {
+		in, out := &in.ProxyModels, &out.ProxyModels
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.BaseUrl != nil {
 		in, out := &in.BaseUrl, &out.BaseUrl
 		*out = new(string)
@@ -326,6 +331,11 @@ func (in *AzureOpenAISettings) DeepCopyInto(out *AzureOpenAISettings) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ProxyModels != nil {
+		in, out := &in.ProxyModels, &out.ProxyModels
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	in.TokenSecretRef.DeepCopyInto(&out.TokenSecretRef)
 }
 
@@ -351,6 +361,11 @@ func (in *BedrockSettings) DeepCopyInto(out *BedrockSettings) {
 		in, out := &in.EmbeddingModel, &out.EmbeddingModel
 		*out = new(string)
 		**out = **in
+	}
+	if in.ProxyModels != nil {
+		in, out := &in.ProxyModels, &out.ProxyModels
+		*out = make([]string, len(*in))
+		copy(*out, *in)
 	}
 	if in.TokenSecretRef != nil {
 		in, out := &in.TokenSecretRef, &out.TokenSecretRef
@@ -9193,6 +9208,11 @@ func (in *VertexSettings) DeepCopyInto(out *VertexSettings) {
 		in, out := &in.EmbeddingModel, &out.EmbeddingModel
 		*out = new(string)
 		**out = **in
+	}
+	if in.ProxyModels != nil {
+		in, out := &in.ProxyModels, &out.ProxyModels
+		*out = make([]string, len(*in))
+		copy(*out, *in)
 	}
 	if in.Endpoint != nil {
 		in, out := &in.Endpoint, &out.Endpoint

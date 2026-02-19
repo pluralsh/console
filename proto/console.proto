@@ -23,6 +23,7 @@ message OpenAiConfig {
   optional string embeddingModel = 3;
   optional string toolModel = 4;
   optional string baseUrl = 5;
+  repeated string proxyModels = 6;
 }
 
 message AnthropicConfig {
@@ -31,6 +32,7 @@ message AnthropicConfig {
   optional string model = 3;
   optional string embeddingModel = 4;
   optional string toolModel = 5;
+  repeated string proxyModels = 6;
 }
 
 message VertexAiConfig {
@@ -42,6 +44,7 @@ message VertexAiConfig {
   optional string toolModel = 6;
   optional string project = 7;
   optional string location = 8;
+  repeated string proxyModels = 9;
 }
 
 message BedrockConfig {
@@ -52,6 +55,7 @@ message BedrockConfig {
   optional string embeddingModelId = 5;
   optional string awsAccessKeyId = 6;
   optional string awsSecretAccessKey = 7;
+  repeated string proxyModels = 8;
 }
 
 message AzureOpenAiConfig {
@@ -61,6 +65,7 @@ message AzureOpenAiConfig {
   optional string embeddingModel = 5;
   optional string toolModel = 6;
   optional string accessToken = 7;
+  repeated string proxyModels = 8;
 }
 
 message ProxyAuthenticationRequest {

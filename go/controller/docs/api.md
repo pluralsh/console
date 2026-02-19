@@ -70,6 +70,7 @@ _Appears in:_
 | `model` _string_ | Model is the LLM model name to use. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `proxyModels` _string array_ | ProxyModels are additional models to support within our integrated ai proxy. |  | Optional: \{\} <br /> |
 | `baseUrl` _string_ | BaseUrl is a custom base url to use, for reimplementations<br />of the same API scheme (for instance Together.ai uses the OpenAI API spec) |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
@@ -252,6 +253,7 @@ _Appears in:_
 | `model` _string_ | Model - the OpenAi model you wish to use. If not specified, Plural will provide a default. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning. |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings. |  | Optional: \{\} <br /> |
+| `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
 
@@ -271,6 +273,7 @@ _Appears in:_
 | `modelId` _string_ | ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported. |  | Required: \{\} <br /> |
 | `toolModelId` _string_ | ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `region` _string_ | Region is the AWS region the model is hosted in |  | Required: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Optional: \{\} <br /> |
 | `awsAccessKeyId` _string_ | AWS Access Key ID to use for authentication |  | Optional: \{\} <br /> |
@@ -2035,8 +2038,8 @@ _Appears in:_
 | `name` _string_ | Name of this stack.<br />If not provided, the name from InfrastructureStack.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM ANSIBLE CUSTOM] <br />Required: \{\} <br /> |
 | `interval` _string_ | Interval specifies the interval at which the stack will be reconciled, default is 5m |  | Optional: \{\} <br /> |
-| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository containing the IaC source code. Leave empty to use git:url instead. |  | Required: \{\} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this stack will be executed. |  | Required: \{\} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository containing the IaC source code. Leave empty to use git:url instead. |  | Optional: \{\} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this stack will be executed. |  | Optional: \{\} <br /> |
 | `cluster` _string_ | Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references a project this stack belongs to.<br />If not provided, it will use the default project. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | Git contains reference within the repository where the IaC manifests are located. |  |  |
@@ -3909,9 +3912,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `path` _string_ |  |  |  |
-| `type` _[RendererType](#renderertype)_ |  |  | Enum: [AUTO RAW HELM KUSTOMIZE] <br /> |
-| `helm` _[HelmMinimal](#helmminimal)_ |  |  |  |
+| `path` _string_ | Path is the path to the renderer works under. |  | Required: \{\} <br /> |
+| `type` _[RendererType](#renderertype)_ | Type is the type of renderer to use. |  | Enum: [AUTO RAW HELM KUSTOMIZE] <br />Required: \{\} <br /> |
+| `helm` _[HelmMinimal](#helmminimal)_ | Helm is the Helm configuration to use for this renderer, use if `path` points to a helm chart and you want to override the default helm configuration. |  | Optional: \{\} <br /> |
 
 
 #### RouterFilters
@@ -4603,9 +4606,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `path` _string_ | Path the subdirectory this source will live in the final tarball |  |  |
-| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef the reference of the Git repository to source from. |  |  |
-| `git` _[GitRef](#gitref)_ | Git contains a location in a Git repository to use. |  |  |
+| `path` _string_ | Path the subdirectory this source will live in the final tarball |  | Optional: \{\} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef the reference of the Git repository to source from. |  | Optional: \{\} <br /> |
+| `git` _[GitRef](#gitref)_ | Git contains a location in a Git repository to use. |  | Optional: \{\} <br /> |
 
 
 #### SpecTemplate
@@ -5005,6 +5008,7 @@ _Appears in:_
 | `model` _string_ | Model is the Vertex AI model to use.  Must support the OpenAI completions api, see: https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/openai/overview |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `project` _string_ | Project is the GCP project you'll be using |  | Required: \{\} <br /> |
 | `location` _string_ | Location is the GCP region Vertex is queried from |  | Required: \{\} <br /> |
 | `endpoint` _string_ | Endpoint is a custom endpoint for self-deployed models |  | Optional: \{\} <br /> |

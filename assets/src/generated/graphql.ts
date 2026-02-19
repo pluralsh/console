@@ -1011,6 +1011,8 @@ export type AnthropicSettings = {
   __typename?: 'AnthropicSettings';
   /** the anthropic model version to use */
   model?: Maybe<Scalars['String']['output']>;
+  /** addditional models to support within the integrated ai proxy */
+  proxyModels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: Maybe<Scalars['String']['output']>;
 };
@@ -1020,6 +1022,8 @@ export type AnthropicSettingsAttributes = {
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
+  /** addditional models to support within the integrated ai proxy */
+  proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
 };
@@ -1337,6 +1341,8 @@ export type AzureOpenaiAttributes = {
   endpoint: Scalars['String']['input'];
   /** the exact model you wish to use */
   model?: InputMaybe<Scalars['String']['input']>;
+  /** addditional models to support within the integrated ai proxy */
+  proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
 };
@@ -1351,6 +1357,8 @@ export type AzureOpenaiSettings = {
   /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
   endpoint: Scalars['String']['output'];
   model?: Maybe<Scalars['String']['output']>;
+  /** addditional models to support within the integrated ai proxy */
+  proxyModels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: Maybe<Scalars['String']['output']>;
 };
@@ -1402,6 +1410,8 @@ export type BedrockAiAttributes = {
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** the bedrock model id to use */
   modelId: Scalars['String']['input'];
+  /** addditional models to support within the integrated ai proxy */
+  proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the aws region the model is hosted in */
   region?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
@@ -1417,6 +1427,8 @@ export type BedrockAiSettings = {
   embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the bedrock model to use */
   modelId: Scalars['String']['output'];
+  /** addditional models to support within the integrated ai proxy */
+  proxyModels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the aws region the model is hosted in */
   region?: Maybe<Scalars['String']['output']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
@@ -6227,6 +6239,8 @@ export type OllamaAttributes = {
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   model: Scalars['String']['input'];
+  /** addditional models to support within the integrated ai proxy */
+  proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
   url: Scalars['String']['input'];
@@ -6251,6 +6265,8 @@ export type OpenaiSettings = {
   embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the openai model version to use */
   model?: Maybe<Scalars['String']['output']>;
+  /** addditional models to support within the integrated ai proxy */
+  proxyModels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: Maybe<Scalars['String']['output']>;
 };
@@ -6261,6 +6277,8 @@ export type OpenaiSettingsAttributes = {
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
+  /** addditional models to support within the integrated ai proxy */
+  proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: InputMaybe<Scalars['String']['input']>;
 };
@@ -13529,6 +13547,8 @@ export type VertexAiAttributes = {
   model?: InputMaybe<Scalars['String']['input']>;
   /** the gcp project id to use */
   project: Scalars['String']['input'];
+  /** addditional models to support within the integrated ai proxy */
+  proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** optional service account json to auth to the GCP vertex apis */
   serviceAccountJson?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
@@ -13546,6 +13566,8 @@ export type VertexAiSettings = {
   model?: Maybe<Scalars['String']['output']>;
   /** the gcp project id to use */
   project: Scalars['String']['output'];
+  /** addditional models to support within the integrated ai proxy */
+  proxyModels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the model to use for tool calls, which are less frequent and require more complex reasoning */
   toolModel?: Maybe<Scalars['String']['output']>;
 };

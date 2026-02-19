@@ -790,6 +790,8 @@ type AnthropicSettings struct {
 	Model *string `json:"model,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 type AnthropicSettingsAttributes struct {
@@ -799,6 +801,8 @@ type AnthropicSettingsAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 // a representation of a kubernetes api deprecation
@@ -1044,6 +1048,8 @@ type AzureOpenaiAttributes struct {
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the azure openai access token to use
 	AccessToken string `json:"accessToken"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 // Settings for configuring against Azure OpenAI
@@ -1057,6 +1063,8 @@ type AzureOpenaiSettings struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the api version you want to use
 	APIVersion *string `json:"apiVersion,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 type AzureSettingsAttributes struct {
@@ -1109,6 +1117,8 @@ type BedrockAiAttributes struct {
 	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 // Settings for usage of AWS Bedrock for LLMs
@@ -1123,6 +1133,8 @@ type BedrockAiSettings struct {
 	Region *string `json:"region,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 type BindingAttributes struct {
@@ -5114,6 +5126,8 @@ type OllamaAttributes struct {
 	URL            string  `json:"url"`
 	// An http authorization header to use on calls to the Ollama api
 	Authorization *string `json:"authorization,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 // Settings for a self-hosted ollama-based LLM deployment
@@ -5135,6 +5149,8 @@ type OpenaiSettings struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 type OpenaiSettingsAttributes struct {
@@ -5145,6 +5161,8 @@ type OpenaiSettingsAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 type OpensearchConnection struct {
@@ -8626,6 +8644,8 @@ type VertexAiAttributes struct {
 	Project string `json:"project"`
 	// the gcp region the model is hosted in
 	Location string `json:"location"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 // Settings for usage of GCP VertexAI for LLMs
@@ -8640,6 +8660,8 @@ type VertexAiSettings struct {
 	Project string `json:"project"`
 	// the gcp region the model
 	Location string `json:"location"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 type VerticalPodAutoscaler struct {

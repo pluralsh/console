@@ -3446,6 +3446,9 @@ input OpenaiSettingsAttributes {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 input AnthropicSettingsAttributes {
@@ -3458,6 +3461,9 @@ input AnthropicSettingsAttributes {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 input OllamaAttributes {
@@ -3473,6 +3479,9 @@ input OllamaAttributes {
 
   "An http authorization header to use on calls to the Ollama api"
   authorization: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 input AzureOpenaiAttributes {
@@ -3493,6 +3502,9 @@ input AzureOpenaiAttributes {
 
   "the azure openai access token to use"
   accessToken: String!
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 input BedrockAiAttributes {
@@ -3516,6 +3528,9 @@ input BedrockAiAttributes {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 input VertexAiAttributes {
@@ -3539,6 +3554,9 @@ input VertexAiAttributes {
 
   "the gcp region the model is hosted in"
   location: String!
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 input VectorStoreAttributes {
@@ -3781,6 +3799,9 @@ type OpenaiSettings {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 "Anthropic connection information"
@@ -3790,6 +3811,9 @@ type AnthropicSettings {
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 "Settings for a self-hosted ollama-based LLM deployment"
@@ -3818,6 +3842,9 @@ type AzureOpenaiSettings {
 
   "the api version you want to use"
   apiVersion: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 "Settings for usage of AWS Bedrock for LLMs"
@@ -3836,6 +3863,9 @@ type BedrockAiSettings {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 "Settings for usage of GCP VertexAI for LLMs"
@@ -3854,6 +3884,9 @@ type VertexAiSettings {
 
   "the gcp region the model"
   location: String!
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 "Settings for configuring log aggregation throughout Plural"
