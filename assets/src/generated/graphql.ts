@@ -14288,6 +14288,8 @@ export type AgentRunFragment = { __typename?: 'AgentRun', id: string, status: Ag
 
 export type AgentRuntimeFragment = { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
+export type AgentRuntimeReposFragment = { __typename?: 'AgentRuntime', id: string, allowedRepositories?: Array<string | null> | null };
+
 export type AgentRunRepositoryFragment = { __typename?: 'AgentRunRepository', id: string, url: string, lastUsedAt?: string | null };
 
 export type AgentAnalysisFragment = { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null };
@@ -14350,6 +14352,13 @@ export type AgentRuntimeQueryVariables = Exact<{
 
 
 export type AgentRuntimeQuery = { __typename?: 'RootQueryType', agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType, aiProxy?: boolean | null, default?: boolean | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
+export type AgentRuntimeReposQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type AgentRuntimeReposQuery = { __typename?: 'RootQueryType', agentRuntime?: { __typename?: 'AgentRuntime', id: string, allowedRepositories?: Array<string | null> | null } | null };
 
 export type AgentRunPodLogsQueryVariables = Exact<{
   runId: Scalars['ID']['input'];
@@ -17845,6 +17854,12 @@ export const AgentRuntimeFragmentDoc = gql`
 }
     ${ClusterTinyFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
+export const AgentRuntimeReposFragmentDoc = gql`
+    fragment AgentRuntimeRepos on AgentRuntime {
+  id
+  allowedRepositories
+}
+    `;
 export const AgentRunRepositoryFragmentDoc = gql`
     fragment AgentRunRepository on AgentRunRepository {
   id
@@ -22519,6 +22534,46 @@ export type AgentRuntimeQueryHookResult = ReturnType<typeof useAgentRuntimeQuery
 export type AgentRuntimeLazyQueryHookResult = ReturnType<typeof useAgentRuntimeLazyQuery>;
 export type AgentRuntimeSuspenseQueryHookResult = ReturnType<typeof useAgentRuntimeSuspenseQuery>;
 export type AgentRuntimeQueryResult = Apollo.QueryResult<AgentRuntimeQuery, AgentRuntimeQueryVariables>;
+export const AgentRuntimeReposDocument = gql`
+    query AgentRuntimeRepos($id: ID!) {
+  agentRuntime(id: $id) {
+    ...AgentRuntimeRepos
+  }
+}
+    ${AgentRuntimeReposFragmentDoc}`;
+
+/**
+ * __useAgentRuntimeReposQuery__
+ *
+ * To run a query within a React component, call `useAgentRuntimeReposQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAgentRuntimeReposQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAgentRuntimeReposQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useAgentRuntimeReposQuery(baseOptions: Apollo.QueryHookOptions<AgentRuntimeReposQuery, AgentRuntimeReposQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AgentRuntimeReposQuery, AgentRuntimeReposQueryVariables>(AgentRuntimeReposDocument, options);
+      }
+export function useAgentRuntimeReposLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AgentRuntimeReposQuery, AgentRuntimeReposQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AgentRuntimeReposQuery, AgentRuntimeReposQueryVariables>(AgentRuntimeReposDocument, options);
+        }
+export function useAgentRuntimeReposSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AgentRuntimeReposQuery, AgentRuntimeReposQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AgentRuntimeReposQuery, AgentRuntimeReposQueryVariables>(AgentRuntimeReposDocument, options);
+        }
+export type AgentRuntimeReposQueryHookResult = ReturnType<typeof useAgentRuntimeReposQuery>;
+export type AgentRuntimeReposLazyQueryHookResult = ReturnType<typeof useAgentRuntimeReposLazyQuery>;
+export type AgentRuntimeReposSuspenseQueryHookResult = ReturnType<typeof useAgentRuntimeReposSuspenseQuery>;
+export type AgentRuntimeReposQueryResult = Apollo.QueryResult<AgentRuntimeReposQuery, AgentRuntimeReposQueryVariables>;
 export const AgentRunPodLogsDocument = gql`
     query AgentRunPodLogs($runId: ID!, $container: String!, $sinceSeconds: Int!) {
   agentRun(id: $runId) {
@@ -36706,6 +36761,7 @@ export const namedOperations = {
     AgentRunPod: 'AgentRunPod',
     AgentRuntimes: 'AgentRuntimes',
     AgentRuntime: 'AgentRuntime',
+    AgentRuntimeRepos: 'AgentRuntimeRepos',
     AgentRunPodLogs: 'AgentRunPodLogs',
     AgentRunRepositories: 'AgentRunRepositories',
     ChatThreads: 'ChatThreads',
@@ -37058,6 +37114,7 @@ export const namedOperations = {
     AgentRunTiny: 'AgentRunTiny',
     AgentRun: 'AgentRun',
     AgentRuntime: 'AgentRuntime',
+    AgentRuntimeRepos: 'AgentRuntimeRepos',
     AgentRunRepository: 'AgentRunRepository',
     AgentAnalysis: 'AgentAnalysis',
     AgentTodo: 'AgentTodo',

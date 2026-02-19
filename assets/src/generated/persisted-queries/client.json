@@ -32,6 +32,11 @@
          "name": "AgentRuntime",
          "body": "query AgentRuntime($id: ID!) {\n  agentRuntime(id: $id) {\n    ...AgentRuntime\n    __typename\n  }\n}\n\nfragment AgentRuntime on AgentRuntime {\n  id\n  name\n  type\n  aiProxy\n  cluster {\n    ...ClusterTiny\n    __typename\n  }\n  default\n  createBindings {\n    ...PolicyBinding\n    __typename\n  }\n  __typename\n}\n\nfragment ClusterTiny on Cluster {\n  ...ClusterMinimal\n  self\n  upgradePlan {\n    compatibilities\n    deprecations\n    incompatibilities\n    __typename\n  }\n  virtual\n  __typename\n}\n\nfragment ClusterMinimal on Cluster {\n  id\n  name\n  handle\n  provider {\n    name\n    cloud\n    __typename\n  }\n  distro\n  __typename\n}\n\nfragment PolicyBinding on PolicyBinding {\n  id\n  user {\n    id\n    name\n    email\n    __typename\n  }\n  group {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:c3828326291fea906271e608edc61b408b2f0d6105526a8f3511dd63576eca7f": {
+         "type": "query",
+         "name": "AgentRuntimeRepos",
+         "body": "query AgentRuntimeRepos($id: ID!) {\n  agentRuntime(id: $id) {\n    ...AgentRuntimeRepos\n    __typename\n  }\n}\n\nfragment AgentRuntimeRepos on AgentRuntime {\n  id\n  allowedRepositories\n  __typename\n}"
+      },
       "sha256:0bbdff23d5fb0e1033f64d6a4e002b470ceb2d17e81b3feda3eec84d78be6356": {
          "type": "query",
          "name": "AgentRunPodLogs",

@@ -13,7 +13,6 @@ import usePersistedState from 'components/hooks/usePersistedState'
 
 const PROMPT_KEY = 'ai-agent-run-prompt'
 const MODE_KEY = 'ai-agent-run-mode'
-const REPOSITORY_KEY = 'ai-agent-run-repository'
 const RUNTIME_ID_KEY = 'ai-agent-run-runtime-id'
 
 export function AIAgentRunInput() {
@@ -24,10 +23,7 @@ export function AIAgentRunInput() {
     MODE_KEY,
     AgentRunMode.Write
   )
-  const [repository, setRepository] = usePersistedState<Nullable<string>>(
-    REPOSITORY_KEY,
-    null
-  )
+  const [repository, setRepository] = useState<Nullable<string>>(null)
   const [runtimeId, setRuntimeId] = usePersistedState<Nullable<string>>(
     RUNTIME_ID_KEY,
     null
@@ -72,6 +68,7 @@ export function AIAgentRunInput() {
               setSelectedMode={setMode}
             />
             <AgentRunRepoSelector
+              selectedRuntimeId={runtimeId}
               selectedRepository={repository}
               setSelectedRepository={setRepository}
             />

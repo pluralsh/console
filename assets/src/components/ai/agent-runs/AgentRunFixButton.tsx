@@ -179,9 +179,11 @@ function AgentRunForm({
           setSelectedRepository={(repository) =>
             repository && setRepository(repository)
           }
+          selectedRuntimeId={runtimeId}
           triggerButton={
             <SelectButton>{repository || 'Select repository'}</SelectButton>
           }
+          width={500}
           leftContent={undefined}
         />
       </FormField>
