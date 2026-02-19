@@ -338,7 +338,7 @@ export const getResourceLinkPath = (
   const insightPathInfo = getInsightPathInfo(insight)
   const flowPath = flow && {
     path: [flow.name],
-    url: getFlowDetailsPath({ flowIdOrName: flow.id }),
+    url: getFlowDetailsPath({ flowIdOrName: flow.name }),
   }
   const servicePath = service && {
     path: [service.name],

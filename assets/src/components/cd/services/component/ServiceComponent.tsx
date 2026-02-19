@@ -26,6 +26,7 @@ import { getServiceDetailsBreadcrumbs } from '../service/ServiceDetails'
 const getServiceComponentBreadcrumbs = ({
   cluster,
   service,
+  flow,
   componentName,
   componentId,
   ...props
@@ -37,6 +38,7 @@ const getServiceComponentBreadcrumbs = ({
     cluster,
     service,
     tab: 'components',
+    flow,
     ...props,
   }),
   {
@@ -44,8 +46,8 @@ const getServiceComponentBreadcrumbs = ({
     url: getServiceComponentPath({
       clusterId: cluster?.id,
       serviceId: service?.id,
+      flowIdOrName: flow?.name,
       componentId,
-      ...props,
     }),
   },
 ]
@@ -79,7 +81,6 @@ export function ServiceComponent() {
           cluster: serviceDeployment?.cluster || { id: clusterId ?? '' },
           service: serviceDeployment || { id: serviceId ?? '' },
           flow: flowData?.flow,
-          flowIdOrName,
           componentId,
           componentName,
         }),
@@ -88,7 +89,6 @@ export function ServiceComponent() {
         clusterId,
         serviceId,
         flowData?.flow,
-        flowIdOrName,
         componentId,
         componentName,
       ]

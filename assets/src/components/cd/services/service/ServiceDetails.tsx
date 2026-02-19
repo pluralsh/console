@@ -52,22 +52,19 @@ export const getServiceDetailsBreadcrumbs = ({
   cluster,
   service,
   flow,
-  flowIdOrName,
   tab,
 }: Parameters<typeof getClusterBreadcrumbs>[0] & {
   service: { name?: Nullable<string>; id: string }
   flow?: Nullable<{ name?: Nullable<string>; id: string }>
-  flowIdOrName?: Nullable<string>
   tab?: string
 }) => {
-  const flowSegment = flowIdOrName ?? flow?.id
   const pathPrefix = getServiceDetailsPath({
     clusterId: cluster?.id,
     serviceId: service?.id,
-    flowIdOrName: flowSegment,
+    flowIdOrName: flow?.name,
   })
   return [
-    ...(flow?.id
+    ...(flow
       ? getFlowBreadcrumbs(flow?.name ?? '', 'services')
       : [
           ...getClusterBreadcrumbs({ cluster }),
@@ -235,7 +232,7 @@ function ServiceDetailsBase() {
   const clusterId = serviceDeployment?.cluster?.id
 
   const pathPrefix = getServiceDetailsPath({
-    flowIdOrName,
+    flowIdOrName: flowData?.flow?.name ?? flowIdOrName,
     clusterId,
     serviceId,
   })
@@ -261,7 +258,6 @@ function ServiceDetailsBase() {
           cluster: serviceDeployment?.cluster ?? { id: clusterId ?? '' },
           service: serviceDeployment ?? { id: serviceId ?? '' },
           flow: flowData?.flow,
-          flowIdOrName,
           tab,
         }),
       ],

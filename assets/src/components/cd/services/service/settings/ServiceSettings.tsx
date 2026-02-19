@@ -89,14 +89,12 @@ const getServiceSettingsBreadcrumbs = ({
   cluster,
   service,
   flow,
-  flowIdOrName,
   tab,
 }: Parameters<typeof getServiceDetailsBreadcrumbs>[0]) => {
   const detailsCrumbs = getServiceDetailsBreadcrumbs({
     cluster,
     service,
     flow,
-    flowIdOrName,
   })
   const detailsUrl = detailsCrumbs.at(-1)?.url
   return [
@@ -129,13 +127,12 @@ export function ServiceSettings() {
   const breadcrumbs = useMemo(
     () =>
       getServiceSettingsBreadcrumbs({
-        cluster: ctx?.service?.cluster,
-        service: ctx?.service ?? { id: serviceId ?? '' },
+        cluster: ctx.service?.cluster,
+        service: ctx.service ?? { id: serviceId ?? '' },
         flow: flowData?.flow,
-        flowIdOrName,
-        tab: tab ?? '',
+        tab,
       }),
-    [ctx?.service, flowData?.flow, flowIdOrName, serviceId, tab]
+    [ctx.service, flowData?.flow, serviceId, tab]
   )
   useSetBreadcrumbs(breadcrumbs)
 
