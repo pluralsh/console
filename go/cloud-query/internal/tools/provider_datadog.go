@@ -54,6 +54,12 @@ func (in *DatadogProvider) toMetricsQueryOutput(resp datadogV1.MetricsQueryRespo
 
 	for _, series := range resp.GetSeries() {
 		labels := in.tagsToLabels(series.TagSet)
+		if len(labels) == 0 {
+			if scope := series.GetScope(); scope != "" {
+				labels = in.tagsToLabels(strings.Split(scope, ","))
+			}
+		}
+
 		metricName := series.GetMetric()
 		for _, pair := range series.Pointlist {
 			if len(pair) < 2 || pair[0] == nil || pair[1] == nil {

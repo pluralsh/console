@@ -31,8 +31,12 @@ func NewToolQueryService() Service {
 }
 
 func (in *ToolQueryService) Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error) {
-	if input == nil || input.GetConnection() == nil {
-		return nil, status.Error(codes.InvalidArgument, "connection is required")
+	if input == nil {
+		return nil, status.Error(codes.InvalidArgument, "input is required")
+	}
+
+	if err := in.validateInput(input.GetConnection(), input.GetQuery(), input.GetRange()); err != nil {
+		return nil, err
 	}
 
 	provider, err := tools.NewProvider(input.GetConnection())
@@ -49,10 +53,13 @@ func (in *ToolQueryService) Metrics(ctx context.Context, input *toolquery.Metric
 }
 
 func (in *ToolQueryService) Logs(ctx context.Context, input *toolquery.LogsQueryInput) (*toolquery.LogsQueryOutput, error) {
-	if input == nil || input.Connection == nil {
-		return nil, status.Error(codes.InvalidArgument, "connection is required")
+	if input == nil {
+		return nil, status.Error(codes.InvalidArgument, "input is required")
 	}
 
+	if err := in.validateInput(input.GetConnection(), input.GetQuery(), input.GetRange()); err != nil {
+		return nil, err
+	}
 	provider, err := tools.NewProvider(input.GetConnection())
 	if err != nil {
 		return nil, in.mapError("logs", err)
@@ -67,8 +74,12 @@ func (in *ToolQueryService) Logs(ctx context.Context, input *toolquery.LogsQuery
 }
 
 func (in *ToolQueryService) Traces(ctx context.Context, input *toolquery.TracesQueryInput) (*toolquery.TracesQueryOutput, error) {
-	if input == nil || input.Connection == nil {
-		return nil, status.Error(codes.InvalidArgument, "connection is required")
+	if input == nil {
+		return nil, status.Error(codes.InvalidArgument, "input is required")
+	}
+
+	if err := in.validateInput(input.GetConnection(), input.GetQuery(), input.GetRange()); err != nil {
+		return nil, err
 	}
 
 	provider, err := tools.NewProvider(input.GetConnection())
@@ -82,6 +93,37 @@ func (in *ToolQueryService) Traces(ctx context.Context, input *toolquery.TracesQ
 	}
 
 	return output, nil
+}
+
+func (in *ToolQueryService) validateInput(connection *toolquery.ToolConnection, query string, timeRange *toolquery.TimeRange) error {
+	if connection == nil {
+		return status.Error(codes.InvalidArgument, "connection is required")
+	}
+
+	if len(query) == 0 {
+		return status.Error(codes.InvalidArgument, "query is required")
+	}
+
+	return in.validateTimeRange(timeRange)
+}
+
+func (in *ToolQueryService) validateTimeRange(timeRange *toolquery.TimeRange) error {
+	if timeRange == nil {
+		return status.Error(codes.InvalidArgument, "time range is required")
+	}
+
+	if timeRange.GetStart() == nil || timeRange.GetEnd() == nil {
+		return status.Error(codes.InvalidArgument, "start and end times are required")
+	}
+
+	from := timeRange.GetStart().AsTime()
+	to := timeRange.GetEnd().AsTime()
+
+	if from.After(to) {
+		return status.Error(codes.InvalidArgument, "start time must be before end time")
+	}
+
+	return nil
 }
 
 func (in *ToolQueryService) mapError(operation string, err error) error {
