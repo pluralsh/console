@@ -75,6 +75,12 @@ console:
 
     # agentHelmValues is used to configure the helm values for the agent on bootstrap. To configure them post-install, utilize the DeploymentSettings CR in our management cluster API.
     agentHelmValues: ~
+
+    # licenseKey is used to configure the license key for the Plural Console for airgapped installations.
+    licenseKey: ~
+
+    # adminEmails is a list of emails which will be auto-configured as admins in the console.
+    adminEmails: []
   
   # customOidc is used to configure custom oidc authentication for the console.
   customOidc:
