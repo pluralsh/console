@@ -35,7 +35,11 @@ func (in *ToolQueryService) Metrics(ctx context.Context, input *toolquery.Metric
 		return nil, status.Error(codes.InvalidArgument, "connection is required")
 	}
 
-	provider := tools.NewProvider(input.GetConnection())
+	provider, err := tools.NewProvider(input.GetConnection())
+	if err != nil {
+		return nil, in.mapError("metrics", err)
+	}
+
 	output, err := provider.Metrics(ctx, input)
 	if err != nil {
 		return nil, in.mapError("metrics", err)
@@ -49,7 +53,11 @@ func (in *ToolQueryService) Logs(ctx context.Context, input *toolquery.LogsQuery
 		return nil, status.Error(codes.InvalidArgument, "connection is required")
 	}
 
-	provider := tools.NewProvider(input.GetConnection())
+	provider, err := tools.NewProvider(input.GetConnection())
+	if err != nil {
+		return nil, in.mapError("logs", err)
+	}
+
 	output, err := provider.Logs(ctx, input)
 	if err != nil {
 		return nil, in.mapError("logs", err)
@@ -63,7 +71,11 @@ func (in *ToolQueryService) Traces(ctx context.Context, input *toolquery.TracesQ
 		return nil, status.Error(codes.InvalidArgument, "connection is required")
 	}
 
-	provider := tools.NewProvider(input.GetConnection())
+	provider, err := tools.NewProvider(input.GetConnection())
+	if err != nil {
+		return nil, in.mapError("traces", err)
+	}
+
 	output, err := provider.Traces(ctx, input)
 	if err != nil {
 		return nil, in.mapError("traces", err)

@@ -28,12 +28,9 @@ func (in *TempoProvider) Traces(ctx context.Context, input *toolquery.TracesQuer
 		return nil, ErrInvalidArgument
 	}
 
-	start, end, err := parseTimeRange(input.Range)
-	if err != nil {
-		return nil, err
-	}
-
 	client := clients.NewTempoClient(in.conn.GetUrl(), in.conn.GetToken(), in.conn.GetTenantId())
+	defer client.Close()
+
 	limit := ""
 	if input.GetLimit() > 0 {
 		limit = strconv.Itoa(int(input.GetLimit()))
@@ -41,8 +38,8 @@ func (in *TempoProvider) Traces(ctx context.Context, input *toolquery.TracesQuer
 	searchResp, err := client.Search(
 		ctx,
 		input.Query,
-		strconv.FormatInt(start.UnixNano(), 10),
-		strconv.FormatInt(end.UnixNano(), 10),
+		strconv.FormatInt(input.Range.GetStart().AsTime().UnixNano(), 10),
+		strconv.FormatInt(input.Range.GetEnd().AsTime().UnixNano(), 10),
 		limit,
 	)
 	if err != nil {

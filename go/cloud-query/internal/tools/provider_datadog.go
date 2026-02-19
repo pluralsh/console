@@ -15,8 +15,7 @@ import (
 )
 
 type DatadogProvider struct {
-	client *datadog.APIClient
-	conn   *toolquery.DatadogConnection
+	conn *toolquery.DatadogConnection
 }
 
 func NewDatadogProvider(conn *toolquery.DatadogConnection) *DatadogProvider {
@@ -31,7 +30,7 @@ func (in *DatadogProvider) Metrics(ctx context.Context, input *toolquery.Metrics
 		return nil, ErrInvalidArgument
 	}
 
-	client, err := in.newDatadogClient(ctx, in.conn)
+	ctx, client, err := in.newDatadogClient(ctx, in.conn)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +53,7 @@ func (in *DatadogProvider) toMetricsQueryOutput(resp datadogV1.MetricsQueryRespo
 	metrics := make([]*toolquery.MetricPoint, 0)
 
 	for _, series := range resp.GetSeries() {
-		labels := tagsToLabels(series.TagSet)
+		labels := in.tagsToLabels(series.TagSet)
 		metricName := series.GetMetric()
 		for _, pair := range series.Pointlist {
 			if len(pair) < 2 || pair[0] == nil || pair[1] == nil {
@@ -82,7 +81,7 @@ func (in *DatadogProvider) Logs(ctx context.Context, input *toolquery.LogsQueryI
 		return nil, ErrInvalidArgument
 	}
 
-	client, err := in.newDatadogClient(ctx, in.conn)
+	ctx, client, err := in.newDatadogClient(ctx, in.conn)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +119,7 @@ func (in *DatadogProvider) toLogsQueryOutput(resp datadogV2.LogsListResponse) *t
 			timestamp = time.Now()
 		}
 
-		labels := tagsToLabels(attributes.Tags)
+		labels := in.tagsToLabels(attributes.Tags)
 		if service := attributes.GetService(); service != "" {
 			labels["service"] = service
 		}
@@ -149,14 +148,14 @@ func (in *DatadogProvider) Traces(ctx context.Context, input *toolquery.TracesQu
 		return nil, ErrInvalidArgument
 	}
 
-	client, err := in.newDatadogClient(ctx, in.conn)
+	ctx, client, err := in.newDatadogClient(ctx, in.conn)
 	if err != nil {
 		return nil, err
 	}
 
 	filter := datadogV2.NewSpansQueryFilter()
 	filter.SetFrom(input.GetRange().GetStart().AsTime().UTC().Format(time.RFC3339Nano))
-	filter.SetTo(input.GetRange().GetStart().AsTime().UTC().Format(time.RFC3339Nano))
+	filter.SetTo(input.GetRange().GetEnd().AsTime().UTC().Format(time.RFC3339Nano))
 	filter.SetQuery(input.Query)
 
 	attrs := datadogV2.NewSpansListRequestAttributes()
@@ -195,7 +194,7 @@ func (in *DatadogProvider) toTraceQueryOutput(resp datadogV2.SpansListResponse) 
 			endTime = startTime
 		}
 
-		labels := tagsToLabels(attributes.Tags)
+		labels := in.tagsToLabels(attributes.Tags)
 		if env := attributes.GetEnv(); env != "" {
 			labels["env"] = env
 		}
@@ -218,11 +217,11 @@ func (in *DatadogProvider) toTraceQueryOutput(resp datadogV2.SpansListResponse) 
 	return &toolquery.TracesQueryOutput{Spans: spans}
 }
 
-func (in *DatadogProvider) newDatadogClient(ctx context.Context, conn *toolquery.DatadogConnection) (*datadog.APIClient, error) {
+func (in *DatadogProvider) newDatadogClient(ctx context.Context, conn *toolquery.DatadogConnection) (context.Context, *datadog.APIClient, error) {
 	apiKey := conn.GetApiKey()
 	appKey := conn.GetAppKey()
 	if apiKey == "" || appKey == "" {
-		return nil, fmt.Errorf("%w: missing api key or app key", ErrInvalidArgument)
+		return ctx, nil, fmt.Errorf("%w: missing api key or app key", ErrInvalidArgument)
 	}
 
 	ctx = context.WithValue(ctx, datadog.ContextAPIKeys, map[string]datadog.APIKey{
@@ -234,26 +233,23 @@ func (in *DatadogProvider) newDatadogClient(ctx context.Context, conn *toolquery
 		},
 	})
 
-	ctx = datadogWithSite(ctx, conn.GetSite())
 	configuration := datadog.NewConfiguration()
 	client := datadog.NewAPIClient(configuration)
 
-	return client, nil
+	return in.datadogWithSite(ctx, conn.GetSite()), client, nil
 }
 
-func datadogWithSite(ctx context.Context, site string) context.Context {
+func (in *DatadogProvider) datadogWithSite(ctx context.Context, site string) context.Context {
 	if len(site) == 0 {
 		return ctx
 	}
 
-	ctx = context.WithValue(ctx, datadog.ContextServerVariables, map[string]string{
+	return context.WithValue(ctx, datadog.ContextServerVariables, map[string]string{
 		"site": site,
 	})
-
-	return ctx
 }
 
-func tagsToLabels(tags []string) map[string]string {
+func (in *DatadogProvider) tagsToLabels(tags []string) map[string]string {
 	labels := make(map[string]string, len(tags))
 	for _, tag := range tags {
 		parts := strings.SplitN(tag, ":", 2)

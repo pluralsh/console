@@ -95,7 +95,11 @@ func (p *toolProvider) Traces(ctx context.Context, input *toolquery.TracesQueryI
 	return p.traces.Traces(ctx, input)
 }
 
-func NewProvider(conn *toolquery.ToolConnection) Provider {
-	logs, _ := newLogsProvider(conn)
-	return &toolProvider{metrics: newMetricsProvider(conn), logs: logs, traces: newTracesProvider(conn)}
+func NewProvider(conn *toolquery.ToolConnection) (Provider, error) {
+	logs, err := newLogsProvider(conn)
+	if err != nil {
+		return nil, err
+	}
+
+	return &toolProvider{metrics: newMetricsProvider(conn), logs: logs, traces: newTracesProvider(conn)}, nil
 }

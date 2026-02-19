@@ -63,12 +63,9 @@ func (in *PrometheusProvider) Metrics(ctx context.Context, input *toolquery.Metr
 		return nil, err
 	}
 
-	step := 30 * time.Second
-	if len(input.GetStep()) > 0 {
-		step, err = time.ParseDuration(input.GetStep())
-		if err != nil {
-			return nil, fmt.Errorf("%w: invalid step duration: %s", ErrInvalidArgument, input.GetStep())
-		}
+	step, err := in.toStep(input)
+	if err != nil {
+		return nil, err
 	}
 
 	value, _, err := client.QueryRange(ctx, input.Query, v1.Range{

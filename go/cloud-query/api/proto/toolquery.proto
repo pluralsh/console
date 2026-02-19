@@ -26,8 +26,8 @@ message PrometheusConnection {
 
 message LokiConnection {
   string url = 1;
-  string token = 3;
-  optional string tenant_id = 4;
+  string token = 2;
+  optional string tenant_id = 3;
 }
 
 message TempoConnection {

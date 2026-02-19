@@ -35,8 +35,8 @@ func (in *LokiProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInpu
 	resp, err := client.Logs(
 		ctx,
 		input.Query,
-		strconv.Itoa(input.GetRange().GetStart().AsTime().Nanosecond()),
-		strconv.Itoa(input.GetRange().GetEnd().AsTime().Nanosecond()),
+		strconv.FormatInt(input.GetRange().GetStart().AsTime().UnixNano(), 10),
+		strconv.FormatInt(input.GetRange().GetEnd().AsTime().UnixNano(), 10),
 		strconv.Itoa(int(input.GetLimit())))
 	if err != nil {
 		return nil, err

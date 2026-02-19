@@ -205,8 +205,8 @@ func (x *PrometheusConnection) GetPassword() string {
 type LokiConnection struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	Token         string                 `protobuf:"bytes,3,opt,name=token,proto3" json:"token,omitempty"`
-	TenantId      *string                `protobuf:"bytes,4,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`
+	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	TenantId      *string                `protobuf:"bytes,3,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1091,8 +1091,8 @@ const file_toolquery_proto_rawDesc = "" +
 	"\t_password\"h\n" +
 	"\x0eLokiConnection\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x14\n" +
-	"\x05token\x18\x03 \x01(\tR\x05token\x12 \n" +
-	"\ttenant_id\x18\x04 \x01(\tH\x00R\btenantId\x88\x01\x01B\f\n" +
+	"\x05token\x18\x02 \x01(\tR\x05token\x12 \n" +
+	"\ttenant_id\x18\x03 \x01(\tH\x00R\btenantId\x88\x01\x01B\f\n" +
 	"\n" +
 	"_tenant_id\"i\n" +
 	"\x0fTempoConnection\x12\x10\n" +
