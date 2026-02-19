@@ -14,7 +14,7 @@ import { ALERT_INSIGHT_REL_PATH } from './cdRoutesConsts.tsx'
 import {
   FLOWS_ABS_PATH,
   FLOW_MCP_CONNECTIONS_REL_PATH,
-  FLOW_PARAM_ID,
+  FLOW_PARAM_ID_OR_NAME,
 } from './flowRoutesConsts.tsx'
 import {
   getComponentRoutes,
@@ -28,7 +28,7 @@ import {
 } from './securityRoutesConsts.tsx'
 import { VulnerabilityReportDetails } from 'components/security/vulnerabilities/VulnReportDetails.tsx'
 
-const FLOW_ABS_PREFIX = `${FLOWS_ABS_PATH}/:${FLOW_PARAM_ID}`
+const FLOW_ABS_PREFIX = `${FLOWS_ABS_PATH}/:${FLOW_PARAM_ID_OR_NAME}`
 
 export const flowRoutes = [
   <Route

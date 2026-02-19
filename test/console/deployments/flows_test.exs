@@ -62,6 +62,33 @@ defmodule Console.Deployments.FlowsTest do
     end
   end
 
+  describe "accessible_by_name/2" do
+    test "reader can fetch flow by name" do
+      user = insert(:user)
+      flow = insert(:flow, name: "my-flow", read_bindings: [%{user_id: user.id}])
+
+      {:ok, found} = Flows.accessible_by_name(flow.name, user)
+
+      assert found.id == flow.id
+      assert found.name == flow.name
+    end
+
+    test "non-reader cannot fetch flow by name" do
+      user = insert(:user)
+      flow = insert(:flow, name: "other-flow")
+
+      {:error, _} = Flows.accessible_by_name(flow.name, user)
+    end
+
+    test "raises when flow name does not exist" do
+      user = insert(:user)
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Flows.accessible_by_name("nonexistent-flow", user)
+      end
+    end
+  end
+
   describe "delete_flow/2" do
     test "writers can delete a flow" do
       user = insert(:user)

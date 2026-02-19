@@ -437,7 +437,7 @@ type RootQueryType {
 
   flows(after: String, first: Int, before: String, last: Int, q: String): FlowConnection
 
-  flow(id: ID!): Flow
+  flow(id: ID, name: String): Flow
 
   mcpServers(after: String, first: Int, before: String, last: Int, q: String): McpServerConnection
 

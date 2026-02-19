@@ -8,12 +8,13 @@ import {
   useFlowServicesQuery,
 } from 'generated/graphql'
 import { useMemo } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 import { Edge } from 'utils/graphql'
+import type { FlowOutletContext } from './Flow'
 
 export function FlowServices() {
   const navigate = useNavigate()
-  const { flowId } = useParams()
+  const { flow } = useOutletContext<FlowOutletContext>()
   const {
     data,
     loading,
@@ -24,7 +25,7 @@ export function FlowServices() {
     setVirtualSlice,
   } = useFetchPaginatedData(
     { queryHook: useFlowServicesQuery, keyPath: ['flow', 'services'] },
-    { id: flowId ?? '' }
+    { id: flow?.id ?? '' }
   )
   const reactTableOptions = useMemo(() => ({ meta: { refetch } }), [refetch])
 

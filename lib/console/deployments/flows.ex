@@ -62,6 +62,13 @@ defmodule Console.Deployments.Flows do
     |> allow(user, :read)
   end
 
+  @doc "fetches a flow by name and determines if the user has access to it"
+  @spec accessible_by_name(binary, User.t) :: flow_resp
+  def accessible_by_name(name, %User{} = user) do
+    get_by_name!(name)
+    |> allow(user, :read)
+  end
+
   @doc "fetches and determines if the user has access to the given mcp server"
   @spec server_accessible(binary, User.t) :: flow_resp
   def server_accessible(id, %User{} = user) do

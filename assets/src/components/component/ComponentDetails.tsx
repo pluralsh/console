@@ -68,7 +68,7 @@ export function ComponentDetails({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { flowId } = useParams()
+  const { flowIdOrName } = useParams()
   const tabStateRef = useRef<any>(null)
   const { me } = useLogin()
   const componentKind = component.kind?.toLowerCase() || ''
@@ -134,7 +134,7 @@ export function ComponentDetails({
     const redirectPath = getServiceDetailsPath({
       clusterId: service?.cluster?.id,
       serviceId: service?.id,
-      flowId,
+      flowIdOrName,
     })
     if (isEmpty(filteredDirectory)) navigate(redirectPath)
     else
@@ -142,7 +142,14 @@ export function ComponentDetails({
         `${redirectPath}/components/${component.id}/${filteredDirectory[0].path}`,
         { replace: true }
       )
-  }, [navigate, currentTab, filteredDirectory, service, component, flowId])
+  }, [
+    navigate,
+    currentTab,
+    filteredDirectory,
+    service,
+    component,
+    flowIdOrName,
+  ])
 
   if (!me || (!data && loading)) return <LoadingIndicator />
 
@@ -193,7 +200,7 @@ export function ComponentDetails({
                   <Button
                     as={Link}
                     to={getServiceDetailsPath({
-                      flowId,
+                      flowIdOrName,
                       serviceId: pluralServiceDeploymentRef?.id,
                       clusterId: pluralServiceDeploymentRef?.cluster.id,
                     })}

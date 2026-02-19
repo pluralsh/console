@@ -4,9 +4,9 @@ import { useParams } from 'react-router-dom'
 
 import {
   ServiceDeploymentComponentFragment,
-  useFlowQuery,
   useServiceDeploymentQuery,
 } from 'generated/graphql'
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 
 import {
   CD_SERVICE_COMPONENT_PATH_MATCHER_ABS,
@@ -51,16 +51,13 @@ const getServiceComponentBreadcrumbs = ({
 ]
 
 export function ServiceComponent() {
-  const { componentId, clusterId, serviceId, flowId } = useParams()
-  const referrer = flowId ? 'flow' : 'cd'
+  const { componentId, clusterId, serviceId } = useParams()
+  const { flowIdOrName, flowData } = useCurrentFlow()
+  const referrer = flowIdOrName ? 'flow' : 'cd'
 
   const settings = useDeploymentSettings()
   const { data, loading, error } = useServiceDeploymentQuery({
     variables: { id: serviceId || '' },
-  })
-  const { data: flowData } = useFlowQuery({
-    variables: { id: flowId || '' },
-    skip: !flowId,
   })
 
   const serviceDeployment = data?.serviceDeployment
@@ -82,6 +79,7 @@ export function ServiceComponent() {
           cluster: serviceDeployment?.cluster || { id: clusterId ?? '' },
           service: serviceDeployment || { id: serviceId ?? '' },
           flow: flowData?.flow,
+          flowIdOrName,
           componentId,
           componentName,
         }),
@@ -90,6 +88,7 @@ export function ServiceComponent() {
         clusterId,
         serviceId,
         flowData?.flow,
+        flowIdOrName,
         componentId,
         componentName,
       ]

@@ -38,6 +38,49 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
       assert found["id"] == flow.id
     end
 
+    test "it can fetch a flow by name" do
+      user = insert(:user)
+      flow = insert(:flow, name: "my-flow", read_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"flow" => found}}} = run_query("""
+        query flow($name: String!) {
+          flow(name: $name) {
+            id
+            name
+          }
+        }
+      """, %{"name" => flow.name}, %{current_user: user})
+
+      assert found["id"] == flow.id
+      assert found["name"] == flow.name
+    end
+
+    test "fetching by name enforces read access" do
+      user = insert(:user)
+      flow = insert(:flow, name: "other-flow")
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query flow($name: String!) {
+          flow(name: $name) {
+            id
+            name
+          }
+        }
+      """, %{"name" => flow.name}, %{current_user: user})
+    end
+
+    test "flow requires id or name" do
+      user = insert(:user)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query flow {
+          flow {
+            id
+          }
+        }
+      """, %{}, %{current_user: user})
+    end
+
     test "it can fetch services within a flow" do
       user = insert(:user)
       flow = insert(:flow, read_bindings: [%{user_id: user.id}])

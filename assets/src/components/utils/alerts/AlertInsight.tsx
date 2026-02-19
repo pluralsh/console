@@ -28,7 +28,7 @@ export function AlertInsight({
   type: 'cluster' | 'service' | 'flow'
 }) {
   const navigate = useNavigate()
-  const { clusterId, serviceId, flowId, insightId } = useParams()
+  const { clusterId, serviceId, flowIdOrName, insightId } = useParams()
 
   const { data, loading, error, refetch } = useAiInsightQuery({
     variables: { id: insightId ?? '' },
@@ -60,8 +60,8 @@ export function AlertInsight({
               type === 'cluster'
                 ? `${getClusterDetailsPath({ clusterId })}/alerts`
                 : type === 'service'
-                  ? `${getServiceDetailsPath({ clusterId, serviceId, flowId })}/alerts`
-                  : `${getFlowDetailsPath({ flowId })}/alerts`
+                  ? `${getServiceDetailsPath({ clusterId, serviceId, flowIdOrName })}/alerts`
+                  : `${getFlowDetailsPath({ flowIdOrName })}/alerts`
             )
           }
           floating

@@ -6,7 +6,6 @@ import { useTheme } from 'styled-components'
 import {
   ServiceDeploymentDetailsFragment,
   ServiceError,
-  useFlowQuery,
   useServiceDeploymentQuery,
 } from 'generated/graphql'
 
@@ -21,6 +20,7 @@ import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import {
   CD_SERVICE_PATH_MATCHER_ABS,
   FLOW_SERVICE_PATH_MATCHER_ABS,
@@ -52,20 +52,23 @@ export const getServiceDetailsBreadcrumbs = ({
   cluster,
   service,
   flow,
+  flowIdOrName,
   tab,
 }: Parameters<typeof getClusterBreadcrumbs>[0] & {
   service: { name?: Nullable<string>; id: string }
   flow?: Nullable<{ name?: Nullable<string>; id: string }>
+  flowIdOrName?: Nullable<string>
   tab?: string
 }) => {
+  const flowSegment = flowIdOrName ?? flow?.id
   const pathPrefix = getServiceDetailsPath({
     clusterId: cluster?.id,
     serviceId: service?.id,
-    flowId: flow?.id,
+    flowIdOrName: flowSegment,
   })
   return [
     ...(flow?.id
-      ? getFlowBreadcrumbs(flow?.id, flow?.name ?? '', 'services')
+      ? getFlowBreadcrumbs(flow?.name ?? '', 'services')
       : [
           ...getClusterBreadcrumbs({ cluster }),
           {
@@ -205,10 +208,11 @@ export const getDirectory = ({
 function ServiceDetailsBase() {
   const theme = useTheme()
   const { pathname } = useLocation()
-  const { serviceId, flowId } = useParams()
+  const { serviceId } = useParams()
+  const { flowIdOrName, flowData } = useCurrentFlow()
   const { tab } =
     useMatch(
-      `${flowId ? FLOW_SERVICE_PATH_MATCHER_ABS : CD_SERVICE_PATH_MATCHER_ABS}/:tab?/*`
+      `${flowIdOrName ? FLOW_SERVICE_PATH_MATCHER_ABS : CD_SERVICE_PATH_MATCHER_ABS}/:tab?/*`
     )?.params ?? {}
 
   const personaType = useServicePersonaType()
@@ -230,13 +234,8 @@ function ServiceDetailsBase() {
   const { serviceDeployment } = serviceData ?? {}
   const clusterId = serviceDeployment?.cluster?.id
 
-  const { data: flowData } = useFlowQuery({
-    variables: { id: flowId ?? '' },
-    skip: !flowId,
-  })
-
   const pathPrefix = getServiceDetailsPath({
-    flowId,
+    flowIdOrName,
     clusterId,
     serviceId,
   })
@@ -262,6 +261,7 @@ function ServiceDetailsBase() {
           cluster: serviceDeployment?.cluster ?? { id: clusterId ?? '' },
           service: serviceDeployment ?? { id: serviceId ?? '' },
           flow: flowData?.flow,
+          flowIdOrName,
           tab,
         }),
       ],

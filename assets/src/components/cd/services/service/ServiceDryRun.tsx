@@ -27,7 +27,7 @@ export default function ServiceDryRun() {
   const theme = useTheme()
   const [splitView, setSplitView] = useState(true)
   const { service } = useServiceContext()
-  const { flowId } = useParams()
+  const { flowIdOrName } = useParams()
 
   const [live, desired] = useMemo(
     () => [
@@ -51,7 +51,7 @@ export default function ServiceDryRun() {
       getServiceDetailsPath({
         serviceId: service.id,
         clusterId: service.cluster?.id,
-        flowId,
+        flowIdOrName,
       })
     )
 

@@ -42,7 +42,7 @@ export default function Pods({ pods }: { pods: Nullable<PodFragment>[] }) {
   const referrer = useLocation().pathname.includes(FLOWS_ABS_PATH)
     ? 'flow'
     : 'service'
-  const { flowId } = useParams()
+  const { flowIdOrName } = useParams()
   const { refetch, component, ...rest } =
     useOutletContext<ComponentDetailsContext>()
   const clusterId = rest.cluster?.id
@@ -71,13 +71,13 @@ export default function Pods({ pods }: { pods: Nullable<PodFragment>[] }) {
         clusterId={rest.cluster?.id}
         serviceId={rest?.serviceId}
         refetch={refetch}
-        {...((clusterId || flowId) && rest?.serviceId
+        {...((clusterId || flowIdOrName) && rest?.serviceId
           ? {
               linkBasePath: getPodDetailsPath({
                 type: referrer,
                 serviceId: rest?.serviceId,
                 clusterId,
-                flowId,
+                flowIdOrName,
               }),
             }
           : {})}

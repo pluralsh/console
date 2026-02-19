@@ -10252,7 +10252,8 @@ export type RootQueryTypeFetchManifestsArgs = {
 
 
 export type RootQueryTypeFlowArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -16314,7 +16315,8 @@ export type FlowsQueryVariables = Exact<{
 export type FlowsQuery = { __typename?: 'RootQueryType', flows?: { __typename?: 'FlowConnection', edges?: Array<{ __typename?: 'FlowEdge', node?: { __typename?: 'Flow', id: string, name: string, description?: string | null, icon?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, alerts?: { __typename?: 'AlertConnection', edges?: Array<{ __typename?: 'AlertEdge', node?: { __typename?: 'Alert', id: string } | null } | null> | null } | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
 
 export type FlowQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -30868,8 +30870,8 @@ export type FlowsLazyQueryHookResult = ReturnType<typeof useFlowsLazyQuery>;
 export type FlowsSuspenseQueryHookResult = ReturnType<typeof useFlowsSuspenseQuery>;
 export type FlowsQueryResult = Apollo.QueryResult<FlowsQuery, FlowsQueryVariables>;
 export const FlowDocument = gql`
-    query Flow($id: ID!) {
-  flow(id: $id) {
+    query Flow($id: ID, $name: String) {
+  flow(id: $id, name: $name) {
     ...FlowBasicWithBindings
   }
 }
@@ -30888,10 +30890,11 @@ export const FlowDocument = gql`
  * const { data, loading, error } = useFlowQuery({
  *   variables: {
  *      id: // value for 'id'
+ *      name: // value for 'name'
  *   },
  * });
  */
-export function useFlowQuery(baseOptions: Apollo.QueryHookOptions<FlowQuery, FlowQueryVariables>) {
+export function useFlowQuery(baseOptions?: Apollo.QueryHookOptions<FlowQuery, FlowQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<FlowQuery, FlowQueryVariables>(FlowDocument, options);
       }
