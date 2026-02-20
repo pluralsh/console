@@ -8,14 +8,14 @@
  * MIT Licensed
  */
 
-const QESC_REGEXP = /\\([\u0000-\u007f])/g // eslint-disable-line no-control-regex
+const QESC_REGEXP = /\\([\u0000-\u007f])/g
 const NON_LATIN1_REGEXP = /[^\x20-\x7e\xa0-\xff]/g
 const HEX_ESCAPE_REPLACE_REGEXP = /%([0-9A-Fa-f]{2})/g
 
 const PARAM_REGEXP =
-  /;[\x09\x20]*([!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*=[\x09\x20]*("(?:[\x20!\x23-\x5b\x5d-\x7e\x80-\xff]|\\[\x20-\x7e])*"|[!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*/g // eslint-disable-line no-control-regex
+  /;[\x09\x20]*([!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*=[\x09\x20]*("(?:[\x20!\x23-\x5b\x5d-\x7e\x80-\xff]|\\[\x20-\x7e])*"|[!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*/g
 const DISPOSITION_TYPE_REGEXP =
-  /^([!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*(?:$|;)/ // eslint-disable-line no-control-regex
+  /^([!#$%&'*+.0-9A-Z^_`a-z|~-]+)[\x09\x20]*(?:$|;)/
 const EXT_VALUE_REGEXP =
   /^([A-Za-z0-9!#$%&+\-^_`{}~]+)'(?:[A-Za-z]{2,3}(?:-[A-Za-z]{3}){0,3}|[A-Za-z]{4,8}|)'((?:%[0-9A-Fa-f]{2}|[A-Za-z0-9!#$&+.^_`|~-])+)$/
 
