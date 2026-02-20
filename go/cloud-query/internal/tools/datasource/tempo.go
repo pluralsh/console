@@ -13,18 +13,10 @@ import (
 
 type TempoTraceResponse struct {
 	ResourceSpans []OTLPResourceSpans `json:"resourceSpans"`
-	Batches       []OTLPBatch         `json:"batches"`
+	Batches       []OTLPResourceSpans `json:"batches"`
 }
 
 type OTLPResourceSpans struct {
-	Resource struct {
-		Attributes []OTLPKeyValue `json:"attributes"`
-	} `json:"resource"`
-	ScopeSpans                  []OTLPScopeSpans `json:"scopeSpans"`
-	InstrumentationLibrarySpans []OTLPScopeSpans `json:"instrumentationLibrarySpans"`
-}
-
-type OTLPBatch struct {
 	Resource struct {
 		Attributes []OTLPKeyValue `json:"attributes"`
 	} `json:"resource"`
@@ -60,18 +52,7 @@ func (t *TempoTraceResponse) toResourceSpans() []OTLPResourceSpans {
 		return nil
 	}
 
-	resourceSpans := make([]OTLPResourceSpans, 0, len(t.ResourceSpans)+len(t.Batches))
-	resourceSpans = append(resourceSpans, t.ResourceSpans...)
-
-	for _, batch := range t.Batches {
-		resourceSpans = append(resourceSpans, OTLPResourceSpans{
-			Resource:                    batch.Resource,
-			ScopeSpans:                  batch.ScopeSpans,
-			InstrumentationLibrarySpans: batch.InstrumentationLibrarySpans,
-		})
-	}
-
-	return resourceSpans
+	return append(t.ResourceSpans, t.Batches...)
 }
 
 func (t *TempoTraceResponse) toScopeSpans(resourceSpan OTLPResourceSpans) []OTLPScopeSpans {
