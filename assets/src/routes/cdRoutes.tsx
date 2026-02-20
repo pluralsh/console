@@ -4,9 +4,9 @@ import ContinuousDeployment, {
   useDefaultCDPath,
 } from 'components/cd/ContinuousDeployment'
 
-import GlobalServices from 'components/cd/globalServices/GlobalServices.tsx'
+import { GlobalServices } from 'components/cd/globalServices/GlobalServices.tsx'
 
-import Pipelines from 'components/cd/pipelines/Pipelines'
+import { Pipelines } from 'components/cd/pipelines/Pipelines'
 import { Repositories } from 'components/cd/repos/Repositories'
 
 import { ServiceComponent } from 'components/cd/services/component/ServiceComponent'
@@ -15,7 +15,7 @@ import { ServiceComponents } from 'components/cd/services/service/ServiceCompone
 import { ServiceDependencies } from 'components/cd/services/service/ServiceDependencies'
 import ServiceDetails from 'components/cd/services/service/ServiceDetails'
 import ServiceDryRun from 'components/cd/services/service/ServiceDryRun'
-import ServiceErrors from 'components/cd/services/service/ServiceErrors'
+import { ServiceErrors } from 'components/cd/services/service/ServiceErrors'
 import { ServiceInsights } from 'components/cd/services/service/ServiceInsights'
 import { ServiceStackImports } from 'components/cd/services/service/ServiceStackImports'
 
@@ -61,11 +61,11 @@ import PodShell from '../components/cd/cluster/pod/PodShell'
 
 import VClusters from '../components/cd/cluster/VClusters'
 
-import GlobalService from '../components/cd/globalServices/details/GlobalService'
+import { GlobalService } from '../components/cd/globalServices/details/GlobalService'
 
-import Observers from '../components/cd/observers/Observers'
+import { Observers } from '../components/cd/observers/Observers'
 
-import ServicePRs from '../components/cd/services/service/ServicePRs'
+import { ServicePRs } from '../components/cd/services/service/ServicePRs'
 
 import ServicesTable from '../components/cd/services/ServicesTable'
 

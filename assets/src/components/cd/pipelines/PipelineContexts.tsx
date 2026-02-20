@@ -1,21 +1,22 @@
 import { Button, PrOpenIcon, Table, Tooltip } from '@pluralsh/design-system'
-import { useNavigate } from 'react-router-dom'
-import { Row, createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
+import { GqlError } from 'components/utils/Alert'
+import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import {
   PipelineContextFragment,
   PipelineFragment,
   usePipelineContextsQuery,
 } from 'generated/graphql'
-import { Edge } from 'utils/graphql'
-import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { ReactNode, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Edge } from 'utils/graphql'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import { PipelinePullRequestsModal } from './PipelinePullRequests'
 
-type RowData = Edge<PipelineContextFragment>
-export const columnHelper = createColumnHelper<RowData>()
+export const columnHelper = createColumnHelper<Edge<PipelineContextFragment>>()
 
 const ColId = columnHelper.accessor((row) => row.node?.id, {
   id: 'id',
@@ -116,16 +117,18 @@ export function PipelineContexts({
 }: {
   pipeline: Nullable<PipelineFragment>
 }) {
-  const navigate = useNavigate()
-
-  const { data } = usePipelineContextsQuery({
-    variables: { id: pipeline?.id || '', first: 100 },
-    fetchPolicy: 'cache-and-network',
-    skip: !pipeline?.id,
-  })
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      {
+        queryHook: usePipelineContextsQuery,
+        keyPath: ['pipeline', 'contexts'],
+      },
+      { id: pipeline?.id ?? '' }
+    )
   const tableData = data?.pipeline?.contexts?.edges ?? []
 
-  if (!pipeline?.id) return null
+  if (!pipeline) return null
+  if (error) return <GqlError error={error} />
 
   return (
     <Table
@@ -134,11 +137,19 @@ export function PipelineContexts({
       virtualizeRows
       data={tableData}
       columns={columns}
-      onRowClick={(_e, { original }: Row<RowData>) =>
-        navigate(
-          `${PIPELINES_ABS_PATH}/${pipeline?.id}/context/${original.node?.id}`
+      loading={!data && loading}
+      hasNextPage={pageInfo?.hasNextPage}
+      fetchNextPage={fetchNextPage}
+      isFetchingNextPage={loading}
+      onVirtualSliceChange={setVirtualSlice}
+      getRowLink={({ original }) => {
+        const { node } = original as Edge<PipelineContextFragment>
+        return (
+          <Link
+            to={`${PIPELINES_ABS_PATH}/${pipeline?.id}/context/${node?.id}`}
+          />
         )
-      }
+      }}
       emptyStateProps={{ message: 'No contexts available.' }}
     />
   )

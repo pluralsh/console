@@ -16,7 +16,7 @@ export function ServiceHelmSettings() {
   const { me } = useLogin()
   const isAdmin = !!me?.roles?.admin
   const { service } = useServiceContext()
-  const prevServiceId = usePrevious(service.id)
+  const prevServiceId = usePrevious(service?.id)
   const [helmValueErrors, setHelmValueErrors] = useState(false)
   const filteredValuesFiles =
     service?.helm?.valuesFiles?.filter(isNonNullable) ?? []
@@ -27,16 +27,16 @@ export function ServiceHelmSettings() {
     hasUpdates,
     reset,
   } = useUpdateState({
-    ...(service.helm?.url ? { helmUrl: service.helm?.url } : {}),
-    helmChart: service.helm?.chart,
-    helmVersion: service.helm?.version,
+    ...(service?.helm?.url ? { helmUrl: service?.helm?.url } : {}),
+    helmChart: service?.helm?.chart,
+    helmVersion: service?.helm?.version,
     helmValues: service?.helm?.values,
     helmValuesFiles: !isEmpty(filteredValuesFiles) ? filteredValuesFiles : [''],
   })
 
   useEffect(() => {
-    if (service.id !== prevServiceId) reset()
-  }, [prevServiceId, reset, service.id])
+    if (service?.id !== prevServiceId) reset()
+  }, [prevServiceId, reset, service?.id])
 
   const attributes = useMemo(() => {
     return state.helmChart && state.helmVersion
@@ -54,7 +54,7 @@ export function ServiceHelmSettings() {
 
   const [mutation, { loading, error }] = useUpdateServiceDeploymentMutation({
     variables: {
-      id: service.id,
+      id: service?.id ?? '',
       attributes,
     },
     onCompleted: ({ updateServiceDeployment }) => {

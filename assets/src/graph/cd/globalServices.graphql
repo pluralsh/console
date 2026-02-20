@@ -138,6 +138,7 @@ query GetGlobalService($serviceId: ID!) {
 
 query GetGlobalServiceServices($serviceId: ID!, $first: Int, $after: String) {
   globalService(id: $serviceId) {
+    id
     services(first: $first, after: $after) {
       pageInfo {
         ...PageInfo

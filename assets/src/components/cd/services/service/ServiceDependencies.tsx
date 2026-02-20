@@ -15,7 +15,7 @@ const columnHelper = createColumnHelper<ServiceDependencyFragment>()
 export function ServiceDependencies() {
   const { service } = useServiceContext()
 
-  if (isEmpty(service.dependencies))
+  if (isEmpty(service?.dependencies))
     return <EmptyState message="No dependencies found." />
 
   return (

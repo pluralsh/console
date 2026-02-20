@@ -5,7 +5,7 @@ import PipelineJobPods from 'components/cd/pipelines/job/PipelineJobPods'
 import PipelineJobStatus from 'components/cd/pipelines/job/PipelineJobStatus'
 import PipelineJobSpecs from 'components/cd/pipelines/job/PipelineJobSpecs'
 
-import PipelineDetails from 'components/cd/pipelines/PipelineDetails'
+import { PipelineDetails } from 'components/cd/pipelines/PipelineDetails'
 
 import { PipelineContextDetails } from 'components/cd/pipelines/context/PipelineContextDetails'
 

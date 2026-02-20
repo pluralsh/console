@@ -55,6 +55,7 @@ import { TRUNCATE, TRUNCATE_LEFT } from '../../../utils/truncate.ts'
 import { ComponentIcon } from './component/misc.tsx'
 import { AiInsightSummaryIcon } from '../../../utils/AiInsights.tsx'
 import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 
 type ServiceComponentNodeType = Node<
   ServiceComponent,
@@ -103,11 +104,12 @@ export function ComponentsTreeView({
 }) {
   const { serviceId } = useParams()
 
-  const { data, error } = useServiceDeploymentComponentsWithChildrenQuery({
-    variables: { id: serviceId || '' },
-    pollInterval: 15_000, // 15 seconds
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data, loading, error } =
+    useServiceDeploymentComponentsWithChildrenQuery({
+      variables: { id: serviceId || '' },
+      pollInterval: 15_000, // 15 seconds
+      fetchPolicy: 'cache-and-network',
+    })
 
   const components = useMemo(() => {
     const unfilteredComponents =
@@ -150,7 +152,13 @@ export function ComponentsTreeView({
   )
 
   if (error) return <GqlError error={error} />
-  if (!data) return <LoadingIndicator />
+  if (!data && loading)
+    return (
+      <RectangleSkeleton
+        $height={520}
+        $width="100%"
+      />
+    )
   if (isEmpty(components)) return <EmptyState message="No components found." />
 
   return (

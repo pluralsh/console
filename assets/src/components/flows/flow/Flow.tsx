@@ -22,7 +22,7 @@ import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import { ReactNode, useMemo, useState } from 'react'
-import { Link, Outlet, useParams } from 'react-router-dom'
+import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
   FLOW_MCP_CONNECTIONS_REL_PATH,
   FLOWS_ABS_PATH,
@@ -55,8 +55,8 @@ export const getFlowBreadcrumbs = (flowName: string = '', tab: string = '') =>
 
 export function Flow() {
   const [showPermissions, setShowPermissions] = useState(false)
-  const { flowData, loading, error, refetch } = useCurrentFlow()
-  const { tab } = useParams()
+  const { flowIdOrName, flowData, loading, error, refetch } = useCurrentFlow()
+  const tab = useMatch(`${FLOWS_ABS_PATH}/${flowIdOrName}/:tab/*`)?.params.tab
   const flow = flowData?.flow
 
   const [headerContent, setHeaderContent] = useState<ReactNode | null>(null)

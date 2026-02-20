@@ -6,7 +6,7 @@ import { type TableFillLevel } from './tableUtils'
 
 export const Th = styled.th<{
   $fillLevel: TableFillLevel
-  $stickyColumn: boolean
+  $stickyColumn?: boolean
   $highlight?: boolean
   $cursor?: CSSProperties['cursor']
   $hideHeader?: boolean

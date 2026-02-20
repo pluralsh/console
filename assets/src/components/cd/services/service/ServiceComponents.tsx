@@ -1,15 +1,15 @@
 import {
-  ArrowScroll,
   AiSparkleFilledIcon,
+  ArrowScroll,
   Button,
   Callout,
   ComponentsIcon,
-  TreeViewIcon,
   FillLevelProvider,
   Flex,
   ListIcon,
   NetworkInterfaceIcon,
   SearchIcon,
+  TreeViewIcon,
   UpdatesIcon,
 } from '@pluralsh/design-system'
 import { type Key } from '@react-types/shared'
@@ -19,7 +19,6 @@ import { GqlError } from 'components/utils/Alert.tsx'
 import { ExpandedInput, IconExpander } from 'components/utils/IconExpander.tsx'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import {
@@ -30,6 +29,7 @@ import {
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 
+import { useChatbot } from 'components/ai/AIContext'
 import { getServiceComponentPath } from 'routes/cdRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -40,12 +40,11 @@ import {
   useComponentKindSelect,
 } from './component/Components.tsx'
 import { countDeprecations } from './deprecationUtils'
-import { ComponentsTreeView } from './ServiceComponentsTree.tsx'
-import { ComponentsFilesView } from './ServiceComponentsFiles.tsx'
-import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 import { ServiceComponentsContext } from './ServiceComponentsContext'
+import { ComponentsFilesView } from './ServiceComponentsFiles.tsx'
+import { ComponentsTreeView } from './ServiceComponentsTree.tsx'
+import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 import { useServiceContext } from './ServiceDetailsContext'
-import { useChatbot } from 'components/ai/AIContext'
 
 const directory = [
   { path: 'list', icon: <ListIcon />, tooltip: 'Component list view' },
@@ -93,7 +92,7 @@ export function ServiceComponents() {
   )
 
   return (
-    <ServiceComponentsContext.Provider value={contextValue}>
+    <ServiceComponentsContext value={contextValue}>
       <ScrollablePage
         noPadding
         contentStyles={{ paddingTop: theme.spacing.medium }}
@@ -142,7 +141,7 @@ export function ServiceComponents() {
                 tab={view}
                 setTab={(view: string) => setSearchParams({ view })}
               />
-              {showChatButton && (
+              {showChatButton && service && (
                 <Button
                   startIcon={<AiSparkleFilledIcon />}
                   loading={mutationLoading}
@@ -160,25 +159,27 @@ export function ServiceComponents() {
           </ArrowScroll>
         }
       >
-        {view === 'list' && (
-          <ComponentsListView
-            setComponents={setComponents}
-            selectedKinds={selectedKinds}
-            selectedState={selectedState}
-            searchQuery={searchQuery}
-          />
-        )}
-        {view === 'tree' && (
-          <ComponentsTreeView
-            setComponents={setComponents}
-            selectedKinds={selectedKinds}
-            selectedState={selectedState}
-            searchQuery={searchQuery}
-          />
-        )}
-        {view === 'files' && <ComponentsFilesView />}
+        <>
+          {view === 'list' && (
+            <ComponentsListView
+              setComponents={setComponents}
+              selectedKinds={selectedKinds}
+              selectedState={selectedState}
+              searchQuery={searchQuery}
+            />
+          )}
+          {view === 'tree' && (
+            <ComponentsTreeView
+              setComponents={setComponents}
+              selectedKinds={selectedKinds}
+              selectedState={selectedState}
+              searchQuery={searchQuery}
+            />
+          )}
+          {view === 'files' && <ComponentsFilesView />}
+        </>
       </ScrollablePage>
-    </ServiceComponentsContext.Provider>
+    </ServiceComponentsContext>
   )
 }
 
@@ -217,7 +218,7 @@ function ComponentsListView({
   const throttledSearchQuery = useThrottle(searchQuery, 250)
   const [showDeprecations, setShowDeprecations] = useState(false)
 
-  const { data, error } = useServiceDeploymentComponentsQuery({
+  const { data, loading, error } = useServiceDeploymentComponentsQuery({
     variables: { id: serviceId || '' },
     pollInterval: 15_000, // 15 seconds
     fetchPolicy: 'cache-and-network',
@@ -237,7 +238,6 @@ function ComponentsListView({
   }, [components, setComponents])
 
   if (error) return <GqlError error={error} />
-  if (!data) return <LoadingIndicator />
 
   return (
     <>
@@ -264,6 +264,7 @@ function ComponentsListView({
           </Callout>
         )}
         <ComponentList
+          loading={!data && loading}
           setUrl={(c) =>
             c?.name && c?.kind
               ? `${getServiceComponentPath({
