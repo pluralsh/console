@@ -7,37 +7,14 @@ import (
 	"strings"
 
 	"resty.dev/v3"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/datasource"
 )
 
 type TempoSearchResponse struct {
 	Traces []struct {
 		TraceID string `json:"traceID"`
 	} `json:"traces"`
-}
-
-type TempoTraceResponse struct {
-	Data []struct {
-		TraceID string `json:"traceID"`
-		Spans   []struct {
-			SpanID        string `json:"spanID"`
-			ParentSpanID  string `json:"parentSpanID"`
-			OperationName string `json:"operationName"`
-			StartTime     int64  `json:"startTime"`
-			Duration      int64  `json:"duration"`
-			ProcessID     string `json:"processID"`
-			Tags          []struct {
-				Key   string      `json:"key"`
-				Value interface{} `json:"value"`
-			} `json:"tags"`
-		} `json:"spans"`
-		Processes map[string]struct {
-			ServiceName string `json:"serviceName"`
-			Tags        []struct {
-				Key   string      `json:"key"`
-				Value interface{} `json:"value"`
-			} `json:"tags"`
-		} `json:"processes"`
-	} `json:"data"`
 }
 
 type TempoClient struct {
@@ -63,8 +40,8 @@ func (in *TempoClient) Search(ctx context.Context, query, start, end, limit stri
 	return &resp, nil
 }
 
-func (in *TempoClient) Trace(ctx context.Context, traceID string) (*TempoTraceResponse, error) {
-	var resp TempoTraceResponse
+func (in *TempoClient) Trace(ctx context.Context, traceID string) (*datasource.TempoTraceResponse, error) {
+	var resp datasource.TempoTraceResponse
 	response, err := in.R().
 		SetContext(ctx).
 		SetResult(&resp).
