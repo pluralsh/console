@@ -12,18 +12,18 @@ import {
 } from 'routes/securityRoutesConsts'
 
 import { createColumnHelper } from '@tanstack/react-table'
-import { Edge } from '../../../utils/graphql.ts'
+import { GqlError } from 'components/utils/Alert.tsx'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
 import {
   ComplianceReportGeneratorFragment,
   useComplianceReportGeneratorsQuery,
-} from '../../../generated/graphql.ts'
-import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData.tsx'
-import { GqlError } from '../../utils/Alert.tsx'
-import { parse } from 'content-disposition'
+} from 'generated/graphql.ts'
+import { fetchToken } from 'helpers/auth.ts'
 import streamSaver from 'streamsaver'
-import { fetchToken } from '../../../helpers/auth.ts'
-import { ReportHistory } from './ReportHistory.tsx'
+import { parseContentDispositionFilename } from 'utils/contentDisposition.ts'
+import { Edge } from 'utils/graphql.ts'
 import { Permissions } from './Permissions.tsx'
+import { ReportHistory } from './ReportHistory.tsx'
 
 const fetchPolicyReport = (generator: string, token: string) => {
   streamSaver.mitm = '/mitm.html'
@@ -33,7 +33,7 @@ const fetchPolicyReport = (generator: string, token: string) => {
   }).then((res) => {
     const contentDisposition = res.headers?.get('content-disposition') ?? ''
     const filename =
-      parse(contentDisposition)?.parameters?.filename ?? 'report.zip'
+      parseContentDispositionFilename(contentDisposition) ?? 'report.zip'
     const writeStream = streamSaver.createWriteStream(filename)
     return res.body?.pipeTo(writeStream)
   })
