@@ -12,6 +12,10 @@ import (
 )
 
 func checkDatabaseHealth(ctx context.Context) error {
+	if !args.DatabaseEnabled() {
+		return nil
+	}
+
 	// Create a database connection using the same configuration as the main application
 	dataSource := common.DataSource(
 		args.DatabaseHost(),

@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package toolquery;
+
+option go_package = "internal/proto/toolquery";
+
+import "google/protobuf/timestamp.proto";
+
+message ElasticConnection {
+  string url = 1;
+  string apiKey = 2;
+}
+
+message DatadogConnection {
+  optional string site = 1;
+  string apiKey = 2;
+  string appKey = 3;
+}
+
+message PrometheusConnection {
+  string url = 1;
+  optional string token = 2;
+  optional string username = 3;
+  optional string password = 4;
+}
+
+message LokiConnection {
+  string url = 1;
+  string token = 2;
+  optional string tenant_id = 3;
+}
+
+message TempoConnection {
+  string url = 1;
+  string token = 2;
+  optional string tenant_id = 3;
+}
+
+message ToolConnection {
+  oneof connection {
+    ElasticConnection elastic = 1;
+    DatadogConnection datadog = 2;
+    PrometheusConnection prometheus = 3;
+    LokiConnection loki = 4;
+    TempoConnection tempo = 5;
+  }
+}
+
+message TimeRange {
+  google.protobuf.Timestamp start = 1;
+  google.protobuf.Timestamp end = 2;
+}
+
+message MetricsQueryInput {
+  ToolConnection connection = 1;
+  string query = 2;
+  TimeRange range = 3;
+  optional string step = 4;
+}
+
+message LogsQueryInput {
+  ToolConnection connection = 1;
+  string query = 2;
+  TimeRange range = 3;
+  optional int32 limit = 4;
+}
+
+message TracesQueryInput {
+  ToolConnection connection = 1;
+  string query = 2;
+  TimeRange range = 3;
+  optional int32 limit = 4;
+}
+
+message MetricPoint {
+  google.protobuf.Timestamp timestamp = 1;
+  string name = 2;
+  double value = 3;
+  map<string, string> labels = 4;
+}
+
+message MetricsQueryOutput {
+  repeated MetricPoint metrics = 1;
+}
+
+message LogEntry {
+  google.protobuf.Timestamp timestamp = 1;
+  string message = 2;
+  map<string, string> labels = 3;
+}
+
+message LogsQueryOutput {
+  repeated LogEntry logs = 1;
+}
+
+message TraceSpan {
+  string trace_id = 1;
+  string span_id = 2;
+  string parent_id = 3;
+  string name = 4;
+  string service = 5;
+  google.protobuf.Timestamp start = 6;
+  google.protobuf.Timestamp end = 7;
+  map<string, string> tags = 8;
+}
+
+message TracesQueryOutput {
+  repeated TraceSpan spans = 1;
+}
+
+service ToolQuery {
+  rpc Metrics(MetricsQueryInput) returns (MetricsQueryOutput) {}
+  rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
+  rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
+}

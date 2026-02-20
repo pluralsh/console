@@ -580,6 +580,7 @@ cloudQuery:
     # targetMemoryUtilizationPercentage: 80
 
   database:
+    enabled: true
     image:
       repository: ghcr.io/pluralsh/cloud-query-db
       pullPolicy: IfNotPresent

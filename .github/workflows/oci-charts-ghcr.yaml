@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
     - "charts/**"
+    - ".github/workflows/oci-charts-ghcr.yaml"
   push:
     branches:
     - master
@@ -47,10 +48,10 @@ jobs:
       if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
       id: pr_tags
       run: |
-        echo "pr_tag=pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
-        echo "sha_tag=sha-${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+        echo "pr_tag=0.0.0+pr-${{ github.event.pull_request.number }}" >> "$GITHUB_OUTPUT"
+        echo "sha_tag=0.0.0+sha-${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
 
-    - name: Push chart (pr-<number>)
+    - name: Push chart (0.0.0+pr-<number>)
       if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
       uses: appany/helm-oci-chart-releaser@v0.5.0
       with:
@@ -63,7 +64,7 @@ jobs:
         registry_password: ${{ secrets.GITHUB_TOKEN }}
         update_dependencies: "true"
 
-    - name: Push chart (sha-<sha>)
+    - name: Push chart (0.0.0+sha-<sha>)
       if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
       uses: appany/helm-oci-chart-releaser@v0.5.0
       with:
@@ -101,13 +102,13 @@ jobs:
         registry_password: ${{ secrets.GITHUB_TOKEN }}
         update_dependencies: "true"
 
-    - name: Push chart (latest)
+    - name: Push chart (${{ steps.chart_version.outputs.version }}+latest)
       if: ${{ github.ref == 'refs/heads/master' }}
       uses: appany/helm-oci-chart-releaser@v0.5.0
       with:
         name: ${{ matrix.name }}
         repository: ${{ matrix.repository }}
-        tag: latest
+        tag: ${{ steps.chart_version.outputs.version }}+latest
         path: ${{ matrix.dir }}
         registry: ghcr.io
         registry_username: ${{ github.actor }}

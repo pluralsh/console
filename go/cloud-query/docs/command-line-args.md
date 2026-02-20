@@ -10,19 +10,29 @@ cloud-query [flags]
 
 ## Available Arguments
 
-| Argument | Default Value | Description |
-|----------|---------------|-------------|
-| `--extensions-dir` | `./bin` | Directory where extensions are stored |
-| `--database-dir` | `./bin/pg` | Path to the database |
-| `--database-version` | `V15` | Version of the embedded PostgreSQL database to use |
-| `--database-port` | `5432` | Port on which the embedded PostgreSQL database will listen |
-| `--database-max-connections` | `200` | Maximum number of connections to the embedded PostgreSQL database |
-| `--connection-ttl` | `15m` | Default TTL for connections in the pool, connections will be closed after this duration if not used |
-| `--server-address` | `:9192` | Address on which the gRPC server will listen |
-| `--server-tls-cert` | `""` | Path to the TLS certificate file for the gRPC server |
-| `--server-tls-key` | `""` | Path to the TLS key file for the gRPC server |
-| `--server-enable-reflection` | `false` | Enable gRPC reflection for the server, useful for debugging and introspection |
-| `-v` | Varies | Log level verbosity (0-5) |
+| Argument | Default Value | Description                                                                                       |
+|----------|---------------|---------------------------------------------------------------------------------------------------|
+| `--database-enabled` | `true` | Enable PostgreSQL-backed CloudQuery features (disables CloudQuery service when false)             |
+| `--database-host` | `localhost` | Host of the PostgreSQL database                                                                   |
+| `--database-port` | `5432` | Port of the PostgreSQL database                                                                   |
+| `--database-user` | `postgres` | Username for the PostgreSQL database                                                              |
+| `--database-password` | `postgres` | Password for the PostgreSQL database                         |
+| `--database-name` | `postgres` | Database name for the PostgreSQL database                                                         |
+| `--connection-ttl` | `3h` | Default TTL for connections in the pool, connections will be closed after this duration if not used |
+| `--server-address` | `:9192` | Address on which the gRPC server will listen                                                      |
+| `--server-tls-cert` | `""` | Path to the TLS certificate file for the gRPC server                                              |
+| `--server-tls-key` | `""` | Path to the TLS key file for the gRPC server                                                      |
+| `--server-enable-reflection` | `false` | Enable gRPC reflection for the server, useful for debugging and introspection                     |
+| `-v` | Varies | Log level verbosity (0-5)                                                                         |
+
+## Environment Variables
+
+Some defaults can be configured via environment variables:
+
+| Variable                | Description |
+|-------------------------|-------------|
+| `PLRL_DATABASE_ENABLED` | Overrides the default for `--database-enabled` |
+| `PLRL_PG_PASSWORD`      | Overrides the default for `--database-password` |
 
 ## Log Levels
 
@@ -42,7 +52,7 @@ The Cloud-Query service uses klog for logging with the following verbosity level
 ### Starting the server with custom database location
 
 ```bash
-cloud-query --database-dir /data/postgres --database-port 5433
+cloud-query --database-host db.example.internal --database-port 5433
 ```
 
 ### Starting the server with TLS enabled
@@ -54,7 +64,13 @@ cloud-query --server-tls-cert /path/to/cert.pem --server-tls-key /path/to/key.pe
 ### Starting the server with increased connection pool size
 
 ```bash
-cloud-query --database-max-connections 500 --connection-ttl 30m
+cloud-query --connection-ttl 30m
+```
+
+### Starting the server without the PostgreSQL sidecar
+
+```bash
+cloud-query --database-enabled=false
 ```
 
 ### Starting the server with gRPC reflection enabled
@@ -71,8 +87,8 @@ cloud-query -v=3
 
 ## Note on Directory Paths
 
-When specifying directory paths, such as for `--extensions-dir` and `--database-dir`, you should ensure that:
+When specifying file paths, such as for `--server-tls-cert` and `--server-tls-key`, you should ensure that:
 
-1. The directories exist or the Cloud-Query process has permissions to create them
-2. The Cloud-Query process has read/write permissions for these directories
+1. The files exist and are readable by the Cloud-Query process
+2. The Cloud-Query process has permission to read the files
 3. For production use, consider using absolute paths instead of relative paths
