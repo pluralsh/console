@@ -117,10 +117,7 @@ export function ServiceSettings() {
 
   const directory = useMemo(
     () =>
-      getDirectory({
-        service: ctx.service,
-        personaType,
-      }),
+      ctx.service ? getDirectory({ service: ctx.service, personaType }) : [],
     [ctx.service, personaType]
   )
 

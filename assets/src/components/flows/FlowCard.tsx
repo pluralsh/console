@@ -37,7 +37,7 @@ export function FlowCard({
       <CardSC
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        onClick={() => navigate(flow.id)}
+        onClick={() => navigate(flow.name)}
       >
         <ContentSC>
           <Flex

@@ -1,6 +1,6 @@
 import { Button, FormField, Modal } from '@pluralsh/design-system'
 import isEqual from 'lodash/isEqual'
-import { ComponentProps, Dispatch, useMemo } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import {
   GlobalServiceFragment,
@@ -11,11 +11,6 @@ import { GqlError } from '../../../utils/Alert.tsx'
 import { ModalMountTransition } from '../../../utils/ModalMountTransition.tsx'
 import { tagsToNameValue } from '../../services/CreateGlobalService.tsx'
 import { TagSelection } from '../../services/TagSelection.tsx'
-
-interface TagsModalProps {
-  globalService: GlobalServiceFragment
-  refetch: Dispatch<void>
-}
 
 export function TagsModal(props: ComponentProps<typeof TagsModalInner>) {
   return (
@@ -29,9 +24,10 @@ function TagsModalInner({
   open,
   onClose,
   globalService,
-  refetch,
   ...props
-}: ComponentProps<typeof Modal> & TagsModalProps) {
+}: ComponentProps<typeof Modal> & {
+  globalService: Nullable<GlobalServiceFragment>
+}) {
   const theme = useTheme()
   const initialTags: Record<string, string> = useMemo(
     () =>
@@ -49,19 +45,17 @@ function TagsModalInner({
     hasUpdates,
   } = useUpdateState({ tags: initialTags }, { tags: (a, b) => !isEqual(a, b) })
   const [mutation, { loading, error }] = useUpdateGlobalServiceMutation({
-    onCompleted: () => {
-      refetch?.()
-      onClose?.()
-    },
+    onCompleted: () => onClose?.(),
+    refetchQueries: ['GetGlobalService'],
+    awaitRefetchQueries: true,
   })
 
-  if (!globalService) {
-    return null
-  }
+  if (!globalService) return null
 
   return (
     <Modal
-      form
+      asForm
+      size="large"
       open={open}
       onClose={onClose}
       header="Edit tags"

@@ -1,7 +1,6 @@
 import {
   DiscoverIcon,
   IconFrame,
-  LoopingLogo,
   Modal,
   Prop,
   PropWide,
@@ -301,7 +300,7 @@ const columns = [
   }),
 ]
 
-export default function Observers() {
+export function Observers() {
   const projectId = useProjectId()
 
   const { data, loading, error, pageInfo, fetchNextPage } =
@@ -314,12 +313,11 @@ export default function Observers() {
 
   if (error) return <GqlError error={error} />
 
-  if (!data) return <LoopingLogo />
-
   return (
     <Table
       fullHeightWrap
       columns={columns}
+      loading={!data && loading}
       data={data?.observers?.edges || []}
       virtualizeRows
       hasNextPage={pageInfo?.hasNextPage}

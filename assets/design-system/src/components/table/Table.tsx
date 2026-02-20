@@ -257,7 +257,10 @@ function Table({
                 >
                   {headerGroup.headers.map((header) =>
                     header.column.id.includes(GHOST_LINK_ID) ? (
-                      <th key={header.id} />
+                      <Th
+                        key={header.id}
+                        $fillLevel={fillLevel}
+                      />
                     ) : (
                       <Th
                         key={header.id}
@@ -315,19 +318,26 @@ function Table({
                       $fillLevel={fillLevel}
                       $raised={isRaised(i)}
                     >
-                      {columns.map((_, j) => (
-                        <Td
-                          key={j}
-                          $fillLevel={fillLevel}
-                          $firstRow={i === 0}
-                          $padCells={true}
-                          $loose={loose}
-                          $stickyColumn={stickyColumn}
-                          $truncateColumn={false}
-                        >
-                          <Skeleton />
-                        </Td>
-                      ))}
+                      {columns.map((_, j) =>
+                        !!getRowLink && j === columns.length - 1 ? (
+                          <td
+                            key={j}
+                            style={{ height: 0, width: 0 }}
+                          />
+                        ) : (
+                          <Td
+                            key={j}
+                            $fillLevel={fillLevel}
+                            $firstRow={i === 0}
+                            $padCells={true}
+                            $loose={loose}
+                            $stickyColumn={stickyColumn}
+                            $truncateColumn={false}
+                          >
+                            <Skeleton />
+                          </Td>
+                        )
+                      )}
                     </Tr>
                   ))}
                 </>

@@ -1,4 +1,4 @@
-import { Chip, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Chip, Flex, Select, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { memo, ReactNode, Suspense, useMemo, useState } from 'react'
 import { Outlet, useLocation, useMatch, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -13,14 +13,13 @@ import {
   DocPageContextProvider,
   useDocPageContext,
 } from 'components/contexts/DocPageContext'
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { GqlError } from 'components/utils/Alert'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import {
   CD_SERVICE_PATH_MATCHER_ABS,
   FLOW_SERVICE_PATH_MATCHER_ABS,
@@ -43,10 +42,14 @@ import { ServiceSelector } from '../ServiceSelector'
 
 import { getFlowBreadcrumbs } from 'components/flows/flow/Flow'
 import { InsightsTabLabel } from 'components/utils/AiInsights'
+import {
+  RectangleSkeleton,
+  SidecarSkeleton,
+} from 'components/utils/SkeletonLoaders'
 import { serviceStatusToSeverity } from '../ServiceStatusChip'
+import { type ServiceDetailsContextType } from './ServiceDetailsContext'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 import { useServicePersonaType } from './settings/ServiceSettings'
-import { type ServiceDetailsContextType } from './ServiceDetailsContext'
 
 export const getServiceDetailsBreadcrumbs = ({
   cluster,
@@ -218,17 +221,14 @@ function ServiceDetailsBase() {
 
   const [sidenavContent, setSidenavContent] = useState<ReactNode | null>(null)
 
-  const {
-    data: serviceData,
-    error: serviceError,
-    refetch,
-  } = useServiceDeploymentQuery({
+  const { data, loading, error, refetch } = useServiceDeploymentQuery({
     variables: { id: serviceId ?? '' },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
   })
-  const { serviceDeployment } = serviceData ?? {}
+  const { serviceDeployment } = data ?? {}
+  const isLoading = !data && loading
   const clusterId = serviceDeployment?.cluster?.id
 
   const pathPrefix = getServiceDetailsPath({
@@ -277,7 +277,20 @@ function ServiceDetailsBase() {
             maxHeight: '100%',
           }}
         >
-          <Suspense fallback={null}>
+          <Suspense
+            fallback={
+              <Select
+                label={
+                  <RectangleSkeleton
+                    $width="100%"
+                    $height="medium"
+                  />
+                }
+              >
+                <div />
+              </Select>
+            }
+          >
             <ServiceSelector />
           </Suspense>
           <div
@@ -292,6 +305,7 @@ function ServiceDetailsBase() {
                 pathname={pathname}
                 pathPrefix={pathPrefix}
                 docPageContext={docPageContext}
+                loading={isLoading}
               />
             )}
           </div>
@@ -299,9 +313,9 @@ function ServiceDetailsBase() {
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer role="main">
-        {!serviceDeployment && serviceError ? (
-          <GqlError error={serviceError} />
-        ) : serviceDeployment ? (
+        {!serviceDeployment && error ? (
+          <GqlError error={error} />
+        ) : (
           <Outlet
             context={
               {
@@ -311,16 +325,19 @@ function ServiceDetailsBase() {
                   return refetch().finally(() => setIsRefetching(false))
                 },
                 isRefetching,
+                isLoading,
                 setSidenavContent,
               } satisfies ServiceDetailsContextType
             }
           />
-        ) : (
-          <LoadingIndicator />
         )}
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer>
-        <ServiceDetailsSidecar serviceDeployment={serviceDeployment} />
+        {isLoading ? (
+          <SidecarSkeleton />
+        ) : (
+          <ServiceDetailsSidecar serviceDeployment={serviceDeployment} />
+        )}
       </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
     </ResponsiveLayoutPage>

@@ -32,8 +32,8 @@ export function ServiceInsights() {
           first="Insight"
           firstPartialType="body1Bold"
           second={
-            service.insight?.updatedAt &&
-            `Last updated ${fromNow(service.insight.updatedAt)}`
+            service?.insight?.updatedAt &&
+            `Last updated ${fromNow(service?.insight?.updatedAt)}`
           }
         />
         <Flex
@@ -50,7 +50,7 @@ export function ServiceInsights() {
         </Flex>
       </Flex>
       <InsightDisplay
-        insight={service.insight}
+        insight={service?.insight}
         kind="service"
       />
     </Flex>

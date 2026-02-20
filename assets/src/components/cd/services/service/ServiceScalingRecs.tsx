@@ -11,10 +11,10 @@ import {
   ColScalingPr,
 } from 'components/cost-management/details/recommendations/ClusterScalingRecsTableCols'
 export function ServiceScalingRecs() {
-  const { service } = useServiceContext()
+  const { service, isLoading } = useServiceContext()
 
   const recommendations =
-    service.scalingRecommendations?.filter(
+    service?.scalingRecommendations?.filter(
       (rec): rec is ClusterScalingRecommendationFragment => !!rec
     ) ?? []
 
@@ -22,6 +22,7 @@ export function ServiceScalingRecs() {
     <Table
       fullHeightWrap
       virtualizeRows
+      loading={isLoading}
       fillLevel={1}
       rowBg="base"
       columns={cols}

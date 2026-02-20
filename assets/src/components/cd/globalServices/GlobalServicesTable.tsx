@@ -1,12 +1,10 @@
 import { Flex, Input2, SearchIcon, Table } from '@pluralsh/design-system'
-import type { Row } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import {
-  type ServiceDeploymentsRowFragment,
+  GlobalServiceFragment,
   useGlobalServicesQuery,
 } from 'generated/graphql'
 import { ComponentProps, memo, useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router'
 import { getGlobalServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
 
@@ -16,6 +14,7 @@ import { useThrottle } from 'components/hooks/useThrottle'
 
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
+import { Link } from 'react-router-dom'
 import { columns } from './GlobalServices'
 
 function GlobalServicesTableComponent({
@@ -23,7 +22,6 @@ function GlobalServicesTableComponent({
 }: {
   setRefetch?: (refetch: () => () => void) => void
 }) {
-  const navigate = useNavigate()
   const projectId = useProjectId()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 100)
@@ -69,19 +67,17 @@ function GlobalServicesTableComponent({
         data={data?.globalServices?.edges || []}
         columns={columns}
         loading={!data && loading}
-        onRowClick={(
-          _e,
-          { original }: Row<Edge<ServiceDeploymentsRowFragment>>
-        ) =>
-          navigate(
-            getGlobalServiceDetailsPath({ serviceId: original.node?.id })
-          )
-        }
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         reactTableOptions={reactTableOptions}
         onVirtualSliceChange={setVirtualSlice}
+        getRowLink={({ original }) => {
+          const { node } = original as Edge<GlobalServiceFragment>
+          return (
+            <Link to={getGlobalServiceDetailsPath({ serviceId: node?.id })} />
+          )
+        }}
         emptyStateProps={{
           message: debouncedSearchString
             ? `No results found for "${debouncedSearchString}"`

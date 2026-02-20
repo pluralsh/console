@@ -75,7 +75,7 @@ export function ServiceErrorsTable({
   )
 }
 
-export default function ServiceErrors() {
+export function ServiceErrors() {
   const { service } = useServiceContext()
 
   return (
@@ -83,10 +83,10 @@ export default function ServiceErrors() {
       scrollable={false}
       heading="Errors"
     >
-      {isEmpty(service.errors) ? (
+      {isEmpty(service?.errors) ? (
         <EmptyState message="No errors" />
       ) : (
-        <ServiceErrorsTable errors={service.errors} />
+        <ServiceErrorsTable errors={service?.errors} />
       )}
     </ScrollablePage>
   )

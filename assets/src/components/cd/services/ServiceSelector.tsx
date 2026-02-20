@@ -15,6 +15,7 @@ import {
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { POLL_INTERVAL } from '../ContinuousDeployment'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 export function ServiceSelector() {
   const theme = useTheme()
@@ -28,12 +29,15 @@ export function ServiceSelector() {
     variables: { id: serviceId ?? '' },
   })
 
-  const { data: clusterServices } = useServiceDeploymentsTinyQuery({
-    variables: { clusterId: serviceTiny.serviceDeployment?.cluster?.id ?? '' },
-    skip: referrer !== 'cd',
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data: clusterServices, loading: clusterServicesLoading } =
+    useServiceDeploymentsTinyQuery({
+      variables: {
+        clusterId: serviceTiny.serviceDeployment?.cluster?.id ?? '',
+      },
+      skip: referrer !== 'cd',
+      pollInterval: POLL_INTERVAL,
+      fetchPolicy: 'cache-and-network',
+    })
   const flowId = flowData?.flow?.id
   const { data: flowServices } = useFlowServicesQuery({
     variables: { id: flowId ?? '' },
@@ -84,7 +88,16 @@ export function ServiceSelector() {
       aria-label="app"
       selectedKey={serviceId}
       onSelectionChange={switchService}
-      label="Select a service"
+      label={
+        clusterServicesLoading ? (
+          <RectangleSkeleton
+            $width="100%"
+            $height="medium"
+          />
+        ) : (
+          'Select a service'
+        )
+      }
     >
       {serviceList.map((service) => (
         <ListBoxItem

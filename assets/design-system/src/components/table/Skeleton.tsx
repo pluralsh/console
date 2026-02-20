@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled, { CSSProperties } from 'styled-components'
 
 function SkeletonUnstyled({ ...props }) {
   return (
@@ -8,7 +8,9 @@ function SkeletonUnstyled({ ...props }) {
   )
 }
 
-export const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
+export const Skeleton = styled(SkeletonUnstyled)<{
+  $width?: CSSProperties['width']
+}>(({ theme }) => ({
   '@keyframes moving-gradient': {
     '0%': { backgroundPosition: '-250px 0' },
     '100%': { backgroundPosition: '250px 0' },
@@ -16,7 +18,7 @@ export const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
   width: '100%',
   span: {
     borderRadius: theme.borderRadiuses.medium,
-    minWidth: '150px',
+    minWidth: 100,
     display: 'block',
     height: '12px',
     background: `linear-gradient(to right, ${theme.colors.border} 20%, ${theme.colors['border-fill-two']} 50%, ${theme.colors.border} 80%)`,
