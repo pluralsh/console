@@ -5408,8 +5408,11 @@ export function useChatLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatQ
           const options = {...defaultOptions, ...baseOptions}
           return Apollo.useLazyQuery<ChatQuery, ChatQueryVariables>(ChatDocument, options);
         }
-export function useChatSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatQuery, ChatQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
+// @ts-ignore
+export function useChatSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatQuery, ChatQueryVariables>): Apollo.UseSuspenseQueryResult<ChatQuery, ChatQueryVariables>;
+export function useChatSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ChatQuery, ChatQueryVariables>): Apollo.UseSuspenseQueryResult<ChatQuery | undefined, ChatQueryVariables>;
+export function useChatSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ChatQuery, ChatQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
           return Apollo.useSuspenseQuery<ChatQuery, ChatQueryVariables>(ChatDocument, options);
         }
 export type ChatQueryHookResult = ReturnType<typeof useChatQuery>;

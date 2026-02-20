@@ -20,10 +20,10 @@ export const DEFAULT_PAGE_SIZE = 100
 export type GenericQueryHook<
   TQueryType,
   TVariables extends OperationVariables,
-> = (baseOptions: QueryHookOptions<TQueryType, TVariables>) => QueryResult<
-  TQueryType,
-  TVariables
-> & {
+> = (
+  baseOptions: QueryHookOptions<TQueryType, TVariables> &
+    ({ variables: TVariables; skip?: boolean } | { skip: boolean })
+) => QueryResult<TQueryType, TVariables> & {
   fetchMore: (options: any) => Promise<any>
 }
 
