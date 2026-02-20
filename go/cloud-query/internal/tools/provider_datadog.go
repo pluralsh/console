@@ -166,11 +166,13 @@ func (in *DatadogProvider) Traces(ctx context.Context, input *toolquery.TracesQu
 
 	attrs := datadogV2.NewSpansListRequestAttributes()
 	attrs.SetFilter(*filter)
+
 	if input.GetLimit() > 0 {
 		page := datadogV2.NewSpansListRequestPage()
 		page.SetLimit(input.GetLimit())
 		attrs.SetPage(*page)
 	}
+
 	sort := datadogV2.SPANSSORT_TIMESTAMP_ASCENDING
 	attrs.SetSort(sort)
 

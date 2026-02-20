@@ -46,7 +46,6 @@ func (in *ElasticProvider) Logs(ctx context.Context, input *toolquery.LogsQueryI
 	}
 
 	resp, err := in.client.Search().
-		Size(lo.Ternary(input.GetLimit() > 0, int(input.GetLimit()), 100)).
 		Request(in.toRequest(input)).
 		Do(ctx)
 	if err != nil {
@@ -84,17 +83,17 @@ func (in *ElasticProvider) toLogsQueryOutput(resp *search.Response) (*toolquery.
 }
 
 func (in *ElasticProvider) toRequest(input *toolquery.LogsQueryInput) *search.Request {
-	limit := 100
-	if input.GetLimit() > 0 {
-		limit = int(input.GetLimit())
-	}
-
-	return &search.Request{
-		Size: lo.ToPtr(limit),
+	query := strings.TrimSpace(input.Query)
+	request := &search.Request{
 		Query: &types.Query{
 			Bool: &types.BoolQuery{
 				Must: []types.Query{
-					{QueryString: esdsl.NewQueryStringQuery(input.Query).QueryStringQueryCaster()},
+					{
+						QueryString: esdsl.NewQueryStringQuery(query).
+							AllowLeadingWildcard(true).
+							DefaultField("*").
+							AnalyzeWildcard(true).QueryStringQueryCaster(),
+					},
 				},
 				Filter: []types.Query{
 					{Range: map[string]types.RangeQuery{
@@ -107,6 +106,12 @@ func (in *ElasticProvider) toRequest(input *toolquery.LogsQueryInput) *search.Re
 			},
 		},
 	}
+
+	if input.GetLimit() > 0 {
+		request.Size = lo.ToPtr(int(input.GetLimit()))
+	}
+
+	return request
 }
 
 func (in *ElasticProvider) newElasticClient() (*elasticsearch.TypedClient, error) {
