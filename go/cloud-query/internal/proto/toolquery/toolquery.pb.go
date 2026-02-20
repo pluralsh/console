@@ -76,9 +76,9 @@ func (x *ElasticConnection) GetApiKey() string {
 
 type DatadogConnection struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Site          string                 `protobuf:"bytes,1,opt,name=site,proto3" json:"site,omitempty"`
+	Site          *string                `protobuf:"bytes,1,opt,name=site,proto3,oneof" json:"site,omitempty"`
 	ApiKey        string                 `protobuf:"bytes,2,opt,name=apiKey,proto3" json:"apiKey,omitempty"`
-	AppKey        *string                `protobuf:"bytes,3,opt,name=appKey,proto3,oneof" json:"appKey,omitempty"`
+	AppKey        string                 `protobuf:"bytes,3,opt,name=appKey,proto3" json:"appKey,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -114,8 +114,8 @@ func (*DatadogConnection) Descriptor() ([]byte, []int) {
 }
 
 func (x *DatadogConnection) GetSite() string {
-	if x != nil {
-		return x.Site
+	if x != nil && x.Site != nil {
+		return *x.Site
 	}
 	return ""
 }
@@ -128,8 +128,8 @@ func (x *DatadogConnection) GetApiKey() string {
 }
 
 func (x *DatadogConnection) GetAppKey() string {
-	if x != nil && x.AppKey != nil {
-		return *x.AppKey
+	if x != nil {
+		return x.AppKey
 	}
 	return ""
 }
@@ -1075,12 +1075,12 @@ const file_toolquery_proto_rawDesc = "" +
 	"\x0ftoolquery.proto\x12\ttoolquery\x1a\x1fgoogle/protobuf/timestamp.proto\"=\n" +
 	"\x11ElasticConnection\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x16\n" +
-	"\x06apiKey\x18\x02 \x01(\tR\x06apiKey\"g\n" +
-	"\x11DatadogConnection\x12\x12\n" +
-	"\x04site\x18\x01 \x01(\tR\x04site\x12\x16\n" +
-	"\x06apiKey\x18\x02 \x01(\tR\x06apiKey\x12\x1b\n" +
-	"\x06appKey\x18\x03 \x01(\tH\x00R\x06appKey\x88\x01\x01B\t\n" +
-	"\a_appKey\"\xa9\x01\n" +
+	"\x06apiKey\x18\x02 \x01(\tR\x06apiKey\"e\n" +
+	"\x11DatadogConnection\x12\x17\n" +
+	"\x04site\x18\x01 \x01(\tH\x00R\x04site\x88\x01\x01\x12\x16\n" +
+	"\x06apiKey\x18\x02 \x01(\tR\x06apiKey\x12\x16\n" +
+	"\x06appKey\x18\x03 \x01(\tR\x06appKeyB\a\n" +
+	"\x05_site\"\xa9\x01\n" +
 	"\x14PrometheusConnection\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x19\n" +
 	"\x05token\x18\x02 \x01(\tH\x00R\x05token\x88\x01\x01\x12\x1f\n" +

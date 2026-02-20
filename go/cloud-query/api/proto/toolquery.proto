@@ -12,9 +12,9 @@ message ElasticConnection {
 }
 
 message DatadogConnection {
-  string site = 1;
+  optional string site = 1;
   string apiKey = 2;
-  optional string appKey = 3;
+  string appKey = 3;
 }
 
 message PrometheusConnection {

@@ -226,18 +226,16 @@ func (in *DatadogProvider) toTraceQueryOutput(resp datadogV2.SpansListResponse) 
 }
 
 func (in *DatadogProvider) newDatadogClient(ctx context.Context, conn *toolquery.DatadogConnection) (context.Context, *datadog.APIClient, error) {
-	apiKey := conn.GetApiKey()
-	appKey := conn.GetAppKey()
-	if apiKey == "" || appKey == "" {
+	if len(conn.GetApiKey()) == 0 || len(conn.GetAppKey()) == 0 {
 		return ctx, nil, fmt.Errorf("%w: missing api key or app key", ErrInvalidArgument)
 	}
 
 	ctx = context.WithValue(ctx, datadog.ContextAPIKeys, map[string]datadog.APIKey{
 		"apiKeyAuth": {
-			Key: apiKey,
+			Key: conn.GetApiKey(),
 		},
 		"appKeyAuth": {
-			Key: appKey,
+			Key: conn.GetAppKey(),
 		},
 	})
 
