@@ -16,6 +16,7 @@ require (
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/klog/v2 v2.130.1
+	resty.dev/v3 v3.0.0-beta.6
 )
 
 require (
@@ -40,5 +41,4 @@ require (
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260112192933-99fd39fd28a9 // indirect
-	resty.dev/v3 v3.0.0-beta.6 // indirect
 )

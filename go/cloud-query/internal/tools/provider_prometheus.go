@@ -9,7 +9,8 @@ import (
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"resty.dev/v3"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/clients"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 )
@@ -22,23 +23,14 @@ func NewPrometheusProvider(conn *toolquery.PrometheusConnection) MetricsProvider
 	return &PrometheusProvider{conn: conn}
 }
 
-func (in *PrometheusProvider) newClient(httpClient *resty.Client) (v1.API, error) {
+func (in *PrometheusProvider) newClient() (v1.API, error) {
 	if len(in.conn.GetUrl()) == 0 {
 		return nil, fmt.Errorf("%w: missing url", ErrInvalidArgument)
 	}
 
-	if len(in.conn.GetUsername()) > 0 && len(in.conn.GetPassword()) > 0 {
-		httpClient.SetBasicAuth(in.conn.GetUsername(), in.conn.GetPassword())
-	}
-
-	if len(in.conn.GetToken()) > 0 {
-		httpClient.SetAuthScheme("Bearer")
-		httpClient.SetAuthToken(in.conn.GetToken())
-	}
-
 	apiClient, err := api.NewClient(api.Config{
 		Address: in.conn.GetUrl(),
-		Client:  httpClient.Client(),
+		Client:  clients.NewPrometheusHTTPClient(in.conn),
 	})
 	if err != nil {
 		return nil, err
@@ -55,10 +47,7 @@ func (in *PrometheusProvider) Metrics(ctx context.Context, input *toolquery.Metr
 		return nil, fmt.Errorf("%w: query is required", ErrInvalidArgument)
 	}
 
-	httpClient := resty.New()
-	defer httpClient.Close()
-
-	client, err := in.newClient(httpClient)
+	client, err := in.newClient()
 	if err != nil {
 		return nil, err
 	}
