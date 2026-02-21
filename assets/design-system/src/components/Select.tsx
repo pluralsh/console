@@ -147,8 +147,8 @@ const SelectButtonInner = styled.div<{
     backgroundColor: transparent
       ? 'transparent'
       : theme.mode === 'light'
-        ? theme.colors['fill-zero']
-        : theme.colors[parentFillLevelToBackground[parentFillLevel]],
+      ? theme.colors['fill-zero']
+      : theme.colors[parentFillLevelToBackground[parentFillLevel]],
     display: 'flex',
     flexDirection: 'row',
     flexShrink: 1,

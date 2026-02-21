@@ -40,3 +40,4 @@ names:
 - kserve
 - kubescape-operator
 - dynatrace-operator
+- karmada

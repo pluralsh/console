@@ -28,8 +28,8 @@ export function NamespaceMultiSelect({
           {sortedSelectedNamespaces.length === 0
             ? 'Select namespaces'
             : allSelected
-              ? 'All namespaces'
-              : sortedSelectedNamespaces.join(', ')}
+            ? 'All namespaces'
+            : sortedSelectedNamespaces.join(', ')}
         </FilterTrigger>
       }
       selectionMode="multiple"
