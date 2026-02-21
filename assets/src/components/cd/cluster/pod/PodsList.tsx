@@ -390,10 +390,6 @@ export const PodsList = memo(
       [linkBasePath, reactTableOptionsProp, refetch]
     )
 
-    if (!pods || pods.length === 0) {
-      return <>No pods available.</>
-    }
-
     return (
       <PodsListContext.Provider value={contextVal}>
         <Table
@@ -401,6 +397,7 @@ export const PodsList = memo(
           columns={columns}
           virtualizeRows
           reactTableOptions={reactTableOptions}
+          emptyStateProps={{ message: 'No pods available.' }}
           {...props}
           onRowClick={(_e, { original }: Row<PodTableRow>) =>
             navigate(

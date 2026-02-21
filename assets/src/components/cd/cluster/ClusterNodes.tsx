@@ -1,8 +1,7 @@
-import { EmptyState, Table, Tooltip } from '@pluralsh/design-system'
-import { ColumnDef, createColumnHelper, Row } from '@tanstack/react-table'
+import { Table, Tooltip } from '@pluralsh/design-system'
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { filesize } from 'filesize'
 import {
-  ClusterFragment,
   ClusterNodeFragment,
   Node,
   NodeMetric,
@@ -10,7 +9,7 @@ import {
   useClusterNodesQuery,
 } from 'generated/graphql'
 import { useMemo } from 'react'
-import { useNavigate, useOutletContext } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
@@ -30,15 +29,15 @@ import {
   TableText,
   UsageText,
 } from '../../cluster/TableElements'
-import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import { UsageBar } from '../../utils/UsageBar.tsx'
+import { useClusterContext } from './Cluster.tsx'
 
-export default function ClusterNodes() {
+export function ClusterNodes() {
   const theme = useTheme()
-  const { cluster } = useOutletContext() as { cluster: ClusterFragment }
+  const { cluster } = useClusterContext()
 
-  const { data } = useClusterNodesQuery({
-    variables: { id: cluster.id || '' },
+  const { data, loading } = useClusterNodesQuery({
+    variables: { id: cluster?.id ?? '' },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
@@ -58,8 +57,6 @@ export default function ClusterNodes() {
     [cluster]
   )
 
-  if (!data) return <LoadingIndicator />
-
   return (
     <div
       css={{
@@ -75,6 +72,7 @@ export default function ClusterNodes() {
         nodeMetrics={data?.cluster?.nodeMetrics || []}
         columns={columns}
         clusterId={cluster?.id}
+        loading={!data && loading}
       />
     </div>
   )
@@ -233,13 +231,14 @@ function NodesList({
   nodeMetrics,
   columns,
   clusterId,
+  loading,
 }: {
   nodes: (ClusterNodeFragment | null)[]
   nodeMetrics: (NodeMetricFragment | null)[]
   columns: ColumnDef<TableData, any>[]
   clusterId?: string
+  loading: boolean
 }) {
-  const navigate = useNavigate()
   const metrics: Record<string, { cpu?: number; memory?: number }> =
     useMemo(() => {
       if (!nodeMetrics) {
@@ -287,19 +286,25 @@ function NodesList({
     [metrics, nodes]
   )
 
-  if (!tableData || tableData.length === 0) {
-    return <EmptyState message="No nodes available." />
-  }
-
   return (
     <Table
       loose
       fullHeightWrap
       data={tableData}
       columns={columns}
-      onRowClick={(_e, { original }: Row<TableData>) =>
-        navigate(getResourceDetailsAbsPath(clusterId, 'node', original?.name))
-      }
+      loading={loading}
+      emptyStateProps={{ message: 'No nodes available.' }}
+      getRowLink={({ original }) => {
+        return (
+          <Link
+            to={getResourceDetailsAbsPath(
+              clusterId,
+              'node',
+              (original as TableData)?.name
+            )}
+          />
+        )
+      }}
     />
   )
 }

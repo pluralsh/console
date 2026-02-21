@@ -172,7 +172,7 @@ export const getClusterBreadcrumbs = ({
   ]
 }
 
-export default function Cluster() {
+export function Cluster() {
   const theme = useTheme()
   const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
@@ -244,12 +244,8 @@ export default function Cluster() {
   useSetBreadcrumbs(crumbs)
   useEffect(() => setMoreMenuItems(sharedMenuItems), [sharedMenuItems, tab])
 
-  if (!cluster)
-    return clusterLoading ? (
-      <LoadingIndicator />
-    ) : (
-      <EmptyState message="Cluster not found." />
-    )
+  if (!(cluster || clusterLoading))
+    return <EmptyState message="Cluster not found." />
 
   return (
     <ResponsivePageFullWidth
@@ -387,7 +383,7 @@ export default function Cluster() {
 }
 
 export type ClusterContextType = {
-  cluster: ClusterFragment
+  cluster: Nullable<ClusterFragment>
   clusterLoading: boolean
   refetch: ClusterQueryHookResult['refetch']
   refetchServices: () => void

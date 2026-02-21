@@ -1,27 +1,27 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
 import { EmptyState, TabPanel } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
-import isEmpty from 'lodash/isEmpty'
+import { ReactFlowProvider } from '@xyflow/react'
+import { GqlError } from 'components/utils/Alert'
 import {
   useGlobalServicesQuery,
   useServiceStatusesQuery,
   useServiceTreeQuery,
 } from 'generated/graphql'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { GqlError } from 'components/utils/Alert'
-import { ReactFlowProvider } from '@xyflow/react'
+import isEmpty from 'lodash/isEmpty'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
-import { useProjectId } from '../../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../../utils/graphql'
+import { useProjectId } from '../../contexts/ProjectsContext'
 
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { ServicesContextT, getServiceStatuses } from './Services'
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import { ServicesTreeDiagram } from './ServicesTreeDiagram'
-import { ServicesContextT, getServiceStatuses } from './Services'
 
 const servicesLimit = 1000
 
-export default function ServicesTree() {
+export function ServicesTree() {
   const theme = useTheme()
   const projectId = useProjectId()
   const { setRefetch, clusterId } = useOutletContext<ServicesContextT>()
@@ -29,7 +29,7 @@ export default function ServicesTree() {
   const [queryStatusFilter, setQueryStatusFilter] =
     useState<StatusTabKey>('ALL')
 
-  const { data, error, refetch } = useServiceTreeQuery({
+  const { data, loading, error, refetch } = useServiceTreeQuery({
     variables: {
       projectId,
       ...(clusterId ? { clusterId } : {}),
@@ -43,10 +43,13 @@ export default function ServicesTree() {
     [data?.serviceTree]
   )
 
-  const { data: globalServicesData, error: globalServicesError } =
-    useGlobalServicesQuery({
-      variables: { projectId, first: servicesLimit },
-    })
+  const {
+    data: globalServicesData,
+    loading: globalServicesLoading,
+    error: globalServicesError,
+  } = useGlobalServicesQuery({
+    variables: { projectId, first: servicesLimit },
+  })
 
   const globalServices = useMemo(
     () => mapExistingNodes(globalServicesData?.globalServices),
@@ -64,13 +67,13 @@ export default function ServicesTree() {
   )
 
   useEffect(() => setRefetch?.(() => refetch), [refetch, setRefetch])
+  const isLoading =
+    (!data && loading) || (!globalServicesData && globalServicesLoading)
 
-  if (error) return <GqlError error={error} />
-
-  if (serviceStatusesError) return <GqlError error={serviceStatusesError} />
-
-  if (globalServicesError) return <GqlError error={globalServicesError} />
-
+  if (error || serviceStatusesError || globalServicesError)
+    return (
+      <GqlError error={error || serviceStatusesError || globalServicesError} />
+    )
   return (
     <div
       css={{
@@ -90,8 +93,11 @@ export default function ServicesTree() {
         stateRef={tabStateRef}
         css={{ height: '100%', overflow: 'hidden' }}
       >
-        {!data || !globalServicesData ? (
-          <LoadingIndicator />
+        {isLoading ? (
+          <RectangleSkeleton
+            $height="100%"
+            $width="100%"
+          />
         ) : !isEmpty(services) ? (
           <ReactFlowProvider>
             <ServicesTreeDiagram
