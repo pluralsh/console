@@ -39,7 +39,7 @@ import ClusterAddOnCompatibility from '../components/cd/cluster/addon/ClusterAdd
 import ClusterAddOnReadme from '../components/cd/cluster/addon/ClusterAddOnReadme'
 import ClusterAddOnReleases from '../components/cd/cluster/addon/ClusterAddOnReleases'
 
-import Cluster from '../components/cd/cluster/Cluster'
+import { Cluster } from '../components/cd/cluster/Cluster'
 import ClusterAddOns from '../components/cd/cluster/ClusterAddOns'
 import ClusterInsightComponent from '../components/cd/cluster/ClusterInsightComponent.tsx'
 import ClusterInsights, {
@@ -47,10 +47,10 @@ import ClusterInsights, {
 } from '../components/cd/cluster/ClusterInsights.tsx'
 import { ClusterInsightsComponents } from '../components/cd/cluster/ClusterInsightsComponents.tsx'
 import { ClusterMetadata } from '../components/cd/cluster/ClusterMetadata'
-import ClusterNodes from '../components/cd/cluster/ClusterNodes'
-import ClusterPods from '../components/cd/cluster/ClusterPods'
+import { ClusterNodes } from '../components/cd/cluster/ClusterNodes'
+import { ClusterPods } from '../components/cd/cluster/ClusterPods'
 
-import ClusterPRs from '../components/cd/cluster/ClusterPRs'
+import { ClusterPRs } from '../components/cd/cluster/ClusterPRs'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 
 import { PodLogs } from '../components/cd/cluster/pod/logs/PodLogs.tsx'
@@ -59,7 +59,7 @@ import Pod from '../components/cd/cluster/pod/Pod'
 import PodInfo from '../components/cd/cluster/pod/PodInfo'
 import PodShell from '../components/cd/cluster/pod/PodShell'
 
-import VClusters from '../components/cd/cluster/VClusters'
+import { VClusters } from '../components/cd/cluster/VClusters'
 
 import { GlobalService } from '../components/cd/globalServices/details/GlobalService'
 
@@ -69,7 +69,7 @@ import { ServicePRs } from '../components/cd/services/service/ServicePRs'
 
 import ServicesTable from '../components/cd/services/ServicesTable'
 
-import ServicesTree from '../components/cd/services/ServicesTree'
+import { ServicesTree } from '../components/cd/services/ServicesTree'
 
 import ComponentDryRun from '../components/component/ComponentDryRun'
 

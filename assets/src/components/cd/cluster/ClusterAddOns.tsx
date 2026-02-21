@@ -88,7 +88,7 @@ export default function ClusterAddOns() {
 
   const hasAddons = !isEmpty(addOns)
 
-  const supportsCloudAddons = cluster.distro === ClusterDistro.Eks
+  const supportsCloudAddons = cluster?.distro === ClusterDistro.Eks
 
   useEffect(() => {
     if (hasAddons && !addOnId)
