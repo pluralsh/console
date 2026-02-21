@@ -4161,13 +4161,35 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `format` _[SentinelRunJobFormat](#sentinelrunjobformat)_ | the test output format of the job |  | Enum: [PLAINTEXT JUNIT] <br />Required: \{\} <br /> |
-| `jobSpec` _[JobSpec](#jobspec)_ | the job to run for this check |  |  |
+| `jobSpec` _[JobSpec](#jobspec)_ | The job to run for this check. We expect there to at least be one container named `default` that includes the sentinel go test code.  It's also recommended to not allow retries on the job. |  | Optional: \{\} <br /> |
 | `gotestsum` _[SentinelCheckGotestsumConfiguration](#sentinelcheckgotestsumconfiguration)_ | the configuration for the gotestsum test runner for this check |  | Optional: \{\} <br /> |
-| `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br /> |
-| `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  |  |
+| `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br />Optional: \{\} <br /> |
+| `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository to use for this integration test. |  | Optional: \{\} <br /> |
-| `git` _[GitRef](#gitref)_ | The git location to use for this integration test. |  |  |
-| `cases` _[SentinelCheckIntegrationTestCase](#sentinelcheckintegrationtestcase) array_ |  |  |  |
+| `git` _[GitRef](#gitref)_ | The git location to use for this integration test. |  | Optional: \{\} <br /> |
+| `default` _[SentinelCheckIntegrationTestDefault](#sentinelcheckintegrationtestdefault)_ | Default configures default test cases and global behavior (e.g. namespace labels and annotations for created resources). |  | Optional: \{\} <br /> |
+| `cases` _[SentinelCheckIntegrationTestCase](#sentinelcheckintegrationtestcase) array_ | A list of custom test cases to run for this check.  These can provide yaml-configurable targeted cases of things like coredns, load balancers, pvcs, etc. |  | Optional: \{\} <br /> |
+
+
+#### SentinelCheckIntegrationTestDefault
+
+
+
+SentinelCheckIntegrationTestDefault configures default integration test behavior: built-in test cases and labels/annotations applied to created namespaces and deployments.
+
+
+
+_Appears in:_
+- [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `ignore` _boolean_ | Ignore disables default integration test cases, useful if you'd prefer to just use custom test cases exclusively. |  | Optional: \{\} <br /> |
+| `namespaceLabels` _object (keys:string, values:string)_ | NamespaceLabels labels to apply to created namespaces (test cases run in temporary namespaces to ensure cleanup is seamless). |  | Optional: \{\} <br /> |
+| `namespaceAnnotations` _object (keys:string, values:string)_ | NamespaceAnnotations annotations to apply to created namespaces (test cases run in temporary namespaces to ensure cleanup is seamless). |  | Optional: \{\} <br /> |
+| `registry` _string_ | Registry container image registry for test deployments.  Image names an tags will still be preserved |  | Optional: \{\} <br /> |
+| `resourceAnnotations` _object (keys:string, values:string)_ | ResourceAnnotations annotations to apply to test resources within a namespace (this is useful if you need to sidestep policy enforcement for test resources). |  | Optional: \{\} <br /> |
+| `resourceLabels` _object (keys:string, values:string)_ | ResourceLabels labels to apply to test resources within a namespace (this is useful if you need to sidestep policy enforcement for test resources). |  | Optional: \{\} <br /> |
 
 
 #### SentinelCheckKubernetesConfiguration

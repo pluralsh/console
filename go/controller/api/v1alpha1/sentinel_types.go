@@ -71,7 +71,8 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	//+kubebuilder:validation:Enum=PLAINTEXT;JUNIT
 	Format console.SentinelRunJobFormat `json:"format"`
 
-	// the job to run for this check
+	// The job to run for this check. We expect there to at least be one container named `default` that includes the sentinel go test code.  It's also recommended to not allow retries on the job.
+	// +kubebuilder:validation:Optional
 	Job *JobSpec `json:"jobSpec,omitempty"`
 
 	// the configuration for the gotestsum test runner for this check
@@ -80,9 +81,11 @@ type SentinelCheckIntegrationTestConfiguration struct {
 
 	// the distro to run the check on
 	//+kubebuilder:validation:Enum=GENERIC;EKS;AKS;GKE;RKE;K3S;OPENSHIFT
+	//+kubebuilder:validation:Optional
 	Distro *console.ClusterDistro `json:"distro,omitempty"`
 
 	// the cluster tags to select where to run this job
+	// +kubebuilder:validation:Optional
 	Tags map[string]string `json:"tags,omitempty"`
 
 	// RepositoryRef references a Git repository to use for this integration test.
@@ -90,9 +93,43 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
 	// The git location to use for this integration test.
+	// +kubebuilder:validation:Optional
 	Git *GitRef `json:"git,omitempty"`
 
+	// Default configures default test cases and global behavior (e.g. namespace labels and annotations for created resources).
+	// +kubebuilder:validation:Optional
+	Default *SentinelCheckIntegrationTestDefault `json:"default,omitempty"`
+
+	// A list of custom test cases to run for this check.  These can provide yaml-configurable targeted cases of things like coredns, load balancers, pvcs, etc.
+	// +kubebuilder:validation:Optional
 	Cases []SentinelCheckIntegrationTestCase `json:"cases,omitempty"`
+}
+
+// SentinelCheckIntegrationTestDefault configures default integration test behavior: built-in test cases and labels/annotations applied to created namespaces and deployments.
+type SentinelCheckIntegrationTestDefault struct {
+	// Ignore disables default integration test cases, useful if you'd prefer to just use custom test cases exclusively.
+	// +kubebuilder:validation:Optional
+	Ignore *bool `json:"ignore,omitempty"`
+
+	// NamespaceLabels labels to apply to created namespaces (test cases run in temporary namespaces to ensure cleanup is seamless).
+	// +kubebuilder:validation:Optional
+	NamespaceLabels map[string]string `json:"namespaceLabels,omitempty"`
+
+	// NamespaceAnnotations annotations to apply to created namespaces (test cases run in temporary namespaces to ensure cleanup is seamless).
+	// +kubebuilder:validation:Optional
+	NamespaceAnnotations map[string]string `json:"namespaceAnnotations,omitempty"`
+
+	// Registry container image registry for test deployments.  Image names an tags will still be preserved
+	// +kubebuilder:validation:Optional
+	Registry *string `json:"registry,omitempty"`
+
+	// ResourceAnnotations annotations to apply to test resources within a namespace (this is useful if you need to sidestep policy enforcement for test resources).
+	// +kubebuilder:validation:Optional
+	ResourceAnnotations map[string]string `json:"resourceAnnotations,omitempty"`
+
+	// ResourceLabels labels to apply to test resources within a namespace (this is useful if you need to sidestep policy enforcement for test resources).
+	// +kubebuilder:validation:Optional
+	ResourceLabels map[string]string `json:"resourceLabels,omitempty"`
 }
 
 type SentinelCheckIntegrationTestCase struct {

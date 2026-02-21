@@ -65,6 +65,16 @@ defmodule Console.Schema.Sentinel do
             field :parallel, :string
           end
 
+          embeds_one :default, DefaultConfiguration, on_replace: :update do
+            field :ignore,                :boolean, default: false
+            field :namespace_labels,      :map
+            field :namespace_annotations, :map
+
+            field :registry,               :string
+            field :resource_annotations, :map
+            field :resource_labels,      :map
+          end
+
           embeds_many :cases, IntegrationTestCase, on_replace: :delete do
             field :type, IntegrationTestCaseType
             field :name, :string
@@ -198,6 +208,7 @@ defmodule Console.Schema.Sentinel do
     |> cast_embed(:git)
     |> cast_embed(:gotestsum, with: &gotestsum_changeset/2)
     |> cast_embed(:cases, with: &integration_test_case_changeset/2)
+    |> cast_embed(:default, with: &default_changeset/2)
     |> validate_required(~w(format)a)
   end
 
@@ -214,6 +225,11 @@ defmodule Console.Schema.Sentinel do
     |> cast_embed(:raw, with: &raw_changeset/2)
     |> cast_embed(:pvc, with: &pvc_changeset/2)
     |> validate_required(~w(type name)a)
+  end
+
+  defp default_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(ignore namespace_labels namespace_annotations registry resource_annotations resource_labels)a)
   end
 
   defp coredns_changeset(model, attrs) do

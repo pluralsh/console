@@ -11715,6 +11715,8 @@ export type SentinelCheckIntegrationTestConfiguration = {
   __typename?: 'SentinelCheckIntegrationTestConfiguration';
   /** a list of custom test cases to run for this check */
   cases?: Maybe<Array<Maybe<SentinelCheckIntegrationTestCaseConfiguration>>>;
+  /** default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources) */
+  default?: Maybe<SentinelCheckIntegrationTestDefaultConfiguration>;
   /** the distro to run the check on */
   distro?: Maybe<ClusterDistro>;
   /** the format of the job */
@@ -11734,6 +11736,8 @@ export type SentinelCheckIntegrationTestConfiguration = {
 export type SentinelCheckIntegrationTestConfigurationAttributes = {
   /** a list of custom test cases to run for this check */
   cases?: InputMaybe<Array<InputMaybe<SentinelCheckIntegrationTestCaseAttributes>>>;
+  /** default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources) */
+  default?: InputMaybe<SentinelCheckIntegrationTestDefaultAttributes>;
   /** the distro to run the check on */
   distro?: InputMaybe<ClusterDistro>;
   /** the format of the job output */
@@ -11748,6 +11752,37 @@ export type SentinelCheckIntegrationTestConfigurationAttributes = {
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   /** the cluster tags to select where to run this job */
   tags?: InputMaybe<Scalars['Json']['input']>;
+};
+
+export type SentinelCheckIntegrationTestDefaultAttributes = {
+  /** whether to ignore disable the default built-in test cases, in case you'd prefer to just use custom cases. */
+  ignore?: InputMaybe<Scalars['Boolean']['input']>;
+  /** annotations to apply to created namespaces, temporary namespaces are used for all test cases */
+  namespaceAnnotations?: InputMaybe<Scalars['Json']['input']>;
+  /** labels to apply to created namespaces, temporary namespaces are used for all test cases */
+  namespaceLabels?: InputMaybe<Scalars['Json']['input']>;
+  /** container image registry for test deployments */
+  registry?: InputMaybe<Scalars['String']['input']>;
+  /** annotations to apply to test deployments, useful if you need to opt out of policy enforcement */
+  resourceAnnotations?: InputMaybe<Scalars['Json']['input']>;
+  /** labels to apply to test deployments, useful if you need to opt out of policy enforcement */
+  resourceLabels?: InputMaybe<Scalars['Json']['input']>;
+};
+
+export type SentinelCheckIntegrationTestDefaultConfiguration = {
+  __typename?: 'SentinelCheckIntegrationTestDefaultConfiguration';
+  /** whether to ignore default namespace/deployment labels and annotations */
+  ignore?: Maybe<Scalars['Boolean']['output']>;
+  /** annotations to apply to created namespaces */
+  namespaceAnnotations?: Maybe<Scalars['Map']['output']>;
+  /** labels to apply to created namespaces */
+  namespaceLabels?: Maybe<Scalars['Map']['output']>;
+  /** container image registry for test deployments */
+  registry?: Maybe<Scalars['String']['output']>;
+  /** annotations to apply to test deployments */
+  resourceAnnotations?: Maybe<Scalars['Map']['output']>;
+  /** labels to apply to test deployments */
+  resourceLabels?: Maybe<Scalars['Map']['output']>;
 };
 
 export type SentinelCheckKubernetesConfiguration = {

@@ -2547,6 +2547,29 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
 
   "the gotestsum configuration to use for this check"
   gotestsum: SentinelCheckGotestsumAttributes
+
+  "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
+  default: SentinelCheckIntegrationTestDefaultAttributes
+}
+
+input SentinelCheckIntegrationTestDefaultAttributes {
+  "whether to ignore disable the default built-in test cases, in case you'd prefer to just use custom cases."
+  ignore: Boolean
+
+  "labels to apply to created namespaces, temporary namespaces are used for all test cases"
+  namespaceLabels: Json
+
+  "annotations to apply to created namespaces, temporary namespaces are used for all test cases"
+  namespaceAnnotations: Json
+
+  "container image registry for test deployments"
+  registry: String
+
+  "annotations to apply to test deployments, useful if you need to opt out of policy enforcement"
+  resourceAnnotations: Json
+
+  "labels to apply to test deployments, useful if you need to opt out of policy enforcement"
+  resourceLabels: Json
 }
 
 input SentinelRunJobUpdateAttributes {
@@ -2772,8 +2795,31 @@ type SentinelCheckIntegrationTestConfiguration {
   "the gotestsum configuration to use for this check"
   gotestsum: SentinelCheckGotestsumConfiguration
 
+  "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
+  default: SentinelCheckIntegrationTestDefaultConfiguration
+
   "a list of custom test cases to run for this check"
   cases: [SentinelCheckIntegrationTestCaseConfiguration]
+}
+
+type SentinelCheckIntegrationTestDefaultConfiguration {
+  "whether to ignore default namespace\/deployment labels and annotations"
+  ignore: Boolean
+
+  "labels to apply to created namespaces"
+  namespaceLabels: Map
+
+  "annotations to apply to created namespaces"
+  namespaceAnnotations: Map
+
+  "container image registry for test deployments"
+  registry: String
+
+  "annotations to apply to test deployments"
+  resourceAnnotations: Map
+
+  "labels to apply to test deployments"
+  resourceLabels: Map
 }
 
 type SentinelCheckGotestsumConfiguration {

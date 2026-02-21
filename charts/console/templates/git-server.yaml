@@ -1,4 +1,4 @@
-{{- if .Values.gitServer.enabled }}
+{{- if or .Values.gitServer.enabled .Values.console.config.airgap }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
