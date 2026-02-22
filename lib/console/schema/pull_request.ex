@@ -15,31 +15,33 @@ defmodule Console.Schema.PullRequest do
   defenum Status, open: 0, merged: 1, closed: 2
 
   schema "pull_requests" do
-    field :url,              :string
-    field :status,           Status, default: :open
-    field :title,            :string
-    field :body,             :string
-    field :creator,          :string
-    field :labels,           {:array, :string}
-    field :ref,              :string
-    field :sha,              :string
-    field :polled_sha,       :string
-    field :commit_sha,       :string
-    field :approver,         :string
-    field :preview,          :string
-    field :attributes,       :map
-    field :patch,            :binary
-    field :agent_id,         :string
-    field :approved,         :boolean, default: false
-    field :governance_state, :map
-    field :next_poll_at,     :utc_datetime_usec
-    field :merge_cron,       :string
-    field :merge_attempt_at, :utc_datetime_usec
+    field :url,                :string
+    field :status,             Status, default: :open
+    field :title,              :string
+    field :body,               :string
+    field :creator,            :string
+    field :labels,             {:array, :string}
+    field :ref,                :string
+    field :sha,                :string
+    field :polled_sha,         :string
+    field :commit_sha,         :string
+    field :approver,           :string
+    field :preview,            :string
+    field :attributes,         :map
+    field :patch,              :binary
+    field :agent_id,           :string
+    field :approved,           :boolean, default: false
+    field :governance_state,   :map
+    field :governance_poll_at, :utc_datetime_usec
+    field :next_poll_at,       :utc_datetime_usec
+    field :merge_cron,         :string
+    field :merge_attempt_at,   :utc_datetime_usec
 
     field :notifications_policy_id, :binary_id
 
-    field :comment_id, :string,  virtual: true
-    field :fresh,      :boolean, virtual: true, default: false
+    field :comment_id,         :string,  virtual: true
+    field :fresh,              :boolean, virtual: true, default: false
+    field :governance_changed, :boolean, virtual: true, default: false
 
     belongs_to :cluster,    Cluster
     belongs_to :service,    Service
@@ -112,7 +114,10 @@ defmodule Console.Schema.PullRequest do
   end
 
   def pending_governance(query \\ __MODULE__) do
-    from(pr in query, where: not is_nil(pr.governance_id) and not pr.approved and pr.status == ^:open)
+    from(pr in query, where:
+      not is_nil(pr.governance_id) and not pr.approved and pr.status == ^:open and
+      (is_nil(pr.governance_poll_at) or pr.governance_poll_at < ^DateTime.utc_now())
+    )
   end
 
   def stack(query \\ __MODULE__) do
@@ -167,6 +172,7 @@ defmodule Console.Schema.PullRequest do
     |> foreign_key_constraint(:flow_id)
     |> put_new_change(:notifications_policy_id, &Ecto.UUID.generate/0)
     |> unique_constraint(:url)
+    |> change_markers(governance_id: :governance_changed)
     |> next_merge_attempt()
     |> validate_required(~w(url title)a)
   end
@@ -178,6 +184,13 @@ defmodule Console.Schema.PullRequest do
     Ecto.Changeset.change(model, %{
       next_poll_at: DateTime.shift(DateTime.utc_now(), jittered)
     })
+  end
+
+  def governance_poll_changeset(model) do
+    duration = Duration.new!(minute: 15)
+    jittered = Duration.add(duration, Duration.new!(second: jitter(duration)))
+
+    Ecto.Changeset.change(model, %{governance_poll_at: DateTime.shift(DateTime.utc_now(), jittered)})
   end
 
   def poll_duration(interval) when is_binary(interval) do

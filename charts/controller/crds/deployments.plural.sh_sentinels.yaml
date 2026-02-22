@@ -56,6 +56,10 @@ spec:
                             this check
                           properties:
                             cases:
+                              description: A list of custom test cases to run for
+                                this check.  These can provide yaml-configurable targeted
+                                cases of things like coredns, load balancers, pvcs,
+                                etc.
                               items:
                                 properties:
                                   coredns:

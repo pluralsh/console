@@ -1,0 +1,14 @@
+Here is the Pull Request we need to make a change based on:
+
+Url: <%= @pr.url %>
+Title: <%= @pr.title %>
+
+# Pull Request Body
+
+<%= @pr.body %>
+
+Here are the current attributes, possibly empty, provided for the change as well in JSON format (you can preserve any of these if adequate):
+
+```JSON
+<%= Jason.encode!(@attributes, pretty: true) %>
+```

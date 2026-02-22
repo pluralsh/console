@@ -75,6 +75,16 @@ spec:
                 description: BaseUrl is a base URL for Git clones for self-hosted
                   versions.
                 type: string
+              bitbucketDatacenter:
+                description: Settings for configuring Bitbucket Data Center / Server
+                  authentication
+                properties:
+                  userSlug:
+                    description: The user slug for Bitbucket Data Center / Server
+                    type: string
+                required:
+                - userSlug
+                type: object
               default:
                 type: boolean
               github:

@@ -501,6 +501,7 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
         }
       """, %{
         "attrs" => %{
+          "type" => "WEBHOOK",
           "name" => "governance",
           "connectionId" => conn.id,
           "configuration" => %{

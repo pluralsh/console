@@ -54,15 +54,26 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
 
   defp pr_content(pr), do: "#{pr["source"]["branch"]["name"]}\n#{pr["title"]}\n#{pr["summary"]["raw"]}"
 
-  def review(conn, %PullRequest{url: url}, body) do
+  def review(conn, %PullRequest{url: url} = pr, body) do
     with {:ok, org, repo, number} <- get_pull_id(url),
          {:ok, conn} <- connection(conn) do
-      case post(conn, Path.join(["/repositories", "#{URI.encode("#{org}/#{repo}")}", "pullrequests", number, "comments"]), %{
-        content: %{
-          raw: filter_ansi(body),
-          markup: "markdown"
-        }
-      }) do
+      case pr do
+        %PullRequest{comment_id: id} when is_binary(id) ->
+          put(conn, Path.join(["/repositories", "#{URI.encode("#{org}/#{repo}")}", "pullrequests", number, "comments", id]), %{
+            content: %{
+              raw: filter_ansi(body),
+              markup: "markdown"
+            }
+          })
+        _ ->
+          post(conn, Path.join(["/repositories", "#{URI.encode("#{org}/#{repo}")}", "pullrequests", number, "comments"]), %{
+            content: %{
+              raw: filter_ansi(body),
+              markup: "markdown"
+            }
+          })
+      end
+      |> case do
         {:ok, %{"id" => id}} -> {:ok, "#{id}"}
         err -> err
       end
@@ -99,7 +110,17 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     end
   end
 
-  def approve(_, _, _), do: {:error, "not implemented"}
+  def approve(conn, %PullRequest{url: url}, _) do
+    with {:ok, workspace, repo, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn) do
+      Path.join(["/repositories", "#{URI.encode("#{workspace}/#{repo}")}", "pullrequests", number, "approve"])
+      |> then(&post(conn, &1, %{}))
+      |> case do
+        {:ok, %{"id" => id}} -> {:ok, "#{id}"}
+        err -> err
+      end
+    end
+  end
 
   def pr_info(url) do
     with {:ok, workspace, repo, number} <- get_pull_id(url) do
@@ -122,6 +143,11 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
 
   defp post(conn, url, body) do
     HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
+    |> handle_response()
+  end
+
+  defp put(conn, url, body) do
+    HTTPoison.put("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))
     |> handle_response()
   end
 

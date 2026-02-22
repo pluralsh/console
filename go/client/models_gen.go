@@ -1143,6 +1143,18 @@ type BindingAttributes struct {
 	GroupID *string `json:"groupId,omitempty"`
 }
 
+// Requirements for Bitbucket Data Center / Server authentication
+type BitbucketDatacenterAttributes struct {
+	// the user slug for Bitbucket Data Center / Server
+	UserSlug string `json:"userSlug"`
+}
+
+// Bitbucket Data Center / Server connection configuration
+type BitbucketDatacenterConfiguration struct {
+	// the user slug for Bitbucket Data Center / Server
+	UserSlug string `json:"userSlug"`
+}
+
 // A restricted token meant only for use in registering clusters, esp for edge devices
 type BootstrapToken struct {
 	ID string `json:"id"`
@@ -3502,6 +3514,32 @@ type GlobalServiceConnection struct {
 type GlobalServiceEdge struct {
 	Node   *GlobalService `json:"node,omitempty"`
 	Cursor *string        `json:"cursor,omitempty"`
+}
+
+// ServiceNow configuration for a pr governance controller
+type GovernanceServiceNow struct {
+	// the ServiceNow instance URL
+	URL string `json:"url"`
+	// the change request model/type
+	ChangeModel *string `json:"changeModel,omitempty"`
+	// ServiceNow API username
+	Username string `json:"username"`
+	// additional attributes sent with change requests
+	Attributes map[string]any `json:"attributes,omitempty"`
+}
+
+// ServiceNow configuration for a pr governance controller
+type GovernanceServiceNowAttributes struct {
+	// the ServiceNow instance URL
+	URL string `json:"url"`
+	// the change request model/type
+	ChangeModel *string `json:"changeModel,omitempty"`
+	// ServiceNow API username
+	Username string `json:"username"`
+	// ServiceNow API password
+	Password string `json:"password"`
+	// additional attributes to send with change requests
+	Attributes *string `json:"attributes,omitempty"`
 }
 
 // The webhook configuration for a pr governance controller
@@ -6069,6 +6107,7 @@ type PrDeleteSpec struct {
 type PrGovernance struct {
 	ID            string                     `json:"id"`
 	Name          string                     `json:"name"`
+	Type          PrGovernanceType           `json:"type"`
 	Connection    *ScmConnection             `json:"connection,omitempty"`
 	Configuration *PrGovernanceConfiguration `json:"configuration,omitempty"`
 	InsertedAt    *string                    `json:"insertedAt,omitempty"`
@@ -6077,7 +6116,9 @@ type PrGovernance struct {
 
 // The settings for configuring a pr governance controller
 type PrGovernanceAttributes struct {
-	Name string `json:"name"`
+	// the type of pr governance controller to use
+	Type PrGovernanceType `json:"type"`
+	Name string           `json:"name"`
 	// the scm connection to use for pr generation
 	ConnectionID  string                               `json:"connectionId"`
 	Configuration *PrGovernanceConfigurationAttributes `json:"configuration,omitempty"`
@@ -6085,12 +6126,14 @@ type PrGovernanceAttributes struct {
 
 // The configuration for a pr governance controller
 type PrGovernanceConfiguration struct {
-	Webhook *GovernanceWebhook `json:"webhook,omitempty"`
+	Webhook    *GovernanceWebhook    `json:"webhook,omitempty"`
+	ServiceNow *GovernanceServiceNow `json:"serviceNow,omitempty"`
 }
 
 // The settings for configuring a pr governance controller
 type PrGovernanceConfigurationAttributes struct {
-	Webhook *GovernanceWebhookAttributes `json:"webhook,omitempty"`
+	Webhook    *GovernanceWebhookAttributes    `json:"webhook,omitempty"`
+	ServiceNow *GovernanceServiceNowAttributes `json:"serviceNow,omitempty"`
 }
 
 type PrHelmVendorSpec struct {
@@ -6775,6 +6818,8 @@ type ScmConnection struct {
 	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the azure devops attributes for this connection
 	Azure *AzureDevopsConfiguration `json:"azure,omitempty"`
+	// the Bitbucket Data Center / Server attributes for this connection
+	BitbucketDatacenter *BitbucketDatacenterConfiguration `json:"bitbucketDatacenter,omitempty"`
 	// base url for git clones for self-hosted versions
 	BaseURL *string `json:"baseUrl,omitempty"`
 	// base url for HTTP apis for self-hosted versions if different from base url
@@ -6788,15 +6833,16 @@ type ScmConnectionAttributes struct {
 	Name string  `json:"name"`
 	Type ScmType `json:"type"`
 	// the owning entity in this scm provider, eg a github organization
-	Owner    *string                `json:"owner,omitempty"`
-	Username *string                `json:"username,omitempty"`
-	Token    *string                `json:"token,omitempty"`
-	BaseURL  *string                `json:"baseUrl,omitempty"`
-	APIURL   *string                `json:"apiUrl,omitempty"`
-	Github   *GithubAppAttributes   `json:"github,omitempty"`
-	Azure    *AzureDevopsAttributes `json:"azure,omitempty"`
-	Default  *bool                  `json:"default,omitempty"`
-	Proxy    *HTTPProxyAttributes   `json:"proxy,omitempty"`
+	Owner               *string                        `json:"owner,omitempty"`
+	Username            *string                        `json:"username,omitempty"`
+	Token               *string                        `json:"token,omitempty"`
+	BaseURL             *string                        `json:"baseUrl,omitempty"`
+	APIURL              *string                        `json:"apiUrl,omitempty"`
+	Github              *GithubAppAttributes           `json:"github,omitempty"`
+	Azure               *AzureDevopsAttributes         `json:"azure,omitempty"`
+	BitbucketDatacenter *BitbucketDatacenterAttributes `json:"bitbucketDatacenter,omitempty"`
+	Default             *bool                          `json:"default,omitempty"`
+	Proxy               *HTTPProxyAttributes           `json:"proxy,omitempty"`
 	// a ssh private key to be used for commit signing
 	SigningPrivateKey *string `json:"signingPrivateKey,omitempty"`
 }
@@ -12658,6 +12704,61 @@ func (e *PolicyEngineType) UnmarshalJSON(b []byte) error {
 }
 
 func (e PolicyEngineType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type PrGovernanceType string
+
+const (
+	PrGovernanceTypeServiceNow PrGovernanceType = "SERVICE_NOW"
+	PrGovernanceTypeWebhook    PrGovernanceType = "WEBHOOK"
+)
+
+var AllPrGovernanceType = []PrGovernanceType{
+	PrGovernanceTypeServiceNow,
+	PrGovernanceTypeWebhook,
+}
+
+func (e PrGovernanceType) IsValid() bool {
+	switch e {
+	case PrGovernanceTypeServiceNow, PrGovernanceTypeWebhook:
+		return true
+	}
+	return false
+}
+
+func (e PrGovernanceType) String() string {
+	return string(e)
+}
+
+func (e *PrGovernanceType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PrGovernanceType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PrGovernanceType", str)
+	}
+	return nil
+}
+
+func (e PrGovernanceType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PrGovernanceType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PrGovernanceType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

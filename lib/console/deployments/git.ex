@@ -447,8 +447,16 @@ defmodule Console.Deployments.Git do
         create_pr(attrs, url)
       {%{flow_id: flow_id} = attrs, nil} when is_binary(flow_id) ->
         create_pr(attrs, url)
+      {%{governance_id: governance_id} = attrs, nil} when is_binary(governance_id) ->
+        create_pr(attrs, url)
       _ -> {:error, :not_found}
     end
+  end
+
+  @spec governance_poll(PullRequest.t) :: pull_request_resp
+  def governance_poll(%PullRequest{} = pr) do
+    PullRequest.governance_poll_changeset(pr)
+    |> Repo.update()
   end
 
   @doc """
@@ -457,9 +465,9 @@ defmodule Console.Deployments.Git do
   @spec confirm_pull_request(PullRequest.t) :: pull_request_resp
   def confirm_pull_request(%PullRequest{} = pr) do
     with %PullRequest{} = pr = Repo.preload(pr, [governance: :connection]),
-         {:ok, _} <- GovernanceProvider.confirm(pr),
+         {:ok, state} <- GovernanceProvider.confirm(pr),
          {:ok, _} <- Dispatcher.approve(pr.governance.connection, pr, "Approved by Plural PR Governance") do
-      PullRequest.changeset(pr, %{approved: true})
+      PullRequest.changeset(pr, %{approved: true, governance_state: state})
       |> Repo.update()
     end
   end

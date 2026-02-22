@@ -48,12 +48,13 @@ var _ = Describe("PrGovernanceReconciler Controller", Ordered, func() {
 					},
 					Spec: v1alpha1.PrGovernanceSpec{
 						Name: lo.ToPtr(name),
+						Type: gqlclient.PrGovernanceTypeWebhook,
 						ConnectionRef: v1.ObjectReference{
 							Name:      name,
 							Namespace: namespace,
 						},
 						Configuration: &v1alpha1.PrGovernanceConfiguration{
-							Webhooks: v1alpha1.PrGovernanceWebhook{
+							Webhook: &v1alpha1.PrGovernanceWebhook{
 								Url: "test",
 							},
 						},
@@ -101,7 +102,7 @@ var _ = Describe("PrGovernanceReconciler Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("WDUVGRJ367GZ26DHXADTE3AYVXFWIQZWQRL7H2RESA6AZOD2XARA===="),
+					SHA: lo.ToPtr("QEJYO5KBUE6SMTNTVLE37GTQQMKA4XCB3MRDWPVVC5YIOQTSRM4A===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.ReadyConditionType.String(),

@@ -22,6 +22,21 @@ defmodule Console.Deployments.PubSub.GovernanceTest do
   end
 
   describe "PullRequestUpdated" do
+    test "it will call the open callback if the governance has changed" do
+      governance = insert(:pr_governance, configuration: %{webhook: %{url: "https://webhook.url"}})
+      pr = insert(:pull_request, governance: governance, status: :open, governance_changed: true)
+
+      expect(HTTPoison, :post, fn "https://webhook.url/v1/open", _, _ ->
+        state = Jason.encode!(%{service_now_id: "1234567890"})
+        {:ok, %HTTPoison.Response{status_code: 200, body: state}}
+      end)
+
+      event = %PubSub.PullRequestUpdated{item: pr}
+      :ok = Governance.handle_event(event)
+
+      assert refetch(pr).governance_state == %{"service_now_id" => "1234567890"}
+    end
+
     test "it can handle a pull request updated event" do
       governance = insert(:pr_governance, configuration: %{webhook: %{url: "https://webhook.url"}})
       pr = insert(:pull_request, governance: governance, status: :merged)
