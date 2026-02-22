@@ -24,7 +24,6 @@ export function RunJobStatus() {
           direction="column"
           gap="xlarge"
         >
-          {status?.active}
           <Card
             css={{
               display: 'flex',
