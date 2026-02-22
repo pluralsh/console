@@ -57,18 +57,27 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
       title: mr["title"],
       body: mr["description"]
     }, pr_associations(mr_content(mr)))
+    |> add_approver(mr)
     |> Console.drop_nils()
 
     {:ok, url, attrs}
   end
   def pr(_), do: :ignore
 
-  def review(conn, %PullRequest{url: url}, body) do
+  def review(conn, %PullRequest{url: url} = pr, body) do
     with {:ok, owner, repo, number} <- get_pull_id(url),
          {:ok, conn} <- connection(conn) do
-      case post(conn, Path.join(["/api/v4/projects", "#{uri_encode("#{owner}/#{repo}")}", "merge_requests", number]), %{
-        body: filter_ansi(body)
-      }) do
+      case pr do
+        %PullRequest{comment_id: id} when is_binary(id) ->
+          put(conn, Path.join(["/api/v4/projects", "#{uri_encode("#{owner}/#{repo}")}", "merge_requests", number, "notes", id]), %{
+            body: filter_ansi(body)
+          })
+        _ ->
+          post(conn, Path.join(["/api/v4/projects", "#{uri_encode("#{owner}/#{repo}")}", "merge_requests", number, "notes"]), %{
+            body: filter_ansi(body)
+          })
+      end
+      |> case do
         {:ok, %{"id" => id}} -> {:ok, "#{id}"}
         err -> err
       end
@@ -105,7 +114,17 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
-  def approve(_, _, _), do: {:error, "not implemented"}
+  def approve(conn, %PullRequest{url: url}, _) do
+    with {:ok, owner, repo, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn) do
+      Path.join(["/api/v4/projects", "#{uri_encode("#{owner}/#{repo}")}", "merge_requests", number, "approve"])
+      |> then(&post(conn, &1, %{}))
+      |> case do
+        {:ok, %{"id" => id}} -> {:ok, "#{id}"}
+        err -> err
+      end
+    end
+  end
 
   def commit_status(_, _, _, _, _), do: :ok
 
@@ -124,13 +143,33 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
-  def merge(_, _), do: :ok
+  def merge(conn, %PullRequest{url: url}) do
+    with {:ok, owner, repo, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn) do
+      Path.join(["/api/v4/projects", "#{uri_encode("#{owner}/#{repo}")}", "merge_requests", number, "merge"])
+      |> then(&put(conn, &1, %{squash: true, auto_merge: true}))
+      |> case do
+        {:ok, %{"id" => id}} -> {:ok, "#{id}"}
+        err -> err
+      end
+    end
+  end
 
   defp mr_content(mr), do: "#{mr["branch"]}\n#{mr["title"]}\n#{mr["description"]}"
+
+  defp add_approver(attrs, %{"approvers" => [%{"username" => username}]}),
+    do: Map.put(attrs, :approver, username)
+  defp add_approver(attrs, _), do: attrs
 
   defp post(conn, url, body) do
     api_url(conn, url)
     |> HTTPoison.post(Jason.encode!(body), Connection.headers(conn))
+    |> handle_response()
+  end
+
+  defp put(conn, url, body) do
+    api_url(conn, url)
+    |> HTTPoison.put(Jason.encode!(body), Connection.headers(conn))
     |> handle_response()
   end
 

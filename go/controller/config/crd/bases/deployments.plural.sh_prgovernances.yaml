@@ -55,9 +55,67 @@ spec:
                   This includes webhook configurations, approval requirements, and other policy enforcement
                   mechanisms that control how pull requests are managed and processed.
                 properties:
+                  serviceNow:
+                    description: |-
+                      ServiceNow defines ServiceNow change request integration for PR governance.
+                      When set, PRs will require a ServiceNow change request to be opened and approved
+                      before merge. The password is read from the referenced Secret.
+                    properties:
+                      attributes:
+                        description: Attributes is optional JSON passed as additional
+                          attributes when creating change requests.
+                        type: object
+                        x-kubernetes-preserve-unknown-fields: true
+                      changeModel:
+                        description: |-
+                          ChangeModel is the change request model/type (e.g. "Standard"). If empty, "Standard" is used.
+                          We currently support the built-in ILI4 models, such as Standard, Normal, and Emergency.
+                        type: string
+                      passwordSecretKeyRef:
+                        description: |-
+                          PasswordSecretKeyRef references a key in a Secret containing the ServiceNow API password.
+                          For namespaced PrGovernance the secret is read from the same namespace; for cluster-scoped
+                          PrGovernance set SecretNamespace to the namespace where the secret lives.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      secretNamespace:
+                        description: SecretNamespace is the namespace of the secret
+                          referenced by PasswordSecretKeyRef.
+                        type: string
+                      url:
+                        description: Url is the ServiceNow instance URL (e.g. https://instance.service-now.com).
+                        type: string
+                      username:
+                        description: Username is the ServiceNow API username for authentication.
+                        type: string
+                    required:
+                    - passwordSecretKeyRef
+                    - url
+                    - username
+                    type: object
                   webhook:
                     description: |-
-                      Webhooks defines webhook integration settings for governance enforcement.
+                      Webhook defines webhook integration settings for governance enforcement.
                       This enables the governance controller to receive notifications about pull request
                       events and respond with appropriate policy enforcement actions such as requiring
                       additional approvals, running compliance checks, or blocking merges.
@@ -73,8 +131,6 @@ spec:
                     required:
                     - url
                     type: object
-                required:
-                - webhook
                 type: object
               connectionRef:
                 description: ConnectionRef references an ScmConnection to reuse its
@@ -148,8 +204,16 @@ spec:
                     example: 5m30s
                     type: string
                 type: object
+              type:
+                description: Type specifies the type of PR governance controller to
+                  use.
+                enum:
+                - WEBHOOK
+                - SERVICE_NOW
+                type: string
             required:
             - connectionRef
+            - type
             type: object
           status:
             description: |-

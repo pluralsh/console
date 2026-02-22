@@ -82,7 +82,22 @@ defmodule Console.Deployments.Pr.Impl.Azure do
     end
   end
 
-  def approve(_, _, _), do: {:error, "not implemented"}
+  def approve(conn, %PullRequest{url: url}, _) do
+    with {:ok, name, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn),
+         {:ok, repo_id} <- get_repo_id(conn, name) do
+      Path.join(["/git/repositories", repo_id, "pullRequests", number, "reviewers"])
+      |> then(&post(conn, &1, %{
+        "descriptor" => "Plural Governance",
+        "displayName" => "Plural Governance",
+        "vote" => 10,
+      }))
+      |> case do
+        {:ok, %{"id" => id}} -> {:ok, "#{id}"}
+        err -> err
+      end
+    end
+  end
 
   def files(_, _), do: {:ok, []}
 

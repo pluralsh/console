@@ -9,7 +9,8 @@ defmodule Console.GraphQl.Deployments.Git do
     ScmWebhook,
     PrAutomation,
     Configuration,
-    Observer
+    Observer,
+    PrGovernance
   }
 
   ecto_enum :auth_method,              GitRepository.AuthMethod
@@ -28,6 +29,7 @@ defmodule Console.GraphQl.Deployments.Git do
   ecto_enum :observer_git_target_type, Observer.GitTargetType
   ecto_enum :observer_target_order,    Observer.TargetOrder
   ecto_enum :observer_status,          Observer.Status
+  ecto_enum :pr_governance_type,       PrGovernance.Type
 
   input_object :catalog_attributes do
     field :name,           non_null(:string)
@@ -106,6 +108,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :api_url,             :string
     field :github,              :github_app_attributes
     field :azure,               :azure_devops_attributes
+    field :bitbucket_datacenter, :bitbucket_datacenter_attributes
     field :default,             :boolean
     field :proxy,               :http_proxy_attributes
     field :signing_private_key, :string, description: "a ssh private key to be used for commit signing"
@@ -129,6 +132,11 @@ defmodule Console.GraphQl.Deployments.Git do
     field :username,     non_null(:string), description: "the username asociated with your Azure DevOps PAT"
     field :organization, non_null(:string), description: "the organization to use for azure devops"
     field :project,      non_null(:string), description: "the project to use for azure devops"
+  end
+
+  @desc "Requirements for Bitbucket Data Center / Server authentication"
+  input_object :bitbucket_datacenter_attributes do
+    field :user_slug, non_null(:string), description: "the user slug for Bitbucket Data Center / Server"
   end
 
   @desc "A way to create a self-service means of generating PRs against an IaC repo"
@@ -434,6 +442,7 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "The settings for configuring a pr governance controller"
   input_object :pr_governance_attributes do
+    field :type, non_null(:pr_governance_type), description: "the type of pr governance controller to use"
     field :name, non_null(:string)
     field :connection_id, non_null(:id), description: "the scm connection to use for pr generation"
     field :configuration, :pr_governance_configuration_attributes
@@ -442,11 +451,21 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "The settings for configuring a pr governance controller"
   input_object :pr_governance_configuration_attributes do
     field :webhook, :governance_webhook_attributes
+    field :service_now, :governance_service_now_attributes
   end
 
   @desc "The settings for configuring a pr governance controller"
   input_object :governance_webhook_attributes do
     field :url, non_null(:string), description: "the url to send webhooks to"
+  end
+
+  @desc "ServiceNow configuration for a pr governance controller"
+  input_object :governance_service_now_attributes do
+    field :url,          non_null(:string), description: "the ServiceNow instance URL"
+    field :change_model, :string, description: "the change request model/type"
+    field :username,     non_null(:string), description: "ServiceNow API username"
+    field :password,     non_null(:string), description: "ServiceNow API password"
+    field :attributes,   :json, description: "additional attributes to send with change requests"
   end
 
   @desc "a git repository available for deployments"
@@ -539,6 +558,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :username, :string
     field :proxy,    :http_proxy_configuration, description: "a proxy to use for git requests"
     field :azure,    :azure_devops_configuration, description: "the azure devops attributes for this connection"
+    field :bitbucket_datacenter, :bitbucket_datacenter_configuration,
+      description: "the Bitbucket Data Center / Server attributes for this connection"
 
     field :base_url, :string, description: "base url for git clones for self-hosted versions"
     field :api_url,  :string, description: "base url for HTTP apis for self-hosted versions if different from base url"
@@ -720,6 +741,11 @@ defmodule Console.GraphQl.Deployments.Git do
     field :username,     non_null(:string), description: "the username asociated with your Azure DevOps PAT"
     field :organization, non_null(:string), description: "the organization to use for azure devops"
     field :project,      non_null(:string), description: "the project to use for azure devops"
+  end
+
+  @desc "Bitbucket Data Center / Server connection configuration"
+  object :bitbucket_datacenter_configuration do
+    field :user_slug, non_null(:string), description: "the user slug for Bitbucket Data Center / Server"
   end
 
   @desc "A reference to a pull request for your kubernetes related IaC"
@@ -925,6 +951,7 @@ defmodule Console.GraphQl.Deployments.Git do
   object :pr_governance do
     field :id,            non_null(:id)
     field :name,          non_null(:string)
+    field :type,          non_null(:pr_governance_type)
     field :connection,    :scm_connection, resolve: dataloader(Deployments)
     field :configuration, :pr_governance_configuration
 
@@ -934,11 +961,20 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "The configuration for a pr governance controller"
   object :pr_governance_configuration do
     field :webhook, :governance_webhook
+    field :service_now, :governance_service_now
   end
 
   @desc "The webhook configuration for a pr governance controller"
   object :governance_webhook do
     field :url, non_null(:string)
+  end
+
+  @desc "ServiceNow configuration for a pr governance controller"
+  object :governance_service_now do
+    field :url,          non_null(:string), description: "the ServiceNow instance URL"
+    field :change_model, :string, description: "the change request model/type"
+    field :username,     non_null(:string), description: "ServiceNow API username"
+    field :attributes,   :map, description: "additional attributes sent with change requests"
   end
 
   connection node_type: :git_repository

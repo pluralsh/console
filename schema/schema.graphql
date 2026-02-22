@@ -9661,6 +9661,11 @@ enum ObserverStatus {
   FAILED
 }
 
+enum PrGovernanceType {
+  SERVICE_NOW
+  WEBHOOK
+}
+
 input CatalogAttributes {
   name: String!
 
@@ -9779,6 +9784,8 @@ input ScmConnectionAttributes {
 
   azure: AzureDevopsAttributes
 
+  bitbucketDatacenter: BitbucketDatacenterAttributes
+
   default: Boolean
 
   proxy: HttpProxyAttributes
@@ -9815,6 +9822,12 @@ input AzureDevopsAttributes {
 
   "the project to use for azure devops"
   project: String!
+}
+
+"Requirements for Bitbucket Data Center \/ Server authentication"
+input BitbucketDatacenterAttributes {
+  "the user slug for Bitbucket Data Center \/ Server"
+  userSlug: String!
 }
 
 "A way to create a self-service means of generating PRs against an IaC repo"
@@ -10259,6 +10272,9 @@ input ObserverAddonAttributes {
 
 "The settings for configuring a pr governance controller"
 input PrGovernanceAttributes {
+  "the type of pr governance controller to use"
+  type: PrGovernanceType!
+
   name: String!
 
   "the scm connection to use for pr generation"
@@ -10270,12 +10286,31 @@ input PrGovernanceAttributes {
 "The settings for configuring a pr governance controller"
 input PrGovernanceConfigurationAttributes {
   webhook: GovernanceWebhookAttributes
+  serviceNow: GovernanceServiceNowAttributes
 }
 
 "The settings for configuring a pr governance controller"
 input GovernanceWebhookAttributes {
   "the url to send webhooks to"
   url: String!
+}
+
+"ServiceNow configuration for a pr governance controller"
+input GovernanceServiceNowAttributes {
+  "the ServiceNow instance URL"
+  url: String!
+
+  "the change request model\/type"
+  changeModel: String
+
+  "ServiceNow API username"
+  username: String!
+
+  "ServiceNow API password"
+  password: String!
+
+  "additional attributes to send with change requests"
+  attributes: Json
 }
 
 "a git repository available for deployments"
@@ -10405,6 +10440,9 @@ type ScmConnection {
 
   "the azure devops attributes for this connection"
   azure: AzureDevopsConfiguration
+
+  "the Bitbucket Data Center \/ Server attributes for this connection"
+  bitbucketDatacenter: BitbucketDatacenterConfiguration
 
   "base url for git clones for self-hosted versions"
   baseUrl: String
@@ -10686,6 +10724,12 @@ type AzureDevopsConfiguration {
   project: String!
 }
 
+"Bitbucket Data Center \/ Server connection configuration"
+type BitbucketDatacenterConfiguration {
+  "the user slug for Bitbucket Data Center \/ Server"
+  userSlug: String!
+}
+
 "A reference to a pull request for your kubernetes related IaC"
 type PullRequest {
   id: ID!
@@ -10950,6 +10994,7 @@ type CatalogSearchItem {
 type PrGovernance {
   id: ID!
   name: String!
+  type: PrGovernanceType!
   connection: ScmConnection
   configuration: PrGovernanceConfiguration
   insertedAt: DateTime
@@ -10959,11 +11004,27 @@ type PrGovernance {
 "The configuration for a pr governance controller"
 type PrGovernanceConfiguration {
   webhook: GovernanceWebhook
+  serviceNow: GovernanceServiceNow
 }
 
 "The webhook configuration for a pr governance controller"
 type GovernanceWebhook {
   url: String!
+}
+
+"ServiceNow configuration for a pr governance controller"
+type GovernanceServiceNow {
+  "the ServiceNow instance URL"
+  url: String!
+
+  "the change request model\/type"
+  changeModel: String
+
+  "ServiceNow API username"
+  username: String!
+
+  "additional attributes sent with change requests"
+  attributes: Map
 }
 
 type GitRepositoryConnection {

@@ -1441,6 +1441,19 @@ export type BindingAttributes = {
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+/** Requirements for Bitbucket Data Center / Server authentication */
+export type BitbucketDatacenterAttributes = {
+  /** the user slug for Bitbucket Data Center / Server */
+  userSlug: Scalars['String']['input'];
+};
+
+/** Bitbucket Data Center / Server connection configuration */
+export type BitbucketDatacenterConfiguration = {
+  __typename?: 'BitbucketDatacenterConfiguration';
+  /** the user slug for Bitbucket Data Center / Server */
+  userSlug: Scalars['String']['output'];
+};
+
 /** A restricted token meant only for use in registering clusters, esp for edge devices */
 export type BootstrapToken = {
   __typename?: 'BootstrapToken';
@@ -4306,6 +4319,33 @@ export type GlobalServiceEdge = {
   __typename?: 'GlobalServiceEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<GlobalService>;
+};
+
+/** ServiceNow configuration for a pr governance controller */
+export type GovernanceServiceNow = {
+  __typename?: 'GovernanceServiceNow';
+  /** additional attributes sent with change requests */
+  attributes?: Maybe<Scalars['Map']['output']>;
+  /** the change request model/type */
+  changeModel?: Maybe<Scalars['String']['output']>;
+  /** the ServiceNow instance URL */
+  url: Scalars['String']['output'];
+  /** ServiceNow API username */
+  username: Scalars['String']['output'];
+};
+
+/** ServiceNow configuration for a pr governance controller */
+export type GovernanceServiceNowAttributes = {
+  /** additional attributes to send with change requests */
+  attributes?: InputMaybe<Scalars['Json']['input']>;
+  /** the change request model/type */
+  changeModel?: InputMaybe<Scalars['String']['input']>;
+  /** ServiceNow API password */
+  password: Scalars['String']['input'];
+  /** the ServiceNow instance URL */
+  url: Scalars['String']['input'];
+  /** ServiceNow API username */
+  username: Scalars['String']['input'];
 };
 
 /** The webhook configuration for a pr governance controller */
@@ -7317,6 +7357,7 @@ export type PrGovernance = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
+  type: PrGovernanceType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -7326,18 +7367,27 @@ export type PrGovernanceAttributes = {
   /** the scm connection to use for pr generation */
   connectionId: Scalars['ID']['input'];
   name: Scalars['String']['input'];
+  /** the type of pr governance controller to use */
+  type: PrGovernanceType;
 };
 
 /** The configuration for a pr governance controller */
 export type PrGovernanceConfiguration = {
   __typename?: 'PrGovernanceConfiguration';
+  serviceNow?: Maybe<GovernanceServiceNow>;
   webhook?: Maybe<GovernanceWebhook>;
 };
 
 /** The settings for configuring a pr governance controller */
 export type PrGovernanceConfigurationAttributes = {
+  serviceNow?: InputMaybe<GovernanceServiceNowAttributes>;
   webhook?: InputMaybe<GovernanceWebhookAttributes>;
 };
+
+export enum PrGovernanceType {
+  ServiceNow = 'SERVICE_NOW',
+  Webhook = 'WEBHOOK'
+}
 
 export type PrHelmVendorSpec = {
   __typename?: 'PrHelmVendorSpec';
@@ -11360,6 +11410,8 @@ export type ScmConnection = {
   azure?: Maybe<AzureDevopsConfiguration>;
   /** base url for git clones for self-hosted versions */
   baseUrl?: Maybe<Scalars['String']['output']>;
+  /** the Bitbucket Data Center / Server attributes for this connection */
+  bitbucketDatacenter?: Maybe<BitbucketDatacenterConfiguration>;
   default?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -11376,6 +11428,7 @@ export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
   azure?: InputMaybe<AzureDevopsAttributes>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
+  bitbucketDatacenter?: InputMaybe<BitbucketDatacenterAttributes>;
   default?: InputMaybe<Scalars['Boolean']['input']>;
   github?: InputMaybe<GithubAppAttributes>;
   name: Scalars['String']['input'];

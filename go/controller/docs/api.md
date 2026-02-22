@@ -347,6 +347,22 @@ _Appears in:_
 | `write` _string_ | Write bindings. |  | Optional: \{\} <br /> |
 
 
+#### BitbucketDatacenterSettings
+
+
+
+BitbucketDatacenterSettings holds configuration for Bitbucket Data Center / Server authentication.
+
+
+
+_Appears in:_
+- [ScmConnectionSpec](#scmconnectionspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `userSlug` _string_ | The user slug for Bitbucket Data Center / Server |  |  |
+
+
 #### BootstrapToken
 
 
@@ -3689,7 +3705,30 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `webhook` _[PrGovernanceWebhook](#prgovernancewebhook)_ | Webhooks defines webhook integration settings for governance enforcement.<br />This enables the governance controller to receive notifications about pull request<br />events and respond with appropriate policy enforcement actions such as requiring<br />additional approvals, running compliance checks, or blocking merges. |  | Required: \{\} <br /> |
+| `webhook` _[PrGovernanceWebhook](#prgovernancewebhook)_ | Webhook defines webhook integration settings for governance enforcement.<br />This enables the governance controller to receive notifications about pull request<br />events and respond with appropriate policy enforcement actions such as requiring<br />additional approvals, running compliance checks, or blocking merges. |  | Optional: \{\} <br /> |
+| `serviceNow` _[PrGovernanceServiceNow](#prgovernanceservicenow)_ | ServiceNow defines ServiceNow change request integration for PR governance.<br />When set, PRs will require a ServiceNow change request to be opened and approved<br />before merge. The password is read from the referenced Secret. |  | Optional: \{\} <br /> |
+
+
+#### PrGovernanceServiceNow
+
+
+
+PrGovernanceServiceNow defines ServiceNow integration for PR governance.
+PRs governed by this configuration will create and manage ServiceNow change requests.
+
+
+
+_Appears in:_
+- [PrGovernanceConfiguration](#prgovernanceconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Url is the ServiceNow instance URL (e.g. https://instance.service-now.com). |  | Required: \{\} <br /> |
+| `changeModel` _string_ | ChangeModel is the change request model/type (e.g. "Standard"). If empty, "Standard" is used.<br />We currently support the built-in ILI4 models, such as Standard, Normal, and Emergency. |  | Optional: \{\} <br /> |
+| `username` _string_ | Username is the ServiceNow API username for authentication. |  | Required: \{\} <br /> |
+| `passwordSecretKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretKeyRef references a key in a Secret containing the ServiceNow API password.<br />For namespaced PrGovernance the secret is read from the same namespace; for cluster-scoped<br />PrGovernance set SecretNamespace to the namespace where the secret lives. |  | Required: \{\} <br /> |
+| `secretNamespace` _string_ | SecretNamespace is the namespace of the secret referenced by PasswordSecretKeyRef. |  | Optional: \{\} <br /> |
+| `attributes` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Attributes is optional JSON passed as additional attributes when creating change requests.<br />Not all change attributes need to be provided, we will auto-fill basics like description, implementation plan, backout plan, test plan, etc using AI if not provided. |  | Optional: \{\} <br /> |
 
 
 #### PrGovernanceSpec
@@ -3707,6 +3746,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `type` _[PrGovernanceType](#prgovernancetype)_ | Type specifies the type of PR governance controller to use. |  | Enum: [WEBHOOK SERVICE_NOW] <br />Required: \{\} <br /> |
 | `name` _string_ | Name specifies the name for this PR governance controller.<br />If not provided, the name from the resource metadata will be used. |  | Optional: \{\} <br /> |
 | `connectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ConnectionRef references an ScmConnection to reuse its credentials for this governance controller's authentication. |  | Required: \{\} <br /> |
 | `configuration` _[PrGovernanceConfiguration](#prgovernanceconfiguration)_ | Configuration contains the specific governance settings and rules to enforce on pull requests.<br />This includes webhook configurations, approval requirements, and other policy enforcement<br />mechanisms that control how pull requests are managed and processed. |  | Optional: \{\} <br /> |
@@ -3977,6 +4017,7 @@ _Appears in:_
 | `apiUrl` _string_ | APIUrl is a base URL for HTTP apis for shel-hosted versions if different from BaseUrl. |  | Optional: \{\} <br /> |
 | `github` _[ScmGithubConnection](#scmgithubconnection)_ | Settings for configuring Github App authentication |  | Optional: \{\} <br /> |
 | `azure` _[AzureDevopsSettings](#azuredevopssettings)_ | Settings for configuring Azure DevOps authentication |  | Optional: \{\} <br /> |
+| `bitbucketDatacenter` _[BitbucketDatacenterSettings](#bitbucketdatacentersettings)_ | Settings for configuring Bitbucket Data Center / Server authentication |  | Optional: \{\} <br /> |
 | `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Configures usage of an HTTP proxy for all requests involving this SCM connection. |  | Optional: \{\} <br /> |
 | `default` _boolean_ |  |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |

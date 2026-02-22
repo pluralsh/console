@@ -20,6 +20,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
 func init() {
@@ -88,6 +91,11 @@ func (in *PrGovernance) ConsoleName() string {
 // It specifies governance rules, approval workflows, and integration settings
 // for managing pull requests created through Plural Console automations.
 type PrGovernanceSpec struct {
+	// Type specifies the type of PR governance controller to use.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum:=WEBHOOK;SERVICE_NOW
+	Type console.PrGovernanceType `json:"type"`
+
 	// Name specifies the name for this PR governance controller.
 	// If not provided, the name from the resource metadata will be used.
 	// +kubebuilder:validation:Optional
@@ -113,12 +121,18 @@ type PrGovernanceSpec struct {
 // It specifies the mechanisms and integrations used to implement governance policies
 // for pull requests managed through Plural Console automations.
 type PrGovernanceConfiguration struct {
-	// Webhooks defines webhook integration settings for governance enforcement.
+	// Webhook defines webhook integration settings for governance enforcement.
 	// This enables the governance controller to receive notifications about pull request
 	// events and respond with appropriate policy enforcement actions such as requiring
 	// additional approvals, running compliance checks, or blocking merges.
-	// +kubebuilder:validation:Required
-	Webhooks PrGovernanceWebhook `json:"webhook"`
+	// +kubebuilder:validation:Optional
+	Webhook *PrGovernanceWebhook `json:"webhook,omitempty"`
+
+	// ServiceNow defines ServiceNow change request integration for PR governance.
+	// When set, PRs will require a ServiceNow change request to be opened and approved
+	// before merge. The password is read from the referenced Secret.
+	// +kubebuilder:validation:Optional
+	ServiceNow *PrGovernanceServiceNow `json:"serviceNow,omitempty"`
 }
 
 // PrGovernanceWebhook defines webhook configuration for external governance system integration.
@@ -133,4 +147,36 @@ type PrGovernanceWebhook struct {
 	// to handle the webhook payload format expected by the governance system.
 	// +kubebuilder:validation:Required
 	Url string `json:"url"`
+}
+
+// PrGovernanceServiceNow defines ServiceNow integration for PR governance.
+// PRs governed by this configuration will create and manage ServiceNow change requests.
+type PrGovernanceServiceNow struct {
+	// Url is the ServiceNow instance URL (e.g. https://instance.service-now.com).
+	// +kubebuilder:validation:Required
+	Url string `json:"url"`
+
+	// ChangeModel is the change request model/type (e.g. "Standard"). If empty, "Standard" is used.
+	// We currently support the built-in ILI4 models, such as Standard, Normal, and Emergency.
+	// +kubebuilder:validation:Optional
+	ChangeModel *string `json:"changeModel,omitempty"`
+
+	// Username is the ServiceNow API username for authentication.
+	// +kubebuilder:validation:Required
+	Username string `json:"username"`
+
+	// PasswordSecretKeyRef references a key in a Secret containing the ServiceNow API password.
+	// For namespaced PrGovernance the secret is read from the same namespace; for cluster-scoped
+	// PrGovernance set SecretNamespace to the namespace where the secret lives.
+	// +kubebuilder:validation:Required
+	PasswordSecretKeyRef corev1.SecretKeySelector `json:"passwordSecretKeyRef"`
+
+	// SecretNamespace is the namespace of the secret referenced by PasswordSecretKeyRef.
+	// +kubebuilder:validation:Optional
+	SecretNamespace *string `json:"secretNamespace,omitempty"`
+
+	// Attributes is optional JSON passed as additional attributes when creating change requests.
+	// Not all change attributes need to be provided, we will auto-fill basics like description, implementation plan, backout plan, test plan, etc using AI if not provided.
+	// +kubebuilder:validation:Optional
+	Attributes *runtime.RawExtension `json:"attributes,omitempty"`
 }
