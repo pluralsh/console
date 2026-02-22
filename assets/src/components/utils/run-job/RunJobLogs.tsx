@@ -25,7 +25,7 @@ import {
 
 import { isNonNullable } from 'utils/isNonNullable'
 
-import { isEmpty } from 'lodash'
+import { isEmpty, isNil } from 'lodash'
 import { STACKS_PARAM_STACK } from 'routes/stacksRoutesConsts'
 import { useJobPods } from './RunJob'
 
@@ -49,12 +49,16 @@ export function RunJobLogs() {
   )
 
   const [sinceSeconds, setSinceSeconds] = useState(SinceSecondsOptions.HalfHour)
-  const [selectedContainer, setSelectedContainer] = useState<string>(
-    containers?.[0]?.name || ''
-  )
+  const [selectedContainer, setSelectedContainer] = useState<
+    string | undefined
+  >(undefined)
 
   const prevContainers = usePrevious(containers)
-  if (!selectedContainer && isEmpty(prevContainers) && !isEmpty(containers))
+  if (
+    isNil(selectedContainer) &&
+    isEmpty(prevContainers) &&
+    !isEmpty(containers)
+  )
     setSelectedContainer(containers?.[0]?.name || '')
 
   const {
@@ -154,7 +158,7 @@ export function RunJobLogs() {
           logs={logs || []}
           loading={loading}
           refetch={refetch}
-          container={selectedContainer}
+          container={selectedContainer ?? ''}
         />
       </div>
     </ScrollablePage>

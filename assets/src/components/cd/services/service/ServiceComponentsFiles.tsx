@@ -1,3 +1,7 @@
+import {
+  createTheme,
+  ThemeProvider as MuiThemeProvider,
+} from '@mui/material/styles'
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
 import { Code, EmptyState, FolderIcon, Tooltip } from '@pluralsh/design-system'
@@ -85,6 +89,10 @@ const TreeItemText = styled.span({
   ...TRUNCATE_LEFT,
   minWidth: 0,
 })
+
+// mui components need a proper mui theme where theme.spacing is a function
+// otherwise HonorableThemeProvider leaks in and crashes things
+const muiTheme = createTheme()
 
 const FILE_TYPE_ICON_PATH = '/file-type-icons' as const
 const FILE_ICON_SIZE = 18
@@ -375,15 +383,17 @@ export function ComponentsFilesView() {
       })
 
     return data?.serviceTarball && treeNodes.length > 0 ? (
-      <StyledTreeView
-        itemChildrenIndentation={12}
-        selectedItems={selectedFile?.path ? [selectedFile.path] : []}
-        expandedItems={expandedItems}
-        onExpandedItemsChange={(_event, itemIds) => setExpandedItems(itemIds)}
-        onItemSelectionToggle={handleItemSelection}
-      >
-        {renderTree(treeNodes)}
-      </StyledTreeView>
+      <MuiThemeProvider theme={muiTheme}>
+        <StyledTreeView
+          itemChildrenIndentation={12}
+          selectedItems={selectedFile?.path ? [selectedFile.path] : []}
+          expandedItems={expandedItems}
+          onExpandedItemsChange={(_event, itemIds) => setExpandedItems(itemIds)}
+          onItemSelectionToggle={handleItemSelection}
+        >
+          {renderTree(treeNodes)}
+        </StyledTreeView>
+      </MuiThemeProvider>
     ) : undefined
   }, [
     data,
