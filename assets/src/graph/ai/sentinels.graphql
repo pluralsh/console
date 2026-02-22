@@ -230,6 +230,9 @@ query SentinelRunJob($id: ID!) {
 query SentinelRunJobK8sJob($id: ID!) {
   sentinelRunJob(id: $id) {
     id
+    cluster {
+      id
+    }
     job {
       ...Job
     }

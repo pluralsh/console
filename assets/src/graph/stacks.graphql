@@ -458,6 +458,10 @@ query StackRun($id: ID!) {
 
 query StackRunJob($id: ID!) {
   stackRun(id: $id) {
+    id
+    cluster {
+      id
+    }
     job {
       ...PipelineGateJob
     }
@@ -466,6 +470,7 @@ query StackRunJob($id: ID!) {
 
 query StackRunJobLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
   stackRun(id: $id) {
+    id
     job {
       logs(container: $container, sinceSeconds: $sinceSeconds)
     }

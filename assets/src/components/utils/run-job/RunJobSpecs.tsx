@@ -13,6 +13,7 @@ import { LinkTabWrap } from 'components/utils/Tabs'
 import { RawYaml } from 'components/component/ComponentRaw'
 
 import { useRunJob } from './RunJob'
+import { RectangleSkeleton } from '../SkeletonLoaders'
 
 const TABS = [
   { path: '', label: 'Info' },
@@ -22,7 +23,7 @@ const TABS = [
 export function RunJobSpecs() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { raw, spec, pathPrefix } = useRunJob()
+  const { raw, spec, pathPrefix, isLoading } = useRunJob()
   const { tab: tabName, jobId } = useParams()
   const tabStateRef = useRef<any>(null)
   const currentTab = TABS.find((tab) => tab.path === (tabName ?? ''))
@@ -63,7 +64,12 @@ export function RunJobSpecs() {
         </TabList>
       }
     >
-      {currentTab.path === 'raw' ? (
+      {isLoading ? (
+        <RectangleSkeleton
+          $width="100%"
+          $height="xxxxxxlarge"
+        />
+      ) : currentTab.path === 'raw' ? (
         <RawYaml raw={raw} />
       ) : (
         <Card

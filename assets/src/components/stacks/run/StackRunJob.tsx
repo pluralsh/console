@@ -27,6 +27,7 @@ export function StackRunJob() {
       error={error}
       refetch={refetch}
       pathPrefix={`${getStackRunsAbsPath(stackId, runId)}/job`}
+      clusterId={data?.stackRun?.cluster?.id ?? ''}
     />
   )
 }

@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
 import isEmpty from 'lodash/isEmpty'
+import { useMemo } from 'react'
 
 import {
   ColActions,
@@ -17,8 +17,6 @@ import {
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
-import { useOutletContext } from 'react-router-dom'
-
 import { useJobPods, useRunJob } from './RunJob'
 
 const columns = [
@@ -35,9 +33,8 @@ const columns = [
 
 export function RunJobPods() {
   const pods = useJobPods()
-  const { clusterId } = useOutletContext() as { clusterId: string | undefined }
 
-  const { refetch } = useRunJob()
+  const { refetch, clusterId, isLoading } = useRunJob()
 
   const podsWithId = useMemo(() => {
     if (isEmpty(pods)) {
@@ -68,7 +65,7 @@ export function RunJobPods() {
         linkToK8sDashboard
         columns={columns}
         refetch={refetch}
-        // reactTableOptions={reactTableOptions}
+        loading={isLoading}
       />
     </ScrollablePage>
   )

@@ -1,9 +1,14 @@
-import { useMemo, useState } from 'react'
-import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
+import {
+  FormField,
+  ListBoxItem,
+  Select,
+  usePrevious,
+} from '@pluralsh/design-system'
 import {
   useSentinelRunJobK8sJobLogsQuery,
   useStackRunJobLogsQuery,
 } from 'generated/graphql'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -20,8 +25,9 @@ import {
 
 import { isNonNullable } from 'utils/isNonNullable'
 
-import { useJobPods } from './RunJob'
+import { isEmpty } from 'lodash'
 import { STACKS_PARAM_STACK } from 'routes/stacksRoutesConsts'
+import { useJobPods } from './RunJob'
 
 export function RunJobLogs() {
   const theme = useTheme()
@@ -46,6 +52,10 @@ export function RunJobLogs() {
   const [selectedContainer, setSelectedContainer] = useState<string>(
     containers?.[0]?.name || ''
   )
+
+  const prevContainers = usePrevious(containers)
+  if (!selectedContainer && isEmpty(prevContainers) && !isEmpty(containers))
+    setSelectedContainer(containers?.[0]?.name || '')
 
   const {
     data: stackCurData,
