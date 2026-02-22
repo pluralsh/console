@@ -154,7 +154,7 @@ export function ContainerLogsTable({
 
     setContainerHeight(containerRef.current.clientHeight)
   }, [containerRef, size])
-  console.log(logs)
+
   return (
     <div
       ref={containerRef}
