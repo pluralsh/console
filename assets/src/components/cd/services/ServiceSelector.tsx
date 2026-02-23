@@ -92,7 +92,7 @@ export function ServiceSelector() {
         clusterServicesLoading ? (
           <RectangleSkeleton
             $width="100%"
-            $height="medium"
+            $height={20}
           />
         ) : (
           'Select a service'

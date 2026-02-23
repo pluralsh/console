@@ -10,6 +10,7 @@ import LoadingIndicator from '../../../../utils/LoadingIndicator'
 import { determineLevel, logLevelToColor } from '../../../logs/LogLine'
 
 import { SinceSecondsOptions } from './PodLogs'
+import { isEmpty } from 'lodash'
 
 const columnHelper = createColumnHelper<string>()
 
@@ -172,6 +173,7 @@ export function ContainerLogsTable({
         onRowClick={() => {}}
         columns={columns}
         data={logs}
+        loading={isEmpty(logs) && loading}
         emptyStateProps={{ message: 'No logs found to display' }}
       />
     </div>

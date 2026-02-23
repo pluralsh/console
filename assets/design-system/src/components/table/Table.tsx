@@ -260,6 +260,7 @@ function Table({
                       <Th
                         key={header.id}
                         $fillLevel={fillLevel}
+                        $hideHeader={hideHeader}
                       />
                     ) : (
                       <Th

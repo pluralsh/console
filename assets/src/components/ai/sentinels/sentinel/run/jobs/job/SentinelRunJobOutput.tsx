@@ -6,12 +6,21 @@ import { parseJunit } from 'utils/junitParse'
 import { GqlError } from 'components/utils/Alert'
 import { JUnitTable } from 'components/utils/junit/JUnitTable'
 import { JUnitSuitesMetadata } from 'components/utils/junit/JUnitSuitesMetadata'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 export function SentinelRunJobOutput() {
-  const { job } = useOutletContext<SentinelRunJobOutletCtxT>()
-  if (!job.output)
+  const { job, isLoading } = useOutletContext<SentinelRunJobOutletCtxT>()
+
+  if (isLoading)
+    return (
+      <RectangleSkeleton
+        $width="100%"
+        $height="xxxxxxlarge"
+      />
+    )
+  if (!job?.output)
     return <EmptyState message="No output available yet for this job." />
-  if (job.format === SentinelRunJobFormat.Junit) {
+  if (job?.format === SentinelRunJobFormat.Junit) {
     const parsedJunit = parseJunit(job.output)
 
     if (!parsedJunit) return <GqlError error="Failed to parse JUnit output" />

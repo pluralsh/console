@@ -283,7 +283,7 @@ function ServiceDetailsBase() {
                 label={
                   <RectangleSkeleton
                     $width="100%"
-                    $height="medium"
+                    $height={20}
                   />
                 }
               >

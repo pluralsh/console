@@ -44,8 +44,6 @@ export default function Service() {
   const hasIngress = !!loadBalancer?.ingress && !isEmpty(loadBalancer.ingress)
   const ports = service.spec?.ports?.filter(isNonNullable) ?? []
 
-  console.log(service.spec)
-
   return (
     <Flex
       direction="column"
