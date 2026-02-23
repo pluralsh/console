@@ -244,6 +244,10 @@ type AnsibleConfiguration struct {
 	// Additional args for the ansible playbook command.
 	// +kubebuilder:validation:Optional
 	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
+
+	// PrivateKeyFile is the path to the private key file for SSH authentication.
+	// +kubebuilder:validation:Optional
+	PrivateKeyFile *string `json:"privateKeyFile,omitempty"`
 }
 
 type AiApprovalConfiguration struct {

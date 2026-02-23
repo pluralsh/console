@@ -72,6 +72,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :playbook, :string, description: "the playbook to run"
     field :inventory, :string, description: "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
     field :additional_args, list_of(:string), description: "additional args for the playbook"
+    field :private_key_file, :string, description: "path to the private key file for SSH authentication"
   end
 
   input_object :ai_approval_attributes do
@@ -337,6 +338,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :playbook,  :string, description: "The playbook to run"
     field :inventory, :string, description: "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
     field :additional_args, list_of(:string), description: "Additional args for the playbook"
+    field :private_key_file, :string, description: "path to the private key file for SSH authentication"
   end
 
   object :stack_run do

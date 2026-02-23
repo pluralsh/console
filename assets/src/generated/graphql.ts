@@ -995,6 +995,8 @@ export type AnsibleConfiguration = {
   inventory?: Maybe<Scalars['String']['output']>;
   /** The playbook to run */
   playbook?: Maybe<Scalars['String']['output']>;
+  /** path to the private key file for SSH authentication */
+  privateKeyFile?: Maybe<Scalars['String']['output']>;
 };
 
 export type AnsibleConfigurationAttributes = {
@@ -1004,6 +1006,8 @@ export type AnsibleConfigurationAttributes = {
   inventory?: InputMaybe<Scalars['String']['input']>;
   /** the playbook to run */
   playbook?: InputMaybe<Scalars['String']['input']>;
+  /** path to the private key file for SSH authentication */
+  privateKeyFile?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Anthropic connection information */

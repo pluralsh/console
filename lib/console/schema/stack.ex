@@ -58,9 +58,10 @@ defmodule Console.Schema.Stack do
       end
 
       embeds_one :ansible, Ansible, on_replace: :update do
-        field :playbook,        :string
-        field :inventory,       :string
-        field :additional_args, {:array, :string}
+        field :playbook,         :string
+        field :inventory,        :string
+        field :additional_args,  {:array, :string}
+        field :private_key_file, :string
       end
 
       embeds_one :ai_approval, AiApproval, on_replace: :update do
@@ -93,7 +94,8 @@ defmodule Console.Schema.Stack do
 
     def ansible_changeset(model, attrs) do
       model
-      |> cast(attrs, ~w(playbook inventory additional_args)a)
+      |> cast(attrs, ~w(playbook inventory additional_args private_key_file)a)
+      |> validate_required([:playbook])
     end
 
     defp ai_approval_changeset(model, attrs) do

@@ -193,6 +193,7 @@ _Appears in:_
 | `playbook` _string_ | Playbook is the ansible playbook to run. |  | Optional: \{\} <br /> |
 | `inventory` _string_ | Inventory is the ansible inventory file to use.  We recommend checking this into git alongside your playbook files, and referencing it with a relative path. |  | Optional: \{\} <br /> |
 | `additionalArgs` _string array_ | Additional args for the ansible playbook command. |  | Optional: \{\} <br /> |
+| `privateKeyFile` _string_ | PrivateKeyFile is the path to the private key file for SSH authentication. |  | Optional: \{\} <br /> |
 
 
 
