@@ -62,8 +62,9 @@ spec:
                       before merge. The password is read from the referenced Secret.
                     properties:
                       attributes:
-                        description: Attributes is optional JSON passed as additional
-                          attributes when creating change requests.
+                        description: |-
+                          Attributes is optional JSON passed as additional attributes when creating change requests.
+                          Not all change attributes need to be provided, we will auto-fill basics like description, implementation plan, backout plan, test plan, etc using AI if not provided.
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       changeModel:

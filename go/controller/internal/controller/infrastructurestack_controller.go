@@ -480,6 +480,7 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 			Playbook:       conf.Ansible.Playbook,
 			Inventory:      conf.Ansible.Inventory,
 			AdditionalArgs: conf.Ansible.AdditionalArgs,
+			PrivateKeyFile: conf.Ansible.PrivateKeyFile,
 		}
 	}
 

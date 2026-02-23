@@ -773,6 +773,8 @@ type AnsibleConfiguration struct {
 	Inventory *string `json:"inventory,omitempty"`
 	// Additional args for the playbook
 	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
+	// path to the private key file for SSH authentication
+	PrivateKeyFile *string `json:"privateKeyFile,omitempty"`
 }
 
 type AnsibleConfigurationAttributes struct {
@@ -782,6 +784,8 @@ type AnsibleConfigurationAttributes struct {
 	Inventory *string `json:"inventory,omitempty"`
 	// additional args for the playbook
 	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
+	// path to the private key file for SSH authentication
+	PrivateKeyFile *string `json:"privateKeyFile,omitempty"`
 }
 
 // Anthropic connection information

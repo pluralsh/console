@@ -4412,6 +4412,9 @@ input AnsibleConfigurationAttributes {
 
   "additional args for the playbook"
   additionalArgs: [String]
+
+  "path to the private key file for SSH authentication"
+  privateKeyFile: String
 }
 
 input AiApprovalAttributes {
@@ -4814,6 +4817,9 @@ type AnsibleConfiguration {
 
   "Additional args for the playbook"
   additionalArgs: [String]
+
+  "path to the private key file for SSH authentication"
+  privateKeyFile: String
 }
 
 type StackRun {

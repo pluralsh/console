@@ -115,6 +115,10 @@ spec:
                       playbook:
                         description: Playbook is the ansible playbook to run.
                         type: string
+                      privateKeyFile:
+                        description: PrivateKeyFile is the path to the private key
+                          file for SSH authentication.
+                        type: string
                     type: object
                   hooks:
                     description: Hooks to run at various stages of the stack run.
