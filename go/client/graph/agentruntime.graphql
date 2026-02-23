@@ -124,6 +124,11 @@ fragment TinyAgentRuntimeFragment on AgentRuntime {
     id
     name
     type
+    cluster {
+        id
+        name
+        handle
+    }
 }
 
 fragment AgentRuntimeFragment on AgentRuntime {
