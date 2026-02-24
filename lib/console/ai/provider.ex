@@ -4,7 +4,7 @@ defmodule Console.AI.Provider do
   import Console.GraphQl.Helpers, only: [resolve_changeset: 1]
   alias Console.Deployments.Settings
   alias Console.Schema.{DeploymentSettings, DeploymentSettings.AI}
-  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex, Tool}
+  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex, Nexus, Tool}
 
   @type sender :: :system | :user | :assistant
   @type error :: Console.error
@@ -115,6 +115,15 @@ defmodule Console.AI.Provider do
     end
   end
 
+  @doc """
+  Generates embeddings for the given text.
+
+  If Nexus is configured in DeploymentSettings (ai.nexus.url is set), it will be used.
+  Otherwise, falls back to the configured embedding provider.
+
+  Options (only used when Nexus is not configured):
+  - `:client` - Which client to use (`:embedding` by default, uses embedding_provider if set)
+  """
   def embeddings(text, opts \\ []) do
     settings = Settings.cached()
     with {:ok, %mod{} = client} <- client(settings, opts[:client] || :embedding),
@@ -135,6 +144,8 @@ defmodule Console.AI.Provider do
   defp client(settings, :embedding), do: embedding_client(settings)
   defp client(settings, _), do: client(settings)
 
+  defp client(%DeploymentSettings{ai: %AI{nexus: %{url: url} = nexus}}) when is_binary(url),
+    do: {:ok, Nexus.new(nexus)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :openai, openai: %{} = openai}}),
     do: {:ok, OpenAI.new(openai)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :anthropic, anthropic: %{} = anthropic}}),

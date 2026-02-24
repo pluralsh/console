@@ -679,6 +679,8 @@ type AiSettings struct {
 	Azure        *AzureOpenaiSettings `json:"azure,omitempty"`
 	Bedrock      *BedrockAiSettings   `json:"bedrock,omitempty"`
 	Vertex       *VertexAiSettings    `json:"vertex,omitempty"`
+	// settings for nexus proxy
+	Nexus *NexusSettings `json:"nexus,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -696,8 +698,10 @@ type AiSettingsAttributes struct {
 	Azure             *AzureOpenaiAttributes       `json:"azure,omitempty"`
 	Bedrock           *BedrockAiAttributes         `json:"bedrock,omitempty"`
 	Vertex            *VertexAiAttributes          `json:"vertex,omitempty"`
-	VectorStore       *VectorStoreAttributes       `json:"vectorStore,omitempty"`
-	Graph             *GraphStoreAttributes        `json:"graph,omitempty"`
+	// configuration for nexus proxy
+	Nexus       *NexusSettingsAttributes `json:"nexus,omitempty"`
+	VectorStore *VectorStoreAttributes   `json:"vectorStore,omitempty"`
+	Graph       *GraphStoreAttributes    `json:"graph,omitempty"`
 }
 
 type Alert struct {
@@ -8742,6 +8746,31 @@ type VertexAiSettings struct {
 	Location string `json:"location"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
+}
+
+type NexusSettingsAttributes struct {
+	// the url for the nexus proxy
+	URL string `json:"url"`
+	// the access token for authenticating with the nexus proxy
+	AccessToken *string `json:"accessToken,omitempty"`
+	// the model to use for completions
+	Model *string `json:"model,omitempty"`
+	// the model to use for tool calls
+	ToolModel *string `json:"toolModel,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+}
+
+// Settings for nexus proxy
+type NexusSettings struct {
+	// the url for the nexus proxy
+	URL string `json:"url"`
+	// the model to use for completions
+	Model *string `json:"model,omitempty"`
+	// the model to use for tool calls
+	ToolModel *string `json:"toolModel,omitempty"`
+	// the model to use for vector embeddings
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 }
 
 type VerticalPodAutoscaler struct {
