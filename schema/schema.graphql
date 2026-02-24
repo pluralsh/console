@@ -3685,10 +3685,17 @@ input ElasticsearchConnectionAttributes {
 
 input OpensearchConnectionAttributes {
   host: String!
+
   index: String!
+
   awsAccessKeyId: String
+
   awsSecretAccessKey: String
+
   awsRegion: String
+
+  "whether to use pod identity (IRSA\/Workload Identity) for AWS authentication instead of static credentials"
+  usePodIdentity: Boolean
 }
 
 input AiSettingsAttributes {
@@ -4230,6 +4237,9 @@ type OpensearchConnection {
   awsAccessKeyId: String
 
   awsRegion: String
+
+  "whether to use pod identity (IRSA\/Workload Identity) for AWS authentication"
+  usePodIdentity: Boolean
 }
 
 "A read-only connection to a cloud provider"

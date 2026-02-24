@@ -5213,6 +5213,8 @@ type OpensearchConnection struct {
 	Index          string  `json:"index"`
 	AWSAccessKeyID *string `json:"awsAccessKeyId,omitempty"`
 	AWSRegion      *string `json:"awsRegion,omitempty"`
+	// whether to use pod identity (IRSA/Workload Identity) for AWS authentication
+	UsePodIdentity *bool `json:"usePodIdentity,omitempty"`
 }
 
 type OpensearchConnectionAttributes struct {
@@ -5221,6 +5223,8 @@ type OpensearchConnectionAttributes struct {
 	AWSAccessKeyID     *string `json:"awsAccessKeyId,omitempty"`
 	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
 	AWSRegion          *string `json:"awsRegion,omitempty"`
+	// whether to use pod identity (IRSA/Workload Identity) for AWS authentication instead of static credentials
+	UsePodIdentity *bool `json:"usePodIdentity,omitempty"`
 }
 
 // a high level description of the setup of common resources in a cluster

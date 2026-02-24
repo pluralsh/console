@@ -62,7 +62,7 @@ defmodule Console.Schema.DeploymentSettings do
   defmodule Opensearch do
     use Piazza.Ecto.Schema
 
-    @aws_service_name "es"
+    @aws_service_name :es
 
     embedded_schema do
       field :host,     :string
@@ -71,19 +71,48 @@ defmodule Console.Schema.DeploymentSettings do
       field :aws_secret_access_key, EncryptedString
       field :aws_region, :string
       field :aws_session_token, EncryptedString
+      field :use_pod_identity, :boolean, default: false
     end
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(host index aws_access_key_id aws_secret_access_key aws_region aws_session_token)a)
+      |> cast(attrs, ~w(host index aws_access_key_id aws_secret_access_key aws_region aws_session_token use_pod_identity)a)
       |> validate_required([:host, :index])
     end
 
+    def headers(%__MODULE__{use_pod_identity: true} = os, headers) do
+      region = Map.get(os, :aws_region) || System.get_env("AWS_REGION") || "us-east-1"
+
+      ExAws.Config.new(@aws_service_name, region: region)
+      |> Map.new()
+      |> Map.get(:security_token)
+      |> case do
+        token when is_binary(token) -> [{"X-Amz-Security-Token", token} | headers]
+        _ -> headers
+      end
+    end
     def headers(%__MODULE__{} = os, headers) do
-      session_token = Map.get(os, :aws_session_token) || System.get_env("AWS_SESSION_TOKEN")
-      [{"X-Amz-Security-Token", session_token} | headers]
+      case Map.get(os, :aws_session_token) || System.get_env("AWS_SESSION_TOKEN") do
+        token when is_binary(token) -> [{"X-Amz-Security-Token", token} | headers]
+        _ -> headers
+      end
     end
 
+    def aws_sigv4_headers(%__MODULE__{use_pod_identity: true} = os) do
+      region = Map.get(os, :aws_region) || System.get_env("AWS_REGION") || "us-east-1"
+
+      ExAws.Config.new(@aws_service_name, region: region)
+      |> Map.new()
+      |> case do
+        %{access_key_id: aid, secret_access_key: sak} = config when is_binary(aid) and is_binary(sak) ->
+          config
+          |> Map.take([:access_key_id, :secret_access_key, :security_token, :region])
+          |> Map.to_list()
+          |> Keyword.merge(service: @aws_service_name)
+        _ ->
+          [service: @aws_service_name, region: region]
+      end
+    end
     def aws_sigv4_headers(%__MODULE__{} = os) do
       [
         service: @aws_service_name,
