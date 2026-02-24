@@ -4,10 +4,22 @@ import { useOutletContext } from 'react-router-dom'
 
 import { ComponentDetailsContext } from './ComponentDetails'
 import { InfoSection } from './info/common'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
-export default function MetadataOutlet() {
-  const { component, componentDetails } =
+export function ComponentMetadata() {
+  const { component, componentDetails, loading } =
     useOutletContext<ComponentDetailsContext>()
+
+  if (!componentDetails && loading) {
+    return (
+      <InfoSection title="Metadata">
+        <RectangleSkeleton
+          $width="100%"
+          $height="xxxxxxlarge"
+        />
+      </InfoSection>
+    )
+  }
 
   return (
     <MetadataBase

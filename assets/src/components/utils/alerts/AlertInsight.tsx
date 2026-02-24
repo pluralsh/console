@@ -1,6 +1,6 @@
 import { Button, EmptyState, Flex, ReturnIcon } from '@pluralsh/design-system'
 import { useAiInsightQuery } from 'generated/graphql'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { fromNow } from 'utils/datetime'
 
 import { AISuggestFix } from 'components/ai/chatbot/AISuggestFix'
@@ -11,7 +11,6 @@ import {
 import { InsightDisplay } from 'components/ai/insights/InsightDisplay'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import IconFrameRefreshButton from 'components/utils/RefreshIconFrame'
 import { StackedText } from 'components/utils/table/StackedText'
 import { ComponentPropsWithoutRef } from 'react'
@@ -27,7 +26,6 @@ export function AlertInsight({
 }: {
   type: 'cluster' | 'service' | 'flow'
 }) {
-  const navigate = useNavigate()
   const { clusterId, serviceId, flowIdOrName, insightId } = useParams()
 
   const { data, loading, error, refetch } = useAiInsightQuery({
@@ -39,9 +37,27 @@ export function AlertInsight({
   const insight = data?.aiInsight
   const alert = insight?.alert
 
-  if (!data && loading) return <LoadingIndicator />
-  if (error) return <GqlError error={error} />
-  if (!insight) return <EmptyState message="Insight not found" />
+  const backButton = (
+    <Button
+      as={Link}
+      to={
+        type === 'cluster'
+          ? `${getClusterDetailsPath({ clusterId })}/alerts`
+          : type === 'service'
+            ? `${getServiceDetailsPath({ clusterId, serviceId, flowIdOrName })}/alerts`
+            : `${getFlowDetailsPath({ flowIdOrName })}/alerts`
+      }
+      floating
+      startIcon={<ReturnIcon />}
+    >
+      Back to alerts
+    </Button>
+  )
+
+  if (error && !error?.message?.includes('could not find resource'))
+    return <GqlError error={error} />
+  if (!(data || loading))
+    return <EmptyState message="Insight not found">{backButton}</EmptyState>
 
   return (
     <Flex
@@ -54,21 +70,7 @@ export function AlertInsight({
         justify="space-between"
         alignItems="center"
       >
-        <Button
-          onClick={() =>
-            navigate(
-              type === 'cluster'
-                ? `${getClusterDetailsPath({ clusterId })}/alerts`
-                : type === 'service'
-                  ? `${getServiceDetailsPath({ clusterId, serviceId, flowIdOrName })}/alerts`
-                  : `${getFlowDetailsPath({ flowIdOrName })}/alerts`
-            )
-          }
-          floating
-          startIcon={<ReturnIcon />}
-        >
-          Back to alerts
-        </Button>
+        {backButton}
         {alert && (
           <StackedText
             truncate
@@ -99,7 +101,7 @@ export function AlertInsight({
           />
           <ChatWithAIButton
             floating
-            insightId={insight.id}
+            insightId={insight?.id}
             messages={[insightMessage(insight)]}
           />
           <AISuggestFix insight={insight} />
@@ -108,6 +110,7 @@ export function AlertInsight({
       <InsightDisplay
         insight={insight}
         kind="alert"
+        loading={loading}
       />
     </Flex>
   )

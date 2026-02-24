@@ -66,6 +66,7 @@ export function StackRunInsights() {
       <InsightDisplay
         insight={stackRun?.insight}
         kind="stack run"
+        loading={loading}
       />
     </Flex>
   )

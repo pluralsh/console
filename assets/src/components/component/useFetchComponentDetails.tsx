@@ -47,7 +47,7 @@ export type ComponentDetailsT =
   | ArgoRolloutFragment
   | UnstructuredResourceFragment
 
-export type ComponentDetailsWithPodsT = ComponentDetailsT & {
+export type ComponentDetailsWithPodsT = Nullable<ComponentDetailsT> & {
   pods: Nullable<Nullable<PodFragment>[]>
 }
 
@@ -55,10 +55,10 @@ export function useFetchComponentDetails({
   component,
   service,
 }: {
-  component: ServiceDeploymentComponentFragment
+  component: Nullable<ServiceDeploymentComponentFragment>
   service?: Nullable<ServiceDeploymentDetailsFragment>
 }) {
-  const kindLower = component.kind?.toLowerCase()
+  const kindLower = component?.kind?.toLowerCase() ?? ''
 
   // call all hooks unconditionally, skip the ones that don't match
   const certificateQuery = useCertificateQuery(
@@ -95,16 +95,16 @@ export function useFetchComponentDetails({
     getQueryOptions({ component, service, queryKind: 'rollout' })
   )
   const unstructuredQuery = useUnstructuredResourceQuery({
-    skip: !isUnstructured(kindLower),
+    skip: !isUnstructured(kindLower) || !component,
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
     variables: {
-      group: component.group,
-      kind: component.kind,
-      name: component.name,
-      namespace: component.namespace,
+      group: component?.group,
+      kind: component?.kind ?? '',
+      name: component?.name ?? '',
+      namespace: component?.namespace,
       serviceId: service?.id ?? '',
-      version: component.version ?? '',
+      version: component?.version ?? '',
     },
   })
 
@@ -141,18 +141,18 @@ const getQueryOptions = ({
   service,
   queryKind,
 }: {
-  component: ServiceDeploymentComponentFragment
+  component: Nullable<ServiceDeploymentComponentFragment>
   service: Nullable<ServiceDeploymentDetailsFragment>
   queryKind?: string
 }) => {
-  const kind = component.kind?.toLowerCase() ?? ''
+  const kind = component?.kind?.toLowerCase() ?? ''
   return {
-    skip: kind !== queryKind,
+    skip: kind !== queryKind || !component,
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network' as WatchQueryFetchPolicy,
     variables: {
-      name: component.name,
-      namespace: component.namespace ?? '',
+      name: component?.name ?? '',
+      namespace: component?.namespace ?? '',
       serviceId: service?.id ?? '',
     },
   }

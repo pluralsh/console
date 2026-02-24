@@ -114,13 +114,13 @@ function CronJobJobs({
   )
 }
 
-export default function CronJob() {
+export function CronJob() {
   const {
     componentDetails: cronJob,
     refetch,
     component,
   } = useOutletContext<ComponentDetailsContext>()
-  const namespace = component.namespace?.toLowerCase()
+  const namespace = component?.namespace?.toLowerCase()
 
   if (cronJob?.__typename !== 'CronJob') return null
 

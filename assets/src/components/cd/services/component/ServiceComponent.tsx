@@ -2,11 +2,11 @@ import { EmptyState, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import {
   ServiceDeploymentComponentFragment,
   useServiceDeploymentQuery,
 } from 'generated/graphql'
-import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 
 import {
   CD_SERVICE_COMPONENT_PATH_MATCHER_ABS,
@@ -16,7 +16,6 @@ import {
 
 import { ComponentDetails } from 'components/component/ComponentDetails'
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
@@ -27,12 +26,10 @@ const getServiceComponentBreadcrumbs = ({
   cluster,
   service,
   flow,
-  componentName,
-  componentId,
+  component,
   ...props
 }: Parameters<typeof getServiceDetailsBreadcrumbs>[0] & {
-  componentName: string | null | undefined
-  componentId: string | null | undefined
+  component: Nullable<ServiceDeploymentComponentFragment>
 }) => [
   ...getServiceDetailsBreadcrumbs({
     cluster,
@@ -42,12 +39,12 @@ const getServiceComponentBreadcrumbs = ({
     ...props,
   }),
   {
-    label: componentName || componentId || '',
+    label: component?.name ?? '',
     url: getServiceComponentPath({
       clusterId: cluster?.id,
       serviceId: service?.id,
       flowIdOrName: flow?.name,
-      componentId,
+      componentId: component?.id,
     }),
   },
 ]
@@ -72,7 +69,6 @@ export function ServiceComponent() {
     data?.serviceDeployment?.components?.find(
       (component) => component?.id === componentId
     )
-  const componentName = component?.name
 
   useSetBreadcrumbs(
     useMemo(
@@ -81,27 +77,20 @@ export function ServiceComponent() {
           cluster: serviceDeployment?.cluster || { id: clusterId ?? '' },
           service: serviceDeployment || { id: serviceId ?? '' },
           flow: flowData?.flow,
-          componentId,
-          componentName,
+          component,
         }),
-      [
-        serviceDeployment,
-        clusterId,
-        serviceId,
-        flowData?.flow,
-        componentId,
-        componentName,
-      ]
+      [serviceDeployment, clusterId, serviceId, flowData?.flow, component]
     )
   )
 
   if (error) return <GqlError error={error} />
-  if (!data && loading) return <LoadingIndicator />
-  if (!component) return <EmptyState message="Component not found" />
+  if (!(component || loading))
+    return <EmptyState message="Component not found." />
 
   return (
     <ComponentDetails
       component={component}
+      serviceLoading={loading}
       serviceComponents={components}
       service={data?.serviceDeployment}
       hasPrometheus={!!settings?.prometheusConnection}

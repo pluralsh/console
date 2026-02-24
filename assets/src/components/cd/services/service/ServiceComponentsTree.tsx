@@ -481,6 +481,7 @@ function ServiceComponentModal({
                 <InsightDisplay
                   insight={component.insight}
                   kind={component.kind}
+                  loading={false}
                 />
               ) : (
                 <EmptyState message="No insights available." />

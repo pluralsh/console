@@ -39,13 +39,14 @@ const columns = [
   }),
 ]
 
-export default function EventsTable({
+export function EventsTable({
   events,
+  loading,
   ...props
 }: { events?: Nullable<EventFragment>[] } & Partial<
   ComponentProps<typeof Table>
 >) {
-  if (!events || isEmpty(events))
+  if (!loading && isEmpty(events))
     return (
       <EmptyStateCardSC>
         <StackedText
@@ -56,16 +57,17 @@ export default function EventsTable({
           firstColor="text"
           secondPartialType="body2"
           secondColor="text-light"
-          second="This pod hasn't generated any events. As soon as events occur, they'll be listed here with details like timestamps and statuses."
+          second="As soon as events occur, they'll be listed here with details like timestamps and statuses."
         />
       </EmptyStateCardSC>
     )
 
   return (
     <Table
-      data={events}
+      data={events ?? []}
       columns={columns}
       maxHeight="calc(100vh - 244px)"
+      loading={isEmpty(events) && loading}
       {...props}
     />
   )

@@ -37,7 +37,7 @@ const columns = [
   ColDelete,
 ]
 
-export default function Pods({ pods }: { pods: Nullable<PodFragment>[] }) {
+export function Pods({ pods }: { pods: Nullable<PodFragment>[] }) {
   const theme = useTheme()
   const referrer = useLocation().pathname.includes(FLOWS_ABS_PATH)
     ? 'flow'
@@ -48,8 +48,8 @@ export default function Pods({ pods }: { pods: Nullable<PodFragment>[] }) {
   const clusterId = rest.cluster?.id
 
   const linkToK8sDashboard =
-    component.kind.toLowerCase() === 'job' ||
-    component.kind.toLowerCase() === 'cronjob'
+    component?.kind?.toLowerCase() === 'job' ||
+    component?.kind?.toLowerCase() === 'cronjob'
 
   const filteredPods = pods.filter(isNonNullable)
 
