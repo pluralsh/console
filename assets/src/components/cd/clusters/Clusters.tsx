@@ -36,7 +36,6 @@ import {
 
 import usePersistedState from 'components/hooks/usePersistedState'
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { keySetToTagArray } from 'utils/clusterTags'
 import { Edge } from 'utils/graphql'
 
@@ -138,7 +137,7 @@ export default function Clusters() {
     useState<UpgradeableFilterKey>('ALL')
 
   const [searchString, setSearchString] = useState<string>()
-  const debouncedSearchString = useDebounce(searchString, 100)
+  const debouncedSearchString = useDebounce(searchString, 100) || undefined
 
   const searchTags = useMemo(
     () => keySetToTagArray(selectedTagKeys),
@@ -236,7 +235,6 @@ export default function Clusters() {
   useSetPageScrollable(isDemo)
 
   if (error) return <GqlError error={error} />
-  if (!data) return <LoadingIndicator />
 
   return !isDemo ? (
     <Flex
@@ -255,7 +253,7 @@ export default function Clusters() {
         setTagOp={setTagOp as ComponentProps<typeof TagsFilter>['setSearchOp']}
         upgradeableFilter={upgradeableFilter}
         setUpgradeableFilter={setUpgradeableFilter}
-        upgradeStats={data.upgradeStatistics}
+        upgradeStats={data?.upgradeStatistics}
       />
       <TabPanel
         stateRef={tabStateRef}
@@ -277,6 +275,7 @@ export default function Clusters() {
           }
         >
           <ClustersTable
+            loading={!data && loading}
             flush={showGettingStarted}
             fullHeightWrap={!showGettingStarted}
             data={tableData || []}

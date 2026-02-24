@@ -1,33 +1,25 @@
 import { Table } from '@pluralsh/design-system'
-import type { Row } from '@tanstack/react-table'
 
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
-  ServiceDeployment,
-  ServiceDeploymentEdge,
   type ServiceDeploymentsRowFragment,
   useGetGlobalServiceServicesQuery,
 } from 'generated/graphql'
 import { useMemo } from 'react'
-import { useNavigate } from 'react-router'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
-import { Edge } from 'utils/graphql'
+import { Edge, mapExistingNodes } from 'utils/graphql'
 
+import { Link } from 'react-router-dom'
 import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 import { columns } from './columns'
-
-interface GlobalServiceServicesProps {
-  seedService: ServiceDeployment
-  globalServiceID: string
-}
 
 export function GlobalServiceServices({
   seedService,
   globalServiceID,
-}: GlobalServiceServicesProps) {
-  const navigate = useNavigate()
-
+}: {
+  seedService: Nullable<ServiceDeploymentsRowFragment>
+  globalServiceID: string
+}) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
@@ -36,42 +28,40 @@ export function GlobalServiceServices({
       },
       { serviceId: globalServiceID }
     )
-
-  const services = useMemo(
+  const serviceEdges: Edge<ServiceDeploymentsRowFragment>[] = useMemo(
     () =>
-      (seedService
-        ? [{ node: seedService } as ServiceDeploymentEdge]
-        : []
-      ).concat(
-        data?.globalService?.services?.edges as Array<ServiceDeploymentEdge>
+      (seedService ? [{ node: seedService }] : []).concat(
+        mapExistingNodes(data?.globalService?.services).map((service) => ({
+          node: service,
+        }))
       ),
-    [data?.globalService?.services?.edges, seedService]
+    [data?.globalService?.services, seedService]
   )
 
   if (error) return <GqlError error={error} />
-  if (!data) return <LoadingIndicator />
 
   return (
     <Table
       fullHeightWrap
       virtualizeRows
-      data={services || []}
+      data={serviceEdges}
+      loading={!data && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
       columns={columns}
-      onRowClick={(
-        _e,
-        { original }: Row<Edge<ServiceDeploymentsRowFragment>>
-      ) =>
-        navigate(
-          getServiceDetailsPath({
-            clusterId: original.node?.cluster?.id,
-            serviceId: original.node?.id,
-          })
+      getRowLink={({ original }) => {
+        const { node } = original as Edge<ServiceDeploymentsRowFragment>
+        return (
+          <Link
+            to={getServiceDetailsPath({
+              clusterId: node?.cluster?.id,
+              serviceId: node?.id,
+            })}
+          />
         )
-      }
+      }}
       reactTableOptions={{ meta: { seedServiceID: seedService?.id } }}
       emptyStateProps={{ message: 'No services found.' }}
     />

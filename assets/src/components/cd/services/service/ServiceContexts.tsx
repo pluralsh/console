@@ -1,5 +1,4 @@
-import { Code, EmptyState, Table } from '@pluralsh/design-system'
-import isEmpty from 'lodash/isEmpty'
+import { Code, Table } from '@pluralsh/design-system'
 
 import { createColumnHelper } from '@tanstack/react-table'
 import { Body2P } from 'components/utils/typography/Text'
@@ -10,16 +9,15 @@ import { useServiceContext } from './ServiceDetailsContext'
 const columnHelper = createColumnHelper<ServiceContextFragment>()
 
 export function ServiceContexts() {
-  const { service } = useServiceContext()
-
-  if (isEmpty(service.contexts))
-    return <EmptyState message="No contexts found." />
+  const { service, isLoading } = useServiceContext()
 
   return (
     <Table
       fullHeightWrap
       data={service?.contexts?.filter(isNonNullable) ?? []}
       columns={columns}
+      loading={isLoading}
+      emptyStateProps={{ message: 'No contexts found.' }}
     />
   )
 }

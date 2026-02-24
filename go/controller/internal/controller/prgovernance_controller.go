@@ -8,6 +8,7 @@ import (
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/utils"
+	"github.com/pluralsh/console/go/controller/internal/utils/safe"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -36,6 +37,7 @@ type PrGovernanceReconciler struct {
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=prgovernances,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=prgovernances/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=prgovernances/finalizers,verbs=update
+//+kubebuilder:rbac:groups=core,resources=secrets,verbs=get
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -96,7 +98,7 @@ func (r *PrGovernanceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 func (r *PrGovernanceReconciler) addOrRemoveFinalizer(ctx context.Context, prGovernance *v1alpha1.PrGovernance) *ctrl.Result {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if prGovernance.GetDeletionTimestamp().IsZero() && !controllerutil.ContainsFinalizer(prGovernance, PreviewEnvironmentTemplateFinalizerName) {
+	if prGovernance.GetDeletionTimestamp().IsZero() && !controllerutil.ContainsFinalizer(prGovernance, PrGovernanceFinalizerName) {
 		controllerutil.AddFinalizer(prGovernance, PrGovernanceFinalizerName)
 	}
 
@@ -139,6 +141,7 @@ func (r *PrGovernanceReconciler) addOrRemoveFinalizer(ctx context.Context, prGov
 func (r *PrGovernanceReconciler) attributes(ctx context.Context, prGovernance *v1alpha1.PrGovernance) (*console.PrGovernanceAttributes, *ctrl.Result, error) {
 	attributes := &console.PrGovernanceAttributes{
 		Name: prGovernance.ConsoleName(),
+		Type: prGovernance.Spec.Type,
 	}
 
 	connection := &v1alpha1.ScmConnection{}
@@ -155,14 +158,53 @@ func (r *PrGovernanceReconciler) attributes(ctx context.Context, prGovernance *v
 	attributes.ConnectionID = *connection.Status.ID
 
 	if prGovernance.Spec.Configuration != nil {
-		attributes.Configuration = &console.PrGovernanceConfigurationAttributes{
-			Webhook: &console.GovernanceWebhookAttributes{
-				URL: prGovernance.Spec.Configuration.Webhooks.Url,
-			},
+		cfg := prGovernance.Spec.Configuration
+		attributes.Configuration = &console.PrGovernanceConfigurationAttributes{}
+
+		if cfg.Webhook != nil {
+			attributes.Configuration.Webhook = &console.GovernanceWebhookAttributes{
+				URL: cfg.Webhook.Url,
+			}
+		}
+
+		if cfg.ServiceNow != nil {
+			snAttrs, err := r.serviceNowAttributes(ctx, prGovernance.Namespace, cfg.ServiceNow)
+			if err != nil {
+				return nil, lo.ToPtr(common.Wait()), err
+			}
+			attributes.Configuration.ServiceNow = snAttrs
 		}
 	}
 
 	return attributes, nil, nil
+}
+
+// serviceNowAttributes resolves the ServiceNow password from the secret and builds API attributes.
+func (r *PrGovernanceReconciler) serviceNowAttributes(ctx context.Context, defaultNamespace string, sn *v1alpha1.PrGovernanceServiceNow) (*console.GovernanceServiceNowAttributes, error) {
+	namespace := defaultNamespace
+	if sn.SecretNamespace != nil && *sn.SecretNamespace != "" {
+		namespace = *sn.SecretNamespace
+	}
+	if namespace == "" {
+		return nil, fmt.Errorf("secret namespace is required for ServiceNow password (PrGovernance is cluster-scoped or namespace not set)")
+	}
+
+	password, err := safe.GetSecretKey(ctx, r.Client, &sn.PasswordSecretKeyRef, namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	attrs := &console.GovernanceServiceNowAttributes{
+		URL:         sn.Url,
+		Username:    sn.Username,
+		Password:    password,
+		ChangeModel: sn.ChangeModel,
+	}
+	if sn.Attributes != nil && len(sn.Attributes.Raw) > 0 {
+		s := string(sn.Attributes.Raw)
+		attrs.Attributes = &s
+	}
+	return attrs, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

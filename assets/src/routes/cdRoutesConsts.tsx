@@ -103,15 +103,15 @@ export function getClusterDetailsPath({
 export function getServiceDetailsPath({
   clusterId,
   serviceId,
-  flowId,
+  flowIdOrName,
   isRelative = false,
 }: Parameters<typeof getClusterDetailsPath>[0] & {
   serviceId: Nullable<string>
-  flowId?: Nullable<string>
+  flowIdOrName?: Nullable<string>
 }) {
   return `${
-    flowId
-      ? getFlowDetailsPath({ flowId })
+    flowIdOrName
+      ? getFlowDetailsPath({ flowIdOrName })
       : getClusterDetailsPath({ clusterId, isRelative })
   }/${SERVICES_REL_PATH}/${encodeSlashes(serviceId || '')}`
 }
@@ -165,7 +165,7 @@ export function getPodDetailsPath({
   type = 'cluster',
   clusterId,
   serviceId,
-  flowId,
+  flowIdOrName,
   agentRunId,
   name,
   namespace,
@@ -174,7 +174,7 @@ export function getPodDetailsPath({
   type: 'cluster' | 'service' | 'flow' | 'agent-run'
   clusterId?: Nullable<string>
   serviceId?: Nullable<string>
-  flowId?: Nullable<string>
+  flowIdOrName?: Nullable<string>
   agentRunId?: Nullable<string>
   name?: Nullable<string>
   namespace?: Nullable<string>
@@ -195,7 +195,7 @@ export function getPodDetailsPath({
     case 'flow':
       path = getServiceDetailsPath({
         serviceId,
-        flowId,
+        flowIdOrName,
         isRelative,
       })
       break

@@ -4,7 +4,7 @@ import {
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { createColumnHelper, Row } from '@tanstack/react-table'
+import { createColumnHelper } from '@tanstack/react-table'
 import { filesize } from 'filesize'
 import { isEmpty } from 'lodash'
 import {
@@ -15,7 +15,6 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { useNavigate } from 'react-router-dom'
 
 import { Pod, PodFragment, useDeletePodMutation } from 'generated/graphql'
 import { ReadinessT } from 'utils/status'
@@ -36,6 +35,7 @@ import {
 } from '../../../cluster/TableElements.tsx'
 import { DateTimeCol } from '../../../utils/table/DateTimeCol.tsx'
 import { getPodResources } from './getPodResources.tsx'
+import { Link } from 'react-router-dom'
 
 function DeletePod({
   name,
@@ -113,14 +113,7 @@ export const ColName = columnHelper.accessor((row) => row.name, {
   id: 'name',
   enableGlobalFilter: true,
   enableSorting: true,
-  cell: (props) => (
-    <Tooltip
-      label={props.getValue()}
-      placement="top-start"
-    >
-      <TableText>{props.getValue()}</TableText>
-    </Tooltip>
-  ),
+  cell: ({ getValue }) => <TableText>{getValue()}</TableText>,
   header: 'Name',
 })
 
@@ -337,7 +330,6 @@ export const PodsList = memo(
     reactTableOptions: reactTableOptionsProp,
     ...props
   }: PodListProps) => {
-    const navigate = useNavigate()
     const tableData: PodTableRow[] = useMemo(
       () =>
         (pods || [])
@@ -355,14 +347,8 @@ export const PodsList = memo(
               nodeName: pod?.spec?.nodeName || undefined,
               namespace: pod?.metadata?.namespace || undefined,
               namespaceIcon: undefined,
-              memory: {
-                requests: memoryRequests,
-                limits: memoryLimits,
-              },
-              cpu: {
-                requests: cpuRequests,
-                limits: cpuLimits,
-              },
+              memory: { requests: memoryRequests, limits: memoryLimits },
+              cpu: { requests: cpuRequests, limits: cpuLimits },
               restarts: getRestarts(pod.status),
               containers: getPodContainersStats(pod.status),
               images: getPodImages(pod.spec),
@@ -371,12 +357,7 @@ export const PodsList = memo(
           }),
       [pods]
     )
-    const contextVal = useMemo(
-      () => ({
-        serviceId,
-      }),
-      [serviceId]
-    )
+    const contextVal = useMemo(() => ({ serviceId }), [serviceId])
 
     const reactTableOptions = useMemo(
       () => ({
@@ -390,10 +371,6 @@ export const PodsList = memo(
       [linkBasePath, reactTableOptionsProp, refetch]
     )
 
-    if (!pods || pods.length === 0) {
-      return <>No pods available.</>
-    }
-
     return (
       <PodsListContext.Provider value={contextVal}>
         <Table
@@ -401,16 +378,20 @@ export const PodsList = memo(
           columns={columns}
           virtualizeRows
           reactTableOptions={reactTableOptions}
+          emptyStateProps={{ message: 'No pods available.' }}
           {...props}
-          onRowClick={(_e, { original }: Row<PodTableRow>) =>
-            navigate(
-              clusterId && linkToK8sDashboard
-                ? `${getKubernetesAbsPath(clusterId)}/pods/${
-                    original.namespace
-                  }/${original.name}`
-                : `${linkBasePath}/${original.namespace}/${original.name}`
+          getRowLink={({ original }) => {
+            const { namespace, name } = (original ?? {}) as PodTableRow
+            return (
+              <Link
+                to={
+                  clusterId && linkToK8sDashboard
+                    ? `${getKubernetesAbsPath(clusterId)}/pods/${namespace}/${name}`
+                    : `${linkBasePath}/${namespace}/${name}`
+                }
+              />
             )
-          }
+          }}
         />
       </PodsListContext.Provider>
     )

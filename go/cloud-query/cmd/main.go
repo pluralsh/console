@@ -29,9 +29,16 @@ func startHealthzHandler() {
 func main() {
 	startHealthzHandler()
 
-	p, err := pool.NewConnectionPool(args.DatabaseConnectionTTL())
-	if err != nil {
-		klog.Fatalf("failed to create connection pool: %v", err)
+	services := []service.Service{service.NewToolQueryService()}
+
+	if args.DatabaseEnabled() {
+		p, err := pool.NewConnectionPool(args.DatabaseConnectionTTL())
+		if err != nil {
+			klog.Fatalf("failed to create connection pool: %v", err)
+		}
+		services = append(services, service.NewCloudQueryService(p))
+	} else {
+		klog.Info("database disabled: skipping CloudQuery service registration")
 	}
 
 	s, err := server.New(&server.Config{
@@ -39,7 +46,7 @@ func main() {
 		TLSCertPath:      args.ServerTLSCertPath(),
 		TLSKeyPath:       args.ServerTLSKeyPath(),
 		EnableReflection: args.ServerEnableReflection(),
-	}, service.NewCloudQueryService(p))
+	}, services...)
 	if err != nil {
 		klog.Fatalf("failed to create server: %v", err)
 	}

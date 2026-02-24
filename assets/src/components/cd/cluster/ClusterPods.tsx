@@ -1,19 +1,28 @@
-import { useParams } from 'react-router-dom'
 import {
   ComboBox,
-  EmptyState,
+  Flex,
   Input,
   ListBoxItem,
   SearchIcon,
 } from '@pluralsh/design-system'
-import { useMemo, useState } from 'react'
-import { isEmpty } from 'lodash'
-import { useTheme } from 'styled-components'
-import Fuse from 'fuse.js'
 import { useDebounce } from '@react-hooks-library/core'
+import Fuse from 'fuse.js'
+import { isEmpty } from 'lodash'
+import { useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 import { GqlError } from 'components/utils/Alert'
 
+import {
+  useClusterNamespacesQuery,
+  useClusterPodsQuery,
+} from '../../../generated/graphql'
+import { getPodDetailsPath } from '../../../routes/cdRoutesConsts'
+import { TableCaretLink } from '../../cluster/TableElements'
+import { NamespaceListFooter } from '../../utils/NamespaceListFooter'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
+import { columnHelper } from './ClusterNodes.tsx'
 import {
   ColContainers,
   ColCpuReservation,
@@ -26,16 +35,6 @@ import {
   PodWithId,
   PodsList,
 } from './pod/PodsList'
-import {
-  useClusterNamespacesQuery,
-  useClusterPodsQuery,
-} from '../../../generated/graphql'
-import LoadingIndicator from '../../utils/LoadingIndicator'
-import { TableCaretLink } from '../../cluster/TableElements'
-import { getPodDetailsPath } from '../../../routes/cdRoutesConsts'
-import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
-import { NamespaceListFooter } from '../../utils/NamespaceListFooter'
-import { columnHelper } from './ClusterNodes.tsx'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -94,7 +93,7 @@ const columns = [
   ColActions,
 ]
 
-export default function ClusterPods() {
+export function ClusterPods() {
   const { clusterId = '' } = useParams()
   const [namespace, setNamespace] = useState<string>('')
   const { data: namespacesData, refetch } = useClusterNamespacesQuery({
@@ -109,10 +108,7 @@ export default function ClusterPods() {
         queryHook: useClusterPodsQuery,
         keyPath: ['pods'],
       },
-      {
-        clusterId,
-        namespace,
-      }
+      { clusterId, namespace }
     )
 
   const theme = useTheme()
@@ -169,26 +165,21 @@ export default function ClusterPods() {
     [debouncedFilterString]
   )
 
-  if (error) {
+  if (error)
     return (
       <GqlError
         header="Sorry, something went wrong"
         error={error}
       />
     )
-  }
 
-  return !data ? (
-    <LoadingIndicator />
-  ) : (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-      }}
+  return (
+    <Flex
+      direction="column"
+      height="100%"
+      width="100%"
     >
-      <div css={{ display: 'flex', gap: theme.spacing.large }}>
+      <Flex gap="large">
         <Input
           startIcon={<SearchIcon />}
           placeholder="Filter pods"
@@ -235,27 +226,25 @@ export default function ClusterPods() {
             </ComboBox>
           </div>
         )}
-      </div>
-      {!pods || pods.length === 0 ? (
-        <EmptyState message="No pods match your selection" />
-      ) : (
-        <PodsList
-          fullHeightWrap
-          pods={pods}
-          columns={columns}
-          reactTableOptions={reactTableOptions}
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onVirtualSliceChange={setVirtualSlice}
-          refetch={refetch}
-          linkBasePath={getPodDetailsPath({
-            type: 'cluster',
-            clusterId,
-            isRelative: false,
-          })}
-        />
-      )}
-    </div>
+      </Flex>
+      <PodsList
+        fullHeightWrap
+        pods={pods}
+        columns={columns}
+        loading={!data && loading}
+        reactTableOptions={reactTableOptions}
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+        refetch={refetch}
+        linkBasePath={getPodDetailsPath({
+          type: 'cluster',
+          clusterId,
+          isRelative: false,
+        })}
+        emptyStateProps={{ message: 'No pods match your selection.' }}
+      />
+    </Flex>
   )
 }

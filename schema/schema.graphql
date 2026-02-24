@@ -437,7 +437,7 @@ type RootQueryType {
 
   flows(after: String, first: Int, before: String, last: Int, q: String): FlowConnection
 
-  flow(id: ID!): Flow
+  flow(id: ID, name: String): Flow
 
   mcpServers(after: String, first: Int, before: String, last: Int, q: String): McpServerConnection
 
@@ -2547,6 +2547,29 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
 
   "the gotestsum configuration to use for this check"
   gotestsum: SentinelCheckGotestsumAttributes
+
+  "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
+  default: SentinelCheckIntegrationTestDefaultAttributes
+}
+
+input SentinelCheckIntegrationTestDefaultAttributes {
+  "whether to ignore disable the default built-in test cases, in case you'd prefer to just use custom cases."
+  ignore: Boolean
+
+  "labels to apply to created namespaces, temporary namespaces are used for all test cases"
+  namespaceLabels: Json
+
+  "annotations to apply to created namespaces, temporary namespaces are used for all test cases"
+  namespaceAnnotations: Json
+
+  "container image registry for test deployments"
+  registry: String
+
+  "annotations to apply to test deployments, useful if you need to opt out of policy enforcement"
+  resourceAnnotations: Json
+
+  "labels to apply to test deployments, useful if you need to opt out of policy enforcement"
+  resourceLabels: Json
 }
 
 input SentinelRunJobUpdateAttributes {
@@ -2772,8 +2795,31 @@ type SentinelCheckIntegrationTestConfiguration {
   "the gotestsum configuration to use for this check"
   gotestsum: SentinelCheckGotestsumConfiguration
 
+  "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
+  default: SentinelCheckIntegrationTestDefaultConfiguration
+
   "a list of custom test cases to run for this check"
   cases: [SentinelCheckIntegrationTestCaseConfiguration]
+}
+
+type SentinelCheckIntegrationTestDefaultConfiguration {
+  "whether to ignore default namespace\/deployment labels and annotations"
+  ignore: Boolean
+
+  "labels to apply to created namespaces"
+  namespaceLabels: Map
+
+  "annotations to apply to created namespaces"
+  namespaceAnnotations: Map
+
+  "container image registry for test deployments"
+  registry: String
+
+  "annotations to apply to test deployments"
+  resourceAnnotations: Map
+
+  "labels to apply to test deployments"
+  resourceLabels: Map
 }
 
 type SentinelCheckGotestsumConfiguration {
@@ -3446,6 +3492,9 @@ input OpenaiSettingsAttributes {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 input AnthropicSettingsAttributes {
@@ -3458,6 +3507,9 @@ input AnthropicSettingsAttributes {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 input OllamaAttributes {
@@ -3473,6 +3525,9 @@ input OllamaAttributes {
 
   "An http authorization header to use on calls to the Ollama api"
   authorization: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 input AzureOpenaiAttributes {
@@ -3493,6 +3548,9 @@ input AzureOpenaiAttributes {
 
   "the azure openai access token to use"
   accessToken: String!
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 input BedrockAiAttributes {
@@ -3516,6 +3574,9 @@ input BedrockAiAttributes {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 input VertexAiAttributes {
@@ -3539,6 +3600,9 @@ input VertexAiAttributes {
 
   "the gcp region the model is hosted in"
   location: String!
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 input VectorStoreAttributes {
@@ -3781,6 +3845,9 @@ type OpenaiSettings {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 "Anthropic connection information"
@@ -3790,6 +3857,9 @@ type AnthropicSettings {
 
   "the model to use for tool calls, which are less frequent and require more complex reasoning"
   toolModel: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 "Settings for a self-hosted ollama-based LLM deployment"
@@ -3818,6 +3888,9 @@ type AzureOpenaiSettings {
 
   "the api version you want to use"
   apiVersion: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 "Settings for usage of AWS Bedrock for LLMs"
@@ -3836,6 +3909,9 @@ type BedrockAiSettings {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 "Settings for usage of GCP VertexAI for LLMs"
@@ -3854,6 +3930,9 @@ type VertexAiSettings {
 
   "the gcp region the model"
   location: String!
+
+  "addditional models to support within the integrated ai proxy"
+  proxyModels: [String]
 }
 
 "Settings for configuring log aggregation throughout Plural"
@@ -4333,6 +4412,9 @@ input AnsibleConfigurationAttributes {
 
   "additional args for the playbook"
   additionalArgs: [String]
+
+  "path to the private key file for SSH authentication"
+  privateKeyFile: String
 }
 
 input AiApprovalAttributes {
@@ -4735,6 +4817,9 @@ type AnsibleConfiguration {
 
   "Additional args for the playbook"
   additionalArgs: [String]
+
+  "path to the private key file for SSH authentication"
+  privateKeyFile: String
 }
 
 type StackRun {
@@ -9582,6 +9667,11 @@ enum ObserverStatus {
   FAILED
 }
 
+enum PrGovernanceType {
+  SERVICE_NOW
+  WEBHOOK
+}
+
 input CatalogAttributes {
   name: String!
 
@@ -9700,6 +9790,8 @@ input ScmConnectionAttributes {
 
   azure: AzureDevopsAttributes
 
+  bitbucketDatacenter: BitbucketDatacenterAttributes
+
   default: Boolean
 
   proxy: HttpProxyAttributes
@@ -9736,6 +9828,12 @@ input AzureDevopsAttributes {
 
   "the project to use for azure devops"
   project: String!
+}
+
+"Requirements for Bitbucket Data Center \/ Server authentication"
+input BitbucketDatacenterAttributes {
+  "the user slug for Bitbucket Data Center \/ Server"
+  userSlug: String!
 }
 
 "A way to create a self-service means of generating PRs against an IaC repo"
@@ -10180,6 +10278,9 @@ input ObserverAddonAttributes {
 
 "The settings for configuring a pr governance controller"
 input PrGovernanceAttributes {
+  "the type of pr governance controller to use"
+  type: PrGovernanceType!
+
   name: String!
 
   "the scm connection to use for pr generation"
@@ -10191,12 +10292,31 @@ input PrGovernanceAttributes {
 "The settings for configuring a pr governance controller"
 input PrGovernanceConfigurationAttributes {
   webhook: GovernanceWebhookAttributes
+  serviceNow: GovernanceServiceNowAttributes
 }
 
 "The settings for configuring a pr governance controller"
 input GovernanceWebhookAttributes {
   "the url to send webhooks to"
   url: String!
+}
+
+"ServiceNow configuration for a pr governance controller"
+input GovernanceServiceNowAttributes {
+  "the ServiceNow instance URL"
+  url: String!
+
+  "the change request model\/type"
+  changeModel: String
+
+  "ServiceNow API username"
+  username: String!
+
+  "ServiceNow API password"
+  password: String!
+
+  "additional attributes to send with change requests"
+  attributes: Json
 }
 
 "a git repository available for deployments"
@@ -10326,6 +10446,9 @@ type ScmConnection {
 
   "the azure devops attributes for this connection"
   azure: AzureDevopsConfiguration
+
+  "the Bitbucket Data Center \/ Server attributes for this connection"
+  bitbucketDatacenter: BitbucketDatacenterConfiguration
 
   "base url for git clones for self-hosted versions"
   baseUrl: String
@@ -10607,6 +10730,12 @@ type AzureDevopsConfiguration {
   project: String!
 }
 
+"Bitbucket Data Center \/ Server connection configuration"
+type BitbucketDatacenterConfiguration {
+  "the user slug for Bitbucket Data Center \/ Server"
+  userSlug: String!
+}
+
 "A reference to a pull request for your kubernetes related IaC"
 type PullRequest {
   id: ID!
@@ -10871,6 +11000,7 @@ type CatalogSearchItem {
 type PrGovernance {
   id: ID!
   name: String!
+  type: PrGovernanceType!
   connection: ScmConnection
   configuration: PrGovernanceConfiguration
   insertedAt: DateTime
@@ -10880,11 +11010,27 @@ type PrGovernance {
 "The configuration for a pr governance controller"
 type PrGovernanceConfiguration {
   webhook: GovernanceWebhook
+  serviceNow: GovernanceServiceNow
 }
 
 "The webhook configuration for a pr governance controller"
 type GovernanceWebhook {
   url: String!
+}
+
+"ServiceNow configuration for a pr governance controller"
+type GovernanceServiceNow {
+  "the ServiceNow instance URL"
+  url: String!
+
+  "the change request model\/type"
+  changeModel: String
+
+  "ServiceNow API username"
+  username: String!
+
+  "additional attributes sent with change requests"
+  attributes: Map
 }
 
 type GitRepositoryConnection {

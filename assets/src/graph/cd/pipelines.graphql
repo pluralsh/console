@@ -308,7 +308,7 @@ query PipelineContexts(
   $id: ID!
   $before: String
   $after: String
-  $first: Int!
+  $first: Int = 100
   $last: Int
 ) {
   pipeline(id: $id) {

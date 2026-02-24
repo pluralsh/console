@@ -48,6 +48,11 @@ fragment AgentRuntime on AgentRuntime {
   }
 }
 
+fragment AgentRuntimeRepos on AgentRuntime {
+  id
+  allowedRepositories
+}
+
 fragment AgentRunRepository on AgentRunRepository {
   id
   url
@@ -194,6 +199,12 @@ query AgentRuntimes($after: String, $first: Int = 100) {
 query AgentRuntime($id: ID!) {
   agentRuntime(id: $id) {
     ...AgentRuntime
+  }
+}
+
+query AgentRuntimeRepos($id: ID!) {
+  agentRuntime(id: $id) {
+    ...AgentRuntimeRepos
   }
 }
 

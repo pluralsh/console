@@ -70,14 +70,22 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
 
   defp pr_content(pr), do: "#{pr["fromRef"]["displayId"]}\n#{pr["title"]}\n#{pr["description"]}"
 
-  def review(conn, %PullRequest{url: url}, body) do
+  def review(conn, %PullRequest{url: url} = pr, body) do
     with {:ok, project, slug, number} <- get_pull_id(url),
          {:ok, conn} <- connection(conn) do
-      case post(conn, Path.join(["/projects", project, "repos", slug, "pull-requests", number, "comments"]), %{
-        severity: "NORMAL",
-        state: "OPEN",
-        text: filter_ansi(body),
-      }) do
+      case pr do
+        %PullRequest{comment_id: id} when is_binary(id) ->
+          put(conn, Path.join(["/projects", project, "repos", slug, "pull-requests", number, "comments", id]), %{
+            text: filter_ansi(body),
+          })
+        _ ->
+          post(conn, Path.join(["/projects", project, "repos", slug, "pull-requests", number, "comments"]), %{
+            severity: "NORMAL",
+            state: "OPEN",
+            text: filter_ansi(body),
+          })
+      end
+      |> case do
         {:ok, %{"id" => id}} -> {:ok, "#{id}"}
         err -> err
       end
@@ -86,7 +94,18 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
 
   def files(_, _), do: {:ok, []}
 
-  def approve(_, _, _), do: {:error, "not implemented"}
+  def approve(conn, %PullRequest{url: url}, _) do
+    with {:ok, project, slug, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn),
+         {:ok, user_slug} <- user_slug(conn) do
+      Path.join(["/projects", project, "repos", slug, "pull-requests", number, "participants", user_slug])
+      |> then(&put(conn, &1, %{"status" => "APPROVED"}))
+      |> case do
+        {:ok, %{"id" => id}} -> {:ok, "#{id}"}
+        err -> err
+      end
+    end
+  end
 
   def slug(url) do
     with %URI{path: "/scm/" <> path} <- URI.parse(url),
@@ -99,7 +118,17 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
 
   def commit_status(_, _, _, _, _), do: :ok
 
-  def merge(_, _), do: :ok
+  def merge(conn, %PullRequest{url: url}) do
+    with {:ok, project, slug, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn) do
+      Path.join(["/projects", project, "repos", slug, "pull-requests", number, "merge"])
+      |> then(&post(conn, &1, %{}))
+      |> case do
+        {:ok, %{"id" => id}} -> {:ok, "#{id}"}
+        err -> err
+      end
+    end
+  end
 
   def pr_info(url) do
     with {:ok, project, repo, number} <- get_pull_id(url),
@@ -109,6 +138,12 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
   defp post(conn, path, body) do
     url(conn, path)
     |> HTTPoison.post(Jason.encode!(body), Connection.headers(conn))
+    |> handle_response()
+  end
+
+  defp put(conn, path, body) do
+    url(conn, path)
+    |> HTTPoison.put(Jason.encode!(body), Connection.headers(conn))
     |> handle_response()
   end
 
@@ -159,4 +194,8 @@ defmodule Console.Deployments.Pr.Impl.BitBucketDatacenter do
     host = String.trim_trailing(host, "/rest/api/latest")
     Path.join([host, "projects", project, "repos", slug, "pull-requests", "#{id}"])
   end
+
+  defp user_slug(%ScmConnection{bitbucket_datacenter: %{user_slug: user_slug}})
+    when is_binary(user_slug), do: {:ok, user_slug}
+  defp user_slug(_), do: {:error, "could not determine user slug"}
 end

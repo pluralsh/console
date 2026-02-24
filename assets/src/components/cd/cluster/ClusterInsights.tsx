@@ -165,14 +165,14 @@ export function ClusterInsightsSummary() {
 
   return (
     <InsightDisplay
-      insight={cluster.insight}
+      insight={cluster?.insight}
       kind="cluster"
     />
   )
 }
 
 type ClusterInsightsContextType = {
-  cluster: ClusterFragment & Nullable<ClusterInsightFragment>
+  cluster: Nullable<ClusterFragment> & Nullable<ClusterInsightFragment>
   clusterLoading: boolean
   refetch: () => void
   setNavigationContent: Dispatch<SetStateAction<Nullable<ReactNode>>>

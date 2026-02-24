@@ -14,7 +14,7 @@ export function ClusterInsightsComponents() {
   const { cluster } = useClusterInsightsContext()
   const theme = useTheme()
   const navigate = useNavigate()
-  const data = cluster.insightComponents?.filter(componentHasInsight) ?? []
+  const data = cluster?.insightComponents?.filter(componentHasInsight) ?? []
 
   return (
     <Table

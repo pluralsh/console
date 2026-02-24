@@ -29,8 +29,8 @@ defmodule Console.Schema.SentinelRunJob do
 
     embeds_one :git, Service.Git, on_replace: :update
 
-    belongs_to :repository, GitRepository
-    belongs_to :cluster, Cluster
+    belongs_to :repository,   GitRepository
+    belongs_to :cluster,      Cluster
     belongs_to :sentinel_run, SentinelRun
 
     timestamps()

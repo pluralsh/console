@@ -2,6 +2,10 @@ import Config
 
 config :console, :initialize, true
 
+config :hackney,
+  max_connections: 150,
+  max_per_host: 20
+
 config :console, ConsoleWeb.Endpoint,
   adapter: Bandit.PhoenixAdapter,
   http: [
@@ -66,7 +70,6 @@ config :console, Console.Cron.Scheduler,
     {"15 1 * * *",     {Console.Deployments.Cron, :prune_cluster_audit_logs, []}},
     {"0 * * * *",      {Console.Deployments.Cron, :prune_policy, []}},
     {"15 * * * *",     {Console.Deployments.Cron, :prune_vuln_reports, []}},
-    {"*/15 * * * *",   {Console.Deployments.Cron, :pr_governance, []}},
     {"15 3 * * *",     {Console.Deployments.Cron, :prune_dangling_templates, []}},
     {"30 3 * * *",     {Console.Deployments.Cron, :prune_insight_components, []}},
     {"0 4 * * *",      {Console.Deployments.Cron, :prune_helm_repositories, []}},

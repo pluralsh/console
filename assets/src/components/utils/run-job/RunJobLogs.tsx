@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
 import { FormField, ListBoxItem, Select } from '@pluralsh/design-system'
 import {
   useSentinelRunJobK8sJobLogsQuery,
   useStackRunJobLogsQuery,
 } from 'generated/graphql'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -20,8 +20,8 @@ import {
 
 import { isNonNullable } from 'utils/isNonNullable'
 
-import { useJobPods } from './RunJob'
 import { STACKS_PARAM_STACK } from 'routes/stacksRoutesConsts'
+import { useJobPods } from './RunJob'
 
 export function RunJobLogs() {
   const theme = useTheme()
@@ -30,23 +30,22 @@ export function RunJobLogs() {
   const id = (type === 'stack' ? params.runId : params.jobId) ?? ''
 
   const pods = useJobPods()
-  const containers =
-    useMemo(
-      () =>
-        pods?.flatMap(
-          (p) =>
-            p?.spec?.containers?.flatMap?.((c) => ({
-              id: `${p.metadata.name}++${p.metadata.namespace}++${c?.name}`,
-              ...c,
-            })) ?? []
-        ),
-      [pods]
-    ) || []
+  const containers = useMemo(
+    () =>
+      pods?.flatMap(
+        (p) =>
+          p?.spec?.containers?.flatMap?.((c) => ({
+            id: `${p.metadata.name}++${p.metadata.namespace}++${c?.name}`,
+            ...c,
+          })) ?? []
+      ) ?? [],
+    [pods]
+  )
 
   const [sinceSeconds, setSinceSeconds] = useState(SinceSecondsOptions.HalfHour)
-  const [selectedContainer, setSelectedContainer] = useState<string>(
-    containers?.[0]?.name || ''
-  )
+  const [selectedContainer, setSelectedContainer] =
+    useState<Nullable<string>>(undefined)
+  const container = selectedContainer ?? containers?.[0]?.name ?? ''
 
   const {
     data: stackCurData,
@@ -55,8 +54,8 @@ export function RunJobLogs() {
     loading: stackLoading,
     refetch: stackRefetch,
   } = useStackRunJobLogsQuery({
-    skip: type !== 'stack',
-    variables: { id, container: containers?.[0]?.name || '', sinceSeconds },
+    skip: type !== 'stack' || !container,
+    variables: { id, container, sinceSeconds },
     notifyOnNetworkStatusChange: true,
   })
 
@@ -67,8 +66,8 @@ export function RunJobLogs() {
     loading: sentinelLoading,
     refetch: sentinelRefetch,
   } = useSentinelRunJobK8sJobLogsQuery({
-    skip: type !== 'sentinel',
-    variables: { id, container: containers?.[0]?.name || '', sinceSeconds },
+    skip: type !== 'sentinel' || !container,
+    variables: { id, container, sinceSeconds },
     notifyOnNetworkStatusChange: true,
   })
   const stackData = stackCurData || stackPrevData
@@ -111,7 +110,7 @@ export function RunJobLogs() {
         >
           <FormField label="Container">
             <Select
-              selectedKey={selectedContainer}
+              selectedKey={container}
               onSelectionChange={(key) => setSelectedContainer(key as string)}
             >
               {containers?.map((c) => (
@@ -145,7 +144,7 @@ export function RunJobLogs() {
           logs={logs || []}
           loading={loading}
           refetch={refetch}
-          container={selectedContainer}
+          container={container}
         />
       </div>
     </ScrollablePage>

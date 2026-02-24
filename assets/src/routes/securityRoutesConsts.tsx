@@ -35,26 +35,26 @@ export function getPolicyPath({
 
 export function getVulnerabilityReportsPath({
   clusterId,
-  flowId,
+  flowIdOrName,
 }: {
   clusterId?: Nullable<string>
-  flowId?: Nullable<string>
+  flowIdOrName?: Nullable<string>
 }) {
-  return flowId
-    ? `${getFlowDetailsPath({ flowId })}/${VULNERABILITY_REPORTS_REL_PATH}`
+  return flowIdOrName
+    ? `${getFlowDetailsPath({ flowIdOrName })}/${VULNERABILITY_REPORTS_REL_PATH}`
     : `${VULNERABILITY_REPORTS_ABS_PATH}/${clusterId ?? ''}`
 }
 
 export function getVulnerabilityReportDetailsPath({
   clusterId,
-  flowId,
+  flowIdOrName,
   vulnerabilityReportId,
 }: {
   clusterId?: Nullable<string>
-  flowId?: Nullable<string>
+  flowIdOrName?: Nullable<string>
   vulnerabilityReportId: string
 }) {
-  return flowId
-    ? `${getFlowDetailsPath({ flowId })}/${VULNERABILITY_REPORTS_REL_PATH}/${vulnerabilityReportId}`
+  return flowIdOrName
+    ? `${getFlowDetailsPath({ flowIdOrName })}/${VULNERABILITY_REPORTS_REL_PATH}/${vulnerabilityReportId}`
     : `${VULNERABILITY_REPORTS_ABS_PATH}/${clusterId}/report/${vulnerabilityReportId}`
 }

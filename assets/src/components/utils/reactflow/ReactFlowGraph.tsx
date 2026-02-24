@@ -27,7 +27,7 @@ import '@xyflow/react/dist/style.css'
 import { LayoutOptions } from 'elkjs'
 import { runAfterBrowserLayout } from 'utils/runAfterBrowserLayout'
 import { GqlError } from '../Alert'
-import LoadingIndicator from '../LoadingIndicator'
+import { RectangleSkeleton } from '../SkeletonLoaders'
 import { useAutoLayout } from './layouting'
 
 const ReactFlowFullScreenWrapperSC = styled(FocusLock)<{
@@ -154,7 +154,12 @@ export function ReactFlowGraph({
       $fullscreen={fullscreen}
     >
       <ReactFlowAreaSC $fullscreen={fullscreen}>
-        {showLayoutingIndicator && isLayouting && <LoadingIndicator />}
+        {showLayoutingIndicator && isLayouting && (
+          <RectangleSkeleton
+            $height="100%"
+            $width="100%"
+          />
+        )}
         <ReactFlowWrapperSC
           $hide={isLayouting}
           $edgesSelectable={edgesSelectable}

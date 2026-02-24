@@ -1,14 +1,12 @@
-import { useState } from 'react'
 import {
+  Flex,
   Input2,
-  LoopingLogo,
   SearchIcon,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { type Row } from '@tanstack/react-table'
-import { useTheme } from 'styled-components'
-import { useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
@@ -31,65 +29,49 @@ export const PIPELINES_CRUMBS = [
   { label: 'pipelines', url: PIPELINES_ABS_PATH },
 ]
 
-export default function PipelineList() {
-  const { spacing } = useTheme()
-  const navigate = useNavigate()
+export function Pipelines() {
   const projectId = useProjectId()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 100)
 
   const { data, loading, error, pageInfo, fetchNextPage } =
     useFetchPaginatedData(
-      {
-        queryHook: usePipelinesQuery,
-        keyPath: ['pipelines'],
-      },
-      {
-        q: debouncedSearchString,
-        projectId,
-      }
+      { queryHook: usePipelinesQuery, keyPath: ['pipelines'] },
+      { q: debouncedSearchString, projectId }
     )
 
   useSetBreadcrumbs(PIPELINES_CRUMBS)
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!data) {
-    return <LoopingLogo />
-  }
+  if (error) return <GqlError error={error} />
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: spacing.small,
-        height: '100%',
-      }}
+    <Flex
+      direction="column"
+      gap="small"
+      height="100%"
     >
-      <div css={{ display: 'flex', minWidth: 0, gap: spacing.medium }}>
-        <Input2
-          placeholder="Search pipelines"
-          startIcon={<SearchIcon />}
-          showClearButton
-          value={searchString}
-          onChange={(e) => setSearchString(e.currentTarget.value)}
-          css={{ flexGrow: 1 }}
-        />
-      </div>
+      <Input2
+        placeholder="Search pipelines"
+        startIcon={<SearchIcon />}
+        showClearButton
+        value={searchString}
+        onChange={(e) => setSearchString(e.currentTarget.value)}
+        css={{ flexGrow: 1 }}
+      />
       <Table
         fullHeightWrap
         columns={columns}
+        loading={!data && loading}
         data={data?.pipelines?.edges || []}
         virtualizeRows
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
-        onRowClick={(_e, { original }: Row<Edge<PipelineFragment>>) => {
-          navigate(`${PIPELINES_ABS_PATH}/${original.node?.id}`)
+        getRowLink={({ original }) => {
+          const { node } = original as Edge<PipelineFragment>
+          return <Link to={`${PIPELINES_ABS_PATH}/${node?.id}`} />
         }}
       />
-    </div>
+    </Flex>
   )
 }

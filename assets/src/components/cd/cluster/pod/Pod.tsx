@@ -23,10 +23,10 @@ import { getFlowBreadcrumbs } from 'components/flows/flow/Flow.tsx'
 import {
   useAgentRunPodQuery,
   useClusterQuery,
-  useFlowQuery,
   usePodQuery,
   useServiceDeploymentTinyQuery,
 } from '../../../../generated/graphql'
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { getPodDetailsPath } from '../../../../routes/cdRoutesConsts'
 import { LinkTabWrap } from '../../../utils/Tabs'
 import { LogsLegend } from '../../logs/LogsLegend.tsx'
@@ -50,12 +50,12 @@ export default function Pod() {
   const {
     clusterId: clusterIdParam,
     serviceId,
-    flowId,
     runId,
     name = '',
     namespace = '',
   } = useParams()
-  const type = flowId
+  const { flowIdOrName, flowData } = useCurrentFlow()
+  const type = flowIdOrName
     ? 'flow'
     : serviceId
       ? 'service'
@@ -64,7 +64,7 @@ export default function Pod() {
         : 'cluster'
   const tab =
     useMatch(
-      `${getPodDetailsPath({ type, clusterId: clusterIdParam, serviceId, flowId, agentRunId: runId, name, namespace })}/:tab`
+      `${getPodDetailsPath({ type, clusterId: clusterIdParam, serviceId, flowIdOrName, agentRunId: runId, name, namespace })}/:tab`
     )?.params?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
 
@@ -79,10 +79,6 @@ export default function Pod() {
     variables: { id: clusterId },
     skip: !clusterId,
   })
-  const { data: flowData } = useFlowQuery({
-    variables: { id: flowId ?? '' },
-    skip: !flowId,
-  })
   const { data: agentRunData, loading: agentRunLoading } = useAgentRunPodQuery({
     variables: { id: runId ?? '' },
     skip: !runId,
@@ -92,7 +88,7 @@ export default function Pod() {
     useMemo(
       () => [
         ...(type === 'flow'
-          ? getFlowBreadcrumbs(flowId, flowData?.flow?.name, 'services')
+          ? getFlowBreadcrumbs(flowData?.flow?.name, 'services')
           : type === 'service'
             ? getServiceDetailsBreadcrumbs({
                 service: serviceData?.serviceDeployment ?? {
@@ -119,7 +115,7 @@ export default function Pod() {
                   type,
                   clusterId,
                   serviceId,
-                  flowId,
+                  flowIdOrName,
                   name,
                   namespace,
                 }),
@@ -133,7 +129,7 @@ export default function Pod() {
         clusterData?.cluster,
         clusterId,
         flowData?.flow?.name,
-        flowId,
+        flowIdOrName,
         name,
         namespace,
         runId,

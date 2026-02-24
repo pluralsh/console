@@ -35,6 +35,10 @@ defmodule Console.Schema.ScmConnection do
       field :project,      :string
     end
 
+    embeds_one :bitbucket_datacenter, BitbucketDatacenter, on_replace: :update do
+      field :user_slug, :string
+    end
+
     embeds_one :proxy, Proxy, on_replace: :update do
       field :url,     :string
       field :noproxy, :string
@@ -60,6 +64,7 @@ defmodule Console.Schema.ScmConnection do
     |> cast_embed(:github, with: &github_changeset/2)
     |> cast_embed(:proxy, with: &proxy_changeset/2)
     |> cast_embed(:azure, with: &azure_changeset/2)
+    |> cast_embed(:bitbucket_datacenter, with: &bitbucket_datacenter_changeset/2)
     |> unique_constraint(:name)
     |> unique_constraint(:default, message: "only one scm connection can be marked default at once")
     |> validate_required([:name, :type])
@@ -78,6 +83,12 @@ defmodule Console.Schema.ScmConnection do
     model
     |> cast(attrs, ~w(username organization project)a)
     |> validate_required(~w(username organization project)a)
+  end
+
+  defp bitbucket_datacenter_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(user_slug)a)
+    |> validate_required(~w(user_slug)a)
   end
 
   def proxy_changeset(model, attrs) do

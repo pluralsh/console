@@ -31,9 +31,9 @@ import { mapExistingNodes } from 'utils/graphql'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv.tsx'
 
 export function ServiceGitSettings() {
-  const { service } = useServiceContext()
-  const prevServiceId = usePrevious(service.id)
-  const { flowId } = useParams()
+  const { service, isLoading } = useServiceContext()
+  const prevServiceId = usePrevious(service?.id)
+  const { flowIdOrName } = useParams()
   const navigate = useNavigate()
 
   const { data: reposData } = useGitRepositoriesQuery({
@@ -51,15 +51,15 @@ export function ServiceGitSettings() {
     hasUpdates,
     reset,
   } = useUpdateState({
-    protect: !!service.protect,
-    gitRef: service.git?.ref,
-    gitFolder: service.git?.folder,
-    repositoryId: service.repository?.id ?? '',
+    protect: !!service?.protect,
+    gitRef: service?.git?.ref,
+    gitFolder: service?.git?.folder,
+    repositoryId: service?.repository?.id ?? '',
   })
 
   useEffect(() => {
-    if (service.id !== prevServiceId) reset()
-  }, [prevServiceId, reset, service.id])
+    if (service?.id !== prevServiceId) reset()
+  }, [prevServiceId, reset, service?.id])
 
   const attributes = useMemo(() => {
     const git =
@@ -77,7 +77,7 @@ export function ServiceGitSettings() {
 
   const [mutation, { loading, error }] = useUpdateServiceDeploymentMutation({
     variables: {
-      id: service.id,
+      id: service?.id ?? '',
       attributes,
     },
     onCompleted: ({ updateServiceDeployment }) => {
@@ -91,21 +91,21 @@ export function ServiceGitSettings() {
     },
   })
 
-  const hasGitRepo = !!service.repository
+  const hasGitRepo = !!service?.repository
   const formIsValid = !hasGitRepo || !!(state.gitRef && state.gitFolder)
 
   useEffect(() => {
-    if (hasGitRepo) return
+    if (hasGitRepo || isLoading) return
     navigate(
       getServiceSettingsPath({
-        flowId,
+        flowIdOrName,
         clusterId: service?.cluster?.id,
         serviceId: service?.id,
         isRelative: false,
         subTab: SERVICE_SETTINGS_HELM_REL_PATH,
       })
     )
-  }, [hasGitRepo, navigate, service, flowId])
+  }, [hasGitRepo, navigate, service, flowIdOrName, isLoading])
 
   return (
     <form

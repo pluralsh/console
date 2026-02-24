@@ -6,43 +6,38 @@ import {
   Select,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   GlobalServiceFragment,
-  ServiceDeployment,
   useGetGlobalServiceQuery,
   useGlobalServicesQuery,
   useSyncGlobalServiceMutation,
 } from 'generated/graphql'
-import { ReactNode, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { GLOBAL_SERVICE_PARAM_ID } from 'routes/cdRoutesConsts'
-import { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { mapExistingNodes } from '../../../../utils/graphql'
 import { useProjectId } from '../../../contexts/ProjectsContext'
 import { GqlError } from '../../../utils/Alert'
 import { DistroProviderIcon } from '../../../utils/ClusterDistro'
 import KickButton from '../../../utils/KickButton'
 
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
+import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../../../utils/layout/ResponsiveLayoutContentContainer.tsx'
 import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 import { TRUNCATE } from '../../../utils/truncate'
-import { PluralErrorBoundary } from '../../PluralErrorBoundary'
-import { GlobalServiceServices } from './GlobalServiceServices.tsx'
-import GlobalServiceSidecar from './GlobalServiceSidecar.tsx'
-import { ResponsiveLayoutPage } from '../../../utils/layout/ResponsiveLayoutPage.tsx'
 import { crumbs } from '../GlobalServices.tsx'
-import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../../../utils/layout/ResponsiveLayoutContentContainer.tsx'
+import { GlobalServiceServices } from './GlobalServiceServices.tsx'
+import { GlobalServiceSidecar } from './GlobalServiceSidecar.tsx'
 
-export default function GlobalService() {
-  const theme = useTheme()
-  const projectId = useProjectId()
+export function GlobalService() {
   const globalServiceId = useParams()[GLOBAL_SERVICE_PARAM_ID] ?? ''
 
-  const { data, error } = useGetGlobalServiceQuery({
+  const { data, loading, error } = useGetGlobalServiceQuery({
     variables: { serviceId: globalServiceId },
   })
-
   const globalService = data?.globalService
+  const isLoading = !data && loading
 
   useSetBreadcrumbs(
     useMemo(
@@ -51,80 +46,77 @@ export default function GlobalService() {
     )
   )
 
-  const { data: globalServicesData, error: globalServicesError } =
-    useFetchPaginatedData(
-      {
-        queryHook: useGlobalServicesQuery,
-        keyPath: ['globalServices'],
-      },
-      { projectId }
+  if (error)
+    return (
+      <GqlError
+        margin="large"
+        error={error}
+      />
     )
 
-  const globalServices = useMemo(
-    () => mapExistingNodes(globalServicesData?.globalServices),
-    [globalServicesData?.globalServices]
-  )
-
-  if (error || globalServicesError)
-    return <GqlError error={error ?? globalServicesError} />
-  if (!globalService || !globalServices) return <LoadingIndicator />
-
   return (
-    <ResponsiveLayoutPage
-      css={{
-        gap: theme.spacing.large,
-        maxWidth: theme.breakpoints.desktopLarge,
-        margin: 'auto',
-      }}
-    >
-      <PluralErrorBoundary>
-        <Flex
-          direction="column"
-          gap="large"
-          flexGrow={1}
-          flexShrink={1}
-          width={RESPONSIVE_LAYOUT_CONTENT_WIDTH}
-        >
-          <GlobalServiceSelect
-            selectedGlobalService={globalService}
-            globalServices={globalServices}
-          />
-          <GlobalServiceServices
-            globalServiceID={globalServiceId}
-            seedService={globalService?.service as ServiceDeployment}
-          />
-        </Flex>
-        <Flex
-          align="flex-end"
-          direction="column"
-          gap="large"
-        >
-          <KickButton
-            secondary
-            startIcon={<ReloadIcon />}
-            kickMutationHook={useSyncGlobalServiceMutation}
-            message="Resync"
-            tooltipMessage="Sync this service now instead of at the next poll interval"
-            variables={{ id: globalServiceId }}
-          />
-          <GlobalServiceSidecar globalService={globalService} />
-        </Flex>
-      </PluralErrorBoundary>
-    </ResponsiveLayoutPage>
+    <WrapperSC>
+      <Flex
+        direction="column"
+        gap="large"
+        flexGrow={1}
+        flexShrink={1}
+        width={RESPONSIVE_LAYOUT_CONTENT_WIDTH}
+      >
+        <GlobalServiceSelect selectedGlobalService={globalService} />
+        <GlobalServiceServices
+          globalServiceID={globalServiceId}
+          seedService={globalService?.service}
+        />
+      </Flex>
+      <Flex
+        direction="column"
+        gap="large"
+      >
+        <KickButton
+          secondary
+          width="100%"
+          startIcon={<ReloadIcon />}
+          kickMutationHook={useSyncGlobalServiceMutation}
+          message="Resync"
+          tooltipMessage="Sync this service now instead of at the next poll interval"
+          variables={{ id: globalServiceId }}
+        />
+        <GlobalServiceSidecar
+          loading={isLoading}
+          globalService={globalService}
+        />
+      </Flex>
+    </WrapperSC>
   )
-}
-
-interface GlobalServiceSelectProps {
-  selectedGlobalService: GlobalServiceFragment
-  globalServices: Array<GlobalServiceFragment>
 }
 
 function GlobalServiceSelect({
   selectedGlobalService,
-  globalServices,
-}: GlobalServiceSelectProps): ReactNode {
+}: {
+  selectedGlobalService: Nullable<GlobalServiceFragment>
+}) {
+  const globalServiceId = useParams()[GLOBAL_SERVICE_PARAM_ID] ?? ''
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const projectId = useProjectId()
+  const { data, loading, error } = useFetchPaginatedData(
+    { queryHook: useGlobalServicesQuery, keyPath: ['globalServices'] },
+    { projectId }
+  )
+
+  const globalServices = useMemo(
+    () => mapExistingNodes(data?.globalServices),
+    [data?.globalServices]
+  )
+
+  if (error)
+    return (
+      <GqlError
+        header="Failed to fetch global services"
+        error={error}
+      />
+    )
 
   return (
     <div css={{ width: 320 }}>
@@ -141,9 +133,21 @@ function GlobalServiceSelect({
           )
         }
         onSelectionChange={(id) =>
-          navigate(pathname.replace(selectedGlobalService?.id, id as string))
+          navigate(
+            pathname.replace(
+              selectedGlobalService?.id ?? globalServiceId,
+              `${id}`
+            )
+          )
         }
         selectedKey={selectedGlobalService?.id}
+        label={
+          loading ? (
+            <RectangleSkeleton $width="100%" />
+          ) : (
+            'Select a global service'
+          )
+        }
       >
         {globalServices.map((gs) => (
           <ListBoxItem
@@ -167,3 +171,10 @@ function GlobalServiceSelect({
     </div>
   )
 }
+
+const WrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.large,
+  maxWidth: theme.breakpoints.desktopLarge + 800,
+  padding: theme.spacing.large,
+}))

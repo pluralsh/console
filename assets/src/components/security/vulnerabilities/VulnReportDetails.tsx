@@ -8,11 +8,8 @@ import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 
-import {
-  useClusterQuery,
-  useFlowQuery,
-  useVulnerabilityReportQuery,
-} from 'generated/graphql'
+import { useClusterQuery, useVulnerabilityReportQuery } from 'generated/graphql'
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { Link, useParams } from 'react-router-dom'
 import {
   getVulnerabilityReportsPath,
@@ -33,15 +30,12 @@ import { useMemo } from 'react'
 import { AgentRunFormPopupSC } from 'components/ai/agent-runs/AgentRunFixButton'
 
 export function VulnerabilityReportDetails() {
-  const { vulnerabilityReportId, clusterId, flowId } = useParams()
+  const { vulnerabilityReportId, clusterId } = useParams()
 
+  const { flowIdOrName, flowData, loading: flowLoading } = useCurrentFlow()
   const { data: clusterData, loading: clusterLoading } = useClusterQuery({
     variables: { id: clusterId ?? '' },
     skip: !clusterId,
-  })
-  const { data: flowData, loading: flowLoading } = useFlowQuery({
-    variables: { id: flowId ?? '' },
-    skip: !flowId,
   })
 
   const cluster = clusterData?.cluster
@@ -61,14 +55,13 @@ export function VulnerabilityReportDetails() {
   useSetBreadcrumbs(
     useMemo(
       () =>
-        flowId
+        flowIdOrName
           ? getFlowBreadcrumbs(
-              flowId,
               flowData?.flow?.name ?? '',
               VULNERABILITY_REPORTS_REL_PATH
             )
           : securityVulnReportsCrumbs,
-      [flowId, flowData?.flow?.name]
+      [flowIdOrName, flowData?.flow?.name]
     )
   )
 
@@ -91,8 +84,8 @@ export function VulnerabilityReportDetails() {
             size="large"
             clickable
             type="secondary"
-            to={getVulnerabilityReportsPath({ clusterId, flowId })}
-            tooltip={`Return to ${flowId ? 'flow' : 'security'}`}
+            to={getVulnerabilityReportsPath({ clusterId, flowIdOrName })}
+            tooltip={`Return to ${flowIdOrName ? 'flow' : 'security'}`}
             icon={<ReturnIcon />}
             style={{ flexShrink: 0 }}
           />

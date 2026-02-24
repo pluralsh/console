@@ -61,12 +61,12 @@ export const ColReferenceService = columnHelper.accessor(
     cell: function Cell({ getValue }) {
       const { spacing, colors } = useTheme()
       const service = getValue()
-      const { flowId } = useParams()
+      const { flowIdOrName } = useParams()
       return (
         <InlineLink
           as={Link}
           to={getServiceDetailsPath({
-            flowId,
+            flowIdOrName,
             serviceId: service?.id,
             clusterId: service?.cluster?.id,
           })}

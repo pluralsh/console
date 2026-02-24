@@ -6,16 +6,15 @@ import {
   Table,
 } from '@pluralsh/design-system'
 import { EmptyStateCompact } from 'components/ai/AIThreads'
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import {
   ColActions,
   ColConfirm,
   ColInfo,
   McpTableAction,
 } from 'components/settings/ai/mcp/McpServerTableCols'
-import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import {
-  FlowBasicFragment,
   McpServerAssociationAttributes,
   McpServerFragment,
   useFlowMcpServersQuery,
@@ -23,22 +22,21 @@ import {
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useState } from 'react'
-import { Link, useOutletContext, useParams } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import { AI_MCP_SERVERS_ABS_PATH } from 'routes/aiRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
 import { FLOW_DOCS_URL } from '../Flows'
 import { ChangeMcpConnectionsModal } from './ChangeMcpConnectionsModal'
+import type { FlowOutletContext } from './Flow'
 
 export function FlowMcpConnections() {
-  const { flowId } = useParams()
+  const { flow } = useOutletContext<FlowOutletContext>()
   const [showConnectionsModal, setShowConnectionsModal] = useState(false)
   const { data, loading, error } = useFlowMcpServersQuery({
-    variables: { id: flowId ?? '' },
+    variables: { id: flow?.id ?? '' },
   })
 
   const servers = data?.flow?.servers?.filter(isNonNullable) ?? []
-
-  const flow = useOutletContext<FlowBasicFragment | undefined>()
 
   const [mutation, { loading: mutationLoading, error: mutationError }] =
     useUpsertFlowMutation({

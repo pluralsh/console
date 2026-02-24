@@ -8,9 +8,9 @@ import {
   TabList,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { ReactFlowProvider } from '@xyflow/react'
 import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { ReactFlowProvider } from '@xyflow/react'
 import { useTheme } from 'styled-components'
 
 import {
@@ -20,8 +20,6 @@ import {
 } from 'generated/graphql'
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-
 import { mapExistingNodes } from 'utils/graphql'
 
 import { useThrottle } from 'components/hooks/useThrottle'
@@ -30,11 +28,12 @@ import { SplitPane } from 'components/utils/SplitPane'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { PipelineContexts } from './PipelineContexts'
 import { Pipeline } from './PipelineGraph'
 import { PIPELINES_CRUMBS } from './Pipelines'
-
-const POLL_INTERVAL = 10 * 1000
+import { POLL_INTERVAL } from '../ContinuousDeployment'
+import { GqlError } from 'components/utils/Alert'
 
 function PipelineHeading({
   pipeline,
@@ -163,13 +162,12 @@ function PipelineSelector({
 }
 
 function PipelineDetailsBase() {
-  const theme = useTheme()
-  const pipelineId = useParams().pipelineId!
+  const { pipelineId } = useParams()
   const [searchParams] = useSearchParams()
   const view = searchParams.get('view')
 
-  const { data, error } = usePipelineQuery({
-    variables: { id: pipelineId },
+  const { data, loading, error } = usePipelineQuery({
+    variables: { id: pipelineId ?? '' },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
     notifyOnNetworkStatusChange: true,
@@ -188,50 +186,13 @@ function PipelineDetailsBase() {
     )
   )
 
-  const emptyState = (
-    <EmptyState message="Looks like you don't have any pipelines yet." />
-  )
-
-  if (error) {
-    return emptyState
-  }
-  if (!data) {
-    return <LoadingIndicator />
-  }
-
-  const contentGraph = pipeline && (
-    <Pipeline
-      pipeline={pipeline}
-      key={pipeline.id}
-    />
-  )
-
-  const contentContexts = <PipelineContexts pipeline={pipeline} />
-
-  let content = contentGraph
-
-  if (view === 'contexts') {
-    content = (
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-          width: '100%',
-        }}
-      >
-        {contentContexts}
-      </div>
-    )
-  } else if (view === 'split') {
-    content = (
-      <SplitPane
-        id="pipeline-details"
-        pane1={contentGraph}
-        pane2={contentContexts}
+  if (error)
+    return (
+      <GqlError
+        margin="large"
+        error={error}
       />
     )
-  }
 
   return (
     <Flex
@@ -241,16 +202,33 @@ function PipelineDetailsBase() {
       padding="large"
     >
       <PipelineHeading pipeline={pipeline} />
-      {pipeline && (
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.medium,
-            height: '100%',
-          }}
-        >
-          {content}
-        </div>
+      {!pipeline ? (
+        loading ? (
+          <RectangleSkeleton
+            $height={500}
+            $width="100%"
+          />
+        ) : (
+          <EmptyState message="Pipeline not found." />
+        )
+      ) : view === 'graph' ? (
+        <Pipeline
+          pipeline={pipeline}
+          key={pipeline.id}
+        />
+      ) : view === 'contexts' ? (
+        <PipelineContexts pipeline={pipeline} />
+      ) : (
+        <SplitPane
+          id="pipeline-details"
+          pane1={
+            <Pipeline
+              pipeline={pipeline}
+              key={pipeline.id}
+            />
+          }
+          pane2={<PipelineContexts pipeline={pipeline} />}
+        />
       )}
     </Flex>
   )
@@ -267,16 +245,11 @@ export function getPipelineBreadcrumbs({
     ...PIPELINES_CRUMBS,
     ...(!pipelineName
       ? []
-      : [
-          {
-            label: pipelineName,
-            url: `${PIPELINES_ABS_PATH}/${pipelineId}`,
-          },
-        ]),
+      : [{ label: pipelineName, url: `${PIPELINES_ABS_PATH}/${pipelineId}` }]),
   ]
 }
 
-export default function PipelineDetails() {
+export function PipelineDetails() {
   return (
     <ReactFlowProvider>
       <PipelineDetailsBase />

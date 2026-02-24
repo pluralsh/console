@@ -10,6 +10,7 @@ import isEmpty from 'lodash/isEmpty'
 import { useDocPageContext } from 'components/contexts/DocPageContext'
 import { ReactNode } from 'react'
 import { SetOptional } from 'type-fest'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 export type DirectoryEntry = {
   enabled?: boolean
@@ -22,19 +23,41 @@ export type DirectoryEntry = {
 }
 export type Directory = Nullable<DirectoryEntry>[]
 
+const SIDENAV_SKELETON_COUNT = 6
+
 export function SideNavEntries({
   directory,
   pathname,
   pathPrefix,
   root = true,
   docPageContext,
+  loading = false,
 }: {
   directory: Directory
   pathname: string
   pathPrefix: string
   root?: boolean
   docPageContext?: ReturnType<typeof useDocPageContext>
+  loading?: boolean
 }) {
+  if (loading)
+    return (
+      <TreeNav>
+        {Array.from({ length: SIDENAV_SKELETON_COUNT }, (_, i) => (
+          <TreeNavEntry
+            key={i}
+            active={i === 0}
+            label={
+              <RectangleSkeleton
+                $height="xlarge"
+                $width={`${100 - (i % 3) * 10}%`}
+              />
+            }
+          />
+        ))}
+      </TreeNav>
+    )
+
   return (
     <WrapWithIf
       condition={root}

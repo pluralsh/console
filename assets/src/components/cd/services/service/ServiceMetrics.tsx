@@ -5,7 +5,10 @@ import {
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
-import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
+import {
+  useLoadingDeploymentSettings,
+  useMetricsEnabled,
+} from 'components/contexts/DeploymentSettingsContext'
 import { HeatMapFlavor, useServiceHeatMapQuery } from 'generated/graphql'
 import { capitalize } from 'lodash'
 import styled, { useTheme } from 'styled-components'
@@ -16,7 +19,7 @@ import { useParams } from 'react-router-dom'
 import { isNonNullable } from 'utils/isNonNullable'
 
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { UtilizationHeatmap } from 'components/utils/UtilizationHeatmap'
 
 const HEATMAP_HEIGHT = 350
@@ -25,6 +28,7 @@ export function ServiceMetrics() {
   const { spacing } = useTheme()
   const { serviceId } = useParams()
   const metricsEnabled = useMetricsEnabled()
+  const loadingDeploymentSettings = useLoadingDeploymentSettings()
   const [heatMapFlavor, setHeatMapFlavor] = useState<HeatMapFlavor>(
     HeatMapFlavor.Pod
   )
@@ -39,6 +43,8 @@ export function ServiceMetrics() {
     fetchPolicy: 'cache-and-network',
     pollInterval: 60_000,
   })
+  const isLoading =
+    !heatMapData && (heatMapLoading || loadingDeploymentSettings)
 
   const { cpuHeatMap, memoryHeatMap } = useMemo(
     () => ({
@@ -53,7 +59,8 @@ export function ServiceMetrics() {
     [heatMapData?.serviceDeployment?.heatMap]
   )
 
-  if (!metricsEnabled) return <EmptyState message="Metrics are not enabled." />
+  if (!(metricsEnabled || loadingDeploymentSettings))
+    return <EmptyState message="Metrics are not enabled." />
 
   return (
     <WrapperSC>
@@ -84,15 +91,13 @@ export function ServiceMetrics() {
           </Select>
         </Flex>
       </Flex>
-      {!heatMapData ? (
+      {!(heatMapData || isLoading) ? (
         <Card css={{ padding: spacing.xlarge, flex: 1 }}>
           {heatMapError ? (
             <GqlError
               css={{ width: '100%' }}
               error={heatMapError}
             />
-          ) : heatMapLoading ? (
-            <LoadingIndicator />
           ) : (
             <EmptyState message="Utilization heatmaps not available." />
           )}
@@ -106,12 +111,19 @@ export function ServiceMetrics() {
             }}
             css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
           >
-            <UtilizationHeatmap
-              colorScheme="blue"
-              data={memoryHeatMap}
-              flavor={heatMapFlavor}
-              utilizationType="memory"
-            />
+            {isLoading ? (
+              <RectangleSkeleton
+                $height="100%"
+                $width="100%"
+              />
+            ) : (
+              <UtilizationHeatmap
+                colorScheme="blue"
+                data={memoryHeatMap}
+                flavor={heatMapFlavor}
+                utilizationType="memory"
+              />
+            )}
           </Card>
           <Card
             header={{
@@ -120,12 +132,19 @@ export function ServiceMetrics() {
             }}
             css={{ height: HEATMAP_HEIGHT, padding: spacing.medium }}
           >
-            <UtilizationHeatmap
-              colorScheme="purple"
-              data={cpuHeatMap}
-              flavor={heatMapFlavor}
-              utilizationType="cpu"
-            />
+            {isLoading ? (
+              <RectangleSkeleton
+                $height="100%"
+                $width="100%"
+              />
+            ) : (
+              <UtilizationHeatmap
+                colorScheme="purple"
+                data={cpuHeatMap}
+                flavor={heatMapFlavor}
+                utilizationType="cpu"
+              />
+            )}
           </Card>
         </>
       )}

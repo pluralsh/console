@@ -340,6 +340,14 @@ func (r *SentinelReconciler) buildIntegrationTestConfiguration(ctx context.Conte
 		}
 	}
 
+	if integrationTest.Default != nil {
+		defaultAttr, err := r.buildIntegrationTestDefaultAttributes(integrationTest.Default)
+		if err != nil {
+			return nil, err
+		}
+		config.Default = defaultAttr
+	}
+
 	if len(integrationTest.Cases) > 0 {
 		cases, err := r.buildIntegrationTestCases(integrationTest.Cases)
 		if err != nil {
@@ -442,6 +450,42 @@ func (r *SentinelReconciler) buildLoadbalancerTestCaseAttributes(lb *v1alpha1.Se
 	}
 
 	return lbAttr, nil
+}
+
+func (r *SentinelReconciler) buildIntegrationTestDefaultAttributes(d *v1alpha1.SentinelCheckIntegrationTestDefault) (*console.SentinelCheckIntegrationTestDefaultAttributes, error) {
+	attr := &console.SentinelCheckIntegrationTestDefaultAttributes{
+		Ignore:   d.Ignore,
+		Registry: d.Registry,
+	}
+	if len(d.NamespaceLabels) > 0 {
+		b, err := json.Marshal(d.NamespaceLabels)
+		if err != nil {
+			return nil, err
+		}
+		attr.NamespaceLabels = lo.ToPtr(string(b))
+	}
+	if len(d.NamespaceAnnotations) > 0 {
+		b, err := json.Marshal(d.NamespaceAnnotations)
+		if err != nil {
+			return nil, err
+		}
+		attr.NamespaceAnnotations = lo.ToPtr(string(b))
+	}
+	if len(d.ResourceAnnotations) > 0 {
+		b, err := json.Marshal(d.ResourceAnnotations)
+		if err != nil {
+			return nil, err
+		}
+		attr.ResourceAnnotations = lo.ToPtr(string(b))
+	}
+	if len(d.ResourceLabels) > 0 {
+		b, err := json.Marshal(d.ResourceLabels)
+		if err != nil {
+			return nil, err
+		}
+		attr.ResourceLabels = lo.ToPtr(string(b))
+	}
+	return attr, nil
 }
 
 func (r *SentinelReconciler) getGitAttributes(sentinel *v1alpha1.Sentinel) *console.GitRefAttributes {

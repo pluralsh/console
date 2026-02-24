@@ -28,7 +28,6 @@ type ModalSeverity = Extract<SeverityExt, (typeof SEVERITIES)[number]>
 
 type ModalPropsType = ModalWrapperProps & {
   onClose?: Nullable<() => void>
-  form?: boolean
   scrollable?: boolean
   size?: ModalSize
   header?: ReactNode
@@ -132,8 +131,7 @@ function Modal({
   header,
   actions,
   open = false,
-  form = false,
-  size = form ? 'large' : 'medium',
+  size = 'medium',
   onClose,
   severity,
   asForm = false,

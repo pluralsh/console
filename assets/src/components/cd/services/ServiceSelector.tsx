@@ -4,6 +4,7 @@ import {
   useServiceDeploymentsTinyQuery,
   useServiceDeploymentTinySuspenseQuery,
 } from 'generated/graphql'
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import { Key, useCallback, useMemo } from 'react'
 import { useMatch, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -14,27 +15,33 @@ import {
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { POLL_INTERVAL } from '../ContinuousDeployment'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 export function ServiceSelector() {
   const theme = useTheme()
   const navigate = useNavigate()
 
-  const { flowId, serviceId } = useParams()
-  const referrer = !!flowId ? 'flow' : 'cd'
+  const { serviceId } = useParams()
+  const { flowIdOrName, flowData } = useCurrentFlow()
+  const referrer = !!flowIdOrName ? 'flow' : 'cd'
 
   const { data: serviceTiny } = useServiceDeploymentTinySuspenseQuery({
     variables: { id: serviceId ?? '' },
   })
 
-  const { data: clusterServices } = useServiceDeploymentsTinyQuery({
-    variables: { clusterId: serviceTiny.serviceDeployment?.cluster?.id ?? '' },
-    skip: referrer !== 'cd',
-    pollInterval: POLL_INTERVAL,
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data: clusterServices, loading: clusterServicesLoading } =
+    useServiceDeploymentsTinyQuery({
+      variables: {
+        clusterId: serviceTiny.serviceDeployment?.cluster?.id ?? '',
+      },
+      skip: referrer !== 'cd',
+      pollInterval: POLL_INTERVAL,
+      fetchPolicy: 'cache-and-network',
+    })
+  const flowId = flowData?.flow?.id
   const { data: flowServices } = useFlowServicesQuery({
     variables: { id: flowId ?? '' },
-    skip: referrer !== 'flow',
+    skip: referrer !== 'flow' || !flowId,
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
@@ -66,14 +73,14 @@ export function ServiceSelector() {
         )
         navigate(
           `${getServiceDetailsPath({
-            flowId,
+            flowIdOrName,
             clusterId: service?.cluster?.id,
             serviceId: service?.id,
           })}/${urlSuffix}`
         )
       }
     },
-    [flowId, navigate, serviceId, serviceList, urlSuffix]
+    [flowIdOrName, navigate, serviceId, serviceList, urlSuffix]
   )
 
   return (
@@ -81,7 +88,16 @@ export function ServiceSelector() {
       aria-label="app"
       selectedKey={serviceId}
       onSelectionChange={switchService}
-      label="Select a service"
+      label={
+        clusterServicesLoading ? (
+          <RectangleSkeleton
+            $width="100%"
+            $height={20}
+          />
+        ) : (
+          'Select a service'
+        )
+      }
     >
       {serviceList.map((service) => (
         <ListBoxItem

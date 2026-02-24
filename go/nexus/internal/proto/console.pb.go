@@ -148,6 +148,7 @@ type OpenAiConfig struct {
 	EmbeddingModel *string                `protobuf:"bytes,3,opt,name=embeddingModel,proto3,oneof" json:"embeddingModel,omitempty"`
 	ToolModel      *string                `protobuf:"bytes,4,opt,name=toolModel,proto3,oneof" json:"toolModel,omitempty"`
 	BaseUrl        *string                `protobuf:"bytes,5,opt,name=baseUrl,proto3,oneof" json:"baseUrl,omitempty"`
+	ProxyModels    []string               `protobuf:"bytes,6,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -217,6 +218,13 @@ func (x *OpenAiConfig) GetBaseUrl() string {
 	return ""
 }
 
+func (x *OpenAiConfig) GetProxyModels() []string {
+	if x != nil {
+		return x.ProxyModels
+	}
+	return nil
+}
+
 type AnthropicConfig struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	BaseUrl        *string                `protobuf:"bytes,1,opt,name=baseUrl,proto3,oneof" json:"baseUrl,omitempty"`
@@ -224,6 +232,7 @@ type AnthropicConfig struct {
 	Model          *string                `protobuf:"bytes,3,opt,name=model,proto3,oneof" json:"model,omitempty"`
 	EmbeddingModel *string                `protobuf:"bytes,4,opt,name=embeddingModel,proto3,oneof" json:"embeddingModel,omitempty"`
 	ToolModel      *string                `protobuf:"bytes,5,opt,name=toolModel,proto3,oneof" json:"toolModel,omitempty"`
+	ProxyModels    []string               `protobuf:"bytes,6,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -293,6 +302,13 @@ func (x *AnthropicConfig) GetToolModel() string {
 	return ""
 }
 
+func (x *AnthropicConfig) GetProxyModels() []string {
+	if x != nil {
+		return x.ProxyModels
+	}
+	return nil
+}
+
 type VertexAiConfig struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
 	ApiKey             *string                `protobuf:"bytes,1,opt,name=apiKey,proto3,oneof" json:"apiKey,omitempty"`
@@ -303,6 +319,7 @@ type VertexAiConfig struct {
 	ToolModel          *string                `protobuf:"bytes,6,opt,name=toolModel,proto3,oneof" json:"toolModel,omitempty"`
 	Project            *string                `protobuf:"bytes,7,opt,name=project,proto3,oneof" json:"project,omitempty"`
 	Location           *string                `protobuf:"bytes,8,opt,name=location,proto3,oneof" json:"location,omitempty"`
+	ProxyModels        []string               `protobuf:"bytes,9,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -393,6 +410,13 @@ func (x *VertexAiConfig) GetLocation() string {
 	return ""
 }
 
+func (x *VertexAiConfig) GetProxyModels() []string {
+	if x != nil {
+		return x.ProxyModels
+	}
+	return nil
+}
+
 type BedrockConfig struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
 	ModelId            *string                `protobuf:"bytes,1,opt,name=modelId,proto3,oneof" json:"modelId,omitempty"`
@@ -402,6 +426,7 @@ type BedrockConfig struct {
 	EmbeddingModelId   *string                `protobuf:"bytes,5,opt,name=embeddingModelId,proto3,oneof" json:"embeddingModelId,omitempty"`
 	AwsAccessKeyId     *string                `protobuf:"bytes,6,opt,name=awsAccessKeyId,proto3,oneof" json:"awsAccessKeyId,omitempty"`
 	AwsSecretAccessKey *string                `protobuf:"bytes,7,opt,name=awsSecretAccessKey,proto3,oneof" json:"awsSecretAccessKey,omitempty"`
+	ProxyModels        []string               `protobuf:"bytes,8,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -485,6 +510,13 @@ func (x *BedrockConfig) GetAwsSecretAccessKey() string {
 	return ""
 }
 
+func (x *BedrockConfig) GetProxyModels() []string {
+	if x != nil {
+		return x.ProxyModels
+	}
+	return nil
+}
+
 type AzureOpenAiConfig struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	ApiVersion     *string                `protobuf:"bytes,1,opt,name=apiVersion,proto3,oneof" json:"apiVersion,omitempty"`
@@ -493,6 +525,7 @@ type AzureOpenAiConfig struct {
 	EmbeddingModel *string                `protobuf:"bytes,5,opt,name=embeddingModel,proto3,oneof" json:"embeddingModel,omitempty"`
 	ToolModel      *string                `protobuf:"bytes,6,opt,name=toolModel,proto3,oneof" json:"toolModel,omitempty"`
 	AccessToken    *string                `protobuf:"bytes,7,opt,name=accessToken,proto3,oneof" json:"accessToken,omitempty"`
+	ProxyModels    []string               `protobuf:"bytes,8,rep,name=proxyModels,proto3" json:"proxyModels,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -567,6 +600,13 @@ func (x *AzureOpenAiConfig) GetAccessToken() string {
 		return *x.AccessToken
 	}
 	return ""
+}
+
+func (x *AzureOpenAiConfig) GetProxyModels() []string {
+	if x != nil {
+		return x.ProxyModels
+	}
+	return nil
 }
 
 type ProxyAuthenticationRequest struct {
@@ -669,33 +709,35 @@ const file_console_proto_rawDesc = "" +
 	"\tanthropic\x18\x03 \x01(\v2\x15.plrl.AnthropicConfigR\tanthropic\x120\n" +
 	"\bvertexAi\x18\x04 \x01(\v2\x14.plrl.VertexAiConfigR\bvertexAi\x12-\n" +
 	"\abedrock\x18\x05 \x01(\v2\x13.plrl.BedrockConfigR\abedrock\x12-\n" +
-	"\x05azure\x18\x06 \x01(\v2\x17.plrl.AzureOpenAiConfigR\x05azure\"\xf7\x01\n" +
+	"\x05azure\x18\x06 \x01(\v2\x17.plrl.AzureOpenAiConfigR\x05azure\"\x99\x02\n" +
 	"\fOpenAiConfig\x12\x1b\n" +
 	"\x06apiKey\x18\x01 \x01(\tH\x00R\x06apiKey\x88\x01\x01\x12\x19\n" +
 	"\x05model\x18\x02 \x01(\tH\x01R\x05model\x88\x01\x01\x12+\n" +
 	"\x0eembeddingModel\x18\x03 \x01(\tH\x02R\x0eembeddingModel\x88\x01\x01\x12!\n" +
 	"\ttoolModel\x18\x04 \x01(\tH\x03R\ttoolModel\x88\x01\x01\x12\x1d\n" +
-	"\abaseUrl\x18\x05 \x01(\tH\x04R\abaseUrl\x88\x01\x01B\t\n" +
+	"\abaseUrl\x18\x05 \x01(\tH\x04R\abaseUrl\x88\x01\x01\x12 \n" +
+	"\vproxyModels\x18\x06 \x03(\tR\vproxyModelsB\t\n" +
 	"\a_apiKeyB\b\n" +
 	"\x06_modelB\x11\n" +
 	"\x0f_embeddingModelB\f\n" +
 	"\n" +
 	"_toolModelB\n" +
 	"\n" +
-	"\b_baseUrl\"\xfa\x01\n" +
+	"\b_baseUrl\"\x9c\x02\n" +
 	"\x0fAnthropicConfig\x12\x1d\n" +
 	"\abaseUrl\x18\x01 \x01(\tH\x00R\abaseUrl\x88\x01\x01\x12\x1b\n" +
 	"\x06apiKey\x18\x02 \x01(\tH\x01R\x06apiKey\x88\x01\x01\x12\x19\n" +
 	"\x05model\x18\x03 \x01(\tH\x02R\x05model\x88\x01\x01\x12+\n" +
 	"\x0eembeddingModel\x18\x04 \x01(\tH\x03R\x0eembeddingModel\x88\x01\x01\x12!\n" +
-	"\ttoolModel\x18\x05 \x01(\tH\x04R\ttoolModel\x88\x01\x01B\n" +
+	"\ttoolModel\x18\x05 \x01(\tH\x04R\ttoolModel\x88\x01\x01\x12 \n" +
+	"\vproxyModels\x18\x06 \x03(\tR\vproxyModelsB\n" +
 	"\n" +
 	"\b_baseUrlB\t\n" +
 	"\a_apiKeyB\b\n" +
 	"\x06_modelB\x11\n" +
 	"\x0f_embeddingModelB\f\n" +
 	"\n" +
-	"_toolModel\"\xa1\x03\n" +
+	"_toolModel\"\xc3\x03\n" +
 	"\x0eVertexAiConfig\x12\x1b\n" +
 	"\x06apiKey\x18\x01 \x01(\tH\x00R\x06apiKey\x88\x01\x01\x12\x19\n" +
 	"\x05model\x18\x02 \x01(\tH\x01R\x05model\x88\x01\x01\x12\x1f\n" +
@@ -704,7 +746,8 @@ const file_console_proto_rawDesc = "" +
 	"\x0eembeddingModel\x18\x05 \x01(\tH\x04R\x0eembeddingModel\x88\x01\x01\x12!\n" +
 	"\ttoolModel\x18\x06 \x01(\tH\x05R\ttoolModel\x88\x01\x01\x12\x1d\n" +
 	"\aproject\x18\a \x01(\tH\x06R\aproject\x88\x01\x01\x12\x1f\n" +
-	"\blocation\x18\b \x01(\tH\aR\blocation\x88\x01\x01B\t\n" +
+	"\blocation\x18\b \x01(\tH\aR\blocation\x88\x01\x01\x12 \n" +
+	"\vproxyModels\x18\t \x03(\tR\vproxyModelsB\t\n" +
 	"\a_apiKeyB\b\n" +
 	"\x06_modelB\v\n" +
 	"\t_endpointB\x15\n" +
@@ -714,7 +757,7 @@ const file_console_proto_rawDesc = "" +
 	"_toolModelB\n" +
 	"\n" +
 	"\b_projectB\v\n" +
-	"\t_location\"\xa2\x03\n" +
+	"\t_location\"\xc4\x03\n" +
 	"\rBedrockConfig\x12\x1d\n" +
 	"\amodelId\x18\x01 \x01(\tH\x00R\amodelId\x88\x01\x01\x12%\n" +
 	"\vtoolModelId\x18\x02 \x01(\tH\x01R\vtoolModelId\x88\x01\x01\x12%\n" +
@@ -722,7 +765,8 @@ const file_console_proto_rawDesc = "" +
 	"\x06region\x18\x04 \x01(\tH\x03R\x06region\x88\x01\x01\x12/\n" +
 	"\x10embeddingModelId\x18\x05 \x01(\tH\x04R\x10embeddingModelId\x88\x01\x01\x12+\n" +
 	"\x0eawsAccessKeyId\x18\x06 \x01(\tH\x05R\x0eawsAccessKeyId\x88\x01\x01\x123\n" +
-	"\x12awsSecretAccessKey\x18\a \x01(\tH\x06R\x12awsSecretAccessKey\x88\x01\x01B\n" +
+	"\x12awsSecretAccessKey\x18\a \x01(\tH\x06R\x12awsSecretAccessKey\x88\x01\x01\x12 \n" +
+	"\vproxyModels\x18\b \x03(\tR\vproxyModelsB\n" +
 	"\n" +
 	"\b_modelIdB\x0e\n" +
 	"\f_toolModelIdB\x0e\n" +
@@ -730,7 +774,7 @@ const file_console_proto_rawDesc = "" +
 	"\a_regionB\x13\n" +
 	"\x11_embeddingModelIdB\x11\n" +
 	"\x0f_awsAccessKeyIdB\x15\n" +
-	"\x13_awsSecretAccessKey\"\xc2\x02\n" +
+	"\x13_awsSecretAccessKey\"\xe4\x02\n" +
 	"\x11AzureOpenAiConfig\x12#\n" +
 	"\n" +
 	"apiVersion\x18\x01 \x01(\tH\x00R\n" +
@@ -739,7 +783,8 @@ const file_console_proto_rawDesc = "" +
 	"\bendpoint\x18\x04 \x01(\tH\x02R\bendpoint\x88\x01\x01\x12+\n" +
 	"\x0eembeddingModel\x18\x05 \x01(\tH\x03R\x0eembeddingModel\x88\x01\x01\x12!\n" +
 	"\ttoolModel\x18\x06 \x01(\tH\x04R\ttoolModel\x88\x01\x01\x12%\n" +
-	"\vaccessToken\x18\a \x01(\tH\x05R\vaccessToken\x88\x01\x01B\r\n" +
+	"\vaccessToken\x18\a \x01(\tH\x05R\vaccessToken\x88\x01\x01\x12 \n" +
+	"\vproxyModels\x18\b \x03(\tR\vproxyModelsB\r\n" +
 	"\v_apiVersionB\b\n" +
 	"\x06_modelB\v\n" +
 	"\t_endpointB\x11\n" +

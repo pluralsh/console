@@ -1,13 +1,13 @@
 :root {
-  --loading-fill-one: #171a21;
-  --loading-fill-two: #21242c;
-  --loading-fill-three: #2a2e37;
+  --loading-fill-one: #747b8b;
+  --loading-fill-two: #a8aebc;
+  --loading-fill-three: #e3e4e7;
 }
 
 html[data-theme-mode='light'] {
-  --loading-fill-one: #e3e4e7;
-  --loading-fill-two: #ebedee;
-  --loading-fill-three: #eef0f1;
+  --loading-fill-one: #bfc4ca;
+  --loading-fill-two: #d6d9dd;
+  --loading-fill-three: #f7f9fa;
 }
 
 #loading-placeholder {
@@ -24,6 +24,7 @@ html[data-theme-mode='light'] {
 #loading-placeholder.force-visible {
   position: fixed;
   inset: 0;
+  top: -25%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -32,28 +33,26 @@ html[data-theme-mode='light'] {
 
 @keyframes loading-placeholder-shimmer {
   0% {
-    stop-color: var(--loading-fill-one);
-  }
-  25% {
-    stop-color: var(--loading-fill-two);
-  }
-  50% {
-    stop-color: var(--loading-fill-three);
-  }
-  75% {
-    stop-color: var(--loading-fill-two);
+    background-position: 100% 0;
   }
   100% {
-    stop-color: var(--loading-fill-one);
+    background-position: -100% 0;
   }
 }
 
 .plural-logo-skeleton-shimmer {
-  width: 96px;
-  height: 96px;
-  display: block;
-}
-
-.plural-logo-skeleton-shimmer stop {
-  animation: loading-placeholder-shimmer 3.6s linear infinite;
+  width: 128px;
+  height: 128px;
+  -webkit-mask: url('/page-load-spinner/plural-logomark-only-white.svg') 0 0 /
+    contain no-repeat;
+  mask: url('/page-load-spinner/plural-logomark-only-white.svg') 0 0 / contain
+    no-repeat;
+  background: linear-gradient(
+    130deg,
+    var(--loading-fill-one) 30%,
+    var(--loading-fill-three) 50%,
+    var(--loading-fill-one) 70%
+  );
+  background-size: 200% 100%;
+  animation: loading-placeholder-shimmer 1.6s linear infinite;
 }

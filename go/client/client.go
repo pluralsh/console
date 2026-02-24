@@ -317,9 +317,10 @@ func NewClient(cli clientv2.HttpClient, baseURL string, options *clientv2.Option
 }
 
 type TinyAgentRuntimeFragment struct {
-	ID   string           "json:\"id\" graphql:\"id\""
-	Name string           "json:\"name\" graphql:\"name\""
-	Type AgentRuntimeType "json:\"type\" graphql:\"type\""
+	ID      string                            "json:\"id\" graphql:\"id\""
+	Name    string                            "json:\"name\" graphql:\"name\""
+	Type    AgentRuntimeType                  "json:\"type\" graphql:\"type\""
+	Cluster *TinyAgentRuntimeFragment_Cluster "json:\"cluster,omitempty\" graphql:\"cluster\""
 }
 
 func (t *TinyAgentRuntimeFragment) GetID() string {
@@ -339,6 +340,12 @@ func (t *TinyAgentRuntimeFragment) GetType() *AgentRuntimeType {
 		t = &TinyAgentRuntimeFragment{}
 	}
 	return &t.Type
+}
+func (t *TinyAgentRuntimeFragment) GetCluster() *TinyAgentRuntimeFragment_Cluster {
+	if t == nil {
+		t = &TinyAgentRuntimeFragment{}
+	}
+	return t.Cluster
 }
 
 type AgentRuntimeFragment struct {
@@ -6560,6 +6567,31 @@ func (t *WorkbenchToolFragment) GetUpdatedAt() *string {
 	return t.UpdatedAt
 }
 
+type TinyAgentRuntimeFragment_Cluster struct {
+	Handle *string "json:\"handle,omitempty\" graphql:\"handle\""
+	ID     string  "json:\"id\" graphql:\"id\""
+	Name   string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *TinyAgentRuntimeFragment_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Handle
+}
+func (t *TinyAgentRuntimeFragment_Cluster) GetID() string {
+	if t == nil {
+		t = &TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.ID
+}
+func (t *TinyAgentRuntimeFragment_Cluster) GetName() string {
+	if t == nil {
+		t = &TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Name
+}
+
 type AgentRunFragment_User struct {
 	Email string "json:\"email\" graphql:\"email\""
 	ID    string "json:\"id\" graphql:\"id\""
@@ -11443,6 +11475,31 @@ func (t *StackDefinitionFragment_DeleteSteps) GetStage() *StepStage {
 		t = &StackDefinitionFragment_DeleteSteps{}
 	}
 	return &t.Stage
+}
+
+type WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster struct {
+	Handle *string "json:\"handle,omitempty\" graphql:\"handle\""
+	ID     string  "json:\"id\" graphql:\"id\""
+	Name   string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Handle
+}
+func (t *WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetID() string {
+	if t == nil {
+		t = &WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.ID
+}
+func (t *WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetName() string {
+	if t == nil {
+		t = &WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Name
 }
 
 type WorkbenchFragment_Configuration_Coding struct {
@@ -24908,6 +24965,31 @@ func (t *DeleteGroupMember_DeleteGroupMember_GroupMemberFragment_Group) GetID() 
 	return t.ID
 }
 
+type CreateWorkbench_CreateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster struct {
+	Handle *string "json:\"handle,omitempty\" graphql:\"handle\""
+	ID     string  "json:\"id\" graphql:\"id\""
+	Name   string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Handle
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetID() string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.ID
+}
+func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetName() string {
+	if t == nil {
+		t = &CreateWorkbench_CreateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Name
+}
+
 type CreateWorkbench_CreateWorkbench_WorkbenchFragment_Configuration_Coding struct {
 	Mode         *AgentRunMode "json:\"mode,omitempty\" graphql:\"mode\""
 	Repositories []*string     "json:\"repositories,omitempty\" graphql:\"repositories\""
@@ -25080,6 +25162,31 @@ func (t *CreateWorkbench_CreateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 	return t.HTTP
 }
 
+type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster struct {
+	Handle *string "json:\"handle,omitempty\" graphql:\"handle\""
+	ID     string  "json:\"id\" graphql:\"id\""
+	Name   string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Handle
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetID() string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.ID
+}
+func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetName() string {
+	if t == nil {
+		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Name
+}
+
 type UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Configuration_Coding struct {
 	Mode         *AgentRunMode "json:\"mode,omitempty\" graphql:\"mode\""
 	Repositories []*string     "json:\"repositories,omitempty\" graphql:\"repositories\""
@@ -25250,6 +25357,31 @@ func (t *UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFr
 		t = &UpdateWorkbench_UpdateWorkbench_WorkbenchFragment_Tools_WorkbenchToolFragment_Configuration{}
 	}
 	return t.HTTP
+}
+
+type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster struct {
+	Handle *string "json:\"handle,omitempty\" graphql:\"handle\""
+	ID     string  "json:\"id\" graphql:\"id\""
+	Name   string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Handle
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetID() string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.ID
+}
+func (t *DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetName() string {
+	if t == nil {
+		t = &DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Name
 }
 
 type DeleteWorkbench_DeleteWorkbench_WorkbenchFragment_Configuration_Coding struct {
@@ -25628,6 +25760,31 @@ func (t *DeleteWorkbenchTool_DeleteWorkbenchTool_WorkbenchToolFragment_Configura
 	return t.HTTP
 }
 
+type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster struct {
+	Handle *string "json:\"handle,omitempty\" graphql:\"handle\""
+	ID     string  "json:\"id\" graphql:\"id\""
+	Name   string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Handle
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetID() string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.ID
+}
+func (t *ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetName() string {
+	if t == nil {
+		t = &ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Name
+}
+
 type ListWorkbenches_Workbenches_Edges_Node_WorkbenchFragment_Configuration_Coding struct {
 	Mode         *AgentRunMode "json:\"mode,omitempty\" graphql:\"mode\""
 	Repositories []*string     "json:\"repositories,omitempty\" graphql:\"repositories\""
@@ -25827,6 +25984,31 @@ func (t *ListWorkbenches_Workbenches) GetPageInfo() *PageInfoFragment {
 		t = &ListWorkbenches_Workbenches{}
 	}
 	return &t.PageInfo
+}
+
+type GetWorkbench_Workbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster struct {
+	Handle *string "json:\"handle,omitempty\" graphql:\"handle\""
+	ID     string  "json:\"id\" graphql:\"id\""
+	Name   string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetWorkbench_Workbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Handle
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetID() string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.ID
+}
+func (t *GetWorkbench_Workbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster) GetName() string {
+	if t == nil {
+		t = &GetWorkbench_Workbench_WorkbenchFragment_AgentRuntime_TinyAgentRuntimeFragment_Cluster{}
+	}
+	return t.Name
 }
 
 type GetWorkbench_Workbench_WorkbenchFragment_Configuration_Coding struct {
@@ -50249,6 +50431,11 @@ fragment TinyAgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	cluster {
+		id
+		name
+		handle
+	}
 }
 fragment WorkbenchToolFragment on WorkbenchTool {
 	id
@@ -50353,6 +50540,11 @@ fragment TinyAgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	cluster {
+		id
+		name
+		handle
+	}
 }
 fragment WorkbenchToolFragment on WorkbenchTool {
 	id
@@ -50458,6 +50650,11 @@ fragment TinyAgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	cluster {
+		id
+		name
+		handle
+	}
 }
 fragment WorkbenchToolFragment on WorkbenchTool {
 	id
@@ -50726,6 +50923,11 @@ fragment TinyAgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	cluster {
+		id
+		name
+		handle
+	}
 }
 fragment WorkbenchToolFragment on WorkbenchTool {
 	id
@@ -50838,6 +51040,11 @@ fragment TinyAgentRuntimeFragment on AgentRuntime {
 	id
 	name
 	type
+	cluster {
+		id
+		name
+		handle
+	}
 }
 fragment WorkbenchToolFragment on WorkbenchTool {
 	id

@@ -194,7 +194,8 @@ defmodule Console.GraphQl.Deployments.Flow do
       middleware Scope,
         resource: :flow,
         action: :read
-      arg :id, non_null(:id)
+      arg :id,   :id
+      arg :name, :string
 
       resolve &Deployments.resolve_flow/2
     end

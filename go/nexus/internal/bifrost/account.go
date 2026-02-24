@@ -76,7 +76,7 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 				Value: schemas.EnvVar{
 					Val: cfg.GetApiKey(),
 				},
-				Models:         []string{cfg.GetModel(), cfg.GetEmbeddingModel(), cfg.GetToolModel()},
+				Models:         filterModels(append([]string{cfg.GetModel(), cfg.GetEmbeddingModel(), cfg.GetToolModel()}, cfg.GetProxyModels()...)),
 				UseForBatchAPI: lo.ToPtr(true),
 				Weight:         1.0,
 			},
@@ -94,7 +94,7 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 				Value: schemas.EnvVar{
 					Val: cfg.GetApiKey(),
 				},
-				Models:         []string{cfg.GetModel(), cfg.GetToolModel()},
+				Models:         filterModels(append([]string{cfg.GetModel(), cfg.GetToolModel()}, cfg.GetProxyModels()...)),
 				UseForBatchAPI: lo.ToPtr(true),
 				Weight:         1.0,
 			},
@@ -132,4 +132,10 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 	}
 
 	return config, nil
+}
+
+func filterModels(models []string) []string {
+	return lo.Filter(models, func(model string, _ int) bool {
+		return model != ""
+	})
 }

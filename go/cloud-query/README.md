@@ -66,6 +66,20 @@ Cloud-Query exposes a gRPC API for querying cloud resources. Client implementati
 
 For detailed information about the API endpoints, request/response schemas, and usage examples, see the [API Reference Documentation](docs/api-reference.md).
 
+## Tool Integrations (ToolQuery)
+
+Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metrics, logs, traces). Compatibility is per operation:
+
+| Tool | Metrics | Logs | Traces | Notes |
+|------|---------|------|--------|-------|
+| Prometheus | Yes | No | No | Prometheus HTTP API via `prometheus/client_golang` with optional bearer token or basic auth |
+| Datadog | Yes | Yes | Yes | Datadog API v1/v2 via `datadog-api-client-go` (requires API key + app key; site optional) |
+| Elasticsearch | No | Yes | No | Elasticsearch typed client v9 Search API (API key required) |
+| Loki | No | Yes | No | REST client to `/loki/api/v1/query_range` (bearer token; optional `X-Scope-OrgID`) |
+| Tempo | No | No | Yes | REST client to `/api/search` and `/api/traces/{traceID}` (bearer token; optional `X-Scope-OrgID`) |
+
+For provider-specific request payloads, query formats, and examples, see the [API Reference Documentation](docs/api-reference.md).
+
 ## Documentation
 
 The project includes detailed documentation:

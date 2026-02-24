@@ -20,14 +20,14 @@ import { ClusterProviderIcon } from '../../utils/Provider'
 import { SubTitle } from '../../utils/SubTitle'
 import { InlineLink } from '../../utils/typography/InlineLink'
 
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { ClusterUpgradeButton } from '../clusters/ClusterUpgradeButton'
 import { useClusterContext } from './Cluster'
 import { ClusterMetadataEditor } from './ClusterMetadataEditor'
 import { NodePoolsSection } from './ClusterNodePools'
 
 export function ClusterMetadata() {
-  const { cluster, refetch } = useClusterContext()
-
+  const { cluster, clusterLoading, refetch } = useClusterContext()
   return (
     <Flex
       direction="column"
@@ -38,18 +38,21 @@ export function ClusterMetadata() {
     >
       <MetadataCard
         cluster={cluster}
+        clusterLoading={clusterLoading}
         refetch={refetch}
       />
-      <NodePoolsSection cluster={cluster} />
+      {cluster && <NodePoolsSection cluster={cluster} />}
     </Flex>
   )
 }
 
 function MetadataCard({
   cluster,
+  clusterLoading,
   refetch,
 }: {
-  cluster: ClusterFragment
+  cluster: Nullable<ClusterFragment>
+  clusterLoading: boolean
   refetch: ClusterQueryHookResult['refetch']
 }) {
   const theme = useTheme()
@@ -59,6 +62,14 @@ function MetadataCard({
     cluster?.provider?.supportedVersions
   )
   const renderTag = (tag) => `${tag.name}${tag.value ? `: ${tag.value}` : ''}`
+
+  if (clusterLoading)
+    return (
+      <RectangleSkeleton
+        $height={128}
+        $width="100%"
+      />
+    )
 
   return (
     <Card
@@ -137,7 +148,7 @@ function MetadataCard({
           />
         </section>
       )}
-      {cluster.metadata && (
+      {cluster?.metadata && (
         <ClusterMetadataEditor
           cluster={cluster}
           refetch={refetch}

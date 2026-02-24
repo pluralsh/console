@@ -27,7 +27,7 @@ defmodule Console.AI.Anthropic do
   @max_tokens 8_000
   @base_headers [{"content-type", "application/json"}]
 
-  @options [recv_timeout: :timer.minutes(5), timeout: :timer.minutes(5)]
+  @options [recv_timeout: :timer.minutes(5), timeout: :timer.minutes(5), hackney: [pool: :ai_pool]]
 
   defmodule Content do
     @type t :: %__MODULE__{}

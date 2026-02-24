@@ -8,7 +8,6 @@ import {
 import { DetailsPageWithSidecarWrapper } from 'components/ai/sentinels/sentinel/Sentinel'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
@@ -27,8 +26,9 @@ import {
 import { getSentinelRunBreadcrumbs } from '../../SentinelRun'
 
 export type SentinelRunJobOutletCtxT = {
-  job: SentinelRunJobFragment
+  job: Nullable<SentinelRunJobFragment>
   pathPrefix: string
+  isLoading: boolean
 }
 
 const directory: SubtabDirectory = [
@@ -61,13 +61,15 @@ export function SentinelRunJob() {
   const sentinel = runJob?.sentinelRun?.sentinel
   const runId = runJob?.sentinelRun?.id ?? ''
   const sentinelId = sentinel?.id ?? ''
+  const isLoading = !runJob && loading
 
-  const ctx = useMemo(
+  const ctx: SentinelRunJobOutletCtxT = useMemo(
     () => ({
       job: runJob,
       pathPrefix: `${getSentinelRunJobAbsPath({ sentinelId, runId, jobId })}/${AI_SENTINELS_RUNS_JOBS_K8S_JOB_REL_PATH}`,
+      isLoading,
     }),
-    [runJob, sentinelId, runId, jobId]
+    [runJob, sentinelId, runId, jobId, isLoading]
   )
   useSetBreadcrumbs(
     useMemo(
@@ -113,12 +115,10 @@ export function SentinelRunJob() {
           maxWidth="100%"
         >
           <SubTabs directory={directory} />
-          {runJob ? (
+          {runJob || isLoading ? (
             <Outlet context={ctx} />
           ) : error ? (
             <GqlError error={error} />
-          ) : loading ? (
-            <LoadingIndicator />
           ) : (
             <EmptyState message="Job not found." />
           )}

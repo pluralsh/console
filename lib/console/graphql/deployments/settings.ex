@@ -114,6 +114,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :model,           :string
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   input_object :anthropic_settings_attributes do
@@ -121,6 +122,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :model,           :string
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   input_object :ollama_attributes do
@@ -129,6 +131,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :embedding_model, :string, description: "the model to use for vector embeddings"
     field :url,             non_null(:string)
     field :authorization,   :string, description: "An http authorization header to use on calls to the Ollama api"
+    field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   input_object :azure_openai_attributes do
@@ -138,6 +141,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
     field :access_token,    non_null(:string), description: "the azure openai access token to use"
+    field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   input_object :bedrock_ai_attributes do
@@ -148,6 +152,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :aws_access_key_id,     :string, description: "the aws access key id to use (DEPRECATED)"
     field :aws_secret_access_key, :string, description: "the aws secret access key to use (DEPRECATED)"
     field :embedding_model,       :string, description: "the model to use for vector embeddings"
+    field :proxy_models,          list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   input_object :vertex_ai_attributes do
@@ -158,6 +163,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :endpoint,             :string, description: "custom vertexai endpoint if for dedicated customer deployments"
     field :project,              non_null(:string), description: "the gcp project id to use"
     field :location,             non_null(:string), description: "the gcp region the model is hosted in"
+    field :proxy_models,         list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   input_object :vector_store_attributes do
@@ -331,12 +337,14 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :model,           :string, description: "the openai model version to use"
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   @desc "Anthropic connection information"
   object :anthropic_settings do
-    field :model,      :string, description: "the anthropic model version to use"
-    field :tool_model, :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :model,        :string, description: "the anthropic model version to use"
+    field :tool_model,   :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :proxy_models, list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   @desc "Settings for a self-hosted ollama-based LLM deployment"
@@ -353,6 +361,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :embedding_model, :string, description: "the model to use for vector embeddings"
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :api_version,     :string, description: "the api version you want to use"
+    field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   @desc "Settings for usage of AWS Bedrock for LLMs"
@@ -362,6 +371,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :access_key_id,   :string, description: "the openai bedrock aws access key id to use (DEPRECATED)"
     field :region,          :string, description: "the aws region the model is hosted in"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   @desc "Settings for usage of GCP VertexAI for LLMs"
@@ -371,6 +381,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :project,         non_null(:string), description: "the gcp project id to use"
     field :location,        non_null(:string), description: "the gcp region the model"
+    field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
   @desc "Settings for configuring log aggregation throughout Plural"

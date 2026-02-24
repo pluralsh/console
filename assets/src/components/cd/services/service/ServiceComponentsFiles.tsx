@@ -1,30 +1,28 @@
-import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { ServiceFile, useServiceTarballQuery } from 'generated/graphql'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  createTheme,
+  ThemeProvider as MuiThemeProvider,
+} from '@mui/material/styles'
 import { SimpleTreeView } from '@mui/x-tree-view/SimpleTreeView'
 import { TreeItem, treeItemClasses } from '@mui/x-tree-view/TreeItem'
+import { Code, EmptyState, FolderIcon, Tooltip } from '@pluralsh/design-system'
+import { GqlError } from 'components/utils/Alert'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { StackedText } from 'components/utils/table/StackedText'
+import { TRUNCATE_LEFT } from 'components/utils/truncate'
+import { ServiceFile, useServiceTarballQuery } from 'generated/graphql'
+import { isEmpty } from 'lodash'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import {
-  useServiceContext,
-  useSetSidenavContent,
-} from './ServiceDetailsContext'
-import {
-  Code,
-  EmptyState,
-  Flex,
-  FolderIcon,
-  Tooltip,
-} from '@pluralsh/design-system'
 import { getExtensionFromFileName, getLanguageFromFileName } from 'utils/file'
 import {
   useSetServiceComponentsChatButtonVisible,
   useSetServiceComponentsFiltersHidden,
   useSetServiceComponentsHeadingContent,
 } from './ServiceComponentsContext'
-import { Body1BoldP, CaptionP } from 'components/utils/typography/Text'
-import { isEmpty } from 'lodash'
-import { TRUNCATE_LEFT } from 'components/utils/truncate'
+import {
+  useServiceContext,
+  useSetSidenavContent,
+} from './ServiceDetailsContext'
 
 const StyledTreeView = styled(SimpleTreeView)(({ theme }) => ({
   height: '100%',
@@ -91,6 +89,10 @@ const TreeItemText = styled.span({
   ...TRUNCATE_LEFT,
   minWidth: 0,
 })
+
+// mui components need a proper mui theme where theme.spacing is a function
+// otherwise HonorableThemeProvider leaks in and crashes things
+const muiTheme = createTheme()
 
 const FILE_TYPE_ICON_PATH = '/file-type-icons' as const
 const FILE_ICON_SIZE = 18
@@ -245,16 +247,15 @@ function buildNodeLookup(
 }
 
 export function ComponentsFilesView() {
-  const theme = useTheme()
-  const { service } = useServiceContext()
+  const { service, isLoading: serviceLoading } = useServiceContext()
   const [selectedFile, setSelectedFile] = useState<ServiceFile>()
   const [parentOfSelectedId, setParentOfSelectedId] = useState<string>()
   const [expandedItems, setExpandedItems] = useState<string[]>([])
   const hasAutoSelectedRef = useRef(false)
 
   const { data, loading, error } = useServiceTarballQuery({
-    variables: { id: service.id! },
-    skip: !service.id,
+    variables: { id: service?.id ?? '' },
+    skip: !service?.id,
   })
 
   const treeNodes = useMemo(() => {
@@ -382,15 +383,17 @@ export function ComponentsFilesView() {
       })
 
     return data?.serviceTarball && treeNodes.length > 0 ? (
-      <StyledTreeView
-        itemChildrenIndentation={12}
-        selectedItems={selectedFile?.path ? [selectedFile.path] : []}
-        expandedItems={expandedItems}
-        onExpandedItemsChange={(_event, itemIds) => setExpandedItems(itemIds)}
-        onItemSelectionToggle={handleItemSelection}
-      >
-        {renderTree(treeNodes)}
-      </StyledTreeView>
+      <MuiThemeProvider theme={muiTheme}>
+        <StyledTreeView
+          itemChildrenIndentation={12}
+          selectedItems={selectedFile?.path ? [selectedFile.path] : []}
+          expandedItems={expandedItems}
+          onExpandedItemsChange={(_event, itemIds) => setExpandedItems(itemIds)}
+          onItemSelectionToggle={handleItemSelection}
+        >
+          {renderTree(treeNodes)}
+        </StyledTreeView>
+      </MuiThemeProvider>
     ) : undefined
   }, [
     data,
@@ -401,17 +404,18 @@ export function ComponentsFilesView() {
     expandedItems,
   ])
 
-  const headingSecondaryColor = theme.colors['text-xlight']
   const heading = useMemo(
     () => (
-      <Flex flexDirection="column">
-        <Body1BoldP>{service.name}</Body1BoldP>
-        <CaptionP css={{ color: headingSecondaryColor }}>
-          ID: {service.id}
-        </CaptionP>
-      </Flex>
+      <StackedText
+        loading={serviceLoading}
+        first={service?.name}
+        firstColor="text"
+        firstPartialType="body1Bold"
+        second={`ID: ${service?.id}`}
+        secondPartialType="caption"
+      />
     ),
-    [service.name, service.id, headingSecondaryColor]
+    [service, serviceLoading]
   )
 
   useSetSidenavContent(sidenavContent)
@@ -420,8 +424,13 @@ export function ComponentsFilesView() {
   useSetServiceComponentsChatButtonVisible(true)
 
   if (error) return <GqlError error={error} />
-
-  if (loading) return <LoadingIndicator />
+  if (serviceLoading || (!data && loading))
+    return (
+      <RectangleSkeleton
+        $height="100%"
+        $width="100%"
+      />
+    )
 
   return selectedFile ? (
     <Code

@@ -95,6 +95,12 @@ spec:
                       model:
                         description: Model is the LLM model name to use.
                         type: string
+                      proxyModels:
+                        description: ProxyModels are additional models to support
+                          within our integrated ai proxy.
+                        items:
+                          type: string
+                        type: array
                       tokenSecretRef:
                         description: |-
                           TokenSecretRef is a reference to the local secret holding the token to access
@@ -149,6 +155,12 @@ spec:
                         description: Model - the OpenAi model you wish to use. If
                           not specified, Plural will provide a default.
                         type: string
+                      proxyModels:
+                        description: ProxyModels are additional models to support
+                          within the integrated ai proxy.
+                        items:
+                          type: string
+                        type: array
                       tokenSecretRef:
                         description: |-
                           TokenSecretRef is a reference to the local secret holding the token to access
@@ -222,6 +234,12 @@ spec:
                           will use the openai compatible endpoint, so the model id
                           must be supported.
                         type: string
+                      proxyModels:
+                        description: ProxyModels are additional models to support
+                          within the integrated ai proxy.
+                        items:
+                          type: string
+                        type: array
                       region:
                         description: Region is the AWS region the model is hosted
                           in
@@ -393,6 +411,12 @@ spec:
                       model:
                         description: Model is the LLM model name to use.
                         type: string
+                      proxyModels:
+                        description: ProxyModels are additional models to support
+                          within our integrated ai proxy.
+                        items:
+                          type: string
+                        type: array
                       tokenSecretRef:
                         description: |-
                           TokenSecretRef is a reference to the local secret holding the token to access
@@ -630,6 +654,12 @@ spec:
                       project:
                         description: Project is the GCP project you'll be using
                         type: string
+                      proxyModels:
+                        description: ProxyModels are additional models to support
+                          within the integrated ai proxy.
+                        items:
+                          type: string
+                        type: array
                       serviceAccountJsonSecretRef:
                         description: ServiceAccountJsonSecretRef is a Service Account
                           json file stored w/in a kubernetes secret to use for authentication

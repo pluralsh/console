@@ -3,7 +3,6 @@ import {
   BriefcaseIcon,
   EmptyState,
   Flex,
-  LoopingLogo,
   Tooltip,
 } from '@pluralsh/design-system'
 import { SideNavEntries } from 'components/layout/SideNavEntries'
@@ -39,12 +38,14 @@ export const useJobPods = () => {
 }
 
 type OutletContextT = {
+  clusterId: string
   refetch: () => void
   pathPrefix: string
   status: Nullable<JobFragment['status']>
   metadata: Nullable<JobFragment['metadata']>
   raw: Nullable<JobFragment['raw']>
   spec: Nullable<JobFragment['spec']>
+  isLoading: boolean
 }
 export const useRunJob = () => useOutletContext<OutletContextT>()
 
@@ -55,21 +56,33 @@ export function K8sRunJob({
   error,
   pathPrefix,
   refetch,
+  clusterId,
 }: {
+  clusterId: string
   job: Nullable<JobFragment>
   pods: PodFragment[]
-  loading?: boolean
+  loading: boolean
   error?: GqlErrorType
   refetch: () => void
   pathPrefix: string
 }) {
   const theme = useTheme()
   const { pathname } = useLocation()
+  const isLoading = !job && loading
 
   const outletContext: OutletContextT = useMemo(() => {
     const { status, metadata, raw, spec } = job ?? {}
-    return { refetch, status, metadata, raw, spec, pathPrefix }
-  }, [job, pathPrefix, refetch])
+    return {
+      refetch,
+      status,
+      metadata,
+      raw,
+      spec,
+      pathPrefix,
+      clusterId,
+      isLoading,
+    }
+  }, [job, pathPrefix, refetch, clusterId, isLoading])
 
   const name = job?.metadata.name
 
@@ -106,12 +119,10 @@ export function K8sRunJob({
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer css={{ maxWidth: 'unset' }}>
         <PodsContext value={pods}>
-          {job ? (
+          {job || isLoading ? (
             <Outlet context={outletContext} />
           ) : error ? (
             <GqlError error={error} />
-          ) : loading ? (
-            <LoopingLogo />
           ) : (
             <EmptyState message="Job not found." />
           )}

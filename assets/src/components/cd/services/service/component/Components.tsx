@@ -156,6 +156,7 @@ function ComponentKindSelect({
 
   return (
     <Select
+      width={360}
       label="All components"
       triggerButton={
         <FilterTrigger

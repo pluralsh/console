@@ -4,15 +4,16 @@ import { AlertsTable } from 'components/utils/alerts/AlertsTable'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useFlowAlertsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
-import { useParams } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 import { mapExistingNodes } from 'utils/graphql'
+import type { FlowOutletContext } from './Flow'
 
 export function FlowAlerts() {
-  const { flowId } = useParams()
+  const { flow } = useOutletContext<FlowOutletContext>()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       { queryHook: useFlowAlertsQuery, keyPath: ['flow', 'alerts'] },
-      { id: flowId ?? '' }
+      { id: flow?.id ?? '' }
     )
 
   const alerts = useMemo(() => mapExistingNodes(data?.flow?.alerts), [data])

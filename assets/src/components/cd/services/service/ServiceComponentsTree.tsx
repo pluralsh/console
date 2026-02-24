@@ -55,6 +55,7 @@ import { TRUNCATE, TRUNCATE_LEFT } from '../../../utils/truncate.ts'
 import { ComponentIcon } from './component/misc.tsx'
 import { AiInsightSummaryIcon } from '../../../utils/AiInsights.tsx'
 import { InsightDisplay } from '../../../ai/insights/InsightDisplay.tsx'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 
 type ServiceComponentNodeType = Node<
   ServiceComponent,
@@ -103,11 +104,12 @@ export function ComponentsTreeView({
 }) {
   const { serviceId } = useParams()
 
-  const { data, error } = useServiceDeploymentComponentsWithChildrenQuery({
-    variables: { id: serviceId || '' },
-    pollInterval: 15_000, // 15 seconds
-    fetchPolicy: 'cache-and-network',
-  })
+  const { data, loading, error } =
+    useServiceDeploymentComponentsWithChildrenQuery({
+      variables: { id: serviceId || '' },
+      pollInterval: 15_000, // 15 seconds
+      fetchPolicy: 'cache-and-network',
+    })
 
   const components = useMemo(() => {
     const unfilteredComponents =
@@ -150,7 +152,13 @@ export function ComponentsTreeView({
   )
 
   if (error) return <GqlError error={error} />
-  if (!data) return <LoadingIndicator />
+  if (!data && loading)
+    return (
+      <RectangleSkeleton
+        $height={520}
+        $width="100%"
+      />
+    )
   if (isEmpty(components)) return <EmptyState message="No components found." />
 
   return (
@@ -289,14 +297,14 @@ function ServiceComponentTreeNode({
   type,
 }: NodeProps<ServiceComponentNodeType | ServiceComponentChildNodeType>) {
   const theme = useTheme()
-  const { serviceId, clusterId, flowId } = useParams()
+  const { serviceId, clusterId, flowIdOrName } = useParams()
   const [open, setOpen] = useState(false)
 
   const componentDetailsUrl = getComponentDetailsUrl({
     component: data,
     clusterId,
     serviceId,
-    flowId,
+    flowIdOrName,
   })
 
   return (
@@ -365,7 +373,7 @@ function ServiceComponentModal({
   setOpen: Dispatch<SetStateAction<boolean>>
 }) {
   const theme = useTheme()
-  const { serviceId, clusterId, flowId } = useParams()
+  const { serviceId, clusterId, flowIdOrName } = useParams()
   const tabStateRef = useRef<any>(null)
   const [activeTab, setActiveTab] = useState<Key>('yaml')
 
@@ -374,7 +382,7 @@ function ServiceComponentModal({
     component,
     clusterId,
     serviceId,
-    flowId,
+    flowIdOrName,
   })
 
   return (
@@ -567,12 +575,12 @@ function getComponentDetailsUrl({
   component,
   clusterId,
   serviceId,
-  flowId,
+  flowIdOrName,
 }: {
   component: ServiceComponent | ServiceComponentChild
   clusterId?: string
   serviceId?: string
-  flowId?: string
+  flowIdOrName?: string
 }): string | undefined {
   const { id, group, version, kind, name, namespace } = component
   if (component.__typename === 'ServiceComponentChild')
@@ -597,7 +605,7 @@ function getComponentDetailsUrl({
     return getServiceComponentPath({
       clusterId,
       serviceId,
-      flowId,
+      flowIdOrName,
       componentId: id,
     })
   else return undefined

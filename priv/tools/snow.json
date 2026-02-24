@@ -1,0 +1,26 @@
+{
+    "type": "object",
+    "properties": {
+        "short_description": {
+            "type": "string",
+            "description": "The short description of the change"
+        },
+        "description": {
+            "type": "string",
+            "description": "The description of the change"
+        },
+        "implementation_plan": {
+            "type": "string",
+            "description": "The implementation plan for the change"
+        },
+        "backout_plan": {
+            "type": "string",
+            "description": "The backout plan for the change"
+        },
+        "test_plan": {
+            "type": "string",
+            "description": "The test plan for the change"
+        }
+    },
+    "required": ["short_description", "description", "implementation_plan", "backout_plan", "test_plan"]
+}

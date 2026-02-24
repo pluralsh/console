@@ -1,4 +1,10 @@
-import { Input, SearchIcon, SubTab, TabList } from '@pluralsh/design-system'
+import {
+  Flex,
+  Input,
+  SearchIcon,
+  SubTab,
+  TabList,
+} from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
 import {
   Dispatch,
@@ -12,19 +18,17 @@ import {
   useState,
 } from 'react'
 import { useParams } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
+import { isNonNullable } from 'utils/isNonNullable'
 import { useVClustersQuery } from '../../../generated/graphql'
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { GqlError } from '../../utils/Alert'
-import LoadingIndicator from '../../utils/LoadingIndicator'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 import { ClustersTable } from '../clusters/Clusters'
 import { ClusterStatusTabKey, statusTabs } from '../services/ClustersFilters'
-import { isNonNullable } from 'utils/isNonNullable'
 
-export default function VClusters(): ReactNode {
-  const theme = useTheme()
+export function VClusters() {
   const { clusterId } = useParams<{ clusterId: string }>()
   const projectId = useProjectId()
   const tabStateRef = useRef<any>(null)
@@ -60,16 +64,12 @@ export default function VClusters(): ReactNode {
   )
 
   if (error) return <GqlError error={error} />
-  if (!data) return <LoadingIndicator />
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        height: '100%',
-      }}
+    <Flex
+      direction="column"
+      gap="small"
+      height="100%"
     >
       <VirtualClustersFilters
         setQueryStatusFilter={setStatusFilter}
@@ -78,6 +78,7 @@ export default function VClusters(): ReactNode {
       />
       <ClustersTable
         fullHeightWrap
+        loading={!data && loading}
         data={tableData}
         refetch={refetch}
         virtualizeRows
@@ -86,7 +87,7 @@ export default function VClusters(): ReactNode {
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
       />
-    </div>
+    </Flex>
   )
 }
 

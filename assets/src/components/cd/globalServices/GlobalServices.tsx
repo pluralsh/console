@@ -41,7 +41,7 @@ export const crumbs = [
   },
 ]
 
-export default function GlobalServices() {
+export function GlobalServices() {
   const theme = useTheme()
   const [refetch, setRefetch] = useState(() => () => {})
   const [isModalOpen, setIsModalOpen] = useState(false)

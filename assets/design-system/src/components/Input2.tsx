@@ -15,10 +15,10 @@ import styled, { type DefaultTheme } from 'styled-components'
 import { useRefResizeObserver } from '../hooks/useRefResizeObserver'
 import { simulateInputChange } from '../utils/simulateInputChange'
 
-import { useFillLevel } from './contexts/FillLevelContext'
+import { FillLevel, useFillLevel } from './contexts/FillLevelContext'
 import IconFrame from './IconFrame'
 import CloseIcon from './icons/CloseIcon'
-import { TitleContent } from './Select'
+import { parentFillLevelToBackground, TitleContent } from './Select'
 import Tooltip from './Tooltip'
 
 import { useFormField } from './FormField'
@@ -34,6 +34,7 @@ export type InputProps = {
   dropdownButton?: ReactNode
   inputContent?: ReactNode
   inputProps?: ComponentProps<typeof InputBaseSC>
+  raised?: boolean
   /**
    * @deprecated use `size`
    */
@@ -118,7 +119,9 @@ const InputTitleContent = styled(TitleContent)((_) => ({
 const InputRootSC = styled.div<{
   $error: boolean
   $size: InputProps['size']
-}>(({ theme, $error, $size }) => ({
+  $raised: boolean
+  $parentFillLevel: FillLevel
+}>(({ theme, $error, $size, $raised, $parentFillLevel }) => ({
   ...($size === 'small'
     ? theme.partials.text.caption
     : theme.partials.text.body2),
@@ -130,7 +133,10 @@ const InputRootSC = styled.div<{
   minHeight: $size === 'large' ? 48 : $size === 'small' ? 32 : 40,
   width: 'auto',
   padding: 0,
-  backgroundColor: theme.colors['fill-zero'],
+  backgroundColor:
+    !$raised || theme.mode === 'light'
+      ? theme.colors['fill-zero']
+      : theme.colors[parentFillLevelToBackground[$parentFillLevel]],
   border: theme.borders.input,
   borderColor: $error
     ? theme.colors['border-danger']
@@ -225,6 +231,7 @@ function Input2({
   size,
   small,
   large,
+  raised = false,
   onEnter,
   onDeleteInputContent,
   inputContent,
@@ -318,6 +325,8 @@ function Input2({
       ref={ref}
       $size={size}
       $error={!!error}
+      $raised={raised}
+      $parentFillLevel={parentFillLevel}
       aria-disabled={disabled}
       onClick={outerOnClick}
       {...props}

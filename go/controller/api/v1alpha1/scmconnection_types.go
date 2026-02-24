@@ -94,6 +94,12 @@ func (s *ScmConnection) Attributes(ctx context.Context, kubeClient client.Client
 		}
 	}
 
+	if s.Spec.BitbucketDatacenter != nil {
+		attr.BitbucketDatacenter = &console.BitbucketDatacenterAttributes{
+			UserSlug: s.Spec.BitbucketDatacenter.UserSlug,
+		}
+	}
+
 	return attr, nil
 }
 
@@ -142,6 +148,10 @@ type ScmConnectionSpec struct {
 	// +kubebuilder:validation:Optional
 	Azure *AzureDevopsSettings `json:"azure,omitempty"`
 
+	// Settings for configuring Bitbucket Data Center / Server authentication
+	// +kubebuilder:validation:Optional
+	BitbucketDatacenter *BitbucketDatacenterSettings `json:"bitbucketDatacenter,omitempty"`
+
 	// Configures usage of an HTTP proxy for all requests involving this SCM connection.
 	// +kubebuilder:validation:Optional
 	Proxy *HttpProxyConfiguration `json:"proxy,omitempty"`
@@ -171,6 +181,12 @@ type AzureDevopsSettings struct {
 	Organization string `json:"organization"`
 	// The project to use for azure devops
 	Project string `json:"project"`
+}
+
+// BitbucketDatacenterSettings holds configuration for Bitbucket Data Center / Server authentication.
+type BitbucketDatacenterSettings struct {
+	// The user slug for Bitbucket Data Center / Server
+	UserSlug string `json:"userSlug"`
 }
 
 type HttpProxyConfiguration struct {

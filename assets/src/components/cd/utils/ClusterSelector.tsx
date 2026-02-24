@@ -58,7 +58,11 @@ export default function ClusterSelector({
       keyPath: ['clusters'],
       errorPolicy: 'ignore',
     },
-    { q: throttledInput || null, currentClusterId: clusterId, projectId }
+    {
+      q: throttledInput || undefined,
+      currentClusterId: clusterId || undefined,
+      projectId,
+    }
   )
 
   const clusters = useMemo(

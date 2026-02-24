@@ -18,6 +18,16 @@ type ServiceContextSpec struct {
 	// that needs to be shared across multiple services.
 	Configuration runtime.RawExtension `json:"configuration,omitempty"`
 
+	// ConfigMapRef references a ConfigMap containing configuration data to merge into the Configuration.
+	// The keys and values from the ConfigMap will be merged into the Configuration JSON.
+	// +kubebuilder:validation:Optional
+	ConfigMapRef *v1.ObjectReference `json:"configMapRef,omitempty"`
+
+	// SecretRef references a Secret containing configuration data to merge into the Configuration.
+	// The keys and values from the Secret will be merged into the Configuration JSON.
+	// +kubebuilder:validation:Optional
+	SecretRef *v1.SecretReference `json:"secretRef,omitempty"`
+
 	// ProjectRef references the project this service context belongs to.
 	// If not provided, it will use the default project.
 	// +kubebuilder:validation:Optional

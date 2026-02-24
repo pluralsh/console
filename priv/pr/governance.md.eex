@@ -1,0 +1,11 @@
+Plural has created a change in ServiceNow for the following PR:
+
+| Attribute | Value |
+|-----------|-------|
+| URL       | <%= @url %> |
+| State     | <%= @state %> |
+| Approved  | <%= @approval_emoji %> |
+
+<%= if @pending do %>
+Plural will approve this PR once the change is approved in ServiceNow, and will manage the change based on the PR's lifecycle from there.
+<% end %>

@@ -4,9 +4,9 @@ import ContinuousDeployment, {
   useDefaultCDPath,
 } from 'components/cd/ContinuousDeployment'
 
-import GlobalServices from 'components/cd/globalServices/GlobalServices.tsx'
+import { GlobalServices } from 'components/cd/globalServices/GlobalServices.tsx'
 
-import Pipelines from 'components/cd/pipelines/Pipelines'
+import { Pipelines } from 'components/cd/pipelines/Pipelines'
 import { Repositories } from 'components/cd/repos/Repositories'
 
 import { ServiceComponent } from 'components/cd/services/component/ServiceComponent'
@@ -15,7 +15,7 @@ import { ServiceComponents } from 'components/cd/services/service/ServiceCompone
 import { ServiceDependencies } from 'components/cd/services/service/ServiceDependencies'
 import ServiceDetails from 'components/cd/services/service/ServiceDetails'
 import ServiceDryRun from 'components/cd/services/service/ServiceDryRun'
-import ServiceErrors from 'components/cd/services/service/ServiceErrors'
+import { ServiceErrors } from 'components/cd/services/service/ServiceErrors'
 import { ServiceInsights } from 'components/cd/services/service/ServiceInsights'
 import { ServiceStackImports } from 'components/cd/services/service/ServiceStackImports'
 
@@ -39,7 +39,7 @@ import ClusterAddOnCompatibility from '../components/cd/cluster/addon/ClusterAdd
 import ClusterAddOnReadme from '../components/cd/cluster/addon/ClusterAddOnReadme'
 import ClusterAddOnReleases from '../components/cd/cluster/addon/ClusterAddOnReleases'
 
-import Cluster from '../components/cd/cluster/Cluster'
+import { Cluster } from '../components/cd/cluster/Cluster'
 import ClusterAddOns from '../components/cd/cluster/ClusterAddOns'
 import ClusterInsightComponent from '../components/cd/cluster/ClusterInsightComponent.tsx'
 import ClusterInsights, {
@@ -47,10 +47,10 @@ import ClusterInsights, {
 } from '../components/cd/cluster/ClusterInsights.tsx'
 import { ClusterInsightsComponents } from '../components/cd/cluster/ClusterInsightsComponents.tsx'
 import { ClusterMetadata } from '../components/cd/cluster/ClusterMetadata'
-import ClusterNodes from '../components/cd/cluster/ClusterNodes'
-import ClusterPods from '../components/cd/cluster/ClusterPods'
+import { ClusterNodes } from '../components/cd/cluster/ClusterNodes'
+import { ClusterPods } from '../components/cd/cluster/ClusterPods'
 
-import ClusterPRs from '../components/cd/cluster/ClusterPRs'
+import { ClusterPRs } from '../components/cd/cluster/ClusterPRs'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 
 import { PodLogs } from '../components/cd/cluster/pod/logs/PodLogs.tsx'
@@ -59,17 +59,17 @@ import Pod from '../components/cd/cluster/pod/Pod'
 import PodInfo from '../components/cd/cluster/pod/PodInfo'
 import PodShell from '../components/cd/cluster/pod/PodShell'
 
-import VClusters from '../components/cd/cluster/VClusters'
+import { VClusters } from '../components/cd/cluster/VClusters'
 
-import GlobalService from '../components/cd/globalServices/details/GlobalService'
+import { GlobalService } from '../components/cd/globalServices/details/GlobalService'
 
-import Observers from '../components/cd/observers/Observers'
+import { Observers } from '../components/cd/observers/Observers'
 
-import ServicePRs from '../components/cd/services/service/ServicePRs'
+import { ServicePRs } from '../components/cd/services/service/ServicePRs'
 
 import ServicesTable from '../components/cd/services/ServicesTable'
 
-import ServicesTree from '../components/cd/services/ServicesTree'
+import { ServicesTree } from '../components/cd/services/ServicesTree'
 
 import ComponentDryRun from '../components/component/ComponentDryRun'
 
@@ -148,7 +148,7 @@ import {
   SERVICES_REL_PATH,
   SERVICES_TREE_REL_PATH,
 } from './cdRoutesConsts'
-import { FLOW_PARAM_ID } from './flowRoutesConsts.tsx'
+import { FLOW_PARAM_ID_OR_NAME } from './flowRoutesConsts.tsx'
 import { pipelineRoutes } from './pipelineRoutes'
 
 function CDRootRedirect() {
@@ -462,7 +462,7 @@ export const getPodDetailsRoutes = (
       type,
       clusterId: `:${CLUSTER_PARAM_ID}`,
       serviceId: `:${SERVICE_PARAM_ID}`,
-      flowId: `:${FLOW_PARAM_ID}`,
+      flowIdOrName: `:${FLOW_PARAM_ID_OR_NAME}`,
       agentRunId: `:${AI_AGENT_RUNS_PARAM_RUN_ID}`,
       name: `:${POD_PARAM_NAME}`,
       namespace: `:${POD_PARAM_NAMESPACE}`,

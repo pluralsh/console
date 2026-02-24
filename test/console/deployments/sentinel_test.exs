@@ -101,6 +101,18 @@ defmodule Console.Deployments.SentinelTest do
       assert refetch(sentinel).last_run_at
     end
 
+    test "it can run a sentinel with a crontab" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      sentinel = insert(:sentinel, project: project, crontab: "*/5 * * * *")
+
+      {:ok, run} = Sentinels.run_sentinel(sentinel.id, user)
+
+      assert run.sentinel_id == sentinel.id
+
+      assert refetch(sentinel).next_run_at
+    end
+
     test "non project readers cannot run a sentinel" do
       user = insert(:user)
       project = insert(:project)

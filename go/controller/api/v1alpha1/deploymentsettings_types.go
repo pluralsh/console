@@ -580,6 +580,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			BaseURL:        in.OpenAI.BaseUrl,
 			ToolModel:      in.OpenAI.ToolModel,
 			EmbeddingModel: in.OpenAI.EmbeddingModel,
+			ProxyModels:    lo.ToSlicePtr(in.OpenAI.ProxyModels),
 		}
 	}
 
@@ -594,6 +595,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Model:          in.Anthropic.Model,
 			ToolModel:      in.Anthropic.ToolModel,
 			EmbeddingModel: in.Anthropic.EmbeddingModel,
+			ProxyModels:    lo.ToSlicePtr(in.Anthropic.ProxyModels),
 		}
 	}
 
@@ -610,6 +612,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			ToolModel:      in.Azure.ToolModel,
 			EmbeddingModel: in.Azure.EmbeddingModel,
 			AccessToken:    token,
+			ProxyModels:    lo.ToSlicePtr(in.Azure.ProxyModels),
 		}
 	}
 
@@ -631,6 +634,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Endpoint:           in.Vertex.Endpoint,
 			EmbeddingModel:     in.Vertex.EmbeddingModel,
 			ToolModel:          in.Vertex.ToolModel,
+			ProxyModels:        lo.ToSlicePtr(in.Vertex.ProxyModels),
 		}
 	}
 
@@ -655,6 +659,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			AccessToken:        secret,
 			Region:             lo.ToPtr(in.Bedrock.Region),
 			EmbeddingModel:     in.Bedrock.EmbeddingModel,
+			ProxyModels:        lo.ToSlicePtr(in.Bedrock.ProxyModels),
 			AWSSecretAccessKey: secretKey,
 			AWSAccessKeyID:     in.Bedrock.AwsAccessKeyID,
 		}
@@ -747,6 +752,11 @@ type AIProviderSettings struct {
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 
+	// ProxyModels are additional models to support within our integrated ai proxy.
+	//
+	// +kubebuilder:validation:Optional
+	ProxyModels []string `json:"proxyModels,omitempty"`
+
 	// BaseUrl is a custom base url to use, for reimplementations
 	// of the same API scheme (for instance Together.ai uses the OpenAI API spec)
 	//
@@ -812,6 +822,11 @@ type AzureOpenAISettings struct {
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 
+	// ProxyModels are additional models to support within the integrated ai proxy.
+	//
+	// +kubebuilder:validation:Optional
+	ProxyModels []string `json:"proxyModels,omitempty"`
+
 	// TokenSecretRef is a reference to the local secret holding the token to access
 	// the configured AI provider.
 	//
@@ -834,6 +849,11 @@ type BedrockSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+
+	// ProxyModels are additional models to support within the integrated ai proxy.
+	//
+	// +kubebuilder:validation:Optional
+	ProxyModels []string `json:"proxyModels,omitempty"`
 
 	// Region is the AWS region the model is hosted in
 	//
@@ -872,6 +892,11 @@ type VertexSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+
+	// ProxyModels are additional models to support within the integrated ai proxy.
+	//
+	// +kubebuilder:validation:Optional
+	ProxyModels []string `json:"proxyModels,omitempty"`
 
 	// Project is the GCP project you'll be using
 	//

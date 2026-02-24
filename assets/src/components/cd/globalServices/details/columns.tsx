@@ -24,9 +24,7 @@ const ColDeployment = columnHelper.accessor(({ node }) => node, {
     return (
       serviceDeployment && (
         <DecoratedName deletedAt={serviceDeployment.deletedAt}>
-          <span css={{ width: 'max-content', whiteSpace: 'nowrap' }}>
-            {serviceDeployment.name}
-          </span>
+          <span>{serviceDeployment.name}</span>
           {serviceDeployment.id === id && (
             <Chip size="small">Seed service</Chip>
           )}

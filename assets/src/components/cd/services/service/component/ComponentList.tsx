@@ -10,6 +10,7 @@ import {
 import { isEmpty } from 'lodash'
 import ComponentCard from './ComponentCard'
 import { compareComponents } from './Components.tsx'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 
 const searchOptions: Fuse.IFuseOptions<ServiceDeploymentComponentFragment> = {
   keys: ['name', 'kind', 'namespace'],
@@ -18,12 +19,14 @@ const searchOptions: Fuse.IFuseOptions<ServiceDeploymentComponentFragment> = {
 }
 
 export function ComponentList({
+  loading,
   components,
   selectedKinds,
   selectedState,
   setUrl,
   searchQuery,
 }: {
+  loading: boolean
   components: ServiceDeploymentComponentFragment[]
   selectedKinds: Set<string>
   selectedState?: ComponentState | null
@@ -52,9 +55,10 @@ export function ComponentList({
       .sort(compareComponents)
   }, [components, selectedKinds, selectedState, searchQuery])
 
-  return isEmpty(filteredComponents) ? (
-    <EmptyState message="No components match your selection" />
-  ) : (
+  if (!loading && isEmpty(filteredComponents))
+    return <EmptyState message="No components match your selection" />
+
+  return (
     <div
       css={{
         display: 'grid',
@@ -62,16 +66,24 @@ export function ComponentList({
         gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))',
       }}
     >
-      {filteredComponents?.map(
-        (component, i) =>
-          component && (
-            <ComponentCard
+      {loading
+        ? Array.from({ length: 8 }).map((_, i) => (
+            <RectangleSkeleton
               key={i}
-              url={setUrl(component)}
-              component={component}
+              $height={48}
+              $width="100%"
             />
-          )
-      )}
+          ))
+        : filteredComponents?.map(
+            (component, i) =>
+              component && (
+                <ComponentCard
+                  key={i}
+                  url={setUrl(component)}
+                  component={component}
+                />
+              )
+          )}
     </div>
   )
 }

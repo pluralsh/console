@@ -44,72 +44,80 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-        - name: cloud-query-db
-          image: "{{ .Values.cloudQuery.database.image.repository }}:{{ .Values.cloudQuery.database.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
-          imagePullPolicy: {{ .Values.cloudQuery.database.image.pullPolicy }}
-          env:
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
+        {{ if .Values.cloudQuery.database.enabled }}
+      - name: cloud-query-db
+        image: "{{ .Values.cloudQuery.database.image.repository }}:{{ .Values.cloudQuery.database.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
+        imagePullPolicy: {{ .Values.cloudQuery.database.image.pullPolicy }}
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
                 {{- if .Values.cloudQuery.database.password.existingSecret.name }}
-                  name: {{ .Values.cloudQuery.database.password.existingSecret.name }}
-                  key: {{ .Values.cloudQuery.database.password.existingSecret.key }}
+              name: {{ .Values.cloudQuery.database.password.existingSecret.name }}
+              key: {{ .Values.cloudQuery.database.password.existingSecret.key }}
                 {{- else }}
-                  name: {{ include "console.cloudquery.db.secret" . }}
-                  key: password
+              name: {{ include "console.cloudquery.db.secret" . }}
+              key: password
                 {{- end }}
-          readinessProbe:
-            exec:
-              command:
-                - /bin/sh
-                - -c
-                - pg_isready -U postgres
-            initialDelaySeconds: 10
-            periodSeconds: 30
-            failureThreshold: 3
-        - name: cloud-query
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - pg_isready -U postgres
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          failureThreshold: 3
+        {{- end }}
+      - name: cloud-query
           {{- with .Values.cloudQuery.securityContext }}
-          securityContext:
+        securityContext:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.cloudQuery.image.repository }}:{{ .Values.cloudQuery.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
-          imagePullPolicy: {{ .Values.cloudQuery.image.pullPolicy }}
+        image: "{{ .Values.cloudQuery.image.repository }}:{{ .Values.cloudQuery.image.tag | default (printf "v%s" .Chart.AppVersion) }}"
+        imagePullPolicy: {{ .Values.cloudQuery.image.pullPolicy }}
           {{- with .Values.cloudQuery.image.args }}
-          args:
+        args:
             {{- toYaml .| nindent 12}}
           {{- end }}
-          env:
-            - name: PLRL_PG_PASSWORD
-              valueFrom:
-                secretKeyRef:
+          {{ if .Values.cloudQuery.database.enabled }}
+        env:
+        - name: PLRL_PG_PASSWORD
+          valueFrom:
+            secretKeyRef:
                 {{- if .Values.cloudQuery.database.password.existingSecret.name }}
-                  name: {{ .Values.cloudQuery.database.password.existingSecret.name }}
-                  key: {{ .Values.cloudQuery.database.password.existingSecret.key }}
+              name: {{ .Values.cloudQuery.database.password.existingSecret.name }}
+              key: {{ .Values.cloudQuery.database.password.existingSecret.key }}
                 {{- else }}
-                  name: {{ include "console.cloudquery.db.secret" . }}
-                  key: password
+              name: {{ include "console.cloudquery.db.secret" . }}
+              key: password
                 {{- end }}
-          ports:
-            - name: grpc
-              containerPort: {{ .Values.cloudQuery.service.port }}
-              protocol: TCP
+          {{- else }}
+        env:
+        - name: PLRL_DATABASE_ENABLED
+          value: "false"
+          {{- end }}
+        ports:
+        - name: grpc
+          containerPort: {{ .Values.cloudQuery.service.port }}
+          protocol: TCP
           {{- with .Values.cloudQuery.livenessProbe }}
-          livenessProbe:
+        livenessProbe:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: 8080
-            initialDelaySeconds: 15
-            periodSeconds: 30
-            failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 30
+          failureThreshold: 3
           {{- with .Values.cloudQuery.resources }}
-          resources:
+        resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
           {{- with .Values.cloudQuery.volumeMounts }}
-          volumeMounts:
+        volumeMounts:
             {{- toYaml . | nindent 12 }}
           {{- end }}
       {{- with .Values.cloudQuery.volumes }}

@@ -62,6 +62,16 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :tags,      :json, description: "the cluster tags to select where to run this job"
     field :format,    non_null(:sentinel_run_job_format), description: "the format of the job output"
     field :gotestsum, :sentinel_check_gotestsum_attributes, description: "the gotestsum configuration to use for this check"
+    field :default,   :sentinel_check_integration_test_default_attributes, description: "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
+  end
+
+  input_object :sentinel_check_integration_test_default_attributes do
+    field :ignore,                 :boolean, description: "whether to ignore disable the default built-in test cases, in case you'd prefer to just use custom cases."
+    field :namespace_labels,       :json, description: "labels to apply to created namespaces, temporary namespaces are used for all test cases"
+    field :namespace_annotations,  :json, description: "annotations to apply to created namespaces, temporary namespaces are used for all test cases"
+    field :registry,               :string, description: "container image registry for test deployments"
+    field :resource_annotations, :json, description: "annotations to apply to test deployments, useful if you need to opt out of policy enforcement"
+    field :resource_labels,      :json, description: "labels to apply to test deployments, useful if you need to opt out of policy enforcement"
   end
 
   input_object :sentinel_run_job_update_attributes do
@@ -174,7 +184,17 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :tags,          :map, description: "the cluster tags to select where to run this job"
     field :format,        non_null(:sentinel_run_job_format), description: "the format of the job"
     field :gotestsum,     :sentinel_check_gotestsum_configuration, description: "the gotestsum configuration to use for this check"
+    field :default,       :sentinel_check_integration_test_default_configuration, description: "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
     field :cases,         list_of(:sentinel_check_integration_test_case_configuration), description: "a list of custom test cases to run for this check"
+  end
+
+  object :sentinel_check_integration_test_default_configuration do
+    field :ignore, :boolean, description: "whether to ignore default namespace/deployment labels and annotations"
+    field :namespace_labels,       :map, description: "labels to apply to created namespaces"
+    field :namespace_annotations,  :map, description: "annotations to apply to created namespaces"
+    field :registry,                :string, description: "container image registry for test deployments"
+    field :resource_annotations, :map, description: "annotations to apply to test deployments"
+    field :resource_labels,      :map, description: "labels to apply to test deployments"
   end
 
   object :sentinel_check_gotestsum_configuration do

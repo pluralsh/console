@@ -65,6 +65,7 @@ defmodule Console.AI.Tools.Pr do
          {:ok, identifier} <- slug(conn, url),
          impl = Dispatcher.dispatcher(conn) do
       impl.create(%PrAutomation{
+        ignore_templates: true,
         branch: conn.branch,
         connection: conn,
         title: pr.pr_title,

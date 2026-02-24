@@ -773,6 +773,8 @@ type AnsibleConfiguration struct {
 	Inventory *string `json:"inventory,omitempty"`
 	// Additional args for the playbook
 	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
+	// path to the private key file for SSH authentication
+	PrivateKeyFile *string `json:"privateKeyFile,omitempty"`
 }
 
 type AnsibleConfigurationAttributes struct {
@@ -782,6 +784,8 @@ type AnsibleConfigurationAttributes struct {
 	Inventory *string `json:"inventory,omitempty"`
 	// additional args for the playbook
 	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
+	// path to the private key file for SSH authentication
+	PrivateKeyFile *string `json:"privateKeyFile,omitempty"`
 }
 
 // Anthropic connection information
@@ -790,6 +794,8 @@ type AnthropicSettings struct {
 	Model *string `json:"model,omitempty"`
 	// the model to use for tool calls, which are less frequent and require more complex reasoning
 	ToolModel *string `json:"toolModel,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 type AnthropicSettingsAttributes struct {
@@ -799,6 +805,8 @@ type AnthropicSettingsAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 // a representation of a kubernetes api deprecation
@@ -1044,6 +1052,8 @@ type AzureOpenaiAttributes struct {
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the azure openai access token to use
 	AccessToken string `json:"accessToken"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 // Settings for configuring against Azure OpenAI
@@ -1057,6 +1067,8 @@ type AzureOpenaiSettings struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the api version you want to use
 	APIVersion *string `json:"apiVersion,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 type AzureSettingsAttributes struct {
@@ -1109,6 +1121,8 @@ type BedrockAiAttributes struct {
 	AWSSecretAccessKey *string `json:"awsSecretAccessKey,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 // Settings for usage of AWS Bedrock for LLMs
@@ -1123,12 +1137,26 @@ type BedrockAiSettings struct {
 	Region *string `json:"region,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 type BindingAttributes struct {
 	ID      *string `json:"id,omitempty"`
 	UserID  *string `json:"userId,omitempty"`
 	GroupID *string `json:"groupId,omitempty"`
+}
+
+// Requirements for Bitbucket Data Center / Server authentication
+type BitbucketDatacenterAttributes struct {
+	// the user slug for Bitbucket Data Center / Server
+	UserSlug string `json:"userSlug"`
+}
+
+// Bitbucket Data Center / Server connection configuration
+type BitbucketDatacenterConfiguration struct {
+	// the user slug for Bitbucket Data Center / Server
+	UserSlug string `json:"userSlug"`
 }
 
 // A restricted token meant only for use in registering clusters, esp for edge devices
@@ -3492,6 +3520,32 @@ type GlobalServiceEdge struct {
 	Cursor *string        `json:"cursor,omitempty"`
 }
 
+// ServiceNow configuration for a pr governance controller
+type GovernanceServiceNow struct {
+	// the ServiceNow instance URL
+	URL string `json:"url"`
+	// the change request model/type
+	ChangeModel *string `json:"changeModel,omitempty"`
+	// ServiceNow API username
+	Username string `json:"username"`
+	// additional attributes sent with change requests
+	Attributes map[string]any `json:"attributes,omitempty"`
+}
+
+// ServiceNow configuration for a pr governance controller
+type GovernanceServiceNowAttributes struct {
+	// the ServiceNow instance URL
+	URL string `json:"url"`
+	// the change request model/type
+	ChangeModel *string `json:"changeModel,omitempty"`
+	// ServiceNow API username
+	Username string `json:"username"`
+	// ServiceNow API password
+	Password string `json:"password"`
+	// additional attributes to send with change requests
+	Attributes *string `json:"attributes,omitempty"`
+}
+
 // The webhook configuration for a pr governance controller
 type GovernanceWebhook struct {
 	URL string `json:"url"`
@@ -5114,6 +5168,8 @@ type OllamaAttributes struct {
 	URL            string  `json:"url"`
 	// An http authorization header to use on calls to the Ollama api
 	Authorization *string `json:"authorization,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 // Settings for a self-hosted ollama-based LLM deployment
@@ -5135,6 +5191,8 @@ type OpenaiSettings struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 type OpenaiSettingsAttributes struct {
@@ -5145,6 +5203,8 @@ type OpenaiSettingsAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 type OpensearchConnection struct {
@@ -6051,6 +6111,7 @@ type PrDeleteSpec struct {
 type PrGovernance struct {
 	ID            string                     `json:"id"`
 	Name          string                     `json:"name"`
+	Type          PrGovernanceType           `json:"type"`
 	Connection    *ScmConnection             `json:"connection,omitempty"`
 	Configuration *PrGovernanceConfiguration `json:"configuration,omitempty"`
 	InsertedAt    *string                    `json:"insertedAt,omitempty"`
@@ -6059,7 +6120,9 @@ type PrGovernance struct {
 
 // The settings for configuring a pr governance controller
 type PrGovernanceAttributes struct {
-	Name string `json:"name"`
+	// the type of pr governance controller to use
+	Type PrGovernanceType `json:"type"`
+	Name string           `json:"name"`
 	// the scm connection to use for pr generation
 	ConnectionID  string                               `json:"connectionId"`
 	Configuration *PrGovernanceConfigurationAttributes `json:"configuration,omitempty"`
@@ -6067,12 +6130,14 @@ type PrGovernanceAttributes struct {
 
 // The configuration for a pr governance controller
 type PrGovernanceConfiguration struct {
-	Webhook *GovernanceWebhook `json:"webhook,omitempty"`
+	Webhook    *GovernanceWebhook    `json:"webhook,omitempty"`
+	ServiceNow *GovernanceServiceNow `json:"serviceNow,omitempty"`
 }
 
 // The settings for configuring a pr governance controller
 type PrGovernanceConfigurationAttributes struct {
-	Webhook *GovernanceWebhookAttributes `json:"webhook,omitempty"`
+	Webhook    *GovernanceWebhookAttributes    `json:"webhook,omitempty"`
+	ServiceNow *GovernanceServiceNowAttributes `json:"serviceNow,omitempty"`
 }
 
 type PrHelmVendorSpec struct {
@@ -6757,6 +6822,8 @@ type ScmConnection struct {
 	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// the azure devops attributes for this connection
 	Azure *AzureDevopsConfiguration `json:"azure,omitempty"`
+	// the Bitbucket Data Center / Server attributes for this connection
+	BitbucketDatacenter *BitbucketDatacenterConfiguration `json:"bitbucketDatacenter,omitempty"`
 	// base url for git clones for self-hosted versions
 	BaseURL *string `json:"baseUrl,omitempty"`
 	// base url for HTTP apis for self-hosted versions if different from base url
@@ -6770,15 +6837,16 @@ type ScmConnectionAttributes struct {
 	Name string  `json:"name"`
 	Type ScmType `json:"type"`
 	// the owning entity in this scm provider, eg a github organization
-	Owner    *string                `json:"owner,omitempty"`
-	Username *string                `json:"username,omitempty"`
-	Token    *string                `json:"token,omitempty"`
-	BaseURL  *string                `json:"baseUrl,omitempty"`
-	APIURL   *string                `json:"apiUrl,omitempty"`
-	Github   *GithubAppAttributes   `json:"github,omitempty"`
-	Azure    *AzureDevopsAttributes `json:"azure,omitempty"`
-	Default  *bool                  `json:"default,omitempty"`
-	Proxy    *HTTPProxyAttributes   `json:"proxy,omitempty"`
+	Owner               *string                        `json:"owner,omitempty"`
+	Username            *string                        `json:"username,omitempty"`
+	Token               *string                        `json:"token,omitempty"`
+	BaseURL             *string                        `json:"baseUrl,omitempty"`
+	APIURL              *string                        `json:"apiUrl,omitempty"`
+	Github              *GithubAppAttributes           `json:"github,omitempty"`
+	Azure               *AzureDevopsAttributes         `json:"azure,omitempty"`
+	BitbucketDatacenter *BitbucketDatacenterAttributes `json:"bitbucketDatacenter,omitempty"`
+	Default             *bool                          `json:"default,omitempty"`
+	Proxy               *HTTPProxyAttributes           `json:"proxy,omitempty"`
 	// a ssh private key to be used for commit signing
 	SigningPrivateKey *string `json:"signingPrivateKey,omitempty"`
 }
@@ -7087,6 +7155,8 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	Format SentinelRunJobFormat `json:"format"`
 	// the gotestsum configuration to use for this check
 	Gotestsum *SentinelCheckGotestsumConfiguration `json:"gotestsum,omitempty"`
+	// default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)
+	Default *SentinelCheckIntegrationTestDefaultConfiguration `json:"default,omitempty"`
 	// a list of custom test cases to run for this check
 	Cases []*SentinelCheckIntegrationTestCaseConfiguration `json:"cases,omitempty"`
 }
@@ -7108,6 +7178,38 @@ type SentinelCheckIntegrationTestConfigurationAttributes struct {
 	Format SentinelRunJobFormat `json:"format"`
 	// the gotestsum configuration to use for this check
 	Gotestsum *SentinelCheckGotestsumAttributes `json:"gotestsum,omitempty"`
+	// default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)
+	Default *SentinelCheckIntegrationTestDefaultAttributes `json:"default,omitempty"`
+}
+
+type SentinelCheckIntegrationTestDefaultAttributes struct {
+	// whether to ignore disable the default built-in test cases, in case you'd prefer to just use custom cases.
+	Ignore *bool `json:"ignore,omitempty"`
+	// labels to apply to created namespaces, temporary namespaces are used for all test cases
+	NamespaceLabels *string `json:"namespaceLabels,omitempty"`
+	// annotations to apply to created namespaces, temporary namespaces are used for all test cases
+	NamespaceAnnotations *string `json:"namespaceAnnotations,omitempty"`
+	// container image registry for test deployments
+	Registry *string `json:"registry,omitempty"`
+	// annotations to apply to test deployments, useful if you need to opt out of policy enforcement
+	ResourceAnnotations *string `json:"resourceAnnotations,omitempty"`
+	// labels to apply to test deployments, useful if you need to opt out of policy enforcement
+	ResourceLabels *string `json:"resourceLabels,omitempty"`
+}
+
+type SentinelCheckIntegrationTestDefaultConfiguration struct {
+	// whether to ignore default namespace/deployment labels and annotations
+	Ignore *bool `json:"ignore,omitempty"`
+	// labels to apply to created namespaces
+	NamespaceLabels map[string]any `json:"namespaceLabels,omitempty"`
+	// annotations to apply to created namespaces
+	NamespaceAnnotations map[string]any `json:"namespaceAnnotations,omitempty"`
+	// container image registry for test deployments
+	Registry *string `json:"registry,omitempty"`
+	// annotations to apply to test deployments
+	ResourceAnnotations map[string]any `json:"resourceAnnotations,omitempty"`
+	// labels to apply to test deployments
+	ResourceLabels map[string]any `json:"resourceLabels,omitempty"`
 }
 
 type SentinelCheckKubernetesConfiguration struct {
@@ -8626,6 +8728,8 @@ type VertexAiAttributes struct {
 	Project string `json:"project"`
 	// the gcp region the model is hosted in
 	Location string `json:"location"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 // Settings for usage of GCP VertexAI for LLMs
@@ -8640,6 +8744,8 @@ type VertexAiSettings struct {
 	Project string `json:"project"`
 	// the gcp region the model
 	Location string `json:"location"`
+	// addditional models to support within the integrated ai proxy
+	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
 
 type VerticalPodAutoscaler struct {
@@ -12602,6 +12708,61 @@ func (e *PolicyEngineType) UnmarshalJSON(b []byte) error {
 }
 
 func (e PolicyEngineType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type PrGovernanceType string
+
+const (
+	PrGovernanceTypeServiceNow PrGovernanceType = "SERVICE_NOW"
+	PrGovernanceTypeWebhook    PrGovernanceType = "WEBHOOK"
+)
+
+var AllPrGovernanceType = []PrGovernanceType{
+	PrGovernanceTypeServiceNow,
+	PrGovernanceTypeWebhook,
+}
+
+func (e PrGovernanceType) IsValid() bool {
+	switch e {
+	case PrGovernanceTypeServiceNow, PrGovernanceTypeWebhook:
+		return true
+	}
+	return false
+}
+
+func (e PrGovernanceType) String() string {
+	return string(e)
+}
+
+func (e *PrGovernanceType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PrGovernanceType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PrGovernanceType", str)
+	}
+	return nil
+}
+
+func (e PrGovernanceType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PrGovernanceType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PrGovernanceType) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

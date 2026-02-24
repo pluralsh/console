@@ -72,6 +72,7 @@ _Appears in:_
 | `model` _string_ | Model is the LLM model name to use. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `proxyModels` _string array_ | ProxyModels are additional models to support within our integrated ai proxy. |  | Optional: \{\} <br /> |
 | `baseUrl` _string_ | BaseUrl is a custom base url to use, for reimplementations<br />of the same API scheme (for instance Together.ai uses the OpenAI API spec) |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
@@ -194,6 +195,7 @@ _Appears in:_
 | `playbook` _string_ | Playbook is the ansible playbook to run. |  | Optional: \{\} <br /> |
 | `inventory` _string_ | Inventory is the ansible inventory file to use.  We recommend checking this into git alongside your playbook files, and referencing it with a relative path. |  | Optional: \{\} <br /> |
 | `additionalArgs` _string array_ | Additional args for the ansible playbook command. |  | Optional: \{\} <br /> |
+| `privateKeyFile` _string_ | PrivateKeyFile is the path to the private key file for SSH authentication. |  | Optional: \{\} <br /> |
 
 
 
@@ -254,6 +256,7 @@ _Appears in:_
 | `model` _string_ | Model - the OpenAi model you wish to use. If not specified, Plural will provide a default. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning. |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings. |  | Optional: \{\} <br /> |
+| `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
 
@@ -273,6 +276,7 @@ _Appears in:_
 | `modelId` _string_ | ModelID is the AWS Bedrock Model ID to use.  This will use the openai compatible endpoint, so the model id must be supported. |  | Required: \{\} <br /> |
 | `toolModelId` _string_ | ToolModelId to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `region` _string_ | Region is the AWS region the model is hosted in |  | Required: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Optional: \{\} <br /> |
 | `awsAccessKeyId` _string_ | AWS Access Key ID to use for authentication |  | Optional: \{\} <br /> |
@@ -344,6 +348,22 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `read` _string_ | Read bindings. |  | Optional: \{\} <br /> |
 | `write` _string_ | Write bindings. |  | Optional: \{\} <br /> |
+
+
+#### BitbucketDatacenterSettings
+
+
+
+BitbucketDatacenterSettings holds configuration for Bitbucket Data Center / Server authentication.
+
+
+
+_Appears in:_
+- [ScmConnectionSpec](#scmconnectionspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `userSlug` _string_ | The user slug for Bitbucket Data Center / Server |  |  |
 
 
 #### BootstrapToken
@@ -2037,8 +2057,8 @@ _Appears in:_
 | `name` _string_ | Name of this stack.<br />If not provided, the name from InfrastructureStack.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `type` _[StackType](#stacktype)_ | Type specifies the IaC tool to use for executing the stack.<br />One of TERRAFORM, ANSIBLE, CUSTOM. |  | Enum: [TERRAFORM ANSIBLE CUSTOM] <br />Required: \{\} <br /> |
 | `interval` _string_ | Interval specifies the interval at which the stack will be reconciled, default is 5m |  | Optional: \{\} <br /> |
-| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository containing the IaC source code. Leave empty to use git:url instead. |  | Required: \{\} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this stack will be executed. |  | Required: \{\} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references the GitRepository containing the IaC source code. Leave empty to use git:url instead. |  | Optional: \{\} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references the target Cluster where this stack will be executed. |  | Optional: \{\} <br /> |
 | `cluster` _string_ | Cluster is the handle of the target Cluster where this service will be deployed. Leave it empty to use the clusterRef field instead. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references a project this stack belongs to.<br />If not provided, it will use the default project. |  | Optional: \{\} <br /> |
 | `git` _[GitRef](#gitref)_ | Git contains reference within the repository where the IaC manifests are located. |  |  |
@@ -3688,7 +3708,30 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `webhook` _[PrGovernanceWebhook](#prgovernancewebhook)_ | Webhooks defines webhook integration settings for governance enforcement.<br />This enables the governance controller to receive notifications about pull request<br />events and respond with appropriate policy enforcement actions such as requiring<br />additional approvals, running compliance checks, or blocking merges. |  | Required: \{\} <br /> |
+| `webhook` _[PrGovernanceWebhook](#prgovernancewebhook)_ | Webhook defines webhook integration settings for governance enforcement.<br />This enables the governance controller to receive notifications about pull request<br />events and respond with appropriate policy enforcement actions such as requiring<br />additional approvals, running compliance checks, or blocking merges. |  | Optional: \{\} <br /> |
+| `serviceNow` _[PrGovernanceServiceNow](#prgovernanceservicenow)_ | ServiceNow defines ServiceNow change request integration for PR governance.<br />When set, PRs will require a ServiceNow change request to be opened and approved<br />before merge. The password is read from the referenced Secret. |  | Optional: \{\} <br /> |
+
+
+#### PrGovernanceServiceNow
+
+
+
+PrGovernanceServiceNow defines ServiceNow integration for PR governance.
+PRs governed by this configuration will create and manage ServiceNow change requests.
+
+
+
+_Appears in:_
+- [PrGovernanceConfiguration](#prgovernanceconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | Url is the ServiceNow instance URL (e.g. https://instance.service-now.com). |  | Required: \{\} <br /> |
+| `changeModel` _string_ | ChangeModel is the change request model/type (e.g. "Standard"). If empty, "Standard" is used.<br />We currently support the built-in ILI4 models, such as Standard, Normal, and Emergency. |  | Optional: \{\} <br /> |
+| `username` _string_ | Username is the ServiceNow API username for authentication. |  | Required: \{\} <br /> |
+| `passwordSecretKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretKeyRef references a key in a Secret containing the ServiceNow API password.<br />For namespaced PrGovernance the secret is read from the same namespace; for cluster-scoped<br />PrGovernance set SecretNamespace to the namespace where the secret lives. |  | Required: \{\} <br /> |
+| `secretNamespace` _string_ | SecretNamespace is the namespace of the secret referenced by PasswordSecretKeyRef. |  | Optional: \{\} <br /> |
+| `attributes` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Attributes is optional JSON passed as additional attributes when creating change requests.<br />Not all change attributes need to be provided, we will auto-fill basics like description, implementation plan, backout plan, test plan, etc using AI if not provided. |  | Optional: \{\} <br /> |
 
 
 #### PrGovernanceSpec
@@ -3706,6 +3749,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `type` _[PrGovernanceType](#prgovernancetype)_ | Type specifies the type of PR governance controller to use. |  | Enum: [WEBHOOK SERVICE_NOW] <br />Required: \{\} <br /> |
 | `name` _string_ | Name specifies the name for this PR governance controller.<br />If not provided, the name from the resource metadata will be used. |  | Optional: \{\} <br /> |
 | `connectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ConnectionRef references an ScmConnection to reuse its credentials for this governance controller's authentication. |  | Required: \{\} <br /> |
 | `configuration` _[PrGovernanceConfiguration](#prgovernanceconfiguration)_ | Configuration contains the specific governance settings and rules to enforce on pull requests.<br />This includes webhook configurations, approval requirements, and other policy enforcement<br />mechanisms that control how pull requests are managed and processed. |  | Optional: \{\} <br /> |
@@ -3913,9 +3957,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `path` _string_ |  |  |  |
-| `type` _[RendererType](#renderertype)_ |  |  | Enum: [AUTO RAW HELM KUSTOMIZE] <br /> |
-| `helm` _[HelmMinimal](#helmminimal)_ |  |  |  |
+| `path` _string_ | Path is the path to the renderer works under. |  | Required: \{\} <br /> |
+| `type` _[RendererType](#renderertype)_ | Type is the type of renderer to use. |  | Enum: [AUTO RAW HELM KUSTOMIZE] <br />Required: \{\} <br /> |
+| `helm` _[HelmMinimal](#helmminimal)_ | Helm is the Helm configuration to use for this renderer, use if `path` points to a helm chart and you want to override the default helm configuration. |  | Optional: \{\} <br /> |
 
 
 #### RouterFilters
@@ -3978,6 +4022,7 @@ _Appears in:_
 | `apiUrl` _string_ | APIUrl is a base URL for HTTP apis for shel-hosted versions if different from BaseUrl. |  | Optional: \{\} <br /> |
 | `github` _[ScmGithubConnection](#scmgithubconnection)_ | Settings for configuring Github App authentication |  | Optional: \{\} <br /> |
 | `azure` _[AzureDevopsSettings](#azuredevopssettings)_ | Settings for configuring Azure DevOps authentication |  | Optional: \{\} <br /> |
+| `bitbucketDatacenter` _[BitbucketDatacenterSettings](#bitbucketdatacentersettings)_ | Settings for configuring Bitbucket Data Center / Server authentication |  | Optional: \{\} <br /> |
 | `proxy` _[HttpProxyConfiguration](#httpproxyconfiguration)_ | Configures usage of an HTTP proxy for all requests involving this SCM connection. |  | Optional: \{\} <br /> |
 | `default` _boolean_ |  |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
@@ -4162,13 +4207,35 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `format` _[SentinelRunJobFormat](#sentinelrunjobformat)_ | the test output format of the job |  | Enum: [PLAINTEXT JUNIT] <br />Required: \{\} <br /> |
-| `jobSpec` _[JobSpec](#jobspec)_ | the job to run for this check |  |  |
+| `jobSpec` _[JobSpec](#jobspec)_ | The job to run for this check. We expect there to at least be one container named `default` that includes the sentinel go test code.  It's also recommended to not allow retries on the job. |  | Optional: \{\} <br /> |
 | `gotestsum` _[SentinelCheckGotestsumConfiguration](#sentinelcheckgotestsumconfiguration)_ | the configuration for the gotestsum test runner for this check |  | Optional: \{\} <br /> |
-| `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br /> |
-| `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  |  |
+| `distro` _[ClusterDistro](#clusterdistro)_ | the distro to run the check on |  | Enum: [GENERIC EKS AKS GKE RKE K3S OPENSHIFT] <br />Optional: \{\} <br /> |
+| `tags` _object (keys:string, values:string)_ | the cluster tags to select where to run this job |  | Optional: \{\} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef references a Git repository to use for this integration test. |  | Optional: \{\} <br /> |
-| `git` _[GitRef](#gitref)_ | The git location to use for this integration test. |  |  |
-| `cases` _[SentinelCheckIntegrationTestCase](#sentinelcheckintegrationtestcase) array_ |  |  |  |
+| `git` _[GitRef](#gitref)_ | The git location to use for this integration test. |  | Optional: \{\} <br /> |
+| `default` _[SentinelCheckIntegrationTestDefault](#sentinelcheckintegrationtestdefault)_ | Default configures default test cases and global behavior (e.g. namespace labels and annotations for created resources). |  | Optional: \{\} <br /> |
+| `cases` _[SentinelCheckIntegrationTestCase](#sentinelcheckintegrationtestcase) array_ | A list of custom test cases to run for this check.  These can provide yaml-configurable targeted cases of things like coredns, load balancers, pvcs, etc. |  | Optional: \{\} <br /> |
+
+
+#### SentinelCheckIntegrationTestDefault
+
+
+
+SentinelCheckIntegrationTestDefault configures default integration test behavior: built-in test cases and labels/annotations applied to created namespaces and deployments.
+
+
+
+_Appears in:_
+- [SentinelCheckIntegrationTestConfiguration](#sentinelcheckintegrationtestconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `ignore` _boolean_ | Ignore disables default integration test cases, useful if you'd prefer to just use custom test cases exclusively. |  | Optional: \{\} <br /> |
+| `namespaceLabels` _object (keys:string, values:string)_ | NamespaceLabels labels to apply to created namespaces (test cases run in temporary namespaces to ensure cleanup is seamless). |  | Optional: \{\} <br /> |
+| `namespaceAnnotations` _object (keys:string, values:string)_ | NamespaceAnnotations annotations to apply to created namespaces (test cases run in temporary namespaces to ensure cleanup is seamless). |  | Optional: \{\} <br /> |
+| `registry` _string_ | Registry container image registry for test deployments.  Image names an tags will still be preserved |  | Optional: \{\} <br /> |
+| `resourceAnnotations` _object (keys:string, values:string)_ | ResourceAnnotations annotations to apply to test resources within a namespace (this is useful if you need to sidestep policy enforcement for test resources). |  | Optional: \{\} <br /> |
+| `resourceLabels` _object (keys:string, values:string)_ | ResourceLabels labels to apply to test resources within a namespace (this is useful if you need to sidestep policy enforcement for test resources). |  | Optional: \{\} <br /> |
 
 
 #### SentinelCheckKubernetesConfiguration
@@ -4354,6 +4421,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this service context.<br />If not provided, the name from ServiceContext.ObjectMeta will be used. |  | Optional: \{\} <br /> |
 | `configuration` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Configuration is a reusable configuration context that can include any JSON-compatible configuration data<br />that needs to be shared across multiple services. |  |  |
+| `configMapRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ConfigMapRef references a ConfigMap containing configuration data to merge into the Configuration.<br />The keys and values from the ConfigMap will be merged into the Configuration JSON. |  | Optional: \{\} <br /> |
+| `secretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | SecretRef references a Secret containing configuration data to merge into the Configuration.<br />The keys and values from the Secret will be merged into the Configuration JSON. |  | Optional: \{\} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references the project this service context belongs to.<br />If not provided, it will use the default project. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
@@ -4605,9 +4674,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `path` _string_ | Path the subdirectory this source will live in the final tarball |  |  |
-| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef the reference of the Git repository to source from. |  |  |
-| `git` _[GitRef](#gitref)_ | Git contains a location in a Git repository to use. |  |  |
+| `path` _string_ | Path the subdirectory this source will live in the final tarball |  | Optional: \{\} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef the reference of the Git repository to source from. |  | Optional: \{\} <br /> |
+| `git` _[GitRef](#gitref)_ | Git contains a location in a Git repository to use. |  | Optional: \{\} <br /> |
 
 
 #### SpecTemplate
@@ -5007,6 +5076,7 @@ _Appears in:_
 | `model` _string_ | Model is the Vertex AI model to use.  Must support the OpenAI completions api, see: https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/openai/overview |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `project` _string_ | Project is the GCP project you'll be using |  | Required: \{\} <br /> |
 | `location` _string_ | Location is the GCP region Vertex is queried from |  | Required: \{\} <br /> |
 | `endpoint` _string_ | Endpoint is a custom endpoint for self-deployed models |  | Optional: \{\} <br /> |

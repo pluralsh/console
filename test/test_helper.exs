@@ -53,6 +53,7 @@ Mimic.copy(Console.AI.Workbench.Subagents.Plan)
 Mimic.copy(Console.AI.Workbench.Subagents.Infrastructure)
 Mimic.copy(Console.AI.Workbench.Subagents.Integration)
 Mimic.copy(Console.AI.Tools.Workbench.Http)
+Mimic.copy(Console.ServiceNow.Client)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)

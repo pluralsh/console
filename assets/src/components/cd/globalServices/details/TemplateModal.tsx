@@ -29,7 +29,6 @@ function TemplateModalInner({
 }: ComponentProps<typeof Modal> & TemplateModalProps) {
   return (
     <Modal
-      form
       open={open}
       onClose={onClose}
       header={`${serviceName}'s service template`}
@@ -37,12 +36,8 @@ function TemplateModalInner({
         <Button
           secondary
           type="button"
-          onClick={() => {
-            onClose?.()
-          }}
-          css={{
-            width: '100%',
-          }}
+          onClick={() => onClose?.()}
+          css={{ width: '100%' }}
         >
           Close
         </Button>
@@ -52,7 +47,7 @@ function TemplateModalInner({
       <Code
         language="yaml"
         showHeader={false}
-        css={{ height: '100%' }}
+        css={{ overflow: 'auto' }}
       >
         {stringify(deepOmitKey(template, '__typename' as const), null, 2)}
       </Code>

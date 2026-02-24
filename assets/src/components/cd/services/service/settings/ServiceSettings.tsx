@@ -5,8 +5,8 @@ import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import {
   ServiceDeploymentDetailsFragment,
   ServiceDeploymentStatus,
-  useFlowQuery,
 } from 'generated/graphql'
+import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo } from 'react'
 import { Navigate, Outlet, useMatch, useParams } from 'react-router-dom'
@@ -106,36 +106,30 @@ const getServiceSettingsBreadcrumbs = ({
 
 export function ServiceSettings() {
   const ctx = useServiceContext()
-  const { serviceId, flowId } = useParams()
+  const { serviceId } = useParams()
+  const { flowIdOrName, flowData } = useCurrentFlow()
   const { tab } =
     useMatch(
-      `${flowId ? FLOW_SERVICE_PATH_MATCHER_ABS : CD_SERVICE_PATH_MATCHER_ABS}/settings/:tab/*`
+      `${flowIdOrName ? FLOW_SERVICE_PATH_MATCHER_ABS : CD_SERVICE_PATH_MATCHER_ABS}/settings/:tab/*`
     )?.params ?? {}
-  const { data: flowData } = useFlowQuery({
-    variables: { id: flowId ?? '' },
-    skip: !flowId,
-  })
 
   const personaType = useServicePersonaType()
 
   const directory = useMemo(
     () =>
-      getDirectory({
-        service: ctx.service,
-        personaType,
-      }),
+      ctx.service ? getDirectory({ service: ctx.service, personaType }) : [],
     [ctx.service, personaType]
   )
 
   const breadcrumbs = useMemo(
     () =>
       getServiceSettingsBreadcrumbs({
-        cluster: ctx?.service?.cluster,
-        service: ctx?.service ?? { id: serviceId ?? '' },
+        cluster: ctx.service?.cluster,
+        service: ctx.service ?? { id: serviceId ?? '' },
         flow: flowData?.flow,
-        tab: tab ?? '',
+        tab,
       }),
-    [ctx?.service, flowData?.flow, serviceId, tab]
+    [ctx.service, flowData?.flow, serviceId, tab]
   )
   useSetBreadcrumbs(breadcrumbs)
 

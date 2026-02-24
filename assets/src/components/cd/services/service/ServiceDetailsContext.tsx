@@ -7,9 +7,10 @@ import {
 import { useOutletContext } from 'react-router-dom'
 
 export type ServiceDetailsContextType = {
-  service: ServiceDeploymentDetailsFragment
+  service: Nullable<ServiceDeploymentDetailsFragment>
   refetch: () => Promise<ApolloQueryResult<ServiceDeploymentQuery>>
   isRefetching: boolean
+  isLoading: boolean
   setSidenavContent: (content: ReactNode | null) => void
 }
 

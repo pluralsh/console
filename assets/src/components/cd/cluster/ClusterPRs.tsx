@@ -28,8 +28,8 @@ export const columns = [
   ColActions,
 ]
 
-export default function ClusterPRs() {
-  const { cluster } = useClusterContext()
+export function ClusterPRs() {
+  const { cluster, clusterLoading } = useClusterContext()
   const theme = useTheme()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 200)
@@ -43,8 +43,12 @@ export default function ClusterPRs() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    { queryHook: usePullRequestsQuery, keyPath: ['pullRequests'] },
-    { q: debouncedSearchString, clusterId: cluster.id }
+    {
+      queryHook: usePullRequestsQuery,
+      keyPath: ['pullRequests'],
+      skip: !cluster,
+    },
+    { q: debouncedSearchString, clusterId: cluster?.id ?? '' }
   )
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
@@ -82,7 +86,7 @@ export default function ClusterPRs() {
             virtualizeRows
             columns={columns}
             data={data?.pullRequests?.edges || []}
-            loading={!data && loading}
+            loading={(!data && loading) || (!cluster && clusterLoading)}
             reactTableOptions={reactTableOptions}
             hasNextPage={pageInfo?.hasNextPage}
             fetchNextPage={fetchNextPage}

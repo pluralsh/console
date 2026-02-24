@@ -21,16 +21,17 @@ function ClusterPermissionsModalInner({
   'bindings' | 'id' | 'type' | 'header'
 > & {
   header?: ReactNode
-  cluster: ClustersRowFragment
+  cluster: Nullable<ClustersRowFragment>
 }) {
   const { data, refetch } = useClusterBindingsQuery({
-    variables: { id: cluster.id },
+    variables: { id: cluster?.id ?? '' },
     fetchPolicy: 'no-cache',
-    skip: !cluster.id || !props.open,
+    skip: !cluster?.id || !props.open,
   })
   const bindings = data?.cluster
 
-  if (!bindings) {
+  if (!cluster) return null
+  if (!bindings)
     return (
       <ModalWrapper
         open={props.open}
@@ -39,7 +40,6 @@ function ClusterPermissionsModalInner({
         <LoadingIndicator />
       </ModalWrapper>
     )
-  }
 
   return (
     <PermissionsModal

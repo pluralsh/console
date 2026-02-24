@@ -39,6 +39,14 @@ defimpl Console.Deployments.PubSub.Governable, for: Console.PubSub.PullRequestUp
   alias Console.Schema.PullRequest
   alias Console.Deployments.Pr.Governance.Provider
 
+  def reconcile(%@for{item: %PullRequest{governance_changed: true, governance_id: id} = pr}) when is_binary(id) do
+    with %PullRequest{} = pr = Repo.preload(pr, [:governance]),
+         {:ok, result} <- Provider.open(pr),
+         {:ok, _} <- add_state(pr, result) do
+      :ok
+    end
+  end
+
   def reconcile(%@for{item: %PullRequest{governance_id: id, status: status} = pr}) when is_binary(id) and status in [:merged, :closed] do
     with %PullRequest{} = pr = Repo.preload(pr, [:governance]),
          {:ok, _} <- Provider.close(pr) do
@@ -46,4 +54,10 @@ defimpl Console.Deployments.PubSub.Governable, for: Console.PubSub.PullRequestUp
     end
   end
   def reconcile(_), do: :ok
+
+  def add_state(%PullRequest{} = pr, state) do
+    pr
+    |> PullRequest.changeset(%{governance_state: state})
+    |> Repo.update()
+  end
 end
