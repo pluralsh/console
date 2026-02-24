@@ -318,7 +318,7 @@ func (in *WorkbenchReconciler) handleWorkbenchTools(ctx context.Context, workben
 	}
 
 	logger := log.FromContext(ctx)
-	var toolIDs []string
+	toolIDs := make([]string, 0, len(workbench.Spec.ToolRefs))
 	for _, toolRef := range workbench.Spec.ToolRefs {
 		tool := &v1alpha1.WorkbenchTool{}
 		if err := in.Get(ctx, client.ObjectKey{
