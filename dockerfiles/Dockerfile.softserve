@@ -13,6 +13,8 @@ EXPOSE 9418
 
 # basics, in case need to access shell to debug/troubleshoot
 RUN apk update --no-cache
+# Upgrade OpenSSL packages to fix CVE related to stack buffer overflow in CMS AuthEnvelopedData parsing
+RUN apk upgrade --no-cache libssl3 libcrypto3
 RUN apk add sudo git vim curl
 
 # create keys
@@ -45,6 +47,8 @@ EXPOSE 9418
 
 # needs git for repos to be accessible
 RUN apk update --no-cache
+# Upgrade OpenSSL packages to fix CVE related to stack buffer overflow in CMS AuthEnvelopedData parsing
+RUN apk upgrade --no-cache libssl3 libcrypto3
 RUN apk add git
 
 COPY --from=builder /usr/bin/soft /usr/bin/
