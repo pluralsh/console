@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: git-server
   annotations:
-{{ include "console.annotations" . | nindent 4 }}
+    platform.plural.sh/repository-url: https://github.com/pluralsh/soft-serve.git
   labels:
 {{ include "console.labels" . | indent 4 }}
 spec:

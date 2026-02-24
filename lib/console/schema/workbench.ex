@@ -32,21 +32,21 @@ defmodule Console.Schema.Workbench do
     end
 
     embeds_one :skills, Skills, on_replace: :update do
-      embeds_one :ref, Service.GitRef, on_replace: :update
+      embeds_one :ref, Service.Git, on_replace: :update
       field :files, {:array, :string}
     end
 
-    field :read_policy_id, :binary_id
+    field :read_policy_id,  :binary_id
     field :write_policy_id, :binary_id
 
     has_many :read_bindings, PolicyBinding,
-      on_replace: :delete,
+      on_replace:  :delete,
       foreign_key: :policy_id,
-      references: :read_policy_id
+      references:  :read_policy_id
     has_many :write_bindings, PolicyBinding,
-      on_replace: :delete,
+      on_replace:  :delete,
       foreign_key: :policy_id,
-      references: :write_policy_id
+      references:  :write_policy_id
 
     belongs_to :project,   Project
     belongs_to :repository, GitRepository
