@@ -4,8 +4,8 @@ query GetAgentRuntime($id: ID!) {
     }
 }
 
-query GetAgentRuntimeByName($name: String!) {
-    agentRuntime(name: $name) {
+query GetAgentRuntimeByName($name: String!, $clusterId: ID!) {
+    agentRuntime(name: $name, clusterId: $clusterId) {
         ...AgentRuntimeFragment
     }
 }

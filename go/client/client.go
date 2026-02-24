@@ -10,7 +10,7 @@ import (
 
 type ConsoleClient interface {
 	GetAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntime, error)
-	GetAgentRuntimeByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntimeByName, error)
+	GetAgentRuntimeByName(ctx context.Context, name string, clusterID string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntimeByName, error)
 	UpsertAgentRuntime(ctx context.Context, attributes AgentRuntimeAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertAgentRuntime, error)
 	DeleteAgentRuntime(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteAgentRuntime, error)
 	ListAgentRuntimes(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, typeArg *AgentRuntimeType, interceptors ...clientv2.RequestInterceptor) (*ListAgentRuntimes, error)
@@ -301,11 +301,11 @@ type ConsoleClient interface {
 	UpdateWorkbenchTool(ctx context.Context, id string, attributes WorkbenchToolAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateWorkbenchTool, error)
 	DeleteWorkbenchTool(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteWorkbenchTool, error)
 	ListWorkbenches(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ListWorkbenches, error)
-	GetWorkbench(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbench, error)
-	GetWorkbenchTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchTiny, error)
+	GetWorkbench(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbench, error)
+	GetWorkbenchTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchTiny, error)
 	ListWorkbenchTools(ctx context.Context, after *string, first *int64, before *string, last *int64, q *string, interceptors ...clientv2.RequestInterceptor) (*ListWorkbenchTools, error)
-	GetWorkbenchTool(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchTool, error)
-	GetWorkbenchToolTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchToolTiny, error)
+	GetWorkbenchTool(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchTool, error)
+	GetWorkbenchToolTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchToolTiny, error)
 }
 
 type Client struct {
@@ -29722,8 +29722,8 @@ func (c *Client) GetAgentRuntime(ctx context.Context, id string, interceptors ..
 	return &res, nil
 }
 
-const GetAgentRuntimeByNameDocument = `query GetAgentRuntimeByName ($name: String!) {
-	agentRuntime(name: $name) {
+const GetAgentRuntimeByNameDocument = `query GetAgentRuntimeByName ($name: String!, $clusterId: ID!) {
+	agentRuntime(name: $name, clusterId: $clusterId) {
 		... AgentRuntimeFragment
 	}
 }
@@ -29776,9 +29776,10 @@ fragment UserFragment on User {
 }
 `
 
-func (c *Client) GetAgentRuntimeByName(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntimeByName, error) {
+func (c *Client) GetAgentRuntimeByName(ctx context.Context, name string, clusterID string, interceptors ...clientv2.RequestInterceptor) (*GetAgentRuntimeByName, error) {
 	vars := map[string]any{
-		"name": name,
+		"name":      name,
+		"clusterId": clusterID,
 	}
 
 	var res GetAgentRuntimeByName
@@ -50978,8 +50979,8 @@ func (c *Client) ListWorkbenches(ctx context.Context, after *string, first *int6
 	return &res, nil
 }
 
-const GetWorkbenchDocument = `query GetWorkbench ($id: ID!) {
-	workbench(id: $id) {
+const GetWorkbenchDocument = `query GetWorkbench ($id: ID, $name: String) {
+	workbench(id: $id, name: $name) {
 		... WorkbenchFragment
 	}
 }
@@ -51070,9 +51071,10 @@ fragment WorkbenchToolFragment on WorkbenchTool {
 }
 `
 
-func (c *Client) GetWorkbench(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbench, error) {
+func (c *Client) GetWorkbench(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbench, error) {
 	vars := map[string]any{
-		"id": id,
+		"id":   id,
+		"name": name,
 	}
 
 	var res GetWorkbench
@@ -51087,17 +51089,18 @@ func (c *Client) GetWorkbench(ctx context.Context, id string, interceptors ...cl
 	return &res, nil
 }
 
-const GetWorkbenchTinyDocument = `query GetWorkbenchTiny ($id: ID!) {
-	workbench(id: $id) {
+const GetWorkbenchTinyDocument = `query GetWorkbenchTiny ($id: ID, $name: String) {
+	workbench(id: $id, name: $name) {
 		id
 		name
 	}
 }
 `
 
-func (c *Client) GetWorkbenchTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchTiny, error) {
+func (c *Client) GetWorkbenchTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchTiny, error) {
 	vars := map[string]any{
-		"id": id,
+		"id":   id,
+		"name": name,
 	}
 
 	var res GetWorkbenchTiny
@@ -51179,8 +51182,8 @@ func (c *Client) ListWorkbenchTools(ctx context.Context, after *string, first *i
 	return &res, nil
 }
 
-const GetWorkbenchToolDocument = `query GetWorkbenchTool ($id: ID!) {
-	workbenchTool(id: $id) {
+const GetWorkbenchToolDocument = `query GetWorkbenchTool ($id: ID, $name: String) {
+	workbenchTool(id: $id, name: $name) {
 		... WorkbenchToolFragment
 	}
 }
@@ -51214,9 +51217,10 @@ fragment TinyProjectFragment on Project {
 }
 `
 
-func (c *Client) GetWorkbenchTool(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchTool, error) {
+func (c *Client) GetWorkbenchTool(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchTool, error) {
 	vars := map[string]any{
-		"id": id,
+		"id":   id,
+		"name": name,
 	}
 
 	var res GetWorkbenchTool
@@ -51231,17 +51235,18 @@ func (c *Client) GetWorkbenchTool(ctx context.Context, id string, interceptors .
 	return &res, nil
 }
 
-const GetWorkbenchToolTinyDocument = `query GetWorkbenchToolTiny ($id: ID!) {
-	workbenchTool(id: $id) {
+const GetWorkbenchToolTinyDocument = `query GetWorkbenchToolTiny ($id: ID, $name: String) {
+	workbenchTool(id: $id, name: $name) {
 		id
 		name
 	}
 }
 `
 
-func (c *Client) GetWorkbenchToolTiny(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchToolTiny, error) {
+func (c *Client) GetWorkbenchToolTiny(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetWorkbenchToolTiny, error) {
 	vars := map[string]any{
-		"id": id,
+		"id":   id,
+		"name": name,
 	}
 
 	var res GetWorkbenchToolTiny
