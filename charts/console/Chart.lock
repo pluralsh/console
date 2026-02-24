@@ -1,7 +1,7 @@
 dependencies:
 - name: kas
   repository: file://../kas
-  version: 0.3.1
+  version: 0.3.2
 - name: controller
   repository: file://../controller
   version: 0.0.170
@@ -11,5 +11,5 @@ dependencies:
 - name: dex
   repository: https://charts.dexidp.io
   version: 0.24.0
-digest: sha256:393c18aa1c4c065ba124168a02c6362f6e951012e10ff112d95443db0693f16f
-generated: "2026-02-22T05:15:41.020179007Z"
+digest: sha256:ff0a9c9984bb4a883a79ea741fdaa78b1c32f69d226d42637a13b50ddc0759b9
+generated: "2026-02-24T16:53:23.439913-05:00"
