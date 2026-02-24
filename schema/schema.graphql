@@ -1978,8 +1978,8 @@ input WorkbenchJobAttributes {
 }
 
 input WorkbenchAttributes {
-  "the name of the workbench"
-  name: String
+  "the name of the workbench (must be unique)"
+  name: String!
 
   "the description of the workbench"
   description: String

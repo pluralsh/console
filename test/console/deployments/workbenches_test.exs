@@ -45,6 +45,27 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert length(workbench.tools) == 2
       assert ids_equal(workbench.tools, [tool1, tool2])
     end
+
+    test "fails when name is missing (required)" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:error, %Ecto.Changeset{errors: errors}} =
+        Workbenches.create_workbench(%{description: "No name", project_id: project.id}, user)
+
+      assert [name: _] = errors
+    end
+
+    test "fails when name is duplicate (unique)" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      insert(:workbench, project: project, name: "already-taken")
+
+      {:error, %Ecto.Changeset{errors: errors}} =
+        Workbenches.create_workbench(%{name: "already-taken", project_id: project.id}, user)
+
+      assert [name: _] = errors
+    end
   end
 
   describe "update_workbench/3" do

@@ -13958,8 +13958,8 @@ export type WorkbenchAttributes = {
   configuration?: InputMaybe<WorkbenchConfigurationAttributes>;
   /** the description of the workbench */
   description?: InputMaybe<Scalars['String']['input']>;
-  /** the name of the workbench */
-  name?: InputMaybe<Scalars['String']['input']>;
+  /** the name of the workbench (must be unique) */
+  name: Scalars['String']['input'];
   /** the project for this workbench */
   projectId?: InputMaybe<Scalars['ID']['input']>;
   /** the git repository for this workbench */

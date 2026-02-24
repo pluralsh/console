@@ -15,7 +15,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_attributes do
-    field :name,             :string, description: "the name of the workbench"
+    field :name,             non_null(:string), description: "the name of the workbench (must be unique)"
     field :description,      :string, description: "the description of the workbench"
     field :system_prompt,    :string, description: "the system prompt for the workbench"
     field :project_id,       :id, description: "the project for this workbench"
