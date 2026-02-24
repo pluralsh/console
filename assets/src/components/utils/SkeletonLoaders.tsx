@@ -1,4 +1,6 @@
 import {
+  Flex,
+  FlexProps,
   SemanticSpacingKey,
   Sidecar,
   SidecarItem,
@@ -188,7 +190,7 @@ export const RectangleSkeleton = styled.div<{
     )
       .alpha(0.2)
       .hex()} 20%, ${theme.colors[$bright ? 'border-fill-two' : 'border-fill-one']} 50%, ${chroma(
-      theme.colors[$bright ? 'fill-zero' : 'border']
+      theme.colors[$bright ? 'border-fill-one' : 'border']
     )
       .alpha(0.2)
       .hex()} 80%)`,
@@ -256,5 +258,66 @@ export function ChatSkeleton({ numMessages = 5 }: { numMessages?: number }) {
         )
       })}
     </div>
+  )
+}
+
+const DEFAULT_PARAGRAPH_WIDTHS = [0.85, 1, 0.55]
+const DEFAULT_HEADER_WIDTHS = [0.5, 0.6, 0.75, 1]
+/** Number of paragraph lines (uses default widths), or array of line widths (0–1). */
+type MarkdownSkeletonSection = number | number[]
+
+export function MarkdownSkeleton({
+  sections = [],
+  bright = false,
+  ...props
+}: {
+  sections?: MarkdownSkeletonSection[]
+  bright?: boolean
+} & FlexProps) {
+  return (
+    <Flex
+      direction="column"
+      gap="xlarge"
+      height="100%"
+      width="100%"
+      {...props}
+    >
+      {sections.map((section, sectionIndex) => (
+        <Flex
+          key={sectionIndex}
+          direction="column"
+          gap="medium"
+        >
+          <RectangleSkeleton
+            $height="xlarge"
+            $width={
+              DEFAULT_HEADER_WIDTHS[
+                sectionIndex % DEFAULT_HEADER_WIDTHS.length
+              ] * 250
+            }
+            $bright={bright}
+          />
+          {getParagraphWidths(section).map((width, i) => (
+            <RectangleSkeleton
+              key={`p-${i}`}
+              $height="xsmall"
+              $width={`${width * 100}%`}
+              $bright={bright}
+            />
+          ))}
+        </Flex>
+      ))}
+    </Flex>
+  )
+}
+
+const getParagraphWidths = (
+  paragraphLines: number | number[] | undefined
+): number[] => {
+  if (paragraphLines === undefined) return []
+  if (Array.isArray(paragraphLines)) return paragraphLines
+  return Array.from(
+    { length: paragraphLines },
+    (_, i) => DEFAULT_PARAGRAPH_WIDTHS[i % DEFAULT_PARAGRAPH_WIDTHS.length]
   )
 }

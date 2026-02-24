@@ -23,9 +23,11 @@ const HEADER_HEIGHT = 40
 export function InsightDisplay({
   insight,
   kind = 'resource',
+  loading = false,
 }: {
   insight: Nullable<AiInsightFragment>
   kind: Nullable<string>
+  loading: boolean
 }) {
   const evidence = insight?.evidence?.filter(isNonNullable)
   const hasEvidence = !isEmpty(evidence)
@@ -54,6 +56,7 @@ export function InsightDisplay({
         <InsightMainContent
           text={insight?.text}
           kind={kind}
+          loading={loading}
         />
       </LeftSideSC>
       {hasEvidence && (
