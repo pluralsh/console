@@ -1,23 +1,33 @@
 import { IconFrame, ReloadIcon, Spinner } from '@pluralsh/design-system'
-
-interface RefreshIconFrameButtonProps {
-  refetch: () => void
-  loading?: boolean
-}
+import { useCallback, useRef, useState } from 'react'
 
 export default function IconFrameRefreshButton({
   refetch,
   loading,
-}: RefreshIconFrameButtonProps) {
+}: {
+  refetch: () => void
+  loading?: boolean
+}) {
+  const [clickedRecently, setClickedRecently] = useState(false)
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined)
+
+  const handleClick = useCallback(() => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    refetch()
+    setClickedRecently(true)
+    timeoutRef.current = setTimeout(() => setClickedRecently(false), 2500)
+  }, [refetch])
+
   return (
     <IconFrame
       clickable
       type="secondary"
       size="large"
       tooltip="Refetch data"
-      onClick={() => refetch()}
+      onClick={handleClick}
+      disabled={loading}
       icon={
-        loading ? (
+        clickedRecently && loading ? (
           <Spinner
             css={{
               width: 16,

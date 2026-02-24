@@ -26,14 +26,14 @@ import { ServiceSecrets } from 'components/cd/services/service/settings/ServiceS
 import Services from 'components/cd/services/Services'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
-import ComponentEvents from 'components/component/ComponentEvents'
+import { ComponentEvents } from 'components/component/ComponentEvents'
 
-import ComponentInfo from 'components/component/ComponentInfo'
+import { ComponentInfo } from 'components/component/ComponentInfo'
 import { ComponentInsights } from 'components/component/ComponentInsights'
 
-import ComponentMetadata from 'components/component/ComponentMetadata'
+import { ComponentMetadata } from 'components/component/ComponentMetadata'
 import ComponentMetrics from 'components/component/ComponentMetrics'
-import ComponentRaw from 'components/component/ComponentRaw'
+import { ComponentRaw } from 'components/component/ComponentRaw'
 import { Navigate, Outlet, Route } from 'react-router-dom'
 import ClusterAddOnCompatibility from '../components/cd/cluster/addon/ClusterAddOnCompatibility'
 import ClusterAddOnReadme from '../components/cd/cluster/addon/ClusterAddOnReadme'
@@ -41,8 +41,9 @@ import ClusterAddOnReleases from '../components/cd/cluster/addon/ClusterAddOnRel
 
 import { Cluster } from '../components/cd/cluster/Cluster'
 import ClusterAddOns from '../components/cd/cluster/ClusterAddOns'
-import ClusterInsightComponent from '../components/cd/cluster/ClusterInsightComponent.tsx'
-import ClusterInsights, {
+import { ClusterInsightComponent } from '../components/cd/cluster/ClusterInsightComponent.tsx'
+import {
+  ClusterInsights,
   ClusterInsightsSummary,
 } from '../components/cd/cluster/ClusterInsights.tsx'
 import { ClusterInsightsComponents } from '../components/cd/cluster/ClusterInsightsComponents.tsx'
@@ -95,7 +96,7 @@ import styled from 'styled-components'
 import ClusterCloudAddOnCompatibility from '../components/cd/cluster/addon/ClusterCloudAddOnCompatibility.tsx'
 import ClusterAddon from '../components/cd/cluster/ClusterAddon.tsx'
 import ClusterCloudAddon from '../components/cd/cluster/ClusterCloudAddon.tsx'
-import PodEvents from '../components/cd/cluster/pod/PodEvents.tsx'
+import { PodEvents } from '../components/cd/cluster/pod/PodEvents.tsx'
 import PodRaw from '../components/cd/cluster/pod/PodRaw.tsx'
 import { AI_AGENT_RUNS_PARAM_RUN_ID } from './aiRoutesConsts.tsx'
 import {

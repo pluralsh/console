@@ -1,26 +1,20 @@
-import { Code, Divider, Flex, IconFrame, Switch } from '@pluralsh/design-system'
-import { GqlError } from 'components/utils/Alert.tsx'
-import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
-import { ReactNode, useMemo, useState } from 'react'
-import { Link, useMatch } from 'react-router-dom'
-import { useTheme } from 'styled-components'
-import { stringify } from 'yaml'
-import {
-  ClusterInsightComponent as ClusterInsightComponentAPI,
-  useClusterInsightComponentQuery,
-} from '../../../generated/graphql.ts'
-import {
-  CLUSTER_ABS_PATH,
-  CLUSTER_INSIGHTS_PATH,
-} from '../../../routes/cdRoutesConsts.tsx'
+import { Code, Divider, Switch } from '@pluralsh/design-system'
 import {
   ChatWithAIButton,
   insightMessage,
-} from '../../ai/chatbot/ChatbotButton.tsx'
-import { InsightDisplay } from '../../ai/insights/InsightDisplay.tsx'
-import { ClusterProviderIcon } from '../../utils/Provider.tsx'
-import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
-import { BasicLink } from '../../utils/typography/BasicLink.tsx'
+} from 'components/ai/chatbot/ChatbotButton.tsx'
+import { InsightDisplay } from 'components/ai/insights/InsightDisplay.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
+import IconFrameRefreshButton from 'components/utils/RefreshIconFrame.tsx'
+import { useClusterInsightComponentQuery } from 'generated/graphql.ts'
+import { useMemo, useState } from 'react'
+import { useMatch } from 'react-router-dom'
+import {
+  CLUSTER_ABS_PATH,
+  CLUSTER_INSIGHTS_PATH,
+} from 'routes/cdRoutesConsts.tsx'
+import { useTheme } from 'styled-components'
+import { stringify } from 'yaml'
 import {
   useClusterInsightsContext,
   useSetActionContent,
@@ -28,9 +22,9 @@ import {
 } from './ClusterInsights.tsx'
 import { ClusterInsightComponentLabel } from './ClusterInsightsComponents.tsx'
 
-export default function ClusterInsightComponent(): ReactNode {
+export function ClusterInsightComponent() {
   const theme = useTheme()
-  const { cluster, clusterLoading, refetch } = useClusterInsightsContext()
+  const { clusterLoading, refetch } = useClusterInsightsContext()
   const id =
     useMatch(`${CLUSTER_ABS_PATH}/${CLUSTER_INSIGHTS_PATH}/components/:id`)
       ?.params?.id || ''
@@ -44,38 +38,13 @@ export default function ClusterInsightComponent(): ReactNode {
   useSetNavigationContent(
     useMemo(
       () => (
-        <Flex
-          flexDirection="column"
-          gap="xxsmall"
-        >
-          <BasicLink
-            as={Link}
-            to=".."
-            relative="path"
-            css={{
-              display: 'flex',
-              gap: theme.spacing.xsmall,
-              alignItems: 'center',
-              ...theme.partials.text.overline,
-              lineHeight: '12px',
-              cursor: 'pointer',
-            }}
-          >
-            <IconFrame
-              type="floating"
-              size="xsmall"
-              icon={<ClusterProviderIcon cluster={cluster} />}
-            />
-
-            {cluster?.name}
-          </BasicLink>
-          <ClusterInsightComponentLabel
-            component={component as Nullable<ClusterInsightComponentAPI>}
-            icon={null}
-          />
-        </Flex>
+        <ClusterInsightComponentLabel
+          component={component}
+          loading={!data && (loading || clusterLoading)}
+          icon={null}
+        />
       ),
-      [cluster, component, theme]
+      [component, data, loading, clusterLoading]
     )
   )
 
@@ -104,18 +73,13 @@ export default function ClusterInsightComponent(): ReactNode {
     )
   )
 
-  if (error) {
+  if (error)
     return (
       <GqlError
         error={error}
         header="Error loading insight component"
       />
     )
-  }
-
-  if (loading) {
-    return <LoadingIndicator />
-  }
 
   return (
     <>
@@ -140,6 +104,7 @@ export default function ClusterInsightComponent(): ReactNode {
         <InsightDisplay
           insight={component?.insight}
           kind={component?.kind}
+          loading={loading}
         />
         {showRaw && (
           <Code language="yaml">{stringify(component?.resource?.raw)}</Code>
