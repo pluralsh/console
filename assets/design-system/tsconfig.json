@@ -7,7 +7,6 @@
     "outDir": "dist",
 
     // TODO: get rid of all these once errors are fixed
-    "strict": false,
     "strictNullChecks": false,
     "strictFunctionTypes": false,
     "strictBindCallApply": false,

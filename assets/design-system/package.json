@@ -26,7 +26,6 @@
     "clean": "rimraf storybook-static dist",
     "test": "vitest --run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
     "lint": "run-p lint:format lint:js",
     "lint:format": "prettier --check ./src",
