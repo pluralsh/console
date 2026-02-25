@@ -13932,6 +13932,8 @@ export type Workbench = {
   name: Scalars['String']['output'];
   /** the project of this workbench */
   project?: Maybe<Project>;
+  /** read policy for this service */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the git repository for this workbench */
   repository?: Maybe<GitRepository>;
   runs?: Maybe<WorkbenchJobConnection>;
@@ -13942,6 +13944,8 @@ export type Workbench = {
   /** tools associated with this workbench */
   tools?: Maybe<Array<Maybe<WorkbenchTool>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** write policy of this service */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 
@@ -13963,6 +13967,8 @@ export type WorkbenchAttributes = {
   name: Scalars['String']['input'];
   /** the project for this workbench */
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  /** users who can read and execute this workbench */
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   /** the git repository for this workbench */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   /** skills configuration (ref and files) */
@@ -13971,6 +13977,8 @@ export type WorkbenchAttributes = {
   systemPrompt?: InputMaybe<Scalars['String']['input']>;
   /** tool ids to associate with this workbench */
   toolAssociations?: InputMaybe<Array<InputMaybe<WorkbenchToolAssociationAttributes>>>;
+  /** users who can modify this workbench */
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type WorkbenchCoding = {
