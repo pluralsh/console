@@ -265,5 +265,5 @@ export { default as WarningShieldIcon } from './components/icons/WarningShieldIc
 export { default as WavingHandIcon } from './components/icons/WavingHandIcon'
 export { default as WebhooksIcon } from './components/icons/WebhooksIcon'
 export { default as WindowsLogoIcon } from './components/icons/WindowsLogoIcon'
-export { default as WorkspaceIcon } from './components/icons/WorkspaceIcon'
+export { default as WorkbenchIcon } from './components/icons/WorkbenchIcon'
 export { default as YouTubeIcon } from './components/icons/YouTubeIcon'
