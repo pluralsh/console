@@ -80,6 +80,7 @@ defmodule Console.AI.Workbench.Environment do
     |> Enum.map(fn
       :metrics     -> :observability
       :logs        -> :observability
+      :traces      -> :observability
       :integration -> :integration
       :ticketing   -> :integration
       _            -> nil

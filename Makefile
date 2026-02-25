@@ -174,4 +174,5 @@ scrape-addons: ## scrapes cloud addon information and prints to a common format 
 
 proto: .PHONY ## generates protobufs schemas for elixir
 	cd go/cloud-query/api/proto && protoc --elixir_out=plugins=grpc:./../../../../lib/cloud_query cloudquery.proto
+	cd go/cloud-query/api/proto && protoc --elixir_out=plugins=grpc:./../../../../lib/cloud_query toolquery.proto
 	cd proto && pwd && protoc --elixir_out=plugins=grpc:./../lib/grpc console.proto

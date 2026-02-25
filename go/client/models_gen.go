@@ -9268,11 +9268,31 @@ type WorkbenchToolAttributes struct {
 type WorkbenchToolConfiguration struct {
 	// http tool configuration
 	HTTP *WorkbenchToolHTTPConfiguration `json:"http,omitempty"`
+	// elasticsearch connection (no secrets)
+	Elastic *WorkbenchToolElasticConnection `json:"elastic,omitempty"`
+	// prometheus connection (no secrets)
+	Prometheus *WorkbenchToolPrometheusConnection `json:"prometheus,omitempty"`
+	// loki connection (no secrets)
+	Loki *WorkbenchToolLokiConnection `json:"loki,omitempty"`
+	// tempo connection (no secrets)
+	Tempo *WorkbenchToolTempoConnection `json:"tempo,omitempty"`
+	// datadog connection (no secrets)
+	Datadog *WorkbenchToolDatadogConnection `json:"datadog,omitempty"`
 }
 
 type WorkbenchToolConfigurationAttributes struct {
 	// http tool configuration
 	HTTP *WorkbenchToolHTTPConfigurationAttributes `json:"http,omitempty"`
+	// elasticsearch connection (logs)
+	Elastic *WorkbenchToolElasticConnectionAttributes `json:"elastic,omitempty"`
+	// prometheus connection (metrics)
+	Prometheus *WorkbenchToolPrometheusConnectionAttributes `json:"prometheus,omitempty"`
+	// loki connection (logs)
+	Loki *WorkbenchToolLokiConnectionAttributes `json:"loki,omitempty"`
+	// tempo connection (traces)
+	Tempo *WorkbenchToolTempoConnectionAttributes `json:"tempo,omitempty"`
+	// datadog connection (metrics, logs)
+	Datadog *WorkbenchToolDatadogConnectionAttributes `json:"datadog,omitempty"`
 }
 
 type WorkbenchToolConnection struct {
@@ -9280,9 +9300,37 @@ type WorkbenchToolConnection struct {
 	Edges    []*WorkbenchToolEdge `json:"edges,omitempty"`
 }
 
+type WorkbenchToolDatadogConnection struct {
+	// datadog site (API/app keys never exposed)
+	Site *string `json:"site,omitempty"`
+}
+
+type WorkbenchToolDatadogConnectionAttributes struct {
+	// datadog site (e.g. datadoghq.com)
+	Site *string `json:"site,omitempty"`
+	// datadog API key
+	APIKey string `json:"apiKey"`
+	// datadog application key
+	AppKey *string `json:"appKey,omitempty"`
+}
+
 type WorkbenchToolEdge struct {
 	Node   *WorkbenchTool `json:"node,omitempty"`
 	Cursor *string        `json:"cursor,omitempty"`
+}
+
+type WorkbenchToolElasticConnection struct {
+	// elasticsearch base url (credentials never exposed)
+	URL *string `json:"url,omitempty"`
+}
+
+type WorkbenchToolElasticConnectionAttributes struct {
+	// elasticsearch base url
+	URL string `json:"url"`
+	// basic auth username
+	Username string `json:"username"`
+	// basic auth password
+	Password string `json:"password"`
 }
 
 type WorkbenchToolHTTPConfiguration struct {
@@ -9319,6 +9367,54 @@ type WorkbenchToolHTTPHeader struct {
 type WorkbenchToolHTTPHeaderAttributes struct {
 	Name  *string `json:"name,omitempty"`
 	Value *string `json:"value,omitempty"`
+}
+
+type WorkbenchToolLokiConnection struct {
+	// loki base url
+	URL *string `json:"url,omitempty"`
+	// optional tenant id
+	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolLokiConnectionAttributes struct {
+	// loki base url
+	URL string `json:"url"`
+	// bearer token or api key
+	Token string `json:"token"`
+	// optional tenant id
+	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolPrometheusConnection struct {
+	// prometheus base url
+	URL *string `json:"url,omitempty"`
+	// optional tenant id
+	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolPrometheusConnectionAttributes struct {
+	// prometheus base url
+	URL string `json:"url"`
+	// bearer token or api key
+	Token string `json:"token"`
+	// optional tenant id (e.g. for Mimir)
+	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolTempoConnection struct {
+	// tempo base url
+	URL *string `json:"url,omitempty"`
+	// optional tenant id
+	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolTempoConnectionAttributes struct {
+	// tempo base url
+	URL string `json:"url"`
+	// bearer token or api key
+	Token string `json:"token"`
+	// optional tenant id
+	TenantID *string `json:"tenantId,omitempty"`
 }
 
 // a description of a yaml-merge operation on a file
@@ -14948,16 +15044,26 @@ func (e WorkbenchToolHTTPMethod) MarshalJSON() ([]byte, error) {
 type WorkbenchToolType string
 
 const (
-	WorkbenchToolTypeHTTP WorkbenchToolType = "HTTP"
+	WorkbenchToolTypeHTTP       WorkbenchToolType = "HTTP"
+	WorkbenchToolTypeElastic    WorkbenchToolType = "ELASTIC"
+	WorkbenchToolTypeDatadog    WorkbenchToolType = "DATADOG"
+	WorkbenchToolTypePrometheus WorkbenchToolType = "PROMETHEUS"
+	WorkbenchToolTypeLoki       WorkbenchToolType = "LOKI"
+	WorkbenchToolTypeTempo      WorkbenchToolType = "TEMPO"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeHTTP,
+	WorkbenchToolTypeElastic,
+	WorkbenchToolTypeDatadog,
+	WorkbenchToolTypePrometheus,
+	WorkbenchToolTypeLoki,
+	WorkbenchToolTypeTempo,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo:
 		return true
 	}
 	return false

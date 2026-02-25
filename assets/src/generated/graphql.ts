@@ -14304,13 +14304,33 @@ export enum WorkbenchToolCategory {
 
 export type WorkbenchToolConfiguration = {
   __typename?: 'WorkbenchToolConfiguration';
+  /** datadog connection (no secrets) */
+  datadog?: Maybe<WorkbenchToolDatadogConnection>;
+  /** elasticsearch connection (no secrets) */
+  elastic?: Maybe<WorkbenchToolElasticConnection>;
   /** http tool configuration */
   http?: Maybe<WorkbenchToolHttpConfiguration>;
+  /** loki connection (no secrets) */
+  loki?: Maybe<WorkbenchToolLokiConnection>;
+  /** prometheus connection (no secrets) */
+  prometheus?: Maybe<WorkbenchToolPrometheusConnection>;
+  /** tempo connection (no secrets) */
+  tempo?: Maybe<WorkbenchToolTempoConnection>;
 };
 
 export type WorkbenchToolConfigurationAttributes = {
+  /** datadog connection (metrics, logs) */
+  datadog?: InputMaybe<WorkbenchToolDatadogConnectionAttributes>;
+  /** elasticsearch connection (logs) */
+  elastic?: InputMaybe<WorkbenchToolElasticConnectionAttributes>;
   /** http tool configuration */
   http?: InputMaybe<WorkbenchToolHttpConfigurationAttributes>;
+  /** loki connection (logs) */
+  loki?: InputMaybe<WorkbenchToolLokiConnectionAttributes>;
+  /** prometheus connection (metrics) */
+  prometheus?: InputMaybe<WorkbenchToolPrometheusConnectionAttributes>;
+  /** tempo connection (traces) */
+  tempo?: InputMaybe<WorkbenchToolTempoConnectionAttributes>;
 };
 
 export type WorkbenchToolConnection = {
@@ -14319,10 +14339,40 @@ export type WorkbenchToolConnection = {
   pageInfo: PageInfo;
 };
 
+export type WorkbenchToolDatadogConnection = {
+  __typename?: 'WorkbenchToolDatadogConnection';
+  /** datadog site (API/app keys never exposed) */
+  site?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchToolDatadogConnectionAttributes = {
+  /** datadog API key */
+  apiKey: Scalars['String']['input'];
+  /** datadog application key */
+  appKey?: InputMaybe<Scalars['String']['input']>;
+  /** datadog site (e.g. datadoghq.com) */
+  site?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type WorkbenchToolEdge = {
   __typename?: 'WorkbenchToolEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<WorkbenchTool>;
+};
+
+export type WorkbenchToolElasticConnection = {
+  __typename?: 'WorkbenchToolElasticConnection';
+  /** elasticsearch base url (credentials never exposed) */
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchToolElasticConnectionAttributes = {
+  /** basic auth password */
+  password: Scalars['String']['input'];
+  /** elasticsearch base url */
+  url: Scalars['String']['input'];
+  /** basic auth username */
+  username: Scalars['String']['input'];
 };
 
 export type WorkbenchToolHttpConfiguration = {
@@ -14371,8 +14421,64 @@ export enum WorkbenchToolHttpMethod {
   Put = 'PUT'
 }
 
+export type WorkbenchToolLokiConnection = {
+  __typename?: 'WorkbenchToolLokiConnection';
+  /** optional tenant id */
+  tenantId?: Maybe<Scalars['String']['output']>;
+  /** loki base url */
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchToolLokiConnectionAttributes = {
+  /** optional tenant id */
+  tenantId?: InputMaybe<Scalars['String']['input']>;
+  /** bearer token or api key */
+  token: Scalars['String']['input'];
+  /** loki base url */
+  url: Scalars['String']['input'];
+};
+
+export type WorkbenchToolPrometheusConnection = {
+  __typename?: 'WorkbenchToolPrometheusConnection';
+  /** optional tenant id */
+  tenantId?: Maybe<Scalars['String']['output']>;
+  /** prometheus base url */
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchToolPrometheusConnectionAttributes = {
+  /** optional tenant id (e.g. for Mimir) */
+  tenantId?: InputMaybe<Scalars['String']['input']>;
+  /** bearer token or api key */
+  token: Scalars['String']['input'];
+  /** prometheus base url */
+  url: Scalars['String']['input'];
+};
+
+export type WorkbenchToolTempoConnection = {
+  __typename?: 'WorkbenchToolTempoConnection';
+  /** optional tenant id */
+  tenantId?: Maybe<Scalars['String']['output']>;
+  /** tempo base url */
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchToolTempoConnectionAttributes = {
+  /** optional tenant id */
+  tenantId?: InputMaybe<Scalars['String']['input']>;
+  /** bearer token or api key */
+  token: Scalars['String']['input'];
+  /** tempo base url */
+  url: Scalars['String']['input'];
+};
+
 export enum WorkbenchToolType {
-  Http = 'HTTP'
+  Datadog = 'DATADOG',
+  Elastic = 'ELASTIC',
+  Http = 'HTTP',
+  Loki = 'LOKI',
+  Prometheus = 'PROMETHEUS',
+  Tempo = 'TEMPO'
 }
 
 /** a description of a yaml-merge operation on a file */

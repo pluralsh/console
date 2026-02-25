@@ -97,7 +97,7 @@ defmodule Console.AI.Workbench.Engine do
     |> loop()
   end
 
-  @supported_subagents ~w(infrastructure integration coding)a
+  @supported_subagents ~w(infrastructure integration coding observability)a
 
   defp spawn_activity(%Subagent{subagent: type, prompt: prompt} = call, %__MODULE__{job: job, environment: environment})
       when type in @supported_subagents do
@@ -123,6 +123,7 @@ defmodule Console.AI.Workbench.Engine do
   defp subagent_module(:infrastructure), do: SA.Infrastructure
   defp subagent_module(:integration), do: SA.Integration
   defp subagent_module(:coding), do: SA.Coding
+  defp subagent_module(:observability), do: SA.Observability
 
   defp tool_attrs(%{id: %Console.AI.Tool{id: id, name: name, arguments: arguments}}) when is_binary(id) and is_binary(name),
     do: %{call_id: id, name: name, arguments: arguments}

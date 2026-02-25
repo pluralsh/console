@@ -1,0 +1,27 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "The query to use to filter the desired timeseries metrics"
+        },
+        "step": {
+            "type": "string",
+            "description": "The step to use to aggregate the desired timeseries metrics"
+        },
+        "time_range": {
+            "type": "object",
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "description": "The start time to use to filter metrics"
+                },
+                "end": {
+                    "type": "string",
+                    "description": "The end time to use to filter metrics"
+                }
+            }
+        }
+    },
+    "required": ["query"]
+}

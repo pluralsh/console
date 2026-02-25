@@ -3,7 +3,7 @@ defmodule Console.Schema.WorkbenchTool do
   alias Console.Schema.{Project, PolicyBinding, User}
   alias Console.Deployments.Policies.Rbac
 
-  defenum Tool, http: 0
+  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5
   defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
@@ -13,6 +13,36 @@ defmodule Console.Schema.WorkbenchTool do
     field :name,            :string
 
     embeds_one :configuration, Configuration, on_replace: :update do
+      embeds_one :elastic, ElasticConnection, on_replace: :update do
+        field :url,      :string
+        field :username, :string
+        field :password, :string
+      end
+
+      embeds_one :prometheus, PrometheusConnection, on_replace: :update do
+        field :url,       :string
+        field :token,     :string
+        field :tenant_id, :string
+      end
+
+      embeds_one :loki, LokiConnection, on_replace: :update do
+        field :url,       :string
+        field :token,     :string
+        field :tenant_id, :string
+      end
+
+      embeds_one :tempo, TempoConnection, on_replace: :update do
+        field :url,       :string
+        field :token,     :string
+        field :tenant_id, :string
+      end
+
+      embeds_one :datadog, DatadogConnection, on_replace: :update do
+        field :site,      :string
+        field :api_key,   :string
+        field :app_key,   :string
+      end
+
       embeds_one :http, HttpConfiguration, on_replace: :update do
         field :url,          :string
         field :method,       HttpMethod
@@ -106,6 +136,11 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, [])
     |> cast_embed(:http, with: &http_configuration_changeset/2)
+    |> cast_embed(:elastic, with: &elastic_configuration_changeset/2)
+    |> cast_embed(:prometheus, with: &prom_configuration_changeset/2)
+    |> cast_embed(:loki, with: &prom_configuration_changeset/2)
+    |> cast_embed(:tempo, with: &prom_configuration_changeset/2)
+    |> cast_embed(:datadog, with: &datadog_configuration_changeset/2)
   end
 
   defp http_configuration_changeset(model, attrs) do
@@ -119,6 +154,24 @@ defmodule Console.Schema.WorkbenchTool do
       end
     end)
     |> validate_required([:url, :method, :input_schema])
+  end
+
+  defp prom_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token tenant_id)a)
+    |> validate_required([:url, :token])
+  end
+
+  defp datadog_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(site api_key app_key)a)
+    |> validate_required([:api_key])
+  end
+
+  defp elastic_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url username password)a)
+    |> validate_required([:url, :username, :password])
   end
 
   defp header_changeset(model, attrs) do

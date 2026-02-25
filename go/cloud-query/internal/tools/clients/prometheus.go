@@ -13,6 +13,7 @@ type prometheusAuthRoundTripper struct {
 	token    string
 	username string
 	password string
+	tenantID string
 }
 
 func (rt *prometheusAuthRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -22,6 +23,10 @@ func (rt *prometheusAuthRoundTripper) RoundTrip(req *http.Request) (*http.Respon
 
 	if len(req.Header.Get("Authorization")) != 0 {
 		return rt.base.RoundTrip(req)
+	}
+
+	if len(rt.tenantID) > 0 {
+		req.Header.Set("X-Scope-OrgID", rt.tenantID)
 	}
 
 	if len(rt.token) > 0 {
@@ -47,6 +52,7 @@ func NewPrometheusHTTPClient(conn *toolquery.PrometheusConnection) *http.Client 
 			token:    conn.GetToken(),
 			username: conn.GetUsername(),
 			password: conn.GetPassword(),
+			tenantID: conn.GetTenantId(),
 		},
 	}
 }

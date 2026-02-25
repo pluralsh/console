@@ -60,7 +60,42 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_configuration_attributes do
-    field :http, :workbench_tool_http_configuration_attributes, description: "http tool configuration"
+    field :http,       :workbench_tool_http_configuration_attributes, description: "http tool configuration"
+    field :elastic,    :workbench_tool_elastic_connection_attributes, description: "elasticsearch connection (logs)"
+    field :prometheus, :workbench_tool_prometheus_connection_attributes, description: "prometheus connection (metrics)"
+    field :loki,       :workbench_tool_loki_connection_attributes, description: "loki connection (logs)"
+    field :tempo,      :workbench_tool_tempo_connection_attributes, description: "tempo connection (traces)"
+    field :datadog,    :workbench_tool_datadog_connection_attributes, description: "datadog connection (metrics, logs)"
+  end
+
+  input_object :workbench_tool_elastic_connection_attributes do
+    field :url,      non_null(:string), description: "elasticsearch base url"
+    field :username, non_null(:string), description: "basic auth username"
+    field :password, non_null(:string), description: "basic auth password"
+  end
+
+  input_object :workbench_tool_prometheus_connection_attributes do
+    field :url,       non_null(:string), description: "prometheus base url"
+    field :token,     non_null(:string), description: "bearer token or api key"
+    field :tenant_id, :string, description: "optional tenant id (e.g. for Mimir)"
+  end
+
+  input_object :workbench_tool_loki_connection_attributes do
+    field :url,       non_null(:string), description: "loki base url"
+    field :token,     non_null(:string), description: "bearer token or api key"
+    field :tenant_id, :string, description: "optional tenant id"
+  end
+
+  input_object :workbench_tool_tempo_connection_attributes do
+    field :url,       non_null(:string), description: "tempo base url"
+    field :token,     non_null(:string), description: "bearer token or api key"
+    field :tenant_id, :string, description: "optional tenant id"
+  end
+
+  input_object :workbench_tool_datadog_connection_attributes do
+    field :site,    :string, description: "datadog site (e.g. datadoghq.com)"
+    field :api_key, non_null(:string), description: "datadog API key"
+    field :app_key, :string, description: "datadog application key"
   end
 
   input_object :workbench_tool_http_configuration_attributes do
@@ -219,7 +254,35 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_configuration do
-    field :http, :workbench_tool_http_configuration, description: "http tool configuration"
+    field :http,      :workbench_tool_http_configuration, description: "http tool configuration"
+    field :elastic,   :workbench_tool_elastic_connection, description: "elasticsearch connection (no secrets)"
+    field :prometheus, :workbench_tool_prometheus_connection, description: "prometheus connection (no secrets)"
+    field :loki,      :workbench_tool_loki_connection, description: "loki connection (no secrets)"
+    field :tempo,     :workbench_tool_tempo_connection, description: "tempo connection (no secrets)"
+    field :datadog,   :workbench_tool_datadog_connection, description: "datadog connection (no secrets)"
+  end
+
+  object :workbench_tool_elastic_connection do
+    field :url, :string, description: "elasticsearch base url (credentials never exposed)"
+  end
+
+  object :workbench_tool_prometheus_connection do
+    field :url,       :string, description: "prometheus base url"
+    field :tenant_id, :string, description: "optional tenant id"
+  end
+
+  object :workbench_tool_loki_connection do
+    field :url,       :string, description: "loki base url"
+    field :tenant_id, :string, description: "optional tenant id"
+  end
+
+  object :workbench_tool_tempo_connection do
+    field :url,       :string, description: "tempo base url"
+    field :tenant_id, :string, description: "optional tenant id"
+  end
+
+  object :workbench_tool_datadog_connection do
+    field :site, :string, description: "datadog site (API/app keys never exposed)"
   end
 
   object :workbench_tool_http_configuration do
