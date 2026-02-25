@@ -72,7 +72,7 @@ func (in *ServiceAccount) Attributes() console.ServiceAccountAttributes {
 }
 
 func (in *ServiceAccount) TokenSecretNamespace() string {
-	if in.Spec.TokenSecretRef.Namespace != "" {
+	if in.Spec.TokenSecretRef != nil && in.Spec.TokenSecretRef.Namespace != "" {
 		return in.Spec.TokenSecretRef.Namespace
 	}
 
