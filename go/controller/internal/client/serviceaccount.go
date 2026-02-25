@@ -60,7 +60,7 @@ func (c *client) CreateServiceAccountToken(ctx context.Context, id string, scope
 		return nil, err
 	}
 
-	if response.CreateServiceAccountToken.Token == nil {
+	if response.CreateServiceAccountToken == nil || response.CreateServiceAccountToken.Token == nil {
 		return response.CreateServiceAccountToken, fmt.Errorf("service account token is empty")
 	}
 
