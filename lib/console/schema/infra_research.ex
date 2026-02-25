@@ -44,17 +44,16 @@ defmodule Console.Schema.InfraResearch do
     timestamps()
   end
 
-  def for_published(query \\ __MODULE__, user_id, published)
 
-  def for_published(query, _, true) do
+  def published(query, _, true) do
     from(r in query, where: r.published)
   end
 
-  def for_published(query, user_id, false) do
+  def unpublished(query, user_id, false) do
     from(r in query, where: r.user_id == ^user_id and (is_nil(r.published) or not r.published))
   end
 
-  def for_published(query, user_id, _) do
+  def for_user(query, user_id) do
     from(r in query, where: r.user_id == ^user_id or r.published)
   end
 
