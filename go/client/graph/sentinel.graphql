@@ -143,6 +143,18 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
     cases {
         ...TestCaseConfigurationFragment
     }
+    default {
+        ...SentinelCheckIntegrationTestDefaultConfigurationFragment
+    }
+}
+
+fragment SentinelCheckIntegrationTestDefaultConfigurationFragment on SentinelCheckIntegrationTestDefaultConfiguration {
+    ignore
+    namespaceAnnotations
+    namespaceLabels
+    registry
+    resourceAnnotations
+    resourceLabels
 }
 
 fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfiguration {
