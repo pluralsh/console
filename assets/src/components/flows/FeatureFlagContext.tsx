@@ -14,18 +14,19 @@ import { InlineLink } from 'components/utils/typography/InlineLink'
 import { createContext, ReactNode, useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { EDGE_ABS_PATH } from 'routes/edgeRoutes'
+import { WORKBENCHES_ABS_PATH } from 'routes/workbenchesRoutesConsts'
 
 const FEATURE_FLAG_STORAGE_KEY = 'feature-flags'
 const defaultDocsUrl = 'https://docs.plural.sh/'
 
 export type FeatureFlags = {
   Edge: boolean
-  Agent: boolean
+  Workbenches: boolean
 }
 
 const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   Edge: false,
-  Agent: false,
+  Workbenches: false,
 }
 
 export const FeatureFlagContext = createContext<{
@@ -74,8 +75,7 @@ export const FeatureFlagProvider = ({ children }: { children: ReactNode }) => {
         }}
       >
         {curType === 'Edge' && <EdgeBodyContent />}
-        {curType === 'Agent' &&
-          'Enables UI for experimental AI agent features.'}
+        {curType === 'Workbenches' && <WorkbenchesBodyContent />}
       </FeatureFlagConfirmationModal>
       <Toast
         show={showToast}
@@ -93,6 +93,14 @@ export const FeatureFlagProvider = ({ children }: { children: ReactNode }) => {
               to={EDGE_ABS_PATH}
             >
               Go to Edge
+            </InlineLink>
+          )}
+          {curType === 'Workbenches' && (
+            <InlineLink
+              as={Link}
+              to={WORKBENCHES_ABS_PATH}
+            >
+              Go to Workbenches
             </InlineLink>
           )}
         </Flex>
@@ -157,6 +165,15 @@ function EdgeBodyContent() {
     <span>
       <strong>Edge</strong> is an experimental feature that allows you to deploy
       and manage your own edge compute resources on Plural.
+    </span>
+  )
+}
+
+function WorkbenchesBodyContent() {
+  return (
+    <span>
+      <strong>Workbenches</strong> is an experimental feature that provides
+      configurable, reusable agent definitions for common devops tasks.
     </span>
   )
 }

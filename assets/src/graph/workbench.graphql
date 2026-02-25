@@ -1,0 +1,151 @@
+fragment WorkbenchTool on WorkbenchTool {
+  id
+  name
+  tool
+  categories
+  project {
+    id
+    name
+  }
+  configuration {
+    http {
+      url
+      method
+      headers {
+        name
+        value
+      }
+      body
+      inputSchema
+    }
+  }
+  insertedAt
+  updatedAt
+}
+
+fragment WorkbenchTiny on Workbench {
+  id
+  name
+  description
+  insertedAt
+  updatedAt
+}
+
+fragment Workbench on Workbench {
+  ...WorkbenchTiny
+  systemPrompt
+  project {
+    id
+    name
+  }
+  repository {
+    id
+    url
+    httpsPath
+  }
+  agentRuntime {
+    id
+    name
+  }
+  configuration {
+    infrastructure {
+      services
+      stacks
+      kubernetes
+    }
+    coding {
+      mode
+      repositories
+    }
+  }
+  skills {
+    ref {
+      ref
+      folder
+    }
+    files
+  }
+  tools {
+    ...WorkbenchTool
+  }
+}
+
+query Workbenches($first: Int = 100, $after: String, $q: String) {
+  workbenches(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...WorkbenchTiny
+      }
+    }
+  }
+}
+
+query Workbench($id: ID, $name: String) {
+  workbench(id: $id, name: $name) {
+    ...Workbench
+  }
+}
+
+query WorkbenchTools($first: Int = 100, $after: String, $q: String) {
+  workbenchTools(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...WorkbenchTool
+      }
+    }
+  }
+}
+
+mutation CreateWorkbench($attributes: WorkbenchAttributes!) {
+  createWorkbench(attributes: $attributes) {
+    ...Workbench
+  }
+}
+
+mutation UpdateWorkbench($id: ID!, $attributes: WorkbenchAttributes!) {
+  updateWorkbench(id: $id, attributes: $attributes) {
+    ...Workbench
+  }
+}
+
+mutation DeleteWorkbench($id: ID!) {
+  deleteWorkbench(id: $id) {
+    id
+  }
+}
+
+mutation CreateWorkbenchTool($attributes: WorkbenchToolAttributes!) {
+  createWorkbenchTool(attributes: $attributes) {
+    ...WorkbenchTool
+  }
+}
+
+mutation UpdateWorkbenchTool($id: ID!, $attributes: WorkbenchToolAttributes!) {
+  updateWorkbenchTool(id: $id, attributes: $attributes) {
+    ...WorkbenchTool
+  }
+}
+
+mutation DeleteWorkbenchTool($id: ID!) {
+  deleteWorkbenchTool(id: $id) {
+    id
+  }
+}
+
+mutation CreateWorkbenchJob(
+  $workbenchId: ID!
+  $attributes: WorkbenchJobAttributes!
+) {
+  createWorkbenchJob(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    status
+    prompt
+    insertedAt
+  }
+}
