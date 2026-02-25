@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/nexus
 
-go 1.25.5
+go 1.25.7
 
 require (
 	github.com/bytedance/sonic v1.14.2
