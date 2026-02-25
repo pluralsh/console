@@ -478,6 +478,7 @@ defmodule Console.GraphQl.AI do
 
     connection field :infra_researches, node_type: :infra_research do
       middleware Authenticated
+      arg :published, :boolean
 
       resolve &AI.list_researches/2
     end

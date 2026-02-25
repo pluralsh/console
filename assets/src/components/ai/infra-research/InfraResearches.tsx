@@ -3,6 +3,8 @@ import {
   Divider,
   Flex,
   IconFrame,
+  ListBoxItem,
+  Select,
   Table,
   TelescopeIcon,
   useSetBreadcrumbs,
@@ -17,7 +19,7 @@ import {
   useInfraResearchesQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { AI_INFRA_RESEARCH_REL_PATH } from 'routes/aiRoutesConsts'
 import styled from 'styled-components'
@@ -27,16 +29,18 @@ import { getAIBreadcrumbs } from '../AI'
 import { InfraResearchInput } from './InfraResearchInput'
 import { RunStatusChip } from './details/InfraResearch'
 import { AIExampleCard, infraResearchExamples } from '../AIExampleCard'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
 
 export const getInfraResearchesBreadcrumbs = () =>
   getAIBreadcrumbs(AI_INFRA_RESEARCH_REL_PATH)
 
 export function InfraResearches() {
+  const [published, setPublished] = useState<Nullable<boolean>>(undefined)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData({
-      queryHook: useInfraResearchesQuery,
-      keyPath: ['infraResearches'],
-    })
+    useFetchPaginatedData(
+      { queryHook: useInfraResearchesQuery, keyPath: ['infraResearches'] },
+      { published }
+    )
   const infraResearches = useMemo(
     () => mapExistingNodes(data?.infraResearches),
     [data?.infraResearches]
@@ -100,15 +104,33 @@ export function InfraResearches() {
           gap="small"
           minHeight={260}
         >
-          <StackedText
-            first="Research questions"
-            firstPartialType="body2Bold"
-            firstColor="text"
-            second="Previous prompts and questions"
-            secondPartialType="body2"
-            secondColor="text-light"
-            loading={isLoading}
-          />
+          <StretchedFlex>
+            <StackedText
+              first="Research questions"
+              firstPartialType="body2Bold"
+              firstColor="text"
+              second="Previous prompts and questions"
+              secondPartialType="body2"
+              secondColor="text-light"
+              loading={isLoading}
+            />
+            <Select
+              width={160}
+              selectedKey={publishedToLabel(published)}
+              onSelectionChange={(key) =>
+                setPublished(
+                  labelToPublished[key as keyof typeof labelToPublished]
+                )
+              }
+            >
+              {Object.keys(labelToPublished).map((label) => (
+                <ListBoxItem
+                  key={label}
+                  label={label}
+                />
+              ))}
+            </Select>
+          </StretchedFlex>
           {error ? (
             <GqlError error={error} />
           ) : (
@@ -186,3 +208,19 @@ const PromptSectionSC = styled.div(({ theme }) => ({
     paddingRight: theme.spacing.small,
   },
 }))
+
+const labelToPublished = {
+  All: undefined,
+  Published: true,
+  'My drafts': false,
+}
+const publishedToLabel = (published: Nullable<boolean>) => {
+  switch (published) {
+    case undefined:
+      return 'All'
+    case true:
+      return 'Published'
+    case false:
+      return 'My drafts'
+  }
+}

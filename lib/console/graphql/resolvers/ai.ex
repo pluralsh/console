@@ -77,7 +77,7 @@ defmodule Console.GraphQl.Resolvers.AI do
 
   def list_researches(args, %{context: %{current_user: user}}) do
     InfraResearch.ordered()
-    |> InfraResearch.for_user(user.id)
+    |> InfraResearch.for_published(user.id, args[:published])
     |> paginate(args)
   end
 

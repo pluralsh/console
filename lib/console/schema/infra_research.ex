@@ -44,8 +44,18 @@ defmodule Console.Schema.InfraResearch do
     timestamps()
   end
 
-  def for_user(query \\ __MODULE__, user_id) do
-    from(r in query, where: r.user_id == ^user_id or (not is_nil(r.published) and r.published))
+  def for_published(query \\ __MODULE__, user_id, published)
+
+  def for_published(query, _, true) do
+    from(r in query, where: r.published)
+  end
+
+  def for_published(query, user_id, false) do
+    from(r in query, where: r.user_id == ^user_id and (is_nil(r.published) or not r.published))
+  end
+
+  def for_published(query, user_id, _) do
+    from(r in query, where: r.user_id == ^user_id or r.published)
   end
 
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do

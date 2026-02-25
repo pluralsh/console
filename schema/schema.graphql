@@ -580,7 +580,7 @@ type RootQueryType {
 
   mcpToken: String
 
-  infraResearches(after: String, first: Int, before: String, last: Int): InfraResearchConnection
+  infraResearches(after: String, first: Int, before: String, last: Int, published: Boolean): InfraResearchConnection
 
   infraResearch(id: ID!): InfraResearch
 

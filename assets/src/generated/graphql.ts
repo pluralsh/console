@@ -10434,6 +10434,7 @@ export type RootQueryTypeInfraResearchesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  published?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -14726,6 +14727,7 @@ export type InfraResearchesQueryVariables = Exact<{
   last?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  published?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -23817,8 +23819,14 @@ export type InfraResearchLazyQueryHookResult = ReturnType<typeof useInfraResearc
 export type InfraResearchSuspenseQueryHookResult = ReturnType<typeof useInfraResearchSuspenseQuery>;
 export type InfraResearchQueryResult = Apollo.QueryResult<InfraResearchQuery, InfraResearchQueryVariables>;
 export const InfraResearchesDocument = gql`
-    query InfraResearches($first: Int = 100, $last: Int, $after: String, $before: String) {
-  infraResearches(first: $first, last: $last, after: $after, before: $before) {
+    query InfraResearches($first: Int = 100, $last: Int, $after: String, $before: String, $published: Boolean) {
+  infraResearches(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    published: $published
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -23848,6 +23856,7 @@ ${InfraResearchFragmentDoc}`;
  *      last: // value for 'last'
  *      after: // value for 'after'
  *      before: // value for 'before'
+ *      published: // value for 'published'
  *   },
  * });
  */
