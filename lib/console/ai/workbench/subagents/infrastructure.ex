@@ -13,7 +13,7 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
-      {:error, error} -> %{status: :failed, error: "error running integration subagent: #{inspect(error)}"}
+      {:error, error} -> %{status: :failed, error: "error running infrastructure subagent: #{inspect(error)}"}
     end
   end
 
