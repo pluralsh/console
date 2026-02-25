@@ -8975,10 +8975,14 @@ type Workbench struct {
 	// skills configuration
 	Skills *WorkbenchSkills `json:"skills,omitempty"`
 	// tools associated with this workbench
-	Tools      []*WorkbenchTool        `json:"tools,omitempty"`
-	Runs       *WorkbenchJobConnection `json:"runs,omitempty"`
-	InsertedAt *string                 `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                 `json:"updatedAt,omitempty"`
+	Tools []*WorkbenchTool `json:"tools,omitempty"`
+	// read policy for this service
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// write policy of this service
+	WriteBindings []*PolicyBinding        `json:"writeBindings,omitempty"`
+	Runs          *WorkbenchJobConnection `json:"runs,omitempty"`
+	InsertedAt    *string                 `json:"insertedAt,omitempty"`
+	UpdatedAt     *string                 `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchAttributes struct {
@@ -8998,6 +9002,10 @@ type WorkbenchAttributes struct {
 	Configuration *WorkbenchConfigurationAttributes `json:"configuration,omitempty"`
 	// skills configuration (ref and files)
 	Skills *WorkbenchSkillsAttributes `json:"skills,omitempty"`
+	// users who can read and execute this workbench
+	ReadBindings []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	// users who can modify this workbench
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	// tool ids to associate with this workbench
 	ToolAssociations []*WorkbenchToolAssociationAttributes `json:"toolAssociations,omitempty"`
 }

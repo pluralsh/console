@@ -15,14 +15,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_attributes do
-    field :name,             non_null(:string), description: "the name of the workbench (must be unique)"
-    field :description,      :string, description: "the description of the workbench"
-    field :system_prompt,    :string, description: "the system prompt for the workbench"
-    field :project_id,       :id, description: "the project for this workbench"
-    field :repository_id,    :id, description: "the git repository for this workbench"
-    field :agent_runtime_id, :id, description: "the agent runtime for this workbench"
+    field :name,              non_null(:string), description: "the name of the workbench (must be unique)"
+    field :description,       :string, description: "the description of the workbench"
+    field :system_prompt,     :string, description: "the system prompt for the workbench"
+    field :project_id,        :id, description: "the project for this workbench"
+    field :repository_id,     :id, description: "the git repository for this workbench"
+    field :agent_runtime_id,  :id, description: "the agent runtime for this workbench"
     field :configuration,     :workbench_configuration_attributes, description: "workbench configuration"
-    field :skills,           :workbench_skills_attributes, description: "skills configuration (ref and files)"
+    field :skills,            :workbench_skills_attributes, description: "skills configuration (ref and files)"
+    field :read_bindings,     list_of(:policy_binding_attributes), description: "users who can read and execute this workbench"
+    field :write_bindings,    list_of(:policy_binding_attributes), description: "users who can modify this workbench"
     field :tool_associations, list_of(:workbench_tool_association_attributes), description: "tool ids to associate with this workbench"
   end
 
@@ -122,6 +124,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :configuration, :workbench_configuration, description: "workbench configuration"
     field :skills,        :workbench_skills, description: "skills configuration"
     field :tools,         list_of(:workbench_tool), resolve: dataloader(Deployments), description: "tools associated with this workbench"
+
+    field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this service"
+    field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this service"
 
     connection field :runs, node_type: :workbench_job do
       resolve &Deployments.list_workbench_runs/3

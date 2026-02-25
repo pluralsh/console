@@ -2007,6 +2007,12 @@ input WorkbenchAttributes {
   "skills configuration (ref and files)"
   skills: WorkbenchSkillsAttributes
 
+  "users who can read and execute this workbench"
+  readBindings: [PolicyBindingAttributes]
+
+  "users who can modify this workbench"
+  writeBindings: [PolicyBindingAttributes]
+
   "tool ids to associate with this workbench"
   toolAssociations: [WorkbenchToolAssociationAttributes]
 }
@@ -2195,6 +2201,12 @@ type Workbench {
 
   "tools associated with this workbench"
   tools: [WorkbenchTool]
+
+  "read policy for this service"
+  readBindings: [PolicyBinding]
+
+  "write policy of this service"
+  writeBindings: [PolicyBinding]
 
   runs(after: String, first: Int, before: String, last: Int): WorkbenchJobConnection
 
