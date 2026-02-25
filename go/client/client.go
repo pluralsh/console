@@ -6127,6 +6127,7 @@ type StackConfigurationFragment struct {
 	Tag       *string                               "json:\"tag,omitempty\" graphql:\"tag\""
 	Hooks     []*StackHookFragment                  "json:\"hooks,omitempty\" graphql:\"hooks\""
 	Terraform *StackConfigurationFragment_Terraform "json:\"terraform,omitempty\" graphql:\"terraform\""
+	Ansible   *StackConfigurationFragment_Ansible   "json:\"ansible,omitempty\" graphql:\"ansible\""
 }
 
 func (t *StackConfigurationFragment) GetImage() *string {
@@ -6158,6 +6159,12 @@ func (t *StackConfigurationFragment) GetTerraform() *StackConfigurationFragment_
 		t = &StackConfigurationFragment{}
 	}
 	return t.Terraform
+}
+func (t *StackConfigurationFragment) GetAnsible() *StackConfigurationFragment_Ansible {
+	if t == nil {
+		t = &StackConfigurationFragment{}
+	}
+	return t.Ansible
 }
 
 type StackHookFragment struct {
@@ -10609,6 +10616,31 @@ func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Config
 	return t.Refresh
 }
 
+type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type StackRunEdgeFragment_Node_StackRunFragment_StateUrls_Terraform struct {
 	Address *string "json:\"address,omitempty\" graphql:\"address\""
 	Lock    *string "json:\"lock,omitempty\" graphql:\"lock\""
@@ -10724,6 +10756,31 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFra
 	return t.Refresh
 }
 
+type StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -10783,6 +10840,31 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigura
 		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+
+type StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
 }
 
 type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -10846,6 +10928,31 @@ func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_
 	return t.Refresh
 }
 
+type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -10905,6 +11012,31 @@ func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Te
 		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+
+type InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
 }
 
 type StackRunFragment_StateUrls_Terraform struct {
@@ -11022,6 +11154,31 @@ func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackC
 	return t.Refresh
 }
 
+type StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type StackRunFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -11083,6 +11240,31 @@ func (t *StackRunFragment_Configuration_StackConfigurationFragment_Terraform) Ge
 	return t.Refresh
 }
 
+type StackRunFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -11142,6 +11324,31 @@ func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraf
 		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+
+type StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
 }
 
 type StackRunBaseFragment_StateUrls_Terraform struct {
@@ -11259,6 +11466,31 @@ func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_St
 	return t.Refresh
 }
 
+type StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -11320,6 +11552,31 @@ func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform
 	return t.Refresh
 }
 
+type StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -11343,6 +11600,31 @@ func (t *StackConfigurationFragment_Terraform) GetRefresh() *bool {
 		t = &StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+
+type StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
 }
 
 type CustomStackRunFragment_Stack struct {
@@ -22630,6 +22912,31 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 	return t.Refresh
 }
 
+type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -22689,6 +22996,31 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+
+type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
 }
 
 type ListClusterStacks_ClusterStackRuns struct {
@@ -22788,6 +23120,31 @@ func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFrag
 	return t.Refresh
 }
 
+type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type ListClusterMinimalStacks_ClusterStackRuns struct {
 	Edges    []*MinimalStackRunEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
 	PageInfo PageInfoFragment               "json:\"pageInfo\" graphql:\"pageInfo\""
@@ -22867,6 +23224,31 @@ func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStack
 	return t.Refresh
 }
 
+type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type ListInfrastructureStacks_InfrastructureStacks struct {
 	Edges    []*InfrastructureStackEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
 	PageInfo PageInfoFragment                   "json:\"pageInfo\" graphql:\"pageInfo\""
@@ -22944,6 +23326,31 @@ func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_Stack
 		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+
+type GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
 }
 
 type GetStackRun_StackRun_StackRunFragment_StateUrls_Terraform struct {
@@ -23061,6 +23468,31 @@ func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment
 	return t.Refresh
 }
 
+type GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type GetStackRun_StackRun_StackRunFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -23120,6 +23552,31 @@ func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationF
 		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+
+type GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -23237,6 +23694,31 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStack
 	return t.Refresh
 }
 
+type GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -23296,6 +23778,31 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfig
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+
+type GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -23413,6 +23920,31 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_Infrastructure
 	return t.Refresh
 }
 
+type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -23472,6 +24004,31 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackC
 		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+
+type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
 }
 
 type CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -23535,6 +24092,31 @@ func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_Stack
 	return t.Refresh
 }
 
+type CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -23596,6 +24178,31 @@ func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_Stack
 	return t.Refresh
 }
 
+type UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -23655,6 +24262,31 @@ func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_
 		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+
+type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
 }
 
 type AddStackRunLogs_AddRunLogs struct {
@@ -23827,6 +24459,31 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 	return t.Refresh
 }
 
+type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -23886,6 +24543,31 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Conf
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+
+type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges struct {
@@ -24043,6 +24725,31 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFra
 	return t.Refresh
 }
 
+type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
+}
+
 type TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -24102,6 +24809,31 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigura
 		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform{}
 	}
 	return t.Refresh
+}
+
+type TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible struct {
+	Inventory      *string "json:\"inventory,omitempty\" graphql:\"inventory\""
+	Playbook       *string "json:\"playbook,omitempty\" graphql:\"playbook\""
+	PrivateKeyFile *string "json:\"privateKeyFile,omitempty\" graphql:\"privateKeyFile\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetInventory() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Inventory
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetPlaybook() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.Playbook
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible) GetPrivateKeyFile() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Ansible{}
+	}
+	return t.PrivateKeyFile
 }
 
 type GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
@@ -46302,6 +47034,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	ansible {
+		inventory
+		playbook
+		privateKeyFile
+	}
 }
 fragment StackHookFragment on StackHook {
 	cmd
@@ -46570,6 +47307,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	ansible {
+		inventory
+		playbook
+		privateKeyFile
+	}
 }
 fragment StackHookFragment on StackHook {
 	cmd
@@ -46718,6 +47460,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+	}
+	ansible {
+		inventory
+		playbook
+		privateKeyFile
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -46891,6 +47638,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+	}
+	ansible {
+		inventory
+		playbook
+		privateKeyFile
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -47096,6 +47848,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+	}
+	ansible {
+		inventory
+		playbook
+		privateKeyFile
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -47411,6 +48168,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	ansible {
+		inventory
+		playbook
+		privateKeyFile
+	}
 }
 fragment StackHookFragment on StackHook {
 	cmd
@@ -47725,6 +48487,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	ansible {
+		inventory
+		playbook
+		privateKeyFile
+	}
 }
 fragment StackHookFragment on StackHook {
 	cmd
@@ -47997,6 +48764,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	ansible {
+		inventory
+		playbook
+		privateKeyFile
+	}
 }
 fragment StackHookFragment on StackHook {
 	cmd
@@ -48203,6 +48975,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+	}
+	ansible {
+		inventory
+		playbook
+		privateKeyFile
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -48465,6 +49242,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+	}
+	ansible {
+		inventory
+		playbook
+		privateKeyFile
 	}
 }
 fragment StackHookFragment on StackHook {
@@ -49145,6 +49927,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		refresh
 		approveEmpty
 	}
+	ansible {
+		inventory
+		playbook
+		privateKeyFile
+	}
 }
 fragment StackHookFragment on StackHook {
 	cmd
@@ -49462,6 +50249,11 @@ fragment StackConfigurationFragment on StackConfiguration {
 		parallelism
 		refresh
 		approveEmpty
+	}
+	ansible {
+		inventory
+		playbook
+		privateKeyFile
 	}
 }
 fragment StackHookFragment on StackHook {

@@ -229,6 +229,11 @@ fragment StackConfigurationFragment on StackConfiguration {
         refresh
         approveEmpty
     }
+    ansible {
+        inventory
+        playbook
+        privateKeyFile
+    }
 }
 
 fragment StackHookFragment on StackHook {
