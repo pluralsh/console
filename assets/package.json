@@ -35,7 +35,7 @@
     "analyze": "vite-bundle-visualizer -o stats.html"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.22.0"
   },
   "packageManager": "yarn@3.6.0",
   "dependencies": {
@@ -151,7 +151,7 @@
     "@typescript-eslint/eslint-plugin": "8.24.0",
     "@typescript-eslint/parser": "8.24.0",
     "@vitejs/plugin-basic-ssl": "2.1.4",
-    "@vitejs/plugin-react": "4.3.4",
+    "@vitejs/plugin-react": "5.1.4",
     "@vitest/ui": "3.2.4",
     "babel-plugin-styled-components": "2.1.4",
     "eslint": "9.20.0",
@@ -171,7 +171,7 @@
     "type-fest": "4.8.3",
     "typescript": "5.8.2",
     "typescript-eslint": "8.24.0",
-    "vite": "6.4.1",
+    "vite": "7.3.1",
     "vite-bundle-visualizer": "1.2.1",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.4"
