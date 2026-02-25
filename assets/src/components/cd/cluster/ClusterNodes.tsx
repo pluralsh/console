@@ -1,4 +1,4 @@
-import { Table, Tooltip } from '@pluralsh/design-system'
+import { Flex, Table, Tooltip } from '@pluralsh/design-system'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table'
 import { filesize } from 'filesize'
 import {
@@ -10,30 +10,28 @@ import {
 } from 'generated/graphql'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { useTheme } from 'styled-components'
 
 import { getResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
-import { cpuParser, memoryParser } from '../../../utils/kubernetes.ts'
-import { rounded } from '../../../utils/number.ts'
+import { cpuParser, memoryParser } from 'utils/kubernetes.ts'
+import { rounded } from 'utils/number.ts'
 import {
   nodeStatusToReadiness,
   ReadinessT,
   readinessToLabel,
-} from '../../../utils/status.ts'
-import { POLL_INTERVAL } from '../../cluster/constants.ts'
-import { mapify } from '../../cluster/LabelsAnnotations.tsx'
+} from 'utils/status.ts'
+import { POLL_INTERVAL } from 'components/cluster/constants.ts'
+import { mapify } from 'components/cluster/LabelsAnnotations.tsx'
 import {
   numishSort,
   StatusChip,
   TableCaretLink,
   TableText,
   UsageText,
-} from '../../cluster/TableElements'
-import { UsageBar } from '../../utils/UsageBar.tsx'
+} from 'components/cluster/TableElements'
+import { UsageBar } from 'components/utils/UsageBar.tsx'
 import { useClusterContext } from './Cluster.tsx'
 
 export function ClusterNodes() {
-  const theme = useTheme()
   const { cluster } = useClusterContext()
 
   const { data, loading } = useClusterNodesQuery({
@@ -58,14 +56,12 @@ export function ClusterNodes() {
   )
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.medium,
-        overflow: 'hidden',
-        height: '100%',
-      }}
+    <Flex
+      direction="column"
+      gap="medium"
+      overflow="hidden"
+      height="100%"
+      width="100%"
     >
       <NodesList
         nodes={data?.cluster?.nodes || []}
@@ -74,7 +70,7 @@ export function ClusterNodes() {
         clusterId={cluster?.id}
         loading={!data && loading}
       />
-    </div>
+    </Flex>
   )
 }
 
