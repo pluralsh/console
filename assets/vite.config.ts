@@ -2,7 +2,6 @@ import basicSsl from '@vitejs/plugin-basic-ssl'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
-import pluginRewriteAll from 'vite-plugin-rewrite-all'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
 const API_URL = process.env.BASE_URL
@@ -24,7 +23,6 @@ export default defineConfig({
       },
     }),
     tsconfigPaths({ loose: true }),
-    pluginRewriteAll(), // Fix 404 error for urls with dots in their path
     // this was very memory intensive (from source maps) and ultimately not that useful
     // could consider reenabling in the future if we rework DS bundling/publishing
     // sentryVitePlugin({
