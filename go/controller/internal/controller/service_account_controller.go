@@ -102,7 +102,7 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 	sa.Status.ID = &apiServiceAccount.ID
 	sa.Status.SHA = &sha
 
-	err = r.syncToken(ctx, sa)
+	err = r.syncTokenSecret(ctx, sa)
 	if err != nil {
 		logger.Error(err, "unable to create token secret")
 		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -171,7 +171,7 @@ func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.Servic
 		return r.ConsoleClient.CreateServiceAccount(ctx, sa.Attributes())
 	}
 
-	// Update only if ServiceAccount has changed
+	// Update only if ServiceAccount has changed.
 	if changed {
 		attr := sa.Attributes()
 		return r.ConsoleClient.UpdateServiceAccount(ctx, existingSA.ID, attr)
@@ -180,53 +180,32 @@ func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.Servic
 	return existingSA, nil
 }
 
-func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.ServiceAccount) error {
+func (r *ServiceAccountReconciler) syncTokenSecret(ctx context.Context, sa *v1alpha1.ServiceAccount) error {
 	if sa.Spec.TokenSecretRef == nil {
 		return nil
 	}
 
-	if sa.Annotations == nil {
-		sa.Annotations = make(map[string]string)
-	}
-	var err error
-	currentScopeSHA := ""
-	scopeSHA := sa.Annotations[scopeHashAnnotation]
-	if len(sa.Spec.Scopes) > 0 {
-		currentScopeSHA, err = utils.HashObject(sa.Spec.Scopes)
-		if err != nil {
-			return err
-		}
-	}
-	// If scope hasn't changed, no need to recreate the token
-	if scopeSHA == currentScopeSHA {
-		return nil
-	}
-	sa.Annotations[scopeHashAnnotation] = currentScopeSHA
-
-	token, err := r.ConsoleClient.CreateServiceAccountToken(ctx, *sa.Status.ID, sa.Spec.ScopeAttributes(), sa.Spec.TokenExpiry)
-	if err != nil {
-		return fmt.Errorf("failed to create service account token: %s", err.Error())
-	}
-	if token.Token == nil {
-		return fmt.Errorf("service account token is empty")
-	}
-
 	secret := &corev1.Secret{}
-	err = r.Get(ctx, types.NamespacedName{Name: sa.Spec.TokenSecretRef.Name, Namespace: getTokenSecretNamespace(sa)}, secret)
+	err := r.Get(ctx, types.NamespacedName{Name: sa.Spec.TokenSecretRef.Name, Namespace: sa.TokenSecretNamespace()}, secret)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	}
 
-	if err == nil {
-		secret.StringData = map[string]string{credentials.CredentialsSecretTokenKey: *token.Token}
-		if err = controllerutil.SetControllerReference(sa, secret, r.Scheme); err != nil {
-			return err
-		}
-		return r.Update(ctx, secret)
+	if errors.IsNotFound(err) {
+		return r.createTokenSecret(ctx, sa)
 	}
 
-	secret = &corev1.Secret{
-		ObjectMeta: v1.ObjectMeta{Name: sa.Spec.TokenSecretRef.Name, Namespace: getTokenSecretNamespace(sa)},
+	return r.updateTokenSecret(ctx, sa, secret)
+}
+
+func (r *ServiceAccountReconciler) createTokenSecret(ctx context.Context, sa *v1alpha1.ServiceAccount) error {
+	token, err := r.ConsoleClient.CreateServiceAccountToken(ctx, *sa.Status.ID, sa.Spec.ScopeAttributes(), sa.Spec.TokenExpiry)
+	if err != nil {
+		return fmt.Errorf("failed to create service account token: %s", err.Error())
+	}
+
+	secret := &corev1.Secret{
+		ObjectMeta: v1.ObjectMeta{Name: sa.Spec.TokenSecretRef.Name, Namespace: sa.TokenSecretNamespace()},
 		StringData: map[string]string{credentials.CredentialsSecretTokenKey: *token.Token},
 	}
 	if err = controllerutil.SetControllerReference(sa, secret, r.Scheme); err != nil {
@@ -235,16 +214,36 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 	return r.Create(ctx, secret)
 }
 
-func getTokenSecretNamespace(sa *v1alpha1.ServiceAccount) string {
-	if sa.Spec.TokenSecretRef.Namespace != "" {
-		return sa.Spec.TokenSecretRef.Namespace
+func (r *ServiceAccountReconciler) updateTokenSecret(ctx context.Context, sa *v1alpha1.ServiceAccount, secret *corev1.Secret) (err error) {
+	if sa.Annotations == nil {
+		sa.Annotations = make(map[string]string)
+	}
+	currentScopeSHA := ""
+	scopeSHA := sa.Annotations[scopeHashAnnotation]
+	if len(sa.Spec.Scopes) > 0 {
+		if currentScopeSHA, err = utils.HashObject(sa.Spec.Scopes); err != nil {
+			return fmt.Errorf("failed to hash scopes: %s", err.Error())
+		}
+	}
+	if scopeSHA == currentScopeSHA {
+		return nil // Do nothing if scopes haven't changed.
 	}
 
-	if sa.Namespace != "" {
-		return sa.Namespace
+	token, err := r.ConsoleClient.CreateServiceAccountToken(ctx, *sa.Status.ID, sa.Spec.ScopeAttributes(), sa.Spec.TokenExpiry)
+	if err != nil {
+		return fmt.Errorf("failed to create service account token: %s", err.Error())
 	}
 
-	return "default"
+	secret.StringData = map[string]string{credentials.CredentialsSecretTokenKey: *token.Token}
+	if err = controllerutil.SetControllerReference(sa, secret, r.Scheme); err != nil {
+		return err
+	}
+	if err = r.Update(ctx, secret); err != nil {
+		return err
+	}
+
+	sa.Annotations[scopeHashAnnotation] = currentScopeSHA // Commit scopes SHA if the secret was successfully updated.
+	return nil
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
