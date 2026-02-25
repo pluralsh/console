@@ -10667,6 +10667,20 @@ entries:
     version: 0.0.1
   kas:
   - apiVersion: v2
+    appVersion: 0.2.2
+    created: "2026-02-25T15:17:20.704856362Z"
+    dependencies:
+    - condition: redis.enabled
+      name: redis
+      repository: file://../../chart-dependencies/redis
+      version: 24.0.0
+    description: k8s agent server
+    digest: 648c0b5e8f42a19cd2e779db0551d060105c991f7ebf14dbedf23c88c22210a0
+    name: kas
+    urls:
+    - https://github.com/pluralsh/console/releases/download/kas-chart-v0.3.2/kas-0.3.2.tgz
+    version: 0.3.2
+  - apiVersion: v2
     appVersion: 0.2.0
     created: "2026-01-11T02:29:13.899457253Z"
     dependencies:
@@ -10848,4 +10862,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2026-02-22T15:57:11.832621619Z"
+generated: "2026-02-25T15:17:20.705523457Z"
