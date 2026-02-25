@@ -116,12 +116,17 @@ func (in *ElasticProvider) newElasticClient() (*elasticsearch.TypedClient, error
 		return nil, fmt.Errorf("%w: missing url", ErrInvalidArgument)
 	}
 
-	if len(in.conn.GetApiKey()) == 0 {
-		return nil, fmt.Errorf("%w: missing api key", ErrInvalidArgument)
+	if len(in.conn.GetUsername()) == 0 {
+		return nil, fmt.Errorf("%w: missing username", ErrInvalidArgument)
+	}
+
+	if len(in.conn.GetPassword()) == 0 {
+		return nil, fmt.Errorf("%w: missing password", ErrInvalidArgument)
 	}
 
 	return elasticsearch.NewTypedClient(elasticsearch.Config{
 		Addresses: []string{in.conn.GetUrl()},
-		APIKey:    in.conn.GetApiKey(),
+		Username:  in.conn.GetUsername(),
+		Password:  in.conn.GetPassword(),
 	})
 }

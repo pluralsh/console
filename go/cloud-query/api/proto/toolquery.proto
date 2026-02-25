@@ -8,13 +8,14 @@ import "google/protobuf/timestamp.proto";
 
 message ElasticConnection {
   string url = 1;
-  string apiKey = 2;
+  string username = 2;
+  string password = 3;
 }
 
 message DatadogConnection {
   optional string site = 1;
   string apiKey = 2;
-  string appKey = 3;
+  optional string appKey = 3;
 }
 
 message PrometheusConnection {
@@ -22,6 +23,7 @@ message PrometheusConnection {
   optional string token = 2;
   optional string username = 3;
   optional string password = 4;
+  optional string tenant_id = 5;
 }
 
 message LokiConnection {

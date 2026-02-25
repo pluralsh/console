@@ -1,0 +1,62 @@
+defmodule Console.AI.Workbench.Subagents.Observability do
+  use Console.AI.Workbench.Subagents.Base
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
+  alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill}
+  alias Console.AI.Tools.Workbench.Observability.{Metrics, Logs, Traces}
+  alias Console.AI.Workbench.Environment
+
+  require EEx
+
+  def run(%WorkbenchJobActivity{prompt: prompt} = activity, %WorkbenchJob{prompt: jprompt}, %Environment{} = environment) do
+    tools(environment)
+    |> MemoryEngine.new(20, system_prompt: system_prompt(prompt: jprompt), acc: %{}, callback: &callback(activity, &1))
+    |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
+    |> case do
+      {:ok, attrs} -> attrs
+      {:error, error} -> %{status: :failed, error: "error running observability subagent: #{inspect(error)}"}
+    end
+  end
+
+  defp reducer(messages, _) do
+    case Enum.find(messages, &match?(%ObservabilityResult{}, &1)) do
+      %ObservabilityResult{} = result -> {:halt, %{
+        status: :successful,
+        result: Console.mapify(result)
+      }}
+      _ -> last_message(messages, & {:cont, %{status: :failed, error: &1}})
+    end
+  end
+
+  defp tools(%Environment{skills: skills, tools: tools}) do
+    workbench_tools(tools)
+    |> Enum.concat([
+      %Skills{skills: skills},
+      %Skill{skills: skills},
+      ObservabilityResult
+    ])
+  end
+
+  @allowed_tools MapSet.new(~w(metrics logs traces)a)
+
+  defp workbench_tools(tools) do
+    Enum.map(tools, &elem(&1, 1))
+    |> Enum.filter(fn
+      %WorkbenchTool{categories: categories} when is_list(categories) ->
+        MapSet.subset?(MapSet.new(categories), @allowed_tools)
+      _ -> false
+    end)
+    |> Enum.flat_map(fn
+      %WorkbenchTool{categories: categories} = tool when is_list(categories) ->
+        Enum.map(categories, fn c -> to_tool(tool, c) end)
+      _ -> []
+    end)
+    |> Enum.filter(& &1)
+  end
+
+  defp to_tool(%WorkbenchTool{} = tool, :metrics), do: %Metrics{tool: tool}
+  defp to_tool(%WorkbenchTool{} = tool, :logs), do: %Logs{tool: tool}
+  defp to_tool(%WorkbenchTool{} = tool, :traces), do: %Traces{tool: tool}
+  defp to_tool(_, _), do: nil
+
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "observability.md.eex"]), [:assigns])
+end

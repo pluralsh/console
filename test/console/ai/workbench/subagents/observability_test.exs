@@ -1,0 +1,105 @@
+defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
+  use Console.DataCase, async: false
+  use Mimic
+  alias Console.AI.Workbench.{Subagents, Environment}
+  alias Console.AI.{Provider, Tool}
+  alias Console.AI.Tools.Workbench.Observability.Metrics
+  alias Console.Deployments.Workbenches
+  import ElasticsearchUtils
+
+  setup :set_mimic_global
+
+  describe "run/3" do
+    test "happy path: metrics tool call then observability_result, output and metrics set and persisted" do
+      deployment_settings(
+        logging: %{enabled: true, driver: :elastic, elastic: es_settings()},
+        ai: %{
+          enabled: true,
+          provider: :openai,
+          openai: %{access_token: "key"},
+          vector_store: %{
+            enabled: true,
+            store: :elastic,
+            elastic: es_vector_settings(),
+          },
+        }
+      )
+
+      metrics_tool_name = "workbench_observability_metrics_prom"
+      sample_metrics = [
+        %{
+          "timestamp" => "2025-02-25T12:00:00Z",
+          "name" => "cpu_usage",
+          "value" => 0.5,
+          "labels" => %{"env" => "test"}
+        }
+      ]
+      result_output = "Investigation complete. CPU usage is at 50%."
+
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "querying metrics", [
+          %Tool{
+            name: metrics_tool_name,
+            arguments: %{"query" => "up"},
+            id: "1"
+          }
+        ]}
+      end)
+      expect(Metrics, :implement, fn _tool, _input ->
+        {:ok, "{\"metrics\":[]}"}
+      end)
+      expect(Provider, :completion, fn _, _ ->
+        {:ok, "summarizing", [
+          %Tool{
+            name: "observability_result",
+            arguments: %{
+              "output" => result_output,
+              "metrics" => sample_metrics,
+              "logs" => []
+            },
+            id: "2"
+          }
+        ]}
+      end)
+
+      workbench =
+        insert(:workbench,
+          configuration: %{infrastructure: %{services: true, stacks: true, kubernetes: true}}
+        )
+
+      tool =
+        insert(:workbench_tool,
+          tool: :prometheus,
+          name: "prom",
+          categories: [:metrics],
+          configuration: %{
+            prometheus: %{url: "https://prom.example.com", token: "token", tenant_id: nil}
+          }
+        )
+
+      insert(:workbench_tool_association, workbench: workbench, tool: tool)
+      job = insert(:workbench_job, workbench: workbench)
+      activity = insert(:workbench_job_activity, workbench_job: job, type: :observability)
+
+      result = Subagents.Observability.run(activity, job, Environment.new(job, [tool], []))
+
+      assert result[:status] == :successful
+      assert result[:result][:output] == result_output
+      assert length(result[:result][:metrics]) == 1
+      [result_metric] = result[:result][:metrics]
+      assert result_metric.name == "cpu_usage"
+      assert result_metric.value == 0.5
+      assert result_metric.labels == %{"env" => "test"}
+      assert result[:result][:logs] == []
+
+      {:ok, updated} = Workbenches.update_job_activity(result, activity)
+      assert updated.status == :successful
+      assert updated.result.output == result_output
+      assert length(updated.result.metrics) == 1
+      [persisted_metric] = updated.result.metrics
+      assert persisted_metric.name == "cpu_usage"
+      assert persisted_metric.value == 0.5
+      assert persisted_metric.labels == %{"env" => "test"}
+    end
+  end
+end

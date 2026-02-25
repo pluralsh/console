@@ -1928,6 +1928,11 @@ type AgentRunDelta {
 
 enum WorkbenchToolType {
   HTTP
+  ELASTIC
+  DATADOG
+  PROMETHEUS
+  LOKI
+  TEMPO
 }
 
 enum WorkbenchToolCategory {
@@ -2066,6 +2071,76 @@ input WorkbenchToolAttributes {
 input WorkbenchToolConfigurationAttributes {
   "http tool configuration"
   http: WorkbenchToolHttpConfigurationAttributes
+
+  "elasticsearch connection (logs)"
+  elastic: WorkbenchToolElasticConnectionAttributes
+
+  "prometheus connection (metrics)"
+  prometheus: WorkbenchToolPrometheusConnectionAttributes
+
+  "loki connection (logs)"
+  loki: WorkbenchToolLokiConnectionAttributes
+
+  "tempo connection (traces)"
+  tempo: WorkbenchToolTempoConnectionAttributes
+
+  "datadog connection (metrics, logs)"
+  datadog: WorkbenchToolDatadogConnectionAttributes
+}
+
+input WorkbenchToolElasticConnectionAttributes {
+  "elasticsearch base url"
+  url: String!
+
+  "basic auth username"
+  username: String!
+
+  "basic auth password"
+  password: String!
+}
+
+input WorkbenchToolPrometheusConnectionAttributes {
+  "prometheus base url"
+  url: String!
+
+  "bearer token or api key"
+  token: String!
+
+  "optional tenant id (e.g. for Mimir)"
+  tenantId: String
+}
+
+input WorkbenchToolLokiConnectionAttributes {
+  "loki base url"
+  url: String!
+
+  "bearer token or api key"
+  token: String!
+
+  "optional tenant id"
+  tenantId: String
+}
+
+input WorkbenchToolTempoConnectionAttributes {
+  "tempo base url"
+  url: String!
+
+  "bearer token or api key"
+  token: String!
+
+  "optional tenant id"
+  tenantId: String
+}
+
+input WorkbenchToolDatadogConnectionAttributes {
+  "datadog site (e.g. datadoghq.com)"
+  site: String
+
+  "datadog API key"
+  apiKey: String!
+
+  "datadog application key"
+  appKey: String
 }
 
 input WorkbenchToolHttpConfigurationAttributes {
@@ -2341,6 +2416,55 @@ type WorkbenchTool {
 type WorkbenchToolConfiguration {
   "http tool configuration"
   http: WorkbenchToolHttpConfiguration
+
+  "elasticsearch connection (no secrets)"
+  elastic: WorkbenchToolElasticConnection
+
+  "prometheus connection (no secrets)"
+  prometheus: WorkbenchToolPrometheusConnection
+
+  "loki connection (no secrets)"
+  loki: WorkbenchToolLokiConnection
+
+  "tempo connection (no secrets)"
+  tempo: WorkbenchToolTempoConnection
+
+  "datadog connection (no secrets)"
+  datadog: WorkbenchToolDatadogConnection
+}
+
+type WorkbenchToolElasticConnection {
+  "elasticsearch base url (credentials never exposed)"
+  url: String
+}
+
+type WorkbenchToolPrometheusConnection {
+  "prometheus base url"
+  url: String
+
+  "optional tenant id"
+  tenantId: String
+}
+
+type WorkbenchToolLokiConnection {
+  "loki base url"
+  url: String
+
+  "optional tenant id"
+  tenantId: String
+}
+
+type WorkbenchToolTempoConnection {
+  "tempo base url"
+  url: String
+
+  "optional tenant id"
+  tenantId: String
+}
+
+type WorkbenchToolDatadogConnection {
+  "datadog site (API\/app keys never exposed)"
+  site: String
 }
 
 type WorkbenchToolHttpConfiguration {
