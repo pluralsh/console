@@ -488,26 +488,7 @@ defmodule Console.GraphQl.AiQueriesSyccTest do
              |> ids_equal(researches)
     end
 
-    test "published=nil returns user's own researches plus other users' published researches" do
-      user = insert(:user)
-      own = insert_list(2, :infra_research, user: user)
-      own_published = insert(:infra_research, user: user, published: true)
-      other_published = insert(:infra_research, published: true)
-      insert_list(2, :infra_research, published: false)
-
-      {:ok, %{data: %{"infraResearches" => found}}} = run_query("""
-        query {
-          infraResearches(first: 20) {
-            edges { node { id } }
-          }
-        }
-      """, %{}, %{current_user: user})
-
-      assert from_connection(found)
-             |> ids_equal(own ++ [own_published, other_published])
-    end
-
-    test "published=true returns all published researches regardless of user" do
+    test "it can list all published researches" do
       user = insert(:user)
       insert_list(2, :infra_research, user: user, published: false)
       own_published = insert(:infra_research, user: user, published: true)
@@ -524,25 +505,6 @@ defmodule Console.GraphQl.AiQueriesSyccTest do
 
       assert from_connection(found)
              |> ids_equal([own_published, other_published])
-    end
-
-    test "published=false returns only current user's unpublished researches" do
-      user = insert(:user)
-      own_unpublished = insert_list(2, :infra_research, user: user, published: false)
-      insert(:infra_research, user: user, published: true)
-      insert(:infra_research, published: true)
-      insert_list(2, :infra_research, published: false)
-
-      {:ok, %{data: %{"infraResearches" => found}}} = run_query("""
-        query Researches($published: Boolean) {
-          infraResearches(first: 20, published: $published) {
-            edges { node { id } }
-          }
-        }
-      """, %{"published" => false}, %{current_user: user})
-
-      assert from_connection(found)
-             |> ids_equal(own_unpublished)
     end
   end
 end

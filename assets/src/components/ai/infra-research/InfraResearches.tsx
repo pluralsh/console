@@ -1,5 +1,6 @@
 import {
   CaretRightIcon,
+  Chip,
   Divider,
   Flex,
   IconFrame,
@@ -11,6 +12,7 @@ import {
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP, Title2H1 } from 'components/utils/typography/Text'
@@ -26,16 +28,15 @@ import styled from 'styled-components'
 import { fromNow } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { getAIBreadcrumbs } from '../AI'
+import { AIExampleCard, infraResearchExamples } from '../AIExampleCard'
 import { InfraResearchInput } from './InfraResearchInput'
 import { RunStatusChip } from './details/InfraResearch'
-import { AIExampleCard, infraResearchExamples } from '../AIExampleCard'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
 
 export const getInfraResearchesBreadcrumbs = () =>
   getAIBreadcrumbs(AI_INFRA_RESEARCH_REL_PATH)
 
 export function InfraResearches() {
-  const [published, setPublished] = useState<Nullable<boolean>>(undefined)
+  const [published, setPublished] = useState<Nullable<boolean>>(true)
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       { queryHook: useInfraResearchesQuery, keyPath: ['infraResearches'] },
@@ -115,7 +116,7 @@ export function InfraResearches() {
               loading={isLoading}
             />
             <Select
-              width={160}
+              width={200}
               selectedKey={publishedToLabel(published)}
               onSelectionChange={(key) =>
                 setPublished(
@@ -166,6 +167,29 @@ const columns = [
     header: 'Prompt',
     meta: { gridTemplate: '1fr', truncate: true },
   }),
+  columnHelper.accessor('published', {
+    id: 'published',
+    header: 'Published',
+    cell: function Cell({ getValue }) {
+      const published = getValue()
+      return (
+        <Chip
+          size="small"
+          css={{ alignSelf: 'flex-end' }}
+          severity={published ? 'info' : 'neutral'}
+        >
+          {published ? 'Published' : 'Draft'}
+        </Chip>
+      )
+    },
+  }),
+  columnHelper.accessor('user.name', {
+    id: 'user',
+    header: 'User',
+    cell: ({ getValue }) => (
+      <CaptionP $color="text-xlight">{getValue()}</CaptionP>
+    ),
+  }),
   columnHelper.accessor('insertedAt', {
     id: 'createdAt',
     cell: ({ getValue }) => (
@@ -210,17 +234,16 @@ const PromptSectionSC = styled.div(({ theme }) => ({
 }))
 
 const labelToPublished = {
-  All: undefined,
-  Published: true,
-  'My drafts': false,
+  'Published research': true,
+  'My research': undefined,
 }
+
 const publishedToLabel = (published: Nullable<boolean>) => {
   switch (published) {
-    case undefined:
-      return 'All'
     case true:
-      return 'Published'
+      return 'Published research'
     case false:
-      return 'My drafts'
+    case undefined:
+      return 'My research'
   }
 }

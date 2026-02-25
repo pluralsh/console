@@ -15,6 +15,7 @@ fragment InfraResearch on InfraResearch {
   }
   user {
     id
+    name
   }
   insertedAt
   updatedAt

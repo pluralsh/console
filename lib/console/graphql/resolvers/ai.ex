@@ -81,8 +81,7 @@ defmodule Console.GraphQl.Resolvers.AI do
     |> paginate(args)
   end
 
-  defp filter_research(query, user_id, true), do: InfraResearch.published(query)
-  defp filter_research(query, user_id, false), do: InfraResearch.unpublished(query, user_id)
+  defp filter_research(query, _, true), do: InfraResearch.published(query)
   defp filter_research(query, user_id, _), do: InfraResearch.for_user(query, user_id)
 
   defp maybe_thread(%{thread_id: tid}, user) when is_binary(tid) do
