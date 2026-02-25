@@ -6,12 +6,16 @@ on:
     paths:
       - ".github/workflows/controller.yaml"
       - "go/controller/**"
+      - "lib/**"
+      - "schema/**"
   pull_request:
     branches:
       - "**"
     paths:
       - ".github/workflows/controller.yaml"
       - "go/controller/**"
+      - "lib/**"
+      - "schema/**"
 permissions:
   contents: read
 env:

@@ -94,7 +94,7 @@ func (in *Workbench) SetCondition(condition metav1.Condition) {
 
 func (in *Workbench) Attributes(projectID, repositoryID, agentRuntimeID *string, toolIDs []string) console.WorkbenchAttributes {
 	return console.WorkbenchAttributes{
-		Name:           lo.ToPtr(in.ConsoleName()),
+		Name:           in.ConsoleName(),
 		Description:    in.Spec.Description,
 		SystemPrompt:   in.Spec.SystemPrompt,
 		ProjectID:      projectID,
