@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -59,7 +60,11 @@ func (c *client) CreateServiceAccountToken(ctx context.Context, id string, scope
 		return nil, err
 	}
 
-	return response.CreateServiceAccountToken, err
+	if response.CreateServiceAccountToken.Token == nil {
+		return response.CreateServiceAccountToken, fmt.Errorf("service account token is empty")
+	}
+
+	return response.CreateServiceAccountToken, nil
 }
 
 func (c *client) UpdateServiceAccount(ctx context.Context, id string, attributes console.ServiceAccountAttributes) (*console.UserFragment, error) {
