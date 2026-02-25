@@ -88,7 +88,7 @@ func (c client) PutILMPolicy(policy string, definition runtime.RawExtension) (*e
 		return nil, err
 	}
 
-	return c.elasticsearch.ILM.PutLifecycle(policy, c.elasticsearch.ILM.PutLifecycle.WithBody(bytes.NewReader(body)))
+	return c.elasticsearch.ILM.PutLifecycle(bytes.NewReader(body), policy)
 }
 
 func (c client) DeleteILMPolicy(policy string) (*esapi.Response, error) {
@@ -124,5 +124,5 @@ func (c client) PutIndexTemplate(name string, def []byte) (*esapi.Response, erro
 }
 
 func (c client) DeleteIndexTemplate(ctx context.Context, name string) (*esapi.Response, error) {
-	return c.elasticsearch.Indices.DeleteIndexTemplate(name, c.elasticsearch.Indices.DeleteIndexTemplate.WithContext(ctx))
+	return c.elasticsearch.Indices.DeleteIndexTemplate([]string{name}, c.elasticsearch.Indices.DeleteIndexTemplate.WithContext(ctx))
 }

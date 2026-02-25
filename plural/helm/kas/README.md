@@ -1,3 +1,0 @@
-# Kubernetes Agent Server
-
-TODO
