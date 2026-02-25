@@ -4917,6 +4917,7 @@ type SentinelCheckIntegrationTestConfigurationFragment struct {
 	Gotestsum *SentinelCheckIntegrationTestConfigurationFragment_Gotestsum "json:\"gotestsum,omitempty\" graphql:\"gotestsum\""
 	Job       *JobSpecFragment                                             "json:\"job,omitempty\" graphql:\"job\""
 	Cases     []*TestCaseConfigurationFragment                             "json:\"cases,omitempty\" graphql:\"cases\""
+	Default   *SentinelCheckIntegrationTestDefaultConfigurationFragment    "json:\"default,omitempty\" graphql:\"default\""
 }
 
 func (t *SentinelCheckIntegrationTestConfigurationFragment) GetDistro() *ClusterDistro {
@@ -4948,6 +4949,58 @@ func (t *SentinelCheckIntegrationTestConfigurationFragment) GetCases() []*TestCa
 		t = &SentinelCheckIntegrationTestConfigurationFragment{}
 	}
 	return t.Cases
+}
+func (t *SentinelCheckIntegrationTestConfigurationFragment) GetDefault() *SentinelCheckIntegrationTestDefaultConfigurationFragment {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestConfigurationFragment{}
+	}
+	return t.Default
+}
+
+type SentinelCheckIntegrationTestDefaultConfigurationFragment struct {
+	Ignore               *bool          "json:\"ignore,omitempty\" graphql:\"ignore\""
+	NamespaceAnnotations map[string]any "json:\"namespaceAnnotations,omitempty\" graphql:\"namespaceAnnotations\""
+	NamespaceLabels      map[string]any "json:\"namespaceLabels,omitempty\" graphql:\"namespaceLabels\""
+	Registry             *string        "json:\"registry,omitempty\" graphql:\"registry\""
+	ResourceAnnotations  map[string]any "json:\"resourceAnnotations,omitempty\" graphql:\"resourceAnnotations\""
+	ResourceLabels       map[string]any "json:\"resourceLabels,omitempty\" graphql:\"resourceLabels\""
+}
+
+func (t *SentinelCheckIntegrationTestDefaultConfigurationFragment) GetIgnore() *bool {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestDefaultConfigurationFragment{}
+	}
+	return t.Ignore
+}
+func (t *SentinelCheckIntegrationTestDefaultConfigurationFragment) GetNamespaceAnnotations() map[string]any {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestDefaultConfigurationFragment{}
+	}
+	return t.NamespaceAnnotations
+}
+func (t *SentinelCheckIntegrationTestDefaultConfigurationFragment) GetNamespaceLabels() map[string]any {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestDefaultConfigurationFragment{}
+	}
+	return t.NamespaceLabels
+}
+func (t *SentinelCheckIntegrationTestDefaultConfigurationFragment) GetRegistry() *string {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestDefaultConfigurationFragment{}
+	}
+	return t.Registry
+}
+func (t *SentinelCheckIntegrationTestDefaultConfigurationFragment) GetResourceAnnotations() map[string]any {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestDefaultConfigurationFragment{}
+	}
+	return t.ResourceAnnotations
+}
+func (t *SentinelCheckIntegrationTestDefaultConfigurationFragment) GetResourceLabels() map[string]any {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestDefaultConfigurationFragment{}
+	}
+	return t.ResourceLabels
 }
 
 type TestCaseConfigurationFragment struct {
@@ -45560,6 +45613,9 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	cases {
 		... TestCaseConfigurationFragment
 	}
+	default {
+		... SentinelCheckIntegrationTestDefaultConfigurationFragment
+	}
 }
 fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfiguration {
 	name
@@ -45589,6 +45645,14 @@ fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfig
 		yaml
 		expectedResult
 	}
+}
+fragment SentinelCheckIntegrationTestDefaultConfigurationFragment on SentinelCheckIntegrationTestDefaultConfiguration {
+	ignore
+	namespaceAnnotations
+	namespaceLabels
+	registry
+	resourceAnnotations
+	resourceLabels
 }
 `
 
@@ -45733,6 +45797,9 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	cases {
 		... TestCaseConfigurationFragment
 	}
+	default {
+		... SentinelCheckIntegrationTestDefaultConfigurationFragment
+	}
 }
 fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfiguration {
 	name
@@ -45762,6 +45829,14 @@ fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfig
 		yaml
 		expectedResult
 	}
+}
+fragment SentinelCheckIntegrationTestDefaultConfigurationFragment on SentinelCheckIntegrationTestDefaultConfiguration {
+	ignore
+	namespaceAnnotations
+	namespaceLabels
+	registry
+	resourceAnnotations
+	resourceLabels
 }
 `
 
@@ -45847,6 +45922,9 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	cases {
 		... TestCaseConfigurationFragment
 	}
+	default {
+		... SentinelCheckIntegrationTestDefaultConfigurationFragment
+	}
 }
 fragment JobSpecFragment on JobGateSpec {
 	namespace
@@ -45913,6 +45991,14 @@ fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfig
 		yaml
 		expectedResult
 	}
+}
+fragment SentinelCheckIntegrationTestDefaultConfigurationFragment on SentinelCheckIntegrationTestDefaultConfiguration {
+	ignore
+	namespaceAnnotations
+	namespaceLabels
+	registry
+	resourceAnnotations
+	resourceLabels
 }
 `
 
@@ -46054,6 +46140,9 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	cases {
 		... TestCaseConfigurationFragment
 	}
+	default {
+		... SentinelCheckIntegrationTestDefaultConfigurationFragment
+	}
 }
 fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfiguration {
 	name
@@ -46083,6 +46172,14 @@ fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfig
 		yaml
 		expectedResult
 	}
+}
+fragment SentinelCheckIntegrationTestDefaultConfigurationFragment on SentinelCheckIntegrationTestDefaultConfiguration {
+	ignore
+	namespaceAnnotations
+	namespaceLabels
+	registry
+	resourceAnnotations
+	resourceLabels
 }
 `
 
@@ -46193,6 +46290,9 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	cases {
 		... TestCaseConfigurationFragment
 	}
+	default {
+		... SentinelCheckIntegrationTestDefaultConfigurationFragment
+	}
 }
 fragment JobSpecFragment on JobGateSpec {
 	namespace
@@ -46259,6 +46359,14 @@ fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfig
 		yaml
 		expectedResult
 	}
+}
+fragment SentinelCheckIntegrationTestDefaultConfigurationFragment on SentinelCheckIntegrationTestDefaultConfiguration {
+	ignore
+	namespaceAnnotations
+	namespaceLabels
+	registry
+	resourceAnnotations
+	resourceLabels
 }
 `
 
@@ -46368,6 +46476,9 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	cases {
 		... TestCaseConfigurationFragment
 	}
+	default {
+		... SentinelCheckIntegrationTestDefaultConfigurationFragment
+	}
 }
 fragment JobSpecFragment on JobGateSpec {
 	namespace
@@ -46434,6 +46545,14 @@ fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfig
 		yaml
 		expectedResult
 	}
+}
+fragment SentinelCheckIntegrationTestDefaultConfigurationFragment on SentinelCheckIntegrationTestDefaultConfiguration {
+	ignore
+	namespaceAnnotations
+	namespaceLabels
+	registry
+	resourceAnnotations
+	resourceLabels
 }
 `
 
@@ -46568,6 +46687,9 @@ fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckInteg
 	cases {
 		... TestCaseConfigurationFragment
 	}
+	default {
+		... SentinelCheckIntegrationTestDefaultConfigurationFragment
+	}
 }
 fragment JobSpecFragment on JobGateSpec {
 	namespace
@@ -46634,6 +46756,14 @@ fragment TestCaseConfigurationFragment on SentinelCheckIntegrationTestCaseConfig
 		yaml
 		expectedResult
 	}
+}
+fragment SentinelCheckIntegrationTestDefaultConfigurationFragment on SentinelCheckIntegrationTestDefaultConfiguration {
+	ignore
+	namespaceAnnotations
+	namespaceLabels
+	registry
+	resourceAnnotations
+	resourceLabels
 }
 `
 
