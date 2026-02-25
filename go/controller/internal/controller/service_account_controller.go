@@ -225,8 +225,8 @@ func (r *ServiceAccountReconciler) updateTokenSecret(ctx context.Context, sa *v1
 			return fmt.Errorf("failed to hash scopes: %s", err.Error())
 		}
 	}
-	if scopeSHA == currentScopeSHA {
-		return nil // Do nothing if scopes haven't changed.
+	if scopeSHA == currentScopeSHA && secret.Data != nil && secret.Data[credentials.CredentialsSecretTokenKey] != nil {
+		return nil // Do nothing if scopes haven't changed and secret has token data.
 	}
 
 	token, err := r.ConsoleClient.CreateServiceAccountToken(ctx, *sa.Status.ID, sa.Spec.ScopeAttributes(), sa.Spec.TokenExpiry)
