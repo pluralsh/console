@@ -110,7 +110,6 @@ codegen-helm: --tool manifests ## generate controller helm chart with kustomize
 .PHONY: codegen-chart-crds
 codegen-chart-crds: ## copy CRDs to the controller helm chart
 	@cp -a config/crd/bases/. $(DATASTORE_CHART_DIR)/crds
-	@cp -a $(DATASTORE_CHART_DIR)/crds/. $(PLURAL_CONSOLE_CHART_DIR)/crds
 
 .PHONY: codegen-crd-docs
 codegen-crd-docs: TOOL = crd-ref-docs
