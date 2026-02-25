@@ -71,6 +71,18 @@ func (in *ServiceAccount) Attributes() console.ServiceAccountAttributes {
 	return attrs
 }
 
+func (in *ServiceAccount) TokenSecretNamespace() string {
+	if in.Spec.TokenSecretRef != nil && in.Spec.TokenSecretRef.Namespace != "" {
+		return in.Spec.TokenSecretRef.Namespace
+	}
+
+	if in.Namespace != "" {
+		return in.Namespace
+	}
+
+	return "default"
+}
+
 func (in *ServiceAccount) Diff(hasher Hasher) (changed bool, sha string, err error) {
 	currentSha, err := hasher(in.Spec)
 	if err != nil {
