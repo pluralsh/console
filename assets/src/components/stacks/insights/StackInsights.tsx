@@ -13,7 +13,7 @@ import { StackedText } from '../../utils/table/StackedText.tsx'
 import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
 
 export function StackInsights() {
-  const { stack } = useOutletContext() as StackOutletContextT
+  const { stack, loading } = useOutletContext() as StackOutletContextT
 
   useSetBreadcrumbs(
     useMemo(
@@ -57,6 +57,7 @@ export function StackInsights() {
       <InsightDisplay
         insight={stack.insight}
         kind="stack"
+        loading={loading}
       />
     </Flex>
   )

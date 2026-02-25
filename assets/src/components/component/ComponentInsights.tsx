@@ -32,8 +32,8 @@ export function ComponentInsights() {
           css={{ width: 'max-content' }}
           $color="text-xlight"
         >
-          {component.insight?.updatedAt &&
-            `Last updated at ${formatDateTime(component.insight?.updatedAt)}`}
+          {component?.insight?.updatedAt &&
+            `Last updated at ${formatDateTime(component?.insight?.updatedAt)}`}
         </CaptionP>
         <IconFrameRefreshButton
           loading={loading}
@@ -47,8 +47,9 @@ export function ComponentInsights() {
         <AISuggestFix insight={component?.insight} />
       </Flex>
       <InsightDisplay
-        insight={component.insight}
-        kind={component.kind}
+        insight={component?.insight}
+        kind={component?.kind}
+        loading={loading}
       />
     </Flex>
   )

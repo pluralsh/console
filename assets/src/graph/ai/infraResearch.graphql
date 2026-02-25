@@ -15,6 +15,7 @@ fragment InfraResearch on InfraResearch {
   }
   user {
     id
+    name
   }
   insertedAt
   updatedAt
@@ -46,8 +47,15 @@ query InfraResearches(
   $last: Int
   $after: String
   $before: String
+  $published: Boolean
 ) {
-  infraResearches(first: $first, last: $last, after: $after, before: $before) {
+  infraResearches(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    published: $published
+  ) {
     pageInfo {
       ...PageInfo
     }

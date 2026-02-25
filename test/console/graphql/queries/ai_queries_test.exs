@@ -487,5 +487,24 @@ defmodule Console.GraphQl.AiQueriesSyccTest do
       assert from_connection(found)
              |> ids_equal(researches)
     end
+
+    test "it can list all published researches" do
+      user = insert(:user)
+      insert_list(2, :infra_research, user: user, published: false)
+      own_published = insert(:infra_research, user: user, published: true)
+      other_published = insert(:infra_research, published: true)
+      insert_list(2, :infra_research, published: false)
+
+      {:ok, %{data: %{"infraResearches" => found}}} = run_query("""
+        query Researches($published: Boolean) {
+          infraResearches(first: 20, published: $published) {
+            edges { node { id } }
+          }
+        }
+      """, %{"published" => true}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal([own_published, other_published])
+    end
   end
 end

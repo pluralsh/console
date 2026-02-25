@@ -8982,8 +8982,8 @@ type Workbench struct {
 }
 
 type WorkbenchAttributes struct {
-	// the name of the workbench
-	Name *string `json:"name,omitempty"`
+	// the name of the workbench (must be unique)
+	Name string `json:"name"`
 	// the description of the workbench
 	Description *string `json:"description,omitempty"`
 	// the system prompt for the workbench

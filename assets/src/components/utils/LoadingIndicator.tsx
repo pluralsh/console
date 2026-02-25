@@ -10,6 +10,8 @@ export const LoadingIndicatorWrap = styled.div(({ theme }) => ({
   padding: theme.spacing.xlarge,
 }))
 
+// DEPRECATED: DO NOT USE
+// will remove once we've completed the migration to fully using skeleton loaders, they're much cleaner
 export default function LoadingIndicator(
   props: ComponentPropsWithRef<typeof LoadingIndicatorWrap>
 ) {

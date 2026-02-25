@@ -1,18 +1,19 @@
 import { useMemo, type JSX } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 
+import { Flex } from '@pluralsh/design-system'
 import { ComponentDetailsContext } from './ComponentDetails'
 import CanaryInfo from './info/Canary'
 import Certificate from './info/Certificate'
-import CronJob from './info/CronJob'
+import { CronJob } from './info/CronJob'
 import DaemonSet from './info/Daemonset'
 import Deployment from './info/Deployment'
 import Ingress from './info/Ingress'
 import Job from './info/Job'
 import PluralServiceDeployment from './info/PluralServiceDeployment'
-import Pods from './info/Pods'
+import { Pods } from './info/Pods'
 import { Rollout } from './info/rollout/Rollout'
 import Service from './info/Service'
 import StatefulSet from './info/StatefulSet'
@@ -20,6 +21,7 @@ import {
   ComponentDetailsWithPodsT,
   StructuredComponentKind,
 } from './useFetchComponentDetails'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 const componentsWithPods: StructuredComponentKind[] = [
   'deployment',
@@ -57,36 +59,38 @@ function getInfo(kind: string): JSX.Element | undefined {
   return componentInfoMap[kind]
 }
 
-export default function ComponentInfo() {
-  const theme = useTheme()
-  const {
-    componentDetails,
-    component: { kind },
-  } = useOutletContext<ComponentDetailsContext>()
-  const componentKind = kind.toLowerCase()
+export function ComponentInfo() {
+  const { spacing } = useTheme()
+  const { componentDetails, component, loading } =
+    useOutletContext<ComponentDetailsContext>()
+  const componentKind = component?.kind?.toLowerCase() ?? ''
   const info = useMemo(() => getInfo(componentKind), [componentKind])
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.xlarge,
-        paddingBottom: theme.spacing.xxlarge,
-      }}
+    <Flex
+      direction="column"
+      gap="xlarge"
+      paddingBottom={spacing.xxlarge}
     >
+      {!componentDetails && loading && (
+        <RectangleSkeleton
+          $width="100%"
+          $height="xxxxxxlarge"
+        />
+      )}
       {hasPods(componentKind) && (
         <Pods
           pods={(componentDetails as ComponentDetailsWithPodsT)?.pods ?? []}
         />
       )}
-      {info && componentDetails && <InfoWrapperSC>{info}</InfoWrapperSC>}
-    </div>
+      {info && componentDetails && (
+        <Flex
+          wrap="wrap"
+          gap="xlarge"
+        >
+          {info}
+        </Flex>
+      )}
+    </Flex>
   )
 }
-
-const InfoWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: theme.spacing.xlarge,
-}))

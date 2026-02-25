@@ -14,7 +14,7 @@ import { useServiceContext } from './ServiceDetailsContext'
 
 export function ServiceInsights() {
   const theme = useTheme()
-  const { service } = useServiceContext()
+  const { service, isLoading } = useServiceContext()
 
   return (
     <Flex
@@ -52,6 +52,7 @@ export function ServiceInsights() {
       <InsightDisplay
         insight={service?.insight}
         kind="service"
+        loading={isLoading}
       />
     </Flex>
   )

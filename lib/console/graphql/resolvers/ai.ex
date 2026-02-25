@@ -77,9 +77,12 @@ defmodule Console.GraphQl.Resolvers.AI do
 
   def list_researches(args, %{context: %{current_user: user}}) do
     InfraResearch.ordered()
-    |> InfraResearch.for_user(user.id)
+    |> filter_research(user.id, args[:published])
     |> paginate(args)
   end
+
+  defp filter_research(query, _, true), do: InfraResearch.published(query)
+  defp filter_research(query, user_id, _), do: InfraResearch.for_user(query, user_id)
 
   defp maybe_thread(%{thread_id: tid}, user) when is_binary(tid) do
     with {:ok, _} <- ChatSvc.thread_access(tid, user),

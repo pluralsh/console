@@ -580,7 +580,7 @@ type RootQueryType {
 
   mcpToken: String
 
-  infraResearches(after: String, first: Int, before: String, last: Int): InfraResearchConnection
+  infraResearches(after: String, first: Int, before: String, last: Int, published: Boolean): InfraResearchConnection
 
   infraResearch(id: ID!): InfraResearch
 
@@ -1978,8 +1978,8 @@ input WorkbenchJobAttributes {
 }
 
 input WorkbenchAttributes {
-  "the name of the workbench"
-  name: String
+  "the name of the workbench (must be unique)"
+  name: String!
 
   "the description of the workbench"
   description: String

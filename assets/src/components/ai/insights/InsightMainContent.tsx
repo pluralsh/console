@@ -1,5 +1,5 @@
 import { AiSparkleFilledIcon, Markdown } from '@pluralsh/design-system'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { MarkdownSkeleton } from 'components/utils/SkeletonLoaders'
 import styled from 'styled-components'
 import {
   useAIEnabled,
@@ -10,18 +10,22 @@ import { AIDisabledState, EmptyStateCompact } from '../AIThreads'
 export function InsightMainContent({
   text,
   kind,
+  loading,
 }: {
   text: Nullable<string>
   kind: Nullable<string>
+  loading?: boolean
 }) {
   const aiEnabled = useAIEnabled()
-  const loading = useLoadingDeploymentSettings()
+  const deploymentSettingsLoading = useLoadingDeploymentSettings()
+  const isLoading = deploymentSettingsLoading || (!text && loading)
 
-  if (loading)
+  if (isLoading)
     return (
-      <RectangleSkeleton
-        $width="100%"
-        $height="100%"
+      <MarkdownSkeleton
+        bright
+        padding="medium"
+        sections={[5, 3, 6, 2]}
       />
     )
 

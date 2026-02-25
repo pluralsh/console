@@ -46,7 +46,7 @@ interface DirectoryEntry {
   label?: string
 }
 
-export default function ClusterInsights() {
+export function ClusterInsights() {
   const theme = useTheme()
   const { cluster, clusterLoading } = useClusterContext()
   const tabStateRef = useRef<any>(null)
@@ -61,9 +61,11 @@ export default function ClusterInsights() {
     error,
     refetch,
   } = useClusterInsightQuery({
+    skip: !cluster?.id,
     variables: { id: cluster?.id ?? '' },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
+    notifyOnNetworkStatusChange: true,
   })
 
   const [navigationContent, setNavigationContent] = useState<ReactNode>()
@@ -80,12 +82,8 @@ export default function ClusterInsights() {
   )
 
   if (error) return <GqlError error={error} />
-  if (!data)
-    return insightLoading ? (
-      <LoadingIndicator />
-    ) : (
-      <EmptyState message="Cluster insights not found." />
-    )
+  if (!(data || insightLoading || clusterLoading))
+    return <EmptyState message="Cluster insights not found." />
   return (
     <Flex
       direction="column"
@@ -146,6 +144,7 @@ export default function ClusterInsights() {
 
 export function ClusterInsightsSummary() {
   const { cluster } = useClusterContext()
+  const { clusterLoading } = useClusterInsightsContext()
 
   useSetActionContent(
     useMemo(
@@ -167,6 +166,7 @@ export function ClusterInsightsSummary() {
     <InsightDisplay
       insight={cluster?.insight}
       kind="cluster"
+      loading={clusterLoading}
     />
   )
 }

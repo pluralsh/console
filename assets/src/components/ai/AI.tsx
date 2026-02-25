@@ -8,6 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import usePersistedState from 'components/hooks/usePersistedState'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { SubTabs } from 'components/utils/SubTabs'
 import { isNil } from 'lodash'
@@ -30,7 +31,6 @@ import {
   useAIEnabled,
   useLoadingDeploymentSettings,
 } from '../contexts/DeploymentSettingsContext'
-import LoadingIndicator from '../utils/LoadingIndicator'
 import { AIDisabledState } from './AIThreads'
 
 const DISMISSED_AI_ENABLED_DIALOG_KEY = 'dismissedAIEnabledDialog'
@@ -65,8 +65,6 @@ export function AI() {
     if (!isNil(aiEnabled)) setShowEnableAIDialog(!aiEnabled)
   }, [aiEnabled, setShowEnableAIDialog])
 
-  if (loading) return <LoadingIndicator />
-
   return (
     <WrapperSC>
       <HeaderSC>
@@ -82,7 +80,14 @@ export function AI() {
           />
         </StretchedFlex>
       </HeaderSC>
-      <Outlet />
+      {loading ? (
+        <RectangleSkeleton
+          $height="100%"
+          $width="100%"
+        />
+      ) : (
+        <Outlet />
+      )}
       <Modal
         open={showEnableAIDialog}
         header="Enable Plural AI"

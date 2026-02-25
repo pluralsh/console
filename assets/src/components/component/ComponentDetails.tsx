@@ -9,7 +9,6 @@ import {
 import { ViewLogsButton } from 'components/component/ViewLogsButton'
 import { useLogin } from 'components/contexts'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { LinkTabWrap } from 'components/utils/Tabs'
 import { ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -26,7 +25,6 @@ import {
   ServiceDeploymentComponentFragment,
   ServiceDeploymentDetailsFragment,
 } from 'generated/graphql'
-import { isEmpty } from 'lodash'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 
@@ -44,9 +42,10 @@ import {
   isUnstructured,
   useFetchComponentDetails,
 } from './useFetchComponentDetails.tsx'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 
 export type ComponentDetailsContext = {
-  component: ServiceDeploymentComponentFragment
+  component: Nullable<ServiceDeploymentComponentFragment>
   refetch: () => void
   componentDetails: Nullable<ComponentDetailsT>
   loading: boolean
@@ -56,12 +55,14 @@ export type ComponentDetailsContext = {
 
 export function ComponentDetails({
   component,
+  serviceLoading,
   pathMatchString,
   service,
   serviceComponents,
   hasPrometheus,
 }: {
-  component: ServiceDeploymentComponentFragment
+  component: Nullable<ServiceDeploymentComponentFragment>
+  serviceLoading: boolean
   pathMatchString: string
   service?: Nullable<ServiceDeploymentDetailsFragment>
   serviceComponents: ServiceDeploymentComponentFragment[]
@@ -72,13 +73,16 @@ export function ComponentDetails({
   const { flowIdOrName } = useParams()
   const tabStateRef = useRef<any>(null)
   const { me } = useLogin()
-  const componentKind = component.kind?.toLowerCase() || ''
-  const componentName = component.name?.toLowerCase() || ''
+  const componentKind = component?.kind?.toLowerCase() || ''
+  const componentName = component?.name?.toLowerCase() || ''
 
-  const { data, loading, refetch, error } = useFetchComponentDetails({
-    component,
-    service,
-  })
+  const {
+    data,
+    loading: componentLoading,
+    refetch,
+    error,
+  } = useFetchComponentDetails({ component, service })
+  const loading = !me || componentLoading || serviceLoading
 
   // To avoid mapping between component types and fields of data returned by API
   // we are picking first available value from API object for now.
@@ -105,7 +109,7 @@ export function ComponentDetails({
       serviceId: service?.id,
       serviceComponents,
     }),
-    [component, value, loading, refetch, service, serviceComponents]
+    [component, loading, refetch, service, serviceComponents, value]
   )
   const pluralServiceDeploymentRef =
     value?.__typename === 'PluralServiceDeployment' ? value.reference : null
@@ -131,38 +135,26 @@ export function ComponentDetails({
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
 
   useEffect(() => {
-    if (currentTab) return
-    const redirectPath = getServiceDetailsPath({
-      clusterId: service?.cluster?.id,
-      serviceId: service?.id,
-      flowIdOrName,
-    })
-    if (isEmpty(filteredDirectory)) navigate(redirectPath)
-    else
-      navigate(
-        `${redirectPath}/components/${component.id}/${filteredDirectory[0].path}`,
-        { replace: true }
-      )
-  }, [
-    navigate,
-    currentTab,
-    filteredDirectory,
-    service,
-    component,
-    flowIdOrName,
-  ])
-
-  if (!me || (!data && loading)) return <LoadingIndicator />
+    if (currentTab || !service) return // default to first tab once everything is loaded
+    navigate(filteredDirectory[0].path, { replace: true })
+  }, [currentTab, filteredDirectory, navigate, service])
 
   return (
-    <PageHeaderContext.Provider value={pageHeaderContext}>
+    <PageHeaderContext value={pageHeaderContext}>
       <ResponsivePageFullWidth
         scrollable={
           currentTab?.path === '' ||
           currentTab?.path === 'info' ||
           currentTab?.path === 'metadata'
         }
-        heading={componentName}
+        heading={
+          componentName || (
+            <RectangleSkeleton
+              $width={200}
+              $height="xlarge"
+            />
+          )
+        }
         headingContent={
           <Flex gap="medium">
             <TabList
@@ -182,25 +174,24 @@ export function ComponentDetails({
                 </LinkTabWrap>
               ))}
             </TabList>
-            {service?.cluster?.id && (
+            {service?.cluster?.id && component && (
               <ViewInDashboardButton
                 clusterId={service.cluster.id}
                 component={component}
               />
             )}
-            {pluralServiceDeploymentRef?.id &&
-              pluralServiceDeploymentRef?.cluster?.id && (
-                <Button
-                  as={Link}
-                  to={getServiceDetailsPath({
-                    flowIdOrName,
-                    serviceId: pluralServiceDeploymentRef?.id,
-                    clusterId: pluralServiceDeploymentRef?.cluster.id,
-                  })}
-                >
-                  View Service
-                </Button>
-              )}
+            {pluralServiceDeploymentRef?.cluster?.id && (
+              <Button
+                as={Link}
+                to={getServiceDetailsPath({
+                  flowIdOrName,
+                  serviceId: pluralServiceDeploymentRef.id,
+                  clusterId: pluralServiceDeploymentRef.cluster.id,
+                })}
+              >
+                View Service
+              </Button>
+            )}
             {!service?.id && (
               <ViewLogsButton
                 metadata={value?.metadata}
@@ -223,7 +214,7 @@ export function ComponentDetails({
           <Outlet context={outletContext} />
         </TabPanel>
       </ResponsivePageFullWidth>
-    </PageHeaderContext.Provider>
+    </PageHeaderContext>
   )
 }
 

@@ -122,6 +122,35 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
         }
       """, %{"attributes" => %{"name" => "reader-workbench", "projectId" => project.id}}, %{current_user: user})
     end
+
+    test "fails when name is missing (required)" do
+      project = insert(:project)
+
+      {:ok, %{errors: [error | _]}} = run_query("""
+        mutation WorkbenchCreate($attributes: WorkbenchAttributes!) {
+          createWorkbench(attributes: $attributes) {
+            id
+            name
+          }
+        }
+      """, %{"attributes" => %{"description" => "No name", "projectId" => project.id}}, %{current_user: admin_user()})
+
+      assert error.message =~ "name"
+    end
+
+    test "fails when name is duplicate (unique)" do
+      project = insert(:project)
+      insert(:workbench, project: project, name: "taken-name")
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation WorkbenchCreate($attributes: WorkbenchAttributes!) {
+          createWorkbench(attributes: $attributes) {
+            id
+            name
+          }
+        }
+      """, %{"attributes" => %{"name" => "taken-name", "projectId" => project.id}}, %{current_user: admin_user()})
+    end
   end
 
   describe "updateWorkbench" do
