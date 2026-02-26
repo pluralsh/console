@@ -136,8 +136,8 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v5
         with:
-          context: "."
-          file: go/kubernetes-agent/hack/docker/Dockerfile
+          context: go/kubernetes-agent
+          file: hack/docker/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
