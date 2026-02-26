@@ -1,11 +1,17 @@
-name: KAS / CI
+name: CI / Kubernetes Agent
 on:
   push:
     branches:
-      - master
+      - "master"
+    paths:
+      - ".github/workflows/kubernetes-agent-ci.yaml"
+      - "go/kubernetes-agent/**"
   pull_request:
     branches:
-      - master
+      - "**"
+    paths:
+      - ".github/workflows/kubernetes-agent-ci.yaml"
+      - "go/kubernetes-agent/**"
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
@@ -16,50 +22,66 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/kubernetes-agent
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version-file: modules/go.work
+          go-version-file: go/go.work
           check-latest: true
-      - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C modules/api build
+      - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C api build
 
   build-kas:
-    name: Build KAS
+    name: Build kas
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/kubernetes-agent
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version-file: modules/go.work
+          go-version-file: go/go.work
           check-latest: true
-      - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C modules/kas build-kas
+      - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C kas build-kas
 
   build-agentk:
     name: Build agentk
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/kubernetes-agent
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version-file: modules/go.work
+          go-version-file: go/go.work
           check-latest: true
-      - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C modules/kas build-agentk
+      - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C kas build-agentk
 
   test:
     name: Unit test
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/kubernetes-agent
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version-file: modules/go.work
+          go-version-file: go/go.work
           check-latest: true
       - run: PATH=$PATH:$GOPATH/bin make test
 
@@ -72,11 +94,11 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version-file: modules/go.work
+          go-version-file: go/go.work
           check-latest: true
       - uses: golangci/golangci-lint-action@v7
         with:
-          working-directory: modules/kas
+          working-directory: go/kubernetes-agent/kas
           version: v2.4.0
 
   publish:
@@ -115,7 +137,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: "."
-          file: hack/docker/Dockerfile
+          file: go/kubernetes-agent/hack/docker/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
