@@ -94,6 +94,10 @@ install-ginkgo: --tool ## Download and install ginkgo in the $BINARIES_DIR
 install-gotestsum: TOOL = gotestsum
 install-gotestsum: --tool ## Download and install gotestsum in the $BINARIES_DIR
 
+.PHONY: install-mockgen
+install-mockgen: TOOL = mockgen
+install-mockgen: --tool ## Download and install mockgen in the $BINARIES_DIR
+
 .PHONY: install-protoc-gen-go
 install-protoc-gen-go: TOOL = protoc-gen-go
 install-protoc-gen-go: --tool ## Download and install protoc-gen-go in the $BINARIES_DIR
@@ -102,7 +106,13 @@ install-protoc-gen-go: --tool ## Download and install protoc-gen-go in the $BINA
 install-protoc-gen-go-grpc: TOOL = protoc-gen-go-grpc
 install-protoc-gen-go-grpc: --tool ## Download and install protoc-gen-go-grpc in the $BINARIES_DIR
 
+.PHONY: install-protoc-gen-validate
+install-protoc-gen-validate: TOOL = protoc-gen-validate
+install-protoc-gen-validate: --tool ## Download and install protoc-gen-validate in the $BINARIES_DIR
 
+.PHONY: install-protoc-gen-doc
+install-protoc-gen-doc: TOOL = protoc-gen-doc
+install-protoc-gen-doc: --tool ## Download and install protoc-gen-doc in the $BINARIES_DIR
 
 .PHONY: install-protoc
 install-protoc: --ensure-binaries-dir ## Download and install protoc compiler in the $BINARIES_DIR
