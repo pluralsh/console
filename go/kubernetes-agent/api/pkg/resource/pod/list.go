@@ -169,7 +169,6 @@ func GetPodList(client k8sClient.Interface, metricClient metricapi.MetricClient,
 // reading required resource list once from the channels.
 func GetPodListFromChannels(channels *common.ResourceChannels, dsQuery *dataselect.DataSelectQuery,
 	metricClient metricapi.MetricClient) (*PodList, error) {
-
 	pods := <-channels.PodList.List
 	err := <-channels.PodList.Error
 	nonCriticalErrors, criticalError := errors.ExtractErrors(err)
