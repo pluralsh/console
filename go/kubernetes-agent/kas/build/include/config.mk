@@ -3,10 +3,12 @@ APP_NAME := $(PROJECT_NAME)
 
 ### Dirs and paths
 KAS_DIST_DIR = $(KAS_DIR)/.bin
+
 # Docker files
-DOCKER_DIRECTORY := $(ROOT_DIRECTORY)/build/docker
+DOCKER_DIRECTORY := $(KUBERNETES_AGENT_DIR)/kas/build/docker
 DOCKER_COMPOSE_PATH := $(DOCKER_DIRECTORY)/compose.yaml
 DOCKER_COMPOSE_DEBUG_PATH := $(DOCKER_DIRECTORY)/compose.debug.yaml
+
 # Secret dir for run targets
 SECRET_DIRECTORY := $(KAS_DIR)/.secret
 
