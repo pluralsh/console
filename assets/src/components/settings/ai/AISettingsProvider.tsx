@@ -12,7 +12,11 @@ import {
   Switch,
   Toast,
 } from '@pluralsh/design-system'
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
+import {
+  AIVerbosityLevel,
+  useExplainWithAIContext,
+} from 'components/ai/AIContext.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import {
   Body1BoldP,
@@ -22,6 +26,7 @@ import {
 import {
   AiProvider,
   AiSettingsAttributes,
+  useDeploymentSettingsSuspenseQuery,
   useUpdateDeploymentSettingsMutation,
 } from 'generated/graphql'
 import { produce } from 'immer'
@@ -31,19 +36,14 @@ import { FormEvent, ReactNode, useMemo, useReducer, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { PartialDeep } from 'type-fest'
 import {
-  AIVerbosityLevel,
-  useExplainWithAIContext,
-} from 'components/ai/AIContext.tsx'
-import { GqlError } from 'components/utils/Alert.tsx'
-import {
-  initialSettingsAttributes,
-  OpenAISettings,
   AnthropicSettings,
-  OllamaSettings,
   AzureSettings,
   BedrockSettings,
-  VertexSettings,
+  initialSettingsAttributes,
+  OllamaSettings,
+  OpenAISettings,
   validateAttributes,
+  VertexSettings,
 } from './AISettingsProviders.tsx'
 
 const updateSettings = produce(
@@ -59,7 +59,10 @@ const updateSettings = produce(
 
 export function AISettingsProvider() {
   const theme = useTheme()
-  const { ai } = useDeploymentSettings()
+  const { data: deploymentSettings, error: deploymentSettingsError } =
+    useDeploymentSettingsSuspenseQuery()
+  const ai = deploymentSettings.deploymentSettings?.ai
+
   const [enabled, setEnabled] = useState<boolean>(ai?.enabled ?? false)
   const [provider, setProvider] = useState<AiProvider>(
     ai?.provider ?? AiProvider.Openai
@@ -173,15 +176,17 @@ export function AISettingsProvider() {
   return (
     <ScrollablePage>
       <Flex
-        direction={'column'}
-        gap={'medium'}
+        direction="column"
+        gap="medium"
       >
         <WrapperCardSC
           forwardedAs="form"
           onSubmit={handleSubmit}
         >
-          {error && <GqlError error={error} />}
-          <Flex justifyContent={'space-between'}>
+          {(error || deploymentSettingsError) && (
+            <GqlError error={error || deploymentSettingsError} />
+          )}
+          <Flex justifyContent="space-between">
             <Switch
               checked={enabled}
               onChange={(checked) => setEnabled(checked)}
@@ -203,26 +208,30 @@ export function AISettingsProvider() {
               /> */}
               <ListBoxItem
                 key={AiProvider.Openai}
-                label={'OpenAI'}
+                label="OpenAI"
               />
               <ListBoxItem
                 key={AiProvider.Anthropic}
-                label={'Anthropic'}
+                label="Anthropic"
               />
               <ListBoxItem
                 key={AiProvider.Azure}
-                label={'Azure AI'}
+                label="Azure AI"
               />
               <ListBoxItem
                 key={AiProvider.Ollama}
-                label={'Ollama'}
+                label="Ollama"
               />
               <ListBoxItem
                 key={AiProvider.Vertex}
-                label={'Vertex AI'}
+                label="Vertex AI"
               />
             </SelectWithDisable>
           </FormField>
+          <Body2P $color="text-xlight">
+            Note: model fields can be left blank to use Plural defaults unless
+            otherwise specified.
+          </Body2P>
           {settings}
           <Button
             alignSelf="flex-end"
@@ -290,7 +299,7 @@ export function AISettingsProvider() {
 const WrapperCardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.large,
+  gap: theme.spacing.medium,
   padding: theme.spacing.xlarge,
 }))
 

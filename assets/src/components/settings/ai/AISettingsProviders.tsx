@@ -19,6 +19,7 @@ export function initialSettingsAttributes(
           ? {
               anthropic: {
                 model: ai.anthropic.model,
+                toolModel: ai.anthropic.toolModel,
                 accessToken: '',
               },
             }
@@ -30,6 +31,7 @@ export function initialSettingsAttributes(
                 endpoint: ai.azure.endpoint,
                 model: ai.azure.model,
                 embeddingModel: ai.azure.embeddingModel,
+                toolModel: ai.azure.toolModel,
                 accessToken: '',
               },
             }
@@ -38,6 +40,7 @@ export function initialSettingsAttributes(
           ? {
               bedrock: {
                 modelId: ai.bedrock.modelId,
+                toolModelId: ai.bedrock.toolModelId,
                 embeddingModel: ai.bedrock.embeddingModel,
                 accessToken: '',
                 region: ai.bedrock.region,
@@ -48,6 +51,7 @@ export function initialSettingsAttributes(
           ? {
               ollama: {
                 model: ai.ollama.model,
+                toolModel: ai.ollama.toolModel,
                 url: ai.ollama.url,
                 authorization: '',
               },
@@ -57,6 +61,7 @@ export function initialSettingsAttributes(
           ? {
               openai: {
                 model: ai.openai.model,
+                toolModel: ai.openai.toolModel,
                 embeddingModel: ai.openai.embeddingModel,
                 baseUrl: ai.openai.baseUrl,
                 accessToken: '',
@@ -68,9 +73,10 @@ export function initialSettingsAttributes(
               vertex: {
                 model: ai.vertex.model,
                 embeddingModel: ai.vertex.embeddingModel,
-                serviceAccountJson: '',
+                toolModel: ai.vertex.toolModel,
                 project: ai.vertex.project,
                 location: ai.vertex.location,
+                serviceAccountJson: '',
               },
             }
           : {}),
@@ -130,41 +136,48 @@ export function OpenAISettings({
     <>
       <FormField
         label="Model"
-        hint="Leave blank for Plural default."
+        hint="Primary model for Explain/Fix with AI, Insights, and similar features."
         flex={1}
       >
         <Input
           disabled={!enabled}
           value={settings?.model}
-          onChange={(e) => {
-            updateSettings({ model: e.currentTarget.value })
-          }}
+          onChange={(e) => updateSettings({ model: e.currentTarget.value })}
         />
       </FormField>
       <FormField
         label="Embedding Model"
-        hint="Leave blank for Plural default."
+        hint="Model used for embeddings and vector search."
         flex={1}
       >
         <Input
           disabled={!enabled}
           value={settings?.embeddingModel}
-          onChange={(e) => {
+          onChange={(e) =>
             updateSettings({ embeddingModel: e.currentTarget.value })
-          }}
+          }
+        />
+      </FormField>
+      <FormField
+        label="Tool model"
+        hint="Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.toolModel}
+          onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
         />
       </FormField>
       <FormField
         label="Base URL"
-        hint="The base URL to use when querying an OpenAI compatible API. Leave blank for OpenAI."
+        hint="Optional custom API base URL for OpenAI-compatible providers. Leave blank to use OpenAI."
         flex={1}
       >
         <Input
           disabled={!enabled}
           value={settings?.baseUrl}
-          onChange={(e) => {
-            updateSettings({ baseUrl: e.currentTarget.value })
-          }}
+          onChange={(e) => updateSettings({ baseUrl: e.currentTarget.value })}
         />
       </FormField>
       <FormField
@@ -175,9 +188,9 @@ export function OpenAISettings({
         <InputRevealer
           disabled={!enabled}
           value={settings?.accessToken ?? undefined}
-          onChange={(e) => {
+          onChange={(e) =>
             updateSettings({ accessToken: e.currentTarget.value })
-          }}
+          }
         />
       </FormField>
     </>
@@ -199,15 +212,24 @@ export function AnthropicSettings({
     <>
       <FormField
         label="Model"
-        hint="Leave blank for Plural default."
+        hint="Primary model for Explain/Fix with AI, Insights, and similar features."
         flex={1}
       >
         <Input
           disabled={!enabled}
           value={settings?.model}
-          onChange={(e) => {
-            updateSettings({ model: e.currentTarget.value })
-          }}
+          onChange={(e) => updateSettings({ model: e.currentTarget.value })}
+        />
+      </FormField>
+      <FormField
+        label="Tool model"
+        hint="Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.toolModel}
+          onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
         />
       </FormField>
       <FormField
@@ -218,9 +240,9 @@ export function AnthropicSettings({
         <InputRevealer
           disabled={!enabled}
           value={settings?.accessToken ?? undefined}
-          onChange={(e) => {
+          onChange={(e) =>
             updateSettings({ accessToken: e.currentTarget.value })
-          }}
+          }
         />
       </FormField>
     </>
@@ -242,15 +264,25 @@ export function OllamaSettings({
     <>
       <FormField
         label="Model"
+        hint="Primary model for Explain/Fix with AI, Insights, and similar features."
         required={enabled}
         flex={1}
       >
         <Input
           disabled={!enabled}
           value={settings?.model}
-          onChange={(e) => {
-            updateSettings({ model: e.currentTarget.value })
-          }}
+          onChange={(e) => updateSettings({ model: e.currentTarget.value })}
+        />
+      </FormField>
+      <FormField
+        label="Tool model"
+        hint="Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.toolModel}
+          onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
         />
       </FormField>
       <FormField
@@ -262,9 +294,7 @@ export function OllamaSettings({
         <Input
           disabled={!enabled}
           value={settings?.url}
-          onChange={(e) => {
-            updateSettings({ url: e.currentTarget.value })
-          }}
+          onChange={(e) => updateSettings({ url: e.currentTarget.value })}
         />
       </FormField>
       <FormField
@@ -276,9 +306,9 @@ export function OllamaSettings({
         <InputRevealer
           disabled={!enabled}
           value={settings?.authorization ?? undefined}
-          onChange={(e) => {
+          onChange={(e) =>
             updateSettings({ authorization: e.currentTarget.value })
-          }}
+          }
         />
       </FormField>
     </>
@@ -300,42 +330,50 @@ export function AzureSettings({
     <>
       <FormField
         label="Model"
-        hint="Leave blank for Plural default."
+        hint="Primary model for Explain/Fix with AI, Insights, and similar features."
         flex={1}
       >
         <Input
           disabled={!enabled}
           value={settings?.model}
-          onChange={(e) => {
-            updateSettings({ model: e.currentTarget.value })
-          }}
+          onChange={(e) => updateSettings({ model: e.currentTarget.value })}
         />
       </FormField>
       <FormField
         label="API version"
-        hint="The API version you want to use."
         required={enabled}
         flex={1}
       >
         <Input
           disabled={!enabled}
           value={settings?.apiVersion}
-          onChange={(e) => {
+          onChange={(e) =>
             updateSettings({ apiVersion: e.currentTarget.value })
-          }}
+          }
         />
       </FormField>
       <FormField
         label="Embedding Model"
-        hint="Leave blank for Plural default."
+        hint="Model used for embeddings and vector search."
         flex={1}
       >
         <Input
           disabled={!enabled}
           value={settings?.embeddingModel}
-          onChange={(e) => {
+          onChange={(e) =>
             updateSettings({ embeddingModel: e.currentTarget.value })
-          }}
+          }
+        />
+      </FormField>
+      <FormField
+        label="Tool model"
+        hint="Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.toolModel}
+          onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
         />
       </FormField>
       <FormField
@@ -347,9 +385,7 @@ export function AzureSettings({
         <Input
           disabled={!enabled}
           value={settings?.endpoint}
-          onChange={(e) => {
-            updateSettings({ endpoint: e.currentTarget.value })
-          }}
+          onChange={(e) => updateSettings({ endpoint: e.currentTarget.value })}
         />
       </FormField>
       <FormField
@@ -361,9 +397,9 @@ export function AzureSettings({
         <InputRevealer
           disabled={!enabled}
           value={settings?.accessToken ?? undefined}
-          onChange={(e) => {
+          onChange={(e) =>
             updateSettings({ accessToken: e.currentTarget.value })
-          }}
+          }
         />
       </FormField>
     </>
@@ -385,29 +421,40 @@ export function BedrockSettings({
     <>
       <FormField
         label="Model ID"
-        hint="The Model ID you want to use."
+        hint="Primary Bedrock model ID for Explain/Fix with AI, Insights, and similar features."
         required={enabled}
         flex={1}
       >
         <Input
           disabled={!enabled}
           value={settings?.modelId}
-          onChange={(e) => {
-            updateSettings({ modelId: e.currentTarget.value })
-          }}
+          onChange={(e) => updateSettings({ modelId: e.currentTarget.value })}
+        />
+      </FormField>
+      <FormField
+        label="Tool model ID"
+        hint="Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.toolModelId}
+          onChange={(e) =>
+            updateSettings({ toolModelId: e.currentTarget.value })
+          }
         />
       </FormField>
       <FormField
         label="Embedding Model"
-        hint="Leave blank for Plural default."
+        hint="Model used for embeddings and vector search."
         flex={1}
       >
         <Input
           disabled={!enabled}
           value={settings?.embeddingModel}
-          onChange={(e) => {
+          onChange={(e) =>
             updateSettings({ embeddingModel: e.currentTarget.value })
-          }}
+          }
         />
       </FormField>
       <FormField
@@ -418,9 +465,9 @@ export function BedrockSettings({
         <Input
           disabled={!enabled}
           value={settings?.accessToken}
-          onChange={(e) => {
+          onChange={(e) =>
             updateSettings({ accessToken: e.currentTarget.value })
-          }}
+          }
         />
       </FormField>
       <FormField
@@ -431,9 +478,7 @@ export function BedrockSettings({
         <InputRevealer
           disabled={!enabled}
           value={settings?.region ?? undefined}
-          onChange={(e) => {
-            updateSettings({ region: e.currentTarget.value })
-          }}
+          onChange={(e) => updateSettings({ region: e.currentTarget.value })}
         />
       </FormField>
     </>
@@ -495,28 +540,26 @@ export function VertexSettings({
     <>
       <FormField
         label="Model"
-        hint="The Model ID you want to use."
+        hint="Primary model for Explain/Fix with AI, Insights, and similar features."
         flex={1}
       >
         <Input
           disabled={!enabled}
           value={settings?.model}
-          onChange={(e) => {
-            updateSettings({ model: e.currentTarget.value })
-          }}
+          onChange={(e) => updateSettings({ model: e.currentTarget.value })}
         />
       </FormField>
       <FormField
         label="Embedding Model"
-        hint="Leave blank for Plural default."
+        hint="Model used for embeddings and vector search."
         flex={1}
       >
         <Input
           disabled={!enabled}
           value={settings?.embeddingModel}
-          onChange={(e) => {
+          onChange={(e) =>
             updateSettings({ embeddingModel: e.currentTarget.value })
-          }}
+          }
         />
       </FormField>
       <FormField
@@ -527,9 +570,18 @@ export function VertexSettings({
         <Input
           disabled={!enabled}
           value={settings?.project}
-          onChange={(e) => {
-            updateSettings({ project: e.currentTarget.value })
-          }}
+          onChange={(e) => updateSettings({ project: e.currentTarget.value })}
+        />
+      </FormField>
+      <FormField
+        label="Tool model"
+        hint="Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.toolModel}
+          onChange={(e) => updateSettings({ toolModel: e.currentTarget.value })}
         />
       </FormField>
       <FormField
@@ -540,9 +592,18 @@ export function VertexSettings({
         <Input
           disabled={!enabled}
           value={settings?.location}
-          onChange={(e) => {
-            updateSettings({ location: e.currentTarget.value })
-          }}
+          onChange={(e) => updateSettings({ location: e.currentTarget.value })}
+        />
+      </FormField>
+      <FormField
+        label="Endpoint"
+        hint="Custom Vertex AI endpoint for dedicated deployments. Leave blank to use the default endpoint."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.endpoint}
+          onChange={(e) => updateSettings({ endpoint: e.currentTarget.value })}
         />
       </FormField>
       <FormField

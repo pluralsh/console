@@ -14,9 +14,12 @@ fragment SmtpSettings on SmtpSettings {
 fragment AiSettings on AiSettings {
   anthropic {
     model
+    toolModel
   }
   openai {
+    baseUrl
     model
+    toolModel
     embeddingModel
   }
   azure {
@@ -24,19 +27,25 @@ fragment AiSettings on AiSettings {
     endpoint
     model
     embeddingModel
+    toolModel
+    apiVersion
   }
   ollama {
     model
+    toolModel
     url
   }
   bedrock {
     region
     modelId
+    toolModelId
+    accessKeyId
     embeddingModel
   }
   vertex {
     model
     embeddingModel
+    toolModel
     project
     location
   }
