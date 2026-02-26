@@ -1,4 +1,4 @@
-name: KAS / CD
+name: CD / Kubernetes Agent
 on:
   push:
     tags:
@@ -13,16 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/kubernetes-agent
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
-          go-version-file: modules/go.work
+          go-version-file: go/go.work
           check-latest: true
-      - run: PATH=$PATH:$GOPATH/bin make -C modules/kas test
+      - run: PATH=$PATH:$GOPATH/bin make test
 
   image:
-    name: Build kubernetes agent container
+    name: Build image
     needs: [test]
     permissions:
       contents: 'read'
@@ -71,8 +75,8 @@ jobs:
         id: build
         uses: docker/build-push-action@v6
         with:
-          context: "."
-          file: hack/docker/Dockerfile
+          context: go/kubernetes-agent
+          file: go/kubernetes-agent/hack/docker/Dockerfile
           tags: ${{ env.REGISTRY_IMAGE }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platforms.platform }}
