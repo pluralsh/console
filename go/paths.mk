@@ -13,15 +13,15 @@ CONTROLLER_DIR := $(WORKSPACES_DIR)/controller
 CLOUD_QUERY_DIR := $(WORKSPACES_DIR)/cloud-query
 KUBERNETES_AGENT_DIR := $(WORKSPACES_DIR)/kubernetes-agent
 BINARIES_DIR := $(ROOT_DIRECTORY)/binaries
+GOLANGCI_LINT_CONFIG := $(WORKSPACES_DIR)/.golangci.yml
 
-# Tools
+# Tool binaries
 CONTROLLER_GEN ?= $(BINARIES_DIR)/controller-gen
 CRDDOCS ?= $(BINARIES_DIR)/crd-ref-docs
 ENVSUBST ?= $(BINARIES_DIR)/envsubst
 ENVTEST ?= $(BINARIES_DIR)/setup-envtest
 GOIMPORTS ?= $(BINARIES_DIR)/goimports
 GOLANGCI_LINT ?= $(BINARIES_DIR)/golangci-lint
-GOLANGCI_LINT_CONFIG := $(ROOT_DIRECTORY)/.golangci.yml
 GRAPHQL_MESH ?= $(BINARIES_DIR)/bin/graphql-mesh
 GQLGEN ?= $(BINARIES_DIR)/gqlgen
 GQLGENC ?= $(BINARIES_DIR)/gqlgenc

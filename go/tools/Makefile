@@ -1,5 +1,5 @@
 ##@ Build Dependencies
-ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
+ROOT_DIRECTORY ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
 include $(ROOT_DIRECTORY)/go/tools/os.mk

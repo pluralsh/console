@@ -1,9 +1,10 @@
-ROOT_DIRECTORY = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
+ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../../..
 
-# Global makefile partial config
-include $(ROOT_DIRECTORY)/hack/include/config.mk
-include $(ROOT_DIRECTORY)/hack/include/kind.mk
+include $(ROOT_DIRECTORY)/go/paths.mk
 include $(TOOLS_MAKEFILE)
+
+include $(KUBERNETES_AGENT_DIR)/config.mk
+include $(KUBERNETES_AGENT_DIR)/kind.mk
 
 # Local makefile partial config
 include hack/include/config.mk
