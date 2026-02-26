@@ -1,5 +1,6 @@
 ### Application details
 APP_NAME := $(PROJECT_NAME)-api
+PACKAGE_NAME := .
 
 ### Dirs and paths
 API_DIST_DIR = $(API_DIR)/.dist
