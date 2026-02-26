@@ -36,17 +36,6 @@ export function initialSettingsAttributes(
               },
             }
           : {}),
-        ...(ai.bedrock
-          ? {
-              bedrock: {
-                modelId: ai.bedrock.modelId,
-                toolModelId: ai.bedrock.toolModelId,
-                embeddingModel: ai.bedrock.embeddingModel,
-                accessToken: '',
-                region: ai.bedrock.region,
-              },
-            }
-          : {}),
         ...(ai.ollama
           ? {
               ollama: {
@@ -107,12 +96,6 @@ export function validateAttributes(
         settings.azure?.apiVersion &&
         settings.azure?.endpoint &&
         settings.azure?.accessToken
-      )
-    case AiProvider.Bedrock:
-      return !!(
-        settings.bedrock?.modelId &&
-        settings.bedrock?.accessToken &&
-        settings.bedrock?.region
       )
     case AiProvider.Vertex:
       return !!(settings.vertex?.project && settings.vertex?.location)
@@ -400,85 +383,6 @@ export function AzureSettings({
           onChange={(e) =>
             updateSettings({ accessToken: e.currentTarget.value })
           }
-        />
-      </FormField>
-    </>
-  )
-}
-
-export function BedrockSettings({
-  enabled,
-  settings,
-  updateSettings,
-}: {
-  enabled: boolean
-  settings: AiSettingsAttributes['bedrock']
-  updateSettings: (
-    update: NonNullable<Partial<AiSettingsAttributes['bedrock']>>
-  ) => void
-}) {
-  return (
-    <>
-      <FormField
-        label="Model ID"
-        hint="Primary Bedrock model ID for Explain/Fix with AI, Insights, and similar features."
-        required={enabled}
-        flex={1}
-      >
-        <Input
-          disabled={!enabled}
-          value={settings?.modelId}
-          onChange={(e) => updateSettings({ modelId: e.currentTarget.value })}
-        />
-      </FormField>
-      <FormField
-        label="Tool model ID"
-        hint="Model used for tool calls and general chat, which are less frequent and benefit from more complex reasoning."
-        flex={1}
-      >
-        <Input
-          disabled={!enabled}
-          value={settings?.toolModelId}
-          onChange={(e) =>
-            updateSettings({ toolModelId: e.currentTarget.value })
-          }
-        />
-      </FormField>
-      <FormField
-        label="Embedding Model"
-        hint="Model used for embeddings and vector search."
-        flex={1}
-      >
-        <Input
-          disabled={!enabled}
-          value={settings?.embeddingModel}
-          onChange={(e) =>
-            updateSettings({ embeddingModel: e.currentTarget.value })
-          }
-        />
-      </FormField>
-      <FormField
-        label="Access token"
-        required={enabled}
-        flex={1}
-      >
-        <Input
-          disabled={!enabled}
-          value={settings?.accessToken}
-          onChange={(e) =>
-            updateSettings({ accessToken: e.currentTarget.value })
-          }
-        />
-      </FormField>
-      <FormField
-        label="Region"
-        required={enabled}
-        flex={1}
-      >
-        <InputRevealer
-          disabled={!enabled}
-          value={settings?.region ?? undefined}
-          onChange={(e) => updateSettings({ region: e.currentTarget.value })}
         />
       </FormField>
     </>

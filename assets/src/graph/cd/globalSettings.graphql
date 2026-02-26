@@ -28,19 +28,11 @@ fragment AiSettings on AiSettings {
     model
     embeddingModel
     toolModel
-    apiVersion
   }
   ollama {
     model
     toolModel
     url
-  }
-  bedrock {
-    region
-    modelId
-    toolModelId
-    accessKeyId
-    embeddingModel
   }
   vertex {
     model

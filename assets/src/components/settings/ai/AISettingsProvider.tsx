@@ -38,7 +38,6 @@ import { PartialDeep } from 'type-fest'
 import {
   AnthropicSettings,
   AzureSettings,
-  BedrockSettings,
   initialSettingsAttributes,
   OllamaSettings,
   OpenAISettings,
@@ -120,17 +119,6 @@ export function AISettingsProvider() {
         />
       )
       break
-    case AiProvider.Bedrock:
-      settings = (
-        <BedrockSettings
-          enabled={enabled}
-          settings={providerSettings.bedrock}
-          updateSettings={(settings) =>
-            updateProviderSettings({ bedrock: settings })
-          }
-        />
-      )
-      break
     case AiProvider.Vertex:
       settings = (
         <VertexSettings
@@ -202,10 +190,6 @@ export function AISettingsProvider() {
                 setProvider(v as AiProvider)
               }}
             >
-              {/* <ListBoxItem
-                key={AiProvider.Bedrock}
-                label={'Amazon Bedrock'}
-              /> */}
               <ListBoxItem
                 key={AiProvider.Openai}
                 label="OpenAI"
