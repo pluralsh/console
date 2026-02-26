@@ -1,29 +1,19 @@
-### Common application/container details
+### Application details
 PROJECT_NAME := kas
 
-# Modules
-MODULES_DIR := $(KUBERNETES_AGENT_DIR)/modules
-API_DIR := $(MODULES_DIR)/api
-KAS_DIR := $(MODULES_DIR)/kas
-
-# Build
+# Directories
+API_DIR := $(KUBERNETES_AGENT_DIR)/api
+KAS_DIR := $(KUBERNETES_AGENT_DIR)/kas
 TMP_DIR := $(KUBERNETES_AGENT_DIR)/.tmp
 
 # Docker files
-DOCKER_DIRECTORY := $(ROOT_DIRECTORY)/hack/docker
+DOCKER_DIRECTORY := $(KUBERNETES_AGENT_DIR)/hack/docker
 DOCKER_COMPOSE_PATH := $(DOCKER_DIRECTORY)/compose.yaml
 DOCKER_COMPOSE_DEV_PATH := $(DOCKER_DIRECTORY)/compose.debug.yaml
 
-# Metrics server
-METRICS_SERVER_VERSION := v0.7.0
-
-# Ingress nginx
+# Local testing setup
 INGRESS_NGINX_VERSION := v1.14.1
-
-# Redis
 REDIS_VERSION := 7.2.2
-
-# Kind
 KIND_CLUSTER_NAME := $(PROJECT_NAME)
 KIND_CLUSTER_VERSION := 1.32.0
 KIND_CLUSTER_IMAGE := docker.io/kindest/node:v${KIND_CLUSTER_VERSION}
