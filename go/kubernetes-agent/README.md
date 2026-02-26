@@ -2,7 +2,7 @@
 
 Plural Agent for Kubernetes is an active in-cluster component for solving any Plural<->Kubernetes integration tasks.
 
-It's implemented as two communicating pieces - Plural Agent (`agentk`) that is running in the cluster and Plural Agent Server (`gitlab-kas`) that is running on the Plural side. Please see the [architecture](doc/architecture.md) document and other documents in the [doc](doc) directory for more information. [User-facing documentation](https://docs.gitlab.com/ee/user/clusters/agent/) is also available.
+It's implemented as two communicating pieces - Plural Agent (`agentk`) that is running in the cluster and Plural Agent Server (`gitlab-kas`) that is running on the Plural side.
 
 ## Local development & testing
 
@@ -13,12 +13,6 @@ This section focuses on running and testing:
 - `api` (backend-for-frontend API service)
 
 using the provided `Makefile`, local [kind](https://kind.sigs.k8s.io/) cluster, and the dev Helm chart in `hack/chart/kas`.
-
-For a deeper architecture and development guide, see:
-
-- [Architecture](doc/architecture.md)
-- [Development guide](doc/developing.md)
-- [kas request routing](doc/kas_request_routing.md)
 
 ### Prerequisites
 
@@ -34,14 +28,10 @@ For a deeper architecture and development guide, see:
 
 - Root
   - `Makefile` – orchestration entry point (build, test, kind + Helm, local compose)
-  - `doc/` – architecture and deeper development docs
   - `hack/chart/kas` – dev Helm chart used for local testing
 - `modules/`
   - `kas/` – kas & agentk source, Dockerfiles, tests and tooling
   - `api/` – backend-for-frontend API service
-  - `common/`, `tools/` – shared libraries and tooling
-
-See [doc/modules.md](doc/modules.md) for a more detailed module overview.
 
 ### Spinning up a local kind cluster with kas + proxy (Helm path)
 
@@ -136,8 +126,6 @@ Key points:
 
 - `--kas-insecure-skip-tls-verify` is typically needed in local dev because the ingress TLS is self-signed.
 - `--kas-address` must match the proxy hostname and path configured by the Helm chart and kind ingress. In the default setup this is `wss://kas.local/ext/kas`.
-
-For non-proxy (direct) development setups, see [doc/developing.md](doc/developing.md) for examples using `grpc://127.0.0.1:8150` and a `token.txt` file instead of `AGENTK_TOKEN`.
 
 ### Testing the kas API service (modules/api)
 
