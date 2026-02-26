@@ -1,0 +1,20 @@
+We've found the following alert from <%= @alert.type %>, please investigate it's root cause and provide any supporting evidence to explain why it is happening.
+
+# <%= @alert.title %>
+
+<%= @alert.message %>
+
+<%= if is_list(@alert.tags) do %>
+# Tags
+<%= for %{name: k, value: v} <- @alert.tags do %>
+- <%= k %>: <%= v %>
+<% end %>
+<% end %>
+
+<%= if is_map(@alert.stacktrace) do %>
+There's also an associated stacktrace, which I'll provide in JSON format:
+
+```json
+<%= Jason.encode!(Console.mapify(@alert.stacktrace)) %>
+```
+<% end %>

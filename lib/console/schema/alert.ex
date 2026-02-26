@@ -8,7 +8,8 @@ defmodule Console.Schema.Alert do
     ObservabilityWebhook,
     AiInsight,
     AlertResolution,
-    Flow
+    Flow,
+    Workbench
   }
 
   defenum Severity, low: 0, medium: 1, high: 2, critical: 3, undefined: 4
@@ -46,10 +47,11 @@ defmodule Console.Schema.Alert do
 
     belongs_to :insight, AiInsight, on_replace: :update
 
-    belongs_to :project, Project
-    belongs_to :cluster, Cluster
-    belongs_to :service, Service
-    belongs_to :flow,    Flow
+    belongs_to :project,   Project
+    belongs_to :cluster,   Cluster
+    belongs_to :service,   Service
+    belongs_to :flow,      Flow
+    belongs_to :workbench, Workbench
 
     has_one :resolution, AlertResolution
 
@@ -80,6 +82,10 @@ defmodule Console.Schema.Alert do
 
   def for_project(query \\ __MODULE__, id) do
     from(a in query, where: a.project_id == ^id)
+  end
+
+  def for_workbench(query \\ __MODULE__, id) do
+    from(a in query, where: a.workbench_id == ^id)
   end
 
   def for_flow(query \\ __MODULE__, id) do
@@ -116,7 +122,23 @@ defmodule Console.Schema.Alert do
     from(a in query, where: a.severity in ^severities)
   end
 
-  @valid ~w(type severity state title message fingerprint annotations url project_id flow_id cluster_id insight_id service_id ai_poll_at)a
+  @valid ~w(
+    type
+    severity
+    state
+    title
+    message
+    fingerprint
+    annotations
+    url
+    project_id
+    flow_id
+    cluster_id
+    insight_id
+    service_id
+    workbench_id
+    ai_poll_at
+  )a
 
   def changeset(model, attrs) do
     model

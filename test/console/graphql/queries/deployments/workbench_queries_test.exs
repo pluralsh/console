@@ -150,6 +150,61 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert ids_equal(found["tools"], [tool1, tool2])
     end
 
+    test "it can fetch workbench crons" do
+      workbench = insert(:workbench)
+      cron1 = insert(:workbench_cron, workbench: workbench, crontab: "*/5 * * * *", prompt: "run 1")
+      cron2 = insert(:workbench_cron, workbench: workbench, crontab: "0 * * * *", prompt: "run 2")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            crons(first: 5) {
+              edges {
+                node {
+                  id
+                  crontab
+                  prompt
+                  nextRunAt
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      nodes = from_connection(found["crons"])
+      assert ids_equal(nodes, [cron1, cron2])
+      assert Enum.any?(nodes, & &1["crontab"] == "*/5 * * * *" and &1["prompt"] == "run 1")
+    end
+
+    test "it can fetch workbench webhooks" do
+      workbench = insert(:workbench)
+      webhook1 = insert(:workbench_webhook, workbench: workbench, name: "wh-one")
+      webhook2 = insert(:workbench_webhook, workbench: workbench, name: "wh-two")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            webhooks(first: 5) {
+              edges {
+                node {
+                  id
+                  name
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      nodes = from_connection(found["webhooks"])
+      assert ids_equal(nodes, [webhook1, webhook2])
+    end
+
     test "it can fetch workbench runs" do
       workbench = insert(:workbench)
       runs = insert_list(3, :workbench_job, workbench: workbench)
@@ -169,6 +224,27 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert found["id"] == workbench.id
       assert from_connection(found["runs"])
              |> ids_equal(runs)
+    end
+
+    test "it can fetch workbench alerts" do
+      workbench = insert(:workbench)
+      alerts = insert_list(3, :alert, workbench: workbench, project: workbench.project)
+      insert_list(2, :alert, project: workbench.project)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            alerts(first: 5) {
+              edges { node { id title state } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      assert from_connection(found["alerts"])
+             |> ids_equal(alerts)
     end
   end
 

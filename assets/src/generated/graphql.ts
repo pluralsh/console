@@ -8121,9 +8121,11 @@ export type RootMutationType = {
   createThread?: Maybe<ChatThread>;
   createUser?: Maybe<User>;
   createWorkbench?: Maybe<Workbench>;
+  createWorkbenchCron?: Maybe<WorkbenchCron>;
   /** Creates a new workbench job. Requires read access to the workbench. */
   createWorkbenchJob?: Maybe<WorkbenchJob>;
   createWorkbenchTool?: Maybe<WorkbenchTool>;
+  createWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   deleteAccessToken?: Maybe<AccessToken>;
   deleteAgentRuntime?: Maybe<AgentRuntime>;
   deleteBootstrapToken?: Maybe<BootstrapToken>;
@@ -8182,7 +8184,9 @@ export type RootMutationType = {
   deleteUser?: Maybe<User>;
   deleteVirtualCluster?: Maybe<Cluster>;
   deleteWorkbench?: Maybe<Workbench>;
+  deleteWorkbenchCron?: Maybe<WorkbenchCron>;
   deleteWorkbenchTool?: Maybe<WorkbenchTool>;
+  deleteWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   delinkBackups?: Maybe<Cluster>;
   /** soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects */
   detachCluster?: Maybe<Cluster>;
@@ -8300,7 +8304,9 @@ export type RootMutationType = {
   updateThread?: Maybe<ChatThread>;
   updateUser?: Maybe<User>;
   updateWorkbench?: Maybe<Workbench>;
+  updateWorkbenchCron?: Maybe<WorkbenchCron>;
   updateWorkbenchTool?: Maybe<WorkbenchTool>;
+  updateWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   upsertAgentRuntime?: Maybe<AgentRuntime>;
   upsertCatalog?: Maybe<Catalog>;
   upsertChatProviderConnection?: Maybe<ChatProviderConnection>;
@@ -8700,6 +8706,12 @@ export type RootMutationTypeCreateWorkbenchArgs = {
 };
 
 
+export type RootMutationTypeCreateWorkbenchCronArgs = {
+  attributes: WorkbenchCronAttributes;
+  workbenchId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateWorkbenchJobArgs = {
   attributes: WorkbenchJobAttributes;
   workbenchId: Scalars['ID']['input'];
@@ -8708,6 +8720,12 @@ export type RootMutationTypeCreateWorkbenchJobArgs = {
 
 export type RootMutationTypeCreateWorkbenchToolArgs = {
   attributes?: InputMaybe<WorkbenchToolAttributes>;
+};
+
+
+export type RootMutationTypeCreateWorkbenchWebhookArgs = {
+  attributes: WorkbenchWebhookAttributes;
+  workbenchId: Scalars['ID']['input'];
 };
 
 
@@ -8993,7 +9011,17 @@ export type RootMutationTypeDeleteWorkbenchArgs = {
 };
 
 
+export type RootMutationTypeDeleteWorkbenchCronArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteWorkbenchToolArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteWorkbenchWebhookArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -9515,8 +9543,20 @@ export type RootMutationTypeUpdateWorkbenchArgs = {
 };
 
 
+export type RootMutationTypeUpdateWorkbenchCronArgs = {
+  attributes: WorkbenchCronAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateWorkbenchToolArgs = {
   attributes?: InputMaybe<WorkbenchToolAttributes>;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateWorkbenchWebhookArgs = {
+  attributes: WorkbenchWebhookAttributes;
   id: Scalars['ID']['input'];
 };
 
@@ -13921,8 +13961,10 @@ export type Workbench = {
   __typename?: 'Workbench';
   /** the agent runtime for this workbench */
   agentRuntime?: Maybe<AgentRuntime>;
+  alerts?: Maybe<AlertConnection>;
   /** workbench configuration */
   configuration?: Maybe<WorkbenchConfiguration>;
+  crons?: Maybe<WorkbenchCronConnection>;
   /** the description of the workbench */
   description?: Maybe<Scalars['String']['output']>;
   /** the id of the workbench */
@@ -13944,12 +13986,37 @@ export type Workbench = {
   /** tools associated with this workbench */
   tools?: Maybe<Array<Maybe<WorkbenchTool>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  webhooks?: Maybe<WorkbenchWebhookConnection>;
   /** write policy of this service */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 
+export type WorkbenchAlertsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchCronsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type WorkbenchRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchWebhooksArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -14015,6 +14082,43 @@ export type WorkbenchConnection = {
   __typename?: 'WorkbenchConnection';
   edges?: Maybe<Array<Maybe<WorkbenchEdge>>>;
   pageInfo: PageInfo;
+};
+
+export type WorkbenchCron = {
+  __typename?: 'WorkbenchCron';
+  /** cron expression */
+  crontab?: Maybe<Scalars['String']['output']>;
+  /** the id of the cron */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** when the cron last ran */
+  lastRunAt?: Maybe<Scalars['DateTime']['output']>;
+  /** when the cron will next run */
+  nextRunAt?: Maybe<Scalars['DateTime']['output']>;
+  /** prompt to run when the cron triggers */
+  prompt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the workbench this cron belongs to */
+  workbench?: Maybe<Workbench>;
+};
+
+export type WorkbenchCronAttributes = {
+  /** cron expression (e.g. *\/5 * * * *) (required for create) */
+  crontab?: InputMaybe<Scalars['String']['input']>;
+  /** the prompt to run when the cron triggers */
+  prompt?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type WorkbenchCronConnection = {
+  __typename?: 'WorkbenchCronConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchCronEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchCronEdge = {
+  __typename?: 'WorkbenchCronEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchCron>;
 };
 
 export type WorkbenchEdge = {
@@ -14488,6 +14592,62 @@ export enum WorkbenchToolType {
   Prometheus = 'PROMETHEUS',
   Tempo = 'TEMPO'
 }
+
+export type WorkbenchWebhook = {
+  __typename?: 'WorkbenchWebhook';
+  /** the id of the webhook */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** criteria to match incoming webhook payloads */
+  matches?: Maybe<WorkbenchWebhookMatches>;
+  /** name of this webhook trigger */
+  name?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the observability webhook that receives events */
+  webhook?: Maybe<ObservabilityWebhook>;
+  /** the workbench this webhook belongs to */
+  workbench?: Maybe<Workbench>;
+};
+
+export type WorkbenchWebhookAttributes = {
+  /** criteria to match incoming webhook payloads */
+  matches?: InputMaybe<WorkbenchWebhookMatchesAttributes>;
+  /** unique name for this webhook on the workbench (required for create) */
+  name?: InputMaybe<Scalars['String']['input']>;
+  /** observability webhook to receive events */
+  webhookId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type WorkbenchWebhookConnection = {
+  __typename?: 'WorkbenchWebhookConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchWebhookEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchWebhookEdge = {
+  __typename?: 'WorkbenchWebhookEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchWebhook>;
+};
+
+export type WorkbenchWebhookMatches = {
+  __typename?: 'WorkbenchWebhookMatches';
+  /** case insensitive matching */
+  caseInsensitive?: Maybe<Scalars['Boolean']['output']>;
+  /** regex pattern to match */
+  regex?: Maybe<Scalars['String']['output']>;
+  /** substring to match */
+  substring?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchWebhookMatchesAttributes = {
+  /** whether matching is case insensitive */
+  caseInsensitive?: InputMaybe<Scalars['Boolean']['input']>;
+  /** regex pattern to match in webhook body */
+  regex?: InputMaybe<Scalars['String']['input']>;
+  /** substring to match in webhook body */
+  substring?: InputMaybe<Scalars['String']['input']>;
+};
 
 /** a description of a yaml-merge operation on a file */
 export type YamlOverlay = {

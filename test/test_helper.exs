@@ -57,6 +57,7 @@ Mimic.copy(Console.AI.Tools.Workbench.Observability.Metrics)
 Mimic.copy(Console.ServiceNow.Client)
 Mimic.copy(CloudQuery.Client)
 Mimic.copy(Toolquery.ToolQuery.Stub)
+Mimic.copy(Console.Cache)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)
