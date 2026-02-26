@@ -12,15 +12,15 @@ services:
     image: kubernetes-agent:latest
     container_name: kas
     build:
-      context: ../../../../../kubernetes-agent
-      dockerfile: Dockerfile
+      context: ../..
+      dockerfile: hack/docker/Dockerfile
       args:
         VERSION: ${VERSION:?}
     entrypoint: /kas
     command:
       - --configuration-file=/config.yaml
     volumes:
-      - ${PWD}/modules/kas/.secret:/.secret
+      - ${PWD}/kas/.secret:/.secret
       - ${PWD}/hack/docker/config.yaml:/config.yaml
     tmpfs:
       - /tmp

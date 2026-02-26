@@ -23,7 +23,7 @@ WORKDIR /src
 COPY . .
 
 # Build API binary with debug symbols
-WORKDIR /src/modules/api
+WORKDIR /src/api
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -gcflags="all=-N -l" \
@@ -31,7 +31,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -o /binaries/api .
 
 # Build KAS and AGENTK binaries with debug symbols
-WORKDIR /src/modules/kas
+WORKDIR /src/kas
 RUN go mod download
 
 # Build kas binary with debug symbols

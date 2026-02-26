@@ -13,26 +13,15 @@ ARG BUILD_TIME
 
 WORKDIR /workspace
 
-# Copy go workspace files
-COPY modules/go.work modules/go.work.sum ./
-
-# Copy all common modules (shared dependencies)
-COPY modules/common/certificates ./common/certificates
-COPY modules/common/client ./common/client
-COPY modules/common/csrf ./common/csrf
-COPY modules/common/errors ./common/errors
-COPY modules/common/types ./common/types
-COPY modules/common/helpers ./common/helpers
-
 # Copy API module
-COPY modules/api/go.mod modules/api/go.sum ./api/
-COPY modules/api/main.go ./api/
-COPY modules/api/pkg ./api/pkg
+COPY api/go.mod api/go.sum ./api/
+COPY api/main.go ./api/
+COPY api/pkg ./api/pkg
 
 # Copy KAS module (includes both kas and agentk)
-COPY modules/kas/go.mod modules/kas/go.sum ./kas/
-COPY modules/kas/cmd ./kas/cmd
-COPY modules/kas/pkg ./kas/pkg
+COPY kas/go.mod kas/go.sum ./kas/
+COPY kas/cmd ./kas/cmd
+COPY kas/pkg ./kas/pkg
 
 # Set build time if not provided
 RUN if [ -z "$BUILD_TIME" ]; then BUILD_TIME="$(date -u +%Y%m%d.%H%M%S)"; fi

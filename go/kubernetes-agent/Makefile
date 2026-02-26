@@ -56,7 +56,7 @@ tools: clean ## Installs required tools
 
 # Starts development version of the application.
 .PHONY: serve
-serve: clean --ensure-kind-cluster --ensure-metrics-server ## Starts development version of the application
+serve: clean --ensure-kind-cluster ## Starts development version of the application
 	@KUBECONFIG=$(KIND_CLUSTER_INTERNAL_KUBECONFIG_PATH) \
 	VERSION="v0.0.0-dev" \
 	docker compose -f $(DOCKER_COMPOSE_DEV_PATH) --project-name=$(PROJECT_NAME) up \
