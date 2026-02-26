@@ -1,3 +1,24 @@
+# IDE
+/.idea
+/.vscode/**/*
+!/.vscode/settings.json
+
+# System
+.DS_Store
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Locally vendored project tools binaries
+binaries/
+
+# Generated credentials from google-github-actions/auth
+gha-creds-*.json
+
 # The directory Mix will write compiled artifacts to.
 /_build/
 
@@ -24,30 +45,15 @@ watchman-*.tar
 
 /priv/data
 
-# IDE
-/.vscode/**/*
-!/.vscode/settings.json
-/.idea
-
-# misc
-.DS_Store
-
 # yalc
 .yalc
 yalc.lock
 
-# python
+# Python
 **/__pycache__
 **/venv
 
 secrets/
-
 data/
 
 # config/pubkey.pem
-
-# Ignore generated credentials from google-github-actions/auth
-gha-creds-*.json
-
-# Ignore locally vendored project tools binaries
-binaries/
