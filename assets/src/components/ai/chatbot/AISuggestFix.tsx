@@ -7,6 +7,7 @@ import {
   Toast,
 } from '@pluralsh/design-system'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import {
   Dispatch,
   ReactNode,
@@ -26,10 +27,10 @@ import {
 } from '../../../generated/graphql.ts'
 import { useLogin } from '../../contexts.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
-import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import { hasAccess } from '../../utils/persona.tsx'
 import { AIPanel } from '../AIPanel.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
+import { useStreamBuffer } from './useStreamBuffer.tsx'
 
 function fixMessage(fix: string): ChatMessage {
   return {
@@ -51,30 +52,33 @@ export function AiStream({
   scrollToBottom?: () => void
   setStreaming?: Dispatch<SetStateAction<boolean>>
 }) {
-  const [streamedMessage, setStreamedMessage] = useState<AiDeltaFragment[]>([])
+  const { value: streamedMessage, push } = useStreamBuffer<AiDeltaFragment>([])
+
   useAiChatStreamSubscription({
     variables: { insightId, scopeId, recommendationId },
+    ignoreResults: true, // all our state logic is managed in onData the results would otherwise cause unnecessary heavy re-renders
     onData: ({ data: { data } }) => {
       setStreaming?.(true)
       if ((data?.aiStream?.seq ?? 1) % 120 === 0) scrollToBottom?.()
-      setStreamedMessage((streamedMessage) => [
-        ...streamedMessage,
-        {
-          seq: data?.aiStream?.seq ?? 0,
-          content: data?.aiStream?.content ?? '',
-        },
-      ])
+      push({
+        seq: data?.aiStream?.seq ?? 0,
+        content: data?.aiStream?.content ?? '',
+      })
     },
   })
 
-  if (!streamedMessage.length) {
-    return <LoadingIndicator />
-  }
+  if (!streamedMessage.length)
+    return (
+      <RectangleSkeleton
+        $height="xxxxxlarge"
+        $width="100%"
+      />
+    )
 
   return (
     <Markdown
       text={streamedMessage
-        .sort((a, b) => a.seq - b.seq)
+        .toSorted((a, b) => a.seq - b.seq)
         .map((delta) => delta.content)
         .join('')}
     />
