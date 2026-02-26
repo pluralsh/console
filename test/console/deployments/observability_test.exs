@@ -1,6 +1,7 @@
 defmodule Console.Deployments.ObservabilityTest do
   use Console.DataCase, async: true
-  alias Console.Deployments.Observability
+  alias Console.Deployments.{Observability, Observability.Webhook}
+  alias Console.Schema.WorkbenchWebhook
 
   describe "#upsert_provider/2" do
     test "it can create a new obs provider" do
@@ -142,6 +143,40 @@ defmodule Console.Deployments.ObservabilityTest do
       webhook = insert(:observability_webhook)
 
       {:error, _} = Observability.delete_webhook(webhook.id, insert(:user))
+    end
+  end
+
+  describe "Webhook.payload/2 workbench association" do
+    test "grafana payload gets workbench_id when a matching workbench_webhook exists" do
+      obs_webhook = insert(:observability_webhook, type: :grafana)
+      workbench = insert(:workbench)
+      insert(:workbench_webhook,
+        workbench: workbench,
+        webhook: obs_webhook,
+        name: "grafana-alerts",
+        matches: %WorkbenchWebhook.Matches{substring: "High CPU"}
+      )
+
+      grafana_payload = %{
+        "alerts" => [
+          %{
+            "labels" => %{"alertname" => "High CPU"},
+            "annotations" => %{"summary" => "CPU above 80%"},
+            "status" => "firing",
+            "fingerprint" => "fp1",
+            "generatorURL" => "http://grafana.example/dashboard"
+          }
+        ],
+        "commonLabels" => %{},
+        "commonAnnotations" => %{},
+        "message" => ""
+      }
+
+      {:ok, [alert_data]} = Webhook.payload(obs_webhook, grafana_payload)
+
+      assert alert_data[:workbench_id] == workbench.id
+      assert alert_data[:title] == "High CPU"
+      assert alert_data[:state] == :firing
     end
   end
 end

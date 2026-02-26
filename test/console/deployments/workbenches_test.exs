@@ -472,4 +472,192 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert failed.error == "Something went wrong."
     end
   end
+
+  describe "create_workbench_cron/3" do
+    test "project writers can create a cron" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, cron} = Workbenches.create_workbench_cron(%{
+        crontab: "*/5 * * * *",
+        prompt: "run analysis"
+      }, workbench.id, user)
+
+      assert cron.workbench_id == workbench.id
+      assert cron.crontab == "*/5 * * * *"
+      assert cron.prompt == "run analysis"
+      assert cron.next_run_at
+      assert_receive {:event, %PubSub.WorkbenchCronCreated{item: ^cron}}
+    end
+
+    test "project readers cannot create a cron" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:error, _} = Workbenches.create_workbench_cron(%{
+        crontab: "*/5 * * * *",
+        prompt: "run"
+      }, workbench.id, user)
+    end
+  end
+
+  describe "update_workbench_cron/3" do
+    test "project writers can update a cron" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      cron = insert(:workbench_cron, workbench: workbench, crontab: "0 * * * *", prompt: "old")
+
+      {:ok, updated} = Workbenches.update_workbench_cron(%{
+        crontab: "*/10 * * * *",
+        prompt: "updated prompt"
+      }, cron.id, user)
+
+      assert updated.id == cron.id
+      assert updated.crontab == "*/10 * * * *"
+      assert updated.prompt == "updated prompt"
+      assert_receive {:event, %PubSub.WorkbenchCronUpdated{item: ^updated}}
+    end
+
+    test "project readers cannot update a cron" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      cron = insert(:workbench_cron, workbench: workbench)
+
+      {:error, _} = Workbenches.update_workbench_cron(%{
+        crontab: "*/10 * * * *",
+        prompt: "updated"
+      }, cron.id, user)
+
+      assert refetch(cron).crontab != "*/10 * * * *"
+    end
+  end
+
+  describe "delete_workbench_cron/2" do
+    test "project writers can delete a cron" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      cron = insert(:workbench_cron, workbench: workbench)
+
+      {:ok, deleted} = Workbenches.delete_workbench_cron(cron.id, user)
+
+      assert deleted.id == cron.id
+      refute refetch(cron)
+      assert_receive {:event, %PubSub.WorkbenchCronDeleted{item: ^deleted}}
+    end
+
+    test "project readers cannot delete a cron" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      cron = insert(:workbench_cron, workbench: workbench)
+
+      {:error, _} = Workbenches.delete_workbench_cron(cron.id, user)
+
+      assert refetch(cron)
+    end
+  end
+
+  describe "create_workbench_webhook/3" do
+    test "project writers can create a webhook" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, webhook} = Workbenches.create_workbench_webhook(%{
+        name: "my-webhook"
+      }, workbench.id, user)
+
+      assert webhook.workbench_id == workbench.id
+      assert webhook.name == "my-webhook"
+      assert_receive {:event, %PubSub.WorkbenchWebhookCreated{item: ^webhook}}
+    end
+
+    test "project readers cannot create a webhook" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:error, _} = Workbenches.create_workbench_webhook(%{
+        name: "forbidden"
+      }, workbench.id, user)
+    end
+  end
+
+  describe "update_workbench_webhook/3" do
+    test "project writers can update a webhook" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      webhook = insert(:workbench_webhook, workbench: workbench, name: "original")
+
+      {:ok, updated} = Workbenches.update_workbench_webhook(%{
+        name: "updated-name"
+      }, webhook.id, user)
+
+      assert updated.id == webhook.id
+      assert updated.name == "updated-name"
+      assert_receive {:event, %PubSub.WorkbenchWebhookUpdated{item: ^updated}}
+    end
+
+    test "project writers can update a webhook with matches" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      webhook = insert(:workbench_webhook, workbench: workbench, name: "existing")
+
+      {:ok, updated} = Workbenches.update_workbench_webhook(%{
+        matches: %{substring: "error", case_insensitive: true}
+      }, webhook.id, user)
+
+      assert updated.id == webhook.id
+      assert updated.name == "existing"
+      assert updated.matches.substring == "error"
+      assert updated.matches.case_insensitive == true
+      assert_receive {:event, %PubSub.WorkbenchWebhookUpdated{item: ^updated}}
+    end
+
+    test "project readers cannot update a webhook" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      webhook = insert(:workbench_webhook, workbench: workbench, name: "original")
+
+      {:error, _} = Workbenches.update_workbench_webhook(%{
+        name: "updated"
+      }, webhook.id, user)
+
+      assert refetch(webhook).name == "original"
+    end
+  end
+
+  describe "delete_workbench_webhook/2" do
+    test "project writers can delete a webhook" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      webhook = insert(:workbench_webhook, workbench: workbench)
+
+      {:ok, deleted} = Workbenches.delete_workbench_webhook(webhook.id, user)
+
+      assert deleted.id == webhook.id
+      refute refetch(webhook)
+      assert_receive {:event, %PubSub.WorkbenchWebhookDeleted{item: ^deleted}}
+    end
+
+    test "project readers cannot delete a webhook" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      webhook = insert(:workbench_webhook, workbench: workbench)
+
+      {:error, _} = Workbenches.delete_workbench_webhook(webhook.id, user)
+
+      assert refetch(webhook)
+    end
+  end
 end

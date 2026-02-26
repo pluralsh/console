@@ -7,9 +7,12 @@ defmodule Console.Schema.Workbench do
     AgentRuntime,
     WorkbenchJob,
     WorkbenchToolAssociation,
+    WorkbenchWebhook,
+    WorkbenchCron,
     PolicyBinding,
     User,
-    AgentRun
+    AgentRun,
+    Alert
   }
   alias Console.Deployments.Policies.Rbac
 
@@ -52,9 +55,12 @@ defmodule Console.Schema.Workbench do
     belongs_to :repository, GitRepository
     belongs_to :agent_runtime, AgentRuntime
 
-    has_many :jobs, WorkbenchJob, on_replace: :delete
     has_many :tool_associations, WorkbenchToolAssociation, on_replace: :delete
     has_many :tools, through: [:tool_associations, :tool]
+    has_many :jobs,     WorkbenchJob,     on_replace: :delete
+    has_many :webhooks, WorkbenchWebhook, on_replace: :delete
+    has_many :crons,    WorkbenchCron,    on_replace: :delete
+    has_many :alerts,   Alert
 
     timestamps()
   end

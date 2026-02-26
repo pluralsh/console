@@ -283,3 +283,20 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentRunUpdated do
 
   def process(%@for{item: run}), do: Agents.record_repository(run)
 end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.AlertCreated do
+  alias Console.Schema.Alert
+  alias Console.Deployments.Workbenches
+  alias Console.Services.Users
+  require EEx
+
+  def process(%@for{item: %Alert{workbench_id: wid} = alert}) when is_binary(wid) do
+    alert = Console.Repo.preload(alert, [:tags])
+    Workbenches.create_workbench_job(%{prompt: prompt(alert: alert)}, wid, bot())
+  end
+  def process(_), do: :ok
+
+  defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
+
+  EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/alert.md.eex", [:assigns])
+end

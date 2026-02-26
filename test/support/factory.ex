@@ -730,9 +730,9 @@ defmodule Console.Factory do
     }
   end
 
-  def observability_webhook_factory(attrs) do
+  def observability_webhook_factory  do
     %Schema.ObservabilityWebhook{
-      type: Map.get(attrs, :type),
+      type: :grafana,
       name: sequence(:obs_hook, & "obs-wh-#{&1}"),
       external_id: sequence(:obs_id, & "obs-wh-id-#{&1}"),
       secret: Ecto.UUID.generate()
@@ -1178,6 +1178,23 @@ defmodule Console.Factory do
     %Schema.WorkbenchToolAssociation{
       workbench: build(:workbench),
       tool: build(:workbench_tool)
+    }
+  end
+
+  def workbench_cron_factory do
+    %Schema.WorkbenchCron{
+      crontab: "*/5 * * * *",
+      prompt: "test prompt",
+      next_run_at: Timex.now(),
+      workbench: build(:workbench)
+    }
+  end
+
+  def workbench_webhook_factory do
+    %Schema.WorkbenchWebhook{
+      name: sequence(:workbench_webhook, & "workbench-webhook-#{&1}"),
+      workbench: build(:workbench),
+      webhook: build(:observability_webhook)
     }
   end
 

@@ -5,14 +5,15 @@ defmodule Console.Deployments.Observability.Webhook do
   """
   import Console.Services.Base, only: [ok: 1]
   alias Console.Deployments.Observability.Webhook.{Grafana, Datadog, Pagerduty, Newrelic, Raw, Sentry}
-  alias Console.Schema.ObservabilityWebhook
+  alias Console.Schema.{ObservabilityWebhook, WorkbenchWebhook}
+  alias Console.Deployments.Workbenches
 
   @callback associations(atom, map, map) :: map
   @callback state(binary) :: :firing | :resolved
   @callback severity(map) :: :low | :medium | :high | :critical | :undefined
   @callback summary(map) :: binary
 
-  def payload(%ObservabilityWebhook{type: :grafana}, %{"alerts" => [_ | _] = alerts} = payload) do
+  def payload(%ObservabilityWebhook{type: :grafana} = hook, %{"alerts" => [_ | _] = alerts} = payload) do
     Enum.map(alerts, fn alert ->
       alert =
         Map.put(alert, "labels", Map.merge(alert["labels"] || %{}, payload["commonLabels"] || %{}))
@@ -29,12 +30,13 @@ defmodule Console.Deployments.Observability.Webhook do
         message: "#{Grafana.summary(alert)}#{payload["message"] || ""}",
         tags: tags(alert["labels"]),
       }, add_associations(Grafana, alert))
+      |> workbench_association(hook)
       |> backfill_raw()
     end)
     |> ok()
   end
 
-  def payload(%ObservabilityWebhook{type: :pagerduty}, %{"event" => event = %{"data" => data}} = payload) do
+  def payload(%ObservabilityWebhook{type: :pagerduty} = hook, %{"event" => event = %{"data" => data}} = payload) do
     # Create structured alert
     # Note that pagerduty doesn't have annotations like grafana does, so just use an empty map
     # Also, pagerduty has a single event per payload, so unlike grafana we don't iterate over messages
@@ -50,11 +52,12 @@ defmodule Console.Deployments.Observability.Webhook do
       tags: tags(data["custom_details"] || %{}),
     }, add_associations(Pagerduty, payload))
     |> backfill_raw()
+    |> workbench_association(hook)
     |> listify()
     |> ok()
   end
 
-  def payload(%ObservabilityWebhook{type: :sentry}, %{"data" => payload}) do
+  def payload(%ObservabilityWebhook{type: :sentry} = hook, %{"data" => payload}) do
     tags = (get_in(payload, ["event", "tags"]) || [])
            |> Map.new(fn [k, v] -> {k, v} end)
 
@@ -68,11 +71,12 @@ defmodule Console.Deployments.Observability.Webhook do
       message: Sentry.summary(payload),
       annotations: tags,
     }, add_associations(Sentry, tags))
+    |> workbench_association(hook)
     |> listify()
     |> ok()
   end
 
-  def payload(%ObservabilityWebhook{type: :datadog}, payload) do
+  def payload(%ObservabilityWebhook{type: :datadog} = hook, payload) do
     Map.merge(%{
       type: :datadog,
       fingerprint: Map.get(payload, "id"),
@@ -89,11 +93,12 @@ defmodule Console.Deployments.Observability.Webhook do
       tags: tags(Datadog.datadog_tag_map(payload)),
     }, add_associations(Datadog, payload))
     |> backfill_raw()
+    |> workbench_association(hook)
     |> listify()
     |> ok()
   end
 
-  def payload(%ObservabilityWebhook{type: :newrelic}, payload) do
+  def payload(%ObservabilityWebhook{type: :newrelic} = hook, payload) do
     Map.merge(%{
       type: :newrelic,
       fingerprint: Map.get(payload, "id") || "[NO_ID]",
@@ -105,12 +110,23 @@ defmodule Console.Deployments.Observability.Webhook do
       message: Newrelic.summary(payload),
       tags: %{},
     }, add_associations(Newrelic, payload))
+    |> workbench_association(hook)
     |> backfill_raw()
     |> listify()
     |> ok()
   end
 
   def payload(_, _), do: {:error, "invalid payload"}
+
+  defp workbench_association(data, %ObservabilityWebhook{id: id}) do
+    payload = "#{data[:title]}\n#{data[:message]}"
+    Workbenches.list_workbench_webhooks(id)
+    |> Enum.find(&WorkbenchWebhook.matches?(&1, payload))
+    |> case do
+      %WorkbenchWebhook{workbench_id: wid} -> Map.put(data, :workbench_id, wid)
+      _ -> data
+    end
+  end
 
   defp add_associations(impl, data) do
     Enum.reduce(~w(project cluster service flow)a, %{}, &impl.associations(&1, data, &2))

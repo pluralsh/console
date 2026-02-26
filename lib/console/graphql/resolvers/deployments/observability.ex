@@ -9,7 +9,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     Cluster,
     Service,
     Project,
-    ServiceComponent
+    ServiceComponent,
+    Workbench
   }
   alias Console.Deployments.{Settings, Observability, Services}
   alias Console.Services.Observability, as: ObsSvc
@@ -125,4 +126,5 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   defp for_parent(%Service{id: id}), do: Alert.for_service(id)
   defp for_parent(%Cluster{id: id}), do: Alert.for_cluster(id)
   defp for_parent(%Project{id: id}), do: Alert.for_project(id)
+  defp for_parent(%Workbench{id: id}), do: Alert.for_workbench(id)
 end

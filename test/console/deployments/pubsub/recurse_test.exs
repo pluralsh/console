@@ -623,4 +623,27 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
       assert updated.approval_result.reason == "approved"
     end
   end
+
+  describe "AlertCreated" do
+    test "creates a workbench job when alert has workbench_id and console bot and workbench are present" do
+      bot = insert(:user, bot_name: "console", roles: %{admin: true})
+      workbench = insert(:workbench)
+      alert =
+        insert(:alert,
+          workbench: workbench,
+          project: workbench.project,
+          title: "High CPU",
+          message: "CPU above 80%"
+        )
+
+      event = %PubSub.AlertCreated{item: alert}
+      {:ok, job} = Recurse.handle_event(event)
+
+      assert job.workbench_id == workbench.id
+      assert job.prompt != nil
+      assert job.status == :pending
+      assert job.user_id == bot.id
+      assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+  end
 end

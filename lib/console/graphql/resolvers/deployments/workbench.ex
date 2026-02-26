@@ -1,7 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.Workbenches
-  alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
+  alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, WorkbenchCron, WorkbenchWebhook}
 
   def workbench(%{id: id}, ctx) when is_binary(id) do
     Workbenches.get_workbench!(id)
@@ -31,6 +31,18 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def list_workbench_runs(workbench, args, _) do
     WorkbenchJob.for_workbench(workbench.id)
     |> WorkbenchJob.ordered()
+    |> paginate(args)
+  end
+
+  def list_workbench_crons(workbench, args, _) do
+    WorkbenchCron.for_workbench(workbench.id)
+    |> WorkbenchCron.ordered()
+    |> paginate(args)
+  end
+
+  def list_workbench_webhooks(workbench, args, _) do
+    WorkbenchWebhook.for_workbench(workbench.id)
+    |> WorkbenchWebhook.ordered()
     |> paginate(args)
   end
 
@@ -76,6 +88,24 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def create_workbench_job(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_job(attrs, workbench_id, user)
+
+  def create_workbench_cron(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_workbench_cron(attrs, workbench_id, user)
+
+  def update_workbench_cron(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.update_workbench_cron(attrs, id, user)
+
+  def delete_workbench_cron(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.delete_workbench_cron(id, user)
+
+  def create_workbench_webhook(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_workbench_webhook(attrs, workbench_id, user)
+
+  def update_workbench_webhook(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.update_workbench_webhook(attrs, id, user)
+
+  def delete_workbench_webhook(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.delete_workbench_webhook(id, user)
 
   defp workbench_filters(query, args) do
     Enum.reduce(args, query, fn

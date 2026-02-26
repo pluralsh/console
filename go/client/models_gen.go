@@ -8964,25 +8964,28 @@ type Workbench struct {
 	Description *string `json:"description,omitempty"`
 	// the system prompt for the workbench
 	SystemPrompt *string `json:"systemPrompt,omitempty"`
+	// workbench configuration
+	Configuration *WorkbenchConfiguration `json:"configuration,omitempty"`
+	// skills configuration
+	Skills *WorkbenchSkills `json:"skills,omitempty"`
 	// the project of this workbench
 	Project *Project `json:"project,omitempty"`
 	// the git repository for this workbench
 	Repository *GitRepository `json:"repository,omitempty"`
 	// the agent runtime for this workbench
 	AgentRuntime *AgentRuntime `json:"agentRuntime,omitempty"`
-	// workbench configuration
-	Configuration *WorkbenchConfiguration `json:"configuration,omitempty"`
-	// skills configuration
-	Skills *WorkbenchSkills `json:"skills,omitempty"`
 	// tools associated with this workbench
 	Tools []*WorkbenchTool `json:"tools,omitempty"`
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service
-	WriteBindings []*PolicyBinding        `json:"writeBindings,omitempty"`
-	Runs          *WorkbenchJobConnection `json:"runs,omitempty"`
-	InsertedAt    *string                 `json:"insertedAt,omitempty"`
-	UpdatedAt     *string                 `json:"updatedAt,omitempty"`
+	WriteBindings []*PolicyBinding            `json:"writeBindings,omitempty"`
+	Runs          *WorkbenchJobConnection     `json:"runs,omitempty"`
+	Crons         *WorkbenchCronConnection    `json:"crons,omitempty"`
+	Webhooks      *WorkbenchWebhookConnection `json:"webhooks,omitempty"`
+	Alerts        *AlertConnection            `json:"alerts,omitempty"`
+	InsertedAt    *string                     `json:"insertedAt,omitempty"`
+	UpdatedAt     *string                     `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchAttributes struct {
@@ -9041,6 +9044,40 @@ type WorkbenchConfigurationAttributes struct {
 type WorkbenchConnection struct {
 	PageInfo PageInfo         `json:"pageInfo"`
 	Edges    []*WorkbenchEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchCron struct {
+	// the id of the cron
+	ID string `json:"id"`
+	// cron expression
+	Crontab *string `json:"crontab,omitempty"`
+	// prompt to run when the cron triggers
+	Prompt *string `json:"prompt,omitempty"`
+	// when the cron will next run
+	NextRunAt *string `json:"nextRunAt,omitempty"`
+	// when the cron last ran
+	LastRunAt *string `json:"lastRunAt,omitempty"`
+	// the workbench this cron belongs to
+	Workbench  *Workbench `json:"workbench,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchCronAttributes struct {
+	// cron expression (e.g. */5 * * * *) (required for create)
+	Crontab *string `json:"crontab,omitempty"`
+	// the prompt to run when the cron triggers
+	Prompt *string `json:"prompt,omitempty"`
+}
+
+type WorkbenchCronConnection struct {
+	PageInfo PageInfo             `json:"pageInfo"`
+	Edges    []*WorkbenchCronEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchCronEdge struct {
+	Node   *WorkbenchCron `json:"node,omitempty"`
+	Cursor *string        `json:"cursor,omitempty"`
 }
 
 type WorkbenchEdge struct {
@@ -9423,6 +9460,58 @@ type WorkbenchToolTempoConnectionAttributes struct {
 	Token string `json:"token"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchWebhook struct {
+	// the id of the webhook
+	ID string `json:"id"`
+	// name of this webhook trigger
+	Name *string `json:"name,omitempty"`
+	// criteria to match incoming webhook payloads
+	Matches *WorkbenchWebhookMatches `json:"matches,omitempty"`
+	// the workbench this webhook belongs to
+	Workbench *Workbench `json:"workbench,omitempty"`
+	// the observability webhook that receives events
+	Webhook    *ObservabilityWebhook `json:"webhook,omitempty"`
+	InsertedAt *string               `json:"insertedAt,omitempty"`
+	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchWebhookAttributes struct {
+	// unique name for this webhook on the workbench (required for create)
+	Name *string `json:"name,omitempty"`
+	// observability webhook to receive events
+	WebhookID *string `json:"webhookId,omitempty"`
+	// criteria to match incoming webhook payloads
+	Matches *WorkbenchWebhookMatchesAttributes `json:"matches,omitempty"`
+}
+
+type WorkbenchWebhookConnection struct {
+	PageInfo PageInfo                `json:"pageInfo"`
+	Edges    []*WorkbenchWebhookEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchWebhookEdge struct {
+	Node   *WorkbenchWebhook `json:"node,omitempty"`
+	Cursor *string           `json:"cursor,omitempty"`
+}
+
+type WorkbenchWebhookMatches struct {
+	// regex pattern to match
+	Regex *string `json:"regex,omitempty"`
+	// substring to match
+	Substring *string `json:"substring,omitempty"`
+	// case insensitive matching
+	CaseInsensitive *bool `json:"caseInsensitive,omitempty"`
+}
+
+type WorkbenchWebhookMatchesAttributes struct {
+	// regex pattern to match in webhook body
+	Regex *string `json:"regex,omitempty"`
+	// substring to match in webhook body
+	Substring *string `json:"substring,omitempty"`
+	// whether matching is case insensitive
+	CaseInsensitive *bool `json:"caseInsensitive,omitempty"`
 }
 
 // a description of a yaml-merge operation on a file
