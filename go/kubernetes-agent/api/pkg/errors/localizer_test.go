@@ -43,7 +43,7 @@ func TestLocalizeError(t *testing.T) {
 		},
 	}
 	for _, c := range cases {
-		actual := errors.errors.LocalizeError(c.err)
+		actual := errors.LocalizeError(c.err)
 		if !areErrorsEqual(actual, c.expected) {
 			t.Errorf("LocalizeError(%+v) == %+v, expected %+v", c.err, actual, c.expected)
 		}

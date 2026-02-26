@@ -20,6 +20,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/pluralsh/kubernetes-agent/api/pkg/client/cache/client/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	authorizationapiv1 "k8s.io/api/authorization/v1"
@@ -51,7 +52,7 @@ func (m *MockLister) List(_ context.Context, _ metav1.ListOptions) (*TestResourc
 }
 
 // mockRequestWithHeaders creates a RequestGetter function for testing
-func mockRequestWithHeaders(headers map[string]string) RequestGetter {
+func mockRequestWithHeaders(headers map[string]string) common.RequestGetter {
 	return func() *http.Request {
 		if headers == nil {
 			return nil
@@ -67,10 +68,10 @@ func mockRequestWithHeaders(headers map[string]string) RequestGetter {
 func TestNewCachedResourceLister(t *testing.T) {
 	// Test with required parameters
 	auth := &authorizationv1fake.FakeAuthorizationV1{Fake: &k8stesting.Fake{}}
-	lister := NewCachedResourceLister[TestResource](
+	lister := common.NewCachedResourceLister[TestResource](
 		auth,
 		common.WithResourceKind[TestResource]("pods"),
-		WithToken[TestResource]("test-token"),
+		common.WithToken[TestResource]("test-token"),
 	)
 
 	// We can still check that the lister was created properly
@@ -78,17 +79,17 @@ func TestNewCachedResourceLister(t *testing.T) {
 
 	// Test that it panics when token is not provided
 	assert.Panics(t, func() {
-		NewCachedResourceLister[TestResource](
+		common.NewCachedResourceLister[TestResource](
 			auth,
-			WithResourceKind[TestResource]("pods"),
+			common.WithResourceKind[TestResource]("pods"),
 		)
 	})
 
 	// Test that it panics when resource kind is not provided
 	assert.Panics(t, func() {
-		NewCachedResourceLister[TestResource](
+		common.NewCachedResourceLister[TestResource](
 			auth,
-			WithToken[TestResource]("test-token"),
+			common.WithToken[TestResource]("test-token"),
 		)
 	})
 }
@@ -115,11 +116,11 @@ func TestCachedResourceLister_List(t *testing.T) {
 		}
 
 		// Create the cached resource lister
-		lister := NewCachedResourceLister[TestResource](
+		lister := common.NewCachedResourceLister[TestResource](
 			auth,
-			WithResourceKind[TestResource]("pods"),
-			WithToken[TestResource]("test-token"),
-			WithNamespace[TestResource]("default"),
+			common.WithResourceKind[TestResource]("pods"),
+			common.WithToken[TestResource]("test-token"),
+			common.WithNamespace[TestResource]("default"),
 		)
 
 		// Call List which should load data from the mock lister
@@ -141,12 +142,12 @@ func TestCachedResourceLister_List(t *testing.T) {
 			},
 		}
 
-		lister := NewCachedResourceLister[TestResource](
+		lister := common.NewCachedResourceLister[TestResource](
 			auth,
-			WithResourceKind[TestResource]("pods"),
-			WithToken[TestResource]("test-token-3"),
-			WithNamespace[TestResource]("default"),
-			WithRequestGetter[TestResource](mockRequestWithHeaders(map[string]string{})),
+			common.WithResourceKind[TestResource]("pods"),
+			common.WithToken[TestResource]("test-token-3"),
+			common.WithNamespace[TestResource]("default"),
+			common.WithRequestGetter[TestResource](mockRequestWithHeaders(map[string]string{})),
 		)
 
 		// Initial call to populate the cache
@@ -158,12 +159,12 @@ func TestCachedResourceLister_List(t *testing.T) {
 		mockLister.returnVal = &TestResource{
 			Items: []string{"fresh-item"},
 		}
-		lister = NewCachedResourceLister[TestResource](
+		lister = common.NewCachedResourceLister[TestResource](
 			auth,
-			WithResourceKind[TestResource]("pods"),
-			WithToken[TestResource]("test-token-3"),
-			WithNamespace[TestResource]("default"),
-			WithRequestGetter[TestResource](mockRequestWithHeaders(map[string]string{
+			common.WithResourceKind[TestResource]("pods"),
+			common.WithToken[TestResource]("test-token-3"),
+			common.WithNamespace[TestResource]("default"),
+			common.WithRequestGetter[TestResource](mockRequestWithHeaders(map[string]string{
 				"Cache-Control": "no-cache",
 			})),
 		)
@@ -193,11 +194,11 @@ func TestCachedResourceLister_List(t *testing.T) {
 			},
 		}
 
-		lister := NewCachedResourceLister[TestResource](
+		lister := common.NewCachedResourceLister[TestResource](
 			auth,
-			WithResourceKind[TestResource]("pods"),
-			WithToken[TestResource]("test-token-3"),
-			WithNamespace[TestResource]("default"),
+			common.WithResourceKind[TestResource]("pods"),
+			common.WithToken[TestResource]("test-token-3"),
+			common.WithNamespace[TestResource]("default"),
 		)
 
 		// Initial call to populate the cache
@@ -206,11 +207,11 @@ func TestCachedResourceLister_List(t *testing.T) {
 		assert.Equal(t, []string{"secure-item"}, result.Items)
 
 		// Create the cached resource lister with denying auth
-		lister = NewCachedResourceLister[TestResource](
+		lister = common.NewCachedResourceLister[TestResource](
 			authDeny,
-			WithResourceKind[TestResource]("pods"),
-			WithToken[TestResource]("test-token-4"),
-			WithNamespace[TestResource]("default"),
+			common.WithResourceKind[TestResource]("pods"),
+			common.WithToken[TestResource]("test-token-4"),
+			common.WithNamespace[TestResource]("default"),
 		)
 
 		// Call should be denied due to authorization
@@ -229,11 +230,11 @@ func TestCachedResourceLister_List(t *testing.T) {
 		}
 
 		// Create the cached resource lister
-		lister := NewCachedResourceLister[TestResource](
+		lister := common.NewCachedResourceLister[TestResource](
 			auth,
-			WithResourceKind[TestResource]("pods"),
-			WithToken[TestResource]("test-token-6"),
-			WithNamespace[TestResource]("default"),
+			common.WithResourceKind[TestResource]("pods"),
+			common.WithToken[TestResource]("test-token-6"),
+			common.WithNamespace[TestResource]("default"),
 		)
 
 		// Call should return the error from the lister
