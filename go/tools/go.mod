@@ -3,6 +3,12 @@ module github.com/pluralsh/console/go/tools
 go 1.25.7
 
 require (
+	github.com/envoyproxy/protoc-gen-validate v1.2.1
+	github.com/golangci/golangci-lint/v2 v2.6.2
+	github.com/pseudomuto/protoc-gen-doc v1.5.1
+	go.uber.org/mock v0.6.0
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.0
+	google.golang.org/protobuf v1.36.10
 	github.com/99designs/gqlgen v0.17.73
 	github.com/Yamashou/gqlgenc v0.33.0
 	github.com/a8m/envsubst v1.4.3
