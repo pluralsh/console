@@ -4,6 +4,7 @@ include $(ROOT_DIRECTORY)/go/paths.mk
 include $(TOOLS_MAKEFILE)
 
 include $(KUBERNETES_AGENT_DIR)/config.mk
+include $(KUBERNETES_AGENT_DIR)/kind.mk
 
 .PHONY: help
 help:
@@ -12,30 +13,35 @@ help:
 # ============================ GLOBAL ============================ #
 #
 # A global list of targets executed for every module, it includes:
-# - all modules in 'modules' directory except 'modules/common'
-# - all common modules in 'modules/common' directory except 'modules/tools'
+# - api
+# - kas
 #
 # ================================================================ #
 
 .PHONY: build
 build: clean ## Builds all modules
-	@$(MAKE) --no-print-directory -C $(MODULES_DIR) TARGET=build
+	@$(MAKE) --no-print-directory -C $(API_DIR) build
+	@$(MAKE) --no-print-directory -C $(KAS_DIR) build
 
 .PHONY: check
 check: clean ## Runs all available checks
-	@$(MAKE) --no-print-directory -C $(MODULES_DIR) TARGET=check
+	@$(MAKE) --no-print-directory -C $(API_DIR) check
+	@$(MAKE) --no-print-directory -C $(KAS_DIR) check
 
 .PHONY: clean
 clean: --clean ## Clean up all temporary directories
-	@$(MAKE) --no-print-directory -C $(MODULES_DIR) TARGET=clean
+	@$(MAKE) --no-print-directory -C $(API_DIR) clean
+	@$(MAKE) --no-print-directory -C $(KAS_DIR) clean
 
 .PHONY: fix
 fix: clean ## Runs all available fix scripts
-	@$(MAKE) --no-print-directory -C $(MODULES_DIR) TARGET=fix
+	@$(MAKE) --no-print-directory -C $(API_DIR) fix
+	@$(MAKE) --no-print-directory -C $(KAS_DIR) fix
 
 .PHONY: test
 test: clean ## Runs all available test scripts
-	@$(MAKE) --no-print-directory -C $(MODULES_DIR) TARGET=test
+	@$(MAKE) --no-print-directory -C $(API_DIR) test
+	@$(MAKE) --no-print-directory -C $(KAS_DIR) test
 
 # ============================ Local ============================ #
 
@@ -87,31 +93,6 @@ ifndef NO_BUILD
       -t kubernetes-agent:latest \
       .
 endif
-
-.PHONY: --ensure-kind-cluster
---ensure-kind-cluster:
-	@if test -n "$(shell kind get clusters 2>/dev/null | grep $(KIND_CLUSTER_NAME))"; then \
-  	echo [kind] cluster already exists; \
-  else \
-    echo [kind] creating cluster $(KIND_CLUSTER_NAME); \
-    kind create cluster -q --config=$(KIND_CONFIG_FILE) --name=$(KIND_CLUSTER_NAME) --image=$(KIND_CLUSTER_IMAGE); \
-  fi; \
-  echo [kind] exporting internal kubeconfig to $(TMP_DIR); \
-  mkdir -p $(TMP_DIR); \
-  kind get kubeconfig --name $(KIND_CLUSTER_NAME) --internal > $(KIND_CLUSTER_INTERNAL_KUBECONFIG_PATH)
-
-.PHONY: --ensure-kind-ingress-nginx
---ensure-kind-ingress-nginx:
-	@echo [kind] installing ingress-nginx
-	@kubectl --context $(KIND_CLUSTER_KUBECONFIG_CONTEXT) apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-$(INGRESS_NGINX_VERSION)/deploy/static/provider/kind/deploy.yaml >/dev/null
-	@kubectl delete -A ValidatingWebhookConfiguration ingress-nginx-admission >/dev/null
-
-.PHONY: --kind-load-images
---kind-load-images:
-	@echo Loading redis:$(REDIS_VERSION) into kind cluster
-	@kind load docker-image -n $(KIND_CLUSTER_NAME) redis:$(REDIS_VERSION) >/dev/null
-	@echo Loading kubernetes-agent:latest into kind cluster
-	@kind load docker-image -n $(KIND_CLUSTER_NAME) kubernetes-agent:latest >/dev/null
 
 # Prepares and installs local dev version of Kubernetes Agent in our dedicated kind cluster.
 #
