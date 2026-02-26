@@ -3,7 +3,7 @@ ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../
 include $(ROOT_DIRECTORY)/go/paths.mk
 include $(TOOLS_MAKEFILE)
 
-
+include $(KUBERNETES_AGENT_DIR)/config.mk
 
 .PHONY: help
 help:
