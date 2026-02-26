@@ -1,11 +1,11 @@
-import { WorkbenchIntegrations } from 'components/workbenches/WorkbenchIntegrations'
+import { WorkbenchTools } from 'components/workbenches/WorkbenchTools'
 import { Workbenches } from 'components/workbenches/Workbenches'
 import { WorkbenchesList } from 'components/workbenches/WorkbenchesList'
 import { Route } from 'react-router-dom'
 import {
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
-  WORKBENCHES_INTEGRATIONS_REL_PATH,
+  WORKBENCHES_TOOLS_REL_PATH,
 } from './workbenchesRoutesConsts'
 import { Workbench } from 'components/workbenches/workbench/Workbench'
 
@@ -19,8 +19,8 @@ export const workbenchesRoutes = [
       element={<WorkbenchesList />}
     />
     <Route
-      path={WORKBENCHES_INTEGRATIONS_REL_PATH}
-      element={<WorkbenchIntegrations />}
+      path={WORKBENCHES_TOOLS_REL_PATH}
+      element={<WorkbenchTools />}
     />
   </Route>,
   <Route
