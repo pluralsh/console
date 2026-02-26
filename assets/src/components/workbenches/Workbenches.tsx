@@ -5,13 +5,13 @@ import { useMemo } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
 import {
   WORKBENCHES_ABS_PATH,
-  WORKBENCHES_INTEGRATIONS_REL_PATH,
+  WORKBENCHES_TOOLS_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 
 const directory = [
   { label: 'Workbenches', path: WORKBENCHES_ABS_PATH },
-  { label: 'Integrations', path: WORKBENCHES_INTEGRATIONS_REL_PATH },
+  { label: 'Tools', path: WORKBENCHES_TOOLS_REL_PATH },
 ]
 
 export const getWorkbenchesBreadcrumbs = (tab: Nullable<string>) => [
