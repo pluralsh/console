@@ -127,6 +127,7 @@ defmodule Console.Schema.Cluster do
     field :distro_changed,  :boolean, default: false, virtual: true
     field :token_readable,  :boolean, default: false, virtual: true
     field :gs_instance,     :map, virtual: true
+    field :ignore_limit,    :boolean, default: false, virtual: true
 
     embeds_one :upgrade_plan, UpgradePlan, on_replace: :update do
       boolean_fields [:deprecations, :compatibilities, :incompatibilities, :kubelet_skew]
@@ -471,7 +472,7 @@ defmodule Console.Schema.Cluster do
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id ai_poll_at disable_ai distro metadata protect project_id service_id credential_id self version current_version name handle installed)a
+  @valid ~w(provider_id ai_poll_at disable_ai distro metadata protect project_id service_id credential_id self version current_version name handle installed ignore_limit)a
 
   def changeset(model, attrs \\ %{}) do
     model

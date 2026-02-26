@@ -6334,6 +6334,8 @@ export type OpensearchConnection = {
   host: Scalars['String']['output'];
   /** the index to query for log data */
   index: Scalars['String']['output'];
+  /** whether to use pod identity (IRSA/Workload Identity) for AWS authentication */
+  usePodIdentity?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type OpensearchConnectionAttributes = {
@@ -6342,6 +6344,8 @@ export type OpensearchConnectionAttributes = {
   awsSecretAccessKey?: InputMaybe<Scalars['String']['input']>;
   host: Scalars['String']['input'];
   index: Scalars['String']['input'];
+  /** whether to use pod identity (IRSA/Workload Identity) for AWS authentication instead of static credentials */
+  usePodIdentity?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export enum Operation {

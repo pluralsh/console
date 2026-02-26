@@ -69,9 +69,9 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   input_object :ansible_configuration_attributes do
-    field :playbook, :string, description: "the playbook to run"
-    field :inventory, :string, description: "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
-    field :additional_args, list_of(:string), description: "additional args for the playbook"
+    field :playbook,         :string, description: "the playbook to run"
+    field :inventory,        :string, description: "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
+    field :additional_args,  list_of(:string), description: "additional args for the playbook"
     field :private_key_file, :string, description: "path to the private key file for SSH authentication"
   end
 
@@ -335,9 +335,9 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   object :ansible_configuration do
-    field :playbook,  :string, description: "The playbook to run"
-    field :inventory, :string, description: "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
-    field :additional_args, list_of(:string), description: "Additional args for the playbook"
+    field :playbook,         :string, description: "The playbook to run"
+    field :inventory,        :string, description: "The ansible inventory file to use. we recommend checking this into git alongside your playbook files"
+    field :additional_args,  list_of(:string), description: "Additional args for the playbook"
     field :private_key_file, :string, description: "path to the private key file for SSH authentication"
   end
 
@@ -442,7 +442,10 @@ defmodule Console.GraphQl.Deployments.Stack do
 
   object :stack_output do
     field :name,   non_null(:string)
-    field :value,  non_null(:string)
+    field :value,  non_null(:string), resolve: fn
+      %{value: v}, _ when is_binary(v) -> {:ok, v}
+      _, _ -> {:ok, ""}
+    end
     field :secret, :boolean
   end
 

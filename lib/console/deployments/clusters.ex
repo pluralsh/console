@@ -454,7 +454,7 @@ defmodule Console.Deployments.Clusters do
     start_transaction()
     |> add_operation(:cloud, fn _ -> {:ok, Console.cloud?()} end)
     |> add_operation(:limit, fn _ ->
-      case cluster_limit?() do
+      case !attrs[:ignore_limit] && cluster_limit?() do
         true -> {:error, "this instance is at the cluster limit for the current account"}
         _ -> {:ok, true}
       end

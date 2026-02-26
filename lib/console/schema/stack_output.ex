@@ -20,6 +20,6 @@ defmodule Console.Schema.StackOutput do
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:stack_id)
     |> foreign_key_constraint(:run_id)
-    |> validate_required(~w(name value)a)
+    |> validate_required(~w(name)a)
   end
 end

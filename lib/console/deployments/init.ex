@@ -38,7 +38,8 @@ defmodule Console.Deployments.Init do
         name: Console.conf(:cluster_name),
         self: true,
         handle: "mgmt",
-        version: "1.24"
+        version: "1.24",
+        ignore_limit: true
       }, bot)
     end)
     |> add_operation(:provider, fn _ ->
