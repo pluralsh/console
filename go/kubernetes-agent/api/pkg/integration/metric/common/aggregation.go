@@ -17,7 +17,7 @@ package common
 import (
 	"sort"
 
-	metricapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/api"
+	metricapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/api"
 )
 
 // SortableInt64 implements sort.Interface for []int64. This allows to use built in sort with int64.

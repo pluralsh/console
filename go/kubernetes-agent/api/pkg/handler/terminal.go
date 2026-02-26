@@ -34,7 +34,7 @@ import (
 	"k8s.io/client-go/tools/remotecommand"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/args"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/args"
 )
 
 const END_OF_TRANSMISSION = "\u0004"

@@ -23,7 +23,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/logs"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/logs"
 )
 
 // maximum number of lines loaded from the apiserver

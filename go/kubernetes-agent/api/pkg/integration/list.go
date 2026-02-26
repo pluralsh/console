@@ -15,7 +15,7 @@
 package integration
 
 import (
-	"github.com/pluralsh/kubernetes-agent/api/pkg/integration/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/api"
 )
 
 // Getter is responsible for listing all supported integrations.

@@ -17,7 +17,7 @@ package ingress
 import (
 	v1 "k8s.io/api/networking/v1"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/dataselect"
 )
 
 // The code below allows to perform complex data section on []extensions.Ingress

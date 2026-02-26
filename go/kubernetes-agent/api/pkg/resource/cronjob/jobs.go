@@ -23,12 +23,12 @@ import (
 	"k8s.io/apimachinery/pkg/util/rand"
 	client "k8s.io/client-go/kubernetes"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
-	metricapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/api"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/job"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/errors"
+	metricapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/dataselect"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/job"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/types"
 )
 
 const (

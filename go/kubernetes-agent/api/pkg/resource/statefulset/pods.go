@@ -23,12 +23,12 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
-	metricapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/api"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/event"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/pod"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/errors"
+	metricapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/dataselect"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/event"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/pod"
 )
 
 // GetStatefulSetPods return list of pods targeting pet set.

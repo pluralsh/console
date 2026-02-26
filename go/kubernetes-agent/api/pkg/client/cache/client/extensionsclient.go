@@ -20,8 +20,8 @@ import (
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	"k8s.io/client-go/rest"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/client/cache/client/common"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/client/cache/client/extensions"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/client/cache/client/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/client/cache/client/extensions"
 )
 
 // CachedExtensionsInterface is a custom wrapper around the [extensionsclient.Interface].

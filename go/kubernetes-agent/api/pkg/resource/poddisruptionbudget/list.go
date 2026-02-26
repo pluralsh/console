@@ -20,10 +20,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/errors"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/dataselect"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/types"
 )
 
 type PodDisruptionBudgetList struct {

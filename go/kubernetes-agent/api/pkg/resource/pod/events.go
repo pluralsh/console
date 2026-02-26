@@ -17,9 +17,9 @@ package pod
 import (
 	client "k8s.io/client-go/kubernetes"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/event"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/dataselect"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/event"
 )
 
 // GetEventsForPod gets events that are associated with this pod.

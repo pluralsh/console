@@ -21,7 +21,7 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/logs"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/logs"
 )
 
 var log1 = logs.LogLine{

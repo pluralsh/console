@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/args"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/args"
 )
 
 func TestCreateHTTPAPIHandler(t *testing.T) {

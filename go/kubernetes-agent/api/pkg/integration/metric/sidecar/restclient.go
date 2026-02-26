@@ -19,7 +19,7 @@ import (
 
 	"k8s.io/client-go/rest"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/args"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/args"
 )
 
 // SidecarRESTClient is used to make raw requests to sidecar.

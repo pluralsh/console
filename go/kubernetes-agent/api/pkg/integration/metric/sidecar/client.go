@@ -25,11 +25,11 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/args"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/client"
-	integrationapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/api"
-	metricapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/api"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/args"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/client"
+	integrationapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/api"
+	metricapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/common"
 )
 
 // Sidecar client implements MetricClient and Integration interfaces.

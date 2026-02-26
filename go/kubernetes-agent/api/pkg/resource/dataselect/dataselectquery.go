@@ -15,7 +15,7 @@
 package dataselect
 
 import (
-	metricapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/api"
+	metricapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/api"
 )
 
 // DataSelectQuery is options for GenericDataSelect which takes []GenericDataCell and returns selected data.

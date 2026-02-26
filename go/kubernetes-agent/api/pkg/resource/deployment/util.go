@@ -18,7 +18,7 @@ import (
 	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/common"
 )
 
 // Methods below are taken from kubernetes repo:

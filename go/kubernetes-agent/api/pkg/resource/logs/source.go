@@ -20,9 +20,9 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/helpers"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/controller"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/helpers"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/controller"
 )
 
 // GetLogSources returns all log sources for a given resource. A log source identifies a log file through the combination of pod & container

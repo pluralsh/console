@@ -30,9 +30,9 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	integrationapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/api"
-	metricapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/api"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
+	integrationapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/api"
+	metricapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/types"
 )
 
 func areErrorsEqual(err1, err2 error) bool {

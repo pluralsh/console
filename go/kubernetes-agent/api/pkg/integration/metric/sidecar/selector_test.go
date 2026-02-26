@@ -21,8 +21,8 @@ import (
 	v1 "k8s.io/api/core/v1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	metricapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/api"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
+	metricapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/types"
 )
 
 func TestGetSidecarSelector(t *testing.T) {

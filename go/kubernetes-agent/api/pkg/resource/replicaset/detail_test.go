@@ -22,12 +22,12 @@ import (
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/horizontalpodautoscaler"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/pod"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/service"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/dataselect"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/horizontalpodautoscaler"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/pod"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/service"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/types"
 )
 
 func TestGetReplicaSetDetail(t *testing.T) {

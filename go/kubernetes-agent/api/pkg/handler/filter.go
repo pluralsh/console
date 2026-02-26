@@ -26,9 +26,9 @@ import (
 	utilnet "k8s.io/apimachinery/pkg/util/net"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/args"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/csrf"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/helpers"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/args"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/csrf"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/helpers"
 )
 
 const (

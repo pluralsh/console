@@ -26,14 +26,14 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/args"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/certificates"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/certificates/ecdsa"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/client"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/environment"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/handler"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/integration"
-	integrationapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/args"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/certificates"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/certificates/ecdsa"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/client"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/environment"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/handler"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration"
+	integrationapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/api"
 )
 
 func main() {

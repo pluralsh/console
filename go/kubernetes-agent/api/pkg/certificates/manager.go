@@ -19,7 +19,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/certificates/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/certificates/api"
 )
 
 // Manager is used to implement cert/api/types.Manager interface. See Manager for more information.

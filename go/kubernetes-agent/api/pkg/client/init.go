@@ -25,8 +25,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd/api"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/client/args"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/client/args"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/errors"
 )
 
 var (

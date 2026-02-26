@@ -26,9 +26,9 @@ import (
 	apimachinery "k8s.io/apimachinery/pkg/types"
 	client "k8s.io/client-go/kubernetes"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/event"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/event"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/types"
 )
 
 // ResourceOwner is an structure representing resource owner, it may be Replication Controller,

@@ -19,9 +19,9 @@ import (
 	apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/customresourcedefinition/types"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/customresourcedefinition/types"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/dataselect"
 )
 
 type CustomResourceDefinitionCell apiextensions.CustomResourceDefinition

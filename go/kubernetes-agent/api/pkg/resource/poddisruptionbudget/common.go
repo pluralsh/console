@@ -17,7 +17,7 @@ package poddisruptionbudget
 import (
 	policyv1 "k8s.io/api/policy/v1"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/dataselect"
 )
 
 type PodDisruptionBudgetCell policyv1.PodDisruptionBudget

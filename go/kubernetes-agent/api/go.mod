@@ -1,4 +1,4 @@
-module github.com/pluralsh/kubernetes-agent/api
+module github.com/pluralsh/console/go/kubernetes-agent/api
 
 go 1.25.7
 

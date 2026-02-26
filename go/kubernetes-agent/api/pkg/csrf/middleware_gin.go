@@ -21,7 +21,7 @@ import (
 	"golang.org/x/net/xsrftoken"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/errors"
 )
 
 var (

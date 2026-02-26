@@ -36,8 +36,8 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/args"
-	derrors "github.com/pluralsh/kubernetes-agent/api/pkg/errors"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/args"
+	derrors "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/errors"
 )
 
 const (

@@ -19,11 +19,11 @@ import (
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/customresourcedefinition/types"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
-	commontypes "github.com/pluralsh/kubernetes-agent/api/pkg/types"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/errors"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/customresourcedefinition/types"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/dataselect"
+	commontypes "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/types"
 )
 
 // GetCustomResourceDefinitionList returns all the custom resource definitions in the cluster.

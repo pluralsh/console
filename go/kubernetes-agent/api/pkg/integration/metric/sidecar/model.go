@@ -15,8 +15,8 @@
 package sidecar
 
 import (
-	metricapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/api"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
+	metricapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/types"
 )
 
 // SidecarAllInOneDownloadConfig holds config information specifying whether given native Sidecar

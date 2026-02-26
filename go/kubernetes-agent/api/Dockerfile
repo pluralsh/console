@@ -54,7 +54,7 @@ RUN go mod download
 COPY api/pkg ./pkg
 COPY api/main.go ./
 
-RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -trimpath -ldflags="-s -w -X github.com/pluralsh/kubernetes-agent/api/pkg/environment.Version=${VERSION}" -o dashboard-api .
+RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -trimpath -ldflags="-s -w -X github.com/pluralsh/console/go/kubernetes-agent/api/pkg/environment.Version=${VERSION}" -o dashboard-api .
 
 # Scratch can be used as the base image because the binary is compiled to include all dependencies.
 FROM scratch AS final

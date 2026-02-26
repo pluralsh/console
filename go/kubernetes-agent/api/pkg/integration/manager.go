@@ -19,8 +19,8 @@ import (
 
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/integration/api"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric"
 )
 
 // Manager is responsible for management of all integrated applications.

@@ -20,8 +20,8 @@ import (
 
 	"github.com/emicklei/go-restful/v3"
 
-	metricapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/api"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
+	metricapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/dataselect"
 )
 
 func parsePaginationPathParameter(request *restful.Request) *dataselect.PaginationQuery {

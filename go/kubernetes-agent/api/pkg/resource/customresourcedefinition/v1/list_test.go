@@ -23,9 +23,9 @@ import (
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/customresourcedefinition/types"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
-	commontypes "github.com/pluralsh/kubernetes-agent/api/pkg/types"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/customresourcedefinition/types"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/dataselect"
+	commontypes "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/types"
 )
 
 func TestGetCustomResourceDefinition(t *testing.T) {

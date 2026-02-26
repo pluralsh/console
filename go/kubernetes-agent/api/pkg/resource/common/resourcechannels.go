@@ -31,7 +31,7 @@ import (
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client "k8s.io/client-go/kubernetes"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/helpers"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/helpers"
 )
 
 // ResourceChannels struct holds channels to resource lists. Each list channel is paired with

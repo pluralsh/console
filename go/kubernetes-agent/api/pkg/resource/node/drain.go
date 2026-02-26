@@ -25,7 +25,7 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/kubectl/pkg/drain"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/args"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/args"
 )
 
 // NodeDrainSpec is a specification to control the behavior of drainer.

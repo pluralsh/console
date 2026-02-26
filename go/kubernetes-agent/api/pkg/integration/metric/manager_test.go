@@ -18,9 +18,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
-	integrationapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/api"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/errors"
+	integrationapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/api"
 )
 
 const fakeMetricClientID integrationapi.IntegrationID = "test-id"

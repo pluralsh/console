@@ -20,7 +20,7 @@ import (
 	api "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/common"
 )
 
 // FailedReasonPartials  is an array of partial strings to correctly filter warning events.

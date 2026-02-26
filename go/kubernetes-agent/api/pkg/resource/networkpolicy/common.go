@@ -17,7 +17,7 @@ package networkpolicy
 import (
 	v1 "k8s.io/api/networking/v1"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/dataselect"
 )
 
 type ServiceAccountCell v1.NetworkPolicy

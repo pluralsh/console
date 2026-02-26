@@ -21,8 +21,8 @@ import (
 	k8sClient "k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 
-	metricapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/api"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
+	metricapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/resource/common"
 )
 
 // DaemonSetDetail represents detailed information about a Daemon Set.

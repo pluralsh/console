@@ -30,7 +30,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	certapi "github.com/pluralsh/kubernetes-agent/api/pkg/certificates/api"
+	certapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/certificates/api"
 )
 
 // Implements certificate Creator interface. See Creator for more information.

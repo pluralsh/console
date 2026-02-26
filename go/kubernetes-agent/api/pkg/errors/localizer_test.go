@@ -17,7 +17,7 @@ package errors_test
 import (
 	"testing"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/errors"
 )
 
 func TestLocalizeError(t *testing.T) {

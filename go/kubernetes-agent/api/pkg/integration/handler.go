@@ -19,7 +19,7 @@ import (
 
 	"github.com/emicklei/go-restful/v3"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/integration/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/api"
 )
 
 // Handler manages all endpoints related to integrated applications, such as state.

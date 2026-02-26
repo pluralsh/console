@@ -17,7 +17,7 @@ package helpers_test
 import (
 	"testing"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/helpers"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/helpers"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

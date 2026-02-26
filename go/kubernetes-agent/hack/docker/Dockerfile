@@ -31,7 +31,7 @@ WORKDIR /workspace/api
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -trimpath \
-    -ldflags="-s -w -X github.com/pluralsh/kubernetes-agent/api/pkg/environment.Version=${VERSION}" \
+    -ldflags="-s -w -X github.com/pluralsh/console/go/kubernetes-agent/api/pkg/environment.Version=${VERSION}" \
     -o /binaries/api .
 
 # Build KAS and AGENTK binaries

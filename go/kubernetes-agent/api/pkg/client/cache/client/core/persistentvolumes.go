@@ -22,8 +22,8 @@ import (
 	authorizationv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
-	"github.com/pluralsh/kubernetes-agent/api/pkg/client/cache/client/common"
-	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/client/cache/client/common"
+	"github.com/pluralsh/console/go/kubernetes-agent/api/pkg/types"
 )
 
 type persistentVolumes struct {
