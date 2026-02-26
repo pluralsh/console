@@ -1,0 +1,85 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.kas;
+
+option go_package = "github.com/pluralsh/kubernetes-agent/cmd/kas/kasapp";
+
+import "pkg/tool/grpctool/automata/automata.proto";
+import "pkg/tool/prototool/prototool.proto";
+//import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";
+import "validate/validate.proto";
+// https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto
+import "google/rpc/status.proto";
+
+message StartStreaming {
+}
+
+message GatewayKasResponse {
+  // Tunnel is ready, can start forwarding stream.
+  message TunnelReady {
+  }
+
+  // No tunnels available at the moment.
+  message NoTunnel {
+  }
+
+  // Headers is a gRPC metadata.
+  message Header {
+    map<string, prototool.Values> meta = 1;
+  }
+
+  // Message is a gRPC message data.
+  message Message {
+    bytes data = 1;
+  }
+
+  // Trailer is a gRPC trailer metadata.
+  message Trailer {
+    map<string, prototool.Values> meta = 1;
+  }
+
+  // Error represents a gRPC error that should be returned.
+  message Error {
+    // Error status as returned by gRPC.
+    // See https://cloud.google.com/apis/design/errors.
+    google.rpc.Status status = 1 [(validate.rules).message.required = true];
+  }
+
+  oneof msg {
+    option (validate.required) = true;
+    option (grpctool.automata.first_allowed_field) = -1;
+    option (grpctool.automata.first_allowed_field) = 1;
+    option (grpctool.automata.first_allowed_field) = 6;
+
+    TunnelReady tunnel_ready = 1 [
+      (grpctool.automata.next_allowed_field) = 2,
+      (validate.rules).message.required = true
+    ];
+    Header header = 2 [
+      (grpctool.automata.next_allowed_field) = 3,
+      (grpctool.automata.next_allowed_field) = 4,
+      (validate.rules).message.required = true
+    ];
+    Message message = 3 [
+      (grpctool.automata.next_allowed_field) = 3,
+      (grpctool.automata.next_allowed_field) = 4,
+      (validate.rules).message.required = true
+    ];
+    Trailer trailer = 4 [
+      (grpctool.automata.next_allowed_field) = 5,
+      (grpctool.automata.next_allowed_field) = -1,
+      (validate.rules).message.required = true
+    ];
+    Error error = 5 [
+      (grpctool.automata.next_allowed_field) = -1,
+      (validate.rules).message.required = true
+    ];
+    NoTunnel no_tunnel = 6 [
+      (grpctool.automata.next_allowed_field) = -1,
+      (grpctool.automata.next_allowed_field) = 1,
+      (validate.rules).message.required = true
+    ];
+  }
+}

@@ -1,0 +1,114 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.reverse_tunnel.rpc;
+
+option go_package = "github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/rpc";
+
+import "pkg/tool/grpctool/automata/automata.proto";
+import "pkg/tool/prototool/prototool.proto";
+import "pkg/module/reverse_tunnel/info/info.proto";
+//import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";
+import "validate/validate.proto";
+// https://github.com/googleapis/googleapis/blob/master/google/rpc/status.proto
+import "google/rpc/status.proto";
+
+message Descriptor {
+  info.AgentDescriptor agent_descriptor = 1 [(validate.rules).message.required = true];
+}
+
+// Header is a gRPC metadata.
+message Header {
+  map<string, prototool.Values> meta = 1;
+}
+
+// Message is a gRPC message data.
+message Message {
+  bytes data = 1;
+}
+
+// Trailer is a gRPC trailer metadata.
+message Trailer {
+  map<string, prototool.Values> meta = 1;
+}
+
+// Error represents a gRPC error that should be returned.
+message Error {
+  // Error status as returned by gRPC.
+  // See https://cloud.google.com/apis/design/errors.
+  google.rpc.Status status = 1 [(validate.rules).message.required = true];
+}
+
+message ConnectRequest {
+  oneof msg {
+
+    option (grpctool.automata.first_allowed_field) = 1;
+    option (validate.required) = true;
+
+    Descriptor descriptor = 1 [
+      (grpctool.automata.next_allowed_field) = 2,
+      (grpctool.automata.next_allowed_field) = 5,
+      (validate.rules).message.required = true
+    ];
+    Header header = 2 [
+      (grpctool.automata.next_allowed_field) = 3,
+      (grpctool.automata.next_allowed_field) = 4,
+      (validate.rules).message.required = true
+    ];
+    Message message = 3 [
+      (grpctool.automata.next_allowed_field) = 3,
+      (grpctool.automata.next_allowed_field) = 4,
+      (validate.rules).message.required = true
+    ];
+    Trailer trailer = 4 [
+      (grpctool.automata.next_allowed_field) = 5,
+      (grpctool.automata.next_allowed_field) = -1,
+      (validate.rules).message.required = true
+    ];
+    Error error = 5 [
+      (grpctool.automata.next_allowed_field) = -1,
+      (validate.rules).message.required = true
+    ];
+  }
+}
+
+message RequestInfo {
+  string method_name = 1;
+  map<string, prototool.Values> meta = 2;
+}
+
+message CloseSend {
+}
+
+message ConnectResponse {
+  oneof msg {
+
+    option (grpctool.automata.first_allowed_field) = 1;
+    option (grpctool.automata.first_allowed_field) = -1; // EOF means there is nothing to do
+    option (validate.required) = true;
+
+    RequestInfo request_info = 1 [
+      (grpctool.automata.next_allowed_field) = 2,
+      (grpctool.automata.next_allowed_field) = 3,
+      (grpctool.automata.next_allowed_field) = -1,
+      (validate.rules).message.required = true
+    ];
+    Message message = 2 [
+      (grpctool.automata.next_allowed_field) = 2,
+      (grpctool.automata.next_allowed_field) = 3,
+      (grpctool.automata.next_allowed_field) = -1,
+      (validate.rules).message.required = true
+    ];
+    CloseSend close_send = 3 [
+      (grpctool.automata.next_allowed_field) = -1,
+      (validate.rules).message.required = true
+    ];
+  }
+}
+
+service ReverseTunnel {
+  // Connect to server to establish a reverse tunnel.
+  rpc Connect (stream ConnectRequest) returns (stream ConnectResponse) {
+  }
+}

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.event;
+
+option go_package = "github.com/pluralsh/kubernetes-agent/pkg/event";
+
+import "validate/validate.proto";
+
+message GitPushEvent {
+  Project project = 1 [(validate.rules).message.required = true];
+}
+
+message Project {
+  // The numeric GitLab project id
+  int64 id = 1 [(validate.rules).int64.gt = 0];
+  // The full path to the GitLab project
+  string full_path = 2 [(validate.rules).string.min_bytes = 1];
+}

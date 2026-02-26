@@ -1,0 +1,68 @@
+agent:
+  listen:
+    address: 0.0.0.0:8150
+    websocket: true
+  configuration:
+    poll_period: "300s"
+    max_configuration_file_size: 131072
+  kubernetes_api:
+    listen:
+      network: tcp
+      address: 0.0.0.0:8154
+      certificate_file: /.secret/cert.pub
+      key_file: /.secret/cert.key
+      listen_grace_period: "5s"
+      shutdown_grace_period: "3600s"
+    url_path_prefix: /
+    allowed_agent_cache_ttl: "60s"
+    allowed_agent_cache_error_ttl: "10s"
+  info_cache_ttl: "300s"
+  info_cache_error_ttl: "60s"
+  redis_conn_info_ttl: "300s"
+  redis_conn_info_refresh: "240s"
+  redis_conn_info_gc: "600s"
+observability:
+  listen:
+    network: tcp
+    address: 127.0.0.1:8151
+  prometheus:
+    url_path: /metrics
+  # tracing:
+  #   otlp_endpoint: "https://localhost:4317/traces/foo/bar"
+  #   otlp_token_secret_file: "/some/path"
+  #   otlp_ca_certificate_file: "/some/path/ca.crt"
+  sentry:
+    dsn: ""
+    environment: ""
+  logging:
+    level: info
+    grpc_level: error
+  liveness_probe:
+    url_path: /liveness
+  readiness_probe:
+    url_path: /readiness
+private_api:
+  listen:
+    network: tcp
+    address: 127.0.0.1:8155
+    authentication_secret_file: /.secret/private_api_secret
+    max_connection_age: 7200s
+    listen_grace_period: "5s"
+redis:
+  server:
+    address: "redis:6379" # required
+  dial_timeout: "5s"
+  write_timeout: "3s"
+  key_prefix: kubernetes-agent
+  password_file: /.secret/redis_server_secret
+  network: "tcp"
+api:
+  listen:
+    network: tcp
+    address: 127.0.0.1:8153
+    authentication_secret_file: /.secret/api_listen_secret
+    # certificate_file: /server-cert.pem
+    # key_file: /server-key.pem
+    max_connection_age: "7200s"
+    listen_grace_period: "5s"
+plural_url: "https://console.plrl-dev-aws.onplural.sh/gql"

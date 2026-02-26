@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.reverse_tunnel.info;
+
+option go_package = "github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/info";
+
+//import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";
+import "validate/validate.proto";
+
+message Method {
+  string name = 1 [(validate.rules).string.min_bytes = 1];
+}
+
+message Service {
+  string name = 1 [(validate.rules).string.min_bytes = 1];
+  repeated Method methods = 2;
+}
+
+message AgentDescriptor {
+  repeated Service services = 1;
+}

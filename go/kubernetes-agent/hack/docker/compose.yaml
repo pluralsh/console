@@ -1,0 +1,72 @@
+services:
+  redis:
+    image: redis:7.2.2
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  kas:
+    depends_on:
+      redis:
+        condition: service_started
+    image: kubernetes-agent:latest
+    container_name: kas
+    build:
+      context: ../../../../../kubernetes-agent
+      dockerfile: Dockerfile
+      args:
+        VERSION: ${VERSION:?}
+    entrypoint: /kas
+    command:
+      - --configuration-file=/config.yaml
+    volumes:
+      - ${PWD}/modules/kas/.secret:/.secret
+      - ${PWD}/hack/docker/config.yaml:/config.yaml
+    tmpfs:
+      - /tmp
+    ports:
+      - "8154:8154"
+      - "8150:8150"
+
+  agent:
+    depends_on:
+      kas:
+        condition: service_started
+    image: kubernetes-agent:latest
+    container_name: agentk
+    entrypoint: /agentk
+    command:
+      - --kas-address=ws://kas:8150
+    environment:
+      POD_NAME: agentk
+      POD_NAMESPACE: default
+      AGENTK_TOKEN: ${AGENTK_TOKEN:-test}
+      KUBECONFIG: /.secret/kubeconfig
+    volumes:
+      - ${PWD}/.tmp/kubeconfig:/.secret/kubeconfig
+    tmpfs:
+      - /tmp
+
+  api:
+    depends_on:
+      kas:
+        condition: service_started
+    image: kubernetes-agent:latest
+    container_name: api
+    entrypoint: /api
+    command:
+      - --metrics-provider=none
+      - --act-as-proxy
+      - --apiserver-host=https://kas:8154
+      - --apiserver-skip-tls-verify
+      - --disable-csrf-protection
+      - --insecure-bind-address=0.0.0.0
+    tmpfs:
+      - /tmp
+    ports:
+      - "8000:8000"
+
+networks:
+  default:
+    external: true
+    name: kind

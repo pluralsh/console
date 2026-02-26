@@ -1,0 +1,12 @@
+# System
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+go_build_agentk*
+go_build_kas*
+
+# Tools
+binaries/
+.tmp/

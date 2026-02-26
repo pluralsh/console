@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.prototool;
+
+option go_package = "github.com/pluralsh/kubernetes-agent/pkg/tool/prototool";
+
+//import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";
+import "validate/validate.proto";
+
+message Values {
+  repeated string value = 1;
+}
+
+message HttpRequest {
+  // HTTP method.
+  string method = 1 [(validate.rules).string.min_bytes = 1];
+  // HTTP header.
+  map<string, Values> header = 2;
+  // URL path. Should start with a slash.
+  string url_path = 3 [(validate.rules).string.min_bytes = 1];
+  // query is the URL query part without the leading question mark.
+  map<string, Values> query = 4;
+}
+
+message HttpResponse {
+  // HTTP status code.
+  int32 status_code = 1;
+  // HTTP status message.
+  string status = 2;
+  // HTTP header.
+  map<string, Values> header = 3;
+}

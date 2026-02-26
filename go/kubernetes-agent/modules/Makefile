@@ -1,0 +1,12 @@
+COMMON_MODULES_WILDCARD = common/*
+COMMON_MODULES = $(wildcard $(COMMON_MODULES_WILDCARD))
+
+MODULES_EXCLUDE = common/ tools/
+MODULES_WILDCARD = */
+MODULES = $(dir $(filter-out $(MODULES_EXCLUDE), $(wildcard $(MODULES_WILDCARD))))
+
+.PHONY: --run $(MODULES) $(COMMON_MODULES)
+--run: $(MODULES) $(COMMON_MODULES)
+
+$(MODULES) $(COMMON_MODULES):
+	@$(MAKE) --directory=$@ $(TARGET)

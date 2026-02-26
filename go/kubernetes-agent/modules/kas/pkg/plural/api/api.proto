@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.plural.api;
+
+option go_package = "github.com/pluralsh/kubernetes-agent/pkg/plural/api";
+
+import "pkg/agentcfg/agentcfg.proto";
+import "validate/validate.proto";
+
+// Configuration contains shared fields from agentcfg.CiAccessProjectCF and agentcfg.CiAccessGroupCF.
+// It is used to parse response from the allowed_agents API endpoint.
+// See https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/kubernetes_ci_access.md#apiv4joballowed_agents-api.
+message Configuration {
+  string default_namespace = 1 [json_name = "default_namespace"];
+  agentcfg.CiAccessAsCF access_as = 2 [json_name = "access_as"];
+}
+
+message AllowedAgent {
+  int64 id = 1 [json_name = "id"];
+  ConfigProject config_project = 2 [json_name = "config_project", (validate.rules).message.required = true];
+  Configuration configuration = 3 [json_name = "configuration"];
+}
+
+message ConfigProject {
+  int64 id = 1 [json_name = "id"];
+}
+
+message Pipeline {
+  int64 id = 1 [json_name = "id"];
+}
+
+message Project {
+  int64 id = 1 [json_name = "id"];
+  repeated Group groups = 2 [json_name = "groups"];
+}
+
+message Group {
+  int64 id = 1 [json_name = "id"];
+}
+
+message Job {
+  int64 id = 1 [json_name = "id"];
+}
+
+message User {
+  string id = 1 [json_name = "id"];
+  string username = 2 [json_name = "username", (validate.rules).string.min_bytes = 1];
+  string email = 3 [json_name = "email", (validate.rules).string.min_bytes = 1];
+}
+
+message Environment {
+  string slug = 1 [json_name = "slug", (validate.rules).string.min_bytes = 1];
+  string tier = 2 [json_name = "tier", (validate.rules).string.min_bytes = 1];
+}
+
+message GetAgentInfoResponse {
+  int64 project_id = 1 [json_name = "project_id", (validate.rules).int64.gt = 0];
+  int64 agent_id = 2 [json_name = "agent_id", (validate.rules).int64.gt = 0];
+  string agent_name = 3 [json_name = "agent_name", (validate.rules).string.min_bytes = 1];
+  string default_branch = 6 [json_name = "default_branch", (validate.rules).string.min_bytes = 1];
+}
+
+message GetProjectInfoResponse {
+  int64 project_id = 1 [json_name = "project_id", (validate.rules).int64.gt = 0];
+  string default_branch = 4 [json_name = "default_branch", (validate.rules).string.min_bytes = 1];
+}
+
+message AllowedAgentsForJob {
+  repeated AllowedAgent allowed_agents = 1 [json_name = "allowed_agents"];
+  Job job = 2 [json_name = "job", (validate.rules).message.required = true];
+  Pipeline pipeline = 3 [json_name = "pipeline", (validate.rules).message.required = true];
+  Project project = 4 [json_name = "project", (validate.rules).message.required = true];
+  User user = 5 [json_name = "user", (validate.rules).message.required = true];
+  Environment environment = 6 [json_name = "environment"]; // optional
+}
+
+message AuthorizeProxyUserRequest {
+  int64 agent_id = 1 [json_name = "agent_id", (validate.rules).int64.gt = 0];
+  string access_type = 2 [json_name = "access_type", (validate.rules).string = {in: ["session_cookie", "personal_access_token"]}];
+  string access_key = 3 [json_name = "access_key", (validate.rules).string.min_bytes = 1];
+  string csrf_token = 4 [json_name = "csrf_token"];
+}
+
+message AuthorizeProxyUserResponse {
+  AuthorizedAgentForUser agent = 1 [json_name = "agent", (validate.rules).message.required = true];
+  User user = 2 [json_name = "user", (validate.rules).message.required = true];
+  AccessAsProxyAuthorization access_as = 3 [json_name = "access_as", (validate.rules).message.required = true];
+}
+
+message AuthorizedAgentForUser {
+  int64 id = 1 [json_name = "id"];
+  ConfigProject config_project = 2 [json_name = "config_project", (validate.rules).message.required = true];
+}
+
+message AccessAsProxyAuthorization {
+  oneof access_as {
+    option (validate.required) = true;
+    AccessAsAgentAuthorization agent = 1 [json_name = "agent", (validate.rules).message.required = true];
+    AccessAsUserAuthorization user = 2 [json_name = "user", (validate.rules).message.required = true];
+  }
+}
+
+message AccessAsAgentAuthorization {}
+
+message AccessAsUserAuthorization {
+  repeated string roles = 1 [json_name = "roles"];
+  repeated string groups = 2 [json_name = "groups"];
+}
+
+message AgentConfigurationRequest {
+  int64 agent_id = 1 [json_name = "agent_id", (validate.rules).int64.gt = 0];
+  agentcfg.ConfigurationFile agent_config = 2 [json_name = "agent_config", (validate.rules).message.required = true];
+}

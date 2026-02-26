@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.agent_tracker.rpc;
+
+option go_package = "github.com/pluralsh/kubernetes-agent/pkg/module/agent_tracker/rpc";
+
+import "pkg/module/agent_tracker/agent_tracker.proto";
+//import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";
+import "validate/validate.proto";
+
+message GetConnectedAgentsRequest {
+  oneof request {
+    option (validate.required) = true;
+
+    int64 project_id = 1;
+    int64 agent_id = 2;
+  }
+}
+
+message GetConnectedAgentsResponse {
+  // There may 0 or more agents with the same id, depending on the number of running agentk Pods.
+  repeated agent_tracker.ConnectedAgentInfo agents = 1 [json_name = "agents"];
+}
+
+service AgentTracker {
+  // Get connected agents for a configuration project or an agent id.
+  rpc GetConnectedAgents (GetConnectedAgentsRequest) returns (GetConnectedAgentsResponse) {
+  }
+}

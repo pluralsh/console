@@ -1,0 +1,117 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.grpctool;
+
+option go_package = "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool";
+
+import "pkg/tool/grpctool/automata/automata.proto";
+import "pkg/tool/prototool/prototool.proto";
+//import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";
+import "validate/validate.proto";
+import "google/protobuf/any.proto";
+
+message HttpRequest {
+  // First message of the stream.
+  message Header {
+    prototool.HttpRequest request = 1 [(validate.rules).message.required = true];
+    // Optional extra information about the HTTP request.
+    google.protobuf.Any extra = 2;
+    // content_length contains the size of the expected body (if any) in the request.
+    // Possible values are:
+    // * -1:  if the body size cannot be determined, but there is a body (e.g. chunked)
+    // * 0:   there is no body in the request
+    // * > 0: the actual size of the body in bytes
+    optional int64 content_length = 3 [(validate.rules).int64.gte = -1];
+  }
+  // Subsequent messages of the stream.
+  message Data {
+    // A chunk of request body.
+    bytes data = 1;
+  }
+  // Last message of the stream if no UpgradeData is sent.
+  message Trailer {
+  }
+  // Last message of the stream.
+  // This is to support streaming requests that send an "Upgrade: ..." header.
+  // https://datatracker.ietf.org/doc/html/rfc7230#section-6.7
+  message UpgradeData {
+    // A chunk of upgraded connection data.
+    bytes data = 1;
+  }
+  oneof message {
+
+    option (grpctool.automata.first_allowed_field) = 1;
+    option (validate.required) = true;
+
+    Header header = 1 [
+      (grpctool.automata.next_allowed_field) = 2,
+      (grpctool.automata.next_allowed_field) = 3,
+      (validate.rules).message.required = true
+    ];
+    Data data = 2 [
+      (grpctool.automata.next_allowed_field) = 2,
+      (grpctool.automata.next_allowed_field) = 3,
+      (validate.rules).message.required = true
+    ];
+    Trailer trailer = 3 [
+      (grpctool.automata.next_allowed_field) = 4,
+      (grpctool.automata.next_allowed_field) = -1,
+      (validate.rules).message.required = true
+    ];
+    UpgradeData upgradeData = 4 [
+      (grpctool.automata.next_allowed_field) = 4,
+      (grpctool.automata.next_allowed_field) = -1,
+      (validate.rules).message.required = true
+    ];
+  }
+}
+
+message HttpResponse {
+  // First message of the stream.
+  message Header {
+    prototool.HttpResponse response = 1 [(validate.rules).message.required = true];
+  }
+  // Subsequent messages of the stream.
+  message Data {
+    // A chunk of response body.
+    bytes data = 1;
+  }
+  // Last message of the stream if no UpgradeData is received.
+  message Trailer {
+  }
+  // Last message of the stream.
+  // This is to support streaming requests that send an "Upgrade: ..." header.
+  // https://datatracker.ietf.org/doc/html/rfc7230#section-6.7
+  message UpgradeData {
+    // A chunk of upgraded connection data.
+    bytes data = 1;
+  }
+  oneof message {
+
+    option (grpctool.automata.first_allowed_field) = 1;
+    option (validate.required) = true;
+
+    Header header = 1 [
+      (grpctool.automata.next_allowed_field) = 2,
+      (grpctool.automata.next_allowed_field) = 3,
+      (validate.rules).message.required = true
+    ];
+    Data data = 2 [
+      (grpctool.automata.next_allowed_field) = 2,
+      (grpctool.automata.next_allowed_field) = 3,
+      (validate.rules).message.required = true
+    ];
+    Trailer trailer = 3 [
+      (grpctool.automata.next_allowed_field) = 4,
+      (grpctool.automata.next_allowed_field) = -1,
+      (validate.rules).message.required = true
+    ];
+    UpgradeData upgradeData = 4 [
+      (grpctool.automata.next_allowed_field) = 4,
+      (grpctool.automata.next_allowed_field) = -1,
+      (validate.rules).message.required = true
+    ];
+  }
+}
