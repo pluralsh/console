@@ -8744,6 +8744,8 @@ type VertexAiSettings struct {
 	Project string `json:"project"`
 	// the gcp region the model
 	Location string `json:"location"`
+	// custom vertexai endpoint if for dedicated customer deployments
+	Endpoint *string `json:"endpoint,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 }

@@ -65,6 +65,7 @@ export function initialSettingsAttributes(
                 toolModel: ai.vertex.toolModel,
                 project: ai.vertex.project,
                 location: ai.vertex.location,
+                endpoint: ai.vertex.endpoint,
                 serviceAccountJson: '',
               },
             }
