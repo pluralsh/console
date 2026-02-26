@@ -15,7 +15,7 @@
 package cronjob_test
 
 import (
-	"github.com/pluralsh/kubernetes-agent/common/errors"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
 )
 
 var (

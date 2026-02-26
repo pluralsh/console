@@ -18,9 +18,9 @@ import (
 	k8sClient "k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
-	"github.com/pluralsh/kubernetes-agent/common/errors"
 )
 
 func GetEventList(client k8sClient.Interface, nsQuery *common.NamespaceQuery,

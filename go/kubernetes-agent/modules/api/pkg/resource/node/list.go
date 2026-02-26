@@ -21,11 +21,11 @@ import (
 	client "k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
 
+	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/helpers"
 	metricapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/metric/api"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
-	"github.com/pluralsh/kubernetes-agent/common/errors"
-	"github.com/pluralsh/kubernetes-agent/common/helpers"
-	"github.com/pluralsh/kubernetes-agent/common/types"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
 )
 
 // NodeList contains a list of nodes in the cluster.

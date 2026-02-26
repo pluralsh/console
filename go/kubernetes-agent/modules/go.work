@@ -2,11 +2,5 @@ go 1.25.7
 
 use (
 	./api
-	./common/certificates
-	./common/client
-	./common/csrf
-	./common/errors
-	./common/helpers
-	./common/types
 	./kas
 )

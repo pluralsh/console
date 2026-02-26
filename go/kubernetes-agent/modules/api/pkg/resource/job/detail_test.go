@@ -24,7 +24,7 @@ import (
 
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
-	"github.com/pluralsh/kubernetes-agent/common/types"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
 )
 
 func createJob(name, namespace string, jobCompletions int32, labelSelector map[string]string) *batch.Job {

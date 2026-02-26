@@ -26,11 +26,11 @@ import (
 	apimachinery "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 
+	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/helpers"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
-	"github.com/pluralsh/kubernetes-agent/common/errors"
-	"github.com/pluralsh/kubernetes-agent/common/helpers"
-	"github.com/pluralsh/kubernetes-agent/common/types"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
 )
 
 // EmptyEventList is a empty list of events.

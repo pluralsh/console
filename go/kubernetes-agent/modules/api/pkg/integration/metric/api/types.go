@@ -22,7 +22,7 @@ import (
 	apimachinery "k8s.io/apimachinery/pkg/types"
 
 	integrationapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/api"
-	"github.com/pluralsh/kubernetes-agent/common/types"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
 )
 
 // MetricClient is an interface that exposes API used by dashboard to show graphs and sparklines.

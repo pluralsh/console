@@ -29,7 +29,7 @@ import (
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/controller"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/persistentvolumeclaim"
-	"github.com/pluralsh/kubernetes-agent/common/types"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
 )
 
 func TestGetPodDetail(t *testing.T) {

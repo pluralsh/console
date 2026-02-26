@@ -22,7 +22,7 @@ import (
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
 
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
-	"github.com/pluralsh/kubernetes-agent/common/types"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
 )
 
 // CustomResourceDefinitionList contains a list of Custom Resource Definitions in the cluster.

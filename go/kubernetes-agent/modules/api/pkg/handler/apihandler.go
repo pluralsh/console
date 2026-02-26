@@ -28,6 +28,9 @@ import (
 	"golang.org/x/net/xsrftoken"
 	"k8s.io/client-go/tools/remotecommand"
 
+	"github.com/pluralsh/kubernetes-agent/api/pkg/client"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/csrf"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/errors"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/handler/parser"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/integration"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/clusterrole"
@@ -66,9 +69,6 @@ import (
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/storageclass"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/scaling"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/validation"
-	"github.com/pluralsh/kubernetes-agent/common/client"
-	"github.com/pluralsh/kubernetes-agent/common/csrf"
-	"github.com/pluralsh/kubernetes-agent/common/errors"
 )
 
 const (

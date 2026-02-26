@@ -7,12 +7,6 @@ require (
 	github.com/emicklei/go-restful-openapi/v2 v2.11.0
 	github.com/emicklei/go-restful/v3 v3.12.2
 	github.com/go-openapi/spec v0.21.0
-	github.com/pluralsh/kubernetes-agent/common/certificates v0.0.0-00010101000000-000000000000
-	github.com/pluralsh/kubernetes-agent/common/client v0.0.0-00010101000000-000000000000
-	github.com/pluralsh/kubernetes-agent/common/csrf v0.0.0-00010101000000-000000000000
-	github.com/pluralsh/kubernetes-agent/common/errors v0.0.0-00010101000000-000000000000
-	github.com/pluralsh/kubernetes-agent/common/helpers v0.0.0-00010101000000-000000000000
-	github.com/pluralsh/kubernetes-agent/common/types v0.0.0-00010101000000-000000000000
 	github.com/prometheus/client_golang v1.23.2
 	github.com/samber/lo v1.51.0
 	github.com/spf13/pflag v1.0.10
@@ -119,13 +113,4 @@ require (
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
-)
-
-replace (
-	github.com/pluralsh/kubernetes-agent/common/certificates => ./../common/certificates
-	github.com/pluralsh/kubernetes-agent/common/client => ./../common/client
-	github.com/pluralsh/kubernetes-agent/common/csrf => ./../common/csrf
-	github.com/pluralsh/kubernetes-agent/common/errors => ./../common/errors
-	github.com/pluralsh/kubernetes-agent/common/helpers => ./../common/helpers
-	github.com/pluralsh/kubernetes-agent/common/types => ./../common/types
 )

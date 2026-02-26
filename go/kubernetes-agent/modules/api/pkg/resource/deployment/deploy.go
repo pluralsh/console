@@ -37,7 +37,7 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/kubernetes-agent/api/pkg/args"
-	derrors "github.com/pluralsh/kubernetes-agent/common/errors"
+	derrors "github.com/pluralsh/kubernetes-agent/api/pkg/errors"
 )
 
 const (

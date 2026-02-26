@@ -24,7 +24,7 @@ import (
 
 	"github.com/pluralsh/kubernetes-agent/api/pkg/args"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/common"
-	"github.com/pluralsh/kubernetes-agent/common/types"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/types"
 )
 
 type Endpoint struct {

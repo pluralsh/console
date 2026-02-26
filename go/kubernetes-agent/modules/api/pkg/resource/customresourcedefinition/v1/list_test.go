@@ -25,7 +25,7 @@ import (
 
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/customresourcedefinition/types"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/resource/dataselect"
-	commontypes "github.com/pluralsh/kubernetes-agent/common/types"
+	commontypes "github.com/pluralsh/kubernetes-agent/api/pkg/types"
 )
 
 func TestGetCustomResourceDefinition(t *testing.T) {

@@ -27,13 +27,13 @@ import (
 	"k8s.io/klog/v2"
 
 	"github.com/pluralsh/kubernetes-agent/api/pkg/args"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/certificates"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/certificates/ecdsa"
+	"github.com/pluralsh/kubernetes-agent/api/pkg/client"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/environment"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/handler"
 	"github.com/pluralsh/kubernetes-agent/api/pkg/integration"
 	integrationapi "github.com/pluralsh/kubernetes-agent/api/pkg/integration/api"
-	"github.com/pluralsh/kubernetes-agent/common/certificates"
-	"github.com/pluralsh/kubernetes-agent/common/certificates/ecdsa"
-	"github.com/pluralsh/kubernetes-agent/common/client"
 )
 
 func main() {
