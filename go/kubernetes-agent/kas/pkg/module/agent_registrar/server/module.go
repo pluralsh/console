@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/agent_registrar"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_registrar"
 )
 
 type module struct{}

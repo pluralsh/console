@@ -17,14 +17,14 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 
-	grpctool2 "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/test"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/httpz"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/prototool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/matcher"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_kubernetes_api"
-	mock_stdlib2 "github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_stdlib"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/testhelpers"
+	grpctool2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/test"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/httpz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/matcher"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_kubernetes_api"
+	mock_stdlib2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_stdlib"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/testhelpers"
 )
 
 const (

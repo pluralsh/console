@@ -11,11 +11,11 @@ import (
 	"go.uber.org/zap"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/api"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	rpc2 "github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/syncz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	rpc2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/syncz"
 )
 
 const (

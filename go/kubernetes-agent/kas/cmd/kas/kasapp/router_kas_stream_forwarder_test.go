@@ -13,10 +13,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/testhelpers"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/testhelpers"
 )
 
 func TestStreamForwarder_ErrorFromRecvOnSendEof(t *testing.T) {

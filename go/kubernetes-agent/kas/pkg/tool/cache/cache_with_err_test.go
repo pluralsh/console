@@ -11,7 +11,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/mock/gomock"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_cache"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_cache"
 )
 
 func TestGetItem_HappyPath(t *testing.T) {

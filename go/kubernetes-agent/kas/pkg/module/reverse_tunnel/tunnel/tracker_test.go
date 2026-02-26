@@ -11,9 +11,9 @@ import (
 	"go.uber.org/mock/gomock"
 	clocktesting "k8s.io/utils/clock/testing"
 
-	redistool2 "github.com/pluralsh/kubernetes-agent/pkg/tool/redistool"
-	mock_redis2 "github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_redis"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/testhelpers"
+	redistool2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/redistool"
+	mock_redis2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_redis"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/testhelpers"
 )
 
 var (

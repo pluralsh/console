@@ -139,26 +139,26 @@ codegen-delete: ## delete generated files
 .PHONY: --mocks
 --mocks:
 	@PATH="${PATH}:$(shell pwd)/build" go generate -x -v \
-		"github.com/pluralsh/kubernetes-agent/cmd/agentk/agentkapp" \
-		"github.com/pluralsh/kubernetes-agent/cmd/kas/kasapp" \
-		"github.com/pluralsh/kubernetes-agent/pkg/module/modagent" \
-		"github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/tunnel" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/redistool" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_agent_registrar" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_agent_tracker" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_cache" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_k8s" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_kubernetes_api" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_modagent" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_modserver" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_modshared" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_redis" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_reverse_tunnel_rpc" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_reverse_tunnel_tunnel" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_rpc" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_stdlib" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_tool" \
-		"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_usage_metrics"
+		"github.com/pluralsh/console/go/kubernetes-agent/cmd/agentk/agentkapp" \
+		"github.com/pluralsh/console/go/kubernetes-agent/cmd/kas/kasapp" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modagent" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/tunnel" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/redistool" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_agent_registrar" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_agent_tracker" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_cache" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_k8s" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_kubernetes_api" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_modagent" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_modserver" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_modshared" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_redis" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_reverse_tunnel_rpc" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_reverse_tunnel_tunnel" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_rpc" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_stdlib" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_tool" \
+		"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_usage_metrics"
 
 ##@ Tests
 

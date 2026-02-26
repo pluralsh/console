@@ -14,11 +14,11 @@ import (
 	"google.golang.org/grpc/status"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/api"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	rpc2 "github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
-	grpctool2 "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/logz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	rpc2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
+	grpctool2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/logz"
 )
 
 const (

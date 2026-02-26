@@ -1,8 +1,8 @@
 package agentkapp
 
 import (
-	"github.com/pluralsh/kubernetes-agent/pkg/agentcfg"
-	logz2 "github.com/pluralsh/kubernetes-agent/pkg/tool/logz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg"
+	logz2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/logz"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/buffer"

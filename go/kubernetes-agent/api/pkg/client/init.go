@@ -225,7 +225,7 @@ func Init(options ...Option) {
 
 func isInitialized() bool {
 	if baseConfig == nil {
-		klog.Errorf(`github.com/pluralsh/kubernetes-agent/common/client' package has not been initialized properly. Run 'client.Init(...)' to initialize it. `)
+		klog.Errorf(`github.com/pluralsh/console/go/kubernetes-agent/common/client' package has not been initialized properly. Run 'client.Init(...)' to initialize it. `)
 		return false
 	}
 

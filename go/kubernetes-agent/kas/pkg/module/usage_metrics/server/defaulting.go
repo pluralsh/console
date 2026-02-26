@@ -3,8 +3,8 @@ package server
 import (
 	"time"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/kascfg"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/prototool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/kascfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
 )
 
 const (

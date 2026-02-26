@@ -1,9 +1,9 @@
 package server
 
 import (
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/usage_metrics"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/usage_metrics"
 )
 
 type Factory struct {

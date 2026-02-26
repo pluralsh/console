@@ -12,9 +12,9 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/logz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/logz"
 )
 
 // RouteToKasStreamHandler is a gRPC handler that routes the request to another kas instance.

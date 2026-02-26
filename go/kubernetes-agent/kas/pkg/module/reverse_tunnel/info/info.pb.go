@@ -175,7 +175,7 @@ const file_pkg_module_reverse_tunnel_info_info_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tB\a\xfaB\x04r\x02 \x01R\x04name\x12B\n" +
 	"\amethods\x18\x02 \x03(\v2(.plural.agent.reverse_tunnel.info.MethodR\amethods\"X\n" +
 	"\x0fAgentDescriptor\x12E\n" +
-	"\bservices\x18\x01 \x03(\v2).plural.agent.reverse_tunnel.info.ServiceR\bservicesBEZCgithub.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/infob\x06proto3"
+	"\bservices\x18\x01 \x03(\v2).plural.agent.reverse_tunnel.info.ServiceR\bservicesBEZCgithub.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/infob\x06proto3"
 
 var (
 	file_pkg_module_reverse_tunnel_info_info_proto_rawDescOnce sync.Once

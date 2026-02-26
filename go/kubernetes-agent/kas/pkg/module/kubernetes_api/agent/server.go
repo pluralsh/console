@@ -15,13 +15,13 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/transport"
 
-	rpc2 "github.com/pluralsh/kubernetes-agent/pkg/module/kubernetes_api/rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modagent"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	grpctool2 "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	httpz2 "github.com/pluralsh/kubernetes-agent/pkg/tool/httpz"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/prototool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/tlstool"
+	rpc2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/kubernetes_api/rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modagent"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	grpctool2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	httpz2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/httpz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/tlstool"
 )
 
 type server struct {

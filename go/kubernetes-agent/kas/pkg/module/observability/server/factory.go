@@ -7,10 +7,10 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/observability"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/tlstool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/observability"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/tlstool"
 )
 
 type Factory struct {

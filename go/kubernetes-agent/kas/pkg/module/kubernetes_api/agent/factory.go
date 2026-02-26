@@ -7,10 +7,10 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/rest"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/kubernetes_api"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/kubernetes_api/rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modagent"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/kubernetes_api"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/kubernetes_api/rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modagent"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
 )
 
 type Factory struct {

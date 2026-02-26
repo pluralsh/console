@@ -9,7 +9,7 @@
 package agent_tracker
 
 import (
-	entity "github.com/pluralsh/kubernetes-agent/pkg/entity"
+	entity "github.com/pluralsh/console/go/kubernetes-agent/pkg/entity"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -122,7 +122,7 @@ const file_pkg_module_agent_tracker_agent_tracker_proto_rawDesc = "" +
 	"\bagent_id\x18\x04 \x01(\x03R\bagent_id\x12\x1e\n" +
 	"\n" +
 	"cluster_id\x18\x05 \x01(\tR\n" +
-	"cluster_idB?Z=github.com/pluralsh/kubernetes-agent/pkg/module/agent_trackerb\x06proto3"
+	"cluster_idB?Z=github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_trackerb\x06proto3"
 
 var (
 	file_pkg_module_agent_tracker_agent_tracker_proto_rawDescOnce sync.Once

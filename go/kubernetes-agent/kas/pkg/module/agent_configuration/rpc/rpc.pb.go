@@ -10,8 +10,8 @@ package rpc
 
 import (
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
-	agentcfg "github.com/pluralsh/kubernetes-agent/pkg/agentcfg"
-	entity "github.com/pluralsh/kubernetes-agent/pkg/entity"
+	agentcfg "github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg"
+	entity "github.com/pluralsh/console/go/kubernetes-agent/pkg/entity"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -160,7 +160,7 @@ const file_pkg_module_agent_configuration_rpc_rpc_proto_rawDesc = "" +
 	"\rconfiguration\x18\x01 \x01(\v2).plural.agent.agentcfg.AgentConfigurationR\rconfiguration\x12$\n" +
 	"\tcommit_id\x18\x02 \x01(\tB\a\xfaB\x04r\x02 \x01R\bcommitId2\xa6\x01\n" +
 	"\x12AgentConfiguration\x12\x8f\x01\n" +
-	"\x10GetConfiguration\x12:.plural.agent.agent_configuration.rpc.ConfigurationRequest\x1a;.plural.agent.agent_configuration.rpc.ConfigurationResponse\"\x000\x01BIZGgithub.com/pluralsh/kubernetes-agent/pkg/module/agent_configuration/rpcb\x06proto3"
+	"\x10GetConfiguration\x12:.plural.agent.agent_configuration.rpc.ConfigurationRequest\x1a;.plural.agent.agent_configuration.rpc.ConfigurationResponse\"\x000\x01BIZGgithub.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_configuration/rpcb\x06proto3"
 
 var (
 	file_pkg_module_agent_configuration_rpc_rpc_proto_rawDescOnce sync.Once

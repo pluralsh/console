@@ -10,8 +10,8 @@ package grpctool
 
 import (
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
-	_ "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/automata"
-	prototool "github.com/pluralsh/kubernetes-agent/pkg/tool/prototool"
+	_ "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/automata"
+	prototool "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	anypb "google.golang.org/protobuf/types/known/anypb"
@@ -662,7 +662,7 @@ const file_pkg_tool_grpctool_grpctool_proto_rawDesc = "" +
 	"\aTrailer\x1a!\n" +
 	"\vUpgradeData\x12\x12\n" +
 	"\x04data\x18\x01 \x01(\fR\x04dataB\x13\n" +
-	"\amessage\x12\b\xf8B\x01\x8a\xf6,\x01\x01B8Z6github.com/pluralsh/kubernetes-agent/pkg/tool/grpctoolb\x06proto3"
+	"\amessage\x12\b\xf8B\x01\x8a\xf6,\x01\x01B8Z6github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctoolb\x06proto3"
 
 var (
 	file_pkg_tool_grpctool_grpctool_proto_rawDescOnce sync.Once

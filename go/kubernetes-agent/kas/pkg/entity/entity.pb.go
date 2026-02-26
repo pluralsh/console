@@ -193,7 +193,7 @@ const file_pkg_entity_entity_proto_rawDesc = "" +
 	"\x05major\x18\x01 \x01(\tR\x05major\x12\x14\n" +
 	"\x05minor\x18\x02 \x01(\tR\x05minor\x12 \n" +
 	"\vgit_version\x18\x03 \x01(\tR\vgit_version\x12\x1a\n" +
-	"\bplatform\x18\x04 \x01(\tR\bplatformB1Z/github.com/pluralsh/kubernetes-agent/pkg/entityb\x06proto3"
+	"\bplatform\x18\x04 \x01(\tR\bplatformB1Z/github.com/pluralsh/console/go/kubernetes-agent/pkg/entityb\x06proto3"
 
 var (
 	file_pkg_entity_entity_proto_rawDescOnce sync.Once

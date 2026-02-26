@@ -6,7 +6,7 @@ import (
 	"go.uber.org/mock/gomock"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/testhelpers"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/testhelpers"
 )
 
 func InitMockClientStream(ctrl *gomock.Controller, eof bool, msgs ...proto.Message) (*MockClientStream, []any) {

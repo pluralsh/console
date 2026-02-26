@@ -17,15 +17,15 @@ import (
 	"google.golang.org/grpc/status"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/info"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/prototool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/matcher"
-	mock_modserver2 "github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_reverse_tunnel_rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/testhelpers"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/info"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/matcher"
+	mock_modserver2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_reverse_tunnel_rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/testhelpers"
 )
 
 // "slow" tests in this file are marked for concurrent execution with t.Parallel()

@@ -8,8 +8,8 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/entity"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/redistool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/entity"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/redistool"
 )
 
 func TestConnectedAgentInfoSize(t *testing.T) {

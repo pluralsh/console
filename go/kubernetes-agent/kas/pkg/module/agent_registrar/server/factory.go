@@ -1,11 +1,11 @@
 package server
 
 import (
-	"github.com/pluralsh/kubernetes-agent/pkg/module/agent_registrar"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/agent_registrar/rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/agent_tracker"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_registrar"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_registrar/rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_tracker"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
 )
 
 type Factory struct {

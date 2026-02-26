@@ -7,11 +7,11 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	agent_tracker2 "github.com/pluralsh/kubernetes-agent/pkg/module/agent_tracker"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/agent_tracker/rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/metric"
+	agent_tracker2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_tracker"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_tracker/rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/metric"
 )
 
 type Factory struct {

@@ -4,7 +4,7 @@ syntax = "proto3";
 
 package plural.agent.redistool;
 
-option go_package = "github.com/pluralsh/kubernetes-agent/pkg/tool/redistool";
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/redistool";
 
 message ExpiringValue {
   // When the value should be considered expired. Number of seconds since UNIX epoch.

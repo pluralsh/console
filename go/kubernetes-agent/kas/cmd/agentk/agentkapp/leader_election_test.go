@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/agentcfg"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_modagent"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_modagent"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -5,7 +5,7 @@ import (
 
 	"google.golang.org/grpc/credentials"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/api"
 )
 
 const (

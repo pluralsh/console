@@ -3,12 +3,12 @@ package server
 import (
 	"time"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/tunnel"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/retry"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/tunnel"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/retry"
 )
 
 const (

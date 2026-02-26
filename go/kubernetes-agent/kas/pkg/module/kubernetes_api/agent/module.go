@@ -3,8 +3,8 @@ package agent
 import (
 	"context"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/agentcfg"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/kubernetes_api"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/kubernetes_api"
 )
 
 type module struct {

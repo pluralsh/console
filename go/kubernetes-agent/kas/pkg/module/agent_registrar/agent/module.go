@@ -3,13 +3,13 @@ package agent
 import (
 	"context"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/agentcfg"
-	"github.com/pluralsh/kubernetes-agent/pkg/entity"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/agent_registrar"
-	rpc2 "github.com/pluralsh/kubernetes-agent/pkg/module/agent_registrar/rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/logz"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/retry"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/entity"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_registrar"
+	rpc2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_registrar/rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/logz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/retry"
 
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"

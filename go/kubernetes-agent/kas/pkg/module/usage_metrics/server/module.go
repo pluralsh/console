@@ -6,11 +6,11 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/usage_metrics"
-	pluralapi "github.com/pluralsh/kubernetes-agent/pkg/plural/api"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/errz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/usage_metrics"
+	pluralapi "github.com/pluralsh/console/go/kubernetes-agent/pkg/plural/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/errz"
 )
 
 type module struct {

@@ -10,8 +10,8 @@ package kasapp
 
 import (
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
-	_ "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/automata"
-	prototool "github.com/pluralsh/kubernetes-agent/pkg/tool/prototool"
+	_ "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/automata"
+	prototool "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
 	status "google.golang.org/genproto/googleapis/rpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -496,7 +496,7 @@ const file_cmd_kas_kasapp_kasapp_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\v2\x1e.plural.agent.prototool.ValuesR\x05value:\x028\x01\x1a=\n" +
 	"\x05Error\x124\n" +
 	"\x06status\x18\x01 \x01(\v2\x12.google.rpc.StatusB\b\xfaB\x05\x8a\x01\x02\x10\x01R\x06statusB\x1a\n" +
-	"\x03msg\x12\x13\xf8B\x01\x8a\xf6,\f\xff\xff\xff\xff\xff\xff\xff\xff\xff\x01\x01\x06B5Z3github.com/pluralsh/kubernetes-agent/cmd/kas/kasappb\x06proto3"
+	"\x03msg\x12\x13\xf8B\x01\x8a\xf6,\f\xff\xff\xff\xff\xff\xff\xff\xff\xff\x01\x01\x06B5Z3github.com/pluralsh/console/go/kubernetes-agent/cmd/kas/kasappb\x06proto3"
 
 var (
 	file_cmd_kas_kasapp_kasapp_proto_rawDescOnce sync.Once

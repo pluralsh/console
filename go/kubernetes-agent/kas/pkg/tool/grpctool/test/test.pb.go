@@ -10,7 +10,7 @@ package test
 
 import (
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
-	_ "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/automata"
+	_ "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/automata"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -844,7 +844,7 @@ const file_pkg_tool_grpctool_test_test_proto_rawDesc = "" +
 	"\x02v2\x10\x012\xd6\x01\n" +
 	"\aTesting\x12^\n" +
 	"\x0fRequestResponse\x12#.plural.agent.grpctool.test.Request\x1a$.plural.agent.grpctool.test.Response\"\x00\x12k\n" +
-	"\x18StreamingRequestResponse\x12#.plural.agent.grpctool.test.Request\x1a$.plural.agent.grpctool.test.Response\"\x00(\x010\x01BFZDgithub.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/automata/testb\x06proto3"
+	"\x18StreamingRequestResponse\x12#.plural.agent.grpctool.test.Request\x1a$.plural.agent.grpctool.test.Response\"\x00(\x010\x01BFZDgithub.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/automata/testb\x06proto3"
 
 var (
 	file_pkg_tool_grpctool_test_test_proto_rawDescOnce sync.Once

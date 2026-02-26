@@ -11,10 +11,10 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/info"
-	rpc2 "github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
-	grpctool2 "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/prototool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/info"
+	rpc2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
+	grpctool2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
 )
 
 type stateType int

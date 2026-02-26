@@ -5,9 +5,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/errz"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/retry"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/errz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/retry"
 )
 
 type RpcApiStub struct {

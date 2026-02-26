@@ -15,8 +15,8 @@ import (
 	"github.com/coder/websocket"
 	"go.uber.org/zap"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/kascfg"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/wstunnel"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/kascfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/wstunnel"
 )
 
 const (

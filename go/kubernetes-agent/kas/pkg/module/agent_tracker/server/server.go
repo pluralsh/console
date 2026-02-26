@@ -6,10 +6,10 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/agent_tracker"
-	rpc2 "github.com/pluralsh/kubernetes-agent/pkg/module/agent_tracker/rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_tracker"
+	rpc2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_tracker/rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
 )
 
 type server struct {

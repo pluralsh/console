@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/httpz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/httpz"
 )
 
 func TestDefaultErrorHandlerWithReason_DiscardUnknownFields(t *testing.T) {

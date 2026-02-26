@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	gitlab2 "github.com/pluralsh/kubernetes-agent/pkg/gitlab"
+	gitlab2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/gitlab"
 )
 
 // IsCacheableError checks if an error is cacheable.

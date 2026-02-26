@@ -131,7 +131,7 @@ const file_pkg_event_event_proto_rawDesc = "" +
 	"\aproject\x18\x01 \x01(\v2\x1b.plural.agent.event.ProjectB\b\xfaB\x05\x8a\x01\x02\x10\x01R\aproject\"H\n" +
 	"\aProject\x12\x17\n" +
 	"\x02id\x18\x01 \x01(\x03B\a\xfaB\x04\"\x02 \x00R\x02id\x12$\n" +
-	"\tfull_path\x18\x02 \x01(\tB\a\xfaB\x04r\x02 \x01R\bfullPathB0Z.github.com/pluralsh/kubernetes-agent/pkg/eventb\x06proto3"
+	"\tfull_path\x18\x02 \x01(\tB\a\xfaB\x04r\x02 \x01R\bfullPathB0Z.github.com/pluralsh/console/go/kubernetes-agent/pkg/eventb\x06proto3"
 
 var (
 	file_pkg_event_event_proto_rawDescOnce sync.Once

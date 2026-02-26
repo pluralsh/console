@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/agentcfg"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/logz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/logz"
 
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"

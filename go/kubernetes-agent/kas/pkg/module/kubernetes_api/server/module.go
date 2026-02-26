@@ -6,8 +6,8 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/kubernetes_api"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/logz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/kubernetes_api"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/logz"
 )
 
 type module struct {

@@ -16,13 +16,13 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/api"
-	modserver2 "github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	modshared2 "github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/cache"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/errz"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_cache"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/testhelpers"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/api"
+	modserver2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	modshared2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/cache"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/errz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_cache"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/testhelpers"
 )
 
 var (

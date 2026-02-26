@@ -16,10 +16,10 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 
-	httpz2 "github.com/pluralsh/kubernetes-agent/pkg/tool/httpz"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/logz"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/memz"
-	prototool2 "github.com/pluralsh/kubernetes-agent/pkg/tool/prototool"
+	httpz2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/httpz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/logz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/memz"
+	prototool2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
 )
 
 var (

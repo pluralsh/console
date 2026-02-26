@@ -10,7 +10,7 @@ package rpc
 
 import (
 	context "context"
-	grpctool "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
+	grpctool "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"

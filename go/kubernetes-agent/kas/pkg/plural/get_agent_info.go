@@ -3,8 +3,8 @@ package plural
 import (
 	"context"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/api"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/uuid"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/uuid"
 )
 
 func GetAgentInfo(ctx context.Context, agentToken api.AgentToken, pluralURL string) (*api.AgentInfo, error) {

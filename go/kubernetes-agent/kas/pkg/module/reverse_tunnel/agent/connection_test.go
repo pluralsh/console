@@ -15,14 +15,14 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/info"
-	rpc2 "github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/prototool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/matcher"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_reverse_tunnel_rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/testhelpers"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/info"
+	rpc2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/matcher"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_reverse_tunnel_rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/testhelpers"
 )
 
 var (

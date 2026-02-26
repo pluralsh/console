@@ -133,7 +133,7 @@ const file_pkg_tool_redistool_redistool_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\fR\x05value\"7\n" +
 	"\x16ExpiringValueTimestamp\x12\x1d\n" +
 	"\n" +
-	"expires_at\x18\x01 \x01(\x03R\texpiresAtB9Z7github.com/pluralsh/kubernetes-agent/pkg/tool/redistoolb\x06proto3"
+	"expires_at\x18\x01 \x01(\x03R\texpiresAtB9Z7github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/redistoolb\x06proto3"
 
 var (
 	file_pkg_tool_redistool_redistool_proto_rawDescOnce sync.Once

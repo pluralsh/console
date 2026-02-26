@@ -16,9 +16,9 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/api"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/httpz"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/retry"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/httpz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/retry"
 )
 
 const (

@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/stats"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/mathz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/mathz"
 )
 
 // Load balancer in front of kas typically has a timeout parameter, limiting the maximum connection age.

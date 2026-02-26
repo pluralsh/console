@@ -4,7 +4,7 @@ syntax = "proto3";
 
 package plural.agent.agent_tracker.rpc;
 
-option go_package = "github.com/pluralsh/kubernetes-agent/pkg/module/agent_tracker/rpc";
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_tracker/rpc";
 
 import "pkg/module/agent_tracker/agent_tracker.proto";
 //import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";

@@ -11,8 +11,8 @@ import (
 	"go.uber.org/mock/gomock"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/httpz"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_stdlib"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/httpz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_stdlib"
 )
 
 func TestContextConn_CloseUnblocksGoroutine(t *testing.T) {

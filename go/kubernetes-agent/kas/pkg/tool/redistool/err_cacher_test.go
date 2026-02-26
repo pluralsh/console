@@ -11,8 +11,8 @@ import (
 	"go.uber.org/mock/gomock"
 	"go.uber.org/zap/zaptest"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/matcher"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_tool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/matcher"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_tool"
 )
 
 const (

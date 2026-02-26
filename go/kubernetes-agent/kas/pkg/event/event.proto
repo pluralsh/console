@@ -4,7 +4,7 @@ syntax = "proto3";
 
 package plural.agent.event;
 
-option go_package = "github.com/pluralsh/kubernetes-agent/pkg/event";
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/event";
 
 import "validate/validate.proto";
 

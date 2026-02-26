@@ -11,8 +11,8 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 	"sigs.k8s.io/yaml"
 
-	"github.com/pluralsh/kubernetes-agent/cmd/kas/kasapp"
-	"github.com/pluralsh/kubernetes-agent/pkg/kascfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/cmd/kas/kasapp"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/kascfg"
 )
 
 const (

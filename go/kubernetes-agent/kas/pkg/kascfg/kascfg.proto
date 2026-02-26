@@ -4,7 +4,7 @@ syntax = "proto3";
 
 package plural.agent.kascfg;
 
-option go_package = "github.com/pluralsh/kubernetes-agent/pkg/kascfg";
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/kascfg";
 
 import "google/protobuf/duration.proto";
 //import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";

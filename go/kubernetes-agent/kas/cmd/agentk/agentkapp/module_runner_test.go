@@ -6,11 +6,11 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/agentcfg"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/agent_configuration/rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modagent"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_modagent"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_configuration/rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modagent"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_modagent"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_rpc"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

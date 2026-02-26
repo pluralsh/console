@@ -13,7 +13,7 @@ import (
 	context "context"
 	reflect "reflect"
 
-	agentcfg "github.com/pluralsh/kubernetes-agent/pkg/agentcfg"
+	agentcfg "github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg"
 	gomock "go.uber.org/mock/gomock"
 	proto "google.golang.org/protobuf/proto"
 )

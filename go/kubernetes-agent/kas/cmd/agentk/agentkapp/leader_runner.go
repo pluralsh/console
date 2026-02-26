@@ -11,7 +11,7 @@ import (
 	"k8s.io/client-go/tools/leaderelection"
 	"k8s.io/client-go/tools/leaderelection/resourcelock"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modagent"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modagent"
 )
 
 type electorStatus byte

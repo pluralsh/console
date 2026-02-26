@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	gitlab2 "github.com/pluralsh/kubernetes-agent/pkg/gitlab"
+	gitlab2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/gitlab"
 )
 
 const (

@@ -9,7 +9,7 @@
 package rpc
 
 import (
-	grpctool "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
+	grpctool "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -208,7 +208,7 @@ const file_pkg_module_kubernetes_api_rpc_rpc_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x10\n" +
 	"\x03val\x18\x02 \x03(\tR\x03val2m\n" +
 	"\rKubernetesApi\x12\\\n" +
-	"\vMakeRequest\x12\".plural.agent.grpctool.HttpRequest\x1a#.plural.agent.grpctool.HttpResponse\"\x00(\x010\x01BDZBgithub.com/pluralsh/kubernetes-agent/pkg/module/kubernetes_api/rpcb\x06proto3"
+	"\vMakeRequest\x12\".plural.agent.grpctool.HttpRequest\x1a#.plural.agent.grpctool.HttpResponse\"\x00(\x010\x01BDZBgithub.com/pluralsh/console/go/kubernetes-agent/pkg/module/kubernetes_api/rpcb\x06proto3"
 
 var (
 	file_pkg_module_kubernetes_api_rpc_rpc_proto_rawDescOnce sync.Once

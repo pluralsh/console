@@ -10,7 +10,7 @@ package rpc
 
 import (
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
-	agent_tracker "github.com/pluralsh/kubernetes-agent/pkg/module/agent_tracker"
+	agent_tracker "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_tracker"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -165,7 +165,7 @@ const file_pkg_module_agent_tracker_rpc_rpc_proto_rawDesc = "" +
 	"\x1aGetConnectedAgentsResponse\x12F\n" +
 	"\x06agents\x18\x01 \x03(\v2..plural.agent.agent_tracker.ConnectedAgentInfoR\x06agents2\x9e\x01\n" +
 	"\fAgentTracker\x12\x8d\x01\n" +
-	"\x12GetConnectedAgents\x129.plural.agent.agent_tracker.rpc.GetConnectedAgentsRequest\x1a:.plural.agent.agent_tracker.rpc.GetConnectedAgentsResponse\"\x00BCZAgithub.com/pluralsh/kubernetes-agent/pkg/module/agent_tracker/rpcb\x06proto3"
+	"\x12GetConnectedAgents\x129.plural.agent.agent_tracker.rpc.GetConnectedAgentsRequest\x1a:.plural.agent.agent_tracker.rpc.GetConnectedAgentsResponse\"\x00BCZAgithub.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_tracker/rpcb\x06proto3"
 
 var (
 	file_pkg_module_agent_tracker_rpc_rpc_proto_rawDescOnce sync.Once

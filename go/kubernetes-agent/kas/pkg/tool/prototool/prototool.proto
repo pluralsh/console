@@ -4,7 +4,7 @@ syntax = "proto3";
 
 package plural.agent.prototool;
 
-option go_package = "github.com/pluralsh/kubernetes-agent/pkg/tool/prototool";
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool";
 
 //import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";
 import "validate/validate.proto";

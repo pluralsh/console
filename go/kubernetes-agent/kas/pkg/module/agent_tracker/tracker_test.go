@@ -15,11 +15,11 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/entity"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/redistool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/matcher"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_redis"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_tool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/entity"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/redistool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/matcher"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_redis"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_tool"
 )
 
 var (

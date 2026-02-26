@@ -10,9 +10,9 @@ package rpc
 
 import (
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
-	info "github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/info"
-	_ "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/automata"
-	prototool "github.com/pluralsh/kubernetes-agent/pkg/tool/prototool"
+	info "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/info"
+	_ "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/automata"
+	prototool "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/prototool"
 	status "google.golang.org/genproto/googleapis/rpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
@@ -618,7 +618,7 @@ const file_pkg_module_reverse_tunnel_rpc_rpc_proto_rawDesc = "" +
 	"\xff\xff\xff\xff\xff\xff\xff\xff\xff\x01H\x00R\tcloseSendB\x19\n" +
 	"\x03msg\x12\x12\xf8B\x01\x8a\xf6,\v\x01\xff\xff\xff\xff\xff\xff\xff\xff\xff\x012\x83\x01\n" +
 	"\rReverseTunnel\x12r\n" +
-	"\aConnect\x12/.plural.agent.reverse_tunnel.rpc.ConnectRequest\x1a0.plural.agent.reverse_tunnel.rpc.ConnectResponse\"\x00(\x010\x01BDZBgithub.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/rpcb\x06proto3"
+	"\aConnect\x12/.plural.agent.reverse_tunnel.rpc.ConnectRequest\x1a0.plural.agent.reverse_tunnel.rpc.ConnectResponse\"\x00(\x010\x01BDZBgithub.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/rpcb\x06proto3"
 
 var (
 	file_pkg_module_reverse_tunnel_rpc_rpc_proto_rawDescOnce sync.Once

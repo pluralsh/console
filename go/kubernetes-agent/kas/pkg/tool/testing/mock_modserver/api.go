@@ -13,10 +13,10 @@ import (
 	context "context"
 	reflect "reflect"
 
-	event "github.com/pluralsh/kubernetes-agent/pkg/event"
-	modserver "github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	modshared "github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	syncz "github.com/pluralsh/kubernetes-agent/pkg/tool/syncz"
+	event "github.com/pluralsh/console/go/kubernetes-agent/pkg/event"
+	modserver "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	modshared "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	syncz "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/syncz"
 	gomock "go.uber.org/mock/gomock"
 	zap "go.uber.org/zap"
 )

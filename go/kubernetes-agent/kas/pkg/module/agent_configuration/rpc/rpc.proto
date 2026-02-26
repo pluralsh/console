@@ -4,7 +4,7 @@ syntax = "proto3";
 
 package plural.agent.agent_configuration.rpc;
 
-option go_package = "github.com/pluralsh/kubernetes-agent/pkg/module/agent_configuration/rpc";
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_configuration/rpc";
 
 import "pkg/agentcfg/agentcfg.proto";
 import "pkg/entity/entity.proto";

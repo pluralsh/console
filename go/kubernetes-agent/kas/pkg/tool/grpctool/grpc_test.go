@@ -18,7 +18,7 @@ import (
 	"google.golang.org/grpc/status"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	test2 "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/test"
+	test2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/test"
 )
 
 // These tests explore various gRPC error scenarios and other poorly documented things.

@@ -8,7 +8,7 @@ import (
 	"github.com/redis/rueidis"
 	"k8s.io/utils/clock"
 
-	redistool2 "github.com/pluralsh/kubernetes-agent/pkg/tool/redistool"
+	redistool2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/redistool"
 )
 
 type Querier interface {

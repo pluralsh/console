@@ -9,7 +9,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/info"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/info"
 )
 
 type state int8

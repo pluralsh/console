@@ -18,7 +18,7 @@ import (
 	"go.uber.org/mock/gomock"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/tlstool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/tlstool"
 )
 
 const (

@@ -8,9 +8,9 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	rpc2 "github.com/pluralsh/kubernetes-agent/pkg/module/agent_registrar/rpc"
-	agent_tracker2 "github.com/pluralsh/kubernetes-agent/pkg/module/agent_tracker"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
+	rpc2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_registrar/rpc"
+	agent_tracker2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_tracker"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
 )
 
 type server struct {

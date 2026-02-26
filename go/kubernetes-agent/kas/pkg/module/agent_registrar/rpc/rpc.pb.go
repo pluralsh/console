@@ -9,7 +9,7 @@
 package rpc
 
 import (
-	entity "github.com/pluralsh/kubernetes-agent/pkg/entity"
+	entity "github.com/pluralsh/console/go/kubernetes-agent/pkg/entity"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -125,7 +125,7 @@ const file_pkg_module_agent_registrar_rpc_rpc_proto_rawDesc = "" +
 	"\x06pod_id\x18\x02 \x01(\x03R\x05podId\"\x12\n" +
 	"\x10RegisterResponse2\x85\x01\n" +
 	"\x0eAgentRegistrar\x12s\n" +
-	"\bRegister\x121.plural.agent.agent_registrar.rpc.RegisterRequest\x1a2.plural.agent.agent_registrar.rpc.RegisterResponse\"\x00BEZCgithub.com/pluralsh/kubernetes-agent/pkg/module/agent_registrar/rpcb\x06proto3"
+	"\bRegister\x121.plural.agent.agent_registrar.rpc.RegisterRequest\x1a2.plural.agent.agent_registrar.rpc.RegisterResponse\"\x00BEZCgithub.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_registrar/rpcb\x06proto3"
 
 var (
 	file_pkg_module_agent_registrar_rpc_rpc_proto_rawDescOnce sync.Once

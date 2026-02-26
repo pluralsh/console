@@ -3,7 +3,7 @@ package rpc
 import (
 	"google.golang.org/grpc/metadata"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
 )
 
 func (x *RequestInfo) Metadata() metadata.MD {

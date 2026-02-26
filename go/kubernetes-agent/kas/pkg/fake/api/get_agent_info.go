@@ -3,8 +3,8 @@ package api
 import (
 	"context"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/api"
-	"github.com/pluralsh/kubernetes-agent/pkg/gitlab"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/api"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/gitlab"
 )
 
 func GetAgentInfo(ctx context.Context, agentToken api.AgentToken, opts ...gitlab.DoOption) (*api.AgentInfo, error) {

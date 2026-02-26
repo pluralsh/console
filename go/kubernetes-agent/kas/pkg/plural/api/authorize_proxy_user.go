@@ -9,8 +9,8 @@ import (
 	"github.com/pluralsh/polly/algorithms"
 	"go.uber.org/zap"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/plural"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/logz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/plural"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/logz"
 )
 
 func AuthorizeProxyUser(ctx context.Context, token, clusterId, pluralURL string) (*AuthorizeProxyUserResponse, error) {

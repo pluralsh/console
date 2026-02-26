@@ -12,7 +12,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/automata"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/automata"
 )
 
 const (

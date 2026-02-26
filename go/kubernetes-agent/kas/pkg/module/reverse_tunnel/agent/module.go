@@ -6,9 +6,9 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/agentcfg"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/info"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/info"
 )
 
 // connectionFactory helps to inject fake connections for testing.

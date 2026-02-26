@@ -4,7 +4,7 @@ syntax = "proto3";
 
 package plural.agent.kas;
 
-option go_package = "github.com/pluralsh/kubernetes-agent/cmd/kas/kasapp";
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/cmd/kas/kasapp";
 
 import "pkg/tool/grpctool/automata/automata.proto";
 import "pkg/tool/prototool/prototool.proto";

@@ -1,7 +1,7 @@
 package agent
 
 import (
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modagent"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modagent"
 )
 
 var (

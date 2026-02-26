@@ -27,16 +27,16 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	modserver2 "github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
-	tunnel2 "github.com/pluralsh/kubernetes-agent/pkg/module/reverse_tunnel/tunnel"
-	grpctool2 "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	test2 "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/test"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_reverse_tunnel_tunnel"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_tool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/testhelpers"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/tlstool"
+	modserver2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/rpc"
+	tunnel2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/reverse_tunnel/tunnel"
+	grpctool2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	test2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/test"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_reverse_tunnel_tunnel"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_tool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/testhelpers"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/tlstool"
 )
 
 var (

@@ -4,10 +4,10 @@ import (
 	"context"
 	"net"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/kascfg"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	observability2 "github.com/pluralsh/kubernetes-agent/pkg/module/observability"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/logz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/kascfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	observability2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/observability"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/logz"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"go.uber.org/zap"

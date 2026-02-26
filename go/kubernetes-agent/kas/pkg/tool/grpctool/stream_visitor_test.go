@@ -10,9 +10,9 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
-	grpctool2 "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/test"
-	mock_rpc2 "github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_rpc"
+	grpctool2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/test"
+	mock_rpc2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_rpc"
 )
 
 const (

@@ -139,7 +139,7 @@ const file_pkg_gitlab_gitlab_proto_rawDesc = "" +
 	"\x04path\x18\x02 \x01(\tR\x04path\x12\x16\n" +
 	"\x06reason\x18\x03 \x01(\tR\x06reason\"+\n" +
 	"\x0fDefaultApiError\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessageB1Z/github.com/pluralsh/kubernetes-agent/pkg/gitlabb\x06proto3"
+	"\amessage\x18\x01 \x01(\tR\amessageB1Z/github.com/pluralsh/console/go/kubernetes-agent/pkg/gitlabb\x06proto3"
 
 var (
 	file_pkg_gitlab_gitlab_proto_rawDescOnce sync.Once

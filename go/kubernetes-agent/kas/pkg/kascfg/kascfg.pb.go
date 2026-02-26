@@ -2078,7 +2078,7 @@ const file_pkg_kascfg_kascfg_proto_rawDesc = "" +
 	"\x04info\x10\x00\x12\t\n" +
 	"\x05debug\x10\x01\x12\b\n" +
 	"\x04warn\x10\x02\x12\t\n" +
-	"\x05error\x10\x03B1Z/github.com/pluralsh/kubernetes-agent/pkg/kascfgb\x06proto3"
+	"\x05error\x10\x03B1Z/github.com/pluralsh/console/go/kubernetes-agent/pkg/kascfgb\x06proto3"
 
 var (
 	file_pkg_kascfg_kascfg_proto_rawDescOnce sync.Once

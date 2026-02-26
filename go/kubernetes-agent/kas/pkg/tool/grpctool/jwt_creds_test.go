@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	test2 "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/test"
+	test2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/test"
 )
 
 var (

@@ -3,7 +3,7 @@ package mock_modserver
 import (
 	"go.uber.org/mock/gomock"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/retry"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/retry"
 )
 
 func NewMockAgentRpcApiWithMockPoller(ctrl *gomock.Controller, pollTimes int) *MockAgentRpcApi {

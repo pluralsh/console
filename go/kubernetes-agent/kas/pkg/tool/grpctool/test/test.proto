@@ -4,7 +4,7 @@ syntax = "proto3";
 
 package plural.agent.grpctool.test;
 
-option go_package = "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/automata/test";
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/automata/test";
 
 import "pkg/tool/grpctool/automata/automata.proto";
 //import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";

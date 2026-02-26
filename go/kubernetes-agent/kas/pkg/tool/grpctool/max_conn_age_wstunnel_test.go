@@ -20,11 +20,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/apimachinery/pkg/util/wait"
 
-	test2 "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/test"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/httpz"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/testhelpers"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/tlstool"
-	wstunnel2 "github.com/pluralsh/kubernetes-agent/pkg/tool/wstunnel"
+	test2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/test"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/httpz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/testhelpers"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/tlstool"
+	wstunnel2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/wstunnel"
 )
 
 var (

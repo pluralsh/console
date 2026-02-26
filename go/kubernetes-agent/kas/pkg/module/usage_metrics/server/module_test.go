@@ -16,15 +16,15 @@ import (
 	"go.uber.org/zap/zaptest"
 	"google.golang.org/protobuf/types/known/durationpb"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/kascfg"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/usage_metrics"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/httpz"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/matcher"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/mock_usage_metrics"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/testing/testhelpers"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/kascfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/usage_metrics"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/httpz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/matcher"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/mock_usage_metrics"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/testing/testhelpers"
 )
 
 var (

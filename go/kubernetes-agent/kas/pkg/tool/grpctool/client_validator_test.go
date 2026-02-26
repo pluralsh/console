@@ -9,7 +9,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	test2 "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/test"
+	test2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/test"
 )
 
 func TestValidator(t *testing.T) {

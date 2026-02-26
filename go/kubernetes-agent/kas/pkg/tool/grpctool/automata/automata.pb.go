@@ -68,7 +68,7 @@ const file_pkg_tool_grpctool_automata_automata_proto_rawDesc = "" +
 	"\n" +
 	")pkg/tool/grpctool/automata/automata.proto\x12\x1eplural.agent.grpctool.automata\x1a google/protobuf/descriptor.proto:M\n" +
 	"\x12next_allowed_field\x12\x1d.google.protobuf.FieldOptions\x18\xe0\xce\x05 \x03(\x05R\x10nextAllowedField:O\n" +
-	"\x13first_allowed_field\x12\x1d.google.protobuf.OneofOptions\x18\xe1\xce\x05 \x03(\x05R\x11firstAllowedFieldBAZ?github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/automatab\x06proto3"
+	"\x13first_allowed_field\x12\x1d.google.protobuf.OneofOptions\x18\xe1\xce\x05 \x03(\x05R\x11firstAllowedFieldBAZ?github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/automatab\x06proto3"
 
 var file_pkg_tool_grpctool_automata_automata_proto_goTypes = []any{
 	(*descriptorpb.FieldOptions)(nil), // 0: google.protobuf.FieldOptions

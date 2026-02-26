@@ -11,12 +11,12 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/api"
-	fake "github.com/pluralsh/kubernetes-agent/pkg/fake/api"
-	gitlab2 "github.com/pluralsh/kubernetes-agent/pkg/gitlab"
-	modserver2 "github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modshared"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/cache"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/api"
+	fake "github.com/pluralsh/console/go/kubernetes-agent/pkg/fake/api"
+	gitlab2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/gitlab"
+	modserver2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modshared"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/cache"
 )
 
 type serverAgentRpcApi struct {

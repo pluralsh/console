@@ -5,7 +5,7 @@ package server
 import (
 	"context"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/module/agent_configuration"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_configuration"
 )
 
 type module struct {

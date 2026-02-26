@@ -42,24 +42,24 @@ RUN go mod download
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -trimpath \
     -ldflags="-s -w \
-        -X 'github.com/pluralsh/kubernetes-agent/cmd.Version=${VERSION}' \
-        -X 'github.com/pluralsh/kubernetes-agent/cmd.Commit=${GIT_COMMIT}' \
-        -X 'github.com/pluralsh/kubernetes-agent/cmd.BuildTime=${BUILD_TIME}'" \
+        -X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.Version=${VERSION}' \
+        -X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.Commit=${GIT_COMMIT}' \
+        -X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.BuildTime=${BUILD_TIME}'" \
     -o /binaries/kas ./cmd/kas
 
 # Build agentk binary
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -trimpath \
     -ldflags="-s -w \
-        -X 'github.com/pluralsh/kubernetes-agent/cmd.Version=${VERSION}' \
-        -X 'github.com/pluralsh/kubernetes-agent/cmd.Commit=${GIT_COMMIT}' \
-        -X 'github.com/pluralsh/kubernetes-agent/cmd.BuildTime=${BUILD_TIME}'" \
+        -X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.Version=${VERSION}' \
+        -X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.Commit=${GIT_COMMIT}' \
+        -X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.BuildTime=${BUILD_TIME}'" \
     -o /binaries/agentk ./cmd/agentk
 
 # Final stage - minimal image with all three binaries
 FROM gcr.io/distroless/static-debian12:nonroot AS final
 
-LABEL source="https://github.com/pluralsh/kubernetes-agent" \
+LABEL source="https://github.com/pluralsh/console/go/kubernetes-agent" \
       name="Kubernetes Agent Multi-Binary" \
       maintainer="Plural::sre" \
       vendor="Plural" \

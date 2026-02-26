@@ -3,8 +3,8 @@ package agentkapp
 import (
 	"context"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/agentcfg"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modagent"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modagent"
 
 	"k8s.io/apimachinery/pkg/util/wait"
 )

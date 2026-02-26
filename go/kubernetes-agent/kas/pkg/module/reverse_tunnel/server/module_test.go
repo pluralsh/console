@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modserver"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modserver"
 )
 
 var (

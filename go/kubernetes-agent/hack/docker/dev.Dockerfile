@@ -37,23 +37,23 @@ RUN go mod download
 # Build kas binary with debug symbols
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -gcflags="all=-N -l" \
-    -ldflags="-X 'github.com/pluralsh/kubernetes-agent/cmd.Version=${VERSION}' \
-        -X 'github.com/pluralsh/kubernetes-agent/cmd.Commit=${GIT_COMMIT}' \
-        -X 'github.com/pluralsh/kubernetes-agent/cmd.BuildTime=${BUILD_TIME}'" \
+    -ldflags="-X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.Version=${VERSION}' \
+        -X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.Commit=${GIT_COMMIT}' \
+        -X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.BuildTime=${BUILD_TIME}'" \
     -o /binaries/kas ./cmd/kas
 
 # Build agentk binary with debug symbols
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -gcflags="all=-N -l" \
-    -ldflags="-X 'github.com/pluralsh/kubernetes-agent/cmd.Version=${VERSION}' \
-        -X 'github.com/pluralsh/kubernetes-agent/cmd.Commit=${GIT_COMMIT}' \
-        -X 'github.com/pluralsh/kubernetes-agent/cmd.BuildTime=${BUILD_TIME}'" \
+    -ldflags="-X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.Version=${VERSION}' \
+        -X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.Commit=${GIT_COMMIT}' \
+        -X 'github.com/pluralsh/console/go/kubernetes-agent/cmd.BuildTime=${BUILD_TIME}'" \
     -o /binaries/agentk ./cmd/agentk
 
 # Final stage - distroless base with shell and delve
 FROM gcr.io/distroless/base-debian12:nonroot AS final
 
-LABEL source="https://github.com/pluralsh/kubernetes-agent" \
+LABEL source="https://github.com/pluralsh/console/go/kubernetes-agent" \
       name="Kubernetes Agent Multi-Binary Debug" \
       maintainer="Plural::sre" \
       vendor="Plural" \

@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/syncz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/syncz"
 )
 
 type Entry[V any] struct {

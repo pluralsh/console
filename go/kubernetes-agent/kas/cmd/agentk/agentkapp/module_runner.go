@@ -6,11 +6,11 @@ import (
 
 	"github.com/ash2k/stager"
 
-	"github.com/pluralsh/kubernetes-agent/pkg/agentcfg"
-	agent_configuration_rpc "github.com/pluralsh/kubernetes-agent/pkg/module/agent_configuration/rpc"
-	"github.com/pluralsh/kubernetes-agent/pkg/module/modagent"
-	"github.com/pluralsh/kubernetes-agent/pkg/tool/errz"
-	logz2 "github.com/pluralsh/kubernetes-agent/pkg/tool/logz"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg"
+	agent_configuration_rpc "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_configuration/rpc"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/module/modagent"
+	"github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/errz"
+	logz2 "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/logz"
 
 	"go.uber.org/zap"
 )

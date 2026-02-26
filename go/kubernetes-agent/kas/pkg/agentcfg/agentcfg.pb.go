@@ -2271,7 +2271,7 @@ const file_pkg_agentcfg_agentcfg_proto_rawDesc = "" +
 	"\x04info\x10\x00\x12\t\n" +
 	"\x05debug\x10\x01\x12\b\n" +
 	"\x04warn\x10\x02\x12\t\n" +
-	"\x05error\x10\x03B3Z1github.com/pluralsh/kubernetes-agent/pkg/agentcfgb\x06proto3"
+	"\x05error\x10\x03B3Z1github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfgb\x06proto3"
 
 var (
 	file_pkg_agentcfg_agentcfg_proto_rawDescOnce sync.Once

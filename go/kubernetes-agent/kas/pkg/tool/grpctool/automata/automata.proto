@@ -5,7 +5,7 @@ syntax = "proto3";
 // Package allows to define the allowed order in which fields of a oneof group can appear in a client gRPC stream.
 package plural.agent.grpctool.automata;
 
-option go_package = "github.com/pluralsh/kubernetes-agent/pkg/tool/grpctool/automata";
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/automata";
 
 import "google/protobuf/descriptor.proto";
 

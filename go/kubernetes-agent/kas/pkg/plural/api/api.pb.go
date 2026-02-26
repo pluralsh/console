@@ -10,7 +10,7 @@ package api
 
 import (
 	_ "github.com/envoyproxy/protoc-gen-validate/validate"
-	agentcfg "github.com/pluralsh/kubernetes-agent/pkg/agentcfg"
+	agentcfg "github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -1163,7 +1163,7 @@ const file_pkg_plural_api_api_proto_rawDesc = "" +
 	"\x06groups\x18\x02 \x03(\tR\x06groups\"\x98\x01\n" +
 	"\x19AgentConfigurationRequest\x12#\n" +
 	"\bagent_id\x18\x01 \x01(\x03B\a\xfaB\x04\"\x02 \x00R\bagent_id\x12V\n" +
-	"\fagent_config\x18\x02 \x01(\v2(.plural.agent.agentcfg.ConfigurationFileB\b\xfaB\x05\x8a\x01\x02\x10\x01R\fagent_configB5Z3github.com/pluralsh/kubernetes-agent/pkg/plural/apib\x06proto3"
+	"\fagent_config\x18\x02 \x01(\v2(.plural.agent.agentcfg.ConfigurationFileB\b\xfaB\x05\x8a\x01\x02\x10\x01R\fagent_configB5Z3github.com/pluralsh/console/go/kubernetes-agent/pkg/plural/apib\x06proto3"
 
 var (
 	file_pkg_plural_api_api_proto_rawDescOnce sync.Once
