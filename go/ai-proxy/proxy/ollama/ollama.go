@@ -280,7 +280,6 @@ func (o *OllamaProxy) handleNonStreamingOllama(
 		klog.Errorf("Error encoding response: %v", err)
 		return
 	}
-
 }
 
 func (o *OllamaProxy) convertOpenAIToOllamaChatRequest(req *openai.ChatCompletionRequest) (*ollamaapi.ChatRequest, error) {

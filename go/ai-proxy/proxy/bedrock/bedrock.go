@@ -167,7 +167,6 @@ func (b *BedrockProxy) handleNonStreamingBedrock(
 	w http.ResponseWriter,
 	req *openai.ChatCompletionRequest,
 ) {
-
 	input, err := convertOpenAIToBedrockInput(req)
 	if err != nil {
 		klog.ErrorS(err, "failed to convert bedrock request")
@@ -285,7 +284,6 @@ func buildBedrockComponents(
 	inferenceConfig *types.InferenceConfiguration,
 	toolConfig *types.ToolConfiguration,
 	err error) {
-
 	bedrockMessages := convertMessages(openAIReq.Messages)
 
 	var temp, topP *float32
