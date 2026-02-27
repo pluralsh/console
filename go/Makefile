@@ -1,6 +1,7 @@
 ROOT_DIRECTORY = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
+include $(TOOLS_MAKEFILE)
 
 ##@ General
 
@@ -20,7 +21,7 @@ lint: --tool ## run linters
 	@go work edit -json | jq -r '.Use[].DiskPath' | grep -v './tools' | \
 		while read dir; do \
 			echo "\nLinting $$dir"; \
-			golangci-lint run -c .golangci.yml $$dir/...; \
+			$(GOLANGCI_LINT) run -c $(GOLANGCI_LINT_CONFIG) $$dir/...; \
 		done
 
 .PHONY: fix
@@ -29,7 +30,7 @@ fix: --tool ## fix issues found by linters
 	@go work edit -json | jq -r '.Use[].DiskPath' | grep -v './tools' | \
 		while read dir; do \
 			echo "\nFixing $$dir"; \
-			golangci-lint run -c .golangci.yml --fix $$dir/...; \
+			$(GOLANGCI_LINT) run -c $(GOLANGCI_LINT_CONFIG) --fix $$dir/...; \
 		done
 
 # Image URL to use all building/pushing image targets
