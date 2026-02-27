@@ -3,7 +3,7 @@ defmodule Console.PubSub.Consumers.Cache do
   use Console.PubSub.Consumer,
     broadcaster: Console.PubSub.Broadcaster,
     max_demand: 10,
-    protocol: Console.Deployments.PubSub.Cacheable
+    protocol: Console.PubSub.Cacheable
 
   def handle_event(event) do
     with {action, key, item} <- Console.PubSub.Cacheable.cache(event) do

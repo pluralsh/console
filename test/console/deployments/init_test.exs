@@ -60,7 +60,36 @@ defmodule Console.Deployments.InitTest do
       refute res.settings.ai
     end
 
-    test "it will set up ollama when cloud" do
+    test "it will bypass cluster limits" do
+      expect(Console, :byok?, fn -> true end)
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      expect(Kube.Utils, :get_secret, fn _, _ -> {:error, "not found"} end)
+      expect(Kube.Utils, :create_secret, fn "console", "console-auth-token", data -> {:ok, data} end)
+      reject(&Console.Features.cluster_max/0)
+      {:ok, res} = Init.setup()
+
+      refute res.provider.id
+
+      assert res.deploy_repo.url == Git.deploy_url()
+      assert res.artifacts_repo.url == Git.artifacts_url()
+
+      assert res.cluster.name == Console.conf(:cluster_name)
+      assert res.cluster.self
+
+      assert res.rebind.id == res.cluster.id
+      refute res.rebind.provider_id
+
+      assert res.settings.name == "global"
+      assert res.settings.deployer_repository_id == res.deploy_repo.id
+      assert res.settings.artifact_repository_id == res.artifacts_repo.id
+      assert res.settings.write_policy_id
+      assert res.settings.read_policy_id
+      assert res.settings.git_policy_id
+      assert res.settings.create_policy_id
+      refute res.settings.ai
+    end
+
+    test "it will set up openai provider when cloud" do
       expect(Console, :byok?, fn -> true end)
       expect(Console, :cloud?, 5, fn -> true end)
       insert(:user, bot_name: "console", roles: %{admin: true})
