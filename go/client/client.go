@@ -9435,14 +9435,35 @@ func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelC
 }
 
 type SentinelRunJobFragment_Cluster struct {
-	ID string "json:\"id\" graphql:\"id\""
+	Distro *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
+	Handle *string        "json:\"handle,omitempty\" graphql:\"handle\""
+	ID     string         "json:\"id\" graphql:\"id\""
+	Name   string         "json:\"name\" graphql:\"name\""
 }
 
+func (t *SentinelRunJobFragment_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &SentinelRunJobFragment_Cluster{}
+	}
+	return t.Distro
+}
+func (t *SentinelRunJobFragment_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment_Cluster{}
+	}
+	return t.Handle
+}
 func (t *SentinelRunJobFragment_Cluster) GetID() string {
 	if t == nil {
 		t = &SentinelRunJobFragment_Cluster{}
 	}
 	return t.ID
+}
+func (t *SentinelRunJobFragment_Cluster) GetName() string {
+	if t == nil {
+		t = &SentinelRunJobFragment_Cluster{}
+	}
+	return t.Name
 }
 
 type SentinelRunFragment_Sentinel struct {
@@ -21327,14 +21348,35 @@ func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRu
 }
 
 type ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Cluster struct {
-	ID string "json:\"id\" graphql:\"id\""
+	Distro *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
+	Handle *string        "json:\"handle,omitempty\" graphql:\"handle\""
+	ID     string         "json:\"id\" graphql:\"id\""
+	Name   string         "json:\"name\" graphql:\"name\""
 }
 
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Cluster{}
+	}
+	return t.Distro
+}
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Cluster{}
+	}
+	return t.Handle
+}
 func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Cluster) GetID() string {
 	if t == nil {
 		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Cluster{}
 	}
 	return t.ID
+}
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Cluster) GetName() string {
+	if t == nil {
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Cluster{}
+	}
+	return t.Name
 }
 
 type ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges struct {
@@ -21636,14 +21678,35 @@ func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_Sen
 }
 
 type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster struct {
-	ID string "json:\"id\" graphql:\"id\""
+	Distro *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
+	Handle *string        "json:\"handle,omitempty\" graphql:\"handle\""
+	ID     string         "json:\"id\" graphql:\"id\""
+	Name   string         "json:\"name\" graphql:\"name\""
 }
 
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster{}
+	}
+	return t.Distro
+}
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster{}
+	}
+	return t.Handle
+}
 func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster) GetID() string {
 	if t == nil {
 		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster{}
 	}
 	return t.ID
+}
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster) GetName() string {
+	if t == nil {
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Cluster{}
+	}
+	return t.Name
 }
 
 type GetSentinelRun_SentinelRun_SentinelRunFragment_Sentinel struct {
@@ -22131,14 +22194,35 @@ func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_
 }
 
 type UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Cluster struct {
-	ID string "json:\"id\" graphql:\"id\""
+	Distro *ClusterDistro "json:\"distro,omitempty\" graphql:\"distro\""
+	Handle *string        "json:\"handle,omitempty\" graphql:\"handle\""
+	ID     string         "json:\"id\" graphql:\"id\""
+	Name   string         "json:\"name\" graphql:\"name\""
 }
 
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Cluster) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Cluster{}
+	}
+	return t.Distro
+}
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Cluster) GetHandle() *string {
+	if t == nil {
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Cluster{}
+	}
+	return t.Handle
+}
 func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Cluster) GetID() string {
 	if t == nil {
 		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Cluster{}
 	}
 	return t.ID
+}
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Cluster) GetName() string {
+	if t == nil {
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Cluster{}
+	}
+	return t.Name
 }
 
 type CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_Log_SentinelCheckLogConfigurationFragment_Facets struct {
@@ -45514,6 +45598,9 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	}
 	cluster {
 		id
+		name
+		handle
+		distro
 	}
 }
 fragment JobSpecFragment on JobGateSpec {
@@ -45698,6 +45785,9 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	}
 	cluster {
 		id
+		name
+		handle
+		distro
 	}
 }
 fragment JobSpecFragment on JobGateSpec {
@@ -46041,6 +46131,9 @@ fragment SentinelRunJobFragment on SentinelRunJob {
 	}
 	cluster {
 		id
+		name
+		handle
+		distro
 	}
 }
 fragment JobSpecFragment on JobGateSpec {

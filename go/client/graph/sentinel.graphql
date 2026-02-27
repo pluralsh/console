@@ -75,6 +75,9 @@ fragment SentinelRunJobFragment on SentinelRunJob {
     }
     cluster {
         id
+        name
+        handle
+        distro
     }
 }
 
