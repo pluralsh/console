@@ -2,10 +2,6 @@ ROOT_DIRECTORY = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
 
-# Image URL to use all building/pushing image targets
-IMG_NAME ?= deployment-controller
-IMG_TAG ?= master
-
 ##@ General
 
 .PHONY: help
@@ -20,11 +16,23 @@ tools: ## install required tools
 
 .PHONY: lint
 lint: ## run linters
-	go work edit -json | jq -r '.Use[].DiskPath'  | xargs -I{} golangci-lint run {}/...
+	@go work edit -json | jq -r '.Use[].DiskPath' | grep -v './tools' | \
+		while read dir; do \
+			echo "\nLinting $$dir"; \
+			golangci-lint run -c .golangci.yml $$dir/...; \
+		done
 
 .PHONY: fix
 fix: ## fix issues found by linters
-	go work edit -json | jq -r '.Use[].DiskPath'  | xargs -I{} golangci-lint run --fix {}/...
+	@go work edit -json | jq -r '.Use[].DiskPath' | grep -v './tools' | \
+		while read dir; do \
+			echo "\nFixing $$dir"; \
+			golangci-lint run -c .golangci.yml --fix $$dir/...; \
+		done
+
+# Image URL to use all building/pushing image targets
+IMG_NAME ?= deployment-controller
+IMG_TAG ?= master
 
 ##@ Docker
 
