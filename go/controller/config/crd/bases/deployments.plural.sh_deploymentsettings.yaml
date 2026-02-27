@@ -620,11 +620,6 @@ spec:
                           index:
                             description: Index is the index of the opensearch cluster.
                             type: string
-                          usePodIdentity:
-                            description: UsePodIdentity specifies whether to use pod identity
-                              (IRSA/Workload Identity) for AWS authentication instead of
-                              static credentials.
-                            type: boolean
                         required:
                         - host
                         - index
@@ -921,9 +916,9 @@ spec:
                         description: Index to query in opensearch.
                         type: string
                       usePodIdentity:
-                        description: UsePodIdentity specifies whether to use pod identity
-                          (IRSA/Workload Identity) for AWS authentication instead of static
-                          credentials.
+                        description: |-
+                          UsePodIdentity enables Workload Identity for AWS authentication instead of static credentials.
+                          When enabled, the controller will use the default AWS credential chain which supports EKS Pod Identity or instance metadata credentials.
                         type: boolean
                     required:
                     - host

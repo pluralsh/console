@@ -65,62 +65,55 @@ defmodule Console.Schema.DeploymentSettings do
     @aws_service_name :es
 
     embedded_schema do
-      field :host,     :string
-      field :index,    :string
-      field :aws_access_key_id, :string
+      field :host,                  :string
+      field :index,                 :string
+      field :aws_access_key_id,     :string
       field :aws_secret_access_key, EncryptedString
-      field :aws_region, :string
-      field :aws_session_token, EncryptedString
-      field :use_pod_identity, :boolean, default: false
+      field :aws_region,            :string
+      field :use_pod_identity,      :boolean, default: false
     end
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(host index aws_access_key_id aws_secret_access_key aws_region aws_session_token use_pod_identity)a)
+      |> cast(attrs, ~w(host index aws_access_key_id aws_secret_access_key aws_region use_pod_identity)a)
       |> validate_required([:host, :index])
+      |> validate_creds()
     end
 
-    def headers(%__MODULE__{use_pod_identity: true} = os, headers) do
-      region = Map.get(os, :aws_region) || System.get_env("AWS_REGION") || "us-east-1"
-
-      ExAws.Config.new(@aws_service_name, region: region)
-      |> Map.new()
-      |> Map.get(:security_token)
-      |> case do
-        token when is_binary(token) -> [{"X-Amz-Security-Token", token} | headers]
-        _ -> headers
-      end
-    end
-    def headers(%__MODULE__{} = os, headers) do
-      case Map.get(os, :aws_session_token) || System.get_env("AWS_SESSION_TOKEN") do
-        token when is_binary(token) -> [{"X-Amz-Security-Token", token} | headers]
-        _ -> headers
+    defp validate_creds(changeset) do
+      case get_field(changeset, :use_pod_identity) do
+        true -> changeset
+        false -> validate_required(changeset, [:aws_access_key_id, :aws_secret_access_key], message: "aws_access_key_id and aws_secret_access_key are required when pod identity is disabled")
       end
     end
 
-    def aws_sigv4_headers(%__MODULE__{use_pod_identity: true} = os) do
-      region = Map.get(os, :aws_region) || System.get_env("AWS_REGION") || "us-east-1"
+    def headers(_, headers), do: headers
 
-      ExAws.Config.new(@aws_service_name, region: region)
-      |> Map.new()
-      |> case do
-        %{access_key_id: aid, secret_access_key: sak} = config when is_binary(aid) and is_binary(sak) ->
-          config
-          |> Map.take([:access_key_id, :secret_access_key, :security_token, :region])
-          |> Map.to_list()
-          |> Keyword.merge(service: @aws_service_name)
-        _ ->
-          [service: @aws_service_name, region: region]
-      end
-    end
     def aws_sigv4_headers(%__MODULE__{} = os) do
-      [
-        service: @aws_service_name,
-        region: Map.get(os, :aws_region) || System.get_env("AWS_REGION"),
-        access_key_id: Map.get(os, :aws_access_key_id) || System.get_env("AWS_ACCESS_KEY_ID"),
-        secret_access_key: Map.get(os, :aws_secret_access_key) || System.get_env("AWS_SECRET_ACCESS_KEY")
-      ]
+      environment_creds(os)
+      |> Map.merge(Console.drop_nils(aws_sigv4_base(os)))
+      |> maybe_drop_token(os)
+      |> Console.drop_nils()
+      |> Map.put_new(:region, "us-east-1")
+      |> Map.to_list()
     end
+
+    defp environment_creds(%__MODULE__{use_pod_identity: true}) do
+      ExAws.Config.new(@aws_service_name)
+      |> Map.new()
+    end
+    defp environment_creds(%__MODULE__{}), do: %{}
+
+    defp aws_sigv4_base(%__MODULE__{use_pod_identity: true, aws_region: region}), do: %{service: @aws_service_name, region: region}
+    defp aws_sigv4_base(%__MODULE__{aws_access_key_id: aid, aws_secret_access_key: sak, aws_region: region})
+      when is_binary(aid) and is_binary(sak), do: %{service: @aws_service_name, access_key_id: aid, secret_access_key: sak, region: region}
+    defp aws_sigv4_base(%__MODULE__{aws_region: region}), do: %{service: @aws_service_name, region: region}
+
+    defp maybe_drop_token(%{security_token: _} = attrs, %__MODULE__{use_pod_identity: true}),
+      do: Console.move(attrs, [:security_token], [:token])
+    defp maybe_drop_token(attrs, %__MODULE__{aws_access_key_id: aid, aws_secret_access_key: sak})
+      when is_binary(aid) and is_binary(sak), do: Map.delete(attrs, :token)
+    defp maybe_drop_token(attrs, _), do: attrs
 
     def url(%__MODULE__{host: host}, path) when is_binary(host) do
       Path.join(host, path)

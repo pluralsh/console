@@ -269,8 +269,8 @@ type OpensearchConnection struct {
 	// +kubebuilder:validation:Optional
 	AWSRegion *string `json:"awsRegion,omitempty"`
 
-	// UsePodIdentity enables IRSA/Workload Identity for AWS authentication instead of static credentials.
-	// When enabled, the controller will use the default AWS credential chain which supports IRSA.
+	// UsePodIdentity enables Workload Identity for AWS authentication instead of static credentials.
+	// When enabled, the controller will use the default AWS credential chain which supports EKS Pod Identity or instance metadata credentials.
 	//
 	// +kubebuilder:validation:Optional
 	UsePodIdentity *bool `json:"usePodIdentity,omitempty"`
