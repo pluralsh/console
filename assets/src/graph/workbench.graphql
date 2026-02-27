@@ -1,28 +1,3 @@
-fragment WorkbenchTool on WorkbenchTool {
-  id
-  name
-  tool
-  categories
-  project {
-    id
-    name
-  }
-  configuration {
-    http {
-      url
-      method
-      headers {
-        name
-        value
-      }
-      body
-      inputSchema
-    }
-  }
-  insertedAt
-  updatedAt
-}
-
 fragment WorkbenchTiny on Workbench {
   id
   name
@@ -40,15 +15,6 @@ fragment WorkbenchTiny on Workbench {
 fragment Workbench on Workbench {
   ...WorkbenchTiny
   systemPrompt
-  project {
-    id
-    name
-  }
-  repository {
-    id
-    url
-    httpsPath
-  }
   agentRuntime {
     id
     name
