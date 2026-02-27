@@ -10,22 +10,22 @@ type Processor struct {
 }
 
 func NewLuaState(path string) *lua.LState {
-	L := lua.NewState(lua.Options{
+	l := lua.NewState(lua.Options{
 		SkipOpenLibs: true,
 	})
 
 	// Load only safe standard libraries
-	lua.OpenBase(L)
-	lua.OpenString(L)
-	lua.OpenTable(L)
-	lua.OpenMath(L)
-	lua.OpenPackage(L)
+	lua.OpenBase(l)
+	lua.OpenString(l)
+	lua.OpenTable(l)
+	lua.OpenMath(l)
+	lua.OpenPackage(l)
 
 	p := &Processor{BasePath: path}
 	// Register custom modules
-	RegisterEncodingModule(p, L)
-	RegisterFSModule(p, L)
-	RegisterUtilsModule(L)
+	RegisterEncodingModule(p, l)
+	RegisterFSModule(p, l)
+	RegisterUtilsModule(l)
 
-	return L
+	return l
 }

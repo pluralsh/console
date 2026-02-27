@@ -10,50 +10,50 @@ import (
 )
 
 // RegisterFSModule registers the fs module functions
-func RegisterFSModule(processor *Processor, L *lua.LState) {
-	mod := L.RegisterModule("fs", map[string]lua.LGFunction{
+func RegisterFSModule(processor *Processor, l *lua.LState) {
+	mod := l.RegisterModule("fs", map[string]lua.LGFunction{
 		"read": processor.fsRead,
 		"walk": processor.fsWalk,
 	})
-	L.Push(mod)
+	l.Push(mod)
 }
 
-func (p *Processor) fsRead(L *lua.LState) int {
-	filePath := L.CheckString(1)
+func (p *Processor) fsRead(l *lua.LState) int {
+	filePath := l.CheckString(1)
 
 	// Validate and clean the path
 	cleanPath, err := p.validatePath(filePath)
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString(err.Error()))
+		l.Push(lua.LNil)
+		l.Push(lua.LString(err.Error()))
 		return 2
 	}
 
 	content, err := os.ReadFile(cleanPath)
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString(err.Error()))
+		l.Push(lua.LNil)
+		l.Push(lua.LString(err.Error()))
 		return 2
 	}
 
-	L.Push(lua.LString(string(content)))
+	l.Push(lua.LString(content))
 	return 1
 }
 
-func (p *Processor) fsWalk(L *lua.LState) int {
-	dir := L.CheckString(1)
+func (p *Processor) fsWalk(l *lua.LState) int {
+	dir := l.CheckString(1)
 
 	// Optional setting: ignore dotfiles
 	ignoreDotfiles := false
-	if L.GetTop() >= 2 {
-		ignoreDotfiles = L.CheckBool(2)
+	if l.GetTop() >= 2 {
+		ignoreDotfiles = l.CheckBool(2)
 	}
 
 	// Validate and clean the path
 	cleanPath, err := p.validatePath(dir)
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString(err.Error()))
+		l.Push(lua.LNil)
+		l.Push(lua.LString(err.Error()))
 		return 2
 	}
 
@@ -89,18 +89,18 @@ func (p *Processor) fsWalk(L *lua.LState) int {
 	})
 
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString(err.Error()))
+		l.Push(lua.LNil)
+		l.Push(lua.LString(err.Error()))
 		return 2
 	}
 
 	// Convert files slice to Lua table
-	filesTable := L.NewTable()
+	filesTable := l.NewTable()
 	for i, file := range files {
-		L.RawSetInt(filesTable, i+1, lua.LString(file))
+		l.RawSetInt(filesTable, i+1, lua.LString(file))
 	}
 
-	L.Push(filesTable)
+	l.Push(filesTable)
 	return 1
 }
 

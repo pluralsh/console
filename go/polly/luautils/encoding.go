@@ -13,37 +13,37 @@ import (
 )
 
 // RegisterEncodingModule registers the encoding module functions
-func RegisterEncodingModule(processor *Processor, L *lua.LState) {
-	mod := L.RegisterModule("encoding", map[string]lua.LGFunction{
+func RegisterEncodingModule(processor *Processor, l *lua.LState) {
+	mod := l.RegisterModule("encoding", map[string]lua.LGFunction{
 		"jsonEncode": jsonEncode,
 		"jsonDecode": jsonDecode,
 		"yamlEncode": yamlEncode,
 		"yamlDecode": yamlDecode,
 		"jsonSchema": processor.jsonSchema,
 	})
-	L.Push(mod)
+	l.Push(mod)
 }
 
 // jsonSchema validates a Lua table against a JSON schema file.
 // Usage: encoding.jsonSchema(struct, "path/to/schema.json")
-func (p *Processor) jsonSchema(L *lua.LState) int {
+func (p *Processor) jsonSchema(l *lua.LState) int {
 	// Get arguments
-	luaValue := L.CheckAny(1)      // Lua value to validate
-	schemaPath := L.CheckString(2) // JSON schema file path
+	luaValue := l.CheckAny(1)      // Lua value to validate
+	schemaPath := l.CheckString(2) // JSON schema file path
 
 	// Validate and clean the path
 	cleanPath, err := p.validatePath(schemaPath)
 	if err != nil {
-		L.Push(lua.LFalse)
-		L.Push(lua.LString(err.Error()))
+		l.Push(lua.LFalse)
+		l.Push(lua.LString(err.Error()))
 		return 2
 	}
 
 	// Read the JSON schema file
 	schemaBytes, err := os.ReadFile(cleanPath)
 	if err != nil {
-		L.Push(lua.LFalse)
-		L.Push(lua.LString(fmt.Sprintf("Failed to read schema file: %v", err)))
+		l.Push(lua.LFalse)
+		l.Push(lua.LString(fmt.Sprintf("Failed to read schema file: %v", err)))
 		return 2
 	}
 
@@ -56,8 +56,8 @@ func (p *Processor) jsonSchema(L *lua.LState) int {
 	// Marshal the value to JSON (required by gojsonschema)
 	jsonBytes, err := json.Marshal(sanitized)
 	if err != nil {
-		L.Push(lua.LFalse)
-		L.Push(lua.LString(fmt.Sprintf("Failed to marshal Lua value to JSON: %v", err)))
+		l.Push(lua.LFalse)
+		l.Push(lua.LString(fmt.Sprintf("Failed to marshal Lua value to JSON: %v", err)))
 		return 2
 	}
 	documentLoader := gojsonschema.NewBytesLoader(jsonBytes)
@@ -65,87 +65,87 @@ func (p *Processor) jsonSchema(L *lua.LState) int {
 	// Perform schema validation
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
-		L.Push(lua.LFalse)
-		L.Push(lua.LString(fmt.Sprintf("Schema validation error: %v", err)))
+		l.Push(lua.LFalse)
+		l.Push(lua.LString(fmt.Sprintf("Schema validation error: %v", err)))
 		return 2
 	}
 
 	// Check validation result
 	if result.Valid() {
-		L.Push(lua.LTrue)
-		L.Push(lua.LNil)
+		l.Push(lua.LTrue)
+		l.Push(lua.LNil)
 	} else {
-		L.Push(lua.LFalse)
+		l.Push(lua.LFalse)
 		// Collect validation errors
 		var errorMessages []string
 		for _, validationError := range result.Errors() {
 			errorMessages = append(errorMessages, validationError.String())
 		}
-		L.Push(lua.LString(strings.Join(errorMessages, "\n")))
+		l.Push(lua.LString(strings.Join(errorMessages, "\n")))
 	}
 	return 2
 }
 
-func jsonEncode(L *lua.LState) int {
-	value := L.CheckAny(1)
+func jsonEncode(l *lua.LState) int {
+	value := l.CheckAny(1)
 	goValue := ToGoValue(value)
 
 	sanitized := SanitizeValue(goValue)
 
 	jsonBytes, err := json.Marshal(sanitized)
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString(err.Error()))
+		l.Push(lua.LNil)
+		l.Push(lua.LString(err.Error()))
 		return 2
 	}
 
-	L.Push(lua.LString(jsonBytes))
+	l.Push(lua.LString(jsonBytes))
 	return 1
 }
 
-func jsonDecode(L *lua.LState) int {
-	jsonStr := L.CheckString(1)
+func jsonDecode(l *lua.LState) int {
+	jsonStr := l.CheckString(1)
 
 	var goValue interface{}
 	err := json.Unmarshal([]byte(jsonStr), &goValue)
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString(err.Error()))
+		l.Push(lua.LNil)
+		l.Push(lua.LString(err.Error()))
 		return 2
 	}
 
-	L.Push(GoValueToLuaValue(L, goValue))
+	l.Push(GoValueToLuaValue(l, goValue))
 	return 1
 }
 
-func yamlEncode(L *lua.LState) int {
-	value := L.CheckAny(1)
+func yamlEncode(l *lua.LState) int {
+	value := l.CheckAny(1)
 	goValue := ToGoValue(value)
 	goValue = SanitizeValue(goValue)
 
 	yamlBytes, err := yaml.Marshal(goValue)
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString(err.Error()))
+		l.Push(lua.LNil)
+		l.Push(lua.LString(err.Error()))
 		return 2
 	}
 
-	L.Push(lua.LString(string(yamlBytes)))
+	l.Push(lua.LString(yamlBytes))
 	return 1
 }
 
-func yamlDecode(L *lua.LState) int {
-	yamlStr := L.CheckString(1)
+func yamlDecode(l *lua.LState) int {
+	yamlStr := l.CheckString(1)
 
 	var goValue interface{}
 	err := yaml.Unmarshal([]byte(yamlStr), &goValue)
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString(err.Error()))
+		l.Push(lua.LNil)
+		l.Push(lua.LString(err.Error()))
 		return 2
 	}
 
-	L.Push(GoValueToLuaValue(L, goValue))
+	l.Push(GoValueToLuaValue(l, goValue))
 	return 1
 }
 

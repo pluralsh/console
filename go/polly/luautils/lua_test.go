@@ -31,9 +31,9 @@ func runLua(L *lua.LState, code string) (string, error) {
 }
 
 func TestBaseLibPrint(t *testing.T) {
-	L := luautils.NewLuaState("")
+	l := luautils.NewLuaState("")
 
-	out, err := runLua(L, `print("hello world")`)
+	out, err := runLua(l, `print("hello world")`)
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
@@ -43,9 +43,9 @@ func TestBaseLibPrint(t *testing.T) {
 }
 
 func TestStringLibrary(t *testing.T) {
-	L := luautils.NewLuaState("")
+	l := luautils.NewLuaState("")
 
-	out, err := runLua(L, `print(string.upper("abc"))`)
+	out, err := runLua(l, `print(string.upper("abc"))`)
 	if err != nil {
 		t.Fatalf("lua error: %v", err)
 	}
@@ -55,14 +55,14 @@ func TestStringLibrary(t *testing.T) {
 }
 
 func TestTableLibrary(t *testing.T) {
-	L := luautils.NewLuaState("")
+	l := luautils.NewLuaState("")
 
 	code := `
 		local t = {3,1,2}
 		table.sort(t)
 		print(table.concat(t, ","))
 	`
-	out, err := runLua(L, code)
+	out, err := runLua(l, code)
 	if err != nil {
 		t.Fatalf("lua error: %v", err)
 	}
@@ -72,9 +72,9 @@ func TestTableLibrary(t *testing.T) {
 }
 
 func TestMathLibrary(t *testing.T) {
-	L := luautils.NewLuaState("")
+	l := luautils.NewLuaState("")
 
-	out, err := runLua(L, `print(math.sqrt(9))`)
+	out, err := runLua(l, `print(math.sqrt(9))`)
 	if err != nil {
 		t.Fatalf("lua error: %v", err)
 	}

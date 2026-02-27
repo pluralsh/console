@@ -136,7 +136,7 @@ func ToGoValueWithoutEmptyTables(lv lua.LValue) any {
 }
 
 // GoValueToLuaValue converts a Go value to a Lua value
-func GoValueToLuaValue(L *lua.LState, value interface{}) lua.LValue {
+func GoValueToLuaValue(l *lua.LState, value interface{}) lua.LValue {
 	if value == nil {
 		return lua.LNil
 	}
@@ -161,11 +161,11 @@ func GoValueToLuaValue(L *lua.LState, value interface{}) lua.LValue {
 		if rv.IsNil() {
 			return lua.LNil
 		}
-		table := L.NewTable()
+		table := l.NewTable()
 		for _, key := range rv.MapKeys() {
 			keyStr := fmt.Sprint(key.Interface())
 			val := rv.MapIndex(key).Interface()
-			L.RawSet(table, lua.LString(keyStr), GoValueToLuaValue(L, val))
+			l.RawSet(table, lua.LString(keyStr), GoValueToLuaValue(l, val))
 		}
 		return table
 
@@ -173,21 +173,21 @@ func GoValueToLuaValue(L *lua.LState, value interface{}) lua.LValue {
 		if rv.IsNil() {
 			return lua.LNil
 		}
-		table := L.NewTable()
+		table := l.NewTable()
 		for i := 0; i < rv.Len(); i++ {
-			L.RawSetInt(table, i+1, GoValueToLuaValue(L, rv.Index(i).Interface()))
+			l.RawSetInt(table, i+1, GoValueToLuaValue(l, rv.Index(i).Interface()))
 		}
 		return table
 
 	case reflect.Struct:
-		table := L.NewTable()
+		table := l.NewTable()
 		for i := 0; i < rt.NumField(); i++ {
 			field := rt.Field(i)
 			if field.PkgPath != "" { // skip unexported
 				continue
 			}
 			fieldVal := rv.Field(i).Interface()
-			L.RawSet(table, lua.LString(field.Name), GoValueToLuaValue(L, fieldVal))
+			l.RawSet(table, lua.LString(field.Name), GoValueToLuaValue(l, fieldVal))
 		}
 		return table
 	}

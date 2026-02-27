@@ -23,7 +23,6 @@ func Untar(dst string, r io.Reader) error {
 		header, err := tr.Next()
 
 		switch {
-
 		// if no more files are found return
 		case err == io.EOF:
 			return nil
@@ -45,7 +44,6 @@ func Untar(dst string, r io.Reader) error {
 
 		// check the file type
 		switch header.Typeflag {
-
 		// if its a dir and it doesn't exist create it
 		case tar.TypeDir:
 			if err := makeDir(target, madeDir); err != nil {

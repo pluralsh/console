@@ -9,17 +9,17 @@ import (
 )
 
 // RegisterUtilsModule registers the utils module functions
-func RegisterUtilsModule(L *lua.LState) {
-	mod := L.RegisterModule("utils", map[string]lua.LGFunction{
+func RegisterUtilsModule(l *lua.LState) {
+	mod := l.RegisterModule("utils", map[string]lua.LGFunction{
 		"merge":       merge,
 		"splitString": splitString,
 		"pathJoin":    pathJoin,
 	})
-	L.Push(mod)
+	l.Push(mod)
 }
 
-func pathJoin(L *lua.LState) int {
-	parts := L.CheckTable(1)
+func pathJoin(l *lua.LState) int {
+	parts := l.CheckTable(1)
 
 	converted := ToGoValue(parts).([]interface{})
 	res := make([]string, 0, len(converted))
@@ -28,23 +28,23 @@ func pathJoin(L *lua.LState) int {
 	}
 
 	joined := filepath.Join(res...)
-	L.Push(GoValueToLuaValue(L, joined))
+	l.Push(GoValueToLuaValue(l, joined))
 	return 1
 }
 
-func splitString(L *lua.LState) int {
-	str := L.CheckString(1)
-	delim := L.CheckString(2)
+func splitString(l *lua.LState) int {
+	str := l.CheckString(1)
+	delim := l.CheckString(2)
 
 	parts := strings.Split(str, delim)
-	L.Push(GoValueToLuaValue(L, parts))
+	l.Push(GoValueToLuaValue(l, parts))
 	return 1
 }
 
-func merge(L *lua.LState) int {
-	dst := L.CheckTable(1) // Get the destination (first argument)
-	src := L.CheckTable(2) // Get the source (second argument)
-	override := L.OptString(3, "override")
+func merge(l *lua.LState) int {
+	dst := l.CheckTable(1) // Get the destination (first argument)
+	src := l.CheckTable(2) // Get the source (second argument)
+	override := l.OptString(3, "override")
 
 	opts := []func(*mergo.Config){mergo.WithOverride}
 	if override == "append" {
@@ -67,12 +67,12 @@ func merge(L *lua.LState) int {
 	// Perform deep merge using mergo
 	err := mergo.Merge(&dstMap, srcMap, opts...)
 	if err != nil {
-		L.Push(lua.LNil)
-		L.Push(lua.LString(err.Error()))
+		l.Push(lua.LNil)
+		l.Push(lua.LString(err.Error()))
 		return 2
 	}
 
 	// Convert back to Lua table and return
-	L.Push(GoValueToLuaValue(L, SanitizeValue(dstMap)))
+	l.Push(GoValueToLuaValue(l, SanitizeValue(dstMap)))
 	return 1
 }
