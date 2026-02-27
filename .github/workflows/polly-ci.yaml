@@ -4,13 +4,13 @@ on:
     branches:
       - "master"
     paths:
-      - "polly-ci.yaml"
+      - ".github/workflows/polly-ci.yaml"
       - "go/polly/**"
   pull_request:
     branches:
       - "**"
     paths:
-      - "polly-ci.yaml"
+      - ".github/workflows/polly-ci.yaml"
       - "go/polly/**"
 env:
   GOPATH: /home/runner/go/
