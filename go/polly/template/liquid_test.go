@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/pluralsh/polly/template"
+	"github.com/pluralsh/console/go/polly/template"
 )
 
 func TestAppendFunctionNotOverridden(t *testing.T) {

@@ -3,7 +3,7 @@ package retry
 import (
 	"time"
 
-	"github.com/pluralsh/polly/algorithms"
+	"github.com/pluralsh/console/go/polly/algorithms"
 )
 
 type BackoffAlgorithm interface {

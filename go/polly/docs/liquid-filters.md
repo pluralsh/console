@@ -546,7 +546,7 @@ _Implementation_: `reflect.DeepEqual`
 
 
 
-_Implementation_: `github.com/pluralsh/polly/template.dfault`
+_Implementation_: `github.com/pluralsh/console/go/polly/template.dfault`
 
 ##  `derivePassword`
 
@@ -1038,7 +1038,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.htpasswd`
 
 
 
-_Implementation_: `github.com/pluralsh/polly/template.indent`
+_Implementation_: `github.com/pluralsh/console/go/polly/template.indent`
 
 ##  `initial`
 Compliments `last` by retuning all but the last element. It will panic if there is a problem.
@@ -1725,7 +1725,7 @@ _Implementation_: `github.com/Masterminds/sprig/v3.mustWithout`
 
 
 
-_Implementation_: `github.com/pluralsh/polly/template.nindent`
+_Implementation_: `github.com/pluralsh/console/go/polly/template.nindent`
 
 ##  `nospace`
 Removes all whitespace from a string.
@@ -2217,7 +2217,7 @@ _Implementation_: `github.com/huandu/xstrings.Shuffle`
 
 
 
-_Implementation_: `github.com/pluralsh/polly/template.slice`
+_Implementation_: `github.com/pluralsh/console/go/polly/template.slice`
 
 ##  `snakecase`
 Converts a string from camelCase to snake_case.
@@ -2342,7 +2342,7 @@ _Example_: `ternary "foo" "bar" true` or `true | "foo" "bar"` will return `"foo"
 
 
 
-_Implementation_: `github.com/pluralsh/polly/template.ternary`
+_Implementation_: `github.com/pluralsh/console/go/polly/template.ternary`
 
 ##  `title`
 Converts a string to title case.

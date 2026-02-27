@@ -20,4 +20,4 @@ release-vsn: # tags and pushes a new release
 	git push origin $$tag
 
 gen-docs: # generates docs for registered liquid template functions
-	go run github.com/pluralsh/polly/internal/template
+	go run github.com/pluralsh/console/go/polly/internal/template

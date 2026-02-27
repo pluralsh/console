@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/pluralsh/polly/luautils"
+	"github.com/pluralsh/console/go/polly/luautils"
 	"github.com/stretchr/testify/assert"
 	lua "github.com/yuin/gopher-lua"
 	"gopkg.in/yaml.v2"
@@ -52,7 +52,7 @@ func TestGenerateOutput(t *testing.T) {
 		values = {}
 		values["key1"] = "value1"
 		values["key2"] = 42
-		
+
 		valuesFiles = {"config.json", "data.txt"}
 	`
 
@@ -78,7 +78,7 @@ func TestComplex(t *testing.T) {
 	luaScript := `
 		local jsonStr = fs.read("simple.json")
 		local data = encoding.jsonDecode(jsonStr)
-		
+
 		local yamlStr = encoding.yamlEncode({
 		  user = {
 			name = "Alice",
@@ -86,7 +86,7 @@ func TestComplex(t *testing.T) {
 		  }
 		})
 		local yamlData = encoding.yamlDecode(yamlStr)
-		
+
 		-- Define values
 		values = {}
 		values["name"] = "John Doe"
@@ -96,10 +96,10 @@ func TestComplex(t *testing.T) {
 		  yaml = yamlStr,
 		  json = encoding.jsonEncode(data)
 		}
-		
+
 		-- Define an array
 		values["tags"] = {"personal", "important", "urgent"}
-		
+
 		-- Define a nested table
 		values["settings"] = {
 			theme = "dark",
@@ -109,7 +109,7 @@ func TestComplex(t *testing.T) {
 				colorScheme = "monokai"
 			}
 		}
-		
+
 		local textFile = fs.read("text.txt")
  		values["text"] = textFile
 
@@ -183,15 +183,15 @@ func TestUnsafeReadFile(t *testing.T) {
 		valuesFiles = {}
 
 		local filename = "text.txt"
-		
+
 		-- Open the file for reading
 		local file = io.open(filename, "r")
-		
+
 		if file then
 			-- Read the entire contents
 			local content = file:read("*all")
 			file:close()
-		
+
 			print("File contents:")
 			print(content)
 		else
@@ -224,7 +224,7 @@ func TestFileOutsideTheBaseDir(t *testing.T) {
 		else
 			values["content"] = content
 		end
-		
+
 	`
 
 	// Process the Lua script
@@ -261,7 +261,7 @@ func TestMerge(t *testing.T) {
 
 	// Test Lua script
 	luaScript := `
-		values = {}	
+		values = {}
 		valuesFiles = {}
 		local baseConfig = {
 			server = {
@@ -270,14 +270,14 @@ func TestMerge(t *testing.T) {
 				ssl = {enabled = false, cert = "default.crt"}
 			}
 		}
-		
+
 		local prodOverrides = {
 			server = {
 				host = "0.0.0.0",
 				ssl = {enabled = true, key = "prod.key"}
 			}
 		}
-		
+
 		local finalConfig = utils.merge(baseConfig, prodOverrides)
 		values["config"] = finalConfig
 
@@ -359,7 +359,7 @@ func TestMergeWithEmptySliceAppend(t *testing.T) {
 				}
 			}
 		}
-	
+
 		local prodOverrides = {
 			argocd = {
 				configs = {
@@ -418,7 +418,7 @@ func TestMergeWithEmptySliceOverride(t *testing.T) {
 				userGroups = {}
 			}
 		}
-	
+
 		local patch = {
 			clusterAccess = {
 				adminGroups = {},
@@ -463,7 +463,7 @@ func TestMergeWithEmptyBaseOverride(t *testing.T) {
 		valuesFiles = {}
 
 		local base = {}
-	
+
 		local patch = {
 			clusterAccess = {
 				adminGroups = {},
@@ -508,7 +508,7 @@ func TestMergeWithEmptyBaseAppend(t *testing.T) {
 		valuesFiles = {}
 
 		local base = {}
-	
+
 		local patch = {
 			clusterAccess = {
 				adminGroups = {},
@@ -562,7 +562,7 @@ clusterAccess:
 
 		local patchYaml = [[
 clusterAccess:
-  adminGroups: 
+  adminGroups:
     - "test"
   userGroups:
     - "user1"
