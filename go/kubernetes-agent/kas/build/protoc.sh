@@ -4,7 +4,7 @@
 set -e
 
 KAS_DIR="$(cd $(dirname "${BASH_SOURCE}")/.. && pwd -P)"
-ROOT_DIR="${KAS_DIR}/../.."
+ROOT_DIR="${KAS_DIR}/../../.."
 BINARIES_DIR="${ROOT_DIR}/binaries"
 PROTOC="${BINARIES_DIR}/protoc"
 

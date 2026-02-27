@@ -120,7 +120,7 @@ docker-agentk-debug: --image-debug ## build docker agentk debug image with embed
 ##@ Codegen
 
 .PHONY: codegen
-codegen: TOOL = mockgen
+codegen: TOOL = mockgen protoc
 codegen: --tool codegen-delete --protoc --mocks ## regenerate protobuf and mocks
 
 .PHONY: codegen-delete
