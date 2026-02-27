@@ -471,6 +471,7 @@ export function VertexSettings({
         label="Project"
         hint="The GCP Project ID"
         flex={1}
+        required={enabled}
       >
         <Input
           disabled={!enabled}
@@ -493,6 +494,7 @@ export function VertexSettings({
         label="Location"
         hint="The GCP Location you're querying from."
         flex={1}
+        required={enabled}
       >
         <Input
           disabled={!enabled}
