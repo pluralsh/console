@@ -1,6 +1,6 @@
 import { Outlet, useMatch } from 'react-router-dom'
 
-import { useMemo, useRef } from 'react'
+import { Suspense, useMemo, useRef } from 'react'
 
 import {
   AI_SETTINGS_ABS_PATH,
@@ -12,6 +12,7 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { LinkTabWrap } from 'components/utils/Tabs'
 
 import { SETTINGS_BREADCRUMBS } from '../Settings'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 export const getAISettingsBreadcrumbs = (tab: string) => [
   ...SETTINGS_BREADCRUMBS,
@@ -54,7 +55,18 @@ export function AISettings() {
     </TabList>
   )
 
-  return <Outlet />
+  return (
+    <Suspense
+      fallback={
+        <RectangleSkeleton
+          $height="100%"
+          $width="100%"
+        />
+      }
+    >
+      <Outlet />
+    </Suspense>
+  )
 }
 
 const getAISettingsAbsPath = (tab: string) => `${AI_SETTINGS_ABS_PATH}/${tab}`

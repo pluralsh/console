@@ -382,6 +382,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :project,         non_null(:string), description: "the gcp project id to use"
     field :location,        non_null(:string), description: "the gcp region the model"
+    field :endpoint,        :string, description: "custom vertexai endpoint if for dedicated customer deployments"
     field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
