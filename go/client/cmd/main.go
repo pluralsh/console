@@ -13,5 +13,4 @@ func main() {
 		"operations": queries,
 	}
 	json.NewEncoder(os.Stdout).Encode(output)
-
 }

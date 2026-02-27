@@ -69,7 +69,6 @@ const (
 // ToController maps a Reconciler to its corresponding Controller.
 func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.ConsoleClient,
 	credentialsCache credentials.NamespaceCredentialsCache) (Controller, error) {
-
 	if factory, exists := controllerFactories[sc]; exists {
 		return factory(mgr, consoleClient, credentialsCache), nil
 	}

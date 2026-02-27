@@ -219,7 +219,6 @@ func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, s
 	}
 	if status.Status == console.StackStatusSuccessful {
 		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-
 	}
 	return nil
 }

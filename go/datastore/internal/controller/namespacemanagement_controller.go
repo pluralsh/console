@@ -118,7 +118,6 @@ func (r *NamespaceManagementReconciler) Reconcile(ctx context.Context, req ctrl.
 				return result, err
 			}
 			logger.V(5).Info("Namespace pruned", "namespace", namespace.Name)
-
 		}
 	}
 	utils.MarkCondition(namespaceManagement.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")

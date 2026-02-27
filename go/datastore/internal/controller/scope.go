@@ -26,7 +26,7 @@ func (in *DefaultScope[T]) PatchObject() error {
 func NewDefaultScope[T client.Object](ctx context.Context, client client.Client, object T) (Scope[T], error) {
 	helper, err := patch.NewHelper(object, client)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create scope: %s", err)
+		return nil, fmt.Errorf("failed to create scope: %w", err)
 	}
 
 	return &DefaultScope[T]{

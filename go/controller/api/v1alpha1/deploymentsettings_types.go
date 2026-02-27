@@ -931,7 +931,6 @@ func (in *AnalysisRates) Attributes() (*console.AnalysisRatesAttributes, error) 
 			return nil, err
 		}
 		fast = lo.ToPtr(int64(fDur.Minutes()))
-
 	}
 	if in.Slow != nil {
 		sDur, err := time.ParseDuration(*in.Fast)
