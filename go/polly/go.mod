@@ -1,4 +1,4 @@
-module github.com/pluralsh/polly
+module github.com/pluralsh/console/go/polly
 
 go 1.24.2
 
