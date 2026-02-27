@@ -39,6 +39,6 @@ const WrapperSC = styled.div(({ theme }) => ({
   overflow: 'hidden',
   height: '100%',
   width: '100%',
-  maxWidth: theme.breakpoints.desktop,
+  maxWidth: theme.breakpoints.desktopLarge,
   alignSelf: 'center',
 }))

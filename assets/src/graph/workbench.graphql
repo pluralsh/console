@@ -1,48 +1,20 @@
-fragment WorkbenchTool on WorkbenchTool {
-  id
-  name
-  tool
-  categories
-  project {
-    id
-    name
-  }
-  configuration {
-    http {
-      url
-      method
-      headers {
-        name
-        value
-      }
-      body
-      inputSchema
-    }
-  }
-  insertedAt
-  updatedAt
-}
-
 fragment WorkbenchTiny on Workbench {
   id
   name
   description
-  insertedAt
-  updatedAt
-}
-
-fragment Workbench on Workbench {
-  ...WorkbenchTiny
-  systemPrompt
-  project {
-    id
-    name
-  }
   repository {
     id
     url
     httpsPath
   }
+  tools {
+    ...WorkbenchToolTiny
+  }
+}
+
+fragment Workbench on Workbench {
+  ...WorkbenchTiny
+  systemPrompt
   agentRuntime {
     id
     name
@@ -67,6 +39,53 @@ fragment Workbench on Workbench {
   }
   tools {
     ...WorkbenchTool
+  }
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
+fragment WorkbenchToolTiny on WorkbenchTool {
+  id
+  name
+  tool
+  categories
+}
+
+fragment WorkbenchTool on WorkbenchTool {
+  ...WorkbenchToolTiny
+  configuration {
+    http {
+      url
+      method
+      headers {
+        name
+        value
+      }
+      body
+      inputSchema
+    }
+    datadog {
+      site
+    }
+    elastic {
+      url
+    }
+    loki {
+      url
+      tenantId
+    }
+    prometheus {
+      url
+      tenantId
+    }
+    tempo {
+      url
+      tenantId
+    }
   }
 }
 
