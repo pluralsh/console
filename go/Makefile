@@ -16,6 +16,16 @@ help: ## show help
 tools: ## install required tools
 	@$(MAKE) --no-print-directory --directory=$(TOOLS_DIR) tools
 
+##@ Static checks
+
+.PHONY: lint
+lint: ## run linters
+	go work edit -json | jq -r '.Use[].DiskPath'  | xargs -I{} golangci-lint run {}/...
+
+.PHONY: fix
+fix: ## fix issues found by linters
+	go work edit -json | jq -r '.Use[].DiskPath'  | xargs -I{} golangci-lint run --fix {}/...
+
 ##@ Docker
 
 # If you wish to build the controller image targeting other platforms you can use the --platform flag.
