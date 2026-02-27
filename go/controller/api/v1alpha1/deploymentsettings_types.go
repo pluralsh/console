@@ -268,6 +268,12 @@ type OpensearchConnection struct {
 	//
 	// +kubebuilder:validation:Optional
 	AWSRegion *string `json:"awsRegion,omitempty"`
+
+	// UsePodIdentity enables Workload Identity for AWS authentication instead of static credentials.
+	// When enabled, the controller will use the default AWS credential chain which supports EKS Pod Identity or instance metadata credentials.
+	//
+	// +kubebuilder:validation:Optional
+	UsePodIdentity *bool `json:"usePodIdentity,omitempty"`
 }
 
 func (r *OpensearchConnection) Attributes(ctx context.Context, c client.Client, namespace string) (*console.OpensearchConnectionAttributes, error) {
@@ -275,6 +281,8 @@ func (r *OpensearchConnection) Attributes(ctx context.Context, c client.Client, 
 		Host:           r.Host,
 		Index:          r.Index,
 		AWSAccessKeyID: r.AWSAccessKeyID,
+		AWSRegion:      r.AWSRegion,
+		UsePodIdentity: r.UsePodIdentity,
 	}
 	if r.AwsSecretAccessKeySecretRef != nil {
 		awsSecretAccessKeyValue, err := utils.GetSecretKey(ctx, c, r.AwsSecretAccessKeySecretRef, namespace)

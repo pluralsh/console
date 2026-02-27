@@ -76,6 +76,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :aws_access_key_id,     :string
     field :aws_secret_access_key, :string
     field :aws_region,            :string
+    field :use_pod_identity,      :boolean, description: "whether to use pod identity (IRSA/Workload Identity) for AWS authentication instead of static credentials"
   end
 
   input_object :ai_settings_attributes do
@@ -404,6 +405,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :index,             non_null(:string), description: "the index to query for log data"
     field :aws_access_key_id, :string
     field :aws_region,        :string
+    field :use_pod_identity,  :boolean, description: "whether to use pod identity (IRSA/Workload Identity) for AWS authentication"
   end
 
   @desc "A read-only connection to a cloud provider"
