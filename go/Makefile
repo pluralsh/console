@@ -15,7 +15,8 @@ tools: ## install required tools
 ##@ Static checks
 
 .PHONY: lint
-lint: ## run linters
+lint: TOOL = golangci-lint
+lint: --tool ## run linters
 	@go work edit -json | jq -r '.Use[].DiskPath' | grep -v './tools' | \
 		while read dir; do \
 			echo "\nLinting $$dir"; \
@@ -23,7 +24,8 @@ lint: ## run linters
 		done
 
 .PHONY: fix
-fix: ## fix issues found by linters
+lint: TOOL = golangci-lint
+fix: --tool ## fix issues found by linters
 	@go work edit -json | jq -r '.Use[].DiskPath' | grep -v './tools' | \
 		while read dir; do \
 			echo "\nFixing $$dir"; \
