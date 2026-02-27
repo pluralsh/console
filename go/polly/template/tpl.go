@@ -27,7 +27,6 @@ func include(tpl *template.Template, name string, data interface{}) (string, err
 
 // RenderTpl renders the given Helm .tpl template with the provided bindings and automatically includes additional templates from a directory.
 func RenderTpl(input []byte, bindings map[string]interface{}) ([]byte, error) {
-
 	tpl := template.New("gotpl")
 
 	// Create a new template and add the sprig functions and the include function.
