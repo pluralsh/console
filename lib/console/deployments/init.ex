@@ -34,7 +34,7 @@ defmodule Console.Deployments.Init do
       |> Settings.create()
     end)
     |> add_operation(:cluster, fn _ ->
-      Clusters.create_cluster(%{
+      Clusters.create_cluster_raw(%{
         name: Console.conf(:cluster_name),
         self: true,
         handle: "mgmt",
