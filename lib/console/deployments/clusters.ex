@@ -450,7 +450,9 @@ defmodule Console.Deployments.Clusters do
   """
   @spec create_cluster(map, User.t) :: cluster_resp
   @decorate cache_evict(cache: @cache_adapter, key: :cluster_count)
-  def create_cluster(attrs, %User{} = user) do
+  def create_cluster(attrs, %User{} = user), do: create_cluster_raw(attrs, user)
+
+  def create_cluster_raw(attrs, %User{} = user) do
     start_transaction()
     |> add_operation(:cloud, fn _ -> {:ok, Console.cloud?()} end)
     |> add_operation(:limit, fn _ ->
