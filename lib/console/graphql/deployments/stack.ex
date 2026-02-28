@@ -443,8 +443,8 @@ defmodule Console.GraphQl.Deployments.Stack do
   object :stack_output do
     field :name,   non_null(:string)
     field :value,  non_null(:string), resolve: fn
-      %{value: v}, _ when is_binary(v) -> {:ok, v}
-      _, _ -> {:ok, ""}
+      %{value: v}, _, _ when is_binary(v) -> {:ok, v}
+      _, _, _ -> {:ok, ""}
     end
     field :secret, :boolean
   end
