@@ -59,9 +59,10 @@ defmodule Console.AI.Workbench.Conversion do
   def to_proto(%WorkbenchTool{tool: :elastic, configuration: %{elastic: %{} = elastic}}) do
     {:ok, %ToolConnection{
       connection: %ElasticConnection{
-        url: elastic.url,
+        url:      elastic.url,
         username: elastic.username,
         password: elastic.password,
+        index:    elastic.index,
       }
     }}
   end

@@ -91,6 +91,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :url,      non_null(:string), description: "elasticsearch base url"
     field :username, non_null(:string), description: "basic auth username"
     field :password, non_null(:string), description: "basic auth password"
+    field :index,    non_null(:string), description: "elasticsearch index"
   end
 
   input_object :workbench_tool_prometheus_connection_attributes do
@@ -333,7 +334,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_elastic_connection do
-    field :url, :string, description: "elasticsearch base url (credentials never exposed)"
+    field :url,      non_null(:string), description: "elasticsearch base url (credentials never exposed)"
+    field :index,    non_null(:string), description: "elasticsearch index"
+    field :username, non_null(:string), description: "basic auth username"
   end
 
   object :workbench_tool_prometheus_connection do

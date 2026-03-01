@@ -9372,7 +9372,11 @@ type WorkbenchToolEdge struct {
 
 type WorkbenchToolElasticConnection struct {
 	// elasticsearch base url (credentials never exposed)
-	URL *string `json:"url,omitempty"`
+	URL string `json:"url"`
+	// elasticsearch index
+	Index string `json:"index"`
+	// basic auth username
+	Username string `json:"username"`
 }
 
 type WorkbenchToolElasticConnectionAttributes struct {
@@ -9382,6 +9386,8 @@ type WorkbenchToolElasticConnectionAttributes struct {
 	Username string `json:"username"`
 	// basic auth password
 	Password string `json:"password"`
+	// elasticsearch index
+	Index string `json:"index"`
 }
 
 type WorkbenchToolHTTPConfiguration struct {

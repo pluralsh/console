@@ -14480,11 +14480,17 @@ export type WorkbenchToolEdge = {
 
 export type WorkbenchToolElasticConnection = {
   __typename?: 'WorkbenchToolElasticConnection';
+  /** elasticsearch index */
+  index: Scalars['String']['output'];
   /** elasticsearch base url (credentials never exposed) */
-  url?: Maybe<Scalars['String']['output']>;
+  url: Scalars['String']['output'];
+  /** basic auth username */
+  username: Scalars['String']['output'];
 };
 
 export type WorkbenchToolElasticConnectionAttributes = {
+  /** elasticsearch index */
+  index: Scalars['String']['input'];
   /** basic auth password */
   password: Scalars['String']['input'];
   /** elasticsearch base url */

@@ -2155,6 +2155,9 @@ input WorkbenchToolElasticConnectionAttributes {
 
   "basic auth password"
   password: String!
+
+  "elasticsearch index"
+  index: String!
 }
 
 input WorkbenchToolPrometheusConnectionAttributes {
@@ -2579,7 +2582,13 @@ type WorkbenchToolConfiguration {
 
 type WorkbenchToolElasticConnection {
   "elasticsearch base url (credentials never exposed)"
-  url: String
+  url: String!
+
+  "elasticsearch index"
+  index: String!
+
+  "basic auth username"
+  username: String!
 }
 
 type WorkbenchToolPrometheusConnection {

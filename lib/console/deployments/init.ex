@@ -135,20 +135,21 @@ defmodule Console.Deployments.Init do
       start_transaction()
       |> add_operation(:es, fn _ ->
         Workbenches.create_tool(%{
-          name: "plrl_elastic_logs",
+          name: "plrl.elastic.logs",
           tool: :elastic,
           configuration: %{
             elastic: %{
               url: url,
-              username: "plrl-#{inst}-logs-*",
-              password: pass
+              username: "plrl-#{inst}",
+              password: pass,
+              index: "plrl-#{inst}-logs-*"
             }
           }
         }, bot)
       end)
       |> add_operation(:prometheus, fn _ ->
         Workbenches.create_tool(%{
-          name: "plrl_prometheus",
+          name: "plrl.prometheus",
           tool: :prometheus,
           configuration: %{
             prometheus: %{
