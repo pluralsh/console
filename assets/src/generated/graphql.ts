@@ -14548,12 +14548,16 @@ export type WorkbenchToolLokiConnection = {
 };
 
 export type WorkbenchToolLokiConnectionAttributes = {
+  /** basic auth password */
+  password?: InputMaybe<Scalars['String']['input']>;
   /** optional tenant id */
   tenantId?: InputMaybe<Scalars['String']['input']>;
   /** bearer token or api key */
-  token: Scalars['String']['input'];
+  token?: InputMaybe<Scalars['String']['input']>;
   /** loki base url */
   url: Scalars['String']['input'];
+  /** basic auth username */
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type WorkbenchToolPrometheusConnection = {
@@ -14565,12 +14569,16 @@ export type WorkbenchToolPrometheusConnection = {
 };
 
 export type WorkbenchToolPrometheusConnectionAttributes = {
+  /** basic auth password */
+  password?: InputMaybe<Scalars['String']['input']>;
   /** optional tenant id (e.g. for Mimir) */
   tenantId?: InputMaybe<Scalars['String']['input']>;
   /** bearer token or api key */
-  token: Scalars['String']['input'];
+  token?: InputMaybe<Scalars['String']['input']>;
   /** prometheus base url */
   url: Scalars['String']['input'];
+  /** basic auth username */
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type WorkbenchToolTempoConnection = {
@@ -14582,12 +14590,16 @@ export type WorkbenchToolTempoConnection = {
 };
 
 export type WorkbenchToolTempoConnectionAttributes = {
+  /** basic auth password */
+  password?: InputMaybe<Scalars['String']['input']>;
   /** optional tenant id */
   tenantId?: InputMaybe<Scalars['String']['input']>;
   /** bearer token or api key */
-  token: Scalars['String']['input'];
+  token?: InputMaybe<Scalars['String']['input']>;
   /** tempo base url */
   url: Scalars['String']['input'];
+  /** basic auth username */
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum WorkbenchToolType {

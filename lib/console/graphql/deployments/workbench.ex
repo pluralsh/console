@@ -59,8 +59,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_webhook_matches_attributes do
-    field :regex,           :string, description: "regex pattern to match in webhook body"
-    field :substring,       :string, description: "substring to match in webhook body"
+    field :regex,            :string, description: "regex pattern to match in webhook body"
+    field :substring,        :string, description: "substring to match in webhook body"
     field :case_insensitive, :boolean, description: "whether matching is case insensitive"
   end
 
@@ -95,19 +95,25 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_tool_prometheus_connection_attributes do
     field :url,       non_null(:string), description: "prometheus base url"
-    field :token,     non_null(:string), description: "bearer token or api key"
+    field :token,     :string, description: "bearer token or api key"
+    field :username,  :string, description: "basic auth username"
+    field :password,  :string, description: "basic auth password"
     field :tenant_id, :string, description: "optional tenant id (e.g. for Mimir)"
   end
 
   input_object :workbench_tool_loki_connection_attributes do
     field :url,       non_null(:string), description: "loki base url"
-    field :token,     non_null(:string), description: "bearer token or api key"
+    field :token,     :string, description: "bearer token or api key"
+    field :username,  :string, description: "basic auth username"
+    field :password,  :string, description: "basic auth password"
     field :tenant_id, :string, description: "optional tenant id"
   end
 
   input_object :workbench_tool_tempo_connection_attributes do
     field :url,       non_null(:string), description: "tempo base url"
-    field :token,     non_null(:string), description: "bearer token or api key"
+    field :token,     :string, description: "bearer token or api key"
+    field :username,  :string, description: "basic auth username"
+    field :password,  :string, description: "basic auth password"
     field :tenant_id, :string, description: "optional tenant id"
   end
 

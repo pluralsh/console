@@ -173,6 +173,30 @@ defmodule Console.Deployments.InitTest do
     end
   end
 
+  describe "#setup_workbench/0" do
+    test "creates elastic and prometheus workbench tools when cloud and creds are available" do
+      expect(Console, :cloud?, fn -> true end)
+      expect(Console, :cloud_instance, fn -> "test" end)
+      expect(Console, :es_creds, fn -> {:ok, "http://test.es.com", "secret"} end)
+      expect(Console, :vmetrics_creds, fn -> {:ok, "http://vmetrics.example.com", "vtenant"} end)
+      insert(:user, bot_name: "console", roles: %{admin: true})
+
+      {:ok, %{es: es, prometheus: prometheus}} = Init.setup_workbench()
+
+      assert es.name == "plrl_elastic_logs"
+      assert es.tool == :elastic
+      assert es.configuration.elastic.url == "http://test.es.com"
+      assert es.configuration.elastic.username == "plrl-test-logs-*"
+      assert es.configuration.elastic.password == "secret"
+
+      assert prometheus.name == "plrl_prometheus"
+      assert prometheus.tool == :prometheus
+      assert prometheus.configuration.prometheus.url == "http://vmetrics.example.com/select/vtenant/prometheus"
+      assert prometheus.configuration.prometheus.username == "plrl-test"
+      assert prometheus.configuration.prometheus.password == "secret"
+    end
+  end
+
   describe "#setup_groups/0" do
     test "it will setup the sre group" do
       user = insert(:user)

@@ -9431,7 +9431,11 @@ type WorkbenchToolLokiConnectionAttributes struct {
 	// loki base url
 	URL string `json:"url"`
 	// bearer token or api key
-	Token string `json:"token"`
+	Token *string `json:"token,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+	// basic auth password
+	Password *string `json:"password,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
 }
@@ -9447,7 +9451,11 @@ type WorkbenchToolPrometheusConnectionAttributes struct {
 	// prometheus base url
 	URL string `json:"url"`
 	// bearer token or api key
-	Token string `json:"token"`
+	Token *string `json:"token,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+	// basic auth password
+	Password *string `json:"password,omitempty"`
 	// optional tenant id (e.g. for Mimir)
 	TenantID *string `json:"tenantId,omitempty"`
 }
@@ -9463,7 +9471,11 @@ type WorkbenchToolTempoConnectionAttributes struct {
 	// tempo base url
 	URL string `json:"url"`
 	// bearer token or api key
-	Token string `json:"token"`
+	Token *string `json:"token,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+	// basic auth password
+	Password *string `json:"password,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
 }

@@ -25,6 +25,8 @@ defmodule Console.AI.Workbench.Conversion do
       connection: %PrometheusConnection{
         url: prom.url,
         token: prom.token,
+        username: prom.username,
+        password: prom.password,
         tenant_id: prom.tenant_id,
       }
     }}
@@ -35,6 +37,8 @@ defmodule Console.AI.Workbench.Conversion do
       connection: %LokiConnection{
         url: loki.url,
         token: loki.token,
+        username: loki.username,
+        password: loki.password,
         tenant_id: loki.tenant_id,
       }
     }}
@@ -45,6 +49,8 @@ defmodule Console.AI.Workbench.Conversion do
       connection: %TempoConnection{
         url: tempo.url,
         token: tempo.token,
+        username: tempo.username,
+        password: tempo.password,
         tenant_id: tempo.tenant_id,
       }
     }}

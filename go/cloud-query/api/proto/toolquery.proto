@@ -28,14 +28,18 @@ message PrometheusConnection {
 
 message LokiConnection {
   string url = 1;
-  string token = 2;
+  optional string token = 2;
   optional string tenant_id = 3;
+  optional string username = 4;
+  optional string password = 5;
 }
 
 message TempoConnection {
   string url = 1;
   string token = 2;
   optional string tenant_id = 3;
+  optional string username = 4;
+  optional string password = 5;
 }
 
 message ToolConnection {

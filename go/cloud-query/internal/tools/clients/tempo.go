@@ -78,11 +78,17 @@ func (in *TempoClient) searchParams(query, start, end, limit string) url.Values 
 	return params
 }
 
-func NewTempoClient(baseUrl, token, tenantID string) *TempoClient {
+func NewTempoClient(baseUrl, token, username, password, tenantID string) *TempoClient {
 	client := resty.New()
 
-	client.SetAuthToken(token)
-	client.SetAuthScheme("Bearer")
+	if len(token) > 0 {
+		client.SetAuthToken(token)
+		client.SetAuthScheme("Bearer")
+	}
+
+	if len(username) > 0 && len(password) > 0 {
+		client.SetBasicAuth(username, password)
+	}
 
 	if len(tenantID) > 0 {
 		client.SetHeader("X-Scope-OrgID", tenantID)

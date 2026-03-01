@@ -2162,7 +2162,13 @@ input WorkbenchToolPrometheusConnectionAttributes {
   url: String!
 
   "bearer token or api key"
-  token: String!
+  token: String
+
+  "basic auth username"
+  username: String
+
+  "basic auth password"
+  password: String
 
   "optional tenant id (e.g. for Mimir)"
   tenantId: String
@@ -2173,7 +2179,13 @@ input WorkbenchToolLokiConnectionAttributes {
   url: String!
 
   "bearer token or api key"
-  token: String!
+  token: String
+
+  "basic auth username"
+  username: String
+
+  "basic auth password"
+  password: String
 
   "optional tenant id"
   tenantId: String
@@ -2184,7 +2196,13 @@ input WorkbenchToolTempoConnectionAttributes {
   url: String!
 
   "bearer token or api key"
-  token: String!
+  token: String
+
+  "basic auth username"
+  username: String
+
+  "basic auth password"
+  password: String
 
   "optional tenant id"
   tenantId: String

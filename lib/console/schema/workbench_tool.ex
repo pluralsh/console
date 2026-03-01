@@ -23,18 +23,24 @@ defmodule Console.Schema.WorkbenchTool do
         field :url,       :string
         field :token,     :string
         field :tenant_id, :string
+        field :username,  :string
+        field :password,  :string
       end
 
       embeds_one :loki, LokiConnection, on_replace: :update do
         field :url,       :string
         field :token,     :string
         field :tenant_id, :string
+        field :username,  :string
+        field :password,  :string
       end
 
       embeds_one :tempo, TempoConnection, on_replace: :update do
         field :url,       :string
         field :token,     :string
         field :tenant_id, :string
+        field :username,  :string
+        field :password,  :string
       end
 
       embeds_one :datadog, DatadogConnection, on_replace: :update do
@@ -158,8 +164,8 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp prom_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url token tenant_id)a)
-    |> validate_required([:url, :token])
+    |> cast(attrs, ~w(url token tenant_id username password)a)
+    |> validate_required([:url])
   end
 
   defp datadog_configuration_changeset(model, attrs) do
