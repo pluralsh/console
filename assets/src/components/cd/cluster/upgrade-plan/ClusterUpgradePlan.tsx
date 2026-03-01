@@ -124,7 +124,9 @@ export function ClusterUpgradePlan() {
   const kubeVersion = getClusterKubeVersion(clusterBasic)
   const parsedKubeVersion =
     semver.coerce(kubeVersion) ?? semver.coerce('1.21.0')
-  const nextKubeVersion = `${parsedKubeVersion.major}.${parsedKubeVersion.minor + 1}`
+  const nextKubeVersion = `${parsedKubeVersion.major}.${
+    parsedKubeVersion.minor + 1
+  }`
 
   const { data, loading, error } = useClusterOverviewDetailsQuery({
     variables: {
@@ -198,7 +200,9 @@ export function ClusterUpgradePlan() {
           onClusterChange={(cluster) => {
             if (cluster?.id)
               navigate(
-                `${getClusterDetailsPath({ clusterId: cluster.id })}/${CLUSTER_UPGRADES_REL_PATH}`
+                `${getClusterDetailsPath({
+                  clusterId: cluster.id,
+                })}/${CLUSTER_UPGRADES_REL_PATH}`
               )
           }}
           placeholder="Select a cluster"
