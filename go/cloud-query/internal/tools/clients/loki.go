@@ -71,9 +71,7 @@ func NewLokiClient(baseUrl, token, username, password, tenantID string) *LokiCli
 	if len(token) > 0 {
 		client.SetAuthToken(token)
 		client.SetAuthScheme("Bearer")
-	}
-
-	if len(username) > 0 && len(password) > 0 {
+	} else if len(username) > 0 && len(password) > 0 {
 		client.SetBasicAuth(username, password)
 	}
 
