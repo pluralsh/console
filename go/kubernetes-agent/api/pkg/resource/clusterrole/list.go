@@ -74,7 +74,7 @@ func toClusterRoleLists(clusterRoles []rbac.ClusterRole, nonCriticalErrors []err
 		Errors:   nonCriticalErrors,
 	}
 
-	items := make([]ClusterRole, 0)
+	items := make([]ClusterRole, 0, len(clusterRoles))
 	for _, item := range clusterRoles {
 		items = append(items, toClusterRole(item))
 	}

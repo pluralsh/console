@@ -54,43 +54,40 @@ func newApiServer(log *zap.Logger, cfg *kascfg.ConfigurationFile, tp trace.Trace
 
 	auxCtx, auxCancel := context.WithCancel(context.Background())
 	keepaliveOpt, sh := grpctool2.MaxConnectionAge2GrpcKeepalive(auxCtx, listenCfg.MaxConnectionAge.AsDuration())
-	serverOpts := []grpc.ServerOption{
-		grpc.StatsHandler(otelgrpc.NewServerHandler(
-			otelgrpc.WithTracerProvider(tp),
-			otelgrpc.WithMeterProvider(mp),
-			otelgrpc.WithPropagators(p),
-			otelgrpc.WithMessageEvents(otelgrpc.ReceivedEvents, otelgrpc.SentEvents),
-		)),
-		grpc.StatsHandler(ssh),
-		grpc.StatsHandler(sh),
-		grpc.SharedWriteBuffer(true),
-		grpc.ChainStreamInterceptor(
-			streamProm, // 1. measure all invocations
-			modserver.StreamRpcApiInterceptor(factory), // 2. inject RPC API
-			jwtAuther.StreamServerInterceptor,          // 3. auth and maybe log
-			grpc_validator.StreamServerInterceptor(),   // x. wrap with validator
-			grpctool2.StreamServerErrorReporterInterceptor(grpcServerErrorReporter),
-		),
-		grpc.ChainUnaryInterceptor(
-			unaryProm, // 1. measure all invocations
-			modserver.UnaryRpcApiInterceptor(factory), // 2. inject RPC API
-			jwtAuther.UnaryServerInterceptor,          // 3. auth and maybe log
-			grpc_validator.UnaryServerInterceptor(),   // x. wrap with validator
-			grpctool2.UnaryServerErrorReporterInterceptor(grpcServerErrorReporter),
-		),
-		grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
-			MinTime:             20 * time.Second,
-			PermitWithoutStream: true,
-		}),
-		keepaliveOpt,
-	}
-
-	serverOpts = append(serverOpts, credsOpt...)
 
 	return &apiServer{
 		log:       log,
 		listenCfg: listenCfg,
-		server:    grpc.NewServer(serverOpts...),
+		server: grpc.NewServer(append([]grpc.ServerOption{
+			grpc.StatsHandler(otelgrpc.NewServerHandler(
+				otelgrpc.WithTracerProvider(tp),
+				otelgrpc.WithMeterProvider(mp),
+				otelgrpc.WithPropagators(p),
+				otelgrpc.WithMessageEvents(otelgrpc.ReceivedEvents, otelgrpc.SentEvents),
+			)),
+			grpc.StatsHandler(ssh),
+			grpc.StatsHandler(sh),
+			grpc.SharedWriteBuffer(true),
+			grpc.ChainStreamInterceptor(
+				streamProm, // 1. measure all invocations
+				modserver.StreamRpcApiInterceptor(factory), // 2. inject RPC API
+				jwtAuther.StreamServerInterceptor,          // 3. auth and maybe log
+				grpc_validator.StreamServerInterceptor(),   // x. wrap with validator
+				grpctool2.StreamServerErrorReporterInterceptor(grpcServerErrorReporter),
+			),
+			grpc.ChainUnaryInterceptor(
+				unaryProm, // 1. measure all invocations
+				modserver.UnaryRpcApiInterceptor(factory), // 2. inject RPC API
+				jwtAuther.UnaryServerInterceptor,          // 3. auth and maybe log
+				grpc_validator.UnaryServerInterceptor(),   // x. wrap with validator
+				grpctool2.UnaryServerErrorReporterInterceptor(grpcServerErrorReporter),
+			),
+			grpc.KeepaliveEnforcementPolicy(keepalive.EnforcementPolicy{
+				MinTime:             20 * time.Second,
+				PermitWithoutStream: true,
+			}),
+			keepaliveOpt,
+		}, credsOpt...)...),
 		auxCancel: auxCancel,
 		ready:     probeRegistry.RegisterReadinessToggle("apiServer"),
 	}, nil

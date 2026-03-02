@@ -236,7 +236,7 @@ func getVolume(volumes []v1.Volume, volumeName string) v1.Volume {
 }
 
 func extractContainerMounts(container v1.Container, pod *v1.Pod) []VolumeMount {
-	volumeMounts := make([]VolumeMount, 0)
+	volumeMounts := make([]VolumeMount, 0, len(container.VolumeMounts))
 	for _, vm := range container.VolumeMounts {
 		volumeMount := VolumeMount{
 			Name:      vm.Name,
@@ -251,9 +251,9 @@ func extractContainerMounts(container v1.Container, pod *v1.Pod) []VolumeMount {
 }
 
 func extractContainerInfo(containerList []v1.Container, pod *v1.Pod, configMaps *v1.ConfigMapList, secrets *v1.SecretList) []Container {
-	containers := make([]Container, 0)
+	containers := make([]Container, 0, len(containerList))
 	for _, container := range containerList {
-		vars := make([]EnvVar, 0)
+		vars := make([]EnvVar, 0, len(container.Env))
 		for _, envVar := range container.Env {
 			variable := EnvVar{
 				Name:      envVar.Name,

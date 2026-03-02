@@ -77,7 +77,7 @@ func toRoleBindingList(roleBindings []rbac.RoleBinding, nonCriticalErrors []erro
 		Errors:   nonCriticalErrors,
 	}
 
-	items := make([]RoleBinding, 0)
+	items := make([]RoleBinding, 0, len(roleBindings))
 	for _, item := range roleBindings {
 		items = append(items, toRoleBinding(item))
 	}

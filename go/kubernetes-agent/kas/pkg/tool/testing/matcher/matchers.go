@@ -25,7 +25,8 @@ var (
 // - have fields of the above types.
 // See https://blog.golang.org/protobuf-apiv2 for v1 vs v2 details.
 func ProtoEq(t *testing.T, msg interface{}, opts ...cmp.Option) gomock.Matcher {
-	o := []cmp.Option{protocmp.Transform()}
+	o := make([]cmp.Option, 0, 1+len(opts))
+	o = append(o, protocmp.Transform())
 	o = append(o, opts...)
 	return Cmp(t, msg, o...)
 }

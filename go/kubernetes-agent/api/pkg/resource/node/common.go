@@ -25,7 +25,11 @@ import (
 
 // getContainerImages returns container image strings from the given node.
 func getContainerImages(node v1.Node) []string {
-	var containerImages []string
+	totalImages := 0
+	for _, image := range node.Status.Images {
+		totalImages += len(image.Names)
+	}
+	containerImages := make([]string, 0, totalImages)
 	for _, image := range node.Status.Images {
 		containerImages = append(containerImages, image.Names...)
 	}

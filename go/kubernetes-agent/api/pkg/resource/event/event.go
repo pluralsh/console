@@ -34,11 +34,11 @@ var FailedReasonPartials = []string{"failed", "err", "exceeded", "invalid", "unh
 
 // GetPodsEventWarnings returns warning pod events by filtering out events targeting only given pods
 func GetPodsEventWarnings(events []api.Event, pods []api.Pod) []common.Event {
-	result := make([]common.Event, 0)
+	result := make([]common.Event, 0, len(events))
 
 	// Filter out only warning events
 	events = getWarningEvents(events)
-	failedPods := make([]api.Pod, 0)
+	failedPods := make([]api.Pod, 0, len(pods))
 
 	// Filter out ready and successful pods
 	for _, pod := range pods {
@@ -65,7 +65,7 @@ func GetPodsEventWarnings(events []api.Event, pods []api.Pod) []common.Event {
 // Returns filtered list of event objects. Events list is filtered to get only events targeting
 // pods on the list.
 func filterEventsByPodsUID(events []api.Event, pods []api.Pod) []api.Event {
-	result := make([]api.Event, 0)
+	result := make([]api.Event, 0, len(events))
 	podEventMap := make(map[types.UID]bool, 0)
 
 	if len(pods) == 0 || len(events) == 0 {

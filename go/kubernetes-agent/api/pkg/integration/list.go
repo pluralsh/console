@@ -27,10 +27,11 @@ type Getter interface {
 // List implements integration getter interface. See Getter for
 // more information.
 func (in *manager) List() []api.Integration {
-	result := make([]api.Integration, 0)
+	metrics := in.Metric().List()
+	result := make([]api.Integration, 0, len(metrics))
 
 	// Append all types of integrations
-	result = append(result, in.Metric().List()...)
+	result = append(result, metrics...)
 
 	return result
 }

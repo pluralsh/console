@@ -106,7 +106,7 @@ func (in *metricManager) EnableWithRetry(id integrationapi.IntegrationID, period
 
 // List implements metric manager interface. See MetricManager for more information.
 func (in *metricManager) List() []integrationapi.Integration {
-	result := make([]integrationapi.Integration, 0)
+	result := make([]integrationapi.Integration, 0, len(in.clients))
 	for _, c := range in.clients {
 		result = append(result, c.(integrationapi.Integration))
 	}

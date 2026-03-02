@@ -77,7 +77,7 @@ func toClusterRoleBindingList(clusterRoleBindings []rbac.ClusterRoleBinding, non
 		Errors:   nonCriticalErrors,
 	}
 
-	items := make([]ClusterRoleBinding, 0)
+	items := make([]ClusterRoleBinding, 0, len(clusterRoleBindings))
 	for _, item := range clusterRoleBindings {
 		items = append(items, toClusterRoleBinding(item))
 	}

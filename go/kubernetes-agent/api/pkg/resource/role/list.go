@@ -77,7 +77,7 @@ func toRoleList(roles []rbac.Role, nonCriticalErrors []error, dsQuery *dataselec
 		Errors:   nonCriticalErrors,
 	}
 
-	items := make([]Role, 0)
+	items := make([]Role, 0, len(roles))
 	for _, item := range roles {
 		items = append(items, toRole(item))
 	}
