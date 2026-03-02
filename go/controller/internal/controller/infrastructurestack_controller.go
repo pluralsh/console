@@ -360,9 +360,10 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		var isSecret *bool
 		var value string
 
-		if env.Value != nil {
+		switch {
+		case env.Value != nil:
 			value = *env.Value
-		} else if env.SecretKeyRef != nil {
+		case env.SecretKeyRef != nil:
 			secret := &corev1.Secret{}
 			name := types.NamespacedName{Name: env.SecretKeyRef.Name, Namespace: stack.GetNamespace()}
 			if err := r.Get(ctx, name, secret); err != nil {
@@ -377,7 +378,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 				return nil, fmt.Errorf("can not find secret data for the key %s", env.SecretKeyRef.Key)
 			}
 			value = string(rawData)
-		} else if env.ConfigMapRef != nil {
+		case env.ConfigMapRef != nil:
 			configMap := &corev1.ConfigMap{}
 			name := types.NamespacedName{Name: env.ConfigMapRef.Name, Namespace: stack.GetNamespace()}
 			if err := r.Get(ctx, name, configMap); err != nil {
