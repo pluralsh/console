@@ -29,6 +29,9 @@ func getContainerImages(node v1.Node) []string {
 	for _, image := range node.Status.Images {
 		totalImages += len(image.Names)
 	}
+	if totalImages == 0 {
+		return nil
+	}
 	containerImages := make([]string, 0, totalImages)
 	for _, image := range node.Status.Images {
 		containerImages = append(containerImages, image.Names...)
