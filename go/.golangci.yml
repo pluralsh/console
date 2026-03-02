@@ -2,7 +2,9 @@ version: "2"
 run:
   modules-download-mode: readonly
   allow-parallel-runners: true
+  concurrency: 4
   tests: false
+  timeout: 10m
 linters:
   default: none
   enable:

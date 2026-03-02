@@ -283,7 +283,7 @@ func (o *OllamaProxy) handleNonStreamingOllama(
 }
 
 func (o *OllamaProxy) convertOpenAIToOllamaChatRequest(req *openai.ChatCompletionRequest) (*ollamaapi.ChatRequest, error) {
-	var messages []ollamaapi.Message
+	messages := make([]ollamaapi.Message, 0, len(req.Messages))
 
 	for _, tool := range req.Tools {
 		otc := ollamaapi.ToolCall{

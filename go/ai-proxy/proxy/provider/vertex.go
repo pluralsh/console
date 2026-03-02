@@ -61,8 +61,7 @@ func (in *VertexProxy) ModifyResponse(r *http.Response) error {
 
 func (in *VertexProxy) modifyRequestBody(r *httputil.ProxyRequest) error {
 	endpoint := r.Out.URL.Path
-	switch endpoint {
-	case os.Expand(vertex.EndpointChat, in.mapping):
+	if endpoint == os.Expand(vertex.EndpointChat, in.mapping) {
 		return replaceRequestBody(r, openai.ToChatCompletionRequest)
 	}
 
@@ -75,8 +74,7 @@ func (in *VertexProxy) modifyResponseBody(r *http.Response) error {
 	}
 
 	endpoint := r.Request.URL.Path
-	switch endpoint {
-	case os.Expand(vertex.EndpointChat, in.mapping):
+	if endpoint == os.Expand(vertex.EndpointChat, in.mapping) {
 		return replaceResponseBody(r, openai.FromChatCompletionResponse)
 	}
 

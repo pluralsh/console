@@ -121,26 +121,24 @@ func (b *BedrockProxy) handleStreamingBedrock(
 				Model:   req.Model,
 			}
 
-			switch v.Value.Delta.(type) {
+			switch delta := v.Value.Delta.(type) {
 			case *types.ContentBlockDeltaMemberText:
-				textResponse := v.Value.Delta.(*types.ContentBlockDeltaMemberText)
 				chunkResp.Choices = []openai.ChunkChoice{
 					{
 						Index: 0,
 						Delta: openai.Message{
 							Role:    "assistant",
-							Content: textResponse.Value,
+							Content: delta.Value,
 						},
 					},
 				}
 			case *types.ContentBlockDeltaMemberToolUse:
-				textResponse := v.Value.Delta.(*types.ContentBlockDeltaMemberToolUse)
 				chunkResp.Choices = []openai.ChunkChoice{
 					{
 						Index: 0,
 						Delta: openai.Message{
 							Role:    "assistant",
-							Content: *textResponse.Value.Input,
+							Content: *delta.Value.Input,
 						},
 					},
 				}
@@ -193,7 +191,7 @@ func (b *BedrockProxy) handleNonStreamingBedrock(
 }
 
 func convertMessages(messages []openai.Message) []types.Message {
-	var bedrockMessages []types.Message
+	bedrockMessages := make([]types.Message, 0, len(messages))
 
 	for _, msg := range messages {
 		var role types.ConversationRole
