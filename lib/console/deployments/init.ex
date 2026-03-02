@@ -34,11 +34,12 @@ defmodule Console.Deployments.Init do
       |> Settings.create()
     end)
     |> add_operation(:cluster, fn _ ->
-      Clusters.create_cluster(%{
+      Clusters.create_cluster_raw(%{
         name: Console.conf(:cluster_name),
         self: true,
         handle: "mgmt",
-        version: "1.24"
+        version: "1.24",
+        ignore_limit: true
       }, bot)
     end)
     |> add_operation(:provider, fn _ ->

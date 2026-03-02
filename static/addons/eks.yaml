@@ -1972,6 +1972,15 @@
   publisher: eks
 - name: aws-efs-csi-driver
   versions:
+  - version: v2.3.0-eksbuild.2
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v2.3.0-eksbuild.1
     compatibilities:
     - '1.35'
@@ -3070,6 +3079,12 @@
   publisher: s3
 - name: aws-network-flow-monitoring-agent
   versions:
+  - version: v1.1.3-eksbuild.2
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.1.3-eksbuild.1
     compatibilities:
     - '1.35'
@@ -4582,6 +4597,15 @@
   publisher: eG Innovations
 - name: eks-node-monitoring-agent
   versions:
+  - version: v1.5.2-eksbuild.1
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.5.1-eksbuild.1
     compatibilities:
     - '1.35'
@@ -5590,6 +5614,10 @@
   - version: v1.35.0-eksbuild.2
     compatibilities:
     - '1.35'
+  - version: v1.34.3-eksbuild.5
+    compatibilities:
+    - '1.35'
+    - '1.34'
   - version: v1.34.3-eksbuild.2
     compatibilities:
     - '1.35'
@@ -5606,6 +5634,11 @@
     compatibilities:
     - '1.35'
     - '1.34'
+  - version: v1.33.8-eksbuild.4
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
   - version: v1.33.7-eksbuild.2
     compatibilities:
     - '1.35'
@@ -5636,6 +5669,12 @@
     - '1.35'
     - '1.34'
     - '1.33'
+  - version: v1.32.11-eksbuild.5
+    compatibilities:
+    - '1.35'
+    - '1.34'
+    - '1.33'
+    - '1.32'
   - version: v1.32.11-eksbuild.2
     compatibilities:
     - '1.35'
@@ -5696,6 +5735,12 @@
     - '1.34'
     - '1.33'
     - '1.32'
+  - version: v1.31.14-eksbuild.5
+    compatibilities:
+    - '1.34'
+    - '1.33'
+    - '1.32'
+    - '1.31'
   - version: v1.31.14-eksbuild.2
     compatibilities:
     - '1.34'
@@ -5780,6 +5825,12 @@
     - '1.33'
     - '1.32'
     - '1.31'
+  - version: v1.30.14-eksbuild.23
+    compatibilities:
+    - '1.33'
+    - '1.32'
+    - '1.31'
+    - '1.30'
   - version: v1.30.14-eksbuild.20
     compatibilities:
     - '1.33'
@@ -5882,6 +5933,12 @@
     - '1.32'
     - '1.31'
     - '1.30'
+  - version: v1.29.15-eksbuild.31
+    compatibilities:
+    - '1.32'
+    - '1.31'
+    - '1.30'
+    - '1.29'
   - version: v1.29.15-eksbuild.28
     compatibilities:
     - '1.32'

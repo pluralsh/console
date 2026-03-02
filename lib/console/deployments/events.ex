@@ -124,3 +124,9 @@ defmodule Console.PubSub.WorkbenchJobActivityUpdated, do: use Piazza.PubSub.Even
 defmodule Console.PubSub.WorkbenchToolCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchToolUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchToolDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchCronCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchCronUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchCronDeleted, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchWebhookCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchWebhookUpdated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.WorkbenchWebhookDeleted, do: use Piazza.PubSub.Event

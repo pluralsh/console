@@ -32,6 +32,24 @@ func (c *client) GetStack(ctx context.Context, id string) (*console.Infrastructu
 	return response.InfrastructureStack, err
 }
 
+func (c *client) GetFullStackByName(ctx context.Context, name string) (*console.InfrastructureStackFragment, error) {
+	if name == "" {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	response, err := c.consoleClient.GetInfrastructureStack(ctx, nil, lo.ToPtr(name))
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	if err == nil && (response == nil || response.InfrastructureStack == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.InfrastructureStack, err
+}
+
 func (c *client) GetStackById(ctx context.Context, id string) (*console.InfrastructureStackIDFragment, error) {
 	if id == "" {
 		return nil, errors.NewNotFound(schema.GroupResource{}, "")
@@ -42,6 +60,24 @@ func (c *client) GetStackById(ctx context.Context, id string) (*console.Infrastr
 	}
 	if err == nil && (response == nil || response.InfrastructureStack == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.InfrastructureStack, err
+}
+
+func (c *client) GetStackByName(ctx context.Context, name string) (*console.InfrastructureStackIDFragment, error) {
+	if name == "" {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	response, err := c.consoleClient.GetInfrastructureStackID(ctx, nil, lo.ToPtr(name))
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	if err == nil && (response == nil || response.InfrastructureStack == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
 	}
 	if response == nil {
 		return nil, err

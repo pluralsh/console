@@ -1138,6 +1138,28 @@ type RootMutationType {
 
   deleteWorkbenchTool(id: ID!): WorkbenchTool
 
+  createWorkbenchCron(
+    "the workbench to create a cron for"
+    workbenchId: ID!
+
+    attributes: WorkbenchCronAttributes!
+  ): WorkbenchCron
+
+  updateWorkbenchCron(id: ID!, attributes: WorkbenchCronAttributes!): WorkbenchCron
+
+  deleteWorkbenchCron(id: ID!): WorkbenchCron
+
+  createWorkbenchWebhook(
+    "the workbench to create a webhook for"
+    workbenchId: ID!
+
+    attributes: WorkbenchWebhookAttributes!
+  ): WorkbenchWebhook
+
+  updateWorkbenchWebhook(id: ID!, attributes: WorkbenchWebhookAttributes!): WorkbenchWebhook
+
+  deleteWorkbenchWebhook(id: ID!): WorkbenchWebhook
+
   "Creates a new workbench job. Requires read access to the workbench."
   createWorkbenchJob(
     "the workbench to create a job for"
@@ -2057,6 +2079,36 @@ input WorkbenchToolAssociationAttributes {
   toolId: ID!
 }
 
+input WorkbenchCronAttributes {
+  "cron expression (e.g. *\/5 * * * *) (required for create)"
+  crontab: String
+
+  "the prompt to run when the cron triggers"
+  prompt: String
+}
+
+input WorkbenchWebhookMatchesAttributes {
+  "regex pattern to match in webhook body"
+  regex: String
+
+  "substring to match in webhook body"
+  substring: String
+
+  "whether matching is case insensitive"
+  caseInsensitive: Boolean
+}
+
+input WorkbenchWebhookAttributes {
+  "unique name for this webhook on the workbench (required for create)"
+  name: String
+
+  "observability webhook to receive events"
+  webhookId: ID
+
+  "criteria to match incoming webhook payloads"
+  matches: WorkbenchWebhookMatchesAttributes
+}
+
 input WorkbenchToolAttributes {
   "the name of the tool (a-z, 0-9, underscores)"
   name: String!
@@ -2184,6 +2236,12 @@ type Workbench {
   "the system prompt for the workbench"
   systemPrompt: String
 
+  "workbench configuration"
+  configuration: WorkbenchConfiguration
+
+  "skills configuration"
+  skills: WorkbenchSkills
+
   "the project of this workbench"
   project: Project
 
@@ -2192,12 +2250,6 @@ type Workbench {
 
   "the agent runtime for this workbench"
   agentRuntime: AgentRuntime
-
-  "workbench configuration"
-  configuration: WorkbenchConfiguration
-
-  "skills configuration"
-  skills: WorkbenchSkills
 
   "tools associated with this workbench"
   tools: [WorkbenchTool]
@@ -2209,6 +2261,12 @@ type Workbench {
   writeBindings: [PolicyBinding]
 
   runs(after: String, first: Int, before: String, last: Int): WorkbenchJobConnection
+
+  crons(after: String, first: Int, before: String, last: Int): WorkbenchCronConnection
+
+  webhooks(after: String, first: Int, before: String, last: Int): WorkbenchWebhookConnection
+
+  alerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
   insertedAt: DateTime
 
@@ -2401,6 +2459,62 @@ type WorkbenchSkills {
   files: [String]
 }
 
+type WorkbenchCron {
+  "the id of the cron"
+  id: String!
+
+  "cron expression"
+  crontab: String
+
+  "prompt to run when the cron triggers"
+  prompt: String
+
+  "when the cron will next run"
+  nextRunAt: DateTime
+
+  "when the cron last ran"
+  lastRunAt: DateTime
+
+  "the workbench this cron belongs to"
+  workbench: Workbench
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type WorkbenchWebhookMatches {
+  "regex pattern to match"
+  regex: String
+
+  "substring to match"
+  substring: String
+
+  "case insensitive matching"
+  caseInsensitive: Boolean
+}
+
+type WorkbenchWebhook {
+  "the id of the webhook"
+  id: String!
+
+  "name of this webhook trigger"
+  name: String
+
+  "criteria to match incoming webhook payloads"
+  matches: WorkbenchWebhookMatches
+
+  "the workbench this webhook belongs to"
+  workbench: Workbench
+
+  "the observability webhook that receives events"
+  webhook: ObservabilityWebhook
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type WorkbenchTool {
   "the id of the tool"
   id: String!
@@ -2526,6 +2640,16 @@ type WorkbenchJobConnection {
 type WorkbenchJobActivityConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchJobActivityEdge]
+}
+
+type WorkbenchCronConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchCronEdge]
+}
+
+type WorkbenchWebhookConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchWebhookEdge]
 }
 
 type WorkbenchJobDelta {
@@ -3561,10 +3685,17 @@ input ElasticsearchConnectionAttributes {
 
 input OpensearchConnectionAttributes {
   host: String!
+
   index: String!
+
   awsAccessKeyId: String
+
   awsSecretAccessKey: String
+
   awsRegion: String
+
+  "whether to use pod identity (IRSA\/Workload Identity) for AWS authentication instead of static credentials"
+  usePodIdentity: Boolean
 }
 
 input AiSettingsAttributes {
@@ -4067,6 +4198,9 @@ type VertexAiSettings {
   "the gcp region the model"
   location: String!
 
+  "custom vertexai endpoint if for dedicated customer deployments"
+  endpoint: String
+
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
 }
@@ -4106,6 +4240,9 @@ type OpensearchConnection {
   awsAccessKeyId: String
 
   awsRegion: String
+
+  "whether to use pod identity (IRSA\/Workload Identity) for AWS authentication"
+  usePodIdentity: Boolean
 }
 
 "A read-only connection to a cloud provider"
@@ -13516,6 +13653,16 @@ type SentinelRunEdge {
 
 type SentinelEdge {
   node: Sentinel
+  cursor: String
+}
+
+type WorkbenchWebhookEdge {
+  node: WorkbenchWebhook
+  cursor: String
+}
+
+type WorkbenchCronEdge {
+  node: WorkbenchCron
   cursor: String
 }
 

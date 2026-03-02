@@ -89,7 +89,9 @@ defmodule Console.AI.Chat.Tools do
     Explain.Files,
     Explain.Read,
     Agent.Discovery,
-    Agent.ApiSpec
+    Agent.ApiSpec,
+    Explain.ListComponents,
+    Explain.SummarizeComponent
   ]
 
   @search_code_tools [Agent.CodingAgent, Agent.Coding.ServiceFiles, Agent.Coding.StackFiles]
@@ -115,8 +117,8 @@ defmodule Console.AI.Chat.Tools do
 
 
   defp agent_tools(%ChatThread{research_id: id}) when is_binary(id), do: @research_tools
-
   defp agent_tools(%ChatThread{flow_id: id}) when is_binary(id), do: []
+  defp agent_tools(%ChatThread{service_id: id}) when is_binary(id), do: []
 
   defp agent_tools(%ChatThread{session: %AgentSession{type: :kubernetes, service_id: id, tf_booted: true}}) when is_binary(id),
     do: @kubernetes_code_post_tools

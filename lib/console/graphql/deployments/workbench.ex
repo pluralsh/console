@@ -53,6 +53,23 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tool_id, non_null(:id), description: "the workbench tool id to associate"
   end
 
+  input_object :workbench_cron_attributes do
+    field :crontab, :string, description: "cron expression (e.g. */5 * * * *) (required for create)"
+    field :prompt,  :string, description: "the prompt to run when the cron triggers"
+  end
+
+  input_object :workbench_webhook_matches_attributes do
+    field :regex,           :string, description: "regex pattern to match in webhook body"
+    field :substring,       :string, description: "substring to match in webhook body"
+    field :case_insensitive, :boolean, description: "whether matching is case insensitive"
+  end
+
+  input_object :workbench_webhook_attributes do
+    field :name,       :string, description: "unique name for this webhook on the workbench (required for create)"
+    field :webhook_id, :id, description: "observability webhook to receive events"
+    field :matches,   :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
+  end
+
   input_object :workbench_tool_attributes do
     field :name,          non_null(:string), description: "the name of the tool (a-z, 0-9, underscores)"
     field :tool,          non_null(:workbench_tool_type), description: "the type of tool"
@@ -118,18 +135,31 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,          non_null(:string), description: "the name of the workbench"
     field :description,   :string, description: "the description of the workbench"
     field :system_prompt, :string, description: "the system prompt for the workbench"
-    field :project,       :project, resolve: dataloader(Deployments), description: "the project of this workbench"
-    field :repository,    :git_repository, resolve: dataloader(Deployments), description: "the git repository for this workbench"
-    field :agent_runtime, :agent_runtime, resolve: dataloader(Deployments), description: "the agent runtime for this workbench"
     field :configuration, :workbench_configuration, description: "workbench configuration"
     field :skills,        :workbench_skills, description: "skills configuration"
-    field :tools,         list_of(:workbench_tool), resolve: dataloader(Deployments), description: "tools associated with this workbench"
 
-    field :read_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this service"
+    field :project,       :project,        resolve: dataloader(Deployments), description: "the project of this workbench"
+    field :repository,    :git_repository, resolve: dataloader(Deployments), description: "the git repository for this workbench"
+    field :agent_runtime, :agent_runtime,  resolve: dataloader(Deployments), description: "the agent runtime for this workbench"
+    field :tools,         list_of(:workbench_tool),    resolve: dataloader(Deployments), description: "tools associated with this workbench"
+
+    field :read_bindings, list_of(:policy_binding),  resolve: dataloader(Deployments), description: "read policy for this service"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this service"
 
     connection field :runs, node_type: :workbench_job do
       resolve &Deployments.list_workbench_runs/3
+    end
+
+    connection field :crons, node_type: :workbench_cron do
+      resolve &Deployments.list_workbench_crons/3
+    end
+
+    connection field :webhooks, node_type: :workbench_webhook do
+      resolve &Deployments.list_workbench_webhooks/3
+    end
+
+    connection field :alerts, node_type: :alert do
+      resolve &Deployments.list_alerts/3
     end
 
     timestamps()
@@ -247,6 +277,35 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :files, list_of(:string), description: "files to include"
   end
 
+  object :workbench_cron do
+    field :id,          non_null(:string), description: "the id of the cron"
+    field :crontab,     :string, description: "cron expression"
+    field :prompt,      :string, description: "prompt to run when the cron triggers"
+    field :next_run_at, :datetime, description: "when the cron will next run"
+    field :last_run_at, :datetime, description: "when the cron last ran"
+
+    field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this cron belongs to"
+
+    timestamps()
+  end
+
+  object :workbench_webhook_matches do
+    field :regex,            :string, description: "regex pattern to match"
+    field :substring,        :string, description: "substring to match"
+    field :case_insensitive,  :boolean, description: "case insensitive matching"
+  end
+
+  object :workbench_webhook do
+    field :id,     non_null(:string), description: "the id of the webhook"
+    field :name,   :string, description: "name of this webhook trigger"
+    field :matches, :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
+
+    field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
+    field :webhook,   :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"
+
+    timestamps()
+  end
+
   object :workbench_tool do
     field :id,            non_null(:string), description: "the id of the tool"
     field :name,          non_null(:string), description: "the name of the tool"
@@ -315,6 +374,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench_job
   connection node_type: :workbench_job_activity
   connection node_type: :workbench_job_thought
+  connection node_type: :workbench_cron
+  connection node_type: :workbench_webhook
 
   delta :workbench_job
   delta :workbench_job_activity
@@ -436,6 +497,70 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench_tool/2
+    end
+
+    field :create_workbench_cron, :workbench_cron do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id), description: "the workbench to create a cron for"
+      arg :attributes, non_null(:workbench_cron_attributes)
+
+      resolve &Deployments.create_workbench_cron/2
+    end
+
+    field :update_workbench_cron, :workbench_cron do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_cron_attributes)
+
+      resolve &Deployments.update_workbench_cron/2
+    end
+
+    field :delete_workbench_cron, :workbench_cron do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_cron/2
+    end
+
+    field :create_workbench_webhook, :workbench_webhook do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id), description: "the workbench to create a webhook for"
+      arg :attributes, non_null(:workbench_webhook_attributes)
+
+      resolve &Deployments.create_workbench_webhook/2
+    end
+
+    field :update_workbench_webhook, :workbench_webhook do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_webhook_attributes)
+
+      resolve &Deployments.update_workbench_webhook/2
+    end
+
+    field :delete_workbench_webhook, :workbench_webhook do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_webhook/2
     end
 
     @desc "Creates a new workbench job. Requires read access to the workbench."

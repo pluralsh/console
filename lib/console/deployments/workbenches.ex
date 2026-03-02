@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Workbenches do
   use Console.Services.Base
+  use Nebulex.Caching
   import Console.Deployments.Policies
   alias Console.Schema.{
     User,
@@ -8,6 +9,8 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchTool,
     WorkbenchJobActivity,
     WorkbenchJobResult,
+    WorkbenchCron,
+    WorkbenchWebhook,
   }
   alias Console.Deployments.Settings
   alias Console.PubSub
@@ -17,6 +20,11 @@ defmodule Console.Deployments.Workbenches do
   @type tool_resp :: {:ok, WorkbenchTool.t()} | error
   @type job_resp :: {:ok, WorkbenchJob.t()} | error
   @type activity_resp :: {:ok, WorkbenchJobActivity.t()} | error
+  @type cron_resp :: {:ok, WorkbenchCron.t()} | error
+  @type webhook_resp :: {:ok, WorkbenchWebhook.t()} | error
+
+  @cache_adapter Console.conf(:cache_adapter)
+  @ttl :timer.hours(6)
 
   def get_workbench!(id), do: Repo.get!(Workbench, id)
   def get_workbench(id), do: Repo.get(Workbench, id)
@@ -31,6 +39,11 @@ defmodule Console.Deployments.Workbenches do
 
   def get_workbench_tool_by_name(name), do: Repo.get_by(WorkbenchTool, name: name)
   def get_workbench_tool_by_name!(name), do: Repo.get_by!(WorkbenchTool, name: name)
+
+  def get_workbench_cron!(id), do: Repo.get!(WorkbenchCron, id)
+  def get_workbench_cron(id), do: Repo.get(WorkbenchCron, id)
+  def get_workbench_webhook!(id), do: Repo.get!(WorkbenchWebhook, id)
+  def get_workbench_webhook(id), do: Repo.get(WorkbenchWebhook, id)
 
   @doc """
   Creates or updates a workbench. If attrs contain an id, that record is updated.
@@ -100,6 +113,90 @@ defmodule Console.Deployments.Workbenches do
   @spec delete_tool(binary, User.t()) :: tool_resp
   def delete_tool(id, %User{} = user) do
     get_workbench_tool!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Creates or updates a workbench cron. If attrs contain an id for an existing cron
+  on the workbench, that record is updated. Otherwise a new cron is created.
+  Requires write permission on the workbench.
+  """
+  @spec create_workbench_cron(map, binary, User.t()) :: cron_resp
+  def create_workbench_cron(attrs, workbench_id, %User{} = user) do
+    %WorkbenchCron{workbench_id: workbench_id}
+    |> WorkbenchCron.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Updates a workbench cron. Requires write permission on the workbench.
+  """
+  @spec update_workbench_cron(map, binary, User.t()) :: cron_resp
+  def update_workbench_cron(attrs, id, %User{} = user) do
+    get_workbench_cron!(id)
+    |> allow(user, :write)
+    |> when_ok(&WorkbenchCron.changeset(&1, attrs))
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
+  Deletes a workbench cron. Requires write permission on the workbench.
+  """
+  @spec delete_workbench_cron(binary, User.t()) :: cron_resp
+  def delete_workbench_cron(id, %User{} = user) do
+    get_workbench_cron!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Lists all webhooks for a workbench, this view is cached.
+  """
+  @decorate cacheable(cache: @cache_adapter, key: {:wb_webhooks, webhook_id}, opts: [ttl: @ttl])
+  def list_workbench_webhooks(webhook_id) do
+    WorkbenchWebhook.for_webhook(webhook_id)
+    |> Repo.all()
+  end
+
+  @doc """
+  Creates or updates a workbench webhook. If attrs contain an id for an existing
+  webhook on the workbench, that record is updated. Otherwise if attrs contain
+  workbench_id and name, looks up by name and updates or creates.
+  Requires write permission on the workbench.
+  """
+  @spec create_workbench_webhook(map, binary, User.t()) :: webhook_resp
+  def create_workbench_webhook(attrs, workbench_id, %User{} = user) do
+    %WorkbenchWebhook{workbench_id: workbench_id}
+    |> WorkbenchWebhook.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Updates a workbench webhook. Requires write permission on the workbench.
+  """
+  @spec update_workbench_webhook(map, binary, User.t()) :: webhook_resp
+  def update_workbench_webhook(attrs, id, %User{} = user) do
+    get_workbench_webhook!(id)
+    |> allow(user, :write)
+    |> when_ok(&WorkbenchWebhook.changeset(&1, attrs))
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
+  Deletes a workbench webhook. Requires write permission on the workbench.
+  """
+  @spec delete_workbench_webhook(binary, User.t()) :: webhook_resp
+  def delete_workbench_webhook(id, %User{} = user) do
+    get_workbench_webhook!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
     |> notify(:delete, user)
@@ -227,6 +324,18 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchToolUpdated, tool, actor: user)
   defp notify({:ok, %WorkbenchTool{} = tool}, :delete, user),
     do: handle_notify(PubSub.WorkbenchToolDeleted, tool, actor: user)
+  defp notify({:ok, %WorkbenchCron{} = cron}, :create, user),
+    do: handle_notify(PubSub.WorkbenchCronCreated, cron, actor: user)
+  defp notify({:ok, %WorkbenchCron{} = cron}, :update, user),
+    do: handle_notify(PubSub.WorkbenchCronUpdated, cron, actor: user)
+  defp notify({:ok, %WorkbenchCron{} = cron}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchCronDeleted, cron, actor: user)
+  defp notify({:ok, %WorkbenchWebhook{} = webhook}, :create, user),
+    do: handle_notify(PubSub.WorkbenchWebhookCreated, webhook, actor: user)
+  defp notify({:ok, %WorkbenchWebhook{} = webhook}, :update, user),
+    do: handle_notify(PubSub.WorkbenchWebhookUpdated, webhook, actor: user)
+  defp notify({:ok, %WorkbenchWebhook{} = webhook}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchWebhookDeleted, webhook, actor: user)
   defp notify(pass, _, _), do: pass
 
   defp notify({:ok, %WorkbenchJobActivity{} = activity}, :create),

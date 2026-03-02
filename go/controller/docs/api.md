@@ -2872,6 +2872,7 @@ _Appears in:_
 | `awsAccessKeyId` _string_ | AWS Access Key ID to use, can also use IRSA to acquire credentials. |  | Optional: \{\} <br /> |
 | `awsSecretAccessKeySecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | AWS Secret Access Key to use, can also use IRSA to acquire credentials. |  | Optional: \{\} <br /> |
 | `awsRegion` _string_ | AWS Region to use. |  | Optional: \{\} <br /> |
+| `usePodIdentity` _boolean_ | UsePodIdentity enables Workload Identity for AWS authentication instead of static credentials.<br />When enabled, the controller will use the default AWS credential chain which supports EKS Pod Identity or instance metadata credentials. |  | Optional: \{\} <br /> |
 
 
 #### OpensearchConnectionSettings

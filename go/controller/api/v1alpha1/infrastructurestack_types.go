@@ -357,6 +357,21 @@ func (p *InfrastructureStack) ProjectName() string {
 	return p.Spec.ProjectRef.Name
 }
 
+// ConsoleName implements [PluralResource] interface
+func (p *InfrastructureStack) ConsoleName() string {
+	return p.StackName()
+}
+
+// ConsoleID implements [PluralResource] interface
+func (p *InfrastructureStack) ConsoleID() *string {
+	return p.Status.ID
+}
+
+// SetReadOnlyStatus sets the InfrastructureStack's readonly status.
+func (p *InfrastructureStack) SetReadOnlyStatus(readOnly bool) {
+	p.Status.ReadOnly = readOnly
+}
+
 func (p *InfrastructureStack) HasProjectRef() bool {
 	return p.Spec.ProjectRef != nil
 }

@@ -38,6 +38,95 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
 
       assert hd(read["readBindings"])["user"]["id"] == user.id
     end
+
+    test "admins can configure opensearch logging with pod identity" do
+      admin = admin_user()
+      settings = deployment_settings()
+
+      {:ok, %{data: %{"updateDeploymentSettings" => updated}}} = run_query("""
+        mutation Update($attrs: DeploymentSettingsAttributes!) {
+          updateDeploymentSettings(attributes: $attrs) {
+            id
+            logging {
+              enabled
+              driver
+              opensearch {
+                host
+                index
+                awsRegion
+                usePodIdentity
+              }
+            }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "logging" => %{
+            "enabled" => true,
+            "driver" => "OPENSEARCH",
+            "opensearch" => %{
+              "host" => "https://opensearch.example.com",
+              "index" => "logs",
+              "awsRegion" => "us-west-2",
+              "usePodIdentity" => true
+            }
+          }
+        }
+      }, %{current_user: admin})
+
+      assert updated["id"] == settings.id
+      assert updated["logging"]["enabled"] == true
+      assert updated["logging"]["driver"] == "OPENSEARCH"
+      assert updated["logging"]["opensearch"]["host"] == "https://opensearch.example.com"
+      assert updated["logging"]["opensearch"]["index"] == "logs"
+      assert updated["logging"]["opensearch"]["awsRegion"] == "us-west-2"
+      assert updated["logging"]["opensearch"]["usePodIdentity"] == true
+    end
+
+    test "admins can configure opensearch logging with static credentials" do
+      admin = admin_user()
+      settings = deployment_settings()
+
+      {:ok, %{data: %{"updateDeploymentSettings" => updated}}} = run_query("""
+        mutation Update($attrs: DeploymentSettingsAttributes!) {
+          updateDeploymentSettings(attributes: $attrs) {
+            id
+            logging {
+              enabled
+              driver
+              opensearch {
+                host
+                index
+                awsRegion
+                awsAccessKeyId
+                usePodIdentity
+              }
+            }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "logging" => %{
+            "enabled" => true,
+            "driver" => "OPENSEARCH",
+            "opensearch" => %{
+              "host" => "https://opensearch.example.com",
+              "index" => "logs",
+              "awsRegion" => "us-west-2",
+              "awsAccessKeyId" => "AKIAIOSFODNN7EXAMPLE",
+              "awsSecretAccessKey" => "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+              "usePodIdentity" => false
+            }
+          }
+        }
+      }, %{current_user: admin})
+
+      assert updated["id"] == settings.id
+      assert updated["logging"]["enabled"] == true
+      assert updated["logging"]["opensearch"]["host"] == "https://opensearch.example.com"
+      assert updated["logging"]["opensearch"]["awsAccessKeyId"] == "AKIAIOSFODNN7EXAMPLE"
+      assert updated["logging"]["opensearch"]["usePodIdentity"] == false
+    end
   end
 
   describe "enableDeployments" do

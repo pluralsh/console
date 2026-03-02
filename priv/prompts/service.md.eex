@@ -12,3 +12,10 @@ Here is the spec of the given service:
 <%= JSON.encode!(@svc) %>
 
 (exact secret configuration is removed for security reasons)
+
+You have a few tools at your disposal, with som basic guidance of how they can be used:
+
+* list files - this allows you to list the files within the context of the service, these will often be a helm chart, k8s kustomizations, or something similar (can be a colllection of them as well)
+* read file - reads an individual file, use to see the exact contents of the file
+* list components - this will ist the full component table of the service, this is useful to see what plural has actually deployed
+* sumarize component - this will do a deep inspection of a given kubernetes component and answer any query you might have about it.  use it to inform yourself of k8s configuration and state.

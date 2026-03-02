@@ -382,4 +382,261 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
       """, %{"workbenchId" => workbench.id}, %{current_user: user})
     end
   end
+
+  describe "createWorkbenchCron" do
+    test "it can create a workbench cron" do
+      workbench = insert(:workbench)
+
+      {:ok, %{data: %{"createWorkbenchCron" => cron}}} = run_query("""
+        mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {
+          createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            crontab
+            prompt
+            workbench { id }
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"crontab" => "*/5 * * * *", "prompt" => "run analysis"}}, %{current_user: admin_user()})
+
+      assert cron["workbench"]["id"] == workbench.id
+      assert cron["crontab"] == "*/5 * * * *"
+      assert cron["prompt"] == "run analysis"
+    end
+
+    test "project writers can create a cron" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, %{data: %{"createWorkbenchCron" => cron}}} = run_query("""
+        mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {
+          createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            crontab
+            workbench { id }
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"crontab" => "0 * * * *", "prompt" => "daily"}}, %{current_user: user})
+
+      assert cron["workbench"]["id"] == workbench.id
+      assert cron["crontab"] == "0 * * * *"
+    end
+
+    test "project readers cannot create a cron" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {
+          createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            crontab
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"crontab" => "*/5 * * * *", "prompt" => "run"}}, %{current_user: user})
+    end
+  end
+
+  describe "updateWorkbenchCron" do
+    test "it can update a workbench cron" do
+      workbench = insert(:workbench)
+      cron = insert(:workbench_cron, workbench: workbench, crontab: "0 * * * *", prompt: "old")
+
+      {:ok, %{data: %{"updateWorkbenchCron" => updated}}} = run_query("""
+        mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {
+          updateWorkbenchCron(id: $id, attributes: $attributes) {
+            id
+            crontab
+            prompt
+          }
+        }
+      """, %{"id" => cron.id, "attributes" => %{"crontab" => "*/10 * * * *", "prompt" => "updated prompt"}}, %{current_user: admin_user()})
+
+      assert updated["id"] == cron.id
+      assert updated["crontab"] == "*/10 * * * *"
+      assert updated["prompt"] == "updated prompt"
+    end
+
+    test "project readers cannot update a cron" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      cron = insert(:workbench_cron, workbench: workbench)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {
+          updateWorkbenchCron(id: $id, attributes: $attributes) {
+            id
+            crontab
+          }
+        }
+      """, %{"id" => cron.id, "attributes" => %{"crontab" => "*/10 * * * *"}}, %{current_user: user})
+
+      assert refetch(cron).crontab != "*/10 * * * *"
+    end
+  end
+
+  describe "deleteWorkbenchCron" do
+    test "it can delete a workbench cron" do
+      workbench = insert(:workbench)
+      cron = insert(:workbench_cron, workbench: workbench)
+
+      {:ok, %{data: %{"deleteWorkbenchCron" => deleted}}} = run_query("""
+        mutation DeleteWorkbenchCron($id: ID!) {
+          deleteWorkbenchCron(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => cron.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == cron.id
+      refute refetch(cron)
+    end
+
+    test "project readers cannot delete a cron" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      cron = insert(:workbench_cron, workbench: workbench)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation DeleteWorkbenchCron($id: ID!) {
+          deleteWorkbenchCron(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => cron.id}, %{current_user: user})
+
+      assert refetch(cron)
+    end
+  end
+
+  describe "createWorkbenchWebhook" do
+    test "it can create a workbench webhook" do
+      workbench = insert(:workbench)
+
+      {:ok, %{data: %{"createWorkbenchWebhook" => webhook}}} = run_query("""
+        mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
+          createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            name
+            workbench { id }
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"name" => "my-webhook"}}, %{current_user: admin_user()})
+
+      assert webhook["workbench"]["id"] == workbench.id
+      assert webhook["name"] == "my-webhook"
+    end
+
+    test "project writers can create a webhook" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, %{data: %{"createWorkbenchWebhook" => webhook}}} = run_query("""
+        mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
+          createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            name
+            workbench { id }
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"name" => "writer-webhook"}}, %{current_user: user})
+
+      assert webhook["name"] == "writer-webhook"
+      assert webhook["workbench"]["id"] == workbench.id
+    end
+
+    test "project readers cannot create a webhook" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
+          createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            name
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"name" => "forbidden"}}, %{current_user: user})
+    end
+  end
+
+  describe "updateWorkbenchWebhook" do
+    test "it can update a workbench webhook" do
+      workbench = insert(:workbench)
+      webhook = insert(:workbench_webhook, workbench: workbench, name: "original")
+
+      {:ok, %{data: %{"updateWorkbenchWebhook" => updated}}} = run_query("""
+        mutation UpdateWorkbenchWebhook($id: ID!, $attributes: WorkbenchWebhookAttributes!) {
+          updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+            id
+            name
+            matches { substring caseInsensitive }
+          }
+        }
+      """, %{"id" => webhook.id, "attributes" => %{"name" => "updated-name", "matches" => %{"substring" => "error", "caseInsensitive" => true}}}, %{current_user: admin_user()})
+
+      assert updated["id"] == webhook.id
+      assert updated["name"] == "updated-name"
+      assert updated["matches"]["substring"] == "error"
+      assert updated["matches"]["caseInsensitive"] == true
+    end
+
+    test "project readers cannot update a webhook" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      webhook = insert(:workbench_webhook, workbench: workbench, name: "original")
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation UpdateWorkbenchWebhook($id: ID!, $attributes: WorkbenchWebhookAttributes!) {
+          updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+            id
+            name
+          }
+        }
+      """, %{"id" => webhook.id, "attributes" => %{"name" => "updated"}}, %{current_user: user})
+
+      assert refetch(webhook).name == "original"
+    end
+  end
+
+  describe "deleteWorkbenchWebhook" do
+    test "it can delete a workbench webhook" do
+      workbench = insert(:workbench)
+      webhook = insert(:workbench_webhook, workbench: workbench)
+
+      {:ok, %{data: %{"deleteWorkbenchWebhook" => deleted}}} = run_query("""
+        mutation DeleteWorkbenchWebhook($id: ID!) {
+          deleteWorkbenchWebhook(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => webhook.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == webhook.id
+      refute refetch(webhook)
+    end
+
+    test "project readers cannot delete a webhook" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      webhook = insert(:workbench_webhook, workbench: workbench)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation DeleteWorkbenchWebhook($id: ID!) {
+          deleteWorkbenchWebhook(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => webhook.id}, %{current_user: user})
+
+      assert refetch(webhook)
+    end
+  end
 end
