@@ -41,8 +41,8 @@ docker:
 		--build-arg GIT_COMMIT="make-build" \
 		--no-cache \
 		-t ${IMG_NAME}:${IMG_TAG} \
-		-f Dockerfile \
-		.
+		-f $(ROOT_DIRECTORY)/go/ai-proxy/Dockerfile \
+		$(ROOT_DIRECTORY)
 
 .PHONY: test
 test: ## run tests
