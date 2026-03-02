@@ -513,6 +513,10 @@ type RootQueryType {
 
   chatProviderConnection(id: ID, name: String): ChatProviderConnection
 
+  issueWebhook(id: ID, name: String): IssueWebhook
+
+  issueWebhooks(after: String, first: Int, before: String, last: Int): IssueWebhookConnection
+
   aiInsight(id: ID!): AiInsight
 
   "General api to query the configured LLM for your console"
@@ -1195,6 +1199,12 @@ type RootMutationType {
 
   deleteChatProviderConnection(id: ID!): ChatProviderConnection
 
+  createIssueWebhook(attributes: IssueWebhookAttributes!): IssueWebhook
+
+  updateIssueWebhook(id: ID!, attributes: IssueWebhookAttributes!): IssueWebhook
+
+  deleteIssueWebhook(id: ID!): IssueWebhook
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
@@ -1386,6 +1396,17 @@ enum ChatProviderConnectionType {
   TEAMS
 }
 
+enum IssueWebhookProvider {
+  LINEAR
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  CANCELLED
+  COMPLETED
+}
+
 "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
 input ChatProviderConnectionAttributes {
   "the name of this chat connection"
@@ -1438,6 +1459,74 @@ type SlackConnectionConfiguration {
 type ChatProviderConnectionConnection {
   pageInfo: PageInfo!
   edges: [ChatProviderConnectionEdge]
+}
+
+"input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required."
+input IssueWebhookAttributes {
+  provider: IssueWebhookProvider
+  url: String
+  name: String
+  secret: String
+}
+
+"A webhook receiver for an issue provider like Linear"
+type IssueWebhook {
+  id: ID!
+
+  provider: IssueWebhookProvider!
+
+  name: String!
+
+  "the url for this specific webhook"
+  url: String!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type IssueWebhookConnection {
+  pageInfo: PageInfo!
+  edges: [IssueWebhookEdge]
+}
+
+"An issue synced from an external provider (e.g. Linear)"
+type Issue {
+  "the unique identifier of the issue"
+  id: ID!
+
+  "the provider (e.g., Linear, GitHub) that originated this issue"
+  provider: IssueWebhookProvider!
+
+  "the current status of the issue (e.g., open, in progress, completed, cancelled)"
+  status: IssueStatus!
+
+  "the identifier of the issue in the external provider system"
+  externalId: String!
+
+  "the URL linking to this issue on the external provider"
+  url: String!
+
+  "the title of the issue"
+  title: String!
+
+  "the detailed description or body content of the issue"
+  body: String!
+
+  "the flow this issue is associated with"
+  flow: Flow
+
+  "the workbench this issue is associated with"
+  workbench: Workbench
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type IssueConnection {
+  pageInfo: PageInfo!
+  edges: [IssueEdge]
 }
 
 enum AgentRuntimeType {
@@ -2102,8 +2191,11 @@ input WorkbenchWebhookAttributes {
   "unique name for this webhook on the workbench (required for create)"
   name: String
 
-  "observability webhook to receive events"
+  "observability webhook to receive events (either webhook_id or issue_webhook_id required)"
   webhookId: ID
+
+  "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
+  issueWebhookId: ID
 
   "criteria to match incoming webhook payloads"
   matches: WorkbenchWebhookMatchesAttributes
@@ -2322,6 +2414,12 @@ type WorkbenchJob {
   "the result for this job (sideloadable)"
   result: WorkbenchJobResult
 
+  "the alert this run was spawned from"
+  alert: Alert
+
+  "the issue this run was spawned from"
+  issue: Issue
+
   activities(after: String, first: Int, before: String, last: Int): WorkbenchJobActivityConnection
 
   insertedAt: DateTime
@@ -2530,6 +2628,9 @@ type WorkbenchWebhook {
 
   "the observability webhook that receives events"
   webhook: ObservabilityWebhook
+
+  "the issue webhook that receives events"
+  issueWebhook: IssueWebhook
 
   insertedAt: DateTime
 
@@ -3418,6 +3519,19 @@ type Flow {
   previewEnvironmentInstances(after: String, first: Int, before: String, last: Int): PreviewEnvironmentInstanceConnection
 
   vulnerabilityReports(after: String, first: Int, before: String, last: Int): VulnerabilityReportConnection
+
+  issues(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "filter issues by status (e.g. open, in_progress, completed)"
+    status: IssueStatus
+  ): IssueConnection
 
   insertedAt: DateTime
 
@@ -13725,6 +13839,16 @@ type AgentRunEdge {
 
 type AgentRuntimeEdge {
   node: AgentRuntime
+  cursor: String
+}
+
+type IssueEdge {
+  node: Issue
+  cursor: String
+}
+
+type IssueWebhookEdge {
+  node: IssueWebhook
   cursor: String
 }
 

@@ -21,7 +21,9 @@ defimpl Console.PubSub.Cacheable, for: [
 ] do
   alias Console.Schema.WorkbenchWebhook
 
-  def cache(%@for{item: %WorkbenchWebhook{webhook_id: wid} = hook}),
+  def cache(%@for{item: %WorkbenchWebhook{webhook_id: wid} = hook}) when is_binary(wid),
     do: {:del, {:wb_webhooks, wid}, hook}
+  def cache(%@for{item: %WorkbenchWebhook{issue_webhook_id: iwid} = hook}) when is_binary(iwid),
+    do: {:del, {:wb_webhooks_for_issue, iwid}, hook}
   def cache(_), do: :ok
 end

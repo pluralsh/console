@@ -51,7 +51,8 @@ defmodule Console.Deployments.Policies.Rbac do
     WorkbenchJob,
     WorkbenchTool,
     WorkbenchCron,
-    WorkbenchWebhook
+    WorkbenchWebhook,
+    IssueWebhook
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -81,6 +82,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(oidc, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%Project{} = pipe, %User{} = user, action),
     do: recurse(pipe, user, action, fn _ -> Settings.fetch() end)
+  def evaluate(%IssueWebhook{} = webhook, %User{} = user, action),
+    do: recurse(webhook, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%Pipeline{} = pipe, %User{} = user, action),
     do: recurse(pipe, user, action, & [&1.project, &1.flow])
   def evaluate(%Service{} = svc, %User{} = user, action),

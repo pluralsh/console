@@ -130,3 +130,7 @@ defmodule Console.PubSub.WorkbenchCronDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchWebhookCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchWebhookUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.WorkbenchWebhookDeleted, do: use Piazza.PubSub.Event
+
+
+defmodule Console.PubSub.IssueCreated, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.IssueUpdated, do: use Piazza.PubSub.Event

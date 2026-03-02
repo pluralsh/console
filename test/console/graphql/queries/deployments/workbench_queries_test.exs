@@ -205,6 +205,38 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert ids_equal(nodes, [webhook1, webhook2])
     end
 
+    test "it can fetch workbench webhooks with issue webhook association" do
+      workbench = insert(:workbench)
+      issue_wh = insert(:issue_webhook, name: "linear-issues")
+      wb_webhook = insert(:workbench_webhook, workbench: workbench, name: "wh-issue", issue_webhook: issue_wh)
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            webhooks(first: 5) {
+              edges {
+                node {
+                  id
+                  name
+                  issueWebhook { id name }
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      nodes = from_connection(found["webhooks"])
+      assert length(nodes) == 1
+      node = hd(nodes)
+      assert node["id"] == wb_webhook.id
+      assert node["name"] == "wh-issue"
+      assert node["issueWebhook"]["id"] == issue_wh.id
+      assert node["issueWebhook"]["name"] == "linear-issues"
+    end
+
     test "it can fetch workbench runs" do
       workbench = insert(:workbench)
       runs = insert_list(3, :workbench_job, workbench: workbench)

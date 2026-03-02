@@ -3918,6 +3918,7 @@ export type Flow = {
   icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  issues?: Maybe<IssueConnection>;
   name: Scalars['String']['output'];
   pipelines?: Maybe<PipelineConnection>;
   previewEnvironmentInstances?: Maybe<PreviewEnvironmentInstanceConnection>;
@@ -3944,6 +3945,15 @@ export type FlowAlertsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type FlowIssuesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<IssueStatus>;
 };
 
 
@@ -4954,6 +4964,86 @@ export type Invite = {
 export type InviteAttributes = {
   email?: InputMaybe<Scalars['String']['input']>;
 };
+
+/** An issue synced from an external provider (e.g. Linear) */
+export type Issue = {
+  __typename?: 'Issue';
+  /** the detailed description or body content of the issue */
+  body: Scalars['String']['output'];
+  /** the identifier of the issue in the external provider system */
+  externalId: Scalars['String']['output'];
+  /** the flow this issue is associated with */
+  flow?: Maybe<Flow>;
+  /** the unique identifier of the issue */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the provider (e.g., Linear, GitHub) that originated this issue */
+  provider: IssueWebhookProvider;
+  /** the current status of the issue (e.g., open, in progress, completed, cancelled) */
+  status: IssueStatus;
+  /** the title of the issue */
+  title: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the URL linking to this issue on the external provider */
+  url: Scalars['String']['output'];
+  /** the workbench this issue is associated with */
+  workbench?: Maybe<Workbench>;
+};
+
+export type IssueConnection = {
+  __typename?: 'IssueConnection';
+  edges?: Maybe<Array<Maybe<IssueEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type IssueEdge = {
+  __typename?: 'IssueEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Issue>;
+};
+
+export enum IssueStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  InProgress = 'IN_PROGRESS',
+  Open = 'OPEN'
+}
+
+/** A webhook receiver for an issue provider like Linear */
+export type IssueWebhook = {
+  __typename?: 'IssueWebhook';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  provider: IssueWebhookProvider;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the url for this specific webhook */
+  url: Scalars['String']['output'];
+};
+
+/** input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required. */
+export type IssueWebhookAttributes = {
+  name?: InputMaybe<Scalars['String']['input']>;
+  provider?: InputMaybe<IssueWebhookProvider>;
+  secret?: InputMaybe<Scalars['String']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type IssueWebhookConnection = {
+  __typename?: 'IssueWebhookConnection';
+  edges?: Maybe<Array<Maybe<IssueWebhookEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type IssueWebhookEdge = {
+  __typename?: 'IssueWebhookEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<IssueWebhook>;
+};
+
+export enum IssueWebhookProvider {
+  Linear = 'LINEAR'
+}
 
 export type IssuerRef = {
   __typename?: 'IssuerRef';
@@ -8097,6 +8187,7 @@ export type RootMutationType = {
   /** Creates a new infrastructure research based on a prompt */
   createInfraResearch?: Maybe<InfraResearch>;
   createInvite?: Maybe<Invite>;
+  createIssueWebhook?: Maybe<IssueWebhook>;
   createManagedNamespace?: Maybe<ManagedNamespace>;
   createObjectStore?: Maybe<ObjectStore>;
   createOidcProvider?: Maybe<OidcProvider>;
@@ -8153,6 +8244,7 @@ export type RootMutationType = {
   deleteGroupMember?: Maybe<GroupMember>;
   /** Deletes an existing infrastructure research */
   deleteInfraResearch?: Maybe<InfraResearch>;
+  deleteIssueWebhook?: Maybe<IssueWebhook>;
   deleteJob?: Maybe<Job>;
   deleteManagedNamespace?: Maybe<ManagedNamespace>;
   deleteMcpServer?: Maybe<McpServer>;
@@ -8284,6 +8376,7 @@ export type RootMutationType = {
   updateGroup?: Maybe<Group>;
   /** Updates an existing infrastructure research based on a prompt */
   updateInfraResearch?: Maybe<InfraResearch>;
+  updateIssueWebhook?: Maybe<IssueWebhook>;
   updateManagedNamespace?: Maybe<ManagedNamespace>;
   updateObjectStore?: Maybe<ObjectStore>;
   updateOidcProvider?: Maybe<OidcProvider>;
@@ -8570,6 +8663,11 @@ export type RootMutationTypeCreateInviteArgs = {
 };
 
 
+export type RootMutationTypeCreateIssueWebhookArgs = {
+  attributes: IssueWebhookAttributes;
+};
+
+
 export type RootMutationTypeCreateManagedNamespaceArgs = {
   attributes: ManagedNamespaceAttributes;
 };
@@ -8836,6 +8934,11 @@ export type RootMutationTypeDeleteGroupMemberArgs = {
 
 
 export type RootMutationTypeDeleteInfraResearchArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteIssueWebhookArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -9400,6 +9503,12 @@ export type RootMutationTypeUpdateInfraResearchArgs = {
 };
 
 
+export type RootMutationTypeUpdateIssueWebhookArgs = {
+  attributes: IssueWebhookAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateManagedNamespaceArgs = {
   attributes: ManagedNamespaceAttributes;
   id: Scalars['ID']['input'];
@@ -9781,6 +9890,8 @@ export type RootQueryType = {
   infrastructureStacks?: Maybe<InfrastructureStackConnection>;
   ingress?: Maybe<Ingress>;
   invite?: Maybe<Invite>;
+  issueWebhook?: Maybe<IssueWebhook>;
+  issueWebhooks?: Maybe<IssueWebhookConnection>;
   job?: Maybe<Job>;
   kubernetesChangelog?: Maybe<KubernetesChangelog>;
   kubernetesVersionInfo?: Maybe<Array<Maybe<KubernetesVersionInfo>>>;
@@ -10508,6 +10619,20 @@ export type RootQueryTypeIngressArgs = {
 
 export type RootQueryTypeInviteArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeIssueWebhookArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeIssueWebhooksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -14155,6 +14280,8 @@ export type WorkbenchInfrastructureAttributes = {
 export type WorkbenchJob = {
   __typename?: 'WorkbenchJob';
   activities?: Maybe<WorkbenchJobActivityConnection>;
+  /** the alert this run was spawned from */
+  alert?: Maybe<Alert>;
   /** when the run completed */
   completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** error message when the job failed */
@@ -14162,6 +14289,8 @@ export type WorkbenchJob = {
   /** the id of the run */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the issue this run was spawned from */
+  issue?: Maybe<Issue>;
   /** the prompt for this run */
   prompt?: Maybe<Scalars['String']['output']>;
   /** the result for this job (sideloadable) */
@@ -14622,6 +14751,8 @@ export type WorkbenchWebhook = {
   /** the id of the webhook */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the issue webhook that receives events */
+  issueWebhook?: Maybe<IssueWebhook>;
   /** criteria to match incoming webhook payloads */
   matches?: Maybe<WorkbenchWebhookMatches>;
   /** name of this webhook trigger */
@@ -14634,11 +14765,13 @@ export type WorkbenchWebhook = {
 };
 
 export type WorkbenchWebhookAttributes = {
+  /** issue webhook to receive events (either webhook_id or issue_webhook_id required) */
+  issueWebhookId?: InputMaybe<Scalars['ID']['input']>;
   /** criteria to match incoming webhook payloads */
   matches?: InputMaybe<WorkbenchWebhookMatchesAttributes>;
   /** unique name for this webhook on the workbench (required for create) */
   name?: InputMaybe<Scalars['String']['input']>;
-  /** observability webhook to receive events */
+  /** observability webhook to receive events (either webhook_id or issue_webhook_id required) */
   webhookId?: InputMaybe<Scalars['ID']['input']>;
 };
 

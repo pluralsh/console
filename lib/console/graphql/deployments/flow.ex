@@ -89,6 +89,12 @@ defmodule Console.GraphQl.Deployments.Flow do
       resolve &Deployments.list_vulnerability_reports_for_flow/3
     end
 
+    connection field :issues, node_type: :issue do
+      arg :status, :issue_status, description: "filter issues by status (e.g. open, in_progress, completed)"
+
+      resolve &Deployments.issues_for_flow/3
+    end
+
     timestamps()
   end
 

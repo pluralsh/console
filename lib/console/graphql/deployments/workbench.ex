@@ -65,9 +65,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_webhook_attributes do
-    field :name,       :string, description: "unique name for this webhook on the workbench (required for create)"
-    field :webhook_id, :id, description: "observability webhook to receive events"
-    field :matches,   :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
+    field :name,             :string, description: "unique name for this webhook on the workbench (required for create)"
+    field :webhook_id,       :id, description: "observability webhook to receive events (either webhook_id or issue_webhook_id required)"
+    field :issue_webhook_id, :id, description: "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
+    field :matches,          :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
   end
 
   input_object :workbench_tool_attributes do
@@ -183,6 +184,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
     field :result,       :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
+
+    field :alert,        :alert, resolve: dataloader(Deployments), description: "the alert this run was spawned from"
+    field :issue,        :issue, resolve: dataloader(Deployments), description: "the issue this run was spawned from"
 
     connection field :activities, node_type: :workbench_job_activity do
       resolve &Deployments.list_workbench_job_activities/3
@@ -307,8 +311,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,   :string, description: "name of this webhook trigger"
     field :matches, :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
 
-    field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
-    field :webhook,   :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"
+    field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
+    field :webhook,     :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"
+    field :issue_webhook, :issue_webhook, resolve: dataloader(Deployments), description: "the issue webhook that receives events"
 
     timestamps()
   end
