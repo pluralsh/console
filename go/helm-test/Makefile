@@ -1,6 +1,7 @@
 ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
+include $(WORKSPACES_DIR)/common.mk
 include $(TOOLS_MAKEFILE)
 
 .PHONY: test

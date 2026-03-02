@@ -1,6 +1,7 @@
 ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
+include $(WORKSPACES_DIR)/common.mk
 include $(TOOLS_MAKEFILE)
 
 # Image tag used to deploy controller with helm
@@ -20,55 +21,22 @@ SHELL = /usr/bin/env bash -o pipefail
 
 ##@ General
 
-.PHONY: help
-help: ## show help
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
-
-.PHONY: show-dependency-updates
-show-dependency-updates: ## show possible dependency updates
-	go list -u -f '{{if (and (not (or .Main .Indirect)) .Update)}}{{.Path}} {{.Version}} -> {{.Update.Version}}{{end}}' -m all
-
-.PHONY: update-dependencies
-update-dependencies: ## update dependencies
-	go get -u ./...
-	go mod tidy
-
 .PHONY: build
-build: manifests generate fmt vet ## build manager binary
+build: manifests generate ## build manager binary
 	go build -o bin/manager cmd/*.go
 
 .PHONY: run
-run: manifests generate fmt vet ## run a controller from your host
+run: manifests generate ## run a controller from your host
 	go run ./cmd/main.go \
 		--console-url=${PLURAL_CONSOLE_URL}/gql
 
 .PHONY: release
-release: manifests generate fmt vet ## builds release version of the app. Requires GoReleaser to work.
+release: manifests generate ## builds release version of the app. Requires GoReleaser to work.
 	goreleaser build --clean --single-target --snapshot
-
-##@ Tests / Lint
-
-.PHONY: fmt
-fmt: ## run go fmt against code
-	@go fmt ./...
-
-.PHONY: vet
-vet: ## run go vet against code
-	@go vet ./...
-
-.PHONY: lint
-lint: TOOL = golangci-lint
-lint: --tool ## run linters
-	@$(GOLANGCI_LINT) run ./...
-
-.PHONY: fix
-fix: TOOL = golangci-lint
-fix: --tool ## fix issues found by linters
-	@$(GOLANGCI_LINT) run --fix ./...
 
 .PHONY: test
 test: TOOL = envtest controller-gen mockery
-test: --tool manifests generate genmock fmt vet ## run tests
+test: --tool manifests generate genmock ## run tests
 	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(BINARIES_DIR) -p path)" go test -p 1 $$(go list ./... | grep -vE '/e2e|/benchmark') -v
 
 .PHONY: bench

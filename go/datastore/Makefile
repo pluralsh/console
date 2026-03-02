@@ -39,40 +39,20 @@ update-dependencies: ## update dependencies
 	go mod tidy
 
 .PHONY: build
-build: manifests generate fmt vet ## build manager binary
+build: manifests generate ## build manager binary
 	go build -o bin/manager cmd/main.go
 
 .PHONY: run
-run: manifests generate fmt vet ## run a controller from your host
+run: manifests generate ## run a controller from your host
 	go run ./cmd/main.go
 
 .PHONY: release
-release: manifests generate fmt vet ## builds release version of the app. Requires GoReleaser to work.
+release: manifests generate ## builds release version of the app. Requires GoReleaser to work.
 	goreleaser build --clean --single-target --snapshot
-
-##@ Tests / Lint
-
-.PHONY: fmt
-fmt: ## run go fmt against code
-	@go fmt ./...
-
-.PHONY: vet
-vet: ## run go vet against code
-	@go vet ./...
-
-.PHONY: lint
-lint: TOOL = golangci-lint
-lint: --tool ## run linters
-	@$(GOLANGCI_LINT) run ./...
-
-.PHONY: fix
-fix: TOOL = golangci-lint
-fix: --tool ## fix issues found by linters
-	@$(GOLANGCI_LINT) run --fix ./...
 
 .PHONY: test
 test: TOOL = envtest controller-gen mockery
-test: --tool manifests generate genmock fmt vet ## run tests
+test: --tool manifests generate genmock ## run tests
 	@KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(BINARIES_DIR) -p path)" go test $$(go list ./... | grep -v /e2e) -v
 
 .PHONY: e2e

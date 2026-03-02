@@ -1,23 +1,25 @@
-.PHONY: # ignore
+ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
-help:
-	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+include $(ROOT_DIRECTORY)/go/paths.mk
+include $(WORKSPACES_DIR)/common.mk
+include $(TOOLS_MAKEFILE)
 
-build: .PHONY # compiles
+.PHONY: build
+build: ## compiles
 	go build ./...
 
-test: .PHONY # tests the codebase
+.PHONY: test
+test: ## tests the codebase
 	go test ./...
 
-fix: .PHONY ## fix issues found by linters
-	golangci-lint run --fix ./...
-
-release-vsn: # tags and pushes a new release
+.PHONY: release-vsn
+release-vsn: ## tags and pushes a new release
 	@read -p "Version: " tag; \
 	git checkout main; \
 	git pull --rebase; \
 	git tag -a $$tag -m "new release"; \
 	git push origin $$tag
 
-gen-docs: # generates docs for registered liquid template functions
+.PHONY: gen-docs
+gen-docs: ## generates docs for registered liquid template functions
 	go run github.com/pluralsh/console/go/polly/internal/template

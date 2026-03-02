@@ -1,4 +1,3 @@
-##@ Build Dependencies
 ROOT_DIRECTORY ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
@@ -10,6 +9,8 @@ TOOL_VERSIONS := $(shell awk '/require \(/{flag=1; next} flag&&/\)/{exit} flag' 
 ARCH := $(shell go env GOARCH)
 OS := $(shell go env GOOS)
 KUBEBUILDER_VERSION := 4.5.1
+
+##@ Build Dependencies
 
 .PHONY: tools
 tools: ## install required tools
