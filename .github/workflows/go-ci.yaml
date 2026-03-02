@@ -35,10 +35,10 @@ jobs:
           check-latest: true
       - id: lint-packages
         run: |
-          packages=$(make --no-print-directory lint-packages | tr '\n' ' ')
+          packages=$(make --no-print-directory lint-packages)
           echo "packages=$packages" >> "$GITHUB_OUTPUT"
       - uses: golangci/golangci-lint-action@v8
         with:
           working-directory: go
           version: latest
-          args: --config .golangci.yml ${{ steps.lint-packages.outputs.packages }}
+          args: -c .golangci.yml ${{ steps.lint-packages.outputs.packages }}

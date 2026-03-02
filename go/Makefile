@@ -17,7 +17,7 @@ tools: ## install required tools
 
 .PHONY: lint-packages
 lint-packages: ## print workspace packages to lint
-	@go work edit -json | jq -r '.Use[].DiskPath' | grep -v './nexus' | grep -v './tools' | sed 's|$$|/...|'
+	@go work edit -json | jq -r '.Use[].DiskPath' | grep -v './nexus' | grep -v './tools' | sed 's|$$|/...|' | tr '\n' ' '
 
 .PHONY: lint
 lint: TOOL = golangci-lint
