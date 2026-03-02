@@ -7,6 +7,7 @@ WORKDIR /workspace
 
 # Copy required local modules
 COPY /client /workspace/client
+COPY /polly /workspace/polly
 
 WORKDIR /workspace/controller
 
