@@ -116,7 +116,7 @@ func (in *DatadogProvider) Logs(ctx context.Context, input *toolquery.LogsQueryI
 }
 
 func (in *DatadogProvider) toLogsQueryOutput(resp datadogV2.LogsListResponse) *toolquery.LogsQueryOutput {
-	logs := make([]*toolquery.LogEntry, 0)
+	logs := make([]*toolquery.LogEntry, 0, len(resp.GetData()))
 
 	for _, entry := range resp.GetData() {
 		attributes := entry.GetAttributes()
@@ -192,7 +192,7 @@ func (in *DatadogProvider) Traces(ctx context.Context, input *toolquery.TracesQu
 }
 
 func (in *DatadogProvider) toTraceQueryOutput(resp datadogV2.SpansListResponse) *toolquery.TracesQueryOutput {
-	spans := make([]*toolquery.TraceSpan, 0)
+	spans := make([]*toolquery.TraceSpan, 0, len(resp.GetData()))
 
 	for _, span := range resp.GetData() {
 		attributes := span.GetAttributes()

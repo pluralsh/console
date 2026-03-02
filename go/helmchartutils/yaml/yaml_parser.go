@@ -61,7 +61,7 @@ func ItemTreeToString(node *ItemsTreeNode) string {
 }
 
 func treeToString(node *ItemsTreeNode, currIndent, indent string) []string {
-	lines := []string{}
+	lines := make([]string, 0, len(node.children))
 	sortedKeys := make([]string, 0, len(node.children))
 	for key := range node.children {
 		sortedKeys = append(sortedKeys, key)

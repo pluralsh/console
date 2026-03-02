@@ -48,7 +48,7 @@ func compress(selectors []sidecarSelector) ([]sidecarSelector, map[string][]int)
 	}
 
 	// create new compressed SidecarSelectors.
-	compressed := make([]sidecarSelector, 0)
+	compressed := make([]sidecarSelector, 0, len(resourceTypeMap))
 	for entry, resourceType := range resourceTypeMap {
 		newSelector := sidecarSelector{
 			Path:               entry,

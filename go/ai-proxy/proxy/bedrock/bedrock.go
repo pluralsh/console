@@ -315,7 +315,7 @@ func buildBedrockComponents(
 	}
 
 	if len(openAIReq.Tools) > 0 {
-		var tools []types.Tool
+		tools := make([]types.Tool, 0, len(openAIReq.Tools))
 		for _, tool := range openAIReq.Tools {
 			schemaMap := buildBedrockToolSchema(tool)
 			inputSchemaDoc := document.NewLazyDocument(schemaMap)

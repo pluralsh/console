@@ -312,7 +312,7 @@ func (in StatefulSetController) GetLogSources(allPods []v1.Pod) LogSources {
 }
 
 func getPodNames(pods []v1.Pod) []string {
-	names := make([]string, 0)
+	names := make([]string, 0, len(pods))
 	for _, pod := range pods {
 		names = append(names, pod.Name)
 	}

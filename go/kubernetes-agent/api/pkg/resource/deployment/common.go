@@ -95,7 +95,7 @@ func getStatus(list *apps.DeploymentList, rs []apps.ReplicaSet, pods []v1.Pod, e
 }
 
 func getConditions(deploymentConditions []apps.DeploymentCondition) []common.Condition {
-	conditions := make([]common.Condition, 0)
+	conditions := make([]common.Condition, 0, len(deploymentConditions))
 
 	for _, condition := range deploymentConditions {
 		conditions = append(conditions, common.Condition{

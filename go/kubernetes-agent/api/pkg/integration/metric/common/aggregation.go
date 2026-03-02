@@ -37,11 +37,11 @@ func AggregateData(metricList []metricapi.Metric, metricName string,
 	}
 
 	aggrMap, newLabel := AggregatingMapFromDataList(metricList, metricName)
-	Xs := SortableInt64{}
+	Xs := make(SortableInt64, 0, len(aggrMap))
 	for k := range aggrMap {
 		Xs = append(Xs, k)
 	}
-	newDataPoints := []metricapi.DataPoint{}
+	newDataPoints := make([]metricapi.DataPoint, 0, len(Xs))
 	sort.Sort(Xs) // ensure X data points are sorted
 	for _, x := range Xs {
 		y := metricapi.AggregatingFunctions[aggregationName](aggrMap[x])

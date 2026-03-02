@@ -85,7 +85,7 @@ func getStatus(list *batch.CronJobList) common.ResourceStatus {
 
 func getContainerImages(cronJob *batch.CronJob) []string {
 	podSpec := cronJob.Spec.JobTemplate.Spec.Template.Spec
-	result := make([]string, 0)
+	result := make([]string, 0, len(podSpec.Containers))
 
 	for _, container := range podSpec.Containers {
 		result = append(result, container.Image)
