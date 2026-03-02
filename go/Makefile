@@ -18,18 +18,20 @@ tools: ## install required tools
 .PHONY: lint
 lint: TOOL = golangci-lint
 lint: --tool ## run linters
+	@echo "Running linters..."
 	@go work edit -json | jq -r '.Use[].DiskPath' | grep -v './tools' | \
 		while read dir; do \
-			echo "\nLinting $$dir"; \
+			echo "\nLinting $$dir/..."; \
 			$(GOLANGCI_LINT) run -c $(GOLANGCI_LINT_CONFIG) $$dir/...; \
 		done
 
 .PHONY: fix
 lint: TOOL = golangci-lint
 fix: --tool ## fix issues found by linters
+	@echo "Fixing issues found by linters..."
 	@go work edit -json | jq -r '.Use[].DiskPath' | grep -v './tools' | \
 		while read dir; do \
-			echo "\nFixing $$dir"; \
+			echo "\nFixing $$dir/..."; \
 			$(GOLANGCI_LINT) run -c $(GOLANGCI_LINT_CONFIG) --fix $$dir/...; \
 		done
 
