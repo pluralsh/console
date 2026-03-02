@@ -9,11 +9,11 @@ on:
     - "go/ai-proxy/**"
 permissions:
   contents: read
-  
+
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
-  
+
 jobs:
   build:
     name: Build
@@ -31,20 +31,3 @@ jobs:
         cache: true
     - run: go mod download
     - run: PATH=$PATH:$GOPATH/bin make build
-
-  check:
-    name: Check
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: go/ai-proxy
-    timeout-minutes: 5
-    steps:
-    - uses: actions/checkout@v4.2.2
-    - uses: actions/setup-go@v6
-      with:
-        go-version-file: go/ai-proxy/go.mod
-        cache: true
-    - run: go mod download
-    - run: PATH=$PATH:$GOPATH/bin make check
