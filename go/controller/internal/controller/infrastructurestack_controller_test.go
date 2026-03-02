@@ -263,7 +263,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetStackById", mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("GetStackByName", mock.Anything, mock.Anything).Return(nil, nil)
 			fakeConsoleClient.On("CreateStack", mock.Anything, mock.Anything).Return(test.returnCreateStack, nil)
 			reconciler := &controller.InfrastructureStackReconciler{
 				Client:        k8sClient,
@@ -354,7 +354,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetStackById", mock.Anything, mock.Anything).Return(test.returnResource, nil)
+			fakeConsoleClient.On("GetStackByName", mock.Anything, mock.Anything).Return(test.returnResource, nil)
 			fakeConsoleClient.On("UpdateStack", mock.Anything, mock.Anything, mock.Anything).Return(test.returnCreateStack, nil)
 			fakeConsoleClient.On("GetStackStatus", mock.Anything, mock.Anything).Return(&gqlclient.InfrastructureStackStatusFragment{
 				Status: gqlclient.StackStatusSuccessful,
@@ -398,7 +398,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetStack", mock.Anything, mock.Anything).Return(test.returnResource, nil)
+			fakeConsoleClient.On("GetFullStackByName", mock.Anything, mock.Anything).Return(test.returnResource, nil)
 			fakeConsoleClient.On("DeleteStack", mock.Anything, mock.Anything).Return(nil)
 			reconciler := &controller.InfrastructureStackReconciler{
 				Client:           k8sClient,

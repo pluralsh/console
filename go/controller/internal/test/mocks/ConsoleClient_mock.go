@@ -4101,6 +4101,65 @@ func (_c *ConsoleClientMock_GetFlow_Call) RunAndReturn(run func(context.Context,
 	return _c
 }
 
+// GetFullStackByName provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) GetFullStackByName(ctx context.Context, name string) (*client.InfrastructureStackFragment, error) {
+	ret := _m.Called(ctx, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetFullStackByName")
+	}
+
+	var r0 *client.InfrastructureStackFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.InfrastructureStackFragment, error)); ok {
+		return rf(ctx, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.InfrastructureStackFragment); ok {
+		r0 = rf(ctx, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.InfrastructureStackFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetFullStackByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetFullStackByName'
+type ConsoleClientMock_GetFullStackByName_Call struct {
+	*mock.Call
+}
+
+// GetFullStackByName is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+func (_e *ConsoleClientMock_Expecter) GetFullStackByName(ctx interface{}, name interface{}) *ConsoleClientMock_GetFullStackByName_Call {
+	return &ConsoleClientMock_GetFullStackByName_Call{Call: _e.mock.On("GetFullStackByName", ctx, name)}
+}
+
+func (_c *ConsoleClientMock_GetFullStackByName_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_GetFullStackByName_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetFullStackByName_Call) Return(_a0 *client.InfrastructureStackFragment, _a1 error) *ConsoleClientMock_GetFullStackByName_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetFullStackByName_Call) RunAndReturn(run func(context.Context, string) (*client.InfrastructureStackFragment, error)) *ConsoleClientMock_GetFullStackByName_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetGlobalService provides a mock function with given fields: id
 func (_m *ConsoleClientMock) GetGlobalService(id string) (*client.GlobalServiceFragment, error) {
 	ret := _m.Called(id)
@@ -6151,6 +6210,65 @@ func (_c *ConsoleClientMock_GetStackById_Call) Return(_a0 *client.Infrastructure
 }
 
 func (_c *ConsoleClientMock_GetStackById_Call) RunAndReturn(run func(context.Context, string) (*client.InfrastructureStackIDFragment, error)) *ConsoleClientMock_GetStackById_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetStackByName provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) GetStackByName(ctx context.Context, name string) (*client.InfrastructureStackIDFragment, error) {
+	ret := _m.Called(ctx, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStackByName")
+	}
+
+	var r0 *client.InfrastructureStackIDFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.InfrastructureStackIDFragment, error)); ok {
+		return rf(ctx, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.InfrastructureStackIDFragment); ok {
+		r0 = rf(ctx, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.InfrastructureStackIDFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetStackByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetStackByName'
+type ConsoleClientMock_GetStackByName_Call struct {
+	*mock.Call
+}
+
+// GetStackByName is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+func (_e *ConsoleClientMock_Expecter) GetStackByName(ctx interface{}, name interface{}) *ConsoleClientMock_GetStackByName_Call {
+	return &ConsoleClientMock_GetStackByName_Call{Call: _e.mock.On("GetStackByName", ctx, name)}
+}
+
+func (_c *ConsoleClientMock_GetStackByName_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_GetStackByName_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetStackByName_Call) Return(_a0 *client.InfrastructureStackIDFragment, _a1 error) *ConsoleClientMock_GetStackByName_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetStackByName_Call) RunAndReturn(run func(context.Context, string) (*client.InfrastructureStackIDFragment, error)) *ConsoleClientMock_GetStackByName_Call {
 	_c.Call.Return(run)
 	return _c
 }
