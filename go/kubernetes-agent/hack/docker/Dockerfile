@@ -13,21 +13,30 @@ ARG BUILD_TIME
 
 WORKDIR /workspace
 
-# Copy API module
-COPY api/go.mod api/go.sum ./api/
-COPY api/main.go ./api/
-COPY api/pkg ./api/pkg
+# Expect build context to be /go so local modules (e.g. polly) are available.
+
+# Copy API module (preserve repo layout for local module replaces)
+COPY kubernetes-agent/api/go.mod kubernetes-agent/api/go.sum ./kubernetes-agent/api/
+COPY kubernetes-agent/api/main.go ./kubernetes-agent/api/
+COPY kubernetes-agent/api/pkg ./kubernetes-agent/api/pkg
 
 # Copy KAS module (includes both kas and agentk)
-COPY kas/go.mod kas/go.sum ./kas/
-COPY kas/cmd ./kas/cmd
-COPY kas/pkg ./kas/pkg
+COPY kubernetes-agent/kas/go.mod kubernetes-agent/kas/go.sum ./kubernetes-agent/kas/
+COPY kubernetes-agent/kas/cmd ./kubernetes-agent/kas/cmd
+COPY kubernetes-agent/kas/pkg ./kubernetes-agent/kas/pkg
+
+# Copy local dependency required by kas/go.mod replace directive
+COPY polly ./polly
+
+# Create a minimal Go workspace so module sums resolve from go.work.sum.
+WORKDIR /workspace
+RUN go work init ./kubernetes-agent/api ./kubernetes-agent/kas ./polly
 
 # Set build time if not provided
 RUN if [ -z "$BUILD_TIME" ]; then BUILD_TIME="$(date -u +%Y%m%d.%H%M%S)"; fi
 
 # Build API binary
-WORKDIR /workspace/api
+WORKDIR /workspace/kubernetes-agent/api
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -trimpath \
@@ -35,7 +44,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -o /binaries/api .
 
 # Build KAS and AGENTK binaries
-WORKDIR /workspace/kas
+WORKDIR /workspace/kubernetes-agent/kas
 RUN go mod download
 
 # Build kas binary
@@ -89,4 +98,3 @@ ENTRYPOINT ["/kas"]
 # 8154 - Kubernetes API
 # 8155 - Internal API
 EXPOSE 8000 8001 8150 8151 8153 8154 8155
-

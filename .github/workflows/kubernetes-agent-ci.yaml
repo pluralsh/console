@@ -124,7 +124,7 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v5
         with:
-          context: go/kubernetes-agent
+          context: go
           file: go/kubernetes-agent/hack/docker/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}

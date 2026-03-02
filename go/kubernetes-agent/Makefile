@@ -91,7 +91,7 @@ ifndef NO_BUILD
       --build-arg VERSION=v0.0.0-prod \
       -f hack/docker/Dockerfile \
       -t kubernetes-agent:latest \
-      .
+      ..
 endif
 
 # Prepares and installs local dev version of Kubernetes Agent in our dedicated kind cluster.

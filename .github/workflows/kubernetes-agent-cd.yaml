@@ -80,7 +80,7 @@ jobs:
         id: build
         uses: docker/build-push-action@v6
         with:
-          context: go/kubernetes-agent
+          context: go
           file: go/kubernetes-agent/hack/docker/Dockerfile
           tags: ${{ env.REGISTRY_IMAGE }}
           labels: ${{ steps.meta.outputs.labels }}
