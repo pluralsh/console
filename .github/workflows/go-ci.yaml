@@ -35,4 +35,4 @@ jobs:
         with:
           working-directory: go/
           version: latest
-          automatic-module-directories: true
+          experimental: "automatic-module-directories"
