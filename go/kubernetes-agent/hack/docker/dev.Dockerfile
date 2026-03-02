@@ -19,11 +19,17 @@ RUN go install github.com/go-delve/delve/cmd/dlv@latest
 
 WORKDIR /src
 
+# Expect build context to be /go so local modules (e.g. polly) are available.
 # Copy entire source tree to preserve directory structure for debugging
 COPY . .
 
+# Create a minimal Go workspace so module sums resolve from go.work.sum.
+# If a workspace already exists in the build context, keep it.
+WORKDIR /src
+RUN [ -f /src/go.work ] || go work init ./kubernetes-agent/api ./kubernetes-agent/kas ./polly
+
 # Build API binary with debug symbols
-WORKDIR /src/api
+WORKDIR /src/kubernetes-agent/api
 RUN go mod download
 RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -gcflags="all=-N -l" \
@@ -31,7 +37,7 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build \
     -o /binaries/api .
 
 # Build KAS and AGENTK binaries with debug symbols
-WORKDIR /src/kas
+WORKDIR /src/kubernetes-agent/kas
 RUN go mod download
 
 # Build kas binary with debug symbols
@@ -75,7 +81,7 @@ COPY --from=builder /binaries/agentk /agentk
 COPY --from=builder /src /src
 
 # Copy entrypoint scripts
-COPY hack/docker/entrypoint.debug.sh /entrypoint.sh
+COPY --from=builder /src/kubernetes-agent/hack/docker/entrypoint.debug.sh /entrypoint.sh
 
 # Environment variable for application flags
 ENV APP_FLAGS=""

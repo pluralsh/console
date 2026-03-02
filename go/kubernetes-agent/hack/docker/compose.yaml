@@ -12,8 +12,8 @@ services:
     image: kubernetes-agent:latest
     container_name: kas
     build:
-      context: ../..
-      dockerfile: hack/docker/Dockerfile
+      context: ../../..
+      dockerfile: kubernetes-agent/hack/docker/Dockerfile
       args:
         VERSION: ${VERSION:?}
     entrypoint: /kas

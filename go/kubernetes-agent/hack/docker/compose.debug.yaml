@@ -12,8 +12,8 @@ services:
     image: kubernetes-agent:debug
     container_name: kas
     build:
-      context: ../..
-      dockerfile: hack/docker/dev.Dockerfile
+      context: ../../..
+      dockerfile: kubernetes-agent/hack/docker/dev.Dockerfile
       args:
         VERSION: ${VERSION:-dev}
     environment:
