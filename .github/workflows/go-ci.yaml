@@ -34,7 +34,9 @@ jobs:
           go-version-file: go/go.work
           check-latest: true
       - id: lint-packages
-        run: packages=$(make --no-print-directory lint-packages) echo "packages=$packages" >> "$GITHUB_OUTPUT"
+        run: |
+          packages=$(make --no-print-directory lint-packages | tr '\n' ' ')
+          echo "packages=$packages" >> "$GITHUB_OUTPUT"
       - uses: golangci/golangci-lint-action@v8
         with:
           working-directory: go
