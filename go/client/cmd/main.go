@@ -12,5 +12,5 @@ func main() {
 	output := map[string]map[string]string{
 		"operations": queries,
 	}
-	json.NewEncoder(os.Stdout).Encode(output)
+	_ = json.NewEncoder(os.Stdout).Encode(output)
 }
