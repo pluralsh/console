@@ -326,8 +326,15 @@ func (in *OpenAIRouter) newEmbeddingsRoute() RouteConfig {
 		GetRequestTypeInstance: func() interface{} { return &openai.OpenAIEmbeddingRequest{} },
 		RequestConverter: func(ctx *schemas.BifrostContext, req interface{}) (*schemas.BifrostRequest, error) {
 			if embeddingReq, ok := req.(*openai.OpenAIEmbeddingRequest); ok {
+				bifrostReq := embeddingReq.ToBifrostEmbeddingRequest()
+				if bifrostReq == nil {
+					return nil, errors.New("invalid request type")
+				}
+				if err := in.resolver.Apply(schemas.OpenAI, bifrostReq); err != nil {
+					return nil, err
+				}
 				return &schemas.BifrostRequest{
-					EmbeddingRequest: embeddingReq.ToBifrostEmbeddingRequest(),
+					EmbeddingRequest: bifrostReq,
 				}, nil
 			}
 			return nil, errors.New("invalid request type")
@@ -417,10 +424,11 @@ func (in *OpenAIRouter) init() Router {
 	return in
 }
 
-func NewOpenAIRouter(client *bifrostcore.Bifrost) Router {
+func NewOpenAIRouter(client *bifrostcore.Bifrost, resolver *EmbeddingResolver) Router {
 	return (&OpenAIRouter{
 		GenericRouter: &GenericRouter{
-			client: client,
+			client:   client,
+			resolver: resolver,
 		},
 	}).init()
 }

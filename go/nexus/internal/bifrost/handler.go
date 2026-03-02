@@ -19,6 +19,7 @@ type Handler struct {
 	bifrostClient *bifrostcore.Bifrost
 	logger        *zap.Logger
 	router        chi.Router
+	resolver      *EmbeddingResolver
 }
 
 // NewHandler creates a new Bifrost handler using the Bifrost Core SDK
@@ -36,11 +37,13 @@ func NewHandler(consoleClient console.Client) (*Handler, error) {
 		return nil, fmt.Errorf("failed to initialize Bifrost client: %w", err)
 	}
 
+	resolver := NewEmbeddingResolver(account)
 	h := &Handler{
 		consoleClient: consoleClient,
 		bifrostClient: bifrostClient,
 		logger:        logger,
 		router:        chi.NewRouter(),
+		resolver:      resolver,
 	}
 
 	h.registerRoutes()
@@ -49,8 +52,10 @@ func NewHandler(consoleClient console.Client) (*Handler, error) {
 }
 
 func (h *Handler) registerRoutes() {
-	NewOpenAIRouter(h.bifrostClient).RegisterRoutes(h.router)
-	NewAnthropicRouter(h.bifrostClient).RegisterRoutes(h.router)
+	NewOpenAIRouter(h.bifrostClient, h.resolver).RegisterRoutes(h.router)
+	NewAnthropicRouter(h.bifrostClient, h.resolver).RegisterRoutes(h.router)
+	NewBedrockRouter(h.bifrostClient, h.resolver).RegisterRoutes(h.router)
+	NewVertexRouter(h.bifrostClient, h.resolver).RegisterRoutes(h.router)
 }
 
 // ServeHTTP implements the http.Handler interface

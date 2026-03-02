@@ -79,6 +79,8 @@ type Provider string
 const (
 	ProviderOpenAI    Provider = "openai"
 	ProviderAnthropic Provider = "anthropic"
+	ProviderBedrock   Provider = "bedrock"
+	ProviderVertex    Provider = "vertex"
 )
 
 type RouteConfig struct {
@@ -150,6 +152,9 @@ type GenericRouter struct {
 
 	// List of route configurations
 	routes []RouteConfig
+
+	// resolver is an instance of EmbeddingResolver used for resolving embedding configurations within the router.
+	resolver *EmbeddingResolver
 }
 
 func (in *GenericRouter) RegisterRoutes(r chi.Router) {
@@ -574,6 +579,10 @@ func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.Bif
 
 func (in *GenericRouter) shouldSendDoneMarker(provider Provider, path string) bool {
 	if provider == ProviderAnthropic {
+		return false
+	}
+
+	if provider == ProviderBedrock {
 		return false
 	}
 

@@ -10,6 +10,18 @@ import (
 	"go.uber.org/zap"
 )
 
+type NexusAccount interface {
+	schemas.Account
+
+	// EmbeddingsModelGetter provides the functionality
+	// to retrieve embedding models by provider.
+	EmbeddingsModelGetter
+}
+
+type EmbeddingsModelGetter interface {
+	EmbeddingModelByProvider(provider schemas.ModelProvider) (string, error)
+}
+
 // Account implements the Bifrost account interface using Console configuration
 type Account struct {
 	consoleClient console.Client
@@ -18,12 +30,40 @@ type Account struct {
 }
 
 // NewAccount creates a new account store that bridges Console and Bifrost
-func NewAccount(ctx context.Context, consoleClient console.Client, logger *zap.Logger) schemas.Account {
+func NewAccount(ctx context.Context, consoleClient console.Client, logger *zap.Logger) NexusAccount {
 	return &Account{
 		consoleClient: consoleClient,
 		logger:        logger.With(zap.String("component", "account")),
 		ctx:           ctx,
 	}
+}
+
+func (in *Account) EmbeddingModelByProvider(provider schemas.ModelProvider) (string, error) {
+	aiConfig, err := in.consoleClient.GetAiConfig(in.ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to get AI config: %w", err)
+	}
+
+	if !aiConfig.GetEnabled() {
+		return "", fmt.Errorf("AI is disabled in Console")
+	}
+
+	switch provider {
+	case schemas.OpenAI:
+		if cfg := aiConfig.GetOpenai(); cfg != nil && cfg.GetEmbeddingModel() != "" {
+			return cfg.GetEmbeddingModel(), nil
+		}
+	case schemas.Vertex:
+		if cfg := aiConfig.GetVertexAi(); cfg != nil && cfg.GetEmbeddingModel() != "" {
+			return cfg.GetEmbeddingModel(), nil
+		}
+	case schemas.Bedrock:
+		if cfg := aiConfig.GetBedrock(); cfg != nil && cfg.GetEmbeddingModelId() != "" {
+			return cfg.GetEmbeddingModelId(), nil
+		}
+	}
+
+	return "", nil
 }
 
 // GetConfiguredProviders returns the list of configured providers from Console
@@ -48,6 +88,14 @@ func (in *Account) GetConfiguredProviders() ([]schemas.ModelProvider, error) {
 		providers = append(providers, schemas.Anthropic)
 	}
 
+	if cfg := aiConfig.GetVertexAi(); cfg != nil && cfg.GetProject() != "" && cfg.GetLocation() != "" {
+		providers = append(providers, schemas.Vertex)
+	}
+
+	if cfg := aiConfig.GetBedrock(); cfg != nil && cfg.GetRegion() != "" {
+		providers = append(providers, schemas.Bedrock)
+	}
+
 	if len(providers) == 0 {
 		return nil, fmt.Errorf("no AI providers configured")
 	}
@@ -70,7 +118,12 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 			return nil, fmt.Errorf("OpenAI not configured")
 		}
 
-		in.logger.Debug("OpenAI configuration", zap.String("model", cfg.GetModel()), zap.String("embedding_model", cfg.GetEmbeddingModel()), zap.String("tool_model", cfg.GetToolModel()))
+		in.logger.Debug("OpenAI configuration",
+			zap.String("model", cfg.GetModel()),
+			zap.String("embedding_model", cfg.GetEmbeddingModel()),
+			zap.String("tool_model", cfg.GetToolModel()),
+		)
+
 		return []schemas.Key{
 			{
 				Value: schemas.EnvVar{
@@ -99,6 +152,83 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 				Weight:         1.0,
 			},
 		}, nil
+
+	case schemas.Vertex:
+		cfg := aiConfig.GetVertexAi()
+		if cfg == nil || cfg.GetProject() == "" || cfg.GetLocation() == "" {
+			return nil, fmt.Errorf("vertex ai not configured")
+		}
+
+		in.logger.Debug("Vertex AI configuration",
+			zap.String("model", cfg.GetModel()),
+			zap.String("embedding_model", cfg.GetEmbeddingModel()),
+			zap.String("tool_model", cfg.GetToolModel()),
+		)
+
+		return []schemas.Key{
+			{
+				Value: schemas.EnvVar{
+					Val: cfg.GetApiKey(),
+				},
+				Models: filterModels(append([]string{
+					cfg.GetModel(),
+					cfg.GetEmbeddingModel(),
+					cfg.GetToolModel(),
+				}, cfg.GetProxyModels()...)),
+				VertexKeyConfig: &schemas.VertexKeyConfig{
+					ProjectID: schemas.EnvVar{
+						Val: cfg.GetProject(),
+					},
+					Region: schemas.EnvVar{
+						Val: cfg.GetLocation(),
+					},
+					AuthCredentials: schemas.EnvVar{
+						Val: cfg.GetServiceAccountJson(),
+					},
+				},
+				UseForBatchAPI: lo.ToPtr(true),
+				Weight:         1.0,
+			},
+		}, nil
+
+	case schemas.Bedrock:
+		cfg := aiConfig.GetBedrock()
+		if cfg == nil || cfg.GetRegion() == "" {
+			return nil, fmt.Errorf("bedrock not configured")
+		}
+
+		in.logger.Debug("Bedrock configuration",
+			zap.String("model", cfg.GetModelId()),
+			zap.String("embedding_model", cfg.GetEmbeddingModelId()),
+			zap.String("tool_model", cfg.GetToolModelId()),
+		)
+
+		key := schemas.Key{
+			Models: filterModels(append([]string{
+				cfg.GetModelId(),
+				cfg.GetEmbeddingModelId(),
+				cfg.GetToolModelId(),
+			}, cfg.GetProxyModels()...)),
+			BedrockKeyConfig: &schemas.BedrockKeyConfig{
+				AccessKey: schemas.EnvVar{
+					Val: cfg.GetAwsAccessKeyId(),
+				},
+				SecretKey: schemas.EnvVar{
+					Val: cfg.GetAwsSecretAccessKey(),
+				},
+				Region: lo.ToPtr(schemas.EnvVar{
+					Val: cfg.GetRegion(),
+				}),
+			},
+			UseForBatchAPI: lo.ToPtr(true),
+			Weight:         1.0,
+		}
+
+		if cfg.GetAccessToken() != "" {
+			key.Value = schemas.EnvVar{Val: cfg.GetAccessToken()}
+		}
+
+		return []schemas.Key{key}, nil
 
 	default:
 		return nil, fmt.Errorf("unsupported provider: %s", provider)
@@ -129,6 +259,12 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 		if cfg := aiConfig.GetAnthropic(); cfg != nil && cfg.GetBaseUrl() != "" {
 			config.NetworkConfig.BaseURL = cfg.GetBaseUrl()
 		}
+
+	case schemas.Vertex:
+		// Vertex uses project/location + auth in keys; no base URL override required.
+
+	case schemas.Bedrock:
+		// Bedrock uses AWS region + credentials in keys; no base URL override required.
 	}
 
 	return config, nil

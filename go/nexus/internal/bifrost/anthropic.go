@@ -9,6 +9,7 @@ import (
 
 	bifrostcore "github.com/maximhq/bifrost/core"
 	"github.com/maximhq/bifrost/core/providers/anthropic"
+	"github.com/maximhq/bifrost/core/providers/openai"
 	"github.com/maximhq/bifrost/core/schemas"
 	"github.com/pluralsh/console/go/nexus/internal/log"
 	"go.uber.org/zap"
@@ -89,6 +90,45 @@ func (in *AnthropicRouter) newMessagesRoute() RouteConfig {
 			ErrorConverter: func(ctx *schemas.BifrostContext, err *schemas.BifrostError) interface{} {
 				return err
 			},
+		},
+	}
+}
+
+func (in *AnthropicRouter) newEmbeddingsRoute() RouteConfig {
+	return RouteConfig{
+		Provider:               ProviderAnthropic,
+		Path:                   "/v1/embeddings",
+		Method:                 http.MethodPost,
+		GetRequestTypeInstance: func() interface{} { return &openai.OpenAIEmbeddingRequest{} },
+		RequestConverter: func(ctx *schemas.BifrostContext, req interface{}) (*schemas.BifrostRequest, error) {
+			embeddingReq, ok := req.(*openai.OpenAIEmbeddingRequest)
+			if !ok {
+				return nil, errors.New("invalid request type")
+			}
+
+			bifrostReq := embeddingReq.ToBifrostEmbeddingRequest()
+			if bifrostReq == nil {
+				return nil, errors.New("invalid request type")
+			}
+
+			if err := in.resolver.Apply(schemas.Anthropic, bifrostReq); err != nil {
+				return nil, err
+			}
+
+			return &schemas.BifrostRequest{
+				EmbeddingRequest: bifrostReq,
+			}, nil
+		},
+		EmbeddingResponseConverter: func(ctx *schemas.BifrostContext, resp *schemas.BifrostEmbeddingResponse) (interface{}, error) {
+			if resp.ExtraFields.Provider == schemas.OpenAI {
+				if resp.ExtraFields.RawResponse != nil {
+					return resp.ExtraFields.RawResponse, nil
+				}
+			}
+			return resp, nil
+		},
+		ErrorConverter: func(ctx *schemas.BifrostContext, err *schemas.BifrostError) interface{} {
+			return anthropic.ToAnthropicChatCompletionError(err)
 		},
 	}
 }
@@ -290,16 +330,18 @@ func (in *AnthropicRouter) init() Router {
 	in.routes = []RouteConfig{
 		in.newCompleteRoute(),
 		in.newMessagesRoute(),
+		in.newEmbeddingsRoute(),
 	}
 	in.routes = append(in.routes, in.newFileRouteConfigs()...)
 
 	return in
 }
 
-func NewAnthropicRouter(client *bifrostcore.Bifrost) Router {
+func NewAnthropicRouter(client *bifrostcore.Bifrost, resolver *EmbeddingResolver) Router {
 	return (&AnthropicRouter{
 		GenericRouter: &GenericRouter{
-			client: client,
+			client:   client,
+			resolver: resolver,
 		},
 	}).init()
 }
