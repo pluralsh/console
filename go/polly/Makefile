@@ -12,13 +12,19 @@ build: ## compiles
 test: ## tests the codebase
 	go test ./...
 
-.PHONY: release-vsn
-release-vsn: ## tags and pushes a new release
-	@read -p "Version: " tag; \
-	git checkout main; \
-	git pull --rebase; \
-	git tag -a $$tag -m "new release"; \
-	git push origin $$tag
+.PHONY: release
+release: ## create and push a tag with new polly version
+	@LATEST_TAG=$$(git describe --tags `git rev-list --tags --max-count=1` --match="go/polly/*" 2>/dev/null) ;\
+	if [ $$? -ne 0 ]; then \
+	  	echo Could not find latest tag ;\
+	else \
+  		echo Latest tag: $${LATEST_TAG} ;\
+	fi ;\
+	read -p "Version (without prefix): " tag ;\
+	git checkout master ;\
+	git pull --rebase ;\
+	git tag -a go/polly/$${tag} -m "release go/polly/$${tag}" ;\
+	git push origin go/polly/$${tag}
 
 .PHONY: gen-docs
 gen-docs: ## generates docs for registered liquid template functions
