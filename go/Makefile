@@ -15,16 +15,20 @@ tools: ## install required tools
 
 ##@ Static checks
 
+.PHONY: lint-packages
+lint-packages: ## print workspace packages to lint
+	@go work edit -json | jq -r '.Use[].DiskPath' | grep -v './nexus' | grep -v './tools' | sed 's|$$|/...|'
+
 .PHONY: lint
 lint: TOOL = golangci-lint
 lint: --tool ## run linters
-	@packages=$$(go work edit -json | jq -r '.Use[].DiskPath' | grep -v './nexus' | grep -v './tools' | sed 's|$$|/...|'); \
+	@packages=$$($(MAKE) --no-print-directory lint-packages); \
 		$(GOLANGCI_LINT) run -c $(GOLANGCI_LINT_CONFIG) $$packages
 
 .PHONY: fix
 lint: TOOL = golangci-lint
 fix: --tool ## fix issues found by linters
-	@packages=$$(go work edit -json | jq -r '.Use[].DiskPath' | grep -v './nexus' | grep -v './tools' | sed 's|$$|/...|'); \
+	@packages=$$($(MAKE) --no-print-directory lint-packages); \
 		$(GOLANGCI_LINT) run -c $(GOLANGCI_LINT_CONFIG) --fix $$packages
 
 # Image URL to use all building/pushing image targets

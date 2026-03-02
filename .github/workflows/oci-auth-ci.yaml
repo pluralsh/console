@@ -50,17 +50,3 @@ jobs:
           cache: true
       - run: go mod download
       - run: PATH=$PATH:$GOPATH/bin make test
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
-        with:
-          go-version-file: go/oci-auth/go.mod
-          check-latest: true
-      - uses: golangci/golangci-lint-action@v8
-        with:
-          version: v2.4.0
-          working-directory: go/oci-auth
-          args: --timeout=30m

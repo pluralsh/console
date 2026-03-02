@@ -85,22 +85,6 @@ jobs:
           check-latest: true
       - run: PATH=$PATH:$GOPATH/bin make test
 
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go/go.work
-          check-latest: true
-      - uses: golangci/golangci-lint-action@v7
-        with:
-          working-directory: go/kubernetes-agent/kas
-          version: v2.4.0
-
   publish:
     name: Publish image
     runs-on: ubuntu-latest

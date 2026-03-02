@@ -44,16 +44,3 @@ jobs:
           go-version-file: go/go.work
           check-latest: true
       - run: PATH=$PATH:$GOPATH/bin make test
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go/go.work
-          check-latest: true
-      - uses: golangci/golangci-lint-action@v8
-        with:
-          version: latest
-          working-directory: go/polly
