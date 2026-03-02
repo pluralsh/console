@@ -286,7 +286,6 @@ func (r *InfrastructureStackReconciler) addOrRemoveFinalizer(ctx context.Context
 				}
 			}
 			return lo.ToPtr(common.WaitForResources()), nil
-
 		}
 		controllerutil.RemoveFinalizer(stack, InfrastructureStackFinalizer)
 		logger.Info("stack deleted successfully")
