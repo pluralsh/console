@@ -3,6 +3,11 @@ on:
   push:
     tags:
       - 'v*.*.*'
+    paths:
+      - 'go/kubernetes-agent/**'
+      - 'go/polly/**'
+      - 'go/client/**'
+      - '.github/workflows/kubernetes-agent-cd.yaml'
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"

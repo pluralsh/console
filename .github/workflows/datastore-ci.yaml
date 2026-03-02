@@ -6,12 +6,16 @@ on:
     paths:
       - ".github/workflows/datastore.yaml"
       - "go/datastore/**"
+      - "go/polly/**"
+      - "go/client/**"
   pull_request:
     branches:
       - "**"
     paths:
       - ".github/workflows/datastore.yaml"
       - "go/datastore/**"
+      - "go/polly/**"
+      - "go/client/**"
 permissions:
   contents: read
 env:

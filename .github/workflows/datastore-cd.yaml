@@ -5,6 +5,8 @@ on:
       - 'master'
     paths:
       - 'go/datastore/**'
+      - 'go/polly/**'
+      - 'go/client/**'
       - '.github/workflows/datastore-cd.yaml'
   push:
     tags:

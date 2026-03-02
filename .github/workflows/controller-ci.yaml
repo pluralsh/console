@@ -6,6 +6,8 @@ on:
     paths:
       - ".github/workflows/controller.yaml"
       - "go/controller/**"
+      - "go/polly/**"
+      - "go/client/**"
       - "lib/**"
       - "schema/**"
   pull_request:
@@ -14,6 +16,8 @@ on:
     paths:
       - ".github/workflows/controller.yaml"
       - "go/controller/**"
+      - "go/polly/**"
+      - "go/client/**"
       - "lib/**"
       - "schema/**"
 permissions:

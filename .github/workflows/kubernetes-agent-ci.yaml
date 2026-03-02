@@ -6,12 +6,16 @@ on:
     paths:
       - ".github/workflows/kubernetes-agent-ci.yaml"
       - "go/kubernetes-agent/**"
+      - "go/polly/**"
+      - "go/client/**"
   pull_request:
     branches:
       - "**"
     paths:
       - ".github/workflows/kubernetes-agent-ci.yaml"
       - "go/kubernetes-agent/**"
+      - "go/polly/**"
+      - "go/client/**"
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
