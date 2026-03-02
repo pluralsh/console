@@ -12,7 +12,7 @@ import (
 	ollamaapi "github.com/ollama/ollama/api"
 	"github.com/ollama/ollama/openai"
 	"github.com/pluralsh/console/go/ai-proxy/api"
-	"github.com/pluralsh/polly/algorithms"
+	"github.com/pluralsh/console/go/polly/algorithms"
 	"k8s.io/klog/v2"
 )
 

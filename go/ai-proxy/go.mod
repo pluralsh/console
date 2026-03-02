@@ -2,6 +2,8 @@ module github.com/pluralsh/console/go/ai-proxy
 
 go 1.25.7
 
+replace github.com/pluralsh/console/go/polly => ../polly
+
 require (
 	github.com/andybalholm/brotli v1.2.0
 	github.com/aws/aws-sdk-go-v2 v1.41.0
@@ -10,7 +12,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
 	github.com/ollama/ollama v0.6.6
-	github.com/pluralsh/polly v0.3.6
+	github.com/pluralsh/console/go/polly v0.0.0-00010101000000-000000000000
 	github.com/samber/lo v1.52.0
 	github.com/spf13/pflag v1.0.10
 	golang.org/x/oauth2 v0.34.0

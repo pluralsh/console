@@ -2,6 +2,11 @@ module github.com/pluralsh/console/go/controller
 
 go 1.25.7
 
+replace (
+	github.com/pluralsh/console/go/client => ../client
+	github.com/pluralsh/console/go/polly => ../polly
+)
+
 require (
 	github.com/DataDog/dd-trace-go/contrib/k8s.io/client-go/v2 v2.5.0
 	github.com/DataDog/dd-trace-go/v2 v2.5.0
@@ -12,7 +17,7 @@ require (
 	github.com/onsi/gomega v1.39.1
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/pluralsh/console/go/client v1.61.0
-	github.com/pluralsh/polly v0.3.6
+	github.com/pluralsh/console/go/polly v0.0.0-00010101000000-000000000000
 	github.com/samber/lo v1.50.0
 	github.com/stretchr/testify v1.11.1
 	github.com/vektah/gqlparser/v2 v2.5.30
@@ -162,5 +167,3 @@ require (
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.2-0.20260122202528-d9cc6641c482 // indirect
 )
-
-replace github.com/pluralsh/console/go/client => ../client

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/polly/algorithms"
+	"github.com/pluralsh/console/go/polly/algorithms"
 	"go.uber.org/zap"
 
 	"github.com/pluralsh/console/go/kubernetes-agent/pkg/plural"

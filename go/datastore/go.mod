@@ -2,7 +2,10 @@ module github.com/pluralsh/console/go/datastore
 
 go 1.25.7
 
-replace github.com/pluralsh/console/go/client => ../client
+replace (
+	github.com/pluralsh/console/go/polly => ../polly
+	github.com/pluralsh/console/go/client => ../client
+)
 
 require (
 	github.com/elastic/go-elasticsearch/v9 v9.3.1
@@ -11,7 +14,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
 	github.com/pluralsh/console/go/controller v0.0.0-20250617024024-ba6fc3257d84
-	github.com/pluralsh/polly v0.2.0
+	github.com/pluralsh/console/go/polly v0.0.0-00010101000000-000000000000
 	github.com/samber/lo v1.51.0
 	github.com/stretchr/testify v1.11.1
 	k8s.io/api v0.34.1
@@ -91,6 +94,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pluralsh/console/go/client v1.28.3 // indirect
+	github.com/pluralsh/polly v0.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/prometheus/client_golang v1.22.0 // indirect

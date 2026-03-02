@@ -223,8 +223,6 @@ github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 h1:GFCKgm
 github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10/go.mod h1:t/avpk3KcrXxUnYOhZhMXJlSEyie6gQbtLq5NM3loB8=
 github.com/pluralsh/console/go/client v1.56.0 h1:J3I9U7bYQ4CQST36vQ4NerVyhX4PGws6U6JmjVjG+VU=
 github.com/pluralsh/console/go/client v1.56.0/go.mod h1:EwMrcI23s61oLY3etCVc3NE5RYxgfoiokvU0O7KDOQg=
-github.com/pluralsh/polly v0.3.5 h1:DQlr/c4UI+BBlPErH87BxDSmWDDjQQe2TQkEf51Y484=
-github.com/pluralsh/polly v0.3.5/go.mod h1:gk48el0JCoEV2FZXW5DV5FvlDf4G/01Wb+Py7attQjU=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=

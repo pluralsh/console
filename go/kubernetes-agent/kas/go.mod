@@ -2,6 +2,8 @@ module github.com/pluralsh/console/go/kubernetes-agent
 
 go 1.25.7
 
+replace github.com/pluralsh/console/go/polly => ../../polly
+
 require (
 	github.com/alicebob/miniredis/v2 v2.35.0
 	github.com/ash2k/stager v0.4.0
@@ -14,7 +16,7 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3
 	github.com/pluralsh/console/go/client v1.56.0
-	github.com/pluralsh/polly v0.3.5
+	github.com/pluralsh/console/go/polly v0.0.0-00010101000000-000000000000
 	github.com/prometheus/client_golang v1.23.2
 	github.com/redis/rueidis v1.0.68
 	github.com/redis/rueidis/mock v1.0.68
@@ -189,5 +191,3 @@ require (
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 )
-
-replace google.golang.org/genproto => google.golang.org/genproto v0.0.0-20251124214823-79d6a2a48846

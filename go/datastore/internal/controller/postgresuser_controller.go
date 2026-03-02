@@ -7,7 +7,7 @@ import (
 
 	"github.com/pluralsh/console/go/datastore/internal/client/postgres"
 	"github.com/pluralsh/console/go/datastore/internal/utils"
-	"github.com/pluralsh/polly/containers"
+	"github.com/pluralsh/console/go/polly/containers"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

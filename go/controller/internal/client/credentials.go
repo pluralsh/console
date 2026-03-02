@@ -5,7 +5,7 @@ import (
 
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"github.com/pluralsh/polly/http"
+	"github.com/pluralsh/console/go/polly/http"
 )
 
 func (c *client) UseCredentials(namespace string, credentialsCache credentials.NamespaceCredentialsCache) (string, error) {

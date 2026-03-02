@@ -4,7 +4,7 @@ import (
 	"github.com/pluralsh/console/go/controller/cmd/args"
 	"github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/log"
-	pollycache "github.com/pluralsh/polly/cache"
+	pollycache "github.com/pluralsh/console/go/polly/cache"
 	"github.com/samber/lo"
 	"k8s.io/klog/v2"
 )
