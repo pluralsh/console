@@ -21,10 +21,9 @@ services:
       dockerfile: Dockerfile.sidecar
     depends_on:
       - flaky-service
+    network_mode: "service:flaky-service"
     volumes:
       - flaky-service:/app/service
-    networks:
-      - flaky-service-network    
 
 volumes:
   flaky-service:
@@ -33,4 +32,3 @@ volumes:
 networks:
   flaky-service-network:
     driver: bridge
-  
