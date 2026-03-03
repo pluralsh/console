@@ -1,0 +1,8 @@
+services:
+  polly-test:
+    build:
+      context: ../..
+      dockerfile: go/test.Dockerfile
+      args:
+        MODULE_PATH: go/polly
+    command: go test ./...
