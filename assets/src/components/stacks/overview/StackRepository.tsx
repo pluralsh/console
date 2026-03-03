@@ -6,24 +6,25 @@ import {
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { isEmpty } from 'lodash'
 import { useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'
-import { isEmpty } from 'lodash'
 
+import {
+  cleanRefs,
+  RepositorySelector,
+} from 'components/cd/services/deployModal/DeployServiceSettingsGit'
+import { StackOutletContextT } from 'components/stacks/Stacks'
+import { GqlError } from 'components/utils/Alert'
+import { OverlineH1 } from 'components/utils/typography/Text'
 import {
   useGitRepositoriesQuery,
   useGitRepositoryQuery,
   useUpdateStackMutation,
-} from '../../../generated/graphql'
-import { RepositorySelector } from '../../cd/services/deployModal/DeployServiceSettingsGit'
-import { mapExistingNodes } from '../../../utils/graphql'
-import { GqlError } from '../../utils/Alert'
-
-import { StackOutletContextT } from '../Stacks'
-
-import { OverlineH1 } from '../../utils/typography/Text'
+} from 'generated/graphql'
+import { mapExistingNodes } from 'utils/graphql'
 
 export default function StackRepository() {
   const theme = useTheme()
@@ -157,8 +158,4 @@ export default function StackRepository() {
       </div>
     </Card>
   )
-}
-
-const cleanRefs = (refs: string[] | null) => {
-  return refs?.map((ref) => ref.replace(/^(?:\/)?(?:refs\/heads\/)?/, '')) ?? []
 }

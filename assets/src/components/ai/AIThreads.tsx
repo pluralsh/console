@@ -17,7 +17,7 @@ import { AI_SETTINGS_AI_PROVIDER_ABS_PATH } from '../../routes/settingsRoutesCon
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { isEmpty } from 'lodash'
-import { CSSProperties, useTheme } from 'styled-components'
+import { CSSProperties, StyledObject, useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql.ts'
 import { Body1BoldP } from '../utils/typography/Text.tsx'
 import { AITableEntry, sortThreadsOrPins } from './AITableEntry.tsx'
@@ -79,9 +79,9 @@ export function EmptyStateCompact({
 }: {
   message: string
   description: string
-  icon: ReactNode
+  icon?: ReactNode
   children?: ReactNode
-  cssProps?: CSSProperties
+  cssProps?: StyledObject
 }) {
   const theme = useTheme()
 
@@ -98,7 +98,7 @@ export function EmptyStateCompact({
         ...cssProps,
       }}
     >
-      <div css={{ margin: theme.spacing.medium }}>{icon}</div>
+      {icon && <div css={{ margin: theme.spacing.medium }}>{icon}</div>}
       <Body1BoldP>{message}</Body1BoldP>
       <p
         css={{
