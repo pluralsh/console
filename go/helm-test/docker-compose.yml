@@ -1,0 +1,8 @@
+services:
+  helm-test:
+    build:
+      context: ../..
+      dockerfile: go/build.Dockerfile
+      args:
+        MODULE_PATH: go/helm-test
+    command: go build ./...
