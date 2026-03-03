@@ -1,8 +1,10 @@
-import { Flex, HistoryIcon, Card } from '@pluralsh/design-system'
+import { Card, Flex, HistoryIcon } from '@pluralsh/design-system'
 import { ReactNode } from 'react'
 import styled from 'styled-components'
 import { TestSuites } from 'utils/junitParse'
 import { StackedText } from '../table/StackedText'
+import { getCountFromStatus } from './JUnitTable'
+import { JUnitTestStatus } from './JUnitTableExpanderRow'
 
 export function JUnitSuitesMetadata({
   testSuites,
@@ -21,11 +23,19 @@ export function JUnitSuitesMetadata({
       />
       <MetadataItem
         heading="Failures"
-        value={testSuites.failures ?? 0}
+        value={getCountFromStatus(testSuites, JUnitTestStatus.Failed)}
       />
       <MetadataItem
         heading="Errors"
-        value={testSuites.errors ?? 0}
+        value={getCountFromStatus(testSuites, JUnitTestStatus.Error)}
+      />
+      <MetadataItem
+        heading="Passed"
+        value={getCountFromStatus(testSuites, JUnitTestStatus.Passed)}
+      />
+      <MetadataItem
+        heading="Skipped"
+        value={getCountFromStatus(testSuites, JUnitTestStatus.Skipped)}
       />
       <MetadataItem
         heading={

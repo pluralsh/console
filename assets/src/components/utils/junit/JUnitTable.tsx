@@ -191,15 +191,36 @@ const testStatusToSeverity: Record<JUnitTestStatus, ChipSeverity> = {
   [JUnitTestStatus.Error]: 'warning',
   [JUnitTestStatus.Skipped]: 'info',
 }
-const getCountFromStatus = (
+
+export const getCountFromStatus = (
   testSuites: TestSuites,
   status: JUnitTestStatus
 ) => {
-  const { failures = 0, errors = 0, tests = 0, skipped = 0 } = testSuites
-  if (status === JUnitTestStatus.Failed) return failures
-  if (status === JUnitTestStatus.Error) return errors
-  if (status === JUnitTestStatus.Skipped) return skipped
+  const stats = testSuites?.testsuite?.reduce(
+    (acc, suite) => ({
+      failures: (acc.failures ?? 0) + (suite.failures ?? 0),
+      tests: (acc.tests ?? 0) + (suite.tests ?? 0),
+      skipped: (acc.skipped ?? 0) + (suite.skipped ?? 0),
+      errors: (acc.errors ?? 0) + (suite.errors ?? 0),
+    }),
+    { failures: 0, tests: 0, skipped: 0, errors: 0 }
+  ) ?? {
+    failures: testSuites.failures ?? 0,
+    tests: testSuites?.tests ?? 0,
+    skipped: testSuites?.skipped ?? 0,
+    errors: testSuites?.errors ?? 0,
+  }
+
+  if (status === JUnitTestStatus.Failed) return stats.failures ?? 0
+  if (status === JUnitTestStatus.Skipped) return stats.skipped ?? 0
+  if (status === JUnitTestStatus.Error) return stats.errors ?? 0
   if (status === JUnitTestStatus.Passed)
-    return Math.max(0, tests - failures - errors - skipped)
+    return Math.max(
+      0,
+      (stats.tests ?? 0) -
+        (stats.failures ?? 0) -
+        (stats.errors ?? 0) -
+        (stats.skipped ?? 0)
+    )
   return 0
 }
