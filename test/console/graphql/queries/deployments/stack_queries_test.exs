@@ -236,6 +236,29 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       assert from_connection(found)
              |> ids_equal(stacks)
     end
+
+    test "it can list stacks by status" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member, user: user)
+      failed_stacks = insert_list(2, :stack, status: :failed, write_bindings: [%{group_id: group.id}])
+      insert_list(2, :stack, status: :successful, write_bindings: [%{group_id: group.id}])
+      insert(:stack, status: :pending, write_bindings: [%{group_id: group.id}])
+
+      {:ok, %{data: %{"infrastructureStacks" => found}}} = run_query("""
+        query Stacks($status: StackStatus!) {
+          infrastructureStacks(first: 10, status: $status) {
+            edges {
+              node { id status }
+            }
+          }
+        }
+      """, %{"status" => "FAILED"}, %{current_user: user})
+
+      nodes = from_connection(found)
+      assert length(nodes) == 2
+      assert Enum.all?(nodes, &(&1["status"] == "FAILED"))
+      assert ids_equal(nodes, failed_stacks)
+    end
   end
 
   describe "clusterStackRuns" do

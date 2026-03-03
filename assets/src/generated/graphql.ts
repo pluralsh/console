@@ -10636,6 +10636,7 @@ export type RootQueryTypeInfrastructureStacksArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<StackStatus>;
   tagQuery?: InputMaybe<TagQuery>;
 };
 

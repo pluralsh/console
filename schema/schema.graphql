@@ -411,7 +411,22 @@ type RootQueryType {
   stackDefinitions(after: String, first: Int, before: String, last: Int): StackDefinitionConnection
 
   infrastructureStacks(
-    after: String, first: Int, before: String, last: Int, q: String, projectId: ID, tagQuery: TagQuery
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    q: String
+
+    projectId: ID
+
+    tagQuery: TagQuery
+
+    "filter stacks by status"
+    status: StackStatus
   ): InfrastructureStackConnection
 
   "fetches the files from a stack's git tarball"

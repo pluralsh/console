@@ -656,6 +656,7 @@ defmodule Console.GraphQl.Deployments.Stack do
       arg :q,          :string
       arg :project_id, :id
       arg :tag_query,  :tag_query
+      arg :status,     :stack_status, description: "filter stacks by status"
 
       resolve &Deployments.list_stacks/2
     end
