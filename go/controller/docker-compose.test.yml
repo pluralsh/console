@@ -1,0 +1,14 @@
+services:
+  controller-test:
+    build:
+      context: ../..
+      dockerfile: go/test.Dockerfile
+      args:
+        MODULE_PATH: go/controller
+    environment:
+      ENVTEST_K8S_VERSION: "1.28.3"
+    command: >-
+      sh -c "
+      KUBEBUILDER_ASSETS=\"$(/workspace/binaries/setup-envtest use $$ENVTEST_K8S_VERSION --bin-dir /workspace/binaries -p path)\" \
+      go test -p 1 $(go list ./... | grep -vE '/e2e|/benchmark') -v
+      "
