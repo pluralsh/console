@@ -113,14 +113,12 @@ export const TdBasic = styled.td({
 })
 
 export function TdGhostLink({
-  width,
   link,
 }: {
-  width: number
   link: Nullable<string | ReactElement>
 }) {
   return (
-    <TdGhostLinkSC style={{ ['--ghost-link-width']: `${width}px` }}>
+    <TdGhostLinkSC>
       {typeof link === 'string' ? <a href={link} /> : link}
     </TdGhostLinkSC>
   )
@@ -132,6 +130,6 @@ const TdGhostLinkSC = styled.td(() => ({
     position: 'absolute',
     inset: '0 0 0 auto',
     zIndex: 0,
-    width: 'var(--ghost-link-width)',
+    width: `100vw`, // this will always get (correctly) clipped by the table container, so it's safe if bigger than the actual table
   },
 }))

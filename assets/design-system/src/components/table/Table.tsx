@@ -19,12 +19,7 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 
-import {
-  InfoOutlineIcon,
-  Tooltip,
-  useResizeObserver,
-  WrapWithIf,
-} from '../../index'
+import { InfoOutlineIcon, Tooltip, WrapWithIf } from '../../index'
 import EmptyState from '../EmptyState'
 import { Spinner } from '../Spinner'
 
@@ -43,7 +38,7 @@ import {
   getGridTemplateCols,
   isRow,
   isValidId,
-  measureElementHeight,
+  measureElement,
   TableProps,
 } from './tableUtils'
 import { Tbody } from './Tbody'
@@ -91,9 +86,6 @@ function Table({
 }: TableProps) {
   const theme = useTheme()
   const tableContainerRef = useRef<HTMLDivElement>(undefined)
-
-  const [tableWidth, setTableWidth] = useState(0)
-  useResizeObserver(tableContainerRef, (entry) => setTableWidth(entry.width))
 
   const [expanded, setExpanded] = useState({})
 
@@ -147,11 +139,11 @@ function Table({
     getScrollElement: () => tableContainerRef.current,
     estimateSize: () => 52,
     measureElement: (el) => {
-      let totalHeight = measureElementHeight(el)
+      let totalHeight = measureElement(el, 'height')
       // add height of expanded row if present
       const sibling = el.nextElementSibling
       if (sibling?.getAttribute('data-expander-row'))
-        totalHeight += measureElementHeight(sibling)
+        totalHeight += measureElement(sibling, 'height')
 
       return totalHeight
     },
@@ -415,7 +407,6 @@ function Table({
                               cell.id.includes(GHOST_LINK_ID) ? (
                                 <TdGhostLink
                                   key={cell.id}
-                                  width={tableWidth}
                                   link={getRowLink?.(tableRow)}
                                 />
                               ) : (
