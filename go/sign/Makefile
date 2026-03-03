@@ -1,7 +1,8 @@
-.PHONY: help
+ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
-help:
-	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+include $(ROOT_DIRECTORY)/go/paths.mk
+include $(WORKSPACES_DIR)/common.mk
+include $(TOOLS_MAKEFILE)
 
 ##@ Docker Compose
 
