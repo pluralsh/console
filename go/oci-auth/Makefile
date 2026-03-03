@@ -26,3 +26,20 @@ release: lint test ## builds release version of the app, requires GoReleaser to 
 .PHONY: test
 test: ## run tests
 	go test ./...
+
+##@ Docker Compose
+
+.PHONY: up-docker
+up-docker: ## build and run via docker compose
+	docker compose -f docker-compose.yml up --build
+
+.PHONY: test-docker
+test-docker: ## run tests via docker compose
+	@docker compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from oci-auth-test; \
+	status=$$?; \
+	docker compose -f docker-compose.test.yml down; \
+	exit $$status
+
+.PHONY: build-docker
+build-docker: ## build docker image via compose
+	docker compose -f docker-compose.yml build
