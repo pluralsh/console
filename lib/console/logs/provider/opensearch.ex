@@ -28,7 +28,7 @@ defmodule Console.Logs.Provider.Opensearch do
     build_query(q)
     |> Map.put(:size, 0)
     |> Map.delete(:sort)
-    |> Map.put(:aggs, %{"facet_values" => %{terms: %{field: field, size: 100}}})
+    |> Map.put(:aggs, %{"facet_values" => %{terms: %{field: "#{field}.keyword", size: 100}}})
     |> then(&search(connection, &1))
     |> case do
       {:ok, response} -> {:ok, format_labels_response(response)}
