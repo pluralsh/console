@@ -196,12 +196,15 @@ export const getCountFromStatus = (
   testSuites: TestSuites,
   status: JUnitTestStatus
 ) => {
-  const stats = testSuites?.testsuite?.reduce((acc, suite) => ({
-    failures: (acc.failures ?? 0) + (suite.failures ?? 0),
-    tests: (acc.tests ?? 0) + (suite.tests ?? 0),
-    skipped: (acc.skipped ?? 0) + (suite.skipped ?? 0),
-    errors: (acc.errors ?? 0) + (suite.errors ?? 0),
-  })) ?? {
+  const stats = testSuites?.testsuite?.reduce(
+    (acc, suite) => ({
+      failures: (acc.failures ?? 0) + (suite.failures ?? 0),
+      tests: (acc.tests ?? 0) + (suite.tests ?? 0),
+      skipped: (acc.skipped ?? 0) + (suite.skipped ?? 0),
+      errors: (acc.errors ?? 0) + (suite.errors ?? 0),
+    }),
+    { failures: 0, tests: 0, skipped: 0, errors: 0 }
+  ) ?? {
     failures: testSuites.failures ?? 0,
     tests: testSuites?.tests ?? 0,
     skipped: testSuites?.skipped ?? 0,
