@@ -128,3 +128,20 @@ undeploy-helm: NAMESPACE := console
 undeploy-helm: RELEASE_NAME := controller-manager
 undeploy-helm: manifests ## undeploy controller from the K8S cluster specified in ~/.kube/config via helm
 	@$(HELM) uninstall --namespace $(NAMESPACE) $(RELEASE_NAME)
+
+##@ Docker Compose
+
+.PHONY: up-docker
+up-docker: ## build and run via docker compose
+	docker compose -f docker-compose.yml up --build
+
+.PHONY: test-docker
+test-docker: ## run tests via docker compose
+	@docker compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from controller-test; \
+	status=$$?; \
+	docker compose -f docker-compose.test.yml down; \
+	exit $$status
+
+.PHONY: build-docker
+build-docker: ## build docker image via compose
+	docker compose -f docker-compose.yml build

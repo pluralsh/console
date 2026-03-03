@@ -1,0 +1,38 @@
+services:
+  kind:
+    image: docker:27.4.1
+    container_name: controller-kind
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - kind_kubeconfig:/kube
+    environment:
+      KIND_CLUSTER_NAME: ${KIND_CLUSTER_NAME:-controller}
+      KUBERNETES_VERSION: ${KUBERNETES_VERSION:-1.32.0}
+    command: >-
+      sh -c "
+      apk add --no-cache curl tar gzip &&
+      curl -sSL https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64 -o /usr/local/bin/kind &&
+      chmod +x /usr/local/bin/kind &&
+      curl -sSL https://dl.k8s.io/release/v1.32.0/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl &&
+      chmod +x /usr/local/bin/kubectl &&
+      kind get clusters | grep -q \"^$$KIND_CLUSTER_NAME$$\" || kind create cluster --name $$KIND_CLUSTER_NAME --image kindest/node:v$$KUBERNETES_VERSION &&
+      kind get kubeconfig --name $$KIND_CLUSTER_NAME > /kube/config
+      "
+  controller:
+    build:
+      context: ..
+      dockerfile: controller/Dockerfile
+    environment:
+      CONSOLE_URL: ${CONSOLE_URL:?CONSOLE_URL is required}
+      CONSOLE_TOKEN: ${CONSOLE_TOKEN:?CONSOLE_TOKEN is required}
+      KUBECONFIG: /kube/config
+    volumes:
+      - kind_kubeconfig:/kube:ro
+    depends_on:
+      kind:
+        condition: service_completed_successfully
+    command:
+      - "-v=9"
+
+volumes:
+  kind_kubeconfig:
