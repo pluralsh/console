@@ -197,10 +197,10 @@ export const getCountFromStatus = (
   status: JUnitTestStatus
 ) => {
   const stats = testSuites?.testsuite?.reduce((acc, suite) => ({
-    failures: acc.failures ?? 0 + (suite.failures ?? 0),
-    tests: acc.tests ?? 0 + (suite.tests ?? 0),
-    skipped: acc.skipped ?? 0 + (suite.skipped ?? 0),
-    errors: acc.errors ?? 0 + (suite.errors ?? 0),
+    failures: (acc.failures ?? 0) + (suite.failures ?? 0),
+    tests: (acc.tests ?? 0) + (suite.tests ?? 0),
+    skipped: (acc.skipped ?? 0) + (suite.skipped ?? 0),
+    errors: (acc.errors ?? 0) + (suite.errors ?? 0),
   })) ?? {
     failures: testSuites.failures ?? 0,
     tests: testSuites?.tests ?? 0,
@@ -214,7 +214,10 @@ export const getCountFromStatus = (
   if (status === JUnitTestStatus.Passed)
     return Math.max(
       0,
-      (stats.tests ?? 0) - (stats.failures ?? 0) - (stats.skipped ?? 0)
+      (stats.tests ?? 0) -
+        (stats.failures ?? 0) -
+        (stats.errors ?? 0) -
+        (stats.skipped ?? 0)
     )
   return 0
 }

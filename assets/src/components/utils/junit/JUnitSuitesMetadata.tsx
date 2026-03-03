@@ -3,8 +3,8 @@ import { ReactNode } from 'react'
 import styled from 'styled-components'
 import { TestSuites } from 'utils/junitParse'
 import { StackedText } from '../table/StackedText'
-import { getCountFromStatus } from './JUnitTable.tsx'
-import { JUnitTestStatus } from './JUnitTableExpanderRow.tsx'
+import { getCountFromStatus } from './JUnitTable'
+import { JUnitTestStatus } from './JUnitTableExpanderRow'
 
 export function JUnitSuitesMetadata({
   testSuites,
