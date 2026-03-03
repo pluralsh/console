@@ -53,6 +53,8 @@ type RootQueryType {
 
   logAggregation(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, facets: [LogFacetInput]): [LogLine]
 
+  logLabels(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, field: String!): [LogFacetDetail]
+
   logAggregationBuckets(
     serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, aggregation: LogAggregationInput, facets: [LogFacetInput]
   ): [LogAggregationBucket]
@@ -12181,6 +12183,11 @@ type LogLine {
 type LogFacet {
   key: String!
   value: String
+}
+
+type LogFacetDetail {
+  label: String!
+  count: Int!
 }
 
 type LogAggregationBucket {

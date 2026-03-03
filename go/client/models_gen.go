@@ -4283,6 +4283,11 @@ type LogFacet struct {
 	Value *string `json:"value,omitempty"`
 }
 
+type LogFacetDetail struct {
+	Label string `json:"label"`
+	Count int64  `json:"count"`
+}
+
 type LogFacetInput struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`

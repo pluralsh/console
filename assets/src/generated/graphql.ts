@@ -5249,6 +5249,12 @@ export type LogFacet = {
   value?: Maybe<Scalars['String']['output']>;
 };
 
+export type LogFacetDetail = {
+  __typename?: 'LogFacetDetail';
+  count: Scalars['Int']['output'];
+  label: Scalars['String']['output'];
+};
+
 export type LogFacetInput = {
   key: Scalars['String']['input'];
   value: Scalars['String']['input'];
@@ -9897,6 +9903,7 @@ export type RootQueryType = {
   kubernetesVersionInfo?: Maybe<Array<Maybe<KubernetesVersionInfo>>>;
   logAggregation?: Maybe<Array<Maybe<LogLine>>>;
   logAggregationBuckets?: Maybe<Array<Maybe<LogAggregationBucket>>>;
+  logLabels?: Maybe<Array<Maybe<LogFacetDetail>>>;
   loginInfo?: Maybe<LoginInfo>;
   logs?: Maybe<Array<Maybe<LogStream>>>;
   managedNamespace?: Maybe<ManagedNamespace>;
@@ -10667,6 +10674,15 @@ export type RootQueryTypeLogAggregationBucketsArgs = {
   aggregation?: InputMaybe<LogAggregationInput>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  time?: InputMaybe<LogTimeRange>;
+};
+
+
+export type RootQueryTypeLogLabelsArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  field: Scalars['String']['input'];
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;
