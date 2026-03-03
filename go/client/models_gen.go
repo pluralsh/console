@@ -1643,6 +1643,8 @@ type Cluster struct {
 	MemoryUtil *float64 `json:"memoryUtil,omitempty"`
 	// The availability zones this cluster is running in
 	AvailabilityZones []*string `json:"availabilityZones,omitempty"`
+	// A set of metrics for a kubernetes controller, currently only deployments and statefulsets are supported
+	ComponentMetrics *KubernetesControllerMetrics `json:"componentMetrics,omitempty"`
 	// The helm values for the agent installation
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
 	// Whether this cluster was recently pinged
@@ -4203,6 +4205,13 @@ type KubernetesChangelog struct {
 	BugFixes []*string `json:"bugFixes,omitempty"`
 	// the api updates in this version
 	APIUpdates []*string `json:"apiUpdates,omitempty"`
+}
+
+type KubernetesControllerMetrics struct {
+	CPU    []*MetricResponse `json:"cpu,omitempty"`
+	Mem    []*MetricResponse `json:"mem,omitempty"`
+	PodCPU []*MetricResponse `json:"podCpu,omitempty"`
+	PodMem []*MetricResponse `json:"podMem,omitempty"`
 }
 
 type KubernetesUnstructured struct {

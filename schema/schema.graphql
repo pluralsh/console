@@ -4640,6 +4640,13 @@ type UtilizationHeatMap {
   memory: [MetricPointResponse]
 }
 
+type KubernetesControllerMetrics {
+  cpu: [MetricResponse]
+  mem: [MetricResponse]
+  podCpu: [MetricResponse]
+  podMem: [MetricResponse]
+}
+
 type ObservabilityProviderConnection {
   pageInfo: PageInfo!
   edges: [ObservabilityProviderEdge]
@@ -8822,6 +8829,30 @@ type Cluster {
 
   "The availability zones this cluster is running in"
   availabilityZones: [String]
+
+  "A set of metrics for a kubernetes controller, currently only deployments and statefulsets are supported"
+  componentMetrics(
+    "the group of the kubernetes controller"
+    group: String!
+
+    "the version of the kubernetes controller"
+    version: String!
+
+    "the kind of the kubernetes controller"
+    kind: String!
+
+    "the name of the kubernetes controller"
+    name: String!
+
+    "the namespace of the kubernetes controller"
+    namespace: String!
+
+    start: DateTime
+
+    stop: DateTime
+
+    step: String
+  ): KubernetesControllerMetrics
 
   "The helm values for the agent installation"
   agentHelmValues: String

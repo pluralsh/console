@@ -1974,6 +1974,8 @@ export type Cluster = {
   cloudAddons?: Maybe<Array<Maybe<CloudAddon>>>;
   clusterMetrics?: Maybe<ClusterMetrics>;
   clusterNodeMetrics?: Maybe<ClusterNodeMetrics>;
+  /** A set of metrics for a kubernetes controller, currently only deployments and statefulsets are supported */
+  componentMetrics?: Maybe<KubernetesControllerMetrics>;
   /** The total CPU capacity of the cluster */
   cpuTotal?: Maybe<Scalars['Float']['output']>;
   /** The CPU utilization of the cluster */
@@ -2147,6 +2149,19 @@ export type ClusterClusterNodeMetricsArgs = {
   start?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterComponentMetricsArgs = {
+  group: Scalars['String']['input'];
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  start?: InputMaybe<Scalars['DateTime']['input']>;
+  step?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['DateTime']['input']>;
+  version: Scalars['String']['input'];
 };
 
 
@@ -5148,6 +5163,14 @@ export type KubernetesChangelog = {
   removals?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the kubernetes version */
   version?: Maybe<Scalars['String']['output']>;
+};
+
+export type KubernetesControllerMetrics = {
+  __typename?: 'KubernetesControllerMetrics';
+  cpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  mem?: Maybe<Array<Maybe<MetricResponse>>>;
+  podCpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  podMem?: Maybe<Array<Maybe<MetricResponse>>>;
 };
 
 export type KubernetesUnstructured = {
