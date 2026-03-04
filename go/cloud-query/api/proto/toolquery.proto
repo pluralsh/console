@@ -90,6 +90,26 @@ message MetricsQueryOutput {
   repeated MetricPoint metrics = 1;
 }
 
+message MetricsSearchInput {
+  ToolConnection connection = 1;
+  // Query string used to search for metric series or names.
+  // Semantics are provider-specific but typically support substring or
+  // pattern-based matching on metric names and associated labels.
+  string query = 2;
+  // Maximum number of results to return. If not set or zero, a
+  // provider-specific default will be used.
+  optional int32 limit = 3;
+}
+
+message MetricsSearchResult {
+  // Name of the metric or series as returned by the provider.
+  string name = 1;
+}
+
+message MetricsSearchOutput {
+  repeated MetricsSearchResult metrics = 1;
+}
+
 message LogEntry {
   google.protobuf.Timestamp timestamp = 1;
   string message = 2;
@@ -117,6 +137,7 @@ message TracesQueryOutput {
 
 service ToolQuery {
   rpc Metrics(MetricsQueryInput) returns (MetricsQueryOutput) {}
+  rpc MetricsSearch(MetricsSearchInput) returns (MetricsSearchOutput) {}
   rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
   rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
 }

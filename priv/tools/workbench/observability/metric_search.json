@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "The query to use to filter the desired metrics"
+        }
+    },
+    "required": ["query"]
+}
