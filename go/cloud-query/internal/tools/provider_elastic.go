@@ -45,6 +45,7 @@ func (in *ElasticProvider) Logs(ctx context.Context, input *toolquery.LogsQueryI
 	}
 
 	resp, err := in.client.Search().
+		Index(in.conn.GetIndex()).
 		Request(in.toRequest(input)).
 		Do(ctx)
 	if err != nil {

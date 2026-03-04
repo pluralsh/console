@@ -46,10 +46,6 @@ defmodule Console.AI.Agents.Upgrade do
     |> persist_and_poll_run(step)
   end
 
-  defp persist_and_poll_run(error, %ClusterUpgradeStep{} = step) when is_binary(error) do
-    ClusterUpgradeStep.changeset(step, %{status: :failed, error: error})
-    |> Repo.update()
-  end
 
   defp persist_and_poll_run(%AgentRun{id: id} = run, %ClusterUpgradeStep{} = step) do
     ClusterUpgradeStep.changeset(step, %{agent_run_id: id})
@@ -59,6 +55,11 @@ defmodule Console.AI.Agents.Upgrade do
       {:error, error} -> {step, %{status: :failed, error: "error polling agent run: #{inspect(error)}"}}
     end)
     |> then(fn {step, attrs} -> ClusterUpgradeStep.changeset(step, attrs) end)
+    |> Repo.update()
+  end
+
+  defp persist_and_poll_run(%{error: _} = error, %ClusterUpgradeStep{} = step) do
+    ClusterUpgradeStep.changeset(step, error)
     |> Repo.update()
   end
 

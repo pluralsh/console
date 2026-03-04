@@ -1,6 +1,6 @@
-import { Chip } from '@pluralsh/design-system'
+import { Flex, SpinnerAlt, Tooltip } from '@pluralsh/design-system'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { ReactNode } from 'react'
-import { useTheme } from 'styled-components'
 
 export default function DecoratedName({
   prefix,
@@ -10,38 +10,27 @@ export default function DecoratedName({
 }: {
   prefix?: ReactNode
   suffix?: ReactNode
-  deletedAt?: any
+  deletedAt?: Nullable<string>
   children: ReactNode
 }) {
-  const theme = useTheme()
-
   return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.small,
-        alignItems: 'center',
-      }}
-    >
-      <div
-        css={{
-          display: 'flex',
-          gap: theme.spacing.xsmall,
-          alignItems: 'center',
-        }}
+    <StretchedFlex gap="small">
+      <Flex
+        gap="xsmall"
+        align="center"
       >
         {prefix}
         {children}
         {suffix}
-      </div>
+      </Flex>
       {deletedAt && (
-        <Chip
-          loading
-          severity="neutral"
+        <Tooltip
+          label="Deleting"
+          placement="top"
         >
-          Deleting
-        </Chip>
+          <SpinnerAlt color="icon-danger" />
+        </Tooltip>
       )}
-    </div>
+    </StretchedFlex>
   )
 }

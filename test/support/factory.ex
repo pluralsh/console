@@ -1235,6 +1235,27 @@ defmodule Console.Factory do
     }
   end
 
+  def issue_factory do
+    %Schema.Issue{
+      provider: :linear,
+      status: :open,
+      external_id: sequence(:issue_external_id, & "issue-ext-#{&1}"),
+      title: sequence(:issue_title, & "Issue #{&1}"),
+      body: "Issue body",
+      workbench: build(:workbench)
+    }
+  end
+
+  def issue_webhook_factory do
+    %Schema.IssueWebhook{
+      provider: 0,
+      url: sequence(:issue_webhook_url, & "https://issues.example.com/hook-#{&1}"),
+      name: sequence(:issue_webhook, & "issue-wh-#{&1}"),
+      secret: "test-secret-#{Ecto.UUID.generate()}",
+      external_id: sequence(:issue_external_id, & "issue-ext-#{&1}"),
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

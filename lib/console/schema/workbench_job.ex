@@ -1,9 +1,12 @@
 defmodule Console.Schema.WorkbenchJob do
   use Console.Schema.Base
-  alias Console.Schema.{Workbench,
+  alias Console.Schema.{
+    Workbench,
     WorkbenchJobResult,
     WorkbenchJobActivity,
-    User
+    User,
+    Alert,
+    Issue
   }
 
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
@@ -18,6 +21,8 @@ defmodule Console.Schema.WorkbenchJob do
 
     belongs_to :workbench, Workbench
     belongs_to :user,      User
+    belongs_to :alert,     Alert
+    belongs_to :issue,     Issue
 
     has_one  :result, WorkbenchJobResult, on_replace: :update
     has_many :activities, WorkbenchJobActivity, on_replace: :delete
@@ -52,7 +57,7 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, preload: ^preloads)
   end
 
-  @valid ~w(status prompt workbench_id error user_id started_at completed_at)a
+  @valid ~w(status prompt workbench_id error user_id started_at completed_at alert_id issue_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -60,6 +65,8 @@ defmodule Console.Schema.WorkbenchJob do
     |> cast_assoc(:result)
     |> foreign_key_constraint(:workbench_id)
     |> foreign_key_constraint(:user_id)
+    |> foreign_key_constraint(:alert_id)
+    |> foreign_key_constraint(:issue_id)
     |> validate_required([:status, :workbench_id, :user_id])
   end
 end

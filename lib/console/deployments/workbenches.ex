@@ -164,6 +164,12 @@ defmodule Console.Deployments.Workbenches do
     |> Repo.all()
   end
 
+  @decorate cacheable(cache: @cache_adapter, key: {:wb_webhooks_for_issue, issue_webhook_id}, opts: [ttl: @ttl])
+  def list_workbench_webhooks_for_issue(issue_webhook_id) do
+    WorkbenchWebhook.for_issue_webhook(issue_webhook_id)
+    |> Repo.all()
+  end
+
   @doc """
   Creates or updates a workbench webhook. If attrs contain an id for an existing
   webhook on the workbench, that record is updated. Otherwise if attrs contain

@@ -1643,6 +1643,8 @@ type Cluster struct {
 	MemoryUtil *float64 `json:"memoryUtil,omitempty"`
 	// The availability zones this cluster is running in
 	AvailabilityZones []*string `json:"availabilityZones,omitempty"`
+	// A set of metrics for a kubernetes controller, currently only deployments and statefulsets are supported
+	ComponentMetrics *KubernetesControllerMetrics `json:"componentMetrics,omitempty"`
 	// The helm values for the agent installation
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
 	// Whether this cluster was recently pinged
@@ -3231,6 +3233,7 @@ type Flow struct {
 	PreviewEnvironmentTemplates *PreviewEnvironmentTemplateConnection `json:"previewEnvironmentTemplates,omitempty"`
 	PreviewEnvironmentInstances *PreviewEnvironmentInstanceConnection `json:"previewEnvironmentInstances,omitempty"`
 	VulnerabilityReports        *VulnerabilityReportConnection        `json:"vulnerabilityReports,omitempty"`
+	Issues                      *IssueConnection                      `json:"issues,omitempty"`
 	InsertedAt                  *string                               `json:"insertedAt,omitempty"`
 	UpdatedAt                   *string                               `json:"updatedAt,omitempty"`
 }
@@ -4050,6 +4053,69 @@ type InviteAttributes struct {
 	Email *string `json:"email,omitempty"`
 }
 
+// An issue synced from an external provider (e.g. Linear)
+type Issue struct {
+	// the unique identifier of the issue
+	ID string `json:"id"`
+	// the provider (e.g., Linear, GitHub) that originated this issue
+	Provider IssueWebhookProvider `json:"provider"`
+	// the current status of the issue (e.g., open, in progress, completed, cancelled)
+	Status IssueStatus `json:"status"`
+	// the identifier of the issue in the external provider system
+	ExternalID string `json:"externalId"`
+	// the URL linking to this issue on the external provider
+	URL string `json:"url"`
+	// the title of the issue
+	Title string `json:"title"`
+	// the detailed description or body content of the issue
+	Body string `json:"body"`
+	// the flow this issue is associated with
+	Flow *Flow `json:"flow,omitempty"`
+	// the workbench this issue is associated with
+	Workbench  *Workbench `json:"workbench,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+}
+
+type IssueConnection struct {
+	PageInfo PageInfo     `json:"pageInfo"`
+	Edges    []*IssueEdge `json:"edges,omitempty"`
+}
+
+type IssueEdge struct {
+	Node   *Issue  `json:"node,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+}
+
+// A webhook receiver for an issue provider like Linear
+type IssueWebhook struct {
+	ID       string               `json:"id"`
+	Provider IssueWebhookProvider `json:"provider"`
+	Name     string               `json:"name"`
+	// the url for this specific webhook
+	URL        string  `json:"url"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+// input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required.
+type IssueWebhookAttributes struct {
+	Provider *IssueWebhookProvider `json:"provider,omitempty"`
+	URL      *string               `json:"url,omitempty"`
+	Name     *string               `json:"name,omitempty"`
+	Secret   *string               `json:"secret,omitempty"`
+}
+
+type IssueWebhookConnection struct {
+	PageInfo PageInfo            `json:"pageInfo"`
+	Edges    []*IssueWebhookEdge `json:"edges,omitempty"`
+}
+
+type IssueWebhookEdge struct {
+	Node   *IssueWebhook `json:"node,omitempty"`
+	Cursor *string       `json:"cursor,omitempty"`
+}
+
 type IssuerRef struct {
 	Group *string `json:"group,omitempty"`
 	Kind  *string `json:"kind,omitempty"`
@@ -4141,6 +4207,13 @@ type KubernetesChangelog struct {
 	APIUpdates []*string `json:"apiUpdates,omitempty"`
 }
 
+type KubernetesControllerMetrics struct {
+	CPU    []*MetricResponse `json:"cpu,omitempty"`
+	Mem    []*MetricResponse `json:"mem,omitempty"`
+	PodCPU []*MetricResponse `json:"podCpu,omitempty"`
+	PodMem []*MetricResponse `json:"podMem,omitempty"`
+}
+
 type KubernetesUnstructured struct {
 	Group    *string        `json:"group,omitempty"`
 	Version  string         `json:"version"`
@@ -4217,6 +4290,11 @@ type LogAggregationInput struct {
 type LogFacet struct {
 	Key   string  `json:"key"`
 	Value *string `json:"value,omitempty"`
+}
+
+type LogFacetDetail struct {
+	Label string `json:"label"`
+	Count int64  `json:"count"`
 }
 
 type LogFacetInput struct {
@@ -9127,7 +9205,11 @@ type WorkbenchJob struct {
 	// the user who created this run
 	User *User `json:"user,omitempty"`
 	// the result for this job (sideloadable)
-	Result     *WorkbenchJobResult             `json:"result,omitempty"`
+	Result *WorkbenchJobResult `json:"result,omitempty"`
+	// the alert this run was spawned from
+	Alert *Alert `json:"alert,omitempty"`
+	// the issue this run was spawned from
+	Issue      *Issue                          `json:"issue,omitempty"`
 	Activities *WorkbenchJobActivityConnection `json:"activities,omitempty"`
 	InsertedAt *string                         `json:"insertedAt,omitempty"`
 	UpdatedAt  *string                         `json:"updatedAt,omitempty"`
@@ -9372,7 +9454,11 @@ type WorkbenchToolEdge struct {
 
 type WorkbenchToolElasticConnection struct {
 	// elasticsearch base url (credentials never exposed)
-	URL *string `json:"url,omitempty"`
+	URL string `json:"url"`
+	// elasticsearch index
+	Index string `json:"index"`
+	// basic auth username
+	Username string `json:"username"`
 }
 
 type WorkbenchToolElasticConnectionAttributes struct {
@@ -9382,6 +9468,8 @@ type WorkbenchToolElasticConnectionAttributes struct {
 	Username string `json:"username"`
 	// basic auth password
 	Password string `json:"password"`
+	// elasticsearch index
+	Index string `json:"index"`
 }
 
 type WorkbenchToolHTTPConfiguration struct {
@@ -9431,7 +9519,11 @@ type WorkbenchToolLokiConnectionAttributes struct {
 	// loki base url
 	URL string `json:"url"`
 	// bearer token or api key
-	Token string `json:"token"`
+	Token *string `json:"token,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+	// basic auth password
+	Password *string `json:"password,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
 }
@@ -9447,7 +9539,11 @@ type WorkbenchToolPrometheusConnectionAttributes struct {
 	// prometheus base url
 	URL string `json:"url"`
 	// bearer token or api key
-	Token string `json:"token"`
+	Token *string `json:"token,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+	// basic auth password
+	Password *string `json:"password,omitempty"`
 	// optional tenant id (e.g. for Mimir)
 	TenantID *string `json:"tenantId,omitempty"`
 }
@@ -9463,7 +9559,11 @@ type WorkbenchToolTempoConnectionAttributes struct {
 	// tempo base url
 	URL string `json:"url"`
 	// bearer token or api key
-	Token string `json:"token"`
+	Token *string `json:"token,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+	// basic auth password
+	Password *string `json:"password,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
 }
@@ -9478,16 +9578,20 @@ type WorkbenchWebhook struct {
 	// the workbench this webhook belongs to
 	Workbench *Workbench `json:"workbench,omitempty"`
 	// the observability webhook that receives events
-	Webhook    *ObservabilityWebhook `json:"webhook,omitempty"`
-	InsertedAt *string               `json:"insertedAt,omitempty"`
-	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+	Webhook *ObservabilityWebhook `json:"webhook,omitempty"`
+	// the issue webhook that receives events
+	IssueWebhook *IssueWebhook `json:"issueWebhook,omitempty"`
+	InsertedAt   *string       `json:"insertedAt,omitempty"`
+	UpdatedAt    *string       `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchWebhookAttributes struct {
 	// unique name for this webhook on the workbench (required for create)
 	Name *string `json:"name,omitempty"`
-	// observability webhook to receive events
+	// observability webhook to receive events (either webhook_id or issue_webhook_id required)
 	WebhookID *string `json:"webhookId,omitempty"`
+	// issue webhook to receive events (either webhook_id or issue_webhook_id required)
+	IssueWebhookID *string `json:"issueWebhookId,omitempty"`
 	// criteria to match incoming webhook payloads
 	Matches *WorkbenchWebhookMatchesAttributes `json:"matches,omitempty"`
 }
@@ -11763,6 +11867,118 @@ func (e *InsightFreshness) UnmarshalJSON(b []byte) error {
 }
 
 func (e InsightFreshness) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type IssueStatus string
+
+const (
+	IssueStatusOpen       IssueStatus = "OPEN"
+	IssueStatusInProgress IssueStatus = "IN_PROGRESS"
+	IssueStatusCancelled  IssueStatus = "CANCELLED"
+	IssueStatusCompleted  IssueStatus = "COMPLETED"
+)
+
+var AllIssueStatus = []IssueStatus{
+	IssueStatusOpen,
+	IssueStatusInProgress,
+	IssueStatusCancelled,
+	IssueStatusCompleted,
+}
+
+func (e IssueStatus) IsValid() bool {
+	switch e {
+	case IssueStatusOpen, IssueStatusInProgress, IssueStatusCancelled, IssueStatusCompleted:
+		return true
+	}
+	return false
+}
+
+func (e IssueStatus) String() string {
+	return string(e)
+}
+
+func (e *IssueStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IssueStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IssueStatus", str)
+	}
+	return nil
+}
+
+func (e IssueStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *IssueStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e IssueStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type IssueWebhookProvider string
+
+const (
+	IssueWebhookProviderLinear IssueWebhookProvider = "LINEAR"
+)
+
+var AllIssueWebhookProvider = []IssueWebhookProvider{
+	IssueWebhookProviderLinear,
+}
+
+func (e IssueWebhookProvider) IsValid() bool {
+	switch e {
+	case IssueWebhookProviderLinear:
+		return true
+	}
+	return false
+}
+
+func (e IssueWebhookProvider) String() string {
+	return string(e)
+}
+
+func (e *IssueWebhookProvider) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IssueWebhookProvider(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IssueWebhookProvider", str)
+	}
+	return nil
+}
+
+func (e IssueWebhookProvider) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *IssueWebhookProvider) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e IssueWebhookProvider) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

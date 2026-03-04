@@ -290,13 +290,35 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.AlertCreated do
   alias Console.Services.Users
   require EEx
 
-  def process(%@for{item: %Alert{workbench_id: wid} = alert}) when is_binary(wid) do
+  def process(%@for{item: %Alert{workbench_id: wid, id: id} = alert}) when is_binary(wid) do
     alert = Console.Repo.preload(alert, [:tags])
-    Workbenches.create_workbench_job(%{prompt: prompt(alert: alert)}, wid, bot())
+    Workbenches.create_workbench_job(%{
+      prompt: prompt(alert: alert),
+      alert_id: id,
+    }, wid, bot())
   end
   def process(_), do: :ok
 
   defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 
   EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/alert.md.eex", [:assigns])
+end
+
+defimpl Console.PubSub.Recurse, for: [Console.PubSub.IssueCreated, Console.PubSub.IssueUpdated] do
+  alias Console.Schema.Issue
+  alias Console.Deployments.Workbenches
+  alias Console.Services.Users
+  require EEx
+
+  def process(%@for{item: %Issue{workbench_id: wid, id: id} = issue}) when is_binary(wid) do
+    Workbenches.create_workbench_job(%{
+      prompt: prompt(issue: issue),
+      issue_id: id,
+    }, wid, bot())
+  end
+  def process(_), do: :ok
+
+  defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
+
+  EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/issue.md.eex", [:assigns])
 end

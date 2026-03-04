@@ -72,6 +72,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     Enum.reduce(args, query, fn
       {:project_id, id}, q -> Stack.for_project(q, id)
       {:tag_query, tq}, q -> Stack.with_tag_query(q, tq)
+      {:status, status}, q -> Stack.for_status(q, status)
       _, q -> q
     end)
   end

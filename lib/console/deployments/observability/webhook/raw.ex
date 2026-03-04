@@ -4,9 +4,11 @@ defmodule Console.Deployments.Observability.Webhook.Raw do
   @project_regex [~r/plrl-project-([[:alnum:]_\-]+)/, ~r/Plural Project: ([[:alnum:]_\-]+)/]
   @svc_regex [~r/plrl-service-([[:alnum:]_\-]+)/, ~r/plrl-svc-([[:alnum:]_\-]+)\/?/, ~r/Plural Service: ([[:alnum:]_\-\/]+)/]
   @cluster_regex [~r/plrl-cluster-([[:alnum:]_\-]+)/, ~r/Plural Cluster: ([[:alnum:]_\-]+)/]
+  @flow_regex [~r/plrl-flow-([[:alnum:]_\-]+)/, ~r/Plural Flow: ([[:alnum:]_\-]+)/]
 
   def associations(:project, txt, acc), do: extract_and_save(:project, txt, acc)
   def associations(:cluster, txt, acc), do: extract_and_save(:cluster, txt, acc)
+  def associations(:flow, txt, acc), do: extract_and_save(:flow, txt, acc)
   def associations(:service, txt, %{cluster_id: id} = acc) when is_binary(id),
     do: extract_and_save(:service, txt, acc)
   def associations(_, _, acc), do: acc
@@ -35,6 +37,12 @@ defmodule Console.Deployments.Observability.Webhook.Raw do
     |> put(acc, :service_id)
   end
 
+  def extract_and_save(:flow, txt, acc) do
+    scrape(:flow, txt)
+    |> Enum.find_value(&flow/1)
+    |> put(acc, :flow_id)
+  end
+
   defp scrape(scope, content) do
     regexes(scope)
     |> Enum.flat_map(fn rgx ->
@@ -50,6 +58,7 @@ defmodule Console.Deployments.Observability.Webhook.Raw do
   defp regexes(:project), do: @project_regex
   defp regexes(:service), do: @svc_regex
   defp regexes(:cluster), do: @cluster_regex
+  defp regexes(:flow), do: @flow_regex
 
   defp put(val, acc, key), do: Map.put(acc, key, val)
 end

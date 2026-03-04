@@ -62,7 +62,6 @@ type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
   width?: string | number
   maxHeight?: string | number
   inputProps?: InputProps
-  filter?: ComboBoxStateOptions<object>['defaultFilter']
   loading?: boolean
   titleContent?: ReactNode
   chips?: ComponentProps<typeof Chip>[]

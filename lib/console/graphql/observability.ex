@@ -91,6 +91,11 @@ defmodule Console.GraphQl.Observability do
     field :value, :string
   end
 
+  object :log_facet_detail do
+    field :label, non_null(:string)
+    field :count, non_null(:integer)
+  end
+
   object :observability_queries do
     field :dashboards, list_of(:dashboard) do
       middleware Authenticated
@@ -136,14 +141,25 @@ defmodule Console.GraphQl.Observability do
       resolve &Observability.list_logs/2
     end
 
-    field :log_aggregation_buckets, list_of(:log_aggregation_bucket) do
+    field :log_labels, list_of(:log_facet_detail) do
       middleware Authenticated
       arg :service_id, :id
       arg :cluster_id, :id
-      arg :query, :string
-      arg :time, :log_time_range
+      arg :query,      :string
+      arg :time,       :log_time_range
+      arg :field,      non_null(:string)
+
+      resolve &Observability.list_log_labels/2
+    end
+
+    field :log_aggregation_buckets, list_of(:log_aggregation_bucket) do
+      middleware Authenticated
+      arg :service_id,  :id
+      arg :cluster_id,  :id
+      arg :query,       :string
+      arg :time,        :log_time_range
       arg :aggregation, :log_aggregation_input
-      arg :facets, list_of(:log_facet_input)
+      arg :facets,      list_of(:log_facet_input)
 
       resolve &Observability.list_log_aggregations/2
     end

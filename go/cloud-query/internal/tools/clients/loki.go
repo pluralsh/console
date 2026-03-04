@@ -61,14 +61,18 @@ func (in *LokiClient) logsParams(query, start, end, limit string) url.Values {
 	return params
 }
 
-func NewLokiClient(baseUrl, token, tenantID string) *LokiClient {
+func NewLokiClient(baseUrl, token, username, password, tenantID string) *LokiClient {
 	client := resty.New()
-
-	client.SetAuthToken(token)
-	client.SetAuthScheme("Bearer")
 
 	if len(tenantID) > 0 {
 		client.SetHeader("X-Scope-OrgID", tenantID)
+	}
+
+	if len(token) > 0 {
+		client.SetAuthToken(token)
+		client.SetAuthScheme("Bearer")
+	} else if len(username) > 0 && len(password) > 0 {
+		client.SetBasicAuth(username, password)
 	}
 
 	return &LokiClient{Client: client, baseUrl: baseUrl}

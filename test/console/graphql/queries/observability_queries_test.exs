@@ -318,6 +318,33 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
     end
   end
 
+  describe "logLabels" do
+    test "it can fetch log labels" do
+      user = insert(:user)
+      svc = insert(:service, read_bindings: [%{user_id: user.id}])
+
+      # the index gets set up using a mix task before the test is run, so we can index directly
+      log_document(svc, "valid log message") |> index_doc()
+      log_document(svc, "another valid log message") |> index_doc()
+      refresh()
+
+      # Instead of using expect to mock the logs provider, we use the elasticsearch index
+      deployment_settings(logging: %{enabled: true, driver: :elastic, elastic: %{
+        host: @host,
+        index: @index
+      }})
+
+      {:ok, %{data: %{"logLabels" => [%{"label" => "test", "count" => 2}]}}} = run_query("""
+        query LogLabels($serviceId: ID!, $field: String!) {
+          logLabels(serviceId: $serviceId, field: $field) { label count }
+        }
+      """, %{
+        "serviceId" => svc.id,
+        "field" => "kubernetes.namespace"
+      }, %{current_user: user})
+    end
+  end
+
   def dashboard() do
     %Dashboard{
       metadata: %{

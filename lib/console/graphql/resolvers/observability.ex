@@ -38,6 +38,12 @@ defmodule Console.GraphQl.Resolvers.Observability do
       do: Provider.aggregate(query)
   end
 
+  def list_log_labels(args, %{context: %{current_user: user}}) do
+    query = Query.new(args)
+    with {:ok, query} <- Provider.accessible(query, user),
+      do: Provider.labels(query)
+  end
+
   def resolve_metric(%{query: query} = args, _) do
     now   = Timex.now()
     start = Timex.shift(now, seconds: -Map.get(args, :offset, @default_offset))

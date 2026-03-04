@@ -27,6 +27,7 @@ type ElasticConnection struct {
 	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
 	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
 	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	Index         string                 `protobuf:"bytes,4,opt,name=index,proto3" json:"index,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -78,6 +79,13 @@ func (x *ElasticConnection) GetUsername() string {
 func (x *ElasticConnection) GetPassword() string {
 	if x != nil {
 		return x.Password
+	}
+	return ""
+}
+
+func (x *ElasticConnection) GetIndex() string {
+	if x != nil {
+		return x.Index
 	}
 	return ""
 }
@@ -221,8 +229,10 @@ func (x *PrometheusConnection) GetTenantId() string {
 type LokiConnection struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	Token         *string                `protobuf:"bytes,2,opt,name=token,proto3,oneof" json:"token,omitempty"`
 	TenantId      *string                `protobuf:"bytes,3,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`
+	Username      *string                `protobuf:"bytes,4,opt,name=username,proto3,oneof" json:"username,omitempty"`
+	Password      *string                `protobuf:"bytes,5,opt,name=password,proto3,oneof" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -265,8 +275,8 @@ func (x *LokiConnection) GetUrl() string {
 }
 
 func (x *LokiConnection) GetToken() string {
-	if x != nil {
-		return x.Token
+	if x != nil && x.Token != nil {
+		return *x.Token
 	}
 	return ""
 }
@@ -278,11 +288,27 @@ func (x *LokiConnection) GetTenantId() string {
 	return ""
 }
 
+func (x *LokiConnection) GetUsername() string {
+	if x != nil && x.Username != nil {
+		return *x.Username
+	}
+	return ""
+}
+
+func (x *LokiConnection) GetPassword() string {
+	if x != nil && x.Password != nil {
+		return *x.Password
+	}
+	return ""
+}
+
 type TempoConnection struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	Token         *string                `protobuf:"bytes,2,opt,name=token,proto3,oneof" json:"token,omitempty"`
 	TenantId      *string                `protobuf:"bytes,3,opt,name=tenant_id,json=tenantId,proto3,oneof" json:"tenant_id,omitempty"`
+	Username      *string                `protobuf:"bytes,4,opt,name=username,proto3,oneof" json:"username,omitempty"`
+	Password      *string                `protobuf:"bytes,5,opt,name=password,proto3,oneof" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -325,8 +351,8 @@ func (x *TempoConnection) GetUrl() string {
 }
 
 func (x *TempoConnection) GetToken() string {
-	if x != nil {
-		return x.Token
+	if x != nil && x.Token != nil {
+		return *x.Token
 	}
 	return ""
 }
@@ -334,6 +360,20 @@ func (x *TempoConnection) GetToken() string {
 func (x *TempoConnection) GetTenantId() string {
 	if x != nil && x.TenantId != nil {
 		return *x.TenantId
+	}
+	return ""
+}
+
+func (x *TempoConnection) GetUsername() string {
+	if x != nil && x.Username != nil {
+		return *x.Username
+	}
+	return ""
+}
+
+func (x *TempoConnection) GetPassword() string {
+	if x != nil && x.Password != nil {
+		return *x.Password
 	}
 	return ""
 }
@@ -1088,11 +1128,12 @@ var File_toolquery_proto protoreflect.FileDescriptor
 
 const file_toolquery_proto_rawDesc = "" +
 	"\n" +
-	"\x0ftoolquery.proto\x12\ttoolquery\x1a\x1fgoogle/protobuf/timestamp.proto\"]\n" +
+	"\x0ftoolquery.proto\x12\ttoolquery\x1a\x1fgoogle/protobuf/timestamp.proto\"s\n" +
 	"\x11ElasticConnection\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x1a\n" +
-	"\bpassword\x18\x03 \x01(\tR\bpassword\"u\n" +
+	"\bpassword\x18\x03 \x01(\tR\bpassword\x12\x14\n" +
+	"\x05index\x18\x04 \x01(\tR\x05index\"u\n" +
 	"\x11DatadogConnection\x12\x17\n" +
 	"\x04site\x18\x01 \x01(\tH\x00R\x04site\x88\x01\x01\x12\x16\n" +
 	"\x06apiKey\x18\x02 \x01(\tR\x06apiKey\x12\x1b\n" +
@@ -1109,19 +1150,29 @@ const file_toolquery_proto_rawDesc = "" +
 	"\t_usernameB\v\n" +
 	"\t_passwordB\f\n" +
 	"\n" +
-	"_tenant_id\"h\n" +
+	"_tenant_id\"\xd3\x01\n" +
 	"\x0eLokiConnection\x12\x10\n" +
-	"\x03url\x18\x01 \x01(\tR\x03url\x12\x14\n" +
-	"\x05token\x18\x02 \x01(\tR\x05token\x12 \n" +
-	"\ttenant_id\x18\x03 \x01(\tH\x00R\btenantId\x88\x01\x01B\f\n" +
+	"\x03url\x18\x01 \x01(\tR\x03url\x12\x19\n" +
+	"\x05token\x18\x02 \x01(\tH\x00R\x05token\x88\x01\x01\x12 \n" +
+	"\ttenant_id\x18\x03 \x01(\tH\x01R\btenantId\x88\x01\x01\x12\x1f\n" +
+	"\busername\x18\x04 \x01(\tH\x02R\busername\x88\x01\x01\x12\x1f\n" +
+	"\bpassword\x18\x05 \x01(\tH\x03R\bpassword\x88\x01\x01B\b\n" +
+	"\x06_tokenB\f\n" +
 	"\n" +
-	"_tenant_id\"i\n" +
+	"_tenant_idB\v\n" +
+	"\t_usernameB\v\n" +
+	"\t_password\"\xd4\x01\n" +
 	"\x0fTempoConnection\x12\x10\n" +
-	"\x03url\x18\x01 \x01(\tR\x03url\x12\x14\n" +
-	"\x05token\x18\x02 \x01(\tR\x05token\x12 \n" +
-	"\ttenant_id\x18\x03 \x01(\tH\x00R\btenantId\x88\x01\x01B\f\n" +
+	"\x03url\x18\x01 \x01(\tR\x03url\x12\x19\n" +
+	"\x05token\x18\x02 \x01(\tH\x00R\x05token\x88\x01\x01\x12 \n" +
+	"\ttenant_id\x18\x03 \x01(\tH\x01R\btenantId\x88\x01\x01\x12\x1f\n" +
+	"\busername\x18\x04 \x01(\tH\x02R\busername\x88\x01\x01\x12\x1f\n" +
+	"\bpassword\x18\x05 \x01(\tH\x03R\bpassword\x88\x01\x01B\b\n" +
+	"\x06_tokenB\f\n" +
 	"\n" +
-	"_tenant_id\"\xba\x02\n" +
+	"_tenant_idB\v\n" +
+	"\t_usernameB\v\n" +
+	"\t_password\"\xba\x02\n" +
 	"\x0eToolConnection\x128\n" +
 	"\aelastic\x18\x01 \x01(\v2\x1c.toolquery.ElasticConnectionH\x00R\aelastic\x128\n" +
 	"\adatadog\x18\x02 \x01(\v2\x1c.toolquery.DatadogConnectionH\x00R\adatadog\x12A\n" +

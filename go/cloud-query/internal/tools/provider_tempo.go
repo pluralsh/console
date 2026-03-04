@@ -24,7 +24,7 @@ func (in *TempoProvider) Traces(ctx context.Context, input *toolquery.TracesQuer
 		return nil, ErrInvalidArgument
 	}
 
-	client := clients.NewTempoClient(in.conn.GetUrl(), in.conn.GetToken(), in.conn.GetTenantId())
+	client := clients.NewTempoClient(in.conn.GetUrl(), in.conn.GetToken(), in.conn.GetUsername(), in.conn.GetPassword(), in.conn.GetTenantId())
 	defer client.Close()
 
 	limit := ""

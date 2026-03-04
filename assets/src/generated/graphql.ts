@@ -1974,6 +1974,8 @@ export type Cluster = {
   cloudAddons?: Maybe<Array<Maybe<CloudAddon>>>;
   clusterMetrics?: Maybe<ClusterMetrics>;
   clusterNodeMetrics?: Maybe<ClusterNodeMetrics>;
+  /** A set of metrics for a kubernetes controller, currently only deployments and statefulsets are supported */
+  componentMetrics?: Maybe<KubernetesControllerMetrics>;
   /** The total CPU capacity of the cluster */
   cpuTotal?: Maybe<Scalars['Float']['output']>;
   /** The CPU utilization of the cluster */
@@ -2147,6 +2149,19 @@ export type ClusterClusterNodeMetricsArgs = {
   start?: InputMaybe<Scalars['DateTime']['input']>;
   step?: InputMaybe<Scalars['String']['input']>;
   stop?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterComponentMetricsArgs = {
+  group: Scalars['String']['input'];
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  start?: InputMaybe<Scalars['DateTime']['input']>;
+  step?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['DateTime']['input']>;
+  version: Scalars['String']['input'];
 };
 
 
@@ -3918,6 +3933,7 @@ export type Flow = {
   icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  issues?: Maybe<IssueConnection>;
   name: Scalars['String']['output'];
   pipelines?: Maybe<PipelineConnection>;
   previewEnvironmentInstances?: Maybe<PreviewEnvironmentInstanceConnection>;
@@ -3944,6 +3960,15 @@ export type FlowAlertsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type FlowIssuesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<IssueStatus>;
 };
 
 
@@ -4955,6 +4980,86 @@ export type InviteAttributes = {
   email?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** An issue synced from an external provider (e.g. Linear) */
+export type Issue = {
+  __typename?: 'Issue';
+  /** the detailed description or body content of the issue */
+  body: Scalars['String']['output'];
+  /** the identifier of the issue in the external provider system */
+  externalId: Scalars['String']['output'];
+  /** the flow this issue is associated with */
+  flow?: Maybe<Flow>;
+  /** the unique identifier of the issue */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the provider (e.g., Linear, GitHub) that originated this issue */
+  provider: IssueWebhookProvider;
+  /** the current status of the issue (e.g., open, in progress, completed, cancelled) */
+  status: IssueStatus;
+  /** the title of the issue */
+  title: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the URL linking to this issue on the external provider */
+  url: Scalars['String']['output'];
+  /** the workbench this issue is associated with */
+  workbench?: Maybe<Workbench>;
+};
+
+export type IssueConnection = {
+  __typename?: 'IssueConnection';
+  edges?: Maybe<Array<Maybe<IssueEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type IssueEdge = {
+  __typename?: 'IssueEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Issue>;
+};
+
+export enum IssueStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  InProgress = 'IN_PROGRESS',
+  Open = 'OPEN'
+}
+
+/** A webhook receiver for an issue provider like Linear */
+export type IssueWebhook = {
+  __typename?: 'IssueWebhook';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  provider: IssueWebhookProvider;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the url for this specific webhook */
+  url: Scalars['String']['output'];
+};
+
+/** input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required. */
+export type IssueWebhookAttributes = {
+  name?: InputMaybe<Scalars['String']['input']>;
+  provider?: InputMaybe<IssueWebhookProvider>;
+  secret?: InputMaybe<Scalars['String']['input']>;
+  url?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type IssueWebhookConnection = {
+  __typename?: 'IssueWebhookConnection';
+  edges?: Maybe<Array<Maybe<IssueWebhookEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type IssueWebhookEdge = {
+  __typename?: 'IssueWebhookEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<IssueWebhook>;
+};
+
+export enum IssueWebhookProvider {
+  Linear = 'LINEAR'
+}
+
 export type IssuerRef = {
   __typename?: 'IssuerRef';
   group?: Maybe<Scalars['String']['output']>;
@@ -5060,6 +5165,14 @@ export type KubernetesChangelog = {
   version?: Maybe<Scalars['String']['output']>;
 };
 
+export type KubernetesControllerMetrics = {
+  __typename?: 'KubernetesControllerMetrics';
+  cpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  mem?: Maybe<Array<Maybe<MetricResponse>>>;
+  podCpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  podMem?: Maybe<Array<Maybe<MetricResponse>>>;
+};
+
 export type KubernetesUnstructured = {
   __typename?: 'KubernetesUnstructured';
   events?: Maybe<Array<Maybe<Event>>>;
@@ -5157,6 +5270,12 @@ export type LogFacet = {
   __typename?: 'LogFacet';
   key: Scalars['String']['output'];
   value?: Maybe<Scalars['String']['output']>;
+};
+
+export type LogFacetDetail = {
+  __typename?: 'LogFacetDetail';
+  count: Scalars['Int']['output'];
+  label: Scalars['String']['output'];
 };
 
 export type LogFacetInput = {
@@ -8097,6 +8216,7 @@ export type RootMutationType = {
   /** Creates a new infrastructure research based on a prompt */
   createInfraResearch?: Maybe<InfraResearch>;
   createInvite?: Maybe<Invite>;
+  createIssueWebhook?: Maybe<IssueWebhook>;
   createManagedNamespace?: Maybe<ManagedNamespace>;
   createObjectStore?: Maybe<ObjectStore>;
   createOidcProvider?: Maybe<OidcProvider>;
@@ -8153,6 +8273,7 @@ export type RootMutationType = {
   deleteGroupMember?: Maybe<GroupMember>;
   /** Deletes an existing infrastructure research */
   deleteInfraResearch?: Maybe<InfraResearch>;
+  deleteIssueWebhook?: Maybe<IssueWebhook>;
   deleteJob?: Maybe<Job>;
   deleteManagedNamespace?: Maybe<ManagedNamespace>;
   deleteMcpServer?: Maybe<McpServer>;
@@ -8284,6 +8405,7 @@ export type RootMutationType = {
   updateGroup?: Maybe<Group>;
   /** Updates an existing infrastructure research based on a prompt */
   updateInfraResearch?: Maybe<InfraResearch>;
+  updateIssueWebhook?: Maybe<IssueWebhook>;
   updateManagedNamespace?: Maybe<ManagedNamespace>;
   updateObjectStore?: Maybe<ObjectStore>;
   updateOidcProvider?: Maybe<OidcProvider>;
@@ -8570,6 +8692,11 @@ export type RootMutationTypeCreateInviteArgs = {
 };
 
 
+export type RootMutationTypeCreateIssueWebhookArgs = {
+  attributes: IssueWebhookAttributes;
+};
+
+
 export type RootMutationTypeCreateManagedNamespaceArgs = {
   attributes: ManagedNamespaceAttributes;
 };
@@ -8836,6 +8963,11 @@ export type RootMutationTypeDeleteGroupMemberArgs = {
 
 
 export type RootMutationTypeDeleteInfraResearchArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteIssueWebhookArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -9400,6 +9532,12 @@ export type RootMutationTypeUpdateInfraResearchArgs = {
 };
 
 
+export type RootMutationTypeUpdateIssueWebhookArgs = {
+  attributes: IssueWebhookAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateManagedNamespaceArgs = {
   attributes: ManagedNamespaceAttributes;
   id: Scalars['ID']['input'];
@@ -9781,11 +9919,14 @@ export type RootQueryType = {
   infrastructureStacks?: Maybe<InfrastructureStackConnection>;
   ingress?: Maybe<Ingress>;
   invite?: Maybe<Invite>;
+  issueWebhook?: Maybe<IssueWebhook>;
+  issueWebhooks?: Maybe<IssueWebhookConnection>;
   job?: Maybe<Job>;
   kubernetesChangelog?: Maybe<KubernetesChangelog>;
   kubernetesVersionInfo?: Maybe<Array<Maybe<KubernetesVersionInfo>>>;
   logAggregation?: Maybe<Array<Maybe<LogLine>>>;
   logAggregationBuckets?: Maybe<Array<Maybe<LogAggregationBucket>>>;
+  logLabels?: Maybe<Array<Maybe<LogFacetDetail>>>;
   loginInfo?: Maybe<LoginInfo>;
   logs?: Maybe<Array<Maybe<LogStream>>>;
   managedNamespace?: Maybe<ManagedNamespace>;
@@ -10495,6 +10636,7 @@ export type RootQueryTypeInfrastructureStacksArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<StackStatus>;
   tagQuery?: InputMaybe<TagQuery>;
 };
 
@@ -10508,6 +10650,20 @@ export type RootQueryTypeIngressArgs = {
 
 export type RootQueryTypeInviteArgs = {
   id: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeIssueWebhookArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeIssueWebhooksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -10542,6 +10698,15 @@ export type RootQueryTypeLogAggregationBucketsArgs = {
   aggregation?: InputMaybe<LogAggregationInput>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   facets?: InputMaybe<Array<InputMaybe<LogFacetInput>>>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  time?: InputMaybe<LogTimeRange>;
+};
+
+
+export type RootQueryTypeLogLabelsArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  field: Scalars['String']['input'];
   query?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   time?: InputMaybe<LogTimeRange>;
@@ -14155,6 +14320,8 @@ export type WorkbenchInfrastructureAttributes = {
 export type WorkbenchJob = {
   __typename?: 'WorkbenchJob';
   activities?: Maybe<WorkbenchJobActivityConnection>;
+  /** the alert this run was spawned from */
+  alert?: Maybe<Alert>;
   /** when the run completed */
   completedAt?: Maybe<Scalars['DateTime']['output']>;
   /** error message when the job failed */
@@ -14162,6 +14329,8 @@ export type WorkbenchJob = {
   /** the id of the run */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the issue this run was spawned from */
+  issue?: Maybe<Issue>;
   /** the prompt for this run */
   prompt?: Maybe<Scalars['String']['output']>;
   /** the result for this job (sideloadable) */
@@ -14480,11 +14649,17 @@ export type WorkbenchToolEdge = {
 
 export type WorkbenchToolElasticConnection = {
   __typename?: 'WorkbenchToolElasticConnection';
+  /** elasticsearch index */
+  index: Scalars['String']['output'];
   /** elasticsearch base url (credentials never exposed) */
-  url?: Maybe<Scalars['String']['output']>;
+  url: Scalars['String']['output'];
+  /** basic auth username */
+  username: Scalars['String']['output'];
 };
 
 export type WorkbenchToolElasticConnectionAttributes = {
+  /** elasticsearch index */
+  index: Scalars['String']['input'];
   /** basic auth password */
   password: Scalars['String']['input'];
   /** elasticsearch base url */
@@ -14548,12 +14723,16 @@ export type WorkbenchToolLokiConnection = {
 };
 
 export type WorkbenchToolLokiConnectionAttributes = {
+  /** basic auth password */
+  password?: InputMaybe<Scalars['String']['input']>;
   /** optional tenant id */
   tenantId?: InputMaybe<Scalars['String']['input']>;
   /** bearer token or api key */
-  token: Scalars['String']['input'];
+  token?: InputMaybe<Scalars['String']['input']>;
   /** loki base url */
   url: Scalars['String']['input'];
+  /** basic auth username */
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type WorkbenchToolPrometheusConnection = {
@@ -14565,12 +14744,16 @@ export type WorkbenchToolPrometheusConnection = {
 };
 
 export type WorkbenchToolPrometheusConnectionAttributes = {
+  /** basic auth password */
+  password?: InputMaybe<Scalars['String']['input']>;
   /** optional tenant id (e.g. for Mimir) */
   tenantId?: InputMaybe<Scalars['String']['input']>;
   /** bearer token or api key */
-  token: Scalars['String']['input'];
+  token?: InputMaybe<Scalars['String']['input']>;
   /** prometheus base url */
   url: Scalars['String']['input'];
+  /** basic auth username */
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type WorkbenchToolTempoConnection = {
@@ -14582,12 +14765,16 @@ export type WorkbenchToolTempoConnection = {
 };
 
 export type WorkbenchToolTempoConnectionAttributes = {
+  /** basic auth password */
+  password?: InputMaybe<Scalars['String']['input']>;
   /** optional tenant id */
   tenantId?: InputMaybe<Scalars['String']['input']>;
   /** bearer token or api key */
-  token: Scalars['String']['input'];
+  token?: InputMaybe<Scalars['String']['input']>;
   /** tempo base url */
   url: Scalars['String']['input'];
+  /** basic auth username */
+  username?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum WorkbenchToolType {
@@ -14604,6 +14791,8 @@ export type WorkbenchWebhook = {
   /** the id of the webhook */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the issue webhook that receives events */
+  issueWebhook?: Maybe<IssueWebhook>;
   /** criteria to match incoming webhook payloads */
   matches?: Maybe<WorkbenchWebhookMatches>;
   /** name of this webhook trigger */
@@ -14616,11 +14805,13 @@ export type WorkbenchWebhook = {
 };
 
 export type WorkbenchWebhookAttributes = {
+  /** issue webhook to receive events (either webhook_id or issue_webhook_id required) */
+  issueWebhookId?: InputMaybe<Scalars['ID']['input']>;
   /** criteria to match incoming webhook payloads */
   matches?: InputMaybe<WorkbenchWebhookMatchesAttributes>;
   /** unique name for this webhook on the workbench (required for create) */
   name?: InputMaybe<Scalars['String']['input']>;
-  /** observability webhook to receive events */
+  /** observability webhook to receive events (either webhook_id or issue_webhook_id required) */
   webhookId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -17273,6 +17464,8 @@ export type LogLineFragment = { __typename?: 'LogLine', log?: string | null, tim
 
 export type LogFacetFragment = { __typename?: 'LogFacet', key: string, value?: string | null };
 
+export type LogFacetDetailFragment = { __typename?: 'LogFacetDetail', label: string, count: number };
+
 export type LogAggregationQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -17284,6 +17477,17 @@ export type LogAggregationQueryVariables = Exact<{
 
 
 export type LogAggregationQuery = { __typename?: 'RootQueryType', logAggregation?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null };
+
+export type LogLabelsQueryVariables = Exact<{
+  field: Scalars['String']['input'];
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  time?: InputMaybe<LogTimeRange>;
+}>;
+
+
+export type LogLabelsQuery = { __typename?: 'RootQueryType', logLabels?: Array<{ __typename?: 'LogFacetDetail', label: string, count: number } | null> | null };
 
 export type MetricResponseFragment = { __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null };
 
@@ -21990,6 +22194,12 @@ export const AccountFragmentDoc = gql`
       period
     }
   }
+}
+    `;
+export const LogFacetDetailFragmentDoc = gql`
+    fragment LogFacetDetail on LogFacetDetail {
+  label
+  count
 }
     `;
 export const MetricPointResponseFragmentDoc = gql`
@@ -34123,6 +34333,59 @@ export type LogAggregationQueryHookResult = ReturnType<typeof useLogAggregationQ
 export type LogAggregationLazyQueryHookResult = ReturnType<typeof useLogAggregationLazyQuery>;
 export type LogAggregationSuspenseQueryHookResult = ReturnType<typeof useLogAggregationSuspenseQuery>;
 export type LogAggregationQueryResult = Apollo.QueryResult<LogAggregationQuery, LogAggregationQueryVariables>;
+export const LogLabelsDocument = gql`
+    query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange) {
+  logLabels(
+    field: $field
+    clusterId: $clusterId
+    serviceId: $serviceId
+    query: $query
+    time: $time
+  ) {
+    ...LogFacetDetail
+  }
+}
+    ${LogFacetDetailFragmentDoc}`;
+
+/**
+ * __useLogLabelsQuery__
+ *
+ * To run a query within a React component, call `useLogLabelsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLogLabelsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLogLabelsQuery({
+ *   variables: {
+ *      field: // value for 'field'
+ *      clusterId: // value for 'clusterId'
+ *      serviceId: // value for 'serviceId'
+ *      query: // value for 'query'
+ *      time: // value for 'time'
+ *   },
+ * });
+ */
+export function useLogLabelsQuery(baseOptions: Apollo.QueryHookOptions<LogLabelsQuery, LogLabelsQueryVariables> & ({ variables: LogLabelsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LogLabelsQuery, LogLabelsQueryVariables>(LogLabelsDocument, options);
+      }
+export function useLogLabelsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LogLabelsQuery, LogLabelsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LogLabelsQuery, LogLabelsQueryVariables>(LogLabelsDocument, options);
+        }
+// @ts-ignore
+export function useLogLabelsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<LogLabelsQuery, LogLabelsQueryVariables>): Apollo.UseSuspenseQueryResult<LogLabelsQuery, LogLabelsQueryVariables>;
+export function useLogLabelsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<LogLabelsQuery, LogLabelsQueryVariables>): Apollo.UseSuspenseQueryResult<LogLabelsQuery | undefined, LogLabelsQueryVariables>;
+export function useLogLabelsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<LogLabelsQuery, LogLabelsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<LogLabelsQuery, LogLabelsQueryVariables>(LogLabelsDocument, options);
+        }
+export type LogLabelsQueryHookResult = ReturnType<typeof useLogLabelsQuery>;
+export type LogLabelsLazyQueryHookResult = ReturnType<typeof useLogLabelsLazyQuery>;
+export type LogLabelsSuspenseQueryHookResult = ReturnType<typeof useLogLabelsSuspenseQuery>;
+export type LogLabelsQueryResult = Apollo.QueryResult<LogLabelsQuery, LogLabelsQueryVariables>;
 export const ClusterHeatMapDocument = gql`
     query ClusterHeatMap($clusterId: ID!, $flavor: HeatMapFlavor!) {
   cluster(id: $clusterId) {
@@ -37934,6 +38197,7 @@ export const namedOperations = {
     Refresh: 'Refresh',
     TemporaryToken: 'TemporaryToken',
     LogAggregation: 'LogAggregation',
+    LogLabels: 'LogLabels',
     ClusterHeatMap: 'ClusterHeatMap',
     ClusterNoisyNeighbors: 'ClusterNoisyNeighbors',
     ServiceHeatMap: 'ServiceHeatMap',
@@ -38353,6 +38617,7 @@ export const namedOperations = {
     Account: 'Account',
     LogLine: 'LogLine',
     LogFacet: 'LogFacet',
+    LogFacetDetail: 'LogFacetDetail',
     MetricResponse: 'MetricResponse',
     MetricPointResponse: 'MetricPointResponse',
     UtilizationHeatMap: 'UtilizationHeatMap',

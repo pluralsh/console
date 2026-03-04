@@ -25,6 +25,8 @@ defmodule Console.Logs.Provider.Victoria do
   end
   def query(_, _), do: {:error, "no victoria metrics host specified"}
 
+  def labels(_, _), do: {:ok, []}
+
   # Empty since victoria metrics doesn't support aggregations
   def aggregate(%__MODULE__{connection: %Connection{host: host}}, %Query{}) when is_binary(host) do
     {:ok, []}

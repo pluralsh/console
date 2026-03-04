@@ -1,0 +1,5 @@
+You've been assigned the following issue from <%= @issue.provider %>, please investigate everything necessary to complete the task.  The issue will be described below:
+
+# <%= @issue.title %>
+
+<%= @issue.body %>

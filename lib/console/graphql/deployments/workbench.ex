@@ -59,15 +59,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_webhook_matches_attributes do
-    field :regex,           :string, description: "regex pattern to match in webhook body"
-    field :substring,       :string, description: "substring to match in webhook body"
+    field :regex,            :string, description: "regex pattern to match in webhook body"
+    field :substring,        :string, description: "substring to match in webhook body"
     field :case_insensitive, :boolean, description: "whether matching is case insensitive"
   end
 
   input_object :workbench_webhook_attributes do
-    field :name,       :string, description: "unique name for this webhook on the workbench (required for create)"
-    field :webhook_id, :id, description: "observability webhook to receive events"
-    field :matches,   :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
+    field :name,             :string, description: "unique name for this webhook on the workbench (required for create)"
+    field :webhook_id,       :id, description: "observability webhook to receive events (either webhook_id or issue_webhook_id required)"
+    field :issue_webhook_id, :id, description: "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
+    field :matches,          :workbench_webhook_matches_attributes, description: "criteria to match incoming webhook payloads"
   end
 
   input_object :workbench_tool_attributes do
@@ -91,23 +92,30 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :url,      non_null(:string), description: "elasticsearch base url"
     field :username, non_null(:string), description: "basic auth username"
     field :password, non_null(:string), description: "basic auth password"
+    field :index,    non_null(:string), description: "elasticsearch index"
   end
 
   input_object :workbench_tool_prometheus_connection_attributes do
     field :url,       non_null(:string), description: "prometheus base url"
-    field :token,     non_null(:string), description: "bearer token or api key"
+    field :token,     :string, description: "bearer token or api key"
+    field :username,  :string, description: "basic auth username"
+    field :password,  :string, description: "basic auth password"
     field :tenant_id, :string, description: "optional tenant id (e.g. for Mimir)"
   end
 
   input_object :workbench_tool_loki_connection_attributes do
     field :url,       non_null(:string), description: "loki base url"
-    field :token,     non_null(:string), description: "bearer token or api key"
+    field :token,     :string, description: "bearer token or api key"
+    field :username,  :string, description: "basic auth username"
+    field :password,  :string, description: "basic auth password"
     field :tenant_id, :string, description: "optional tenant id"
   end
 
   input_object :workbench_tool_tempo_connection_attributes do
     field :url,       non_null(:string), description: "tempo base url"
-    field :token,     non_null(:string), description: "bearer token or api key"
+    field :token,     :string, description: "bearer token or api key"
+    field :username,  :string, description: "basic auth username"
+    field :password,  :string, description: "basic auth password"
     field :tenant_id, :string, description: "optional tenant id"
   end
 
@@ -176,6 +184,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
     field :result,       :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
+
+    field :alert,        :alert, resolve: dataloader(Deployments), description: "the alert this run was spawned from"
+    field :issue,        :issue, resolve: dataloader(Deployments), description: "the issue this run was spawned from"
 
     connection field :activities, node_type: :workbench_job_activity do
       resolve &Deployments.list_workbench_job_activities/3
@@ -300,8 +311,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :name,   :string, description: "name of this webhook trigger"
     field :matches, :workbench_webhook_matches, description: "criteria to match incoming webhook payloads"
 
-    field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
-    field :webhook,   :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"
+    field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this webhook belongs to"
+    field :webhook,     :observability_webhook, resolve: dataloader(Deployments), description: "the observability webhook that receives events"
+    field :issue_webhook, :issue_webhook, resolve: dataloader(Deployments), description: "the issue webhook that receives events"
 
     timestamps()
   end
@@ -327,7 +339,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   object :workbench_tool_elastic_connection do
-    field :url, :string, description: "elasticsearch base url (credentials never exposed)"
+    field :url,      non_null(:string), description: "elasticsearch base url (credentials never exposed)"
+    field :index,    non_null(:string), description: "elasticsearch index"
+    field :username, non_null(:string), description: "basic auth username"
   end
 
   object :workbench_tool_prometheus_connection do

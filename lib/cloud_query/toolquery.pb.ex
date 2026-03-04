@@ -6,6 +6,7 @@ defmodule Toolquery.ElasticConnection do
   field :url, 1, type: :string
   field :username, 2, type: :string
   field :password, 3, type: :string
+  field :index, 4, type: :string
 end
 
 defmodule Toolquery.DatadogConnection do
@@ -36,8 +37,10 @@ defmodule Toolquery.LokiConnection do
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :url, 1, type: :string
-  field :token, 2, type: :string
+  field :token, 2, proto3_optional: true, type: :string
   field :tenant_id, 3, proto3_optional: true, type: :string, json_name: "tenantId"
+  field :username, 4, proto3_optional: true, type: :string
+  field :password, 5, proto3_optional: true, type: :string
 end
 
 defmodule Toolquery.TempoConnection do
@@ -46,8 +49,10 @@ defmodule Toolquery.TempoConnection do
   use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
 
   field :url, 1, type: :string
-  field :token, 2, type: :string
+  field :token, 2, proto3_optional: true, type: :string
   field :tenant_id, 3, proto3_optional: true, type: :string, json_name: "tenantId"
+  field :username, 4, proto3_optional: true, type: :string
+  field :password, 5, proto3_optional: true, type: :string
 end
 
 defmodule Toolquery.ToolConnection do

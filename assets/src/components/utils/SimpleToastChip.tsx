@@ -1,7 +1,13 @@
-import { Chip, ChipProps } from '@pluralsh/design-system'
+import { Chip, ChipProps, SemanticColorKey } from '@pluralsh/design-system'
 import { animated, useTransition } from '@react-spring/web'
 import { useEffect } from 'react'
 import styled from 'styled-components'
+
+export type ActionToastInfo = {
+  name: Nullable<string>
+  action: string
+  color: SemanticColorKey
+}
 
 export function SimpleToastChip({
   show,

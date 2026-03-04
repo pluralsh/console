@@ -643,6 +643,53 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
       assert job.prompt != nil
       assert job.status == :pending
       assert job.user_id == bot.id
+      assert job.alert_id == alert.id
+      assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+  end
+
+  describe "IssueCreated" do
+    test "creates a workbench job when issue has workbench_id and console bot and workbench are present" do
+      bot = insert(:user, bot_name: "console", roles: %{admin: true})
+      workbench = insert(:workbench)
+      issue =
+        insert(:issue,
+          workbench: workbench,
+          title: "Bug in API",
+          body: "The API returns 500 on invalid input"
+        )
+
+      event = %PubSub.IssueCreated{item: issue}
+      {:ok, job} = Recurse.handle_event(event)
+
+      assert job.workbench_id == workbench.id
+      assert job.prompt != nil
+      assert job.status == :pending
+      assert job.user_id == bot.id
+      assert job.issue_id == issue.id
+      assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
+    end
+  end
+
+  describe "IssueUpdated" do
+    test "creates a workbench job when issue has workbench_id and console bot and workbench are present" do
+      bot = insert(:user, bot_name: "console", roles: %{admin: true})
+      workbench = insert(:workbench)
+      issue =
+        insert(:issue,
+          workbench: workbench,
+          title: "Bug in API",
+          body: "The API returns 500 on invalid input"
+        )
+
+      event = %PubSub.IssueUpdated{item: issue}
+      {:ok, job} = Recurse.handle_event(event)
+
+      assert job.workbench_id == workbench.id
+      assert job.prompt != nil
+      assert job.status == :pending
+      assert job.user_id == bot.id
+      assert job.issue_id == issue.id
       assert_receive {:event, %PubSub.WorkbenchJobCreated{item: ^job}}
     end
   end

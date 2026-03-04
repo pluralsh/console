@@ -114,7 +114,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     WorkbenchTool,
     WorkbenchCron,
     WorkbenchWebhook,
-    ObservabilityWebhook
+    ObservabilityWebhook,
+    IssueWebhook,
+    Issue
   }
 
   def query(Project, _), do: Project
@@ -218,6 +220,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(WorkbenchCron, _), do: WorkbenchCron.ordered()
   def query(WorkbenchWebhook, _), do: WorkbenchWebhook
   def query(ObservabilityWebhook, _), do: ObservabilityWebhook.ordered()
+  def query(IssueWebhook, _), do: IssueWebhook.ordered()
+  def query(Issue, _), do: Issue.ordered()
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

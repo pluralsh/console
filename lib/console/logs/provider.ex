@@ -7,6 +7,7 @@ defmodule Console.Logs.Provider do
 
   @callback query(struct, Query.t) :: {:ok, [Line.t]} | error
   @callback aggregate(struct, Query.t) :: {:ok, [map()]} | error
+  @callback labels(struct, Query.t) :: {:ok, [%{label: String.t, count: integer()}]} | error
 
   @spec query(Query.t) :: {:ok, [Line.t]} | error
   def query(%Query{} = q) do
@@ -18,6 +19,11 @@ defmodule Console.Logs.Provider do
   def aggregate(%Query{} = q) do
     with {:ok, %{__struct__: provider} = prov} <- client(),
       do: provider.aggregate(prov, q)
+  end
+
+  def labels(%Query{} = q) do
+    with {:ok, %{__struct__: provider} = prov} <- client(),
+      do: provider.labels(prov, q)
   end
 
   @spec accessible(Query.t, User.t) :: {:ok, Query.t} | error

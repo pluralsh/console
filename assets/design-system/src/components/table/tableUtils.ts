@@ -107,17 +107,20 @@ export const defaultGlobalFilterFn: FilterFn<any> = (
   return itemRank.passed
 }
 
-export function measureElementHeight(element: Element): number {
-  // Since <td>s are rendered with `display: contents`, we need to calculate
-  // row height from contents using Range
-  if (
-    element?.getBoundingClientRect().height <= 0 &&
-    element?.hasChildNodes()
-  ) {
+export function measureElement(
+  element: Element,
+  dimension: 'height' | 'width' = 'height'
+): number {
+  const { width, height } = element.getBoundingClientRect()
+  const value = dimension === 'width' ? width : height
+  // Since <tr>s are rendered with `display: contents`, we need to calculate
+  // row height/width from contents using Range
+  if (value <= 0 && element?.hasChildNodes()) {
     const range = document.createRange()
     range.setStart(element, 0)
     range.setEnd(element, element.childNodes.length)
-    return range.getBoundingClientRect().height
+    const { width, height } = range.getBoundingClientRect()
+    return dimension === 'width' ? width : height
   }
-  return element.getBoundingClientRect().height
+  return value
 }
