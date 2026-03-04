@@ -199,7 +199,7 @@ export function mapExistingNodes<N>(connection?: Connection<N> | null) {
 // strips __typename's and removes any value in an object where isEmpty is true (except for booleans)
 export function deepOmitFalsy<T extends Nullable<Record<string, any>>>(
   obj: T
-): T {
+): Partial<T> {
   if (obj == null || typeof obj !== 'object' || Array.isArray(obj)) return obj
 
   const result = {} as Record<string, any>

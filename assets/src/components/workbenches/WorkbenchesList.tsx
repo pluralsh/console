@@ -14,17 +14,14 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { Body2P, Title2H1 } from 'components/utils/typography/Text'
+import { Body2P } from 'components/utils/typography/Text'
 import { WorkbenchTinyFragment, useWorkbenchesQuery } from 'generated/graphql'
-import { isEmpty } from 'lodash'
-import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { WORKBENCHES_CREATE_REL_PATH } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import { WorkbenchCreateOrEdit } from './workbench/create-edit/WorkbenchCreateOrEdit'
 
 export function WorkbenchesList() {
-  const [isCreating, setIsCreating] = useState(false)
   const { data, error, loading, pageInfo, fetchNextPage } =
     useFetchPaginatedData({
       queryHook: useWorkbenchesQuery,
@@ -34,43 +31,30 @@ export function WorkbenchesList() {
 
   return (
     <WrapperSC>
-      {!isCreating && (
-        <StackedText
-          first={
-            <Flex
-              align="center"
-              height={40}
-              gap="xsmall"
-            >
-              <IconFrame
-                size="small"
-                icon={<WorkbenchIcon />}
-              />
-              <span>Workbenches</span>
-            </Flex>
-          }
-          firstPartialType="body2Bold"
-          firstColor="text"
-          second="Configurable, reusable agent definitions for common DevOps tasks. Each workbench bundles prompts, tools, and skills that can spawn multiple agents on demand."
-          secondPartialType="body2"
-          secondColor="text-light"
-          gap="xsmall"
-          css={{ maxWidth: 840 }}
-        />
-      )}
+      <StackedText
+        first={
+          <Flex
+            align="center"
+            height={40}
+            gap="xsmall"
+          >
+            <IconFrame
+              size="small"
+              icon={<WorkbenchIcon />}
+            />
+            <span>Workbenches</span>
+          </Flex>
+        }
+        firstPartialType="body2Bold"
+        firstColor="text"
+        second="Configurable, reusable agent definitions for common DevOps tasks. Each workbench bundles prompts, tools, and skills that can spawn multiple agents on demand."
+        secondPartialType="body2"
+        secondColor="text-light"
+        gap="xsmall"
+        css={{ maxWidth: 840 }}
+      />
       {error && <GqlError error={error} />}
-      {isCreating ? (
-        <>
-          <Title2H1>
-            Create {isEmpty(workbenches) ? 'your first' : 'a'} workbench
-          </Title2H1>
-          <WorkbenchCreateOrEdit
-            mode="create"
-            onCancel={() => setIsCreating(false)}
-            onCompleted={() => setIsCreating(false)}
-          />
-        </>
-      ) : !data && loading ? (
+      {!data && loading ? (
         <CardGridSkeleton count={6} />
       ) : (
         <CardGrid
@@ -87,7 +71,8 @@ export function WorkbenchesList() {
           >
             <Button
               startIcon={<PlusIcon />}
-              onClick={() => setIsCreating(true)}
+              as={Link}
+              to={WORKBENCHES_CREATE_REL_PATH}
             >
               Create Workbench
             </Button>
