@@ -27,3 +27,27 @@ defimpl Console.PubSub.Cacheable, for: [
     do: {:del, {:wb_webhooks_for_issue, iwid}, hook}
   def cache(_), do: :ok
 end
+
+defimpl Console.PubSub.Cacheable, for: [
+  Console.PubSub.IssueWebhookCreated,
+  Console.PubSub.IssueWebhookUpdated,
+  Console.PubSub.IssueWebhookDeleted,
+] do
+  alias Console.Schema.IssueWebhook
+
+  def cache(%@for{item: %IssueWebhook{external_id: ext_id} = hook}) when is_binary(ext_id),
+    do: {:del, {:issue_webhook, ext_id}, hook}
+  def cache(_), do: :ok
+end
+
+defimpl Console.PubSub.Cacheable, for: [
+  Console.PubSub.ObservabilityWebhookCreated,
+  Console.PubSub.ObservabilityWebhookUpdated,
+  Console.PubSub.ObservabilityWebhookDeleted,
+] do
+  alias Console.Schema.ObservabilityWebhook
+
+  def cache(%@for{item: %ObservabilityWebhook{external_id: ext_id} = hook}) when is_binary(ext_id),
+    do: {:del, {:obs_webhook, ext_id}, hook}
+  def cache(_), do: :ok
+end

@@ -1,6 +1,7 @@
 defmodule Console.Deployments.IntegrationsTest do
   use Console.DataCase, async: true
   alias Console.Deployments.Integrations
+  alias Console.PubSub
 
   describe "#upsert_chat_connection/2" do
     test "it can upsert a chat connection" do
@@ -43,6 +44,7 @@ defmodule Console.Deployments.IntegrationsTest do
       assert webhook.name == "test-issue-webhook"
       assert webhook.url == "https://issues.example.com/webhook"
       assert webhook.provider == :linear
+      assert_receive {:event, %PubSub.IssueWebhookCreated{item: ^webhook}}
     end
 
     test "non-admin cannot create an issue webhook" do
@@ -68,6 +70,7 @@ defmodule Console.Deployments.IntegrationsTest do
       }, webhook.id, admin)
 
       assert updated.name == "updated-name"
+      assert_receive {:event, %PubSub.IssueWebhookUpdated{item: ^updated}}
     end
 
     test "non-admin cannot update an issue webhook" do
@@ -89,6 +92,7 @@ defmodule Console.Deployments.IntegrationsTest do
 
       assert deleted.id == webhook.id
       refute refetch(webhook)
+      assert_receive {:event, %PubSub.IssueWebhookDeleted{item: ^deleted}}
     end
 
     test "non-admin cannot delete an issue webhook" do
