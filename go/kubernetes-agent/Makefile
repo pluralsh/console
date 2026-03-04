@@ -84,6 +84,13 @@ run-debug: clean --ensure-kind-cluster ## Starts production version of the appli
 		--build \
 		--remove-orphans
 
+.PHONY: test-docker
+test-docker: ## run tests via docker compose
+	@docker compose -f $(DOCKER_COMPOSE_TEST_PATH) up --build --abort-on-container-exit --exit-code-from kubernetes-agent-test; \
+	status=$$?; \
+	docker compose -f $(DOCKER_COMPOSE_TEST_PATH) down; \
+	exit $$status
+
 .PHONY: image
 image:
 ifndef NO_BUILD
