@@ -665,7 +665,7 @@ defmodule Console.Deployments.StacksTest do
       [first, second] = run.steps
 
       assert first.cmd == "ansible-playbook"
-      assert first.args == ["main.yaml", "--diff", "--check"]
+      assert first.args == ["main.yaml", "--diff"]
       assert first.stage == :plan
       assert first.index == 0
 
@@ -711,7 +711,7 @@ defmodule Console.Deployments.StacksTest do
       [first, second] = run.steps
 
       assert first.cmd == "ansible-playbook"
-      assert first.args == ["upgrade.yaml", "-i", "inventory.yaml", "--some-arg", "--diff", "--check"]
+      assert first.args == ["upgrade.yaml", "-i", "inventory.yaml", "--some-arg", "--diff"]
       assert first.stage == :plan
       assert first.index == 0
 

@@ -60,7 +60,7 @@ defmodule Console.Deployments.Stacks.Commands do
 
   defp ansible_commands(%Stack{} = s, true) do
     indexed([
-      cmd("plan", "ansible-playbook", ansible_args(s) ++ ["--diff", "--check"], :plan)
+      cmd("plan", "ansible-playbook", ansible_args(s) ++ ["--diff"], :plan)
     ])
   end
 
@@ -70,7 +70,7 @@ defmodule Console.Deployments.Stacks.Commands do
   defp ansible_commands(%Stack{} = s, _) do
     args = ansible_args(s)
     indexed([
-      cmd("plan", "ansible-playbook", args ++ ["--diff", "--check"], :plan),
+      cmd("plan", "ansible-playbook", args ++ ["--diff"], :plan),
       cmd("apply", "ansible-playbook", args, :apply)
     ])
   end

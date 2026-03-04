@@ -775,6 +775,8 @@ type AnsibleConfiguration struct {
 	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
 	// path to the private key file for SSH authentication
 	PrivateKeyFile *string `json:"privateKeyFile,omitempty"`
+	// path to the ansible config file to use
+	ConfigFile *string `json:"configFile,omitempty"`
 }
 
 type AnsibleConfigurationAttributes struct {
@@ -786,6 +788,8 @@ type AnsibleConfigurationAttributes struct {
 	AdditionalArgs []*string `json:"additionalArgs,omitempty"`
 	// path to the private key file for SSH authentication
 	PrivateKeyFile *string `json:"privateKeyFile,omitempty"`
+	// path to the ansible config file to use
+	ConfigFile *string `json:"configFile,omitempty"`
 }
 
 // Anthropic connection information

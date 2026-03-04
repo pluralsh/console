@@ -4853,6 +4853,9 @@ input AnsibleConfigurationAttributes {
 
   "path to the private key file for SSH authentication"
   privateKeyFile: String
+
+  "path to the ansible config file to use"
+  configFile: String
 }
 
 input AiApprovalAttributes {
@@ -5258,6 +5261,9 @@ type AnsibleConfiguration {
 
   "path to the private key file for SSH authentication"
   privateKeyFile: String
+
+  "path to the ansible config file to use"
+  configFile: String
 }
 
 type StackRun {
