@@ -411,7 +411,7 @@ message MetricsQueryOutput {
 message MetricsSearchInput {
   ToolConnection connection = 1;
   string query = 2;
-  optional int32 limit = 3;
+  optional int64 limit = 3;
 }
 
 message MetricsSearchResult {

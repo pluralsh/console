@@ -84,7 +84,7 @@ func (in *PrometheusProvider) MetricsSearch(ctx context.Context, input *toolquer
 	// Use the Prometheus v1 client to fetch metric names over a recent time window.
 	end := time.Now()
 	start := end.Add(-24 * time.Hour)
-	labelValues, _, err := client.LabelValues(ctx, "__name__", nil, start, end)
+	labelValues, _, err := client.LabelValues(ctx, "__name__", nil, start, end, v1.WithLimit(5000))
 	if err != nil {
 		return nil, err
 	}
@@ -93,6 +93,10 @@ func (in *PrometheusProvider) MetricsSearch(ctx context.Context, input *toolquer
 		labelValues = lo.Filter(labelValues, func(lv model.LabelValue, _ int) bool {
 			return strings.Contains(strings.ToLower(string(lv)), strings.ToLower(input.Query))
 		})
+	}
+
+	if input.GetLimit() > 0 {
+		labelValues = labelValues[:min(len(labelValues), int(input.GetLimit()))]
 	}
 
 	results := lo.Map(labelValues, func(lv model.LabelValue, _ int) *toolquery.MetricsSearchResult {

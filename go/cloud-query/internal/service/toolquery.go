@@ -122,16 +122,16 @@ func (in *ToolQueryService) validateInput(connection *toolquery.ToolConnection, 
 		return err
 	}
 
+	if len(query) == 0 {
+		return status.Error(codes.InvalidArgument, "query is required")
+	}
+
 	return in.validateTimeRange(timeRange)
 }
 
 func (in *ToolQueryService) validateSearchInput(connection *toolquery.ToolConnection, query string) error {
 	if connection == nil {
 		return status.Error(codes.InvalidArgument, "connection is required")
-	}
-
-	if len(query) == 0 {
-		return status.Error(codes.InvalidArgument, "query is required")
 	}
 
 	return nil

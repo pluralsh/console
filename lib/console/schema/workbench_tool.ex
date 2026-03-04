@@ -124,9 +124,19 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp infer_categories(changeset) do
     case get_field(changeset, :categories) do
-      nil -> put_change(changeset, :categories, categories(get_field(changeset, :tool)))
-      _ -> changeset
+      [_ | _] -> valid_category(changeset, get_field(changeset, :tool))
+      _ -> put_change(changeset, :categories, categories(get_field(changeset, :tool)))
     end
+  end
+
+  defp valid_category(changeset, tool) do
+    validate_change(changeset, :categories, fn :categories, categories ->
+      cats = categories(tool)
+      case MapSet.subset?(MapSet.new(categories), MapSet.new(cats)) do
+        true -> []
+        false -> [categories: "must be a subset of #{inspect(cats)} for a #{tool} tool"]
+      end
+    end)
   end
 
   defp categories(:http), do: [:integration]

@@ -885,7 +885,7 @@ type MetricsSearchInput struct {
 	Query string `protobuf:"bytes,2,opt,name=query,proto3" json:"query,omitempty"`
 	// Maximum number of results to return. If not set or zero, a
 	// provider-specific default will be used.
-	Limit         *int32 `protobuf:"varint,3,opt,name=limit,proto3,oneof" json:"limit,omitempty"`
+	Limit         *int64 `protobuf:"varint,3,opt,name=limit,proto3,oneof" json:"limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -934,7 +934,7 @@ func (x *MetricsSearchInput) GetQuery() string {
 	return ""
 }
 
-func (x *MetricsSearchInput) GetLimit() int32 {
+func (x *MetricsSearchInput) GetLimit() int64 {
 	if x != nil && x.Limit != nil {
 		return *x.Limit
 	}
@@ -1379,7 +1379,7 @@ const file_toolquery_proto_rawDesc = "" +
 	"connection\x18\x01 \x01(\v2\x19.toolquery.ToolConnectionR\n" +
 	"connection\x12\x14\n" +
 	"\x05query\x18\x02 \x01(\tR\x05query\x12\x19\n" +
-	"\x05limit\x18\x03 \x01(\x05H\x00R\x05limit\x88\x01\x01B\b\n" +
+	"\x05limit\x18\x03 \x01(\x03H\x00R\x05limit\x88\x01\x01B\b\n" +
 	"\x06_limit\")\n" +
 	"\x13MetricsSearchResult\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\"O\n" +

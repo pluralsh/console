@@ -98,7 +98,7 @@ message MetricsSearchInput {
   string query = 2;
   // Maximum number of results to return. If not set or zero, a
   // provider-specific default will be used.
-  optional int32 limit = 3;
+  optional int64 limit = 3;
 }
 
 message MetricsSearchResult {

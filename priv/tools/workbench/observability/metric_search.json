@@ -3,8 +3,12 @@
     "properties": {
         "query": {
             "type": "string",
-            "description": "The query to use to filter the desired metrics"
+            "description": "A query to use to filter the desired metrics"
+        },
+        "limit": {
+            "type": "integer",
+            "description": "The maximum number of metrics to return"
         }
     },
-    "required": ["query"]
+    "required": []
 }

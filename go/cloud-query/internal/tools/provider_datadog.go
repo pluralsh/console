@@ -61,13 +61,17 @@ func (in *DatadogProvider) MetricsSearch(ctx context.Context, input *toolquery.M
 	}
 
 	api := datadogV1.NewMetricsApi(client)
-	resp, _, err := api.ListMetrics(ctx, input.Query)
+	resp, _, err := api.ListMetrics(ctx, input.Query) //nolint:staticcheck // SA1019 ignore: ListMetrics is deprecated in Datadog API, but required here
 	if err != nil {
 		return nil, err
 	}
 
-	resultsObj := resp.GetResults()
-	results := lo.Map(resultsObj.Metrics, func(name string, _ int) *toolquery.MetricsSearchResult {
+	resultVals := resp.GetResults().Metrics
+	if input.GetLimit() > 0 {
+		resultVals = resultVals[:min(len(resultVals), int(input.GetLimit()))]
+	}
+
+	results := lo.Map(resultVals, func(name string, _ int) *toolquery.MetricsSearchResult {
 		return &toolquery.MetricsSearchResult{Name: name}
 	})
 

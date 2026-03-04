@@ -146,7 +146,7 @@ defmodule Toolquery.MetricsSearchInput do
 
   field :connection, 1, type: Toolquery.ToolConnection
   field :query, 2, type: :string
-  field :limit, 3, proto3_optional: true, type: :int32
+  field :limit, 3, proto3_optional: true, type: :int64
 end
 
 defmodule Toolquery.MetricsSearchResult do
