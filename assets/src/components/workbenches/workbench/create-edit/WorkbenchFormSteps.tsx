@@ -186,54 +186,57 @@ export function WorkbenchSkillsConfigStep({
           }
         />
       </FormField>
-      <ServiceGitRefField
-        required
-        disabled={!formState.repositoryId}
-        loading={repoLoading}
-        refs={refs?.filter(isNonNullable)}
-        value={gitRef}
-        setValue={(ref) =>
-          update((d) => {
-            d.skills ??= {}
-            if (d.skills.ref) d.skills.ref.ref = ref
-            else d.skills.ref = { ref, folder: '' }
-          })
-        }
-      />
-      <ServiceGitFolderField
-        required
-        disabled={!formState.repositoryId}
-        value={gitFolder}
-        label="Git folder"
-        placeholder="e.g. workbenches/skills"
-        hint="Folder within the source tree where skills files are located"
-        onChange={(e) =>
-          update((d) => {
-            d.skills ??= {}
-            if (d.skills.ref) d.skills.ref.folder = e.target.value
-            else d.skills.ref = { ref: '', folder: e.target.value }
-          })
-        }
-      />
-      <FormField
-        label="Skills file names"
-        hint="Paste file names, using a newline per name."
-      >
-        <EditableDivWrapperSC>
-          <EditableDiv
-            disabled={!formState.repositoryId}
-            initialValue={skillsFilesToText(formState.skills?.files ?? null)}
-            setValue={(value) =>
+      {formState.repositoryId && (
+        <>
+          <ServiceGitRefField
+            required
+            loading={repoLoading}
+            refs={refs?.filter(isNonNullable)}
+            value={gitRef}
+            setValue={(ref) =>
               update((d) => {
                 d.skills ??= {}
-                d.skills.files = textToSkillsFiles(value)
+                if (d.skills.ref) d.skills.ref.ref = ref
+                else d.skills.ref = { ref, folder: '' }
               })
             }
-            placeholder={`e.g:\nskill_math.md\nskill_science.md`}
-            css={{ minHeight: 120 }}
           />
-        </EditableDivWrapperSC>
-      </FormField>
+          <ServiceGitFolderField
+            required
+            value={gitFolder}
+            label="Git folder"
+            placeholder="e.g. workbenches/skills"
+            hint="Folder within the source tree where skills files are located"
+            onChange={(e) =>
+              update((d) => {
+                d.skills ??= {}
+                if (d.skills.ref) d.skills.ref.folder = e.target.value
+                else d.skills.ref = { ref: '', folder: e.target.value }
+              })
+            }
+          />
+          <FormField
+            label="Skills file names"
+            hint="Paste file names, using a newline per name."
+          >
+            <EditableDivWrapperSC>
+              <EditableDiv
+                initialValue={skillsFilesToText(
+                  formState.skills?.files ?? null
+                )}
+                setValue={(value) =>
+                  update((d) => {
+                    d.skills ??= {}
+                    d.skills.files = textToSkillsFiles(value)
+                  })
+                }
+                placeholder={`e.g:\nskill_math.md\nskill_science.md`}
+                css={{ minHeight: 120 }}
+              />
+            </EditableDivWrapperSC>
+          </FormField>
+        </>
+      )}
     </>
   )
 }
@@ -286,7 +289,6 @@ export function WorkbenchCodingAgentStep({
 
   const removeRepo = (url: string) =>
     setCodingRepos(repos.filter((r) => r !== url))
-
   return (
     <>
       <FormField label="Select runtime">
