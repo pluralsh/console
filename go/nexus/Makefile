@@ -1,6 +1,7 @@
 ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
+include $(WORKSPACES_DIR)/common.mk
 include $(TOOLS_MAKEFILE)
 
 # Variables
@@ -30,10 +31,6 @@ NEXUS_ANTHROPIC_TOOLMODEL := $(if $(NEXUS_ANTHROPIC_TOOLMODEL),$(NEXUS_ANTHROPIC
 
 ##@ General
 
-.PHONY: help
-help: ## display this help message
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
-
 .PHONY: build
 build: proto ## build the binary
 	@echo "Building $(BINARY_NAME)..."
@@ -51,15 +48,13 @@ run: ## run the service locally
 	NEXUS_ANTHROPIC_TOOLMODEL=$(NEXUS_ANTHROPIC_TOOLMODEL) \
 	go run ./cmd/main.go \
 		--config config/config.yaml
-		
+
 .PHONY: clean
 clean: ## clean build artifacts
 	@echo "Cleaning build artifacts..."
 	rm -rf bin/
 	rm -rf dist/
 	rm -f coverage.txt coverage.html
-
-##@ Tests / Lint
 
 .PHONY: test
 test: TOOL = gotestsum
@@ -74,20 +69,6 @@ test-coverage: --tool ## run tests with coverage
 	$(GOTESTSUM) --format testname -- -race -coverprofile=coverage.txt -covermode=atomic ./...
 	go tool cover -html=coverage.txt -o coverage.html
 	@echo "Coverage report generated: coverage.html"
-
-.PHONY: lint
-lint: TOOL = golangci-lint
-lint: --tool ## run golangci-lint
-	@$(GOLANGCI_LINT) run ./...
-
-.PHONY: verify
-verify: lint test ## run all verification steps (linting and tests)
-	@echo "All verification steps passed!"
-
-.PHONY: fix
-fix: TOOL = golangci-lint
-fix: --tool ## fix issues found by linters
-	@$(GOLANGCI_LINT) run --fix ./...
 
 ##@ Codegen
 
@@ -115,3 +96,19 @@ docker-build: ## build the Docker image
 		-t ghcr.io/pluralsh/nexus:latest \
 		.
 
+##@ Docker Compose
+
+.PHONY: up-docker
+up-docker: ## build and run via docker compose
+	docker compose -f docker-compose.yml up --build
+
+.PHONY: test-docker
+test-docker: ## run tests via docker compose
+	@docker compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from nexus-test; \
+	status=$$?; \
+	docker compose -f docker-compose.test.yml down; \
+	exit $$status
+
+.PHONY: build-docker
+build-docker: ## build docker image via compose
+	docker compose -f docker-compose.yml build

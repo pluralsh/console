@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/pluralsh/console/go/controller/internal/common"
-	"github.com/pluralsh/polly/template"
+	"github.com/pluralsh/console/go/polly/template"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

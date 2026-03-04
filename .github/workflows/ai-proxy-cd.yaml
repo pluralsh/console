@@ -7,12 +7,14 @@ on:
     paths:
       - ".github/workflows/ai-proxy-cd.yaml"
       - "go/ai-proxy/**"
+      - "go/polly/**"
   push:
     branches:
       - "master"
     paths:
       - ".github/workflows/ai-proxy-cd.yaml"
       - "go/ai-proxy/**"
+      - "go/polly/**"
     tags:
       - 'go/ai-proxy/v*.*.*'
 
@@ -91,7 +93,7 @@ jobs:
       - uses: docker/setup-buildx-action@v3.0.0
       - uses: docker/build-push-action@v5.1.0
         with:
-          context: "./go/ai-proxy"
+          context: "."
           file: "./go/ai-proxy/Dockerfile"
           push: true
           tags: ${{ steps.meta.outputs.tags }}

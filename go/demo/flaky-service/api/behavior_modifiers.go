@@ -17,7 +17,7 @@ func HandleRequestDefault() http.HandlerFunc {
 		metrics.IncrementRequestCounter(http.StatusOK, r.Method)
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(`{"message": "req processed successfully"}`))
+		_, _ = w.Write([]byte(`{"message": "req processed successfully"}`))
 	}
 }
 
@@ -33,14 +33,14 @@ func HandleRequestTimestampModulus(timestampModulus int64) http.HandlerFunc {
 			metrics.IncrementRequestCounter(http.StatusInternalServerError, r.Method)
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"message": "req failed"}`))
+			_, _ = w.Write([]byte(`{"message": "req failed"}`))
 		} else {
 			slog.Info("Everything seems fine, returning status.OK", "time_now", time_now, "modulus", timestampModulus)
 
 			metrics.IncrementRequestCounter(http.StatusOK, r.Method)
 			w.WriteHeader(http.StatusOK)
 			w.Header().Set("Content-Type", "application/json")
-			w.Write([]byte(`{"message": "req processed successfully"}`))
+			_, _ = w.Write([]byte(`{"message": "req processed successfully"}`))
 		}
 	}
 }

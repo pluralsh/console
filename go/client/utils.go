@@ -49,7 +49,7 @@ func DatadogTracingInterceptor(ctx context.Context, req *http.Request, gqlInfo *
 
 func GeneratePersistedQueries() map[string]string {
 	result := map[string]string{}
-	for doc, _ := range DocumentOperationNames {
+	for doc := range DocumentOperationNames {
 		hash := HashQuery(doc)
 		result[hash] = doc
 	}

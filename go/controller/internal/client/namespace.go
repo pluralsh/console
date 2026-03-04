@@ -58,7 +58,6 @@ func (c *client) CreateNamespace(ctx context.Context, attributes console.Managed
 		return nil, fmt.Errorf("new created namespace %s is nil", attributes.Name)
 	}
 	return result.CreateManagedNamespace, nil
-
 }
 
 func (c *client) UpdateNamespace(ctx context.Context, id string, attributes console.ManagedNamespaceAttributes) (*console.ManagedNamespaceFragment, error) {
@@ -70,5 +69,4 @@ func (c *client) UpdateNamespace(ctx context.Context, id string, attributes cons
 		return nil, fmt.Errorf("new created namespace %s is nil", attributes.Name)
 	}
 	return result.UpdateManagedNamespace, nil
-
 }

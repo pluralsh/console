@@ -1,0 +1,137 @@
+name: CI / Kubernetes Agent
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/kubernetes-agent-ci.yaml"
+      - "go/kubernetes-agent/**"
+      - "go/polly/**"
+      - "go/client/**"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/kubernetes-agent-ci.yaml"
+      - "go/kubernetes-agent/**"
+      - "go/polly/**"
+      - "go/client/**"
+env:
+  GOPATH: /home/runner/go/
+  GOPROXY: "https://proxy.golang.org"
+  REGISTRY_IMAGE: pluralsh/kubernetes-agent
+jobs:
+  build-api:
+    name: Build API
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/kubernetes-agent
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/go.work
+          check-latest: true
+      - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C api build
+
+  build-kas:
+    name: Build kas
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/kubernetes-agent
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/go.work
+          check-latest: true
+      - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C kas build-kas
+
+  build-agentk:
+    name: Build agentk
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/kubernetes-agent
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/go.work
+          check-latest: true
+      - run: PATH=$PATH:$GOPATH/bin TARGET_DIRECTORY=. make -C kas build-agentk
+
+  test:
+    name: Unit test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/kubernetes-agent
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/go.work
+          check-latest: true
+      - run: PATH=$PATH:$GOPATH/bin make test
+
+  publish:
+    name: Publish image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      packages: 'write'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=sha
+            type=ref,event=pr
+            type=ref,event=branch
+            type=raw,value=latest,enable={{is_default_branch}}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build
+        uses: docker/build-push-action@v5
+        with:
+          context: go
+          file: go/kubernetes-agent/hack/docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64, linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VERSION=v0.0.0-${{ github.sha }}
+            GIT_COMMIT=${{ github.sha }}

@@ -223,7 +223,6 @@ func (in *HelmRepositoryAuth) awsAuthAttributes(ctx context.Context, namespace s
 			return nil, in.missingCredentialKeyError(auth.SecretAccessKeySecretKeyRef.Key)
 		}
 		attrs.AWS.SecretAccessKey = lo.ToPtr(string(secretAccessKey))
-
 	} else if auth.SecretAccessKeySecretRef != nil {
 		secret, err := utils.GetSecret(ctx, in.Client, auth.SecretAccessKeySecretRef)
 		if err != nil {

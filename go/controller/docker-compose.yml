@@ -1,0 +1,47 @@
+services:
+  kind:
+    image: docker:27.4.1
+    container_name: controller-kind
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - kind_kubeconfig:/kube
+      - ../..:/repo:ro
+    environment:
+      KIND_CLUSTER_NAME: ${KIND_CLUSTER_NAME:-controller}
+      KUBERNETES_VERSION: ${KUBERNETES_VERSION:-1.32.0}
+    command: >-
+      sh -c "
+      apk add --no-cache curl tar gzip &&
+      curl -sSL https://kind.sigs.k8s.io/dl/v0.27.0/kind-linux-amd64 -o /usr/local/bin/kind &&
+      chmod +x /usr/local/bin/kind &&
+      curl -sSL https://dl.k8s.io/release/v1.32.0/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl &&
+      chmod +x /usr/local/bin/kubectl &&
+      kind get clusters | grep -q \"^$$KIND_CLUSTER_NAME$$\" || kind create cluster --name $$KIND_CLUSTER_NAME --image kindest/node:v$$KUBERNETES_VERSION &&
+      kind get kubeconfig --name $$KIND_CLUSTER_NAME > /kube/config &&
+      CLUSTER_NAME=$$(kubectl config view --kubeconfig /kube/config -o jsonpath='{.contexts[0].context.cluster}') &&
+      SERVER=$$(kubectl config view --kubeconfig /kube/config -o jsonpath='{.clusters[0].cluster.server}') &&
+      SERVER=$${SERVER/127.0.0.1/host.docker.internal} &&
+      kubectl config set-cluster $$CLUSTER_NAME --server=$$SERVER --insecure-skip-tls-verify=true --kubeconfig /kube/config &&
+      kubectl config unset clusters.$$CLUSTER_NAME.certificate-authority-data --kubeconfig /kube/config &&
+      kubectl --kubeconfig /kube/config wait --for=condition=Ready nodes --all --timeout=120s &&
+      kubectl apply --server-side --force-conflicts --kubeconfig /kube/config -f /repo/go/controller/config/crd/bases
+      "
+  controller:
+    build:
+      context: ..
+      dockerfile: controller/Dockerfile
+    environment:
+      CONSOLE_URL: ${CONSOLE_URL:?CONSOLE_URL is required}
+      CONSOLE_TOKEN: ${CONSOLE_TOKEN:?CONSOLE_TOKEN is required}
+      KUBECONFIG: /kube/config
+      KUBE_INSECURE_SKIP_TLS_VERIFY: "true"
+    volumes:
+      - kind_kubeconfig:/kube:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      kind:
+        condition: service_completed_successfully
+
+volumes:
+  kind_kubeconfig:

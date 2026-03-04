@@ -5,6 +5,8 @@ on:
       - 'master'
     paths:
       - 'go/controller/**'
+      - 'go/polly/**'
+      - 'go/client/**'
       - '.github/workflows/controller-cd.yaml'
   push:
     tags:

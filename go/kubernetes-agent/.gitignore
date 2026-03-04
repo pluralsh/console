@@ -1,0 +1,4 @@
+.tmp/
+
+go_build_agentk*
+go_build_kas*

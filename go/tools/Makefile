@@ -1,5 +1,4 @@
-##@ Build Dependencies
-ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
+ROOT_DIRECTORY ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
 include $(ROOT_DIRECTORY)/go/tools/os.mk
@@ -10,6 +9,8 @@ TOOL_VERSIONS := $(shell awk '/require \(/{flag=1; next} flag&&/\)/{exit} flag' 
 ARCH := $(shell go env GOARCH)
 OS := $(shell go env GOOS)
 KUBEBUILDER_VERSION := 4.5.1
+
+##@ Build Dependencies
 
 .PHONY: tools
 tools: ## install required tools
@@ -94,6 +95,10 @@ install-ginkgo: --tool ## Download and install ginkgo in the $BINARIES_DIR
 install-gotestsum: TOOL = gotestsum
 install-gotestsum: --tool ## Download and install gotestsum in the $BINARIES_DIR
 
+.PHONY: install-mockgen
+install-mockgen: TOOL = mockgen
+install-mockgen: --tool ## Download and install mockgen in the $BINARIES_DIR
+
 .PHONY: install-protoc-gen-go
 install-protoc-gen-go: TOOL = protoc-gen-go
 install-protoc-gen-go: --tool ## Download and install protoc-gen-go in the $BINARIES_DIR
@@ -102,7 +107,13 @@ install-protoc-gen-go: --tool ## Download and install protoc-gen-go in the $BINA
 install-protoc-gen-go-grpc: TOOL = protoc-gen-go-grpc
 install-protoc-gen-go-grpc: --tool ## Download and install protoc-gen-go-grpc in the $BINARIES_DIR
 
+.PHONY: install-protoc-gen-validate
+install-protoc-gen-validate: TOOL = protoc-gen-validate
+install-protoc-gen-validate: --tool ## Download and install protoc-gen-validate in the $BINARIES_DIR
 
+.PHONY: install-protoc-gen-doc
+install-protoc-gen-doc: TOOL = protoc-gen-doc
+install-protoc-gen-doc: --tool ## Download and install protoc-gen-doc in the $BINARIES_DIR
 
 .PHONY: install-protoc
 install-protoc: --ensure-binaries-dir ## Download and install protoc compiler in the $BINARIES_DIR
@@ -115,4 +126,49 @@ install-protoc: --ensure-binaries-dir ## Download and install protoc compiler in
 		mv "$${TEMP_DIR}/bin/protoc" "$(BINARIES_DIR)/" && \
 		rm -rf "$${TEMP_DIR}" && \
 		echo "Installed protoc in $(BINARIES_DIR)/protoc"; \
+	fi
+
+.PHONY: install-node
+install-node: --ensure-binaries-dir ## Download and install Node.js in the $(BINARIES_DIR)
+	@if [ ! -f "$(BINARIES_DIR)/node" ]; then \
+	  NODE_VERSION="24.11.1" && \
+	  NODE_VERSION="$${NODE_VERSION:-$(NODE_VERSION)}" && \
+	  echo "Installing node v$${NODE_VERSION} into $(BINARIES_DIR)" && \
+	  OS=$$(uname -s | tr '[:upper:]' '[:lower:]') && \
+	  case "$$OS" in \
+	    darwin) NODE_OS=darwin ;; \
+	    linux) NODE_OS=linux ;; \
+	    *) echo "Unsupported OS: $$OS"; exit 1 ;; \
+	  esac && \
+	  ARCH=$$(uname -m) && \
+	  case "$$ARCH" in \
+	    x86_64|amd64) NODE_ARCH=x64 ;; \
+	    aarch64|arm64) NODE_ARCH=arm64 ;; \
+	    *) echo "Unsupported ARCH: $$ARCH"; exit 1 ;; \
+	  esac && \
+	  NODE_DISTRO="node-v$${NODE_VERSION}-$$NODE_OS-$$NODE_ARCH" && \
+	  TAR="$${NODE_DISTRO}.tar.xz" && \
+	  TEMP_DIR=$$(mktemp -d) && \
+	  curl -sSL "https://nodejs.org/dist/v$${NODE_VERSION}/$${TAR}" -o "$${TEMP_DIR}/$${TAR}" && \
+	  tar -xJ -C "$${TEMP_DIR}" -f "$${TEMP_DIR}/$${TAR}" && \
+	  mkdir -p "$(BINARIES_DIR)/lib" && \
+	  cp -a "$${TEMP_DIR}/$${NODE_DISTRO}/bin/node" "$(BINARIES_DIR)/" && \
+	  if [ -d "$${TEMP_DIR}/$${NODE_DISTRO}/lib/node_modules/npm" ]; then \
+	    cp -a "$${TEMP_DIR}/$${NODE_DISTRO}/lib/node_modules" "$(BINARIES_DIR)/lib/"; \
+	  fi && \
+	  ln -s "$(BINARIES_DIR)/lib/node_modules/npm/bin/npm-cli.js" "$(BINARIES_DIR)/npm" && \
+	  rm -rf "$${TEMP_DIR}" && \
+	  echo "Installed node v$${NODE_VERSION} in $(BINARIES_DIR)/node"; \
+	else \
+	  echo "[tools] node is already installed, skipping..."; \
+	fi
+
+.PHONY: install-graphql-mesh
+install-graphql-mesh: install-node --ensure-binaries-dir ## Install graphql-mesh into the `$(BINARIES_DIR)`
+	@if [ ! -d "$(BINARIES_DIR)/lib/node_modules/@graphql-mesh" ]; then \
+		echo "[tools] Installing graphql-mesh into $(BINARIES_DIR)" ;\
+		PATH="$(BINARIES_DIR):$$PATH" $(NPM) install -g --prefix "$(BINARIES_DIR)" graphql @graphql-mesh/cli @graphql-mesh/openapi @graphql-mesh/runtime @graphql-mesh/transform-replace-field ;\
+		echo "Installed graphql-mesh in $(BINARIES_DIR)"; \
+	else \
+		echo "[tools] graphql-mesh is already installed, skipping..."; \
 	fi

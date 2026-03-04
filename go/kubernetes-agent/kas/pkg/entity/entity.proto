@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.entity;
+
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/entity";
+
+// AgentMeta contains information about agentk.
+message AgentMeta {
+  // Version of the binary.
+  string version = 1 [json_name = "version"];
+  // Short commit sha of the binary.
+  string commit_id = 2 [json_name = "commit_id"];
+  // Namespace of the Pod running the binary.
+  string pod_namespace = 3 [json_name = "pod_namespace"];
+  // Name of the Pod running the binary.
+  string pod_name = 4 [json_name = "pod_name"];
+  // Version of the Kubernetes cluster.
+  KubernetesVersion kubernetes_version = 5 [json_name = "kubernetes_version"];
+}
+
+// Version information of the Kubernetes cluster.
+message KubernetesVersion {
+  // Major version of the Kubernetes cluster.
+  string major = 1 [json_name = "major"];
+  // Minor version of the Kubernetes cluster.
+  string minor = 2 [json_name = "minor"];
+  // Git version of the Kubernetes cluster.
+  string git_version = 3 [json_name = "git_version"];
+  // Platform of the Kubernetes cluster.
+  string platform = 4 [json_name = "platform"];
+}

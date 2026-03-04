@@ -46,7 +46,7 @@ func Project(ctx context.Context, c runtimeclient.Client, scheme *runtime.Scheme
 	}
 
 	if err := controllerutil.SetOwnerReference(project, objMeta, scheme); err != nil {
-		return nil, nil, fmt.Errorf("could not set owner reference: %+v", err)
+		return nil, nil, fmt.Errorf("could not set owner reference: %+w", err)
 	}
 
 	return project, nil, nil

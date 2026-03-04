@@ -1,0 +1,9 @@
+services:
+  frontend-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app/assets
+    environment:
+      CI: "true"
+    command: yarn test

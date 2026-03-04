@@ -1,0 +1,8 @@
+services:
+  helmchartutils:
+    build:
+      context: ../..
+      dockerfile: go/build.Dockerfile
+      args:
+        MODULE_PATH: go/helmchartutils
+    command: go build ./...

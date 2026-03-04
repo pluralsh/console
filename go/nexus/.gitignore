@@ -1,11 +1,6 @@
 # Binaries
 bin/
 dist/
-*.exe
-*.exe~
-*.dll
-*.so
-*.dylib
 
 # Test binary, built with `go test -c`
 *.test
@@ -20,12 +15,9 @@ go.work
 go.work.sum
 
 # IDE files
-.idea/
-.vscode/
 *.swp
 *.swo
 *~
-.DS_Store
 
 # Dependency directories
 vendor/

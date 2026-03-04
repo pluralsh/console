@@ -50,16 +50,3 @@ jobs:
           cache: true
       - run: go mod download
       - run: PATH=$PATH:$GOPATH/bin make test
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go/cloud-query/go.mod
-          check-latest: true
-      - uses: golangci/golangci-lint-action@v8
-        with:
-          version: v2.4.0
-          working-directory: go/cloud-query

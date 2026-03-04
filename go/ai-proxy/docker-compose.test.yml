@@ -1,0 +1,8 @@
+services:
+  ai-proxy-test:
+    build:
+      context: ../..
+      dockerfile: go/test.Dockerfile
+      args:
+        MODULE_PATH: go/ai-proxy
+    command: make test

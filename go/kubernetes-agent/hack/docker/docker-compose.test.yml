@@ -1,0 +1,8 @@
+services:
+  kubernetes-agent-test:
+    build:
+      context: ../../../..
+      dockerfile: go/test.Dockerfile
+      args:
+        MODULE_PATH: go/kubernetes-agent/api
+    command: make -C /workspace/go/kubernetes-agent test

@@ -100,7 +100,6 @@ func (c *client) CreateService(clusterId *string, attributes console.ServiceDepl
 		return nil, fmt.Errorf("new created service %s is nil", attributes.Name)
 	}
 	return result.CreateServiceDeployment, nil
-
 }
 
 func (c *client) UpdateService(serviceId string, attributes console.ServiceUpdateAttributes) error {

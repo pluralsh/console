@@ -1,0 +1,70 @@
+services:
+  redis:
+    image: redis:7.2.2
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  kas:
+    depends_on:
+      redis:
+        condition: service_started
+    image: kubernetes-agent:debug
+    container_name: kas
+    build:
+      context: ../../..
+      dockerfile: kubernetes-agent/hack/docker/dev.Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+    environment:
+      APP_BINARY: kas
+      APP_FLAGS: --configuration-file=/config.yaml
+    volumes:
+      - ${PWD}/kas/.secret:/.secret
+      - ${PWD}/hack/docker/config.yaml:/config.yaml
+    tmpfs:
+      - /tmp
+    ports:
+      - "40000:40000"
+      - "8154:8154"
+      - "8150:8150"
+
+  agentk:
+    depends_on:
+      kas:
+        condition: service_started
+    image: kubernetes-agent:debug
+    container_name: agentk
+    environment:
+      APP_BINARY: agentk
+      APP_FLAGS: --kas-address=ws://kas:8150
+      POD_NAME: agentk
+      POD_NAMESPACE: default
+      AGENTK_TOKEN: ${AGENTK_TOKEN:-test}
+      KUBECONFIG: /.secret/kubeconfig
+    volumes:
+      - ${PWD}/.tmp/kubeconfig:/.secret/kubeconfig
+    tmpfs:
+      - /tmp
+    ports:
+      - "40001:40000"
+
+  api:
+    depends_on:
+      kas:
+        condition: service_started
+    image: kubernetes-agent:debug
+    container_name: api
+    environment:
+      APP_BINARY: api
+      APP_FLAGS: --metrics-provider=none --act-as-proxy --apiserver-host=https://kas:8154 --apiserver-skip-tls-verify --disable-csrf-protection --insecure-bind-address=0.0.0.0
+    tmpfs:
+      - /tmp
+    ports:
+      - "40002:40000"
+      - "8000:8000"
+
+networks:
+  default:
+    external: true
+    name: kind

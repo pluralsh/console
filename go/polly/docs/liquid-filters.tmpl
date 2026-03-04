@@ -1,0 +1,19 @@
+# Supported Liquid Filters
+{{ range . }}
+##  `{{ .Name }}`
+{{ .Documentation.Description }}
+
+{{ if .Documentation.Parameters }}
+_Parameters_:
+{{ range .Documentation.Parameters }}
+- {{ . }}
+{{ end }}
+{{ end }}
+
+{{ if .Documentation.Example }}
+_Example_: {{ .Documentation.Example }}
+{{ end }}
+
+{{ if .Aliases }}_Aliases_: {{ range $index, $element := .Aliases}}{{ if $index}}, {{end}}`{{$element}}`{{ end }}\{{ end }}
+_Implementation_: `{{ .Implementation }}`
+{{ end }}

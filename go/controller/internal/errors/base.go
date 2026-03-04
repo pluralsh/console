@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	client "github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/samber/lo"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -19,21 +20,14 @@ func (k KnownError) Error() string {
 }
 
 const (
-	ErrorNotFound             KnownError = "could not find resource"
-	ErrorNotFound2            KnownError = "not found"
-	ErrorNotFoundOIDCProvider KnownError = "the resource you requested was not found"
-	ErrDeleteRepository                  = "could not delete repository"
+	ErrNotFound             KnownError = "could not find resource"
+	ErrNotFoundAlt          KnownError = "not found"
+	ErrNotFoundOIDCProvider KnownError = "the resource you requested was not found"
+	ErrDeleteRepository                = "could not delete repository"
 )
 
 func NewNotFound() error {
-	errors := gqlerror.List{
-		{
-			Message: ErrorNotFound.String(),
-		},
-	}
-	return &client.ErrorResponse{
-		GqlErrors: &errors,
-	}
+	return &client.ErrorResponse{GqlErrors: lo.ToPtr(gqlerror.List{{Message: ErrNotFound.String()}})}
 }
 
 type wrappedErrorResponse struct {
@@ -72,9 +66,9 @@ func IsNotFound(err error) bool {
 		return false
 	}
 
-	return (newAPIError(errorResponse).Has(ErrorNotFound) ||
-		newAPIError(errorResponse).Has(ErrorNotFoundOIDCProvider) ||
-		newAPIError(errorResponse).Has(ErrorNotFound2))
+	return (newAPIError(errorResponse).Has(ErrNotFound) ||
+		newAPIError(errorResponse).Has(ErrNotFoundOIDCProvider) ||
+		newAPIError(errorResponse).Has(ErrNotFoundAlt))
 }
 
 func IgnoreNotFound(err error) error {

@@ -5,20 +5,21 @@ ARG TARGETARCH
 ARG VERSION
 ARG GIT_COMMIT
 
-WORKDIR /workspace
+WORKDIR /workspace/ai-proxy
 
 # Retrieve application dependencies.
 # This allows the container build to reuse cached dependencies.
 # Expecting to copy go.mod and if present go.sum.
-COPY go.* ./
+COPY go/ai-proxy/go.* ./
+COPY go/polly /workspace/polly
 RUN go mod download
 
-COPY *.go ./
-COPY api ./api
-COPY args ./args
-COPY environment ./environment
-COPY internal ./internal
-COPY proxy ./proxy
+COPY go/ai-proxy/*.go ./
+COPY go/ai-proxy/api ./api
+COPY go/ai-proxy/args ./args
+COPY go/ai-proxy/environment ./environment
+COPY go/ai-proxy/internal ./internal
+COPY go/ai-proxy/proxy ./proxy
 
 # Update dependencies after copying all source files
 RUN go mod tidy

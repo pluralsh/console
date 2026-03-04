@@ -939,7 +939,6 @@ func (in *AnalysisRates) Attributes() (*console.AnalysisRatesAttributes, error) 
 			return nil, err
 		}
 		fast = lo.ToPtr(int64(fDur.Minutes()))
-
 	}
 	if in.Slow != nil {
 		sDur, err := time.ParseDuration(*in.Fast)
@@ -1056,8 +1055,7 @@ func (in *GraphStore) Attributes(ctx context.Context, c client.Client, namespace
 		Store:   in.Store,
 	}
 
-	switch *in.Store {
-	case console.VectorStoreElastic:
+	if in.Store != nil && *in.Store == console.VectorStoreElastic {
 		if in.Elastic == nil {
 			return nil, fmt.Errorf("must provide elastic configuration to set the provider to ELASTIC")
 		}

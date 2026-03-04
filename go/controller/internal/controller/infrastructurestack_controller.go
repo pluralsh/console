@@ -24,7 +24,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/pluralsh/console/go/controller/internal/plural"
-	"github.com/pluralsh/polly/algorithms"
+	"github.com/pluralsh/console/go/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -227,7 +227,6 @@ func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, s
 	}
 	if status.Status == console.StackStatusSuccessful {
 		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-
 	}
 	return nil
 }
@@ -287,7 +286,6 @@ func (r *InfrastructureStackReconciler) addOrRemoveFinalizer(ctx context.Context
 				}
 			}
 			return lo.ToPtr(common.WaitForResources()), nil
-
 		}
 		controllerutil.RemoveFinalizer(stack, InfrastructureStackFinalizer)
 		logger.Info("stack deleted successfully")
@@ -373,9 +371,10 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		var isSecret *bool
 		var value string
 
-		if env.Value != nil {
+		switch {
+		case env.Value != nil:
 			value = *env.Value
-		} else if env.SecretKeyRef != nil {
+		case env.SecretKeyRef != nil:
 			secret := &corev1.Secret{}
 			name := types.NamespacedName{Name: env.SecretKeyRef.Name, Namespace: stack.GetNamespace()}
 			if err := r.Get(ctx, name, secret); err != nil {
@@ -390,7 +389,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 				return nil, fmt.Errorf("can not find secret data for the key %s", env.SecretKeyRef.Key)
 			}
 			value = string(rawData)
-		} else if env.ConfigMapRef != nil {
+		case env.ConfigMapRef != nil:
 			configMap := &corev1.ConfigMap{}
 			name := types.NamespacedName{Name: env.ConfigMapRef.Name, Namespace: stack.GetNamespace()}
 			if err := r.Get(ctx, name, configMap); err != nil {

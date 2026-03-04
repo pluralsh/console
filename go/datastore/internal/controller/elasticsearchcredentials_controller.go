@@ -177,5 +177,4 @@ func (r *ElasticSearchCredentialsReconciler) handleDelete(ctx context.Context, c
 	}
 	utils.RemoveFinalizer(credentials, ElasticSearchCredentialsProtectionFinalizerName)
 	return nil
-
 }

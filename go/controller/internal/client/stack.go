@@ -129,7 +129,6 @@ func (c *client) CreateStack(ctx context.Context, attributes console.StackAttrib
 		return nil, fmt.Errorf("new created stack %s is nil", attributes.Name)
 	}
 	return result.CreateStack, nil
-
 }
 
 func (c *client) UpdateStack(ctx context.Context, id string, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error) {
@@ -141,7 +140,6 @@ func (c *client) UpdateStack(ctx context.Context, id string, attributes console.
 		return nil, fmt.Errorf("updated stack %s is nil", attributes.Name)
 	}
 	return result.UpdateStack, nil
-
 }
 
 func (c *client) DeleteCustomStackRun(ctx context.Context, id string) error {
@@ -164,7 +162,6 @@ func (c *client) UpdateCustomStackRun(ctx context.Context, id string, attributes
 		return nil, fmt.Errorf("update custom stack run %s is nil", attributes.Name)
 	}
 	return result.UpdateCustomStackRun, nil
-
 }
 
 func (c *client) CreateCustomStackRun(ctx context.Context, attributes console.CustomStackRunAttributes) (*console.CustomStackRunFragment, error) {
@@ -176,7 +173,6 @@ func (c *client) CreateCustomStackRun(ctx context.Context, attributes console.Cu
 		return nil, fmt.Errorf("create custom stack run %s is nil", attributes.Name)
 	}
 	return result.CreateCustomStackRun, nil
-
 }
 
 func (c *client) GetCustomStackRun(ctx context.Context, id string) (*console.CustomStackRunFragment, error) {

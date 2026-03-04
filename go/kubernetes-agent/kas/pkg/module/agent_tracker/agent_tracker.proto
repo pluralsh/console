@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.agent_tracker;
+
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_tracker";
+
+import "google/protobuf/timestamp.proto";
+import "pkg/entity/entity.proto";
+
+// ConnectedAgentInfo contains information about a connected agentk.
+message ConnectedAgentInfo {
+  // Information about the agent sent by the agent.
+  entity.AgentMeta agent_meta = 1 [json_name = "agent_meta"];
+  // When the connection was established.
+  google.protobuf.Timestamp connected_at = 2 [json_name = "connected_at"];
+  // Uniquely identifies a particular agentk->kas connection.
+  // Randomly generated when an agent connects.
+  int64 connection_id = 3 [json_name = "connection_id"];
+  // Unique id of the agent.
+  int64 agent_id = 4 [json_name = "agent_id"];
+  // Id of the parent cluster.
+  string cluster_id = 5 [json_name = "cluster_id"];
+}

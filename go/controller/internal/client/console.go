@@ -6,7 +6,7 @@ import (
 	"github.com/Yamashou/gqlgenc/clientv2"
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"github.com/pluralsh/polly/http"
+	"github.com/pluralsh/console/go/polly/http"
 )
 
 type client struct {

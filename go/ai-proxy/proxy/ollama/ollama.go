@@ -12,7 +12,7 @@ import (
 	ollamaapi "github.com/ollama/ollama/api"
 	"github.com/ollama/ollama/openai"
 	"github.com/pluralsh/console/go/ai-proxy/api"
-	"github.com/pluralsh/polly/algorithms"
+	"github.com/pluralsh/console/go/polly/algorithms"
 	"k8s.io/klog/v2"
 )
 
@@ -280,11 +280,10 @@ func (o *OllamaProxy) handleNonStreamingOllama(
 		klog.Errorf("Error encoding response: %v", err)
 		return
 	}
-
 }
 
 func (o *OllamaProxy) convertOpenAIToOllamaChatRequest(req *openai.ChatCompletionRequest) (*ollamaapi.ChatRequest, error) {
-	var messages []ollamaapi.Message
+	messages := make([]ollamaapi.Message, 0, len(req.Messages))
 
 	for _, tool := range req.Tools {
 		otc := ollamaapi.ToolCall{
