@@ -10,7 +10,7 @@ import {
 import styled from 'styled-components'
 
 const directory = [
-  { label: 'Workbenches', path: WORKBENCHES_ABS_PATH },
+  { label: 'Workbenches', path: '' },
   { label: 'Tools', path: WORKBENCHES_TOOLS_REL_PATH },
 ]
 
@@ -20,12 +20,15 @@ export const getWorkbenchesBreadcrumbs = (tab: Nullable<string>) => [
 ]
 
 export function Workbenches() {
-  const { tab } = useMatch(`${WORKBENCHES_ABS_PATH}/:tab`)?.params ?? {}
+  const { tab = '' } = useMatch(`${WORKBENCHES_ABS_PATH}/:tab`)?.params ?? {}
 
   useSetBreadcrumbs(useMemo(() => getWorkbenchesBreadcrumbs(tab), [tab]))
   return (
     <WrapperSC>
-      <SubTabs directory={directory} />
+      <SubTabs
+        directory={directory}
+        activeFn={(path) => path === tab}
+      />
       <Outlet />
     </WrapperSC>
   )

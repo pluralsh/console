@@ -9,7 +9,13 @@ export type SubtabDirectory = {
   enabled?: boolean
 }[]
 
-export function SubTabs({ directory }: { directory: SubtabDirectory }) {
+export function SubTabs({
+  directory,
+  activeFn,
+}: {
+  directory: SubtabDirectory
+  activeFn?: (path: string, route: string) => boolean
+}) {
   const route = useParams()['*']
   return (
     <Flex>
@@ -17,7 +23,10 @@ export function SubTabs({ directory }: { directory: SubtabDirectory }) {
         .filter(({ enabled }) => (enabled === undefined ? true : enabled))
         .map(({ path, label }) => (
           <LinkTabWrap
-            active={route?.split('/')?.includes(path.split('/').pop() ?? '')}
+            active={
+              activeFn?.(path, route ?? '') ??
+              route?.split('/')?.includes(path.split('/').pop() ?? '')
+            }
             key={path}
             to={path}
           >

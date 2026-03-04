@@ -23,14 +23,7 @@ import {
   useGitRepositoryQuery,
 } from 'generated/graphql'
 import { produce } from 'immer'
-import {
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react'
+import { Dispatch, ReactNode, SetStateAction, useMemo, useState } from 'react'
 import styled from 'styled-components'
 
 import { AIAgentRuntimesSelector } from 'components/ai/agent-runs/AIAgentRuntimesSelector'
@@ -171,7 +164,6 @@ export function WorkbenchSkillsConfigStep({
     () => mapExistingNodes(reposData?.gitRepositories),
     [reposData]
   )
-
   const refs = repoData?.gitRepository?.refs ?? null
   const skillsRef = formState.skills?.ref
   const gitRef = skillsRef?.ref ?? ''
@@ -269,17 +261,15 @@ export function WorkbenchCodingAgentStep({
   )
   const mode = coding?.mode ?? AgentRunMode.Analyze
 
-  const setCodingRepos = useCallback(
-    (next: string[]) =>
-      update((d) => {
-        d.configuration ??= {}
-        d.configuration.coding ??= {}
-        d.configuration.coding.repositories = next
-      }),
-    [update]
-  )
+  const setCodingRepos = (next: string[]) => {
+    update((d) => {
+      d.configuration ??= {}
+      d.configuration.coding ??= {}
+      d.configuration.coding.repositories = next
+    })
+  }
 
-  const addRepo = useCallback(() => {
+  const addRepo = () => {
     if (!repoInput.trim()) return
     if (!isValidRepoUrl(repoInput)) {
       setRepoError('Must be a valid git clone URL')
@@ -292,12 +282,10 @@ export function WorkbenchCodingAgentStep({
     setRepoError(null)
     setCodingRepos([...repos, repoInput.trim()])
     setRepoInput('')
-  }, [allowedRepos, setCodingRepos, repoInput, repos])
+  }
 
-  const removeRepo = useCallback(
-    (url: string) => setCodingRepos(repos.filter((r) => r !== url)),
-    [setCodingRepos, repos]
-  )
+  const removeRepo = (url: string) =>
+    setCodingRepos(repos.filter((r) => r !== url))
 
   return (
     <>
