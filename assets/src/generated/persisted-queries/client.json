@@ -1322,6 +1322,11 @@
          "name": "LogAggregation",
          "body": "query LogAggregation($clusterId: ID, $limit: Int, $query: String, $serviceId: ID, $time: LogTimeRange, $facets: [LogFacetInput]) {\n  logAggregation(\n    clusterId: $clusterId\n    limit: $limit\n    query: $query\n    serviceId: $serviceId\n    time: $time\n    facets: $facets\n  ) {\n    ...LogLine\n    __typename\n  }\n}\n\nfragment LogLine on LogLine {\n  facets {\n    ...LogFacet\n    __typename\n  }\n  log\n  timestamp\n  __typename\n}\n\nfragment LogFacet on LogFacet {\n  key\n  value\n  __typename\n}"
       },
+      "sha256:14e64890f9fb4a797a6ad0dfeb4a93b03422869e202f969e4b38f6a977513865": {
+         "type": "query",
+         "name": "LogLabels",
+         "body": "query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange) {\n  logLabels(\n    field: $field\n    clusterId: $clusterId\n    serviceId: $serviceId\n    query: $query\n    time: $time\n  ) {\n    ...LogFacetDetail\n    __typename\n  }\n}\n\nfragment LogFacetDetail on LogFacetDetail {\n  label\n  count\n  __typename\n}"
+      },
       "sha256:d86d6daf39197ee5434862f7fe0b278a785a959a1ec0c86634d7af08735d43f3": {
          "type": "query",
          "name": "ClusterHeatMap",

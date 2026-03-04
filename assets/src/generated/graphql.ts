@@ -17464,6 +17464,8 @@ export type LogLineFragment = { __typename?: 'LogLine', log?: string | null, tim
 
 export type LogFacetFragment = { __typename?: 'LogFacet', key: string, value?: string | null };
 
+export type LogFacetDetailFragment = { __typename?: 'LogFacetDetail', label: string, count: number };
+
 export type LogAggregationQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -17475,6 +17477,17 @@ export type LogAggregationQueryVariables = Exact<{
 
 
 export type LogAggregationQuery = { __typename?: 'RootQueryType', logAggregation?: Array<{ __typename?: 'LogLine', log?: string | null, timestamp?: string | null, facets?: Array<{ __typename?: 'LogFacet', key: string, value?: string | null } | null> | null } | null> | null };
+
+export type LogLabelsQueryVariables = Exact<{
+  field: Scalars['String']['input'];
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  time?: InputMaybe<LogTimeRange>;
+}>;
+
+
+export type LogLabelsQuery = { __typename?: 'RootQueryType', logLabels?: Array<{ __typename?: 'LogFacetDetail', label: string, count: number } | null> | null };
 
 export type MetricResponseFragment = { __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null };
 
@@ -22181,6 +22194,12 @@ export const AccountFragmentDoc = gql`
       period
     }
   }
+}
+    `;
+export const LogFacetDetailFragmentDoc = gql`
+    fragment LogFacetDetail on LogFacetDetail {
+  label
+  count
 }
     `;
 export const MetricPointResponseFragmentDoc = gql`
@@ -34314,6 +34333,59 @@ export type LogAggregationQueryHookResult = ReturnType<typeof useLogAggregationQ
 export type LogAggregationLazyQueryHookResult = ReturnType<typeof useLogAggregationLazyQuery>;
 export type LogAggregationSuspenseQueryHookResult = ReturnType<typeof useLogAggregationSuspenseQuery>;
 export type LogAggregationQueryResult = Apollo.QueryResult<LogAggregationQuery, LogAggregationQueryVariables>;
+export const LogLabelsDocument = gql`
+    query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange) {
+  logLabels(
+    field: $field
+    clusterId: $clusterId
+    serviceId: $serviceId
+    query: $query
+    time: $time
+  ) {
+    ...LogFacetDetail
+  }
+}
+    ${LogFacetDetailFragmentDoc}`;
+
+/**
+ * __useLogLabelsQuery__
+ *
+ * To run a query within a React component, call `useLogLabelsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLogLabelsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLogLabelsQuery({
+ *   variables: {
+ *      field: // value for 'field'
+ *      clusterId: // value for 'clusterId'
+ *      serviceId: // value for 'serviceId'
+ *      query: // value for 'query'
+ *      time: // value for 'time'
+ *   },
+ * });
+ */
+export function useLogLabelsQuery(baseOptions: Apollo.QueryHookOptions<LogLabelsQuery, LogLabelsQueryVariables> & ({ variables: LogLabelsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LogLabelsQuery, LogLabelsQueryVariables>(LogLabelsDocument, options);
+      }
+export function useLogLabelsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LogLabelsQuery, LogLabelsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LogLabelsQuery, LogLabelsQueryVariables>(LogLabelsDocument, options);
+        }
+// @ts-ignore
+export function useLogLabelsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<LogLabelsQuery, LogLabelsQueryVariables>): Apollo.UseSuspenseQueryResult<LogLabelsQuery, LogLabelsQueryVariables>;
+export function useLogLabelsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<LogLabelsQuery, LogLabelsQueryVariables>): Apollo.UseSuspenseQueryResult<LogLabelsQuery | undefined, LogLabelsQueryVariables>;
+export function useLogLabelsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<LogLabelsQuery, LogLabelsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<LogLabelsQuery, LogLabelsQueryVariables>(LogLabelsDocument, options);
+        }
+export type LogLabelsQueryHookResult = ReturnType<typeof useLogLabelsQuery>;
+export type LogLabelsLazyQueryHookResult = ReturnType<typeof useLogLabelsLazyQuery>;
+export type LogLabelsSuspenseQueryHookResult = ReturnType<typeof useLogLabelsSuspenseQuery>;
+export type LogLabelsQueryResult = Apollo.QueryResult<LogLabelsQuery, LogLabelsQueryVariables>;
 export const ClusterHeatMapDocument = gql`
     query ClusterHeatMap($clusterId: ID!, $flavor: HeatMapFlavor!) {
   cluster(id: $clusterId) {
@@ -38125,6 +38197,7 @@ export const namedOperations = {
     Refresh: 'Refresh',
     TemporaryToken: 'TemporaryToken',
     LogAggregation: 'LogAggregation',
+    LogLabels: 'LogLabels',
     ClusterHeatMap: 'ClusterHeatMap',
     ClusterNoisyNeighbors: 'ClusterNoisyNeighbors',
     ServiceHeatMap: 'ServiceHeatMap',
@@ -38544,6 +38617,7 @@ export const namedOperations = {
     Account: 'Account',
     LogLine: 'LogLine',
     LogFacet: 'LogFacet',
+    LogFacetDetail: 'LogFacetDetail',
     MetricResponse: 'MetricResponse',
     MetricPointResponse: 'MetricPointResponse',
     UtilizationHeatMap: 'UtilizationHeatMap',

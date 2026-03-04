@@ -26,15 +26,12 @@ import { useState } from 'react'
 import { useTheme } from 'styled-components'
 import { GroupMembers } from './GroupMembers'
 import { GROUP_CREATE_ID_KEY, GroupEditT } from './Groups'
-import { SimpleToastChip } from 'components/utils/SimpleToastChip'
+import {
+  ActionToastInfo,
+  SimpleToastChip,
+} from 'components/utils/SimpleToastChip'
 import { Body2BoldP } from 'components/utils/typography/Text'
 import { BindingInput } from 'components/utils/BindingInput'
-
-export type ActionToastInfo = {
-  name: Nullable<string>
-  action: string
-  color: SemanticColorKey
-}
 
 export function GroupEditOrCreate({
   group,
