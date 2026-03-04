@@ -1,5 +1,4 @@
 import {
-  AppIcon,
   ArrowRightIcon,
   Button,
   Card,
@@ -20,7 +19,7 @@ import { WorkbenchTinyFragment, useWorkbenchesQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchCreateOrEdit } from './workbench/create-edit/WorkbenchCreateOrEdit'
 
@@ -34,12 +33,7 @@ export function WorkbenchesList() {
   const workbenches = mapExistingNodes(data?.workbenches)
 
   return (
-    <Flex
-      direction="column"
-      gap="large"
-      overflow="hidden"
-      height="100%"
-    >
+    <WrapperSC>
       {!isCreating && (
         <StackedText
           first={
@@ -106,11 +100,12 @@ export function WorkbenchesList() {
           ))}
         </CardGrid>
       )}
-    </Flex>
+    </WrapperSC>
   )
 }
 
 function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
+  const { spacing } = useTheme()
   return (
     <CardSC
       clickable
@@ -138,12 +133,10 @@ function WorkbenchCard({ workbench }: { workbench: WorkbenchTinyFragment }) {
           )) ?? []}
         </Flex>
       </Flex>
-      <AppIcon
-        $hasBorder={false}
-        $color="fill-one"
-        size="xsmall"
-        icon={<ArrowRightIcon color="icon-xlight" />}
-        style={{ alignSelf: 'flex-end' }}
+      <ArrowRightIcon
+        color="icon-xlight"
+        size={spacing.xlarge}
+        css={{ alignSelf: 'flex-end', padding: spacing.xsmall }}
       />
     </CardSC>
   )
@@ -155,4 +148,12 @@ const CardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
   height: '100%',
   textDecoration: 'none',
+}))
+
+const WrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.large,
+  overflow: 'hidden',
+  height: '100%',
 }))

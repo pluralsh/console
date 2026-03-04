@@ -317,8 +317,8 @@ function sanitizeInitialForm({
     name,
     description,
     systemPrompt,
-    agentRuntimeId: agentRuntime?.id ?? 'null',
-    repositoryId: repository?.id ?? 'null',
+    agentRuntimeId: agentRuntime?.id ?? null,
+    repositoryId: repository?.id ?? null,
     configuration: {
       infrastructure: { kubernetes, services, stacks },
       coding: { mode, repositories },
