@@ -5,6 +5,7 @@ import {
   CircleDashIcon,
   ErrorOutlineIcon,
   Flex,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import {
   PolicyBindingFragment,
@@ -14,7 +15,7 @@ import {
   WorkbenchAttributes,
   WorkbenchFragment,
 } from 'generated/graphql'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import {
   workbenchFormSteps,
@@ -28,9 +29,16 @@ import { cloneDeep } from 'lodash'
 import { isNonNullable } from 'utils/isNonNullable'
 import { bindingToBindingAttributes } from 'components/utils/bindings'
 import { deepOmitFalsy } from 'utils/graphql'
-
-// providing id sets mode to edit
-type WorkbenchWizardMode = 'create' | { id: string }
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import {
+  getWorkbenchAbsPath,
+  WORKBENCH_PARAM_ID,
+  WORKBENCHES_ABS_PATH,
+} from 'routes/workbenchesRoutesConsts'
+import { Title2H1 } from 'components/utils/typography/Text'
+import { StackedText } from 'components/utils/table/StackedText'
+import { getWorkbenchesBreadcrumbs } from 'components/workbenches/Workbenches'
+import { getWorkbenchBreadcrumbs } from '../Workbench'
 
 // requires every key from WorkbenchAttributes to be present. readBindings/writeBindings
 // use FormBinding[] so BindingInput can show chips (user email / group name).
@@ -42,32 +50,59 @@ export type WorkbenchFormState = Omit<
   writeBindings: PolicyBindingFragment[]
 }
 
-export function WorkbenchCreateOrEdit({
-  mode,
-  ...props
-}: {
-  mode: WorkbenchWizardMode
-  onCancel: () => void
-  onCompleted: () => void
-}) {
-  const id = mode === 'create' ? undefined : mode.id
+export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
+  const id = useParams()[WORKBENCH_PARAM_ID]
   const { data, loading, error } = useWorkbenchQuery({
     variables: { id },
-    skip: !id,
+    skip: mode === 'create' || !id,
     fetchPolicy: 'network-only',
   })
   const workbench = data?.workbench
 
-  if (error) return <GqlError error={error} />
+  useSetBreadcrumbs(
+    useMemo(
+      () =>
+        workbench
+          ? [...getWorkbenchBreadcrumbs(workbench), { label: 'edit' }]
+          : getWorkbenchesBreadcrumbs(mode === 'create' ? 'create' : undefined),
+      [workbench, mode]
+    )
+  )
+
+  if (error)
+    return (
+      <GqlError
+        margin="large"
+        error={error}
+      />
+    )
 
   return (
-    <WorkbenchForm
-      workbenchId={id}
-      key={`${data?.workbench?.id}`} // reset form state if data comes in
-      initialFormState={sanitizeInitialForm(workbench ?? { id: '', name: '' })}
-      loading={!data && loading}
-      {...props}
-    />
+    <Flex
+      direction="column"
+      gap="large"
+      height="100%"
+      width="100%"
+      padding="large"
+    >
+      {mode === 'create' ? (
+        <Title2H1>Create a workbench</Title2H1>
+      ) : (
+        <StackedText
+          loading={!data && loading}
+          first={workbench?.name}
+          second={workbench?.description}
+        />
+      )}
+      <WorkbenchForm
+        workbenchId={id}
+        key={`${data?.workbench?.id}`} // reset form state if data comes in
+        initialFormState={sanitizeInitialForm(
+          workbench ?? { id: '', name: '' }
+        )}
+        loading={!data && loading}
+      />
+    </Flex>
   )
 }
 
@@ -75,15 +110,12 @@ function WorkbenchForm({
   workbenchId,
   initialFormState,
   loading,
-  onCancel,
-  onCompleted,
 }: {
   workbenchId: Nullable<string>
   initialFormState: WorkbenchFormState
   loading: boolean
-  onCancel: () => void
-  onCompleted: () => void
 }) {
+  const navigate = useNavigate()
   const isCreateMode = !workbenchId
   const [formState, setFormState] =
     useState<WorkbenchFormState>(initialFormState)
@@ -113,7 +145,11 @@ function WorkbenchForm({
 
   const [createWorkbench, { loading: createLoading, error: createError }] =
     useCreateWorkbenchMutation({
-      onCompleted,
+      onCompleted: () => {
+        navigate(
+          workbenchId ? getWorkbenchAbsPath(workbenchId) : WORKBENCHES_ABS_PATH
+        )
+      },
       refetchQueries: ['Workbenches'],
       awaitRefetchQueries: true,
     })
@@ -167,7 +203,12 @@ function WorkbenchForm({
             <StretchedFlex shrink={0}>
               <Button
                 destructive
-                onClick={onCancel}
+                as={Link}
+                to={
+                  workbenchId
+                    ? getWorkbenchAbsPath(workbenchId)
+                    : WORKBENCHES_ABS_PATH
+                }
               >
                 Cancel
               </Button>
@@ -283,13 +324,18 @@ const validateForm = (formState: WorkbenchFormState) =>
   )
 
 function formStateToAttributes(state: WorkbenchFormState): WorkbenchAttributes {
-  const { readBindings, writeBindings, ...rest } = cloneDeep(
-    deepOmitFalsy(state)
-  )
+  const {
+    name,
+    readBindings: r,
+    writeBindings: w,
+    ...rest
+  } = cloneDeep(deepOmitFalsy(state))
+
   return {
+    name: name ?? '',
+    ...(r && { readBindings: r.map(bindingToBindingAttributes) }),
+    ...(w && { writeBindings: w.map(bindingToBindingAttributes) }),
     ...rest,
-    readBindings: readBindings.map(bindingToBindingAttributes),
-    writeBindings: writeBindings.map(bindingToBindingAttributes),
   }
 }
 

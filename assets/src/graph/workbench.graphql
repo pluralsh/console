@@ -115,9 +115,15 @@ query WorkbenchTools($first: Int = 100, $after: String, $q: String) {
     }
     edges {
       node {
-        ...WorkbenchTool
+        ...WorkbenchToolTiny
       }
     }
+  }
+}
+
+query WorkbenchTool($id: ID, $name: String) {
+  workbenchTool(id: $id, name: $name) {
+    ...WorkbenchTool
   }
 }
 
