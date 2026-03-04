@@ -241,6 +241,8 @@ defmodule Console.Deployments.Observability do
     end
   end
 
+  defp component_args(%ServiceComponent{group: "apps", version: "v1", kind: "DaemonSet", name: name, namespace: ns} = comp),
+    do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[a-z0-9]+"]}
   defp component_args(%ServiceComponent{group: "apps", version: "v1", kind: "Deployment", name: name, namespace: ns} = comp),
     do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[a-z0-9]+-[a-z0-9]+"]}
   defp component_args(%ServiceComponent{group: "apps", version: "v1", kind: "StatefulSet", name: name, namespace: ns} = comp),

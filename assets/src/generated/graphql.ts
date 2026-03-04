@@ -991,6 +991,8 @@ export type AnsibleConfiguration = {
   __typename?: 'AnsibleConfiguration';
   /** Additional args for the playbook */
   additionalArgs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** path to the ansible config file to use */
+  configFile?: Maybe<Scalars['String']['output']>;
   /** The ansible inventory file to use. we recommend checking this into git alongside your playbook files */
   inventory?: Maybe<Scalars['String']['output']>;
   /** The playbook to run */
@@ -1002,6 +1004,8 @@ export type AnsibleConfiguration = {
 export type AnsibleConfigurationAttributes = {
   /** additional args for the playbook */
   additionalArgs?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** path to the ansible config file to use */
+  configFile?: InputMaybe<Scalars['String']['input']>;
   /** The ansible inventory file to use. we recommend checking this into git alongside your playbook files */
   inventory?: InputMaybe<Scalars['String']['input']>;
   /** the playbook to run */

@@ -248,6 +248,10 @@ type AnsibleConfiguration struct {
 	// PrivateKeyFile is the path to the private key file for SSH authentication.
 	// +kubebuilder:validation:Optional
 	PrivateKeyFile *string `json:"privateKeyFile,omitempty"`
+
+	// ConfigFile is the path to the ansible config file to use.
+	// +kubebuilder:validation:Optional
+	ConfigFile *string `json:"configFile,omitempty"`
 }
 
 type AiApprovalConfiguration struct {
