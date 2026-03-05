@@ -12000,6 +12000,10 @@ export type SentinelCheckIntegrationTestConfiguration = {
   job?: Maybe<JobGateSpec>;
   /** the repository to use for this check */
   repositoryId?: Maybe<Scalars['ID']['output']>;
+  /** whether to rerun failed tests */
+  rerunFailures?: Maybe<Scalars['Boolean']['output']>;
+  /** how many times to rerun failures */
+  rerunFailuresCount?: Maybe<Scalars['Int']['output']>;
   /** the cluster tags to select where to run this job */
   tags?: Maybe<Scalars['Map']['output']>;
 };
@@ -12021,6 +12025,10 @@ export type SentinelCheckIntegrationTestConfigurationAttributes = {
   job?: InputMaybe<GateJobAttributes>;
   /** the repository to use for this check */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
+  /** whether to rerun failed tests */
+  rerunFailures?: InputMaybe<Scalars['Boolean']['input']>;
+  /** how many times to rerun failures */
+  rerunFailuresCount?: InputMaybe<Scalars['Int']['input']>;
   /** the cluster tags to select where to run this job */
   tags?: InputMaybe<Scalars['Json']['input']>;
 };

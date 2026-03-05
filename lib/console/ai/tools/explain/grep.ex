@@ -25,14 +25,17 @@ defmodule Console.AI.Tools.Explain.Grep do
     with {:svc, %Service{id: svc_id}} <- {:svc, Tool.parent()},
          %User{} = user <- Tool.actor(),
          {:ok, files} <- Services.service_files(svc_id, user) do
-      Enum.reduce_while(files, [], fn %{name: name, content: content}, acc ->
+      Enum.reduce_while(files, [], fn %{path: name, content: content}, acc ->
         case Console.AI.File.Grepper.grep(content, regex) do
           {:ok, [_ | _] = results} -> {:cont, [%{file: name, results: results} | acc]}
           {:error, _} = err -> {:halt, err}
           _ -> {:cont, acc}
         end
       end)
-      |> when_ok(&Jason.encode/1)
+      |> case do
+        l when is_list(l) -> Jason.encode(l)
+        err -> err
+      end
     else
       {:svc, _} -> {:error, "no service found"}
       err -> {:error, "internal error fetching files: #{inspect(err)}"}

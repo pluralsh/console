@@ -2955,6 +2955,12 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
 
   "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
   default: SentinelCheckIntegrationTestDefaultAttributes
+
+  "whether to rerun failed tests"
+  rerunFailures: Boolean
+
+  "how many times to rerun failures"
+  rerunFailuresCount: Int
 }
 
 input SentinelCheckIntegrationTestDefaultAttributes {
@@ -3205,6 +3211,12 @@ type SentinelCheckIntegrationTestConfiguration {
 
   "a list of custom test cases to run for this check"
   cases: [SentinelCheckIntegrationTestCaseConfiguration]
+
+  "whether to rerun failed tests"
+  rerunFailures: Boolean
+
+  "how many times to rerun failures"
+  rerunFailuresCount: Int
 }
 
 type SentinelCheckIntegrationTestDefaultConfiguration {

@@ -7245,6 +7245,10 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	Default *SentinelCheckIntegrationTestDefaultConfiguration `json:"default,omitempty"`
 	// a list of custom test cases to run for this check
 	Cases []*SentinelCheckIntegrationTestCaseConfiguration `json:"cases,omitempty"`
+	// whether to rerun failed tests
+	RerunFailures *bool `json:"rerunFailures,omitempty"`
+	// how many times to rerun failures
+	RerunFailuresCount *int64 `json:"rerunFailuresCount,omitempty"`
 }
 
 type SentinelCheckIntegrationTestConfigurationAttributes struct {
@@ -7266,6 +7270,10 @@ type SentinelCheckIntegrationTestConfigurationAttributes struct {
 	Gotestsum *SentinelCheckGotestsumAttributes `json:"gotestsum,omitempty"`
 	// default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)
 	Default *SentinelCheckIntegrationTestDefaultAttributes `json:"default,omitempty"`
+	// whether to rerun failed tests
+	RerunFailures *bool `json:"rerunFailures,omitempty"`
+	// how many times to rerun failures
+	RerunFailuresCount *int64 `json:"rerunFailuresCount,omitempty"`
 }
 
 type SentinelCheckIntegrationTestDefaultAttributes struct {

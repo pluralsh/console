@@ -88,6 +88,14 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	// +kubebuilder:validation:Optional
 	Tags map[string]string `json:"tags,omitempty"`
 
+	// RerunFailures when true, failed tests will be rerun (e.g. to reduce flakiness). Defaults to false.
+	// +kubebuilder:validation:Optional
+	RerunFailures *bool `json:"rerunFailures,omitempty"`
+
+	// RerunFailuresCount is the number of times to rerun failed tests when RerunFailures is true. Defaults to 2.
+	// +kubebuilder:validation:Optional
+	RerunFailuresCount *int64 `json:"rerunFailuresCount,omitempty"`
+
 	// RepositoryRef references a Git repository to use for this integration test.
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`

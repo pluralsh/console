@@ -7588,6 +7588,16 @@ func (in *SentinelCheckIntegrationTestConfiguration) DeepCopyInto(out *SentinelC
 			(*out)[key] = val
 		}
 	}
+	if in.RerunFailures != nil {
+		in, out := &in.RerunFailures, &out.RerunFailures
+		*out = new(bool)
+		**out = **in
+	}
+	if in.RerunFailuresCount != nil {
+		in, out := &in.RerunFailuresCount, &out.RerunFailuresCount
+		*out = new(int64)
+		**out = **in
+	}
 	if in.RepositoryRef != nil {
 		in, out := &in.RepositoryRef, &out.RepositoryRef
 		*out = new(v1.ObjectReference)

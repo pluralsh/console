@@ -63,6 +63,8 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :format,    non_null(:sentinel_run_job_format), description: "the format of the job output"
     field :gotestsum, :sentinel_check_gotestsum_attributes, description: "the gotestsum configuration to use for this check"
     field :default,   :sentinel_check_integration_test_default_attributes, description: "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
+    field :rerun_failures,       :boolean, description: "whether to rerun failed tests"
+    field :rerun_failures_count, :integer, description: "how many times to rerun failures"
   end
 
   input_object :sentinel_check_integration_test_default_attributes do
@@ -186,6 +188,8 @@ defmodule Console.GraphQl.Deployments.Sentinel do
     field :gotestsum,     :sentinel_check_gotestsum_configuration, description: "the gotestsum configuration to use for this check"
     field :default,       :sentinel_check_integration_test_default_configuration, description: "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
     field :cases,         list_of(:sentinel_check_integration_test_case_configuration), description: "a list of custom test cases to run for this check"
+    field :rerun_failures,       :boolean, description: "whether to rerun failed tests"
+    field :rerun_failures_count, :integer, description: "how many times to rerun failures"
   end
 
   object :sentinel_check_integration_test_default_configuration do
