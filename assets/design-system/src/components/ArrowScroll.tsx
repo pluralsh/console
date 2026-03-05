@@ -9,11 +9,13 @@ function ArrowScroll({
   children,
   showArrow = true,
   color = 'fill-one-selected',
+  opacity = 1,
   ...props
 }: {
   children?: ReactNode
   showArrow?: boolean
   color?: SemanticColorKey
+  opacity?: number
 } & ComponentPropsWithRef<'div'>) {
   const containerRef = useRef<HTMLDivElement>(undefined)
   const [showLeftGradient, setShowLeftGradient] = useState(false)
@@ -40,6 +42,7 @@ function ArrowScroll({
         $hasArrow={showArrow}
         $color={color}
         $visible={showLeftGradient}
+        $opacity={opacity}
       >
         {showArrow ? <ArrowLeftIcon size={8} /> : null}
       </ArrowWrapperSC>
@@ -51,6 +54,7 @@ function ArrowScroll({
         $hasArrow={showArrow}
         $color={color}
         $visible={showRightGradient}
+        $opacity={opacity}
       >
         {showArrow ? <ArrowRightIcon size={8} /> : null}
       </ArrowWrapperSC>
@@ -86,7 +90,8 @@ const ArrowWrapperSC = styled.div<{
   $color: SemanticColorKey
   $hasArrow: boolean
   $visible: boolean
-}>(({ theme, $direction, $color, $hasArrow, $visible }) => ({
+  $opacity: number
+}>(({ theme, $direction, $color, $hasArrow, $visible, $opacity }) => ({
   color: theme.colors['icon-light'],
   zIndex: theme.zIndexes.modal - 1,
   position: 'absolute',
@@ -100,7 +105,7 @@ const ArrowWrapperSC = styled.div<{
   alignItems: 'center',
   transition: 'opacity .2s ease',
   background: `linear-gradient(to ${$direction}, transparent 0%, ${theme.colors[$color]} 70%, ${theme.colors[$color]} 100%)`,
-  opacity: $visible ? 1 : 0,
+  opacity: $visible ? $opacity : 0,
   cursor: $visible && $hasArrow ? 'pointer' : 'default',
   pointerEvents: $visible && $hasArrow ? 'auto' : 'none',
 }))
