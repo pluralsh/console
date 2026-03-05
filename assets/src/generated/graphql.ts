@@ -1343,6 +1343,8 @@ export type AzureOpenaiAttributes = {
   accessToken: Scalars['String']['input'];
   /** the api version you want to use */
   apiVersion?: InputMaybe<Scalars['String']['input']>;
+  /** the azure openai deployment name */
+  deployment?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments */
@@ -1360,6 +1362,8 @@ export type AzureOpenaiSettings = {
   __typename?: 'AzureOpenaiSettings';
   /** the api version you want to use */
   apiVersion?: Maybe<Scalars['String']['output']>;
+  /** the azure openai deployment name */
+  deployment?: Maybe<Scalars['String']['output']>;
   /** the model to use for vector embeddings */
   embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
@@ -3932,12 +3936,15 @@ export type FederatedCredentialAttributes = {
 
 export type Flow = {
   __typename?: 'Flow';
+  /** the agent runtime for this flow */
+  agentRuntime?: Maybe<AgentRuntime>;
   alerts?: Maybe<AlertConnection>;
   description?: Maybe<Scalars['String']['output']>;
   icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   issues?: Maybe<IssueConnection>;
+  metadata?: Maybe<Scalars['Map']['output']>;
   name: Scalars['String']['output'];
   pipelines?: Maybe<PipelineConnection>;
   previewEnvironmentInstances?: Maybe<PreviewEnvironmentInstanceConnection>;
@@ -3954,6 +3961,8 @@ export type Flow = {
   services?: Maybe<ServiceDeploymentConnection>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   vulnerabilityReports?: Maybe<VulnerabilityReportConnection>;
+  /** workbenches associated with this flow */
+  workbenches?: Maybe<Array<Maybe<Workbench>>>;
   /** write policy for this flow */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
@@ -4024,8 +4033,13 @@ export type FlowVulnerabilityReportsArgs = {
 };
 
 export type FlowAttributes = {
+  /** the agent runtime for this flow */
+  agentRuntimeId?: InputMaybe<Scalars['ID']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
+  /** workbenches associated with this flow */
+  flowWorkbenches?: InputMaybe<Array<InputMaybe<FlowWorkbenchAttributes>>>;
   icon?: InputMaybe<Scalars['String']['input']>;
+  metadata?: InputMaybe<Scalars['Json']['input']>;
   name: Scalars['String']['input'];
   projectId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -4044,6 +4058,11 @@ export type FlowEdge = {
   __typename?: 'FlowEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<Flow>;
+};
+
+export type FlowWorkbenchAttributes = {
+  /** the workbench to associate with this flow */
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 /** a Flux crd representation of a Helm repository */

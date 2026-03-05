@@ -143,6 +143,25 @@ _Appears in:_
 | `template` _string_ | Template the template to use for this callout |  |  |
 
 
+#### AgentRuntimeRef
+
+
+
+AgentRuntimeRef identifies an agent runtime by cluster handle and runtime name.
+Resolution is done similarly to Observer agent actions: cluster handle is resolved to a cluster ID,
+then the runtime is looked up by name and cluster ID.
+
+
+
+_Appears in:_
+- [FlowSpec](#flowspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `cluster` _string_ | Cluster is the handle of the cluster that owns the agent runtime. |  | Required: \{\} <br /> |
+| `runtime` _string_ | Runtime is the name of the agent runtime within that cluster. |  | Required: \{\} <br /> |
+
+
 #### AiApprovalConfiguration
 
 
@@ -257,6 +276,7 @@ _Appears in:_
 | `model` _string_ | Model - the OpenAi model you wish to use. If not specified, Plural will provide a default. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning. |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings. |  | Optional: \{\} <br /> |
+| `deployment` _string_ | Deployment is the Azure OpenAI deployment name. |  | Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
@@ -1505,6 +1525,8 @@ _Appears in:_
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this Flow. |  | Optional: \{\} <br /> |
 | `repositories` _string array_ | Repositories contains a list of git https urls of the application code repositories used in this flow. |  | Optional: \{\} <br /> |
 | `serverAssociations` _[FlowServerAssociation](#flowserverassociation) array_ | ServerAssociations contains a list of MCP services you wish to associate with this flow.<br />Can also be managed within the Plural Console UI securely. |  | Optional: \{\} <br /> |
+| `metadata` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  | Optional: \{\} <br /> |
+| `agentRuntime` _[AgentRuntimeRef](#agentruntimeref)_ | AgentRuntime references the agent runtime to use for this flow by cluster handle and runtime name.<br />The controller resolves this to an agent runtime ID when syncing to the Console API. |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
 
 

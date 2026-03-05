@@ -10,6 +10,7 @@ defmodule Console.AI.File.Grepper do
   end
 
   @context 20
+  @half_context div(@context, 2)
 
   def grep(content, pattern) when is_binary(content) do
     String.split(content, "\n")
@@ -29,7 +30,7 @@ defmodule Console.AI.File.Grepper do
 
   defp traverse(%__MODULE__{line: line, prior: prior, post: [l | _] = post, results: results} = state, regex) do
     case Regex.match?(regex, l) do
-      true -> %{state | results: [new_result(l, line, prior, post) | results]}
+      true -> %{state | results: [new_result(line, prior, post) | results]}
       _ -> state
     end
     |> bookkeep()
@@ -48,21 +49,21 @@ defmodule Console.AI.File.Grepper do
   defp ensure_length(list) when length(list) <= @context, do: list
   defp ensure_length([_ | rest]), do: rest
 
-  defp new_result(line, num, prior, post) do
+  defp new_result(num, prior, post) do
     {left, right} = juggle_lists(prior, post, length(prior), length(post))
     %Result{
-      content: Enum.join(left ++ [line] ++ right, "\n"),
+      content: Enum.join(left ++ right, "\n"),
       start_line: num - length(left),
-      end_line: num + length(right) + 1
+      end_line: num + length(right)
     }
   end
 
-  defp juggle_lists(prior, post, lprior, lpost) when lprior >= 10 and lpost >= 10,
-    do: {Enum.take(prior, 10), reverse_take(post, 10)}
-  defp juggle_lists(prior, post, lprior, lpost) when lpost >= 10,
-    do: {prior, reverse_take(post, 20 - lprior)}
-  defp juggle_lists(prior, post, lprior, lpost) when lprior >= 10,
-    do: {Enum.take(prior, 20 - lpost), post}
+  defp juggle_lists(prior, post, lprior, lpost) when lprior >= @half_context and lpost >= @half_context,
+    do: {reverse_take(prior, @half_context), Enum.take(post, @half_context)}
+  defp juggle_lists(prior, post, lprior, lpost) when lpost >= @half_context,
+    do: {prior, Enum.take(post, @context - lprior)}
+  defp juggle_lists(prior, post, lprior, lpost) when lprior >= @half_context,
+    do: {reverse_take(prior, @context - lpost), post}
   defp juggle_lists(prior, post, _lprior, _lpost), do: {prior, post}
 
   defp reverse_take(list, count) do

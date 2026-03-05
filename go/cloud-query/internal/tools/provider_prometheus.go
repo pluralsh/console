@@ -89,9 +89,9 @@ func (in *PrometheusProvider) MetricsSearch(ctx context.Context, input *toolquer
 		return nil, err
 	}
 
-	if input.Query != "" {
+	if input.GetQuery() != "" {
 		labelValues = lo.Filter(labelValues, func(lv model.LabelValue, _ int) bool {
-			return strings.Contains(strings.ToLower(string(lv)), strings.ToLower(input.Query))
+			return strings.Contains(strings.ToLower(string(lv)), strings.ToLower(input.GetQuery()))
 		})
 	}
 

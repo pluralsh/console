@@ -86,6 +86,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     Alert,
     AlertResolution,
     Flow,
+    FlowWorkbench,
     McpServer,
     DeprecatedCustomResource,
     ServiceComponentChild,
@@ -191,6 +192,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(Alert, _), do: Alert
   def query(AlertResolution, _), do: AlertResolution
   def query(Flow, _), do: Flow
+  def query(FlowWorkbench, _), do: FlowWorkbench
   def query(McpServer, _), do: McpServer
   def query(DeprecatedCustomResource, _), do: DeprecatedCustomResource
   def query(ServiceComponentChild, _), do: ServiceComponentChild

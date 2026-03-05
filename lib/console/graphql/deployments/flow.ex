@@ -8,10 +8,13 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :description,         :string
     field :icon,                :string
     field :project_id,          :id
+    field :metadata,            :json
+    field :agent_runtime_id,    :id, description: "the agent runtime for this flow"
     field :repositories,        list_of(:string)
     field :read_bindings,       list_of(:policy_binding_attributes)
     field :write_bindings,      list_of(:policy_binding_attributes)
     field :server_associations, list_of(:mcp_server_association_attributes)
+    field :flow_workbenches,    list_of(:flow_workbench_attributes), description: "workbenches associated with this flow"
   end
 
   @desc "Input attributes for creating an mcp server"
@@ -26,6 +29,10 @@ defmodule Console.GraphQl.Deployments.Flow do
 
   input_object :mcp_server_association_attributes do
     field :server_id, :id
+  end
+
+  input_object :flow_workbench_attributes do
+    field :workbench_id, :id, description: "the workbench to associate with this flow"
   end
 
   input_object :mcp_server_authentication_attributes do
@@ -48,14 +55,19 @@ defmodule Console.GraphQl.Deployments.Flow do
   end
 
   object :flow do
-    field :id,          non_null(:id)
-    field :name,        non_null(:string)
-    field :description, :string
-    field :icon,        :string
+    field :id,           non_null(:id)
+    field :name,         non_null(:string)
+    field :description,  :string
+    field :icon,         :string
+    field :metadata,     :map
     field :repositories, list_of(:string), description: "the git https urls of the application code repositories used in this flow"
 
+    field :agent_runtime, :agent_runtime, resolve: dataloader(Deployments),
+      description: "the agent runtime for this flow"
     field :servers, list_of(:mcp_server), resolve: dataloader(Deployments),
       description: "servers that are bound to this flow"
+    field :workbenches, list_of(:workbench), resolve: dataloader(Deployments),
+      description: "workbenches associated with this flow"
 
     field :read_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this flow"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy for this flow"

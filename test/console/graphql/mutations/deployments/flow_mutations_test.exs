@@ -14,6 +14,57 @@ defmodule Console.GraphQl.Deployments.FlowMutationsTest do
 
       assert flow["name"] == "test"
     end
+
+    test "upsertFlow can set workbenches on create" do
+      workbenches = insert_list(2, :workbench)
+
+      {:ok, %{data: %{"upsertFlow" => flow}}} = run_query("""
+        mutation upsert($attrs: FlowAttributes!) {
+          upsertFlow(attributes: $attrs) {
+            id
+            name
+            workbenches { id }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "flow-with-workbenches",
+          "flowWorkbenches" => Enum.map(workbenches, fn w -> %{"workbenchId" => w.id} end)
+        }
+      }, %{current_user: admin_user()})
+
+      assert flow["name"] == "flow-with-workbenches"
+      assert length(flow["workbenches"]) == 2
+      assert ids_equal(flow["workbenches"], workbenches)
+    end
+
+    test "upsertFlow can set and replace workbenches on update" do
+      flow = insert(:flow, name: "update-workbenches-flow")
+      wb1 = insert(:workbench)
+      insert(:flow_workbench, flow: flow, workbench: wb1)
+
+      wb2 = insert(:workbench)
+      wb3 = insert(:workbench)
+
+      {:ok, %{data: %{"upsertFlow" => updated}}} = run_query("""
+        mutation upsert($attrs: FlowAttributes!) {
+          upsertFlow(attributes: $attrs) {
+            id
+            name
+            workbenches { id }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "update-workbenches-flow",
+          "flowWorkbenches" => [%{"workbenchId" => wb2.id}, %{"workbenchId" => wb3.id}]
+        }
+      }, %{current_user: admin_user()})
+
+      assert updated["id"] == flow.id
+      assert length(updated["workbenches"]) == 2
+      assert ids_equal(updated["workbenches"], [wb2, wb3])
+    end
   end
 
   describe "deleteFlow" do

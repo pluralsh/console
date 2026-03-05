@@ -57,7 +57,7 @@ func (in *ToolQueryService) MetricsSearch(ctx context.Context, input *toolquery.
 		return nil, status.Error(codes.InvalidArgument, "input is required")
 	}
 
-	if err := in.validateSearchInput(input.GetConnection(), input.GetQuery()); err != nil {
+	if err := in.validateSearchInput(input.GetConnection()); err != nil {
 		return nil, err
 	}
 
@@ -118,7 +118,7 @@ func (in *ToolQueryService) Traces(ctx context.Context, input *toolquery.TracesQ
 }
 
 func (in *ToolQueryService) validateInput(connection *toolquery.ToolConnection, query string, timeRange *toolquery.TimeRange) error {
-	if err := in.validateSearchInput(connection, query); err != nil {
+	if err := in.validateSearchInput(connection); err != nil {
 		return err
 	}
 
@@ -129,7 +129,7 @@ func (in *ToolQueryService) validateInput(connection *toolquery.ToolConnection, 
 	return in.validateTimeRange(timeRange)
 }
 
-func (in *ToolQueryService) validateSearchInput(connection *toolquery.ToolConnection, query string) error {
+func (in *ToolQueryService) validateSearchInput(connection *toolquery.ToolConnection) error {
 	if connection == nil {
 		return status.Error(codes.InvalidArgument, "connection is required")
 	}

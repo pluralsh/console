@@ -259,6 +259,27 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
       assert from_connection(found["previewEnvironmentInstances"])
              |> ids_equal(instances)
     end
+
+    test "it can fetch workbenches within a flow" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      workbenches = insert_list(3, :workbench)
+      for wb <- workbenches, do: insert(:flow_workbench, flow: flow, workbench: wb)
+      insert_list(2, :workbench)
+
+      {:ok, %{data: %{"flow" => found}}} = run_query("""
+        query flow($id: ID!) {
+          flow(id: $id) {
+            id
+            workbenches { id name }
+          }
+        }
+      """, %{"id" => flow.id}, %{current_user: user})
+
+      assert found["id"] == flow.id
+      assert length(found["workbenches"]) == 3
+      assert ids_equal(found["workbenches"], workbenches)
+    end
   end
 
   describe "mcpServers" do
