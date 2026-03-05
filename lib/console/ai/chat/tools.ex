@@ -41,11 +41,7 @@ defmodule Console.AI.Chat.Tools do
     Agent.KubeResource
   ]
 
-  @cloudquery_tools [
-    # Agent.Query,
-    # Agent.Schema,
-    # Agent.Search
-  ]
+  @cloudquery_tools []
 
   @agent_manifests_tools [
     Agent.Discovery,
@@ -88,6 +84,7 @@ defmodule Console.AI.Chat.Tools do
   @service_tools [
     Explain.Files,
     Explain.Read,
+    Explain.Grep,
     Agent.Discovery,
     Agent.ApiSpec,
     Explain.ListComponents,
