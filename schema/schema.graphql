@@ -1415,6 +1415,10 @@ enum ChatProviderConnectionType {
 
 enum IssueWebhookProvider {
   LINEAR
+  JIRA
+  ASANA
+  GITHUB
+  GITLAB
 }
 
 enum IssueStatus {

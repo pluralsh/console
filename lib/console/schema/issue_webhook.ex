@@ -1,7 +1,7 @@
 defmodule Console.Schema.IssueWebhook do
   use Console.Schema.Base
 
-  defenum Provider, linear: 0
+  defenum Provider, linear: 0, jira: 1, asana: 2, github: 3, gitlab: 4
 
   schema "issue_webhooks" do
     field :provider,    Provider

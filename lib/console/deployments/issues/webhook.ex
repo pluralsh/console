@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Issues.Webhook do
   import Console.Services.Base, only: [ok: 1]
-  alias Console.Deployments.Issues.Webhook.Linear
+  alias Console.Deployments.Issues.Webhook.{Linear, Jira, Asana, Github, Gitlab}
   alias Console.Deployments.Workbenches
   alias Console.Deployments.Observability.Webhook.Raw
   alias Console.Schema.{WorkbenchWebhook, IssueWebhook}
@@ -11,6 +11,42 @@ defmodule Console.Deployments.Issues.Webhook do
     |> workbench_association(webhook)
     |> ok()
   end
+
+  def payload(%IssueWebhook{provider: :jira} = webhook, %{"issue" => _} = payload) do
+    build_attributes(Jira, payload)
+    |> Map.put(:provider, :jira)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(%IssueWebhook{provider: :asana} = webhook, %{"task" => _} = payload) do
+    build_attributes(Asana, payload)
+    |> Map.put(:provider, :asana)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(%IssueWebhook{provider: :asana} = webhook, %{"events" => [_ | _]} = payload) do
+    build_attributes(Asana, payload)
+    |> Map.put(:provider, :asana)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(%IssueWebhook{provider: :github} = webhook, %{"issue" => _} = payload) do
+    build_attributes(Github, payload)
+    |> Map.put(:provider, :github)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
+  def payload(%IssueWebhook{provider: :gitlab} = webhook, %{"object_attributes" => _, "object_kind" => "issue"} = payload) do
+    build_attributes(Gitlab, payload)
+    |> Map.put(:provider, :gitlab)
+    |> workbench_association(webhook)
+    |> ok()
+  end
+
   def payload(_, _), do: {:error, "invalid payload"}
 
   defp workbench_association(data, %IssueWebhook{id: id}) do

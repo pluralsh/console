@@ -11939,15 +11939,23 @@ type IssueWebhookProvider string
 
 const (
 	IssueWebhookProviderLinear IssueWebhookProvider = "LINEAR"
+	IssueWebhookProviderJira   IssueWebhookProvider = "JIRA"
+	IssueWebhookProviderAsana  IssueWebhookProvider = "ASANA"
+	IssueWebhookProviderGithub IssueWebhookProvider = "GITHUB"
+	IssueWebhookProviderGitlab IssueWebhookProvider = "GITLAB"
 )
 
 var AllIssueWebhookProvider = []IssueWebhookProvider{
 	IssueWebhookProviderLinear,
+	IssueWebhookProviderJira,
+	IssueWebhookProviderAsana,
+	IssueWebhookProviderGithub,
+	IssueWebhookProviderGitlab,
 }
 
 func (e IssueWebhookProvider) IsValid() bool {
 	switch e {
-	case IssueWebhookProviderLinear:
+	case IssueWebhookProviderLinear, IssueWebhookProviderJira, IssueWebhookProviderAsana, IssueWebhookProviderGithub, IssueWebhookProviderGitlab:
 		return true
 	}
 	return false
