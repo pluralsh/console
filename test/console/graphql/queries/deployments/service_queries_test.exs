@@ -397,6 +397,43 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       refute Enum.empty?(found["componentMetrics"]["cpu"])
     end
 
+    test "it uses deployment pod regex that matches merged hash suffixes" do
+      user = admin_user()
+      service = insert(:service)
+      component = insert(:service_component,
+        service: service,
+        group: "apps",
+        version: "v1",
+        kind: "Deployment",
+        namespace: "ns",
+        name: "name"
+      )
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      expect(HTTPoison, :post, 4, fn _, {:form, form}, _ ->
+        query = Enum.into(form, %{})["query"]
+        assert query =~ "pod=~\"name-[a-z0-9]{9,10}-?[a-z0-9]{5}\""
+
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+          %{values: [[1, "1"]]}
+        ]}})}}
+      end)
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query serviceDeployment($id: ID!, $componentId: ID!) {
+          serviceDeployment(id: $id) {
+            id
+            componentMetrics(componentId: $componentId) {
+              cpu { values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => service.id, "componentId" => component.id}, %{current_user: user})
+
+      assert found["id"] == service.id
+      refute Enum.empty?(found["componentMetrics"]["cpu"])
+    end
+
     test "it can fetch a service heat map" do
       user = admin_user()
       service = insert(:service)
