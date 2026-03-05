@@ -1,18 +1,15 @@
+import { Flex, IconFrame } from '@pluralsh/design-system'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
-import {
-  useWorkbenchToolQuery,
-  WorkbenchToolCategory,
-  WorkbenchToolType,
-} from 'generated/graphql'
+import { Subtitle1H1 } from 'components/utils/typography/Text'
+import { useWorkbenchToolQuery, WorkbenchToolType } from 'generated/graphql'
 import { capitalize } from 'lodash'
 import { useLayoutEffect } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { WORKBENCHES_TOOLS_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
+import { FormCardSC } from '../workbench/create-edit/WorkbenchCreateOrEdit'
 import { isWorkbenchTool, WorkbenchToolIcon } from './WorkbenchTool'
-import { Flex, IconFrame } from '@pluralsh/design-system'
-import { Subtitle1H1 } from 'components/utils/typography/Text'
 
 export const WORKBENCHES_TOOLS_TYPE_PARAM = 'type'
 
@@ -47,7 +44,7 @@ export function WorkbenchToolCreateOrEdit({
           first={mode === 'create' ? 'New tool' : 'Edit tool'}
           firstPartialType="subtitle1"
           firstColor="text"
-          second="Integrate workbenches with your existing observability providers"
+          second="Integrate external observability provider tools with your workbenches"
           secondPartialType="body1"
           gap="xsmall"
         />
@@ -66,6 +63,7 @@ export function WorkbenchToolCreateOrEdit({
           </Subtitle1H1>
         </Flex>
       </StretchedFlex>
+      <FormCardSC></FormCardSC>
     </WrapperSC>
   )
 }

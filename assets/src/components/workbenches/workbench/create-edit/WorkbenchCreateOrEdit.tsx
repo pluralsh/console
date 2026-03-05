@@ -297,7 +297,7 @@ const SidebarBtnSC = styled(Button)<{ $active: boolean }>(
   })
 )
 
-const FormCardSC = styled(Card)(({ theme }) => ({
+export const FormCardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.xlarge,
   display: 'flex',
   flexDirection: 'column',
