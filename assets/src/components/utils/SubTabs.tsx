@@ -1,4 +1,4 @@
-import { Flex, SubTab } from '@pluralsh/design-system'
+import { ArrowScroll, Flex, SubTab } from '@pluralsh/design-system'
 import { useParams } from 'react-router-dom'
 import { LinkTabWrap } from './Tabs'
 import { ReactNode } from 'react'
@@ -18,21 +18,23 @@ export function SubTabs({
 }) {
   const route = useParams()['*']
   return (
-    <Flex>
-      {directory
-        .filter(({ enabled }) => (enabled === undefined ? true : enabled))
-        .map(({ path, label }) => (
-          <LinkTabWrap
-            active={
-              activeFn?.(path, route ?? '') ??
-              route?.split('/')?.includes(path.split('/').pop() ?? '')
-            }
-            key={path}
-            to={path}
-          >
-            <SubTab css={{ minWidth: 'max-content' }}>{label}</SubTab>
-          </LinkTabWrap>
-        ))}
-    </Flex>
+    <ArrowScroll>
+      <Flex>
+        {directory
+          .filter(({ enabled }) => (enabled === undefined ? true : enabled))
+          .map(({ path, label }) => (
+            <LinkTabWrap
+              active={
+                activeFn?.(path, route ?? '') ??
+                route?.split('/')?.includes(path.split('/').pop() ?? '')
+              }
+              key={path}
+              to={path}
+            >
+              <SubTab css={{ minWidth: 'max-content' }}>{label}</SubTab>
+            </LinkTabWrap>
+          ))}
+      </Flex>
+    </ArrowScroll>
   )
 }
