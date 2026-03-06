@@ -103,11 +103,11 @@ func (in *OpenAIRouter) chatCompletionsFixEarlyVertexStreamCompletion(resp *sche
 			continue
 		}
 
-		if choice.ChatStreamResponseChoice == nil || choice.ChatStreamResponseChoice.Delta == nil {
+		if choice.ChatStreamResponseChoice == nil || choice.Delta == nil {
 			continue
 		}
 
-		if len(choice.ChatStreamResponseChoice.Delta.ToolCalls) == 0 {
+		if len(choice.Delta.ToolCalls) == 0 {
 			continue
 		}
 

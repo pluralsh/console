@@ -40,7 +40,7 @@ func (in *Account) GetKeysForProvider(ctx context.Context, provider schemas.Mode
 
 func (in *Account) handleOpenAIKeys(config *pb.OpenAiConfig) ([]schemas.Key, error) {
 	if config == nil {
-		return nil, fmt.Errorf("OpenAI not configured")
+		return nil, fmt.Errorf("openai not configured")
 	}
 
 	in.logger.Debug("OpenAI configuration",
@@ -66,7 +66,7 @@ func (in *Account) handleOpenAIKeys(config *pb.OpenAiConfig) ([]schemas.Key, err
 
 func (in *Account) handleAnthropicKeys(config *pb.AnthropicConfig) ([]schemas.Key, error) {
 	if config == nil {
-		return nil, fmt.Errorf("Anthropic not configured")
+		return nil, fmt.Errorf("anthropic not configured")
 	}
 
 	in.logger.Debug("Anthropic configuration",
@@ -91,7 +91,7 @@ func (in *Account) handleAnthropicKeys(config *pb.AnthropicConfig) ([]schemas.Ke
 
 func (in *Account) handleVertexKeys(config *pb.VertexAiConfig) ([]schemas.Key, error) {
 	if config == nil {
-		return nil, fmt.Errorf("Vertex not configured")
+		return nil, fmt.Errorf("vertex not configured")
 	}
 
 	in.logger.Debug("Vertex AI configuration",
@@ -126,7 +126,7 @@ func (in *Account) handleVertexKeys(config *pb.VertexAiConfig) ([]schemas.Key, e
 
 func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, error) {
 	if config == nil {
-		return nil, fmt.Errorf("Bedrock not configured")
+		return nil, fmt.Errorf("bedrock not configured")
 	}
 
 	in.logger.Debug("Bedrock configuration",
@@ -167,7 +167,7 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 
 func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key, error) {
 	if config == nil {
-		return nil, fmt.Errorf("Azure not configured")
+		return nil, fmt.Errorf("azure not configured")
 	}
 
 	in.logger.Debug("Azure configuration",

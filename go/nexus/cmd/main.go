@@ -36,8 +36,7 @@ func main() {
 
 	// Start the server
 	if err := serve(); err != nil {
-		log.Logger().Error("failed to start server", zap.Error(err))
-		os.Exit(1)
+		log.Logger().Fatal("failed to start server", zap.Error(err))
 	}
 }
 

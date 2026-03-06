@@ -415,11 +415,7 @@ func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.Bif
 }
 
 func (in *GenericRouter) shouldSendDoneMarker(path string) bool {
-	if strings.Contains(path, "/responses") {
-		return false
-	}
-
-	return true
+	return !strings.Contains(path, "/responses")
 }
 
 func (in *GenericRouter) toStreamingErrorResponse(errorResponse any) (string, error) {

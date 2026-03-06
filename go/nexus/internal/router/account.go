@@ -127,7 +127,6 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 	case schemas.OpenAI:
 		if cfg := aiConfig.GetOpenai(); cfg != nil && cfg.GetBaseUrl() != "" {
 			config.NetworkConfig.BaseURL = cfg.GetBaseUrl()
-
 		}
 
 	case schemas.Anthropic:
