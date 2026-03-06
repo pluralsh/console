@@ -139,5 +139,31 @@ defmodule ConsoleWeb.WebhookController do
     end
   end
 
+  defp verify(conn, %IssueWebhook{provider: :jira, secret: secret}) do
+    with [token] <- get_req_header(conn, "x-atlassian-webhook-secret"),
+         true <- Plug.Crypto.secure_compare(token, secret) do
+      :ok
+    else
+      _ -> :reject
+    end
+  end
+
+  defp verify(conn, %IssueWebhook{provider: :asana, secret: secret}) do
+    with [signature] <- get_req_header(conn, "x-hook-signature"),
+         mac = :crypto.mac(:hmac, :sha256, secret, Enum.reverse(conn.assigns.raw_body)),
+         computed_signature = Base.encode16(mac, case: :lower),
+         true <- Plug.Crypto.secure_compare(signature, computed_signature) do
+      :ok
+    else
+      _ -> :reject
+    end
+  end
+
+  defp verify(conn, %IssueWebhook{provider: :github, secret: secret}),
+    do: verify(conn, %ScmWebhook{type: :github, hmac: secret})
+
+  defp verify(conn, %IssueWebhook{provider: :gitlab, secret: secret}),
+    do: verify(conn, %ScmWebhook{type: :gitlab, hmac: secret})
+
   defp verify(_, _), do: :reject
 end

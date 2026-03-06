@@ -5080,6 +5080,10 @@ export type IssueWebhookEdge = {
 };
 
 export enum IssueWebhookProvider {
+  Asana = 'ASANA',
+  Github = 'GITHUB',
+  Gitlab = 'GITLAB',
+  Jira = 'JIRA',
   Linear = 'LINEAR'
 }
 
