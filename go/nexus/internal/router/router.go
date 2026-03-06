@@ -169,18 +169,21 @@ func (in *GenericRouter) createHandler(config RouteConfig) http.HandlerFunc {
 
 		if config.RequestParser != nil {
 			if err := config.RequestParser(r, req); err != nil {
+				defer cancel()
 				in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "Failed to parse request"))
 				return
 			}
 		} else {
 			rawBody, err := io.ReadAll(r.Body)
 			if err != nil {
+				defer cancel()
 				in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "Failed to read request body"))
 				return
 			}
 
 			if len(rawBody) > 0 {
 				if err = sonic.Unmarshal(rawBody, req); err != nil {
+					defer cancel()
 					in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "Invalid JSON"))
 					return
 				}
@@ -192,6 +195,7 @@ func (in *GenericRouter) createHandler(config RouteConfig) http.HandlerFunc {
 
 		if config.PreCallback != nil {
 			if err = config.PreCallback(r, bifrostCtx, req); err != nil {
+				defer cancel()
 				in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "pre-request callback failed"))
 				return
 			}
@@ -200,10 +204,12 @@ func (in *GenericRouter) createHandler(config RouteConfig) http.HandlerFunc {
 		bifrostReq, err = config.RequestConverter(bifrostCtx, req)
 
 		if err != nil {
+			defer cancel()
 			in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "failed to convert request"))
 			return
 		}
 		if bifrostReq == nil {
+			defer cancel()
 			in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(nil, "converted request is nil"))
 			return
 		}

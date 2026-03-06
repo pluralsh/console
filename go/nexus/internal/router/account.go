@@ -19,27 +19,25 @@ type NexusAccount interface {
 }
 
 type EmbeddingsModelGetter interface {
-	EmbeddingModelByProvider(provider schemas.ModelProvider) (string, error)
+	EmbeddingModelByProvider(ctx context.Context, provider schemas.ModelProvider) (string, error)
 }
 
 // Account implements the Bifrost account interface using Console configuration
 type Account struct {
 	consoleClient console.Client
 	logger        *zap.Logger
-	ctx           context.Context
 }
 
 // NewAccount creates a new account store that bridges Console and Bifrost
-func NewAccount(ctx context.Context, consoleClient console.Client) NexusAccount {
+func NewAccount(consoleClient console.Client) NexusAccount {
 	return &Account{
 		consoleClient: consoleClient,
 		logger:        log.Logger().With(zap.String("component", "account")),
-		ctx:           ctx,
 	}
 }
 
-func (in *Account) EmbeddingModelByProvider(provider schemas.ModelProvider) (string, error) {
-	aiConfig, err := in.consoleClient.GetAiConfig(in.ctx)
+func (in *Account) EmbeddingModelByProvider(ctx context.Context, provider schemas.ModelProvider) (string, error) {
+	aiConfig, err := in.consoleClient.GetAiConfig(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to get AI config: %w", err)
 	}
@@ -72,7 +70,7 @@ func (in *Account) EmbeddingModelByProvider(provider schemas.ModelProvider) (str
 
 // GetConfiguredProviders returns the list of configured providers from Console
 func (in *Account) GetConfiguredProviders() ([]schemas.ModelProvider, error) {
-	aiConfig, err := in.consoleClient.GetAiConfig(in.ctx)
+	aiConfig, err := in.consoleClient.GetAiConfig(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get AI config: %w", err)
 	}
@@ -114,7 +112,7 @@ func (in *Account) GetConfiguredProviders() ([]schemas.ModelProvider, error) {
 
 // GetConfigForProvider returns the configuration for a specific provider
 func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schemas.ProviderConfig, error) {
-	aiConfig, err := in.consoleClient.GetAiConfig(in.ctx)
+	aiConfig, err := in.consoleClient.GetAiConfig(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("failed to get AI config: %w", err)
 	}

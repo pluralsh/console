@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"errors"
 	"slices"
 
@@ -30,7 +31,7 @@ func NewEmbeddingsResolver(embeddingsModelGetter EmbeddingsModelGetter) *Embeddi
 	}
 }
 
-func (in *EmbeddingsResolver) Apply(req *schemas.BifrostEmbeddingRequest) error {
+func (in *EmbeddingsResolver) Apply(ctx context.Context, req *schemas.BifrostEmbeddingRequest) error {
 	if in.supportsEmbeddings(req.Provider) {
 		if len(req.Model) == 0 {
 			return errors.New("embedding model is required")
@@ -48,7 +49,7 @@ func (in *EmbeddingsResolver) Apply(req *schemas.BifrostEmbeddingRequest) error 
 		zap.String("provider", string(req.Provider)),
 	)
 
-	config, err := in.toEmbeddingConfig()
+	config, err := in.toEmbeddingConfig(ctx)
 	if err != nil {
 		return err
 	}
@@ -83,11 +84,11 @@ func (in *EmbeddingsResolver) applyDefaults(config *EmbeddingsConfig, req *schem
 	return nil
 }
 
-func (in *EmbeddingsResolver) toEmbeddingConfig() (*EmbeddingsConfig, error) {
+func (in *EmbeddingsResolver) toEmbeddingConfig(ctx context.Context) (*EmbeddingsConfig, error) {
 	providerModels := map[schemas.ModelProvider]string{}
 
 	for _, provider := range embeddingsProviderPriorityList {
-		if model, err := in.embeddingsModelGetter.EmbeddingModelByProvider(provider); err == nil && len(model) > 0 {
+		if model, err := in.embeddingsModelGetter.EmbeddingModelByProvider(ctx, provider); err == nil && len(model) > 0 {
 			providerModels[provider] = model
 		}
 	}
