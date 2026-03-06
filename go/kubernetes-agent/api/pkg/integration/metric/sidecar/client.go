@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/samber/lo"
+
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
@@ -58,12 +60,9 @@ func (in sidecarClient) ID() integrationapi.IntegrationID {
 // DownloadMetrics implements metric client interface. See MetricClient for more information.
 func (in sidecarClient) DownloadMetrics(selectors []metricapi.ResourceSelector,
 	metricNames []string, cachedResources *metricapi.CachedResources) metricapi.MetricPromises {
-	result := metricapi.MetricPromises{}
-	for _, metricName := range metricNames {
-		collectedMetrics := in.DownloadMetric(selectors, metricName, cachedResources)
-		result = append(result, collectedMetrics...)
-	}
-	return result
+	return lo.FlatMap(metricNames, func(metricName string, _ int) []metricapi.MetricPromise {
+		return in.DownloadMetric(selectors, metricName, cachedResources)
+	})
 }
 
 // DownloadMetric implements metric client interface. See MetricClient for more information.
