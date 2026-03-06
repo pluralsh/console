@@ -30,7 +30,7 @@ func NewEmbeddingsResolver(embeddingsModelGetter EmbeddingsModelGetter) *Embeddi
 	}
 }
 
-func (in *EmbeddingsResolver) Apply(provider schemas.ModelProvider, req *schemas.BifrostEmbeddingRequest) error {
+func (in *EmbeddingsResolver) Apply(req *schemas.BifrostEmbeddingRequest) error {
 	if in.supportsEmbeddings(req.Provider) {
 		if len(req.Model) == 0 {
 			return errors.New("embedding model is required")

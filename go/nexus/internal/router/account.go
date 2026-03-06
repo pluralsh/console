@@ -61,6 +61,10 @@ func (in *Account) EmbeddingModelByProvider(provider schemas.ModelProvider) (str
 		if cfg := aiConfig.GetBedrock(); cfg != nil && cfg.GetEmbeddingModelId() != "" {
 			return cfg.GetEmbeddingModelId(), nil
 		}
+	case schemas.Azure:
+		if cfg := aiConfig.GetAzure(); cfg != nil && cfg.GetEmbeddingModel() != "" {
+			return cfg.GetEmbeddingModel(), nil
+		}
 	}
 
 	return "", nil
@@ -80,20 +84,24 @@ func (in *Account) GetConfiguredProviders() ([]schemas.ModelProvider, error) {
 	var providers []schemas.ModelProvider
 
 	// Check each provider and add if configured
-	if cfg := aiConfig.GetOpenai(); cfg != nil && cfg.ApiKey != nil {
+	if cfg := aiConfig.GetOpenai(); cfg != nil {
 		providers = append(providers, schemas.OpenAI)
 	}
 
-	if cfg := aiConfig.GetAnthropic(); cfg != nil && cfg.GetApiKey() != "" {
+	if cfg := aiConfig.GetAnthropic(); cfg != nil {
 		providers = append(providers, schemas.Anthropic)
 	}
 
-	if cfg := aiConfig.GetVertexAi(); cfg != nil && cfg.GetProject() != "" && cfg.GetLocation() != "" {
+	if cfg := aiConfig.GetVertexAi(); cfg != nil {
 		providers = append(providers, schemas.Vertex)
 	}
 
-	if cfg := aiConfig.GetBedrock(); cfg != nil && cfg.GetRegion() != "" {
+	if cfg := aiConfig.GetBedrock(); cfg != nil {
 		providers = append(providers, schemas.Bedrock)
+	}
+
+	if cfg := aiConfig.GetAzure(); cfg != nil {
+		providers = append(providers, schemas.Azure)
 	}
 
 	if len(providers) == 0 {

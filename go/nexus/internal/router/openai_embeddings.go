@@ -42,7 +42,7 @@ func (in *OpenAIRouter) embeddingsRequestConverter(ctx *schemas.BifrostContext, 
 	bifrostReq.Provider = provider
 	bifrostReq.Model = model
 
-	if err := in.resolver.Apply(provider, bifrostReq); err != nil {
+	if err := in.resolver.Apply(bifrostReq); err != nil {
 		return nil, err
 	}
 
