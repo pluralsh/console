@@ -8,11 +8,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream"
 	"github.com/bytedance/sonic"
 	"github.com/go-chi/chi/v5"
 	bifrostcore "github.com/maximhq/bifrost/core"
-	"github.com/maximhq/bifrost/core/providers/bedrock"
 	"github.com/maximhq/bifrost/core/schemas"
 	"go.uber.org/zap"
 )
@@ -275,7 +273,6 @@ func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.Bif
 		return
 	}
 
-	var eventStreamEncoder *eventstream.Encoder
 	for chunk := range stream {
 		if chunk == nil {
 			continue
@@ -360,48 +357,6 @@ func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.Bif
 				cancel()
 				return
 			}
-		}
-
-		if eventStreamEncoder != nil {
-			if bedrockEvent, ok := convertedResponse.(*bedrock.BedrockStreamEvent); ok {
-				events := bedrockEvent.ToEncodedEvents()
-				for _, evt := range events {
-					jsonData, err := sonic.Marshal(evt.Payload)
-					if err != nil {
-						in.logger.Error("failed to marshal bedrock payload", zap.Error(err))
-						continue
-					}
-
-					headers := eventstream.Headers{
-						{
-							Name:  ":content-type",
-							Value: eventstream.StringValue("application/json"),
-						},
-						{
-							Name:  ":event-type",
-							Value: eventstream.StringValue(evt.EventType),
-						},
-						{
-							Name:  ":message-type",
-							Value: eventstream.StringValue("event"),
-						},
-					}
-
-					message := eventstream.Message{
-						Headers: headers,
-						Payload: jsonData,
-					}
-
-					if err := eventStreamEncoder.Encode(w, message); err != nil {
-						in.logger.Error("failed to encode bedrock event stream", zap.Error(err))
-						cancel()
-						return
-					}
-
-					flusher.Flush()
-				}
-			}
-			continue
 		}
 
 		switch sse := convertedResponse.(type) {

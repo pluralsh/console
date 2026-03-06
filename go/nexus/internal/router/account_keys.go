@@ -153,11 +153,11 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 					Val: config.GetRegion(),
 				},
 				// TODO: needs proper mapping from model to inference profile ID. Requires Console config changes.
-				Deployments: map[string]string{
+				Deployments: in.filterDeployments(map[string]string{
 					config.GetModelId():          fmt.Sprintf("global.%s", config.GetModelId()),
 					config.GetToolModelId():      fmt.Sprintf("global.%s", config.GetToolModelId()),
 					config.GetEmbeddingModelId(): config.GetEmbeddingModelId(),
-				},
+				}),
 			},
 			UseForBatchAPI: lo.ToPtr(true),
 			Weight:         1.0,
@@ -192,11 +192,11 @@ func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key,
 					Val: strings.TrimSuffix(config.GetEndpoint(), "/openai/deployments"),
 				},
 				// TODO: needs proper mapping from model to deployment name. Requires Console config changes.
-				Deployments: map[string]string{
+				Deployments: in.filterDeployments(map[string]string{
 					config.GetModel():          config.GetModel(),
 					config.GetEmbeddingModel(): config.GetEmbeddingModel(),
 					config.GetToolModel():      config.GetToolModel(),
-				},
+				}),
 			},
 			UseForBatchAPI: lo.ToPtr(true),
 			Weight:         1.0,
@@ -208,4 +208,16 @@ func (in *Account) filterModels(models []string) []string {
 	return lo.Filter(models, func(model string, _ int) bool {
 		return model != ""
 	})
+}
+
+func (in *Account) filterDeployments(deployments map[string]string) map[string]string {
+	result := make(map[string]string)
+
+	for model, deployment := range deployments {
+		if len(model) > 0 && len(deployment) > 0 {
+			result[model] = deployment
+		}
+	}
+
+	return result
 }

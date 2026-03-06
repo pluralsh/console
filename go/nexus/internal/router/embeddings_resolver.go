@@ -53,10 +53,6 @@ func (in *EmbeddingsResolver) Apply(provider schemas.ModelProvider, req *schemas
 		return err
 	}
 
-	if len(req.Provider) == 0 {
-		req.Provider = provider
-	}
-
 	return in.applyDefaults(config, req)
 }
 
