@@ -1,0 +1,8 @@
+services:
+  cloud-query-test:
+    build:
+      context: ../..
+      dockerfile: go/test.Dockerfile
+      args:
+        MODULE_PATH: go/cloud-query
+    command: go test ./...

@@ -17,24 +17,31 @@ defmodule Console.Schema.WorkbenchTool do
         field :url,      :string
         field :username, :string
         field :password, :string
+        field :index,    :string
       end
 
       embeds_one :prometheus, PrometheusConnection, on_replace: :update do
         field :url,       :string
         field :token,     :string
         field :tenant_id, :string
+        field :username,  :string
+        field :password,  :string
       end
 
       embeds_one :loki, LokiConnection, on_replace: :update do
         field :url,       :string
         field :token,     :string
         field :tenant_id, :string
+        field :username,  :string
+        field :password,  :string
       end
 
       embeds_one :tempo, TempoConnection, on_replace: :update do
         field :url,       :string
         field :token,     :string
         field :tenant_id, :string
+        field :username,  :string
+        field :password,  :string
       end
 
       embeds_one :datadog, DatadogConnection, on_replace: :update do
@@ -108,7 +115,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_assoc(:write_bindings)
     |> foreign_key_constraint(:project_id)
     |> cast_embed(:configuration, with: &configuration_changeset/2)
-    |> validate_format(:name, ~r/^[a-z0-9]([_a-z0-9]*[a-z0-9])?$/, message: "must be a valid name for OpenAI or equivalent tool calls (only a-z, 0-9, and underscores allowed)")
+    |> validate_format(:name, ~r/^[a-z0-9]([\._a-z0-9]*[a-z0-9])?$/, message: "must be a valid name for OpenAI or equivalent tool calls (only a-z, 0-9, .,  and underscores allowed)")
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :tool])
@@ -117,9 +124,19 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp infer_categories(changeset) do
     case get_field(changeset, :categories) do
-      nil -> put_change(changeset, :categories, categories(get_field(changeset, :tool)))
-      _ -> changeset
+      [_ | _] -> valid_category(changeset, get_field(changeset, :tool))
+      _ -> put_change(changeset, :categories, categories(get_field(changeset, :tool)))
     end
+  end
+
+  defp valid_category(changeset, tool) do
+    validate_change(changeset, :categories, fn :categories, categories ->
+      cats = categories(tool)
+      case MapSet.subset?(MapSet.new(categories), MapSet.new(cats)) do
+        true -> []
+        false -> [categories: "must be a subset of #{inspect(cats)} for a #{tool} tool"]
+      end
+    end)
   end
 
   defp categories(:http), do: [:integration]
@@ -158,8 +175,8 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp prom_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url token tenant_id)a)
-    |> validate_required([:url, :token])
+    |> cast(attrs, ~w(url token tenant_id username password)a)
+    |> validate_required([:url])
   end
 
   defp datadog_configuration_changeset(model, attrs) do
@@ -170,8 +187,8 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp elastic_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url username password)a)
-    |> validate_required([:url, :username, :password])
+    |> cast(attrs, ~w(url username password index)a)
+    |> validate_required([:url, :username, :password, :index])
   end
 
   defp header_changeset(model, attrs) do

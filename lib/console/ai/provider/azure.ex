@@ -7,7 +7,7 @@ defmodule Console.AI.Azure do
 
   require Logger
 
-  defstruct [:azure_token, :access_token, :api_version, :base_url, :model, :tool_model, :embedding_model]
+  defstruct [:azure_token, :access_token, :api_version, :base_url, :model, :tool_model, :embedding_model, :deployment]
 
   @api_vsn "2024-10-21"
 
@@ -21,14 +21,15 @@ defmodule Console.AI.Azure do
       model: opts.model,
       tool_model: opts.tool_model,
       embedding_model: opts.embedding_model,
-      base_url: opts.endpoint
+      base_url: opts.endpoint,
+      deployment: opts.deployment
     }
   end
 
   def proxy(%__MODULE__{} = azure) do
     {:ok, %Console.AI.Proxy{
       backend: :openai,
-      url: Path.join(azure.base_url, azure.model || OpenAI.default_model()),
+      url: deployment_url(azure),
       token: azure.azure_token,
       params: %{"api-version" => azure.api_version || @api_vsn}
     }}
@@ -39,7 +40,7 @@ defmodule Console.AI.Azure do
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{api_version: vsn, model: model} = azure, messages, opts) do
-    OpenAI.new(%{azure | base_url: Path.join(azure.base_url, model || OpenAI.default_model())})
+    OpenAI.new(%{azure | base_url: deployment_url(azure)})
     |> Map.put(:params, %{"api-version" => vsn || @api_vsn})
     |> Map.put(:model, model || OpenAI.default_model())
     |> OpenAI.completion(messages, opts)
@@ -50,7 +51,7 @@ defmodule Console.AI.Azure do
   """
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
   def tool_call(%__MODULE__{api_version: vsn, model: model} = azure, messages, tools, opts) do
-    OpenAI.new(%{azure | base_url: Path.join(azure.base_url, model || OpenAI.default_model())})
+    OpenAI.new(%{azure | base_url: deployment_url(azure)})
     |> Map.put(:params, %{"api-version" => vsn || @api_vsn})
     |> Map.put(:model, model || OpenAI.default_model())
     |> OpenAI.tool_call(messages, tools, opts)
@@ -61,13 +62,20 @@ defmodule Console.AI.Azure do
   """
   @spec embeddings(t(), binary) :: {:ok, [{binary, [float]}]} | {:error, binary}
   def embeddings(%__MODULE__{api_version: vsn, embedding_model: model} = azure, text) do
-    OpenAI.new(%{azure | base_url: Path.join(azure.base_url, model || OpenAI.default_embedding_model())})
+    OpenAI.new(%{azure | base_url: deployment_url(azure)})
     |> Map.put(:params, %{"api-version" => vsn || @api_vsn})
     |> Map.put(:embedding_model, model || OpenAI.default_embedding_model())
     |> OpenAI.embeddings(text)
   end
 
   def context_window(azure), do: OpenAI.context_window(OpenAI.new(azure))
+
+  defp deployment_url(%__MODULE__{base_url: base_url, deployment: deployment})
+    when is_binary(base_url) and is_binary(deployment), do: Path.join(base_url, deployment)
+  defp deployment_url(%__MODULE__{base_url: base_url, model: model})
+    when is_binary(base_url) and is_binary(model), do: Path.join(base_url, model)
+  defp deployment_url(%__MODULE__{base_url: base_url})
+    when is_binary(base_url), do: Path.join(base_url, OpenAI.default_model())
 
   def tools?(), do: true
 end

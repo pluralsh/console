@@ -620,6 +620,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			ToolModel:      in.Azure.ToolModel,
 			EmbeddingModel: in.Azure.EmbeddingModel,
 			AccessToken:    token,
+			Deployment:     in.Azure.Deployment,
 			ProxyModels:    lo.ToSlicePtr(in.Azure.ProxyModels),
 		}
 	}
@@ -830,6 +831,11 @@ type AzureOpenAISettings struct {
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 
+	// Deployment is the Azure OpenAI deployment name.
+	//
+	// +kubebuilder:validation:Optional
+	Deployment *string `json:"deployment,omitempty"`
+
 	// ProxyModels are additional models to support within the integrated ai proxy.
 	//
 	// +kubebuilder:validation:Optional
@@ -939,7 +945,6 @@ func (in *AnalysisRates) Attributes() (*console.AnalysisRatesAttributes, error) 
 			return nil, err
 		}
 		fast = lo.ToPtr(int64(fDur.Minutes()))
-
 	}
 	if in.Slow != nil {
 		sDur, err := time.ParseDuration(*in.Fast)
@@ -1056,8 +1061,7 @@ func (in *GraphStore) Attributes(ctx context.Context, c client.Client, namespace
 		Store:   in.Store,
 	}
 
-	switch *in.Store {
-	case console.VectorStoreElastic:
+	if in.Store != nil && *in.Store == console.VectorStoreElastic {
 		if in.Elastic == nil {
 			return nil, fmt.Errorf("must provide elastic configuration to set the provider to ELASTIC")
 		}

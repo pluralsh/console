@@ -924,6 +924,13 @@ defmodule Console.Factory do
     }
   end
 
+  def flow_workbench_factory do
+    %Schema.FlowWorkbench{
+      flow: build(:flow),
+      workbench: build(:workbench)
+    }
+  end
+
   def mcp_server_factory do
     %Schema.McpServer{
       name: sequence(:mcp_server, & "flow-#{&1}"),
@@ -1232,6 +1239,27 @@ defmodule Console.Factory do
       name: sequence(:chat_connection, & "chat-connection-#{&1}"),
       type: :slack,
       configuration: %{slack: %{app_token: "token", bot_token: "token", bot_id: "id"}}
+    }
+  end
+
+  def issue_factory do
+    %Schema.Issue{
+      provider: :linear,
+      status: :open,
+      external_id: sequence(:issue_external_id, & "issue-ext-#{&1}"),
+      title: sequence(:issue_title, & "Issue #{&1}"),
+      body: "Issue body",
+      workbench: build(:workbench)
+    }
+  end
+
+  def issue_webhook_factory do
+    %Schema.IssueWebhook{
+      provider: 0,
+      url: sequence(:issue_webhook_url, & "https://issues.example.com/hook-#{&1}"),
+      name: sequence(:issue_webhook, & "issue-wh-#{&1}"),
+      secret: "test-secret-#{Ecto.UUID.generate()}",
+      external_id: sequence(:issue_external_id, & "issue-ext-#{&1}"),
     }
   end
 

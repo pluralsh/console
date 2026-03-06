@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.kubernetes_api.rpc;
+
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/kubernetes_api/rpc";
+
+import "pkg/tool/grpctool/grpctool.proto";
+
+service KubernetesApi {
+  // MakeRequest allows to make a HTTP request to Kubernetes API.
+  rpc MakeRequest (stream grpctool.HttpRequest) returns (stream grpctool.HttpResponse) {
+  }
+}
+
+// HeaderExtra is passed in grpctool.HttpRequest.extra.
+message HeaderExtra {
+  ImpersonationConfig imp_config = 1;
+}
+
+// ImpersonationConfig is a representation of client-go rest.ImpersonationConfig.
+// See https://github.com/kubernetes/client-go/blob/release-1.22/rest/config.go#L201-L210
+message ImpersonationConfig {
+  string username = 1;
+  repeated string groups = 2;
+  repeated string roles = 3;
+  string uid = 4;
+}
+
+message ExtraKeyVal {
+  string key = 1;
+  repeated string val = 2;
+}

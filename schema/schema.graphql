@@ -53,6 +53,8 @@ type RootQueryType {
 
   logAggregation(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int, facets: [LogFacetInput]): [LogLine]
 
+  logLabels(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, field: String!): [LogFacetDetail]
+
   logAggregationBuckets(
     serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, aggregation: LogAggregationInput, facets: [LogFacetInput]
   ): [LogAggregationBucket]
@@ -409,7 +411,22 @@ type RootQueryType {
   stackDefinitions(after: String, first: Int, before: String, last: Int): StackDefinitionConnection
 
   infrastructureStacks(
-    after: String, first: Int, before: String, last: Int, q: String, projectId: ID, tagQuery: TagQuery
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    q: String
+
+    projectId: ID
+
+    tagQuery: TagQuery
+
+    "filter stacks by status"
+    status: StackStatus
   ): InfrastructureStackConnection
 
   "fetches the files from a stack's git tarball"
@@ -512,6 +529,10 @@ type RootQueryType {
   ): ChatProviderConnectionConnection
 
   chatProviderConnection(id: ID, name: String): ChatProviderConnection
+
+  issueWebhook(id: ID, name: String): IssueWebhook
+
+  issueWebhooks(after: String, first: Int, before: String, last: Int): IssueWebhookConnection
 
   aiInsight(id: ID!): AiInsight
 
@@ -1195,6 +1216,12 @@ type RootMutationType {
 
   deleteChatProviderConnection(id: ID!): ChatProviderConnection
 
+  createIssueWebhook(attributes: IssueWebhookAttributes!): IssueWebhook
+
+  updateIssueWebhook(id: ID!, attributes: IssueWebhookAttributes!): IssueWebhook
+
+  deleteIssueWebhook(id: ID!): IssueWebhook
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID, flowId: ID, serverId: ID
@@ -1386,6 +1413,17 @@ enum ChatProviderConnectionType {
   TEAMS
 }
 
+enum IssueWebhookProvider {
+  LINEAR
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  CANCELLED
+  COMPLETED
+}
+
 "A chat connection is a way to connect Plural to a chat platform like Slack or Microsoft Teams"
 input ChatProviderConnectionAttributes {
   "the name of this chat connection"
@@ -1438,6 +1476,74 @@ type SlackConnectionConfiguration {
 type ChatProviderConnectionConnection {
   pageInfo: PageInfo!
   edges: [ChatProviderConnectionEdge]
+}
+
+"input data for creating or updating an issue webhook (e.g. for Linear). For create, provider, url, name, and secret are required."
+input IssueWebhookAttributes {
+  provider: IssueWebhookProvider
+  url: String
+  name: String
+  secret: String
+}
+
+"A webhook receiver for an issue provider like Linear"
+type IssueWebhook {
+  id: ID!
+
+  provider: IssueWebhookProvider!
+
+  name: String!
+
+  "the url for this specific webhook"
+  url: String!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type IssueWebhookConnection {
+  pageInfo: PageInfo!
+  edges: [IssueWebhookEdge]
+}
+
+"An issue synced from an external provider (e.g. Linear)"
+type Issue {
+  "the unique identifier of the issue"
+  id: ID!
+
+  "the provider (e.g., Linear, GitHub) that originated this issue"
+  provider: IssueWebhookProvider!
+
+  "the current status of the issue (e.g., open, in progress, completed, cancelled)"
+  status: IssueStatus!
+
+  "the identifier of the issue in the external provider system"
+  externalId: String!
+
+  "the URL linking to this issue on the external provider"
+  url: String!
+
+  "the title of the issue"
+  title: String!
+
+  "the detailed description or body content of the issue"
+  body: String!
+
+  "the flow this issue is associated with"
+  flow: Flow
+
+  "the workbench this issue is associated with"
+  workbench: Workbench
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type IssueConnection {
+  pageInfo: PageInfo!
+  edges: [IssueEdge]
 }
 
 enum AgentRuntimeType {
@@ -2102,8 +2208,11 @@ input WorkbenchWebhookAttributes {
   "unique name for this webhook on the workbench (required for create)"
   name: String
 
-  "observability webhook to receive events"
+  "observability webhook to receive events (either webhook_id or issue_webhook_id required)"
   webhookId: ID
+
+  "issue webhook to receive events (either webhook_id or issue_webhook_id required)"
+  issueWebhookId: ID
 
   "criteria to match incoming webhook payloads"
   matches: WorkbenchWebhookMatchesAttributes
@@ -2155,6 +2264,9 @@ input WorkbenchToolElasticConnectionAttributes {
 
   "basic auth password"
   password: String!
+
+  "elasticsearch index"
+  index: String!
 }
 
 input WorkbenchToolPrometheusConnectionAttributes {
@@ -2162,7 +2274,13 @@ input WorkbenchToolPrometheusConnectionAttributes {
   url: String!
 
   "bearer token or api key"
-  token: String!
+  token: String
+
+  "basic auth username"
+  username: String
+
+  "basic auth password"
+  password: String
 
   "optional tenant id (e.g. for Mimir)"
   tenantId: String
@@ -2173,7 +2291,13 @@ input WorkbenchToolLokiConnectionAttributes {
   url: String!
 
   "bearer token or api key"
-  token: String!
+  token: String
+
+  "basic auth username"
+  username: String
+
+  "basic auth password"
+  password: String
 
   "optional tenant id"
   tenantId: String
@@ -2184,7 +2308,13 @@ input WorkbenchToolTempoConnectionAttributes {
   url: String!
 
   "bearer token or api key"
-  token: String!
+  token: String
+
+  "basic auth username"
+  username: String
+
+  "basic auth password"
+  password: String
 
   "optional tenant id"
   tenantId: String
@@ -2300,6 +2430,12 @@ type WorkbenchJob {
 
   "the result for this job (sideloadable)"
   result: WorkbenchJobResult
+
+  "the alert this run was spawned from"
+  alert: Alert
+
+  "the issue this run was spawned from"
+  issue: Issue
 
   activities(after: String, first: Int, before: String, last: Int): WorkbenchJobActivityConnection
 
@@ -2510,6 +2646,9 @@ type WorkbenchWebhook {
   "the observability webhook that receives events"
   webhook: ObservabilityWebhook
 
+  "the issue webhook that receives events"
+  issueWebhook: IssueWebhook
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -2561,7 +2700,13 @@ type WorkbenchToolConfiguration {
 
 type WorkbenchToolElasticConnection {
   "elasticsearch base url (credentials never exposed)"
-  url: String
+  url: String!
+
+  "elasticsearch index"
+  index: String!
+
+  "basic auth username"
+  username: String!
 }
 
 type WorkbenchToolPrometheusConnection {
@@ -2810,6 +2955,12 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
 
   "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
   default: SentinelCheckIntegrationTestDefaultAttributes
+
+  "whether to rerun failed tests"
+  rerunFailures: Boolean
+
+  "how many times to rerun failures"
+  rerunFailuresCount: Int
 }
 
 input SentinelCheckIntegrationTestDefaultAttributes {
@@ -3060,6 +3211,12 @@ type SentinelCheckIntegrationTestConfiguration {
 
   "a list of custom test cases to run for this check"
   cases: [SentinelCheckIntegrationTestCaseConfiguration]
+
+  "whether to rerun failed tests"
+  rerunFailures: Boolean
+
+  "how many times to rerun failures"
+  rerunFailuresCount: Int
 }
 
 type SentinelCheckIntegrationTestDefaultConfiguration {
@@ -3293,13 +3450,28 @@ type SentinelRunJobConnection {
 
 input FlowAttributes {
   name: String!
+
   description: String
+
   icon: String
+
   projectId: ID
+
+  metadata: Json
+
+  "the agent runtime for this flow"
+  agentRuntimeId: ID
+
   repositories: [String]
+
   readBindings: [PolicyBindingAttributes]
+
   writeBindings: [PolicyBindingAttributes]
+
   serverAssociations: [McpServerAssociationAttributes]
+
+  "workbenches associated with this flow"
+  flowWorkbenches: [FlowWorkbenchAttributes]
 }
 
 "Input attributes for creating an mcp server"
@@ -3320,6 +3492,11 @@ input McpServerAttributes {
 
 input McpServerAssociationAttributes {
   serverId: ID
+}
+
+input FlowWorkbenchAttributes {
+  "the workbench to associate with this flow"
+  workbenchId: ID
 }
 
 input McpServerAuthenticationAttributes {
@@ -3363,11 +3540,19 @@ type Flow {
 
   icon: String
 
+  metadata: Map
+
   "the git https urls of the application code repositories used in this flow"
   repositories: [String]
 
+  "the agent runtime for this flow"
+  agentRuntime: AgentRuntime
+
   "servers that are bound to this flow"
   servers: [McpServer]
+
+  "workbenches associated with this flow"
+  workbenches: [Workbench]
 
   "read policy for this flow"
   readBindings: [PolicyBinding]
@@ -3391,6 +3576,19 @@ type Flow {
   previewEnvironmentInstances(after: String, first: Int, before: String, last: Int): PreviewEnvironmentInstanceConnection
 
   vulnerabilityReports(after: String, first: Int, before: String, last: Int): VulnerabilityReportConnection
+
+  issues(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "filter issues by status (e.g. open, in_progress, completed)"
+    status: IssueStatus
+  ): IssueConnection
 
   insertedAt: DateTime
 
@@ -3816,6 +4014,9 @@ input AzureOpenaiAttributes {
   "the azure openai access token to use"
   accessToken: String!
 
+  "the azure openai deployment name"
+  deployment: String
+
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
 }
@@ -4155,6 +4356,9 @@ type AzureOpenaiSettings {
 
   "the api version you want to use"
   apiVersion: String
+
+  "the azure openai deployment name"
+  deployment: String
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
@@ -4497,6 +4701,13 @@ type UtilizationHeatMap {
   memory: [MetricPointResponse]
 }
 
+type KubernetesControllerMetrics {
+  cpu: [MetricResponse]
+  mem: [MetricResponse]
+  podCpu: [MetricResponse]
+  podMem: [MetricResponse]
+}
+
 type ObservabilityProviderConnection {
   pageInfo: PageInfo!
   edges: [ObservabilityProviderEdge]
@@ -4688,6 +4899,9 @@ input AnsibleConfigurationAttributes {
 
   "path to the private key file for SSH authentication"
   privateKeyFile: String
+
+  "path to the ansible config file to use"
+  configFile: String
 }
 
 input AiApprovalAttributes {
@@ -5093,6 +5307,9 @@ type AnsibleConfiguration {
 
   "path to the private key file for SSH authentication"
   privateKeyFile: String
+
+  "path to the ansible config file to use"
+  configFile: String
 }
 
 type StackRun {
@@ -8680,6 +8897,30 @@ type Cluster {
   "The availability zones this cluster is running in"
   availabilityZones: [String]
 
+  "A set of metrics for a kubernetes controller, currently only deployments and statefulsets are supported"
+  componentMetrics(
+    "the group of the kubernetes controller"
+    group: String!
+
+    "the version of the kubernetes controller"
+    version: String!
+
+    "the kind of the kubernetes controller"
+    kind: String!
+
+    "the name of the kubernetes controller"
+    name: String!
+
+    "the namespace of the kubernetes controller"
+    namespace: String!
+
+    start: DateTime
+
+    stop: DateTime
+
+    step: String
+  ): KubernetesControllerMetrics
+
   "The helm values for the agent installation"
   agentHelmValues: String
 
@@ -12042,6 +12283,11 @@ type LogFacet {
   value: String
 }
 
+type LogFacetDetail {
+  label: String!
+  count: Int!
+}
+
 type LogAggregationBucket {
   timestamp: DateTime
   count: Int
@@ -13698,6 +13944,16 @@ type AgentRunEdge {
 
 type AgentRuntimeEdge {
   node: AgentRuntime
+  cursor: String
+}
+
+type IssueEdge {
+  node: Issue
+  cursor: String
+}
+
+type IssueWebhookEdge {
+  node: IssueWebhook
   cursor: String
 }
 

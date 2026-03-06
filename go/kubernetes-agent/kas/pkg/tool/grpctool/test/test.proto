@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.grpctool.test;
+
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/automata/test";
+
+import "pkg/tool/grpctool/automata/automata.proto";
+//import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";
+import "validate/validate.proto";
+
+enum enum1 {
+  v1 = 0;
+  v2 = 1;
+}
+
+message Request {
+  string s1 = 1 [(validate.rules).string.min_bytes = 1];
+}
+
+message Response {
+  // Subsequent messages of the stream.
+  message Data {
+    bytes data = 1;
+  }
+  // Last message of the stream.
+  message Last {
+  }
+  oneof message {
+
+    option (automata.first_allowed_field) = 1;
+    option (validate.required) = true;
+
+    int64 scalar = 1 [(automata.next_allowed_field) = 2];
+    enum1 x1 = 2 [(automata.next_allowed_field) = 3];
+    Data data = 3 [(automata.next_allowed_field) = 3, (automata.next_allowed_field) = 4];
+    Last last = 4 [(automata.next_allowed_field) = -1];
+  }
+}
+
+message NoOneofs {
+}
+
+message TwoOneofs {
+  oneof message1 {
+
+    option (automata.first_allowed_field) = 1;
+
+    int32 m11 = 1;
+    int32 m12 = 2;
+  }
+  oneof message2 {
+
+    option (automata.first_allowed_field) = 3;
+
+    int32 m21 = 3;
+    int32 m22 = 4;
+  }
+}
+
+message TwoValidOneofs {
+  oneof message1 {
+
+    option (automata.first_allowed_field) = 1;
+
+    int32 m11 = 1 [(automata.next_allowed_field) = 2];
+    int32 m12 = 2 [(automata.next_allowed_field) = -1];
+  }
+  oneof message2 {
+
+    option (automata.first_allowed_field) = 3;
+
+    int32 m21 = 3 [(automata.next_allowed_field) = 4];
+    int32 m22 = 4 [(automata.next_allowed_field) = -1];
+  }
+}
+
+message OutOfOneof {
+  int32 x = 1;
+  oneof message {
+
+    option (automata.first_allowed_field) = 2;
+
+    int32 m1 = 2 [(automata.next_allowed_field) = 1];
+    int32 m2 = 3 [(automata.next_allowed_field) = -1];
+  }
+}
+
+message NotAllReachable {
+  oneof message {
+
+    option (automata.first_allowed_field) = 3;
+
+    int32 m1 = 1 [(automata.next_allowed_field) = 2];
+    int32 m2 = 2 [(automata.next_allowed_field) = 1];
+    int32 m3 = 3 [(automata.next_allowed_field) = -1];
+  }
+}
+
+service Testing {
+  rpc RequestResponse (Request) returns (Response) {
+  }
+  rpc StreamingRequestResponse (stream Request) returns (stream Response) {
+  }
+}

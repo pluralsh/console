@@ -144,7 +144,6 @@ func (r *ObserverReconciler) sync(
 }
 
 func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alpha1.Observer) (target console.ObserverTargetAttributes, actions []*console.ObserverActionAttributes, result *ctrl.Result, err error) {
-
 	target = console.ObserverTargetAttributes{
 		Type:   lo.ToPtr(observer.Spec.Target.Type),
 		Format: observer.Spec.Target.Format,
@@ -168,7 +167,6 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		}
 	}
 	if git := observer.Spec.Target.Git; git != nil {
-
 		gitRepo := &v1alpha1.GitRepository{}
 		if err = r.Get(ctx, client.ObjectKey{Name: git.GitRepositoryRef.Name, Namespace: git.GitRepositoryRef.Namespace}, gitRepo); err != nil {
 			if errors.IsNotFound(err) {
@@ -296,7 +294,6 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 
 			actions[i] = a
 		}
-
 	}
 	return target, actions, nil, err
 }

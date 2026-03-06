@@ -24,7 +24,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/common"
 	"github.com/pluralsh/console/go/controller/internal/identity"
 	"github.com/pluralsh/console/go/controller/internal/plural"
-	"github.com/pluralsh/polly/algorithms"
+	"github.com/pluralsh/console/go/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -112,8 +112,9 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		return ctrl.Result{}, err
 	}
 
-	if !stack.GetDeletionTimestamp().IsZero() {
-		return r.handleDelete(ctx, stack)
+	result, err := r.addOrRemoveFinalizer(ctx, stack)
+	if result != nil || err != nil {
+		return common.HandleRequeue(result, err, stack.SetCondition)
 	}
 
 	clusterID, result, err := r.handleClusterRef(ctx, stack)
@@ -156,17 +157,24 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		return ctrl.Result{}, err
 	}
 
+	// If the stack already exists and drift detection is disabled, we mark the stack as read-only and update the status
+	// with the existing stack ID.
+	if existing != nil && !stack.Spec.Reconciliation.DriftDetect() {
+		utils.MarkReadOnly(stack)
+		return r.handleExistingResource(ctx, stack, existing)
+	}
+
+	attr, err := r.getStackAttributes(ctx, stack, attributes)
+	if err != nil {
+		return common.HandleRequeue(nil, err, stack.SetCondition)
+	}
+
+	sha, err := utils.HashObject(attr)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	if existing == nil {
-		attr, err := r.getStackAttributes(ctx, stack, attributes)
-		if err != nil {
-			return common.HandleRequeue(nil, err, stack.SetCondition)
-		}
-
-		sha, err := utils.HashObject(attr)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-
 		st, err := r.ConsoleClient.CreateStack(ctx, *attr)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -176,28 +184,17 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 		logger.Info("created stack", "name", stack.StackName())
 		stack.Status.ID = st.ID
 		stack.Status.SHA = lo.ToPtr(sha)
-		controllerutil.AddFinalizer(stack, InfrastructureStackFinalizer)
-	} else {
-		attr, err := r.getStackAttributes(ctx, stack, attributes)
-		if err != nil {
-			return common.HandleRequeue(nil, err, stack.SetCondition)
-		}
+	}
 
-		sha, err := utils.HashObject(attr)
+	if !stack.Status.IsSHAEqual(sha) {
+		_, err = r.ConsoleClient.UpdateStack(ctx, stack.Status.GetID(), *attr)
 		if err != nil {
+			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
 
-		if !stack.Status.IsSHAEqual(sha) {
-			_, err = r.ConsoleClient.UpdateStack(ctx, stack.Status.GetID(), *attr)
-			if err != nil {
-				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return ctrl.Result{}, err
-			}
-
-			logger.Info("updated stack", "name", stack.StackName())
-			stack.Status.SHA = lo.ToPtr(sha)
-		}
+		logger.Info("updated stack", "name", stack.StackName())
+		stack.Status.SHA = lo.ToPtr(sha)
 	}
 
 	if err := r.setReadyCondition(ctx, stack, existing != nil); err != nil {
@@ -206,6 +203,17 @@ func (r *InfrastructureStackReconciler) Process(ctx context.Context, req ctrl.Re
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return ctrl.Result{RequeueAfter: requeueAfterInfrastructureStack}, nil
+}
+
+func (r *InfrastructureStackReconciler) handleExistingResource(ctx context.Context, stack *v1alpha1.InfrastructureStack, apiStack *console.InfrastructureStackIDFragment) (ctrl.Result, error) {
+	stack.Status.ID = apiStack.ID
+
+	if err := r.setReadyCondition(ctx, stack, apiStack != nil); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	return stack.Spec.Reconciliation.Requeue(), nil
 }
 
 func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, stack *v1alpha1.InfrastructureStack, exists bool) error {
@@ -219,7 +227,6 @@ func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, s
 	}
 	if status.Status == console.StackStatusSuccessful {
 		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-
 	}
 	return nil
 }
@@ -234,7 +241,7 @@ func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error
 }
 
 func (r *InfrastructureStackReconciler) stackExists(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*console.InfrastructureStackIDFragment, error) {
-	stackFragment, err := r.ConsoleClient.GetStackById(ctx, stack.Status.GetID())
+	stackFragment, err := r.ConsoleClient.GetStackByName(ctx, stack.StackName())
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return nil, nil
@@ -249,38 +256,41 @@ func (r *InfrastructureStackReconciler) stackExists(ctx context.Context, stack *
 	return stackFragment, nil
 }
 
-func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack *v1alpha1.InfrastructureStack) (ctrl.Result, error) {
+func (r *InfrastructureStackReconciler) addOrRemoveFinalizer(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*ctrl.Result, error) {
 	logger := log.FromContext(ctx)
-	if controllerutil.ContainsFinalizer(stack, InfrastructureStackFinalizer) {
-		if stack.Status.GetID() != "" {
-			existingStack, err := r.ConsoleClient.GetStack(ctx, stack.Status.GetID())
-			if err != nil && !errors.IsNotFound(err) {
-				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return ctrl.Result{}, err
-			}
-			if existingStack != nil && existingStack.DeletedAt != nil {
+
+	if stack.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(stack, InfrastructureStackFinalizer) {
+		controllerutil.AddFinalizer(stack, InfrastructureStackFinalizer)
+	}
+
+	if !stack.DeletionTimestamp.IsZero() {
+		stackFragment, err := r.ConsoleClient.GetFullStackByName(ctx, stack.StackName())
+		if err != nil && !errors.IsNotFound(err) {
+			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return nil, err
+		}
+		if stackFragment != nil && !stack.Status.IsReadonly() {
+			if stackFragment.DeletedAt != nil {
 				logger.Info("waiting for the stack")
-				return common.Wait(), nil
+				return lo.ToPtr(common.Wait()), nil
 			}
-			if existingStack != nil {
-				if stack.Spec.Detach {
-					if err := r.ConsoleClient.DetachStack(ctx, *stack.Status.ID); err != nil {
-						utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-						return ctrl.Result{}, err
-					}
-				} else {
-					if err := r.ConsoleClient.DeleteStack(ctx, *stack.Status.ID); err != nil {
-						utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-						return ctrl.Result{}, err
-					}
+			if stack.Spec.Detach {
+				if err := r.ConsoleClient.DetachStack(ctx, stack.Status.GetID()); err != nil {
+					utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+					return nil, err
 				}
-				return common.WaitForResources(), nil
+			} else {
+				if err := r.ConsoleClient.DeleteStack(ctx, stack.Status.GetID()); err != nil {
+					utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+					return nil, err
+				}
 			}
+			return lo.ToPtr(common.WaitForResources()), nil
 		}
 		controllerutil.RemoveFinalizer(stack, InfrastructureStackFinalizer)
 		logger.Info("stack deleted successfully")
 	}
-	return ctrl.Result{}, nil
+	return nil, nil
 }
 
 type dynamicAttributes struct {
@@ -361,9 +371,10 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		var isSecret *bool
 		var value string
 
-		if env.Value != nil {
+		switch {
+		case env.Value != nil:
 			value = *env.Value
-		} else if env.SecretKeyRef != nil {
+		case env.SecretKeyRef != nil:
 			secret := &corev1.Secret{}
 			name := types.NamespacedName{Name: env.SecretKeyRef.Name, Namespace: stack.GetNamespace()}
 			if err := r.Get(ctx, name, secret); err != nil {
@@ -378,7 +389,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 				return nil, fmt.Errorf("can not find secret data for the key %s", env.SecretKeyRef.Key)
 			}
 			value = string(rawData)
-		} else if env.ConfigMapRef != nil {
+		case env.ConfigMapRef != nil:
 			configMap := &corev1.ConfigMap{}
 			name := types.NamespacedName{Name: env.ConfigMapRef.Name, Namespace: stack.GetNamespace()}
 			if err := r.Get(ctx, name, configMap); err != nil {
@@ -481,6 +492,7 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 			Inventory:      conf.Ansible.Inventory,
 			AdditionalArgs: conf.Ansible.AdditionalArgs,
 			PrivateKeyFile: conf.Ansible.PrivateKeyFile,
+			ConfigFile:     conf.Ansible.ConfigFile,
 		}
 	}
 

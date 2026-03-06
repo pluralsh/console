@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.gitlab;
+
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/gitlab";
+
+message ClientError {
+  int32 status_code = 1;
+  string path = 2;
+  string reason = 3;
+}
+
+// see https://gitlab.com/gitlab-org/gitlab/blob/2864126a72835bd0b29f670ffc36828014850f5f/lib/api/helpers.rb#L534-534
+message DefaultApiError {
+  string message = 1 [json_name = "message"];
+}

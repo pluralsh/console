@@ -96,29 +96,29 @@ func main() {
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
-		os.Exit(1)
+		os.Exit(1) //nolint:gocritic
 	}
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up health check")
-		os.Exit(1)
+		os.Exit(1) //nolint:gocritic
 	}
 	if err := mgr.AddReadyzCheck("readyz", healthz.Ping); err != nil {
 		setupLog.Error(err, "unable to set up ready check")
-		os.Exit(1)
+		os.Exit(1) //nolint:gocritic
 	}
 
 	credentialsCache, err := credentials.NewNamespaceCredentialsCache(args.ConsoleToken(), scheme)
 	if err != nil {
 		setupLog.Error(err, "unable to initialize credentials cache")
-		os.Exit(1)
+		os.Exit(1) //nolint:gocritic
 	}
 
 	controllers, shardedControllers, err := args.Reconcilers().ToControllers(mgr, args.ConsoleUrl(),
 		args.ConsoleToken(), args.DatadogEnabled(), credentialsCache)
 	if err != nil {
 		setupLog.Error(err, "error when creating controllers")
-		os.Exit(1)
+		os.Exit(1) //nolint:gocritic
 	}
 
 	runOrDie(ctx, controllers, shardedControllers, mgr)

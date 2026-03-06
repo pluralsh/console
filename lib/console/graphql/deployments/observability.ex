@@ -111,6 +111,13 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :memory, list_of(:metric_point_response)
   end
 
+  object :kubernetes_controller_metrics do
+    field :cpu,     list_of(:metric_response)
+    field :mem,     list_of(:metric_response)
+    field :pod_cpu, list_of(:metric_response)
+    field :pod_mem, list_of(:metric_response)
+  end
+
   connection node_type: :observability_provider
   connection node_type: :observability_webhook
   connection node_type: :alert

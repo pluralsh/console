@@ -563,17 +563,37 @@ defmodule Console.Deployments.WorkbenchesTest do
   end
 
   describe "create_workbench_webhook/3" do
-    test "project writers can create a webhook" do
+    test "project writers can create a webhook with observability webhook" do
       user = insert(:user)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
+      obs_webhook = insert(:observability_webhook)
 
       {:ok, webhook} = Workbenches.create_workbench_webhook(%{
-        name: "my-webhook"
+        name: "my-webhook",
+        webhook_id: obs_webhook.id
       }, workbench.id, user)
 
       assert webhook.workbench_id == workbench.id
       assert webhook.name == "my-webhook"
+      assert webhook.webhook_id == obs_webhook.id
+      assert_receive {:event, %PubSub.WorkbenchWebhookCreated{item: ^webhook}}
+    end
+
+    test "project writers can create a webhook with issue webhook" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      issue_wh = insert(:issue_webhook)
+
+      {:ok, webhook} = Workbenches.create_workbench_webhook(%{
+        name: "issue-webhook-trigger",
+        issue_webhook_id: issue_wh.id
+      }, workbench.id, user)
+
+      assert webhook.workbench_id == workbench.id
+      assert webhook.name == "issue-webhook-trigger"
+      assert webhook.issue_webhook_id == issue_wh.id
       assert_receive {:event, %PubSub.WorkbenchWebhookCreated{item: ^webhook}}
     end
 
@@ -581,10 +601,24 @@ defmodule Console.Deployments.WorkbenchesTest do
       user = insert(:user)
       project = insert(:project, read_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
+      obs_webhook = insert(:observability_webhook)
 
       {:error, _} = Workbenches.create_workbench_webhook(%{
-        name: "forbidden"
+        name: "forbidden",
+        webhook_id: obs_webhook.id
       }, workbench.id, user)
+    end
+
+    test "requires webhook_id or issue_webhook_id" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:error, changeset} = Workbenches.create_workbench_webhook(%{
+        name: "no-source"
+      }, workbench.id, user)
+
+      assert %{webhook_id: ["must have either webhook_id or issue_webhook_id"]} = errors_on(changeset)
     end
   end
 

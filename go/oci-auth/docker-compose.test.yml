@@ -1,0 +1,8 @@
+services:
+  oci-auth-test:
+    build:
+      context: ../..
+      dockerfile: go/test.Dockerfile
+      args:
+        MODULE_PATH: go/oci-auth
+    command: go test ./...

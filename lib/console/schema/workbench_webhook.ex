@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchWebhook do
   use Console.Schema.Base
-  alias Console.Schema.{ObservabilityWebhook, Workbench}
+  alias Console.Schema.{ObservabilityWebhook, Workbench, IssueWebhook}
 
   schema "workbench_webhooks" do
     field :name,    :string
@@ -11,8 +11,9 @@ defmodule Console.Schema.WorkbenchWebhook do
       field :case_insensitive, :boolean
     end
 
-    belongs_to :webhook,   ObservabilityWebhook
-    belongs_to :workbench, Workbench
+    belongs_to :webhook,       ObservabilityWebhook
+    belongs_to :issue_webhook, IssueWebhook
+    belongs_to :workbench,     Workbench
 
     timestamps()
   end
@@ -41,16 +42,29 @@ defmodule Console.Schema.WorkbenchWebhook do
     from(w in query, where: w.webhook_id == ^webhook_id)
   end
 
-  @valid ~w(name webhook_id workbench_id)a
+  def for_issue_webhook(query \\ __MODULE__, issue_webhook_id) do
+    from(w in query, where: w.issue_webhook_id == ^issue_webhook_id)
+  end
+
+  @valid ~w(name webhook_id issue_webhook_id workbench_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:matches, with: &matches_changeset/2)
     |> foreign_key_constraint(:webhook_id)
+    |> foreign_key_constraint(:issue_webhook_id)
     |> foreign_key_constraint(:workbench_id)
     |> unique_constraint([:workbench_id, :name])
     |> validate_required([:name, :workbench_id])
+    |> validate_webhook_or_issue_webhook()
+  end
+
+  defp validate_webhook_or_issue_webhook(changeset) do
+    case {get_field(changeset, :webhook_id), get_field(changeset, :issue_webhook_id)} do
+      {nil, nil} -> add_error(changeset, :webhook_id, "must have either webhook_id or issue_webhook_id")
+      {_, _} -> changeset
+    end
   end
 
   defp matches_changeset(model, attrs) do

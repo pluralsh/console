@@ -45,6 +45,23 @@ defmodule ConsoleWeb.OpenAPI.StackControllerTest do
 
       assert ids_equal(results, stacks)
     end
+
+    test "returns stacks filtered by status", %{conn: conn} do
+      user = insert(:user)
+      failed_stacks = insert_list(2, :stack, status: :failed, read_bindings: [%{user_id: user.id}])
+      insert_list(2, :stack, status: :successful, read_bindings: [%{user_id: user.id}])
+      insert(:stack, status: :pending, read_bindings: [%{user_id: user.id}])
+
+      %{"data" => results} =
+        conn
+        |> add_auth_headers(user)
+        |> get("/v1/api/stacks?status=failed")
+        |> json_response(200)
+
+      assert length(results) == 2
+      assert Enum.all?(results, &(&1["status"] == "failed"))
+      assert ids_equal(results, failed_stacks)
+    end
   end
 
   describe "#create/2" do

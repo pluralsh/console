@@ -23,7 +23,6 @@ func NewRoundRobinTokenRotator(tokens []string) *RoundRobinTokenRotator {
 }
 
 func (rr *RoundRobinTokenRotator) GetNextToken() string {
-
 	if len(rr.Tokens) == 0 {
 		return ""
 	}

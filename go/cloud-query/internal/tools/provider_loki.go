@@ -29,7 +29,7 @@ func (in *LokiProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInpu
 		return nil, ErrInvalidArgument
 	}
 
-	client := clients.NewLokiClient(in.conn.GetUrl(), in.conn.GetToken(), in.conn.GetTenantId())
+	client := clients.NewLokiClient(in.conn.GetUrl(), in.conn.GetToken(), in.conn.GetUsername(), in.conn.GetPassword(), in.conn.GetTenantId())
 	defer client.Close()
 
 	resp, err := client.Logs(

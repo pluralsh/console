@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+// Package allows to define the allowed order in which fields of a oneof group can appear in a client gRPC stream.
+package plural.agent.grpctool.automata;
+
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/tool/grpctool/automata";
+
+import "google/protobuf/descriptor.proto";
+
+// See https://developers.google.com/protocol-buffers/docs/proto#customoptions for info about custom options.
+
+extend google.protobuf.FieldOptions {
+  // Specifies field numbers within a oneof. The next message in a stream must have one of these fields set.
+  // -1 can be used for EOF
+  repeated int32 next_allowed_field = 92000; // Random high number between 50000 and 99999.
+}
+
+extend google.protobuf.OneofOptions {
+  // Specifies field numbers within a oneof. The first message in a stream must have one of these fields set.
+  // -1 can be used for EOF
+  repeated int32 first_allowed_field = 92001; // Random high number between 50000 and 99999.
+}

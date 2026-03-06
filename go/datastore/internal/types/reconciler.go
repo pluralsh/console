@@ -124,7 +124,6 @@ var controllerFactories = map[Reconciler]ControllerFactory{
 
 // ToController maps a Reconciler to its corresponding Controller.
 func (sc Reconciler) ToController(mgr ctrl.Manager) (Controller, error) {
-
 	if factory, exists := controllerFactories[sc]; exists {
 		return factory(mgr), nil
 	}

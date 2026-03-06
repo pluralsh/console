@@ -4,6 +4,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func init() {
@@ -98,10 +99,33 @@ type FlowSpec struct {
 	// +kubebuilder:validation:Optional
 	ServerAssociations []FlowServerAssociation `json:"serverAssociations,omitempty"`
 
+	// Metadata contains arbitrary JSON metadata for the flow.
+	// Used for custom configuration and integration with external systems.
+	// +kubebuilder:validation:Optional
+	Metadata *runtime.RawExtension `json:"metadata,omitempty"`
+
+	// AgentRuntime references the agent runtime to use for this flow by cluster handle and runtime name.
+	// The controller resolves this to an agent runtime ID when syncing to the Console API.
+	// +kubebuilder:validation:Optional
+	AgentRuntime *AgentRuntimeRef `json:"agentRuntime,omitempty"`
+
 	// Reconciliation settings for this resource.
 	// Controls drift detection and reconciliation intervals.
 	// +kubebuilder:validation:Optional
 	Reconciliation *Reconciliation `json:"reconciliation,omitempty"`
+}
+
+// AgentRuntimeRef identifies an agent runtime by cluster handle and runtime name.
+// Resolution is done similarly to Observer agent actions: cluster handle is resolved to a cluster ID,
+// then the runtime is looked up by name and cluster ID.
+type AgentRuntimeRef struct {
+	// Cluster is the handle of the cluster that owns the agent runtime.
+	// +kubebuilder:validation:Required
+	Cluster string `json:"cluster"`
+
+	// Runtime is the name of the agent runtime within that cluster.
+	// +kubebuilder:validation:Required
+	Runtime string `json:"runtime"`
 }
 
 func (in *FlowSpec) HasProjectRef() bool {

@@ -218,6 +218,10 @@ spec:
                         items:
                           type: string
                         type: array
+                      configFile:
+                        description: ConfigFile is the path to the ansible config
+                          file to use.
+                        type: string
                       inventory:
                         description: Inventory is the ansible inventory file to use.  We
                           recommend checking this into git alongside your playbook

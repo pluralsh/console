@@ -64,7 +64,7 @@ type namespaceCredentialsCache struct {
 func (in *namespaceCredentialsCache) Init() error {
 	list := new(v1alpha1.NamespaceCredentialsList)
 	if err := in.client.List(in.ctx, list); err != nil {
-		return fmt.Errorf("could not list NamespaceCredentials: %s", err)
+		return fmt.Errorf("could not list NamespaceCredentials: %w", err)
 	}
 
 	for _, nc := range list.Items {
@@ -107,7 +107,7 @@ func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredential
 func (in *namespaceCredentialsCache) getNamespaceCredentialsToken(nc *v1alpha1.NamespaceCredentials) (string, error) {
 	secret := &corev1.Secret{}
 	if err := in.client.Get(in.ctx, types.NamespacedName{Name: nc.Spec.SecretRef.Name, Namespace: nc.Spec.SecretRef.Namespace}, secret); err != nil {
-		return "", fmt.Errorf("failed to get secret: %s", err)
+		return "", fmt.Errorf("failed to get secret: %w", err)
 	}
 
 	// Remove existing owner references from configuration secrets.

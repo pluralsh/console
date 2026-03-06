@@ -1,0 +1,14 @@
+{
+    "type": "object",
+    "properties": {
+        "query": {
+            "type": "string",
+            "description": "A query to use to filter the desired metrics"
+        },
+        "limit": {
+            "type": "integer",
+            "description": "The maximum number of metrics to return"
+        }
+    },
+    "required": []
+}

@@ -120,7 +120,6 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 }
 
 func (in *HelmRepositoryReconciler) tryAddOwnerRef(ctx context.Context, helmRepository *v1alpha1.HelmRepository) error {
-
 	secretRef := in.HelmRepositoryAuth.getAuthSecretRef(helmRepository)
 	if secretRef == nil {
 		return nil

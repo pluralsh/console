@@ -1,0 +1,8 @@
+services:
+  ai-proxy:
+    build:
+      context: ../..
+      dockerfile: go/ai-proxy/Dockerfile
+    command:
+      - --provider=${PLURAL_AIPROXY_PROVIDER:-ollama}
+      - --provider-host=${PLURAL_AIPROXY_PROVIDER_API_HOST:-http://host.docker.internal:11434}

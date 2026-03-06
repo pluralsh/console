@@ -82,7 +82,7 @@ func TryUpdateStatus[PatchObject ctrlruntimeclient.Object](ctx context.Context, 
 
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		if err := client.Get(ctx, key, object); err != nil {
-			return fmt.Errorf("could not fetch current %s/%s state, got error: %+v", object.GetName(), object.GetNamespace(), err)
+			return fmt.Errorf("could not fetch current %s/%s state, got error: %+w", object.GetName(), object.GetNamespace(), err)
 		}
 
 		original := object.DeepCopyObject().(PatchObject)
@@ -279,7 +279,6 @@ func TryToUpdate(ctx context.Context, client ctrlruntimeclient.Client, object ct
 
 		return client.Patch(ctx, original, ctrlruntimeclient.MergeFrom(object))
 	})
-
 }
 
 func TryRemoveControllerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, controlled ctrlruntimeclient.Object, scheme *runtime.Scheme) error {

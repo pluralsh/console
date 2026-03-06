@@ -6,7 +6,7 @@ import (
 	"github.com/Yamashou/gqlgenc/clientv2"
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"github.com/pluralsh/polly/http"
+	"github.com/pluralsh/console/go/polly/http"
 )
 
 type client struct {
@@ -101,7 +101,9 @@ type ConsoleClient interface {
 	CreateNamespace(ctx context.Context, attributes console.ManagedNamespaceAttributes) (*console.ManagedNamespaceFragment, error)
 	UpdateNamespace(ctx context.Context, id string, attributes console.ManagedNamespaceAttributes) (*console.ManagedNamespaceFragment, error)
 	GetStack(ctx context.Context, id string) (*console.InfrastructureStackFragment, error)
+	GetFullStackByName(ctx context.Context, name string) (*console.InfrastructureStackFragment, error)
 	GetStackById(ctx context.Context, id string) (*console.InfrastructureStackIDFragment, error)
+	GetStackByName(ctx context.Context, name string) (*console.InfrastructureStackIDFragment, error)
 	GetStackStatus(ctx context.Context, id string) (*console.InfrastructureStackStatusFragment, error)
 	DeleteStack(ctx context.Context, id string) error
 	CreateStack(ctx context.Context, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error)

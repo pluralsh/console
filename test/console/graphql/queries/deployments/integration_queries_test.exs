@@ -42,4 +42,51 @@ defmodule Console.GraphQl.Deployments.IntegrationQueriesTest do
       assert found["id"] == connection.id
     end
   end
+
+  describe "issueWebhook" do
+    test "it can fetch an issue webhook by id" do
+      webhook = insert(:issue_webhook)
+
+      {:ok, %{data: %{"issueWebhook" => found}}} = run_query("""
+        query IssueWebhook($id: ID!) {
+          issueWebhook(id: $id) { id provider name url }
+        }
+      """, %{"id" => webhook.id}, %{current_user: admin_user()})
+
+      assert found["id"] == webhook.id
+      assert found["provider"] == "LINEAR"
+      assert found["name"] == webhook.name
+      assert found["url"] =~ "/v1/webhooks/issues/"
+    end
+
+    test "it can fetch an issue webhook by name" do
+      webhook = insert(:issue_webhook)
+
+      {:ok, %{data: %{"issueWebhook" => found}}} = run_query("""
+        query IssueWebhook($name: String!) {
+          issueWebhook(name: $name) { id name }
+        }
+      """, %{"name" => webhook.name}, %{current_user: admin_user()})
+
+      assert found["id"] == webhook.id
+      assert found["name"] == webhook.name
+    end
+  end
+
+  describe "issueWebhooks" do
+    test "it can list issue webhooks" do
+      webhooks = insert_list(3, :issue_webhook)
+
+      {:ok, %{data: %{"issueWebhooks" => found}}} = run_query("""
+        query {
+          issueWebhooks(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal(webhooks)
+    end
+  end
 end

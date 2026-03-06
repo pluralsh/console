@@ -233,6 +233,7 @@ fragment StackConfigurationFragment on StackConfiguration {
         inventory
         playbook
         privateKeyFile
+        configFile
     }
 }
 

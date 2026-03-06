@@ -46,7 +46,6 @@ func (c *client) CreateGlobalService(serviceID string, attributes console.Global
 		return nil, fmt.Errorf("new created global service %s is nil", attributes.Name)
 	}
 	return result.CreateGlobalService, nil
-
 }
 
 func (c *client) CreateGlobalServiceFromTemplate(attributes console.GlobalServiceAttributes) (*console.GlobalServiceFragment, error) {
@@ -58,7 +57,6 @@ func (c *client) CreateGlobalServiceFromTemplate(attributes console.GlobalServic
 		return nil, fmt.Errorf("new created global service %s is nil", attributes.Name)
 	}
 	return result.CreateGlobalService, nil
-
 }
 
 func (c *client) DeleteGlobalService(id string) error {
@@ -79,5 +77,4 @@ func (c *client) UpdateGlobalService(id string, attributes console.GlobalService
 		return nil, fmt.Errorf("updated global service %s is nil", attributes.Name)
 	}
 	return result.UpdateGlobalService, nil
-
 }

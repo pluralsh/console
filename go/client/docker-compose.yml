@@ -1,0 +1,8 @@
+services:
+  client:
+    build:
+      context: ../..
+      dockerfile: go/build.Dockerfile
+      args:
+        MODULE_PATH: go/client
+    command: go build ./...

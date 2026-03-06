@@ -210,8 +210,7 @@ defmodule Console.Deployments.Agents do
     start_transaction()
     |> add_operation(:run, fn _ ->
       case get_agent_run!(run_id) do
-        %AgentRun{user_id: ^user_id} = run ->
-          {:ok, run}
+        %AgentRun{user_id: ^user_id} = run -> {:ok, run}
         _ -> {:error, "users can only cancel their own agent runs"}
       end
     end)

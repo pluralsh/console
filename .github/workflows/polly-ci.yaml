@@ -1,0 +1,46 @@
+name: CI / Polly
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/polly-ci.yaml"
+      - "go/polly/**"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/polly-ci.yaml"
+      - "go/polly/**"
+env:
+  GOPATH: /home/runner/go/
+  GOPROXY: "https://proxy.golang.org"
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/polly
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/go.work
+          check-latest: true
+      - run: PATH=$PATH:$GOPATH/bin make build
+  test:
+    name: Unit test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/polly
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/go.work
+          check-latest: true
+      - run: PATH=$PATH:$GOPATH/bin make test

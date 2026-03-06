@@ -1,0 +1,340 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.kascfg;
+
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/kascfg";
+
+import "google/protobuf/duration.proto";
+//import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";
+import "validate/validate.proto";
+
+// CF suffix stands for Configuration File, meaning a message
+// is part of ConfigurationFile.
+
+message ListenAgentCF {
+  // Network type to listen on. Supported values: tcp, tcp4, tcp6, unix.
+  optional string network = 1 [json_name = "network", (validate.rules).string = {in: ["tcp", "tcp4", "tcp6", "unix"]}];
+  // Address to listen on.
+  string address = 2 [json_name = "address"];
+  // Enable "gRPC through WebSocket" listening mode.
+  // Rather than expecting gRPC directly, expect a WebSocket
+  // connection, from which a gRPC stream is then unpacked.
+  bool websocket = 3 [json_name = "websocket"];
+  // X.509 certificate for TLS in PEM format.
+  // TLS is enabled iff both certificate_file and key_file are provided.
+  string certificate_file = 4 [json_name = "certificate_file"];
+  // X.509 key file for TLS in PEM format.
+  // TLS is enabled iff both certificate_file and key_file are provided.
+  string key_file = 5 [json_name = "key_file"];
+  // Maximum number of connections to allow per agent token per minute.
+  uint32 connections_per_token_per_minute = 6 [json_name = "connections_per_token_per_minute"];
+  // Max age of a connection. Connection is closed gracefully once it's
+  // too old and there is no streaming happening.
+  google.protobuf.Duration max_connection_age = 7 [json_name = "max_connection_age", (validate.rules).duration = {gt: {}}];
+  // How much time to wait before stopping accepting new connections on shutdown.
+  google.protobuf.Duration listen_grace_period = 8 [json_name = "listen_grace_period", (validate.rules).duration = {gt: {}}];
+}
+
+message PrometheusCF {
+  // Expected URL path for requests.
+  string url_path = 1 [json_name = "url_path"];
+}
+
+message ObservabilityListenCF {
+  // Network type to listen on. Supported values: tcp, tcp4, tcp6, unix.
+  optional string network = 1 [json_name = "network", (validate.rules).string = {in: ["tcp", "tcp4", "tcp6", "unix"]}];
+  // Address to listen on.
+  string address = 2 [json_name = "address"];
+  // X.509 certificate for TLS in PEM format.
+  // TLS is enabled iff both certificate_file and key_file are provided.
+  optional string certificate_file = 3 [json_name = "certificate_file", (validate.rules).string.min_bytes = 1];
+  // X.509 key file for TLS in PEM format.
+  // TLS is enabled iff both certificate_file and key_file are provided.
+  optional string key_file = 4 [json_name = "key_file", (validate.rules).string.min_bytes = 1];
+}
+
+message TracingCF {
+  reserved 1;
+  reserved "connection_string";
+
+  // URL to send traces to.
+  // Supported protocols are: http, https. Traces are protobuf encoded.
+  // Example: https://localhost:4317/traces/foo/bar
+  string otlp_endpoint = 2 [json_name = "otlp_endpoint", (validate.rules).string.min_bytes = 1];
+
+  // API token to set for authentication.
+  optional string otlp_token_secret_file = 3 [json_name = "otlp_token_secret_file", (validate.rules).string.min_bytes = 1];
+
+  // Custom CA certificate to use in order to verify the connection to OTLP collector
+  optional string otlp_ca_certificate_file = 4 [json_name = "otlp_ca_certificate_file", (validate.rules).string.min_bytes = 1];
+}
+
+enum log_level_enum {
+  info = 0; // default value must be 0
+  debug = 1;
+  warn = 2;
+  error = 3;
+}
+
+message LoggingCF {
+  log_level_enum level = 1 [json_name = "level"];
+  optional log_level_enum grpc_level = 2 [json_name = "grpc_level"]; // optional to be able to tell when not set and use a different default value.
+}
+
+message SentryCF {
+  // Sentry DSN https://docs.sentry.io/platforms/go/#configure
+  string dsn = 1 [json_name = "dsn"];
+  // Sentry environment
+  // https://docs.sentry.io/product/sentry-basics/environments/
+  string environment = 2 [json_name = "environment"];
+}
+
+message ListenKubernetesApiCF {
+  // Network type to listen on. Supported values: tcp, tcp4, tcp6, unix.
+  optional string network = 1 [json_name = "network", (validate.rules).string = {in: ["tcp", "tcp4", "tcp6", "unix"]}];
+  // Address to listen on.
+  string address = 2 [json_name = "address"];
+  // X.509 certificate for TLS in PEM format.
+  // TLS is enabled iff both certificate_file and key_file are provided.
+  string certificate_file = 3 [json_name = "certificate_file"];
+  // X.509 key file for TLS in PEM format.
+  // TLS is enabled iff both certificate_file and key_file are provided.
+  string key_file = 4 [json_name = "key_file"];
+  // How much time to wait before stopping accepting new connections on shutdown.
+  google.protobuf.Duration listen_grace_period = 5 [json_name = "listen_grace_period", (validate.rules).duration = {gt: {}}];
+  // How much time to wait before closing connections with in-flight requests.
+  google.protobuf.Duration shutdown_grace_period = 6 [json_name = "shutdown_grace_period", (validate.rules).duration = {gt: {}}];
+}
+
+message KubernetesApiCF {
+  // HTTP listener configuration for Kubernetes API connections.
+  ListenKubernetesApiCF listen = 1 [json_name = "listen"];
+  // URL path prefix to remove from the incoming request URL.
+  // Should be `/` if no prefix trimming is needed.
+  string url_path_prefix = 2 [json_name = "url_path_prefix"];
+  // TTL for successful allowed agent lookups.
+  // /api/v4/job/allowed_agents
+  // Set to zero to disable.
+  google.protobuf.Duration allowed_agent_cache_ttl = 3 [json_name = "allowed_agent_cache_ttl", (validate.rules).duration = {gte: {}}];
+  // TTL for failed allowed agent lookups.
+  // /api/v4/job/allowed_agents
+  google.protobuf.Duration allowed_agent_cache_error_ttl = 4 [json_name = "allowed_agent_cache_error_ttl", (validate.rules).duration = {gt: {}}];
+}
+
+message AgentCF {
+  // RPC listener configuration for agentk connections.
+  ListenAgentCF listen = 1 [json_name = "listen"];
+  // Configuration for agent's configuration repository.
+  AgentConfigurationCF configuration = 2 [json_name = "configuration"];
+  // TTL for successful agent info lookups.
+  // /api/v4/internal/kubernetes/agent_info
+  // Set to zero to disable.
+  google.protobuf.Duration info_cache_ttl = 4 [json_name = "info_cache_ttl", (validate.rules).duration = {gte: {}}];
+  // TTL for failed agent info lookups.
+  // /api/v4/internal/kubernetes/agent_info
+  google.protobuf.Duration info_cache_error_ttl = 5 [json_name = "info_cache_error_ttl", (validate.rules).duration = {gt: {}}];
+  // TTL for information about connected agents, stored in Redis.
+  google.protobuf.Duration redis_conn_info_ttl = 7 [json_name = "redis_conn_info_ttl"];
+  // Refresh period for information about connected agents, stored in Redis.
+  google.protobuf.Duration redis_conn_info_refresh = 8 [json_name = "redis_conn_info_refresh"];
+  // Garbage collection period for information about connected agents, stored in Redis.
+  // If gitlab-kas crashes, another gitlab-kas instance will clean up stale data. This is how often this cleanup runs.
+  google.protobuf.Duration redis_conn_info_gc = 9 [json_name = "redis_conn_info_gc"];
+  // Configuration for exposing Kubernetes API.
+  KubernetesApiCF kubernetes_api = 10 [json_name = "kubernetes_api"];
+}
+
+message AgentConfigurationCF {
+  // How often to poll agent's configuration repository for changes.
+  google.protobuf.Duration poll_period = 1 [json_name = "poll_period", (validate.rules).duration = {gt: {}}];
+  // Maximum file size of the agent configuration file.
+  uint32 max_configuration_file_size = 2 [json_name = "max_configuration_file_size"];
+}
+
+message GoogleProfilerCF {
+  bool enabled = 1 [json_name = "enabled"];
+  string project_id = 2 [json_name = "project_id"];
+  string credentials_file = 3 [json_name = "credentials_file"];
+  bool debug_logging = 4 [json_name = "debug_logging"];
+}
+
+message LivenessProbeCF {
+  // Expected URL path for requests.
+  string url_path = 1 [json_name = "url_path"];
+}
+
+message ReadinessProbeCF {
+  // Expected URL path for requests.
+  string url_path = 1 [json_name = "url_path"];
+}
+
+message ObservabilityCF {
+  // How often to send usage metrics to the main application.
+  // /api/v4/internal/kubernetes/usage_ping
+  // Set to zero to disable.
+  google.protobuf.Duration usage_reporting_period = 1 [json_name = "usage_reporting_period", (validate.rules).duration = {gte: {}}];
+  // Listener configuration for HTTP endpoint that exposes Prometheus,
+  // pprof, liveness and readiness probes.
+  ObservabilityListenCF listen = 2 [json_name = "listen"];
+  PrometheusCF prometheus = 3 [json_name = "prometheus"];
+  TracingCF tracing = 4 [json_name = "tracing"];
+  SentryCF sentry = 5 [json_name = "sentry"];
+  LoggingCF logging = 6 [json_name = "logging"];
+  // Configuration for the Google Cloud Profiler.
+  // See https://pkg.go.dev/cloud.google.com/go/profiler.
+  GoogleProfilerCF google_profiler = 7 [json_name = "google_profiler"];
+  LivenessProbeCF liveness_probe = 8 [json_name = "liveness_probe"];
+  ReadinessProbeCF readiness_probe = 9 [json_name = "readiness_probe"];
+}
+
+// See https://pkg.go.dev/golang.org/x/time/rate#Limiter.
+message TokenBucketRateLimitCF {
+  // Number of events per second. A zero allows no events.
+  // How fast the "token bucket" is refilled.
+  double refill_rate_per_second = 1 [json_name = "refill_rate_per_second", (validate.rules).double.gte = 0];
+  // Maximum number of events that are allowed to happen in succession.
+  // Size of the "token bucket".
+  uint32 bucket_size = 2 [json_name = "bucket_size"];
+}
+
+message RedisCF {
+  oneof redis_config {
+    option (validate.required) = true;
+
+    // Single-server Redis.
+    RedisServerCF server = 1 [json_name = "server", (validate.rules).message.required = true];
+    // Redis with Sentinel setup. See http://redis.io/topics/sentinel.
+    RedisSentinelCF sentinel = 2 [json_name = "sentinel", (validate.rules).message.required = true];
+  }
+  // The max number of connections.
+  // DEPRECATED, unused.
+  uint32 pool_size = 4 [json_name = "pool_size"];
+  // Dial timeout.
+  google.protobuf.Duration dial_timeout = 5 [json_name = "dial_timeout", (validate.rules).duration = {gt: {}}];
+  // Read timeout.
+  // DEPRECATED, unused.
+  google.protobuf.Duration read_timeout = 6 [json_name = "read_timeout", (validate.rules).duration = {gt: {}}];
+  // Write timeout.
+  google.protobuf.Duration write_timeout = 7 [json_name = "write_timeout", (validate.rules).duration = {gt: {}}];
+  // How long to keep TCP connections alive before closing.
+  // DEPRECATED, unused.
+  google.protobuf.Duration idle_timeout = 8 [json_name = "idle_timeout", (validate.rules).duration = {gt: {}}];
+  // Key prefix for everything gitlab-kas stores in Redis.
+  string key_prefix = 9 [json_name = "key_prefix"];
+  // Use the specified Username to authenticate the current connection
+  // with one of the connections defined in the ACL list when connecting
+  // to a Redis 6.0 instance, or greater, that is using the Redis ACL system.
+  string username = 10 [json_name = "username"];
+  // Optional password. Must match the password specified in the
+  // requirepass server configuration option (if connecting to a Redis 5.0 instance, or lower),
+  // or the User Password when connecting to a Redis 6.0 instance, or greater,
+  // that is using the Redis ACL system.
+  string password_file = 11 [json_name = "password_file"];
+  // The network type, either tcp or unix.
+  // Default is tcp.
+  string network = 12 [json_name = "network", (validate.rules).string = {in: "", in: "tcp", in: "unix"}];
+
+  RedisTLSCF tls = 13 [json_name = "tls"];
+  // The logical zero-based numeric database index.
+  int32 database_index = 14 [json_name = "database_index", (validate.rules).int32.gte = 0];
+}
+
+message RedisTLSCF {
+  // If true, uses TLS for the redis connection (only available if network is "tcp")
+  bool enabled = 1 [json_name = "enabled"];
+  // For mutual TLS, specify both certificate_file and key_file; otherwise, specify neither
+  // Optional custom X.509 certificate file for TLS in PEM format
+  string certificate_file = 2 [json_name = "certificate_file"];
+  // Optional custom X.509 key file for TLS in PEM format
+  string key_file = 3 [json_name = "key_file"];
+  // Optional custom X.509 root CA file in PEM format, used to validate
+  // the Redis server's certificate (e.g. if the server has a self-signed certificate)
+  string ca_certificate_file = 4 [json_name = "ca_certificate_file"];
+}
+
+message RedisServerCF {
+  // The host:port address of the node.
+  string address = 1 [json_name = "address", (validate.rules).string.min_bytes = 1];
+}
+
+message RedisSentinelCF {
+  // The name of the sentinel master.
+  string master_name = 1 [json_name = "master_name", (validate.rules).string.min_bytes = 1];
+  // The host:port addresses of the sentinels.
+  repeated string addresses = 2 [json_name = "addresses", (validate.rules).repeated.min_items = 1, (validate.rules).repeated.items.string.min_bytes = 1];
+  // Sentinel password from "requirepass <password>" (if enabled) in Sentinel configuration
+  string sentinel_password_file = 3 [json_name = "sentinel_password_file"];
+}
+
+message ListenApiCF {
+  // Network type to listen on. Supported values: tcp, tcp4, tcp6, unix.
+  optional string network = 1 [json_name = "network", (validate.rules).string = {in: ["tcp", "tcp4", "tcp6", "unix"]}];
+  // Address to listen on.
+  string address = 2 [json_name = "address"];
+  // Secret to verify JWT tokens.
+  string authentication_secret_file = 3 [json_name = "authentication_secret_file", (validate.rules).string.min_bytes = 1];
+  // X.509 certificate for TLS in PEM format.
+  // TLS is enabled iff both certificate_file and key_file are provided.
+  string certificate_file = 4 [json_name = "certificate_file"];
+  // X.509 key file for TLS in PEM format.
+  // TLS is enabled iff both certificate_file and key_file are provided.
+  string key_file = 5 [json_name = "key_file"];
+  // Max age of a connection. Connection is closed gracefully once it's
+  // too old and there is no streaming happening.
+  google.protobuf.Duration max_connection_age = 6 [json_name = "max_connection_age", (validate.rules).duration = {gt: {}}];
+  // How much time to wait before stopping accepting new connections on shutdown.
+  google.protobuf.Duration listen_grace_period = 7 [json_name = "listen_grace_period", (validate.rules).duration = {gt: {}}];
+}
+
+message ListenPrivateApiCF {
+  // Network type to listen on. Supported values: tcp, tcp4, tcp6, unix.
+  optional string network = 1 [json_name = "network", (validate.rules).string = {in: ["tcp", "tcp4", "tcp6", "unix"]}];
+  // Address to listen on.
+  string address = 2 [json_name = "address"];
+  // Secret to verify JWT tokens.
+  string authentication_secret_file = 3 [json_name = "authentication_secret_file", (validate.rules).string.min_bytes = 1];
+  // X.509 certificate for TLS in PEM format.
+  // TLS is enabled iff both certificate_file and key_file are provided.
+  string certificate_file = 4 [json_name = "certificate_file"];
+  // X.509 key file for TLS in PEM format.
+  // TLS is enabled iff both certificate_file and key_file are provided.
+  string key_file = 5 [json_name = "key_file"];
+  // Max age of a connection. Connection is closed gracefully once it's
+  // too old and there is no streaming happening.
+  google.protobuf.Duration max_connection_age = 6 [json_name = "max_connection_age", (validate.rules).duration = {gt: {}}];
+  // Optional X.509 CA certificate for TLS in PEM format.
+  // Should be set for self-signed certificates.
+  string ca_certificate_file = 7 [json_name = "ca_certificate_file"];
+  // How much time to wait before stopping accepting new connections on shutdown.
+  google.protobuf.Duration listen_grace_period = 8 [json_name = "listen_grace_period", (validate.rules).duration = {gt: {}}];
+}
+
+message ApiCF {
+  // RPC listener configuration for API connections.
+  ListenApiCF listen = 1 [json_name = "listen", (validate.rules).message.required = true];
+}
+
+message PrivateApiCF {
+  // RPC listener configuration for API connections.
+  ListenPrivateApiCF listen = 1 [json_name = "listen", (validate.rules).message.required = true];
+}
+
+// ConfigurationFile represents kas configuration file.
+message ConfigurationFile {
+  // Configuration related to the agent. Generally all configuration for
+  // user-facing features should be here.
+  AgentCF agent = 1 [json_name = "agent"];
+  // Configuration related to all things observability: metrics, tracing,
+  // monitoring, logging, usage metrics, profiling.
+  ObservabilityCF observability = 2 [json_name = "observability"];
+  // Redis configurations available to kas.
+  RedisCF redis = 3 [json_name = "redis", (validate.rules).message.required = true];
+  // Public API.
+  ApiCF api = 4 [json_name = "api", (validate.rules).message.required = true];
+  // Private API for kas->kas communication.
+  PrivateApiCF private_api = 5 [json_name = "private_api", (validate.rules).message.required = true];
+  // Plural URL address
+  string plural_url = 6 [json_name = "plural_url"];
+}

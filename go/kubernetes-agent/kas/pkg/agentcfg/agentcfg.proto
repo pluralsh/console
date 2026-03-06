@@ -1,0 +1,283 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.agentcfg;
+
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/agentcfg";
+
+//import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";
+import "validate/validate.proto";
+import "google/protobuf/duration.proto";
+
+// CF suffix stands for Configuration File, meaning a message is
+// part of ConfigurationFile.
+
+message PathCF {
+  // Glob to use to scan for files in the repository.
+  // Directories with names starting with a dot are ignored.
+  // See https://github.com/bmatcuk/doublestar#about and
+  // https://pkg.go.dev/github.com/bmatcuk/doublestar/v2#Match for
+  // globbing rules.
+  string glob = 1 [json_name = "glob", (validate.rules).string.min_bytes = 1];
+}
+
+// Project with Kubernetes object manifests.
+message ManifestProjectCF {
+  // Project id.
+  // e.g. gitlab-org/cluster-integration/gitlab-agent
+  optional string id = 1 [json_name = "id", (validate.rules).string.min_bytes = 1];
+  reserved 2, 3;
+  // Namespace to use if not set explicitly in object manifest.
+  string default_namespace = 4 [json_name = "default_namespace"];
+  // A list of paths inside of the project to scan for
+  // .yaml/.yml/.json manifest files.
+  repeated PathCF paths = 5 [json_name = "paths"];
+  // Reconcile timeout defines whether the applier should wait
+  // until all applied resources have been reconciled, and if so,
+  // how long to wait.
+  google.protobuf.Duration reconcile_timeout = 6 [json_name = "reconcile_timeout"];
+  // Dry run strategy defines whether changes should actually be performed,
+  // or if it is just talk and no action.
+  // https://github.com/kubernetes-sigs/cli-utils/blob/d6968048dcd80b1c7b55d9e4f31fc25f71c9b490/pkg/common/common.go#L68-L89
+  string dry_run_strategy = 7 [json_name = "dry_run_strategy", (validate.rules).string = {in: ["", "none", "client", "server"]}];
+  // TODO drop oneof and make prune field optional when https://github.com/envoyproxy/protoc-gen-validate/issues/431 is resolved.
+  oneof prune_oneof {
+    // Prune defines whether pruning of previously applied
+    // objects should happen after apply.
+    bool prune = 8 [json_name = "prune"];
+  }
+  // Prune timeout defines whether we should wait for all resources
+  // to be fully deleted after pruning, and if so, how long we should
+  // wait.
+  google.protobuf.Duration prune_timeout = 9 [json_name = "prune_timeout"];
+  // Prune propagation policy defines the deletion propagation policy
+  // that should be used for pruning.
+  // https://github.com/kubernetes/apimachinery/blob/44113beed5d39f1b261a12ec398a356e02358307/pkg/apis/meta/v1/types.go#L456-L470
+  string prune_propagation_policy = 10 [json_name = "prune_propagation_policy", (validate.rules).string = {in: ["", "orphan", "background", "foreground"]}];
+  // InventoryPolicy defines if an inventory object can take over
+  // objects that belong to another inventory object or don't
+  // belong to any inventory object.
+  // This is done by determining if the apply/prune operation
+  // can go through for a resource based on the comparison
+  // the inventory-id value in the package and the owning-inventory
+  // annotation in the live object.
+  // https://github.com/kubernetes-sigs/cli-utils/blob/d6968048dcd80b1c7b55d9e4f31fc25f71c9b490/pkg/inventory/policy.go#L12-L66
+  string inventory_policy = 11 [json_name = "inventory_policy", (validate.rules).string = {in: ["", "must_match", "adopt_if_no_inventory", "adopt_all"]}];
+  // Ref in the GitOps repository to fetch manifests from.
+  GitRefCF ref = 12 [json_name = "ref"];
+}
+
+// GitRef in the repository to fetch manifests from.
+message GitRefCF {
+  oneof ref {
+    option (validate.required) = true;
+
+    // A Git tag name, without `refs/tags/`
+    string tag = 1 [json_name = "tag", (validate.rules).string.min_bytes = 1];
+    // A Git branch name, without `refs/heads/`
+    string branch = 2 [json_name = "branch", (validate.rules).string.min_bytes = 1];
+    // A Git commit SHA
+    string commit = 3 [json_name = "commit", (validate.rules).string.min_bytes = 1];
+  }
+}
+
+message GitopsCF {
+  reserved 2;
+  reserved "charts";
+  repeated ManifestProjectCF manifest_projects = 1 [json_name = "manifest_projects"];
+}
+
+message ObservabilityCF {
+  LoggingCF logging = 1 [json_name = "logging"];
+  GoogleProfilerCF google_profiler = 2 [json_name = "google_profiler"];
+}
+
+enum log_level_enum {
+  info = 0; // default value must be 0
+  debug = 1;
+  warn = 2;
+  error = 3;
+}
+
+message LoggingCF {
+  log_level_enum level = 1 [json_name = "level"];
+  optional log_level_enum grpc_level = 2 [json_name = "grpc_level"]; // optional to be able to tell when not set and use a different default value.
+}
+
+message GoogleProfilerCF {
+  bool enabled = 1 [json_name = "enabled"];
+  string project_id = 2 [json_name = "project_id"];
+  string credentials_file = 3 [json_name = "credentials_file"];
+  bool debug_logging = 4 [json_name = "debug_logging"];
+}
+
+
+// https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/kubernetes_ci_access.md
+message CiAccessCF {
+  repeated CiAccessProjectCF projects = 1 [json_name = "projects"];
+  repeated CiAccessGroupCF groups = 2 [json_name = "groups"];
+}
+
+message CiAccessProjectCF {
+  string id = 1 [json_name = "id", (validate.rules).string.min_bytes = 1];
+  string default_namespace = 2 [json_name = "default_namespace"];
+  CiAccessAsCF access_as = 3  [json_name = "access_as"];
+  repeated string environments = 4 [json_name = "environments", (validate.rules).repeated.items.string.min_bytes = 1];
+}
+
+message CiAccessGroupCF {
+  string id = 1 [json_name = "id", (validate.rules).string.min_bytes = 1];
+  string default_namespace = 2 [json_name = "default_namespace"];
+  CiAccessAsCF access_as = 3  [json_name = "access_as"];
+  repeated string environments = 4 [json_name = "environments", (validate.rules).repeated.items.string.min_bytes = 1];
+}
+
+message CiAccessAsCF {
+  oneof as {
+    option (validate.required) = true;
+
+    CiAccessAsAgentCF agent = 1 [json_name = "agent", (validate.rules).message.required = true];
+    CiAccessAsImpersonateCF impersonate = 2 [json_name = "impersonate", (validate.rules).message.required = true];
+    CiAccessAsCiJobCF ci_job = 3 [json_name = "ci_job", (validate.rules).message.required = true];
+    //    CiAccessAsCiUserCF ci_user = 4 [json_name = "ci_user", (validate.rules).message.required = true];
+  }
+}
+
+message CiAccessAsAgentCF {
+}
+
+message CiAccessAsCiJobCF {
+}
+
+//message CiAccessAsCiUserCF {
+//}
+
+message CiAccessAsImpersonateCF {
+  string username = 1 [json_name = "username", (validate.rules).string.min_bytes = 1];
+  repeated string groups = 2 [json_name = "groups", (validate.rules).repeated.items.string.min_bytes = 1];
+  string uid = 3 [json_name = "uid"];
+  repeated ExtraKeyValCF extra = 4 [json_name = "extra"];
+}
+
+message ExtraKeyValCF {
+  string key = 1 [json_name = "key", (validate.rules).string.min_bytes = 1];
+  // Empty elements are allowed by Kubernetes.
+  repeated string val = 2 [json_name = "val", (validate.rules).repeated.min_items = 1, (validate.rules).repeated.items.string.min_bytes = 1];
+}
+
+// https://gitlab.com/gitlab-org/cluster-integration/gitlab-agent/-/blob/master/doc/kubernetes_user_access.md
+message UserAccessCF {
+  UserAccessAsCF access_as = 1  [json_name = "access_as"];
+  repeated UserAccessProjectCF projects = 2 [json_name = "projects"];
+  repeated UserAccessGroupCF groups = 3 [json_name = "groups"];
+}
+
+message UserAccessProjectCF {
+  string id = 1 [json_name = "id", (validate.rules).string.min_bytes = 1];
+}
+
+message UserAccessGroupCF {
+  string id = 1 [json_name = "id", (validate.rules).string.min_bytes = 1];
+}
+
+message UserAccessAsCF {
+  oneof as {
+    option (validate.required) = true;
+
+    UserAccessAsAgentCF agent = 1 [json_name = "agent", (validate.rules).message.required = true];
+    UserAccessAsUserCF user = 3 [json_name = "user", (validate.rules).message.required = true];
+  }
+}
+
+message UserAccessAsAgentCF {
+}
+
+message UserAccessAsUserCF {
+}
+
+message ContainerScanningCF {
+  VulnerabilityReport vulnerability_report = 1 [json_name = "vulnerability_report"];
+  string cadence = 2 [json_name = "cadence", (validate.rules).string.min_bytes = 1];
+  ResourceRequirements resource_requirements = 3 [json_name = "resource_requirements"];
+}
+
+message VulnerabilityReport {
+  repeated string namespaces = 1 [json_name = "namespaces"];
+  repeated ContainerScanningFilter filters = 2 [json_name = "filters"];
+}
+
+message ContainerScanningFilter {
+  repeated string namespaces = 1 [json_name = "namespaces"];
+  repeated string resources = 2 [json_name = "resources"];
+  repeated string containers = 3 [json_name = "containers"];
+  repeated string kinds = 4 [json_name = "kinds"];
+}
+
+message ResourceRequirements {
+  Resource limits = 1 [json_name = "limits"];
+  Resource requests = 2 [json_name = "requests"];
+}
+
+message Resource {
+  string cpu = 1 [json_name = "cpu"];
+  string memory = 2 [json_name = "memory"];
+}
+
+// ConfigurationFile represents user-facing configuration file.
+message ConfigurationFile {
+  GitopsCF gitops = 1 [json_name = "gitops"];
+  // Configuration related to all things observability. This is about the
+  // agent itself, not any observability-related features.
+  ObservabilityCF observability = 2 [json_name = "observability"];
+  reserved 3;
+  CiAccessCF ci_access = 4 [json_name = "ci_access"];
+  ContainerScanningCF container_scanning = 5 [json_name = "container_scanning"];
+  UserAccessCF user_access = 6 [json_name = "user_access"];
+  RemoteDevelopmentCF remote_development = 7 [json_name = "remote_development"];
+  FluxCF flux = 8 [json_name = "flux"];
+}
+
+// AgentConfiguration represents configuration for agentk.
+// Note that agentk configuration is not exactly the whole file as the file
+// may contain bits that are not relevant for the agent. For example, some
+// additional config for kas.
+message AgentConfiguration {
+  GitopsCF gitops = 1;
+  ObservabilityCF observability = 2;
+  reserved 3;
+  // GitLab-wide unique id of the agent.
+  int64 agent_id = 4;
+  // Id of the configuration project.
+  int64 project_id = 5;
+  CiAccessCF ci_access = 6;
+  ContainerScanningCF container_scanning = 7;
+  // Path of the configuration project
+  string project_path = 8;
+  RemoteDevelopmentCF remote_development = 9;
+  FluxCF flux = 10;
+  string gitlab_external_url = 11;
+}
+
+// GitLabWorkspacesProxy represents the gitlab workspaces proxy configuration for the remote development module
+message GitLabWorkspacesProxy {
+  string namespace = 1 [json_name = "namespace"];
+}
+
+// WorkspaceNetworkPolicy represents the firewall configuration for the remote development workspaces
+message WorkspaceNetworkPolicy {
+  optional bool enabled = 1 [json_name = "enabled"];
+}
+
+message RemoteDevelopmentCF {
+  bool enabled = 1 [json_name = "enabled"];
+  string dns_zone = 2 [json_name = "dns_zone"];
+  google.protobuf.Duration partial_sync_interval = 3 [json_name = "partial_sync_interval", (validate.rules).duration = {gt: {}}];
+  google.protobuf.Duration full_sync_interval = 4 [json_name = "full_sync_interval", (validate.rules).duration = {gt: {}}];
+  GitLabWorkspacesProxy gitlab_workspaces_proxy = 5 [json_name = "gitlab_workspaces_proxy"];
+  WorkspaceNetworkPolicy network_policy = 6 [json_name = "network_policy"];
+}
+
+message FluxCF {
+  string webhook_receiver_url = 1 [json_name = "webhook_receiver_url"];
+}

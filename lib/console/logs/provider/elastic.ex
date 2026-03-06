@@ -25,6 +25,19 @@ defmodule Console.Logs.Provider.Elastic do
     end
   end
 
+  @spec labels(t(), Query.t) :: {:ok, [map()]} | Console.error
+  def labels(%__MODULE__{connection: connection}, %Query{field: field} = q) do
+    build_query(q)
+    |> Map.put(:size, 0)
+    |> Map.delete(:sort)
+    |> Map.put(:aggs, %{"facet_values" => %{terms: %{field: "#{field}.keyword", size: 100}}})
+    |> then(&search(connection, &1))
+    |> case do
+      {:ok, response} -> {:ok, format_labels_response(response)}
+      {:error, err} -> {:error, "failed to query elasticsearch labels: #{inspect(err)}"}
+    end
+  end
+
   @spec aggregate(t(), Query.t) :: {:ok, [AggregationBucket.t()]} | Console.error
   def aggregate(%__MODULE__{connection: connection}, %Query{} = q) do
     case search(connection, build_aggregation_query(q)) do
@@ -68,6 +81,11 @@ defmodule Console.Logs.Provider.Elastic do
     end)
   end
   defp format_aggregation_response(_), do: []
+
+  defp format_labels_response(%Snap.SearchResponse{aggregations: %{"facet_values" => %Snap.Aggregation{buckets: buckets}}}) do
+    Enum.map(buckets, fn bucket -> %{label: bucket["key"], count: bucket["doc_count"]} end)
+  end
+  defp format_labels_response(_), do: []
 
   defp parse_bucket_timestamp(timestamp) when is_integer(timestamp) do
     DateTime.from_unix!(timestamp, :millisecond)

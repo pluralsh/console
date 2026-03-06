@@ -2,7 +2,7 @@ package vertex
 
 import (
 	ollamaapi "github.com/ollama/ollama/api"
-	"github.com/pluralsh/polly/algorithms"
+	"github.com/pluralsh/console/go/polly/algorithms"
 )
 
 type Endpoint string

@@ -80,13 +80,14 @@ defmodule Console.Deployments.Observability do
   """
   @spec upsert_webhook(map, User.t) :: webhook_resp
   def upsert_webhook(%{name: name} = attrs, %User{} = user) do
-    case get_webhook_by_name(name) do
-      %ObservabilityWebhook{} = prov -> prov
-      nil -> %ObservabilityWebhook{}
-    end
+    existing = get_webhook_by_name(name)
+    action = if existing, do: :update, else: :create
+
+    (existing || %ObservabilityWebhook{})
     |> ObservabilityWebhook.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(&Repo.insert_or_update/1)
+    |> notify(action)
   end
 
   @doc """
@@ -107,7 +108,18 @@ defmodule Console.Deployments.Observability do
     get_webhook!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
+    |> notify(:delete)
   end
+
+  defp notify({:ok, %ObservabilityWebhook{} = webhook}, :create),
+    do: handle_notify(PubSub.ObservabilityWebhookCreated, webhook)
+  defp notify({:ok, %ObservabilityWebhook{} = webhook}, :update),
+    do: handle_notify(PubSub.ObservabilityWebhookUpdated, webhook)
+  defp notify({:ok, %ObservabilityWebhook{} = webhook}, :delete),
+    do: handle_notify(PubSub.ObservabilityWebhookDeleted, webhook)
+  defp notify({:ok, %AlertResolution{} = res}, :create),
+    do: handle_notify(PubSub.AlertResolutionCreated, res)
+  defp notify(pass, _), do: pass
 
   @doc """
   Determines if an individual alert is accessible from a user to perform the given action
@@ -229,8 +241,10 @@ defmodule Console.Deployments.Observability do
     end
   end
 
+  defp component_args(%ServiceComponent{group: "apps", version: "v1", kind: "DaemonSet", name: name, namespace: ns} = comp),
+    do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[a-z0-9]+"]}
   defp component_args(%ServiceComponent{group: "apps", version: "v1", kind: "Deployment", name: name, namespace: ns} = comp),
-    do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[a-z0-9]+-[a-z0-9]+"]}
+    do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[a-z0-9]+-?[a-z0-9]+"]}
   defp component_args(%ServiceComponent{group: "apps", version: "v1", kind: "StatefulSet", name: name, namespace: ns} = comp),
     do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[0-9]+"]}
   defp component_args(%ServiceComponent{group: g, kind: k}), do: {:error, "unsupported component kind #{g}/#{k}"}
@@ -285,8 +299,4 @@ defmodule Console.Deployments.Observability do
   defp find(%DeploymentSettings{loki_connection: loki}, :loki), do: loki
   defp find(%DeploymentSettings{prometheus_connection: prometheus}, :prometheus), do: prometheus
   defp find(_, _), do: nil
-
-  defp notify({:ok, %AlertResolution{} = res}, :create),
-    do: handle_notify(PubSub.AlertResolutionCreated, res)
-  defp notify(pass, _), do: pass
 end

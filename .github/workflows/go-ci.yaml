@@ -1,0 +1,44 @@
+name: CI / Go
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/go-ci.yaml"
+      - "go/**"
+      - "schema/**"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/go-ci.yaml"
+      - "go/**"
+      - "schema/**"
+permissions:
+  contents: read
+env:
+  GOPATH: /home/runner/go/
+  GOPROXY: "https://proxy.golang.org"
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go/go.work
+          check-latest: true
+      - id: lint-packages
+        run: |
+          packages=$(make --no-print-directory lint-packages)
+          echo "packages=$packages" >> "$GITHUB_OUTPUT"
+      - uses: golangci/golangci-lint-action@v8
+        with:
+          working-directory: go
+          version: latest
+          args: -c .golangci.yml ${{ steps.lint-packages.outputs.packages }}

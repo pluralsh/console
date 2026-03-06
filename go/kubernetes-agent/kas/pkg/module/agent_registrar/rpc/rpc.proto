@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.agent_registrar.rpc;
+
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_registrar/rpc";
+
+import "pkg/entity/entity.proto";
+
+message RegisterRequest {
+  entity.AgentMeta agent_meta = 1;
+  // Uniquely identifies a particular agentk pods.
+  // Randomly generated when an agentk pod starts working.
+  int64 pod_id = 2;
+}
+
+message RegisterResponse {
+}
+
+service AgentRegistrar {
+  // Register a new agent.
+  rpc Register (RegisterRequest) returns (RegisterResponse) {
+  }
+}

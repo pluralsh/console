@@ -182,4 +182,7 @@ config :sentry,
   root_source_code_paths: [File.cwd!()],
   tags: %{"plrl.flow": "console"}
 
+config :kazan, :httpoison_options,
+  hackney: [pool: :kazan_pool]
+
 import_config "#{Mix.env()}.exs"

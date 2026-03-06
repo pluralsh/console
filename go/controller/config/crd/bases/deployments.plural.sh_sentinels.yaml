@@ -9990,6 +9990,16 @@ spec:
                                   type: string
                               type: object
                               x-kubernetes-map-type: atomic
+                            rerunFailures:
+                              description: RerunFailures when true, failed tests will
+                                be rerun (e.g. to reduce flakiness). Defaults to false.
+                              type: boolean
+                            rerunFailuresCount:
+                              description: RerunFailuresCount is the number of times
+                                to rerun failed tests when RerunFailures is true.
+                                Defaults to 2.
+                              format: int64
+                              type: integer
                             tags:
                               additionalProperties:
                                 type: string

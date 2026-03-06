@@ -11,7 +11,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     Alert,
     PreviewEnvironmentTemplate,
     PreviewEnvironmentInstance,
-    VulnerabilityReport
+    VulnerabilityReport,
+    Issue
   }
 
   def list_flows(args, %{context: %{current_user: user}}) do
@@ -74,6 +75,20 @@ defmodule Console.GraphQl.Resolvers.Deployments.Flow do
     VulnerabilityReport.for_flow(flow.id)
     |> VulnerabilityReport.ordered()
     |> paginate(args)
+  end
+
+  def issues_for_flow(%{id: id}, args, _) do
+    Issue.for_flow(id)
+    |> issue_filters(args)
+    |> Issue.ordered()
+    |> paginate(args)
+  end
+
+  defp issue_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:status, s}, q when not is_nil(s) -> Issue.for_status(q, s)
+      _, q -> q
+    end)
   end
 
   def resolve_flow(%{id: id}, %{context: %{current_user: user}}) when is_binary(id),

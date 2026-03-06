@@ -29,7 +29,7 @@ func signBody(secret, body []byte) string {
 func sendWebhookRequest(url string, secret []byte, body []byte) ([]byte, error) {
 	signature := signBody(secret, body)
 
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
 	}

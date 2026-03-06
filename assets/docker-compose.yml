@@ -1,0 +1,12 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /app/assets
+    ports:
+      - "3000:3000"
+    environment:
+      BASE_URL: ${BASE_URL:-console.plrldemo.onplural.sh}
+      VITE_PROD_SECRET_KEY: ${VITE_PROD_SECRET_KEY:-1234567890}
+    command: sh -c "yarn build && yarn vite preview --host 0.0.0.0 --port 3000"

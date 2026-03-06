@@ -1,6 +1,7 @@
 defmodule Console.Deployments.ObservabilityTest do
   use Console.DataCase, async: true
   alias Console.Deployments.{Observability, Observability.Webhook}
+  alias Console.PubSub
   alias Console.Schema.WorkbenchWebhook
 
   describe "#upsert_provider/2" do
@@ -69,6 +70,7 @@ defmodule Console.Deployments.ObservabilityTest do
       assert webhook.name == "webhook"
       assert webhook.external_id
       assert webhook.secret
+      assert_receive {:event, %PubSub.ObservabilityWebhookCreated{item: ^webhook}}
     end
 
     test "it can update an existing obs webhook" do
@@ -83,6 +85,7 @@ defmodule Console.Deployments.ObservabilityTest do
       assert webhook.type == :grafana
       assert webhook.name == existing.name
       assert webhook.secret == "some secret"
+      assert_receive {:event, %PubSub.ObservabilityWebhookUpdated{item: ^webhook}}
     end
 
     test "nonadmins cannot upsert" do
@@ -137,6 +140,7 @@ defmodule Console.Deployments.ObservabilityTest do
 
       assert webhook.id == deleted.id
       refute refetch(deleted)
+      assert_receive {:event, %PubSub.ObservabilityWebhookDeleted{item: ^deleted}}
     end
 
     test "nonadmins cannot delete" do

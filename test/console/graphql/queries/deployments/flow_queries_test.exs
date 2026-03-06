@@ -146,6 +146,50 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
              |> ids_equal(prs)
     end
 
+    test "it can fetch issues within a flow" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      issues = insert_list(3, :issue, flow: flow)
+      insert_list(3, :issue)
+
+      {:ok, %{data: %{"flow" => found}}} = run_query("""
+        query flow($id: ID!) {
+          flow(id: $id) {
+            id
+            issues(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => flow.id}, %{current_user: user})
+
+      assert found["id"] == flow.id
+      assert from_connection(found["issues"])
+             |> ids_equal(issues)
+    end
+
+    test "it can filter issues by status within a flow" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      open_issues = insert_list(2, :issue, flow: flow, status: :open)
+      insert_list(2, :issue, flow: flow, status: :completed)
+
+      {:ok, %{data: %{"flow" => found}}} = run_query("""
+        query flow($id: ID!, $status: IssueStatus) {
+          flow(id: $id) {
+            id
+            issues(first: 5, status: $status) {
+              edges { node { id status } }
+            }
+          }
+        }
+      """, %{"id" => flow.id, "status" => "OPEN"}, %{current_user: user})
+
+      assert found["id"] == flow.id
+      assert from_connection(found["issues"])
+             |> ids_equal(open_issues)
+    end
+
     test "it can fetch vulnerability reports within a flow" do
       user = insert(:user)
       flow = insert(:flow, read_bindings: [%{user_id: user.id}])
@@ -214,6 +258,27 @@ defmodule Console.GraphQl.Deployments.FlowQueriesTest do
       assert found["id"] == flow.id
       assert from_connection(found["previewEnvironmentInstances"])
              |> ids_equal(instances)
+    end
+
+    test "it can fetch workbenches within a flow" do
+      user = insert(:user)
+      flow = insert(:flow, read_bindings: [%{user_id: user.id}])
+      workbenches = insert_list(3, :workbench)
+      for wb <- workbenches, do: insert(:flow_workbench, flow: flow, workbench: wb)
+      insert_list(2, :workbench)
+
+      {:ok, %{data: %{"flow" => found}}} = run_query("""
+        query flow($id: ID!) {
+          flow(id: $id) {
+            id
+            workbenches { id name }
+          }
+        }
+      """, %{"id" => flow.id}, %{current_user: user})
+
+      assert found["id"] == flow.id
+      assert length(found["workbenches"]) == 3
+      assert ids_equal(found["workbenches"], workbenches)
     end
   end
 

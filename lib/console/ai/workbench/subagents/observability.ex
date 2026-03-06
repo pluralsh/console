@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
   alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill}
-  alias Console.AI.Tools.Workbench.Observability.{Metrics, Logs, Traces}
+  alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces}
   alias Console.AI.Workbench.Environment
 
   require EEx
@@ -47,16 +47,15 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     end)
     |> Enum.flat_map(fn
       %WorkbenchTool{categories: categories} = tool when is_list(categories) ->
-        Enum.map(categories, fn c -> to_tool(tool, c) end)
+        Enum.flat_map(categories, fn c -> to_tool(tool, c) end)
       _ -> []
     end)
-    |> Enum.filter(& &1)
   end
 
-  defp to_tool(%WorkbenchTool{} = tool, :metrics), do: %Metrics{tool: tool}
-  defp to_tool(%WorkbenchTool{} = tool, :logs), do: %Logs{tool: tool}
-  defp to_tool(%WorkbenchTool{} = tool, :traces), do: %Traces{tool: tool}
-  defp to_tool(_, _), do: nil
+  defp to_tool(%WorkbenchTool{} = tool, :metrics), do: [%Metrics{tool: tool}, %MetricsSearch{tool: tool}]
+  defp to_tool(%WorkbenchTool{} = tool, :logs), do: [%Logs{tool: tool}]
+  defp to_tool(%WorkbenchTool{} = tool, :traces), do: [%Traces{tool: tool}]
+  defp to_tool(_, _), do: []
 
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "observability.md.eex"]), [:assigns])
 end

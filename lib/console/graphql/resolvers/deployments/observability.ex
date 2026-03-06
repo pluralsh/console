@@ -60,6 +60,24 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
 
   def noisy_neighbors(%Cluster{} = cluster, _args, _), do: Observability.noisy_neighbors(cluster)
 
+  def kubernetes_metrics(
+    %Cluster{} = cluster,
+    %{group: group, version: version, kind: kind, name: name, namespace: namespace} = args,
+    %{context: %{current_user: user}}
+  ) do
+    kind = Console.GraphQl.Resolvers.Kubernetes.get_kind(cluster, group, version, kind)
+    path = Kube.Client.Base.path(group, version, kind, namespace, name)
+
+    Console.Deployments.Clusters.control_plane(cluster, user)
+    |> Kube.Utils.save_kubeconfig()
+
+    with {:ok, _} <- Kube.Client.raw(path) do
+      {start, stop, step} = prom_args(args)
+      %ServiceComponent{group: group, version: version, kind: kind, name: name, namespace: namespace}
+      |> Observability.query(start, stop, step)
+    end
+  end
+
   def metrics(%Cluster{} = cluster, %{node: node} = args, _) when is_binary(node) do
     {start, stop, step} = prom_args(args)
     Observability.query({cluster, node}, start, stop, step)

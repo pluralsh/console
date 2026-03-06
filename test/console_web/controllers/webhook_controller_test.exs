@@ -365,4 +365,147 @@ defmodule ConsoleWeb.WebhookControllerTest do
 
     assert alert.flow_id == flow.id
   end
+
+  describe "#issue/2 (Linear)" do
+    test "it returns 403 when linear-signature is missing", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :linear)
+      payload = Jason.encode!(%{"type" => "Issue", "data" => %{"id" => "linear-123", "title" => "Bug", "url" => "https://linear.app/issue/123", "description" => "Desc", "state" => %{"name" => "Open"}}})
+
+      conn
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/linear/#{hook.external_id}", payload)
+      |> response(403)
+    end
+
+    test "it returns 403 when linear-signature is invalid", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :linear)
+      payload = Jason.encode!(%{"type" => "Issue", "data" => %{"id" => "linear-123", "title" => "Bug", "url" => "https://linear.app/issue/123", "description" => "Desc", "state" => %{"name" => "Open"}}})
+
+      conn
+      |> put_req_header("linear-signature", "invalid-signature")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/linear/#{hook.external_id}", payload)
+      |> response(403)
+    end
+
+    test "it will ignore if payload is invalid (wrong type)", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :linear)
+      payload = Jason.encode!(%{"type" => "Comment", "data" => %{}})
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      result =
+        conn
+        |> put_req_header("linear-signature", signature)
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/linear/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["ignored"]
+      [] = Console.Repo.all(Console.Schema.Issue)
+    end
+
+    test "it will ignore if payload is invalid (missing data)", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :linear)
+      payload = Jason.encode!(%{"type" => "Issue"})
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      result =
+        conn
+        |> put_req_header("linear-signature", signature)
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/linear/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["ignored"]
+      [] = Console.Repo.all(Console.Schema.Issue)
+    end
+
+    test "it can handle a valid Linear issue webhook and creates the issue", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :linear)
+      linear_issue = %{
+        "id" => "linear-issue-ext-123",
+        "title" => "Fix login bug",
+        "url" => "https://linear.app/team/issue/123",
+        "description" => "Users cannot log in on mobile",
+        "state" => %{"name" => "In Progress"}
+      }
+      payload = Jason.encode!(%{"type" => "Issue", "data" => linear_issue})
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      result =
+        conn
+        |> put_req_header("linear-signature", signature)
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/issues/linear/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["message"] == "persisted issue"
+      refute result["ignored"]
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.provider == :linear
+      assert issue.external_id == "linear-issue-ext-123"
+      assert issue.title == "Fix login bug"
+      assert issue.url == "https://linear.app/team/issue/123"
+      assert issue.body == "Users cannot log in on mobile"
+      assert issue.status == :in_progress
+    end
+
+    test "it can associate issue with flow when body contains Plural Flow", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :linear)
+      flow = insert(:flow, name: "my-flow")
+      linear_issue = %{
+        "id" => "linear-issue-with-flow",
+        "title" => "Task",
+        "url" => "https://linear.app/team/issue/456",
+        "description" => "Plural Flow: my-flow",
+        "state" => %{"name" => "Done"}
+      }
+      payload = Jason.encode!(%{"type" => "Issue", "data" => linear_issue})
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("linear-signature", signature)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/linear/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.flow_id == flow.id
+      assert issue.status == :completed
+    end
+
+    test "it upserts issue when external_id already exists", %{conn: conn} do
+      hook = insert(:issue_webhook, provider: :linear)
+      external_id = "linear-upsert-me"
+      insert(:issue, external_id: external_id, provider: :linear, title: "Old title", url: "https://linear.app/old", body: "Old body", status: :open)
+      linear_issue = %{
+        "id" => external_id,
+        "title" => "Updated title",
+        "url" => "https://linear.app/team/issue/789",
+        "description" => "Updated body",
+        "state" => %{"name" => "Done"}
+      }
+      payload = Jason.encode!(%{"type" => "Issue", "data" => linear_issue})
+      signature = :crypto.mac(:hmac, :sha256, hook.secret, payload)
+                  |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("linear-signature", signature)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/issues/linear/#{hook.external_id}", payload)
+      |> response(200)
+
+      [issue] = Console.Repo.all(Console.Schema.Issue)
+      assert issue.external_id == external_id
+      assert issue.title == "Updated title"
+      assert issue.url == "https://linear.app/team/issue/789"
+      assert issue.body == "Updated body"
+      assert issue.status == :completed
+    end
+  end
 end

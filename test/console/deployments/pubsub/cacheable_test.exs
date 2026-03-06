@@ -57,4 +57,70 @@ defmodule Console.Deployments.PubSub.CacheableTest do
       Cache.handle_event(event)
     end
   end
+
+  describe "IssueWebhookCreated" do
+    test "calls Console.Cache.delete with {:issue_webhook, external_id}" do
+      %{external_id: ext_id} = hook = insert(:issue_webhook, provider: :linear)
+
+      expect(Console.Cache, :delete, fn {:issue_webhook, ^ext_id} -> :ok end)
+
+      event = %PubSub.IssueWebhookCreated{item: hook}
+      Cache.handle_event(event)
+    end
+  end
+
+  describe "IssueWebhookUpdated" do
+    test "calls Console.Cache.delete with {:issue_webhook, external_id}" do
+      %{external_id: ext_id} = hook = insert(:issue_webhook, provider: :linear)
+
+      expect(Console.Cache, :delete, fn {:issue_webhook, ^ext_id} -> :ok end)
+
+      event = %PubSub.IssueWebhookUpdated{item: hook}
+      Cache.handle_event(event)
+    end
+  end
+
+  describe "IssueWebhookDeleted" do
+    test "calls Console.Cache.delete with {:issue_webhook, external_id}" do
+      %{external_id: ext_id} = hook = insert(:issue_webhook, provider: :linear)
+
+      expect(Console.Cache, :delete, fn {:issue_webhook, ^ext_id} -> :ok end)
+
+      event = %PubSub.IssueWebhookDeleted{item: hook}
+      Cache.handle_event(event)
+    end
+  end
+
+  describe "ObservabilityWebhookCreated" do
+    test "calls Console.Cache.delete with {:obs_webhook, external_id}" do
+      %{external_id: ext_id} = hook = insert(:observability_webhook, type: :grafana)
+
+      expect(Console.Cache, :delete, fn {:obs_webhook, ^ext_id} -> :ok end)
+
+      event = %PubSub.ObservabilityWebhookCreated{item: hook}
+      Cache.handle_event(event)
+    end
+  end
+
+  describe "ObservabilityWebhookUpdated" do
+    test "calls Console.Cache.delete with {:obs_webhook, external_id}" do
+      %{external_id: ext_id} = hook = insert(:observability_webhook, type: :grafana)
+
+      expect(Console.Cache, :delete, fn {:obs_webhook, ^ext_id} -> :ok end)
+
+      event = %PubSub.ObservabilityWebhookUpdated{item: hook}
+      Cache.handle_event(event)
+    end
+  end
+
+  describe "ObservabilityWebhookDeleted" do
+    test "calls Console.Cache.delete with {:obs_webhook, external_id}" do
+      %{external_id: ext_id} = hook = insert(:observability_webhook, type: :grafana)
+
+      expect(Console.Cache, :delete, fn {:obs_webhook, ^ext_id} -> :ok end)
+
+      event = %PubSub.ObservabilityWebhookDeleted{item: hook}
+      Cache.handle_event(event)
+    end
+  end
 end

@@ -6,6 +6,8 @@ on:
     paths:
       - ".github/workflows/controller.yaml"
       - "go/controller/**"
+      - "go/polly/**"
+      - "go/client/**"
       - "lib/**"
       - "schema/**"
   pull_request:
@@ -14,6 +16,8 @@ on:
     paths:
       - ".github/workflows/controller.yaml"
       - "go/controller/**"
+      - "go/polly/**"
+      - "go/client/**"
       - "lib/**"
       - "schema/**"
 permissions:
@@ -31,7 +35,7 @@ jobs:
         working-directory: go/controller
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version-file: go/controller/go.mod
@@ -57,22 +61,6 @@ jobs:
           cache: true
       - name: Test
         run: PATH=$PATH:$GOPATH/bin make test
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v6
-        with:
-          go-version-file: go/controller/go.mod
-          check-latest: true
-          cache: 'false'
-      - uses: golangci/golangci-lint-action@v8
-        with:
-          skip-cache: 'true'
-          version: v2.4.0
-          working-directory: go/controller
-          args: --timeout=30m
   check-docs:
     name: verify controller docs
     runs-on: ubuntu-latest

@@ -1,13 +1,8 @@
 ROOT_DIRECTORY := $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))/../..
 
 include $(ROOT_DIRECTORY)/go/paths.mk
+include $(WORKSPACES_DIR)/common.mk
 include $(TOOLS_MAKEFILE)
-
-##@ General
-
-.PHONY: help
-help: ## show help
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 .PHONY: generate
 generate: TOOL = gqlgenc
@@ -28,3 +23,20 @@ release: ## create and push a tag with new client version
 	git pull --rebase ;\
 	git tag -a go/client/$${tag} -m "release go/client/$${tag}" ;\
 	git push origin go/client/$${tag}
+
+##@ Docker Compose
+
+.PHONY: up-docker
+up-docker: ## build and run via docker compose
+	docker compose -f docker-compose.yml up --build
+
+.PHONY: test-docker
+test-docker: ## run tests via docker compose
+	@docker compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from client-test; \
+	status=$$?; \
+	docker compose -f docker-compose.test.yml down; \
+	exit $$status
+
+.PHONY: build-docker
+build-docker: ## build docker image via compose
+	docker compose -f docker-compose.yml build

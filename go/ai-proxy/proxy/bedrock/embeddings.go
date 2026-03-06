@@ -112,7 +112,7 @@ func convertBedrockEmbeddingToOpenAI(output *bedrockruntime.InvokeModelOutput, m
 	case strings.Contains(model, Titan):
 		var embed titanEmbeddingResponse
 		if err := json.Unmarshal(output.Body, &embed); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal Titan embedding response: %v", err)
+			return nil, fmt.Errorf("failed to unmarshal Titan embedding response: %w", err)
 		}
 		var embedding openai.Embedding
 		embedding.Embedding = embed.Embedding
@@ -123,7 +123,7 @@ func convertBedrockEmbeddingToOpenAI(output *bedrockruntime.InvokeModelOutput, m
 	case strings.Contains(model, Cohere):
 		var embed cohereEmbeddingResponse
 		if err := json.Unmarshal(output.Body, &embed); err != nil {
-			return nil, fmt.Errorf("failed to unmarshal Cohere embedding response: %v", err)
+			return nil, fmt.Errorf("failed to unmarshal Cohere embedding response: %w", err)
 		}
 		var embedding openai.Embedding
 		embedding.Embedding = embed.Embedding

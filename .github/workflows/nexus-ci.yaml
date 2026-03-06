@@ -14,24 +14,6 @@ env:
   REGISTRY_IMAGE: ghcr.io/pluralsh/nexus
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Set up Go
-        uses: actions/setup-go@v6
-        with:
-          go-version-file: go/nexus/go.mod
-
-      - name: Run golangci-lint
-        uses: golangci/golangci-lint-action@v8
-        with:
-          version: v2.4.0
-          working-directory: go/nexus
-
   test:
     name: Test
     runs-on: ubuntu-latest

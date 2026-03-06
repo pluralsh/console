@@ -1,30 +1,11 @@
 import { Chip, Flex, Tooltip, WrapWithIf } from '@pluralsh/design-system'
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import { LogFacetInput } from 'generated/graphql'
 
 import { isEmpty, truncate } from 'lodash'
 import { Fragment } from 'react/jsx-runtime'
 
 const MAX_LENGTH = 30
-
-function LogsLabelChip({ name, value, removeLabel, ...props }) {
-  return (
-    <Chip
-      clickable
-      closeButton
-      onClick={() => removeLabel(name)}
-      {...props}
-    >
-      <Flex
-        align="center"
-        gap="xsmall"
-      >
-        <Body2BoldP>{name}:</Body2BoldP>
-        <Body2P>{truncate(value, { length: MAX_LENGTH - name.length })}</Body2P>
-      </Flex>
-    </Chip>
-  )
-}
 
 export function LogsLabels({
   labels,
@@ -37,7 +18,6 @@ export function LogsLabels({
 
   return (
     <Flex
-      direction="row"
       gap="xsmall"
       align="center"
       wrap="wrap"
@@ -46,13 +26,27 @@ export function LogsLabels({
         <Fragment key={key}>
           <WrapWithIf
             condition={key.length + value.length > MAX_LENGTH}
-            wrapper={<Tooltip label={value} />}
+            wrapper={
+              <Tooltip
+                label={
+                  <CaptionP>
+                    <strong>key:</strong> {key}
+                    <br /> <strong>value:</strong> {value}
+                  </CaptionP>
+                }
+                placement="top"
+              />
+            }
           >
-            <LogsLabelChip
-              name={key}
-              value={value}
-              removeLabel={removeLabel}
-            />
+            <Chip
+              clickable
+              closeButton
+              onClick={() => removeLabel(key)}
+            >
+              <Body2P $color="text-light">
+                {key}: {truncate(value, { length: MAX_LENGTH - key.length })}
+              </Body2P>
+            </Chip>
           </WrapWithIf>
         </Fragment>
       ))}

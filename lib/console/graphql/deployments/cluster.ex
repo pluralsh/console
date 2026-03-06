@@ -500,6 +500,20 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :memory_util,        :float, description: "The memory utilization of the cluster"
     field :availability_zones, list_of(:string), description: "The availability zones this cluster is running in"
 
+    @desc "A set of metrics for a kubernetes controller, currently only deployments and statefulsets are supported"
+    field :component_metrics, :kubernetes_controller_metrics do
+      arg :group,        non_null(:string), description: "the group of the kubernetes controller"
+      arg :version,      non_null(:string), description: "the version of the kubernetes controller"
+      arg :kind,         non_null(:string), description: "the kind of the kubernetes controller"
+      arg :name,         non_null(:string), description: "the name of the kubernetes controller"
+      arg :namespace,    non_null(:string), description: "the namespace of the kubernetes controller"
+      arg :start,        :datetime
+      arg :stop,         :datetime
+      arg :step,         :string
+
+      resolve &Deployments.kubernetes_metrics/3
+    end
+
     field :agent_helm_values, :string, description: "The helm values for the agent installation",
       resolve: &Deployments.agent_helm_values_for_cluster/3
 

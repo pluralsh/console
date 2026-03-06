@@ -1,0 +1,7 @@
+doc
+.editorconfig
+.gitignore
+.gitmodules
+.golangci.yml
+LICENSE
+README.md

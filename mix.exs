@@ -144,7 +144,7 @@ defmodule Console.MixProject do
       {:poison, "~> 6.0", override: true},
       {:ets, "~> 0.9"},
       {:reverse_proxy_plug, "~> 3.0"},
-      {:kazan, "~> 0.11", github: "michaeljguarino/kazan", ref: "ef2050c547ab74c283ef02397925d48637bd67a1"},
+      {:kazan, "~> 0.11", github: "michaeljguarino/kazan", ref: "1e4aa9acdf144699ad25be75cc4a9d917c3113a3"},
       {:comeonin, "~> 5.3"},
       {:argon2_elixir, "~> 4.1"},
       {:nimble_parsec, "~> 1.4", override: true},

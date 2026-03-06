@@ -32,6 +32,24 @@ func (c *client) GetStack(ctx context.Context, id string) (*console.Infrastructu
 	return response.InfrastructureStack, err
 }
 
+func (c *client) GetFullStackByName(ctx context.Context, name string) (*console.InfrastructureStackFragment, error) {
+	if name == "" {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	response, err := c.consoleClient.GetInfrastructureStack(ctx, nil, lo.ToPtr(name))
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	if err == nil && (response == nil || response.InfrastructureStack == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.InfrastructureStack, err
+}
+
 func (c *client) GetStackById(ctx context.Context, id string) (*console.InfrastructureStackIDFragment, error) {
 	if id == "" {
 		return nil, errors.NewNotFound(schema.GroupResource{}, "")
@@ -42,6 +60,24 @@ func (c *client) GetStackById(ctx context.Context, id string) (*console.Infrastr
 	}
 	if err == nil && (response == nil || response.InfrastructureStack == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.InfrastructureStack, err
+}
+
+func (c *client) GetStackByName(ctx context.Context, name string) (*console.InfrastructureStackIDFragment, error) {
+	if name == "" {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	response, err := c.consoleClient.GetInfrastructureStackID(ctx, nil, lo.ToPtr(name))
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	if err == nil && (response == nil || response.InfrastructureStack == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
 	}
 	if response == nil {
 		return nil, err
@@ -93,7 +129,6 @@ func (c *client) CreateStack(ctx context.Context, attributes console.StackAttrib
 		return nil, fmt.Errorf("new created stack %s is nil", attributes.Name)
 	}
 	return result.CreateStack, nil
-
 }
 
 func (c *client) UpdateStack(ctx context.Context, id string, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error) {
@@ -105,7 +140,6 @@ func (c *client) UpdateStack(ctx context.Context, id string, attributes console.
 		return nil, fmt.Errorf("updated stack %s is nil", attributes.Name)
 	}
 	return result.UpdateStack, nil
-
 }
 
 func (c *client) DeleteCustomStackRun(ctx context.Context, id string) error {
@@ -128,7 +162,6 @@ func (c *client) UpdateCustomStackRun(ctx context.Context, id string, attributes
 		return nil, fmt.Errorf("update custom stack run %s is nil", attributes.Name)
 	}
 	return result.UpdateCustomStackRun, nil
-
 }
 
 func (c *client) CreateCustomStackRun(ctx context.Context, attributes console.CustomStackRunAttributes) (*console.CustomStackRunFragment, error) {
@@ -140,7 +173,6 @@ func (c *client) CreateCustomStackRun(ctx context.Context, attributes console.Cu
 		return nil, fmt.Errorf("create custom stack run %s is nil", attributes.Name)
 	}
 	return result.CreateCustomStackRun, nil
-
 }
 
 func (c *client) GetCustomStackRun(ctx context.Context, id string) (*console.CustomStackRunFragment, error) {

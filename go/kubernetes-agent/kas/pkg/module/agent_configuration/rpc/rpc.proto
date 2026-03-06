@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+// If you make any changes make sure you run: make regenerate-proto
+
+package plural.agent.agent_configuration.rpc;
+
+option go_package = "github.com/pluralsh/console/go/kubernetes-agent/pkg/module/agent_configuration/rpc";
+
+import "pkg/agentcfg/agentcfg.proto";
+import "pkg/entity/entity.proto";
+//import "github.com/envoyproxy/protoc-gen-validate/blob/master/validate/validate.proto";
+import "validate/validate.proto";
+
+message ConfigurationRequest {
+  // Last processed commit id. Optional.
+  // Server will only send configuration if the last commit on the branch
+  // is a different one. If a connection breaks, this allows to resume
+  // the stream without sending the same data again.
+  string commit_id = 1;
+  // Information about the agent.
+  entity.AgentMeta agent_meta = 2;
+  // Flag to skip agent registration.
+  bool skip_register = 3;
+}
+
+message ConfigurationResponse {
+  agentcfg.AgentConfiguration configuration = 1;
+  // Commit id of the configuration repository.
+  // Can be used to resume connection from where it dropped.
+  string commit_id = 2 [(validate.rules).string.min_bytes = 1];
+}
+
+service AgentConfiguration {
+  // Get agentk configuration.
+  rpc GetConfiguration (ConfigurationRequest) returns (stream ConfigurationResponse) {
+  }
+}

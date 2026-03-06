@@ -1,6 +1,7 @@
 defmodule ConsoleWeb.OpenAPI.StackController do
   use ConsoleWeb, :api_controller
   import Console.Deployments.Policies, only: [allow: 3]
+  import Console.OpenAPI.Base, only: [ecto_enum: 1]
   alias Console.Deployments.Stacks
   alias Console.Schema.Stack
 
@@ -28,16 +29,27 @@ defmodule ConsoleWeb.OpenAPI.StackController do
     tags: ["stacks"],
     "x-required-scopes": ["stacks.read"],
     parameters: [
+      status: [in: :query, schema: ecto_enum(Stack.Status), required: false, description: "Filter stacks by status (queued, pending, running, successful, failed, cancelled, pending_approval)"],
       page: [in: :query, schema: %{type: :integer}, required: false],
       per_page: [in: :query, schema: %{type: :integer}, required: false]
     ],
     responses: [ok: OpenAPI.Stack.List]
   def index(conn, _params) do
     user = Console.Guardian.Plug.current_resource(conn)
+    query_params = conn.private.oaskit.query_params
+
     Stack.for_user(user)
+    |> apply_filters(query_params)
     |> Stack.ordered()
     |> Stack.preloaded([:tags])
     |> paginate(conn, OpenAPI.Stack)
+  end
+
+  defp apply_filters(query, params) do
+    Enum.reduce(params, query, fn
+      {:status, status}, q when not is_nil(status) -> Stack.for_status(q, status)
+      _, q -> q
+    end)
   end
 
   operation :create,

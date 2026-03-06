@@ -1,18 +1,27 @@
 defmodule Console.Schema.Flow do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Project, PolicyBinding, User, McpServerAssociation}
+  alias Console.Schema.{
+    Project,
+    PolicyBinding,
+    User,
+    McpServerAssociation,
+    AgentRuntime,
+    FlowWorkbench
+  }
   alias Console.Deployments.Policies.Rbac
 
   schema "flows" do
-    field :name,        :string
-    field :description, :string
-    field :icon,        :string
+    field :name,         :string
+    field :description,  :string
+    field :icon,         :string
     field :repositories, {:array, :string}
+    field :metadata,     :map
 
     field :write_policy_id, :binary_id
     field :read_policy_id,  :binary_id
 
-    belongs_to :project, Project
+    belongs_to :project,       Project
+    belongs_to :agent_runtime, AgentRuntime
 
     has_many :read_bindings, PolicyBinding,
       on_replace: :delete,
@@ -22,6 +31,8 @@ defmodule Console.Schema.Flow do
       on_replace: :delete,
       foreign_key: :policy_id,
       references: :write_policy_id
+    has_many :flow_workbenches, FlowWorkbench, on_replace: :delete
+    has_many :workbenches, through: [:flow_workbenches, :workbench]
     has_many :server_associations, McpServerAssociation, on_replace: :delete
     has_many :servers, through: [:server_associations, :server]
 
@@ -59,13 +70,15 @@ defmodule Console.Schema.Flow do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(name description icon repositories project_id)a)
+    |> cast(attrs, ~w(name description icon repositories project_id agent_runtime_id metadata)a)
     |> validate_length(:name, max: 255)
     |> cast_assoc(:server_associations)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
+    |> cast_assoc(:flow_workbenches)
     |> unique_constraint(:name)
     |> foreign_key_constraint(:project_id)
+    |> foreign_key_constraint(:agent_runtime_id)
     |> validate_repositories()
     |> foreign_key_constraint(:preview_environment_instances, name: :preview_environment, match: :prefix, message: "Cannot delete as there are preview environments using this flow still deployed")
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)

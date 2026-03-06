@@ -1,0 +1,10 @@
+{
+    "type": "object",
+    "properties": {
+        "regex": {
+            "type": "string",
+            "description": "The regex to use to grep the files of this working directory"
+        }
+    },
+    "required": ["regex"]
+}

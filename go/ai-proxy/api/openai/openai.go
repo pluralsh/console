@@ -6,7 +6,7 @@ import (
 
 	ollamaapi "github.com/ollama/ollama/api"
 	"github.com/ollama/ollama/openai"
-	"github.com/pluralsh/polly/algorithms"
+	"github.com/pluralsh/console/go/polly/algorithms"
 	"github.com/samber/lo"
 )
 

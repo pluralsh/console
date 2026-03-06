@@ -4,14 +4,14 @@ defmodule Console.Deployments.Init do
   """
   use Console.Services.Base
   alias Console.Services.Users
-  alias Console.Schema.{AccessToken, Cluster, Group, User}
+  alias Console.Schema.{AccessToken, Cluster, Group, User, WorkbenchTool}
   alias Kube.Utils
-  alias Console.Deployments.{Clusters, Git, Settings, Services}
+  alias Console.Deployments.{Clusters, Git, Settings, Services, Workbenches}
 
   @secret_name "console-auth-token"
 
   def setup() do
-    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    bot = console_bot()
     start_transaction()
     |> add_operation(:deploy_repo, fn _ ->
       Git.git_auth_attrs()
@@ -125,6 +125,47 @@ defmodule Console.Deployments.Init do
     end
   end
 
+  @spec setup_workbench() :: {:ok, %{es: WorkbenchTool.t(), prometheus: WorkbenchTool.t()}} | Console.error()
+  def setup_workbench() do
+    with true <- Console.cloud?(),
+         inst when is_binary(inst) <- Console.cloud_instance(),
+         {:ok, url, pass} <- Console.es_creds(),
+         {:ok, vurl, vtenant} <- Console.vmetrics_creds() do
+      bot = console_bot()
+      start_transaction()
+      |> add_operation(:es, fn _ ->
+        Workbenches.create_tool(%{
+          name: "plrl.elastic.logs",
+          tool: :elastic,
+          configuration: %{
+            elastic: %{
+              url: url,
+              username: "plrl-#{inst}",
+              password: pass,
+              index: "plrl-#{inst}-logs-*"
+            }
+          }
+        }, bot)
+      end)
+      |> add_operation(:prometheus, fn _ ->
+        Workbenches.create_tool(%{
+          name: "plrl.prometheus",
+          tool: :prometheus,
+          configuration: %{
+            prometheus: %{
+              url: "#{vurl}/select/#{vtenant}/prometheus",
+              username: "plrl-#{inst}",
+              password: pass
+            }
+          }
+        }, bot)
+      end)
+      |> execute()
+    else
+      _ -> {:ok, %{}}
+    end
+  end
+
   defp maybe_observability(attrs) do
     with true <- Console.cloud?(),
          inst when is_binary(inst) <- Console.cloud_instance(),
@@ -193,4 +234,6 @@ defmodule Console.Deployments.Init do
       _ -> url
     end
   end
+
+  defp console_bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 end

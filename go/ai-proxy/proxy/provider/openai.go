@@ -47,8 +47,7 @@ func (in *OpenAIProxy) ModifyResponse(r *http.Response) error {
 
 func (in *OpenAIProxy) modifyRequestBody(r *httputil.ProxyRequest) error {
 	endpoint := r.Out.URL.Path
-	switch endpoint {
-	case openai.EndpointChatCompletions:
+	if endpoint == openai.EndpointChatCompletions {
 		return replaceRequestBody(r, openai.ToChatCompletionRequest)
 	}
 
@@ -61,8 +60,7 @@ func (in *OpenAIProxy) modifyResponseBody(r *http.Response) error {
 	}
 
 	endpoint := r.Request.URL.Path
-	switch endpoint {
-	case openai.EndpointChatCompletions:
+	if endpoint == openai.EndpointChatCompletions {
 		return replaceResponseBody(r, openai.FromChatCompletionResponse)
 	}
 
