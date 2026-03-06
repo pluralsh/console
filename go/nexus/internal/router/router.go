@@ -156,7 +156,7 @@ func (in *GenericRouter) RegisterRoutes(r chi.Router) {
 				zap.String("path", route.Path),
 				zap.String("method", route.Method),
 			)
-			return
+			continue
 		}
 		in.logger.Info("registered route", zap.String("method", route.Method), zap.String("path", path))
 	}
@@ -532,18 +532,35 @@ func (in *GenericRouter) handleNonStreamingRequest(w http.ResponseWriter, config
 }
 
 func (in *GenericRouter) sendError(w http.ResponseWriter, bifrostCtx *schemas.BifrostContext, errorConverter ErrorConverter, bifrostErr *schemas.BifrostError) {
-	if bifrostErr.StatusCode != nil {
-		w.WriteHeader(*bifrostErr.StatusCode)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
+	statusCode := http.StatusInternalServerError
+	if bifrostErr != nil && bifrostErr.StatusCode != nil {
+		statusCode = *bifrostErr.StatusCode
 	}
-	w.Header().Set("Content-Type", "application/json")
 
-	responseObj := errorConverter(bifrostCtx, bifrostErr)
-	if err := json.NewEncoder(w).Encode(responseObj); err != nil {
-		in.logger.Error("failed to encode error response", zap.Error(err))
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "failed to encode error response: %v", err)
+	if bifrostErr == nil {
+		bifrostErr = in.toBifrostError(nil, "internal server error")
+	}
+
+	var responseObj any = map[string]any{
+		"error": map[string]any{
+			"message": "internal server error",
+		},
+	}
+	if errorConverter != nil {
+		responseObj = errorConverter(bifrostCtx, bifrostErr)
+	}
+
+	responsePayload, err := json.Marshal(responseObj)
+	if err != nil {
+		in.logger.Error("failed to marshal error response", zap.Error(err))
+		statusCode = http.StatusInternalServerError
+		responsePayload = []byte(`{"error":{"message":"internal server error"}}`)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	if _, err = w.Write(responsePayload); err != nil {
+		in.logger.Error("failed to write error response", zap.Error(err))
 	}
 }
 
