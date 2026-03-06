@@ -620,6 +620,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			ToolModel:      in.Azure.ToolModel,
 			EmbeddingModel: in.Azure.EmbeddingModel,
 			AccessToken:    token,
+			Deployment:     in.Azure.Deployment,
 			ProxyModels:    lo.ToSlicePtr(in.Azure.ProxyModels),
 		}
 	}
@@ -829,6 +830,11 @@ type AzureOpenAISettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+
+	// Deployment is the Azure OpenAI deployment name.
+	//
+	// +kubebuilder:validation:Optional
+	Deployment *string `json:"deployment,omitempty"`
 
 	// ProxyModels are additional models to support within the integrated ai proxy.
 	//

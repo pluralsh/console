@@ -924,6 +924,13 @@ defmodule Console.Factory do
     }
   end
 
+  def flow_workbench_factory do
+    %Schema.FlowWorkbench{
+      flow: build(:flow),
+      workbench: build(:workbench)
+    }
+  end
+
   def mcp_server_factory do
     %Schema.McpServer{
       name: sequence(:mcp_server, & "flow-#{&1}"),

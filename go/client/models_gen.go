@@ -1056,6 +1056,8 @@ type AzureOpenaiAttributes struct {
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the azure openai access token to use
 	AccessToken string `json:"accessToken"`
+	// the azure openai deployment name
+	Deployment *string `json:"deployment,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
@@ -1071,6 +1073,8 @@ type AzureOpenaiSettings struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the api version you want to use
 	APIVersion *string `json:"apiVersion,omitempty"`
+	// the azure openai deployment name
+	Deployment *string `json:"deployment,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
@@ -3216,14 +3220,19 @@ type FederatedCredentialAttributes struct {
 }
 
 type Flow struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description *string `json:"description,omitempty"`
-	Icon        *string `json:"icon,omitempty"`
+	ID          string         `json:"id"`
+	Name        string         `json:"name"`
+	Description *string        `json:"description,omitempty"`
+	Icon        *string        `json:"icon,omitempty"`
+	Metadata    map[string]any `json:"metadata,omitempty"`
 	// the git https urls of the application code repositories used in this flow
 	Repositories []*string `json:"repositories,omitempty"`
+	// the agent runtime for this flow
+	AgentRuntime *AgentRuntime `json:"agentRuntime,omitempty"`
 	// servers that are bound to this flow
 	Servers []*McpServer `json:"servers,omitempty"`
+	// workbenches associated with this flow
+	Workbenches []*Workbench `json:"workbenches,omitempty"`
 	// read policy for this flow
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy for this flow
@@ -3243,14 +3252,19 @@ type Flow struct {
 }
 
 type FlowAttributes struct {
-	Name               string                            `json:"name"`
-	Description        *string                           `json:"description,omitempty"`
-	Icon               *string                           `json:"icon,omitempty"`
-	ProjectID          *string                           `json:"projectId,omitempty"`
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
+	Icon        *string `json:"icon,omitempty"`
+	ProjectID   *string `json:"projectId,omitempty"`
+	Metadata    *string `json:"metadata,omitempty"`
+	// the agent runtime for this flow
+	AgentRuntimeID     *string                           `json:"agentRuntimeId,omitempty"`
 	Repositories       []*string                         `json:"repositories,omitempty"`
 	ReadBindings       []*PolicyBindingAttributes        `json:"readBindings,omitempty"`
 	WriteBindings      []*PolicyBindingAttributes        `json:"writeBindings,omitempty"`
 	ServerAssociations []*McpServerAssociationAttributes `json:"serverAssociations,omitempty"`
+	// workbenches associated with this flow
+	FlowWorkbenches []*FlowWorkbenchAttributes `json:"flowWorkbenches,omitempty"`
 }
 
 type FlowConnection struct {
@@ -3261,6 +3275,11 @@ type FlowConnection struct {
 type FlowEdge struct {
 	Node   *Flow   `json:"node,omitempty"`
 	Cursor *string `json:"cursor,omitempty"`
+}
+
+type FlowWorkbenchAttributes struct {
+	// the workbench to associate with this flow
+	WorkbenchID *string `json:"workbenchId,omitempty"`
 }
 
 // a Flux crd representation of a Helm repository
@@ -7245,6 +7264,10 @@ type SentinelCheckIntegrationTestConfiguration struct {
 	Default *SentinelCheckIntegrationTestDefaultConfiguration `json:"default,omitempty"`
 	// a list of custom test cases to run for this check
 	Cases []*SentinelCheckIntegrationTestCaseConfiguration `json:"cases,omitempty"`
+	// whether to rerun failed tests
+	RerunFailures *bool `json:"rerunFailures,omitempty"`
+	// how many times to rerun failures
+	RerunFailuresCount *int64 `json:"rerunFailuresCount,omitempty"`
 }
 
 type SentinelCheckIntegrationTestConfigurationAttributes struct {
@@ -7266,6 +7289,10 @@ type SentinelCheckIntegrationTestConfigurationAttributes struct {
 	Gotestsum *SentinelCheckGotestsumAttributes `json:"gotestsum,omitempty"`
 	// default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)
 	Default *SentinelCheckIntegrationTestDefaultAttributes `json:"default,omitempty"`
+	// whether to rerun failed tests
+	RerunFailures *bool `json:"rerunFailures,omitempty"`
+	// how many times to rerun failures
+	RerunFailuresCount *int64 `json:"rerunFailuresCount,omitempty"`
 }
 
 type SentinelCheckIntegrationTestDefaultAttributes struct {

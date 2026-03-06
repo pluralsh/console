@@ -1,0 +1,4 @@
+line before error
+ERROR one
+line after error
+another unrelated line

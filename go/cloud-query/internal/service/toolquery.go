@@ -52,6 +52,28 @@ func (in *ToolQueryService) Metrics(ctx context.Context, input *toolquery.Metric
 	return output, nil
 }
 
+func (in *ToolQueryService) MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {
+	if input == nil {
+		return nil, status.Error(codes.InvalidArgument, "input is required")
+	}
+
+	if err := in.validateSearchInput(input.GetConnection()); err != nil {
+		return nil, err
+	}
+
+	provider, err := tools.NewProvider(input.GetConnection())
+	if err != nil {
+		return nil, in.mapError("metrics_search", err)
+	}
+
+	output, err := provider.MetricsSearch(ctx, input)
+	if err != nil {
+		return nil, in.mapError("metrics_search", err)
+	}
+
+	return output, nil
+}
+
 func (in *ToolQueryService) Logs(ctx context.Context, input *toolquery.LogsQueryInput) (*toolquery.LogsQueryOutput, error) {
 	if input == nil {
 		return nil, status.Error(codes.InvalidArgument, "input is required")
@@ -96,8 +118,8 @@ func (in *ToolQueryService) Traces(ctx context.Context, input *toolquery.TracesQ
 }
 
 func (in *ToolQueryService) validateInput(connection *toolquery.ToolConnection, query string, timeRange *toolquery.TimeRange) error {
-	if connection == nil {
-		return status.Error(codes.InvalidArgument, "connection is required")
+	if err := in.validateSearchInput(connection); err != nil {
+		return err
 	}
 
 	if len(query) == 0 {
@@ -105,6 +127,14 @@ func (in *ToolQueryService) validateInput(connection *toolquery.ToolConnection, 
 	}
 
 	return in.validateTimeRange(timeRange)
+}
+
+func (in *ToolQueryService) validateSearchInput(connection *toolquery.ToolConnection) error {
+	if connection == nil {
+		return status.Error(codes.InvalidArgument, "connection is required")
+	}
+
+	return nil
 }
 
 func (in *ToolQueryService) validateTimeRange(timeRange *toolquery.TimeRange) error {

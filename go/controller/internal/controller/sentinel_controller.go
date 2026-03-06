@@ -290,8 +290,10 @@ func (r *SentinelReconciler) buildKubernetesConfiguration(ctx context.Context, k
 
 func (r *SentinelReconciler) buildIntegrationTestConfiguration(ctx context.Context, sentinel *v1alpha1.Sentinel, integrationTest *v1alpha1.SentinelCheckIntegrationTestConfiguration) (*console.SentinelCheckIntegrationTestConfigurationAttributes, error) {
 	config := &console.SentinelCheckIntegrationTestConfigurationAttributes{
-		Distro: integrationTest.Distro,
-		Format: integrationTest.Format,
+		Distro:             integrationTest.Distro,
+		Format:             integrationTest.Format,
+		RerunFailures:      integrationTest.RerunFailures,
+		RerunFailuresCount: integrationTest.RerunFailuresCount,
 	}
 
 	if integrationTest.Gotestsum != nil {

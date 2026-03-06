@@ -244,7 +244,7 @@ defmodule Console.Deployments.Observability do
   defp component_args(%ServiceComponent{group: "apps", version: "v1", kind: "DaemonSet", name: name, namespace: ns} = comp),
     do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[a-z0-9]+"]}
   defp component_args(%ServiceComponent{group: "apps", version: "v1", kind: "Deployment", name: name, namespace: ns} = comp),
-    do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[a-z0-9]+-[a-z0-9]+"]}
+    do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[a-z0-9]+-?[a-z0-9]+"]}
   defp component_args(%ServiceComponent{group: "apps", version: "v1", kind: "StatefulSet", name: name, namespace: ns} = comp),
     do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[0-9]+"]}
   defp component_args(%ServiceComponent{group: g, kind: k}), do: {:error, "unsupported component kind #{g}/#{k}"}

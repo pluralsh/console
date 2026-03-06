@@ -291,8 +291,8 @@ ToolQuery support varies by operation:
 
 | Tool | Metrics | Logs | Traces | Notes |
 |------|---------|------|--------|-------|
-| Prometheus | Yes | No | No | Prometheus HTTP API range queries |
-| Datadog | Yes | Yes | Yes | Datadog Metrics (v1), Logs (v2), Spans (v2) APIs |
+| Prometheus | Yes | No | No | Prometheus HTTP API range queries and metric name search |
+| Datadog | Yes | Yes | Yes | Datadog Metrics (v1), Logs (v2), Spans (v2) APIs, plus metric search (v2 HTTP) |
 | Elasticsearch | No | Yes | No | Elasticsearch typed Search API with query string |
 | Loki | No | Yes | No | Loki HTTP `query_range` API |
 | Tempo | No | No | Yes | Tempo HTTP search + trace fetch |
@@ -315,6 +315,7 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
 ```protobuf
 service ToolQuery {
   rpc Metrics(MetricsQueryInput) returns (MetricsQueryOutput) {}
+  rpc MetricsSearch(MetricsSearchInput) returns (MetricsSearchOutput) {}
   rpc Logs(LogsQueryInput) returns (LogsQueryOutput) {}
   rpc Traces(TracesQueryInput) returns (TracesQueryOutput) {}
 }
@@ -405,6 +406,20 @@ message MetricPoint {
 
 message MetricsQueryOutput {
   repeated MetricPoint metrics = 1;
+}
+
+message MetricsSearchInput {
+  ToolConnection connection = 1;
+  string query = 2;
+  optional int64 limit = 3;
+}
+
+message MetricsSearchResult {
+  string name = 1;
+}
+
+message MetricsSearchOutput {
+  repeated MetricsSearchResult metrics = 1;
 }
 ```
 

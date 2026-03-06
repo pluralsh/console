@@ -47,6 +47,23 @@ spec:
           spec:
             description: FlowSpec defines the desired state of Flow
             properties:
+              agentRuntime:
+                description: |-
+                  AgentRuntime references the agent runtime to use for this flow by cluster handle and runtime name.
+                  The controller resolves this to an agent runtime ID when syncing to the Console API.
+                properties:
+                  cluster:
+                    description: Cluster is the handle of the cluster that owns the
+                      agent runtime.
+                    type: string
+                  runtime:
+                    description: Runtime is the name of the agent runtime within that
+                      cluster.
+                    type: string
+                required:
+                - cluster
+                - runtime
+                type: object
               bindings:
                 description: Bindings contain read and write policies of this Flow.
                 properties:
@@ -104,6 +121,12 @@ spec:
                 description: Icon specifies an optional image icon for the flow to
                   apply branding or improve identification.
                 type: string
+              metadata:
+                description: |-
+                  Metadata contains arbitrary JSON metadata for the flow.
+                  Used for custom configuration and integration with external systems.
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
               name:
                 description: Name of this Flow. If not provided Flow's own name from
                   Flow.ObjectMeta will be used.

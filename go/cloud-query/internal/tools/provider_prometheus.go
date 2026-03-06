@@ -3,11 +3,13 @@ package tools
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/prometheus/client_golang/api"
 	v1 "github.com/prometheus/client_golang/api/prometheus/v1"
 	"github.com/prometheus/common/model"
+	"github.com/samber/lo"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/tools/clients"
@@ -67,6 +69,41 @@ func (in *PrometheusProvider) Metrics(ctx context.Context, input *toolquery.Metr
 	}
 
 	return in.toMetricsQueryOutput(value)
+}
+
+func (in *PrometheusProvider) MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {
+	if in.conn == nil {
+		return nil, fmt.Errorf("%w: prometheus connection is required", ErrInvalidArgument)
+	}
+
+	client, err := in.newClient()
+	if err != nil {
+		return nil, err
+	}
+
+	// Use the Prometheus v1 client to fetch metric names over a recent time window.
+	end := time.Now()
+	start := end.Add(-24 * time.Hour)
+	labelValues, _, err := client.LabelValues(ctx, "__name__", nil, start, end, v1.WithLimit(5000))
+	if err != nil {
+		return nil, err
+	}
+
+	if input.GetQuery() != "" {
+		labelValues = lo.Filter(labelValues, func(lv model.LabelValue, _ int) bool {
+			return strings.Contains(strings.ToLower(string(lv)), strings.ToLower(input.GetQuery()))
+		})
+	}
+
+	if input.GetLimit() > 0 {
+		labelValues = labelValues[:min(len(labelValues), int(input.GetLimit()))]
+	}
+
+	results := lo.Map(labelValues, func(lv model.LabelValue, _ int) *toolquery.MetricsSearchResult {
+		return &toolquery.MetricsSearchResult{Name: string(lv)}
+	})
+
+	return &toolquery.MetricsSearchOutput{Metrics: results}, nil
 }
 
 func (in *PrometheusProvider) toStep(input *toolquery.MetricsQueryInput) (time.Duration, error) {

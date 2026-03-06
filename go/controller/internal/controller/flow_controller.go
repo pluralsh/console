@@ -109,7 +109,12 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 			return common.HandleRequeue(res, err, flow.SetCondition)
 		}
 
-		attrs, err := r.Attributes(flow, project.Status.ID, serverAssociationAttributes)
+		agentRuntimeID, err := common.ResolveAgentRuntimeID(ctx, r.ConsoleClient, flow.Spec.AgentRuntime)
+		if err != nil {
+			return common.HandleRequeue(lo.ToPtr(common.Wait()), err, flow.SetCondition)
+		}
+
+		attrs, err := r.Attributes(flow, project.Status.ID, serverAssociationAttributes, agentRuntimeID)
 		if err != nil {
 			return common.HandleRequeue(nil, err, flow.SetCondition)
 		}
@@ -132,7 +137,7 @@ func (r *FlowReconciler) Process(ctx context.Context, req ctrl.Request) (_ ctrl.
 	return flow.Spec.Reconciliation.Requeue(), nil
 }
 
-func (r *FlowReconciler) Attributes(flow *v1alpha1.Flow, projectID *string, serverAssociations []*console.McpServerAssociationAttributes) (*console.FlowAttributes, error) {
+func (r *FlowReconciler) Attributes(flow *v1alpha1.Flow, projectID *string, serverAssociations []*console.McpServerAssociationAttributes, agentRuntimeID *string) (*console.FlowAttributes, error) {
 	attrs := console.FlowAttributes{
 		Name:               flow.FlowName(),
 		Description:        flow.Spec.Description,
@@ -140,6 +145,11 @@ func (r *FlowReconciler) Attributes(flow *v1alpha1.Flow, projectID *string, serv
 		ProjectID:          projectID,
 		ServerAssociations: serverAssociations,
 		Repositories:       lo.ToSlicePtr(flow.Spec.Repositories),
+		AgentRuntimeID:     agentRuntimeID,
+	}
+
+	if flow.Spec.Metadata != nil && len(flow.Spec.Metadata.Raw) > 0 {
+		attrs.Metadata = lo.ToPtr(string(flow.Spec.Metadata.Raw))
 	}
 
 	if flow.Spec.Bindings != nil {

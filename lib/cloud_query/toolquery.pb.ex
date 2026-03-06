@@ -139,6 +139,32 @@ defmodule Toolquery.MetricsQueryOutput do
   field :metrics, 1, repeated: true, type: Toolquery.MetricPoint
 end
 
+defmodule Toolquery.MetricsSearchInput do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :connection, 1, type: Toolquery.ToolConnection
+  field :query, 2, type: :string
+  field :limit, 3, proto3_optional: true, type: :int64
+end
+
+defmodule Toolquery.MetricsSearchResult do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :name, 1, type: :string
+end
+
+defmodule Toolquery.MetricsSearchOutput do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :metrics, 1, repeated: true, type: Toolquery.MetricsSearchResult
+end
+
 defmodule Toolquery.LogEntry.LabelsEntry do
   @moduledoc false
 
@@ -204,6 +230,8 @@ defmodule Toolquery.ToolQuery.Service do
   use GRPC.Service, name: "toolquery.ToolQuery", protoc_gen_elixir_version: "0.15.0"
 
   rpc :Metrics, Toolquery.MetricsQueryInput, Toolquery.MetricsQueryOutput
+
+  rpc :MetricsSearch, Toolquery.MetricsSearchInput, Toolquery.MetricsSearchOutput
 
   rpc :Logs, Toolquery.LogsQueryInput, Toolquery.LogsQueryOutput
 

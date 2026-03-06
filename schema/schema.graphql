@@ -2955,6 +2955,12 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
 
   "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
   default: SentinelCheckIntegrationTestDefaultAttributes
+
+  "whether to rerun failed tests"
+  rerunFailures: Boolean
+
+  "how many times to rerun failures"
+  rerunFailuresCount: Int
 }
 
 input SentinelCheckIntegrationTestDefaultAttributes {
@@ -3205,6 +3211,12 @@ type SentinelCheckIntegrationTestConfiguration {
 
   "a list of custom test cases to run for this check"
   cases: [SentinelCheckIntegrationTestCaseConfiguration]
+
+  "whether to rerun failed tests"
+  rerunFailures: Boolean
+
+  "how many times to rerun failures"
+  rerunFailuresCount: Int
 }
 
 type SentinelCheckIntegrationTestDefaultConfiguration {
@@ -3438,13 +3450,28 @@ type SentinelRunJobConnection {
 
 input FlowAttributes {
   name: String!
+
   description: String
+
   icon: String
+
   projectId: ID
+
+  metadata: Json
+
+  "the agent runtime for this flow"
+  agentRuntimeId: ID
+
   repositories: [String]
+
   readBindings: [PolicyBindingAttributes]
+
   writeBindings: [PolicyBindingAttributes]
+
   serverAssociations: [McpServerAssociationAttributes]
+
+  "workbenches associated with this flow"
+  flowWorkbenches: [FlowWorkbenchAttributes]
 }
 
 "Input attributes for creating an mcp server"
@@ -3465,6 +3492,11 @@ input McpServerAttributes {
 
 input McpServerAssociationAttributes {
   serverId: ID
+}
+
+input FlowWorkbenchAttributes {
+  "the workbench to associate with this flow"
+  workbenchId: ID
 }
 
 input McpServerAuthenticationAttributes {
@@ -3508,11 +3540,19 @@ type Flow {
 
   icon: String
 
+  metadata: Map
+
   "the git https urls of the application code repositories used in this flow"
   repositories: [String]
 
+  "the agent runtime for this flow"
+  agentRuntime: AgentRuntime
+
   "servers that are bound to this flow"
   servers: [McpServer]
+
+  "workbenches associated with this flow"
+  workbenches: [Workbench]
 
   "read policy for this flow"
   readBindings: [PolicyBinding]
@@ -3974,6 +4014,9 @@ input AzureOpenaiAttributes {
   "the azure openai access token to use"
   accessToken: String!
 
+  "the azure openai deployment name"
+  deployment: String
+
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
 }
@@ -4313,6 +4356,9 @@ type AzureOpenaiSettings {
 
   "the api version you want to use"
   apiVersion: String
+
+  "the azure openai deployment name"
+  deployment: String
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]

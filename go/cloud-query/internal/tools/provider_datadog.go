@@ -9,6 +9,7 @@ import (
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadog"
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV1"
 	"github.com/DataDog/datadog-api-client-go/v2/api/datadogV2"
+	"github.com/samber/lo"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
@@ -47,6 +48,34 @@ func (in *DatadogProvider) Metrics(ctx context.Context, input *toolquery.Metrics
 	}
 
 	return in.toMetricsQueryOutput(resp), nil
+}
+
+func (in *DatadogProvider) MetricsSearch(ctx context.Context, input *toolquery.MetricsSearchInput) (*toolquery.MetricsSearchOutput, error) {
+	if in.conn == nil {
+		return nil, ErrInvalidArgument
+	}
+
+	ctx, client, err := in.newDatadogClient(ctx, in.conn)
+	if err != nil {
+		return nil, err
+	}
+
+	api := datadogV1.NewMetricsApi(client)
+	resp, _, err := api.ListMetrics(ctx, input.Query) //nolint:staticcheck // SA1019 ignore: ListMetrics is deprecated in Datadog API, but required here
+	if err != nil {
+		return nil, err
+	}
+
+	resultVals := resp.GetResults().Metrics
+	if input.GetLimit() > 0 {
+		resultVals = resultVals[:min(len(resultVals), int(input.GetLimit()))]
+	}
+
+	results := lo.Map(resultVals, func(name string, _ int) *toolquery.MetricsSearchResult {
+		return &toolquery.MetricsSearchResult{Name: name}
+	})
+
+	return &toolquery.MetricsSearchOutput{Metrics: results}, nil
 }
 
 func (in *DatadogProvider) toMetricsQueryOutput(resp datadogV1.MetricsQueryResponse) *toolquery.MetricsQueryOutput {
