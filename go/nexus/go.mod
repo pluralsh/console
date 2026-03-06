@@ -1,12 +1,12 @@
 module github.com/pluralsh/console/go/nexus
 
-go 1.25.7
+go 1.26
 
 require (
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.4
 	github.com/bytedance/sonic v1.15.0
 	github.com/go-chi/chi/v5 v5.2.4
-	github.com/maximhq/bifrost/core v1.4.2
+	github.com/maximhq/bifrost/core v1.4.7
 	github.com/samber/lo v1.52.0
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
