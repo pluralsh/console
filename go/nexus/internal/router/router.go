@@ -87,6 +87,9 @@ type RouteConfig struct {
 	// EmbeddingResponseConverter converts BifrostEmbeddingResponse to integration format
 	EmbeddingResponseConverter EmbeddingResponseConverter
 
+	// ListTokensResponseConverter converts BifrostListModelsResponse to integration format
+	ListModelsResponseConverter ListModelsResponseConverter
+
 	// ErrorConverter converts BifrostError to integration format
 	ErrorConverter ErrorConverter
 
@@ -472,6 +475,22 @@ func (in *GenericRouter) handleNonStreamingRequest(w http.ResponseWriter, config
 	var err error
 
 	switch {
+	case bifrostReq.ListModelsRequest != nil:
+		var listModelsResponse *schemas.BifrostListModelsResponse
+		var bifrostErr *schemas.BifrostError
+		listModelsResponse, bifrostErr = in.client.ListAllModels(ctx, bifrostReq.ListModelsRequest)
+
+		if bifrostErr != nil {
+			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
+			return
+		}
+
+		if listModelsResponse == nil {
+			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "Bifrost response is nil"))
+			return
+		}
+
+		response, err = config.ListModelsResponseConverter(ctx, listModelsResponse)
 	case bifrostReq.TextCompletionRequest != nil:
 		bifrostResponse, bifrostErr := in.client.TextCompletionRequest(ctx, bifrostReq.TextCompletionRequest)
 		if bifrostErr != nil {

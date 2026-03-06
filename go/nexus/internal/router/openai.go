@@ -18,6 +18,7 @@ const (
 	RouteEmbeddings      Route = "/v1/embeddings"
 	RouteChatCompletions Route = "/v1/chat/completions"
 	RouteResponses       Route = "/v1/responses"
+	RouteModels          Route = "/v1/models"
 )
 
 // OpenAIRouter is a generic router that expects a model to be in a format "provider/model" and
@@ -51,6 +52,7 @@ func (in *OpenAIRouter) init() Router {
 		in.newChatCompletionsRoute(),
 		in.newResponsesRoute(),
 		in.newEmbeddingsRoute(),
+		in.newModelsRoute(),
 	}
 
 	return in
