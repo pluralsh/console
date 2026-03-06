@@ -565,11 +565,16 @@ func (in *GenericRouter) sendError(w http.ResponseWriter, bifrostCtx *schemas.Bi
 }
 
 func (in *GenericRouter) sendSuccess(w http.ResponseWriter, bifrostCtx *schemas.BifrostContext, errorConverter ErrorConverter, response any) {
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	responsePayload, err := json.Marshal(response)
+	if err != nil {
 		in.sendError(w, bifrostCtx, errorConverter, in.toBifrostError(err, "failed to encode success response"))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if _, err = w.Write(responsePayload); err != nil {
+		in.logger.Error("failed to write success response", zap.Error(err))
 	}
 }
 

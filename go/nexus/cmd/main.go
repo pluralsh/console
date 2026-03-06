@@ -45,6 +45,7 @@ func main() {
 func serve() error {
 	logger := log.Logger()
 	cfg := args.Config()
+	ctx := context.Background()
 
 	logger.Info("initializing Nexus server",
 		zap.String("version", version.Version),
@@ -72,7 +73,6 @@ func serve() error {
 
 	logger.Info("starting HTTP server", zap.String("address", cfg.Server.Address))
 	srv := server.New(&cfg.Server, consoleClient)
-	ctx := context.Background()
 	readyChan, err := srv.Start(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to start server: %w", err)

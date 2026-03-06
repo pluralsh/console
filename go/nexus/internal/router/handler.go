@@ -22,9 +22,9 @@ type Handler struct {
 }
 
 // NewHandler creates a new Bifrost handler using the Bifrost Core SDK
-func NewHandler(consoleClient console.Client) (*Handler, error) {
+func NewHandler(ctx context.Context, consoleClient console.Client) (*Handler, error) {
 	logger := log.Logger().With(zap.String("component", "bifrost-handler"))
-	account := NewAccount(context.Background(), consoleClient)
+	account := NewAccount(ctx, consoleClient)
 	bifrostClient, err := bifrostcore.Init(context.Background(), schemas.BifrostConfig{
 		Account:            account,
 		InitialPoolSize:    1000,

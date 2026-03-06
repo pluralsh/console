@@ -68,7 +68,7 @@ func (s *Server) SetupRoutes() {
 // Start initializes and starts the HTTP server
 // Returns a ready channel that will be closed when the server is listening and ready to accept connections
 func (s *Server) Start(ctx context.Context) (<-chan struct{}, error) {
-	bifrostHandler, err := router.NewHandler(s.consoleClient)
+	bifrostHandler, err := router.NewHandler(ctx, s.consoleClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize Bifrost handler: %w", err)
 	}
