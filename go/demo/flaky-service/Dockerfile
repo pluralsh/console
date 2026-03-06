@@ -1,5 +1,5 @@
 # Step 1: Build the Go binary
-FROM golang:1.25.7 AS build
+FROM golang:1.26.1 AS build
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o flaky-service .
 
 # Step 2: Create a smaller image to run the application
-FROM alpine:latest  
+FROM alpine:latest
 
 # Install necessary dependencies to run Go binaries
 RUN apk --no-cache add ca-certificates
