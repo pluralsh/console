@@ -19,7 +19,7 @@ type clientCache struct {
 
 func (in *clientCache) GetAiConfig(ctx context.Context) (*pb.AiConfig, error) {
 	if time.Since(in.updated) < in.ttl && in.config != nil {
-		in.logger.Debug("returning cached AI config")
+		in.logger.Debug("returning cached AI config", zap.Duration("ttl", in.ttl), zap.Duration("age", time.Since(in.updated)))
 		return in.config, nil
 	}
 

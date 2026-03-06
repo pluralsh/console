@@ -1,39 +1,52 @@
-package bifrost
+package router
 
 import (
 	"errors"
+	"slices"
 
 	"github.com/maximhq/bifrost/core/schemas"
 	"github.com/pluralsh/console/go/nexus/internal/log"
 	"go.uber.org/zap"
 )
 
-type EmbeddingConfig struct {
+var (
+	embeddingsProviderPriorityList = []schemas.ModelProvider{schemas.OpenAI, schemas.Vertex, schemas.Bedrock, schemas.Azure}
+)
+
+type EmbeddingsConfig struct {
 	DefaultProvider schemas.ModelProvider
 	DefaultModel    string
-	ProviderModels  map[schemas.ModelProvider]string
 }
 
-type EmbeddingResolver struct {
+type EmbeddingsResolver struct {
 	embeddingsModelGetter EmbeddingsModelGetter
 	logger                *zap.Logger
 }
 
-func NewEmbeddingResolver(embeddingsModelGetter EmbeddingsModelGetter) *EmbeddingResolver {
-	return &EmbeddingResolver{
+func NewEmbeddingsResolver(embeddingsModelGetter EmbeddingsModelGetter) *EmbeddingsResolver {
+	return &EmbeddingsResolver{
 		embeddingsModelGetter: embeddingsModelGetter,
 		logger:                log.Logger().With(zap.String("component", "embedding-resolver")),
 	}
 }
 
-func (in *EmbeddingResolver) Apply(provider schemas.ModelProvider, req *schemas.BifrostEmbeddingRequest) error {
+func (in *EmbeddingsResolver) Apply(provider schemas.ModelProvider, req *schemas.BifrostEmbeddingRequest) error {
 	if in.supportsEmbeddings(req.Provider) {
 		if len(req.Model) == 0 {
 			return errors.New("embedding model is required")
 		}
 
+		in.logger.Debug("provider supports embeddings, using provided model",
+			zap.String("provider", string(req.Provider)),
+			zap.String("model", req.Model),
+		)
+
 		return nil
 	}
+
+	in.logger.Debug("provider does not support embeddings, looking for default embedding provider and model",
+		zap.String("provider", string(req.Provider)),
+	)
 
 	config, err := in.toEmbeddingConfig()
 	if err != nil {
@@ -47,7 +60,7 @@ func (in *EmbeddingResolver) Apply(provider schemas.ModelProvider, req *schemas.
 	return in.applyDefaults(config, req)
 }
 
-func (in *EmbeddingResolver) applyDefaults(config *EmbeddingConfig, req *schemas.BifrostEmbeddingRequest) error {
+func (in *EmbeddingsResolver) applyDefaults(config *EmbeddingsConfig, req *schemas.BifrostEmbeddingRequest) error {
 	if config == nil {
 		return errors.New("embedding config is required")
 	}
@@ -70,14 +83,14 @@ func (in *EmbeddingResolver) applyDefaults(config *EmbeddingConfig, req *schemas
 		Model:    config.DefaultModel,
 	}}
 
+	in.logger.Debug("adding default fallback", zap.Any("fallback", req.Fallbacks[0]))
 	return nil
 }
 
-func (in *EmbeddingResolver) toEmbeddingConfig() (*EmbeddingConfig, error) {
-	providers := []schemas.ModelProvider{schemas.OpenAI, schemas.Vertex, schemas.Bedrock}
+func (in *EmbeddingsResolver) toEmbeddingConfig() (*EmbeddingsConfig, error) {
 	providerModels := map[schemas.ModelProvider]string{}
 
-	for _, provider := range providers {
+	for _, provider := range embeddingsProviderPriorityList {
 		if model, err := in.embeddingsModelGetter.EmbeddingModelByProvider(provider); err == nil && len(model) > 0 {
 			providerModels[provider] = model
 		}
@@ -88,28 +101,22 @@ func (in *EmbeddingResolver) toEmbeddingConfig() (*EmbeddingConfig, error) {
 		return nil, errors.New("no embedding providers configured")
 	}
 
-	return &EmbeddingConfig{
+	return &EmbeddingsConfig{
 		DefaultProvider: defaultProvider,
 		DefaultModel:    defaultModel,
-		ProviderModels:  providerModels,
 	}, nil
 }
 
-func (in *EmbeddingResolver) pickDefaultEmbeddingProvider(providerModels map[schemas.ModelProvider]string) (schemas.ModelProvider, string) {
-	priority := []schemas.ModelProvider{schemas.OpenAI, schemas.Vertex, schemas.Bedrock}
-	for _, provider := range priority {
+func (in *EmbeddingsResolver) pickDefaultEmbeddingProvider(providerModels map[schemas.ModelProvider]string) (schemas.ModelProvider, string) {
+	for _, provider := range embeddingsProviderPriorityList {
 		if model, ok := providerModels[provider]; ok && model != "" {
 			return provider, model
 		}
 	}
+
 	return "", ""
 }
 
-func (in *EmbeddingResolver) supportsEmbeddings(provider schemas.ModelProvider) bool {
-	switch provider {
-	case schemas.OpenAI, schemas.Vertex, schemas.Bedrock, schemas.Gemini:
-		return true
-	default:
-		return false
-	}
+func (in *EmbeddingsResolver) supportsEmbeddings(provider schemas.ModelProvider) bool {
+	return slices.Contains(embeddingsProviderPriorityList, provider)
 }
