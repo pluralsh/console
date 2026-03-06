@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/containerd/containerd/pkg/cri/util"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -133,42 +132,7 @@ func (c *client) getAiConfig(ctx context.Context) (*pb.AiConfig, error) {
 		return nil, fmt.Errorf("could not get AI config: %w", err)
 	}
 
-	c.safeLogAiConfig(aiConfig)
 	return aiConfig, nil
-}
-
-func (c *client) safeLogAiConfig(aiConfig *pb.AiConfig) {
-	var configCopy = &pb.AiConfig{}
-	_ = util.DeepCopy(configCopy, aiConfig)
-
-	if aiConfig == nil {
-		return
-	}
-
-	if configCopy.Openai != nil {
-		configCopy.Openai.ApiKey = nil
-	}
-
-	if configCopy.Anthropic != nil {
-		configCopy.Anthropic.ApiKey = nil
-	}
-
-	if configCopy.VertexAi != nil {
-		configCopy.VertexAi.ApiKey = nil
-		configCopy.VertexAi.ServiceAccountJson = nil
-	}
-
-	if configCopy.Bedrock != nil {
-		configCopy.Bedrock.AccessToken = nil
-		configCopy.Bedrock.AwsSecretAccessKey = nil
-		configCopy.Bedrock.AwsAccessKeyId = nil
-	}
-
-	if configCopy.Azure != nil {
-		configCopy.Azure.AccessToken = nil
-	}
-
-	c.logger.Debug("AI config retrieved", zap.Any("config", configCopy))
 }
 
 // ProxyAuthentication authenticates a request token with Console
