@@ -38,7 +38,7 @@ defmodule Console.AI.Workbench.Engine do
   defstruct [:job, :user, :environment, activities: [], iterations: 0, max: 200]
 
   def new(%WorkbenchJob{} = job) do
-    %{user: user, workbench: workbench} = job = Repo.preload(job, [:user, workbench: [:tools, :repository, :agent_runtime]])
+    %{user: user, workbench: workbench} = job = Repo.preload(job, [:user, workbench: [:repository, :agent_runtime, [tools: :mcp_server]]])
 
     user = Console.Services.Rbac.preload(user)
     with {:ok, skills} <- SkillsUtil.skills(workbench),

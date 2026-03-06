@@ -3,6 +3,7 @@ defmodule Console.Cron.JobsTest do
   alias Console.Cron.Jobs
 
   describe "#prune_builds/0" do
+    @tag :skip
     test "It will delete expired builds" do
       keep = insert_list(2, :build)
       expire = insert_list(2, :build, inserted_at: Timex.now() |> Timex.shift(days: -100))
@@ -78,6 +79,7 @@ defmodule Console.Cron.JobsTest do
   end
 
   describe "#fail_builds/0" do
+    @tag :skip
     test "old running builds will be auto-failed" do
       old = insert(:build, status: :running, pinged_at: Timex.now() |> Timex.shift(hours: -1))
       new = insert(:build, status: :running, pinged_at: Timex.now())

@@ -114,7 +114,7 @@ defmodule Console.Schema.WorkbenchTool do
     end)
   end
 
-  @valid ~w(tool categories name project_id)a
+  @valid ~w(tool categories name project_id mcp_server_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -177,7 +177,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:tempo, with: &prom_configuration_changeset/2)
     |> cast_embed(:datadog, with: &datadog_configuration_changeset/2)
     |> cast_embed(:sentry, with: &sentry_configuration_changeset/2)
-    |> validate_required([tool])
+    |> validate_required(if tool == :mcp, do: [], else: [tool])
   end
 
   defp http_configuration_changeset(model, attrs) do
