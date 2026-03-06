@@ -102,6 +102,7 @@ _Appears in:_
 | `azure` _[AzureOpenAISettings](#azureopenaisettings)_ | Azure holds configuration for using AzureOpenAI to generate LLM insights |  | Optional: \{\} <br /> |
 | `bedrock` _[BedrockSettings](#bedrocksettings)_ | Bedrock holds configuration for using AWS Bedrock to generate LLM insights |  | Optional: \{\} <br /> |
 | `vertex` _[VertexSettings](#vertexsettings)_ | Vertex holds configuration for using GCP VertexAI to generate LLM insights |  | Optional: \{\} <br /> |
+| `nexus` _[NexusSettings](#nexussettings)_ | Nexus holds configuration for using the Nexus embeddings proxy |  | Optional: \{\} <br /> |
 | `vectorStore` _[VectorStore](#vectorstore)_ | VectorStore holds configuration for using a vector store to store embeddings. |  | Optional: \{\} <br /> |
 | `graph` _[GraphStore](#graphstore)_ | Configuration for the cloud graph store, which uses similar datastores to the vector store. |  | Optional: \{\} <br /> |
 
@@ -2341,6 +2342,26 @@ _Appears in:_
 | `namespace` _string_ | Namespace is a resource namespace. |  | Required: \{\} <br /> |
 
 
+
+
+#### NexusSettings
+
+
+
+NexusSettings holds configuration for using the Nexus proxy
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | URL is the URL of the Nexus proxy |  | Required: \{\} <br /> |
+| `model` _string_ | Model to use for completions |  | Optional: \{\} <br /> |
+| `toolModel` _string_ | ToolModel to use for tool calling |  | Optional: \{\} <br /> |
+| `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the access token<br />for the Nexus proxy |  | Optional: \{\} <br /> |
 
 
 #### NotificationRouter

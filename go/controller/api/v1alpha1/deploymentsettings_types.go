@@ -461,6 +461,11 @@ type AISettings struct {
 	// +kubebuilder:validation:Optional
 	Vertex *VertexSettings `json:"vertex,omitempty"`
 
+	// Nexus holds configuration for using the Nexus embeddings proxy
+	//
+	// +kubebuilder:validation:Optional
+	Nexus *NexusSettings `json:"nexus,omitempty"`
+
 	// VectorStore holds configuration for using a vector store to store embeddings.
 	//
 	// +kubebuilder:validation:Optional
@@ -685,6 +690,21 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Model:         in.Ollama.Model,
 			ToolModel:     in.Ollama.ToolModel,
 			Authorization: auth,
+		}
+	}
+
+	if in.Nexus != nil {
+		token, err := in.Nexus.Token(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.Nexus = &console.NexusSettingsAttributes{
+			URL:            in.Nexus.URL,
+			AccessToken:    lo.EmptyableToPtr(token),
+			Model:          in.Nexus.Model,
+			ToolModel:      in.Nexus.ToolModel,
+			EmbeddingModel: in.Nexus.EmbeddingModel,
 		}
 	}
 
@@ -931,6 +951,43 @@ type VertexSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	ServiceAccountJsonSecretRef *corev1.SecretKeySelector `json:"serviceAccountJsonSecretRef,omitempty"`
+}
+
+// NexusSettings holds configuration for using the Nexus proxy
+type NexusSettings struct {
+	// URL is the URL of the Nexus proxy
+	//
+	// +kubebuilder:validation:Required
+	URL string `json:"url"`
+
+	// Model to use for completions
+	//
+	// +kubebuilder:validation:Optional
+	Model *string `json:"model,omitempty"`
+
+	// ToolModel to use for tool calling
+	//
+	// +kubebuilder:validation:Optional
+	ToolModel *string `json:"toolModel,omitempty"`
+
+	// EmbeddingModel to use for generating embeddings
+	//
+	// +kubebuilder:validation:Optional
+	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+
+	// TokenSecretRef is a reference to the local secret holding the access token
+	// for the Nexus proxy
+	//
+	// +kubebuilder:validation:Optional
+	TokenSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef,omitempty"`
+}
+
+func (in *NexusSettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
+	if in == nil {
+		return "", nil
+	}
+
+	return utils.GetSecretKey(ctx, c, in.TokenSecretRef, namespace)
 }
 
 func (in *AnalysisRates) Attributes() (*console.AnalysisRatesAttributes, error) {

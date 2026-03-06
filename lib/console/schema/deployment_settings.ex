@@ -265,6 +265,14 @@ defmodule Console.Schema.DeploymentSettings do
         field :embedding_model,      :string
         field :proxy_models,         {:array, :string}
       end
+
+      embeds_one :nexus, Nexus, on_replace: :update do
+        field :url,             :string
+        field :access_token,    EncryptedString
+        field :model,           :string
+        field :tool_model,      :string
+        field :embedding_model, :string
+      end
     end
 
     belongs_to :artifact_repository, GitRepository
@@ -347,6 +355,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:azure, with: &azure_openai_changeset/2)
     |> cast_embed(:bedrock, with: &bedrock_changeset/2)
     |> cast_embed(:vertex, with: &vertex_changeset/2)
+    |> cast_embed(:nexus, with: &nexus_changeset/2)
   end
 
   defp analysis_rates_changeset(model, attrs), do: model |> cast(attrs, ~w(fast slow)a)
@@ -393,6 +402,12 @@ defmodule Console.Schema.DeploymentSettings do
         _ -> [service_account_json: "is not valid json"]
       end
     end)
+  end
+
+  defp nexus_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url access_token model tool_model embedding_model)a)
+    |> validate_required(~w(url)a)
   end
 
   defp tool_config_changeset(model, attrs) do
