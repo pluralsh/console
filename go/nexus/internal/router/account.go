@@ -142,6 +142,9 @@ func (in *Account) GetConfigForProvider(provider schemas.ModelProvider) (*schema
 
 	case schemas.Bedrock:
 		// Bedrock uses AWS region + credentials in keys; no base URL override required.
+
+	case schemas.Azure:
+		// Azure uses endpoint + token in keys; no base URL override required.
 	}
 
 	return config, nil
