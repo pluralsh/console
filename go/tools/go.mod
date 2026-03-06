@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/tools
 
-go 1.25.7
+go 1.26.1
 
 require (
 	github.com/99designs/gqlgen v0.17.73

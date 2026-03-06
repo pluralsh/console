@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/cloud-query
 
-go 1.25.7
+go 1.26.1
 
 require (
 	github.com/DataDog/datadog-api-client-go/v2 v2.54.0

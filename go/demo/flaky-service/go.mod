@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/demo/flaky-service
 
-go 1.25.7
+go 1.26.1
 
 require github.com/prometheus/client_golang v1.23.2
 
