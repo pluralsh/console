@@ -14617,6 +14617,7 @@ export type WorkbenchToolAttributes = {
 };
 
 export enum WorkbenchToolCategory {
+  ErrorTracking = 'ERROR_TRACKING',
   Integration = 'INTEGRATION',
   Logs = 'LOGS',
   Metrics = 'METRICS',
@@ -14817,7 +14818,9 @@ export enum WorkbenchToolType {
   Elastic = 'ELASTIC',
   Http = 'HTTP',
   Loki = 'LOKI',
+  Mcp = 'MCP',
   Prometheus = 'PROMETHEUS',
+  Sentry = 'SENTRY',
   Tempo = 'TEMPO'
 }
 

@@ -1,10 +1,11 @@
 defmodule Console.Schema.WorkbenchTool do
   use Console.Schema.Base
-  alias Console.Schema.{Project, PolicyBinding, User}
+  alias Console.Schema.{Project, PolicyBinding, User, McpServer}
   alias Console.Deployments.Policies.Rbac
+  alias Piazza.Ecto.EncryptedString
 
-  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5
-  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4
+  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7
+  defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
   schema "workbench_tools" do
@@ -16,38 +17,45 @@ defmodule Console.Schema.WorkbenchTool do
       embeds_one :elastic, ElasticConnection, on_replace: :update do
         field :url,      :string
         field :username, :string
-        field :password, :string
+        field :password, EncryptedString
         field :index,    :string
+      end
+
+      embeds_one :sentry, SentryConnection, on_replace: :update do
+        field :url,          :string
+        field :access_token, EncryptedString
+        field :path,         :string
+        field :agent_mode,   :boolean
       end
 
       embeds_one :prometheus, PrometheusConnection, on_replace: :update do
         field :url,       :string
-        field :token,     :string
+        field :token,     EncryptedString
         field :tenant_id, :string
         field :username,  :string
-        field :password,  :string
+        field :password,  EncryptedString
       end
 
       embeds_one :loki, LokiConnection, on_replace: :update do
         field :url,       :string
-        field :token,     :string
+        field :token,     EncryptedString
         field :tenant_id, :string
         field :username,  :string
-        field :password,  :string
+        field :password,  EncryptedString
       end
 
       embeds_one :tempo, TempoConnection, on_replace: :update do
         field :url,       :string
-        field :token,     :string
+        field :token,     EncryptedString
         field :tenant_id, :string
         field :username,  :string
-        field :password,  :string
+        field :password,  EncryptedString
       end
 
       embeds_one :datadog, DatadogConnection, on_replace: :update do
         field :site,      :string
-        field :api_key,   :string
-        field :app_key,   :string
+        field :api_key,   EncryptedString
+        field :app_key,   EncryptedString
       end
 
       embeds_one :http, HttpConfiguration, on_replace: :update do
@@ -76,7 +84,8 @@ defmodule Console.Schema.WorkbenchTool do
       foreign_key: :policy_id,
       references: :write_policy_id
 
-    belongs_to :project, Project
+    belongs_to :project,    Project
+    belongs_to :mcp_server, McpServer
 
     timestamps()
   end
@@ -113,13 +122,14 @@ defmodule Console.Schema.WorkbenchTool do
     |> unique_constraint(:name)
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
+    |> then(fn cs -> cast_embed(cs, :configuration, with: &configuration_changeset(&1, &2, get_field(cs, :tool))) end)
     |> foreign_key_constraint(:project_id)
-    |> cast_embed(:configuration, with: &configuration_changeset/2)
     |> validate_format(:name, ~r/^[a-z0-9]([\._a-z0-9]*[a-z0-9])?$/, message: "must be a valid name for OpenAI or equivalent tool calls (only a-z, 0-9, .,  and underscores allowed)")
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :tool])
     |> infer_categories()
+    |> ensure_mcp_server()
   end
 
   defp infer_categories(changeset) do
@@ -139,6 +149,13 @@ defmodule Console.Schema.WorkbenchTool do
     end)
   end
 
+  defp ensure_mcp_server(changeset) do
+    case get_field(changeset, :tool) do
+      :mcp -> validate_required(changeset, [:mcp_server_id])
+      _ -> changeset
+    end
+  end
+
   defp categories(:http), do: [:integration]
   defp categories(:datadog), do: [:metrics, :logs]
   defp categories(:newrelic), do: [:metrics, :logs]
@@ -147,9 +164,10 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:loki), do: [:logs]
   defp categories(:elastic), do: [:logs]
   defp categories(:tempo), do: [:traces]
+  defp categories(:sentry), do: [:error_tracking]
   defp categories(_), do: [:integration]
 
-  defp configuration_changeset(model, attrs) do
+  defp configuration_changeset(model, attrs, tool) do
     model
     |> cast(attrs, [])
     |> cast_embed(:http, with: &http_configuration_changeset/2)
@@ -158,6 +176,8 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:loki, with: &prom_configuration_changeset/2)
     |> cast_embed(:tempo, with: &prom_configuration_changeset/2)
     |> cast_embed(:datadog, with: &datadog_configuration_changeset/2)
+    |> cast_embed(:sentry, with: &sentry_configuration_changeset/2)
+    |> validate_required([tool])
   end
 
   defp http_configuration_changeset(model, attrs) do
@@ -189,6 +209,12 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(url username password index)a)
     |> validate_required([:url, :username, :password, :index])
+  end
+
+  defp sentry_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url access_token path agent_mode)a)
+    |> validate_required([:access_token])
   end
 
   defp header_changeset(model, attrs) do

@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
   alias Console.AI.Tools.Workbench.{Result, Skills, Skill, Http}
-  alias Console.AI.Workbench.Environment
+  alias Console.AI.Workbench.{Environment, MCP}
 
   require EEx
 
@@ -26,8 +26,9 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     end
   end
 
-  defp tools(%Environment{skills: skills, tools: tools}) do
+  defp tools(%Environment{skills: skills, tools: tools, job: job}) do
     workbench_tools(tools)
+    |> Enum.concat(MCP.expand_tools(tools, job))
     |> Enum.concat([
       %Skills{skills: skills},
       %Skill{skills: skills},

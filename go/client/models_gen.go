@@ -15280,11 +15280,12 @@ func (e WorkbenchJobStatus) MarshalJSON() ([]byte, error) {
 type WorkbenchToolCategory string
 
 const (
-	WorkbenchToolCategoryMetrics     WorkbenchToolCategory = "METRICS"
-	WorkbenchToolCategoryLogs        WorkbenchToolCategory = "LOGS"
-	WorkbenchToolCategoryIntegration WorkbenchToolCategory = "INTEGRATION"
-	WorkbenchToolCategoryTicketing   WorkbenchToolCategory = "TICKETING"
-	WorkbenchToolCategoryTraces      WorkbenchToolCategory = "TRACES"
+	WorkbenchToolCategoryMetrics       WorkbenchToolCategory = "METRICS"
+	WorkbenchToolCategoryLogs          WorkbenchToolCategory = "LOGS"
+	WorkbenchToolCategoryIntegration   WorkbenchToolCategory = "INTEGRATION"
+	WorkbenchToolCategoryTicketing     WorkbenchToolCategory = "TICKETING"
+	WorkbenchToolCategoryTraces        WorkbenchToolCategory = "TRACES"
+	WorkbenchToolCategoryErrorTracking WorkbenchToolCategory = "ERROR_TRACKING"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -15293,11 +15294,12 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategoryIntegration,
 	WorkbenchToolCategoryTicketing,
 	WorkbenchToolCategoryTraces,
+	WorkbenchToolCategoryErrorTracking,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking:
 		return true
 	}
 	return false
@@ -15408,6 +15410,8 @@ const (
 	WorkbenchToolTypePrometheus WorkbenchToolType = "PROMETHEUS"
 	WorkbenchToolTypeLoki       WorkbenchToolType = "LOKI"
 	WorkbenchToolTypeTempo      WorkbenchToolType = "TEMPO"
+	WorkbenchToolTypeSentry     WorkbenchToolType = "SENTRY"
+	WorkbenchToolTypeMcp        WorkbenchToolType = "MCP"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -15417,11 +15421,13 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypePrometheus,
 	WorkbenchToolTypeLoki,
 	WorkbenchToolTypeTempo,
+	WorkbenchToolTypeSentry,
+	WorkbenchToolTypeMcp,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp:
 		return true
 	}
 	return false

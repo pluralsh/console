@@ -21,6 +21,7 @@ defmodule Console.AI.Workbench.Engine do
   alias Console.AI.Workbench.{
     Environment,
     Message,
+    Supervisor
   }
   alias Console.AI.Tools.Workbench.{
     Complete,
@@ -40,8 +41,9 @@ defmodule Console.AI.Workbench.Engine do
     %{user: user, workbench: workbench} = job = Repo.preload(job, [:user, workbench: [:tools, :repository, :agent_runtime]])
 
     user = Console.Services.Rbac.preload(user)
-    with {:ok, skills} <- SkillsUtil.skills(workbench) do
-      env = Environment.new(job, workbench.tools, skills)
+    with {:ok, skills} <- SkillsUtil.skills(workbench),
+         env = Environment.new(job, workbench.tools, skills),
+         {:ok, _} <- Supervisor.start_link(env) do
       Console.AI.Tool.context(user: user, runtime: workbench.agent_runtime)
       {:ok, %__MODULE__{job: job, user: user, environment: env}}
     else

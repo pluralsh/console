@@ -3,7 +3,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
   alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill}
   alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces}
-  alias Console.AI.Workbench.Environment
+  alias Console.AI.Workbench.{Environment, MCP}
 
   require EEx
 
@@ -27,8 +27,9 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     end
   end
 
-  defp tools(%Environment{skills: skills, tools: tools}) do
+  defp tools(%Environment{skills: skills, tools: tools, job: job}) do
     workbench_tools(tools)
+    |> Enum.concat(MCP.expand_tools(tools, job))
     |> Enum.concat([
       %Skills{skills: skills},
       %Skill{skills: skills},

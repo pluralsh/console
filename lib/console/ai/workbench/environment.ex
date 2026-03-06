@@ -78,12 +78,13 @@ defmodule Console.AI.Workbench.Environment do
       _ -> []
     end)
     |> Enum.map(fn
-      :metrics     -> :observability
-      :logs        -> :observability
-      :traces      -> :observability
-      :integration -> :integration
-      :ticketing   -> :integration
-      _            -> nil
+      :metrics        -> :observability
+      :logs           -> :observability
+      :traces         -> :observability
+      :error_tracking -> :observability
+      :integration    -> :integration
+      :ticketing      -> :integration
+      _               -> nil
     end)
     |> Enum.filter(& &1)
     |> Enum.uniq()

@@ -2065,6 +2065,8 @@ enum WorkbenchToolType {
   PROMETHEUS
   LOKI
   TEMPO
+  SENTRY
+  MCP
 }
 
 enum WorkbenchToolCategory {
@@ -2073,6 +2075,7 @@ enum WorkbenchToolCategory {
   INTEGRATION
   TICKETING
   TRACES
+  ERROR_TRACKING
 }
 
 enum WorkbenchToolHttpMethod {
