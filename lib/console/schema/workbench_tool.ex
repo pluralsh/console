@@ -4,7 +4,7 @@ defmodule Console.Schema.WorkbenchTool do
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
 
-  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7
+  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7, linear: 8, atlassian: 9
   defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
@@ -26,6 +26,16 @@ defmodule Console.Schema.WorkbenchTool do
         field :access_token, EncryptedString
         field :path,         :string
         field :agent_mode,   :boolean
+      end
+
+      embeds_one :linear, LinearConnection, on_replace: :update do
+        field :access_token, EncryptedString
+      end
+
+      embeds_one :atlassian, AtlassianConnection, on_replace: :update do
+        field :service_account, EncryptedString
+        field :api_token,       EncryptedString
+        field :email,           :string
       end
 
       embeds_one :prometheus, PrometheusConnection, on_replace: :update do
@@ -165,6 +175,8 @@ defmodule Console.Schema.WorkbenchTool do
   defp categories(:elastic), do: [:logs]
   defp categories(:tempo), do: [:traces]
   defp categories(:sentry), do: [:error_tracking]
+  defp categories(:linear), do: [:integration]
+  defp categories(:atlassian), do: [:integration]
   defp categories(_), do: [:integration]
 
   defp configuration_changeset(model, attrs, tool) do
@@ -177,6 +189,8 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:tempo, with: &prom_configuration_changeset/2)
     |> cast_embed(:datadog, with: &datadog_configuration_changeset/2)
     |> cast_embed(:sentry, with: &sentry_configuration_changeset/2)
+    |> cast_embed(:linear, with: &linear_configuration_changeset/2)
+    |> cast_embed(:atlassian, with: &atlassian_configuration_changeset/2)
     |> validate_required(if tool == :mcp, do: [], else: [tool])
   end
 
@@ -215,6 +229,23 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(url access_token path agent_mode)a)
     |> validate_required([:access_token])
+  end
+
+  defp linear_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(access_token)a)
+    |> validate_required([:access_token])
+  end
+
+  defp atlassian_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(service_account api_token email)a)
+    |> then(fn cs ->
+      case get_field(cs, :service_account) do
+        sa when is_binary(sa) -> cs
+        _ -> validate_required(cs, [:api_token, :email])
+      end
+    end)
   end
 
   defp header_changeset(model, attrs) do

@@ -9424,6 +9424,22 @@ type WorkbenchToolAssociationAttributes struct {
 	ToolID string `json:"toolId"`
 }
 
+type WorkbenchToolAtlassianConnection struct {
+	// static MCP URL for Atlassian/Jira (credentials never exposed)
+	URL string `json:"url"`
+	// atlassian account email for use with PAT authentication
+	Email *string `json:"email,omitempty"`
+}
+
+type WorkbenchToolAtlassianConnectionAttributes struct {
+	// encrypted service account JSON (alternative to api_token + email)
+	ServiceAccount *string `json:"serviceAccount,omitempty"`
+	// atlassian API token (required if not using service_account)
+	APIToken *string `json:"apiToken,omitempty"`
+	// atlassian account email (required if not using service_account)
+	Email *string `json:"email,omitempty"`
+}
+
 type WorkbenchToolAttributes struct {
 	// the name of the tool (a-z, 0-9, underscores)
 	Name string `json:"name"`
@@ -9450,6 +9466,10 @@ type WorkbenchToolConfiguration struct {
 	Tempo *WorkbenchToolTempoConnection `json:"tempo,omitempty"`
 	// datadog connection (no secrets)
 	Datadog *WorkbenchToolDatadogConnection `json:"datadog,omitempty"`
+	// linear connection (no secrets)
+	Linear *WorkbenchToolLinearConnection `json:"linear,omitempty"`
+	// atlassian connection (no secrets)
+	Atlassian *WorkbenchToolAtlassianConnection `json:"atlassian,omitempty"`
 }
 
 type WorkbenchToolConfigurationAttributes struct {
@@ -9465,6 +9485,10 @@ type WorkbenchToolConfigurationAttributes struct {
 	Tempo *WorkbenchToolTempoConnectionAttributes `json:"tempo,omitempty"`
 	// datadog connection (metrics, logs)
 	Datadog *WorkbenchToolDatadogConnectionAttributes `json:"datadog,omitempty"`
+	// linear connection (ticketing)
+	Linear *WorkbenchToolLinearConnectionAttributes `json:"linear,omitempty"`
+	// atlassian/jira connection (ticketing)
+	Atlassian *WorkbenchToolAtlassianConnectionAttributes `json:"atlassian,omitempty"`
 }
 
 type WorkbenchToolConnection struct {
@@ -9545,6 +9569,16 @@ type WorkbenchToolHTTPHeader struct {
 type WorkbenchToolHTTPHeaderAttributes struct {
 	Name  *string `json:"name,omitempty"`
 	Value *string `json:"value,omitempty"`
+}
+
+type WorkbenchToolLinearConnection struct {
+	// static MCP URL for Linear
+	URL string `json:"url"`
+}
+
+type WorkbenchToolLinearConnectionAttributes struct {
+	// linear API access token
+	AccessToken string `json:"accessToken"`
 }
 
 type WorkbenchToolLokiConnection struct {
@@ -15475,6 +15509,8 @@ const (
 	WorkbenchToolTypeTempo      WorkbenchToolType = "TEMPO"
 	WorkbenchToolTypeSentry     WorkbenchToolType = "SENTRY"
 	WorkbenchToolTypeMcp        WorkbenchToolType = "MCP"
+	WorkbenchToolTypeLinear     WorkbenchToolType = "LINEAR"
+	WorkbenchToolTypeAtlassian  WorkbenchToolType = "ATLASSIAN"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -15486,11 +15522,13 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeTempo,
 	WorkbenchToolTypeSentry,
 	WorkbenchToolTypeMcp,
+	WorkbenchToolTypeLinear,
+	WorkbenchToolTypeAtlassian,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian:
 		return true
 	}
 	return false

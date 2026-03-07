@@ -82,12 +82,6 @@ defmodule Console.GRPC.Server do
     }
   end
 
-  defp to_string_map(%{} = map) do
-    Enum.filter_map(map, fn {k, v} -> is_binary(k) and is_binary(v) end)
-    |> Map.new()
-  end
-  defp to_string_map(_), do: %{}
-
   defp to_pb(%AI.Azure{} = azure) do
     %Plrl.AzureOpenAiConfig{
       model: azure.model,
@@ -104,4 +98,10 @@ defmodule Console.GRPC.Server do
 
   defp proxy_models(%{proxy_models: [_ | _] = models}), do: models
   defp proxy_models(_), do: []
+
+  defp to_string_map(%{} = map) do
+    Enum.filter(map, fn {k, v} -> is_binary(k) and is_binary(v) end)
+    |> Map.new()
+  end
+  defp to_string_map(_), do: %{}
 end

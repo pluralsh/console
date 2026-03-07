@@ -14616,6 +14616,23 @@ export type WorkbenchToolAssociationAttributes = {
   toolId: Scalars['ID']['input'];
 };
 
+export type WorkbenchToolAtlassianConnection = {
+  __typename?: 'WorkbenchToolAtlassianConnection';
+  /** atlassian account email for use with PAT authentication */
+  email?: Maybe<Scalars['String']['output']>;
+  /** static MCP URL for Atlassian/Jira (credentials never exposed) */
+  url: Scalars['String']['output'];
+};
+
+export type WorkbenchToolAtlassianConnectionAttributes = {
+  /** atlassian API token (required if not using service_account) */
+  apiToken?: InputMaybe<Scalars['String']['input']>;
+  /** atlassian account email (required if not using service_account) */
+  email?: InputMaybe<Scalars['String']['input']>;
+  /** encrypted service account JSON (alternative to api_token + email) */
+  serviceAccount?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type WorkbenchToolAttributes = {
   /** categories for the tool */
   categories?: InputMaybe<Array<InputMaybe<WorkbenchToolCategory>>>;
@@ -14640,12 +14657,16 @@ export enum WorkbenchToolCategory {
 
 export type WorkbenchToolConfiguration = {
   __typename?: 'WorkbenchToolConfiguration';
+  /** atlassian connection (no secrets) */
+  atlassian?: Maybe<WorkbenchToolAtlassianConnection>;
   /** datadog connection (no secrets) */
   datadog?: Maybe<WorkbenchToolDatadogConnection>;
   /** elasticsearch connection (no secrets) */
   elastic?: Maybe<WorkbenchToolElasticConnection>;
   /** http tool configuration */
   http?: Maybe<WorkbenchToolHttpConfiguration>;
+  /** linear connection (no secrets) */
+  linear?: Maybe<WorkbenchToolLinearConnection>;
   /** loki connection (no secrets) */
   loki?: Maybe<WorkbenchToolLokiConnection>;
   /** prometheus connection (no secrets) */
@@ -14655,12 +14676,16 @@ export type WorkbenchToolConfiguration = {
 };
 
 export type WorkbenchToolConfigurationAttributes = {
+  /** atlassian/jira connection (ticketing) */
+  atlassian?: InputMaybe<WorkbenchToolAtlassianConnectionAttributes>;
   /** datadog connection (metrics, logs) */
   datadog?: InputMaybe<WorkbenchToolDatadogConnectionAttributes>;
   /** elasticsearch connection (logs) */
   elastic?: InputMaybe<WorkbenchToolElasticConnectionAttributes>;
   /** http tool configuration */
   http?: InputMaybe<WorkbenchToolHttpConfigurationAttributes>;
+  /** linear connection (ticketing) */
+  linear?: InputMaybe<WorkbenchToolLinearConnectionAttributes>;
   /** loki connection (logs) */
   loki?: InputMaybe<WorkbenchToolLokiConnectionAttributes>;
   /** prometheus connection (metrics) */
@@ -14763,6 +14788,17 @@ export enum WorkbenchToolHttpMethod {
   Put = 'PUT'
 }
 
+export type WorkbenchToolLinearConnection = {
+  __typename?: 'WorkbenchToolLinearConnection';
+  /** static MCP URL for Linear */
+  url: Scalars['String']['output'];
+};
+
+export type WorkbenchToolLinearConnectionAttributes = {
+  /** linear API access token */
+  accessToken: Scalars['String']['input'];
+};
+
 export type WorkbenchToolLokiConnection = {
   __typename?: 'WorkbenchToolLokiConnection';
   /** optional tenant id */
@@ -14827,9 +14863,11 @@ export type WorkbenchToolTempoConnectionAttributes = {
 };
 
 export enum WorkbenchToolType {
+  Atlassian = 'ATLASSIAN',
   Datadog = 'DATADOG',
   Elastic = 'ELASTIC',
   Http = 'HTTP',
+  Linear = 'LINEAR',
   Loki = 'LOKI',
   Mcp = 'MCP',
   Prometheus = 'PROMETHEUS',

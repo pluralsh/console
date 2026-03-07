@@ -2067,6 +2067,8 @@ enum WorkbenchToolType {
   TEMPO
   SENTRY
   MCP
+  LINEAR
+  ATLASSIAN
 }
 
 enum WorkbenchToolCategory {
@@ -2260,6 +2262,12 @@ input WorkbenchToolConfigurationAttributes {
 
   "datadog connection (metrics, logs)"
   datadog: WorkbenchToolDatadogConnectionAttributes
+
+  "linear connection (ticketing)"
+  linear: WorkbenchToolLinearConnectionAttributes
+
+  "atlassian\/jira connection (ticketing)"
+  atlassian: WorkbenchToolAtlassianConnectionAttributes
 }
 
 input WorkbenchToolElasticConnectionAttributes {
@@ -2336,6 +2344,22 @@ input WorkbenchToolDatadogConnectionAttributes {
 
   "datadog application key"
   appKey: String
+}
+
+input WorkbenchToolLinearConnectionAttributes {
+  "linear API access token"
+  accessToken: String!
+}
+
+input WorkbenchToolAtlassianConnectionAttributes {
+  "encrypted service account JSON (alternative to api_token + email)"
+  serviceAccount: String
+
+  "atlassian API token (required if not using service_account)"
+  apiToken: String
+
+  "atlassian account email (required if not using service_account)"
+  email: String
 }
 
 input WorkbenchToolHttpConfigurationAttributes {
@@ -2703,6 +2727,12 @@ type WorkbenchToolConfiguration {
 
   "datadog connection (no secrets)"
   datadog: WorkbenchToolDatadogConnection
+
+  "linear connection (no secrets)"
+  linear: WorkbenchToolLinearConnection
+
+  "atlassian connection (no secrets)"
+  atlassian: WorkbenchToolAtlassianConnection
 }
 
 type WorkbenchToolElasticConnection {
@@ -2743,6 +2773,19 @@ type WorkbenchToolTempoConnection {
 type WorkbenchToolDatadogConnection {
   "datadog site (API\/app keys never exposed)"
   site: String
+}
+
+type WorkbenchToolLinearConnection {
+  "static MCP URL for Linear"
+  url: String!
+}
+
+type WorkbenchToolAtlassianConnection {
+  "static MCP URL for Atlassian\/Jira (credentials never exposed)"
+  url: String!
+
+  "atlassian account email for use with PAT authentication"
+  email: String
 }
 
 type WorkbenchToolHttpConfiguration {
