@@ -4063,6 +4063,9 @@ input BedrockAiAttributes {
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
+
+  "mapping from model id to bedrock deployment if those require additional configuration"
+  deployments: Json
 }
 
 input VertexAiAttributes {
@@ -4401,6 +4404,9 @@ type BedrockAiSettings {
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
+
+  "mapping from model id to bedrock deployment if those require additional configuration"
+  deployments: Map
 }
 
 "Settings for usage of GCP VertexAI for LLMs"

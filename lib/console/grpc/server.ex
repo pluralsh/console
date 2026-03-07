@@ -77,9 +77,16 @@ defmodule Console.GRPC.Server do
       region: bedrock.region,
       awsAccessKeyId: bedrock.aws_access_key_id,
       awsSecretAccessKey: bedrock.aws_secret_access_key,
-      proxyModels: proxy_models(bedrock)
+      proxyModels: proxy_models(bedrock),
+      deployments: to_string_map(bedrock.deployments)
     }
   end
+
+  defp to_string_map(%{} = map) do
+    Enum.filter_map(map, fn {k, v} -> is_binary(k) and is_binary(v) end)
+    |> Map.new()
+  end
+  defp to_string_map(_), do: %{}
 
   defp to_pb(%AI.Azure{} = azure) do
     %Plrl.AzureOpenAiConfig{
@@ -88,6 +95,7 @@ defmodule Console.GRPC.Server do
       embeddingModel: azure.embedding_model,
       toolModel: azure.tool_model,
       accessToken: azure.access_token,
+      deployment: azure.deployment,
       proxyModels: proxy_models(azure)
     }
   end

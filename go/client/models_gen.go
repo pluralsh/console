@@ -1131,6 +1131,8 @@ type BedrockAiAttributes struct {
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
+	// mapping from model id to bedrock deployment if those require additional configuration
+	Deployments *string `json:"deployments,omitempty"`
 }
 
 // Settings for usage of AWS Bedrock for LLMs
@@ -1147,6 +1149,8 @@ type BedrockAiSettings struct {
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
+	// mapping from model id to bedrock deployment if those require additional configuration
+	Deployments map[string]any `json:"deployments,omitempty"`
 }
 
 type BindingAttributes struct {

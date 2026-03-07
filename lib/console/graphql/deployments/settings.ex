@@ -155,6 +155,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :aws_secret_access_key, :string, description: "the aws secret access key to use (DEPRECATED)"
     field :embedding_model,       :string, description: "the model to use for vector embeddings"
     field :proxy_models,          list_of(:string), description: "addditional models to support within the integrated ai proxy"
+    field :deployments,           :json, description: "mapping from model id to bedrock deployment if those require additional configuration"
   end
 
   input_object :vertex_ai_attributes do
@@ -375,6 +376,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :region,          :string, description: "the aws region the model is hosted in"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
     field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
+    field :deployments,     :map, description: "mapping from model id to bedrock deployment if those require additional configuration"
   end
 
   @desc "Settings for usage of GCP VertexAI for LLMs"

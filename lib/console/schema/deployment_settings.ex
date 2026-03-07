@@ -253,6 +253,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :aws_access_key_id,     :string
         field :aws_secret_access_key, EncryptedString
         field :proxy_models,          {:array, :string}
+        field :deployments,           :map
       end
 
       embeds_one :vertex, Vertex, on_replace: :update do
@@ -379,7 +380,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp bedrock_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model aws_access_key_id aws_secret_access_key proxy_models)a)
+    |> cast(attrs, ~w(model_id tool_model_id access_token region embedding_model aws_access_key_id aws_secret_access_key proxy_models deployments)a)
     |> validate_required(~w(model_id region)a)
   end
 

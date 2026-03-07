@@ -302,6 +302,7 @@ _Appears in:_
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Optional: \{\} <br /> |
 | `awsAccessKeyId` _string_ | AWS Access Key ID to use for authentication |  | Optional: \{\} <br /> |
 | `awsSecretAccessKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | AWS Secret Access Key to use for authentication |  | Optional: \{\} <br /> |
+| `deployments` _object (keys:string, values:string)_ | Deployments is a mapping from model id to bedrock deployment if those require additional configuration |  | Optional: \{\} <br /> |
 
 
 #### Binding

@@ -1418,6 +1418,8 @@ export type BedrockAiAttributes = {
   awsAccessKeyId?: InputMaybe<Scalars['String']['input']>;
   /** the aws secret access key to use (DEPRECATED) */
   awsSecretAccessKey?: InputMaybe<Scalars['String']['input']>;
+  /** mapping from model id to bedrock deployment if those require additional configuration */
+  deployments?: InputMaybe<Scalars['Json']['input']>;
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** the bedrock model id to use */
@@ -1435,6 +1437,8 @@ export type BedrockAiSettings = {
   __typename?: 'BedrockAiSettings';
   /** the openai bedrock aws access key id to use (DEPRECATED) */
   accessKeyId?: Maybe<Scalars['String']['output']>;
+  /** mapping from model id to bedrock deployment if those require additional configuration */
+  deployments?: Maybe<Scalars['Map']['output']>;
   /** the model to use for vector embeddings */
   embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the bedrock model to use */
