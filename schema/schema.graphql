@@ -3455,6 +3455,11 @@ type SentinelRunJobConnection {
   edges: [SentinelRunJobEdge]
 }
 
+enum McpServerProtocol {
+  SSE
+  STREAMABLE_HTTP
+}
+
 input FlowAttributes {
   name: String!
 
@@ -3489,6 +3494,9 @@ input McpServerAttributes {
 
   "whether tool calls against this server should require a confirmation"
   confirm: Boolean
+
+  "MCP transport protocol (e.g. sse, streamable_http)"
+  protocol: McpServerProtocol
 
   authentication: McpServerAuthenticationAttributes
 
@@ -3610,6 +3618,9 @@ type McpServer {
 
   "the HTTP url the server is hosted on"
   url: String!
+
+  "MCP transport protocol (e.g. sse, streamable_http)"
+  protocol: McpServerProtocol
 
   "authentication specs for this server"
   authentication: McpServerAuthentication

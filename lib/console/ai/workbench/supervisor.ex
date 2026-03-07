@@ -13,7 +13,7 @@ defmodule Console.AI.Workbench.Supervisor do
     Map.values(env.tools)
     |> Enum.filter(&MCP.mcp?/1)
     |> Enum.map(&client_child(&1, env.job))
-    |> Supervisor.init(strategy: :one_for_one, restart: :transient)
+    |> Supervisor.init(strategy: :one_for_one)
   end
 
   def client_child(%WorkbenchTool{} = t, %WorkbenchJob{} = job) do

@@ -4024,6 +4024,11 @@ func (in *MCPServerSpec) DeepCopyInto(out *MCPServerSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Protocol != nil {
+		in, out := &in.Protocol, &out.Protocol
+		*out = new(client.McpServerProtocol)
+		**out = **in
+	}
 	if in.Bindings != nil {
 		in, out := &in.Bindings, &out.Bindings
 		*out = new(Bindings)

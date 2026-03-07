@@ -4485,6 +4485,8 @@ type McpServer struct {
 	Name string `json:"name"`
 	// the HTTP url the server is hosted on
 	URL string `json:"url"`
+	// MCP transport protocol (e.g. sse, streamable_http)
+	Protocol *McpServerProtocol `json:"protocol,omitempty"`
 	// authentication specs for this server
 	Authentication *McpServerAuthentication `json:"authentication,omitempty"`
 	// whether a tool call against this server should require user confirmation
@@ -4507,7 +4509,9 @@ type McpServerAttributes struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
 	// whether tool calls against this server should require a confirmation
-	Confirm        *bool                              `json:"confirm,omitempty"`
+	Confirm *bool `json:"confirm,omitempty"`
+	// MCP transport protocol (e.g. sse, streamable_http)
+	Protocol       *McpServerProtocol                 `json:"protocol,omitempty"`
 	Authentication *McpServerAuthenticationAttributes `json:"authentication,omitempty"`
 	ReadBindings   []*PolicyBindingAttributes         `json:"readBindings,omitempty"`
 	WriteBindings  []*PolicyBindingAttributes         `json:"writeBindings,omitempty"`
@@ -12187,6 +12191,61 @@ func (e *MatchStrategy) UnmarshalJSON(b []byte) error {
 }
 
 func (e MatchStrategy) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type McpServerProtocol string
+
+const (
+	McpServerProtocolSse            McpServerProtocol = "SSE"
+	McpServerProtocolStreamableHTTP McpServerProtocol = "STREAMABLE_HTTP"
+)
+
+var AllMcpServerProtocol = []McpServerProtocol{
+	McpServerProtocolSse,
+	McpServerProtocolStreamableHTTP,
+}
+
+func (e McpServerProtocol) IsValid() bool {
+	switch e {
+	case McpServerProtocolSse, McpServerProtocolStreamableHTTP:
+		return true
+	}
+	return false
+}
+
+func (e McpServerProtocol) String() string {
+	return string(e)
+}
+
+func (e *McpServerProtocol) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = McpServerProtocol(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid McpServerProtocol", str)
+	}
+	return nil
+}
+
+func (e McpServerProtocol) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *McpServerProtocol) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e McpServerProtocol) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

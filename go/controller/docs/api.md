@@ -2208,6 +2208,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name specifies the name for this MCP server.<br />If not provided, the name from the resource metadata will be used.<br />This name is used for identification and referencing in AI workflows. |  | Optional: \{\} <br /> |
+| `protocol` _[McpServerProtocol](#mcpserverprotocol)_ | Protocol specifies the MCP transport protocol (SSE or STREAMABLE_HTTP).<br />STREAMABLE_HTTP is the modern protocol and is the default when omitted. | STREAMABLE_HTTP | Enum: [SSE STREAMABLE_HTTP] <br />Optional: \{\} <br /> |
 | `url` _string_ | URL is the HTTP endpoint where the MCP server is hosted.<br />This must be a valid HTTP or HTTPS URL that the AI system can reach<br />to execute tool calls and interact with the server's capabilities. |  | Required: \{\} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings define the read and write access policies for this MCP server.<br />These control which users and groups can view, modify, or execute tools<br />provided by this server, enabling fine-grained access control. |  | Optional: \{\} <br /> |
 | `authentication` _[MCPServerAuthentication](#mcpserverauthentication)_ | Authentication specifies the authentication configuration for accessing this MCP server.<br />Different authentication methods are supported including built-in Plural JWT<br />and custom HTTP headers for integration with various authentication systems. |  | Optional: \{\} <br /> |

@@ -5501,6 +5501,8 @@ export type McpServer = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name for this server */
   name: Scalars['String']['output'];
+  /** MCP transport protocol (e.g. sse, streamable_http) */
+  protocol?: Maybe<McpServerProtocol>;
   /** read policy for this mcp server */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -5528,6 +5530,8 @@ export type McpServerAttributes = {
   /** whether tool calls against this server should require a confirmation */
   confirm?: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
+  /** MCP transport protocol (e.g. sse, streamable_http) */
+  protocol?: InputMaybe<McpServerProtocol>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   url: Scalars['String']['input'];
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -5587,6 +5591,11 @@ export type McpServerHeader = {
   name: Scalars['String']['output'];
   value: Scalars['String']['output'];
 };
+
+export enum McpServerProtocol {
+  Sse = 'SSE',
+  StreamableHttp = 'STREAMABLE_HTTP'
+}
 
 /** A tool related to an mcp server */
 export type McpServerTool = {

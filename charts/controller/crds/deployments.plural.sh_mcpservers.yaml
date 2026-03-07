@@ -138,6 +138,15 @@ spec:
                   If not provided, the name from the resource metadata will be used.
                   This name is used for identification and referencing in AI workflows.
                 type: string
+              protocol:
+                default: STREAMABLE_HTTP
+                description: |-
+                  Protocol specifies the MCP transport protocol (SSE or STREAMABLE_HTTP).
+                  STREAMABLE_HTTP is the modern protocol and is the default when omitted.
+                enum:
+                - SSE
+                - STREAMABLE_HTTP
+                type: string
               reconciliation:
                 description: |-
                   Reconciliation settings for this resource.

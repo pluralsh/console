@@ -107,10 +107,15 @@ func (r *MCPServerReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 }
 
 func (r *MCPServerReconciler) Attributes(mcp *v1alpha1.MCPServer) (*console.McpServerAttributes, error) {
+	protocol := console.McpServerProtocolStreamableHTTP
+	if mcp.Spec.Protocol != nil {
+		protocol = *mcp.Spec.Protocol
+	}
 	attrs := console.McpServerAttributes{
-		Name:    mcp.GetServerName(),
-		URL:     mcp.Spec.URL,
-		Confirm: mcp.Spec.Confirm,
+		Name:     mcp.GetServerName(),
+		URL:      mcp.Spec.URL,
+		Confirm:  mcp.Spec.Confirm,
+		Protocol: &protocol,
 	}
 
 	if mcp.Spec.Bindings != nil {
