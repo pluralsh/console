@@ -11,11 +11,11 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"go.uber.org/zap"
 
-	"github.com/pluralsh/console/go/nexus/internal/bifrost"
 	"github.com/pluralsh/console/go/nexus/internal/config"
 	"github.com/pluralsh/console/go/nexus/internal/console"
 	"github.com/pluralsh/console/go/nexus/internal/log"
 	nexusmw "github.com/pluralsh/console/go/nexus/internal/middleware"
+	"github.com/pluralsh/console/go/nexus/internal/router"
 )
 
 // Server represents the HTTP server with graceful shutdown support
@@ -25,7 +25,7 @@ type Server struct {
 	httpServer     *http.Server
 	router         chi.Router
 	consoleClient  console.Client
-	bifrostHandler *bifrost.Handler
+	bifrostHandler *router.Handler
 }
 
 // New creates a new HTTP server instance with Chi router
@@ -68,7 +68,7 @@ func (s *Server) SetupRoutes() {
 // Start initializes and starts the HTTP server
 // Returns a ready channel that will be closed when the server is listening and ready to accept connections
 func (s *Server) Start(ctx context.Context) (<-chan struct{}, error) {
-	bifrostHandler, err := bifrost.NewHandler(s.consoleClient)
+	bifrostHandler, err := router.NewHandler(s.consoleClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize Bifrost handler: %w", err)
 	}

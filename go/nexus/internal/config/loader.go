@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -42,7 +43,8 @@ func loadFromFile(configFile string, cfg *Config) error {
 	// Read config file
 	if err := v.ReadInConfig(); err != nil {
 		// If file doesn't exist, that's okay - we'll use defaults
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+		var configFileNotFoundError viper.ConfigFileNotFoundError
+		if errors.As(err, &configFileNotFoundError) {
 			return fmt.Errorf("error reading config file: %w", err)
 		}
 		return nil
