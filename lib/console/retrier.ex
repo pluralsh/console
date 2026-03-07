@@ -23,6 +23,10 @@ defmodule Console.Retrier do
       err ->
         Logger.error(Exception.format(:error, err, __STACKTRACE__))
         do_retry(%{retrier | retry: r + 1, res: {:error, {:exception, err}}}, fun)
+    catch
+      reason, err ->
+        Logger.error(Exception.format(:error, err, __STACKTRACE__))
+        do_retry(%{retrier | retry: r + 1, res: {:error, {:exception, {reason, err}}}}, fun)
     end
   end
 

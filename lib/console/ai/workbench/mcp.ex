@@ -23,8 +23,10 @@ defmodule Console.AI.Workbench.MCP do
   end
 
   def list_tools(%WorkbenchTool{} = t, %WorkbenchJob{} = j) do
-    Agent.name(:client, t, j)
-    |> Console.AI.MCP.Client.list_tools()
+    Console.Retrier.retry(fn ->
+      Agent.name(:client, t, j)
+      |> Hermes.Client.Base.list_tools()
+    end)
     |> case do
       {:ok, %Hermes.MCP.Response{result: %{"tools" => found}}} ->
         {:ok, Enum.map(found, &Tool.new/1)}
@@ -34,7 +36,7 @@ defmodule Console.AI.Workbench.MCP do
 
   def invoke(%WorkbenchTool{} = t, %WorkbenchJob{} = j, name, args) do
     Agent.name(:client, t, j)
-    |> Console.AI.MCP.Client.call_tool(name, args)
+    |> Hermes.Client.Base.call_tool(name, args)
     |> case do
       {:ok, %Hermes.MCP.Response{result: %{"content" => content}}} ->
         {:ok, concat_content(content)}

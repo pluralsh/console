@@ -17,12 +17,13 @@ defmodule Console.AI.MCP.ClientSupervisor do
     |> Supervisor.init(strategy: :one_for_one)
   end
 
-  def server_child(%ChatThread{} = t, %McpServer{url: url} = s) do
-    {Console.AI.MCP.Client, [
-      name: Agent.name(:client, t, s),
+  def server_child(%ChatThread{} = t, %McpServer{url: url, protocol: proto} = s) do
+    Console.AI.MCP.Client.child_spec([
+      client_name: Agent.name(:client, t, s),
       transport_name: Agent.name(:transport, t, s),
-      transport: {:sse, [base_url: url, headers: auth_headers(t, s)]}
-    ]}
+      transport: {proto || :sse, [base_url: url, headers: auth_headers(t, s)]}
+    ])
+    |> Map.put(:restart, :transient)
   end
 
   defp auth_headers(%ChatThread{user: %User{} = user}, %McpServer{authentication: %{plural: true}}) do

@@ -15156,7 +15156,7 @@ type WorkbenchJobActivityType string
 const (
 	WorkbenchJobActivityTypeCoding         WorkbenchJobActivityType = "CODING"
 	WorkbenchJobActivityTypeObservability  WorkbenchJobActivityType = "OBSERVABILITY"
-	WorkbenchJobActivityTypeIntegrations   WorkbenchJobActivityType = "INTEGRATIONS"
+	WorkbenchJobActivityTypeIntegration    WorkbenchJobActivityType = "INTEGRATION"
 	WorkbenchJobActivityTypeTicketing      WorkbenchJobActivityType = "TICKETING"
 	WorkbenchJobActivityTypeInfrastructure WorkbenchJobActivityType = "INFRASTRUCTURE"
 	WorkbenchJobActivityTypeMemo           WorkbenchJobActivityType = "MEMO"
@@ -15166,7 +15166,7 @@ const (
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeCoding,
 	WorkbenchJobActivityTypeObservability,
-	WorkbenchJobActivityTypeIntegrations,
+	WorkbenchJobActivityTypeIntegration,
 	WorkbenchJobActivityTypeTicketing,
 	WorkbenchJobActivityTypeInfrastructure,
 	WorkbenchJobActivityTypeMemo,
@@ -15175,7 +15175,7 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegrations, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan:
 		return true
 	}
 	return false

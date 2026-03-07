@@ -14474,7 +14474,7 @@ export enum WorkbenchJobActivityStatus {
 export enum WorkbenchJobActivityType {
   Coding = 'CODING',
   Infrastructure = 'INFRASTRUCTURE',
-  Integrations = 'INTEGRATIONS',
+  Integration = 'INTEGRATION',
   Memo = 'MEMO',
   Observability = 'OBSERVABILITY',
   Plan = 'PLAN',

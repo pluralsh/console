@@ -13,14 +13,15 @@ defmodule Console.AI.Workbench.Supervisor do
     Map.values(env.tools)
     |> Enum.filter(&MCP.mcp?/1)
     |> Enum.map(&client_child(&1, env.job))
-    |> Supervisor.init(strategy: :one_for_one)
+    |> Supervisor.init(strategy: :one_for_one, restart: :transient)
   end
 
   def client_child(%WorkbenchTool{} = t, %WorkbenchJob{} = job) do
-    {Console.AI.MCP.Client, [
-      name: Agent.name(:client, t, job),
+    Console.AI.MCP.Client.child_spec([
+      client_name: Agent.name(:client, t, job),
       transport_name: Agent.name(:transport, t, job),
       transport: MCP.transport(t, job)
-    ]}
+    ])
+    |> Map.put(:restart, :transient)
   end
 end

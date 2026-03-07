@@ -77,7 +77,15 @@ services:
       - "--verbose"
     depends_on:
       - localstack
-
+  mcp:
+    restart: always
+    image: tzolov/mcp-everything-server:v3
+    ports:
+      - 3001:3001
+    command:
+      - node
+      - dist/index.js
+      - "streamableHttp"
 volumes:
   database_data:
     driver: local

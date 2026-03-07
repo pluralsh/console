@@ -15,7 +15,7 @@ defmodule Console.AI.Workbench.MCP.Basic do
   def transport(
     %WorkbenchTool{tool: :mcp, mcp_server: %McpServer{protocol: :streamable_http, url: url} = srv},
     %WorkbenchJob{} = job
-  ), do: {:streamable_http, [url: url, headers: auth_headers(job.user, srv)]}
+  ), do: {:streamable_http, [base_url: url, headers: auth_headers(job.user, srv)]}
 
   defp auth_headers(%User{} = user, %McpServer{authentication: %{plural: true}} = srv) do
     {:ok, jwt, _} = MCP.mint(user)

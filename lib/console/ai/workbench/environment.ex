@@ -59,6 +59,7 @@ defmodule Console.AI.Workbench.Environment do
 
   def subagent_tool?(%WorkbenchTool{categories: categories}, subagent) when is_list(categories),
     do: Enum.any?(categories, & category_to_subagent(&1) == subagent)
+  def subagent_tool?(_, :integration), do: true
   def subagent_tool?(_, _), do: false
 
   def save_environment(%__MODULE__{} = environment), do: Process.put({__MODULE__, :environment}, environment)
@@ -83,7 +84,7 @@ defmodule Console.AI.Workbench.Environment do
   defp tool_agents(tools) do
     Enum.flat_map(tools, fn
       {_, %{categories: [_ | _] = categories}} -> categories
-      _ -> []
+      _ -> [:integration]
     end)
     |> Enum.map(&category_to_subagent/1)
     |> Enum.filter(& &1)
@@ -96,5 +97,5 @@ defmodule Console.AI.Workbench.Environment do
   defp category_to_subagent(:error_tracking), do: :observability
   defp category_to_subagent(:integration), do: :integration
   defp category_to_subagent(:ticketing), do: :integration
-  defp category_to_subagent(_), do: nil
+  defp category_to_subagent(_), do: :integration
 end
