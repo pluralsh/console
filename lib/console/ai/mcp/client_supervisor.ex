@@ -21,7 +21,7 @@ defmodule Console.AI.MCP.ClientSupervisor do
     {Console.AI.MCP.Client, [
       name: Agent.name(:client, t, s),
       transport_name: Agent.name(:transport, t, s),
-      transport: {:sse, [server: [base_url: url], headers: auth_headers(t, s)]}
+      transport: {:sse, [base_url: url, headers: auth_headers(t, s)]}
     ]}
   end
 
