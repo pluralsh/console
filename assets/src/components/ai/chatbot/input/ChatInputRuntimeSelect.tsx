@@ -5,16 +5,13 @@ import {
 } from '../../../../generated/graphql.ts'
 
 import { AIAgentRuntimesSelector } from 'components/ai/agent-runs/AIAgentRuntimesSelector.tsx'
-import { FeatureFlagContext } from 'components/flows/FeatureFlagContext.tsx'
-import { use, useCallback } from 'react'
+import { useCallback } from 'react'
 
 export function ChatInputRuntimeSelect({
   currentThread,
 }: {
   currentThread: ChatThreadTinyFragment
 }) {
-  const { featureFlags } = use(FeatureFlagContext)
-
   const [
     updateThread,
     { loading: updateThreadLoading, error: updateThreadError },
@@ -37,8 +34,6 @@ export function ChatInputRuntimeSelect({
     },
     [currentThread.id, currentThread.summary, currentRuntimeId, updateThread]
   )
-
-  if (!featureFlags.Agent) return null
 
   return (
     <>

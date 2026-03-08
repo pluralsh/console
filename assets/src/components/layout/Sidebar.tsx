@@ -14,6 +14,7 @@ import {
   StackIcon,
   Tooltip,
   WarningShieldIcon,
+  WorkbenchIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
 
@@ -54,6 +55,7 @@ import { TRUNCATE } from 'components/utils/truncate.ts'
 import { FLOWS_ABS_PATH } from 'routes/flowRoutesConsts.tsx'
 import { SELF_SERVICE_ABS_PATH } from 'routes/selfServiceRoutesConsts.tsx'
 import { EDGE_ABS_PATH } from '../../routes/edgeRoutes.tsx'
+import { WORKBENCHES_ABS_PATH } from '../../routes/workbenchesRoutesConsts.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 import { HelpLauncher } from 'components/help/HelpLauncher.tsx'
 
@@ -135,6 +137,7 @@ function getMenuItems({
       path: FLOWS_ABS_PATH,
       hotkeys: ['shift F'],
     },
+
     {
       text: 'Self service',
       expandedLabel: 'Self service',
@@ -175,6 +178,17 @@ function getMenuItems({
       path: SECURITY_ABS_PATH,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
+    ...(featureFlags.Workbenches
+      ? [
+          {
+            text: 'Workbenches',
+            expandedLabel: 'Workbenches',
+            icon: <WorkbenchIcon />,
+            path: WORKBENCHES_ABS_PATH,
+            hotkeys: ['shift W'],
+          },
+        ]
+      : []),
     {
       text: 'Cost management',
       expandedLabel: 'Cost management',

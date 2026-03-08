@@ -6,13 +6,12 @@ import {
   Modal,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import usePersistedState from 'components/hooks/usePersistedState'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { SubTabs } from 'components/utils/SubTabs'
+import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
 import { isNil } from 'lodash'
-import { use, useLayoutEffect, useMemo } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { Link, Outlet, useMatch } from 'react-router-dom'
 import {
   AI_ABS_PATH,
@@ -35,10 +34,8 @@ import { AIDisabledState } from './AIThreads'
 
 const DISMISSED_AI_ENABLED_DIALOG_KEY = 'dismissedAIEnabledDialog'
 
-const getDirectory = (agentEnabled: boolean) => [
-  ...(agentEnabled
-    ? [{ label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH }]
-    : []),
+const directory: SubtabDirectory = [
+  { label: 'Agent runs', path: AI_AGENT_RUNS_REL_PATH },
   { label: 'Infra research', path: AI_INFRA_RESEARCH_REL_PATH },
   { label: 'Sentinels', path: AI_SENTINELS_REL_PATH },
   { label: 'Agent sessions', path: AI_AGENT_SESSIONS_REL_PATH },
@@ -47,7 +44,7 @@ const getDirectory = (agentEnabled: boolean) => [
 
 export const getAIBreadcrumbs = (tab: string = '') => [
   { label: 'plural ai', url: AI_ABS_PATH },
-  { label: tab.split('-').join(' '), url: `${AI_ABS_PATH}/${tab}` },
+  ...getTabCrumb(AI_ABS_PATH, tab),
 ]
 
 export function AI() {
@@ -58,7 +55,6 @@ export function AI() {
     false
   )
   const loading = useLoadingDeploymentSettings()
-  const agentEnabled = !!use(FeatureFlagContext).featureFlags.Agent
   useSetBreadcrumbs(useMemo(() => getAIBreadcrumbs(tab), [tab]))
 
   useLayoutEffect(() => {
@@ -69,7 +65,7 @@ export function AI() {
     <WrapperSC>
       <HeaderSC>
         <StretchedFlex gap="medium">
-          <SubTabs directory={getDirectory(agentEnabled)} />
+          <SubTabs directory={directory} />
           <IconFrame
             clickable
             icon={<GearTrainIcon />}
@@ -132,3 +128,6 @@ const HeaderSC = styled.div(({ theme }) => ({
   flexDirection: 'column',
   gap: theme.spacing.medium,
 }))
+
+export const getTabCrumb = (prefix: string, tab: Nullable<string>) =>
+  tab ? [{ label: tab?.split('-').join(' '), url: `${prefix}/${tab}` }] : []

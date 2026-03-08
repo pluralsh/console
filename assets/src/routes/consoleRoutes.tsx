@@ -18,6 +18,7 @@ import { securityRoutes } from './securityRoutes'
 import { selfServiceRoutes } from './selfServiceRoutes'
 import { settingsRoutes } from './settingsRoutes'
 import { stacksRoutes } from './stacksRoutes'
+import { workbenchesRoutes } from './workbenchesRoutes'
 import { AccessTokens } from 'components/profile/access-tokens/AccessTokens.tsx'
 
 const profileRoutes = [
@@ -71,6 +72,7 @@ export const consoleComponentRoutes = [
   ...aiRoutes,
   ...flowRoutes,
   ...selfServiceRoutes,
+  ...workbenchesRoutes,
 ].map((route, idx) => ({ ...route, key: route.props.path ?? idx }))
 
 export const consoleRoutes: RouteObject[] = [

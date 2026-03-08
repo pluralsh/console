@@ -357,7 +357,6 @@ function CodeContent({
               $verticallyCenter={!multiLine}
             />
             <Highlight
-              key={codeString}
               language={language}
               {...props}
             >
