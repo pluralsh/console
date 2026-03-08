@@ -3,6 +3,8 @@ defmodule Console.GraphQl.Deployments.Flow do
   alias Console.Middleware.AdminRequired
   alias Console.GraphQl.Resolvers.{Deployments, User}
 
+  ecto_enum :mcp_server_protocol, Console.Schema.McpServer.Protocol
+
   input_object :flow_attributes do
     field :name,                non_null(:string)
     field :description,         :string
@@ -22,6 +24,7 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :name,           non_null(:string)
     field :url,            non_null(:string)
     field :confirm,        :boolean, description: "whether tool calls against this server should require a confirmation"
+    field :protocol,       :mcp_server_protocol, description: "MCP transport protocol (e.g. sse, streamable_http)"
     field :authentication, :mcp_server_authentication_attributes
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
@@ -114,6 +117,7 @@ defmodule Console.GraphQl.Deployments.Flow do
     field :id,             non_null(:id)
     field :name,           non_null(:string), description: "the name for this server"
     field :url,            non_null(:string), description: "the HTTP url the server is hosted on"
+    field :protocol,       :mcp_server_protocol, description: "MCP transport protocol (e.g. sse, streamable_http)"
     field :authentication, :mcp_server_authentication, description: "authentication specs for this server"
     field :confirm,        :boolean, description: "whether a tool call against this server should require user confirmation"
 

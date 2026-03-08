@@ -1418,6 +1418,8 @@ export type BedrockAiAttributes = {
   awsAccessKeyId?: InputMaybe<Scalars['String']['input']>;
   /** the aws secret access key to use (DEPRECATED) */
   awsSecretAccessKey?: InputMaybe<Scalars['String']['input']>;
+  /** mapping from model id to bedrock deployment if those require additional configuration */
+  deployments?: InputMaybe<Scalars['Json']['input']>;
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
   /** the bedrock model id to use */
@@ -1435,6 +1437,8 @@ export type BedrockAiSettings = {
   __typename?: 'BedrockAiSettings';
   /** the openai bedrock aws access key id to use (DEPRECATED) */
   accessKeyId?: Maybe<Scalars['String']['output']>;
+  /** mapping from model id to bedrock deployment if those require additional configuration */
+  deployments?: Maybe<Scalars['Map']['output']>;
   /** the model to use for vector embeddings */
   embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the bedrock model to use */
@@ -5501,6 +5505,8 @@ export type McpServer = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name for this server */
   name: Scalars['String']['output'];
+  /** MCP transport protocol (e.g. sse, streamable_http) */
+  protocol?: Maybe<McpServerProtocol>;
   /** read policy for this mcp server */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -5528,6 +5534,8 @@ export type McpServerAttributes = {
   /** whether tool calls against this server should require a confirmation */
   confirm?: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
+  /** MCP transport protocol (e.g. sse, streamable_http) */
+  protocol?: InputMaybe<McpServerProtocol>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   url: Scalars['String']['input'];
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -5587,6 +5595,11 @@ export type McpServerHeader = {
   name: Scalars['String']['output'];
   value: Scalars['String']['output'];
 };
+
+export enum McpServerProtocol {
+  Sse = 'SSE',
+  StreamableHttp = 'STREAMABLE_HTTP'
+}
 
 /** A tool related to an mcp server */
 export type McpServerTool = {
@@ -14474,7 +14487,7 @@ export enum WorkbenchJobActivityStatus {
 export enum WorkbenchJobActivityType {
   Coding = 'CODING',
   Infrastructure = 'INFRASTRUCTURE',
-  Integrations = 'INTEGRATIONS',
+  Integration = 'INTEGRATION',
   Memo = 'MEMO',
   Observability = 'OBSERVABILITY',
   Plan = 'PLAN',
@@ -14603,6 +14616,23 @@ export type WorkbenchToolAssociationAttributes = {
   toolId: Scalars['ID']['input'];
 };
 
+export type WorkbenchToolAtlassianConnection = {
+  __typename?: 'WorkbenchToolAtlassianConnection';
+  /** atlassian account email for use with PAT authentication */
+  email?: Maybe<Scalars['String']['output']>;
+  /** static MCP URL for Atlassian/Jira (credentials never exposed) */
+  url: Scalars['String']['output'];
+};
+
+export type WorkbenchToolAtlassianConnectionAttributes = {
+  /** atlassian API token (required if not using service_account) */
+  apiToken?: InputMaybe<Scalars['String']['input']>;
+  /** atlassian account email (required if not using service_account) */
+  email?: InputMaybe<Scalars['String']['input']>;
+  /** encrypted service account JSON (alternative to api_token + email) */
+  serviceAccount?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type WorkbenchToolAttributes = {
   /** categories for the tool */
   categories?: InputMaybe<Array<InputMaybe<WorkbenchToolCategory>>>;
@@ -14617,6 +14647,7 @@ export type WorkbenchToolAttributes = {
 };
 
 export enum WorkbenchToolCategory {
+  ErrorTracking = 'ERROR_TRACKING',
   Integration = 'INTEGRATION',
   Logs = 'LOGS',
   Metrics = 'METRICS',
@@ -14626,12 +14657,16 @@ export enum WorkbenchToolCategory {
 
 export type WorkbenchToolConfiguration = {
   __typename?: 'WorkbenchToolConfiguration';
+  /** atlassian connection (no secrets) */
+  atlassian?: Maybe<WorkbenchToolAtlassianConnection>;
   /** datadog connection (no secrets) */
   datadog?: Maybe<WorkbenchToolDatadogConnection>;
   /** elasticsearch connection (no secrets) */
   elastic?: Maybe<WorkbenchToolElasticConnection>;
   /** http tool configuration */
   http?: Maybe<WorkbenchToolHttpConfiguration>;
+  /** linear connection (no secrets) */
+  linear?: Maybe<WorkbenchToolLinearConnection>;
   /** loki connection (no secrets) */
   loki?: Maybe<WorkbenchToolLokiConnection>;
   /** prometheus connection (no secrets) */
@@ -14641,12 +14676,16 @@ export type WorkbenchToolConfiguration = {
 };
 
 export type WorkbenchToolConfigurationAttributes = {
+  /** atlassian/jira connection (ticketing) */
+  atlassian?: InputMaybe<WorkbenchToolAtlassianConnectionAttributes>;
   /** datadog connection (metrics, logs) */
   datadog?: InputMaybe<WorkbenchToolDatadogConnectionAttributes>;
   /** elasticsearch connection (logs) */
   elastic?: InputMaybe<WorkbenchToolElasticConnectionAttributes>;
   /** http tool configuration */
   http?: InputMaybe<WorkbenchToolHttpConfigurationAttributes>;
+  /** linear connection (ticketing) */
+  linear?: InputMaybe<WorkbenchToolLinearConnectionAttributes>;
   /** loki connection (logs) */
   loki?: InputMaybe<WorkbenchToolLokiConnectionAttributes>;
   /** prometheus connection (metrics) */
@@ -14749,6 +14788,17 @@ export enum WorkbenchToolHttpMethod {
   Put = 'PUT'
 }
 
+export type WorkbenchToolLinearConnection = {
+  __typename?: 'WorkbenchToolLinearConnection';
+  /** static MCP URL for Linear */
+  url: Scalars['String']['output'];
+};
+
+export type WorkbenchToolLinearConnectionAttributes = {
+  /** linear API access token */
+  accessToken: Scalars['String']['input'];
+};
+
 export type WorkbenchToolLokiConnection = {
   __typename?: 'WorkbenchToolLokiConnection';
   /** optional tenant id */
@@ -14813,11 +14863,15 @@ export type WorkbenchToolTempoConnectionAttributes = {
 };
 
 export enum WorkbenchToolType {
+  Atlassian = 'ATLASSIAN',
   Datadog = 'DATADOG',
   Elastic = 'ELASTIC',
   Http = 'HTTP',
+  Linear = 'LINEAR',
   Loki = 'LOKI',
+  Mcp = 'MCP',
   Prometheus = 'PROMETHEUS',
+  Sentry = 'SENTRY',
   Tempo = 'TEMPO'
 }
 

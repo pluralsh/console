@@ -1131,6 +1131,8 @@ type BedrockAiAttributes struct {
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
+	// mapping from model id to bedrock deployment if those require additional configuration
+	Deployments *string `json:"deployments,omitempty"`
 }
 
 // Settings for usage of AWS Bedrock for LLMs
@@ -1147,6 +1149,8 @@ type BedrockAiSettings struct {
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
+	// mapping from model id to bedrock deployment if those require additional configuration
+	Deployments map[string]any `json:"deployments,omitempty"`
 }
 
 type BindingAttributes struct {
@@ -4485,6 +4489,8 @@ type McpServer struct {
 	Name string `json:"name"`
 	// the HTTP url the server is hosted on
 	URL string `json:"url"`
+	// MCP transport protocol (e.g. sse, streamable_http)
+	Protocol *McpServerProtocol `json:"protocol,omitempty"`
 	// authentication specs for this server
 	Authentication *McpServerAuthentication `json:"authentication,omitempty"`
 	// whether a tool call against this server should require user confirmation
@@ -4507,7 +4513,9 @@ type McpServerAttributes struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
 	// whether tool calls against this server should require a confirmation
-	Confirm        *bool                              `json:"confirm,omitempty"`
+	Confirm *bool `json:"confirm,omitempty"`
+	// MCP transport protocol (e.g. sse, streamable_http)
+	Protocol       *McpServerProtocol                 `json:"protocol,omitempty"`
 	Authentication *McpServerAuthenticationAttributes `json:"authentication,omitempty"`
 	ReadBindings   []*PolicyBindingAttributes         `json:"readBindings,omitempty"`
 	WriteBindings  []*PolicyBindingAttributes         `json:"writeBindings,omitempty"`
@@ -9416,6 +9424,22 @@ type WorkbenchToolAssociationAttributes struct {
 	ToolID string `json:"toolId"`
 }
 
+type WorkbenchToolAtlassianConnection struct {
+	// static MCP URL for Atlassian/Jira (credentials never exposed)
+	URL string `json:"url"`
+	// atlassian account email for use with PAT authentication
+	Email *string `json:"email,omitempty"`
+}
+
+type WorkbenchToolAtlassianConnectionAttributes struct {
+	// encrypted service account JSON (alternative to api_token + email)
+	ServiceAccount *string `json:"serviceAccount,omitempty"`
+	// atlassian API token (required if not using service_account)
+	APIToken *string `json:"apiToken,omitempty"`
+	// atlassian account email (required if not using service_account)
+	Email *string `json:"email,omitempty"`
+}
+
 type WorkbenchToolAttributes struct {
 	// the name of the tool (a-z, 0-9, underscores)
 	Name string `json:"name"`
@@ -9442,6 +9466,10 @@ type WorkbenchToolConfiguration struct {
 	Tempo *WorkbenchToolTempoConnection `json:"tempo,omitempty"`
 	// datadog connection (no secrets)
 	Datadog *WorkbenchToolDatadogConnection `json:"datadog,omitempty"`
+	// linear connection (no secrets)
+	Linear *WorkbenchToolLinearConnection `json:"linear,omitempty"`
+	// atlassian connection (no secrets)
+	Atlassian *WorkbenchToolAtlassianConnection `json:"atlassian,omitempty"`
 }
 
 type WorkbenchToolConfigurationAttributes struct {
@@ -9457,6 +9485,10 @@ type WorkbenchToolConfigurationAttributes struct {
 	Tempo *WorkbenchToolTempoConnectionAttributes `json:"tempo,omitempty"`
 	// datadog connection (metrics, logs)
 	Datadog *WorkbenchToolDatadogConnectionAttributes `json:"datadog,omitempty"`
+	// linear connection (ticketing)
+	Linear *WorkbenchToolLinearConnectionAttributes `json:"linear,omitempty"`
+	// atlassian/jira connection (ticketing)
+	Atlassian *WorkbenchToolAtlassianConnectionAttributes `json:"atlassian,omitempty"`
 }
 
 type WorkbenchToolConnection struct {
@@ -9537,6 +9569,16 @@ type WorkbenchToolHTTPHeader struct {
 type WorkbenchToolHTTPHeaderAttributes struct {
 	Name  *string `json:"name,omitempty"`
 	Value *string `json:"value,omitempty"`
+}
+
+type WorkbenchToolLinearConnection struct {
+	// static MCP URL for Linear
+	URL string `json:"url"`
+}
+
+type WorkbenchToolLinearConnectionAttributes struct {
+	// linear API access token
+	AccessToken string `json:"accessToken"`
 }
 
 type WorkbenchToolLokiConnection struct {
@@ -12187,6 +12229,61 @@ func (e *MatchStrategy) UnmarshalJSON(b []byte) error {
 }
 
 func (e MatchStrategy) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type McpServerProtocol string
+
+const (
+	McpServerProtocolSse            McpServerProtocol = "SSE"
+	McpServerProtocolStreamableHTTP McpServerProtocol = "STREAMABLE_HTTP"
+)
+
+var AllMcpServerProtocol = []McpServerProtocol{
+	McpServerProtocolSse,
+	McpServerProtocolStreamableHTTP,
+}
+
+func (e McpServerProtocol) IsValid() bool {
+	switch e {
+	case McpServerProtocolSse, McpServerProtocolStreamableHTTP:
+		return true
+	}
+	return false
+}
+
+func (e McpServerProtocol) String() string {
+	return string(e)
+}
+
+func (e *McpServerProtocol) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = McpServerProtocol(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid McpServerProtocol", str)
+	}
+	return nil
+}
+
+func (e McpServerProtocol) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *McpServerProtocol) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e McpServerProtocol) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil
@@ -15156,7 +15253,7 @@ type WorkbenchJobActivityType string
 const (
 	WorkbenchJobActivityTypeCoding         WorkbenchJobActivityType = "CODING"
 	WorkbenchJobActivityTypeObservability  WorkbenchJobActivityType = "OBSERVABILITY"
-	WorkbenchJobActivityTypeIntegrations   WorkbenchJobActivityType = "INTEGRATIONS"
+	WorkbenchJobActivityTypeIntegration    WorkbenchJobActivityType = "INTEGRATION"
 	WorkbenchJobActivityTypeTicketing      WorkbenchJobActivityType = "TICKETING"
 	WorkbenchJobActivityTypeInfrastructure WorkbenchJobActivityType = "INFRASTRUCTURE"
 	WorkbenchJobActivityTypeMemo           WorkbenchJobActivityType = "MEMO"
@@ -15166,7 +15263,7 @@ const (
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeCoding,
 	WorkbenchJobActivityTypeObservability,
-	WorkbenchJobActivityTypeIntegrations,
+	WorkbenchJobActivityTypeIntegration,
 	WorkbenchJobActivityTypeTicketing,
 	WorkbenchJobActivityTypeInfrastructure,
 	WorkbenchJobActivityTypeMemo,
@@ -15175,7 +15272,7 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegrations, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan:
 		return true
 	}
 	return false
@@ -15280,11 +15377,12 @@ func (e WorkbenchJobStatus) MarshalJSON() ([]byte, error) {
 type WorkbenchToolCategory string
 
 const (
-	WorkbenchToolCategoryMetrics     WorkbenchToolCategory = "METRICS"
-	WorkbenchToolCategoryLogs        WorkbenchToolCategory = "LOGS"
-	WorkbenchToolCategoryIntegration WorkbenchToolCategory = "INTEGRATION"
-	WorkbenchToolCategoryTicketing   WorkbenchToolCategory = "TICKETING"
-	WorkbenchToolCategoryTraces      WorkbenchToolCategory = "TRACES"
+	WorkbenchToolCategoryMetrics       WorkbenchToolCategory = "METRICS"
+	WorkbenchToolCategoryLogs          WorkbenchToolCategory = "LOGS"
+	WorkbenchToolCategoryIntegration   WorkbenchToolCategory = "INTEGRATION"
+	WorkbenchToolCategoryTicketing     WorkbenchToolCategory = "TICKETING"
+	WorkbenchToolCategoryTraces        WorkbenchToolCategory = "TRACES"
+	WorkbenchToolCategoryErrorTracking WorkbenchToolCategory = "ERROR_TRACKING"
 )
 
 var AllWorkbenchToolCategory = []WorkbenchToolCategory{
@@ -15293,11 +15391,12 @@ var AllWorkbenchToolCategory = []WorkbenchToolCategory{
 	WorkbenchToolCategoryIntegration,
 	WorkbenchToolCategoryTicketing,
 	WorkbenchToolCategoryTraces,
+	WorkbenchToolCategoryErrorTracking,
 }
 
 func (e WorkbenchToolCategory) IsValid() bool {
 	switch e {
-	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces:
+	case WorkbenchToolCategoryMetrics, WorkbenchToolCategoryLogs, WorkbenchToolCategoryIntegration, WorkbenchToolCategoryTicketing, WorkbenchToolCategoryTraces, WorkbenchToolCategoryErrorTracking:
 		return true
 	}
 	return false
@@ -15408,6 +15507,10 @@ const (
 	WorkbenchToolTypePrometheus WorkbenchToolType = "PROMETHEUS"
 	WorkbenchToolTypeLoki       WorkbenchToolType = "LOKI"
 	WorkbenchToolTypeTempo      WorkbenchToolType = "TEMPO"
+	WorkbenchToolTypeSentry     WorkbenchToolType = "SENTRY"
+	WorkbenchToolTypeMcp        WorkbenchToolType = "MCP"
+	WorkbenchToolTypeLinear     WorkbenchToolType = "LINEAR"
+	WorkbenchToolTypeAtlassian  WorkbenchToolType = "ATLASSIAN"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -15417,11 +15520,15 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypePrometheus,
 	WorkbenchToolTypeLoki,
 	WorkbenchToolTypeTempo,
+	WorkbenchToolTypeSentry,
+	WorkbenchToolTypeMcp,
+	WorkbenchToolTypeLinear,
+	WorkbenchToolTypeAtlassian,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian:
 		return true
 	}
 	return false

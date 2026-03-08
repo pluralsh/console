@@ -1,6 +1,7 @@
 package v1alpha1
 
 import (
+	console "github.com/pluralsh/console/go/client"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -68,6 +69,13 @@ type MCPServerSpec struct {
 	// This name is used for identification and referencing in AI workflows.
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
+
+	// Protocol specifies the MCP transport protocol (SSE or STREAMABLE_HTTP).
+	// STREAMABLE_HTTP is the modern protocol and is the default when omitted.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=STREAMABLE_HTTP
+	// +kubebuilder:validation:Enum=SSE;STREAMABLE_HTTP
+	Protocol *console.McpServerProtocol `json:"protocol,omitempty"`
 
 	// URL is the HTTP endpoint where the MCP server is hosted.
 	// This must be a valid HTTP or HTTPS URL that the AI system can reach

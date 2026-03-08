@@ -111,7 +111,7 @@ defmodule Console.MixProject do
       {:telemetry_registry, "~> 0.3"},
       {:snap, "~> 0.11"},
       {:finch, "~> 0.19"},
-      {:hermes_mcp, "~> 0.3.12"},
+      {:hermes_mcp, "~> 0.14"},
       {:piazza_core, "~> 0.3.9", git: "https://github.com/michaeljguarino/piazza_core", commit: "2a91145d0d567f1aab40d52843d77dfb491c424a", override: true},
       {:flow, "~> 1.2"},
       {:gen_stage, "~> 1.0", override: true},

@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -662,6 +663,16 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			return nil, err
 		}
 
+		var deployments *string
+
+		if len(in.Bedrock.Deployments) > 0 {
+			json, err := json.Marshal(in.Bedrock.Deployments)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal bedrock deployments field: %w", err)
+			}
+			deployments = lo.ToPtr(string(json))
+		}
+
 		attr.Bedrock = &console.BedrockAiAttributes{
 			ModelID:            in.Bedrock.ModelID,
 			ToolModelID:        in.Bedrock.ToolModelId,
@@ -671,6 +682,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			ProxyModels:        lo.ToSlicePtr(in.Bedrock.ProxyModels),
 			AWSSecretAccessKey: secretKey,
 			AWSAccessKeyID:     in.Bedrock.AwsAccessKeyID,
+			Deployments:        deployments,
 		}
 	}
 
@@ -889,6 +901,11 @@ type BedrockSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	AwsSecretAccessKeyRef *corev1.SecretKeySelector `json:"awsSecretAccessKeyRef,omitempty"`
+
+	// Deployments is a mapping from model id to bedrock deployment if those require additional configuration
+	//
+	// +kubebuilder:validation:Optional
+	Deployments map[string]string `json:"deployments,omitempty"`
 }
 
 type VertexSettings struct {

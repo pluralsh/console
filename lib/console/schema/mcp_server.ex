@@ -3,7 +3,10 @@ defmodule Console.Schema.McpServer do
   alias Console.Schema.{PolicyBinding, Project, User}
   alias Console.Deployments.Policies.Rbac
 
+  defenum Protocol, sse: 0, streamable_http: 1
+
   schema "mcp_servers" do
+    field :protocol, Protocol, default: :sse
     field :name,    :string
     field :url,     :string
     field :confirm, :boolean, default: false
@@ -66,7 +69,7 @@ defmodule Console.Schema.McpServer do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(url name confirm project_id)a)
+    |> cast(attrs, ~w(url name confirm project_id protocol)a)
     |> cast_embed(:authentication, with: &auth_changeset/2)
     |> foreign_key_constraint(:project_id)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)

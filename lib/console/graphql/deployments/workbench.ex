@@ -86,6 +86,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :loki,       :workbench_tool_loki_connection_attributes, description: "loki connection (logs)"
     field :tempo,      :workbench_tool_tempo_connection_attributes, description: "tempo connection (traces)"
     field :datadog,    :workbench_tool_datadog_connection_attributes, description: "datadog connection (metrics, logs)"
+    field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
+    field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
   end
 
   input_object :workbench_tool_elastic_connection_attributes do
@@ -123,6 +125,16 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :site,    :string, description: "datadog site (e.g. datadoghq.com)"
     field :api_key, non_null(:string), description: "datadog API key"
     field :app_key, :string, description: "datadog application key"
+  end
+
+  input_object :workbench_tool_linear_connection_attributes do
+    field :access_token, non_null(:string), description: "linear API access token"
+  end
+
+  input_object :workbench_tool_atlassian_connection_attributes do
+    field :service_account, :string, description: "encrypted service account JSON (alternative to api_token + email)"
+    field :api_token,       :string, description: "atlassian API token (required if not using service_account)"
+    field :email,           :string, description: "atlassian account email (required if not using service_account)"
   end
 
   input_object :workbench_tool_http_configuration_attributes do
@@ -336,6 +348,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :loki,      :workbench_tool_loki_connection, description: "loki connection (no secrets)"
     field :tempo,     :workbench_tool_tempo_connection, description: "tempo connection (no secrets)"
     field :datadog,   :workbench_tool_datadog_connection, description: "datadog connection (no secrets)"
+    field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
+    field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
   end
 
   object :workbench_tool_elastic_connection do
@@ -361,6 +375,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_tool_datadog_connection do
     field :site, :string, description: "datadog site (API/app keys never exposed)"
+  end
+
+  object :workbench_tool_linear_connection do
+    field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://mcp.linear.app/mcp"} end,
+      description: "static MCP URL for Linear"
+  end
+
+  object :workbench_tool_atlassian_connection do
+    field :url, non_null(:string), resolve: fn _, _ -> {:ok, "https://mcp.atlassian.com/v1/mcp"} end,
+      description: "static MCP URL for Atlassian/Jira (credentials never exposed)"
+    field :email, :string, description: "atlassian account email for use with PAT authentication"
   end
 
   object :workbench_tool_http_configuration do
