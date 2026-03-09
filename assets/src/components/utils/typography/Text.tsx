@@ -27,6 +27,10 @@ export const CaptionP = styled.p<TextProps>((props) => ({
   ...props.theme.partials.text.caption,
   ...sharedTextStyles(props),
 }))
+export const ButtonSmallP = styled.p<TextProps>((props) => ({
+  ...props.theme.partials.text.buttonSmall,
+  ...sharedTextStyles(props),
+}))
 export const BadgeLabelP = styled.p<TextProps>((props) => ({
   ...props.theme.partials.text.badgeLabel,
   ...sharedTextStyles(props),

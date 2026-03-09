@@ -1,10 +1,14 @@
 import {
+  AiSparkleFilledIcon,
+  AtlassianLogoIcon,
   DatadogLogoIcon,
   ElasticsearchLogoIcon,
   IconProps,
+  LinearLogoIcon,
   LokiLogoIcon,
-  TempoLogoIcon,
   PrometheusLogoIcon,
+  SentryLogoIcon,
+  TempoLogoIcon,
   ToolsIcon,
 } from '@pluralsh/design-system'
 import { WorkbenchToolType } from 'generated/graphql'
@@ -41,4 +45,8 @@ const toolToIcon: Record<WorkbenchToolType, ComponentType<IconProps>> = {
   [WorkbenchToolType.Prometheus]: PrometheusLogoIcon,
   [WorkbenchToolType.Tempo]: TempoLogoIcon,
   [WorkbenchToolType.Http]: ToolsIcon,
+  [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
+  [WorkbenchToolType.Linear]: LinearLogoIcon,
+  [WorkbenchToolType.Mcp]: AiSparkleFilledIcon,
+  [WorkbenchToolType.Sentry]: SentryLogoIcon,
 } satisfies Record<WorkbenchToolType, ComponentType<IconProps>>

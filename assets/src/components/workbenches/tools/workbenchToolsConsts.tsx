@@ -7,6 +7,10 @@ export const TOOL_TYPE_LABELS: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Loki]: 'Loki',
   [WorkbenchToolType.Tempo]: 'Tempo',
   [WorkbenchToolType.Datadog]: 'Datadog',
+  [WorkbenchToolType.Atlassian]: 'Atlassian',
+  [WorkbenchToolType.Linear]: 'Linear',
+  [WorkbenchToolType.Mcp]: 'MCP',
+  [WorkbenchToolType.Sentry]: 'Sentry',
 }
 
 export const TOOL_TYPE_CARDS: {

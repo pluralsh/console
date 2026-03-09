@@ -20,7 +20,11 @@ export const getWorkbenchBreadcrumbs = (
 
 export function Workbench() {
   const id = useParams()[WORKBENCH_PARAM_ID]
-  const { data, loading, error } = useWorkbenchQuery({
+  const {
+    data,
+    loading: _l,
+    error: _e,
+  } = useWorkbenchQuery({
     variables: { id },
   })
   const workbench = data?.workbench

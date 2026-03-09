@@ -21,7 +21,11 @@ export function WorkbenchToolCreateOrEdit({
   const id = useParams()[WORKBENCHES_TOOLS_PARAM_ID]
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const { data, loading, error } = useWorkbenchToolQuery({
+  const {
+    data: _d,
+    loading: _l,
+    error: _e,
+  } = useWorkbenchToolQuery({
     variables: { id },
     skip: mode === 'create' || !id,
     fetchPolicy: 'network-only',
