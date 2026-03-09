@@ -152,12 +152,7 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 				Region: &schemas.EnvVar{
 					Val: config.GetRegion(),
 				},
-				// TODO: needs proper mapping from model to inference profile ID. Requires Console config changes.
-				Deployments: in.filterDeployments(map[string]string{
-					config.GetModelId():          fmt.Sprintf("global.%s", config.GetModelId()),
-					config.GetToolModelId():      fmt.Sprintf("global.%s", config.GetToolModelId()),
-					config.GetEmbeddingModelId(): config.GetEmbeddingModelId(),
-				}),
+				Deployments: in.filterDeployments(config.GetDeployments()),
 			},
 			UseForBatchAPI: lo.ToPtr(true),
 			Weight:         1.0,
@@ -191,12 +186,7 @@ func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key,
 					// We need to remove the suffix since console deployment settings enforce it currently.
 					Val: strings.TrimSuffix(config.GetEndpoint(), "/openai/deployments"),
 				},
-				// TODO: needs proper mapping from model to deployment name. Requires Console config changes.
-				Deployments: in.filterDeployments(map[string]string{
-					config.GetDeployment():     config.GetModel(),
-					config.GetEmbeddingModel(): config.GetEmbeddingModel(),
-					config.GetToolModel():      config.GetToolModel(),
-				}),
+				Deployments: in.filterDeployments(config.GetDeployments()),
 			},
 			UseForBatchAPI: lo.ToPtr(true),
 			Weight:         1.0,
