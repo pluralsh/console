@@ -99,6 +99,7 @@ import DaemonSets from '../components/kubernetes/workloads/DaemonSets'
 import Deployment, {
   DeploymentEvents,
   DeploymentHorizontalPodAutoscalers,
+  DeploymentMetrics,
   DeploymentPods,
   DeploymentReplicaSets,
 } from '../components/kubernetes/workloads/Deployment'
@@ -134,6 +135,7 @@ import ReplicationController, {
 import ReplicationControllers from '../components/kubernetes/workloads/ReplicationControllers'
 import StatefulSet, {
   StatefulSetEvents,
+  StatefulSetMetrics,
   StatefulSetPods,
 } from '../components/kubernetes/workloads/StatefulSet'
 import StatefulSets from '../components/kubernetes/workloads/StatefulSets'
@@ -457,6 +459,10 @@ export const kubernetesRoutes = (
         element={<DeploymentHorizontalPodAutoscalers />}
       />
       <Route
+        path="metrics"
+        element={<DeploymentMetrics />}
+      />
+      <Route
         path="events"
         element={<DeploymentEvents />}
       />
@@ -515,6 +521,10 @@ export const kubernetesRoutes = (
       <Route
         path="pods"
         element={<StatefulSetPods />}
+      />
+      <Route
+        path="metrics"
+        element={<StatefulSetMetrics />}
       />
       <Route
         path="events"

@@ -53,11 +53,13 @@ import { getBreadcrumbs } from './Deployments'
 import { useReplicaSetsColumns } from './ReplicaSets'
 import { WorkloadStatusChip } from './utils'
 import { usePodsColumns } from './Pods.tsx'
+import KubernetesMetrics from '../common/KubernetesMetrics'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
   { path: 'replicasets', label: 'Replica Sets' },
   { path: 'hpas', label: 'Horizontal Pod Autoscalers' },
+  { path: 'metrics', label: 'Metrics' },
   { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
 ] as const
@@ -270,6 +272,21 @@ export function DeploymentEvents(): ReactElement<any> {
       pathParams={{ deployment: name, namespace }}
       itemsKey="events"
       disableOnRowClick
+    />
+  )
+}
+
+export function DeploymentMetrics(): ReactElement<any> {
+  const { name = '', namespace = '', clusterId = '' } = useParams()
+
+  return (
+    <KubernetesMetrics
+      clusterId={clusterId}
+      group="apps"
+      version="v1"
+      kind="Deployment"
+      name={name}
+      namespace={namespace}
     />
   )
 }
