@@ -365,7 +365,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp azure_openai_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(endpoint api_version access_token tool_model embedding_model model proxy_models deployment)a)
+    |> cast(attrs, ~w(endpoint api_version access_token tool_model embedding_model model proxy_models deployments)a)
     |> validate_required(~w(access_token endpoint)a)
     |> validate_change(:endpoint, fn :endpoint, endpoint ->
       with %URI{path: path, scheme: "https"} <- URI.parse(endpoint),
