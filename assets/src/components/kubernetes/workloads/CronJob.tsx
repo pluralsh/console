@@ -119,6 +119,7 @@ export default function CronJob(): ReactElement<any> {
             onClick={() =>
               mutation.mutate({
                 client: AxiosInstance(clusterId),
+                body: {} as never,
                 path: { name, namespace },
               })
             }
