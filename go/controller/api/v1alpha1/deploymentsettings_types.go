@@ -616,8 +616,8 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 
 		var deployments *string
 
-		if len(in.Bedrock.Deployments) > 0 {
-			json, err := json.Marshal(in.Bedrock.Deployments)
+		if len(in.Azure.Deployments) > 0 {
+			json, err := json.Marshal(in.Azure.Deployments)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal azure deployments field: %w", err)
 			}
