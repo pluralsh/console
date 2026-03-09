@@ -137,11 +137,7 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 
 	return []schemas.Key{
 		{
-			Models: in.filterModels(append([]string{
-				config.GetModelId(),
-				config.GetToolModelId(),
-				config.GetEmbeddingModelId(),
-			}, config.GetProxyModels()...)),
+			Models: in.toBedrockModels(config),
 			BedrockKeyConfig: &schemas.BedrockKeyConfig{
 				AccessKey: schemas.EnvVar{
 					Val: config.GetAwsAccessKeyId(),
@@ -152,12 +148,76 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 				Region: &schemas.EnvVar{
 					Val: config.GetRegion(),
 				},
-				Deployments: in.filterDeployments(config.GetDeployments()),
+				Deployments: in.toBedrockDeployments(config),
 			},
 			UseForBatchAPI: lo.ToPtr(true),
 			Weight:         1.0,
 		},
 	}, nil
+}
+
+// toBedrockModels returns an array of model IDs. We are assuming that
+// configured models can be inference profile IDs that contain regional prefix in
+// model ID, i.e.,
+//
+// Inference Profile ID: global.anthropic.claude-haiku-4-5-20251001-v1:0
+// Model ID: anthropic.claude-haiku-4-5-20251001-v1:0
+func (in *Account) toBedrockModels(config *pb.BedrockConfig) []string {
+	result := make([]string, 0)
+	models := append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId(), config.GetEmbeddingModelId())
+	for _, model := range models {
+		if len(model) == 0 {
+			continue
+		}
+
+		parts := strings.Split(model, ".")
+
+		// inference profiles should always have 3 parts <region>.<provider>.<model>
+		// if it doesn't just use as-is
+		if len(parts) != 3 {
+			result = append(result, model)
+			continue
+		}
+
+		result = append(result, strings.Join(parts[1:], "."))
+	}
+
+	return result
+}
+
+// toBedrockDeployments returns a map of model IDs to inference profile IDs.
+// Similar to toBedrockModels, we are assuming that configured models can be
+// inference profile IDs that contain regional prefix in model ID, i.e.,
+//
+// Inference Profile ID: global.anthropic.claude-haiku-4-5-20251001-v1:0
+// Model ID: anthropic.claude-haiku-4-5-20251001-v1:0
+func (in *Account) toBedrockDeployments(config *pb.BedrockConfig) map[string]string {
+	deployments := in.filterDeployments(config.GetDeployments())
+	if deployments == nil {
+		deployments = make(map[string]string)
+	}
+
+	inferenceProfileIDs := append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId(), config.GetEmbeddingModelId())
+
+	// Augment configured deployments with provided profiles ids.
+	for _, inferenceProfileID := range inferenceProfileIDs {
+		if len(inferenceProfileID) == 0 {
+			continue
+		}
+
+		parts := strings.Split(inferenceProfileID, ".")
+
+		// inference profiles should always have 3 parts <region>.<provider>.<model>
+		// if it doesn't skip it
+		if len(parts) != 3 {
+			continue
+		}
+
+		model := strings.Join(parts[1:], ".")
+		deployments[model] = inferenceProfileID
+	}
+
+	return deployments
 }
 
 func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key, error) {

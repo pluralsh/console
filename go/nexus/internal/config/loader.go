@@ -35,6 +35,10 @@ func Load(configFile string) (*Config, error) {
 
 // loadFromFile loads configuration from a YAML or JSON file
 func loadFromFile(configFile string, cfg *Config) error {
+	if len(configFile) == 0 {
+		return nil
+	}
+
 	v := viper.New()
 
 	// Set config file
