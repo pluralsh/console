@@ -58,28 +58,26 @@ export function ServicesTree() {
   )
 
   const {
-    data: serviceStatusesData,
-    loading: serviceStatusesLoading,
-    error: serviceStatusesError,
+    data: aggData,
+    previousData: aggPrev,
+    loading: aggLoading,
   } = useServiceStatusesQuery({
     variables: { ...(clusterId ? { clusterId } : {}) },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
-
   const statusCounts = useMemo(
-    () => getServiceStatuses(serviceStatusesData?.serviceStatuses),
-    [serviceStatusesData?.serviceStatuses]
+    () => getServiceStatuses((aggData || aggPrev)?.serviceStatuses),
+    [aggData, aggPrev]
   )
 
   useEffect(() => setRefetch?.(() => refetch), [refetch, setRefetch])
   const isLoading =
     (!data && loading) || (!globalServicesData && globalServicesLoading)
 
-  if (error || serviceStatusesError || globalServicesError)
-    return (
-      <GqlError error={error || serviceStatusesError || globalServicesError} />
-    )
+  if (error || aggLoading || globalServicesError)
+    return <GqlError error={error || aggLoading || globalServicesError} />
+
   return (
     <div
       css={{
@@ -94,7 +92,7 @@ export function ServicesTree() {
         setQueryStatusFilter={setQueryStatusFilter}
         tabStateRef={tabStateRef}
         statusCounts={statusCounts}
-        loadingStatuses={serviceStatusesLoading}
+        loadingStatuses={aggLoading}
       />
       <TabPanel
         stateRef={tabStateRef}

@@ -9,7 +9,6 @@ import {
   IconFrame,
   Input,
   ListBoxItem,
-  LoopingLogo,
   MoreIcon,
   PeopleIcon,
   ReturnIcon,
@@ -68,6 +67,7 @@ import {
 } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { GqlError } from '../utils/Alert'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
@@ -189,6 +189,7 @@ export function Stacks() {
     error: stackError,
   } = useStackQuery({
     variables: { id: stackId },
+    skip: !stackId,
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'all',
     pollInterval: 3_000,
@@ -226,10 +227,6 @@ export function Stacks() {
         />
       </div>
     )
-
-  if (!tinyStack && stackLoading) {
-    return <LoopingLogo />
-  }
 
   if (
     isEmpty(stacks) &&
@@ -310,33 +307,33 @@ export function Stacks() {
             }}
           />
         )}
-        <div css={{ marginTop: theme.spacing.medium, flex: 1 }}>
-          <VirtualList
-            data={stacks}
-            onVirtualSliceChange={setVirtualSlice}
-            hasNextPage={pageInfo?.hasNextPage}
-            isLoadingNextPage={loading}
-            loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
-            renderer={({ rowData, index }) => (
-              <StackEntry
-                stack={rowData}
-                active={rowData.id === stackId}
-                first={index === 0}
-              />
-            )}
-          />
-          {isEmpty(stacks) &&
-            !(isEmpty(debouncedSearchString) && isEmpty(searchTags)) && (
-              <EmptyState message="No stacks match your query.">
-                <Button
-                  secondary
-                  onClick={() => setSearchString('')}
-                >
-                  Reset search
-                </Button>
-              </EmptyState>
-            )}
-        </div>
+        <VirtualList
+          data={stacks}
+          loading={!data && loading}
+          skeletonProps={{ gap: 'xsmall', height: 80 }}
+          onVirtualSliceChange={setVirtualSlice}
+          hasNextPage={pageInfo?.hasNextPage}
+          isLoadingNextPage={loading}
+          loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
+          renderer={({ rowData, index }) => (
+            <StackEntry
+              stack={rowData}
+              active={rowData.id === stackId}
+              first={index === 0}
+            />
+          )}
+        />
+        {isEmpty(stacks) &&
+          !(isEmpty(debouncedSearchString) && isEmpty(searchTags)) && (
+            <EmptyState message="No stacks match your query.">
+              <Button
+                secondary
+                onClick={() => setSearchString('')}
+              >
+                Reset search
+              </Button>
+            </EmptyState>
+          )}
       </Flex>
       {stackError && !fullStack ? (
         <StackDeletedEmptyState />
@@ -349,6 +346,7 @@ export function Stacks() {
         >
           <StretchedFlex align="start">
             <StackedText
+              loading={!tinyStack && stackLoading}
               first={
                 <Flex
                   gap="small"
@@ -464,8 +462,12 @@ export function Stacks() {
                 </LinkTabWrap>
               ))}
           </TabList>
+          {/* TODO: make stack nullable on the context type and add skeletons at the drill-down levels */}
           {!fullStack ? (
-            <LoopingLogo css={{ flex: 1 }} />
+            <RectangleSkeleton
+              $height="100%"
+              $width="100%"
+            />
           ) : (
             <Outlet
               context={

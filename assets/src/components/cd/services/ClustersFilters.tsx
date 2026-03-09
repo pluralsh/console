@@ -142,7 +142,6 @@ export function ClustersFilters({
                 <Chip
                   size="small"
                   severity={serviceStatusToSeverity(key as any)}
-                  loading={isNil(statusCounts?.[key])}
                 >
                   {statusCounts?.[key]}
                 </Chip>
