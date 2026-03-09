@@ -18,6 +18,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/samber/lo"
+
 	"github.com/emicklei/go-restful/v3"
 
 	metricapi "github.com/pluralsh/console/go/kubernetes-agent/api/pkg/integration/metric/api"
@@ -64,10 +66,9 @@ func parseMetricPathParameter(request *restful.Request) *dataselect.MetricQuery 
 	} else {
 		rawAggregations = nil
 	}
-	aggregationModes := metricapi.AggregationModes{}
-	for _, e := range rawAggregations {
-		aggregationModes = append(aggregationModes, metricapi.AggregationMode(e))
-	}
+	aggregationModes := lo.Map(rawAggregations, func(e string, _ int) metricapi.AggregationMode {
+		return metricapi.AggregationMode(e)
+	})
 	return dataselect.NewMetricQuery(metricNames, aggregationModes)
 }
 

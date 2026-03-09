@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/samber/lo"
+
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog/v2"
@@ -58,12 +60,9 @@ func (in sidecarClient) ID() integrationapi.IntegrationID {
 // DownloadMetrics implements metric client interface. See MetricClient for more information.
 func (in sidecarClient) DownloadMetrics(selectors []metricapi.ResourceSelector,
 	metricNames []string, cachedResources *metricapi.CachedResources) metricapi.MetricPromises {
-	result := metricapi.MetricPromises{}
-	for _, metricName := range metricNames {
-		collectedMetrics := in.DownloadMetric(selectors, metricName, cachedResources)
-		result = append(result, collectedMetrics...)
-	}
-	return result
+	return lo.FlatMap(metricNames, func(metricName string, _ int) []metricapi.MetricPromise {
+		return in.DownloadMetric(selectors, metricName, cachedResources)
+	})
 }
 
 // DownloadMetric implements metric client interface. See MetricClient for more information.
@@ -136,16 +135,13 @@ func (in sidecarClient) downloadMetric(sidecarSelectors []sidecarSelector,
 // downloadMetricForEachTargetResource downloads requested metric for each resource present in SidecarSelector
 // and returns the result as a list of promises - one promise for each resource. Order of promises returned is the same as order in in.Resources.
 func (in sidecarClient) downloadMetricForEachTargetResource(selector sidecarSelector, metricName string) metricapi.MetricPromises {
-	var notAggregatedMetrics metricapi.MetricPromises
 	if SidecarAllInOneDownloadConfig[selector.TargetResourceType] {
-		notAggregatedMetrics = in.allInOneDownload(selector, metricName)
-	} else {
-		notAggregatedMetrics = metricapi.MetricPromises{}
-		for i := range selector.Resources {
-			notAggregatedMetrics = append(notAggregatedMetrics, in.ithResourceDownload(selector, metricName, i))
-		}
+		return in.allInOneDownload(selector, metricName)
 	}
-	return notAggregatedMetrics
+
+	return lo.Map(selector.Resources, func(_ string, i int) metricapi.MetricPromise {
+		return in.ithResourceDownload(selector, metricName, i)
+	})
 }
 
 // ithResourceDownload downloads metric for ith resource in in.Resources. Use only in case all in 1 download is not supported

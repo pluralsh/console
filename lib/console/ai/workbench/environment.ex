@@ -53,6 +53,15 @@ defmodule Console.AI.Workbench.Environment do
   def skill(name), do: Process.get({__MODULE__, :skill, name})
   def environment(), do: Process.get({__MODULE__, :environment})
 
+  def subagent_tools(tools, subagent) when is_list(tools) and is_atom(subagent),
+    do: Enum.filter(tools, &subagent_tool?(&1, subagent))
+  def subagent_tools(%{} = tools, subagent), do: subagent_tools(Map.values(tools), subagent)
+
+  def subagent_tool?(%WorkbenchTool{categories: categories}, subagent) when is_list(categories),
+    do: Enum.any?(categories, & category_to_subagent(&1) == subagent)
+  def subagent_tool?(_, :integration), do: true
+  def subagent_tool?(_, _), do: false
+
   def save_environment(%__MODULE__{} = environment), do: Process.put({__MODULE__, :environment}, environment)
 
   defp save_tool(%WorkbenchTool{name: name} = tool), do: Process.put({__MODULE__, :tool, name}, tool)
@@ -74,18 +83,19 @@ defmodule Console.AI.Workbench.Environment do
 
   defp tool_agents(tools) do
     Enum.flat_map(tools, fn
-      {_, %{categories: c}} when is_list(c) -> c
-      _ -> []
+      {_, %{categories: [_ | _] = categories}} -> categories
+      _ -> [:integration]
     end)
-    |> Enum.map(fn
-      :metrics     -> :observability
-      :logs        -> :observability
-      :traces      -> :observability
-      :integration -> :integration
-      :ticketing   -> :integration
-      _            -> nil
-    end)
+    |> Enum.map(&category_to_subagent/1)
     |> Enum.filter(& &1)
     |> Enum.uniq()
   end
+
+  defp category_to_subagent(:metrics), do: :observability
+  defp category_to_subagent(:logs), do: :observability
+  defp category_to_subagent(:traces), do: :observability
+  defp category_to_subagent(:error_tracking), do: :observability
+  defp category_to_subagent(:integration), do: :integration
+  defp category_to_subagent(:ticketing), do: :integration
+  defp category_to_subagent(_), do: :integration
 end

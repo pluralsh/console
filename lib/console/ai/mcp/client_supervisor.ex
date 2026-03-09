@@ -1,5 +1,4 @@
 defmodule Console.AI.MCP.ClientSupervisor do
-  # Automatically defines child_spec/1
   use Supervisor
 
   alias Console.Schema.{ChatThread, McpServer, User}
@@ -14,31 +13,17 @@ defmodule Console.AI.MCP.ClientSupervisor do
   def init(%ChatThread{} = t) do
     Console.Repo.preload(t, [flow: :servers])
     |> Agent.servers()
-    |> Enum.flat_map(&server_children(t, &1))
+    |> Enum.map(&server_child(t, &1))
     |> Supervisor.init(strategy: :one_for_one)
   end
 
-  def server_children(%ChatThread{} = t, %McpServer{url: url} = s) do
-    [
-      {Hermes.Client, [
-        name: Agent.name(:client, t, s),
-        transport: [
-          layer: Hermes.Transport.SSE,
-          name: Agent.name(:transport, t, s)
-        ],
-        client_info: %{
-          "name" => "Plural",
-          "version" => "1.0.0"
-        },
-        capabilities: %{"resources" => %{}, "tools" => %{}, "prompts" => %{}, "sampling" => %{}}
-      ]},
-      {Hermes.Transport.SSE, [
-        name: Agent.name(:transport, t, s),
-        client: Agent.name(:client, t, s),
-        server: [base_url: url],
-        headers: auth_headers(t, s)
-      ]},
-    ]
+  def server_child(%ChatThread{} = t, %McpServer{url: url, protocol: proto} = s) do
+    Console.AI.MCP.Client.child_spec([
+      client_name: Agent.name(:client, t, s),
+      transport_name: Agent.name(:transport, t, s),
+      transport: {proto || :sse, [base_url: url, headers: auth_headers(t, s)]}
+    ])
+    |> Map.put(:restart, :transient)
   end
 
   defp auth_headers(%ChatThread{user: %User{} = user}, %McpServer{authentication: %{plural: true}}) do

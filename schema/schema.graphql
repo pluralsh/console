@@ -1415,6 +1415,10 @@ enum ChatProviderConnectionType {
 
 enum IssueWebhookProvider {
   LINEAR
+  JIRA
+  ASANA
+  GITHUB
+  GITLAB
 }
 
 enum IssueStatus {
@@ -2061,6 +2065,10 @@ enum WorkbenchToolType {
   PROMETHEUS
   LOKI
   TEMPO
+  SENTRY
+  MCP
+  LINEAR
+  ATLASSIAN
 }
 
 enum WorkbenchToolCategory {
@@ -2069,6 +2077,7 @@ enum WorkbenchToolCategory {
   INTEGRATION
   TICKETING
   TRACES
+  ERROR_TRACKING
 }
 
 enum WorkbenchToolHttpMethod {
@@ -2098,7 +2107,7 @@ enum WorkbenchJobActivityStatus {
 enum WorkbenchJobActivityType {
   CODING
   OBSERVABILITY
-  INTEGRATIONS
+  INTEGRATION
   TICKETING
   INFRASTRUCTURE
   MEMO
@@ -2253,6 +2262,12 @@ input WorkbenchToolConfigurationAttributes {
 
   "datadog connection (metrics, logs)"
   datadog: WorkbenchToolDatadogConnectionAttributes
+
+  "linear connection (ticketing)"
+  linear: WorkbenchToolLinearConnectionAttributes
+
+  "atlassian\/jira connection (ticketing)"
+  atlassian: WorkbenchToolAtlassianConnectionAttributes
 }
 
 input WorkbenchToolElasticConnectionAttributes {
@@ -2329,6 +2344,22 @@ input WorkbenchToolDatadogConnectionAttributes {
 
   "datadog application key"
   appKey: String
+}
+
+input WorkbenchToolLinearConnectionAttributes {
+  "linear API access token"
+  accessToken: String!
+}
+
+input WorkbenchToolAtlassianConnectionAttributes {
+  "encrypted service account JSON (alternative to api_token + email)"
+  serviceAccount: String
+
+  "atlassian API token (required if not using service_account)"
+  apiToken: String
+
+  "atlassian account email (required if not using service_account)"
+  email: String
 }
 
 input WorkbenchToolHttpConfigurationAttributes {
@@ -2696,6 +2727,12 @@ type WorkbenchToolConfiguration {
 
   "datadog connection (no secrets)"
   datadog: WorkbenchToolDatadogConnection
+
+  "linear connection (no secrets)"
+  linear: WorkbenchToolLinearConnection
+
+  "atlassian connection (no secrets)"
+  atlassian: WorkbenchToolAtlassianConnection
 }
 
 type WorkbenchToolElasticConnection {
@@ -2736,6 +2773,19 @@ type WorkbenchToolTempoConnection {
 type WorkbenchToolDatadogConnection {
   "datadog site (API\/app keys never exposed)"
   site: String
+}
+
+type WorkbenchToolLinearConnection {
+  "static MCP URL for Linear"
+  url: String!
+}
+
+type WorkbenchToolAtlassianConnection {
+  "static MCP URL for Atlassian\/Jira (credentials never exposed)"
+  url: String!
+
+  "atlassian account email for use with PAT authentication"
+  email: String
 }
 
 type WorkbenchToolHttpConfiguration {
@@ -3448,6 +3498,11 @@ type SentinelRunJobConnection {
   edges: [SentinelRunJobEdge]
 }
 
+enum McpServerProtocol {
+  SSE
+  STREAMABLE_HTTP
+}
+
 input FlowAttributes {
   name: String!
 
@@ -3482,6 +3537,9 @@ input McpServerAttributes {
 
   "whether tool calls against this server should require a confirmation"
   confirm: Boolean
+
+  "MCP transport protocol (e.g. sse, streamable_http)"
+  protocol: McpServerProtocol
 
   authentication: McpServerAuthenticationAttributes
 
@@ -3603,6 +3661,9 @@ type McpServer {
 
   "the HTTP url the server is hosted on"
   url: String!
+
+  "MCP transport protocol (e.g. sse, streamable_http)"
+  protocol: McpServerProtocol
 
   "authentication specs for this server"
   authentication: McpServerAuthentication
@@ -4045,6 +4106,9 @@ input BedrockAiAttributes {
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
+
+  "mapping from model id to bedrock deployment if those require additional configuration"
+  deployments: Json
 }
 
 input VertexAiAttributes {
@@ -4383,6 +4447,9 @@ type BedrockAiSettings {
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
+
+  "mapping from model id to bedrock deployment if those require additional configuration"
+  deployments: Map
 }
 
 "Settings for usage of GCP VertexAI for LLMs"

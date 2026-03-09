@@ -229,6 +229,12 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
+                      deployments:
+                        additionalProperties:
+                          type: string
+                        description: Deployments is a mapping from model id to bedrock
+                          deployment if those require additional configuration
+                        type: object
                       embeddingModel:
                         description: EmbeddingModel to use for generating embeddings
                         type: string
