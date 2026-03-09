@@ -239,7 +239,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :tool_model,      :string
         field :embedding_model, :string
         field :access_token,    EncryptedString
-        field :deployment,      :string
+        field :deployments,      :map
 
         field :proxy_models,    {:array, :string}
       end

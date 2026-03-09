@@ -84,6 +84,15 @@ defmodule Plrl.BedrockConfig do
   field :deployments, 9, repeated: true, type: Plrl.BedrockConfig.DeploymentsEntry, map: true
 end
 
+defmodule Plrl.AzureOpenAiConfig.DeploymentsEntry do
+  @moduledoc false
+
+  use Protobuf, map: true, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :key, 1, type: :string
+  field :value, 2, type: :string
+end
+
 defmodule Plrl.AzureOpenAiConfig do
   @moduledoc false
 
@@ -96,7 +105,7 @@ defmodule Plrl.AzureOpenAiConfig do
   field :toolModel, 6, proto3_optional: true, type: :string
   field :accessToken, 7, proto3_optional: true, type: :string
   field :proxyModels, 8, repeated: true, type: :string
-  field :deployment, 9, proto3_optional: true, type: :string
+  field :deployments, 9, repeated: true, type: Plrl.AzureOpenAiConfig.DeploymentsEntry, map: true
 end
 
 defmodule Plrl.ProxyAuthenticationRequest do

@@ -1056,8 +1056,8 @@ type AzureOpenaiAttributes struct {
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 	// the azure openai access token to use
 	AccessToken string `json:"accessToken"`
-	// the azure openai deployment name
-	Deployment *string `json:"deployment,omitempty"`
+	// mapping from model id to azure openai deployment name
+	Deployments *string `json:"deployments,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 }

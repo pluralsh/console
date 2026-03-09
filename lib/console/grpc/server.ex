@@ -89,7 +89,7 @@ defmodule Console.GRPC.Server do
       embeddingModel: azure.embedding_model,
       toolModel: azure.tool_model,
       accessToken: azure.access_token,
-      deployment: azure.deployment,
+      deployments: to_string_map(azure.deployments),
       proxyModels: proxy_models(azure)
     }
   end

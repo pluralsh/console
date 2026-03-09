@@ -193,7 +193,7 @@ func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key,
 				},
 				// TODO: needs proper mapping from model to deployment name. Requires Console config changes.
 				Deployments: in.filterDeployments(map[string]string{
-					config.GetModel():          config.GetModel(),
+					config.GetDeployment():     config.GetModel(),
 					config.GetEmbeddingModel(): config.GetEmbeddingModel(),
 					config.GetToolModel():      config.GetToolModel(),
 				}),

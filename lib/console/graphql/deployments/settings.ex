@@ -142,7 +142,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
     field :access_token,    non_null(:string), description: "the azure openai access token to use"
-    field :deployment,      :string, description: "the azure openai deployment name"
+    field :deployments,     :json, description: "mapping from model id to azure openai deployment name"
     field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
