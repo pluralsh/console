@@ -43,11 +43,11 @@ func loadFromFile(configFile string, cfg *Config) error {
 	// Read config file
 	if err := v.ReadInConfig(); err != nil {
 		// If file doesn't exist, that's okay - we'll use defaults
-		var configFileNotFoundError viper.ConfigFileNotFoundError
-		if errors.As(err, &configFileNotFoundError) {
+		if _, ok := errors.AsType[viper.ConfigFileNotFoundError](err); ok {
 			return fmt.Errorf("error reading config file: %w", err)
 		}
-		return nil
+
+		return err
 	}
 
 	// Unmarshal into config struct
