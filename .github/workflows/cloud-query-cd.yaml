@@ -10,8 +10,8 @@ on:
     branches:
       - 'master'
     paths:
-      - 'go/cloud-query/**'
       - '.github/workflows/cloud-query-cd.yaml'
+      - 'go/cloud-query/**'
   push:
     tags:
       - 'v*.*.*'

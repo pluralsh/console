@@ -4,10 +4,10 @@ on:
     branches:
       - 'master'
     paths:
+      - '.github/workflows/controller-cd.yaml'
       - 'go/controller/**'
       - 'go/polly/**'
       - 'go/client/**'
-      - '.github/workflows/controller-cd.yaml'
   push:
     tags:
       - 'v*.*.*'

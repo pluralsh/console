@@ -5,6 +5,7 @@ on:
     branches:
       - "master"
     paths:
+      - ".github/workflows/oci-auth-cd.yaml"
       - "go/oci-auth/**"
   push:
     tags:
