@@ -75,8 +75,8 @@ export function ServicesTree() {
   const isLoading =
     (!data && loading) || (!globalServicesData && globalServicesLoading)
 
-  if (error || aggLoading || globalServicesError)
-    return <GqlError error={error || aggLoading || globalServicesError} />
+  if (error || globalServicesError)
+    return <GqlError error={error || globalServicesError} />
 
   return (
     <div
