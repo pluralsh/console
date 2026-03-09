@@ -1,7 +1,6 @@
 import {
   AppIcon,
   ArrowRightIcon,
-  Button,
   Card,
   Chip,
   Flex,
@@ -18,7 +17,7 @@ import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
 import { FlowBasicWithBindingsFragment } from 'generated/graphql'
 import pluralize from 'pluralize'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 export function FlowCard({
@@ -35,9 +34,10 @@ export function FlowCard({
   return (
     <>
       <CardSC
+        forwardedAs={Link}
+        to={flow.name}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        onClick={() => navigate(flow.name)}
       >
         <ContentSC>
           <Flex
@@ -66,7 +66,6 @@ export function FlowCard({
           <Flex gap="xsmall">
             <IconFrame
               clickable
-              type="secondary"
               tooltip="Permissions"
               onClick={(e) => {
                 e.stopPropagation()
@@ -76,7 +75,6 @@ export function FlowCard({
             />
             <IconFrame
               clickable
-              type="secondary"
               tooltip="View pipelines for this flow"
               onClick={(e) => {
                 e.stopPropagation()
@@ -85,13 +83,8 @@ export function FlowCard({
               icon={<GitPullIcon />}
             />
           </Flex>
-          <Button
-            small
-            secondary
-            endIcon={<ArrowRightIcon />}
-          >
-            Go to Flow
-          </Button>
+
+          <ArrowRightIcon />
         </FooterSC>
       </CardSC>
       <PermissionsModal
@@ -142,6 +135,7 @@ const CardSC = styled(Card)(({ theme }) => ({
   width: '100%',
   overflow: 'hidden',
   cursor: 'pointer',
+  textDecoration: 'none',
   backgroundColor:
     theme.mode === 'light'
       ? theme.colors['fill-zero']

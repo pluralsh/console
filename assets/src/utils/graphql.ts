@@ -196,13 +196,13 @@ export function mapExistingNodes<N>(connection?: Connection<N> | null) {
   return (edges || []).map((edge) => edge?.node).filter(isNonNullable)
 }
 
-// strips __typename's and removes any value in an object where isEmpty is true (except for booleans)
+// strips __typename's and removes any value in an object where isEmpty is true (except for booleans and numbers)
 export function deepOmitFalsy<T extends Nullable<Record<string, any>>>(
   obj: T
 ): Partial<T> {
   if (obj == null || typeof obj !== 'object' || Array.isArray(obj)) return obj
 
-  const result = {} as Record<string, any>
+  const result = {} as Record<string, unknown>
   for (const [key, value] of Object.entries(obj)) {
     if (key === '__typename') continue
     let processedVal = value
@@ -214,9 +214,13 @@ export function deepOmitFalsy<T extends Nullable<Record<string, any>>>(
     else if (value && typeof value === 'object')
       processedVal = deepOmitFalsy(value)
 
-    if (!isEmpty(processedVal) || typeof processedVal === 'boolean')
+    if (
+      !isEmpty(processedVal) ||
+      typeof processedVal === 'boolean' ||
+      typeof processedVal === 'number'
+    )
       result[key] = processedVal
   }
 
-  return result as T
+  return result as Partial<T>
 }
