@@ -76,6 +76,34 @@ defmodule Console.AI.OpenAI do
     def spec(), do: %__MODULE__{data: [OpenAI.Embedding.spec()]}
   end
 
+  defmodule ResponsesContentPart do
+    @type t :: %__MODULE__{}
+
+    defstruct [:type, :text]
+
+    def spec(), do: %__MODULE__{}
+  end
+
+  defmodule ResponsesOutputItem do
+    alias Console.AI.OpenAI
+
+    @type t :: %__MODULE__{content: [OpenAI.ResponsesContentPart.t]}
+
+    defstruct [:type, :id, :role, :name, :arguments, :call_id, :content]
+
+    def spec(), do: %__MODULE__{content: [OpenAI.ResponsesContentPart.spec()]}
+  end
+
+  defmodule ResponsesResponse do
+    alias Console.AI.OpenAI
+
+    @type t :: %__MODULE__{output: [OpenAI.ResponsesOutputItem.t]}
+
+    defstruct [:id, :object, :model, :output]
+
+    def spec(), do: %__MODULE__{output: [OpenAI.ResponsesOutputItem.spec()]}
+  end
+
   def new(opts) do
     %__MODULE__{
       access_key: Map.get(opts, :access_token),
@@ -102,6 +130,15 @@ defmodule Console.AI.OpenAI do
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = openai, messages, opts) do
+    m = model(openai, opts[:client])
+    if use_responses_api?(m) do
+      completion_via_responses(openai, messages, opts)
+    else
+      completion_via_chat(openai, messages, opts)
+    end
+  end
+
+  defp completion_via_chat(%__MODULE__{} = openai, messages, opts) do
     case chat(openai, msg_history(model(openai, opts[:client]), messages), opts) do
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content, tool_calls: [_ | _] = calls}} | _]}} ->
         {:ok, content, gen_tools(calls)}
@@ -113,6 +150,52 @@ defmodule Console.AI.OpenAI do
       error -> error
     end
   end
+
+  defp completion_via_responses(%__MODULE__{} = openai, messages, opts) do
+    case responses(openai, messages, opts) do
+      {:ok, %ResponsesResponse{output: output}} ->
+        extract_responses_output(output)
+      {:ok, content} when is_binary(content) -> {:ok, content}
+      {:ok, content, tools} when is_binary(content) -> {:ok, content, tools}
+      {:ok, _} -> {:error, "could not generate an ai completion for this context"}
+      error -> error
+    end
+  end
+
+  defp extract_responses_output(output) when is_list(output) do
+    {text_parts, tool_calls} = Enum.reduce(output, {[], []}, fn item, {texts, tools} ->
+      case item do
+        %ResponsesOutputItem{type: "message", content: content} when is_list(content) ->
+          text = Enum.map_join(content, "", fn
+            %ResponsesContentPart{type: "output_text", text: t} when is_binary(t) -> t
+            _ -> ""
+          end)
+          {[text | texts], tools}
+
+        %ResponsesOutputItem{type: "function_call", id: id, name: name, arguments: args} ->
+          tool = %Console.AI.Tool{id: id, name: name, arguments: safe_decode_args(args)}
+          {texts, [tool | tools]}
+
+        _ ->
+          {texts, tools}
+      end
+    end)
+
+    content = text_parts |> Enum.reverse() |> Enum.join("")
+
+    case Enum.reverse(tool_calls) do
+      [] -> {:ok, content}
+      tools -> {:ok, content, tools}
+    end
+  end
+
+  defp safe_decode_args(args) when is_binary(args) do
+    case Jason.decode(args) do
+      {:ok, decoded} -> decoded
+      _ -> %{}
+    end
+  end
+  defp safe_decode_args(_), do: %{}
 
   @doc """
   Calls an openai tool call interface w/ strict mode
@@ -191,6 +274,33 @@ defmodule Console.AI.OpenAI do
     |> handle_response(CompletionResponse.spec())
   end
 
+  defp responses(%__MODULE__{stream: %Stream{} = stream} = openai, messages, opts) do
+    Stream.Exec.openai_responses(fn ->
+      all   = tools(opts)
+      model = model(openai, opts[:client])
+
+      url(openai, "/responses")
+      |> HTTPoison.post(
+        responses_body(model, messages, all, opts, true),
+        json_headers(openai),
+        [stream_to: self(), async: :once] ++ @options
+      )
+    end, stream)
+  end
+
+  defp responses(%__MODULE__{} = openai, messages, opts) do
+    all   = tools(opts)
+    model = model(openai, opts[:client])
+
+    url(openai, "/responses")
+    |> HTTPoison.post(
+      responses_body(model, messages, all, opts),
+      json_headers(openai),
+      @options
+    )
+    |> handle_response(ResponsesResponse.spec())
+  end
+
   defp chat_body(model, history, tools, opts, stream \\ false) do
     Map.merge(%{
       model: model,
@@ -201,6 +311,67 @@ defmodule Console.AI.OpenAI do
     |> Map.merge(reasoning_details(model))
     |> Console.drop_nils()
     |> Jason.encode!()
+  end
+
+  defp responses_body(model, messages, tools, opts, stream \\ false) do
+    {instructions, input} = extract_instructions_and_input(model, messages)
+
+    Map.merge(%{
+      model: model,
+      instructions: instructions,
+      input: input,
+      stream: stream,
+      tools: (if !Enum.empty?(tools), do: Enum.map(tools, &responses_tool_args/1), else: nil)
+    }, (if opts[:require_tools], do: %{tool_choice: "required"}, else: %{}))
+    |> Map.merge(reasoning_details(model))
+    |> Console.drop_nils()
+    |> Jason.encode!()
+  end
+
+  defp extract_instructions_and_input(model, messages) do
+    {system_msgs, other_msgs} = Enum.split_with(messages, fn
+      {:system, _} -> true
+      {role, _} -> role == :system or role == :developer
+      _ -> false
+    end)
+
+    instructions = case system_msgs do
+      [] -> nil
+      msgs -> Enum.map_join(msgs, "\n\n", fn {_, content} -> content end)
+    end
+
+    input = Enum.flat_map(other_msgs, fn
+      {:tool, msg, %{call_id: id, name: n, arguments: args}} when is_binary(id) ->
+        [
+          %{type: "function_call_output", call_id: id, output: msg}
+        ]
+      {role, msg} ->
+        [%{role: responses_role(role, model), content: msg}]
+    end)
+
+    {instructions, input}
+  end
+
+  defp responses_role(:system, _), do: :developer
+  defp responses_role(:developer, _), do: :developer
+  defp responses_role(role, _), do: role
+
+  defp responses_tool_args(%Console.AI.MCP.Tool{name: name, description: description, input_schema: schema}) do
+    %{
+      type: :function,
+      name: name,
+      description: description,
+      parameters: schema
+    }
+  end
+
+  defp responses_tool_args(tool) do
+    %{
+      type: :function,
+      name: Tool.name(tool),
+      description: Tool.description(tool),
+      parameters: Tool.json_schema(tool)
+    }
   end
 
   defp embed(%__MODULE__{embedding_model: model} = openai, text) do
@@ -260,6 +431,12 @@ defmodule Console.AI.OpenAI do
   defp reasoning_details("gpt-5" <> _), do: %{reasoning_effort: :low}
   defp reasoning_details("o" <> _), do: %{reasoning_effort: :minimal}
   defp reasoning_details(_), do: %{}
+
+  defp use_responses_api?("gpt-5" <> _), do: true
+  defp use_responses_api?("codex" <> _), do: true
+  defp use_responses_api?("o3" <> _), do: true
+  defp use_responses_api?("o4" <> _), do: true
+  defp use_responses_api?(_), do: false
 
   defp tool_role(:system, model) do
     case model do
