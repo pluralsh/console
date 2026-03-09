@@ -16123,6 +16123,23 @@ export type ClusterNetworkGraphQueryVariables = Exact<{
 
 export type ClusterNetworkGraphQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, networkGraph?: Array<{ __typename?: 'NetworkMeshEdge', id: string, from: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, to: { __typename?: 'NetworkMeshWorkload', id: string, name: string, namespace?: string | null, service?: string | null }, statistics: { __typename?: 'NetworkMeshStatistics', bytes?: number | null, packets?: number | null, connections?: number | null, http200?: number | null, http400?: number | null, http500?: number | null, httpClientLatency?: number | null } } | null> | null } | null };
 
+export type ClusterKubernetesMetricsFragment = { __typename?: 'Cluster', id: string, componentMetrics?: { __typename?: 'KubernetesControllerMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null };
+
+export type ClusterKubernetesMetricsQueryVariables = Exact<{
+  clusterId: Scalars['ID']['input'];
+  group: Scalars['String']['input'];
+  version: Scalars['String']['input'];
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  start?: InputMaybe<Scalars['DateTime']['input']>;
+  stop?: InputMaybe<Scalars['DateTime']['input']>;
+  step?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ClusterKubernetesMetricsQuery = { __typename?: 'RootQueryType', cluster?: { __typename?: 'Cluster', id: string, componentMetrics?: { __typename?: 'KubernetesControllerMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
+
 export type ComponentMetricsFragmentFragment = { __typename?: 'ServiceDeployment', componentMetrics?: { __typename?: 'ServiceComponentMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null };
 
 export type ServiceDeploymentComponentMetricsQueryVariables = Exact<{
@@ -20001,6 +20018,34 @@ export const NetworkMeshEdgeFragmentDoc = gql`
 }
     ${NetworkMeshWorkloadFragmentDoc}
 ${NetworkMeshStatisticsFragmentDoc}`;
+export const ClusterKubernetesMetricsFragmentDoc = gql`
+    fragment ClusterKubernetesMetrics on Cluster {
+  id
+  componentMetrics(
+    group: $group
+    version: $version
+    kind: $kind
+    name: $name
+    namespace: $namespace
+    start: $start
+    stop: $stop
+    step: $step
+  ) {
+    cpu {
+      ...MetricResponse
+    }
+    mem {
+      ...MetricResponse
+    }
+    podCpu {
+      ...MetricResponse
+    }
+    podMem {
+      ...MetricResponse
+    }
+  }
+}
+    ${MetricResponseFragmentDoc}`;
 export const ComponentMetricsFragmentFragmentDoc = gql`
     fragment ComponentMetricsFragment on ServiceDeployment {
   componentMetrics(
@@ -28051,6 +28096,57 @@ export type ClusterNetworkGraphQueryHookResult = ReturnType<typeof useClusterNet
 export type ClusterNetworkGraphLazyQueryHookResult = ReturnType<typeof useClusterNetworkGraphLazyQuery>;
 export type ClusterNetworkGraphSuspenseQueryHookResult = ReturnType<typeof useClusterNetworkGraphSuspenseQuery>;
 export type ClusterNetworkGraphQueryResult = Apollo.QueryResult<ClusterNetworkGraphQuery, ClusterNetworkGraphQueryVariables>;
+export const ClusterKubernetesMetricsDocument = gql`
+    query ClusterKubernetesMetrics($clusterId: ID!, $group: String!, $version: String!, $kind: String!, $name: String!, $namespace: String!, $start: DateTime, $stop: DateTime, $step: String) {
+  cluster(id: $clusterId) {
+    ...ClusterKubernetesMetrics
+  }
+}
+    ${ClusterKubernetesMetricsFragmentDoc}`;
+
+/**
+ * __useClusterKubernetesMetricsQuery__
+ *
+ * To run a query within a React component, call `useClusterKubernetesMetricsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterKubernetesMetricsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterKubernetesMetricsQuery({
+ *   variables: {
+ *      clusterId: // value for 'clusterId'
+ *      group: // value for 'group'
+ *      version: // value for 'version'
+ *      kind: // value for 'kind'
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      start: // value for 'start'
+ *      stop: // value for 'stop'
+ *      step: // value for 'step'
+ *   },
+ * });
+ */
+export function useClusterKubernetesMetricsQuery(baseOptions: Apollo.QueryHookOptions<ClusterKubernetesMetricsQuery, ClusterKubernetesMetricsQueryVariables> & ({ variables: ClusterKubernetesMetricsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterKubernetesMetricsQuery, ClusterKubernetesMetricsQueryVariables>(ClusterKubernetesMetricsDocument, options);
+      }
+export function useClusterKubernetesMetricsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterKubernetesMetricsQuery, ClusterKubernetesMetricsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterKubernetesMetricsQuery, ClusterKubernetesMetricsQueryVariables>(ClusterKubernetesMetricsDocument, options);
+        }
+// @ts-ignore
+export function useClusterKubernetesMetricsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterKubernetesMetricsQuery, ClusterKubernetesMetricsQueryVariables>): Apollo.UseSuspenseQueryResult<ClusterKubernetesMetricsQuery, ClusterKubernetesMetricsQueryVariables>;
+export function useClusterKubernetesMetricsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ClusterKubernetesMetricsQuery, ClusterKubernetesMetricsQueryVariables>): Apollo.UseSuspenseQueryResult<ClusterKubernetesMetricsQuery | undefined, ClusterKubernetesMetricsQueryVariables>;
+export function useClusterKubernetesMetricsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ClusterKubernetesMetricsQuery, ClusterKubernetesMetricsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterKubernetesMetricsQuery, ClusterKubernetesMetricsQueryVariables>(ClusterKubernetesMetricsDocument, options);
+        }
+export type ClusterKubernetesMetricsQueryHookResult = ReturnType<typeof useClusterKubernetesMetricsQuery>;
+export type ClusterKubernetesMetricsLazyQueryHookResult = ReturnType<typeof useClusterKubernetesMetricsLazyQuery>;
+export type ClusterKubernetesMetricsSuspenseQueryHookResult = ReturnType<typeof useClusterKubernetesMetricsSuspenseQuery>;
+export type ClusterKubernetesMetricsQueryResult = Apollo.QueryResult<ClusterKubernetesMetricsQuery, ClusterKubernetesMetricsQueryVariables>;
 export const ServiceDeploymentComponentMetricsDocument = gql`
     query ServiceDeploymentComponentMetrics($id: ID, $name: String, $cluster: String, $componentId: ID!, $start: DateTime, $stop: DateTime, $step: String) {
   serviceDeployment(id: $id, name: $name, cluster: $cluster) {
@@ -38195,6 +38291,7 @@ export const namedOperations = {
     ClusterMetrics: 'ClusterMetrics',
     ClusterNodeMetrics: 'ClusterNodeMetrics',
     ClusterNetworkGraph: 'ClusterNetworkGraph',
+    ClusterKubernetesMetrics: 'ClusterKubernetesMetrics',
     ServiceDeploymentComponentMetrics: 'ServiceDeploymentComponentMetrics',
     Usage: 'Usage',
     ServiceTarball: 'ServiceTarball',
@@ -38581,6 +38678,7 @@ export const namedOperations = {
     NetworkMeshWorkload: 'NetworkMeshWorkload',
     NetworkMeshStatistics: 'NetworkMeshStatistics',
     NetworkMeshEdge: 'NetworkMeshEdge',
+    ClusterKubernetesMetrics: 'ClusterKubernetesMetrics',
     ComponentMetricsFragment: 'ComponentMetricsFragment',
     ServiceFile: 'ServiceFile',
     GitRepository: 'GitRepository',
