@@ -110,7 +110,7 @@ function OIDCLogin({ oidcUri, external, oidcName }) {
         <Button
           id="plrl-login"
           onClick={() => {
-            window.location = oidcUri
+            window.location = oidcUri // needed for cases when console + oidc callback are on same fqdn
           }}
         >
           Log in with {external ? oidcName || 'OIDC' : 'Plural'}
