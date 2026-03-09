@@ -7,33 +7,56 @@ defmodule Console.AI.Stream.Exec do
 
   def openai(fun, %AIStream{} = stream), do: exec(fun, stream, &handle_openai/1)
   def anthropic(fun, %AIStream{} = stream), do: exec(fun, stream, &handle_anthropic/1)
+  def openai_responses(fun, %AIStream{} = stream), do: exec(fun, stream, &handle_openai_responses/1)
 
   @spec handle_openai(map) :: stream_message
-  defp handle_openai(%{"choices" => [%{"delta" => %{"content" => c}} | _]}) when is_binary(c), do: c
-  defp handle_openai(%{"choices" => [%{"delta" => %{"tool_calls" => [_ | _] = calls}}]}) do
+  def handle_openai(%{"choices" => [%{"delta" => %{"content" => c}} | _]}) when is_binary(c) and c != "", do: c
+  def handle_openai(%{"choices" => [%{"delta" => %{"tool_calls" => [_ | _] = calls}}]}) do
     {:tools, Enum.map(calls, fn %{"index" => ind, "function" => call} = func ->
       {ind, Map.put(call, "id", func["id"])}
     end)}
   end
-  defp handle_openai(_), do: :pass
+  def handle_openai(_), do: :pass
 
   @spec handle_anthropic(map) :: stream_message
-  defp handle_anthropic(%{
+  def handle_anthropic(%{
     "type" => "content_block_start",
     "content_block" => %{"text" => t}
   }) when is_binary(t), do: t
-  defp handle_anthropic(%{
+  def handle_anthropic(%{
     "type" => "content_block_start",
     "index" => ind,
     "content_block" => %{"type" => "tool_use"} = tool_use
   }), do: {:tools, [{ind, Map.put(tool_use, "arguments", "")}]}
-  defp handle_anthropic(%{
+  def handle_anthropic(%{
     "type" => "content_block_delta",
     "index" => ind,
     "delta" => %{"type" => "input_json_delta", "partial_json" => json}
   }), do: {:tools, [{ind, %{"arguments" => json}}]}
-  defp handle_anthropic(%{"type" => "content_block_delta", "delta" => %{"text" => t}}) when is_binary(t), do: t
-  defp handle_anthropic(_), do: :pass
+  def handle_anthropic(%{"type" => "content_block_delta", "delta" => %{"text" => t}}) when is_binary(t), do: t
+  def handle_anthropic(_), do: :pass
+
+  @spec handle_openai_responses(map) :: stream_message
+  def handle_openai_responses(%{"type" => "response.output_text.delta", "delta" => d}) when is_binary(d) and d != "", do: d
+  def handle_openai_responses(%{
+    "type" => "response.output_item.added",
+    "output_index" => ind,
+    "item" => %{"type" => "function_call"} = item
+  }) do
+    {:tools, [{ind, %{
+      "id" => item["id"],
+      "name" => item["name"],
+      "arguments" => item["arguments"] || ""
+    }}]}
+  end
+  def handle_openai_responses(%{
+    "type" => "response.function_call_arguments.delta",
+    "output_index" => ind,
+    "delta" => delta
+  }) when is_binary(delta) do
+    {:tools, [{ind, %{"arguments" => delta}}]}
+  end
+  def handle_openai_responses(_), do: :pass
 
   defp exec(fun, %AIStream{} = stream, reducer) when is_function(reducer, 1) do
     build_stream(fun)
