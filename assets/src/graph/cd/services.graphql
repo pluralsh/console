@@ -295,9 +295,6 @@ query ServiceDeployments(
   ) {
     ...ServiceDeploymentsConnection
   }
-  serviceStatuses(clusterId: $clusterId) {
-    ...ServiceStatusCount
-  }
 }
 
 query ServiceDeploymentsTiny($clusterId: ID, $projectId: ID) {

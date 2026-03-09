@@ -366,13 +366,6 @@ query Clusters(
       }
     }
   }
-  clusterStatuses(q: $q, projectId: $projectId) {
-    ...ClusterStatusInfo
-  }
-  upgradeStatistics(q: $q, projectId: $projectId) {
-    upgradeable
-    count
-  }
   tags
 }
 
@@ -671,9 +664,13 @@ fragment ClusterStatusInfo on ClusterStatusInfo {
   healthy
 }
 
-query ClusterStatuses {
-  clusterStatuses {
+query ClusterStatuses($q: String, $projectId: ID) {
+  clusterStatuses(q: $q, projectId: $projectId) {
     ...ClusterStatusInfo
+  }
+  upgradeStatistics(q: $q, projectId: $projectId) {
+    upgradeable
+    count
   }
 }
 

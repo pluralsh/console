@@ -18,6 +18,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { ServicesContextT, getServiceStatuses } from './Services'
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import { ServicesTreeDiagram } from './ServicesTreeDiagram'
+import { POLL_INTERVAL } from '../ContinuousDeployment'
 
 const servicesLimit = 1000
 
@@ -56,10 +57,15 @@ export function ServicesTree() {
     [globalServicesData?.globalServices]
   )
 
-  const { data: serviceStatusesData, error: serviceStatusesError } =
-    useServiceStatusesQuery({
-      variables: { ...(clusterId ? { clusterId } : {}) },
-    })
+  const {
+    data: serviceStatusesData,
+    loading: serviceStatusesLoading,
+    error: serviceStatusesError,
+  } = useServiceStatusesQuery({
+    variables: { ...(clusterId ? { clusterId } : {}) },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
 
   const statusCounts = useMemo(
     () => getServiceStatuses(serviceStatusesData?.serviceStatuses),
@@ -88,6 +94,7 @@ export function ServicesTree() {
         setQueryStatusFilter={setQueryStatusFilter}
         tabStateRef={tabStateRef}
         statusCounts={statusCounts}
+        loadingStatuses={serviceStatusesLoading}
       />
       <TabPanel
         stateRef={tabStateRef}

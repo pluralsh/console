@@ -25,6 +25,7 @@ import {
 import styled from 'styled-components'
 import { TagsFilter } from './ClusterTagsFilter'
 import { serviceStatusToSeverity } from './ServiceStatusChip'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 export type ClusterStatusTabKey = 'HEALTHY' | 'UNHEALTHY' | 'ALL'
 export type UpgradeableFilterKey = 'ALL' | 'UPGRADEABLE' | 'NON-UPGRADEABLE'
@@ -61,6 +62,7 @@ export function ClustersFilters({
   upgradeableFilter,
   setUpgradeableFilter,
   upgradeStats,
+  loadingStatuses,
 }: {
   setQueryStatusFilter: Dispatch<SetStateAction<ClusterStatusTabKey>>
   setQueryString: (string) => void
@@ -73,6 +75,7 @@ export function ClustersFilters({
   upgradeableFilter: UpgradeableFilterKey
   setUpgradeableFilter: (val: UpgradeableFilterKey) => void
   upgradeStats: Nullable<Pick<UpgradeStatistics, 'upgradeable' | 'count'>>
+  loadingStatuses: boolean
 }) {
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 400)
@@ -128,7 +131,14 @@ export function ClustersFilters({
               className="statusTab"
             >
               {label}
-              {!isNil(statusCounts?.[key]) && (
+              {isNil(statusCounts?.[key]) ? (
+                loadingStatuses && (
+                  <RectangleSkeleton
+                    $width={26}
+                    $height={22}
+                  />
+                )
+              ) : (
                 <Chip
                   size="small"
                   severity={serviceStatusToSeverity(key as any)}
