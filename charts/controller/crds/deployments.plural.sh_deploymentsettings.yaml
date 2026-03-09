@@ -143,9 +143,12 @@ spec:
                           The azure openai Data plane - inference api version to use,
                           defaults to 2024-10-01-preview or the latest available
                         type: string
-                      deployment:
-                        description: Deployment is the Azure OpenAI deployment name.
-                        type: string
+                      deployments:
+                        additionalProperties:
+                          type: string
+                        description: Deployments is a mapping from model id to azure
+                          OpenAI deployment if those require additional configuration
+                        type: object
                       embeddingModel:
                         description: EmbeddingModel to use for generating embeddings.
                         type: string

@@ -6,7 +6,6 @@ import (
 	context "context"
 
 	client "github.com/pluralsh/console/go/client"
-
 	credentials "github.com/pluralsh/console/go/controller/internal/credentials"
 
 	mock "github.com/stretchr/testify/mock"
