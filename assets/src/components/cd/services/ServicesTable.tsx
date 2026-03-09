@@ -3,6 +3,7 @@ import { GqlError } from 'components/utils/Alert'
 import {
   type ServiceDeploymentsRowFragment,
   useServiceDeploymentsQuery,
+  useServiceStatusesQuery,
 } from 'generated/graphql'
 import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
@@ -14,6 +15,7 @@ import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
+import { POLL_INTERVAL } from '../ContinuousDeployment'
 import { ServicesContextT, columns, getServiceStatuses } from './Services'
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 
@@ -41,10 +43,18 @@ export default function ServicesTable() {
       ...(queryStatusFilter !== 'ALL' ? { status: queryStatusFilter } : {}),
     }
   )
-
+  const {
+    data: aggData,
+    previousData: aggPrev,
+    loading: aggLoading,
+  } = useServiceStatusesQuery({
+    variables: { ...(clusterId ? { clusterId } : {}) },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
   const statusCounts = useMemo(
-    () => getServiceStatuses(data?.serviceStatuses),
-    [data?.serviceStatuses]
+    () => getServiceStatuses((aggData || aggPrev)?.serviceStatuses),
+    [aggData, aggPrev]
   )
 
   useEffect(() => {
@@ -66,6 +76,7 @@ export default function ServicesTable() {
         setQueryStatusFilter={setQueryStatusFilter}
         tabStateRef={tabStateRef}
         statusCounts={statusCounts}
+        loadingStatuses={aggLoading}
       />
       <TabPanel
         stateRef={tabStateRef}
