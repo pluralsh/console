@@ -4,10 +4,10 @@ on:
     tags:
       - 'v*.*.*'
     paths:
+      - '.github/workflows/kubernetes-agent-cd.yaml'
       - 'go/kubernetes-agent/**'
       - 'go/polly/**'
       - 'go/client/**'
-      - '.github/workflows/kubernetes-agent-cd.yaml'
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"

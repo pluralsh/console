@@ -12,8 +12,7 @@
     "strictBindCallApply": false,
     "strictPropertyInitialization": false,
     "noImplicitThis": false,
-    "alwaysStrict": false,
-    "noImplicitAny": true
+    "alwaysStrict": false
   },
   "include": ["src/**/*"]
 }
