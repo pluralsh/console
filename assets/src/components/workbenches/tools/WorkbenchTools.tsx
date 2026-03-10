@@ -27,6 +27,7 @@ import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchToolIcon } from './WorkbenchTool'
 import {
+  categoryToLabel,
   TOOL_TYPE_CARDS,
   TOOL_TYPE_TO_CATEGORIES,
   TOOL_TYPE_TO_LABEL,
@@ -90,13 +91,13 @@ export function WorkbenchTools() {
                 wrap="wrap"
                 flex={1}
               >
-                {TOOL_TYPE_TO_CATEGORIES[type].map((tag) => (
+                {TOOL_TYPE_TO_CATEGORIES[type].map((cat) => (
                   <Chip
-                    key={tag}
+                    key={cat}
                     size="small"
                     css={{ height: 'fit-content' }}
                   >
-                    {tag}
+                    {categoryToLabel[cat]}
                   </Chip>
                 ))}
               </Flex>
