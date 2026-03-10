@@ -527,7 +527,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       user      = insert(:user)
       project   = insert(:project, read_bindings: [%{user_id: user.id}])
       workbench = insert(:workbench, project: project)
-      issuers   = insert_list(2, :issue, workbench: workbench)
+      issues    = insert_list(2, :issue, workbench: workbench)
 
       other_project = insert(:project)
       other_workbench = insert(:workbench, project: other_project)
@@ -542,7 +542,7 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       """, %{}, %{current_user: user})
 
       assert from_connection(found)
-             |> ids_equal(issuers)
+             |> ids_equal(issues)
     end
 
     test "user with no workbench access sees no issues" do
