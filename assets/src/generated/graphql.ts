@@ -1362,8 +1362,8 @@ export type AzureOpenaiSettings = {
   __typename?: 'AzureOpenaiSettings';
   /** the api version you want to use */
   apiVersion?: Maybe<Scalars['String']['output']>;
-  /** the azure openai deployment name */
-  deployment?: Maybe<Scalars['String']['output']>;
+  /** mapping from model id to azure openai deployment name */
+  deployments?: Maybe<Scalars['Map']['output']>;
   /** the model to use for vector embeddings */
   embeddingModel?: Maybe<Scalars['String']['output']>;
   /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */

@@ -1073,8 +1073,8 @@ type AzureOpenaiSettings struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the api version you want to use
 	APIVersion *string `json:"apiVersion,omitempty"`
-	// the azure openai deployment name
-	Deployment *string `json:"deployment,omitempty"`
+	// mapping from model id to azure openai deployment name
+	Deployments map[string]any `json:"deployments,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 }

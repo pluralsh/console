@@ -4421,8 +4421,8 @@ type AzureOpenaiSettings {
   "the api version you want to use"
   apiVersion: String
 
-  "the azure openai deployment name"
-  deployment: String
+  "mapping from model id to azure openai deployment name"
+  deployments: Map
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
