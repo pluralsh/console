@@ -155,10 +155,12 @@ export function ServiceGitFolderField({
 }
 
 export function RepositorySelector({
+  isDisabled,
   repositories,
   repositoryId,
   setRepositoryId,
 }: {
+  isDisabled?: boolean
   repositories: any
   repositoryId: Nullable<string>
   setRepositoryId: (repositoryId: string) => void
@@ -200,6 +202,7 @@ export function RepositorySelector({
       }}
       startIcon={<GitHubLogoIcon />}
       dropdownHeader={repositoryId ? <ListBoxItem label="None" /> : undefined}
+      isDisabled={isDisabled}
       isOpen={selectIsOpen}
       onOpenChange={(open) => setSelectIsOpen(open)}
       onHeaderClick={() => {

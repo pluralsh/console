@@ -154,6 +154,7 @@ export function ServiceGitSettings() {
               <FormField label="Git repository">
                 <FillLevelDiv fillLevel={2}>
                   <RepositorySelector
+                    isDisabled
                     repositories={repos}
                     repositoryId={state.repositoryId}
                     setRepositoryId={(id) => updateState({ repositoryId: id })}
