@@ -44,7 +44,10 @@ defmodule Console.Deployments.Sentinels do
   @spec create_sentinel(map, User.t) :: sentinel_resp
   def create_sentinel(attrs, %User{} = user) do
     %Sentinel{}
-    |> Sentinel.changeset(Settings.add_project_id(attrs, user))
+    |> Sentinel.changeset(
+      Settings.add_project_id(attrs, user)
+      |> Map.put(:last_run_at, Timex.now())
+    )
     |> allow(user, :write)
     |> when_ok(:insert)
   end

@@ -3,6 +3,7 @@ defmodule Console.Deployments.Observability do
   use Nebulex.Caching
   import Console.Deployments.Policies
   import Console.Deployments.Observability.Metrics
+  alias Console.Deployments.Observability.Monitor, as: MonitorImpl
   alias Prometheus.Client, as: PrometheusClient
   alias Console.Deployments.Settings
   alias Console.PubSub
@@ -12,6 +13,7 @@ defmodule Console.Deployments.Observability do
     Cluster,
     Project,
     Service,
+    Monitor,
     AlertResolution,
     DeploymentSettings,
     ObservabilityProvider,
@@ -28,7 +30,9 @@ defmodule Console.Deployments.Observability do
 
   @type error :: Console.error
   @type provider_resp :: {:ok, ObservabilityProvider.t} | error
-  @type webhook_resp :: {:ok, ObservabilityWebhook.t} | error
+  @type webhook_resp  :: {:ok, ObservabilityWebhook.t} | error
+  @type monitor_resp  :: {:ok, Monitor.t} | error
+  @type alert_resp    :: {:ok, Alert.t} | error
 
   @spec get_provider(binary) :: ObservabilityProvider.t | nil
   def get_provider(id), do: Repo.get(ObservabilityProvider, id)
@@ -58,8 +62,73 @@ defmodule Console.Deployments.Observability do
   @decorate cacheable(cache: @cache, key: {:obs_webhook, id}, opts: [ttl: @ttl])
   def get_webhook_by_ext_id(id), do: Repo.get_by!(ObservabilityWebhook, external_id: id)
 
+  def get_monitor!(id), do: Repo.get!(Monitor, id)
+  def get_monitor(id), do: Repo.get(Monitor, id)
+
   @spec get_alert!(binary) :: Alert.t | nil
   def get_alert!(id), do: Repo.get!(Alert, id)
+
+  @doc """
+  Create a new monitor, cannot be done if the user doesn't have read access to the service it belongs to
+  """
+  @spec create_monitor(map, User.t) :: monitor_resp
+  def create_monitor(attrs, %User{} = user) do
+    %Monitor{}
+    |> Monitor.changeset(Map.put(attrs, :last_run_at, Timex.now()))
+    |> allow(user, :read)
+    |> when_ok(:insert)
+  end
+
+  @doc """
+  Update a monitor, cannot be done if the user doesn't have read access to the service it belongs to
+  """
+  @spec update_monitor(map, binary, User.t) :: monitor_resp
+  def update_monitor(attrs, id, %User{} = user) do
+    Repo.get!(Monitor, id)
+    |> Monitor.changeset(attrs)
+    |> allow(user, :read)
+    |> when_ok(:update)
+  end
+
+  @doc """
+  Delete a monitor, cannot be done if the user doesn't have read access to the service it belongs to
+  """
+  @spec delete_monitor(binary, User.t) :: monitor_resp
+  def delete_monitor(id, %User{} = user) do
+    Repo.get!(Monitor, id)
+    |> allow(user, :read)
+    |> when_ok(:delete)
+  end
+
+  @spec mark_run(Monitor.t) :: monitor_resp
+  def mark_run(%Monitor{} = monitor) do
+    Monitor.changeset(monitor, %{last_run_at: Timex.now()})
+    |> Repo.update()
+  end
+
+  @spec run_monitor(Monitor.t) :: alert_resp | :ignore
+  def run_monitor(%Monitor{} = monitor) do
+    monitor = Repo.preload(monitor, [:alert, service: :cluster])
+    with {:ok, result, results} <- MonitorImpl.query(monitor),
+         {:ok, attrs} <- monitor_attrs(monitor, result, results) do
+      monitor_alert(monitor, attrs, result)
+    end
+  end
+
+  defp monitor_alert(%Monitor{alert: %Alert{} = alert}, attrs, :resolved) do
+    Alert.changeset(alert, attrs)
+    |> Repo.update()
+    |> notify(:create)
+  end
+  defp monitor_alert(%Monitor{alert: alert}, attrs, :firing) do
+    Alert.changeset(alert || %Alert{}, attrs)
+    |> Repo.insert_or_update()
+    |> notify(:create)
+  end
+  defp monitor_alert(_, _, _), do: :ignore
+
+  defp monitor_attrs(%Monitor{} = monitor, :firing, results), do: MonitorImpl.alert_attrs(monitor, results)
+  defp monitor_attrs(%Monitor{id: id}, :resolved, _), do: {:ok, %{monitor_id: id, state: :resolved, fingerprint: id}}
 
   @doc """
   Create or update a provider, must inclue name in attrs
@@ -110,16 +179,6 @@ defmodule Console.Deployments.Observability do
     |> when_ok(:delete)
     |> notify(:delete)
   end
-
-  defp notify({:ok, %ObservabilityWebhook{} = webhook}, :create),
-    do: handle_notify(PubSub.ObservabilityWebhookCreated, webhook)
-  defp notify({:ok, %ObservabilityWebhook{} = webhook}, :update),
-    do: handle_notify(PubSub.ObservabilityWebhookUpdated, webhook)
-  defp notify({:ok, %ObservabilityWebhook{} = webhook}, :delete),
-    do: handle_notify(PubSub.ObservabilityWebhookDeleted, webhook)
-  defp notify({:ok, %AlertResolution{} = res}, :create),
-    do: handle_notify(PubSub.AlertResolutionCreated, res)
-  defp notify(pass, _), do: pass
 
   @doc """
   Determines if an individual alert is accessible from a user to perform the given action
@@ -302,4 +361,16 @@ defmodule Console.Deployments.Observability do
   defp find(%DeploymentSettings{loki_connection: loki}, :loki), do: loki
   defp find(%DeploymentSettings{prometheus_connection: prometheus}, :prometheus), do: prometheus
   defp find(_, _), do: nil
+
+  defp notify({:ok, %Alert{} = alert}, :create),
+    do: handle_notify(PubSub.AlertCreated, alert)
+  defp notify({:ok, %ObservabilityWebhook{} = webhook}, :create),
+    do: handle_notify(PubSub.ObservabilityWebhookCreated, webhook)
+  defp notify({:ok, %ObservabilityWebhook{} = webhook}, :update),
+    do: handle_notify(PubSub.ObservabilityWebhookUpdated, webhook)
+  defp notify({:ok, %ObservabilityWebhook{} = webhook}, :delete),
+    do: handle_notify(PubSub.ObservabilityWebhookDeleted, webhook)
+  defp notify({:ok, %AlertResolution{} = res}, :create),
+    do: handle_notify(PubSub.AlertResolutionCreated, res)
+  defp notify(pass, _), do: pass
 end

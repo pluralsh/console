@@ -290,7 +290,7 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.AlertCreated do
   alias Console.Services.Users
   require EEx
 
-  def process(%@for{item: %Alert{workbench_id: wid, id: id} = alert}) when is_binary(wid) do
+  def process(%@for{item: %Alert{state: :firing, state_changed: true, workbench_id: wid, id: id} = alert}) when is_binary(wid) do
     alert = Console.Repo.preload(alert, [:tags])
     Workbenches.create_workbench_job(%{
       prompt: prompt(alert: alert),

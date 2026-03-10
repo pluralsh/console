@@ -636,7 +636,7 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
           message: "CPU above 80%"
         )
 
-      event = %PubSub.AlertCreated{item: alert}
+      event = %PubSub.AlertCreated{item: %{alert | state_changed: true}}
       {:ok, job} = Recurse.handle_event(event)
 
       assert job.workbench_id == workbench.id

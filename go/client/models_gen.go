@@ -700,32 +700,44 @@ type AiSettingsAttributes struct {
 	Graph             *GraphStoreAttributes        `json:"graph,omitempty"`
 }
 
+// An individual alert raised from an observability provider or monitor
 type Alert struct {
-	ID          string                   `json:"id"`
-	Type        ObservabilityWebhookType `json:"type"`
-	Severity    AlertSeverity            `json:"severity"`
-	State       AlertState               `json:"state"`
-	Title       *string                  `json:"title,omitempty"`
-	Message     *string                  `json:"message,omitempty"`
-	Fingerprint *string                  `json:"fingerprint,omitempty"`
-	Annotations map[string]any           `json:"annotations,omitempty"`
-	URL         *string                  `json:"url,omitempty"`
-	// key/value tags to filter clusters
+	// Stable identifier for this alert
+	ID string `json:"id"`
+	// Origin of this alert (for example :grafana)
+	Type ObservabilityWebhookType `json:"type"`
+	// Severity level of this alert as reported by the provider
+	Severity AlertSeverity `json:"severity"`
+	// Current state of the alert (for example firing or resolved)
+	State AlertState `json:"state"`
+	// Short title summarizing the alert condition
+	Title *string `json:"title,omitempty"`
+	// Detailed message or summary supplied by the provider
+	Message *string `json:"message,omitempty"`
+	// Provider‑defined fingerprint used to deduplicate alert instances
+	Fingerprint *string `json:"fingerprint,omitempty"`
+	// Arbitrary key/value annotations attached to this alert
+	Annotations map[string]any `json:"annotations,omitempty"`
+	// Link back to the originating dashboard or alert view in the provider
+	URL *string `json:"url,omitempty"`
+	// Key/value tags associated with this alert, often used for filtering clusters
 	Tags []*Tag `json:"tags,omitempty"`
-	// the resolution for this alert
+	// The human‑authored resolution for this alert, if one exists
 	Resolution *AlertResolution `json:"resolution,omitempty"`
-	// an insight explaining the state of this alert
+	// An AI‑generated insight explaining the current state of this alert
 	Insight *AiInsight `json:"insight,omitempty"`
-	// the cluster this alert was associated with
+	// The cluster this alert was associated with
 	Cluster *Cluster `json:"cluster,omitempty"`
-	// the service this alert was associated with
+	// The service this alert was associated with
 	Service *Service `json:"service,omitempty"`
-	// the project this alert was associated with
+	// The project this alert was associated with
 	Project *Project `json:"project,omitempty"`
-	// the flow this alert was associated with
-	Flow       *Flow   `json:"flow,omitempty"`
-	InsertedAt *string `json:"insertedAt,omitempty"`
-	UpdatedAt  *string `json:"updatedAt,omitempty"`
+	// The flow this alert was associated with
+	Flow *Flow `json:"flow,omitempty"`
+	// Time series metrics and threshold used when this alert was evaluated
+	Timeseries *AlertTimeseries `json:"timeseries,omitempty"`
+	InsertedAt *string          `json:"insertedAt,omitempty"`
+	UpdatedAt  *string          `json:"updatedAt,omitempty"`
 }
 
 type AlertConnection struct {
@@ -745,18 +757,30 @@ type AlertEvidence struct {
 	Resolution *string `json:"resolution,omitempty"`
 }
 
+// A human‑authored explanation of how an alert was resolved
 type AlertResolution struct {
+	// Stable identifier for this alert resolution
 	ID string `json:"id"`
-	// the resolution for this alert
+	// The resolution text explaining how the alert was handled
 	Resolution string `json:"resolution"`
-	// the alert this resolution was associated with
+	// The alert this resolution was associated with
 	Alert      *Alert  `json:"alert,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
 	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
+// Attributes used to persist a human‑authored resolution for an alert
 type AlertResolutionAttributes struct {
+	// Free‑form description of how the alert was resolved or triaged
 	Resolution string `json:"resolution"`
+}
+
+// Time series data associated with an alert evaluation
+type AlertTimeseries struct {
+	// Threshold value used when evaluating this alert over time
+	Threshold *float64 `json:"threshold,omitempty"`
+	// Ordered list of metric points collected while evaluating this alert
+	Metrics []*MetricResult `json:"metrics,omitempty"`
 }
 
 type AnalysisRatesAttributes struct {
@@ -2974,8 +2998,11 @@ type DashboardSpec struct {
 	Graphs      []*DashboardGraph `json:"graphs,omitempty"`
 }
 
+// Datadog API credentials
 type DatadogCredentialsAttributes struct {
+	// Datadog API key with access to query metrics and logs
 	APIKey string `json:"apiKey"`
+	// Datadog application key used alongside the API key
 	AppKey string `json:"appKey"`
 }
 
@@ -4242,10 +4269,15 @@ type KubernetesChangelog struct {
 	APIUpdates []*string `json:"apiUpdates,omitempty"`
 }
 
+// Aggregated metrics for a Kubernetes controller and its pods
 type KubernetesControllerMetrics struct {
-	CPU    []*MetricResponse `json:"cpu,omitempty"`
-	Mem    []*MetricResponse `json:"mem,omitempty"`
+	// CPU usage metrics for the controller
+	CPU []*MetricResponse `json:"cpu,omitempty"`
+	// Memory usage metrics for the controller
+	Mem []*MetricResponse `json:"mem,omitempty"`
+	// CPU usage metrics for pods managed by this controller
 	PodCPU []*MetricResponse `json:"podCpu,omitempty"`
+	// Memory usage metrics for pods managed by this controller
 	PodMem []*MetricResponse `json:"podMem,omitempty"`
 }
 
@@ -4619,6 +4651,142 @@ type MetricResult struct {
 	Value     *string `json:"value,omitempty"`
 }
 
+// A monitor defines a recurring check over observability data that can raise alerts
+type Monitor struct {
+	// Stable identifier for this monitor
+	ID string `json:"id"`
+	// Short name used to identify this monitor
+	Name string `json:"name"`
+	// Optional free‑form description of what this monitor is checking
+	Description *string `json:"description,omitempty"`
+	// Optional template used when rendering alert messages for this monitor
+	AlertTemplate *string `json:"alertTemplate,omitempty"`
+	// Severity level for alerts generated by this monitor
+	Severity AlertSeverity `json:"severity"`
+	// Monitor type (currently log‑based only)
+	Type MonitorType `json:"type"`
+	// Cron schedule defining when the monitor is evaluated
+	EvaluationCron string `json:"evaluationCron"`
+	// Next scheduled time this monitor will be evaluated, if any
+	NextRunAt *string `json:"nextRunAt,omitempty"`
+	// Underlying query configuration used to fetch data for this monitor
+	Query MonitorQuery `json:"query"`
+	// Threshold configuration that determines when the monitor should fire
+	Threshold MonitorThreshold `json:"threshold"`
+	// The service deployment this monitor is attached to
+	Service *ServiceDeployment `json:"service,omitempty"`
+	// The workbench this monitor is attached to
+	Workbench  *Workbench `json:"workbench,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+}
+
+// Attributes used to create or update an observability monitor
+type MonitorAttributes struct {
+	// ID of the service deployment this monitor should be attached to
+	ServiceID string `json:"serviceId"`
+	// ID of the workbench this monitor should be attached to
+	WorkbenchID *string `json:"workbenchId,omitempty"`
+	// Short name used to identify this monitor
+	Name string `json:"name"`
+	// Optional free‑form description of what this monitor is checking
+	Description *string `json:"description,omitempty"`
+	// Optional template used when rendering alert messages for this monitor
+	AlertTemplate *string `json:"alertTemplate,omitempty"`
+	// Severity level applied to alerts generated by this monitor
+	Severity AlertSeverity `json:"severity"`
+	// Monitor type (currently log‑based only)
+	Type MonitorType `json:"type"`
+	// Cron schedule defining when the monitor is evaluated (for example */5 * * * *)
+	EvaluationCron string `json:"evaluationCron"`
+	// Underlying query configuration used to fetch data for this monitor
+	Query MonitorQueryAttributes `json:"query"`
+	// Threshold configuration that determines when the monitor should fire
+	Threshold MonitorThresholdAttributes `json:"threshold"`
+}
+
+type MonitorConnection struct {
+	PageInfo PageInfo       `json:"pageInfo"`
+	Edges    []*MonitorEdge `json:"edges,omitempty"`
+}
+
+type MonitorEdge struct {
+	Node   *Monitor `json:"node,omitempty"`
+	Cursor *string  `json:"cursor,omitempty"`
+}
+
+// A single key/value facet used when filtering log queries
+type MonitorFacet struct {
+	// Facet key (for example kubernetes label or field name)
+	Key string `json:"key"`
+	// Facet value to match for the given key
+	Value string `json:"value"`
+}
+
+// Key/value facet used to further filter log queries
+type MonitorFacetAttributes struct {
+	// Facet key (for example kubernetes namespace or pod label name)
+	Key string `json:"key"`
+	// Facet value to match for the given key
+	Value string `json:"value"`
+}
+
+// Log‑level query parameters for a monitor
+type MonitorLogQuery struct {
+	// Log query string passed through to the underlying log provider
+	Query string `json:"query"`
+	// Lookback duration for the log query (for example 1h, 10m, 30s)
+	Duration *string `json:"duration,omitempty"`
+	// Operator to use for evaluating multi word log queries
+	Operator *MonitorOperator `json:"operator,omitempty"`
+	// Time bucket size (for example 5m) used when aggregating log results
+	BucketSize string `json:"bucketSize"`
+	// Optional list of facets used to filter log results
+	Facets []*MonitorFacet `json:"facets,omitempty"`
+}
+
+// Log query configuration for a monitor
+type MonitorLogQueryAttributes struct {
+	// Log query string passed through to the underlying log provider
+	Query string `json:"query"`
+	// Time bucket size (for example 5m) used when aggregating log results
+	BucketSize string `json:"bucketSize"`
+	// Lookback duration for the log query (for example 1h, 10m, 30s)
+	Duration *string `json:"duration,omitempty"`
+	// Operator to use when combining multiple log queries
+	Operator *MonitorOperator `json:"operator,omitempty"`
+	// Optional key/value facets applied as additional filters on the log query
+	Facets []*MonitorFacetAttributes `json:"facets,omitempty"`
+}
+
+// Wrapper object for all query types used by a monitor
+type MonitorQuery struct {
+	// Log query configuration used by this monitor
+	Log MonitorLogQuery `json:"log"`
+}
+
+// Wrapper for the underlying query definition for a monitor
+type MonitorQueryAttributes struct {
+	// Log query used when the monitor type is log‑based
+	Log MonitorLogQueryAttributes `json:"log"`
+}
+
+// Threshold configuration defining when a monitor should fire alerts
+type MonitorThreshold struct {
+	// Aggregation function applied over the result set (max, min, avg)
+	Aggregate MonitorAggregate `json:"aggregate"`
+	// Numeric value the aggregated metric must cross to trigger the alert
+	Value float64 `json:"value"`
+}
+
+// Threshold configuration used to decide when a monitor should fire
+type MonitorThresholdAttributes struct {
+	// Aggregation function applied over the result set (max, min, avg)
+	Aggregate MonitorAggregate `json:"aggregate"`
+	// Numeric value the aggregated metric must cross to trigger the alert
+	Value float64 `json:"value"`
+}
+
 type Namespace struct {
 	Status   NamespaceStatus `json:"status"`
 	Spec     NamespaceSpec   `json:"spec"`
@@ -4691,7 +4859,9 @@ type NetworkMeshWorkload struct {
 	Service   *string `json:"service,omitempty"`
 }
 
+// New Relic API credentials
 type NewRelicCredentialsAttributes struct {
+	// New Relic user or ingest API key with access to query telemetry
 	APIKey string `json:"apiKey"`
 }
 
@@ -4940,17 +5110,25 @@ type ObjectStoreEdge struct {
 	Cursor *string      `json:"cursor,omitempty"`
 }
 
+// Configuration for an external observability provider such as Datadog or New Relic
 type ObservabilityProvider struct {
-	ID         string                    `json:"id"`
-	Type       ObservabilityProviderType `json:"type"`
-	Name       string                    `json:"name"`
-	InsertedAt *string                   `json:"insertedAt,omitempty"`
-	UpdatedAt  *string                   `json:"updatedAt,omitempty"`
+	// Stable identifier for this observability provider
+	ID string `json:"id"`
+	// Type of provider (for example :datadog or :newrelic)
+	Type ObservabilityProviderType `json:"type"`
+	// Human‑readable name for this provider
+	Name       string  `json:"name"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
+// Attributes for creating or updating an external observability provider
 type ObservabilityProviderAttributes struct {
-	Type        ObservabilityProviderType                  `json:"type"`
-	Name        string                                     `json:"name"`
+	// Type of observability provider (for example Datadog or New Relic)
+	Type ObservabilityProviderType `json:"type"`
+	// Human‑readable name for this provider; must be unique per deployment
+	Name string `json:"name"`
+	// Provider‑specific credentials required to authenticate API calls
 	Credentials ObservabilityProviderCredentialsAttributes `json:"credentials"`
 }
 
@@ -4959,8 +5137,11 @@ type ObservabilityProviderConnection struct {
 	Edges    []*ObservabilityProviderEdge `json:"edges,omitempty"`
 }
 
+// Provider‑specific credential blocks; only one provider key should be populated
 type ObservabilityProviderCredentialsAttributes struct {
-	Datadog  *DatadogCredentialsAttributes  `json:"datadog,omitempty"`
+	// Datadog API credentials
+	Datadog *DatadogCredentialsAttributes `json:"datadog,omitempty"`
+	// New Relic API credentials
 	Newrelic *NewRelicCredentialsAttributes `json:"newrelic,omitempty"`
 }
 
@@ -4971,9 +5152,12 @@ type ObservabilityProviderEdge struct {
 
 // A webhook receiver for an observability provider like grafana or datadog
 type ObservabilityWebhook struct {
-	ID   string                   `json:"id"`
+	// Stable identifier for this webhook
+	ID string `json:"id"`
+	// Type of observability webhook (for example :grafana)
 	Type ObservabilityWebhookType `json:"type"`
-	Name string                   `json:"name"`
+	// Human‑readable name for this webhook
+	Name string `json:"name"`
 	// the url for this specific webhook
 	URL        string  `json:"url"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -4982,9 +5166,12 @@ type ObservabilityWebhook struct {
 
 // input data to persist a webhook receiver for an observability provider like grafana or datadog
 type ObservabilityWebhookAttributes struct {
-	Type   ObservabilityWebhookType `json:"type"`
-	Name   string                   `json:"name"`
-	Secret *string                  `json:"secret,omitempty"`
+	// Type of webhook endpoint (for example Grafana alerting)
+	Type ObservabilityWebhookType `json:"type"`
+	// Unique name used to reference this webhook
+	Name string `json:"name"`
+	// Optional shared secret used to validate incoming webhook payloads
+	Secret *string `json:"secret,omitempty"`
 }
 
 type ObservabilityWebhookConnection struct {
@@ -4997,16 +5184,23 @@ type ObservabilityWebhookEdge struct {
 	Cursor *string               `json:"cursor,omitempty"`
 }
 
+// A metric exposed by an external observability provider and referenced by the console
 type ObservableMetric struct {
-	ID         string                 `json:"id"`
-	Identifier string                 `json:"identifier"`
+	// Stable identifier for this observable metric
+	ID string `json:"id"`
+	// Provider‑specific metric identifier (for example Prometheus metric name)
+	Identifier string `json:"identifier"`
+	// Observability provider that owns this metric
 	Provider   *ObservabilityProvider `json:"provider,omitempty"`
 	InsertedAt *string                `json:"insertedAt,omitempty"`
 	UpdatedAt  *string                `json:"updatedAt,omitempty"`
 }
 
+// Attributes linking a metric in an external provider to this deployment
 type ObservableMetricAttributes struct {
+	// Provider‑specific metric identifier (for example metric name or query ID)
 	Identifier string `json:"identifier"`
+	// ID of the observability provider that owns this metric
 	ProviderID string `json:"providerId"`
 }
 
@@ -7722,7 +7916,9 @@ type ServiceDeployment struct {
 	// a relay connection of all revisions of this service, these are periodically pruned up to a history limit
 	Revisions *RevisionConnection `json:"revisions,omitempty"`
 	// list all alerts discovered for this service
-	Alerts                 *AlertConnection                `json:"alerts,omitempty"`
+	Alerts *AlertConnection `json:"alerts,omitempty"`
+	// list all monitors configured for this service
+	Monitors               *MonitorConnection              `json:"monitors,omitempty"`
 	ScalingRecommendations []*ClusterScalingRecommendation `json:"scalingRecommendations,omitempty"`
 	ComponentMetrics       *ServiceComponentMetrics        `json:"componentMetrics,omitempty"`
 	// A pod-level set of utilization metrics for this cluster for rendering a heat map
@@ -8825,7 +9021,9 @@ type UserRoles struct {
 
 // A representation of the metrics to render a utilization heat map
 type UtilizationHeatMap struct {
-	CPU    []*MetricPointResponse `json:"cpu,omitempty"`
+	// CPU utilization data points grouped by time bucket
+	CPU []*MetricPointResponse `json:"cpu,omitempty"`
+	// Memory utilization data points grouped by time bucket
 	Memory []*MetricPointResponse `json:"memory,omitempty"`
 }
 
@@ -12297,6 +12495,171 @@ func (e McpServerProtocol) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type MonitorAggregate string
+
+const (
+	MonitorAggregateMax MonitorAggregate = "MAX"
+	MonitorAggregateMin MonitorAggregate = "MIN"
+	MonitorAggregateAvg MonitorAggregate = "AVG"
+)
+
+var AllMonitorAggregate = []MonitorAggregate{
+	MonitorAggregateMax,
+	MonitorAggregateMin,
+	MonitorAggregateAvg,
+}
+
+func (e MonitorAggregate) IsValid() bool {
+	switch e {
+	case MonitorAggregateMax, MonitorAggregateMin, MonitorAggregateAvg:
+		return true
+	}
+	return false
+}
+
+func (e MonitorAggregate) String() string {
+	return string(e)
+}
+
+func (e *MonitorAggregate) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = MonitorAggregate(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid MonitorAggregate", str)
+	}
+	return nil
+}
+
+func (e MonitorAggregate) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *MonitorAggregate) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e MonitorAggregate) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type MonitorOperator string
+
+const (
+	MonitorOperatorOr  MonitorOperator = "OR"
+	MonitorOperatorAnd MonitorOperator = "AND"
+)
+
+var AllMonitorOperator = []MonitorOperator{
+	MonitorOperatorOr,
+	MonitorOperatorAnd,
+}
+
+func (e MonitorOperator) IsValid() bool {
+	switch e {
+	case MonitorOperatorOr, MonitorOperatorAnd:
+		return true
+	}
+	return false
+}
+
+func (e MonitorOperator) String() string {
+	return string(e)
+}
+
+func (e *MonitorOperator) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = MonitorOperator(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid MonitorOperator", str)
+	}
+	return nil
+}
+
+func (e MonitorOperator) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *MonitorOperator) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e MonitorOperator) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type MonitorType string
+
+const (
+	MonitorTypeLog MonitorType = "LOG"
+)
+
+var AllMonitorType = []MonitorType{
+	MonitorTypeLog,
+}
+
+func (e MonitorType) IsValid() bool {
+	switch e {
+	case MonitorTypeLog:
+		return true
+	}
+	return false
+}
+
+func (e MonitorType) String() string {
+	return string(e)
+}
+
+func (e *MonitorType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = MonitorType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid MonitorType", str)
+	}
+	return nil
+}
+
+func (e MonitorType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *MonitorType) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e MonitorType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type NodeStatisticHealth string
 
 const (
@@ -12529,6 +12892,7 @@ const (
 	ObservabilityWebhookTypePagerduty ObservabilityWebhookType = "PAGERDUTY"
 	ObservabilityWebhookTypeNewrelic  ObservabilityWebhookType = "NEWRELIC"
 	ObservabilityWebhookTypeSentry    ObservabilityWebhookType = "SENTRY"
+	ObservabilityWebhookTypePlural    ObservabilityWebhookType = "PLURAL"
 )
 
 var AllObservabilityWebhookType = []ObservabilityWebhookType{
@@ -12537,11 +12901,12 @@ var AllObservabilityWebhookType = []ObservabilityWebhookType{
 	ObservabilityWebhookTypePagerduty,
 	ObservabilityWebhookTypeNewrelic,
 	ObservabilityWebhookTypeSentry,
+	ObservabilityWebhookTypePlural,
 }
 
 func (e ObservabilityWebhookType) IsValid() bool {
 	switch e {
-	case ObservabilityWebhookTypeGrafana, ObservabilityWebhookTypeDatadog, ObservabilityWebhookTypePagerduty, ObservabilityWebhookTypeNewrelic, ObservabilityWebhookTypeSentry:
+	case ObservabilityWebhookTypeGrafana, ObservabilityWebhookTypeDatadog, ObservabilityWebhookTypePagerduty, ObservabilityWebhookTypeNewrelic, ObservabilityWebhookTypeSentry, ObservabilityWebhookTypePlural:
 		return true
 	}
 	return false
