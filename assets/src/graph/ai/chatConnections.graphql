@@ -1,0 +1,52 @@
+fragment SlackConnectionConfiguration on SlackConnectionConfiguration {
+  botId
+}
+
+fragment ChatProviderConnectionConfiguration on ChatProviderConnectionConfiguration {
+  slack {
+    ...SlackConnectionConfiguration
+  }
+}
+
+fragment ChatProviderConnection on ChatProviderConnection {
+  id
+  name
+  type
+  configuration {
+    ...ChatProviderConnectionConfiguration
+  }
+  insertedAt
+  updatedAt
+}
+
+query ChatProviderConnections(
+  $first: Int = 100
+  $after: String
+  $type: ChatProviderConnectionType
+  $q: String
+) {
+  chatProviderConnections(first: $first, after: $after, type: $type, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ChatProviderConnection
+      }
+    }
+  }
+}
+
+mutation UpsertChatProviderConnection(
+  $attributes: ChatProviderConnectionAttributes!
+) {
+  upsertChatProviderConnection(attributes: $attributes) {
+    ...ChatProviderConnection
+  }
+}
+
+mutation DeleteChatProviderConnection($id: ID!) {
+  deleteChatProviderConnection(id: $id) {
+    ...ChatProviderConnection
+  }
+}

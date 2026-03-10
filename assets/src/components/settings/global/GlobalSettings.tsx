@@ -28,6 +28,7 @@ const directory = [
   { path: 'observability', label: 'Observability' },
   { path: 'oidc', label: 'OIDC' },
   { path: 'smtp', label: 'SMTP' },
+  { path: 'chat-connections', label: 'Chat connections' },
 ]
 
 type GlobalSettingsContextType = {

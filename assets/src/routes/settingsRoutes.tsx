@@ -25,6 +25,7 @@ import ServiceAccounts from 'components/settings/usermanagement/serviceaccounts/
 import { AccessTokens } from 'components/profile/access-tokens/AccessTokens'
 
 import { GlobalSettingsSMTP } from 'components/settings/global/GlobalSettingsSMTP'
+import { GlobalSettingsChatConnections } from 'components/settings/global/GlobalSettingsChatConnections'
 
 import Notifications from '../components/settings/notifications/Notifications'
 
@@ -145,6 +146,10 @@ const globalSettingsRoutes = (
     <Route
       path="smtp"
       element={<GlobalSettingsSMTP />}
+    />
+    <Route
+      path="chat-connections"
+      element={<GlobalSettingsChatConnections />}
     />
   </Route>
 )

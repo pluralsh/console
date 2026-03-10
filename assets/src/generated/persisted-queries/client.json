@@ -167,6 +167,21 @@
          "name": "AIChatStream",
          "body": "subscription AIChatStream($threadId: ID, $insightId: ID, $scopeId: String, $recommendationId: ID) {\n  aiStream(\n    threadId: $threadId\n    insightId: $insightId\n    scopeId: $scopeId\n    recommendationId: $recommendationId\n  ) {\n    ...AiDelta\n    __typename\n  }\n}\n\nfragment AiDelta on AiDelta {\n  seq\n  message\n  role\n  content\n  tool {\n    id\n    name\n    arguments\n    pending\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:169811f07eddcf9985adabc4a6a244a2204ee5870f2b38754f7a7756b3afa675": {
+         "type": "query",
+         "name": "ChatProviderConnections",
+         "body": "query ChatProviderConnections($first: Int = 100, $after: String, $type: ChatProviderConnectionType, $q: String) {\n  chatProviderConnections(first: $first, after: $after, type: $type, q: $q) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...ChatProviderConnection\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment ChatProviderConnection on ChatProviderConnection {\n  id\n  name\n  type\n  configuration {\n    ...ChatProviderConnectionConfiguration\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ChatProviderConnectionConfiguration on ChatProviderConnectionConfiguration {\n  slack {\n    ...SlackConnectionConfiguration\n    __typename\n  }\n  __typename\n}\n\nfragment SlackConnectionConfiguration on SlackConnectionConfiguration {\n  botId\n  __typename\n}"
+      },
+      "sha256:9ebd9265b265403e41cb81992b5c1636643d1ffdb3d1f0eddd5b7d70b106ac23": {
+         "type": "mutation",
+         "name": "UpsertChatProviderConnection",
+         "body": "mutation UpsertChatProviderConnection($attributes: ChatProviderConnectionAttributes!) {\n  upsertChatProviderConnection(attributes: $attributes) {\n    ...ChatProviderConnection\n    __typename\n  }\n}\n\nfragment ChatProviderConnection on ChatProviderConnection {\n  id\n  name\n  type\n  configuration {\n    ...ChatProviderConnectionConfiguration\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ChatProviderConnectionConfiguration on ChatProviderConnectionConfiguration {\n  slack {\n    ...SlackConnectionConfiguration\n    __typename\n  }\n  __typename\n}\n\nfragment SlackConnectionConfiguration on SlackConnectionConfiguration {\n  botId\n  __typename\n}"
+      },
+      "sha256:11b0203fb1c15934a26c0a1e18d981a26852a9a8ad2be6acbecf359e6514a335": {
+         "type": "mutation",
+         "name": "DeleteChatProviderConnection",
+         "body": "mutation DeleteChatProviderConnection($id: ID!) {\n  deleteChatProviderConnection(id: $id) {\n    ...ChatProviderConnection\n    __typename\n  }\n}\n\nfragment ChatProviderConnection on ChatProviderConnection {\n  id\n  name\n  type\n  configuration {\n    ...ChatProviderConnectionConfiguration\n    __typename\n  }\n  insertedAt\n  updatedAt\n  __typename\n}\n\nfragment ChatProviderConnectionConfiguration on ChatProviderConnectionConfiguration {\n  slack {\n    ...SlackConnectionConfiguration\n    __typename\n  }\n  __typename\n}\n\nfragment SlackConnectionConfiguration on SlackConnectionConfiguration {\n  botId\n  __typename\n}"
+      },
       "sha256:7beff50b854e53212f1ac56c40fac65f6bbea155ed498b568090cdaa30e81a31": {
          "type": "query",
          "name": "InfraResearch",
