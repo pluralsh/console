@@ -38,7 +38,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       securityContext:
-        {{- toYaml .Values.securityContext | nindent 8 }}
+        {{- toYaml .Values.kas.securityContext | nindent 8 }}
       {{- with .Values.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
@@ -51,7 +51,7 @@ spec:
           image: {{ .Values.kas.image.repository }}:{{ .Values.kas.image.tag | default .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.kas.image.pullPolicy }}
           securityContext:
-            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+            {{- toYaml .Values.kas.podSecurityContext | nindent 12 }}
           args:
             - "--configuration-file=/etc/kas/config.yaml"
             {{- range .Values.extraArgs }}
@@ -86,7 +86,7 @@ spec:
             initialDelaySeconds: 15
             periodSeconds: 20
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            {{- toYaml .Values.kas.resources | nindent 12 }}
           volumeMounts:
           {{ if .Values.global.additionalVolumeMounts }}
           {{ toYaml .Values.global.additionalVolumeMounts | nindent 10 }}

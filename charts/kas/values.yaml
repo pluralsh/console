@@ -11,14 +11,6 @@ fullnameOverride: ""
 podAnnotations: {}
 podLabels: {}
 
-podSecurityContext:
-  runAsUser: 65532
-
-securityContext:
-  runAsUser: 65532
-  runAsGroup: 65532
-  fsGroup: 65532
-
 priorityClassName: ""
 
 extraEnv: []
@@ -32,14 +24,6 @@ affinity: {}
 tolerations: []
 
 initContainers: []
-
-resources:
-  limits:
-    cpu: 500m
-    memory: 1Gi
-  requests:
-    cpu: 100m
-    memory: 128Mi
 
 serviceAccount:
   # Specifies whether a service account should be created.

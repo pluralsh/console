@@ -403,14 +403,6 @@ kas:
     additionalVolumes: ~
     additionalVolumeMounts: ~
 
-  image:
-    # See: https://github.com/pluralsh/kubernetes-agent/pkgs/container/kubernetes-agent.
-    repository: ghcr.io/pluralsh/kubernetes-agent
-    pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
-    pullSecrets: []
-
   consoleUrl: ""
 
   nameOverride: ""
@@ -419,14 +411,6 @@ kas:
 
   podAnnotations: { }
   podLabels: { }
-
-  podSecurityContext:
-    runAsUser: 65532
-
-  securityContext:
-    runAsUser: 65532
-    runAsGroup: 65532
-    fsGroup: 65532
 
   priorityClassName: ""
 
@@ -441,23 +425,6 @@ kas:
   tolerations: []
 
   initContainers: []
-
-  resources:
-    limits:
-      cpu: 500m
-      memory: 1Gi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
-  service:
-    agentPort: 8150
-    agentProxyPort: 8180
-    apiInternalPort: 8153
-    kubernetesApiPort: 8154
-    privateApiPort: 8155
-    observabilityPort: 8151
-    type: ClusterIP
 
   serviceAccount:
     # Specifies whether a service account should be created.
@@ -498,43 +465,6 @@ kas:
   api:
     path: /api
     port: 8000
-
-  ingress:
-    ingressClass: nginx
-    kubernetesApiPath: /k8s-proxy
-    tlsSecretName: kas-tls
-
-    tls:
-      enabled: true
-
-    annotations:
-      kubernetes.io/tls-acme: "true"
-      cert-manager.io/cluster-issuer: letsencrypt-prod
-
-  redis:
-    enabled: true
-    architecture: standalone
-    global:
-      security:
-        allowInsecureImages: true
-    image:
-      registry: ghcr.io
-      repository: pluralsh/registry/bitnami/redis
-      tag: 7.4.2-debian-12-r5
-    auth:
-      enabled: true
-      sentinel: false
-    sentinel:
-      enabled: false
-    master:
-      count: 1
-    commonConfiguration: |-
-      # Enable AOF https://redis.io/topics/persistence#append-only-file
-      appendonly yes
-      # Disable RDB persistence, AOF persistence already enabled.
-      save ""
-      # Enable idle client connection timeout (5 minutes)
-      timeout 300
 
 cloudQuery:
   enabled: false
@@ -683,7 +613,20 @@ kas:
     repository: ghcr.io/pluralsh/kubernetes-agent
     pullPolicy: IfNotPresent
     tag: "" # Overrides the image tag whose default is the chart appVersion.
-    pullSecrets: [ ]
+    pullSecrets: []
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  podSecurityContext:
+    runAsUser: 65532
+  securityContext:
+    runAsUser: 65532
+    runAsGroup: 65532
+    fsGroup: 65532
   service:
     agentPort: 8150
     agentProxyPort: 8180
