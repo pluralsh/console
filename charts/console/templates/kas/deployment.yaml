@@ -47,7 +47,7 @@ spec:
       {{ toYaml .Values.kas.initContainers | nindent 6 }}
       {{ end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: kas
           image: {{ .Values.kas.image.repository }}:{{ .Values.kas.image.tag | default .Chart.AppVersion }}
           imagePullPolicy: {{ .Values.kas.image.pullPolicy }}
           securityContext:
