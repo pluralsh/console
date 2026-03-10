@@ -26,6 +26,10 @@ import {
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
+import {
+  ConfigurableWorkbenchToolType,
+  isConfigurableWorkbenchToolType,
+} from './workbenchToolsConsts'
 import { WorkbenchToolFormState } from './WorkbenchToolForm'
 
 type UpdateFn = (update: DeepPartial<WorkbenchToolFormState>) => void
@@ -53,6 +57,26 @@ function updateConfig(
   })
 }
 
+/** Form field components keyed by configurable tool type. Exhaustive over ConfigurableWorkbenchToolType. */
+const CONFIGURABLE_FORM_FIELDS: Record<
+  ConfigurableWorkbenchToolType,
+  (props: {
+    state: WorkbenchToolFormState
+    update: UpdateFn
+  }) => React.ReactNode
+> = {
+  [WorkbenchToolType.Datadog]: (props) => <DatadogFormFields {...props} />,
+  [WorkbenchToolType.Elastic]: (props) => <ElasticFormFields {...props} />,
+  [WorkbenchToolType.Http]: (props) => <HttpFormFields {...props} />,
+  [WorkbenchToolType.Loki]: (props) => <LokiFormFields {...props} />,
+  [WorkbenchToolType.Prometheus]: (props) => (
+    <PrometheusFormFields {...props} />
+  ),
+  [WorkbenchToolType.Tempo]: (props) => <TempoFormFields {...props} />,
+  [WorkbenchToolType.Atlassian]: (props) => <AtlassianFormFields {...props} />,
+  [WorkbenchToolType.Linear]: (props) => <LinearFormFields {...props} />,
+}
+
 export function WorkbenchToolFormFields({
   type,
   state,
@@ -62,69 +86,16 @@ export function WorkbenchToolFormFields({
   state: WorkbenchToolFormState
   update: UpdateFn
 }) {
-  switch (type) {
-    case WorkbenchToolType.Datadog:
-      return (
-        <DatadogFormFields
-          state={state}
-          update={update}
-        />
-      )
-    case WorkbenchToolType.Elastic:
-      return (
-        <ElasticFormFields
-          state={state}
-          update={update}
-        />
-      )
-    case WorkbenchToolType.Http:
-      return (
-        <HttpFormFields
-          state={state}
-          update={update}
-        />
-      )
-    case WorkbenchToolType.Loki:
-      return (
-        <LokiFormFields
-          state={state}
-          update={update}
-        />
-      )
-    case WorkbenchToolType.Prometheus:
-      return (
-        <PrometheusFormFields
-          state={state}
-          update={update}
-        />
-      )
-    case WorkbenchToolType.Tempo:
-      return (
-        <TempoFormFields
-          state={state}
-          update={update}
-        />
-      )
-    case WorkbenchToolType.Atlassian:
-      return (
-        <AtlassianFormFields
-          state={state}
-          update={update}
-        />
-      )
-    case WorkbenchToolType.Linear:
-      return (
-        <LinearFormFields
-          state={state}
-          update={update}
-        />
-      )
-    case WorkbenchToolType.Mcp:
-    case WorkbenchToolType.Sentry:
-      return null
-    default:
-      return null
+  if (!isConfigurableWorkbenchToolType(type)) {
+    return null
   }
+  const Fields = CONFIGURABLE_FORM_FIELDS[type]
+  return (
+    <Fields
+      state={state}
+      update={update}
+    />
+  )
 }
 
 function DatadogFormFields({
