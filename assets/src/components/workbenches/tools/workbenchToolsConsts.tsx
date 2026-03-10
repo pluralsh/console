@@ -23,10 +23,7 @@ export type ConfigurableWorkbenchToolType =
   (typeof CONFIGURABLE_WORKBENCH_TOOL_TYPES)[number]
 
 /** map configurable tool type -> config key in WorkbenchToolConfigurationAttributes. */
-export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY: Record<
-  ConfigurableWorkbenchToolType,
-  keyof WorkbenchToolConfigurationAttributes
-> = {
+export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Http]: 'http',
   [WorkbenchToolType.Elastic]: 'elastic',
   [WorkbenchToolType.Prometheus]: 'prometheus',
@@ -35,12 +32,21 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY: Record<
   [WorkbenchToolType.Datadog]: 'datadog',
   [WorkbenchToolType.Linear]: 'linear',
   [WorkbenchToolType.Atlassian]: 'atlassian',
-}
+} as const satisfies Record<
+  ConfigurableWorkbenchToolType,
+  keyof WorkbenchToolConfigurationAttributes
+>
+
+/** The non-nullable inner config type for a given configurable tool type. */
+export type ConfigForToolType<T extends ConfigurableWorkbenchToolType> =
+  NonNullable<
+    WorkbenchToolConfigurationAttributes[(typeof CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY)[T]]
+  >
 
 export const isConfigurableWorkbenchToolType = (
-  type: string
+  type: Nullable<string>
 ): type is ConfigurableWorkbenchToolType =>
-  CONFIGURABLE_SET.has(type as WorkbenchToolType)
+  !!type && CONFIGURABLE_SET.has(type as WorkbenchToolType)
 
 export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Http]: 'HTTP',

@@ -1,80 +1,35 @@
+import { DeepPartial } from '@apollo/client/utilities'
 import {
   Button,
+  Card,
   Flex,
   FormField,
-  Input,
   Input2,
   ListBoxItem,
   MinusIcon,
   PlusIcon,
   Select,
 } from '@pluralsh/design-system'
-import { DeepPartial } from '@apollo/client/utilities'
-import {
-  WorkbenchToolAtlassianConnectionAttributes,
-  WorkbenchToolConfigurationAttributes,
-  WorkbenchToolDatadogConnectionAttributes,
-  WorkbenchToolElasticConnectionAttributes,
-  WorkbenchToolHttpConfigurationAttributes,
-  WorkbenchToolHttpHeaderAttributes,
-  WorkbenchToolHttpMethod,
-  WorkbenchToolLinearConnectionAttributes,
-  WorkbenchToolLokiConnectionAttributes,
-  WorkbenchToolPrometheusConnectionAttributes,
-  WorkbenchToolTempoConnectionAttributes,
-  WorkbenchToolType,
-} from 'generated/graphql'
-import { isNonNullable } from 'utils/isNonNullable'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
+import { EditableDiv } from 'components/utils/EditableDiv'
+import { WorkbenchToolHttpMethod, WorkbenchToolType } from 'generated/graphql'
+import { ComponentProps, ComponentType } from 'react'
+import styled from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable'
 import {
+  INITIAL_TOOL_CONFIG_BY_TYPE,
+  WorkbenchToolFormState,
+} from './WorkbenchToolForm'
+import {
+  ConfigForToolType,
+  CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
   ConfigurableWorkbenchToolType,
   isConfigurableWorkbenchToolType,
 } from './workbenchToolsConsts'
-import { WorkbenchToolFormState } from './WorkbenchToolForm'
 
-type UpdateFn = (update: DeepPartial<WorkbenchToolFormState>) => void
-
-function getConfig<
-  K extends keyof NonNullable<WorkbenchToolFormState['configuration']>,
->(
-  state: WorkbenchToolFormState,
-  key: K
-): NonNullable<WorkbenchToolFormState['configuration']>[K] | undefined {
-  return state.configuration?.[key]
-}
-
-function updateConfig(
-  state: WorkbenchToolFormState,
-  update: UpdateFn,
-  key: keyof WorkbenchToolConfigurationAttributes,
-  value: NonNullable<WorkbenchToolConfigurationAttributes[typeof key]>
-) {
-  update({
-    configuration: {
-      ...state.configuration,
-      [key]: value,
-    },
-  })
-}
-
-/** Form field components keyed by configurable tool type. Exhaustive over ConfigurableWorkbenchToolType. */
-const CONFIGURABLE_FORM_FIELDS: Record<
-  ConfigurableWorkbenchToolType,
-  (props: {
-    state: WorkbenchToolFormState
-    update: UpdateFn
-  }) => React.ReactNode
-> = {
-  [WorkbenchToolType.Datadog]: (props) => <DatadogFormFields {...props} />,
-  [WorkbenchToolType.Elastic]: (props) => <ElasticFormFields {...props} />,
-  [WorkbenchToolType.Http]: (props) => <HttpFormFields {...props} />,
-  [WorkbenchToolType.Loki]: (props) => <LokiFormFields {...props} />,
-  [WorkbenchToolType.Prometheus]: (props) => (
-    <PrometheusFormFields {...props} />
-  ),
-  [WorkbenchToolType.Tempo]: (props) => <TempoFormFields {...props} />,
-  [WorkbenchToolType.Atlassian]: (props) => <AtlassianFormFields {...props} />,
-  [WorkbenchToolType.Linear]: (props) => <LinearFormFields {...props} />,
+type ToolFormFieldProps<T extends ConfigurableWorkbenchToolType> = {
+  config: ConfigForToolType<T>
+  setConfig: (next: ConfigForToolType<T>) => void
 }
 
 export function WorkbenchToolFormFields({
@@ -84,161 +39,111 @@ export function WorkbenchToolFormFields({
 }: {
   type: WorkbenchToolType
   state: WorkbenchToolFormState
-  update: UpdateFn
+  update: (update: DeepPartial<WorkbenchToolFormState>) => void
 }) {
-  if (!isConfigurableWorkbenchToolType(type)) {
-    return null
+  if (!isConfigurableWorkbenchToolType(type)) return null
+
+  function render<T extends ConfigurableWorkbenchToolType>(
+    t: T,
+    Fields: ComponentType<ToolFormFieldProps<T>>
+  ) {
+    const key = CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY[t]
+    const config =
+      state.configuration?.[key] ?? INITIAL_TOOL_CONFIG_BY_TYPE[type]({})[key]
+    const setConfig = (next: ConfigForToolType<T>) =>
+      update({ configuration: { ...state.configuration, [key]: next } })
+    return (
+      <Fields
+        config={config}
+        setConfig={setConfig}
+      />
+    )
   }
-  const Fields = CONFIGURABLE_FORM_FIELDS[type]
-  return (
-    <Fields
-      state={state}
-      update={update}
-    />
-  )
+
+  switch (type) {
+    case WorkbenchToolType.Datadog:
+      return render(type, DatadogFormFields)
+    case WorkbenchToolType.Elastic:
+      return render(type, ElasticFormFields)
+    case WorkbenchToolType.Http:
+      return render(type, HttpFormFields)
+    case WorkbenchToolType.Loki:
+      return render(type, UrlUsernamePasswordTokenTenantFormFields)
+    case WorkbenchToolType.Prometheus:
+      return render(type, UrlUsernamePasswordTokenTenantFormFields)
+    case WorkbenchToolType.Tempo:
+      return render(type, UrlUsernamePasswordTokenTenantFormFields)
+    case WorkbenchToolType.Atlassian:
+      return render(type, AtlassianFormFields)
+    case WorkbenchToolType.Linear:
+      return render(type, LinearFormFields)
+  }
 }
 
 function DatadogFormFields({
-  state,
-  update,
-}: {
-  state: WorkbenchToolFormState
-  update: UpdateFn
-}) {
-  const c = (getConfig(state, 'datadog') ??
-    {}) as WorkbenchToolDatadogConnectionAttributes
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Datadog>) {
   return (
     <>
-      <FormField
+      <InputField
         label="Site"
         hint="e.g. datadoghq.com"
-      >
-        <Input2
-          placeholder="datadoghq.com"
-          value={c.site ?? ''}
-          onChange={(e) =>
-            updateConfig(state, update, 'datadog', {
-              ...c,
-              apiKey: c.apiKey ?? '',
-              site: e.target.value || undefined,
-            })
-          }
-        />
-      </FormField>
-      <FormField
+        placeholder="datadoghq.com"
+        value={c.site ?? ''}
+        onChange={(e) => set({ ...c, site: e.target.value || undefined })}
+      />
+      <InputField
         label="API key"
         required
-      >
-        <InputRevealer
-          value={c.apiKey ?? ''}
-          onChange={(e) =>
-            updateConfig(state, update, 'datadog', {
-              ...c,
-              apiKey: e.target.value,
-              appKey: c.appKey,
-              site: c.site,
-            })
-          }
-        />
-      </FormField>
-      <FormField label="Application key (optional)">
-        <InputRevealer
-          value={c.appKey ?? ''}
-          onChange={(e) =>
-            updateConfig(state, update, 'datadog', {
-              ...c,
-              apiKey: c.apiKey ?? '',
-              appKey: e.target.value || undefined,
-            })
-          }
-        />
-      </FormField>
+        revealer
+        value={c.apiKey ?? ''}
+        onChange={(e) => set({ ...c, apiKey: e.target.value })}
+      />
+      <InputField
+        label="Application key (optional)"
+        revealer
+        value={c.appKey ?? ''}
+        onChange={(e) => set({ ...c, appKey: e.target.value || undefined })}
+      />
     </>
   )
 }
 
 function ElasticFormFields({
-  state,
-  update,
-}: {
-  state: WorkbenchToolFormState
-  update: UpdateFn
-}) {
-  const c = (getConfig(state, 'elastic') ??
-    {}) as WorkbenchToolElasticConnectionAttributes
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Elastic>) {
   return (
     <>
-      <FormField
+      <InputField
         label="URL"
         required
-      >
-        <Input2
-          placeholder="Elasticsearch base URL"
-          value={c.url ?? ''}
-          onChange={(e) =>
-            updateConfig(state, update, 'elastic', {
-              ...c,
-              url: e.target.value,
-              index: c.index ?? '',
-              username: c.username ?? '',
-              password: c.password ?? '',
-            })
-          }
-        />
-      </FormField>
-      <FormField
+        placeholder="Elasticsearch base URL"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
         label="Index"
         required
-      >
-        <Input2
-          placeholder="Index name"
-          value={c.index ?? ''}
-          onChange={(e) =>
-            updateConfig(state, update, 'elastic', {
-              ...c,
-              index: e.target.value,
-              url: c.url ?? '',
-              username: c.username ?? '',
-              password: c.password ?? '',
-            })
-          }
-        />
-      </FormField>
-      <FormField
+        placeholder="Index name"
+        value={c.index ?? ''}
+        onChange={(e) => set({ ...c, index: e.target.value })}
+      />
+      <InputField
         label="Username"
         required
-      >
-        <Input2
-          placeholder="Basic auth username"
-          value={c.username ?? ''}
-          onChange={(e) =>
-            updateConfig(state, update, 'elastic', {
-              ...c,
-              username: e.target.value,
-              url: c.url ?? '',
-              index: c.index ?? '',
-              password: c.password ?? '',
-            })
-          }
-        />
-      </FormField>
-      <FormField
+        placeholder="Basic auth username"
+        value={c.username ?? ''}
+        onChange={(e) => set({ ...c, username: e.target.value })}
+      />
+      <InputField
         label="Password"
         required
-      >
-        <InputRevealer
-          value={c.password ?? ''}
-          onChange={(e) =>
-            updateConfig(state, update, 'elastic', {
-              ...c,
-              password: e.target.value,
-              url: c.url ?? '',
-              index: c.index ?? '',
-              username: c.username ?? '',
-            })
-          }
-        />
-      </FormField>
+        revealer
+        value={c.password ?? ''}
+        onChange={(e) => set({ ...c, password: e.target.value })}
+      />
     </>
   )
 }
@@ -252,61 +157,35 @@ const HTTP_METHOD_OPTIONS: { key: WorkbenchToolHttpMethod; label: string }[] = [
 ]
 
 function HttpFormFields({
-  state,
-  update,
-}: {
-  state: WorkbenchToolFormState
-  update: UpdateFn
-}) {
-  const c = (getConfig(state, 'http') ??
-    {}) as WorkbenchToolHttpConfigurationAttributes
-  const headers = (c.headers?.filter(isNonNullable) ??
-    []) as WorkbenchToolHttpHeaderAttributes[]
-
-  function setHttp(
-    partial: Partial<
-      NonNullable<WorkbenchToolFormState['configuration']>['http']
-    >
-  ) {
-    updateConfig(state, update, 'http', {
-      url: c.url ?? '',
-      method: c.method ?? WorkbenchToolHttpMethod.Get,
-      body: c.body,
-      headers: c.headers,
-      inputSchema: c.inputSchema,
-      ...partial,
-    })
-  }
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Http>) {
+  const headers = c.headers?.filter(isNonNullable) ?? []
 
   function setHeader(index: number, field: 'name' | 'value', value: string) {
     const next = [...headers]
     if (!next[index]) next[index] = { name: '', value: '' }
     next[index] = { ...next[index], [field]: value }
-    setHttp({ headers: next })
+    set({ ...c, headers: next })
   }
 
   function addHeader() {
-    setHttp({ headers: [...headers, { name: '', value: '' }] })
+    set({ ...c, headers: [...headers, { name: '', value: '' }] })
   }
 
   function removeHeader(index: number) {
-    setHttp({
-      headers: headers.filter((_, i) => i !== index),
-    })
+    set({ ...c, headers: headers.filter((_, i) => i !== index) })
   }
 
   return (
     <>
-      <FormField
+      <InputField
         label="URL"
         required
-      >
-        <Input2
-          placeholder="Request URL"
-          value={c.url ?? ''}
-          onChange={(e) => setHttp({ url: e.target.value })}
-        />
-      </FormField>
+        placeholder="Request URL"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
       <FormField
         label="Method"
         required
@@ -314,7 +193,8 @@ function HttpFormFields({
         <Select
           selectedKey={c.method ?? WorkbenchToolHttpMethod.Get}
           onSelectionChange={(key) =>
-            setHttp({
+            set({
+              ...c,
               method:
                 (key as WorkbenchToolHttpMethod) ?? WorkbenchToolHttpMethod.Get,
             })
@@ -372,233 +252,161 @@ function HttpFormFields({
           </Button>
         </Flex>
       </FormField>
-      <FormField label="Body">
-        <Input
-          multiline
-          minRows={2}
-          maxRows={6}
-          placeholder="Request body (optional)"
-          value={c.body ?? ''}
-          onChange={(e) => setHttp({ body: e.target.value || undefined })}
-        />
-      </FormField>
-      <FormField
+      <InputField
+        multiline
+        label="Body"
+        placeholder="Request body (optional)"
+        initialValue={c.body ?? ''}
+        setValue={(value) => set({ ...c, body: value || undefined })}
+        css={{ minHeight: 56 }}
+      />
+      <InputField
+        multiline
         label="Input schema (JSON)"
         hint="JSON schema for the tool input"
-      >
-        <Input
-          multiline
-          minRows={4}
-          maxRows={12}
-          placeholder='{"type":"object",...}'
-          value={
-            typeof c.inputSchema === 'object'
-              ? JSON.stringify(c.inputSchema, null, 2)
-              : ((c.inputSchema as string) ?? '')
+        placeholder='{"type":"object",...}'
+        initialValue={
+          typeof c.inputSchema === 'object'
+            ? JSON.stringify(c.inputSchema, null, 2)
+            : ((c.inputSchema as string) ?? '')
+        }
+        setValue={(raw) => {
+          if (!raw.trim()) {
+            set({ ...c, inputSchema: undefined })
+            return
           }
-          onChange={(e) => {
-            const raw = e.target.value
-            if (!raw.trim()) {
-              setHttp({ inputSchema: undefined })
-              return
-            }
-            try {
-              setHttp({
-                inputSchema: JSON.parse(raw) as Record<string, unknown>,
-              })
-            } catch {
-              // allow invalid JSON while typing
-              setHttp({ inputSchema: undefined })
-            }
-          }}
-        />
-      </FormField>
+          try {
+            set({
+              ...c,
+              inputSchema: JSON.parse(raw) as Record<string, unknown>,
+            })
+          } catch {
+            // allow invalid JSON while typing
+            set({ ...c, inputSchema: undefined })
+          }
+        }}
+        css={{ minHeight: 96 }}
+      />
     </>
   )
 }
 
-type UrlUsernamePasswordTokenTenant =
-  | WorkbenchToolLokiConnectionAttributes
-  | WorkbenchToolPrometheusConnectionAttributes
-  | WorkbenchToolTempoConnectionAttributes
-
-function urlUsernamePasswordTokenTenantFields(
-  providerKey: 'loki' | 'prometheus' | 'tempo',
-  state: WorkbenchToolFormState,
-  update: UpdateFn,
-  c: UrlUsernamePasswordTokenTenant
-) {
-  const set = (partial: Partial<UrlUsernamePasswordTokenTenant>) =>
-    updateConfig(state, update, providerKey, {
-      ...c,
-      ...partial,
-    } as NonNullable<WorkbenchToolConfigurationAttributes[typeof providerKey]>)
-
+function UrlUsernamePasswordTokenTenantFormFields<
+  T extends
+    | WorkbenchToolType.Loki
+    | WorkbenchToolType.Prometheus
+    | WorkbenchToolType.Tempo,
+>({ config: c, setConfig: set }: ToolFormFieldProps<T>) {
   return (
     <>
-      <FormField
+      <InputField
         label="URL"
         required
-      >
-        <Input2
-          placeholder="Base URL"
-          value={c.url ?? ''}
-          onChange={(e) => set({ url: e.target.value })}
-        />
-      </FormField>
-      <FormField label="Username">
-        <Input2
-          placeholder="Basic auth username"
-          value={c.username ?? ''}
-          onChange={(e) => set({ username: e.target.value || undefined })}
-        />
-      </FormField>
-      <FormField label="Password">
-        <InputRevealer
-          value={c.password ?? ''}
-          onChange={(e) => set({ password: e.target.value || undefined })}
-        />
-      </FormField>
-      <FormField label="Tenant ID">
-        <Input2
-          placeholder="Optional tenant id (e.g. for Mimir)"
-          value={c.tenantId ?? ''}
-          onChange={(e) => set({ tenantId: e.target.value || undefined })}
-        />
-      </FormField>
-      <FormField label="Bearer token / API key">
-        <InputRevealer
-          value={c.token ?? ''}
-          onChange={(e) => set({ token: e.target.value || undefined })}
-        />
-      </FormField>
+        placeholder="Base URL"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Username"
+        placeholder="Basic auth username"
+        value={c.username ?? ''}
+        onChange={(e) => set({ ...c, username: e.target.value || undefined })}
+      />
+      <InputField
+        label="Password"
+        revealer
+        value={c.password ?? ''}
+        onChange={(e) => set({ ...c, password: e.target.value || undefined })}
+      />
+      <InputField
+        label="Tenant ID"
+        placeholder="Optional tenant id (e.g. for Mimir)"
+        value={c.tenantId ?? ''}
+        onChange={(e) => set({ ...c, tenantId: e.target.value || undefined })}
+      />
+      <InputField
+        label="Bearer token / API key"
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value || undefined })}
+      />
     </>
   )
-}
-
-function LokiFormFields({
-  state,
-  update,
-}: {
-  state: WorkbenchToolFormState
-  update: UpdateFn
-}) {
-  const c = (getConfig(state, 'loki') ??
-    {}) as WorkbenchToolLokiConnectionAttributes
-  return urlUsernamePasswordTokenTenantFields('loki', state, update, c)
-}
-
-function PrometheusFormFields({
-  state,
-  update,
-}: {
-  state: WorkbenchToolFormState
-  update: UpdateFn
-}) {
-  const c = (getConfig(state, 'prometheus') ??
-    {}) as WorkbenchToolPrometheusConnectionAttributes
-  return urlUsernamePasswordTokenTenantFields('prometheus', state, update, c)
-}
-
-function TempoFormFields({
-  state,
-  update,
-}: {
-  state: WorkbenchToolFormState
-  update: UpdateFn
-}) {
-  const c = (getConfig(state, 'tempo') ??
-    {}) as WorkbenchToolTempoConnectionAttributes
-  return urlUsernamePasswordTokenTenantFields('tempo', state, update, c)
 }
 
 function AtlassianFormFields({
-  state,
-  update,
-}: {
-  state: WorkbenchToolFormState
-  update: UpdateFn
-}) {
-  const c = (getConfig(state, 'atlassian') ??
-    {}) as WorkbenchToolAtlassianConnectionAttributes
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Atlassian>) {
   return (
     <>
-      <FormField
+      <InputField
         label="Email"
         hint="Atlassian account email (required if not using service account)"
-      >
-        <Input2
-          placeholder="Account email"
-          value={c.email ?? ''}
-          onChange={(e) =>
-            updateConfig(state, update, 'atlassian', {
-              ...c,
-              email: e.target.value || undefined,
-              apiToken: c.apiToken,
-              serviceAccount: c.serviceAccount,
-            })
-          }
-        />
-      </FormField>
-      <FormField
+        placeholder="Account email"
+        value={c.email ?? ''}
+        onChange={(e) => set({ ...c, email: e.target.value || undefined })}
+      />
+      <InputField
         label="API token"
         hint="Required if not using service account"
-      >
-        <InputRevealer
-          value={c.apiToken ?? ''}
-          onChange={(e) =>
-            updateConfig(state, update, 'atlassian', {
-              ...c,
-              apiToken: e.target.value || undefined,
-              email: c.email,
-              serviceAccount: c.serviceAccount,
-            })
-          }
-        />
-      </FormField>
-      <FormField
+        revealer
+        value={c.apiToken ?? ''}
+        onChange={(e) => set({ ...c, apiToken: e.target.value || undefined })}
+      />
+      <InputField
         label="Service account (JSON)"
         hint="Encrypted service account JSON (alternative to API token + email)"
-      >
-        <InputRevealer
-          value={c.serviceAccount ?? ''}
-          onChange={(e) =>
-            updateConfig(state, update, 'atlassian', {
-              ...c,
-              serviceAccount: e.target.value || undefined,
-              email: c.email,
-              apiToken: c.apiToken,
-            })
-          }
-        />
-      </FormField>
+        revealer
+        value={c.serviceAccount ?? ''}
+        onChange={(e) =>
+          set({ ...c, serviceAccount: e.target.value || undefined })
+        }
+      />
     </>
   )
 }
 
 function LinearFormFields({
-  state,
-  update,
-}: {
-  state: WorkbenchToolFormState
-  update: UpdateFn
-}) {
-  const c = (getConfig(state, 'linear') ??
-    {}) as WorkbenchToolLinearConnectionAttributes
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Linear>) {
   return (
-    <FormField
+    <InputField
       label="Access token"
       required
+      revealer
+      value={c.accessToken ?? ''}
+      onChange={(e) => set({ ...c, accessToken: e.target.value })}
+    />
+  )
+}
+
+type InputFieldProps = { label: string; hint?: string; required?: boolean } & (
+  | ({ multiline: true } & ComponentProps<typeof EditableDiv>)
+  | ({ multiline?: false; revealer?: boolean } & ComponentProps<typeof Input2>)
+)
+function InputField({ label, hint, required, ...props }: InputFieldProps) {
+  return (
+    <FormField
+      label={label}
+      hint={hint}
+      required={required}
     >
-      <InputRevealer
-        value={c.accessToken ?? ''}
-        onChange={(e) =>
-          updateConfig(state, update, 'linear', {
-            ...c,
-            accessToken: e.target.value,
-          })
-        }
-      />
+      {props.multiline ? (
+        <EditableDivWrapperSC>
+          <EditableDiv {...props} />
+        </EditableDivWrapperSC>
+      ) : props.revealer ? (
+        <InputRevealer {...props} />
+      ) : (
+        <Input2 {...props} />
+      )}
     </FormField>
   )
 }
+
+const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.medium,
+  background: theme.colors['fill-zero'],
+}))

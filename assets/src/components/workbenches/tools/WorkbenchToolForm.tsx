@@ -21,6 +21,8 @@ import {
 import { WorkbenchToolFormFields } from './WorkbenchToolFormFields'
 import {
   categoryToLabel,
+  ConfigForToolType,
+  CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
   ConfigurableWorkbenchToolType,
   isConfigurableWorkbenchToolType,
   TOOL_TYPE_TO_CATEGORIES,
@@ -49,6 +51,7 @@ export function WorkbenchToolForm({
     categories: tool?.categories ?? TOOL_TYPE_TO_CATEGORIES[type],
     configuration: sanitizeInitialConfiguration(tool),
   })
+  const categories = TOOL_TYPE_TO_CATEGORIES[type] ?? []
   return (
     <FormCardSC>
       <FormField
@@ -67,13 +70,13 @@ export function WorkbenchToolForm({
         state={state}
         update={update}
       />
-      {TOOL_TYPE_TO_CATEGORIES[type].length > 1 && (
+      {categories.length > 1 && (
         <FormField label="Allowed capabilities (must select at least one)">
           <Flex
             direction="column"
             gap="xsmall"
           >
-            {TOOL_TYPE_TO_CATEGORIES[type].map((category) => {
+            {categories.map((category) => {
               const selected = (state.categories ?? []).filter(Boolean)
               const isChecked = selected.includes(category)
               const canUncheck = selected.length > 1
@@ -120,13 +123,16 @@ export function WorkbenchToolForm({
   )
 }
 
-type FragmentConfig = WorkbenchToolFragment['configuration']
-
+// done this way so TS will catch new tool types that aren't fully implemented yet
 /** Build initial form configuration from fragment data. Keyed by configurable tool type. */
-const INITIAL_CONFIG_BY_TYPE: Record<
-  ConfigurableWorkbenchToolType,
-  (config: FragmentConfig) => Partial<WorkbenchToolConfigurationAttributes>
-> = {
+export const INITIAL_TOOL_CONFIG_BY_TYPE: {
+  [T in ConfigurableWorkbenchToolType]: (
+    config: WorkbenchToolFragment['configuration']
+  ) => Record<
+    (typeof CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY)[T],
+    ConfigForToolType<T>
+  >
+} = {
   [WorkbenchToolType.Datadog]: (config) => {
     const { site } = config?.datadog ?? {}
     return { datadog: { site: site ?? undefined, apiKey: '', appKey: '' } }
@@ -178,10 +184,7 @@ function sanitizeInitialConfiguration(
   tool: Nullable<WorkbenchToolFragment>
 ): WorkbenchToolConfigurationAttributes {
   const toolType = tool?.tool
-  if (!toolType || !isConfigurableWorkbenchToolType(toolType)) {
-    return {}
-  }
-  return INITIAL_CONFIG_BY_TYPE[toolType](
-    tool?.configuration ?? null
-  ) as WorkbenchToolConfigurationAttributes
+  if (!isConfigurableWorkbenchToolType(toolType)) return {}
+
+  return INITIAL_TOOL_CONFIG_BY_TYPE[toolType](tool?.configuration)
 }
