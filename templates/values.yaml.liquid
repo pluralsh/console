@@ -56,7 +56,7 @@ kas:
       cert-manager.io/cluster-issuer: {{ configuration.clusterIssuer }}
     {% endif %}
 
-  redis:
-    auth:
-      password: {{ configuration.kasRedis }}
+redis:
+  auth:
+    password: {{ configuration.kasRedis }}
 

@@ -57,7 +57,7 @@ kas:
       cert-manager.io/cluster-issuer: {{ .Values.clusterIssuer }}
     {{ end }}
 
-  redis:
-    auth:
-      password: {{ .Values.kasRedis }}
+redis:
+  auth:
+    password: {{ .Values.kasRedis }}
 
