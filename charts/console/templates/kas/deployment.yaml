@@ -20,7 +20,7 @@ spec:
         cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
         {{- if and .Values.metrics.enabled (not .Values.metrics.serviceMonitor.enabled) }}
         prometheus.io/scrape: "true"
-        prometheus.io/port: {{ .Values.service.observabilityPort | quote }}
+        prometheus.io/port: {{ .Values.kas.service.observabilityPort | quote }}
         prometheus.io/path: {{ .Values.metrics.path }}
         {{- end }}
         {{- with .Values.podAnnotations }}
@@ -63,26 +63,26 @@ spec:
                 fieldRef:
                   fieldPath: status.podIP
             - name: OWN_PRIVATE_API_URL
-              value: "grpc://$(POD_IP):{{ .Values.service.privateApiPort }}"
+              value: "grpc://$(POD_IP):{{ .Values.kas.service.privateApiPort }}"
           {{- if .Values.extraEnv }}
             {{- toYaml .Values.extraEnv | nindent 12 }}
           {{- end }}
           ports:
-            - containerPort: {{ .Values.service.agentPort }}
-            - containerPort: {{ .Values.service.kubernetesApiPort }}
-            - containerPort: {{ .Values.service.privateApiPort }}
-            - containerPort: {{ .Values.service.observabilityPort }}
-            - containerPort: {{ .Values.service.agentProxyPort }}
+            - containerPort: {{ .Values.kas.service.agentPort }}
+            - containerPort: {{ .Values.kas.service.kubernetesApiPort }}
+            - containerPort: {{ .Values.kas.service.privateApiPort }}
+            - containerPort: {{ .Values.kas.service.observabilityPort }}
+            - containerPort: {{ .Values.kas.service.agentProxyPort }}
           readinessProbe:
             httpGet:
               path: /readiness
-              port: {{ .Values.service.observabilityPort }}
+              port: {{ .Values.kas.service.observabilityPort }}
             initialDelaySeconds: 5
             periodSeconds: 10
           livenessProbe:
             httpGet:
               path: /liveness
-              port: {{ .Values.service.observabilityPort }}
+              port: {{ .Values.kas.service.observabilityPort }}
             initialDelaySeconds: 15
             periodSeconds: 20
           resources:

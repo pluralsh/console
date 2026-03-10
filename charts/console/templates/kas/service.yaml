@@ -5,22 +5,22 @@ metadata:
   labels:
     {{- include "kas.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type | quote }}
+  type: {{ .Values.kas.service.type | quote }}
   ports:
-    - port: {{ .Values.service.agentPort }}
-      targetPort: {{ .Values.service.agentPort }}
+    - port: {{ .Values.kas.service.agentPort }}
+      targetPort: {{ .Values.kas.service.agentPort }}
       protocol: TCP
       name: tcp-{{ include "kas.name" . }}-agent
-    - port: {{ .Values.service.apiInternalPort }}
-      targetPort: {{ .Values.service.apiInternalPort }}
+    - port: {{ .Values.kas.service.apiInternalPort }}
+      targetPort: {{ .Values.kas.service.apiInternalPort }}
       protocol: TCP
       name: tcp-{{ include "kas.name" . }}-internal-api
-    - port: {{ .Values.service.kubernetesApiPort }}
-      targetPort: {{ .Values.service.kubernetesApiPort }}
+    - port: {{ .Values.kas.service.kubernetesApiPort }}
+      targetPort: {{ .Values.kas.service.kubernetesApiPort }}
       protocol: TCP
       name: tcp-{{ include "kas.name" . }}-k8s-api
-    - port: {{ .Values.service.agentProxyPort }}
-      targetPort: {{ .Values.service.agentProxyPort }}
+    - port: {{ .Values.kas.service.agentProxyPort }}
+      targetPort: {{ .Values.kas.service.agentProxyPort }}
       protocol: TCP
       name: tcp-{{ include "kas.name" . }}-agent-proxy
     - port: {{ .Values.api.port }}
@@ -28,8 +28,8 @@ spec:
       protocol: TCP
       name: tcp-{{ include "kas.name" . }}-api
   {{- if .Values.metrics.enabled }}
-    - port: {{ .Values.service.observabilityPort }}
-      targetPort: {{ .Values.service.observabilityPort }}
+    - port: {{ .Values.kas.service.observabilityPort }}
+      targetPort: {{ .Values.kas.service.observabilityPort }}
       protocol: TCP
       name: http-metrics
   {{- end }}

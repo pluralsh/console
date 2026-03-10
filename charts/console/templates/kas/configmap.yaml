@@ -8,15 +8,15 @@ data:
   config.yaml: |
     agent:
       listen:
-        address: ":{{ .Values.service.agentPort }}"
+        address: ":{{ .Values.kas.service.agentPort }}"
         websocket: true
       kubernetes_api:
         listen:
-          address: ":{{ .Values.service.kubernetesApiPort }}"
+          address: ":{{ .Values.kas.service.kubernetesApiPort }}"
         url_path_prefix: "{{ .Values.ingress.kubernetesApiPath }}"
     observability:
       listen:
-        address: ":{{ .Values.service.observabilityPort }}"
+        address: ":{{ .Values.kas.service.observabilityPort }}"
     redis:
       server:
         address: "{{ printf "%s-master" (include "common.names.fullname" (index .Subcharts "redis")) }}:{{ .Values.redis.master.service.ports.redis }}"
@@ -24,10 +24,10 @@ data:
       password_file: "/etc/kas/redis_server_secret"
     api:
       listen:
-        address: ":{{ .Values.service.apiInternalPort }}"
+        address: ":{{ .Values.kas.service.apiInternalPort }}"
         authentication_secret_file: "/etc/kas/.api_secret"
     private_api:
       listen:
-        address: ":{{ .Values.service.privateApiPort }}"
+        address: ":{{ .Values.kas.service.privateApiPort }}"
         authentication_secret_file: "/etc/kas/.privateapi_secret"
     plural_url: "https://{{ .Values.consoleUrl }}/gql"

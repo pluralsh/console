@@ -684,6 +684,14 @@ kas:
     pullPolicy: IfNotPresent
     tag: "" # Overrides the image tag whose default is the chart appVersion.
     pullSecrets: [ ]
+  service:
+    agentPort: 8150
+    agentProxyPort: 8180
+    apiInternalPort: 8153
+    kubernetesApiPort: 8154
+    privateApiPort: 8155
+    observabilityPort: 8151
+    type: ClusterIP
 
 redis:
   enabled: true

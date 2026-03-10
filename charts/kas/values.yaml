@@ -41,15 +41,6 @@ resources:
     cpu: 100m
     memory: 128Mi
 
-service:
-  agentPort: 8150
-  agentProxyPort: 8180
-  apiInternalPort: 8153
-  kubernetesApiPort: 8154
-  privateApiPort: 8155
-  observabilityPort: 8151
-  type: ClusterIP
-
 serviceAccount:
   # Specifies whether a service account should be created.
   create: true
