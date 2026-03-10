@@ -185,10 +185,6 @@ func (in *Account) toBedrockModels(config *pb.BedrockConfig) []string {
 // Model ID: anthropic.claude-haiku-4-5-20251001-v1:0
 func (in *Account) toBedrockDeployments(config *pb.BedrockConfig) map[string]string {
 	deployments := in.filterDeployments(config.GetDeployments())
-	if deployments == nil {
-		deployments = make(map[string]string)
-	}
-
 	models := append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId(), config.GetEmbeddingModelId())
 
 	// Augment configured deployments with provided profiles ids.
