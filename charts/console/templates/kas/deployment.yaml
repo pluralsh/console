@@ -23,11 +23,11 @@ spec:
         prometheus.io/port: {{ .Values.kas.service.observabilityPort | quote }}
         prometheus.io/path: {{ .Values.kas.metrics.path }}
         {{- end }}
-        {{- with .Values.podAnnotations }}
+        {{- with .Values.kas.podAnnotations }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
       labels:
-        {{- with .Values.podLabels }}
+        {{- with .Values.kas.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- include "kas.selectorLabels" . | nindent 8 }}
@@ -39,12 +39,12 @@ spec:
       {{- end }}
       securityContext:
         {{- toYaml .Values.kas.securityContext | nindent 8 }}
-      {{- with .Values.priorityClassName }}
+      {{- with .Values.kas.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
       serviceAccountName: {{ include "kas.serviceAccountName" . }}
-      {{ if .Values.initContainers }}
-      {{ toYaml .Values.initContainers | nindent 6 }}
+      {{ if .Values.kas.initContainers }}
+      {{ toYaml .Values.kas.initContainers | nindent 6 }}
       {{ end }}
       containers:
         - name: {{ .Chart.Name }}
@@ -54,7 +54,7 @@ spec:
             {{- toYaml .Values.kas.podSecurityContext | nindent 12 }}
           args:
             - "--configuration-file=/etc/kas/config.yaml"
-            {{- range .Values.extraArgs }}
+            {{- range .Values.kas.extraArgs }}
             - {{ . }}
             {{- end }}
           env:
@@ -64,8 +64,8 @@ spec:
                   fieldPath: status.podIP
             - name: OWN_PRIVATE_API_URL
               value: "grpc://$(POD_IP):{{ .Values.kas.service.privateApiPort }}"
-          {{- if .Values.extraEnv }}
-            {{- toYaml .Values.extraEnv | nindent 12 }}
+          {{- if .Values.kas.extraEnv }}
+            {{- toYaml .Values.kas.extraEnv | nindent 12 }}
           {{- end }}
           ports:
             - containerPort: {{ .Values.kas.service.agentPort }}
@@ -88,8 +88,8 @@ spec:
           resources:
             {{- toYaml .Values.kas.resources | nindent 12 }}
           volumeMounts:
-          {{ if .Values.global.additionalVolumeMounts }}
-          {{ toYaml .Values.global.additionalVolumeMounts | nindent 10 }}
+          {{ if .Values.kas.global.additionalVolumeMounts }}
+          {{ toYaml .Values.kas.global.additionalVolumeMounts | nindent 10 }}
           {{ end }}
           - name: etc-kas
             mountPath: /etc/kas
@@ -122,8 +122,8 @@ spec:
             - containerPort: 8000
       terminationGracePeriodSeconds: 300
       volumes:
-      {{ if .Values.global.additionalVolumes }}
-      {{ toYaml .Values.global.additionalVolumes | nindent 6 }}
+      {{ if .Values.kas.global.additionalVolumes }}
+      {{ toYaml .Values.kas.global.additionalVolumes | nindent 6 }}
       {{ end }}
       - name: etc-kas
         projected:
@@ -143,15 +143,15 @@ spec:
                 items:
                   - key: redis-password
                     path: redis_server_secret
-      {{- with .Values.nodeSelector }}
+      {{- with .Values.kas.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.affinity }}
+      {{- with .Values.kas.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
+      {{- with .Values.kas.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
