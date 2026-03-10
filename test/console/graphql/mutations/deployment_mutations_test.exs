@@ -127,6 +127,45 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
       assert updated["logging"]["opensearch"]["awsAccessKeyId"] == "AKIAIOSFODNN7EXAMPLE"
       assert updated["logging"]["opensearch"]["usePodIdentity"] == false
     end
+
+    test "admins can configure azure deployments map" do
+      admin = admin_user()
+      deployment_settings()
+      endpoint = "https://test.openai.azure.com/openai/deployments"
+
+      {:ok, %{data: %{"updateDeploymentSettings" => updated}}} = run_query("""
+        mutation Update($attrs: DeploymentSettingsAttributes!) {
+          updateDeploymentSettings(attributes: $attrs) {
+            ai {
+              provider
+              azure {
+                endpoint
+                model
+                deployments
+              }
+            }
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "ai" => %{
+            "enabled" => true,
+            "provider" => "AZURE",
+            "azure" => %{
+              "accessToken" => "token",
+              "endpoint" => endpoint,
+              "model" => "gpt-4.1-mini",
+              "deployments" => %{"gpt-4.1-mini" => "chat-deployment"}
+            }
+          }
+        }
+      }, %{current_user: admin})
+
+      assert updated["ai"]["provider"] == "AZURE"
+      assert updated["ai"]["azure"]["endpoint"] == endpoint
+      assert updated["ai"]["azure"]["model"] == "gpt-4.1-mini"
+      assert updated["ai"]["azure"]["deployments"] == %{"gpt-4.1-mini" => "chat-deployment"}
+    end
   end
 
   describe "enableDeployments" do
