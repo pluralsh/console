@@ -33,7 +33,7 @@ spec:
         {{- include "kas.selectorLabels" . | nindent 8 }}
     spec:
       automountServiceAccountToken: false
-      {{- with .Values.image.pullSecrets }}
+      {{- with .Values.kas.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -48,8 +48,8 @@ spec:
       {{ end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: {{ .Values.kas.image.repository }}:{{ .Values.kas.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.kas.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.podSecurityContext | nindent 12 }}
           args:
@@ -95,8 +95,8 @@ spec:
             mountPath: /etc/kas
             readOnly: true
         - name: api
-          image: {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: {{ .Values.kas.image.repository }}:{{ .Values.kas.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.kas.image.pullPolicy }}
           command: ["/api"]
           args:
             - --act-as-proxy

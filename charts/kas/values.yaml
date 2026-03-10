@@ -2,14 +2,6 @@ global:
   additionalVolumes: ~
   additionalVolumeMounts: ~
 
-image:
-  # See: https://github.com/pluralsh/kubernetes-agent/pkgs/container/kubernetes-agent.
-  repository: ghcr.io/pluralsh/kubernetes-agent
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
-  pullSecrets: []
-
 consoleUrl: ""
 
 nameOverride: ""
@@ -109,6 +101,3 @@ ingress:
   annotations:
     kubernetes.io/tls-acme: "true"
     cert-manager.io/cluster-issuer: letsencrypt-prod
-
-
-

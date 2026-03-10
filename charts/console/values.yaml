@@ -678,6 +678,13 @@ dex:
     - hosts:
       - <your-console-fqdn>
 
+kas:
+  image:
+    repository: ghcr.io/pluralsh/kubernetes-agent
+    pullPolicy: IfNotPresent
+    tag: "" # Overrides the image tag whose default is the chart appVersion.
+    pullSecrets: [ ]
+
 redis:
   enabled: true
   architecture: standalone
