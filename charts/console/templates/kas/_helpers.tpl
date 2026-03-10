@@ -65,9 +65,9 @@ Create the name of the config map to use
 Create the name of the service account to use
 */}}
 {{- define "kas.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "kas.fullname" .) .Values.serviceAccount.name }}
+{{- if .Values.kas.serviceAccount.create }}
+{{- default (include "kas.fullname" .) .Values.kas.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- default "default" .Values.kas.serviceAccount.name }}
 {{- end }}
 {{- end }}

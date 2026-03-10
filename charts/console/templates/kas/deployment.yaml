@@ -131,7 +131,7 @@ spec:
           sources:
             - configMap:
                 name: {{ template "kas.configMapName" . }}
-            {{- range $name, $value := (omit .Values.secrets "create") }}
+            {{- range $name, $value := (omit .Values.kas.secrets "create") }}
             - secret:
                 name: {{ $name }}
                 items:

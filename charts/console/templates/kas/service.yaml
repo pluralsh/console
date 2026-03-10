@@ -23,8 +23,8 @@ spec:
       targetPort: {{ .Values.kas.service.agentProxyPort }}
       protocol: TCP
       name: tcp-{{ include "kas.name" . }}-agent-proxy
-    - port: {{ .Values.api.port }}
-      targetPort: {{ .Values.api.port }}
+    - port: {{ .Values.kas.api.port }}
+      targetPort: {{ .Values.kas.api.port }}
       protocol: TCP
       name: tcp-{{ include "kas.name" . }}-api
   {{- if .Values.kas.metrics.enabled }}

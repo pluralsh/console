@@ -402,51 +402,18 @@ kas:
   global:
     additionalVolumes: ~
     additionalVolumeMounts: ~
-
   consoleUrl: ""
-
   nameOverride: ""
-
   fullnameOverride: ""
-
   podAnnotations: { }
   podLabels: { }
-
   priorityClassName: ""
-
   extraEnv: []
-
   extraArgs: []
-
   nodeSelector: { }
-
   affinity: { }
-
   tolerations: []
-
   initContainers: []
-
-  serviceAccount:
-    # Specifies whether a service account should be created.
-    create: true
-    # Annotations to add to the service account.
-    annotations: { }
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template.
-    name: ""
-
-  secrets:
-    create: true
-    api: ""
-    privateapi: ""
-    redis: ""
-
-  agent:
-    path: /ext/kas
-
-  api:
-    path: /api
-    port: 8000
 
 cloudQuery:
   enabled: false
@@ -641,6 +608,20 @@ kas:
     annotations:
       kubernetes.io/tls-acme: "true"
       cert-manager.io/cluster-issuer: letsencrypt-prod
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+  secrets:
+    create: true
+    api: ""
+    privateapi: ""
+    redis: ""
+  agent:
+    path: /ext/kas
+  api:
+    path: /api
+    port: 8000
 
 redis:
   enabled: true

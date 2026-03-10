@@ -28,7 +28,7 @@ spec:
                 name: {{ include "kas.serviceName" . }}
                 port:
                   number: {{ .Values.kas.service.agentProxyPort }}
-          - path: {{ .Values.agent.path }}
+          - path: {{ .Values.kas.agent.path }}
             pathType: Prefix
             backend:
               service:
