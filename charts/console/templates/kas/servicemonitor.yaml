@@ -14,8 +14,7 @@ spec:
       - {{ $.Release.Namespace }}
   selector:
     matchLabels:
-      app: {{ include "kas.name" . }}
-      release: {{ .Release.Name }}
+      {{- include "kas.selectorLabels" . | nindent 6 }}
   endpoints:
     - port: http-metrics
       path: {{ .Values.kas.metrics.path }}
