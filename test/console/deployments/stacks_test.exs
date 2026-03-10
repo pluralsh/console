@@ -646,6 +646,7 @@ defmodule Console.Deployments.StacksTest do
       stack = insert(:stack,
         type: :ansible,
         environment: [%{name: "ENV", value: "1"}],
+        configuration: %{ansible: %{supports_check: true, playbook: "main.yaml"}},
         files: [%{path: "test.txt", content: "test"}],
         git: %{ref: "main", folder: "ansible"},
         sha: "old-sha"
@@ -665,7 +666,7 @@ defmodule Console.Deployments.StacksTest do
       [first, second] = run.steps
 
       assert first.cmd == "ansible-playbook"
-      assert first.args == ["main.yaml", "--diff"]
+      assert first.args == ["main.yaml", "--diff", "--check"]
       assert first.stage == :plan
       assert first.index == 0
 
@@ -708,17 +709,12 @@ defmodule Console.Deployments.StacksTest do
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
       assert run.git.folder == stack.git.folder
-      [first, second] = run.steps
+      [first] = run.steps
 
       assert first.cmd == "ansible-playbook"
-      assert first.args == ["upgrade.yaml", "-i", "inventory.yaml", "--some-arg", "--diff"]
-      assert first.stage == :plan
+      assert first.args == ["upgrade.yaml", "-i", "inventory.yaml", "--some-arg"]
+      assert first.stage == :apply
       assert first.index == 0
-
-      assert second.cmd == "ansible-playbook"
-      assert second.args == ["upgrade.yaml", "-i", "inventory.yaml", "--some-arg"]
-      assert second.stage == :apply
-      assert second.index == 1
 
       stack = refetch(stack)
       assert stack.sha == "new-sha"

@@ -480,6 +480,90 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
     end
   end
 
+  describe "workbenchAlerts" do
+    test "user only sees alerts for workbenches they have access to" do
+      user      = insert(:user)
+      project   = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      alerts    = insert_list(2, :alert, workbench: workbench, project: project)
+
+      other_project = insert(:project)
+      other_workbench = insert(:workbench, project: other_project)
+      insert_list(3, :alert, workbench: other_workbench, project: other_project)
+
+      {:ok, %{data: %{"workbenchAlerts" => found}}} = run_query("""
+        query {
+          workbenchAlerts(first: 10) {
+            edges { node { id title } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(alerts)
+    end
+
+    test "user with no workbench access sees no alerts" do
+      user = insert(:user)
+      project = insert(:project)
+      workbench = insert(:workbench, project: project)
+      insert_list(2, :alert, workbench: workbench, project: project)
+
+      {:ok, %{data: %{"workbenchAlerts" => found}}} = run_query("""
+        query {
+          workbenchAlerts(first: 10) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> Enum.empty?()
+    end
+  end
+
+  describe "workbenchIssues" do
+    test "user only sees issues for workbenches they have access to" do
+      user      = insert(:user)
+      project   = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      issues    = insert_list(2, :issue, workbench: workbench)
+
+      other_project = insert(:project)
+      other_workbench = insert(:workbench, project: other_project)
+      insert_list(3, :issue, workbench: other_workbench)
+
+      {:ok, %{data: %{"workbenchIssues" => found}}} = run_query("""
+        query {
+          workbenchIssues(first: 10) {
+            edges { node { id title } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(issues)
+    end
+
+    test "user with no workbench access sees no issues" do
+      user = insert(:user)
+      project = insert(:project)
+      workbench = insert(:workbench, project: project)
+      insert_list(2, :issue, workbench: workbench)
+
+      {:ok, %{data: %{"workbenchIssues" => found}}} = run_query("""
+        query {
+          workbenchIssues(first: 10) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> Enum.empty?()
+    end
+  end
+
   describe "workbench_tool" do
     test "it can fetch a workbench tool" do
       tool = insert(:workbench_tool)

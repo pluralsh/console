@@ -60,6 +60,13 @@ defmodule Console.Schema.Alert do
     timestamps()
   end
 
+  def for_user(query \\ __MODULE__, user) do
+    from(i in query,
+      join: w in subquery(Workbench.for_user(user)),
+      on: w.id == i.workbench_id
+    )
+  end
+
   def ai_pollable(query \\ __MODULE__) do
     now = DateTime.utc_now()
     from(a in query,
