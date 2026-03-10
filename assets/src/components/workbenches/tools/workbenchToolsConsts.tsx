@@ -71,3 +71,12 @@ export const TOOL_TYPE_CARDS: {
       'Call arbitrary HTTP endpoints- useful for custom integrations.',
   },
 ]
+
+export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
+  [WorkbenchToolCategory.Metrics]: 'Metrics',
+  [WorkbenchToolCategory.Logs]: 'Logs',
+  [WorkbenchToolCategory.Traces]: 'Traces',
+  [WorkbenchToolCategory.Ticketing]: 'Ticketing',
+  [WorkbenchToolCategory.Integration]: 'Integration',
+  [WorkbenchToolCategory.ErrorTracking]: 'Error tracking',
+}

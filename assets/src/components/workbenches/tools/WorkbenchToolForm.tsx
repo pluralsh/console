@@ -1,4 +1,4 @@
-import { FormField, Input2 } from '@pluralsh/design-system'
+import { Checkbox, Flex, FormField, Input2 } from '@pluralsh/design-system'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import {
   WorkbenchToolAttributes,
@@ -9,7 +9,10 @@ import {
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchToolFormFields } from './WorkbenchToolFormFields'
-import { TOOL_TYPE_TO_CATEGORIES } from './workbenchToolsConsts'
+import {
+  categoryToLabel,
+  TOOL_TYPE_TO_CATEGORIES,
+} from './workbenchToolsConsts'
 
 export type WorkbenchToolFormState = Pick<
   WorkbenchToolAttributes,
@@ -46,13 +49,40 @@ export function WorkbenchToolForm({
         state={state}
         update={update}
       />
-      {/* TODO: this will have checkboxes that add/remove categories, but not allowing unchecking if only one is selected */}
       {TOOL_TYPE_TO_CATEGORIES[type].length > 1 && (
-        <FormField
-          label="Allowed capabilities"
-          value={state.categories}
-          onChange={(e) => update({ categories: e.target.value })}
-        />
+        <FormField label="Allowed capabilities (must select at least one)">
+          <Flex
+            direction="column"
+            gap="xsmall"
+          >
+            {TOOL_TYPE_TO_CATEGORIES[type].map((category) => {
+              const selected = (state.categories ?? []).filter(Boolean)
+              const isChecked = selected.includes(category)
+              const canUncheck = selected.length > 1
+              return (
+                <Checkbox
+                  key={category}
+                  small
+                  checked={isChecked}
+                  onChange={(e) => {
+                    const checked = e.target.checked
+                    if (checked) {
+                      update({
+                        categories: [...selected, category].filter(Boolean),
+                      })
+                    } else if (canUncheck) {
+                      update({
+                        categories: selected.filter((c) => c !== category),
+                      })
+                    }
+                  }}
+                >
+                  {categoryToLabel[category]}
+                </Checkbox>
+              )
+            })}
+          </Flex>
+        </FormField>
       )}
     </>
   )
