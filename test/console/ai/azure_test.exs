@@ -9,8 +9,11 @@ defmodule Console.AI.AzureTest do
       azure =
         Azure.new(%{
           access_token: "token",
+          api_version: nil,
           endpoint: "https://test.openai.azure.com/openai/deployments",
           model: "gpt-4.1-mini",
+          tool_model: nil,
+          embedding_model: nil,
           deployments: %{"gpt-4.1-mini" => "chat-deployment"}
         })
 
@@ -22,9 +25,11 @@ defmodule Console.AI.AzureTest do
       azure =
         Azure.new(%{
           access_token: "token",
+          api_version: nil,
           endpoint: "https://test.openai.azure.com/openai/deployments",
           model: "gpt-4.1-mini",
           tool_model: "o3-mini",
+          embedding_model: nil,
           deployments: %{
             "gpt-4.1-mini" => "chat-deployment",
             "o3-mini" => "tool-deployment"
@@ -48,7 +53,10 @@ defmodule Console.AI.AzureTest do
       azure =
         Azure.new(%{
           access_token: "token",
+          api_version: nil,
           endpoint: "https://test.openai.azure.com/openai/deployments",
+          model: nil,
+          tool_model: nil,
           embedding_model: "text-embedding-3-large",
           deployments: %{"text-embedding-3-large" => "embedding-deployment"}
         })

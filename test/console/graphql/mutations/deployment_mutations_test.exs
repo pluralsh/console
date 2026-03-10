@@ -155,7 +155,7 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
               "accessToken" => "token",
               "endpoint" => endpoint,
               "model" => "gpt-4.1-mini",
-              "deployments" => %{"gpt-4.1-mini" => "chat-deployment"}
+              "deployments" => Jason.encode!(%{"gpt-4.1-mini" => "chat-deployment"})
             }
           }
         }
