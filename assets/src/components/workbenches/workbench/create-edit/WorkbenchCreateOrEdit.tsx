@@ -7,6 +7,12 @@ import {
   Flex,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { GqlError } from 'components/utils/Alert'
+import { bindingToBindingAttributes } from 'components/utils/bindings'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { StackedText } from 'components/utils/table/StackedText'
+import { Title2H1 } from 'components/utils/typography/Text'
+import { getWorkbenchesBreadcrumbs } from 'components/workbenches/Workbenches'
 import {
   PolicyBindingFragment,
   useCreateWorkbenchMutation,
@@ -15,30 +21,23 @@ import {
   WorkbenchAttributes,
   WorkbenchFragment,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
-import styled from 'styled-components'
-import {
-  workbenchFormSteps,
-  WorkbenchStepLabel,
-  WORKBENCH_STEP_LABELS,
-} from './WorkbenchFormSteps'
-import { GqlError } from 'components/utils/Alert'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { cloneDeep } from 'lodash'
-import { isNonNullable } from 'utils/isNonNullable'
-import { bindingToBindingAttributes } from 'components/utils/bindings'
-import { deepOmitFalsy } from 'utils/graphql'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
-import { Title2H1 } from 'components/utils/typography/Text'
-import { StackedText } from 'components/utils/table/StackedText'
-import { getWorkbenchesBreadcrumbs } from 'components/workbenches/Workbenches'
+import styled from 'styled-components'
+import { deepOmitFalsy } from 'utils/graphql'
+import { isNonNullable } from 'utils/isNonNullable'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
+import {
+  WORKBENCH_STEP_LABELS,
+  workbenchFormSteps,
+  WorkbenchStepLabel,
+} from './WorkbenchFormSteps'
 
 // requires every key from WorkbenchAttributes to be present. readBindings/writeBindings
 // use FormBinding[] so BindingInput can show chips (user email / group name).
@@ -96,7 +95,7 @@ export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
       )}
       <WorkbenchForm
         workbenchId={id}
-        key={`${data?.workbench?.id}`} // reset form state if data comes in
+        key={`${JSON.stringify(data?.workbench)}`} // reset form state if data updates
         initialFormState={sanitizeInitialForm(
           workbench ?? { id: '', name: '' }
         )}
@@ -189,18 +188,11 @@ function WorkbenchForm({
         StepComponent && (
           <FormCardSC>
             {mutationError && <GqlError error={mutationError} />}
-            <Flex
-              grow={1}
-              direction="column"
-              gap="medium"
-              overflow="auto"
-            >
-              <StepComponent
-                formState={formState}
-                setFormState={setFormState}
-              />
-            </Flex>
-            <StretchedFlex shrink={0}>
+            <StepComponent
+              formState={formState}
+              setFormState={setFormState}
+            />
+            <StickyActionsFooterSC>
               <Button
                 destructive
                 as={Link}
@@ -236,7 +228,7 @@ function WorkbenchForm({
                   Next
                 </Button>
               )}
-            </StretchedFlex>
+            </StickyActionsFooterSC>
           </FormCardSC>
         )
       )}
@@ -299,10 +291,26 @@ const SidebarBtnSC = styled(Button)<{ $active: boolean }>(
 
 export const FormCardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.xlarge,
+  paddingBottom: 0,
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
   flex: 1,
+  overflow: 'auto',
+  height: '100%',
+}))
+
+export const StickyActionsFooterSC = styled.div(({ theme }) => ({
+  position: 'sticky',
+  display: 'flex',
+  justifyContent: 'space-between',
+  bottom: 0,
+  marginTop: 'auto',
+  zIndex: theme.zIndexes.tooltip,
+  background: theme.colors['fill-one'],
+  border: `1px solid ${theme.colors['fill-one']}`, // should match bg color
+  padding: `${theme.spacing.small}px 0 ${theme.spacing.xlarge}px`,
+  '&::before': { flex: 1 },
 }))
 
 type StepStatus = 'not-visited' | 'visited' | 'error'

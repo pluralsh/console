@@ -1,4 +1,10 @@
-import { Checkbox, Flex, FormField, Input2 } from '@pluralsh/design-system'
+import {
+  Button,
+  Checkbox,
+  Flex,
+  FormField,
+  Input2,
+} from '@pluralsh/design-system'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 import {
   WorkbenchToolAttributes,
@@ -8,9 +14,15 @@ import {
   WorkbenchToolType,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
+import {
+  FormCardSC,
+  StickyActionsFooterSC,
+} from '../workbench/create-edit/WorkbenchCreateOrEdit'
 import { WorkbenchToolFormFields } from './WorkbenchToolFormFields'
 import {
   categoryToLabel,
+  ConfigurableWorkbenchToolType,
+  isConfigurableWorkbenchToolType,
   TOOL_TYPE_TO_CATEGORIES,
 } from './workbenchToolsConsts'
 
@@ -22,9 +34,15 @@ export type WorkbenchToolFormState = Pick<
 export function WorkbenchToolForm({
   type,
   tool,
+  mutationLoading,
+  onCancel,
+  onSave,
 }: {
   type: WorkbenchToolType
   tool: Nullable<WorkbenchToolFragment>
+  mutationLoading: boolean
+  onCancel: () => void
+  onSave: (state: WorkbenchToolFormState) => void
 }) {
   const { state, update } = useUpdateState<WorkbenchToolFormState>({
     name: tool?.name ?? '',
@@ -32,7 +50,7 @@ export function WorkbenchToolForm({
     configuration: sanitizeInitialConfiguration(tool),
   })
   return (
-    <>
+    <FormCardSC>
       <FormField
         label="Name"
         value={state.name}
@@ -84,62 +102,86 @@ export function WorkbenchToolForm({
           </Flex>
         </FormField>
       )}
-    </>
+      <StickyActionsFooterSC>
+        <Button
+          destructive
+          onClick={onCancel}
+        >
+          Cancel
+        </Button>
+        <Button
+          loading={mutationLoading}
+          onClick={() => onSave(state)}
+        >
+          Save
+        </Button>
+      </StickyActionsFooterSC>
+    </FormCardSC>
   )
 }
 
-const sanitizeInitialConfiguration = (
+type FragmentConfig = WorkbenchToolFragment['configuration']
+
+/** Build initial form configuration from fragment data. Keyed by configurable tool type. */
+const INITIAL_CONFIG_BY_TYPE: Record<
+  ConfigurableWorkbenchToolType,
+  (config: FragmentConfig) => Partial<WorkbenchToolConfigurationAttributes>
+> = {
+  [WorkbenchToolType.Datadog]: (config) => {
+    const { site } = config?.datadog ?? {}
+    return { datadog: { site: site ?? undefined, apiKey: '', appKey: '' } }
+  },
+  [WorkbenchToolType.Elastic]: (config) => {
+    const { index, url, username } = config?.elastic ?? {}
+    return {
+      elastic: {
+        index: index ?? '',
+        url: url ?? '',
+        username: username ?? '',
+        password: '',
+      },
+    }
+  },
+  [WorkbenchToolType.Http]: (config) => {
+    const { url, method, body, headers, inputSchema } = config?.http ?? {}
+    return {
+      http: {
+        url: url ?? '',
+        method:
+          (method as WorkbenchToolHttpMethod) ?? WorkbenchToolHttpMethod.Get,
+        body: body ?? undefined,
+        headers: headers?.filter(isNonNullable),
+        inputSchema: inputSchema ?? undefined,
+      },
+    }
+  },
+  [WorkbenchToolType.Loki]: (config) => {
+    const { url, username, tenantId } = config?.loki ?? {}
+    return { loki: { url: url ?? '', username, tenantId } }
+  },
+  [WorkbenchToolType.Prometheus]: (config) => {
+    const { url, username, tenantId } = config?.prometheus ?? {}
+    return { prometheus: { url: url ?? '', username, tenantId } }
+  },
+  [WorkbenchToolType.Tempo]: (config) => {
+    const { url, username, tenantId } = config?.tempo ?? {}
+    return { tempo: { url: url ?? '', username, tenantId } }
+  },
+  [WorkbenchToolType.Atlassian]: (config) => {
+    const { email } = config?.atlassian ?? {}
+    return { atlassian: { email: email ?? '' } }
+  },
+  [WorkbenchToolType.Linear]: () => ({ linear: { accessToken: '' } }),
+}
+
+function sanitizeInitialConfiguration(
   tool: Nullable<WorkbenchToolFragment>
-): WorkbenchToolConfigurationAttributes => {
-  const { datadog, elastic, loki, prometheus, tempo, http, atlassian } =
-    tool?.configuration ?? {}
-  switch (tool?.tool) {
-    case WorkbenchToolType.Datadog: {
-      const { site } = datadog ?? {}
-      return { datadog: { site: site, apiKey: '', appKey: '' } }
-    }
-    case WorkbenchToolType.Elastic: {
-      const { index, url, username } = elastic ?? {}
-      return {
-        elastic: {
-          index: index ?? '',
-          url: url ?? '',
-          username: username ?? '',
-          password: '',
-        },
-      }
-    }
-    case WorkbenchToolType.Http: {
-      const { url, method, body, headers, inputSchema } = http ?? {}
-      return {
-        http: {
-          url: url ?? '',
-          method:
-            (method as WorkbenchToolHttpMethod) ?? WorkbenchToolHttpMethod.Get,
-          body: body,
-          headers: headers?.filter(isNonNullable),
-          inputSchema: inputSchema,
-        },
-      }
-    }
-    case WorkbenchToolType.Loki: {
-      const { url, username, tenantId } = loki ?? {}
-      return { loki: { url: url ?? '', username, tenantId } }
-    }
-    case WorkbenchToolType.Prometheus: {
-      const { url, username, tenantId } = prometheus ?? {}
-      return { prometheus: { url: url ?? '', username, tenantId } }
-    }
-    case WorkbenchToolType.Tempo:
-      const { url, username, tenantId } = tempo ?? {}
-      return { tempo: { url: url ?? '', username, tenantId } }
-    case WorkbenchToolType.Atlassian: {
-      const { email } = atlassian ?? {}
-      return { atlassian: { email: email ?? '' } }
-    }
-    case WorkbenchToolType.Linear:
-      return { linear: { accessToken: '' } }
-    default:
-      return {}
+): WorkbenchToolConfigurationAttributes {
+  const toolType = tool?.tool
+  if (!toolType || !isConfigurableWorkbenchToolType(toolType)) {
+    return {}
   }
+  return INITIAL_CONFIG_BY_TYPE[toolType](
+    tool?.configuration ?? null
+  ) as WorkbenchToolConfigurationAttributes
 }

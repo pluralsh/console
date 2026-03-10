@@ -17,8 +17,8 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
 import {
-  WorkbenchToolFragment,
   useWorkbenchToolsQuery,
+  WorkbenchToolFragment,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { Link } from 'react-router-dom'
@@ -26,12 +26,7 @@ import { WORKBENCHES_CREATE_REL_PATH } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchToolIcon } from './WorkbenchTool'
-import {
-  categoryToLabel,
-  TOOL_TYPE_CARDS,
-  TOOL_TYPE_TO_CATEGORIES,
-  TOOL_TYPE_TO_LABEL,
-} from './workbenchToolsConsts'
+import { TOOL_TYPE_CARDS, TOOL_TYPE_TO_LABEL } from './workbenchToolsConsts'
 
 const WORKBENCH_TOOL_TYPE_PARAM = 'type'
 
@@ -63,56 +58,58 @@ export function WorkbenchTools() {
         opacity={0.6}
       >
         <Flex gap="large">
-          {TOOL_TYPE_CARDS.map(({ type, description }) => (
-            <ToolCardSC key={type}>
-              <StackedText
-                first={
-                  <Flex
-                    align="center"
-                    gap="medium"
-                  >
-                    <IconFrame
-                      circle
-                      type="secondary"
-                      icon={<WorkbenchToolIcon type={type} />}
-                    />
-                    {TOOL_TYPE_TO_LABEL[type]}
-                  </Flex>
-                }
-                firstPartialType="subtitle1"
-                firstColor="text"
-                second={description}
-                secondPartialType="body2"
-                secondColor="text-light"
-                gap="small"
-              />
-              <Flex
-                gap="xsmall"
-                wrap="wrap"
-                flex={1}
-              >
-                {TOOL_TYPE_TO_CATEGORIES[type].map((cat) => (
-                  <Chip
-                    key={cat}
-                    size="small"
-                    css={{ height: 'fit-content' }}
-                  >
-                    {categoryToLabel[cat]}
-                  </Chip>
-                ))}
-              </Flex>
-              <Button
-                small
-                floating
-                as={Link}
-                to={`${WORKBENCHES_CREATE_REL_PATH}?${WORKBENCH_TOOL_TYPE_PARAM}=${type}`}
-                style={{ boxShadow: 'none', marginTop: spacing.xsmall }}
-                startIcon={<PlusIcon />}
-              >
-                Add tool
-              </Button>
-            </ToolCardSC>
-          ))}
+          {TOOL_TYPE_CARDS.map(
+            ({ type, description, label, categoryLabels }) => (
+              <ToolCardSC key={type}>
+                <StackedText
+                  first={
+                    <Flex
+                      align="center"
+                      gap="medium"
+                    >
+                      <IconFrame
+                        circle
+                        type="secondary"
+                        icon={<WorkbenchToolIcon type={type} />}
+                      />
+                      {label}
+                    </Flex>
+                  }
+                  firstPartialType="subtitle1"
+                  firstColor="text"
+                  second={description}
+                  secondPartialType="body2"
+                  secondColor="text-light"
+                  gap="small"
+                />
+                <Flex
+                  gap="xsmall"
+                  wrap="wrap"
+                  flex={1}
+                >
+                  {categoryLabels.map((cat) => (
+                    <Chip
+                      key={cat}
+                      size="small"
+                      css={{ height: 'fit-content' }}
+                    >
+                      {cat}
+                    </Chip>
+                  ))}
+                </Flex>
+                <Button
+                  small
+                  floating
+                  as={Link}
+                  to={`${WORKBENCHES_CREATE_REL_PATH}?${WORKBENCH_TOOL_TYPE_PARAM}=${type}`}
+                  style={{ boxShadow: 'none', marginTop: spacing.xsmall }}
+                  startIcon={<PlusIcon />}
+                >
+                  Add tool
+                </Button>
+              </ToolCardSC>
+            )
+          )}
         </Flex>
       </ArrowScroll>
       {data && !isEmpty(tools) && (

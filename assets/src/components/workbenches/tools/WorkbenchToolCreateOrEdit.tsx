@@ -1,18 +1,36 @@
-import { Flex, IconFrame } from '@pluralsh/design-system'
+import {
+  Button,
+  Flex,
+  IconFrame,
+  SidePanelOpenIcon,
+} from '@pluralsh/design-system'
+import { GqlError } from 'components/utils/Alert'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
-import { useWorkbenchToolQuery, WorkbenchToolType } from 'generated/graphql'
-import { capitalize } from 'lodash'
+import {
+  useCreateWorkbenchToolMutation,
+  useUpdateWorkbenchToolMutation,
+  useWorkbenchToolQuery,
+  WorkbenchToolAttributes,
+  WorkbenchToolType,
+} from 'generated/graphql'
+import { capitalize, isEmpty } from 'lodash'
 import { useLayoutEffect } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
-import { WORKBENCHES_TOOLS_PARAM_ID } from 'routes/workbenchesRoutesConsts'
-import styled from 'styled-components'
-import { FormCardSC } from '../workbench/create-edit/WorkbenchCreateOrEdit'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import {
+  WORKBENCHES_TOOLS_ABS_PATH,
+  WORKBENCHES_TOOLS_PARAM_ID,
+} from 'routes/workbenchesRoutesConsts'
+import styled, { useTheme } from 'styled-components'
+import { deepOmitBlank } from 'utils/graphql'
 import { isWorkbenchTool, WorkbenchToolIcon } from './WorkbenchTool'
-import { GqlError } from 'components/utils/Alert'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import { WorkbenchToolForm } from './WorkbenchToolForm'
+import { WorkbenchToolForm, WorkbenchToolFormState } from './WorkbenchToolForm'
+import {
+  CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
+  isConfigurableWorkbenchToolType,
+} from './workbenchToolsConsts'
 
 export const WORKBENCHES_TOOLS_TYPE_PARAM = 'type'
 
@@ -21,10 +39,12 @@ export function WorkbenchToolCreateOrEdit({
 }: {
   mode: 'create' | 'edit'
 }) {
+  const navigate = useNavigate()
+  const { borderRadiuses, borders } = useTheme()
   const id = useParams()[WORKBENCHES_TOOLS_PARAM_ID]
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const { data, loading, error } = useWorkbenchToolQuery({
+  const { data, loading, error, refetch } = useWorkbenchToolQuery({
     variables: { id },
     skip: mode === 'create' || !id,
     fetchPolicy: 'network-only',
@@ -45,6 +65,30 @@ export function WorkbenchToolCreateOrEdit({
   const type = (searchParams.get(WORKBENCHES_TOOLS_TYPE_PARAM) ??
     '') as WorkbenchToolType // the effect above ensures this type is valid
 
+  const [create, { loading: createLoading, error: createError }] =
+    useCreateWorkbenchToolMutation({
+      onCompleted: () => {
+        navigate(WORKBENCHES_TOOLS_ABS_PATH)
+        // pop toast
+      },
+    })
+  const [update, { loading: updateLoading, error: updateError }] =
+    useUpdateWorkbenchToolMutation({
+      onCompleted: ({ updateWorkbenchTool: _updateWorkbenchTool }) => {
+        refetch()
+        // pop toast
+      },
+    })
+  const mutationLoading = createLoading || updateLoading
+  const mutationError = createError || updateError
+  const onSave = (state: WorkbenchToolFormState) => {
+    const attributes = formStateToAttributes(state, type)
+    if (mode === 'create') {
+      create({ variables: { attributes } })
+    } else {
+      update({ variables: { id: id ?? '', attributes } })
+    }
+  }
   return (
     <WrapperSC>
       <StretchedFlex>
@@ -74,21 +118,57 @@ export function WorkbenchToolCreateOrEdit({
         )}
       </StretchedFlex>
       {error && <GqlError error={error} />}
+      {mutationError && <GqlError error={mutationError} />}
       {isLoading ? (
         <RectangleSkeleton
           $height="100%"
           $width="100%"
         />
       ) : (
-        <FormCardSC>
+        <Flex
+          gap="medium"
+          height="100%"
+          minHeight={0}
+        >
           <WorkbenchToolForm
+            key={`${JSON.stringify(tool)}`} // reset form state if data updates
             type={type}
             tool={tool}
+            mutationLoading={mutationLoading}
+            onCancel={() => navigate(WORKBENCHES_TOOLS_ABS_PATH)}
+            onSave={onSave}
           />
-        </FormCardSC>
+          <Button
+            secondary
+            startIcon={<SidePanelOpenIcon />}
+            css={{
+              alignSelf: 'flex-start',
+              border: borders.default,
+              borderRadius: borderRadiuses.large,
+            }}
+          >
+            Setup guide
+          </Button>
+        </Flex>
       )}
     </WrapperSC>
   )
+}
+
+function formStateToAttributes(
+  state: WorkbenchToolFormState,
+  type: WorkbenchToolType
+): WorkbenchToolAttributes {
+  const { name, categories, configuration } = state
+  const base = { tool: type, name, categories }
+  if (!isConfigurableWorkbenchToolType(type) || !configuration) return base
+
+  const configKey = CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY[type]
+  const sanitized = deepOmitBlank(configuration[configKey])
+
+  if (isEmpty(sanitized)) return base
+
+  return { ...base, configuration: { [configKey]: sanitized } }
 }
 
 const WrapperSC = styled.div(({ theme }) => ({
@@ -98,5 +178,6 @@ const WrapperSC = styled.div(({ theme }) => ({
   padding: theme.spacing.large,
   height: '100%',
   width: '100%',
+  minHeight: 0,
   maxWidth: 800,
 }))
