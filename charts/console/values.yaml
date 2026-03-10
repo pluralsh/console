@@ -417,12 +417,12 @@ kas:
     runAsGroup: 65532
     fsGroup: 65532
   priorityClassName: ""
-  extraEnv: [ ]
-  extraArgs: [ ]
-  nodeSelector: { }
-  affinity: { }
-  tolerations: [ ]
-  initContainers: [ ]
+  extraEnv: []
+  extraArgs: []
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  initContainers: []
   resources:
     limits:
       cpu: 500m
