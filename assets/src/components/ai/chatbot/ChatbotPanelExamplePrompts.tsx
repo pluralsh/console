@@ -1,8 +1,8 @@
 import { useTheme } from 'styled-components'
 import {
+  AiSparkleFilledIcon,
   Chip,
   ChipProps,
-  MagicWandIcon,
   MinusIcon,
   PlusIcon,
 } from '@pluralsh/design-system'
@@ -27,7 +27,7 @@ function Prompt({ children, ...props }: ChipProps) {
       }}
       {...props}
     >
-      <MagicWandIcon size={12} />
+      <AiSparkleFilledIcon size={12} />
       <span
         css={{
           ...theme.partials.text.body2,

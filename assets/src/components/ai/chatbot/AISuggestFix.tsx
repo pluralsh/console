@@ -1,7 +1,7 @@
 import {
+  AiSparkleFilledIcon,
   Button,
   LinkoutIcon,
-  MagicWandIcon,
   Markdown,
   PrOpenIcon,
   Toast,
@@ -172,7 +172,7 @@ function AISuggestFix({ insight }: { insight: Nullable<AiInsightFragment> }) {
   return (
     <div css={{ position: 'relative' }}>
       <Button
-        startIcon={<MagicWandIcon />}
+        startIcon={<AiSparkleFilledIcon />}
         onClick={showPanel}
       >
         Suggest a fix
