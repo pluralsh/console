@@ -396,25 +396,6 @@ gitServer:
   resources: ~
   tag: ~
 
-# kas is used to potentially override values in the kas subchart (charts/console/charts/kas-0.3.0.tgz)
-# The values here match the default values in the kas subchart but are here for documentation and ease-of-access in case user wants to override any values
-kas:
-  global:
-    additionalVolumes: ~
-    additionalVolumeMounts: ~
-  consoleUrl: ""
-  nameOverride: ""
-  fullnameOverride: ""
-  podAnnotations: { }
-  podLabels: { }
-  priorityClassName: ""
-  extraEnv: []
-  extraArgs: []
-  nodeSelector: { }
-  affinity: { }
-  tolerations: []
-  initContainers: []
-
 cloudQuery:
   enabled: false
   replicaCount: 1
@@ -558,6 +539,21 @@ dex:
       - <your-console-fqdn>
 
 kas:
+  global:
+    additionalVolumes: ~
+    additionalVolumeMounts: ~
+  consoleUrl: ""
+  nameOverride: ""
+  fullnameOverride: ""
+  podAnnotations: { }
+  podLabels: { }
+  priorityClassName: ""
+  extraEnv: [ ]
+  extraArgs: [ ]
+  nodeSelector: { }
+  affinity: { }
+  tolerations: [ ]
+  initContainers: [ ]
   image:
     repository: ghcr.io/pluralsh/kubernetes-agent
     pullPolicy: IfNotPresent
