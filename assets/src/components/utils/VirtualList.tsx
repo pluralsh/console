@@ -16,9 +16,11 @@ import {
 import { mergeRefs } from 'react-merge-refs'
 import styled, { useTheme } from 'styled-components'
 import { VList, VListHandle } from 'virtua'
+import { RectangleSkeleton } from './SkeletonLoaders'
 
 type BaseProps<T> = {
   data: T[]
+  loading?: boolean
   listRef?: RefObject<VListHandle | null>
   loadNextPage?: () => void
   hasNextPage?: boolean
@@ -30,6 +32,12 @@ type BaseProps<T> = {
   // if true, scroll will start at bottom on mount, and fetches will be triggered at the top
   isReversed?: boolean
   onVirtualSliceChange?: (slice: VirtualSlice) => void
+  skeletonProps?: {
+    gap?: SemanticSpacingKey
+    numRows?: number
+    height?: ComponentPropsWithoutRef<typeof RectangleSkeleton>['$height']
+    width?: ComponentPropsWithoutRef<typeof RectangleSkeleton>['$width']
+  }
 } & Omit<ComponentPropsWithoutRef<typeof VList>, 'children'>
 
 type Renderer<T, M> = (props: {
@@ -48,6 +56,7 @@ export function VirtualList<T, M>(
 export function VirtualList<T, M>({
   listRef,
   data,
+  loading = false,
   loadNextPage,
   hasNextPage,
   isLoadingNextPage,
@@ -59,6 +68,7 @@ export function VirtualList<T, M>({
   bottomContent,
   itemGap = 'none',
   onVirtualSliceChange,
+  skeletonProps,
   ...props
 }: BaseProps<T> & { renderer: Renderer<T, M | undefined>; meta?: M }) {
   const { spacing } = useTheme()
@@ -123,6 +133,24 @@ export function VirtualList<T, M>({
     if (!hasNextPage || !hasInitiallyAligned.current || isLoadingNextPage)
       return
     if (isReversed ? startIndex <= 1 : endIndex >= data.length) loadNextPage?.()
+  }
+
+  if (loading) {
+    const { gap, height, width, numRows } = skeletonProps ?? {}
+    return (
+      <Flex
+        direction="column"
+        gap={gap ?? 'none'}
+      >
+        {Array.from({ length: numRows ?? 8 }).map((_, index) => (
+          <RectangleSkeleton
+            key={index}
+            $height={height ?? 'small'}
+            $width={width ?? '100%'}
+          />
+        ))}
+      </Flex>
+    )
   }
 
   return (

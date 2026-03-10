@@ -18,6 +18,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { ServicesContextT, getServiceStatuses } from './Services'
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import { ServicesTreeDiagram } from './ServicesTreeDiagram'
+import { POLL_INTERVAL } from '../ContinuousDeployment'
 
 const servicesLimit = 1000
 
@@ -56,24 +57,27 @@ export function ServicesTree() {
     [globalServicesData?.globalServices]
   )
 
-  const { data: serviceStatusesData, error: serviceStatusesError } =
-    useServiceStatusesQuery({
-      variables: { ...(clusterId ? { clusterId } : {}) },
-    })
-
+  const {
+    data: aggData,
+    previousData: aggPrev,
+    loading: aggLoading,
+  } = useServiceStatusesQuery({
+    variables: { ...(clusterId ? { clusterId } : {}) },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
   const statusCounts = useMemo(
-    () => getServiceStatuses(serviceStatusesData?.serviceStatuses),
-    [serviceStatusesData?.serviceStatuses]
+    () => getServiceStatuses((aggData || aggPrev)?.serviceStatuses),
+    [aggData, aggPrev]
   )
 
   useEffect(() => setRefetch?.(() => refetch), [refetch, setRefetch])
   const isLoading =
     (!data && loading) || (!globalServicesData && globalServicesLoading)
 
-  if (error || serviceStatusesError || globalServicesError)
-    return (
-      <GqlError error={error || serviceStatusesError || globalServicesError} />
-    )
+  if (error || globalServicesError)
+    return <GqlError error={error || globalServicesError} />
+
   return (
     <div
       css={{
@@ -88,6 +92,7 @@ export function ServicesTree() {
         setQueryStatusFilter={setQueryStatusFilter}
         tabStateRef={tabStateRef}
         statusCounts={statusCounts}
+        loadingStatuses={aggLoading}
       />
       <TabPanel
         stateRef={tabStateRef}

@@ -29,6 +29,7 @@ import {
 } from './ServiceStatusChip'
 import { useOutletContext } from 'react-router-dom'
 import { ServicesContextT } from './Services'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 
 export type StatusTabKey = ServiceDeploymentStatus | 'ALL'
 export const statusTabs = Object.entries({
@@ -66,11 +67,13 @@ export function ServicesFilters({
   hideSearch = false,
   tabStateRef,
   statusCounts,
+  loadingStatuses,
 }: {
   setQueryStatusFilter: Dispatch<SetStateAction<StatusTabKey>>
   hideSearch?: boolean
   tabStateRef: RefObject<any>
   statusCounts: Record<StatusTabKey, number | undefined>
+  loadingStatuses: boolean
 }) {
   const { q, setQ, clusterId, setClusterId } =
     useOutletContext<ServicesContextT>()
@@ -134,12 +137,18 @@ export function ServicesFilters({
             className="statusTab"
           >
             {label}
-            {!isNil(statusCounts?.[key]) && (
+            {isNil(statusCounts?.[key]) ? (
+              loadingStatuses && (
+                <RectangleSkeleton
+                  $width={26}
+                  $height={22}
+                />
+              )
+            ) : (
               <Chip
                 fillLevel={statusFilter === key ? 2 : 0}
                 size="small"
                 severity={serviceStatusToSeverity(key as any)}
-                loading={isNil(statusCounts?.[key])}
               >
                 {statusCounts?.[key]}
               </Chip>

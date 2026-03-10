@@ -4,10 +4,10 @@ on:
     branches:
       - 'master'
     paths:
+      - '.github/workflows/datastore-cd.yaml'
       - 'go/datastore/**'
       - 'go/polly/**'
       - 'go/client/**'
-      - '.github/workflows/datastore-cd.yaml'
   push:
     tags:
       - 'v*.*.*'

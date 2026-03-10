@@ -26,6 +26,7 @@ import {
   ClustersRowFragment,
   Conjunction,
   useClustersQuery,
+  useClusterStatusesQuery,
 } from 'generated/graphql'
 
 import {
@@ -44,6 +45,7 @@ import { isEmpty } from 'lodash'
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 
 import {
+  POLL_INTERVAL,
   useSetPageHeaderContent,
   useSetPageScrollable,
 } from '../ContinuousDeployment'
@@ -174,23 +176,33 @@ export default function Clusters() {
           : upgradeableFilter === 'UPGRADEABLE',
     }
   )
+  const {
+    data: aggData,
+    previousData: aggPrev,
+    loading: aggLoading,
+  } = useClusterStatusesQuery({
+    variables: { q: debouncedSearchString, projectId },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
+  const { clusterStatuses, upgradeStatistics } = (aggData || aggPrev) ?? {}
 
   const statusCounts = useMemo<Record<ClusterStatusTabKey, number | undefined>>(
     () => ({
-      ALL: data?.clusterStatuses?.reduce(
+      ALL: clusterStatuses?.reduce(
         (count, status) => count + (status?.count || 0),
         0
       ),
-      HEALTHY: data?.clusterStatuses ? 0 : undefined,
-      UNHEALTHY: data?.clusterStatuses ? 0 : undefined,
+      HEALTHY: clusterStatuses ? 0 : undefined,
+      UNHEALTHY: clusterStatuses ? 0 : undefined,
       ...Object.fromEntries(
-        data?.clusterStatuses?.map((status) => [
+        clusterStatuses?.map((status) => [
           status?.healthy ? 'HEALTHY' : 'UNHEALTHY',
           status?.count,
         ]) || []
       ),
     }),
-    [data?.clusterStatuses]
+    [clusterStatuses]
   )
 
   const headerActions = useMemo(
@@ -253,7 +265,8 @@ export default function Clusters() {
         setTagOp={setTagOp as ComponentProps<typeof TagsFilter>['setSearchOp']}
         upgradeableFilter={upgradeableFilter}
         setUpgradeableFilter={setUpgradeableFilter}
-        upgradeStats={data?.upgradeStatistics}
+        upgradeStats={upgradeStatistics}
+        loadingStatuses={aggLoading}
       />
       <TabPanel
         stateRef={tabStateRef}

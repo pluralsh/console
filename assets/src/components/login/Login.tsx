@@ -10,7 +10,7 @@ import {
 } from 'generated/graphql'
 import queryString from 'query-string'
 import { RefObject, useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { isValidEmail } from 'utils/email'
 
 import { useTheme } from 'styled-components'
@@ -108,8 +108,10 @@ function OIDCLogin({ oidcUri, external, oidcName }) {
           </Body1P>
         </Flex>
         <Button
-          as={Link}
-          to={oidcUri}
+          id="plrl-login"
+          onClick={() => {
+            window.location = oidcUri // needed for cases when console + oidc callback are on same fqdn
+          }}
         >
           Log in with {external ? oidcName || 'OIDC' : 'Plural'}
         </Button>

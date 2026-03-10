@@ -4,22 +4,18 @@ on:
     branches:
       - "master"
     paths:
-      - ".github/workflows/controller.yaml"
+      - ".github/workflows/controller-ci.yaml"
       - "go/controller/**"
       - "go/polly/**"
       - "go/client/**"
-      - "lib/**"
-      - "schema/**"
   pull_request:
     branches:
       - "**"
     paths:
-      - ".github/workflows/controller.yaml"
+      - ".github/workflows/controller-ci.yaml"
       - "go/controller/**"
       - "go/polly/**"
       - "go/client/**"
-      - "lib/**"
-      - "schema/**"
 permissions:
   contents: read
 env:
