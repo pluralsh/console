@@ -49,6 +49,8 @@ func NewHandler(consoleClient console.Client) (*Handler, error) {
 
 func (h *Handler) registerRoutes(account NexusAccount) {
 	NewOpenAIRouter(h.bifrostClient, NewEmbeddingsResolver(account)).RegisterRoutes(h.router)
+	NewAnthropicRouter(h.bifrostClient, NewEmbeddingsResolver(account)).RegisterRoutes(h.router)
+	NewGeminiRouter(h.bifrostClient, NewEmbeddingsResolver(account)).RegisterRoutes(h.router)
 }
 
 // ServeHTTP implements the http.Handler interface

@@ -165,21 +165,13 @@ func (in *Account) handleBedrockKeys(config *pb.BedrockConfig) ([]schemas.Key, e
 func (in *Account) toBedrockModels(config *pb.BedrockConfig) []string {
 	result := make([]string, 0)
 	models := append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId(), config.GetEmbeddingModelId())
-	for _, model := range models {
-		if len(model) == 0 {
+	for _, modelID := range models {
+		if len(modelID) == 0 {
 			continue
 		}
 
-		parts := strings.Split(model, ".")
-
-		// inference profiles should always have 3 parts <region>.<provider>.<model>
-		// if it doesn't just use as-is
-		if len(parts) != 3 {
-			result = append(result, model)
-			continue
-		}
-
-		result = append(result, strings.Join(parts[1:], "."))
+		_, model := in.parseModelID(modelID)
+		result = append(result, model)
 	}
 
 	return result
@@ -197,27 +189,35 @@ func (in *Account) toBedrockDeployments(config *pb.BedrockConfig) map[string]str
 		deployments = make(map[string]string)
 	}
 
-	inferenceProfileIDs := append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId(), config.GetEmbeddingModelId())
+	models := append(config.GetProxyModels(), config.GetModelId(), config.GetToolModelId(), config.GetEmbeddingModelId())
 
 	// Augment configured deployments with provided profiles ids.
-	for _, inferenceProfileID := range inferenceProfileIDs {
-		if len(inferenceProfileID) == 0 {
+	for _, modelID := range models {
+		if len(modelID) == 0 {
 			continue
 		}
 
-		parts := strings.Split(inferenceProfileID, ".")
-
-		// inference profiles should always have 3 parts <region>.<provider>.<model>
-		// if it doesn't skip it
-		if len(parts) != 3 {
-			continue
-		}
-
-		model := strings.Join(parts[1:], ".")
+		inferenceProfileID, model := in.parseModelID(modelID)
 		deployments[model] = inferenceProfileID
 	}
 
 	return deployments
+}
+
+func (in *Account) parseModelID(modelID string) (inferenceProfileID string, model string) {
+	if len(modelID) == 0 {
+		return "", ""
+	}
+
+	parts := strings.Split(modelID, ".")
+
+	// inference profiles should always have 3 parts <region>.<provider>.<model>
+	// if it doesn't just use as-is
+	if len(parts) != 3 {
+		return modelID, modelID
+	}
+
+	return modelID, strings.Join(parts[1:], ".")
 }
 
 func (in *Account) handleAzureKeys(config *pb.AzureOpenAiConfig) ([]schemas.Key, error) {

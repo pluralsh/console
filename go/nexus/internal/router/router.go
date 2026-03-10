@@ -90,11 +90,18 @@ type RouteConfig struct {
 	// ListTokensResponseConverter converts BifrostListModelsResponse to integration format
 	ListModelsResponseConverter ListModelsResponseConverter
 
+	// CountTokensResponseConverter converts BifrostCountTokensResponse to integration format
+	CountTokensResponseConverter CountTokensResponseConverter
+
 	// ErrorConverter converts BifrostError to integration format
 	ErrorConverter ErrorConverter
 
 	// StreamConfig holds the streaming configuration for the route
 	StreamConfig *StreamConfig
+
+	// SendDoneMarker controls whether "data: [DONE]" is written at the end of a stream.
+	// If nil, legacy path-based behavior is used for backward compatibility.
+	SendDoneMarker *bool
 
 	// PreCallback is called after parsing but before Bifrost processing
 	PreCallback PreRequestCallback
@@ -169,6 +176,9 @@ func (in *GenericRouter) createHandler(config RouteConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := config.GetRequestTypeInstance()
 		bifrostCtx, cancel := schemas.NewBifrostContextWithCancel(r.Context())
+		if userAgent := r.Header.Get("User-Agent"); userAgent != "" {
+			bifrostCtx.SetValue(schemas.BifrostContextKeyUserAgent, userAgent)
+		}
 
 		if config.RequestParser != nil {
 			if err := config.RequestParser(r, req); err != nil {
@@ -326,7 +336,7 @@ func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.Bif
 
 			// Some clients (like OpenAI) expect a [DONE] marker to stop listening,
 			// even if an error occurred during the stream.
-			if in.shouldSendDoneMarker(config.Path) {
+			if in.shouldSendDoneMarker(config) {
 				_, _ = fmt.Fprint(w, "data: [DONE]\n\n")
 				flusher.Flush()
 			}
@@ -405,7 +415,7 @@ func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.Bif
 	//   - OpenAI "responses" API and Anthropic messages API: they signal completion by simply closing the stream, not sending [DONE].
 	//   - Bedrock: uses AWS Event Stream format rather than SSE with [DONE].
 	// Bifrost handles any additional cleanup internally on normal stream completion.
-	if in.shouldSendDoneMarker(config.Path) {
+	if in.shouldSendDoneMarker(config) {
 		if _, err := fmt.Fprint(w, "data: [DONE]\n\n"); err != nil {
 			in.logger.Error("failed to send done marker", zap.Error(err))
 			cancel()
@@ -414,8 +424,12 @@ func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.Bif
 	}
 }
 
-func (in *GenericRouter) shouldSendDoneMarker(path string) bool {
-	return !strings.Contains(path, "/responses")
+func (in *GenericRouter) shouldSendDoneMarker(config RouteConfig) bool {
+	if config.SendDoneMarker != nil {
+		return *config.SendDoneMarker
+	}
+
+	return !strings.Contains(config.Path, "/responses")
 }
 
 func (in *GenericRouter) toStreamingErrorResponse(errorResponse any) (string, error) {
@@ -526,6 +540,19 @@ func (in *GenericRouter) handleNonStreamingRequest(w http.ResponseWriter, config
 		}
 
 		response, err = config.ResponsesResponseConverter(ctx, bifrostResponse)
+	case bifrostReq.CountTokensRequest != nil:
+		bifrostResponse, bifrostErr := in.client.CountTokensRequest(ctx, bifrostReq.CountTokensRequest)
+		if bifrostErr != nil {
+			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
+			return
+		}
+
+		if bifrostResponse == nil {
+			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "count tokens response is nil"))
+			return
+		}
+
+		response, err = config.CountTokensResponseConverter(ctx, bifrostResponse)
 	case bifrostReq.EmbeddingRequest != nil:
 		bifrostResponse, bifrostErr := in.client.EmbeddingRequest(ctx, bifrostReq.EmbeddingRequest)
 		if bifrostErr != nil {
