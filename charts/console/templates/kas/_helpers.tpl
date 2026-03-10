@@ -24,17 +24,10 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 
 {{/*
-Create chart name and version as used by the chart label.
-*/}}
-{{- define "kas.chart" -}}
-{{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- end }}
-
-{{/*
 Common labels
 */}}
 {{- define "kas.labels" -}}
-helm.sh/chart: {{ include "kas.chart" . }}
+helm.sh/chart: {{ include "console.chart" . }}
 {{ include "kas.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
