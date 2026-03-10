@@ -72,9 +72,10 @@ export function WorkbenchesList() {
             }}
           >
             <Button
-              startIcon={<PlusIcon />}
+              small
               as={Link}
               to={WORKBENCHES_CREATE_REL_PATH}
+              startIcon={<PlusIcon />}
             >
               Create Workbench
             </Button>
@@ -149,6 +150,7 @@ const CardSC = styled(Card)(({ theme }) => ({
   gap: theme.spacing.small,
   padding: theme.spacing.medium,
   height: '100%',
+  minHeight: 164,
   textDecoration: 'none',
 }))
 

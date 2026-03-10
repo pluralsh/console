@@ -26,7 +26,11 @@ import { WORKBENCHES_CREATE_REL_PATH } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchToolIcon } from './WorkbenchTool'
-import { TOOL_TYPE_CARDS, TOOL_TYPE_LABELS } from './workbenchToolsConsts'
+import {
+  TOOL_TYPE_CARDS,
+  TOOL_TYPE_TO_CATEGORIES,
+  TOOL_TYPE_TO_LABEL,
+} from './workbenchToolsConsts'
 
 const WORKBENCH_TOOL_TYPE_PARAM = 'type'
 
@@ -58,7 +62,7 @@ export function WorkbenchTools() {
         opacity={0.6}
       >
         <Flex gap="large">
-          {TOOL_TYPE_CARDS.map(({ type, label, description, tags }) => (
+          {TOOL_TYPE_CARDS.map(({ type, description }) => (
             <ToolCardSC key={type}>
               <StackedText
                 first={
@@ -71,7 +75,7 @@ export function WorkbenchTools() {
                       type="secondary"
                       icon={<WorkbenchToolIcon type={type} />}
                     />
-                    {label}
+                    {TOOL_TYPE_TO_LABEL[type]}
                   </Flex>
                 }
                 firstPartialType="subtitle1"
@@ -86,7 +90,7 @@ export function WorkbenchTools() {
                 wrap="wrap"
                 flex={1}
               >
-                {tags.map((tag) => (
+                {TOOL_TYPE_TO_CATEGORIES[type].map((tag) => (
                   <Chip
                     key={tag}
                     size="small"
@@ -152,7 +156,7 @@ function ToolCard({ tool }: { tool: WorkbenchToolFragment }) {
         first={name}
         firstPartialType="body2Bold"
         firstColor="text"
-        second={TOOL_TYPE_LABELS[type]}
+        second={TOOL_TYPE_TO_LABEL[type]}
         icon={
           <IconFrame
             circle

@@ -1,6 +1,6 @@
-import { WorkbenchToolType } from 'generated/graphql'
+import { WorkbenchToolCategory, WorkbenchToolType } from 'generated/graphql'
 
-export const TOOL_TYPE_LABELS: Record<WorkbenchToolType, string> = {
+export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Http]: 'HTTP',
   [WorkbenchToolType.Elastic]: 'Elasticsearch',
   [WorkbenchToolType.Prometheus]: 'Prometheus',
@@ -13,48 +13,61 @@ export const TOOL_TYPE_LABELS: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Sentry]: 'Sentry',
 }
 
+export const TOOL_TYPE_TO_CATEGORIES: Record<
+  WorkbenchToolType,
+  WorkbenchToolCategory[]
+> = {
+  [WorkbenchToolType.Datadog]: [
+    WorkbenchToolCategory.Metrics,
+    WorkbenchToolCategory.Logs,
+  ],
+  [WorkbenchToolType.Elastic]: [WorkbenchToolCategory.Logs],
+  [WorkbenchToolType.Prometheus]: [WorkbenchToolCategory.Metrics],
+  [WorkbenchToolType.Loki]: [WorkbenchToolCategory.Logs],
+  [WorkbenchToolType.Tempo]: [WorkbenchToolCategory.Traces],
+  [WorkbenchToolType.Atlassian]: [WorkbenchToolCategory.Ticketing],
+  [WorkbenchToolType.Linear]: [WorkbenchToolCategory.Ticketing],
+  [WorkbenchToolType.Http]: [WorkbenchToolCategory.Integration],
+  [WorkbenchToolType.Mcp]: [],
+  [WorkbenchToolType.Sentry]: [WorkbenchToolCategory.ErrorTracking],
+}
+
 export const TOOL_TYPE_CARDS: {
   type: WorkbenchToolType
-  label: string
   description: string
-  tags: string[]
 }[] = [
   {
     type: WorkbenchToolType.Datadog,
-    label: 'Datadog',
     description: 'Connect to Datadog for metrics, logs, and APM.',
-    tags: ['Metrics', 'Logs'],
   },
   {
     type: WorkbenchToolType.Elastic,
-    label: 'Elasticsearch',
     description: 'Query logs and search data in Elasticsearch.',
-    tags: ['Logs'],
   },
   {
     type: WorkbenchToolType.Prometheus,
-    label: 'Prometheus',
     description:
       'Query metrics from Prometheus or Prometheus-compatible stores.',
-    tags: ['Metrics'],
   },
   {
     type: WorkbenchToolType.Loki,
-    label: 'Loki',
     description: 'Query log data from Grafana Loki.',
-    tags: ['Logs'],
   },
   {
     type: WorkbenchToolType.Tempo,
-    label: 'Tempo',
     description: 'Query trace data from Grafana Tempo for distributed tracing.',
-    tags: ['Traces'],
+  },
+  {
+    type: WorkbenchToolType.Atlassian,
+    description: 'Connect to Jira, Confluence, and other Atlassian products.',
+  },
+  {
+    type: WorkbenchToolType.Linear,
+    description: 'Connect to Linear for issue tracking and project management.',
   },
   {
     type: WorkbenchToolType.Http,
-    label: 'Custom integration',
     description:
-      'Call arbitrary HTTP endpoints. Use for webhooks, REST APIs, and custom integrations.',
-    tags: ['Integration'],
+      'Call arbitrary HTTP endpoints- useful for custom integrations.',
   },
 ]

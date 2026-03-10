@@ -10,6 +10,9 @@ import { WORKBENCHES_TOOLS_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { FormCardSC } from '../workbench/create-edit/WorkbenchCreateOrEdit'
 import { isWorkbenchTool, WorkbenchToolIcon } from './WorkbenchTool'
+import { GqlError } from 'components/utils/Alert'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { WorkbenchToolForm } from './WorkbenchToolForm'
 
 export const WORKBENCHES_TOOLS_TYPE_PARAM = 'type'
 
@@ -21,22 +24,23 @@ export function WorkbenchToolCreateOrEdit({
   const id = useParams()[WORKBENCHES_TOOLS_PARAM_ID]
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const {
-    data: _d,
-    loading: _l,
-    error: _e,
-  } = useWorkbenchToolQuery({
+  const { data, loading, error } = useWorkbenchToolQuery({
     variables: { id },
     skip: mode === 'create' || !id,
     fetchPolicy: 'network-only',
   })
 
+  const tool = data?.workbenchTool
+  const isLoading = !tool && loading
+
   useLayoutEffect(() => {
-    if (!isWorkbenchTool(searchParams.get(WORKBENCHES_TOOLS_TYPE_PARAM)))
+    if (isLoading) return
+    const typeParam = searchParams.get(WORKBENCHES_TOOLS_TYPE_PARAM)
+    if ((id && typeParam !== tool?.tool) || !isWorkbenchTool(typeParam))
       setSearchParams({
-        [WORKBENCHES_TOOLS_TYPE_PARAM]: WorkbenchToolType.Http,
+        [WORKBENCHES_TOOLS_TYPE_PARAM]: tool?.tool ?? WorkbenchToolType.Http,
       })
-  }, [searchParams, setSearchParams])
+  }, [id, searchParams, setSearchParams, tool, isLoading])
 
   const type = (searchParams.get(WORKBENCHES_TOOLS_TYPE_PARAM) ??
     '') as WorkbenchToolType // the effect above ensures this type is valid
@@ -52,22 +56,37 @@ export function WorkbenchToolCreateOrEdit({
           secondPartialType="body1"
           gap="xsmall"
         />
-        <Flex
-          gap="xsmall"
-          align="center"
-        >
-          <IconFrame
-            circle
-            type="secondary"
-            icon={<WorkbenchToolIcon type={type} />}
-            textValue={capitalize(type)}
-          />
-          <Subtitle1H1 as="h3">
-            {capitalize(type === WorkbenchToolType.Http ? 'Custom' : type)}
-          </Subtitle1H1>
-        </Flex>
+        {!isLoading && (
+          <Flex
+            gap="xsmall"
+            align="center"
+          >
+            <IconFrame
+              circle
+              type="secondary"
+              icon={<WorkbenchToolIcon type={type} />}
+              textValue={capitalize(type)}
+            />
+            <Subtitle1H1 as="h3">
+              {capitalize(type === WorkbenchToolType.Http ? 'Custom' : type)}
+            </Subtitle1H1>
+          </Flex>
+        )}
       </StretchedFlex>
-      <FormCardSC></FormCardSC>
+      {error && <GqlError error={error} />}
+      {isLoading ? (
+        <RectangleSkeleton
+          $height="100%"
+          $width="100%"
+        />
+      ) : (
+        <FormCardSC>
+          <WorkbenchToolForm
+            type={type}
+            tool={tool}
+          />
+        </FormCardSC>
+      )}
     </WrapperSC>
   )
 }
