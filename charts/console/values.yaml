@@ -692,6 +692,15 @@ kas:
     privateApiPort: 8155
     observabilityPort: 8151
     type: ClusterIP
+  ingress:
+    ingressClass: nginx
+    kubernetesApiPath: /k8s-proxy
+    tlsSecretName: kas-tls
+    tls:
+      enabled: true
+    annotations:
+      kubernetes.io/tls-acme: "true"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
 
 redis:
   enabled: true

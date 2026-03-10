@@ -4,17 +4,17 @@ metadata:
   name: {{ include "kas.fullname" . }}
   labels:
     {{- include "kas.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+  {{- with .Values.kas.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  ingressClassName: {{ .Values.ingress.ingressClass }}
+  ingressClassName: {{ .Values.kas.ingress.ingressClass }}
   rules:
-    - host: {{ .Values.ingress.kas_dns | quote }}
+    - host: {{ .Values.kas.ingress.kas_dns | quote }}
       http:
         paths:
-          - path: "{{ $.Values.ingress.kubernetesApiPath }}"
+          - path: "{{ $.Values.kas.ingress.kubernetesApiPath }}"
             pathType: Prefix
             backend:
               service:
@@ -35,9 +35,9 @@ spec:
                 name: {{ include "kas.serviceName" . }}
                 port:
                   number: {{ .Values.kas.service.agentProxyPort }}
-  {{ if .Values.ingress.tls.enabled }}
+  {{ if .Values.kas.ingress.tls.enabled }}
   tls:
     - hosts:
-        - {{ .Values.ingress.kas_dns | quote }}
-      secretName: {{ .Values.ingress.tlsSecretName }}
+        - {{ .Values.kas.ingress.kas_dns | quote }}
+      secretName: {{ .Values.kas.ingress.tlsSecretName }}
   {{ end }}

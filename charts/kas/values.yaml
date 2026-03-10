@@ -80,15 +80,3 @@ agent:
 api:
   path: /api
   port: 8000
-
-ingress:
-  ingressClass: nginx
-  kubernetesApiPath: /k8s-proxy
-  tlsSecretName: kas-tls
-
-  tls:
-    enabled: true
-
-  annotations:
-    kubernetes.io/tls-acme: "true"
-    cert-manager.io/cluster-issuer: letsencrypt-prod

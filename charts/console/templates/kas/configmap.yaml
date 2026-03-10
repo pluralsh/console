@@ -13,7 +13,7 @@ data:
       kubernetes_api:
         listen:
           address: ":{{ .Values.kas.service.kubernetesApiPort }}"
-        url_path_prefix: "{{ .Values.ingress.kubernetesApiPath }}"
+        url_path_prefix: "{{ .Values.kas.ingress.kubernetesApiPath }}"
     observability:
       listen:
         address: ":{{ .Values.kas.service.observabilityPort }}"
