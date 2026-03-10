@@ -34,16 +34,6 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template.
   name: ""
 
-replicCount: 1
-
-autoscaling:
-  enabled: false
-  minReplicas: 2
-  maxReplicas: 10
-  targetCPUAverageValue: 100m
-  # targetCPUUtilizationPercentage: 75
-  # targetMemoryUtilizationPercentage: 75
-
 secrets:
   create: true
   api: ""

@@ -7,8 +7,8 @@ metadata:
   labels:
     {{- include "kas.labels" . | nindent 4 }}
 spec:
-  {{ if not .Values.autoscaling.enabled }}
-  replicas: {{ .Values.replicaCount }}
+  {{ if not .Values.kas.autoscaling.enabled }}
+  replicas: {{ .Values.kas.replicaCount }}
   {{ end }}
   selector:
     matchLabels:

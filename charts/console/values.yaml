@@ -435,16 +435,6 @@ kas:
     # If not set and create is true, a name is generated using the fullname template.
     name: ""
 
-  replicCount: 1
-
-  autoscaling:
-    enabled: false
-    minReplicas: 2
-    maxReplicas: 10
-    targetCPUAverageValue: 100m
-    # targetCPUUtilizationPercentage: 75
-    # targetMemoryUtilizationPercentage: 75
-
   secrets:
     create: true
     api: ""
@@ -606,6 +596,14 @@ kas:
     pullPolicy: IfNotPresent
     tag: "" # Overrides the image tag whose default is the chart appVersion.
     pullSecrets: []
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUAverageValue: 100m
+    # targetCPUUtilizationPercentage: 75
+    # targetMemoryUtilizationPercentage: 75
   resources:
     limits:
       cpu: 500m

@@ -1,4 +1,4 @@
-{{- if .Values.autoscaling.enabled }}
+{{- if .Values.kas.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -10,31 +10,31 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "kas.fullname" . }}
-  minReplicas: {{ .Values.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+  minReplicas: {{ .Values.kas.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.kas.autoscaling.maxReplicas }}
   metrics:
-    {{- if .Values.autoscaling.targetCPUAverageValue }}
+    {{- if .Values.kas.autoscaling.targetCPUAverageValue }}
     - type: Resource
       resource:
         name: cpu
         target:
           type: AverageValue
-          averageValue: {{ .Values.autoscaling.targetCPUAverageValue }}
+          averageValue: {{ .Values.kas.autoscaling.targetCPUAverageValue }}
     {{- end }}
-    {{- if .Values.autoscaling.targetCPUUtilizationPercentage }}
+    {{- if .Values.kas.autoscaling.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+          averageUtilization: {{ .Values.kas.autoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
-    {{- if .Values.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- if .Values.kas.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: {{ .Values.autoscaling.targetMemoryUtilizationPercentage }}
+          averageUtilization: {{ .Values.kas.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
 {{- end }}
