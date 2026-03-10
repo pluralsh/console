@@ -27,7 +27,7 @@ spec:
       targetPort: {{ .Values.api.port }}
       protocol: TCP
       name: tcp-{{ include "kas.name" . }}-api
-  {{- if .Values.metrics.enabled }}
+  {{- if .Values.kas.metrics.enabled }}
     - port: {{ .Values.kas.service.observabilityPort }}
       targetPort: {{ .Values.kas.service.observabilityPort }}
       protocol: TCP

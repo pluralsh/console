@@ -1,11 +1,11 @@
-{{- if and .Values.metrics.enabled .Values.metrics.serviceMonitor.enabled -}}
+{{- if and .Values.kas.metrics.enabled .Values.kas.metrics.serviceMonitor.enabled -}}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "kas.serviceName" . }}
   labels:
     {{- include "kas.labels" . | nindent 4 }}
-  {{- with .Values.metrics.serviceMonitor.additionalLabels }}
+  {{- with .Values.kas.metrics.serviceMonitor.additionalLabels }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
@@ -18,8 +18,8 @@ spec:
       release: {{ .Release.Name }}
   endpoints:
     - port: http-metrics
-      path: {{ .Values.metrics.path }}
-    {{- with .Values.metrics.serviceMonitor.endpointConfig }}
+      path: {{ .Values.kas.metrics.path }}
+    {{- with .Values.kas.metrics.serviceMonitor.endpointConfig }}
       {{- toYaml . | nindent 6 }}
     {{- end }}
 {{- end -}}

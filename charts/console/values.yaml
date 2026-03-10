@@ -435,14 +435,6 @@ kas:
     # If not set and create is true, a name is generated using the fullname template.
     name: ""
 
-  metrics:
-    enabled: false
-    path: /metrics
-    serviceMonitor:
-      enabled: false
-      additionalLabels: { }
-      endpointConfig: { }
-
   replicCount: 1
 
   autoscaling:
@@ -621,6 +613,13 @@ kas:
     requests:
       cpu: 100m
       memory: 128Mi
+  metrics:
+    enabled: false
+    path: /metrics
+    serviceMonitor:
+      enabled: false
+      additionalLabels: {}
+      endpointConfig: {}
   podSecurityContext:
     runAsUser: 65532
   securityContext:
