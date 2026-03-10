@@ -777,6 +777,10 @@ type AnsibleConfiguration struct {
 	PrivateKeyFile *string `json:"privateKeyFile,omitempty"`
 	// path to the ansible config file to use
 	ConfigFile *string `json:"configFile,omitempty"`
+	// whether the ansible playbook supports the check flag
+	SupportsCheck *bool `json:"supportsCheck,omitempty"`
+	// the playbook to run when deleting the stack
+	DeletePlaybook *string `json:"deletePlaybook,omitempty"`
 }
 
 type AnsibleConfigurationAttributes struct {
@@ -790,6 +794,10 @@ type AnsibleConfigurationAttributes struct {
 	PrivateKeyFile *string `json:"privateKeyFile,omitempty"`
 	// path to the ansible config file to use
 	ConfigFile *string `json:"configFile,omitempty"`
+	// whether the ansible playbook supports the check flag
+	SupportsCheck *bool `json:"supportsCheck,omitempty"`
+	// the playbook to run when deleting the stack
+	DeletePlaybook *string `json:"deletePlaybook,omitempty"`
 }
 
 // Anthropic connection information

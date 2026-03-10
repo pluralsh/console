@@ -4973,6 +4973,12 @@ input AnsibleConfigurationAttributes {
 
   "path to the ansible config file to use"
   configFile: String
+
+  "whether the ansible playbook supports the check flag"
+  supportsCheck: Boolean
+
+  "the playbook to run when deleting the stack"
+  deletePlaybook: String
 }
 
 input AiApprovalAttributes {
@@ -5381,6 +5387,12 @@ type AnsibleConfiguration {
 
   "path to the ansible config file to use"
   configFile: String
+
+  "whether the ansible playbook supports the check flag"
+  supportsCheck: Boolean
+
+  "the playbook to run when deleting the stack"
+  deletePlaybook: String
 }
 
 type StackRun {

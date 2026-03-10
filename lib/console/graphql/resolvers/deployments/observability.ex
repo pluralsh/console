@@ -65,8 +65,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     %{group: group, version: version, kind: kind, name: name, namespace: namespace} = args,
     %{context: %{current_user: user}}
   ) do
-    kind = Console.GraphQl.Resolvers.Kubernetes.get_kind(cluster, group, version, kind)
-    path = Kube.Client.Base.path(group, version, kind, namespace, name)
+    pkind = Console.GraphQl.Resolvers.Kubernetes.get_kind(cluster, group, version, kind)
+    path = Kube.Client.Base.path(group, version, pkind, namespace, name)
 
     Console.Deployments.Clusters.control_plane(cluster, user)
     |> Kube.Utils.save_kubeconfig()
