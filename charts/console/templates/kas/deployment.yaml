@@ -4,6 +4,7 @@ metadata:
   name: {{ include "kas.deploymentName" . }}
   annotations:
     platform.plural.sh/repository-url: https://github.com/pluralsh/console.git
+    deployment.plural.sh/sync-options: Force=True
   labels:
     {{- include "kas.labels" . | nindent 4 }}
 spec:
