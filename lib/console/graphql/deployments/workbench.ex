@@ -473,6 +473,24 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
       resolve &Deployments.workbench_job/2
     end
+
+    connection field :workbench_alerts, node_type: :alert do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+
+      resolve &Deployments.all_workbench_alerts/2
+    end
+
+    connection field :workbench_issues, node_type: :issue do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+
+      resolve &Deployments.all_workbench_issues/2
+    end
   end
 
   object :workbench_mutations do

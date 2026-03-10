@@ -10076,6 +10076,8 @@ export type RootQueryType = {
   vulnerabilityReports?: Maybe<VulnerabilityReportConnection>;
   vulnerabilityStatistics?: Maybe<Array<Maybe<VulnerabilityStatistic>>>;
   workbench?: Maybe<Workbench>;
+  workbenchAlerts?: Maybe<AlertConnection>;
+  workbenchIssues?: Maybe<IssueConnection>;
   workbenchJob?: Maybe<WorkbenchJob>;
   workbenchTool?: Maybe<WorkbenchTool>;
   workbenchTools?: Maybe<WorkbenchToolConnection>;
@@ -11427,6 +11429,22 @@ export type RootQueryTypeVulnerabilityStatisticsArgs = {
 export type RootQueryTypeWorkbenchArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeWorkbenchAlertsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeWorkbenchIssuesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

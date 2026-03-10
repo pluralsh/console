@@ -508,6 +508,10 @@ type RootQueryType {
 
   workbenchJob(id: ID!): WorkbenchJob
 
+  workbenchAlerts(after: String, first: Int, before: String, last: Int): AlertConnection
+
+  workbenchIssues(after: String, first: Int, before: String, last: Int): IssueConnection
+
   sharedAgentRun(id: ID!): AgentRun
 
   agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
