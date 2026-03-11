@@ -494,6 +494,8 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 			AdditionalArgs: conf.Ansible.AdditionalArgs,
 			PrivateKeyFile: conf.Ansible.PrivateKeyFile,
 			ConfigFile:     conf.Ansible.ConfigFile,
+			SupportsCheck:  conf.Ansible.SupportsCheck,
+			DeletePlaybook: conf.Ansible.DeletePlaybook,
 		}
 	}
 

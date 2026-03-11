@@ -252,6 +252,14 @@ type AnsibleConfiguration struct {
 	// ConfigFile is the path to the ansible config file to use.
 	// +kubebuilder:validation:Optional
 	ConfigFile *string `json:"configFile,omitempty"`
+
+	// SupportsCheck indicates whether the ansible playbook supports the check flag.
+	// +kubebuilder:validation:Optional
+	SupportsCheck *bool `json:"supportsCheck,omitempty"`
+
+	// DeletePlaybook is the playbook to run when deleting the stack.
+	// +kubebuilder:validation:Optional
+	DeletePlaybook *string `json:"deletePlaybook,omitempty"`
 }
 
 type AiApprovalConfiguration struct {
