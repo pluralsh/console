@@ -18,6 +18,6 @@ dependencies:
     repository: https://charts.dexidp.io
     condition: dex.enabled
   - name: common
-    version: 2.33.2
-    repository: oci://registry-1.docker.io/bitnamicharts
+    version: 2.34.0 # Closest to 2.33.2 used originally in the Redis chart.
+    repository: https://charts.bitnami.com/bitnami
 type: application
