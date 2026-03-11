@@ -640,7 +640,9 @@ kas:
     nameOverride: ""
     fullnameOverride: ""
     namespaceOverride: ""
-    commonLabels: { }
+    commonLabels:
+      app.kubernetes.io/name: redis
+      app.kubernetes.io/instance: console
     commonAnnotations: { }
     configmapChecksumAnnotations: true
     secretChecksumAnnotations: true
