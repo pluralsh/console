@@ -14,6 +14,10 @@ metadata:
   {{- if or .Values.kas.redis.commonAnnotations .Values.kas.redis.master.annotations }}
   {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.kas.redis.master.annotations .Values.kas.redis.commonAnnotations ) "context" . ) }}
   annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+    deployment.plural.sh/sync-options: Force=True
+  {{- else }}
+  annotations:
+    deployment.plural.sh/sync-options: Force=True
   {{- end }}
 spec:
   {{- if not (eq .Values.kas.redis.master.kind "DaemonSet") }}
