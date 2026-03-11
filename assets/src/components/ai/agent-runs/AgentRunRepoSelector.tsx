@@ -80,12 +80,12 @@ function AgentRunRepoSelectorInner({
     errorPolicy: 'ignore',
   })
   const allowedRepos =
-    runtimeData?.agentRuntime?.allowedRepositories?.filter(isNonNullable)
+    runtimeData.agentRuntime?.allowedRepositories?.filter(isNonNullable)
 
   const { data, loading, previousData } = useAgentRunRepositoriesQuery({
     variables: { q: debouncedQuery },
     fetchPolicy: 'cache-and-network',
-    skip: !!runtimeData?.agentRuntime?.allowedRepositories,
+    skip: !!runtimeData.agentRuntime?.allowedRepositories,
   })
   const curData = data || previousData
 
@@ -101,14 +101,16 @@ function AgentRunRepoSelectorInner({
       .map(({ url }) => url)
   }, [allowedRepos, curData, query])
 
-  const setRepositoryToMostRecent = useEffectEvent(() => {
-    if (selectedRepository && query) return
-    if (!repositories.includes(selectedRepository ?? 'null'))
+  const ensureInitialValidSelection = useEffectEvent(() => {
+    if (allowedRepos) {
+      if (selectedRepository && !allowedRepos.includes(selectedRepository))
+        setSelectedRepository(allowedRepos[0] ?? null)
+    } else if (data && defaultMostRecent && !selectedRepository && !query)
       setSelectedRepository(repositories[0])
   })
   useLayoutEffect(() => {
-    if (data && defaultMostRecent) setRepositoryToMostRecent() // data will be undefined if runtime repos is populated
-  }, [data, defaultMostRecent])
+    ensureInitialValidSelection()
+  }, [data, selectedRuntimeId])
 
   const isLoading = !curData && loading
 
