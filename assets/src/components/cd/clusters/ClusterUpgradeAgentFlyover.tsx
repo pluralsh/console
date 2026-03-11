@@ -105,12 +105,7 @@ export function ClusterUpgradeAgentFlyover({
           second={
             <Chip
               fillLevel={2}
-              severity={
-                clusterUpgrade.status === ClusterUpgradeStatus.InProgress ||
-                clusterUpgrade.status === ClusterUpgradeStatus.Pending
-                  ? 'neutral'
-                  : statusToChipSeverity[clusterUpgrade.status]
-              }
+              severity={statusToChipSeverity[clusterUpgrade.status]}
               loading={
                 clusterUpgrade.status == ClusterUpgradeStatus.InProgress ||
                 clusterUpgrade.status === ClusterUpgradeStatus.Pending
@@ -316,8 +311,8 @@ const StepCardSC = styled.div(({ theme }) => ({
 }))
 
 const statusToChipSeverity: Record<ClusterUpgradeStatus, ChipSeverity> = {
-  [ClusterUpgradeStatus.Pending]: 'info',
-  [ClusterUpgradeStatus.InProgress]: 'info',
+  [ClusterUpgradeStatus.Pending]: 'neutral',
+  [ClusterUpgradeStatus.InProgress]: 'neutral',
   [ClusterUpgradeStatus.Completed]: 'success',
   [ClusterUpgradeStatus.Failed]: 'danger',
 }
