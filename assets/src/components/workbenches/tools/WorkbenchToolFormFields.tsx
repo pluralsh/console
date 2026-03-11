@@ -25,7 +25,7 @@ import {
   CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
   ConfigurableWorkbenchToolType,
   isConfigurableWorkbenchToolType,
-} from './workbenchToolsConsts'
+} from './workbenchToolsUtils'
 
 type ToolFormFieldProps<T extends ConfigurableWorkbenchToolType> = {
   config: ConfigForToolType<T>

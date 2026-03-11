@@ -26,7 +26,7 @@ import {
   ConfigurableWorkbenchToolType,
   isConfigurableWorkbenchToolType,
   TOOL_TYPE_TO_CATEGORIES,
-} from './workbenchToolsConsts'
+} from './workbenchToolsUtils'
 
 export type WorkbenchToolFormState = Pick<
   WorkbenchToolAttributes,
@@ -46,7 +46,7 @@ export function WorkbenchToolForm({
   onCancel: () => void
   onSave: (state: WorkbenchToolFormState) => void
 }) {
-  const { state, update } = useUpdateState<WorkbenchToolFormState>({
+  const { state, update, hasUpdates } = useUpdateState<WorkbenchToolFormState>({
     name: tool?.name ?? '',
     categories: tool?.categories ?? TOOL_TYPE_TO_CATEGORIES[type],
     configuration: sanitizeInitialConfiguration(tool),
@@ -107,12 +107,14 @@ export function WorkbenchToolForm({
       )}
       <StickyActionsFooterSC>
         <Button
-          destructive
+          secondary
+          destructive={!!hasUpdates}
           onClick={onCancel}
         >
-          Cancel
+          {hasUpdates ? 'Cancel' : 'Back'}
         </Button>
         <Button
+          disabled={!hasUpdates}
           loading={mutationLoading}
           onClick={() => onSave(state)}
         >

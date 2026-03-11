@@ -1,8 +1,20 @@
 import {
+  AtlassianLogoIcon,
+  DatadogLogoIcon,
+  ElasticsearchLogoIcon,
+  IconProps,
+  LinearLogoIcon,
+  LokiLogoIcon,
+  PrometheusLogoIcon,
+  TempoLogoIcon,
+  ToolsIcon,
+} from '@pluralsh/design-system'
+import {
   WorkbenchToolCategory,
   WorkbenchToolConfigurationAttributes,
   WorkbenchToolType,
 } from 'generated/graphql'
+import { ComponentType } from 'react'
 
 /** Tool types that have a configuration branch in WorkbenchToolConfigurationAttributes and editable forms. */
 const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
@@ -122,3 +134,31 @@ export const TOOL_TYPE_CARDS: {
     (category) => categoryToLabel[category]
   ),
 }))
+
+export function WorkbenchToolIcon({
+  type,
+  fullColor = true,
+  ...props
+}: { type: Nullable<string> } & IconProps) {
+  if (!isConfigurableWorkbenchToolType(type)) return <ToolsIcon {...props} />
+  const Icon = toolToIcon[type]
+  return (
+    <Icon
+      fullColor={fullColor}
+      {...props}
+    />
+  )
+}
+const toolToIcon: Record<
+  ConfigurableWorkbenchToolType,
+  ComponentType<IconProps>
+> = {
+  [WorkbenchToolType.Datadog]: DatadogLogoIcon,
+  [WorkbenchToolType.Elastic]: ElasticsearchLogoIcon,
+  [WorkbenchToolType.Loki]: LokiLogoIcon,
+  [WorkbenchToolType.Prometheus]: PrometheusLogoIcon,
+  [WorkbenchToolType.Tempo]: TempoLogoIcon,
+  [WorkbenchToolType.Http]: ToolsIcon,
+  [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
+  [WorkbenchToolType.Linear]: LinearLogoIcon,
+}

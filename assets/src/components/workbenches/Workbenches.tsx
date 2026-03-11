@@ -44,4 +44,5 @@ const WrapperSC = styled.div(({ theme }) => ({
   width: '100%',
   maxWidth: theme.breakpoints.desktopLarge,
   alignSelf: 'center',
+  overflow: 'auto',
 }))

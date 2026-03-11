@@ -3,6 +3,7 @@ import {
   Flex,
   IconFrame,
   SidePanelOpenIcon,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
@@ -17,22 +18,29 @@ import {
   WorkbenchToolType,
 } from 'generated/graphql'
 import { capitalize, isEmpty } from 'lodash'
-import { useLayoutEffect } from 'react'
+import { useLayoutEffect, useMemo } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   WORKBENCHES_TOOLS_ABS_PATH,
   WORKBENCHES_TOOLS_PARAM_ID,
+  WORKBENCHES_TOOLS_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { deepOmitBlank } from 'utils/graphql'
-import { isWorkbenchTool, WorkbenchToolIcon } from './WorkbenchTool'
-import { WorkbenchToolForm, WorkbenchToolFormState } from './WorkbenchToolForm'
 import {
-  CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
   isConfigurableWorkbenchToolType,
-} from './workbenchToolsConsts'
+  CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
+  WorkbenchToolIcon,
+} from './workbenchToolsUtils'
+import { WorkbenchToolForm, WorkbenchToolFormState } from './WorkbenchToolForm'
+import { getWorkbenchesBreadcrumbs } from '../Workbenches'
 
 export const WORKBENCHES_TOOLS_TYPE_PARAM = 'type'
+
+const getBreadcrumbs = (mode: 'create' | 'edit') => [
+  ...getWorkbenchesBreadcrumbs(WORKBENCHES_TOOLS_REL_PATH),
+  { label: mode === 'create' ? 'create' : 'edit' },
+]
 
 export function WorkbenchToolCreateOrEdit({
   mode,
@@ -43,6 +51,7 @@ export function WorkbenchToolCreateOrEdit({
   const { borderRadiuses, borders } = useTheme()
   const id = useParams()[WORKBENCHES_TOOLS_PARAM_ID]
   const [searchParams, setSearchParams] = useSearchParams()
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(mode), [mode]))
 
   const { data, loading, error, refetch } = useWorkbenchToolQuery({
     variables: { id },
@@ -56,7 +65,10 @@ export function WorkbenchToolCreateOrEdit({
   useLayoutEffect(() => {
     if (isLoading) return
     const typeParam = searchParams.get(WORKBENCHES_TOOLS_TYPE_PARAM)
-    if ((id && typeParam !== tool?.tool) || !isWorkbenchTool(typeParam))
+    if (
+      (id && typeParam !== tool?.tool) ||
+      !isConfigurableWorkbenchToolType(typeParam)
+    )
       setSearchParams({
         [WORKBENCHES_TOOLS_TYPE_PARAM]: tool?.tool ?? WorkbenchToolType.Http,
       })
@@ -75,19 +87,17 @@ export function WorkbenchToolCreateOrEdit({
   const [update, { loading: updateLoading, error: updateError }] =
     useUpdateWorkbenchToolMutation({
       onCompleted: ({ updateWorkbenchTool: _updateWorkbenchTool }) => {
-        refetch()
-        // pop toast
+        refetch().then(() => {
+          // pop toast
+        })
       },
     })
   const mutationLoading = createLoading || updateLoading
   const mutationError = createError || updateError
   const onSave = (state: WorkbenchToolFormState) => {
     const attributes = formStateToAttributes(state, type)
-    if (mode === 'create') {
-      create({ variables: { attributes } })
-    } else {
-      update({ variables: { id: id ?? '', attributes } })
-    }
+    if (mode === 'create') create({ variables: { attributes } })
+    else update({ variables: { id: id ?? '', attributes } })
   }
   return (
     <WrapperSC>
