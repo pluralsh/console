@@ -8,8 +8,5 @@ dependencies:
 - name: dex
   repository: https://charts.dexidp.io
   version: 0.24.0
-- name: redis
-  repository: file://../../chart-dependencies/redis
-  version: 24.0.0
-digest: sha256:1c7f154a87d6104b27702a1f30cd55839005851eba6a346c13c05969f9ab399f
-generated: "2026-03-10T09:19:55.715351+01:00"
+digest: sha256:c8029493799b9536286fcc81ce74c33f91a3fb864c3ca65d355f80e7f1638b02
+generated: "2026-03-11T08:30:01.052265+01:00"
