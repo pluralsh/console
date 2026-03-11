@@ -7,7 +7,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
 kind: RoleBinding
 metadata:
-  name: {{ template "common.names.fullname" . }}
+  name: {{ template "redis.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
   {{- if .Values.kas.redis.commonAnnotations }}
@@ -16,7 +16,7 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ template "common.names.fullname" . }}
+  name: {{ template "redis.fullname" . }}
 subjects:
   - kind: ServiceAccount
     name: {{ template "redis.serviceAccountName" . }}

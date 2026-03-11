@@ -7,7 +7,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
 kind: Role
 metadata:
-  name: {{ template "common.names.fullname" . }}
+  name: {{ template "redis.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
   {{- if .Values.kas.redis.commonAnnotations }}
@@ -21,7 +21,7 @@ rules:
       - 'podsecuritypolicies'
     verbs:
       - 'use'
-    resourceNames: [{{ printf "%s-master" (include "common.names.fullname" .) }}]
+    resourceNames: [{{ printf "%s-master" (include "redis.fullname" .) }}]
   {{- end }}
   {{- if .Values.kas.redis.rbac.rules }}
   {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.rbac.rules "context" $ ) | nindent 2 }}

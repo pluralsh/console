@@ -6,7 +6,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ printf "%s-health" (include "common.names.fullname" .) }}
+  name: {{ printf "%s-health" (include "redis.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
   {{- if .Values.kas.redis.commonAnnotations }}

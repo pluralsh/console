@@ -7,7 +7,7 @@ SPDX-License-Identifier: APACHE-2.0
 kind: NetworkPolicy
 apiVersion: {{ template "common.capabilities.networkPolicy.apiVersion" . }}
 metadata:
-  name: {{ template "common.names.fullname" . }}
+  name: {{ template "redis.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
   {{- if .Values.kas.redis.commonAnnotations }}
@@ -36,7 +36,7 @@ spec:
       from:
         - podSelector:
             matchLabels:
-              {{ template "common.names.fullname" . }}-client: "true"
+              {{ template "redis.fullname" . }}-client: "true"
         - podSelector:
             matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 14 }}
         {{- if or .Values.kas.redis.networkPolicy.ingressNSMatchLabels .Values.kas.redis.networkPolicy.ingressNSPodMatchLabels }}

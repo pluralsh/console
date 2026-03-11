@@ -6,6 +6,14 @@ SPDX-License-Identifier: APACHE-2.0
 {{/* vim: set filetype=mustache: */}}
 
 {{/*
+Create a dedicated fully qualified name for Redis resources.
+*/}}
+{{- define "redis.fullname" -}}
+{{- $baseName := include "console.fullname" . | trunc 57 | trimSuffix "-" -}}
+{{- printf "%s-redis" $baseName | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Return the proper Redis image name
 */}}
 {{- define "redis.image" -}}
@@ -57,7 +65,7 @@ Return the secret containing Redis TLS certificates
 {{- if $secretName -}}
     {{- printf "%s" (tpl $secretName $) -}}
 {{- else -}}
-    {{- printf "%s-crt" (include "common.names.fullname" .) -}}
+    {{- printf "%s-crt" (include "redis.fullname" .) -}}
 {{- end -}}
 {{- end -}}
 
@@ -108,7 +116,7 @@ Create the name of the shared service account to use
 */}}
 {{- define "redis.serviceAccountName" -}}
 {{- if .Values.kas.redis.serviceAccount.create -}}
-    {{ default (include "common.names.fullname" .) .Values.kas.redis.serviceAccount.name }}
+    {{ default (include "redis.fullname" .) .Values.kas.redis.serviceAccount.name }}
 {{- else -}}
     {{ default "default" .Values.kas.redis.serviceAccount.name }}
 {{- end -}}
@@ -119,7 +127,7 @@ Create the name of the master service account to use
 */}}
 {{- define "redis.masterServiceAccountName" -}}
 {{- if .Values.kas.redis.master.serviceAccount.create -}}
-    {{ default (printf "%s-master" (include "common.names.fullname" .)) .Values.kas.redis.master.serviceAccount.name }}
+    {{ default (printf "%s-master" (include "redis.fullname" .)) .Values.kas.redis.master.serviceAccount.name }}
 {{- else -}}
     {{- if .Values.kas.redis.serviceAccount.create -}}
         {{ template "redis.serviceAccountName" . }}
@@ -136,7 +144,7 @@ Return the configuration configmap name
 {{- if .Values.kas.redis.existingConfigmap -}}
     {{- printf "%s" (tpl .Values.kas.redis.existingConfigmap $) -}}
 {{- else -}}
-    {{- printf "%s-configuration" (include "common.names.fullname" .) -}}
+    {{- printf "%s-configuration" (include "redis.fullname" .) -}}
 {{- end -}}
 {{- end -}}
 
@@ -156,7 +164,7 @@ Get the password secret.
 {{- if .Values.kas.redis.auth.existingSecret -}}
 {{- printf "%s" (tpl .Values.kas.redis.auth.existingSecret $) -}}
 {{- else -}}
-{{- printf "%s" (include "common.names.fullname" .) -}}
+{{- printf "%s" (include "redis.fullname" .) -}}
 {{- end -}}
 {{- end -}}
 
@@ -197,7 +205,7 @@ Used for fetching Redis ACL user passwords from Kubernetes Secrets
 
 {{/* Define the suffix utilized for external-dns */}}
 {{- define "redis.externalDNS.suffix" -}}
-{{ printf "%s.%s" (include "common.names.fullname" .) .Values.kas.redis.useExternalDNS.suffix }}
+{{ printf "%s.%s" (include "redis.fullname" .) .Values.kas.redis.useExternalDNS.suffix }}
 {{- end -}}
 
 {{/* Compile all annotations utilized for external-dns */}}

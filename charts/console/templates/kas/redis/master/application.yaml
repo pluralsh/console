@@ -7,7 +7,7 @@ SPDX-License-Identifier: APACHE-2.0
 apiVersion: {{ include "common.capabilities.statefulset.apiVersion" . }}
 kind: {{ .Values.kas.redis.master.kind }}
 metadata:
-  name: {{ printf "%s-master" (include "common.names.fullname" .) }}
+  name: {{ printf "%s-master" (include "redis.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
   labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
     app.kubernetes.io/component: master
@@ -25,7 +25,7 @@ spec:
     matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
       app.kubernetes.io/component: master
   {{- if (eq .Values.kas.redis.master.kind "StatefulSet") }}
-  serviceName: {{ printf "%s-headless" (include "common.names.fullname" .) }}
+  serviceName: {{ printf "%s-headless" (include "redis.fullname" .) }}
   {{- end }}
   {{- if .Values.kas.redis.master.updateStrategy }}
   {{- if (eq .Values.kas.redis.master.kind "Deployment") }}
@@ -303,7 +303,7 @@ spec:
           {{- end }}
           env:
             - name: REDIS_ALIAS
-              value: {{ template "common.names.fullname" . }}
+              value: {{ template "redis.fullname" . }}
             - name: REDIS_EXPORTER_WEB_LISTEN_ADDRESS
               value: {{ printf ":%v" .Values.kas.redis.metrics.containerPorts.http }}
             {{- if .Values.kas.redis.auth.enabled }}
@@ -473,11 +473,11 @@ spec:
       volumes:
         - name: start-scripts
           configMap:
-            name: {{ printf "%s-scripts" (include "common.names.fullname" .) }}
+            name: {{ printf "%s-scripts" (include "redis.fullname" .) }}
             defaultMode: 0755
         - name: health
           configMap:
-            name: {{ printf "%s-health" (include "common.names.fullname" .) }}
+            name: {{ printf "%s-health" (include "redis.fullname" .) }}
             defaultMode: 0755
         {{- if and .Values.kas.redis.auth.enabled .Values.kas.redis.auth.usePasswordFiles }}
         - name: redis-password
@@ -545,7 +545,7 @@ spec:
   {{- else if (eq .Values.kas.redis.master.kind "Deployment") }}
         - name: redis-data
           persistentVolumeClaim:
-            claimName: {{ printf "redis-data-%s-master" (include "common.names.fullname" .) }}
+            claimName: {{ printf "redis-data-%s-master" (include "redis.fullname" .) }}
   {{- else }}
   {{- if .Values.kas.redis.master.persistentVolumeClaimRetentionPolicy.enabled }}
   persistentVolumeClaimRetentionPolicy:
