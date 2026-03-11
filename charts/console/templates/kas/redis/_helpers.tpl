@@ -176,7 +176,7 @@ Return Redis&reg; password
 */}}
 {{- define "redis.password" -}}
 {{- if or .Values.kas.redis.auth.enabled .Values.kas.redis.global.redis.password -}}
-    {{- $password_tmp := include "common.secrets.passwords.manage" (dict "secret" (include "redis.secretName" .) "key" (include "redis.secretPasswordKey" .) "providedValues" (list "global.redis.password" "auth.password") "length" 10 "skipB64enc" true "skipQuote" true "honorProvidedValues" true "context" $) -}}
+    {{- $password_tmp := include "common.secrets.passwords.manage" (dict "secret" (include "redis.secretName" .) "key" (include "redis.secretPasswordKey" .) "providedValues" (list "kas.redis.global.redis.password" "kas.redis.auth.password") "length" 10 "skipB64enc" true "skipQuote" true "honorProvidedValues" true "context" $) -}}
     {{- $_ := set .Values.kas.redis.global.redis "password" $password_tmp -}}
     {{- .Values.kas.redis.global.redis.password -}}
 {{- end }}
