@@ -8,9 +8,9 @@ kind: ConfigMap
 metadata:
   name: {{ printf "%s-health" (include "common.names.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-  {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.kas.redis.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
   ping_readiness_local.sh: |-
@@ -22,13 +22,13 @@ data:
       timeout -s 15 $1 \
       redis-cli \
         -h localhost \
-{{- if .Values.tls.enabled }}
+{{- if .Values.kas.redis.tls.enabled }}
         -p $REDIS_TLS_PORT \
         --tls \
       {{- if not (empty (include "redis.tlsCACert" .)) }}
         --cacert {{ template "redis.tlsCACert" . }} \
       {{- end }}
-      {{- if .Values.tls.authClients }}
+      {{- if .Values.kas.redis.tls.authClients }}
         --cert {{ template "redis.tlsCert" . }} \
         --key {{ template "redis.tlsCertKey" . }} \
       {{- end }}
@@ -54,13 +54,13 @@ data:
       timeout -s 15 $1 \
       redis-cli \
         -h localhost \
-{{- if .Values.tls.enabled }}
+{{- if .Values.kas.redis.tls.enabled }}
         -p $REDIS_TLS_PORT \
         --tls \
       {{- if not (empty (include "redis.tlsCACert" .)) }}
         --cacert {{ template "redis.tlsCACert" . }} \
       {{- end }}
-      {{- if .Values.tls.authClients }}
+      {{- if .Values.kas.redis.tls.authClients }}
         --cert {{ template "redis.tlsCert" . }} \
         --key {{ template "redis.tlsCertKey" . }} \
       {{- end }}
@@ -88,12 +88,12 @@ data:
       redis-cli \
         -h $REDIS_MASTER_HOST \
         -p $REDIS_MASTER_PORT_NUMBER \
-{{- if .Values.tls.enabled }}
+{{- if .Values.kas.redis.tls.enabled }}
         --tls \
       {{- if not (empty (include "redis.tlsCACert" .)) }}
         --cacert {{ template "redis.tlsCACert" . }} \
       {{- end }}
-      {{- if .Values.tls.authClients }}
+      {{- if .Values.kas.redis.tls.authClients }}
         --cert {{ template "redis.tlsCert" . }} \
         --key {{ template "redis.tlsCertKey" . }} \
       {{- end }}
@@ -118,12 +118,12 @@ data:
       redis-cli \
         -h $REDIS_MASTER_HOST \
         -p $REDIS_MASTER_PORT_NUMBER \
-{{- if .Values.tls.enabled }}
+{{- if .Values.kas.redis.tls.enabled }}
         --tls \
       {{- if not (empty (include "redis.tlsCACert" .)) }}
         --cacert {{ template "redis.tlsCACert" . }} \
       {{- end }}
-      {{- if .Values.tls.authClients }}
+      {{- if .Values.kas.redis.tls.authClients }}
         --cert {{ template "redis.tlsCert" . }} \
         --key {{ template "redis.tlsCertKey" . }} \
       {{- end }}

@@ -3,18 +3,18 @@ Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if .Values.rbac.create }}
+{{- if .Values.kas.redis.rbac.create }}
 apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
 kind: Role
 metadata:
   name: {{ template "common.names.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-  {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.kas.redis.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 rules:
-  {{- if and (include "common.capabilities.psp.supported" .) .Values.podSecurityPolicy.enabled }}
+  {{- if and (include "common.capabilities.psp.supported" .) .Values.kas.redis.podSecurityPolicy.enabled }}
   - apiGroups:
       - '{{ template "podSecurityPolicy.apiGroup" . }}'
     resources:
@@ -23,7 +23,7 @@ rules:
       - 'use'
     resourceNames: [{{ printf "%s-master" (include "common.names.fullname" .) }}]
   {{- end }}
-  {{- if .Values.rbac.rules }}
-  {{- include "common.tplvalues.render" ( dict "value" .Values.rbac.rules "context" $ ) | nindent 2 }}
+  {{- if .Values.kas.redis.rbac.rules }}
+  {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.rbac.rules "context" $ ) | nindent 2 }}
   {{- end }}
 {{- end }}

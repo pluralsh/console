@@ -3,88 +3,88 @@ Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if .Values.networkPolicy.enabled }}
+{{- if .Values.kas.redis.networkPolicy.enabled }}
 kind: NetworkPolicy
 apiVersion: {{ template "common.capabilities.networkPolicy.apiVersion" . }}
 metadata:
   name: {{ template "common.names.fullname" . }}
   namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-  {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.kas.redis.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
   podSelector:
-    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 6 }}
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 6 }}
   policyTypes:
     - Ingress
     - Egress
-  {{- if .Values.networkPolicy.allowExternalEgress }}
+  {{- if .Values.kas.redis.networkPolicy.allowExternalEgress }}
   egress:
     - {}
   {{- else }}
   egress:
-    {{- if .Values.networkPolicy.extraEgress }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.networkPolicy.extraEgress "context" $ ) | nindent 4 }}
+    {{- if .Values.kas.redis.networkPolicy.extraEgress }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.networkPolicy.extraEgress "context" $ ) | nindent 4 }}
     {{- end }}
   {{- end }}
   ingress:
     # Allow inbound connections
     - ports:
-        - port: {{ .Values.master.containerPorts.redis }}
-      {{- if not .Values.networkPolicy.allowExternal }}
+        - port: {{ .Values.kas.redis.master.containerPorts.redis }}
+      {{- if not .Values.kas.redis.networkPolicy.allowExternal }}
       from:
         - podSelector:
             matchLabels:
               {{ template "common.names.fullname" . }}-client: "true"
         - podSelector:
-            matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 14 }}
-        {{- if or .Values.networkPolicy.ingressNSMatchLabels .Values.networkPolicy.ingressNSPodMatchLabels }}
+            matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 14 }}
+        {{- if or .Values.kas.redis.networkPolicy.ingressNSMatchLabels .Values.kas.redis.networkPolicy.ingressNSPodMatchLabels }}
         - namespaceSelector:
             matchLabels:
-              {{- if .Values.networkPolicy.ingressNSMatchLabels }}
-                {{- range $key, $value := .Values.networkPolicy.ingressNSMatchLabels }}
+              {{- if .Values.kas.redis.networkPolicy.ingressNSMatchLabels }}
+                {{- range $key, $value := .Values.kas.redis.networkPolicy.ingressNSMatchLabels }}
                 {{ $key | quote }}: {{ $value | quote }}
                 {{- end }}
               {{ else }}
                 {}
               {{- end }}
-          {{- if .Values.networkPolicy.ingressNSPodMatchLabels }}
+          {{- if .Values.kas.redis.networkPolicy.ingressNSPodMatchLabels }}
           podSelector:
             matchLabels:
-              {{- range $key, $value := .Values.networkPolicy.ingressNSPodMatchLabels }}
+              {{- range $key, $value := .Values.kas.redis.networkPolicy.ingressNSPodMatchLabels }}
               {{ $key | quote }}: {{ $value | quote }}
               {{- end }}
           {{- end }}
         {{- end }}
       {{- end }}
-    {{- if .Values.metrics.enabled }}
+    {{- if .Values.kas.redis.metrics.enabled }}
     # Allow prometheus scrapes for metrics
     - ports:
-        - port: {{ .Values.metrics.containerPorts.http }}
-      {{- if not .Values.networkPolicy.metrics.allowExternal }}
+        - port: {{ .Values.kas.redis.metrics.containerPorts.http }}
+      {{- if not .Values.kas.redis.networkPolicy.metrics.allowExternal }}
       from:
-        {{- if or .Values.networkPolicy.metrics.ingressNSMatchLabels .Values.networkPolicy.metrics.ingressNSPodMatchLabels }}
+        {{- if or .Values.kas.redis.networkPolicy.metrics.ingressNSMatchLabels .Values.kas.redis.networkPolicy.metrics.ingressNSPodMatchLabels }}
         - namespaceSelector:
             matchLabels:
-              {{- if .Values.networkPolicy.metrics.ingressNSMatchLabels }}
-                {{- range $key, $value := .Values.networkPolicy.metrics.ingressNSMatchLabels }}
+              {{- if .Values.kas.redis.networkPolicy.metrics.ingressNSMatchLabels }}
+                {{- range $key, $value := .Values.kas.redis.networkPolicy.metrics.ingressNSMatchLabels }}
                 {{ $key | quote }}: {{ $value | quote }}
                 {{- end }}
               {{ else }}
                 {}
               {{- end }}
-          {{- if .Values.networkPolicy.metrics.ingressNSPodMatchLabels }}
+          {{- if .Values.kas.redis.networkPolicy.metrics.ingressNSPodMatchLabels }}
           podSelector:
             matchLabels:
-              {{- range $key, $value := .Values.networkPolicy.metrics.ingressNSPodMatchLabels }}
+              {{- range $key, $value := .Values.kas.redis.networkPolicy.metrics.ingressNSPodMatchLabels }}
               {{ $key | quote }}: {{ $value | quote }}
               {{- end }}
           {{- end }}
         {{- end }}
       {{- end }}
     {{- end }}
-    {{- if .Values.networkPolicy.extraIngress }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.networkPolicy.extraIngress "context" $ ) | nindent 4 }}
+    {{- if .Values.kas.redis.networkPolicy.extraIngress }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.networkPolicy.extraIngress "context" $ ) | nindent 4 }}
     {{- end }}
 {{- end }}

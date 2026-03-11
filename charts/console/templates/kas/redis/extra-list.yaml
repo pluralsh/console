@@ -3,7 +3,7 @@ Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- range .Values.extraDeploy }}
+{{- range .Values.kas.redis.extraDeploy }}
 ---
 {{ include "common.tplvalues.render" (dict "value" . "context" $) }}
 {{- end }}

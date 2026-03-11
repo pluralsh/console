@@ -9,43 +9,43 @@ kind: ConfigMap
 metadata:
   name: {{ printf "%s-configuration" (include "common.names.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-  {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.kas.redis.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 data:
   redis.conf: |-
     # User-supplied common configuration:
-    {{- if .Values.commonConfiguration }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonConfiguration "context" $ ) | nindent 4 }}
+    {{- if .Values.kas.redis.commonConfiguration }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.commonConfiguration "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if .Values.auth.acl.enabled }}
+    {{- if .Values.kas.redis.auth.acl.enabled }}
     # The file with Redis ACL rules
     aclfile /opt/bitnami/redis/etc/users.acl
     {{- end }}
     # End of common configuration
   master.conf: |-
-    dir {{ .Values.master.persistence.path }}
+    dir {{ .Values.kas.redis.master.persistence.path }}
     # User-supplied master configuration:
-    {{- if .Values.master.configuration }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.master.configuration "context" $ ) | nindent 4 }}
+    {{- if .Values.kas.redis.master.configuration }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.master.configuration "context" $ ) | nindent 4 }}
     {{- end }}
-    {{- if .Values.master.disableCommands }}
-    {{- range .Values.master.disableCommands }}
+    {{- if .Values.kas.redis.master.disableCommands }}
+    {{- range .Values.kas.redis.master.disableCommands }}
     rename-command {{ . }} ""
     {{- end }}
     {{- end }}
     # End of master configuration
   users.acl: |-
     {{- /* User-supplied ACL configuration */ -}}
-    {{- if .Values.auth.acl.enabled}}
+    {{- if .Values.kas.redis.auth.acl.enabled}}
     {{- /* The default user uses the same password from `redis.password`; otherwise, it sets the nopass value. */ -}}
     {{- $password := include "redis.password" . }}
     user default on {{ if $password}}#{{ sha256sum $password}}{{ else }}nopass{{ end }} ~* &* +@all
-    {{- if .Values.auth.acl.users -}}
+    {{- if .Values.kas.redis.auth.acl.users -}}
     {{- /* custom users */ -}}
-    {{- $userSecret := .Values.auth.acl.userSecret -}}
-    {{- range .Values.auth.acl.users }}
+    {{- $userSecret := .Values.kas.redis.auth.acl.userSecret -}}
+    {{- range .Values.kas.redis.auth.acl.users }}
     {{- $userPassword := .password | default "" }}
     {{- if $userSecret }}
     {{- $secretPassword := include "common.secrets.get" (dict "secret" $userSecret "key" .username "context" $) }}

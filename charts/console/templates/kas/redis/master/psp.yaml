@@ -3,23 +3,23 @@ Copyright Broadcom, Inc. All Rights Reserved.
 SPDX-License-Identifier: APACHE-2.0
 */}}
 
-{{- if and (include "common.capabilities.psp.supported" .) .Values.podSecurityPolicy.create }}
+{{- if and (include "common.capabilities.psp.supported" .) .Values.kas.redis.podSecurityPolicy.create }}
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: {{ printf "%s-master" (include "common.names.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-  {{- if .Values.commonAnnotations }}
-  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $ ) | nindent 4 }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.kas.redis.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.commonAnnotations "context" $ ) | nindent 4 }}
   {{- end }}
 spec:
   allowPrivilegeEscalation: false
   fsGroup:
     rule: 'MustRunAs'
     ranges:
-      - min: {{ .Values.master.podSecurityContext.fsGroup }}
-        max: {{ .Values.master.podSecurityContext.fsGroup }}
+      - min: {{ .Values.kas.redis.master.podSecurityContext.fsGroup }}
+        max: {{ .Values.kas.redis.master.podSecurityContext.fsGroup }}
   hostIPC: false
   hostNetwork: false
   hostPID: false
@@ -30,15 +30,15 @@ spec:
   runAsUser:
     rule: 'MustRunAs'
     ranges:
-      - min: {{ .Values.master.containerSecurityContext.runAsUser }}
-        max: {{ .Values.master.containerSecurityContext.runAsUser }}
+      - min: {{ .Values.kas.redis.master.containerSecurityContext.runAsUser }}
+        max: {{ .Values.kas.redis.master.containerSecurityContext.runAsUser }}
   seLinux:
     rule: 'RunAsAny'
   supplementalGroups:
     rule: 'MustRunAs'
     ranges:
-      - min: {{ .Values.master.containerSecurityContext.runAsUser }}
-        max: {{ .Values.master.containerSecurityContext.runAsUser }}
+      - min: {{ .Values.kas.redis.master.containerSecurityContext.runAsUser }}
+        max: {{ .Values.kas.redis.master.containerSecurityContext.runAsUser }}
   volumes:
     - 'configMap'
     - 'secret'

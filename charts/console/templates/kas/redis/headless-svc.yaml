@@ -8,11 +8,11 @@ kind: Service
 metadata:
   name: {{ printf "%s-headless" (include "common.names.fullname" .) }}
   namespace: {{ include "common.names.namespace" . | quote }}
-  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-  {{- if or .Values.commonAnnotations (include "redis.externalDNS.annotations" .) }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
+  {{- if or .Values.kas.redis.commonAnnotations (include "redis.externalDNS.annotations" .) }}
   annotations:
-    {{- if .Values.commonAnnotations }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.commonAnnotations "context" $) | nindent 4 }}
+    {{- if .Values.kas.redis.commonAnnotations }}
+    {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.commonAnnotations "context" $) | nindent 4 }}
     {{- end }}
     {{- include "redis.externalDNS.annotations" . | nindent 4 }}
   {{- end }}
@@ -21,6 +21,6 @@ spec:
   clusterIP: None
   ports:
     - name: tcp-redis
-      port: {{ .Values.master.service.ports.redis }}
+      port: {{ .Values.kas.redis.master.service.ports.redis }}
       targetPort: redis
-  selector: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+  selector: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
