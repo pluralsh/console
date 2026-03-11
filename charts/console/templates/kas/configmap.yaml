@@ -19,7 +19,7 @@ data:
         address: ":{{ .Values.kas.service.observabilityPort }}"
     redis:
       server:
-        address: "{{ printf "%s-master" (include "common.names.fullname" (index .Subcharts "redis")) }}:{{ .Values.redis.master.service.ports.redis }}"
+        address: "{{ printf "%s-master" (include "common.names.fullname" .) }}:{{ .Values.kas.redis.master.service.ports.redis }}"
       key_prefix: {{ include "kas.name" . }}
       password_file: "/etc/kas/redis_server_secret"
     api:
