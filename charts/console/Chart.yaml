@@ -17,4 +17,7 @@ dependencies:
     version: 0.24.0
     repository: https://charts.dexidp.io
     condition: dex.enabled
+  - name: common
+    version: 2.33.2
+    repository: oci://registry-1.docker.io/bitnamicharts
 type: application
