@@ -7,6 +7,7 @@ import {
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
@@ -53,7 +54,7 @@ export function WorkbenchToolCreateOrEdit({
   const [searchParams, setSearchParams] = useSearchParams()
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(mode), [mode]))
 
-  const { data, loading, error, refetch } = useWorkbenchToolQuery({
+  const { data, loading, error } = useWorkbenchToolQuery({
     variables: { id },
     skip: mode === 'create' || !id,
     fetchPolicy: 'network-only',
@@ -77,19 +78,21 @@ export function WorkbenchToolCreateOrEdit({
   const type = (searchParams.get(WORKBENCHES_TOOLS_TYPE_PARAM) ??
     '') as WorkbenchToolType // the effect above ensures this type is valid
 
+  const { popToast } = useSimpleToast()
+
   const [create, { loading: createLoading, error: createError }] =
     useCreateWorkbenchToolMutation({
-      onCompleted: () => {
+      onCompleted: ({ createWorkbenchTool }) => {
+        const name = createWorkbenchTool?.name ?? 'Tool'
+        popToast({ name, action: 'created', color: 'icon-success' })
         navigate(WORKBENCHES_TOOLS_ABS_PATH)
-        // pop toast
       },
     })
   const [update, { loading: updateLoading, error: updateError }] =
     useUpdateWorkbenchToolMutation({
-      onCompleted: ({ updateWorkbenchTool: _updateWorkbenchTool }) => {
-        refetch().then(() => {
-          // pop toast
-        })
+      onCompleted: ({ updateWorkbenchTool }) => {
+        const name = updateWorkbenchTool?.name ?? 'Tool'
+        popToast({ name, action: 'updated', color: 'icon-success' })
       },
     })
   const mutationLoading = createLoading || updateLoading

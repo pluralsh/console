@@ -20,8 +20,8 @@ import { Link } from 'react-router-dom'
 import { WORKBENCHES_CREATE_REL_PATH } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import { WorkbenchToolIcon } from './tools/WorkbenchTool'
 import { isNonNullable } from 'utils/isNonNullable'
+import { WorkbenchToolIcon } from './tools/workbenchToolsUtils'
 
 export function WorkbenchesList() {
   const { data, error, loading, pageInfo, fetchNextPage } =
