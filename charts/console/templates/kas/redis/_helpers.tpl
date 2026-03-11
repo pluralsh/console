@@ -13,13 +13,6 @@ Return the proper Redis image name
 {{- end -}}
 
 {{/*
-Return the proper Redis Sentinel image name
-*/}}
-{{- define "redis.sentinel.image" -}}
-{{ include "common.images.image" (dict "imageRoot" .Values.sentinel.image "global" .Values.global) }}
-{{- end -}}
-
-{{/*
 Return the proper image name (for the metrics image)
 */}}
 {{- define "redis.metrics.image" -}}
@@ -51,7 +44,7 @@ Return sysctl image
 Return the proper Docker Image Registry Secret Names
 */}}
 {{- define "redis.imagePullSecrets" -}}
-{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.image .Values.sentinel.image .Values.metrics.image .Values.volumePermissions.image .Values.sysctl.image) "context" $) -}}
+{{- include "common.images.renderPullSecrets" (dict "images" (list .Values.image .Values.metrics.image .Values.volumePermissions.image .Values.sysctl.image) "context" $) -}}
 {{- end -}}
 
 {{/*
@@ -227,7 +220,6 @@ Used for fetching Redis ACL user passwords from Kubernetes Secrets
 {{/* Check if there are rolling tags in the images */}}
 {{- define "redis.checkRollingTags" -}}
 {{- include "common.warnings.rollingTag" .Values.image }}
-{{- include "common.warnings.rollingTag" .Values.sentinel.image }}
 {{- include "common.warnings.rollingTag" .Values.metrics.image }}
 {{- end -}}
 
@@ -255,12 +247,6 @@ redis: architecture
     Invalid architecture selected. Valid values are "standalone" and
     "replication". Please set a valid architecture (--set architecture="xxxx")
 {{- end -}}
-{{- if and .Values.sentinel.enabled (not (eq .Values.architecture "replication")) }}
-redis: architecture
-    Using redis sentinel on standalone mode is not supported.
-    To deploy redis sentinel, please select the "replication" mode
-    (--set "architecture=replication,sentinel.enabled=true")
-{{- end -}}
 {{- end -}}
 
 {{/* Validate values of Redis&reg; - PodSecurityPolicy create */}}
@@ -284,12 +270,6 @@ redis: tls.enabled
 
 {{/* Validate values of Redis&reg; - master service enabled */}}
 {{- define "redis.validateValues.createMaster" -}}
-{{- if and (or .Values.sentinel.masterService.enabled .Values.sentinel.service.createMaster) (or (not .Values.rbac.create) (not .Values.replica.automountServiceAccountToken) (not .Values.serviceAccount.create)) }}
-redis: sentinel.masterService.enabled
-    In order to redirect requests only to the master pod via the service, you also need to
-    create rbac and serviceAccount. In addition, you need to enable
-    replica.automountServiceAccountToken.
-{{- end -}}
 {{- end -}}
 
 {{/* Define the suffix utilized for external-dns */}}

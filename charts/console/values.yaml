@@ -618,6 +618,8 @@ kas:
     annotations:
       kubernetes.io/tls-acme: "true"
       cert-manager.io/cluster-issuer: letsencrypt-prod
+  # Simplified Redis deployment:
+  # - Sentinel support was removed.
   redis:
     # Copyright Broadcom, Inc. All Rights Reserved.
     # SPDX-License-Identifier: APACHE-2.0
@@ -771,9 +773,6 @@ kas:
       ## @param auth.enabled Enable password authentication
       ##
       enabled: true
-      ## @param auth.sentinel Enable authentication on sentinels too
-      ##
-      sentinel: false
       ## @param auth.password Redis(R) password
       ## Defaults to a random 10-character alphanumeric string if not set
       ##
@@ -799,9 +798,6 @@ kas:
         ## @param auth.acl.enabled Enables the support of the Redis ACL system
         ##
         enabled: false
-        ## @param auth.acl.sentinel Enables the support of the Redis ACL system for Sentinel Nodes
-        ##
-        sentinel: false
         ## @param auth.acl.users A list of the configured users in the Redis ACL system
         ##
         ## Example:
@@ -1800,459 +1796,6 @@ kas:
       ## @param replica.annotations Additional custom annotations for Redis(R) replicas resource
       ##
       annotations: { }
-    ## @section Redis(R) Sentinel configuration parameters
-    ##
-
-    sentinel:
-      ## @param sentinel.enabled Use Redis(R) Sentinel on Redis(R) pods.
-      ## IMPORTANT: this will disable the master and replicas services and
-      ## create a single Redis(R) service exposing both the Redis and Sentinel ports
-      ##
-      enabled: false
-      ## Bitnami Redis(R) Sentinel image version
-      ## ref: https://hub.docker.com/r/bitnami/redis-sentinel/tags/
-      ## @param sentinel.image.registry [default: REGISTRY_NAME] Redis(R) Sentinel image registry
-      ## @param sentinel.image.repository [default: REPOSITORY_NAME/redis-sentinel] Redis(R) Sentinel image repository
-      ## @skip sentinel.image.tag Redis(R) Sentinel image tag (immutable tags are recommended)
-      ## @param sentinel.image.digest Redis(R) Sentinel image digest in the way sha256:aa.... Please note this parameter, if set, will override the tag
-      ## @param sentinel.image.pullPolicy Redis(R) Sentinel image pull policy
-      ## @param sentinel.image.pullSecrets Redis(R) Sentinel image pull secrets
-      ## @param sentinel.image.debug Enable image debug mode
-      ##
-      image:
-        registry: registry-1.docker.io
-        repository: bitnami/redis-sentinel
-        tag: latest
-        digest: ""
-        ## Specify a imagePullPolicy
-        ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
-        ##
-        pullPolicy: IfNotPresent
-        ## Optionally specify an array of imagePullSecrets.
-        ## Secrets must be manually created in the namespace.
-        ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-        ## e.g:
-        ## pullSecrets:
-        ##   - myRegistryKeySecretName
-        ##
-        pullSecrets: [ ]
-        ## Enable debug mode
-        ##
-        debug: false
-      ## @param sentinel.annotations Additional custom annotations for Redis(R) Sentinel resource
-      ##
-      annotations: { }
-      ## @param sentinel.masterSet Master set name
-      ##
-      masterSet: mymaster
-      ## @param sentinel.quorum Sentinel Quorum
-      ##
-      quorum: 2
-      ## @param sentinel.getMasterTimeout Amount of time to allow before get_sentinel_master_info() times out.
-      ##
-      getMasterTimeout: 90
-      ## @param sentinel.automateClusterRecovery Automate cluster recovery in cases where the last replica is not considered a good replica and Sentinel won't automatically failover to it.
-      ## This also prevents any new replica from starting until the last remaining replica is elected as master to guarantee that it is the one to be elected by Sentinel, and not a newly started replica with no data.
-      ## NOTE: This feature requires a "downAfterMilliseconds" value less or equal to 2000.
-      ##
-      automateClusterRecovery: false
-      ## @param sentinel.redisShutdownWaitFailover Whether the Redis(R) master container waits for the failover at shutdown (in addition to the Redis(R) Sentinel container).
-      ##
-      redisShutdownWaitFailover: true
-      ## Sentinel timing restrictions
-      ## @param sentinel.downAfterMilliseconds Timeout for detecting a Redis(R) node is down
-      ## @param sentinel.failoverTimeout Timeout for performing a election failover
-      ##
-      downAfterMilliseconds: 60000
-      failoverTimeout: 180000
-      ## @param sentinel.parallelSyncs Number of replicas that can be reconfigured in parallel to use the new master after a failover
-      ##
-      parallelSyncs: 1
-      ## @param sentinel.configuration Configuration for Redis(R) Sentinel nodes
-      ## ref: https://redis.io/topics/sentinel
-      ##
-      configuration: ""
-      ## @param sentinel.command Override default container command (useful when using custom images)
-      ##
-      command: [ ]
-      ## @param sentinel.args Override default container args (useful when using custom images)
-      ##
-      args: [ ]
-      ## @param sentinel.enableServiceLinks Whether information about services should be injected into pod's environment variable
-      ##
-      enableServiceLinks: true
-      ## @param sentinel.preExecCmds Additional commands to run prior to starting Redis(R) Sentinel
-      ##
-      preExecCmds: [ ]
-      ## @param sentinel.extraEnvVars Array with extra environment variables to add to Redis(R) Sentinel nodes
-      ## e.g:
-      ## extraEnvVars:
-      ##   - name: FOO
-      ##     value: "bar"
-      ##
-      extraEnvVars: [ ]
-      ## @param sentinel.extraEnvVarsCM Name of existing ConfigMap containing extra env vars for Redis(R) Sentinel nodes
-      ##
-      extraEnvVarsCM: ""
-      ## @param sentinel.extraEnvVarsSecret Name of existing Secret containing extra env vars for Redis(R) Sentinel nodes
-      ##
-      extraEnvVarsSecret: ""
-      ## @param sentinel.externalMaster.enabled Use external master for bootstrapping
-      ## @param sentinel.externalMaster.host External master host to bootstrap from
-      ## @param sentinel.externalMaster.port Port for Redis service external master host
-      ##
-      externalMaster:
-        enabled: false
-        host: ""
-        port: 6379
-      ## @param sentinel.containerPorts.sentinel Container port to open on Redis(R) Sentinel nodes
-      ##
-      containerPorts:
-        sentinel: 26379
-      ## Configure extra options for Redis(R) containers' liveness and readiness probes
-      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
-      ## @param sentinel.startupProbe.enabled Enable startupProbe on Redis(R) Sentinel nodes
-      ## @param sentinel.startupProbe.initialDelaySeconds Initial delay seconds for startupProbe
-      ## @param sentinel.startupProbe.periodSeconds Period seconds for startupProbe
-      ## @param sentinel.startupProbe.timeoutSeconds Timeout seconds for startupProbe
-      ## @param sentinel.startupProbe.failureThreshold Failure threshold for startupProbe
-      ## @param sentinel.startupProbe.successThreshold Success threshold for startupProbe
-      ##
-      startupProbe:
-        enabled: true
-        initialDelaySeconds: 10
-        periodSeconds: 10
-        timeoutSeconds: 5
-        successThreshold: 1
-        failureThreshold: 22
-      ## @param sentinel.livenessProbe.enabled Enable livenessProbe on Redis(R) Sentinel nodes
-      ## @param sentinel.livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
-      ## @param sentinel.livenessProbe.periodSeconds Period seconds for livenessProbe
-      ## @param sentinel.livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
-      ## @param sentinel.livenessProbe.failureThreshold Failure threshold for livenessProbe
-      ## @param sentinel.livenessProbe.successThreshold Success threshold for livenessProbe
-      ##
-      livenessProbe:
-        enabled: true
-        initialDelaySeconds: 20
-        periodSeconds: 10
-        timeoutSeconds: 5
-        successThreshold: 1
-        failureThreshold: 6
-      ## @param sentinel.readinessProbe.enabled Enable readinessProbe on Redis(R) Sentinel nodes
-      ## @param sentinel.readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
-      ## @param sentinel.readinessProbe.periodSeconds Period seconds for readinessProbe
-      ## @param sentinel.readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
-      ## @param sentinel.readinessProbe.failureThreshold Failure threshold for readinessProbe
-      ## @param sentinel.readinessProbe.successThreshold Success threshold for readinessProbe
-      ##
-      readinessProbe:
-        enabled: true
-        initialDelaySeconds: 20
-        periodSeconds: 5
-        timeoutSeconds: 1
-        successThreshold: 1
-        failureThreshold: 6
-      ## @param sentinel.customStartupProbe Custom startupProbe that overrides the default one
-      ##
-      customStartupProbe: { }
-      ## @param sentinel.customLivenessProbe Custom livenessProbe that overrides the default one
-      ##
-      customLivenessProbe: { }
-      ## @param sentinel.customReadinessProbe Custom readinessProbe that overrides the default one
-      ##
-      customReadinessProbe: { }
-      ## Persistence parameters
-      ## ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
-      ##
-      persistence:
-        ## @param sentinel.persistence.enabled Enable persistence on Redis(R) sentinel nodes using Persistent Volume Claims (Experimental)
-        ##
-        enabled: false
-        ## @param sentinel.persistence.storageClass Persistent Volume storage class
-        ## If defined, storageClassName: <storageClass>
-        ## If set to "-", storageClassName: "", which disables dynamic provisioning
-        ## If undefined (the default) or set to null, no storageClassName spec is set, choosing the default provisioner
-        ##
-        storageClass: ""
-        ## @param sentinel.persistence.accessModes Persistent Volume access modes
-        ##
-        accessModes:
-          - ReadWriteOnce
-        ## @param sentinel.persistence.size Persistent Volume size
-        ##
-        size: 100Mi
-        ## @param sentinel.persistence.annotations Additional custom annotations for the PVC
-        ##
-        annotations: { }
-        ## @param sentinel.persistence.labels Additional custom labels for the PVC
-        ##
-        labels: { }
-        ## @param sentinel.persistence.selector Additional labels to match for the PVC
-        ## e.g:
-        ## selector:
-        ##   matchLabels:
-        ##     app: my-app
-        ##
-        selector: { }
-        ## @param sentinel.persistence.dataSource Custom PVC data source
-        ##
-        dataSource: { }
-        ## @param sentinel.persistence.medium Provide a medium for `emptyDir` volumes.
-        ##
-        medium: ""
-        ## @param sentinel.persistence.sizeLimit Set this to enable a size limit for `emptyDir` volumes.
-        ##
-        sizeLimit: ""
-      ## persistentVolumeClaimRetentionPolicy
-      ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#persistentvolumeclaim-retention
-      ## @param sentinel.persistentVolumeClaimRetentionPolicy.enabled Controls if and how PVCs are deleted during the lifecycle of a StatefulSet
-      ## @param sentinel.persistentVolumeClaimRetentionPolicy.whenScaled Volume retention behavior when the replica count of the StatefulSet is reduced
-      ## @param sentinel.persistentVolumeClaimRetentionPolicy.whenDeleted Volume retention behavior that applies when the StatefulSet is deleted
-      ##
-      persistentVolumeClaimRetentionPolicy:
-        enabled: false
-        whenScaled: Retain
-        whenDeleted: Retain
-      ## Redis(R) Sentinel resource requests and limits
-      ## ref: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
-      ## @param sentinel.resourcesPreset Set container resources according to one common preset (allowed values: none, nano, micro, small, medium, large, xlarge, 2xlarge). This is ignored if sentinel.resources is set (sentinel.resources is recommended for production).
-      ## More information: https://github.com/bitnami/charts/blob/main/bitnami/common/templates/_resources.tpl#L15
-      ##
-      resourcesPreset: "nano"
-      ## @param sentinel.resources Set container requests and limits for different resources like CPU or memory (essential for production workloads)
-      ## Example:
-      ## resources:
-      ##   requests:
-      ##     cpu: 2
-      ##     memory: 512Mi
-      ##   limits:
-      ##     cpu: 3
-      ##     memory: 1024Mi
-      ##
-      resources: { }
-      ## @param sentinel.fips.openssl Configure OpenSSL FIPS mode: '', 'restricted', 'relaxed', 'off'. If empty (""), 'global.defaultFips' would be used
-      ##
-      fips:
-        openssl: ""
-      ## Configure Container Security Context
-      ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
-      ## @param sentinel.containerSecurityContext.enabled Enabled Redis(R) Sentinel containers' Security Context
-      ## @param sentinel.containerSecurityContext.seLinuxOptions [object,nullable] Set SELinux options in container
-      ## @param sentinel.containerSecurityContext.runAsUser Set Redis(R) Sentinel containers' Security Context runAsUser
-      ## @param sentinel.containerSecurityContext.runAsGroup Set Redis(R) Sentinel containers' Security Context runAsGroup
-      ## @param sentinel.containerSecurityContext.runAsNonRoot Set Redis(R) Sentinel containers' Security Context runAsNonRoot
-      ## @param sentinel.containerSecurityContext.readOnlyRootFilesystem Set container's Security Context read-only root filesystem
-      ## @param sentinel.containerSecurityContext.allowPrivilegeEscalation Set Redis(R) Sentinel containers' Security Context allowPrivilegeEscalation
-      ## @param sentinel.containerSecurityContext.seccompProfile.type Set Redis(R) Sentinel containers' Security Context seccompProfile
-      ## @param sentinel.containerSecurityContext.capabilities.drop Set Redis(R) Sentinel containers' Security Context capabilities to drop
-      ##
-      containerSecurityContext:
-        enabled: true
-        seLinuxOptions: { }
-        runAsUser: 1001
-        runAsGroup: 1001
-        runAsNonRoot: true
-        allowPrivilegeEscalation: false
-        readOnlyRootFilesystem: true
-        seccompProfile:
-          type: RuntimeDefault
-        capabilities:
-          drop: [ "ALL" ]
-      ## @param sentinel.lifecycleHooks for the Redis(R) sentinel container(s) to automate configuration before or after startup
-      ##
-      lifecycleHooks: { }
-      ## @param sentinel.extraVolumes Optionally specify extra list of additional volumes for the Redis(R) Sentinel
-      ##
-      extraVolumes: [ ]
-      ## @param sentinel.extraVolumeMounts Optionally specify extra list of additional volumeMounts for the Redis(R) Sentinel container(s)
-      ##
-      extraVolumeMounts: [ ]
-      ## Redis(R) Sentinel service parameters
-      ## Note: values passed in this section also configure the master service, unless the sentinel.masterService is explicitly overridden.
-      service:
-        ## @param sentinel.service.type Redis(R) Sentinel service type
-        ##
-        type: ClusterIP
-        ## @param sentinel.service.ports.redis Redis(R) service port for Redis(R)
-        ## @param sentinel.service.ports.sentinel Redis(R) service port for Redis(R) Sentinel
-        ##
-        ports:
-          redis: 6379
-          sentinel: 26379
-        ## @param sentinel.service.nodePorts.redis Node port for Redis(R)
-        ## @param sentinel.service.nodePorts.sentinel Node port for Sentinel
-        ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
-        ## NOTE: choose port between <30000-32767>
-        ## NOTE: By leaving these values blank, they will be generated by ports-configmap
-        ##       If setting manually, please leave at least replica.replicaCount + 1 in between sentinel.service.nodePorts.redis and sentinel.service.nodePorts.sentinel to take into account the ports that will be created while incrementing that base port
-        ##
-        nodePorts:
-          redis: ""
-          sentinel: ""
-        ## @param sentinel.service.externalTrafficPolicy Redis(R) Sentinel service external traffic policy
-        ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
-        ##
-        externalTrafficPolicy: Cluster
-        ## @param sentinel.service.extraPorts Extra ports to expose (normally used with the `sidecar` value)
-        ##
-        extraPorts: [ ]
-        ## @param sentinel.service.clusterIP Redis(R) Sentinel service Cluster IP
-        ##
-        clusterIP: ""
-        ## @param sentinel.service.createMaster Enable master service pointing to the current master (experimental)
-        ## NOTE: rbac.create need to be set to true
-        ##
-        createMaster: false
-
-        ## @param sentinel.service.loadBalancerIP Redis(R) Sentinel service Load Balancer IP
-        ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#internal-load-balancer
-        ##
-        loadBalancerIP: ""
-        ## @param sentinel.service.loadBalancerClass sentinel service Load Balancer class if service type is `LoadBalancer` (optional, cloud specific)
-        ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
-        ##
-        loadBalancerClass: ""
-        ## @param sentinel.service.loadBalancerSourceRanges Redis(R) Sentinel service Load Balancer sources
-        ## https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
-        ## e.g.
-        ## loadBalancerSourceRanges:
-        ##   - 10.10.10.0/24
-        ##
-        loadBalancerSourceRanges: [ ]
-        ## @param sentinel.service.annotations Additional custom annotations for Redis(R) Sentinel service
-        ##
-        annotations: { }
-        ## @param sentinel.service.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
-        ## If "ClientIP", consecutive client requests will be directed to the same Pod
-        ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
-        ##
-        sessionAffinity: None
-        ## @param sentinel.service.sessionAffinityConfig Additional settings for the sessionAffinity. Ignored if `sentinel.service.sessionAffinity` is `None`
-        ## sessionAffinityConfig:
-        ##   clientIP:
-        ##     timeoutSeconds: 300
-        ##
-        sessionAffinityConfig: { }
-        ## Headless service properties
-        ##
-        headless:
-          ## @param sentinel.service.headless.annotations Annotations for the headless service.
-          ##
-          annotations: { }
-          ## @param sentinel.service.headless.extraPorts Optionally specify extra ports to expose for the headless service.
-          ## Example:
-          ## extraPorts:
-          ##   - name: my-custom-port
-          ##     port: 12345
-          ##     protocol: TCP
-          ##     targetPort: 12345
-          ##
-          extraPorts: [ ]
-      ## Redis(R) master service parameters
-      ##
-      masterService:
-        ## @param sentinel.masterService.enabled Enable master service pointing to the current master (experimental)
-        ## NOTE: rbac.create need to be set to true
-        ##
-        enabled: false
-        ## @param sentinel.masterService.type Redis(R) Sentinel master service type
-        ##
-        type: ClusterIP
-        ## @param sentinel.masterService.ports.redis Redis(R) service port for Redis(R)
-        ##
-        ports:
-          redis: 6379
-        ## @param sentinel.masterService.nodePorts.redis Node port for Redis(R)
-        ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-nodeport
-        ## NOTE: choose port between <30000-32767>
-        ## NOTE: By leaving these values blank, they will be generated by ports-configmap
-        ##       If setting manually, please leave at least replica.replicaCount + 1 in between sentinel.service.nodePorts.redis and sentinel.service.nodePorts.sentinel to take into account the ports that will be created while incrementing that base port
-        ##
-        nodePorts:
-          redis: ""
-        ## @param sentinel.masterService.externalTrafficPolicy Redis(R) master service external traffic policy
-        ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
-        ##
-        externalTrafficPolicy: ""
-        ## @param sentinel.masterService.extraPorts Extra ports to expose (normally used with the `sidecar` value)
-        ##
-        extraPorts: [ ]
-        ## @param sentinel.masterService.clusterIP Redis(R) master service Cluster IP
-        ##
-        clusterIP: ""
-        ## @param sentinel.masterService.loadBalancerIP Redis(R) master service Load Balancer IP
-        ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#internal-load-balancer
-        ##
-        loadBalancerIP: ""
-        ## @param sentinel.masterService.loadBalancerClass master service Load Balancer class if service type is `LoadBalancer` (optional, cloud specific)
-        ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
-        ##
-        loadBalancerClass: ""
-        ## @param sentinel.masterService.loadBalancerSourceRanges Redis(R) master service Load Balancer sources
-        ## https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
-        ## e.g.
-        ## loadBalancerSourceRanges:
-        ##   - 10.10.10.0/24
-        ##
-        loadBalancerSourceRanges: [ ]
-        ## @param sentinel.masterService.annotations Additional custom annotations for Redis(R) master service
-        ##
-        annotations: { }
-        ## @param sentinel.masterService.sessionAffinity Session Affinity for Kubernetes service, can be "None" or "ClientIP"
-        ## If "ClientIP", consecutive client requests will be directed to the same Pod
-        ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
-        ##
-        sessionAffinity: None
-        ## @param sentinel.masterService.sessionAffinityConfig Additional settings for the sessionAffinity. Ignored if `sentinel.masterService.sessionAffinity` is `None`
-        ## sessionAffinityConfig:
-        ##   clientIP:
-        ##     timeoutSeconds: 300
-        ##
-        sessionAffinityConfig: { }
-      ## @param sentinel.terminationGracePeriodSeconds Integer setting the termination grace period for the redis-node pods
-      ##
-      terminationGracePeriodSeconds: 30
-      ## @param sentinel.extraPodSpec Optionally specify extra PodSpec for the Redis(R) Sentinel pod(s)
-      ##
-      extraPodSpec: { }
-
-      externalAccess:
-        ## @param sentinel.externalAccess.enabled Enable external access to the Redis
-        ##
-        enabled: false
-        service:
-          ## @param sentinel.externalAccess.service.loadBalancerIPAnnotaion Name of annotation to specify fixed IP for service in.
-          ##
-          loadBalancerIPAnnotaion: ""
-          ## @param sentinel.externalAccess.service.type Type for the services used to expose every Pod
-          ## At this moment only LoadBalancer is supported
-          ##
-          type: LoadBalancer
-          ## @param sentinel.externalAccess.service.redisPort Port for the services used to expose redis-server
-          ##
-          redisPort: 6379
-
-          ## @param sentinel.externalAccess.service.sentinelPort Port for the services used to expose redis-sentinel
-          ##
-          sentinelPort: 26379
-          ## @param sentinel.externalAccess.service.loadBalancerIP Array of load balancer IPs for each Redis(R) node. Length must be the same as sentinel.replicaCount
-          ##
-          loadBalancerIP: [ ]
-          ## @param sentinel.externalAccess.service.loadBalancerClass Load Balancer class if service type is `LoadBalancer` (optional, cloud specific)
-          ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
-          ##
-          loadBalancerClass: ""
-          ## @param sentinel.externalAccess.service.loadBalancerSourceRanges Service Load Balancer sources
-          ## ref: https://kubernetes.io/docs/tasks/access-application-cluster/configure-cloud-provider-firewall/#restrict-access-for-loadbalancer-service
-          ## e.g:
-          ## loadBalancerSourceRanges:
-          ##   - 10.10.10.0/24
-          ##
-          loadBalancerSourceRanges: [ ]
-          ## @param sentinel.externalAccess.service.annotations Annotations to add to the services used to expose every Pod of the Redis(R) Cluster
-          ##
-          annotations: { }
 
     ## @section Other Parameters
     ##
@@ -2664,19 +2207,9 @@ kas:
         ## @param metrics.serviceMonitor.targetLimit Limit of how many targets should be scraped
         ##
         targetLimit: false
-        ## @param metrics.serviceMonitor.additionalEndpoints  Additional endpoints to scrape (e.g sentinel)
+        ## @param metrics.serviceMonitor.additionalEndpoints  Additional endpoints to scrape
         ##
         additionalEndpoints: [ ]
-        # uncomment in order to scrape sentinel metrics, also to in order distinguish between Sentinel and Redis container metrics
-        # add metricRelabelings with label like app=redis to main redis pod-monitor port
-        # - interval: "30s"
-        #   path: "/scrape"
-        #   port: "http-metrics"
-        #   params:
-        #     target: ["localhost:26379"]
-        #   metricRelabelings:
-        #     - targetLabel: "app"
-        #       replacement: "sentinel"
       ## Prometheus Pod Monitor
       ## ref: https://github.com/coreos/prometheus-operator
       ##      https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md#podmonitor
@@ -2726,17 +2259,9 @@ kas:
         ## @param metrics.podMonitor.targetLimit Limit of how many targets should be scraped
         ##
         targetLimit: false
-        ## @param metrics.podMonitor.additionalEndpoints  Additional endpoints to scrape (e.g sentinel)
+        ## @param metrics.podMonitor.additionalEndpoints  Additional endpoints to scrape
         ##
         additionalEndpoints: [ ]
-        # - interval: "30s"
-        #   path: "/scrape"
-        #   port: "metrics"
-        #   params:
-        #     target: ["localhost:26379"]
-        #   metricRelabelings:
-        #     - targetLabel: "app"
-        #       replacement: "sentinel"
       ## Custom PrometheusRule to be defined
       ## ref: https://github.com/coreos/prometheus-operator#customresourcedefinitions
       ##
@@ -2862,7 +2387,6 @@ kas:
       extraEnvVars: [ ]
 
     ## Kubectl InitContainer
-    ## used by Sentinel to update the isMaster label on the Redis(TM) pods
     ##
     kubectl:
       ## Bitnami Kubectl image version
