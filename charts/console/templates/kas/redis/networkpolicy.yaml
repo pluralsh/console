@@ -32,9 +32,6 @@ spec:
     # Allow outbound connections to other cluster pods
     - ports:
         - port: {{ .Values.master.containerPorts.redis }}
-        {{- if .Values.sentinel.enabled }}
-        - port: {{ .Values.sentinel.containerPorts.sentinel }}
-        {{- end }}
       to:
         - podSelector:
             matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 14 }}
@@ -47,9 +44,6 @@ spec:
     # Allow inbound connections
     - ports:
         - port: {{ .Values.master.containerPorts.redis }}
-        {{- if .Values.sentinel.enabled }}
-        - port: {{ .Values.sentinel.containerPorts.sentinel }}
-        {{- end }}
       {{- if not .Values.networkPolicy.allowExternal }}
       from:
         - podSelector:
