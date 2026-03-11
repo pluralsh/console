@@ -137,21 +137,6 @@ Create the name of the master service account to use
 {{- end -}}
 
 {{/*
-Create the name of the replicas service account to use
-*/}}
-{{- define "redis.replicaServiceAccountName" -}}
-{{- if .Values.replica.serviceAccount.create -}}
-    {{ default (printf "%s-replica" (include "common.names.fullname" .)) .Values.replica.serviceAccount.name }}
-{{- else -}}
-    {{- if .Values.serviceAccount.create -}}
-        {{ template "redis.serviceAccountName" . }}
-    {{- else -}}
-        {{ default "default" .Values.replica.serviceAccount.name }}
-    {{- end -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Return the configuration configmap name
 */}}
 {{- define "redis.configmapName" -}}

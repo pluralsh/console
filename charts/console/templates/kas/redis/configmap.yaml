@@ -36,18 +36,6 @@ data:
     {{- end }}
     {{- end }}
     # End of master configuration
-  replica.conf: |-
-    dir {{ .Values.replica.persistence.path }}
-    # User-supplied replica configuration:
-    {{- if .Values.replica.configuration }}
-    {{- include "common.tplvalues.render" ( dict "value" .Values.replica.configuration "context" $ ) | nindent 4 }}
-    {{- end }}
-    {{- if .Values.replica.disableCommands }}
-    {{- range .Values.replica.disableCommands }}
-    rename-command {{ . }} ""
-    {{- end }}
-    {{- end }}
-    # End of replica configuration
   users.acl: |-
     {{- /* User-supplied ACL configuration */ -}}
     {{- if .Values.auth.acl.enabled}}
