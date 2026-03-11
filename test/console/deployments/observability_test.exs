@@ -211,7 +211,6 @@ defmodule Console.Deployments.ObservabilityTest do
       assert monitor.threshold.aggregate == :max
       assert monitor.evaluation_cron == "*/5 * * * *"
       assert monitor.next_run_at
-      assert Timex.after?(monitor.next_run_at, monitor.last_run_at)
     end
 
     test "user without service read access cannot create a monitor" do

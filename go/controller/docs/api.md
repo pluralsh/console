@@ -3335,6 +3335,23 @@ for users to configure parameters before generating the PR.
 | `spec` _[PrAutomationSpec](#prautomationspec)_ | Spec defines the desired state of the PrAutomation, including the operations<br />to perform, target repository, and user interface configuration. |  | Required: \{\} <br /> |
 
 
+#### PrAutomationAIConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [PrAutomationSpec](#prautomationspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled controls whether AI assistance is enabled for this PR automation. |  | Optional: \{\} <br /> |
+| `prompt` _string_ | Prompt is a custom prompt to guide AI-generated updates for this automation.  Templating is supported. |  | Required: \{\} <br /> |
+
+
 #### PrAutomationBindings
 
 
@@ -3563,6 +3580,7 @@ _Appears in:_
 | `creates` _[PrAutomationCreateConfiguration](#prautomationcreateconfiguration)_ | Creates defines specifications for generating new files from templates,<br />allowing the automation to add new configuration files to the repository. |  | Optional: \{\} <br /> |
 | `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Updates specifies how to modify existing files using regex replacements<br />or YAML overlays, enabling precise changes to infrastructure code. |  | Optional: \{\} <br /> |
 | `deletes` _[PrAutomationDeleteConfiguration](#prautomationdeleteconfiguration)_ | Deletes specifies files and folders to remove from the repository as part<br />of the PR, useful for cleanup or migration scenarios. |  | Optional: \{\} <br /> |
+| `ai` _[PrAutomationAIConfiguration](#prautomationaiconfiguration)_ | AI configuration controls whether AI assistance is enabled for this automation<br />and allows specifying a custom prompt to guide AI-generated updates. |  | Optional: \{\} <br /> |
 | `lua` _[PrAutomationLuaConfiguration](#prautomationluaconfiguration)_ | Lua specification to source lua scripts to preprocess the PR automation. |  | Optional: \{\} <br /> |
 | `vendor` _[PrAutomationVendorConfiguration](#prautomationvendorconfiguration)_ | Software vendoring logic to perform in this PR |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |

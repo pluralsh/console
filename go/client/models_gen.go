@@ -6163,6 +6163,21 @@ type Port struct {
 	Protocol      *string `json:"protocol,omitempty"`
 }
 
+type PrAiSpec struct {
+	// whether AI assistance is enabled for this automation
+	Enabled *bool `json:"enabled,omitempty"`
+	// custom prompt to guide AI updates for this automation
+	Prompt string `json:"prompt"`
+}
+
+// configuration for AI assistance in this PR automation
+type PrAiSpecAttributes struct {
+	// whether AI assistance is enabled for this automation
+	Enabled *bool `json:"enabled,omitempty"`
+	// custom prompt to guide AI updates for this automation
+	Prompt string `json:"prompt"`
+}
+
 // a description of how to generate a pr, which can either modify existing files or generate new ones w/in a repo
 type PrAutomation struct {
 	ID string `json:"id"`
@@ -6182,6 +6197,8 @@ type PrAutomation struct {
 	Proxy *HTTPProxyConfiguration `json:"proxy,omitempty"`
 	// software vendoring logic to perform in this PR
 	Vendor *PrVendorSpec `json:"vendor,omitempty"`
+	// configuration for AI assistance in this PR automation
+	Ai *PrAiSpec `json:"ai,omitempty"`
 	// a set of lua scripts to use to preprocess the PR automation
 	Lua *PrLuaSpec `json:"lua,omitempty"`
 	// location in git for external templates and scripts
@@ -6241,6 +6258,8 @@ type PrAutomationAttributes struct {
 	Deletes *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
 	// a specification for vendoring software in this PR
 	Vendor *PrVendorSpecAttributes `json:"vendor,omitempty"`
+	// configuration for AI assistance in this PR automation
+	Ai *PrAiSpecAttributes `json:"ai,omitempty"`
 	// a specification for sourcing lua scripts to preprocess the PR automation
 	Lua *PrLuaSpecAttributes `json:"lua,omitempty"`
 	// location in git for external templates and scripts

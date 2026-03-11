@@ -7472,11 +7472,29 @@ export type Port = {
   protocol?: Maybe<Scalars['String']['output']>;
 };
 
+export type PrAiSpec = {
+  __typename?: 'PrAiSpec';
+  /** whether AI assistance is enabled for this automation */
+  enabled?: Maybe<Scalars['Boolean']['output']>;
+  /** custom prompt to guide AI updates for this automation */
+  prompt: Scalars['String']['output'];
+};
+
+/** configuration for AI assistance in this PR automation */
+export type PrAiSpecAttributes = {
+  /** whether AI assistance is enabled for this automation */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** custom prompt to guide AI updates for this automation */
+  prompt: Scalars['String']['input'];
+};
+
 /** a description of how to generate a pr, which can either modify existing files or generate new ones w/in a repo */
 export type PrAutomation = {
   __typename?: 'PrAutomation';
   /** link to an add-on name if this can update it */
   addon?: Maybe<Scalars['String']['output']>;
+  /** configuration for AI assistance in this PR automation */
+  ai?: Maybe<PrAiSpec>;
   /** a prefix to use for the branch name, will be appended with a random string for deduplication */
   branchPrefix?: Maybe<Scalars['String']['output']>;
   /** the catalog this pr automation belongs to */
@@ -7535,6 +7553,8 @@ export type PrAutomation = {
 export type PrAutomationAttributes = {
   /** link to an add-on name if this can update it */
   addon?: InputMaybe<Scalars['String']['input']>;
+  /** configuration for AI assistance in this PR automation */
+  ai?: InputMaybe<PrAiSpecAttributes>;
   branch?: InputMaybe<Scalars['String']['input']>;
   branchPrefix?: InputMaybe<Scalars['String']['input']>;
   /** the catalog this automation will belong to */

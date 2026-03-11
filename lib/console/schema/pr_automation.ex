@@ -43,6 +43,11 @@ defmodule Console.Schema.PrAutomation do
       field :folder,   :string
     end
 
+    embeds_one :ai, AI, on_replace: :update do
+      field :enabled, :boolean, default: true
+      field :prompt,  :string
+    end
+
     embeds_one :creates, CreateSpec, on_replace: :update do
       embeds_one :git, Service.Git, on_replace: :update
 
@@ -198,6 +203,7 @@ defmodule Console.Schema.PrAutomation do
     |> validate_length(:name, max: 255)
     |> cast_embed(:git)
     |> cast_embed(:lua, with: &lua_changeset/2)
+    |> cast_embed(:ai, with: &ai_changeset/2)
     |> cast_embed(:updates, with: &update_changeset/2)
     |> cast_embed(:creates, with: &create_changeset/2)
     |> cast_embed(:deletes, with: &delete_changeset/2)
@@ -241,6 +247,12 @@ defmodule Console.Schema.PrAutomation do
   defp lua_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(script folder external)a)
+  end
+
+  defp ai_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(enabled prompt)a)
+    |> validate_required([:prompt])
   end
 
   defp delete_changeset(model, attrs) do

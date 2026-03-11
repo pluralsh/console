@@ -1,0 +1,14 @@
+{
+    "type": "object",
+    "properties": {
+        "path": {
+            "type": "string",
+            "description": "the relative folder path to list the contents of. Supports glob patterns"
+        },
+        "regex": {
+            "type": "string",
+            "description": "a (optional) regex query to filter the results whose content matches"
+        }
+    },
+    "required": ["path"]
+}
