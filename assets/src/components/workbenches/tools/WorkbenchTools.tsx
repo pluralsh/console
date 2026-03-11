@@ -16,17 +16,19 @@ import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
-import {
-  useWorkbenchToolsQuery,
-  WorkbenchToolFragment,
-} from 'generated/graphql'
+import { useWorkbenchToolsQuery } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import { Link } from 'react-router-dom'
 import { WORKBENCHES_CREATE_REL_PATH } from 'routes/workbenchesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import { WorkbenchToolIcon } from './WorkbenchTool'
-import { TOOL_TYPE_CARDS, TOOL_TYPE_TO_LABEL } from './workbenchToolsConsts'
+import {
+  categoryToLabel,
+  TOOL_TYPE_CARDS,
+  TOOL_TYPE_TO_LABEL,
+  WorkbenchToolIcon,
+} from './workbenchToolsUtils'
+import { isNonNullable } from 'utils/isNonNullable'
 
 const WORKBENCH_TOOL_TYPE_PARAM = 'type'
 
@@ -77,7 +79,7 @@ export function WorkbenchTools() {
                   }
                   firstPartialType="subtitle1"
                   firstColor="text"
-                  second={description}
+                  second={isEmpty(tools) ? description : ''}
                   secondPartialType="body2"
                   secondColor="text-light"
                   gap="small"
@@ -128,11 +130,39 @@ export function WorkbenchTools() {
               !loading && pageInfo?.hasNextPage && fetchNextPage()
             }
           >
-            {tools.map((tool) => (
-              <ToolCard
-                key={tool.id}
-                tool={tool}
-              />
+            {tools.map(({ id, name, tool: type, categories }) => (
+              <ToolCardSC
+                clickable
+                forwardedAs={Link}
+                to={id}
+              >
+                <StackedText
+                  first={name}
+                  firstPartialType="body2Bold"
+                  firstColor="text"
+                  second={TOOL_TYPE_TO_LABEL[type]}
+                  icon={
+                    <IconFrame
+                      circle
+                      type="secondary"
+                      icon={<WorkbenchToolIcon type={type} />}
+                    />
+                  }
+                />
+                <Flex
+                  gap="xsmall"
+                  wrap="wrap"
+                >
+                  {categories?.filter(isNonNullable).map((cat, i) => (
+                    <Chip
+                      key={i}
+                      size="small"
+                    >
+                      {categoryToLabel[cat]}
+                    </Chip>
+                  ))}
+                </Flex>
+              </ToolCardSC>
             ))}
           </CardGrid>
         )
@@ -141,52 +171,12 @@ export function WorkbenchTools() {
   )
 }
 
-function ToolCard({ tool }: { tool: WorkbenchToolFragment }) {
-  const { id, name, tool: type, categories } = tool
-
-  return (
-    <ToolCardSC
-      clickable
-      forwardedAs={Link}
-      to={id}
-    >
-      <StackedText
-        first={name}
-        firstPartialType="body2Bold"
-        firstColor="text"
-        second={TOOL_TYPE_TO_LABEL[type]}
-        icon={
-          <IconFrame
-            circle
-            type="secondary"
-            icon={<WorkbenchToolIcon type={type} />}
-          />
-        }
-      />
-      {/* TODO: potentially add custom description field here */}
-      <Flex
-        gap="xsmall"
-        wrap="wrap"
-      >
-        {categories?.map((cat, i) => (
-          <Chip
-            key={i}
-            size="small"
-          >
-            {cat}
-          </Chip>
-        ))}
-      </Flex>
-    </ToolCardSC>
-  )
-}
-
 const ToolCardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.small,
   padding: theme.spacing.large,
-  minHeight: '100%',
+  minHeight: 120,
   textDecoration: 'none',
   minWidth: 320,
 }))
@@ -195,6 +185,5 @@ const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.large,
-  overflow: 'hidden',
-  height: '100%',
+  minHeight: 700,
 }))
