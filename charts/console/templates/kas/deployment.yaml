@@ -45,7 +45,8 @@ spec:
       {{- end }}
       serviceAccountName: {{ include "kas.serviceAccountName" . }}
       {{ if .Values.kas.initContainers }}
-      {{ toYaml .Values.kas.initContainers | nindent 6 }}
+      initContainers:
+        {{ toYaml .Values.kas.initContainers | nindent 8 }}
       {{ end }}
       containers:
         - name: kas
