@@ -82,6 +82,7 @@ export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
       gap="large"
       height="100%"
       width="100%"
+      overflow="auto"
       padding="large"
     >
       {mode === 'create' ? (
@@ -162,7 +163,8 @@ function WorkbenchForm({
     <Flex
       gap="medium"
       height="100%"
-      width={968}
+      minWidth={750}
+      maxWidth={968}
       minHeight={0}
     >
       <Flex
