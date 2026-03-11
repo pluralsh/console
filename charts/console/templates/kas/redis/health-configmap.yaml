@@ -78,57 +78,6 @@ data:
       echo "$response"
       exit 1
     fi
-{{- if .Values.sentinel.enabled }}
-  ping_sentinel.sh: |-
-    #!/bin/bash
-
-{{- if .Values.auth.sentinel }}
-    [[ -f $REDIS_PASSWORD_FILE ]] && export REDIS_PASSWORD="$(< "${REDIS_PASSWORD_FILE}")"
-    [[ -n "$REDIS_PASSWORD" ]] && export REDISCLI_AUTH="$REDIS_PASSWORD"
-{{- end }}
-    response=$(
-      timeout -s 15 $1 \
-      redis-cli \
-        -h localhost \
-{{- if .Values.tls.enabled }}
-        -p $REDIS_SENTINEL_TLS_PORT_NUMBER \
-        --tls \
-      {{- if not (empty (include "redis.tlsCACert" .)) }}
-        --cacert "$REDIS_SENTINEL_TLS_CA_FILE" \
-      {{- end }}
-      {{- if .Values.tls.authClients }}
-        --cert "$REDIS_SENTINEL_TLS_CERT_FILE" \
-        --key "$REDIS_SENTINEL_TLS_KEY_FILE" \
-      {{- end }}
-{{- else }}
-        -p $REDIS_SENTINEL_PORT \
-{{- end }}
-        ping
-    )
-    if [ "$?" -eq "124" ]; then
-      echo "Timed out"
-      exit 1
-    fi
-    if [ "$response" != "PONG" ]; then
-      echo "$response"
-      exit 1
-    fi
-  parse_sentinels.awk: |-
-    /ip/ {FOUND_IP=1}
-    /port/ {FOUND_PORT=1}
-    /runid/ {FOUND_RUNID=1}
-    !/ip|port|runid/ {
-      if (FOUND_IP==1) {
-        IP=$1; FOUND_IP=0;
-      }
-      else if (FOUND_PORT==1) {
-        PORT=$1;
-        FOUND_PORT=0;
-      } else if (FOUND_RUNID==1) {
-        printf "\nsentinel known-sentinel {{ .Values.sentinel.masterSet }} %s %s %s", IP, PORT, $0; FOUND_RUNID=0;
-      }
-    }
-{{- end }}
   ping_readiness_master.sh: |-
     #!/bin/bash
 
