@@ -17,8 +17,4 @@ dependencies:
     version: 0.24.0
     repository: https://charts.dexidp.io
     condition: dex.enabled
-  - name: redis
-    version: 24.0.0
-    repository: file://../../chart-dependencies/redis
-    condition: redis.enabled
 type: application
