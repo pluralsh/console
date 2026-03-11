@@ -1,0 +1,29 @@
+# Grafana Helm values for kube-prometheus-stack
+# Reference: https://github.com/grafana/helm-charts/tree/main/charts/grafana
+grafana:
+  enabled: true
+
+  persistence:
+    enabled: true
+    type: pvc
+    storageClassName: standard
+    accessModes:
+      - ReadWriteOnce
+    size: 20Gi
+    finalizers:
+      - kubernetes.io/pvc-protection
+
+  # Database configuration for Grafana
+  # Using SQLite by default, stored on the persistent volume
+  grafana.ini:
+    database:
+      type: sqlite3
+      path: /var/lib/grafana/grafana.db
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
