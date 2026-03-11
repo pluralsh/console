@@ -33,6 +33,7 @@ import { Sidebar, SidebarProvider } from './Sidebar'
 import Subheader from './Subheader'
 import { SentryInitializer } from '../SentryInitializer'
 import { AccessTokenProvider } from 'components/profile/access-tokens/AccessTokenContext'
+import { SimpleToastProvider } from 'components/utils/SimpleToastContext'
 
 export default function Console() {
   return (
@@ -52,7 +53,9 @@ export default function Console() {
                               <AIContextProvider>
                                 <FeatureFlagProvider>
                                   <CommandPaletteProvider>
-                                    <ConsoleContent />
+                                    <SimpleToastProvider>
+                                      <ConsoleContent />
+                                    </SimpleToastProvider>
                                   </CommandPaletteProvider>
                                 </FeatureFlagProvider>
                               </AIContextProvider>

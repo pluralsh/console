@@ -9,13 +9,14 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { Confirm } from 'components/utils/Confirm'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 import { Info } from 'components/utils/Info'
-import { Group, useDeleteGroupMutation } from 'generated/graphql'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
+import { GroupFragment, useDeleteGroupMutation } from 'generated/graphql'
 import { useState } from 'react'
 
 import { GroupMembers } from './GroupMembers'
 import { GroupsListMeta } from './GroupsList'
 
-const columnHelper = createColumnHelper<Group>()
+const columnHelper = createColumnHelper<GroupFragment>()
 const ColGroupInfo = columnHelper.accessor((group) => group, {
   id: 'info',
   meta: { gridTemplate: '1fr' },
@@ -35,8 +36,8 @@ const ColActions = columnHelper.accessor((group) => group, {
   id: 'actions',
   cell: function Cell({ getValue, table: { options } }) {
     const group = getValue()
-    const { editable, setGroupDeletedToast, setGroupEdit } =
-      options.meta as GroupsListMeta
+    const { editable, setGroupEdit } = options.meta as GroupsListMeta
+    const { popToast } = useSimpleToast()
     const [dialogKey, setDialogKey] = useState<
       'viewGroup' | 'confirmDelete' | ''
     >('')
@@ -44,7 +45,7 @@ const ColActions = columnHelper.accessor((group) => group, {
     const [mutation, { loading, error }] = useDeleteGroupMutation({
       variables: { id: group.id },
       onCompleted: () => {
-        setGroupDeletedToast(true, group.name)
+        popToast({ name: group.name, action: 'deleted', color: 'icon-danger' })
         setDialogKey('')
       },
       refetchQueries: ['Groups'],

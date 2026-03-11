@@ -6,18 +6,18 @@ import {
 } from 'generated/graphql'
 import { useMemo } from 'react'
 
-import { mapExistingNodes } from '../../../../utils/graphql'
+import { mapExistingNodes } from 'utils/graphql'
 
 import {
   GraphQLToast,
   IconFrame,
-  SemanticColorKey,
   Spinner,
   Table,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import UserInfo from 'components/utils/UserInfo'
@@ -25,7 +25,6 @@ import UserInfo from 'components/utils/UserInfo'
 type GroupMembersMeta = {
   viewOnly?: boolean
   removeMember: Nullable<(user: UserFragment) => void>
-  popToast?: (name: string, action: string, color: SemanticColorKey) => void
 }
 
 export function GroupMembers({
@@ -33,14 +32,12 @@ export function GroupMembers({
   viewOnly,
   removeMember,
   newGroupUsers,
-  popToast,
 }: {
   groupId: Nullable<string>
   viewOnly?: boolean
   addMember?: (user: UserFragment) => void
   removeMember?: Nullable<(user: UserFragment) => void>
   newGroupUsers?: UserFragment[]
-  popToast?: (name: string, action: string, color: SemanticColorKey) => void
 }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -62,7 +59,6 @@ export function GroupMembers({
   const meta: GroupMembersMeta = {
     viewOnly,
     removeMember,
-    popToast,
   }
 
   if (error) return <GqlError error={error} />
@@ -91,17 +87,17 @@ const cols = [
     id: 'user',
     cell: function Cell({ getValue, table: { options } }) {
       const { user, group } = getValue()
-      const { viewOnly, removeMember, popToast } =
-        options.meta as GroupMembersMeta
+      const { popToast } = useSimpleToast()
+      const { viewOnly, removeMember } = options.meta as GroupMembersMeta
       const [mutation, { loading, error }] = useDeleteGroupMemberMutation({
         refetchQueries: ['GroupMembers'],
         awaitRefetchQueries: true,
         onCompleted: ({ deleteGroupMember }) =>
-          popToast?.(
-            deleteGroupMember?.user?.name ?? '',
-            'removed',
-            'icon-danger'
-          ),
+          popToast?.({
+            name: deleteGroupMember?.user?.name ?? 'Group member',
+            action: 'removed',
+            color: 'icon-danger',
+          }),
       })
 
       if (!user) return null
