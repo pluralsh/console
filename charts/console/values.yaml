@@ -618,7 +618,6 @@ kas:
     annotations:
       kubernetes.io/tls-acme: "true"
       cert-manager.io/cluster-issuer: letsencrypt-prod
-
   redis:
     # Simplified Redis deployment using standalone mode, without sentinel support and other unused features.
     #
