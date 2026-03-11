@@ -619,7 +619,8 @@ kas:
       kubernetes.io/tls-acme: "true"
       cert-manager.io/cluster-issuer: letsencrypt-prod
   # Simplified Redis deployment:
-  # - Sentinel support was removed.
+  # - Removed Sentinel support.
+  # - Removed NOTES.txt and related helpers.
   redis:
     # Copyright Broadcom, Inc. All Rights Reserved.
     # SPDX-License-Identifier: APACHE-2.0
