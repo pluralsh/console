@@ -538,31 +538,6 @@ dex:
     - hosts:
       - <your-console-fqdn>
 
-redis:
-  enabled: true
-  architecture: standalone
-  global:
-    security:
-      allowInsecureImages: true
-  image:
-    registry: ghcr.io
-    repository: pluralsh/registry/bitnami/redis
-    tag: 7.4.2-debian-12-r5
-  auth:
-    enabled: true
-    sentinel: false
-  sentinel:
-    enabled: false
-  master:
-    count: 1
-  commonConfiguration: |-
-    # Enable AOF https://redis.io/topics/persistence#append-only-file
-    appendonly yes
-    # Disable RDB persistence, AOF persistence already enabled.
-    save ""
-    # Enable idle client connection timeout (5 minutes)
-    timeout 300
-
 kas:
   global:
     additionalVolumes: ~
@@ -673,7 +648,7 @@ kas:
       ##
       security:
         ## @param global.security.allowInsecureImages Allows skipping image verification
-        allowInsecureImages: false
+        allowInsecureImages: true
       redis:
         password: ""
       ## Compatibility adaptations for Kubernetes platforms
@@ -763,9 +738,9 @@ kas:
     ## @param image.debug Enable image debug mode
     ##
     image:
-      registry: registry-1.docker.io
-      repository: bitnami/redis
-      tag: latest
+      registry: ghcr.io
+      repository: pluralsh/registry/bitnami/redis
+      tag: 7.4.2-debian-12-r5
       digest: ""
       ## Specify a imagePullPolicy
       ## ref: https://kubernetes.io/docs/concepts/containers/images/#pre-pulled-images
@@ -788,7 +763,7 @@ kas:
 
     ## @param architecture Redis(R) architecture. Allowed values: `standalone` or `replication`
     ##
-    architecture: replication
+    architecture: standalone
     ## Redis(R) Authentication parameters
     ## ref: https://github.com/bitnami/containers/tree/main/bitnami/redis#setting-the-server-password-on-first-run
     ##
@@ -798,7 +773,7 @@ kas:
       enabled: true
       ## @param auth.sentinel Enable authentication on sentinels too
       ##
-      sentinel: true
+      sentinel: false
       ## @param auth.password Redis(R) password
       ## Defaults to a random 10-character alphanumeric string if not set
       ##
@@ -844,13 +819,12 @@ kas:
     ## ref: https://redis.io/topics/config
     ##
     commonConfiguration: |-
-      # Enable ReJSON y Redisearch
-      loadmodule /opt/bitnami/redis/lib/redis/modules/redisearch.so
-      loadmodule /opt/bitnami/redis/lib/redis/modules/rejson.so
       # Enable AOF https://redis.io/topics/persistence#append-only-file
       appendonly yes
       # Disable RDB persistence, AOF persistence already enabled.
       save ""
+      # Enable idle client connection timeout (5 minutes)
+      timeout 300
     ## @param existingConfigmap The name of an existing ConfigMap with your custom configuration for Redis(R) nodes
     ##
     existingConfigmap: ""
