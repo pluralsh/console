@@ -27,6 +27,7 @@ defmodule Console.AI.Tools.Pra.Ls do
     with {:ok, path} <- relpath(dir, path) do
       maybe_wildcard(path)
       |> maybe_filter(regex)
+      |> relative_paths(dir)
     end
   end
 
@@ -43,8 +44,13 @@ defmodule Console.AI.Tools.Pra.Ls do
         File.read!(path)
         |> then(&Regex.match?(regex, &1))
       end)
-      |> then(& {:ok, &1})
     end
   end
-  defp maybe_filter(paths, _), do: {:ok, paths}
+  defp maybe_filter(paths, _), do: paths
+
+  defp relative_paths(paths, dir) when is_list(paths) do
+    Enum.map(paths, &Path.relative_to(&1, dir))
+    |> Enum.sort()
+    |> then(& {:ok, &1})
+  end
 end
