@@ -993,12 +993,16 @@ export type AnsibleConfiguration = {
   additionalArgs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** path to the ansible config file to use */
   configFile?: Maybe<Scalars['String']['output']>;
+  /** the playbook to run when deleting the stack */
+  deletePlaybook?: Maybe<Scalars['String']['output']>;
   /** The ansible inventory file to use. we recommend checking this into git alongside your playbook files */
   inventory?: Maybe<Scalars['String']['output']>;
   /** The playbook to run */
   playbook?: Maybe<Scalars['String']['output']>;
   /** path to the private key file for SSH authentication */
   privateKeyFile?: Maybe<Scalars['String']['output']>;
+  /** whether the ansible playbook supports the check flag */
+  supportsCheck?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type AnsibleConfigurationAttributes = {
@@ -1006,12 +1010,16 @@ export type AnsibleConfigurationAttributes = {
   additionalArgs?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** path to the ansible config file to use */
   configFile?: InputMaybe<Scalars['String']['input']>;
+  /** the playbook to run when deleting the stack */
+  deletePlaybook?: InputMaybe<Scalars['String']['input']>;
   /** The ansible inventory file to use. we recommend checking this into git alongside your playbook files */
   inventory?: InputMaybe<Scalars['String']['input']>;
   /** the playbook to run */
   playbook?: InputMaybe<Scalars['String']['input']>;
   /** path to the private key file for SSH authentication */
   privateKeyFile?: InputMaybe<Scalars['String']['input']>;
+  /** whether the ansible playbook supports the check flag */
+  supportsCheck?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 /** Anthropic connection information */
@@ -10076,6 +10084,8 @@ export type RootQueryType = {
   vulnerabilityReports?: Maybe<VulnerabilityReportConnection>;
   vulnerabilityStatistics?: Maybe<Array<Maybe<VulnerabilityStatistic>>>;
   workbench?: Maybe<Workbench>;
+  workbenchAlerts?: Maybe<AlertConnection>;
+  workbenchIssues?: Maybe<IssueConnection>;
   workbenchJob?: Maybe<WorkbenchJob>;
   workbenchTool?: Maybe<WorkbenchTool>;
   workbenchTools?: Maybe<WorkbenchToolConnection>;
@@ -11427,6 +11437,22 @@ export type RootQueryTypeVulnerabilityStatisticsArgs = {
 export type RootQueryTypeWorkbenchArgs = {
   id?: InputMaybe<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeWorkbenchAlertsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeWorkbenchIssuesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

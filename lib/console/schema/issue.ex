@@ -19,6 +19,13 @@ defmodule Console.Schema.Issue do
     timestamps()
   end
 
+  def for_user(query \\ __MODULE__, user) do
+    from(i in query,
+      join: w in subquery(Workbench.for_user(user)),
+      on: w.id == i.workbench_id
+    )
+  end
+
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(i in query, order_by: ^order)
   end

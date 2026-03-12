@@ -58,22 +58,28 @@ defmodule Console.Deployments.Stacks.Commands do
     end
   end
 
-  defp ansible_commands(%Stack{} = s, true) do
-    indexed([
-      cmd("plan", "ansible-playbook", ansible_args(s) ++ ["--diff"], :plan)
-    ])
-  end
-
-  defp ansible_commands(%Stack{deleted_at: d} = s, _) when not is_nil(d),
-    do: ansible_commands(s, true)
-
-  defp ansible_commands(%Stack{} = s, _) do
+  defp ansible_commands(%Stack{} = s, true), do: indexed([cmd("plan", "ansible-playbook", ansible_args(s) ++ ["--diff"], :plan)])
+  defp ansible_commands(%Stack{deleted_at: d} = s, _) when not is_nil(d), do: ansible_delete_commands(s)
+  defp ansible_commands(%Stack{configuration: %{ansible: %Stack.Configuration.Ansible{supports_check: true}}} = s, _) do
     args = ansible_args(s)
     indexed([
-      cmd("plan", "ansible-playbook", args ++ ["--diff"], :plan),
+      cmd("plan", "ansible-playbook", args ++ ["--diff", "--check"], :plan),
       cmd("apply", "ansible-playbook", args, :apply)
     ])
   end
+  defp ansible_commands(%Stack{} = s, _) do
+    args = ansible_args(s)
+    indexed([cmd("apply", "ansible-playbook", args, :apply)])
+  end
+
+  defp ansible_delete_commands(%Stack{configuration: %{ansible: %Stack.Configuration.Ansible{delete_playbook: delete_playbook}}} = s)
+        when is_binary(delete_playbook) and byte_size(delete_playbook) > 0 do
+    case ansible_args(s) do
+      [_ | args] -> indexed([cmd("apply", "ansible-playbook", [delete_playbook | args], :apply)])
+      _ -> indexed([cmd("apply", "ansible-playbook", [delete_playbook], :apply)])
+    end
+  end
+  defp ansible_delete_commands(%Stack{} = s), do: ansible_commands(s, true)
 
   defp ansible_args(%Stack{configuration: %{ansible: %Stack.Configuration.Ansible{} = ansible}}) do
     Enum.filter(

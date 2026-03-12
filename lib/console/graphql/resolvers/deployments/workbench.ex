@@ -1,7 +1,16 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.Workbenches
-  alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool, WorkbenchCron, WorkbenchWebhook}
+  alias Console.Schema.{
+    Alert,
+    Issue,
+    Workbench,
+    WorkbenchJob,
+    WorkbenchJobActivity,
+    WorkbenchTool,
+    WorkbenchCron,
+    WorkbenchWebhook
+  }
 
   def workbench(%{id: id}, ctx) when is_binary(id) do
     Workbenches.get_workbench!(id)
@@ -49,6 +58,18 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def list_workbench_job_activities(job, args, _) do
     WorkbenchJobActivity.for_workbench_job(job.id)
     |> WorkbenchJobActivity.ordered()
+    |> paginate(args)
+  end
+
+  def all_workbench_alerts(args, %{context: %{current_user: user}}) do
+    Alert.for_user(user)
+    |> Alert.ordered()
+    |> paginate(args)
+  end
+
+  def all_workbench_issues(args, %{context: %{current_user: user}}) do
+    Issue.for_user(user)
+    |> Issue.ordered()
     |> paginate(args)
   end
 

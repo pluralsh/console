@@ -216,6 +216,8 @@ _Appears in:_
 | `additionalArgs` _string array_ | Additional args for the ansible playbook command. |  | Optional: \{\} <br /> |
 | `privateKeyFile` _string_ | PrivateKeyFile is the path to the private key file for SSH authentication. |  | Optional: \{\} <br /> |
 | `configFile` _string_ | ConfigFile is the path to the ansible config file to use. |  | Optional: \{\} <br /> |
+| `supportsCheck` _boolean_ | SupportsCheck indicates whether the ansible playbook supports the check flag. |  | Optional: \{\} <br /> |
+| `deletePlaybook` _string_ | DeletePlaybook is the playbook to run when deleting the stack. |  | Optional: \{\} <br /> |
 
 
 

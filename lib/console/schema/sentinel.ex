@@ -158,7 +158,7 @@ defmodule Console.Schema.Sentinel do
     from(s in query, order_by: ^order)
   end
 
-  @valid ~w(name description status last_run_at repository_id project_id)a
+  @valid ~w(name description status last_run_at repository_id project_id crontab)a
 
   def changeset(model, attrs \\ %{}) do
     model

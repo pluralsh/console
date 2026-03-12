@@ -74,6 +74,8 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :additional_args,  list_of(:string), description: "additional args for the playbook"
     field :private_key_file, :string, description: "path to the private key file for SSH authentication"
     field :config_file,      :string, description: "path to the ansible config file to use"
+    field :supports_check,   :boolean, description: "whether the ansible playbook supports the check flag"
+    field :delete_playbook,  :string, description: "the playbook to run when deleting the stack"
   end
 
   input_object :ai_approval_attributes do
@@ -341,6 +343,8 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :additional_args,  list_of(:string), description: "Additional args for the playbook"
     field :private_key_file, :string, description: "path to the private key file for SSH authentication"
     field :config_file,      :string, description: "path to the ansible config file to use"
+    field :supports_check,   :boolean, description: "whether the ansible playbook supports the check flag"
+    field :delete_playbook,  :string, description: "the playbook to run when deleting the stack"
   end
 
   object :stack_run do

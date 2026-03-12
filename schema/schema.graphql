@@ -508,6 +508,10 @@ type RootQueryType {
 
   workbenchJob(id: ID!): WorkbenchJob
 
+  workbenchAlerts(after: String, first: Int, before: String, last: Int): AlertConnection
+
+  workbenchIssues(after: String, first: Int, before: String, last: Int): IssueConnection
+
   sharedAgentRun(id: ID!): AgentRun
 
   agentRuntimes(after: String, first: Int, before: String, last: Int, q: String, type: AgentRuntimeType): AgentRuntimeConnection
@@ -4969,6 +4973,12 @@ input AnsibleConfigurationAttributes {
 
   "path to the ansible config file to use"
   configFile: String
+
+  "whether the ansible playbook supports the check flag"
+  supportsCheck: Boolean
+
+  "the playbook to run when deleting the stack"
+  deletePlaybook: String
 }
 
 input AiApprovalAttributes {
@@ -5377,6 +5387,12 @@ type AnsibleConfiguration {
 
   "path to the ansible config file to use"
   configFile: String
+
+  "whether the ansible playbook supports the check flag"
+  supportsCheck: Boolean
+
+  "the playbook to run when deleting the stack"
+  deletePlaybook: String
 }
 
 type StackRun {
