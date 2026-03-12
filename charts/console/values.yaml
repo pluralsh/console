@@ -81,7 +81,7 @@ console:
 
     # adminEmails is a list of emails which will be auto-configured as admins in the console.
     adminEmails: []
-  
+
   # customOidc is used to configure custom oidc authentication for the console.
   customOidc:
     # enabled is used to configure whether custom oidc authentication should be enabled.
@@ -163,8 +163,8 @@ aiProxy:
       configTTL: "60s"
       requestTimeout: "10s"
       connectionRetry:
-        maxAttempts: 5
-        initialBackoff: "1s"
+        maxAttempts: 10
+        initialBackoff: "15s"
         maxBackoff: "30s"
     observability:
       logLevel: info
@@ -272,7 +272,7 @@ externalIngress:
   ingressClass: nginx
   # hostname acts as the flag to determine if console-external ingress controller is created
   hostname: ~
-  
+
   # rewrite is not used in any of the templates
   rewrite:
     annotations:
@@ -387,7 +387,7 @@ gitServer:
   image:
     repository: ghcr.io/pluralsh/git-server
     tag: ~
-  
+
   containerSecurityContext:
     runAsNonRoot: true
   securityContext:
