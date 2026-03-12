@@ -3055,9 +3055,6 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
   "the git repository to use for this check"
   git: GitRefAttributes
 
-  "a list of custom test cases to run for this check"
-  cases: [SentinelCheckIntegrationTestCaseAttributes]
-
   "the job to run for this check"
   job: GateJobAttributes
 
@@ -3081,6 +3078,9 @@ input SentinelCheckIntegrationTestConfigurationAttributes {
 
   "how many times to rerun failures"
   rerunFailuresCount: Int
+
+  "a list of custom test cases to run for this check"
+  cases: [SentinelCheckIntegrationTestCaseAttributes]
 }
 
 input SentinelCheckIntegrationTestDefaultAttributes {

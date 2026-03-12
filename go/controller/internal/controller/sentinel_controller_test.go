@@ -306,7 +306,7 @@ var _ = Describe("Sentinel Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("456"),
-					SHA: lo.ToPtr("BQD7HX7XIBRVKFJG3LVUAJKZCIZSQWB7CRX6BN3FROVVJOXBSN3Q===="),
+					SHA: lo.ToPtr("Y45WU3MRGG2MTOY5BHE7M4XF3GTF5FOJULWA4MX3QMATK52BWF5Q===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
