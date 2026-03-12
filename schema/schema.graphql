@@ -2630,8 +2630,8 @@ type WorkbenchJobResult {
   "todos for this result"
   todos: [WorkbenchJobResultTodo]
 
-  "metrics for this result"
-  metrics: [WorkbenchJobActivityMetric]
+  "metadata for this result"
+  metadata: WorkbenchJobResultMetadata
 
   "the job this result belongs to"
   workbenchJob: WorkbenchJob
@@ -2639,6 +2639,11 @@ type WorkbenchJobResult {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type WorkbenchJobResultMetadata {
+  "metrics for this result"
+  metrics: [WorkbenchJobActivityMetric]
 }
 
 type WorkbenchJobResultTodo {

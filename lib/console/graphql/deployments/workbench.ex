@@ -267,11 +267,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :working_theory,  :string, description: "the working theory for this result"
     field :conclusion,     :string, description: "the conclusion for this result"
     field :todos,          list_of(:workbench_job_result_todo), description: "todos for this result"
-    field :metrics,        list_of(:workbench_job_activity_metric), description: "metrics for this result"
+    field :metadata,       :workbench_job_result_metadata, description: "metadata for this result"
 
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this result belongs to"
 
     timestamps()
+  end
+
+  object :workbench_job_result_metadata do
+    field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for this result"
   end
 
   object :workbench_job_result_todo do

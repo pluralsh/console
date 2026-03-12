@@ -14862,8 +14862,8 @@ export type WorkbenchJobResult = {
   /** the id of the result */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
-  /** metrics for this result */
-  metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
+  /** metadata for this result */
+  metadata?: Maybe<WorkbenchJobResultMetadata>;
   /** todos for this result */
   todos?: Maybe<Array<Maybe<WorkbenchJobResultTodo>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -14871,6 +14871,12 @@ export type WorkbenchJobResult = {
   workbenchJob?: Maybe<WorkbenchJob>;
   /** the working theory for this result */
   workingTheory?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchJobResultMetadata = {
+  __typename?: 'WorkbenchJobResultMetadata';
+  /** metrics for this result */
+  metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
 };
 
 export type WorkbenchJobResultTodo = {
@@ -18730,11 +18736,11 @@ export type WorkbenchToolFragment = { __typename?: 'WorkbenchTool', id: string, 
 
 export type WorkbenchJobResultTodoFragment = { __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null };
 
-export type WorkbenchJobResultFragment = { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null };
+export type WorkbenchJobResultFragment = { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null };
 
 export type WorkbenchJobTinyFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus };
 
-export type WorkbenchJobFragment = { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null };
+export type WorkbenchJobFragment = { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null };
 
 export type WorkbenchesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -18767,7 +18773,7 @@ export type WorkbenchJobQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null };
+export type WorkbenchJobQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null } | null };
 
 export type WorkbenchToolsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -23561,11 +23567,13 @@ export const WorkbenchJobResultFragmentDoc = gql`
   todos {
     ...WorkbenchJobResultTodo
   }
-  metrics {
-    timestamp
-    name
-    value
-    labels
+  metadata {
+    metrics {
+      timestamp
+      name
+      value
+      labels
+    }
   }
 }
     ${WorkbenchJobResultTodoFragmentDoc}`;

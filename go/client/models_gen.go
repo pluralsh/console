@@ -9613,12 +9613,17 @@ type WorkbenchJobResult struct {
 	Conclusion *string `json:"conclusion,omitempty"`
 	// todos for this result
 	Todos []*WorkbenchJobResultTodo `json:"todos,omitempty"`
-	// metrics for this result
-	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
+	// metadata for this result
+	Metadata *WorkbenchJobResultMetadata `json:"metadata,omitempty"`
 	// the job this result belongs to
 	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
 	InsertedAt   *string       `json:"insertedAt,omitempty"`
 	UpdatedAt    *string       `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchJobResultMetadata struct {
+	// metrics for this result
+	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 }
 
 type WorkbenchJobResultTodo struct {

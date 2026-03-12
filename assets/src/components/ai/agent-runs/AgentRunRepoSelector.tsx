@@ -80,12 +80,12 @@ function AgentRunRepoSelectorInner({
     errorPolicy: 'ignore',
   })
   const allowedRepos =
-    runtimeData.agentRuntime?.allowedRepositories?.filter(isNonNullable)
+    runtimeData?.agentRuntime?.allowedRepositories?.filter(isNonNullable)
 
   const { data, loading, previousData } = useAgentRunRepositoriesQuery({
     variables: { q: debouncedQuery },
     fetchPolicy: 'cache-and-network',
-    skip: !!runtimeData.agentRuntime?.allowedRepositories,
+    skip: !!runtimeData?.agentRuntime?.allowedRepositories,
   })
   const curData = data || previousData
 

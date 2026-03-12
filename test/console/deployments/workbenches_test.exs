@@ -419,11 +419,11 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
-  describe "complete_job/3" do
+  describe "complete_job/2" do
     test "sets job status to successful and completed_at" do
       job = insert(:workbench_job, status: :running)
 
-      {:ok, completed} = Workbenches.complete_job("Final conclusion.", job)
+      {:ok, completed} = Workbenches.complete_job(%{conclusion: "Final conclusion."}, job)
 
       assert completed.id == job.id
       assert completed.status == :successful
@@ -437,7 +437,7 @@ defmodule Console.Deployments.WorkbenchesTest do
     test "updates the job result conclusion" do
       job = insert(:workbench_job, status: :running, result: build(:workbench_job_result, conclusion: "old conclusion"))
 
-      {:ok, completed} = Workbenches.complete_job("New final conclusion.", job)
+      {:ok, completed} = Workbenches.complete_job(%{conclusion: "New final conclusion."}, job)
 
       assert completed.id == job.id
       assert completed.status == :successful
@@ -449,7 +449,7 @@ defmodule Console.Deployments.WorkbenchesTest do
     test "persists conclusion when job has existing result with working_theory" do
       job = insert(:workbench_job, status: :running, result: build(:workbench_job_result, working_theory: "theory", conclusion: ""))
 
-      {:ok, completed} = Workbenches.complete_job("Done.", job)
+      {:ok, completed} = Workbenches.complete_job(%{conclusion: "Done."}, job)
 
       assert completed.id == job.id
       assert completed.status == :successful
@@ -459,19 +459,24 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert completed.result.working_theory == "theory"
     end
 
-    test "persists metrics alongside conclusion" do
+    test "persists metadata with metrics alongside conclusion" do
       job = insert(:workbench_job, status: :running)
-      metrics = [
-        %{name: "cpu_usage", value: 0.85, labels: %{"pod" => "web-1"}},
-        %{name: "mem_usage", value: 0.60, labels: %{"pod" => "web-1"}}
-      ]
 
-      {:ok, completed} = Workbenches.complete_job("Done.", metrics, job)
+      {:ok, completed} = Workbenches.complete_job(%{
+        conclusion: "Done.",
+        metadata: %{
+          metrics: [
+            %{name: "cpu_usage", value: 0.85, labels: %{"pod" => "web-1"}},
+            %{name: "mem_usage", value: 0.60, labels: %{"pod" => "web-1"}}
+          ]
+        }
+      }, job)
 
       assert completed.result.conclusion == "Done."
-      assert length(completed.result.metrics) == 2
-      assert Enum.any?(completed.result.metrics, & &1.name == "cpu_usage" and &1.value == 0.85)
-      assert Enum.any?(completed.result.metrics, & &1.name == "mem_usage" and &1.value == 0.60)
+      metrics = completed.result.metadata.metrics
+      assert length(metrics) == 2
+      assert Enum.any?(metrics, & &1.name == "cpu_usage" and &1.value == 0.85)
+      assert Enum.any?(metrics, & &1.name == "mem_usage" and &1.value == 0.60)
     end
   end
 

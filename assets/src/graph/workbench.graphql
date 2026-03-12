@@ -114,11 +114,13 @@ fragment WorkbenchJobResult on WorkbenchJobResult {
   todos {
     ...WorkbenchJobResultTodo
   }
-  metrics {
-    timestamp
-    name
-    value
-    labels
+  metadata {
+    metrics {
+      timestamp
+      name
+      value
+      labels
+    }
   }
 }
 

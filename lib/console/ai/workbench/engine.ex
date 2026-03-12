@@ -68,7 +68,7 @@ defmodule Console.AI.Workbench.Engine do
     |> MemoryEngine.new(20, system_prompt: system_prompt(prompt: job.prompt), acc: %{})
     |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
     |> case do
-      {:ok, %Complete{conclusion: conclusion, metrics: metrics}} -> Workbenches.complete_job(conclusion, metrics, job)
+      {:ok, %Complete{conclusion: conclusion, metrics: metrics}} -> Workbenches.complete_job(%{conclusion: conclusion, metadata: %{metrics: metrics}}, job)
       {:ok, l} when is_list(l) -> spawn_activities(l, engine)
       {:error, error} -> Workbenches.fail_job("Error running workbench: #{inspect(error)}", job)
     end
