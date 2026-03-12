@@ -72,6 +72,25 @@ defmodule Console.Deployments.Pr.Git do
     end
   end
 
+  def normalize_url(url) do
+    url
+    |> String.trim_trailing(".git")
+    |> do_normalize()
+  end
+
+  defp do_normalize("git@" <> rest) do
+    case String.split(rest, ":", parts: 2) do
+      [host, path] -> "#{host}/#{path}"
+      _ -> rest
+    end
+  end
+  defp do_normalize(url) do
+    case URI.parse(url) do
+      %URI{host: host, path: path} when is_binary(host) -> "#{host}#{path}"
+      _ -> url
+    end
+  end
+
   def to_http(%ScmConnection{type: :azure_devops} = conn, url), do: String.trim_trailing(_to_http(conn, url), ".git")
   def to_http(conn, url), do: "#{String.trim_trailing(_to_http(conn, url), ".git")}.git"
 

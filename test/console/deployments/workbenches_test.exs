@@ -419,7 +419,7 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
-  describe "complete_job/2" do
+  describe "complete_job/3" do
     test "sets job status to successful and completed_at" do
       job = insert(:workbench_job, status: :running)
 
@@ -457,6 +457,21 @@ defmodule Console.Deployments.WorkbenchesTest do
 
       assert completed.result.conclusion == "Done."
       assert completed.result.working_theory == "theory"
+    end
+
+    test "persists metrics alongside conclusion" do
+      job = insert(:workbench_job, status: :running)
+      metrics = [
+        %{name: "cpu_usage", value: 0.85, labels: %{"pod" => "web-1"}},
+        %{name: "mem_usage", value: 0.60, labels: %{"pod" => "web-1"}}
+      ]
+
+      {:ok, completed} = Workbenches.complete_job("Done.", metrics, job)
+
+      assert completed.result.conclusion == "Done."
+      assert length(completed.result.metrics) == 2
+      assert Enum.any?(completed.result.metrics, & &1.name == "cpu_usage" and &1.value == 0.85)
+      assert Enum.any?(completed.result.metrics, & &1.name == "mem_usage" and &1.value == 0.60)
     end
   end
 

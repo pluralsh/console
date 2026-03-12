@@ -2331,7 +2331,7 @@ input WorkbenchToolElasticConnectionAttributes {
   username: String!
 
   "basic auth password"
-  password: String!
+  password: String
 
   "elasticsearch index"
   index: String!
@@ -2393,7 +2393,7 @@ input WorkbenchToolDatadogConnectionAttributes {
   site: String
 
   "datadog API key"
-  apiKey: String!
+  apiKey: String
 
   "datadog application key"
   appKey: String
@@ -2401,7 +2401,7 @@ input WorkbenchToolDatadogConnectionAttributes {
 
 input WorkbenchToolLinearConnectionAttributes {
   "linear API access token"
-  accessToken: String!
+  accessToken: String
 }
 
 input WorkbenchToolAtlassianConnectionAttributes {
@@ -2630,6 +2630,9 @@ type WorkbenchJobResult {
   "todos for this result"
   todos: [WorkbenchJobResultTodo]
 
+  "metrics for this result"
+  metrics: [WorkbenchJobActivityMetric]
+
   "the job this result belongs to"
   workbenchJob: WorkbenchJob
 
@@ -2803,6 +2806,9 @@ type WorkbenchToolPrometheusConnection {
   "prometheus base url"
   url: String
 
+  "basic auth username"
+  username: String
+
   "optional tenant id"
   tenantId: String
 }
@@ -2811,6 +2817,9 @@ type WorkbenchToolLokiConnection {
   "loki base url"
   url: String
 
+  "basic auth username"
+  username: String
+
   "optional tenant id"
   tenantId: String
 }
@@ -2818,6 +2827,9 @@ type WorkbenchToolLokiConnection {
 type WorkbenchToolTempoConnection {
   "tempo base url"
   url: String
+
+  "basic auth username"
+  username: String
 
   "optional tenant id"
   tenantId: String

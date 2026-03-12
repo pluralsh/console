@@ -1,19 +1,23 @@
 defmodule Console.AI.Tools.Workbench.Complete do
   use Console.AI.Tools.Workbench.Base
+  alias Console.Schema.WorkbenchJobActivity
+  alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.Metric
 
   embedded_schema do
     field :conclusion, :string
+    embeds_many :metrics, Metric, on_replace: :delete
   end
 
   @json_schema Console.priv_file!("tools/workbench/complete.json") |> Jason.decode!()
 
   def name(), do: "workbench_complete"
   def json_schema(), do: @json_schema
-  def description(), do: "Complete the workbench job, with the final conclusion given"
+  def description(), do: "Complete the workbench job, with the final conclusion given and any relevant metrics to include in the result"
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, [:conclusion])
+    |> cast_embed(:metrics, with: &WorkbenchJobActivity.metric_changeset/2)
     |> validate_required([:conclusion])
   end
 

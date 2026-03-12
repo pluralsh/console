@@ -47,6 +47,23 @@ defmodule Console.OpenAPI.AI.WorkbenchJobResultTodo do
   }
 end
 
+defmodule Console.OpenAPI.AI.WorkbenchJobResultMetric do
+  @moduledoc "OpenAPI schema for a metric on a workbench job result."
+  use Console.OpenAPI.Base
+
+  defschema %{
+    type: :object,
+    title: "WorkbenchJobResultMetric",
+    description: "A metric persisted on the job result",
+    properties: %{
+      timestamp: string(description: "ISO 8601 timestamp of the metric"),
+      name: string(description: "Name of the metric"),
+      value: %{type: :number, description: "Value of the metric"},
+      labels: %{type: :object, description: "Labels for the metric", additionalProperties: %{type: :string}}
+    }
+  }
+end
+
 defmodule Console.OpenAPI.AI.WorkbenchJobResult do
   @moduledoc "OpenAPI schema for workbench job result (sideloaded on job)."
   use Console.OpenAPI.Base
@@ -54,12 +71,13 @@ defmodule Console.OpenAPI.AI.WorkbenchJobResult do
   defschema %{
     type: :object,
     title: "WorkbenchJobResult",
-    description: "The result of a workbench job run (working theory, conclusion, todos)",
+    description: "The result of a workbench job run (working theory, conclusion, todos, metrics)",
     properties: timestamps(%{
       id: string(description: "Unique identifier for the result"),
       working_theory: string(description: "The working theory for this result"),
       conclusion: string(description: "The conclusion for this result"),
       todos: array_of(Console.OpenAPI.AI.WorkbenchJobResultTodo, description: "Todos for this result"),
+      metrics: array_of(Console.OpenAPI.AI.WorkbenchJobResultMetric, description: "Metrics for this result"),
       workbench_job_id: string(description: "ID of the job this result belongs to"),
     })
   }

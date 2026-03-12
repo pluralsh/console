@@ -1,6 +1,7 @@
 defmodule Console.Schema.WorkbenchJobResult do
   use Console.Schema.Base
-  alias Console.Schema.{WorkbenchJob, AgentRun}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, AgentRun}
+  alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.Metric
 
   defenum TodoStatus, pending: 0, in_progress: 1, completed: 2
 
@@ -9,6 +10,7 @@ defmodule Console.Schema.WorkbenchJobResult do
     field :conclusion,     :binary
 
     embeds_many :todos, AgentRun.Todo, on_replace: :delete
+    embeds_many :metrics, Metric, on_replace: :delete
 
     belongs_to :workbench_job, WorkbenchJob
 
@@ -29,6 +31,7 @@ defmodule Console.Schema.WorkbenchJobResult do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:todos, with: &AgentRun.todo_changeset/2)
+    |> cast_embed(:metrics, with: &WorkbenchJobActivity.metric_changeset/2)
     |> foreign_key_constraint(:workbench_job_id)
     |> unique_constraint(:workbench_job_id)
   end

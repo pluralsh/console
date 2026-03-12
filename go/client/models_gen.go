@@ -9613,6 +9613,8 @@ type WorkbenchJobResult struct {
 	Conclusion *string `json:"conclusion,omitempty"`
 	// todos for this result
 	Todos []*WorkbenchJobResultTodo `json:"todos,omitempty"`
+	// metrics for this result
+	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// the job this result belongs to
 	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
 	InsertedAt   *string       `json:"insertedAt,omitempty"`
@@ -9762,7 +9764,7 @@ type WorkbenchToolDatadogConnectionAttributes struct {
 	// datadog site (e.g. datadoghq.com)
 	Site *string `json:"site,omitempty"`
 	// datadog API key
-	APIKey string `json:"apiKey"`
+	APIKey *string `json:"apiKey,omitempty"`
 	// datadog application key
 	AppKey *string `json:"appKey,omitempty"`
 }
@@ -9787,7 +9789,7 @@ type WorkbenchToolElasticConnectionAttributes struct {
 	// basic auth username
 	Username string `json:"username"`
 	// basic auth password
-	Password string `json:"password"`
+	Password *string `json:"password,omitempty"`
 	// elasticsearch index
 	Index string `json:"index"`
 }
@@ -9835,12 +9837,14 @@ type WorkbenchToolLinearConnection struct {
 
 type WorkbenchToolLinearConnectionAttributes struct {
 	// linear API access token
-	AccessToken string `json:"accessToken"`
+	AccessToken *string `json:"accessToken,omitempty"`
 }
 
 type WorkbenchToolLokiConnection struct {
 	// loki base url
 	URL *string `json:"url,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
 }
@@ -9861,6 +9865,8 @@ type WorkbenchToolLokiConnectionAttributes struct {
 type WorkbenchToolPrometheusConnection struct {
 	// prometheus base url
 	URL *string `json:"url,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
 }
@@ -9881,6 +9887,8 @@ type WorkbenchToolPrometheusConnectionAttributes struct {
 type WorkbenchToolTempoConnection struct {
 	// tempo base url
 	URL *string `json:"url,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
 	// optional tenant id
 	TenantID *string `json:"tenantId,omitempty"`
 }
