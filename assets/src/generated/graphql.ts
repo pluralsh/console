@@ -774,6 +774,18 @@ export type AiApprovalConfiguration = {
   ignoreCancel?: Maybe<Scalars['Boolean']['output']>;
 };
 
+/** configuration for AI based service promotion */
+export type AiCriteriaAttributes = {
+  /** whether AI based service promotion is enabled for this promotion */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the message of the pull request used in this promotion, if not provided, the AI will generate a message */
+  message?: InputMaybe<Scalars['String']['input']>;
+  /** the prompt to use to generate the pull request used in this promotion */
+  prompt: Scalars['String']['input'];
+  /** the title of the pull request used in this promotion, if not provided, the AI will generate a title */
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type AiDelta = {
   __typename?: 'AiDelta';
   content: Scalars['String']['output'];
@@ -851,6 +863,19 @@ export type AiPinEdge = {
   node?: Maybe<AiPin>;
 };
 
+/** configuration for AI based service promotion */
+export type AiPromotionCriteria = {
+  __typename?: 'AiPromotionCriteria';
+  /** whether AI based service promotion is enabled for this promotion */
+  enabled?: Maybe<Scalars['Boolean']['output']>;
+  /** the message of the pull request used in this promotion, if not provided, the AI will generate a message */
+  message?: Maybe<Scalars['String']['output']>;
+  /** the prompt to use to generate the pull request used in this promotion */
+  prompt: Scalars['String']['output'];
+  /** the title of the pull request used in this promotion, if not provided, the AI will generate a title */
+  title?: Maybe<Scalars['String']['output']>;
+};
+
 export enum AiProvider {
   Anthropic = 'ANTHROPIC',
   Azure = 'AZURE',
@@ -903,32 +928,44 @@ export type AiSettingsAttributes = {
   vertex?: InputMaybe<VertexAiAttributes>;
 };
 
+/** An individual alert raised from an observability provider or monitor */
 export type Alert = {
   __typename?: 'Alert';
+  /** Arbitrary key/value annotations attached to this alert */
   annotations?: Maybe<Scalars['Map']['output']>;
-  /** the cluster this alert was associated with */
+  /** The cluster this alert was associated with */
   cluster?: Maybe<Cluster>;
+  /** Provider‑defined fingerprint used to deduplicate alert instances */
   fingerprint?: Maybe<Scalars['String']['output']>;
-  /** the flow this alert was associated with */
+  /** The flow this alert was associated with */
   flow?: Maybe<Flow>;
+  /** Stable identifier for this alert */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
-  /** an insight explaining the state of this alert */
+  /** An AI‑generated insight explaining the current state of this alert */
   insight?: Maybe<AiInsight>;
+  /** Detailed message or summary supplied by the provider */
   message?: Maybe<Scalars['String']['output']>;
-  /** the project this alert was associated with */
+  /** The project this alert was associated with */
   project?: Maybe<Project>;
-  /** the resolution for this alert */
+  /** The human‑authored resolution for this alert, if one exists */
   resolution?: Maybe<AlertResolution>;
-  /** the service this alert was associated with */
+  /** The service this alert was associated with */
   service?: Maybe<Service>;
+  /** Severity level of this alert as reported by the provider */
   severity: AlertSeverity;
+  /** Current state of the alert (for example firing or resolved) */
   state: AlertState;
-  /** key/value tags to filter clusters */
+  /** Key/value tags associated with this alert, often used for filtering clusters */
   tags?: Maybe<Array<Maybe<Tag>>>;
+  /** Time series metrics and threshold used when this alert was evaluated */
+  timeseries?: Maybe<AlertTimeseries>;
+  /** Short title summarizing the alert condition */
   title?: Maybe<Scalars['String']['output']>;
+  /** Origin of this alert (for example :grafana) */
   type: ObservabilityWebhookType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Link back to the originating dashboard or alert view in the provider */
   url?: Maybe<Scalars['String']['output']>;
 };
 
@@ -952,18 +989,22 @@ export type AlertEvidence = {
   title?: Maybe<Scalars['String']['output']>;
 };
 
+/** A human‑authored explanation of how an alert was resolved */
 export type AlertResolution = {
   __typename?: 'AlertResolution';
-  /** the alert this resolution was associated with */
+  /** The alert this resolution was associated with */
   alert?: Maybe<Alert>;
+  /** Stable identifier for this alert resolution */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
-  /** the resolution for this alert */
+  /** The resolution text explaining how the alert was handled */
   resolution: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+/** Attributes used to persist a human‑authored resolution for an alert */
 export type AlertResolutionAttributes = {
+  /** Free‑form description of how the alert was resolved or triaged */
   resolution: Scalars['String']['input'];
 };
 
@@ -979,6 +1020,15 @@ export enum AlertState {
   Firing = 'FIRING',
   Resolved = 'RESOLVED'
 }
+
+/** Time series data associated with an alert evaluation */
+export type AlertTimeseries = {
+  __typename?: 'AlertTimeseries';
+  /** Ordered list of metric points collected while evaluating this alert */
+  metrics?: Maybe<Array<Maybe<MetricResult>>>;
+  /** Threshold value used when evaluating this alert over time */
+  threshold?: Maybe<Scalars['Float']['output']>;
+};
 
 export type AnalysisRatesAttributes = {
   /** the rate in seconds for fast analysis, eg when the prompt has seen a material change */
@@ -3659,8 +3709,11 @@ export type DashboardSpec = {
   timeslices?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
 };
 
+/** Datadog API credentials */
 export type DatadogCredentialsAttributes = {
+  /** Datadog API key with access to query metrics and logs */
   apiKey: Scalars['String']['input'];
+  /** Datadog application key used alongside the API key */
   appKey: Scalars['String']['input'];
 };
 
@@ -5204,11 +5257,16 @@ export type KubernetesChangelog = {
   version?: Maybe<Scalars['String']['output']>;
 };
 
+/** Aggregated metrics for a Kubernetes controller and its pods */
 export type KubernetesControllerMetrics = {
   __typename?: 'KubernetesControllerMetrics';
+  /** CPU usage metrics for the controller */
   cpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** Memory usage metrics for the controller */
   mem?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** CPU usage metrics for pods managed by this controller */
   podCpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** Memory usage metrics for pods managed by this controller */
   podMem?: Maybe<Array<Maybe<MetricResponse>>>;
 };
 
@@ -5657,6 +5715,164 @@ export type MetricResult = {
   value?: Maybe<Scalars['String']['output']>;
 };
 
+/** A monitor defines a recurring check over observability data that can raise alerts */
+export type Monitor = {
+  __typename?: 'Monitor';
+  /** Optional template used when rendering alert messages for this monitor */
+  alertTemplate?: Maybe<Scalars['String']['output']>;
+  /** Optional free‑form description of what this monitor is checking */
+  description?: Maybe<Scalars['String']['output']>;
+  /** Cron schedule defining when the monitor is evaluated */
+  evaluationCron: Scalars['String']['output'];
+  /** Stable identifier for this monitor */
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Short name used to identify this monitor */
+  name: Scalars['String']['output'];
+  /** Next scheduled time this monitor will be evaluated, if any */
+  nextRunAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Underlying query configuration used to fetch data for this monitor */
+  query: MonitorQuery;
+  /** The service deployment this monitor is attached to */
+  service?: Maybe<ServiceDeployment>;
+  /** Severity level for alerts generated by this monitor */
+  severity: AlertSeverity;
+  /** Threshold configuration that determines when the monitor should fire */
+  threshold: MonitorThreshold;
+  /** Monitor type (currently log‑based only) */
+  type: MonitorType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The workbench this monitor is attached to */
+  workbench?: Maybe<Workbench>;
+};
+
+export enum MonitorAggregate {
+  Avg = 'AVG',
+  Max = 'MAX',
+  Min = 'MIN'
+}
+
+/** Attributes used to create or update an observability monitor */
+export type MonitorAttributes = {
+  /** Optional template used when rendering alert messages for this monitor */
+  alertTemplate?: InputMaybe<Scalars['String']['input']>;
+  /** Optional free‑form description of what this monitor is checking */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** Cron schedule defining when the monitor is evaluated (for example *\/5 * * * *) */
+  evaluationCron: Scalars['String']['input'];
+  /** Short name used to identify this monitor */
+  name: Scalars['String']['input'];
+  /** Underlying query configuration used to fetch data for this monitor */
+  query: MonitorQueryAttributes;
+  /** ID of the service deployment this monitor should be attached to */
+  serviceId: Scalars['ID']['input'];
+  /** Severity level applied to alerts generated by this monitor */
+  severity: AlertSeverity;
+  /** Threshold configuration that determines when the monitor should fire */
+  threshold: MonitorThresholdAttributes;
+  /** Monitor type (currently log‑based only) */
+  type: MonitorType;
+  /** ID of the workbench this monitor should be attached to */
+  workbenchId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type MonitorConnection = {
+  __typename?: 'MonitorConnection';
+  edges?: Maybe<Array<Maybe<MonitorEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type MonitorEdge = {
+  __typename?: 'MonitorEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Monitor>;
+};
+
+/** A single key/value facet used when filtering log queries */
+export type MonitorFacet = {
+  __typename?: 'MonitorFacet';
+  /** Facet key (for example kubernetes label or field name) */
+  key: Scalars['String']['output'];
+  /** Facet value to match for the given key */
+  value: Scalars['String']['output'];
+};
+
+/** Key/value facet used to further filter log queries */
+export type MonitorFacetAttributes = {
+  /** Facet key (for example kubernetes namespace or pod label name) */
+  key: Scalars['String']['input'];
+  /** Facet value to match for the given key */
+  value: Scalars['String']['input'];
+};
+
+/** Log‑level query parameters for a monitor */
+export type MonitorLogQuery = {
+  __typename?: 'MonitorLogQuery';
+  /** Time bucket size (for example 5m) used when aggregating log results */
+  bucketSize: Scalars['String']['output'];
+  /** Lookback duration for the log query (for example 1h, 10m, 30s) */
+  duration?: Maybe<Scalars['String']['output']>;
+  /** Optional list of facets used to filter log results */
+  facets?: Maybe<Array<Maybe<MonitorFacet>>>;
+  /** Operator to use for evaluating multi word log queries */
+  operator?: Maybe<MonitorOperator>;
+  /** Log query string passed through to the underlying log provider */
+  query: Scalars['String']['output'];
+};
+
+/** Log query configuration for a monitor */
+export type MonitorLogQueryAttributes = {
+  /** Time bucket size (for example 5m) used when aggregating log results */
+  bucketSize: Scalars['String']['input'];
+  /** Lookback duration for the log query (for example 1h, 10m, 30s) */
+  duration?: InputMaybe<Scalars['String']['input']>;
+  /** Optional key/value facets applied as additional filters on the log query */
+  facets?: InputMaybe<Array<InputMaybe<MonitorFacetAttributes>>>;
+  /** Operator to use when combining multiple log queries */
+  operator?: InputMaybe<MonitorOperator>;
+  /** Log query string passed through to the underlying log provider */
+  query: Scalars['String']['input'];
+};
+
+export enum MonitorOperator {
+  And = 'AND',
+  Or = 'OR'
+}
+
+/** Wrapper object for all query types used by a monitor */
+export type MonitorQuery = {
+  __typename?: 'MonitorQuery';
+  /** Log query configuration used by this monitor */
+  log: MonitorLogQuery;
+};
+
+/** Wrapper for the underlying query definition for a monitor */
+export type MonitorQueryAttributes = {
+  /** Log query used when the monitor type is log‑based */
+  log: MonitorLogQueryAttributes;
+};
+
+/** Threshold configuration defining when a monitor should fire alerts */
+export type MonitorThreshold = {
+  __typename?: 'MonitorThreshold';
+  /** Aggregation function applied over the result set (max, min, avg) */
+  aggregate: MonitorAggregate;
+  /** Numeric value the aggregated metric must cross to trigger the alert */
+  value: Scalars['Float']['output'];
+};
+
+/** Threshold configuration used to decide when a monitor should fire */
+export type MonitorThresholdAttributes = {
+  /** Aggregation function applied over the result set (max, min, avg) */
+  aggregate: MonitorAggregate;
+  /** Numeric value the aggregated metric must cross to trigger the alert */
+  value: Scalars['Float']['input'];
+};
+
+export enum MonitorType {
+  Log = 'LOG'
+}
+
 export type Namespace = {
   __typename?: 'Namespace';
   events?: Maybe<Array<Maybe<Event>>>;
@@ -5738,7 +5954,9 @@ export type NetworkMeshWorkload = {
   service?: Maybe<Scalars['String']['output']>;
 };
 
+/** New Relic API credentials */
 export type NewRelicCredentialsAttributes = {
+  /** New Relic user or ingest API key with access to query telemetry */
   apiKey: Scalars['String']['input'];
 };
 
@@ -6029,18 +6247,26 @@ export type ObjectStoreEdge = {
   node?: Maybe<ObjectStore>;
 };
 
+/** Configuration for an external observability provider such as Datadog or New Relic */
 export type ObservabilityProvider = {
   __typename?: 'ObservabilityProvider';
+  /** Stable identifier for this observability provider */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Human‑readable name for this provider */
   name: Scalars['String']['output'];
+  /** Type of provider (for example :datadog or :newrelic) */
   type: ObservabilityProviderType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+/** Attributes for creating or updating an external observability provider */
 export type ObservabilityProviderAttributes = {
+  /** Provider‑specific credentials required to authenticate API calls */
   credentials: ObservabilityProviderCredentialsAttributes;
+  /** Human‑readable name for this provider; must be unique per deployment */
   name: Scalars['String']['input'];
+  /** Type of observability provider (for example Datadog or New Relic) */
   type: ObservabilityProviderType;
 };
 
@@ -6050,8 +6276,11 @@ export type ObservabilityProviderConnection = {
   pageInfo: PageInfo;
 };
 
+/** Provider‑specific credential blocks; only one provider key should be populated */
 export type ObservabilityProviderCredentialsAttributes = {
+  /** Datadog API credentials */
   datadog?: InputMaybe<DatadogCredentialsAttributes>;
+  /** New Relic API credentials */
   newrelic?: InputMaybe<NewRelicCredentialsAttributes>;
 };
 
@@ -6069,9 +6298,12 @@ export enum ObservabilityProviderType {
 /** A webhook receiver for an observability provider like grafana or datadog */
 export type ObservabilityWebhook = {
   __typename?: 'ObservabilityWebhook';
+  /** Stable identifier for this webhook */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Human‑readable name for this webhook */
   name: Scalars['String']['output'];
+  /** Type of observability webhook (for example :grafana) */
   type: ObservabilityWebhookType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the url for this specific webhook */
@@ -6080,8 +6312,11 @@ export type ObservabilityWebhook = {
 
 /** input data to persist a webhook receiver for an observability provider like grafana or datadog */
 export type ObservabilityWebhookAttributes = {
+  /** Unique name used to reference this webhook */
   name: Scalars['String']['input'];
+  /** Optional shared secret used to validate incoming webhook payloads */
   secret?: InputMaybe<Scalars['String']['input']>;
+  /** Type of webhook endpoint (for example Grafana alerting) */
   type: ObservabilityWebhookType;
 };
 
@@ -6102,20 +6337,28 @@ export enum ObservabilityWebhookType {
   Grafana = 'GRAFANA',
   Newrelic = 'NEWRELIC',
   Pagerduty = 'PAGERDUTY',
+  Plural = 'PLURAL',
   Sentry = 'SENTRY'
 }
 
+/** A metric exposed by an external observability provider and referenced by the console */
 export type ObservableMetric = {
   __typename?: 'ObservableMetric';
+  /** Stable identifier for this observable metric */
   id: Scalars['ID']['output'];
+  /** Provider‑specific metric identifier (for example Prometheus metric name) */
   identifier: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Observability provider that owns this metric */
   provider?: Maybe<ObservabilityProvider>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+/** Attributes linking a metric in an external provider to this deployment */
 export type ObservableMetricAttributes = {
+  /** Provider‑specific metric identifier (for example metric name or query ID) */
   identifier: Scalars['String']['input'];
+  /** ID of the observability provider that owns this metric */
   providerId: Scalars['ID']['input'];
 };
 
@@ -7254,11 +7497,29 @@ export type Port = {
   protocol?: Maybe<Scalars['String']['output']>;
 };
 
+export type PrAiSpec = {
+  __typename?: 'PrAiSpec';
+  /** whether AI assistance is enabled for this automation */
+  enabled?: Maybe<Scalars['Boolean']['output']>;
+  /** custom prompt to guide AI updates for this automation */
+  prompt: Scalars['String']['output'];
+};
+
+/** configuration for AI assistance in this PR automation */
+export type PrAiSpecAttributes = {
+  /** whether AI assistance is enabled for this automation */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** custom prompt to guide AI updates for this automation */
+  prompt: Scalars['String']['input'];
+};
+
 /** a description of how to generate a pr, which can either modify existing files or generate new ones w/in a repo */
 export type PrAutomation = {
   __typename?: 'PrAutomation';
   /** link to an add-on name if this can update it */
   addon?: Maybe<Scalars['String']['output']>;
+  /** configuration for AI assistance in this PR automation */
+  ai?: Maybe<PrAiSpec>;
   /** a prefix to use for the branch name, will be appended with a random string for deduplication */
   branchPrefix?: Maybe<Scalars['String']['output']>;
   /** the catalog this pr automation belongs to */
@@ -7317,6 +7578,8 @@ export type PrAutomation = {
 export type PrAutomationAttributes = {
   /** link to an add-on name if this can update it */
   addon?: InputMaybe<Scalars['String']['input']>;
+  /** configuration for AI assistance in this PR automation */
+  ai?: InputMaybe<PrAiSpecAttributes>;
   branch?: InputMaybe<Scalars['String']['input']>;
   branchPrefix?: InputMaybe<Scalars['String']['input']>;
   /** the catalog this automation will belong to */
@@ -7838,6 +8101,10 @@ export type ProjectUsageHistoryEdge = {
 /** how a promotion for a service will be performed */
 export type PromotionCriteria = {
   __typename?: 'PromotionCriteria';
+  /** configuration for AI based service promotion */
+  ai?: Maybe<AiPromotionCriteria>;
+  /** the scm connection to use for service promotion */
+  connection?: Maybe<ScmConnection>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** overrides the repository slug for the referenced pr automation */
@@ -7851,6 +8118,10 @@ export type PromotionCriteria = {
 
 /** actions to perform if this stage service were promoted */
 export type PromotionCriteriaAttributes = {
+  /** configuration for AI based service promotion */
+  ai?: InputMaybe<AiCriteriaAttributes>;
+  /** the id of the scm connection to use for service promotion */
+  connectionId?: InputMaybe<Scalars['ID']['input']>;
   /** the handle of the cluster for the source service */
   handle?: InputMaybe<Scalars['String']['input']>;
   /** the name of the source service */
@@ -8266,6 +8537,7 @@ export type RootMutationType = {
   createInvite?: Maybe<Invite>;
   createIssueWebhook?: Maybe<IssueWebhook>;
   createManagedNamespace?: Maybe<ManagedNamespace>;
+  createMonitor?: Maybe<Monitor>;
   createObjectStore?: Maybe<ObjectStore>;
   createOidcProvider?: Maybe<OidcProvider>;
   createPersona?: Maybe<Persona>;
@@ -8325,6 +8597,7 @@ export type RootMutationType = {
   deleteJob?: Maybe<Job>;
   deleteManagedNamespace?: Maybe<ManagedNamespace>;
   deleteMcpServer?: Maybe<McpServer>;
+  deleteMonitor?: Maybe<Monitor>;
   deleteNotificationRouter?: Maybe<NotificationRouter>;
   deleteNotificationSink?: Maybe<NotificationSink>;
   deleteObjectStore?: Maybe<ObjectStore>;
@@ -8455,6 +8728,7 @@ export type RootMutationType = {
   updateInfraResearch?: Maybe<InfraResearch>;
   updateIssueWebhook?: Maybe<IssueWebhook>;
   updateManagedNamespace?: Maybe<ManagedNamespace>;
+  updateMonitor?: Maybe<Monitor>;
   updateObjectStore?: Maybe<ObjectStore>;
   updateOidcProvider?: Maybe<OidcProvider>;
   updatePersona?: Maybe<Persona>;
@@ -8750,6 +9024,11 @@ export type RootMutationTypeCreateManagedNamespaceArgs = {
 };
 
 
+export type RootMutationTypeCreateMonitorArgs = {
+  attributes: MonitorAttributes;
+};
+
+
 export type RootMutationTypeCreateObjectStoreArgs = {
   attributes: ObjectStoreAttributes;
 };
@@ -9033,6 +9312,11 @@ export type RootMutationTypeDeleteManagedNamespaceArgs = {
 
 
 export type RootMutationTypeDeleteMcpServerArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteMonitorArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -9592,6 +9876,12 @@ export type RootMutationTypeUpdateManagedNamespaceArgs = {
 };
 
 
+export type RootMutationTypeUpdateMonitorArgs = {
+  attributes: MonitorAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateObjectStoreArgs = {
   attributes: ObjectStoreAttributes;
   id: Scalars['ID']['input'];
@@ -9998,6 +10288,7 @@ export type RootQueryType = {
   objectStores?: Maybe<ObjectStoreConnection>;
   observabilityProvider?: Maybe<ObservabilityProvider>;
   observabilityProviders?: Maybe<ObservabilityProviderConnection>;
+  /** List observability providers visible to the current user */
   observabilityWebhook?: Maybe<ObservabilityWebhook>;
   observabilityWebhooks?: Maybe<ObservabilityWebhookConnection>;
   observer?: Maybe<Observer>;
@@ -12537,6 +12828,8 @@ export type ServiceDeployment = {
   message?: Maybe<Scalars['String']['output']>;
   /** metadata about the deployed contents of this service */
   metadata?: Maybe<ServiceMetadata>;
+  /** list all monitors configured for this service */
+  monitors?: Maybe<MonitorConnection>;
   /** human readable name of this service, must be unique per cluster */
   name: Scalars['String']['output'];
   /** kubernetes namespace this service will be deployed to */
@@ -12615,6 +12908,15 @@ export type ServiceDeploymentLogsArgs = {
   limit: Scalars['Int']['input'];
   query: LokiQuery;
   start?: InputMaybe<Scalars['Long']['input']>;
+};
+
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeploymentMonitorsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -13879,7 +14181,9 @@ export type UserRoles = {
 /** A representation of the metrics to render a utilization heat map */
 export type UtilizationHeatMap = {
   __typename?: 'UtilizationHeatMap';
+  /** CPU utilization data points grouped by time bucket */
   cpu?: Maybe<Array<Maybe<MetricPointResponse>>>;
+  /** Memory utilization data points grouped by time bucket */
   memory?: Maybe<Array<Maybe<MetricPointResponse>>>;
 };
 

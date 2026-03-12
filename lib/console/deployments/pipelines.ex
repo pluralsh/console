@@ -8,6 +8,7 @@ defmodule Console.Deployments.Pipelines do
   alias Console.Deployments.{Clusters, Git, Settings, Sentinels}
   alias Console.Services.Users
   alias Kazan.Apis.Batch.V1, as: BatchV1
+  alias Console.AI.Tool
   alias Console.Schema.{
     Pipeline,
     PipelineStage,
@@ -20,7 +21,9 @@ defmodule Console.Deployments.Pipelines do
     PipelinePullRequest,
     User,
     Cluster,
-    SentinelRun
+    SentinelRun,
+    ScmConnection,
+    PrAutomation
   }
 
   @cache Console.conf(:cache_adapter)
@@ -159,17 +162,11 @@ defmodule Console.Deployments.Pipelines do
   end
 
   def apply_pipeline_context(%PipelineStage{} = stage) do
-    bot = Users.admin_bot()
     %{context: ctx} = stage = Repo.preload(stage, [:pipeline, :context, :errors, services: [:service, criteria: :pr_automation]])
     Enum.filter(stage.services, & &1.criteria && &1.criteria.pr_automation_id)
-    |> Enum.reduce(start_transaction(), fn svc, xact ->
-      service = svc.service
-      add_operation(xact, {:pull, svc.id}, fn _ ->
-        branch = "plrl-svc/#{service.name}/pipeline-#{stage.pipeline.name}-#{String.slice(service.id, 0..4)}-#{String.slice(ctx.id, 0..4)}"
-        context = build_pr_context(ctx.context, svc, stage)
-        %{pr_automation_id: id, repository: repo} = svc.criteria
-        Git.create_pull_request(%{service_id: service.id}, context, id, branch, repo, bot)
-      end)
+    |> Enum.reduce(start_transaction(), fn %{service: service} = svc, xact ->
+      xact
+      |> add_operation({:pull, svc.id}, fn _ -> create_stage_pull_request(stage, svc, Users.admin_bot()) end)
       |> add_operation({:ptr, svc.id}, fn res ->
         pr = Map.get(res, {:pull, svc.id})
         %PipelinePullRequest{service_id: service.id, stage_id: stage.id}
@@ -186,8 +183,47 @@ defmodule Console.Deployments.Pipelines do
       |> PipelineContextHistory.changeset(%{stage_id: stage_id, context_id: ctx_id})
       |> Repo.insert()
     end)
-    |> execute(timeout: 60_000)
+    |> execute(timeout: 120_000)
     |> notify(:context)
+  end
+
+  defp create_stage_pull_request(
+    %PipelineStage{context: %PipelineContext{} = ctx} = stage,
+    %StageService{service: service, criteria: %{ai: %{enabled: true, prompt: prompt} = ai, repository: repository}} = svc,
+    %User{} = bot
+  ) do
+    with %ScmConnection{} = conn <- promotion_connection(svc) do
+      branch  = "plrl/ai/#{service.name}/pipeline-#{stage.pipeline.name}-#{String.slice(service.id, 0..4)}-#{String.slice(ctx.id, 0..4)}"
+      context = build_pr_context(ctx.context, svc, stage)
+      pra     = %PrAutomation{
+        ai: %{enabled: true, prompt: prompt},
+        title: ai.title,
+        message: ai.message,
+        connection: conn,
+        write_bindings: [],
+        create_bindings: []
+      }
+      Git.create_pull_request(%{service_id: service.id}, context, pra, branch, repository, bot)
+    else
+      _ -> {:error, "no scm connection configured for promotion"}
+    end
+  end
+
+  defp create_stage_pull_request(
+    %PipelineStage{context: %PipelineContext{} = ctx} = stage,
+    %StageService{service: service, criteria: %{pr_automation: pra, repository: repo}} = svc,
+    %User{} = bot
+  ) do
+    branch = "plrl/promo/#{service.name}/pipeline-#{stage.pipeline.name}-#{String.slice(service.id, 0..4)}-#{String.slice(ctx.id, 0..4)}"
+    context = build_pr_context(ctx.context, svc, stage)
+    Git.create_pull_request(%{service_id: service.id}, context, pra, branch, repo, bot)
+  end
+
+  def promotion_connection(%StageService{} = svc) do
+    case Repo.preload(svc, [criteria: :connection]) do
+      %StageService{criteria: %{connection: %ScmConnection{} = conn}} -> conn
+      _ -> Tool.scm_connection()
+    end
   end
 
   @doc """

@@ -1,0 +1,18 @@
+{
+    "type": "object",
+    "properties": {
+        "path": {
+            "type": "string",
+            "description": "the relative file path to edit the contents of"
+        },
+        "previous": {
+            "type": "string",
+            "description": "the prior content block within the file to replace"
+        },
+        "replacement": {
+            "type": "string",
+            "description": "the new content block to replace the previous content block with"
+        }
+    },
+    "required": ["path", "previous", "replacement"]
+}

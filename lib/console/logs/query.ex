@@ -12,7 +12,7 @@ defmodule Console.Logs.Query do
   defstruct [
     :project_id, :cluster_id, :service_id, :query, :limit,
     :resource, :time, :facets, :namespaces,
-    :bucket_size, :group_by_fields, :pod, :field
+    :bucket_size, :group_by_fields, :pod, :field, :operator
   ]
 
   def new(args) do
@@ -28,9 +28,14 @@ defmodule Console.Logs.Query do
       bucket_size: args[:bucket_size],
       group_by_fields: args[:group_by_fields],
       field: args[:field],
+      operator: args[:operator] || :or,
       pod: args[:pod]
     }
   end
+
+  def elastic_operator(:or), do: "OR"
+  def elastic_operator(:and), do: "AND"
+  def elastic_operator(_), do: "OR"
 
   @spec opposite(direction) :: direction
   def opposite(:gte), do: :lte

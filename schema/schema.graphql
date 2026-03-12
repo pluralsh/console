@@ -432,11 +432,24 @@ type RootQueryType {
   "fetches the files from a stack's git tarball"
   stackTarball(id: ID!): [StackFile]
 
-  observabilityProvider(id: ID, name: String): ObservabilityProvider
+  observabilityProvider(
+    "Fetch a single observability provider by ID or name"
+    id: ID
+
+    "Name of the observability provider to fetch"
+    name: String
+  ): ObservabilityProvider
 
   observabilityProviders(after: String, first: Int, before: String, last: Int): ObservabilityProviderConnection
 
-  observabilityWebhook(id: ID, name: String): ObservabilityWebhook
+  "List observability providers visible to the current user"
+  observabilityWebhook(
+    "Fetch a single observability webhook by ID or name"
+    id: ID
+
+    "Name of the observability webhook to fetch"
+    name: String
+  ): ObservabilityWebhook
 
   observabilityWebhooks(after: String, first: Int, before: String, last: Int): ObservabilityWebhookConnection
 
@@ -1093,15 +1106,51 @@ type RootMutationType {
   "start a new run from the newest sha in the stack's run history"
   triggerRun(id: ID!): StackRun
 
-  upsertObservabilityProvider(attributes: ObservabilityProviderAttributes!): ObservabilityProvider
+  upsertObservabilityProvider(
+    "Create or update an observability provider configuration"
+    attributes: ObservabilityProviderAttributes!
+  ): ObservabilityProvider
 
-  deleteObservabilityProvider(id: ID!): ObservabilityProvider
+  deleteObservabilityProvider(
+    "Delete an observability provider by ID"
+    id: ID!
+  ): ObservabilityProvider
 
-  upsertObservabilityWebhook(attributes: ObservabilityWebhookAttributes!): ObservabilityWebhook
+  upsertObservabilityWebhook(
+    "Create or update an observability webhook"
+    attributes: ObservabilityWebhookAttributes!
+  ): ObservabilityWebhook
 
-  deleteObservabilityWebhook(id: ID!): ObservabilityWebhook
+  deleteObservabilityWebhook(
+    "Delete an observability webhook by ID"
+    id: ID!
+  ): ObservabilityWebhook
 
-  createAlertResolution(id: ID!, attributes: AlertResolutionAttributes!): AlertResolution
+  createAlertResolution(
+    "Create or update the resolution associated with an alert"
+    id: ID!
+
+    "Attributes describing how the alert was resolved"
+    attributes: AlertResolutionAttributes!
+  ): AlertResolution
+
+  createMonitor(
+    "Create a new monitor attached to a service deployment"
+    attributes: MonitorAttributes!
+  ): Monitor
+
+  updateMonitor(
+    "Update an existing monitor"
+    id: ID!
+
+    "Attributes used to update the monitor"
+    attributes: MonitorAttributes!
+  ): Monitor
+
+  deleteMonitor(
+    "Delete an existing monitor"
+    id: ID!
+  ): Monitor
 
   updateDeploymentSettings(attributes: DeploymentSettingsAttributes!): DeploymentSettings
 
@@ -4624,6 +4673,7 @@ enum ObservabilityWebhookType {
   PAGERDUTY
   NEWRELIC
   SENTRY
+  PLURAL
 }
 
 enum AlertSeverity {
@@ -4639,64 +4689,200 @@ enum AlertState {
   RESOLVED
 }
 
+enum MonitorType {
+  LOG
+}
+
+enum MonitorAggregate {
+  MAX
+  MIN
+  AVG
+}
+
+enum MonitorOperator {
+  OR
+  AND
+}
+
+"Attributes for creating or updating an external observability provider"
 input ObservabilityProviderAttributes {
+  "Type of observability provider (for example Datadog or New Relic)"
   type: ObservabilityProviderType!
+
+  "Human‑readable name for this provider; must be unique per deployment"
   name: String!
+
+  "Provider‑specific credentials required to authenticate API calls"
   credentials: ObservabilityProviderCredentialsAttributes!
 }
 
+"Provider‑specific credential blocks; only one provider key should be populated"
 input ObservabilityProviderCredentialsAttributes {
+  "Datadog API credentials"
   datadog: DatadogCredentialsAttributes
+
+  "New Relic API credentials"
   newrelic: NewRelicCredentialsAttributes
 }
 
+"Datadog API credentials"
 input DatadogCredentialsAttributes {
+  "Datadog API key with access to query metrics and logs"
   apiKey: String!
+
+  "Datadog application key used alongside the API key"
   appKey: String!
 }
 
+"New Relic API credentials"
 input NewRelicCredentialsAttributes {
+  "New Relic user or ingest API key with access to query telemetry"
   apiKey: String!
 }
 
+"Attributes linking a metric in an external provider to this deployment"
 input ObservableMetricAttributes {
+  "Provider‑specific metric identifier (for example metric name or query ID)"
   identifier: String!
+
+  "ID of the observability provider that owns this metric"
   providerId: ID!
 }
 
+"Attributes used to create or update an observability monitor"
+input MonitorAttributes {
+  "ID of the service deployment this monitor should be attached to"
+  serviceId: ID!
+
+  "ID of the workbench this monitor should be attached to"
+  workbenchId: ID
+
+  "Short name used to identify this monitor"
+  name: String!
+
+  "Optional free‑form description of what this monitor is checking"
+  description: String
+
+  "Optional template used when rendering alert messages for this monitor"
+  alertTemplate: String
+
+  "Severity level applied to alerts generated by this monitor"
+  severity: AlertSeverity!
+
+  "Monitor type (currently log‑based only)"
+  type: MonitorType!
+
+  "Cron schedule defining when the monitor is evaluated (for example *\/5 * * * *)"
+  evaluationCron: String!
+
+  "Underlying query configuration used to fetch data for this monitor"
+  query: MonitorQueryAttributes!
+
+  "Threshold configuration that determines when the monitor should fire"
+  threshold: MonitorThresholdAttributes!
+}
+
+"Threshold configuration used to decide when a monitor should fire"
+input MonitorThresholdAttributes {
+  "Aggregation function applied over the result set (max, min, avg)"
+  aggregate: MonitorAggregate!
+
+  "Numeric value the aggregated metric must cross to trigger the alert"
+  value: Float!
+}
+
+"Wrapper for the underlying query definition for a monitor"
+input MonitorQueryAttributes {
+  "Log query used when the monitor type is log‑based"
+  log: MonitorLogQueryAttributes!
+}
+
+"Log query configuration for a monitor"
+input MonitorLogQueryAttributes {
+  "Log query string passed through to the underlying log provider"
+  query: String!
+
+  "Time bucket size (for example 5m) used when aggregating log results"
+  bucketSize: String!
+
+  "Lookback duration for the log query (for example 1h, 10m, 30s)"
+  duration: String
+
+  "Operator to use when combining multiple log queries"
+  operator: MonitorOperator
+
+  "Optional key\/value facets applied as additional filters on the log query"
+  facets: [MonitorFacetAttributes]
+}
+
+"Key\/value facet used to further filter log queries"
+input MonitorFacetAttributes {
+  "Facet key (for example kubernetes namespace or pod label name)"
+  key: String!
+
+  "Facet value to match for the given key"
+  value: String!
+}
+
+"Attributes used to persist a human‑authored resolution for an alert"
 input AlertResolutionAttributes {
+  "Free‑form description of how the alert was resolved or triaged"
   resolution: String!
 }
 
 "input data to persist a webhook receiver for an observability provider like grafana or datadog"
 input ObservabilityWebhookAttributes {
+  "Type of webhook endpoint (for example Grafana alerting)"
   type: ObservabilityWebhookType!
+
+  "Unique name used to reference this webhook"
   name: String!
+
+  "Optional shared secret used to validate incoming webhook payloads"
   secret: String
 }
 
+"Configuration for an external observability provider such as Datadog or New Relic"
 type ObservabilityProvider {
+  "Stable identifier for this observability provider"
   id: ID!
+
+  "Type of provider (for example :datadog or :newrelic)"
   type: ObservabilityProviderType!
+
+  "Human‑readable name for this provider"
   name: String!
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
+"A metric exposed by an external observability provider and referenced by the console"
 type ObservableMetric {
+  "Stable identifier for this observable metric"
   id: ID!
+
+  "Provider‑specific metric identifier (for example Prometheus metric name)"
   identifier: String!
+
+  "Observability provider that owns this metric"
   provider: ObservabilityProvider
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
 "A webhook receiver for an observability provider like grafana or datadog"
 type ObservabilityWebhook {
+  "Stable identifier for this webhook"
   id: ID!
 
+  "Type of observability webhook (for example :grafana)"
   type: ObservabilityWebhookType!
 
+  "Human‑readable name for this webhook"
   name: String!
 
   "the url for this specific webhook"
@@ -4707,58 +4893,158 @@ type ObservabilityWebhook {
   updatedAt: DateTime
 }
 
-type Alert {
+"A monitor defines a recurring check over observability data that can raise alerts"
+type Monitor {
+  "Stable identifier for this monitor"
   id: ID!
 
-  type: ObservabilityWebhookType!
+  "Short name used to identify this monitor"
+  name: String!
 
+  "Optional free‑form description of what this monitor is checking"
+  description: String
+
+  "Optional template used when rendering alert messages for this monitor"
+  alertTemplate: String
+
+  "Severity level for alerts generated by this monitor"
   severity: AlertSeverity!
 
-  state: AlertState!
+  "Monitor type (currently log‑based only)"
+  type: MonitorType!
 
-  title: String
+  "Cron schedule defining when the monitor is evaluated"
+  evaluationCron: String!
 
-  message: String
+  "Next scheduled time this monitor will be evaluated, if any"
+  nextRunAt: DateTime
 
-  fingerprint: String
+  "Underlying query configuration used to fetch data for this monitor"
+  query: MonitorQuery!
 
-  annotations: Map
+  "Threshold configuration that determines when the monitor should fire"
+  threshold: MonitorThreshold!
 
-  url: String
+  "The service deployment this monitor is attached to"
+  service: ServiceDeployment
 
-  "key\/value tags to filter clusters"
-  tags: [Tag]
-
-  "the resolution for this alert"
-  resolution: AlertResolution
-
-  "an insight explaining the state of this alert"
-  insight: AiInsight
-
-  "the cluster this alert was associated with"
-  cluster: Cluster
-
-  "the service this alert was associated with"
-  service: Service
-
-  "the project this alert was associated with"
-  project: Project
-
-  "the flow this alert was associated with"
-  flow: Flow
+  "The workbench this monitor is attached to"
+  workbench: Workbench
 
   insertedAt: DateTime
 
   updatedAt: DateTime
 }
 
-type AlertResolution {
+"A single key\/value facet used when filtering log queries"
+type MonitorFacet {
+  "Facet key (for example kubernetes label or field name)"
+  key: String!
+
+  "Facet value to match for the given key"
+  value: String!
+}
+
+"Log‑level query parameters for a monitor"
+type MonitorLogQuery {
+  "Log query string passed through to the underlying log provider"
+  query: String!
+
+  "Lookback duration for the log query (for example 1h, 10m, 30s)"
+  duration: String
+
+  "Operator to use for evaluating multi word log queries"
+  operator: MonitorOperator
+
+  "Time bucket size (for example 5m) used when aggregating log results"
+  bucketSize: String!
+
+  "Optional list of facets used to filter log results"
+  facets: [MonitorFacet]
+}
+
+"Wrapper object for all query types used by a monitor"
+type MonitorQuery {
+  "Log query configuration used by this monitor"
+  log: MonitorLogQuery!
+}
+
+"Threshold configuration defining when a monitor should fire alerts"
+type MonitorThreshold {
+  "Aggregation function applied over the result set (max, min, avg)"
+  aggregate: MonitorAggregate!
+
+  "Numeric value the aggregated metric must cross to trigger the alert"
+  value: Float!
+}
+
+"An individual alert raised from an observability provider or monitor"
+type Alert {
+  "Stable identifier for this alert"
   id: ID!
 
-  "the resolution for this alert"
+  "Origin of this alert (for example :grafana)"
+  type: ObservabilityWebhookType!
+
+  "Severity level of this alert as reported by the provider"
+  severity: AlertSeverity!
+
+  "Current state of the alert (for example firing or resolved)"
+  state: AlertState!
+
+  "Short title summarizing the alert condition"
+  title: String
+
+  "Detailed message or summary supplied by the provider"
+  message: String
+
+  "Provider‑defined fingerprint used to deduplicate alert instances"
+  fingerprint: String
+
+  "Arbitrary key\/value annotations attached to this alert"
+  annotations: Map
+
+  "Link back to the originating dashboard or alert view in the provider"
+  url: String
+
+  "Key\/value tags associated with this alert, often used for filtering clusters"
+  tags: [Tag]
+
+  "The human‑authored resolution for this alert, if one exists"
+  resolution: AlertResolution
+
+  "An AI‑generated insight explaining the current state of this alert"
+  insight: AiInsight
+
+  "The cluster this alert was associated with"
+  cluster: Cluster
+
+  "The service this alert was associated with"
+  service: Service
+
+  "The project this alert was associated with"
+  project: Project
+
+  "The flow this alert was associated with"
+  flow: Flow
+
+  "Time series metrics and threshold used when this alert was evaluated"
+  timeseries: AlertTimeseries
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+"A human‑authored explanation of how an alert was resolved"
+type AlertResolution {
+  "Stable identifier for this alert resolution"
+  id: ID!
+
+  "The resolution text explaining how the alert was handled"
   resolution: String!
 
-  "the alert this resolution was associated with"
+  "The alert this resolution was associated with"
   alert: Alert
 
   insertedAt: DateTime
@@ -4768,15 +5054,35 @@ type AlertResolution {
 
 "A representation of the metrics to render a utilization heat map"
 type UtilizationHeatMap {
+  "CPU utilization data points grouped by time bucket"
   cpu: [MetricPointResponse]
+
+  "Memory utilization data points grouped by time bucket"
   memory: [MetricPointResponse]
 }
 
+"Aggregated metrics for a Kubernetes controller and its pods"
 type KubernetesControllerMetrics {
+  "CPU usage metrics for the controller"
   cpu: [MetricResponse]
+
+  "Memory usage metrics for the controller"
   mem: [MetricResponse]
+
+  "CPU usage metrics for pods managed by this controller"
   podCpu: [MetricResponse]
+
+  "Memory usage metrics for pods managed by this controller"
   podMem: [MetricResponse]
+}
+
+"Time series data associated with an alert evaluation"
+type AlertTimeseries {
+  "Threshold value used when evaluating this alert over time"
+  threshold: Float
+
+  "Ordered list of metric points collected while evaluating this alert"
+  metrics: [MetricResult]
 }
 
 type ObservabilityProviderConnection {
@@ -4792,6 +5098,11 @@ type ObservabilityWebhookConnection {
 type AlertConnection {
   pageInfo: PageInfo!
   edges: [AlertEdge]
+}
+
+type MonitorConnection {
+  pageInfo: PageInfo!
+  edges: [MonitorEdge]
 }
 
 enum StackStatus {
@@ -6933,11 +7244,32 @@ input PromotionCriteriaAttributes {
   "the id of a pr automation to update this service"
   prAutomationId: ID
 
+  "the id of the scm connection to use for service promotion"
+  connectionId: ID
+
   "overrides the repository slug for the referenced pr automation"
   repository: String
 
   "the secrets to copy over in a promotion"
   secrets: [String]
+
+  "configuration for AI based service promotion"
+  ai: AiCriteriaAttributes
+}
+
+"configuration for AI based service promotion"
+input AiCriteriaAttributes {
+  "whether AI based service promotion is enabled for this promotion"
+  enabled: Boolean
+
+  "the prompt to use to generate the pull request used in this promotion"
+  prompt: String!
+
+  "the title of the pull request used in this promotion, if not provided, the AI will generate a title"
+  title: String
+
+  "the message of the pull request used in this promotion, if not provided, the AI will generate a message"
+  message: String
 }
 
 "a release pipeline, composed of multiple stages each with potentially multiple services"
@@ -7188,6 +7520,12 @@ type PromotionCriteria {
   "overrides the repository slug for the referenced pr automation"
   repository: String
 
+  "configuration for AI based service promotion"
+  ai: AiPromotionCriteria
+
+  "the scm connection to use for service promotion"
+  connection: ScmConnection
+
   "the source service in a prior stage to promote settings from"
   source: ServiceDeployment
 
@@ -7197,6 +7535,21 @@ type PromotionCriteria {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"configuration for AI based service promotion"
+type AiPromotionCriteria {
+  "whether AI based service promotion is enabled for this promotion"
+  enabled: Boolean
+
+  "the prompt to use to generate the pull request used in this promotion"
+  prompt: String!
+
+  "the title of the pull request used in this promotion, if not provided, the AI will generate a title"
+  title: String
+
+  "the message of the pull request used in this promotion, if not provided, the AI will generate a message"
+  message: String
 }
 
 "a representation of an individual pipeline promotion, which is a list of services\/revisions and timestamps to determine promotion status"
@@ -7755,6 +8108,9 @@ type ServiceDeployment {
 
   "list all alerts discovered for this service"
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
+
+  "list all monitors configured for this service"
+  monitors(after: String, first: Int, before: String, last: Int): MonitorConnection
 
   scalingRecommendations: [ClusterScalingRecommendation]
 
@@ -10467,6 +10823,9 @@ input PrAutomationAttributes {
   "a specification for vendoring software in this PR"
   vendor: PrVendorSpecAttributes
 
+  "configuration for AI assistance in this PR automation"
+  ai: PrAiSpecAttributes
+
   "a specification for sourcing lua scripts to preprocess the PR automation"
   lua: PrLuaSpecAttributes
 
@@ -10693,6 +11052,15 @@ input PrLuaSpecAttributes {
 
   "a folder with lua library code and scripts to use"
   folder: String
+}
+
+"configuration for AI assistance in this PR automation"
+input PrAiSpecAttributes {
+  "whether AI assistance is enabled for this automation"
+  enabled: Boolean
+
+  "custom prompt to guide AI updates for this automation"
+  prompt: String!
 }
 
 "a specification for vendoring software in this PR"
@@ -11089,6 +11457,9 @@ type PrAutomation {
   "software vendoring logic to perform in this PR"
   vendor: PrVendorSpec
 
+  "configuration for AI assistance in this PR automation"
+  ai: PrAiSpec
+
   "a set of lua scripts to use to preprocess the PR automation"
   lua: PrLuaSpec
 
@@ -11257,6 +11628,14 @@ type PrLuaSpec {
 
   "whether the lua script is sourced from an external git repo bound to this automation"
   external: Boolean
+}
+
+type PrAiSpec {
+  "whether AI assistance is enabled for this automation"
+  enabled: Boolean
+
+  "custom prompt to guide AI updates for this automation"
+  prompt: String!
 }
 
 type PrVendorSpec {
@@ -13912,6 +14291,11 @@ type StackRunEdge {
 
 type InfrastructureStackEdge {
   node: InfrastructureStack
+  cursor: String
+}
+
+type MonitorEdge {
+  node: Monitor
   cursor: String
 }
 

@@ -215,6 +215,11 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	Deletes *PrAutomationDeleteConfiguration `json:"deletes,omitempty"`
 
+	// AI configuration controls whether AI assistance is enabled for this automation
+	// and allows specifying a custom prompt to guide AI-generated updates.
+	// +kubebuilder:validation:Optional
+	AI *PrAutomationAIConfiguration `json:"ai,omitempty"`
+
 	// Lua specification to source lua scripts to preprocess the PR automation.
 	// +kubebuilder:validation:Optional
 	Lua *PrAutomationLuaConfiguration `json:"lua,omitempty"`
@@ -676,6 +681,27 @@ func (in *PrAutomationLuaConfiguration) Attributes() *console.PrLuaSpecAttribute
 		Script:   in.Script,
 		Folder:   in.Folder,
 		External: in.External,
+	}
+}
+
+type PrAutomationAIConfiguration struct {
+	// Enabled controls whether AI assistance is enabled for this PR automation.
+	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Prompt is a custom prompt to guide AI-generated updates for this automation.  Templating is supported.
+	// +kubebuilder:validation:Required
+	Prompt string `json:"prompt,omitempty"`
+}
+
+func (in *PrAutomationAIConfiguration) Attributes() *console.PrAiSpecAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PrAiSpecAttributes{
+		Enabled: in.Enabled,
+		Prompt:  in.Prompt,
 	}
 }
 

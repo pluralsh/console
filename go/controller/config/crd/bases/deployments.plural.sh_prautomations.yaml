@@ -54,6 +54,22 @@ spec:
               addon:
                 description: Addon links this automation to a specific add-on name.
                 type: string
+              ai:
+                description: |-
+                  AI configuration controls whether AI assistance is enabled for this automation
+                  and allows specifying a custom prompt to guide AI-generated updates.
+                properties:
+                  enabled:
+                    description: Enabled controls whether AI assistance is enabled
+                      for this PR automation.
+                    type: boolean
+                  prompt:
+                    description: Prompt is a custom prompt to guide AI-generated updates
+                      for this automation.  Templating is supported.
+                    type: string
+                required:
+                - prompt
+                type: object
               bindings:
                 description: Bindings containing read and write policies of PR automation.
                 properties:

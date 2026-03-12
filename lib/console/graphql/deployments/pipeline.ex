@@ -131,8 +131,18 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :name,             :string, description: "the name of the source service"
     field :source_id,        :id, description: "the id of the service to promote from"
     field :pr_automation_id, :id, description: "the id of a pr automation to update this service"
+    field :connection_id,    :id, description: "the id of the scm connection to use for service promotion"
     field :repository,       :string, description: "overrides the repository slug for the referenced pr automation"
     field :secrets,          list_of(:string), description: "the secrets to copy over in a promotion"
+    field :ai,               :ai_criteria_attributes, description: "configuration for AI based service promotion"
+  end
+
+  @desc "configuration for AI based service promotion"
+  input_object :ai_criteria_attributes do
+    field :enabled,       :boolean, description: "whether AI based service promotion is enabled for this promotion"
+    field :prompt,        non_null(:string), description: "the prompt to use to generate the pull request used in this promotion"
+    field :title,         :string, description: "the title of the pull request used in this promotion, if not provided, the AI will generate a title"
+    field :message,       :string, description: "the message of the pull request used in this promotion, if not provided, the AI will generate a message"
   end
 
   @desc "a release pipeline, composed of multiple stages each with potentially multiple services"
@@ -322,6 +332,11 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   object :promotion_criteria do
     field :id,         non_null(:id)
     field :repository, :string, description: "overrides the repository slug for the referenced pr automation"
+    field :ai,         :ai_promotion_criteria, description: "configuration for AI based service promotion"
+
+    field :connection, :scm_connection,
+      description: "the scm connection to use for service promotion",
+      resolve: dataloader(Deployments)
     field :source,     :service_deployment,
       description: "the source service in a prior stage to promote settings from",
       resolve: dataloader(Deployments)
@@ -329,6 +344,14 @@ defmodule Console.GraphQl.Deployments.Pipeline do
       description: "whether you want to copy any configuration values from the source service"
 
     timestamps()
+  end
+
+  @desc "configuration for AI based service promotion"
+  object :ai_promotion_criteria do
+    field :enabled,       :boolean, description: "whether AI based service promotion is enabled for this promotion"
+    field :prompt,        non_null(:string), description: "the prompt to use to generate the pull request used in this promotion"
+    field :title,         :string, description: "the title of the pull request used in this promotion, if not provided, the AI will generate a title"
+    field :message,       :string, description: "the message of the pull request used in this promotion, if not provided, the AI will generate a message"
   end
 
   @desc "a representation of an individual pipeline promotion, which is a list of services/revisions and timestamps to determine promotion status"
