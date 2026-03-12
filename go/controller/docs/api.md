@@ -181,6 +181,26 @@ _Appears in:_
 | `ignoreCancel` _boolean_ | IgnoreCancel indicates if the cancellation of a stack run should be ignored by AI. |  | Optional: \{\} <br /> |
 
 
+#### AiCriteria
+
+
+
+AiCriteria defines the configuration for AI pull request based service promotion.
+This can be a simpler path to construct the GitOps modifications needed to modify your services.
+
+
+
+_Appears in:_
+- [PipelineStageServicePromotionCriteria](#pipelinestageservicepromotioncriteria)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Whether AI based service promotion is enabled for this promotion. |  | Optional: \{\} <br /> |
+| `prompt` _string_ | The prompt to use to generate the pull request used in this promotion (liquid templating is supported). |  | Required: \{\} <br /> |
+| `title` _string_ | The title of the pull request used in this promotion (liquid templating is supported). If not provided, the AI will generate a title. |  | Optional: \{\} <br /> |
+| `message` _string_ | The message of the pull request used in this promotion (liquid templating is supported). If not provided, the AI will generate a message. |  | Optional: \{\} <br /> |
+
+
 #### AnalysisRates
 
 
@@ -3272,6 +3292,8 @@ _Appears in:_
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef pointing to a source ServiceDeployment to promote from. |  | Optional: \{\} <br /> |
 | `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef pointing to a source PrAutomation to promote from. |  | Optional: \{\} <br /> |
 | `repository` _string_ | The repository slug the PrAutomation will use.<br />E.g., pluralsh/console if PR is done against https://github.com/pluralsh/console. |  | Optional: \{\} <br /> |
+| `ai` _[AiCriteria](#aicriteria)_ | AI configuration for this promotion. |  | Optional: \{\} <br /> |
+| `connectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | SCM connection to use for ai pr based service promotion. |  | Optional: \{\} <br /> |
 | `secrets` _string array_ | Secrets to copy over in a promotion. |  | Optional: \{\} <br /> |
 
 

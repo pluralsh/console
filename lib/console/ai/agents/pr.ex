@@ -4,26 +4,27 @@ defmodule Console.AI.Agents.Pr do
     Pra.Ls,
     Pra.Read,
     Pra.Edit,
-    Agent.Done
+    Pra.Commit
   }
   require EEx
 
   @prompt "make all the edits requested for me"
 
+  @spec exec(binary, binary) :: {:ok, Commit.t} | {:error, binary}
   def exec(dir, prompt) do
     tools(dir)
     |> MemoryEngine.new(30, system_prompt: prompt(prompt))
     |> MemoryEngine.reduce([{:user, @prompt}], &reducer/2)
     |> case do
-      {:ok, %Done{}} -> :ok
+      {:ok, %Commit{} = commit} -> {:ok, commit}
       {:ok, msg} when is_binary(msg) -> {:error, msg}
       {:error, error} -> {:error, "error running code agent: #{inspect(error)}"}
     end
   end
 
   defp reducer(messages, _) do
-    case Enum.find(messages, &match?(%Done{}, &1)) do
-      %Done{} = done -> {:halt, done}
+    case Enum.find(messages, &match?(%Commit{}, &1)) do
+      %Commit{} = commit -> {:halt, commit}
       _ -> last_message(messages)
     end
   end
@@ -43,7 +44,7 @@ defmodule Console.AI.Agents.Pr do
       %Ls{dir: dir},
       %Read{dir: dir},
       %Edit{dir: dir},
-      Done
+      Commit
     ]
   end
 

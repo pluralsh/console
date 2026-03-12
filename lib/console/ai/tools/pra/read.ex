@@ -8,9 +8,11 @@ defmodule Console.AI.Tools.Pra.Read do
     field :path, :string
   end
 
+  @schema Console.priv_file!("tools/pra/read.json") |> Jason.decode!()
+
   def name(_), do: "pra_read"
   def description(_), do: "Reads the contents of a file at the given path"
-  def json_schema(_), do: Console.priv_file!("tools/pra/read.json") |> Jason.decode!()
+  def json_schema(_), do: @schema
 
   @valid ~w(path)a
 

@@ -7244,11 +7244,32 @@ input PromotionCriteriaAttributes {
   "the id of a pr automation to update this service"
   prAutomationId: ID
 
+  "the id of the scm connection to use for service promotion"
+  connectionId: ID
+
   "overrides the repository slug for the referenced pr automation"
   repository: String
 
   "the secrets to copy over in a promotion"
   secrets: [String]
+
+  "configuration for AI based service promotion"
+  ai: AiCriteriaAttributes
+}
+
+"configuration for AI based service promotion"
+input AiCriteriaAttributes {
+  "whether AI based service promotion is enabled for this promotion"
+  enabled: Boolean
+
+  "the prompt to use to generate the pull request used in this promotion"
+  prompt: String!
+
+  "the title of the pull request used in this promotion, if not provided, the AI will generate a title"
+  title: String
+
+  "the message of the pull request used in this promotion, if not provided, the AI will generate a message"
+  message: String
 }
 
 "a release pipeline, composed of multiple stages each with potentially multiple services"
@@ -7499,6 +7520,12 @@ type PromotionCriteria {
   "overrides the repository slug for the referenced pr automation"
   repository: String
 
+  "configuration for AI based service promotion"
+  ai: AiPromotionCriteria
+
+  "the scm connection to use for service promotion"
+  connection: ScmConnection
+
   "the source service in a prior stage to promote settings from"
   source: ServiceDeployment
 
@@ -7508,6 +7535,21 @@ type PromotionCriteria {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"configuration for AI based service promotion"
+type AiPromotionCriteria {
+  "whether AI based service promotion is enabled for this promotion"
+  enabled: Boolean
+
+  "the prompt to use to generate the pull request used in this promotion"
+  prompt: String!
+
+  "the title of the pull request used in this promotion, if not provided, the AI will generate a title"
+  title: String
+
+  "the message of the pull request used in this promotion, if not provided, the AI will generate a message"
+  message: String
 }
 
 "a representation of an individual pipeline promotion, which is a list of services\/revisions and timestamps to determine promotion status"

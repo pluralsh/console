@@ -594,6 +594,18 @@ type AiApprovalConfiguration struct {
 	File string `json:"file"`
 }
 
+// configuration for AI based service promotion
+type AiCriteriaAttributes struct {
+	// whether AI based service promotion is enabled for this promotion
+	Enabled *bool `json:"enabled,omitempty"`
+	// the prompt to use to generate the pull request used in this promotion
+	Prompt string `json:"prompt"`
+	// the title of the pull request used in this promotion, if not provided, the AI will generate a title
+	Title *string `json:"title,omitempty"`
+	// the message of the pull request used in this promotion, if not provided, the AI will generate a message
+	Message *string `json:"message,omitempty"`
+}
+
 type AiDelta struct {
 	Seq     int64      `json:"seq"`
 	Content string     `json:"content"`
@@ -663,6 +675,18 @@ type AiPinConnection struct {
 type AiPinEdge struct {
 	Node   *AiPin  `json:"node,omitempty"`
 	Cursor *string `json:"cursor,omitempty"`
+}
+
+// configuration for AI based service promotion
+type AiPromotionCriteria struct {
+	// whether AI based service promotion is enabled for this promotion
+	Enabled *bool `json:"enabled,omitempty"`
+	// the prompt to use to generate the pull request used in this promotion
+	Prompt string `json:"prompt"`
+	// the title of the pull request used in this promotion, if not provided, the AI will generate a title
+	Title *string `json:"title,omitempty"`
+	// the message of the pull request used in this promotion, if not provided, the AI will generate a message
+	Message *string `json:"message,omitempty"`
 }
 
 // Settings for configuring access to common LLM providers
@@ -6707,6 +6731,10 @@ type PromotionCriteria struct {
 	ID string `json:"id"`
 	// overrides the repository slug for the referenced pr automation
 	Repository *string `json:"repository,omitempty"`
+	// configuration for AI based service promotion
+	Ai *AiPromotionCriteria `json:"ai,omitempty"`
+	// the scm connection to use for service promotion
+	Connection *ScmConnection `json:"connection,omitempty"`
 	// the source service in a prior stage to promote settings from
 	Source *ServiceDeployment `json:"source,omitempty"`
 	// whether you want to copy any configuration values from the source service
@@ -6725,10 +6753,14 @@ type PromotionCriteriaAttributes struct {
 	SourceID *string `json:"sourceId,omitempty"`
 	// the id of a pr automation to update this service
 	PrAutomationID *string `json:"prAutomationId,omitempty"`
+	// the id of the scm connection to use for service promotion
+	ConnectionID *string `json:"connectionId,omitempty"`
 	// overrides the repository slug for the referenced pr automation
 	Repository *string `json:"repository,omitempty"`
 	// the secrets to copy over in a promotion
 	Secrets []*string `json:"secrets,omitempty"`
+	// configuration for AI based service promotion
+	Ai *AiCriteriaAttributes `json:"ai,omitempty"`
 }
 
 // a service to be potentially promoted

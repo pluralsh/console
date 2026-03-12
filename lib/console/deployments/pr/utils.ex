@@ -64,11 +64,14 @@ defmodule Console.Deployments.Pr.Utils do
     |> Map.put(:merge_cron, scrape(:merge_cron, content))
   end
 
-  def ai_edit(%PrAutomation{ai: %PrAutomation.AI{enabled: true, prompt: prompt}}, dir, ctx) do
+  @spec ai_edit(PrAutomation.t, binary, map) :: {:ok, PrAutomation.t} | {:error, binary}
+  def ai_edit(%PrAutomation{ai: %PrAutomation.AI{enabled: true, prompt: prompt}} = pra, dir, ctx) do
     with {:ok, prompt} <- render_solid(prompt, ctx),
-      do: Pr.exec(dir, prompt)
+         {:ok, %{title: title, message: message}} <- Pr.exec(dir, prompt) do
+      {:ok, Console.conditional_merge(pra, title: title, message: message)}
+    end
   end
-  def ai_edit(_, _, _), do: :ok
+  def ai_edit(pra, _, _), do: {:ok, pra}
 
   defp maybe_add(attrs, field, %{id: id}), do: Map.put(attrs, field, id)
   defp maybe_add(attrs, _, _), do: attrs

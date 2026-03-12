@@ -237,6 +237,15 @@ defmodule Console do
 
   def demo_project?(), do: conf(:is_demo_project, false)
 
+  def conditional_merge(%{} = base, overlay) do
+    Enum.reduce(overlay, base, fn {k, v}, acc ->
+      case Map.get(acc, k) do
+        nil -> Map.put(acc, k, v)
+        _ -> acc
+      end
+    end)
+  end
+
   def deep_get(map, keys, def \\ nil)
   def deep_get(map, [key], def), do: Map.get(map, key, def)
   def deep_get(map, [key | keys], def) do

@@ -774,6 +774,18 @@ export type AiApprovalConfiguration = {
   ignoreCancel?: Maybe<Scalars['Boolean']['output']>;
 };
 
+/** configuration for AI based service promotion */
+export type AiCriteriaAttributes = {
+  /** whether AI based service promotion is enabled for this promotion */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the message of the pull request used in this promotion, if not provided, the AI will generate a message */
+  message?: InputMaybe<Scalars['String']['input']>;
+  /** the prompt to use to generate the pull request used in this promotion */
+  prompt: Scalars['String']['input'];
+  /** the title of the pull request used in this promotion, if not provided, the AI will generate a title */
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type AiDelta = {
   __typename?: 'AiDelta';
   content: Scalars['String']['output'];
@@ -849,6 +861,19 @@ export type AiPinEdge = {
   __typename?: 'AiPinEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<AiPin>;
+};
+
+/** configuration for AI based service promotion */
+export type AiPromotionCriteria = {
+  __typename?: 'AiPromotionCriteria';
+  /** whether AI based service promotion is enabled for this promotion */
+  enabled?: Maybe<Scalars['Boolean']['output']>;
+  /** the message of the pull request used in this promotion, if not provided, the AI will generate a message */
+  message?: Maybe<Scalars['String']['output']>;
+  /** the prompt to use to generate the pull request used in this promotion */
+  prompt: Scalars['String']['output'];
+  /** the title of the pull request used in this promotion, if not provided, the AI will generate a title */
+  title?: Maybe<Scalars['String']['output']>;
 };
 
 export enum AiProvider {
@@ -8076,6 +8101,10 @@ export type ProjectUsageHistoryEdge = {
 /** how a promotion for a service will be performed */
 export type PromotionCriteria = {
   __typename?: 'PromotionCriteria';
+  /** configuration for AI based service promotion */
+  ai?: Maybe<AiPromotionCriteria>;
+  /** the scm connection to use for service promotion */
+  connection?: Maybe<ScmConnection>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** overrides the repository slug for the referenced pr automation */
@@ -8089,6 +8118,10 @@ export type PromotionCriteria = {
 
 /** actions to perform if this stage service were promoted */
 export type PromotionCriteriaAttributes = {
+  /** configuration for AI based service promotion */
+  ai?: InputMaybe<AiCriteriaAttributes>;
+  /** the id of the scm connection to use for service promotion */
+  connectionId?: InputMaybe<Scalars['ID']['input']>;
   /** the handle of the cluster for the source service */
   handle?: InputMaybe<Scalars['String']['input']>;
   /** the name of the source service */

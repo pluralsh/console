@@ -11,9 +11,11 @@ defmodule Console.AI.Tools.Pra.Edit do
     field :replacement, :string
   end
 
+  @schema Console.priv_file!("tools/pra/edit.json") |> Jason.decode!()
+
   def name(_), do: "edit"
   def description(_), do: "Edits the contents of a file at the given path by replacing the previous content with replacement content"
-  def json_schema(_), do: Console.priv_file!("tools/pra/edit.json") |> Jason.decode!()
+  def json_schema(_), do: @schema
 
   @valid ~w(path previous replacement)a
 

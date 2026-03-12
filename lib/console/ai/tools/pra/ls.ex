@@ -9,9 +9,11 @@ defmodule Console.AI.Tools.Pra.Ls do
     field :regex, :string
   end
 
+  @schema Console.priv_file!("tools/pra/ls.json") |> Jason.decode!()
+
   def name(_), do: "pra_ls"
   def description(_), do: "Lists the contents of a directory, with optional search to filter only files with matching content"
-  def json_schema(_), do: Console.priv_file!("tools/pra/ls.json") |> Jason.decode!()
+  def json_schema(_), do: @schema
 
   @valid ~w(path regex)a
 
