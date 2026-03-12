@@ -291,7 +291,7 @@ defmodule Console.Deployments.Workbenches do
   def update_job_status(_, _), do: {:error, "invalid input struct for job status update"}
 
   @spec complete_job(map, WorkbenchJob.t()) :: job_resp
-  def complete_job(%{conclusion: conclusion} = attrs, %WorkbenchJob{} = job) when is_binary(conclusion) do
+  def complete_job(attrs, %WorkbenchJob{} = job) do
     Repo.preload(job, :result)
     |> WorkbenchJob.changeset(%{
       status: :successful,
