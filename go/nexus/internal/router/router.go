@@ -1,4 +1,4 @@
-package bifrost
+package router
 
 import (
 	"context"
@@ -53,38 +53,13 @@ type TextResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.Bifro
 type ChatResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostChatResponse) (interface{}, error)
 type ResponsesResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostResponsesResponse) (interface{}, error)
 type EmbeddingResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostEmbeddingResponse) (interface{}, error)
+type CountTokensResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostCountTokensResponse) (interface{}, error)
+type ListModelsResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostListModelsResponse) (interface{}, error)
 type ErrorConverter func(ctx *schemas.BifrostContext, err *schemas.BifrostError) interface{}
-
-type FileRequestConverter func(ctx *schemas.BifrostContext, req interface{}) (*FileRequest, error)
-type FileUploadResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostFileUploadResponse) (interface{}, error)
-type FileListResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostFileListResponse) (interface{}, error)
-type FileRetrieveResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostFileRetrieveResponse) (interface{}, error)
-type FileDeleteResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostFileDeleteResponse) (interface{}, error)
-type FileContentResponseConverter func(ctx *schemas.BifrostContext, resp *schemas.BifrostFileContentResponse) (interface{}, error)
-
-// FileRequest wraps a Bifrost file request with its type information.
-type FileRequest struct {
-	Type            schemas.RequestType
-	UploadRequest   *schemas.BifrostFileUploadRequest
-	ListRequest     *schemas.BifrostFileListRequest
-	RetrieveRequest *schemas.BifrostFileRetrieveRequest
-	DeleteRequest   *schemas.BifrostFileDeleteRequest
-	ContentRequest  *schemas.BifrostFileContentRequest
-}
 
 type PreRequestCallback func(request *http.Request, bifrostCtx *schemas.BifrostContext, req interface{}) error
 
-type Provider string
-
-const (
-	ProviderOpenAI    Provider = "openai"
-	ProviderAnthropic Provider = "anthropic"
-)
-
 type RouteConfig struct {
-	// Provider is the AI provider type for the route
-	Provider Provider
-
 	// Path is the HTTP endpoint path for the route
 	Path string
 
@@ -100,9 +75,6 @@ type RouteConfig struct {
 	// RequestParser is a function to parse the raw request body.
 	RequestParser func(req *http.Request, target interface{}) error
 
-	// FileRequestConverter converts incoming requests to FileRequest
-	FileRequestConverter FileRequestConverter
-
 	// TextResponseConverter converts BifrostTextCompletionResponse to integration format
 	TextResponseConverter TextResponseConverter
 
@@ -115,26 +87,21 @@ type RouteConfig struct {
 	// EmbeddingResponseConverter converts BifrostEmbeddingResponse to integration format
 	EmbeddingResponseConverter EmbeddingResponseConverter
 
-	// FileUploadResponseConverter converts BifrostFileUploadResponse to integration format
-	FileUploadResponseConverter FileUploadResponseConverter
+	// ListTokensResponseConverter converts BifrostListModelsResponse to integration format
+	ListModelsResponseConverter ListModelsResponseConverter
 
-	// FileListResponseConverter converts BifrostFileListResponse to integration format
-	FileListResponseConverter FileListResponseConverter
-
-	// FileRetrieveResponseConverter converts BifrostFileRetrieveResponse to integration format
-	FileRetrieveResponseConverter FileRetrieveResponseConverter
-
-	// FileDeleteResponseConverter converts BifrostFileDeleteResponse to integration format
-	FileDeleteResponseConverter FileDeleteResponseConverter
-
-	// FileContentResponseConverter converts BifrostFileContentResponse to integration format
-	FileContentResponseConverter FileContentResponseConverter
+	// CountTokensResponseConverter converts BifrostCountTokensResponse to integration format
+	CountTokensResponseConverter CountTokensResponseConverter
 
 	// ErrorConverter converts BifrostError to integration format
 	ErrorConverter ErrorConverter
 
 	// StreamConfig holds the streaming configuration for the route
 	StreamConfig *StreamConfig
+
+	// SendDoneMarker controls whether "data: [DONE]" is written at the end of a stream.
+	// If nil, legacy path-based behavior is used for backward compatibility.
+	SendDoneMarker *bool
 
 	// PreCallback is called after parsing but before Bifrost processing
 	PreCallback PreRequestCallback
@@ -150,6 +117,9 @@ type GenericRouter struct {
 
 	// List of route configurations
 	routes []RouteConfig
+
+	// resolver is an instance of EmbeddingsResolver used for resolving embedding configurations within the router.
+	resolver *EmbeddingsResolver
 }
 
 func (in *GenericRouter) RegisterRoutes(r chi.Router) {
@@ -179,7 +149,7 @@ func (in *GenericRouter) RegisterRoutes(r chi.Router) {
 		}
 
 		handler := in.createHandler(route)
-		path := fmt.Sprintf("/%s/%s", route.Provider, strings.TrimPrefix(route.Path, "/"))
+		path := route.Path
 		switch route.Method {
 		case http.MethodGet:
 			r.Get(path, handler)
@@ -187,12 +157,16 @@ func (in *GenericRouter) RegisterRoutes(r chi.Router) {
 			r.Post(path, handler)
 		case http.MethodDelete:
 			r.Delete(path, handler)
+		case http.MethodPut:
+			r.Put(path, handler)
+		case http.MethodHead:
+			r.Head(path, handler)
 		default:
 			in.logger.Warn("unsupported HTTP method in route configuration",
 				zap.String("path", route.Path),
 				zap.String("method", route.Method),
 			)
-			return
+			continue
 		}
 		in.logger.Info("registered route", zap.String("method", route.Method), zap.String("path", path))
 	}
@@ -202,21 +176,27 @@ func (in *GenericRouter) createHandler(config RouteConfig) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		req := config.GetRequestTypeInstance()
 		bifrostCtx, cancel := schemas.NewBifrostContextWithCancel(r.Context())
+		if userAgent := r.Header.Get("User-Agent"); userAgent != "" {
+			bifrostCtx.SetValue(schemas.BifrostContextKeyUserAgent, userAgent)
+		}
 
 		if config.RequestParser != nil {
 			if err := config.RequestParser(r, req); err != nil {
+				defer cancel()
 				in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "Failed to parse request"))
 				return
 			}
 		} else {
 			rawBody, err := io.ReadAll(r.Body)
 			if err != nil {
+				defer cancel()
 				in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "Failed to read request body"))
 				return
 			}
 
 			if len(rawBody) > 0 {
 				if err = sonic.Unmarshal(rawBody, req); err != nil {
+					defer cancel()
 					in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "Invalid JSON"))
 					return
 				}
@@ -224,34 +204,26 @@ func (in *GenericRouter) createHandler(config RouteConfig) http.HandlerFunc {
 		}
 
 		var bifrostReq *schemas.BifrostRequest
-		var fileReq *FileRequest
 		var err error
 
 		if config.PreCallback != nil {
 			if err = config.PreCallback(r, bifrostCtx, req); err != nil {
+				defer cancel()
 				in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "pre-request callback failed"))
 				return
 			}
 		}
 
-		if config.FileRequestConverter != nil {
-			fileReq, err = config.FileRequestConverter(bifrostCtx, req)
-		} else {
-			bifrostReq, err = config.RequestConverter(bifrostCtx, req)
-		}
+		bifrostReq, err = config.RequestConverter(bifrostCtx, req)
 
 		if err != nil {
+			defer cancel()
 			in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(err, "failed to convert request"))
 			return
 		}
-		if bifrostReq == nil && fileReq == nil {
-			in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(nil, "converted request is nil"))
-			return
-		}
-
-		if fileReq != nil {
+		if bifrostReq == nil {
 			defer cancel()
-			in.handleFileRequest(w, config, r, fileReq, bifrostCtx)
+			in.sendError(w, bifrostCtx, config.ErrorConverter, in.toBifrostError(nil, "converted request is nil"))
 			return
 		}
 
@@ -268,133 +240,13 @@ func (in *GenericRouter) createHandler(config RouteConfig) http.HandlerFunc {
 	}
 }
 
-func (in *GenericRouter) handleFileRequest(w http.ResponseWriter, config RouteConfig, _ *http.Request, fileReq *FileRequest, ctx *schemas.BifrostContext) {
-	var response any
-	var err error
-
-	switch fileReq.Type {
-	case schemas.FileUploadRequest:
-		if fileReq.UploadRequest == nil {
-			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "Invalid upload request"))
-			return
-		}
-		uploadResponse, bifrostErr := in.client.FileUploadRequest(ctx, fileReq.UploadRequest)
-		if bifrostErr != nil {
-			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
-			return
-		}
-		if uploadResponse == nil {
-			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "upload response is nil"))
-			return
-		}
-
-		response, err = config.FileUploadResponseConverter(ctx, uploadResponse)
-
-	case schemas.FileListRequest:
-		if fileReq.ListRequest == nil {
-			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "Invalid list request"))
-			return
-		}
-		listResponse, bifrostErr := in.client.FileListRequest(ctx, fileReq.ListRequest)
-		if bifrostErr != nil {
-			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
-			return
-		}
-		if listResponse == nil {
-			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "list response is nil"))
-			return
-		}
-
-		response, err = config.FileListResponseConverter(ctx, listResponse)
-
-	case schemas.FileRetrieveRequest:
-		if fileReq.RetrieveRequest == nil {
-			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "Invalid retrieve request"))
-			return
-		}
-		retrieveResponse, bifrostErr := in.client.FileRetrieveRequest(ctx, fileReq.RetrieveRequest)
-		if bifrostErr != nil {
-			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
-			return
-		}
-		if retrieveResponse == nil {
-			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "retrieve response is nil"))
-			return
-		}
-
-		response, err = config.FileRetrieveResponseConverter(ctx, retrieveResponse)
-
-	case schemas.FileDeleteRequest:
-		if fileReq.DeleteRequest == nil {
-			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "Invalid delete request"))
-			return
-		}
-		deleteResponse, bifrostErr := in.client.FileDeleteRequest(ctx, fileReq.DeleteRequest)
-		if bifrostErr != nil {
-			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
-			return
-		}
-		if deleteResponse == nil {
-			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "delete response is nil"))
-			return
-		}
-
-		response, err = config.FileDeleteResponseConverter(ctx, deleteResponse)
-
-	case schemas.FileContentRequest:
-		if fileReq.ContentRequest == nil {
-			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "Invalid content request"))
-			return
-		}
-		contentResponse, bifrostErr := in.client.FileContentRequest(ctx, fileReq.ContentRequest)
-		if bifrostErr != nil {
-			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
-			return
-		}
-		if contentResponse == nil {
-			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "content response is nil"))
-			return
-		}
-
-		// For file content, we might return binary data
-		// Assuming FileContentResponseConverter handles it or we directly write to writer if it's nil?
-		// In bifrost integration it says: "Note: This may return binary data or a wrapper object depending on the integration."
-		if config.FileContentResponseConverter != nil {
-			response, err = config.FileContentResponseConverter(ctx, contentResponse)
-		} else {
-			// Default binary handling if converter is not provided
-			if contentResponse.Content != nil {
-				_, err = w.Write(contentResponse.Content)
-				if err != nil {
-					in.logger.Error("failed to write file content", zap.Error(err))
-				}
-				return
-			}
-			response = nil // or some success
-		}
-
-	default:
-		in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "unsupported request type"))
-		return
-	}
-
-	if err != nil {
-		in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(err, "failed to convert response"))
-		return
-	}
-
-	if response != nil {
-		in.sendSuccess(w, ctx, config.ErrorConverter, response)
-	}
-}
-
 func (in *GenericRouter) handleStreamingRequest(w http.ResponseWriter, config RouteConfig, bifrostReq *schemas.BifrostRequest, ctx *schemas.BifrostContext, cancel context.CancelFunc) {
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	var stream chan *schemas.BifrostStream
+	var stream chan *schemas.BifrostStreamChunk
 	var bifrostErr *schemas.BifrostError
 
 	switch {
@@ -431,7 +283,7 @@ func (in *GenericRouter) handleStreamingRequest(w http.ResponseWriter, config Ro
 	in.handleStreaming(w, ctx, config, stream, cancel)
 }
 
-func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.BifrostContext, config RouteConfig, stream chan *schemas.BifrostStream, cancel context.CancelFunc) {
+func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.BifrostContext, config RouteConfig, stream chan *schemas.BifrostStreamChunk, cancel context.CancelFunc) {
 	defer cancel()
 
 	flusher, ok := w.(http.Flusher)
@@ -484,7 +336,7 @@ func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.Bif
 
 			// Some clients (like OpenAI) expect a [DONE] marker to stop listening,
 			// even if an error occurred during the stream.
-			if in.shouldSendDoneMarker(config.Provider, config.Path) {
+			if in.shouldSendDoneMarker(config) {
 				_, _ = fmt.Fprint(w, "data: [DONE]\n\n")
 				flusher.Flush()
 			}
@@ -563,7 +415,7 @@ func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.Bif
 	//   - OpenAI "responses" API and Anthropic messages API: they signal completion by simply closing the stream, not sending [DONE].
 	//   - Bedrock: uses AWS Event Stream format rather than SSE with [DONE].
 	// Bifrost handles any additional cleanup internally on normal stream completion.
-	if in.shouldSendDoneMarker(config.Provider, config.Path) {
+	if in.shouldSendDoneMarker(config) {
 		if _, err := fmt.Fprint(w, "data: [DONE]\n\n"); err != nil {
 			in.logger.Error("failed to send done marker", zap.Error(err))
 			cancel()
@@ -572,16 +424,12 @@ func (in *GenericRouter) handleStreaming(w http.ResponseWriter, ctx *schemas.Bif
 	}
 }
 
-func (in *GenericRouter) shouldSendDoneMarker(provider Provider, path string) bool {
-	if provider == ProviderAnthropic {
-		return false
+func (in *GenericRouter) shouldSendDoneMarker(config RouteConfig) bool {
+	if config.SendDoneMarker != nil {
+		return *config.SendDoneMarker
 	}
 
-	if strings.Contains(path, "/responses") {
-		return false
-	}
-
-	return true
+	return !strings.Contains(config.Path, "/responses")
 }
 
 func (in *GenericRouter) toStreamingErrorResponse(errorResponse any) (string, error) {
@@ -603,12 +451,12 @@ func (in *GenericRouter) toStreamingErrorResponse(errorResponse any) (string, er
 	return fmt.Sprintf("data: %s\n\n", string(errorJSON)), nil
 }
 
-// safeGetRequestType safely obtains the request type from a BifrostStream chunk.
+// safeGetRequestType safely obtains the request type from a BifrostStreamChunk.
 // It checks multiple sources in order of preference:
 // 1. Response ExtraFields if any response is available
 // 2. BifrostError ExtraFields if error is available and not nil
 // 3. Falls back to "unknown" if no source is available
-func (in *GenericRouter) safeGetRequestType(chunk *schemas.BifrostStream) string {
+func (in *GenericRouter) safeGetRequestType(chunk *schemas.BifrostStreamChunk) string {
 	if chunk == nil {
 		return "unknown"
 	}
@@ -621,10 +469,6 @@ func (in *GenericRouter) safeGetRequestType(chunk *schemas.BifrostStream) string
 		return string(chunk.BifrostChatResponse.ExtraFields.RequestType)
 	case chunk.BifrostResponsesStreamResponse != nil:
 		return string(chunk.BifrostResponsesStreamResponse.ExtraFields.RequestType)
-	case chunk.BifrostSpeechStreamResponse != nil:
-		return string(chunk.BifrostSpeechStreamResponse.ExtraFields.RequestType)
-	case chunk.BifrostTranscriptionStreamResponse != nil:
-		return string(chunk.BifrostTranscriptionStreamResponse.ExtraFields.RequestType)
 	}
 
 	// Try to get RequestType from error ExtraFields (fallback)
@@ -641,6 +485,22 @@ func (in *GenericRouter) handleNonStreamingRequest(w http.ResponseWriter, config
 	var err error
 
 	switch {
+	case bifrostReq.ListModelsRequest != nil:
+		var listModelsResponse *schemas.BifrostListModelsResponse
+		var bifrostErr *schemas.BifrostError
+		listModelsResponse, bifrostErr = in.client.ListAllModels(ctx, bifrostReq.ListModelsRequest)
+
+		if bifrostErr != nil {
+			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
+			return
+		}
+
+		if listModelsResponse == nil {
+			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "Bifrost response is nil"))
+			return
+		}
+
+		response, err = config.ListModelsResponseConverter(ctx, listModelsResponse)
 	case bifrostReq.TextCompletionRequest != nil:
 		bifrostResponse, bifrostErr := in.client.TextCompletionRequest(ctx, bifrostReq.TextCompletionRequest)
 		if bifrostErr != nil {
@@ -680,6 +540,19 @@ func (in *GenericRouter) handleNonStreamingRequest(w http.ResponseWriter, config
 		}
 
 		response, err = config.ResponsesResponseConverter(ctx, bifrostResponse)
+	case bifrostReq.CountTokensRequest != nil:
+		bifrostResponse, bifrostErr := in.client.CountTokensRequest(ctx, bifrostReq.CountTokensRequest)
+		if bifrostErr != nil {
+			in.sendError(w, ctx, config.ErrorConverter, bifrostErr)
+			return
+		}
+
+		if bifrostResponse == nil {
+			in.sendError(w, ctx, config.ErrorConverter, in.toBifrostError(nil, "count tokens response is nil"))
+			return
+		}
+
+		response, err = config.CountTokensResponseConverter(ctx, bifrostResponse)
 	case bifrostReq.EmbeddingRequest != nil:
 		bifrostResponse, bifrostErr := in.client.EmbeddingRequest(ctx, bifrostReq.EmbeddingRequest)
 		if bifrostErr != nil {
@@ -707,27 +580,49 @@ func (in *GenericRouter) handleNonStreamingRequest(w http.ResponseWriter, config
 }
 
 func (in *GenericRouter) sendError(w http.ResponseWriter, bifrostCtx *schemas.BifrostContext, errorConverter ErrorConverter, bifrostErr *schemas.BifrostError) {
-	if bifrostErr.StatusCode != nil {
-		w.WriteHeader(*bifrostErr.StatusCode)
-	} else {
-		w.WriteHeader(http.StatusInternalServerError)
+	statusCode := http.StatusInternalServerError
+	if bifrostErr != nil && bifrostErr.StatusCode != nil {
+		statusCode = *bifrostErr.StatusCode
 	}
-	w.Header().Set("Content-Type", "application/json")
 
-	responseObj := errorConverter(bifrostCtx, bifrostErr)
-	if err := json.NewEncoder(w).Encode(responseObj); err != nil {
-		in.logger.Error("failed to encode error response", zap.Error(err))
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = fmt.Fprintf(w, "failed to encode error response: %v", err)
+	if bifrostErr == nil {
+		bifrostErr = in.toBifrostError(nil, "internal server error")
+	}
+
+	var responseObj any = map[string]any{
+		"error": map[string]any{
+			"message": "internal server error",
+		},
+	}
+	if errorConverter != nil {
+		responseObj = errorConverter(bifrostCtx, bifrostErr)
+	}
+
+	responsePayload, err := json.Marshal(responseObj)
+	if err != nil {
+		in.logger.Error("failed to marshal error response", zap.Error(err))
+		statusCode = http.StatusInternalServerError
+		responsePayload = []byte(`{"error":{"message":"internal server error"}}`)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	if _, err = w.Write(responsePayload); err != nil {
+		in.logger.Error("failed to write error response", zap.Error(err))
 	}
 }
 
 func (in *GenericRouter) sendSuccess(w http.ResponseWriter, bifrostCtx *schemas.BifrostContext, errorConverter ErrorConverter, response any) {
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("Content-Type", "application/json")
-
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	responsePayload, err := json.Marshal(response)
+	if err != nil {
 		in.sendError(w, bifrostCtx, errorConverter, in.toBifrostError(err, "failed to encode success response"))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if _, err = w.Write(responsePayload); err != nil {
+		in.logger.Error("failed to write success response", zap.Error(err))
 	}
 }
 

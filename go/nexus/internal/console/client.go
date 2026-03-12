@@ -162,7 +162,7 @@ func (c *client) IsConnected() bool {
 		return false
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	err := c.healthCheck(ctx)

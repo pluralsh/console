@@ -361,10 +361,12 @@ func (in *AzureOpenAISettings) DeepCopyInto(out *AzureOpenAISettings) {
 		*out = new(string)
 		**out = **in
 	}
-	if in.Deployment != nil {
-		in, out := &in.Deployment, &out.Deployment
-		*out = new(string)
-		**out = **in
+	if in.Deployments != nil {
+		in, out := &in.Deployments, &out.Deployments
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
 	}
 	if in.ProxyModels != nil {
 		in, out := &in.ProxyModels, &out.ProxyModels

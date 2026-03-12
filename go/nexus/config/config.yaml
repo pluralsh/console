@@ -4,7 +4,7 @@ server:
   address: ":8080"
 
   # Base path for all AI proxy requests
-  path: "/ai/proxy"
+  path: ""
 
   # Request timeouts
   readTimeout: "30s"
@@ -12,7 +12,7 @@ server:
 
 console:
   # Console gRPC endpoint - REQUIRED
-  grpcEndpoint: "localhost:55510"
+  grpcEndpoint: "localhost:50051"
 
   # How often to refresh console configuration
   configTTL: "60s"

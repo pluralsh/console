@@ -95,14 +95,12 @@ func validateConsole(cfg *ConsoleConfig) ValidationErrors {
 			Field:   "console.grpcEndpoint",
 			Message: "grpcEndpoint is required",
 		})
-	} else {
 		// Validate endpoint format (should be host:port)
-		if !strings.Contains(cfg.GRPCEndpoint, ":") {
-			errors = append(errors, ValidationError{
-				Field:   "console.grpcEndpoint",
-				Message: "grpcEndpoint must be in format 'host:port'",
-			})
-		}
+	} else if !strings.Contains(cfg.GRPCEndpoint, ":") {
+		errors = append(errors, ValidationError{
+			Field:   "console.grpcEndpoint",
+			Message: "grpcEndpoint must be in format 'host:port'",
+		})
 	}
 
 	// Validate poll interval

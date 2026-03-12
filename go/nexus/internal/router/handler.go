@@ -1,4 +1,4 @@
-package bifrost
+package router
 
 import (
 	"context"
@@ -24,13 +24,12 @@ type Handler struct {
 // NewHandler creates a new Bifrost handler using the Bifrost Core SDK
 func NewHandler(consoleClient console.Client) (*Handler, error) {
 	logger := log.Logger().With(zap.String("component", "bifrost-handler"))
-	account := NewAccount(context.Background(), consoleClient, logger)
+	account := NewAccount(consoleClient)
 	bifrostClient, err := bifrostcore.Init(context.Background(), schemas.BifrostConfig{
 		Account:            account,
 		InitialPoolSize:    1000,
 		DropExcessRequests: false,
 		Logger:             bifrostcore.NewDefaultLogger(schemas.LogLevelInfo),
-		Plugins:            []schemas.Plugin{},
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize Bifrost client: %w", err)
@@ -43,14 +42,15 @@ func NewHandler(consoleClient console.Client) (*Handler, error) {
 		router:        chi.NewRouter(),
 	}
 
-	h.registerRoutes()
+	h.registerRoutes(account)
 
 	return h, nil
 }
 
-func (h *Handler) registerRoutes() {
-	NewOpenAIRouter(h.bifrostClient).RegisterRoutes(h.router)
-	NewAnthropicRouter(h.bifrostClient).RegisterRoutes(h.router)
+func (h *Handler) registerRoutes(account NexusAccount) {
+	NewOpenAIRouter(h.bifrostClient, NewEmbeddingsResolver(account)).RegisterRoutes(h.router)
+	NewAnthropicRouter(h.bifrostClient, NewEmbeddingsResolver(account)).RegisterRoutes(h.router)
+	NewGeminiRouter(h.bifrostClient, NewEmbeddingsResolver(account)).RegisterRoutes(h.router)
 }
 
 // ServeHTTP implements the http.Handler interface

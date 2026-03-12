@@ -35,6 +35,7 @@ linters:
       - third_party$
       - builtin$
       - examples$
+      - (^|/)ai-proxy($|/) # ai-proxy module is deprecated
 formatters:
   enable:
     - gofmt
