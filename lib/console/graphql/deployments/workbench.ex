@@ -93,7 +93,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_tool_elastic_connection_attributes do
     field :url,      non_null(:string), description: "elasticsearch base url"
     field :username, non_null(:string), description: "basic auth username"
-    field :password, non_null(:string), description: "basic auth password"
+    field :password, :string, description: "basic auth password"
     field :index,    non_null(:string), description: "elasticsearch index"
   end
 
@@ -123,12 +123,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   input_object :workbench_tool_datadog_connection_attributes do
     field :site,    :string, description: "datadog site (e.g. datadoghq.com)"
-    field :api_key, non_null(:string), description: "datadog API key"
+    field :api_key, :string, description: "datadog API key"
     field :app_key, :string, description: "datadog application key"
   end
 
   input_object :workbench_tool_linear_connection_attributes do
-    field :access_token, non_null(:string), description: "linear API access token"
+    field :access_token, :string, description: "linear API access token"
   end
 
   input_object :workbench_tool_atlassian_connection_attributes do
@@ -267,10 +267,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :working_theory,  :string, description: "the working theory for this result"
     field :conclusion,     :string, description: "the conclusion for this result"
     field :todos,          list_of(:workbench_job_result_todo), description: "todos for this result"
+    field :metadata,       :workbench_job_result_metadata, description: "metadata for this result"
 
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this result belongs to"
 
     timestamps()
+  end
+
+  object :workbench_job_result_metadata do
+    field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for this result"
   end
 
   object :workbench_job_result_todo do
@@ -360,16 +365,19 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_tool_prometheus_connection do
     field :url,       :string, description: "prometheus base url"
+    field :username,  :string, description: "basic auth username"
     field :tenant_id, :string, description: "optional tenant id"
   end
 
   object :workbench_tool_loki_connection do
     field :url,       :string, description: "loki base url"
+    field :username,  :string, description: "basic auth username"
     field :tenant_id, :string, description: "optional tenant id"
   end
 
   object :workbench_tool_tempo_connection do
     field :url,       :string, description: "tempo base url"
+    field :username,  :string, description: "basic auth username"
     field :tenant_id, :string, description: "optional tenant id"
   end
 

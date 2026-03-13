@@ -4,7 +4,39 @@
         "conclusion": {
             "type": "string",
             "description": "The conclusion to this workbench job you want to record"
+        },
+        "metrics": {
+            "type": "array",
+            "description": "Key metrics relevant to the conclusion to persist on the final result",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The timestamp of the metric"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the metric"
+                    },
+                    "value": {
+                        "type": "number",
+                        "description": "The value of the metric"
+                    },
+                    "labels": {
+                        "type": "object",
+                        "description": "Labels for the metric"
+                    }
+                },
+                "required": [
+                    "name",
+                    "value"
+                ]
+            }
         }
     },
-    "required": ["conclusion"]
+    "required": [
+        "conclusion"
+    ]
 }

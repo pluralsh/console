@@ -18,7 +18,6 @@ import {
   PodContainerIcon,
   PrOpenIcon,
   PrQueueIcon,
-  RobotIcon,
   setThemeColorMode,
   SprayIcon,
   StackIcon,
@@ -174,17 +173,6 @@ export function useCommands({
                   label: 'Enable Edge',
                   icon: EdgeComputeIcon,
                   callback: () => setFeatureFlag('Edge', true),
-                  deps: [setFeatureFlag],
-                },
-              ]
-            : []),
-          ...(!featureFlags.Agent
-            ? [
-                {
-                  id: 'enable-agent',
-                  label: 'Enable Agent',
-                  icon: RobotIcon,
-                  callback: () => setFeatureFlag('Agent', true),
                   deps: [setFeatureFlag],
                 },
               ]

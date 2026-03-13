@@ -3304,7 +3304,7 @@
       },
       "WorkbenchJobResult": {
         "title": "WorkbenchJobResult",
-        "description": "The result of a workbench job run (working theory, conclusion, todos)",
+        "description": "The result of a workbench job run (working theory, conclusion, todos, metadata)",
         "properties": {
           "conclusion": {
             "description": "The conclusion for this result",
@@ -3317,6 +3317,9 @@
           "inserted_at": {
             "format": "date-time",
             "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/WorkbenchJobResultMetadata"
           },
           "todos": {
             "description": "Todos for this result",
@@ -3336,6 +3339,46 @@
           "working_theory": {
             "description": "The working theory for this result",
             "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "WorkbenchJobResultMetadata": {
+        "title": "WorkbenchJobResultMetadata",
+        "description": "Metadata associated with a workbench job result",
+        "properties": {
+          "metrics": {
+            "description": "Metrics for this result",
+            "items": {
+              "$ref": "#/components/schemas/WorkbenchJobResultMetric"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "WorkbenchJobResultMetric": {
+        "title": "WorkbenchJobResultMetric",
+        "description": "A metric persisted on the job result",
+        "properties": {
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Labels for the metric",
+            "type": "object"
+          },
+          "name": {
+            "description": "Name of the metric",
+            "type": "string"
+          },
+          "timestamp": {
+            "description": "ISO 8601 timestamp of the metric",
+            "type": "string"
+          },
+          "value": {
+            "description": "Value of the metric",
+            "type": "number"
           }
         },
         "type": "object"
