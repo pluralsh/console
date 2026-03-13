@@ -2,6 +2,7 @@ import { DeepPartial } from '@apollo/client/utilities'
 import {
   Button,
   Card,
+  CodeEditor,
   Flex,
   FormField,
   Input2,
@@ -13,9 +14,10 @@ import {
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { EditableDiv } from 'components/utils/EditableDiv'
 import { WorkbenchToolHttpMethod, WorkbenchToolType } from 'generated/graphql'
-import { ComponentProps, ComponentType } from 'react'
+import { ComponentProps, ComponentType, useState } from 'react'
 import styled from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
+import { isValidJson } from 'utils/isValidJson'
 import {
   INITIAL_TOOL_CONFIG_BY_TYPE,
   WorkbenchToolFormState,
@@ -148,14 +150,6 @@ function ElasticFormFields({
   )
 }
 
-const HTTP_METHOD_OPTIONS: { key: WorkbenchToolHttpMethod; label: string }[] = [
-  { key: WorkbenchToolHttpMethod.Get, label: 'GET' },
-  { key: WorkbenchToolHttpMethod.Post, label: 'POST' },
-  { key: WorkbenchToolHttpMethod.Put, label: 'PUT' },
-  { key: WorkbenchToolHttpMethod.Patch, label: 'PATCH' },
-  { key: WorkbenchToolHttpMethod.Delete, label: 'DELETE' },
-]
-
 function HttpFormFields({
   config: c,
   setConfig: set,
@@ -202,9 +196,9 @@ function HttpFormFields({
           selectionMode="single"
           label="HTTP method"
         >
-          {HTTP_METHOD_OPTIONS.map(({ key, label }) => (
+          {Object.values(WorkbenchToolHttpMethod).map((label) => (
             <ListBoxItem
-              key={key}
+              key={label}
               label={label}
             />
           ))}
@@ -260,32 +254,11 @@ function HttpFormFields({
         setValue={(value) => set({ ...c, body: value || undefined })}
         css={{ minHeight: 56 }}
       />
-      <InputField
-        multiline
+      <JsonEditorField
         label="Input schema (JSON)"
         hint="JSON schema for the tool input"
-        placeholder='{"type":"object",...}'
-        initialValue={
-          typeof c.inputSchema === 'object'
-            ? JSON.stringify(c.inputSchema, null, 2)
-            : ((c.inputSchema as string) ?? '')
-        }
-        setValue={(raw) => {
-          if (!raw.trim()) {
-            set({ ...c, inputSchema: undefined })
-            return
-          }
-          try {
-            set({
-              ...c,
-              inputSchema: JSON.parse(raw) as Record<string, unknown>,
-            })
-          } catch {
-            // allow invalid JSON while typing
-            set({ ...c, inputSchema: undefined })
-          }
-        }}
-        css={{ minHeight: 96 }}
+        value={c.inputSchema as Record<string, unknown> | string | undefined}
+        onChange={(jsonStr) => set({ ...c, inputSchema: jsonStr })}
       />
     </>
   )
@@ -379,6 +352,43 @@ function LinearFormFields({
       value={c.accessToken ?? ''}
       onChange={(e) => set({ ...c, accessToken: e.target.value })}
     />
+  )
+}
+
+function JsonEditorField({
+  hint,
+  value,
+  onChange,
+  ...props
+}: {
+  value: Nullable<Record<string, unknown> | string>
+  onChange: (jsonStr: string | undefined) => void
+} & ComponentProps<typeof FormField>) {
+  const [rawValue, setRawValue] = useState(() =>
+    typeof value === 'object' ? JSON.stringify(value, null, 2) : (value ?? '')
+  )
+  const [isJsonInvalid, setIsJsonInvalid] = useState(false)
+
+  return (
+    <FormField
+      {...props}
+      hint={isJsonInvalid ? 'Invalid JSON' : hint}
+      error={isJsonInvalid}
+    >
+      <CodeEditor
+        value={rawValue}
+        onChange={(raw) => {
+          setRawValue(raw ?? '')
+          if (isValidJson(raw)) {
+            onChange(raw)
+            setIsJsonInvalid(false)
+          } else setIsJsonInvalid(true)
+        }}
+        language="json"
+        height={160}
+        options={{ lineNumbers: 'off', minimap: { enabled: false } }}
+      />
+    </FormField>
   )
 }
 

@@ -156,7 +156,8 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
       http: {
         url: url ?? '',
         method:
-          (method as WorkbenchToolHttpMethod) ?? WorkbenchToolHttpMethod.Get,
+          (method?.toUpperCase() as WorkbenchToolHttpMethod) ??
+          WorkbenchToolHttpMethod.Get,
         body: body ?? undefined,
         headers: headers?.filter(isNonNullable),
         inputSchema: inputSchema ?? undefined,
