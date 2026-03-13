@@ -92,6 +92,7 @@ import CronJob, {
 import CronJobs from '../components/kubernetes/workloads/CronJobs'
 import DaemonSet, {
   DaemonSetEvents,
+  DaemonSetMetrics,
   DaemonSetPods,
   DaemonSetServices,
 } from '../components/kubernetes/workloads/DaemonSet'
@@ -555,6 +556,10 @@ export const kubernetesRoutes = (
       <Route
         path="services"
         element={<DaemonSetServices />}
+      />
+      <Route
+        path="metrics"
+        element={<DaemonSetMetrics />}
       />
       <Route
         path="events"
