@@ -137,6 +137,8 @@ fragment SentinelCheckConfigurationFragment on SentinelCheckConfiguration {
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
     distro
     tags
+    rerunFailures
+    rerunFailuresCount
     gotestsum {
         p
         parallel
