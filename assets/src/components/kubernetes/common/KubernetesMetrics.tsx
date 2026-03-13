@@ -19,6 +19,7 @@ import { Prometheus } from '../../../utils/prometheus.ts'
 import { useMetricsEnabled } from 'components/contexts/DeploymentSettingsContext'
 import { GqlError } from 'components/utils/Alert.tsx'
 import { MetricsEmptyState } from '../../cd/cluster/ClusterMetrics.tsx'
+import { RectangleSkeleton } from '../../utils/SkeletonLoaders.tsx'
 
 const convertVals = (values) =>
   values.map(({ timestamp, value }) => ({
@@ -235,7 +236,13 @@ function Metric({
     )
   }
 
-  if (loading && !data) return <LoadingIndicator />
+  if (loading && !data)
+    return (
+      <RectangleSkeleton
+        $height="100%"
+        $width="100%"
+      />
+    )
 
   return (
     <Card
