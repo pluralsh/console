@@ -4704,6 +4704,7 @@ func (t *ProviderCredentialFragment) GetKind() string {
 
 type SentinelRunJobFragment struct {
 	ID          string                            "json:\"id\" graphql:\"id\""
+	Check       *string                           "json:\"check,omitempty\" graphql:\"check\""
 	Status      SentinelRunJobStatus              "json:\"status\" graphql:\"status\""
 	Format      SentinelRunJobFormat              "json:\"format\" graphql:\"format\""
 	UsesGit     *bool                             "json:\"usesGit,omitempty\" graphql:\"usesGit\""
@@ -4718,6 +4719,12 @@ func (t *SentinelRunJobFragment) GetID() string {
 		t = &SentinelRunJobFragment{}
 	}
 	return t.ID
+}
+func (t *SentinelRunJobFragment) GetCheck() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment{}
+	}
+	return t.Check
 }
 func (t *SentinelRunJobFragment) GetStatus() *SentinelRunJobStatus {
 	if t == nil {
@@ -45786,6 +45793,7 @@ fragment PageInfoFragment on PageInfo {
 }
 fragment SentinelRunJobFragment on SentinelRunJob {
 	id
+	check
 	status
 	format
 	usesGit
@@ -45973,6 +45981,7 @@ const GetSentinelRunJobDocument = `query GetSentinelRunJob ($id: ID!) {
 }
 fragment SentinelRunJobFragment on SentinelRunJob {
 	id
+	check
 	status
 	format
 	usesGit
@@ -46319,6 +46328,7 @@ const UpdateSentinelRunJobStatusDocument = `mutation UpdateSentinelRunJobStatus 
 }
 fragment SentinelRunJobFragment on SentinelRunJob {
 	id
+	check
 	status
 	format
 	usesGit
