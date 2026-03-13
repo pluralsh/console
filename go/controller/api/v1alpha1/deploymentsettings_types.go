@@ -614,6 +614,16 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			return nil, err
 		}
 
+		var deployments *string
+
+		if len(in.Azure.Deployments) > 0 {
+			json, err := json.Marshal(in.Azure.Deployments)
+			if err != nil {
+				return nil, fmt.Errorf("failed to marshal azure deployments field: %w", err)
+			}
+			deployments = lo.ToPtr(string(json))
+		}
+
 		attr.Azure = &console.AzureOpenaiAttributes{
 			Endpoint:       in.Azure.Endpoint,
 			APIVersion:     in.Azure.ApiVersion,
@@ -621,7 +631,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			ToolModel:      in.Azure.ToolModel,
 			EmbeddingModel: in.Azure.EmbeddingModel,
 			AccessToken:    token,
-			Deployment:     in.Azure.Deployment,
+			Deployments:    deployments,
 			ProxyModels:    lo.ToSlicePtr(in.Azure.ProxyModels),
 		}
 	}
@@ -843,10 +853,10 @@ type AzureOpenAISettings struct {
 	// +kubebuilder:validation:Optional
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
 
-	// Deployment is the Azure OpenAI deployment name.
+	// Deployments is a mapping from model id to azure OpenAI deployment if those require additional configuration
 	//
 	// +kubebuilder:validation:Optional
-	Deployment *string `json:"deployment,omitempty"`
+	Deployments map[string]string `json:"deployments,omitempty"`
 
 	// ProxyModels are additional models to support within the integrated ai proxy.
 	//

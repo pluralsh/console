@@ -158,6 +158,7 @@ export function VirtualList<T, M>({
       // only shift when infinite scrolling up (and not currently at the bottom)
       shift={
         isReversed &&
+        hasNextPage &&
         (internalRef.current?.scrollOffset ?? Infinity) < 50 &&
         !shouldStickToBottom.current
       }

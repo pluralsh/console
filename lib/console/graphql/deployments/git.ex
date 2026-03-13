@@ -155,6 +155,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :creates,       :pr_automation_create_spec_attributes
     field :deletes,       :pr_automation_delete_spec_attributes
     field :vendor,        :pr_vendor_spec_attributes, description: "a specification for vendoring software in this PR"
+    field :ai,            :pr_ai_spec_attributes, description: "configuration for AI assistance in this PR automation"
     field :lua,           :pr_lua_spec_attributes, description: "a specification for sourcing lua scripts to preprocess the PR automation"
     field :git,           :git_ref_attributes, description: "location in git for external templates and scripts"
     field :labels,        list_of(:string), description: "labels to apply to created prs"
@@ -299,6 +300,12 @@ defmodule Console.GraphQl.Deployments.Git do
     field :external, :boolean, description: "whether the lua script is sourced from an external git repo bound to this automation"
     field :script,   :string, description: "file of a flat script to use"
     field :folder,   :string, description: "a folder with lua library code and scripts to use"
+  end
+
+  @desc "configuration for AI assistance in this PR automation"
+  input_object :pr_ai_spec_attributes do
+    field :enabled, :boolean, description: "whether AI assistance is enabled for this automation"
+    field :prompt,  non_null(:string), description: "custom prompt to guide AI updates for this automation"
   end
 
   @desc "a specification for vendoring software in this PR"
@@ -581,6 +588,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :deletes,       :pr_delete_spec
     field :proxy,         :http_proxy_configuration, description: "a proxy to use for git requests"
     field :vendor,        :pr_vendor_spec, description: "software vendoring logic to perform in this PR"
+    field :ai,            :pr_ai_spec, description: "configuration for AI assistance in this PR automation"
     field :lua,           :pr_lua_spec, description: "a set of lua scripts to use to preprocess the PR automation"
     field :git,           :git_ref, description: "location in git for external templates and scripts"
     field :labels,        list_of(:string), description: "labels to apply to the created prs"
@@ -700,6 +708,11 @@ defmodule Console.GraphQl.Deployments.Git do
     field :script,   :string, description: "file of a flat script to use"
     field :folder,   :string, description: "a folder with lua library code and scripts to use"
     field :external, :boolean, description: "whether the lua script is sourced from an external git repo bound to this automation"
+  end
+
+  object :pr_ai_spec do
+    field :enabled, :boolean, description: "whether AI assistance is enabled for this automation"
+    field :prompt,  non_null(:string), description: "custom prompt to guide AI updates for this automation"
   end
 
   object :pr_vendor_spec do

@@ -643,6 +643,19 @@ defmodule Console.Factory do
     }
   end
 
+  def monitor_factory do
+    %Schema.Monitor{
+      name: sequence(:monitor, & "monitor-#{&1}"),
+      description: "monitor description",
+      severity: :low,
+      type: :log,
+      query: %{log: %{query: "error", bucket_size: "5m"}},
+      threshold: %{aggregate: :max, value: 1},
+      evaluation_cron: "*/5 * * * *",
+      service: build(:service)
+    }
+  end
+
   def terraform_state_factory do
     %Schema.TerraformState{
       stack: build(:stack)

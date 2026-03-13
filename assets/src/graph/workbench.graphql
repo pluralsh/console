@@ -1,0 +1,247 @@
+fragment WorkbenchTiny on Workbench {
+  id
+  name
+  description
+  repository {
+    id
+    url
+    httpsPath
+  }
+  tools {
+    ...WorkbenchToolTiny
+  }
+}
+
+fragment Workbench on Workbench {
+  ...WorkbenchTiny
+  systemPrompt
+  agentRuntime {
+    id
+    name
+  }
+  configuration {
+    infrastructure {
+      services
+      stacks
+      kubernetes
+    }
+    coding {
+      mode
+      repositories
+    }
+  }
+  skills {
+    ref {
+      ref
+      folder
+    }
+    files
+  }
+  tools {
+    ...WorkbenchTool
+  }
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
+fragment WorkbenchToolTiny on WorkbenchTool {
+  id
+  name
+  tool
+  categories
+}
+
+fragment WorkbenchTool on WorkbenchTool {
+  ...WorkbenchToolTiny
+  configuration {
+    http {
+      url
+      method
+      headers {
+        name
+        value
+      }
+      body
+      inputSchema
+    }
+    datadog {
+      site
+    }
+    elastic {
+      index
+      url
+      username
+    }
+    loki {
+      url
+      username
+      tenantId
+    }
+    prometheus {
+      url
+      username
+      tenantId
+    }
+    tempo {
+      url
+      username
+      tenantId
+    }
+    atlassian {
+      email
+      url
+    }
+    linear {
+      url
+    }
+  }
+}
+
+fragment WorkbenchJobResultTodo on WorkbenchJobResultTodo {
+  name
+  description
+  done
+}
+
+fragment WorkbenchJobResult on WorkbenchJobResult {
+  id
+  workingTheory
+  conclusion
+  todos {
+    ...WorkbenchJobResultTodo
+  }
+  metadata {
+    metrics {
+      timestamp
+      name
+      value
+      labels
+    }
+  }
+}
+
+fragment WorkbenchJobTiny on WorkbenchJob {
+  id
+  prompt
+  status
+}
+
+fragment WorkbenchJob on WorkbenchJob {
+  ...WorkbenchJobTiny
+  error
+  result {
+    ...WorkbenchJobResult
+  }
+}
+
+query Workbenches($first: Int = 100, $after: String, $q: String) {
+  workbenches(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...WorkbenchTiny
+      }
+    }
+  }
+}
+
+query Workbench($id: ID, $name: String) {
+  workbench(id: $id, name: $name) {
+    ...Workbench
+  }
+}
+
+query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    runs(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchJobTiny
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchJob($id: ID!) {
+  workbenchJob(id: $id) {
+    ...WorkbenchJob
+  }
+}
+
+query WorkbenchTools($first: Int = 100, $after: String, $q: String) {
+  workbenchTools(first: $first, after: $after, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...WorkbenchToolTiny
+      }
+    }
+  }
+}
+
+query WorkbenchTool($id: ID, $name: String) {
+  workbenchTool(id: $id, name: $name) {
+    ...WorkbenchTool
+  }
+}
+
+mutation CreateWorkbench($attributes: WorkbenchAttributes!) {
+  createWorkbench(attributes: $attributes) {
+    ...Workbench
+  }
+}
+
+mutation UpdateWorkbench($id: ID!, $attributes: WorkbenchAttributes!) {
+  updateWorkbench(id: $id, attributes: $attributes) {
+    ...Workbench
+  }
+}
+
+mutation DeleteWorkbench($id: ID!) {
+  deleteWorkbench(id: $id) {
+    id
+  }
+}
+
+mutation CreateWorkbenchTool($attributes: WorkbenchToolAttributes!) {
+  createWorkbenchTool(attributes: $attributes) {
+    ...WorkbenchTool
+  }
+}
+
+mutation UpdateWorkbenchTool($id: ID!, $attributes: WorkbenchToolAttributes!) {
+  updateWorkbenchTool(id: $id, attributes: $attributes) {
+    ...WorkbenchTool
+  }
+}
+
+mutation DeleteWorkbenchTool($id: ID!) {
+  deleteWorkbenchTool(id: $id) {
+    id
+  }
+}
+
+mutation CreateWorkbenchJob(
+  $workbenchId: ID!
+  $attributes: WorkbenchJobAttributes!
+) {
+  createWorkbenchJob(workbenchId: $workbenchId, attributes: $attributes) {
+    id
+    status
+    prompt
+    insertedAt
+  }
+}

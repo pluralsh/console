@@ -2,17 +2,16 @@ import { createColumnHelper } from '@tanstack/react-table'
 
 import { CheckIcon, Chip } from '@pluralsh/design-system'
 
-import { use, useState } from 'react'
+import { useState } from 'react'
 
 import {
   ClusterOverviewDetailsFragment,
   ClusterUpgradePlanFragment,
   KubernetesChangelogFragment,
-} from '../../../generated/graphql'
-import { toNiceVersion } from '../../../utils/semver'
+} from 'generated/graphql'
+import { toNiceVersion } from 'utils/semver'
 
 import { useLatestK8sVsn } from 'components/contexts/DeploymentSettingsContext'
-import { FeatureFlagContext } from 'components/flows/FeatureFlagContext'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { KubernetesChangelogFlyover } from '../cluster/upgrade-plan/KubernetesChangelogFlyover'
@@ -97,10 +96,9 @@ export const clusterUpgradeColumns = [
     cell: function Cell({ getValue }) {
       const cluster = getValue()
       const latestK8sVsn = useLatestK8sVsn()
-      const agentEnabled = use(FeatureFlagContext).featureFlags.Agent
       const [flyoverOpen, setFlyoverOpen] = useState(false)
 
-      if (cluster.version !== latestK8sVsn && agentEnabled)
+      if (cluster.version !== latestK8sVsn)
         return (
           <>
             <ClusterUpgradeAgentButton

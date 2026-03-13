@@ -84,7 +84,7 @@ export function AIAgentRuntimesSelector({
         triggerButton={
           type === 'pill' ? (
             <ChatOptionPill isOpen={isOpen}>
-              {!isLoading && <SelectedIcon size={12} />}
+              {!isLoading && selectedRuntime && <SelectedIcon size={12} />}
               {isLoading ? (
                 <RectangleSkeleton
                   $bright
@@ -96,7 +96,7 @@ export function AIAgentRuntimesSelector({
             </ChatOptionPill>
           ) : type === 'minimal' ? (
             <ChatInputSelectButton>
-              {!isLoading && (
+              {!isLoading && selectedRuntime && (
                 <SelectedIcon
                   fullColor
                   size={12}

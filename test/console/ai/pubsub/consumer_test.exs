@@ -94,7 +94,7 @@ defmodule Console.AI.PubSub.ConsumerTest do
       alert = insert(:alert, state: :firing, insight: build(:ai_insight))
       expect(Memoizer, :generate, & {:ok, &1.insight})
 
-      event = %PubSub.AlertCreated{item: alert}
+      event = %PubSub.AlertCreated{item: %{alert | state_changed: true}}
       {:ok, res} = Consumer.handle_event(event)
 
       assert res.id == alert.insight.id

@@ -1,10 +1,10 @@
 import {
+  AiSparkleFilledIcon,
   ArrowTopRightIcon,
   Button,
   Callout,
   Card,
   Flex,
-  MagicWandIcon,
   Markdown,
   PrOpenIcon,
   Table,
@@ -60,7 +60,7 @@ export function SelectPrTypeStep({
         $selected={type === 'aiGen'}
         onClick={() => setType('aiGen')}
       >
-        <MagicWandIcon size={24} />
+        <AiSparkleFilledIcon size={24} />
         <StackedText
           first="AI-generated PR"
           firstPartialType="body2Bold"

@@ -111,6 +111,10 @@ spec:
                         description: ConfigFile is the path to the ansible config
                           file to use.
                         type: string
+                      deletePlaybook:
+                        description: DeletePlaybook is the playbook to run when deleting
+                          the stack.
+                        type: string
                       inventory:
                         description: Inventory is the ansible inventory file to use.  We
                           recommend checking this into git alongside your playbook

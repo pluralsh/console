@@ -163,8 +163,8 @@ aiProxy:
       configTTL: "60s"
       requestTimeout: "10s"
       connectionRetry:
-        maxAttempts: 5
-        initialBackoff: "1s"
+        maxAttempts: 10
+        initialBackoff: "15s"
         maxBackoff: "30s"
     observability:
       logLevel: info

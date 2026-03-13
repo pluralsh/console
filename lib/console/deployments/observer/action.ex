@@ -33,7 +33,8 @@ defmodule Console.Deployments.Observer.Action do
 
   def act(_, %Observer.ObserverAction{type: :agent, configuration: %{agent: %{prompt: prompt, repository: repository} = agent}}, input, attrs)
     when is_binary(prompt) and is_binary(repository) do
-    with prompt when is_binary(prompt) <- replace_solid(prompt, Map.put(attrs, :value, input)),
+    attrs = Map.put(attrs, :value, input) |> Console.mapify() |> Console.string_map()
+    with prompt when is_binary(prompt) <- replace_solid(prompt, attrs),
          {:ok, %AgentRuntime{id: id}} <- Agents.find_runtime(agent.runtime, agent.cluster_id),
          {:ok, %AgentRun{id: run_id}} <- Agents.create_agent_run(%{prompt: prompt, repository: repository}, id, bot()) do
       {:ok, {:keep, %{agent_run_id: run_id}}}

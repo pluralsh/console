@@ -311,8 +311,8 @@ const StepCardSC = styled.div(({ theme }) => ({
 }))
 
 const statusToChipSeverity: Record<ClusterUpgradeStatus, ChipSeverity> = {
-  [ClusterUpgradeStatus.Pending]: 'info',
-  [ClusterUpgradeStatus.InProgress]: 'info',
+  [ClusterUpgradeStatus.Pending]: 'neutral',
+  [ClusterUpgradeStatus.InProgress]: 'neutral',
   [ClusterUpgradeStatus.Completed]: 'success',
   [ClusterUpgradeStatus.Failed]: 'danger',
 }

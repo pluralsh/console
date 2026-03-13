@@ -10,7 +10,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     Service,
     Project,
     ServiceComponent,
-    Workbench
+    Workbench,
+    Monitor
   }
   alias Console.Deployments.{Settings, Observability, Services}
   alias Console.Services.Observability, as: ObsSvc
@@ -145,4 +146,19 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   defp for_parent(%Cluster{id: id}), do: Alert.for_cluster(id)
   defp for_parent(%Project{id: id}), do: Alert.for_project(id)
   defp for_parent(%Workbench{id: id}), do: Alert.for_workbench(id)
+
+  def list_monitors(%Service{id: id}, args, _) do
+    Monitor.for_service(id)
+    |> Monitor.ordered()
+    |> paginate(args)
+  end
+
+  def create_monitor(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Observability.create_monitor(attrs, user)
+
+  def update_monitor(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Observability.update_monitor(attrs, id, user)
+
+  def delete_monitor(%{id: id}, %{context: %{current_user: user}}),
+    do: Observability.delete_monitor(id, user)
 end

@@ -52,7 +52,8 @@ defmodule Console.Deployments.Policies.Rbac do
     WorkbenchTool,
     WorkbenchCron,
     WorkbenchWebhook,
-    IssueWebhook
+    IssueWebhook,
+    Monitor
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -142,6 +143,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(cron, user, action, & &1.workbench)
   def evaluate(%WorkbenchWebhook{} = webhook, user, action),
     do: recurse(webhook, user, action, & &1.workbench)
+  def evaluate(%Monitor{} = monitor, %User{} = user, action),
+    do: recurse(monitor, user, action, & &1.service)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
       %{project: %Project{} = project} -> project
@@ -277,6 +280,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(cron, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(%WorkbenchWebhook{} = webhook),
     do: Repo.preload(webhook, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%Monitor{} = monitor),
+    do: Repo.preload(monitor, [service: [:read_bindings, :write_bindings, cluster: @top_preloads, flow: @top_preloads]])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)

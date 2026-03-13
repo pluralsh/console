@@ -1,7 +1,7 @@
 defmodule Console.Schema.AgentRuntime do
   use Piazza.Ecto.Schema
   alias Console.Schema.{Cluster, PolicyBinding, ScmConnection}
-  alias Console.Deployments.Policies.Rbac
+  alias Console.Deployments.{Policies.Rbac, Pr.Git}
 
   defenum Type, claude: 0, opencode: 1, gemini: 3, custom: 4, codex: 5
 
@@ -25,7 +25,9 @@ defmodule Console.Schema.AgentRuntime do
     timestamps()
   end
 
-  def allowed_repository?(%__MODULE__{allowed_repositories: [_ | _] = allowed}, repo), do: Enum.member?(allowed, repo)
+  def allowed_repository?(%__MODULE__{allowed_repositories: [_ | _] = allowed}, repo) do
+    Enum.any?(allowed, &(Git.normalize_url(&1) == Git.normalize_url(repo)))
+  end
   def allowed_repository?(_, _), do: true
 
   def for_name(query \\ __MODULE__, name) do

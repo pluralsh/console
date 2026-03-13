@@ -120,8 +120,36 @@ defmodule Console.Deployments.AgentsTest do
       assert_receive {:event, %PubSub.AgentRunCreated{item: ^run}}
     end
 
+    test "it can create an agent run when submitting an ssh url against an https allowed list" do
+      user    = admin_user()
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster, allowed_repositories: ["https://github.com/pluralsh/console.git"])
+
+      {:ok, run} = Agents.create_agent_run(%{
+        prompt: "hello world",
+        mode: :write,
+        repository: "git@github.com:pluralsh/console.git",
+      }, runtime.id, user)
+
+      assert run.runtime_id == runtime.id
+    end
+
+    test "it can create an agent run when submitting an https url against an ssh allowed list" do
+      user    = admin_user()
+      cluster = insert(:cluster)
+      runtime = insert(:agent_runtime, cluster: cluster, allowed_repositories: ["git@github.com:pluralsh/console.git"])
+
+      {:ok, run} = Agents.create_agent_run(%{
+        prompt: "hello world",
+        mode: :write,
+        repository: "https://github.com/pluralsh/console.git",
+      }, runtime.id, user)
+
+      assert run.runtime_id == runtime.id
+    end
+
     test "it cannot create an agent run for a repository that is not allowed" do
-      user = insert(:user)
+      user    = admin_user()
       cluster = insert(:cluster)
       runtime = insert(:agent_runtime, cluster: cluster, allowed_repositories: ["https://github.com/pluralsh/console.git"])
 

@@ -17,9 +17,8 @@ defmodule Console.Schema.Base do
     end
   end
 
-  def determine_next_run(cs) do
-    with crontab when is_binary(crontab) <- get_field(cs, :crontab),
-         run when not is_nil(run) <- get_change(cs, :last_run_at),
+  def determine_next_run(cs, field \\ :crontab) do
+    with {crontab, run} when is_binary(crontab) and not is_nil(run) <- crontab_changed(cs, field),
          {:ok, cron} <- Crontab.CronExpression.Parser.parse(crontab),
          {:ok, next} <- Crontab.Scheduler.get_next_run_date(cron, Timex.to_naive_datetime(run)) do
       put_change(cs, :next_run_at, next_run(next))
@@ -29,6 +28,21 @@ defmodule Console.Schema.Base do
       _ -> cs
     end
   end
+
+  defp crontab_changed(cs, field) do
+    case get_change(cs, field) || get_change(cs, :last_run_at) do
+      nil -> :ignore
+      _ -> {get_field(cs, field), get_field(cs, :last_run_at) || Timex.now()}
+    end
+  end
+
+  def validate_crontab(field, crontab) when is_binary(crontab) do
+    case Crontab.CronExpression.Parser.parse(crontab) do
+      {:ok, _} -> []
+      {:error, err} -> [{field, "invalid cron expression: #{inspect(err)}"}]
+    end
+  end
+  def validate_crontab(_, _), do: []
 
   defp next_run(ndt) do
     DateTime.from_naive!(ndt, "Etc/UTC")

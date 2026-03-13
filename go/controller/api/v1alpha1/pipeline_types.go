@@ -95,9 +95,37 @@ type PipelineStageServicePromotionCriteria struct {
 	// +kubebuilder:validation:Optional
 	Repository *string `json:"repository,omitempty"`
 
+	// AI configuration for this promotion.
+	// +kubebuilder:validation:Optional
+	Ai *AiCriteria `json:"ai,omitempty"`
+
+	// SCM connection to use for ai pr based service promotion.
+	// +kubebuilder:validation:Optional
+	ConnectionRef *corev1.ObjectReference `json:"connectionRef,omitempty"`
+
 	// Secrets to copy over in a promotion.
 	// +kubebuilder:validation:Optional
 	Secrets []*string `json:"secrets,omitempty"`
+}
+
+// AiCriteria defines the configuration for AI pull request based service promotion.
+// This can be a simpler path to construct the GitOps modifications needed to modify your services.
+type AiCriteria struct {
+	// Whether AI based service promotion is enabled for this promotion.
+	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// The prompt to use to generate the pull request used in this promotion (liquid templating is supported).
+	// +kubebuilder:validation:Required
+	Prompt string `json:"prompt"`
+
+	// The title of the pull request used in this promotion (liquid templating is supported). If not provided, the AI will generate a title.
+	// +kubebuilder:validation:Optional
+	Title *string `json:"title"`
+
+	// The message of the pull request used in this promotion (liquid templating is supported). If not provided, the AI will generate a message.
+	// +kubebuilder:validation:Optional
+	Message *string `json:"message"`
 }
 
 // PipelineEdge defines the flow of execution between stages, controlling promotion paths

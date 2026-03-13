@@ -6,7 +6,7 @@ require (
 	dario.cat/mergo v1.0.2
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/cenkalti/backoff v2.2.1+incompatible
-	github.com/mitchellh/mapstructure v1.5.0
+	github.com/mitchellh/mapstructure v1.5.1-0.20231216201459-8508981c8b6c
 	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/osteele/liquid v1.8.1
 	github.com/samber/lo v1.52.0

@@ -181,6 +181,26 @@ _Appears in:_
 | `ignoreCancel` _boolean_ | IgnoreCancel indicates if the cancellation of a stack run should be ignored by AI. |  | Optional: \{\} <br /> |
 
 
+#### AiCriteria
+
+
+
+AiCriteria defines the configuration for AI pull request based service promotion.
+This can be a simpler path to construct the GitOps modifications needed to modify your services.
+
+
+
+_Appears in:_
+- [PipelineStageServicePromotionCriteria](#pipelinestageservicepromotioncriteria)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Whether AI based service promotion is enabled for this promotion. |  | Optional: \{\} <br /> |
+| `prompt` _string_ | The prompt to use to generate the pull request used in this promotion (liquid templating is supported). |  | Required: \{\} <br /> |
+| `title` _string_ | The title of the pull request used in this promotion (liquid templating is supported). If not provided, the AI will generate a title. |  | Optional: \{\} <br /> |
+| `message` _string_ | The message of the pull request used in this promotion (liquid templating is supported). If not provided, the AI will generate a message. |  | Optional: \{\} <br /> |
+
+
 #### AnalysisRates
 
 
@@ -278,7 +298,7 @@ _Appears in:_
 | `model` _string_ | Model - the OpenAi model you wish to use. If not specified, Plural will provide a default. |  | Optional: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning. |  | Optional: \{\} <br /> |
 | `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings. |  | Optional: \{\} <br /> |
-| `deployment` _string_ | Deployment is the Azure OpenAI deployment name. |  | Optional: \{\} <br /> |
+| `deployments` _object (keys:string, values:string)_ | Deployments is a mapping from model id to azure OpenAI deployment if those require additional configuration |  | Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
@@ -3272,6 +3292,8 @@ _Appears in:_
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef pointing to a source ServiceDeployment to promote from. |  | Optional: \{\} <br /> |
 | `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef pointing to a source PrAutomation to promote from. |  | Optional: \{\} <br /> |
 | `repository` _string_ | The repository slug the PrAutomation will use.<br />E.g., pluralsh/console if PR is done against https://github.com/pluralsh/console. |  | Optional: \{\} <br /> |
+| `ai` _[AiCriteria](#aicriteria)_ | AI configuration for this promotion. |  | Optional: \{\} <br /> |
+| `connectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | SCM connection to use for ai pr based service promotion. |  | Optional: \{\} <br /> |
 | `secrets` _string array_ | Secrets to copy over in a promotion. |  | Optional: \{\} <br /> |
 
 
@@ -3333,6 +3355,23 @@ for users to configure parameters before generating the PR.
 | `kind` _string_ | `PrAutomation` | | |
 | `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
 | `spec` _[PrAutomationSpec](#prautomationspec)_ | Spec defines the desired state of the PrAutomation, including the operations<br />to perform, target repository, and user interface configuration. |  | Required: \{\} <br /> |
+
+
+#### PrAutomationAIConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [PrAutomationSpec](#prautomationspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled controls whether AI assistance is enabled for this PR automation. |  | Optional: \{\} <br /> |
+| `prompt` _string_ | Prompt is a custom prompt to guide AI-generated updates for this automation.  Templating is supported. |  | Required: \{\} <br /> |
 
 
 #### PrAutomationBindings
@@ -3563,6 +3602,7 @@ _Appears in:_
 | `creates` _[PrAutomationCreateConfiguration](#prautomationcreateconfiguration)_ | Creates defines specifications for generating new files from templates,<br />allowing the automation to add new configuration files to the repository. |  | Optional: \{\} <br /> |
 | `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Updates specifies how to modify existing files using regex replacements<br />or YAML overlays, enabling precise changes to infrastructure code. |  | Optional: \{\} <br /> |
 | `deletes` _[PrAutomationDeleteConfiguration](#prautomationdeleteconfiguration)_ | Deletes specifies files and folders to remove from the repository as part<br />of the PR, useful for cleanup or migration scenarios. |  | Optional: \{\} <br /> |
+| `ai` _[PrAutomationAIConfiguration](#prautomationaiconfiguration)_ | AI configuration controls whether AI assistance is enabled for this automation<br />and allows specifying a custom prompt to guide AI-generated updates. |  | Optional: \{\} <br /> |
 | `lua` _[PrAutomationLuaConfiguration](#prautomationluaconfiguration)_ | Lua specification to source lua scripts to preprocess the PR automation. |  | Optional: \{\} <br /> |
 | `vendor` _[PrAutomationVendorConfiguration](#prautomationvendorconfiguration)_ | Software vendoring logic to perform in this PR |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |

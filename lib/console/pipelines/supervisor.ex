@@ -7,7 +7,8 @@ defmodule Console.Pipelines.Supervisor do
     Sentinel,
     SentinelRun,
     Observer,
-    PullRequest
+    PullRequest,
+    Monitor
   }
 
   def start_link(init_arg) do
@@ -28,6 +29,7 @@ defmodule Console.Pipelines.Supervisor do
       Sentinel.Producer,
       SentinelRun.Producer,
       Observer.Producer,
+      Monitor.Producer,
       PullRequest.Producer,
       {GlobalService.Pipeline, GlobalService.Producer},
       {Stack.Pipeline, Stack.Producer},
@@ -41,6 +43,7 @@ defmodule Console.Pipelines.Supervisor do
       {SentinelRun.Pipeline, SentinelRun.Producer},
       {Observer.Pipeline, Observer.Producer},
       {PullRequest.Pipeline, PullRequest.Producer},
+      {Monitor.Pipeline, Monitor.Producer},
     ]
     Supervisor.init(children, strategy: :one_for_one, max_restarts: 15)
   end

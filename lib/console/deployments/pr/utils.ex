@@ -2,6 +2,7 @@ defmodule Console.Deployments.Pr.Utils do
   use Nebulex.Caching
   alias Console.Deployments.{Stacks, Clusters, Services, Flows, Git}
   alias Console.Schema.{PrAutomation, ScmConnection}
+  alias Console.AI.Agents.Pr
 
   @ttl :timer.hours(1)
 
@@ -21,11 +22,56 @@ defmodule Console.Deployments.Pr.Utils do
 
   def filter_ansi(text), do: String.replace(text, @ansi_code, "")
 
+  def description(%PrAutomation{ignore_templates: true, message: msg, title: title}, _), do: {:ok, title, msg}
+  def description(%PrAutomation{message: msg, title: title}, ctx) do
+    with {:ok, body} <- render_solid(msg, ctx),
+         {:ok, title} <- render_solid(title, ctx),
+      do: {:ok, title, body}
+  end
+
+  def render_solid_raw(template, ctx) do
+    with {:parse, {:ok, tpl}} <- {:parse, Solid.parse(template)},
+         {:render, {:ok, res, _}} <- {:render, Solid.render(tpl, %{"context" => ctx}, @solid_opts)} do
+      {:ok, IO.iodata_to_binary(res)}
+    else
+      {:parse, {:error, %Solid.TemplateError{} = err}} -> {:error, Solid.TemplateError.message(err)}
+      {:render, {:error, errs, _}} -> {:error, Enum.map(errs, &inspect/1) |> Enum.join(", ")}
+    end
+  end
+
+  def render_solid(template, ctx) do
+    with {:parse, {:ok, tpl}} <- {:parse, Solid.parse(template)},
+         {:render, {:ok, res, _}} <- {:render, Solid.render(tpl, %{"context" => ctx}, @solid_opts)} do
+      {:ok, IO.iodata_to_binary(res)}
+    else
+      {:parse, {:error, %Solid.TemplateError{} = err}} -> {:error, Solid.TemplateError.message(err)}
+      {:render, {:error, errs, _}} -> {:error, "encountered #{length(errs)} while rendering pr description"}
+    end
+  end
+
+  def url_and_token(%PrAutomation{connection: %ScmConnection{} = conn}, default),
+    do: url_and_token(conn, default)
+  def url_and_token(%ScmConnection{api_url: url, token: token}, _) when is_binary(url),
+    do: {:ok, url, token}
+  def url_and_token(%ScmConnection{base_url: url, token: token}, _) when is_binary(url),
+    do: {:ok, url, token}
+  def url_and_token(%ScmConnection{token: token}, default), do: {:ok, default, token}
+  def url_and_token(_, _), do: {:error, "could not set up gitlab connection"}
+
   def pr_associations(content, scopes \\ ~w(stack cluster service flow governance)a) do
     Enum.reduce(scopes, %{}, &maybe_add(&2, :"#{&1}_id", scrape(&1, content)))
     |> Map.put(:preview, scrape(:preview, content))
     |> Map.put(:merge_cron, scrape(:merge_cron, content))
   end
+
+  @spec ai_edit(PrAutomation.t, binary, map) :: {:ok, PrAutomation.t} | {:error, binary}
+  def ai_edit(%PrAutomation{ai: %PrAutomation.AI{enabled: true, prompt: prompt}} = pra, dir, ctx) do
+    with {:ok, prompt} <- render_solid(prompt, ctx),
+         {:ok, %{title: title, message: message}} <- Pr.exec(dir, prompt) do
+      {:ok, Console.conditional_merge(pra, title: title, message: message)}
+    end
+  end
+  def ai_edit(pra, _, _), do: {:ok, pra}
 
   defp maybe_add(attrs, field, %{id: id}), do: Map.put(attrs, field, id)
   defp maybe_add(attrs, _, _), do: attrs
@@ -66,41 +112,4 @@ defmodule Console.Deployments.Pr.Utils do
   defp do_fetch(:governance, name), do: Git.get_governance_by_name(name)
   defp do_fetch(:preview, name), do: name
   defp do_fetch(:merge_cron, cron), do: cron
-
-  def description(%PrAutomation{ignore_templates: true, message: msg, title: title}, _),
-    do: {:ok, title, msg}
-  def description(%PrAutomation{message: msg, title: title}, ctx) do
-    with {:ok, body} <- render_solid(msg, ctx),
-         {:ok, title} <- render_solid(title, ctx),
-      do: {:ok, title, body}
-  end
-
-  def render_solid_raw(template, ctx) do
-    with {:parse, {:ok, tpl}} <- {:parse, Solid.parse(template)},
-         {:render, {:ok, res, _}} <- {:render, Solid.render(tpl, %{"context" => ctx}, @solid_opts)} do
-      {:ok, IO.iodata_to_binary(res)}
-    else
-      {:parse, {:error, %Solid.TemplateError{} = err}} -> {:error, Solid.TemplateError.message(err)}
-      {:render, {:error, errs, _}} -> {:error, Enum.map(errs, &inspect/1) |> Enum.join(", ")}
-    end
-  end
-
-  def render_solid(template, ctx) do
-    with {:parse, {:ok, tpl}} <- {:parse, Solid.parse(template)},
-         {:render, {:ok, res, _}} <- {:render, Solid.render(tpl, %{"context" => ctx}, @solid_opts)} do
-      {:ok, IO.iodata_to_binary(res)}
-    else
-      {:parse, {:error, %Solid.TemplateError{} = err}} -> {:error, Solid.TemplateError.message(err)}
-      {:render, {:error, errs, _}} -> {:error, "encountered #{length(errs)} while rendering pr description"}
-    end
-  end
-
-  def url_and_token(%PrAutomation{connection: %ScmConnection{} = conn}, default),
-    do: url_and_token(conn, default)
-  def url_and_token(%ScmConnection{api_url: url, token: token}, _) when is_binary(url),
-    do: {:ok, url, token}
-  def url_and_token(%ScmConnection{base_url: url, token: token}, _) when is_binary(url),
-    do: {:ok, url, token}
-  def url_and_token(%ScmConnection{token: token}, default), do: {:ok, default, token}
-  def url_and_token(_, _), do: {:error, "could not set up gitlab connection"}
 end

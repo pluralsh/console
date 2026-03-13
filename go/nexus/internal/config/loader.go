@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -34,6 +35,10 @@ func Load(configFile string) (*Config, error) {
 
 // loadFromFile loads configuration from a YAML or JSON file
 func loadFromFile(configFile string, cfg *Config) error {
+	if len(configFile) == 0 {
+		return nil
+	}
+
 	v := viper.New()
 
 	// Set config file
@@ -42,10 +47,11 @@ func loadFromFile(configFile string, cfg *Config) error {
 	// Read config file
 	if err := v.ReadInConfig(); err != nil {
 		// If file doesn't exist, that's okay - we'll use defaults
-		if _, ok := err.(viper.ConfigFileNotFoundError); !ok {
+		if _, ok := errors.AsType[viper.ConfigFileNotFoundError](err); ok {
 			return fmt.Errorf("error reading config file: %w", err)
 		}
-		return nil
+
+		return err
 	}
 
 	// Unmarshal into config struct
