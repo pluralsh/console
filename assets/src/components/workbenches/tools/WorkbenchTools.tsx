@@ -62,7 +62,10 @@ export function WorkbenchTools() {
         <Flex gap="large">
           {TOOL_TYPE_CARDS.map(
             ({ type, description, label, categoryLabels }) => (
-              <ToolCardSC key={type}>
+              <ToolCardSC
+                key={type}
+                css={{ minWidth: 320 }}
+              >
                 <StackedText
                   first={
                     <Flex
@@ -129,9 +132,13 @@ export function WorkbenchTools() {
             onBottomReached={() =>
               !loading && pageInfo?.hasNextPage && fetchNextPage()
             }
+            styles={{
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+            }}
           >
             {tools.map(({ id, name, tool: type, categories }) => (
               <ToolCardSC
+                key={id}
                 clickable
                 forwardedAs={Link}
                 to={id}
@@ -178,7 +185,6 @@ const ToolCardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.large,
   minHeight: 120,
   textDecoration: 'none',
-  minWidth: 320,
 }))
 
 const WrapperSC = styled.div(({ theme }) => ({

@@ -7,6 +7,7 @@ import {
 } from 'generated/graphql'
 
 import { useCallback, useMemo, useState } from 'react'
+import { isValidJson } from 'utils/isValidJson'
 
 export function ClusterMetadataEditor({
   cluster,
@@ -95,15 +96,6 @@ const stringifyJsonWithError = (
     return JSON.stringify(jsonObject, null, 2)
   } catch (e: unknown) {
     console.error('Invalid JSON:', e)
-    return false
-  }
-}
-
-const isValidJson = (str: string) => {
-  try {
-    JSON.parse(str)
-    return true
-  } catch {
     return false
   }
 }
