@@ -157,7 +157,7 @@ query Workbench($id: ID, $name: String) {
   }
 }
 
-query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
+query WorkbenchRuns($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
     runs(first: $first, after: $after) {
@@ -173,7 +173,7 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
-query WorkbenchJob($id: ID!) {
+query WorkbenchRun($id: ID!) {
   workbenchJob(id: $id) {
     ...WorkbenchJob
   }
