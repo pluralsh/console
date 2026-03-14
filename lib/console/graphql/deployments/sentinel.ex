@@ -51,20 +51,19 @@ defmodule Console.GraphQl.Deployments.Sentinel do
   end
 
   input_object :sentinel_check_integration_test_configuration_attributes do
-    field :repository_id, :id, description: "the repository to use for this check"
-    field :git,           :git_ref_attributes, description: "the git repository to use for this check"
+    field :repository_id,        :id, description: "the repository to use for this check"
+    field :git,                  :git_ref_attributes, description: "the git repository to use for this check"
+    field :job,                  :gate_job_attributes, description: "the job to run for this check"
+    field :distro,               :cluster_distro, description: "the distro to run the check on"
+    field :tags,                 :json, description: "the cluster tags to select where to run this job"
+    field :format,               non_null(:sentinel_run_job_format), description: "the format of the job output"
+    field :gotestsum,            :sentinel_check_gotestsum_attributes, description: "the gotestsum configuration to use for this check"
+    field :default,              :sentinel_check_integration_test_default_attributes, description: "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
+    field :rerun_failures,       :boolean, description: "whether to rerun failed tests"
+    field :rerun_failures_count, :integer, description: "how many times to rerun failures"
 
     field :cases, list_of(:sentinel_check_integration_test_case_attributes), description: "a list of custom test cases to run for this check"
 
-
-    field :job,       :gate_job_attributes, description: "the job to run for this check"
-    field :distro,    :cluster_distro, description: "the distro to run the check on"
-    field :tags,      :json, description: "the cluster tags to select where to run this job"
-    field :format,    non_null(:sentinel_run_job_format), description: "the format of the job output"
-    field :gotestsum, :sentinel_check_gotestsum_attributes, description: "the gotestsum configuration to use for this check"
-    field :default,   :sentinel_check_integration_test_default_attributes, description: "default configuration for integration test runs: default test cases and global behavior (e.g. namespace labels and annotations for created resources)"
-    field :rerun_failures,       :boolean, description: "whether to rerun failed tests"
-    field :rerun_failures_count, :integer, description: "how many times to rerun failures"
   end
 
   input_object :sentinel_check_integration_test_default_attributes do
