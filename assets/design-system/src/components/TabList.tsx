@@ -145,12 +145,7 @@ function TabList({
         alignItems={
           stateProps.orientation === 'vertical' ? 'flex-start' : 'flex-end'
         }
-        css={{
-          ...(scrollable && {
-            overflow: 'auto',
-            whiteSpace: 'nowrap',
-          }),
-        }}
+        css={{ ...(scrollable && { whiteSpace: 'nowrap' }) }}
         ref={mergedRef as any}
       >
         {tabChildren}

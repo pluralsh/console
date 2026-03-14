@@ -33,7 +33,7 @@ import {
   useState,
 } from 'react'
 import { mergeRefs } from 'react-merge-refs'
-import styled, { useTheme } from 'styled-components'
+import styled, { StyledObject, useTheme } from 'styled-components'
 import { useChatbot } from '../../AIContext.tsx'
 import { useCurrentPageChatContext } from '../useCurrentPageChatContext.tsx'
 import { ChatInputClusterSelect } from './ChatInputClusterSelect.tsx'
@@ -220,6 +220,7 @@ export function ChatInputSimple({
   disabled = false,
   bgColor = 'fill-zero-selected',
   options,
+  wrapperStyles,
   ...props
 }: {
   onSubmit: () => void
@@ -227,6 +228,7 @@ export function ChatInputSimple({
   loading?: boolean
   bgColor?: SemanticColorKey
   options?: ReactNode
+  wrapperStyles?: StyledObject
 } & Omit<ComponentPropsWithRef<typeof EditableDiv>, 'onEnter'>) {
   const { spacing } = useTheme()
 
@@ -236,7 +238,7 @@ export function ChatInputSimple({
     <EditableContentWrapperSC
       $agent={false}
       $bgColor={bgColor}
-      css={{ position: 'relative', minHeight: 130 }}
+      css={{ position: 'relative', minHeight: 130, ...wrapperStyles }}
     >
       <EditableDiv
         {...props}

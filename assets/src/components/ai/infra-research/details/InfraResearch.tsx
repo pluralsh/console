@@ -27,6 +27,7 @@ import {
   AgentRunStatus,
   InfraResearchFragment,
   InfraResearchStatus,
+  WorkbenchJobStatus,
   useCreateInfraResearchMutation,
   useFixResearchDiagramMutation,
   useInfraResearchQuery,
@@ -340,12 +341,14 @@ export function RunStatusChip({
   runningText = 'Running',
   ...props
 }: {
-  status: Nullable<InfraResearchStatus | AgentRunStatus>
+  status: Nullable<InfraResearchStatus | AgentRunStatus | WorkbenchJobStatus>
   runningText?: string
 } & ChipProps) {
   if (!status) return null
   const isRunning =
-    status === InfraResearchStatus.Running || status === AgentRunStatus.Running
+    status === InfraResearchStatus.Running ||
+    status === AgentRunStatus.Running ||
+    status === WorkbenchJobStatus.Running
   return (
     <Chip
       fillLevel={isRunning ? 2 : 1}
@@ -367,8 +370,9 @@ export function RunStatusChip({
   )
 }
 
+// these have a lot of overlap so this map is actually exhaustive (typecheck would fail if it wasn't)
 const statusToSeverity: Record<
-  InfraResearchStatus | AgentRunStatus,
+  InfraResearchStatus | AgentRunStatus | WorkbenchJobStatus,
   ChipSeverity
 > = {
   [InfraResearchStatus.Running]: 'neutral',
