@@ -1,0 +1,23 @@
+{{- /*
+Copyright Broadcom, Inc. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if .Values.kas.redis.rbac.create }}
+apiVersion: {{ include "common.capabilities.rbac.apiVersion" . }}
+kind: RoleBinding
+metadata:
+  name: {{ template "redis.fullname" . }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
+  {{- if .Values.kas.redis.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "redis.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "redis.serviceAccountName" . }}
+{{- end }}

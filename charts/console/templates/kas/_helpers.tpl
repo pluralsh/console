@@ -1,0 +1,67 @@
+{{/*
+Expand the name of the kas component, based on console.name with a -kas suffix.
+*/}}
+{{- define "kas.name" -}}
+{{- printf "%s-kas" (include "console.name" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{/*
+Create a default fully qualified name for the kas component.
+Based on console.fullname with a -kas suffix.
+*/}}
+{{- define "kas.fullname" -}}
+{{- if .Values.kas.fullnameOverride }}
+{{- .Values.kas.fullnameOverride | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-kas" (include "console.fullname" .) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+
+{{/*
+Common labels
+*/}}
+{{- define "kas.labels" -}}
+helm.sh/chart: {{ include "console.chart" . }}
+{{ include "kas.selectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Selector labels
+*/}}
+{{- define "kas.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "kas.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{- define "kas.deploymentName" -}}
+{{- printf "%s-server" (include "kas.fullname" .) }}
+{{- end }}
+
+{{/*
+Create the name of the service to use
+*/}}
+{{- define "kas.serviceName" -}}
+{{- printf "%s-service" (include "kas.fullname" .) }}
+{{- end }}
+
+{{/*
+Create the name of the config map to use
+*/}}
+{{- define "kas.configMapName" -}}
+{{- printf "%s-config" (include "kas.fullname" .) }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "kas.serviceAccountName" -}}
+{{- if .Values.kas.serviceAccount.create }}
+{{- default (include "kas.fullname" .) .Values.kas.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.kas.serviceAccount.name }}
+{{- end }}
+{{- end }}

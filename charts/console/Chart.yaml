@@ -5,9 +5,6 @@ description: >-
 appVersion: 0.12.5
 version: 0.4.6
 dependencies:
-  - name: kas
-    version: 0.3.2
-    repository: file://../kas
   - name: controller
     version: 0.0.175
     repository: file://../controller
@@ -20,4 +17,7 @@ dependencies:
     version: 0.24.0
     repository: https://charts.dexidp.io
     condition: dex.enabled
+  - name: common
+    version: 2.34.0 # Closest to 2.33.2 used originally in the Redis chart.
+    repository: https://charts.bitnami.com/bitnami
 type: application
