@@ -86,8 +86,6 @@ config :console, Console.Repo,
   queue_target: 1000,
   migration_timestamps: [type: :utc_datetime_usec]
 
-config :libcluster, :topologies, []
-
 config :tzdata, :autoupdate, :disabled
 
 config :kazan, :server, :in_cluster

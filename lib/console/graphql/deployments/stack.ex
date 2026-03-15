@@ -668,7 +668,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     end
 
     @desc "fetches the files from a stack's git tarball"
-    field :stack_tarball, list_of(:stack_file) do
+    field :stack_tarball, list_of(:service_file) do
       middleware Authenticated
       middleware Scope,
         resource: :stack,

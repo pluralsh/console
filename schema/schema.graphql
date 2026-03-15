@@ -430,7 +430,7 @@ type RootQueryType {
   ): InfrastructureStackConnection
 
   "fetches the files from a stack's git tarball"
-  stackTarball(id: ID!): [StackFile]
+  stackTarball(id: ID!): [ServiceFile]
 
   observabilityProvider(
     "Fetch a single observability provider by ID or name"

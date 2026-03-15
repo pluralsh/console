@@ -10354,7 +10354,7 @@ export type RootQueryType = {
   stackDefinitions?: Maybe<StackDefinitionConnection>;
   stackRun?: Maybe<StackRun>;
   /** fetches the files from a stack's git tarball */
-  stackTarball?: Maybe<Array<Maybe<StackFile>>>;
+  stackTarball?: Maybe<Array<Maybe<ServiceFile>>>;
   statefulSet?: Maybe<StatefulSet>;
   /** adds the ability to search/filter through all tag name/value pairs */
   tagPairs?: Maybe<TagConnection>;
