@@ -80,7 +80,7 @@ defmodule Console.MixProject do
     [
       {:ecto, "~> 3.12.0", override: true},
       {:ex_machina, "~> 2.8", only: :test},
-      {:libcluster, "~> 3.4"},
+      {:dns_cluster, "~> 0.2.0"},
       {:ex_aws, "~> 2.6"},
       {:ex_aws_sts, "~> 2.3.0"},
       {:configparser_ex, "~> 5.0"},

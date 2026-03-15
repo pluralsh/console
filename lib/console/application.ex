@@ -3,8 +3,6 @@ defmodule Console.Application do
   alias Console.Services.OAuth
 
   def start(_type, _args) do
-    topologies = Application.get_env(:libcluster, :topologies)
-
     :logger.add_handler(:sentry_logger, Sentry.LoggerHandler, %{
       config: %{metadata: [:file, :line]}
     })
@@ -22,6 +20,7 @@ defmodule Console.Application do
       Console.MultilevelCache,
       Console.TestCache,
       Console.LocalCache,
+      {DNSCluster, query: Application.get_env(:console, :dns_cluster_query) || :ignore},
       {Task.Supervisor, name: Console.AI.TaskSupervisor},
       {Registry, [keys: :unique, name: Console.Buffer.Base.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
@@ -32,7 +31,6 @@ defmodule Console.Application do
       {Registry, [keys: :unique, name: Console.AI.Agents]},
       :hackney_pool.child_spec(:ai_pool, [max_connections: 100, max_per_host: 100]),
       :hackney_pool.child_spec(:kazan_pool, [max_connections: 100, max_per_host: 100]),
-      {Cluster.Supervisor, [topologies, [name: Console.ClusterSupervisor]]},
       Console.Bootstrapper,
       Console.Deployments.Git.Supervisor,
       Console.Deployments.Stacks.Supervisor,
