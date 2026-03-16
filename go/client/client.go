@@ -4704,6 +4704,7 @@ func (t *ProviderCredentialFragment) GetKind() string {
 
 type SentinelRunJobFragment struct {
 	ID          string                            "json:\"id\" graphql:\"id\""
+	Check       *string                           "json:\"check,omitempty\" graphql:\"check\""
 	Status      SentinelRunJobStatus              "json:\"status\" graphql:\"status\""
 	Format      SentinelRunJobFormat              "json:\"format\" graphql:\"format\""
 	UsesGit     *bool                             "json:\"usesGit,omitempty\" graphql:\"usesGit\""
@@ -4718,6 +4719,12 @@ func (t *SentinelRunJobFragment) GetID() string {
 		t = &SentinelRunJobFragment{}
 	}
 	return t.ID
+}
+func (t *SentinelRunJobFragment) GetCheck() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment{}
+	}
+	return t.Check
 }
 func (t *SentinelRunJobFragment) GetStatus() *SentinelRunJobStatus {
 	if t == nil {
@@ -4912,12 +4919,14 @@ func (t *SentinelCheckConfigurationFragment) GetIntegrationTest() *SentinelCheck
 }
 
 type SentinelCheckIntegrationTestConfigurationFragment struct {
-	Distro    *ClusterDistro                                               "json:\"distro,omitempty\" graphql:\"distro\""
-	Tags      map[string]any                                               "json:\"tags,omitempty\" graphql:\"tags\""
-	Gotestsum *SentinelCheckIntegrationTestConfigurationFragment_Gotestsum "json:\"gotestsum,omitempty\" graphql:\"gotestsum\""
-	Job       *JobSpecFragment                                             "json:\"job,omitempty\" graphql:\"job\""
-	Cases     []*TestCaseConfigurationFragment                             "json:\"cases,omitempty\" graphql:\"cases\""
-	Default   *SentinelCheckIntegrationTestDefaultConfigurationFragment    "json:\"default,omitempty\" graphql:\"default\""
+	Distro             *ClusterDistro                                               "json:\"distro,omitempty\" graphql:\"distro\""
+	Tags               map[string]any                                               "json:\"tags,omitempty\" graphql:\"tags\""
+	RerunFailures      *bool                                                        "json:\"rerunFailures,omitempty\" graphql:\"rerunFailures\""
+	RerunFailuresCount *int64                                                       "json:\"rerunFailuresCount,omitempty\" graphql:\"rerunFailuresCount\""
+	Gotestsum          *SentinelCheckIntegrationTestConfigurationFragment_Gotestsum "json:\"gotestsum,omitempty\" graphql:\"gotestsum\""
+	Job                *JobSpecFragment                                             "json:\"job,omitempty\" graphql:\"job\""
+	Cases              []*TestCaseConfigurationFragment                             "json:\"cases,omitempty\" graphql:\"cases\""
+	Default            *SentinelCheckIntegrationTestDefaultConfigurationFragment    "json:\"default,omitempty\" graphql:\"default\""
 }
 
 func (t *SentinelCheckIntegrationTestConfigurationFragment) GetDistro() *ClusterDistro {
@@ -4931,6 +4940,18 @@ func (t *SentinelCheckIntegrationTestConfigurationFragment) GetTags() map[string
 		t = &SentinelCheckIntegrationTestConfigurationFragment{}
 	}
 	return t.Tags
+}
+func (t *SentinelCheckIntegrationTestConfigurationFragment) GetRerunFailures() *bool {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestConfigurationFragment{}
+	}
+	return t.RerunFailures
+}
+func (t *SentinelCheckIntegrationTestConfigurationFragment) GetRerunFailuresCount() *int64 {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestConfigurationFragment{}
+	}
+	return t.RerunFailuresCount
 }
 func (t *SentinelCheckIntegrationTestConfigurationFragment) GetGotestsum() *SentinelCheckIntegrationTestConfigurationFragment_Gotestsum {
 	if t == nil {
@@ -45786,6 +45807,7 @@ fragment PageInfoFragment on PageInfo {
 }
 fragment SentinelRunJobFragment on SentinelRunJob {
 	id
+	check
 	status
 	format
 	usesGit
@@ -45893,6 +45915,8 @@ fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetes
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
 	distro
 	tags
+	rerunFailures
+	rerunFailuresCount
 	gotestsum {
 		p
 		parallel
@@ -45973,6 +45997,7 @@ const GetSentinelRunJobDocument = `query GetSentinelRunJob ($id: ID!) {
 }
 fragment SentinelRunJobFragment on SentinelRunJob {
 	id
+	check
 	status
 	format
 	usesGit
@@ -46080,6 +46105,8 @@ fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetes
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
 	distro
 	tags
+	rerunFailures
+	rerunFailuresCount
 	gotestsum {
 		p
 		parallel
@@ -46205,6 +46232,8 @@ fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetes
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
 	distro
 	tags
+	rerunFailures
+	rerunFailuresCount
 	gotestsum {
 		p
 		parallel
@@ -46319,6 +46348,7 @@ const UpdateSentinelRunJobStatusDocument = `mutation UpdateSentinelRunJobStatus 
 }
 fragment SentinelRunJobFragment on SentinelRunJob {
 	id
+	check
 	status
 	format
 	usesGit
@@ -46426,6 +46456,8 @@ fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetes
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
 	distro
 	tags
+	rerunFailures
+	rerunFailuresCount
 	gotestsum {
 		p
 		parallel
@@ -46576,6 +46608,8 @@ fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetes
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
 	distro
 	tags
+	rerunFailures
+	rerunFailuresCount
 	gotestsum {
 		p
 		parallel
@@ -46762,6 +46796,8 @@ fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetes
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
 	distro
 	tags
+	rerunFailures
+	rerunFailuresCount
 	gotestsum {
 		p
 		parallel
@@ -46973,6 +47009,8 @@ fragment SentinelCheckKubernetesConfigurationFragment on SentinelCheckKubernetes
 fragment SentinelCheckIntegrationTestConfigurationFragment on SentinelCheckIntegrationTestConfiguration {
 	distro
 	tags
+	rerunFailures
+	rerunFailuresCount
 	gotestsum {
 		p
 		parallel

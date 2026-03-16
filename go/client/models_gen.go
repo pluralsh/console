@@ -7536,8 +7536,6 @@ type SentinelCheckIntegrationTestConfigurationAttributes struct {
 	RepositoryID *string `json:"repositoryId,omitempty"`
 	// the git repository to use for this check
 	Git *GitRefAttributes `json:"git,omitempty"`
-	// a list of custom test cases to run for this check
-	Cases []*SentinelCheckIntegrationTestCaseAttributes `json:"cases,omitempty"`
 	// the job to run for this check
 	Job *GateJobAttributes `json:"job,omitempty"`
 	// the distro to run the check on
@@ -7554,6 +7552,8 @@ type SentinelCheckIntegrationTestConfigurationAttributes struct {
 	RerunFailures *bool `json:"rerunFailures,omitempty"`
 	// how many times to rerun failures
 	RerunFailuresCount *int64 `json:"rerunFailuresCount,omitempty"`
+	// a list of custom test cases to run for this check
+	Cases []*SentinelCheckIntegrationTestCaseAttributes `json:"cases,omitempty"`
 }
 
 type SentinelCheckIntegrationTestDefaultAttributes struct {

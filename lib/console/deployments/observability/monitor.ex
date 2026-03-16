@@ -28,17 +28,26 @@ defmodule Console.Deployments.Observability.Monitor do
   @spec query(Monitor.t) :: {:ok, :firing | :resolved, list} | Console.error
   def query(%Monitor{type: :log} = monitor), do: log_query(monitor)
 
-  defp log_query(%Monitor{query: %Query{log: %LogQuery{query: query, bucket_size: bucket_size, facets: facets, duration: dur}}} = monitor) do
+  defp log_query(
+    %Monitor{
+      query: %Query{
+        log: %LogQuery{query: query, bucket_size: bucket_size, facets: facets, duration: dur} = q
+      }
+    } = monitor
+  ) do
     %LQ{
       query: query,
       bucket_size: bucket_size,
       facets: facets,
+      operator: q.operator,
       resource: monitor.service,
       time: Time.new(duration: Console.convert_duration!(dur || "1h"))
     }
     |> Provider.aggregate()
     |> case do
-      {:ok, results} -> Enum.map(results, & &1.count) |> calc(monitor.threshold, results)
+      {:ok, results} ->
+        Enum.map(results, & &1.count)
+        |> calc(monitor.threshold, results)
       err -> err
     end
   end

@@ -29,7 +29,7 @@ export const getDirectory = (
   {
     label: 'Metrics',
     path: 'metrics',
-    onlyFor: ['deployment', 'statefulset'],
+    onlyFor: ['deployment', 'statefulset', 'daemonset'],
     onlyIfNoError: true,
     prometheus: true,
   },
