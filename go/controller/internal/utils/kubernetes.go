@@ -100,7 +100,12 @@ func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Cli
 
 func OwnerRefAnnotationEventHandler[T ctrlruntimeclient.Object](c ctrlruntimeclient.Client, owner T) handler.EventHandler {
 	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object ctrlruntimeclient.Object) []reconcile.Request {
-		return GetOwnerRefsAnnotationRequests(ctx, c, object, owner)
+		ownerCopy, ok := owner.DeepCopyObject().(ctrlruntimeclient.Object)
+		if !ok {
+			return nil
+		}
+
+		return GetOwnerRefsAnnotationRequests(ctx, c, object, ownerCopy)
 	})
 }
 
