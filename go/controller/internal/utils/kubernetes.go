@@ -64,7 +64,7 @@ func AddOwnerRefAnnotation(ctx context.Context, client ctrlruntimeclient.Client,
 func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Client, object, obj ctrlruntimeclient.Object) []reconcile.Request {
 	requests := make([]reconcile.Request, 0)
 
-	objectGVK, err := apiutil.GVKForObject(object, c.Scheme())
+	objGVK, err := apiutil.GVKForObject(obj, c.Scheme())
 	if err != nil {
 		return requests
 	}
@@ -87,7 +87,7 @@ func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Cli
 
 		group, kind, namespace, name := s[0], s[1], s[2], s[3]
 
-		if group != objectGVK.Group || kind != objectGVK.Kind {
+		if group != objGVK.Group || kind != objGVK.Kind {
 			continue // Skip if group or kind don't match.
 		}
 
