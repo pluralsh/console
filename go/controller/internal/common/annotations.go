@@ -19,11 +19,13 @@ const (
 	// OwnedByAnnotation is an annotation used to mark resources that are owned by our CRDs.
 	// It is used instead of the standard owner reference to avoid garbage collection of resources
 	// but still be able to reconcile them.
+	//
 	// Deprecated: Use utils.OwnerRefAnnotation instead.
 	OwnedByAnnotation = "deployments.plural.sh/owned-by"
 )
 
 // OwnedByEventHandler returns an EventHandler that reconciles objects that have the OwnedByAnnotation.
+//
 // Deprecated: Use utils.OwnerRefAnnotationEventHandler.
 func OwnedByEventHandler(ownerGk *metav1.GroupKind) handler.EventHandler {
 	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj runtimeclient.Object) []reconcile.Request {
@@ -55,6 +57,7 @@ func OwnedByEventHandler(ownerGk *metav1.GroupKind) handler.EventHandler {
 }
 
 // TryAddOwnedByAnnotation adds the owned-by annotation to the child object.
+//
 // Deprecated: Use utils.TryAddOwnerRef instead.
 func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, owner runtimeclient.Object,
 	child runtimeclient.Object) error {
@@ -79,6 +82,7 @@ func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, o
 }
 
 // hasOwnedByAnnotation returns true if the object has the OwnedByAnnotation.
+//
 // Deprecated.
 func hasOwnedByAnnotation(obj runtimeclient.Object) bool {
 	if obj.GetAnnotations() == nil {
@@ -91,6 +95,7 @@ func hasOwnedByAnnotation(obj runtimeclient.Object) bool {
 }
 
 // fromOwnedByAnnotation parses the OwnedByAnnotation and returns the GroupKind and NamespacedName.
+//
 // Deprecated.
 func fromOwnedByAnnotation(annotation string) (metav1.GroupKind, types.NamespacedName, error) {
 	parts := strings.Split(annotation, "/")
@@ -104,6 +109,7 @@ func fromOwnedByAnnotation(annotation string) (metav1.GroupKind, types.Namespace
 }
 
 // toOwnedByAnnotation returns the OwnedByAnnotation for the given group, kind, namespace and name.
+//
 // Deprecated.
 func toOwnedByAnnotation(group, kind, namespace, name string) string {
 	return strings.ToLower(fmt.Sprintf("%s/%s/%s/%s", group, kind, namespace, name))
