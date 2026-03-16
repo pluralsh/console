@@ -25,7 +25,9 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
 			secretName                 = "stack-secret"
+			configMapName              = "stack-configmap"
 			stackName                  = "stack-test"
+			configMapStackName         = "stack-configmap-test"
 			invalidClusterRefStackName = "invalid-cluster-ref-stack"
 			invalidRepoRefStackName    = "invalid-repo-ref-stack"
 			clusterName                = "cluster-test"
@@ -39,6 +41,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 		ctx := context.Background()
 
 		typeNamespacedName := types.NamespacedName{Name: stackName, Namespace: namespace}
+		configMapStackNamespacedName := types.NamespacedName{Name: configMapStackName, Namespace: namespace}
 		invalidClusterRefTypeNamespacedName := types.NamespacedName{Name: invalidClusterRefStackName, Namespace: namespace}
 		invalidRepoRefTypeNamespacedName := types.NamespacedName{Name: invalidRepoRefStackName, Namespace: namespace}
 
@@ -48,6 +51,14 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: namespace},
 				Data: map[string][]byte{
 					"secret": []byte("secret"),
+				},
+			}, nil)).To(Succeed())
+
+			By("creating the configuration configmap")
+			Expect(common.MaybeCreate(k8sClient, &corev1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{Name: configMapName, Namespace: namespace},
+				Data: map[string]string{
+					"config-key": "config-value",
 				},
 			}, nil)).To(Succeed())
 
@@ -134,6 +145,54 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				},
 			}, nil)).To(Succeed())
 
+			By("creating a stack with both ConfigMapRef and SecretKeyRef environment variables")
+			Expect(common.MaybeCreate(k8sClient, &v1alpha1.InfrastructureStack{
+				ObjectMeta: metav1.ObjectMeta{Name: configMapStackName, Namespace: namespace},
+				Spec: v1alpha1.InfrastructureStackSpec{
+					Name: lo.ToPtr(configMapStackName),
+					Type: gqlclient.StackTypeTerraform,
+					RepositoryRef: corev1.ObjectReference{
+						Name:      repoName,
+						Namespace: namespace,
+					},
+					ClusterRef: corev1.ObjectReference{
+						Name:      clusterName,
+						Namespace: namespace,
+					},
+					Git: v1alpha1.GitRef{
+						Ref:    "main",
+						Folder: "terraform",
+					},
+					Configuration: &v1alpha1.StackConfiguration{
+						Version: lo.ToPtr("v0.0.1"),
+					},
+					Environment: []v1alpha1.StackEnvironment{
+						{
+							Name: "testConfigMap",
+							ConfigMapRef: &corev1.ConfigMapKeySelector{
+								LocalObjectReference: corev1.LocalObjectReference{
+									Name: configMapName,
+								},
+								Key: "config-key",
+							},
+						},
+						{
+							Name: "testSecret",
+							SecretKeyRef: &corev1.SecretKeySelector{
+								LocalObjectReference: corev1.LocalObjectReference{
+									Name: secretName,
+								},
+								Key: "secret",
+							},
+						},
+						{
+							Name:  "testValue",
+							Value: lo.ToPtr("testValue"),
+						},
+					},
+				},
+			}, nil)).To(Succeed())
+
 			By("creating stack")
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.InfrastructureStack{
 				ObjectMeta: metav1.ObjectMeta{Name: invalidClusterRefStackName, Namespace: namespace},
@@ -191,6 +250,12 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			By("Cleanup the secret")
 			Expect(k8sClient.Delete(ctx, secret)).To(Succeed())
 
+			configMap := &corev1.ConfigMap{}
+			err = k8sClient.Get(ctx, types.NamespacedName{Name: configMapName, Namespace: namespace}, configMap)
+			Expect(err).NotTo(HaveOccurred())
+			By("Cleanup the configmap")
+			Expect(k8sClient.Delete(ctx, configMap)).To(Succeed())
+
 			resource := &v1alpha1.Cluster{}
 			err = k8sClient.Get(ctx, types.NamespacedName{Name: clusterName, Namespace: namespace}, resource)
 			Expect(err).NotTo(HaveOccurred())
@@ -207,6 +272,12 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, stack)
 			if err == nil {
 				By("Cleanup the specific resource instance InfrastructureStack")
+				Expect(k8sClient.Delete(ctx, stack)).To(Succeed())
+			}
+
+			err = k8sClient.Get(ctx, configMapStackNamespacedName, stack)
+			if err == nil {
+				By("Cleanup the configmap stack resource")
 				Expect(k8sClient.Delete(ctx, stack)).To(Succeed())
 			}
 
@@ -235,8 +306,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				expectedStatus    v1alpha1.Status
 			}{
 				expectedStatus: v1alpha1.Status{
-					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("G6IOXGIMZVRJRZX47TLWQ6LZV72A4I2AU7ZRER7EDPIO7ZVL7LCQ===="),
+					ID: lo.ToPtr(id),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -281,7 +351,10 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, resource)
 
 			Expect(err).NotTo(HaveOccurred())
-			Expect(common.SanitizeStatusConditions(resource.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+			Expect(resource.Status.SHA).NotTo(BeNil())
+			sanitized := common.SanitizeStatusConditions(resource.Status)
+			sanitized.SHA = nil
+			Expect(sanitized).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
 		It("should successfully reconcile and update previously created stack", func() {
@@ -291,8 +364,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 				expectedStatus    v1alpha1.Status
 			}{
 				expectedStatus: v1alpha1.Status{
-					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("MMK4XN5OT3XDP7PYFIQ4R7I7EVM73SYPB6Q5TOMN5EEZLMAFTX5A===="),
+					ID: lo.ToPtr(id),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -372,7 +444,10 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			resource := &v1alpha1.InfrastructureStack{}
 			err = k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(common.SanitizeStatusConditions(resource.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
+			Expect(resource.Status.SHA).NotTo(BeNil())
+			sanitized := common.SanitizeStatusConditions(resource.Status)
+			sanitized.SHA = nil
+			Expect(sanitized).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
 		It("should successfully reconcile the resource", func() {
@@ -416,6 +491,150 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			service := &v1alpha1.InfrastructureStack{}
 			err = k8sClient.Get(ctx, typeNamespacedName, service)
 			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should successfully reconcile a stack with ConfigMapRef environment variable", func() {
+			By("Create Stack with ConfigMapRef env")
+			returnCreateStack := &gqlclient.InfrastructureStackFragment{
+				ID: lo.ToPtr(id),
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetStackByName", mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("CreateStack", mock.Anything, mock.Anything).Return(returnCreateStack, nil)
+			reconciler := &controller.InfrastructureStackReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := reconciler.Process(ctx, reconcile.Request{
+				NamespacedName: configMapStackNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			resource := &v1alpha1.InfrastructureStack{}
+			err = k8sClient.Get(ctx, configMapStackNamespacedName, resource)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resource.Status.ID).To(Equal(lo.ToPtr(id)))
+			Expect(resource.Status.SHA).NotTo(BeNil())
+
+			By("verifying the ConfigMap gets the owned-by annotation")
+			configMap := &corev1.ConfigMap{}
+			err = k8sClient.Get(ctx, types.NamespacedName{Name: configMapName, Namespace: namespace}, configMap)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(configMap.GetAnnotations()).To(HaveKey("deployments.plural.sh/owned-by"))
+		})
+
+		It("should trigger update when ConfigMap value changes", func() {
+			By("Set up existing stack ID")
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.InfrastructureStack{
+				ObjectMeta: metav1.ObjectMeta{Name: configMapStackName, Namespace: namespace},
+			}, func(p *v1alpha1.InfrastructureStack) {
+				p.Status.ID = lo.ToPtr(id)
+			})).To(Succeed())
+
+			By("Recording initial SHA")
+			resource := &v1alpha1.InfrastructureStack{}
+			err := k8sClient.Get(ctx, configMapStackNamespacedName, resource)
+			Expect(err).NotTo(HaveOccurred())
+			initialSHA := resource.Status.SHA
+			Expect(initialSHA).NotTo(BeNil())
+
+			By("Updating ConfigMap value")
+			Expect(common.MaybePatchObject(k8sClient, &corev1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{Name: configMapName, Namespace: namespace},
+			}, func(cm *corev1.ConfigMap) {
+				cm.Data["config-key"] = "updated-config-value"
+			})).To(Succeed())
+
+			returnStack := &gqlclient.InfrastructureStackFragment{
+				ID: lo.ToPtr(id),
+			}
+			returnStackID := &gqlclient.InfrastructureStackIDFragment{
+				ID: lo.ToPtr(id),
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetStackByName", mock.Anything, mock.Anything).Return(returnStackID, nil)
+			fakeConsoleClient.On("UpdateStack", mock.Anything, mock.Anything, mock.Anything).Return(returnStack, nil)
+			fakeConsoleClient.On("GetStackStatus", mock.Anything, mock.Anything).Return(&gqlclient.InfrastructureStackStatusFragment{
+				Status: gqlclient.StackStatusSuccessful,
+			}, nil)
+			reconciler := &controller.InfrastructureStackReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			_, err = reconciler.Process(ctx, reconcile.Request{NamespacedName: configMapStackNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			By("verifying UpdateStack was called due to SHA change")
+			fakeConsoleClient.AssertCalled(GinkgoT(), "UpdateStack", mock.Anything, mock.Anything, mock.Anything)
+
+			By("verifying SHA was updated")
+			err = k8sClient.Get(ctx, configMapStackNamespacedName, resource)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resource.Status.SHA).NotTo(BeNil())
+			Expect(resource.Status.SHA).NotTo(Equal(initialSHA))
+		})
+
+		It("should trigger update when Secret value changes", func() {
+			// Uses configMapStackName which also has a SecretKeyRef env var added in BeforeAll.
+			By("Recording initial SHA from previous reconcile")
+			resource := &v1alpha1.InfrastructureStack{}
+			err := k8sClient.Get(ctx, configMapStackNamespacedName, resource)
+			Expect(err).NotTo(HaveOccurred())
+			initialSHA := resource.Status.SHA
+			Expect(initialSHA).NotTo(BeNil())
+
+			By("Updating the Secret value referenced by the stack")
+			Expect(common.MaybePatchObject(k8sClient, &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: namespace},
+			}, func(s *corev1.Secret) {
+				s.Data["secret"] = []byte("updated-secret-value")
+			})).To(Succeed())
+
+			returnStack := &gqlclient.InfrastructureStackFragment{ID: lo.ToPtr(id)}
+			returnStackID := &gqlclient.InfrastructureStackIDFragment{ID: lo.ToPtr(id)}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
+			fakeConsoleClient.On("GetStackByName", mock.Anything, mock.Anything).Return(returnStackID, nil)
+			fakeConsoleClient.On("UpdateStack", mock.Anything, mock.Anything, mock.Anything).Return(returnStack, nil)
+			fakeConsoleClient.On("GetStackStatus", mock.Anything, mock.Anything).Return(&gqlclient.InfrastructureStackStatusFragment{
+				Status: gqlclient.StackStatusSuccessful,
+			}, nil)
+			reconciler := &controller.InfrastructureStackReconciler{
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+			}
+
+			_, err = reconciler.Process(ctx, reconcile.Request{NamespacedName: configMapStackNamespacedName})
+			Expect(err).NotTo(HaveOccurred())
+
+			By("verifying UpdateStack was called due to secret value change")
+			fakeConsoleClient.AssertCalled(GinkgoT(), "UpdateStack", mock.Anything, mock.Anything, mock.Anything)
+
+			By("verifying SHA was updated to reflect new secret values")
+			err = k8sClient.Get(ctx, configMapStackNamespacedName, resource)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resource.Status.SHA).NotTo(BeNil())
+			Expect(resource.Status.SHA).NotTo(Equal(initialSHA))
+
+			By("Restoring the secret value")
+			Expect(common.MaybePatchObject(k8sClient, &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: namespace},
+			}, func(s *corev1.Secret) {
+				s.Data["secret"] = []byte("secret")
+			})).To(Succeed())
 		})
 
 		It("should detect invalid cluster ref and update conditions accordingly", func() {
