@@ -15,8 +15,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/util/retry"
 	"k8s.io/klog/v2"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
@@ -79,6 +81,12 @@ func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Cli
 	}
 
 	return requests
+}
+
+func OwnerRefAnnotationEventHandler[T client.Object](c client.Client, obj T) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, configMap client.Object) []reconcile.Request {
+		return GetOwnerRefsAnnotationRequests(ctx, c, configMap, obj)
+	})
 }
 
 func TryAddOwnerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, object ctrlruntimeclient.Object, scheme *runtime.Scheme) error {

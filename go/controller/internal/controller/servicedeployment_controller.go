@@ -739,7 +739,7 @@ func (r *ServiceDeploymentReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
 		Watches(&v1alpha1.InfrastructureStack{}, OnInfrastructureStackChange(r.Client, new(v1alpha1.ServiceDeployment))).
-		Watches(&corev1.Secret{}, OnSecretChange(r.Client, new(v1alpha1.ServiceDeployment))).
+		Watches(&corev1.Secret{}, utils.OwnerRefAnnotationEventHandler(r.Client, new(v1alpha1.ServiceDeployment))).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
@@ -768,11 +768,5 @@ func OnInfrastructureStackChange[T client.Object](c client.Client, obj T) handle
 		}
 
 		return requests
-	})
-}
-
-func OnSecretChange[T client.Object](c client.Client, obj T) handler.EventHandler {
-	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, secret client.Object) []reconcile.Request {
-		return utils.GetOwnerRefsAnnotationRequests(ctx, c, secret, obj)
 	})
 }
