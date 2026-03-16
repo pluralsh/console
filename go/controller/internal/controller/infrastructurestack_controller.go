@@ -74,6 +74,8 @@ func (r *InfrastructureStackReconciler) Name() internaltypes.Reconciler {
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;patch
+// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop.
 func (r *InfrastructureStackReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -232,8 +234,6 @@ func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, s
 }
 
 // SetupWithManager sets up the controller with the Manager.
-// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;patch
-// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;patch
 func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                 // Requirement for credentials implementation.
