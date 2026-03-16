@@ -22,6 +22,15 @@ metadata:
 data:
   secret: dGVzdA==
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: infrastructurestack-config
+  namespace: default
+data:
+  region: us-east-1
+  environment: production
+---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: InfrastructureStack
 metadata:
@@ -60,6 +69,14 @@ spec:
       secretKeyRef:
         name: infrastructurestack
         key: secret
+    - name: AWS_REGION
+      configMapRef:
+        name: infrastructurestack-config
+        key: region
+    - name: APP_ENV
+      configMapRef:
+        name: infrastructurestack-config
+        key: environment
   jobSpec:
     namespace: default
     raw:
@@ -72,5 +89,3 @@ spec:
               image: perl:5.34.0
               command: [ "perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)" ]
           restartPolicy: Never
-
-
