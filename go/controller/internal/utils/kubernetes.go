@@ -17,6 +17,7 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -41,7 +42,12 @@ func AddOwnerRefAnnotation(ctx context.Context, client ctrlruntimeclient.Client,
 		}
 	}
 
-	ownerRef := fmt.Sprintf("%s/%s", owner.GetNamespace(), owner.GetName())
+	gvk, err := apiutil.GVKForObject(owner, client.Scheme())
+	if err != nil {
+		return fmt.Errorf("failed to get GVK for owner %s: %w", owner.GetName(), err)
+	}
+
+	ownerRef := fmt.Sprintf("%s/%s/%s/%s", gvk.Group, gvk.Kind, owner.GetNamespace(), owner.GetName())
 	if !objectOwners.Has(ownerRef) {
 		objectOwners.Add(ownerRef)
 		objectAnnotations[OwnerRefAnnotation] = strings.Join(objectOwners.List(), ",")
@@ -58,6 +64,11 @@ func AddOwnerRefAnnotation(ctx context.Context, client ctrlruntimeclient.Client,
 func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Client, object, obj ctrlruntimeclient.Object) []reconcile.Request {
 	requests := make([]reconcile.Request, 0)
 
+	objectGVK, err := apiutil.GVKForObject(object, c.Scheme())
+	if err != nil {
+		return requests
+	}
+
 	objectAnnotations := object.GetAnnotations()
 	if objectAnnotations == nil {
 		return requests
@@ -70,11 +81,16 @@ func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Cli
 
 	for _, owner := range strings.Split(owners, ",") {
 		s := strings.Split(owner, "/")
-		if len(s) != 2 {
-			continue
+		if len(s) != 4 {
+			continue // Skip if not in the expected format.
 		}
 
-		namespace, name := s[0], s[1]
+		group, kind, namespace, name := s[0], s[1], s[2], s[3]
+
+		if group != objectGVK.Group || kind != objectGVK.Kind {
+			continue // Skip if group or kind don't match.
+		}
+
 		if err := c.Get(ctx, ctrlruntimeclient.ObjectKey{Name: name, Namespace: namespace}, obj); err == nil {
 			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: name, Namespace: namespace}})
 		}
@@ -84,8 +100,8 @@ func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Cli
 }
 
 func OwnerRefAnnotationEventHandler[T client.Object](c client.Client, obj T) handler.EventHandler {
-	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, configMap client.Object) []reconcile.Request {
-		return GetOwnerRefsAnnotationRequests(ctx, c, configMap, obj)
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, resource client.Object) []reconcile.Request {
+		return GetOwnerRefsAnnotationRequests(ctx, c, resource, obj)
 	})
 }
 

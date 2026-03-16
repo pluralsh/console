@@ -521,11 +521,11 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			Expect(resource.Status.ID).To(Equal(lo.ToPtr(id)))
 			Expect(resource.Status.SHA).NotTo(BeNil())
 
-			By("verifying the ConfigMap gets the owned-by annotation")
+			By("verifying the ConfigMap gets the owner-ref annotation")
 			configMap := &corev1.ConfigMap{}
 			err = k8sClient.Get(ctx, types.NamespacedName{Name: configMapName, Namespace: namespace}, configMap)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(configMap.GetAnnotations()).To(HaveKeyWithValue("deployments.plural.sh/owner-ref", "deployments.plural.sh/infrastructurestack/default/stack-configmap-test"))
+			Expect(configMap.GetAnnotations()).To(HaveKeyWithValue("deployments.plural.sh/owner-ref", "deployments.plural.sh/InfrastructureStack/default/stack-configmap-test"))
 		})
 
 		It("should trigger update when ConfigMap value changes", func() {
