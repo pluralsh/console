@@ -60,10 +60,10 @@ func AddOwnerRefAnnotation(ctx context.Context, client ctrlruntimeclient.Client,
 	return nil
 }
 
-func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Client, object, obj ctrlruntimeclient.Object) []reconcile.Request {
+func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Client, object, owner ctrlruntimeclient.Object) []reconcile.Request {
 	requests := make([]reconcile.Request, 0)
 
-	objGVK, err := apiutil.GVKForObject(obj, c.Scheme())
+	ownerGVK, err := apiutil.GVKForObject(owner, c.Scheme())
 	if err != nil {
 		return requests
 	}
@@ -73,24 +73,24 @@ func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Cli
 		return requests
 	}
 
-	owners, ok := object.GetAnnotations()[OwnerRefAnnotation]
+	resources, ok := object.GetAnnotations()[OwnerRefAnnotation]
 	if !ok {
 		return requests
 	}
 
-	for _, owner := range strings.Split(owners, ",") {
-		s := strings.Split(owner, "/")
-		if len(s) != 4 {
+	for _, resource := range strings.Split(resources, ",") {
+		parts := strings.Split(resource, "/")
+		if len(parts) != 4 {
 			continue // Skip if not in the expected format.
 		}
 
-		group, kind, namespace, name := s[0], s[1], s[2], s[3]
+		group, kind, namespace, name := parts[0], parts[1], parts[2], parts[3]
 
-		if group != objGVK.Group || kind != objGVK.Kind {
+		if group != ownerGVK.Group || kind != ownerGVK.Kind {
 			continue // Skip if group or kind don't match.
 		}
 
-		if err := c.Get(ctx, ctrlruntimeclient.ObjectKey{Name: name, Namespace: namespace}, obj); err == nil {
+		if err := c.Get(ctx, ctrlruntimeclient.ObjectKey{Name: name, Namespace: namespace}, owner); err == nil {
 			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: name, Namespace: namespace}})
 		}
 	}
@@ -98,9 +98,9 @@ func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Cli
 	return requests
 }
 
-func OwnerRefAnnotationEventHandler[T ctrlruntimeclient.Object](c ctrlruntimeclient.Client, obj T) handler.EventHandler {
-	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, resource ctrlruntimeclient.Object) []reconcile.Request {
-		return GetOwnerRefsAnnotationRequests(ctx, c, resource, obj)
+func OwnerRefAnnotationEventHandler[T ctrlruntimeclient.Object](c ctrlruntimeclient.Client, owner T) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object ctrlruntimeclient.Object) []reconcile.Request {
+		return GetOwnerRefsAnnotationRequests(ctx, c, object, owner)
 	})
 }
 
