@@ -232,8 +232,8 @@ func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, s
 }
 
 // SetupWithManager sets up the controller with the Manager.
-//+kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;patch
-//+kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;patch
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;patch
+// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;patch
 func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                 // Requirement for credentials implementation.
