@@ -525,7 +525,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			configMap := &corev1.ConfigMap{}
 			err = k8sClient.Get(ctx, types.NamespacedName{Name: configMapName, Namespace: namespace}, configMap)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(configMap.GetAnnotations()).To(HaveKey("deployments.plural.sh/owned-by"))
+			Expect(configMap.GetAnnotations()).To(HaveKeyWithValue("deployments.plural.sh/owned-by", "deployments.plural.sh/infrastructurestack/default/stack-configmap-test"))
 		})
 
 		It("should trigger update when ConfigMap value changes", func() {
