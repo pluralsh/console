@@ -20,9 +20,12 @@ const (
 	// OwnedByAnnotation is an annotation used to mark resources that are owned by our CRDs.
 	// It is used instead of the standard owner reference to avoid garbage collection of resources
 	// but still be able to reconcile them.
+	// DEPRECATED: Use utils.OwnerRefAnnotation instead.
 	OwnedByAnnotation = "deployments.plural.sh/owned-by"
 )
 
+// OwnedByEventHandler returns an EventHandler that reconciles objects that have the OwnedByAnnotation.
+// DEPRECATED: Use utils.OwnerRefAnnotationEventHandler.
 func OwnedByEventHandler(ownerGk *metav1.GroupKind) handler.EventHandler {
 	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj runtimeclient.Object) []reconcile.Request {
 		if !hasOwnedByAnnotation(obj) {
@@ -52,7 +55,9 @@ func OwnedByEventHandler(ownerGk *metav1.GroupKind) handler.EventHandler {
 	})
 }
 
-func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, owner runtimeclient.Object,
+// AddOwnerRefAnnotation adds the owned-by annotation to the child object.
+// DEPRECATED: Use utils.TryAddOwnerRef instead.
+func AddOwnerRefAnnotation(ctx context.Context, client runtimeclient.Client, owner runtimeclient.Object,
 	child runtimeclient.Object) error {
 	if hasOwnedByAnnotation(child) {
 		klog.V(log.LogLevelDebug).InfoS("owned-by annotation already exists",
@@ -77,6 +82,8 @@ func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, o
 	return utils.TryToUpdate(ctx, client, child)
 }
 
+// hasOwnedByAnnotation returns true if the object has the OwnedByAnnotation.
+// DEPRECATED.
 func hasOwnedByAnnotation(obj runtimeclient.Object) bool {
 	if obj.GetAnnotations() == nil {
 		return false
@@ -87,6 +94,8 @@ func hasOwnedByAnnotation(obj runtimeclient.Object) bool {
 	return exists && err == nil
 }
 
+// fromOwnedByAnnotation parses the OwnedByAnnotation and returns the GroupKind and NamespacedName.
+// DEPRECATED.
 func fromOwnedByAnnotation(annotation string) (metav1.GroupKind, types.NamespacedName, error) {
 	parts := strings.Split(annotation, "/")
 	if len(parts) != 4 {
@@ -98,6 +107,8 @@ func fromOwnedByAnnotation(annotation string) (metav1.GroupKind, types.Namespace
 		types.NamespacedName{Namespace: parts[2], Name: parts[3]}, nil
 }
 
+// toOwnedByAnnotation returns the OwnedByAnnotation for the given group, kind, namespace and name.
+// DEPRECATED.
 func toOwnedByAnnotation(group, kind, namespace, name string) string {
 	return strings.ToLower(fmt.Sprintf("%s/%s/%s/%s", group, kind, namespace, name))
 }
