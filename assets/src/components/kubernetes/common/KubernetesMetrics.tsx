@@ -1,7 +1,6 @@
 import { Card, EmptyState } from '@pluralsh/design-system'
 import { Graph } from 'components/utils/Graph'
 import GraphHeader from 'components/utils/GraphHeader'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import RangePicker from 'components/utils/RangePicker'
 
