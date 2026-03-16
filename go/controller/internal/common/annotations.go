@@ -11,7 +11,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -20,12 +19,12 @@ const (
 	// OwnedByAnnotation is an annotation used to mark resources that are owned by our CRDs.
 	// It is used instead of the standard owner reference to avoid garbage collection of resources
 	// but still be able to reconcile them.
-	// DEPRECATED: Use utils.OwnerRefAnnotation instead.
+	// Deprecated: Use utils.OwnerRefAnnotation instead.
 	OwnedByAnnotation = "deployments.plural.sh/owned-by"
 )
 
 // OwnedByEventHandler returns an EventHandler that reconciles objects that have the OwnedByAnnotation.
-// DEPRECATED: Use utils.OwnerRefAnnotationEventHandler.
+// Deprecated: Use utils.OwnerRefAnnotationEventHandler.
 func OwnedByEventHandler(ownerGk *metav1.GroupKind) handler.EventHandler {
 	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, obj runtimeclient.Object) []reconcile.Request {
 		if !hasOwnedByAnnotation(obj) {
@@ -56,7 +55,7 @@ func OwnedByEventHandler(ownerGk *metav1.GroupKind) handler.EventHandler {
 }
 
 // TryAddOwnedByAnnotation adds the owned-by annotation to the child object.
-// DEPRECATED: Use utils.TryAddOwnerRef instead.
+// Deprecated: Use utils.TryAddOwnerRef instead.
 func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, owner runtimeclient.Object,
 	child runtimeclient.Object) error {
 	if hasOwnedByAnnotation(child) {
@@ -70,10 +69,7 @@ func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, o
 		annotations = make(map[string]string)
 	}
 
-	gvk, err := apiutil.GVKForObject(owner, client.Scheme())
-	if err != nil {
-		return fmt.Errorf("failed to get GVK for owner %s: %w", owner.GetName(), err)
-	}
+	gvk := owner.GetObjectKind().GroupVersionKind()
 	annotations[OwnedByAnnotation] = toOwnedByAnnotation(gvk.Group, gvk.Kind, owner.GetNamespace(), owner.GetName())
 	child.SetAnnotations(annotations)
 
@@ -83,7 +79,7 @@ func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, o
 }
 
 // hasOwnedByAnnotation returns true if the object has the OwnedByAnnotation.
-// DEPRECATED.
+// Deprecated.
 func hasOwnedByAnnotation(obj runtimeclient.Object) bool {
 	if obj.GetAnnotations() == nil {
 		return false
@@ -95,7 +91,7 @@ func hasOwnedByAnnotation(obj runtimeclient.Object) bool {
 }
 
 // fromOwnedByAnnotation parses the OwnedByAnnotation and returns the GroupKind and NamespacedName.
-// DEPRECATED.
+// Deprecated.
 func fromOwnedByAnnotation(annotation string) (metav1.GroupKind, types.NamespacedName, error) {
 	parts := strings.Split(annotation, "/")
 	if len(parts) != 4 {
@@ -108,7 +104,7 @@ func fromOwnedByAnnotation(annotation string) (metav1.GroupKind, types.Namespace
 }
 
 // toOwnedByAnnotation returns the OwnedByAnnotation for the given group, kind, namespace and name.
-// DEPRECATED.
+// Deprecated.
 func toOwnedByAnnotation(group, kind, namespace, name string) string {
 	return strings.ToLower(fmt.Sprintf("%s/%s/%s/%s", group, kind, namespace, name))
 }
