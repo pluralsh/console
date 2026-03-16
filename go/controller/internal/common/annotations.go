@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/klog/v2"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -64,7 +65,10 @@ func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, o
 		annotations = make(map[string]string)
 	}
 
-	gvk := owner.GetObjectKind().GroupVersionKind()
+	gvk, err := apiutil.GVKForObject(owner, client.Scheme())
+	if err != nil {
+		return fmt.Errorf("failed to get GVK for owner %s: %w", owner.GetName(), err)
+	}
 	annotations[OwnedByAnnotation] = toOwnedByAnnotation(gvk.Group, gvk.Kind, owner.GetNamespace(), owner.GetName())
 	child.SetAnnotations(annotations)
 
