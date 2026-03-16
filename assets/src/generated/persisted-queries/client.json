@@ -592,6 +592,11 @@
          "name": "ClusterNetworkGraph",
          "body": "query ClusterNetworkGraph($clusterId: ID!, $time: DateTime) {\n  cluster(id: $clusterId) {\n    id\n    networkGraph(time: $time) {\n      ...NetworkMeshEdge\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment NetworkMeshEdge on NetworkMeshEdge {\n  id\n  from {\n    ...NetworkMeshWorkload\n    __typename\n  }\n  to {\n    ...NetworkMeshWorkload\n    __typename\n  }\n  statistics {\n    ...NetworkMeshStatistics\n    __typename\n  }\n  __typename\n}\n\nfragment NetworkMeshWorkload on NetworkMeshWorkload {\n  id\n  name\n  namespace\n  service\n  __typename\n}\n\nfragment NetworkMeshStatistics on NetworkMeshStatistics {\n  bytes\n  packets\n  connections\n  http200\n  http400\n  http500\n  httpClientLatency\n  __typename\n}"
       },
+      "sha256:9f094e970df11adabb6148c0ffcbcc2fca20176705b34bf1110f35320fe8b564": {
+         "type": "query",
+         "name": "ClusterKubernetesMetrics",
+         "body": "query ClusterKubernetesMetrics($clusterId: ID!, $group: String!, $version: String!, $kind: String!, $name: String!, $namespace: String!, $start: DateTime, $stop: DateTime, $step: String) {\n  cluster(id: $clusterId) {\n    ...ClusterKubernetesMetrics\n    __typename\n  }\n}\n\nfragment ClusterKubernetesMetrics on Cluster {\n  id\n  componentMetrics(\n    group: $group\n    version: $version\n    kind: $kind\n    name: $name\n    namespace: $namespace\n    start: $start\n    stop: $stop\n    step: $step\n  ) {\n    cpu {\n      ...MetricResponse\n      __typename\n    }\n    mem {\n      ...MetricResponse\n      __typename\n    }\n    podCpu {\n      ...MetricResponse\n      __typename\n    }\n    podMem {\n      ...MetricResponse\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment MetricResponse on MetricResponse {\n  metric\n  values {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
+      },
       "sha256:67942576f712b8192cdd8eedb1f00c9ccc8243b981eb463c2347fc1bc45f58fc": {
          "type": "query",
          "name": "ServiceDeploymentComponentMetrics",
