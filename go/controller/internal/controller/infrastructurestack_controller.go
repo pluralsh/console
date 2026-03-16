@@ -35,6 +35,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -233,9 +234,16 @@ func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, s
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	gvk, err := apiutil.GVKForObject(&v1alpha1.InfrastructureStack{}, mgr.GetScheme())
+	if err != nil {
+		return fmt.Errorf("failed to get GVK for InfrastructureStack: %w", err)
+	}
+
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                 // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.InfrastructureStackList))). // Reconcile objects on credentials change.
+		Watches(&corev1.Secret{}, common.OwnedByEventHandler(&v1.GroupKind{Group: gvk.Group, Kind: gvk.Kind})).
+		Watches(&corev1.ConfigMap{}, common.OwnedByEventHandler(&v1.GroupKind{Group: gvk.Group, Kind: gvk.Kind})).
 		For(&v1alpha1.InfrastructureStack{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }
@@ -381,9 +389,11 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 			if err := r.Get(ctx, name, secret); err != nil {
 				return nil, err
 			}
-			// if err := utils.TryAddControllerRef(ctx, r.Client, stack, secret, r.Scheme); err != nil {
-			// 	return nil, err
-			// }
+
+			if err := common.TryAddOwnedByAnnotation(ctx, r.Client, stack, secret); err != nil {
+				return nil, err
+			}
+
 			isSecret = lo.ToPtr(true)
 			rawData, ok := secret.Data[env.SecretKeyRef.Key]
 			if !ok {
@@ -396,9 +406,11 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 			if err := r.Get(ctx, name, configMap); err != nil {
 				return nil, err
 			}
-			// if err := utils.TryAddControllerRef(ctx, r.Client, stack, configMap, r.Scheme); err != nil {
-			// 	return nil, err
-			// }
+
+			if err := common.TryAddOwnedByAnnotation(ctx, r.Client, stack, configMap); err != nil {
+				return nil, err
+			}
+
 			rawData, ok := configMap.Data[env.ConfigMapRef.Key]
 			if !ok {
 				return nil, fmt.Errorf("can not find secret data for the key %s", env.ConfigMapRef.Key)
