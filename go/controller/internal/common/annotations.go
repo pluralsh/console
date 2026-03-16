@@ -55,9 +55,9 @@ func OwnedByEventHandler(ownerGk *metav1.GroupKind) handler.EventHandler {
 	})
 }
 
-// AddOwnerRefAnnotation adds the owned-by annotation to the child object.
+// TryAddOwnedByAnnotation adds the owned-by annotation to the child object.
 // DEPRECATED: Use utils.TryAddOwnerRef instead.
-func AddOwnerRefAnnotation(ctx context.Context, client runtimeclient.Client, owner runtimeclient.Object,
+func TryAddOwnedByAnnotation(ctx context.Context, client runtimeclient.Client, owner runtimeclient.Object,
 	child runtimeclient.Object) error {
 	if hasOwnedByAnnotation(child) {
 		klog.V(log.LogLevelDebug).InfoS("owned-by annotation already exists",
