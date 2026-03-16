@@ -41,7 +41,7 @@ func TestAddOwnerRefAnnotation(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Verify annotation
-	assert.Equal(t, "default/owner-pod", object.Annotations[utils.OwnerRefAnnotation])
+	assert.Equal(t, "/Pod/default/owner-pod", object.Annotations[utils.OwnerRefAnnotation])
 
 	// Add another owner
 	owner2 := &corev1.Pod{
@@ -59,8 +59,8 @@ func TestAddOwnerRefAnnotation(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Verify annotation contains both
-	assert.Contains(t, object.Annotations[utils.OwnerRefAnnotation], "default/owner-pod")
-	assert.Contains(t, object.Annotations[utils.OwnerRefAnnotation], "default/owner-pod-2")
+	assert.Contains(t, object.Annotations[utils.OwnerRefAnnotation], "/Pod/default/owner-pod")
+	assert.Contains(t, object.Annotations[utils.OwnerRefAnnotation], "/Pod/default/owner-pod-2")
 }
 
 func TestGetOwnerRefsAnnotationRequests(t *testing.T) {
@@ -79,7 +79,7 @@ func TestGetOwnerRefsAnnotationRequests(t *testing.T) {
 			Name:      "owned-cm",
 			Namespace: "default",
 			Annotations: map[string]string{
-				utils.OwnerRefAnnotation: "default/owner-pod",
+				utils.OwnerRefAnnotation: "/Pod/default/owner-pod",
 			},
 		},
 	}
@@ -102,7 +102,7 @@ func TestGetOwnerRefsAnnotationRequests_MissingOwner(t *testing.T) {
 			Name:      "owned-cm",
 			Namespace: "default",
 			Annotations: map[string]string{
-				utils.OwnerRefAnnotation: "default/missing-pod",
+				utils.OwnerRefAnnotation: "/Pod/default/missing-pod",
 			},
 		},
 	}

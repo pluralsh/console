@@ -16,7 +16,9 @@ import (
 	"k8s.io/client-go/util/retry"
 	"k8s.io/klog/v2"
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
@@ -39,7 +41,12 @@ func AddOwnerRefAnnotation(ctx context.Context, client ctrlruntimeclient.Client,
 		}
 	}
 
-	ownerRef := fmt.Sprintf("%s/%s", owner.GetNamespace(), owner.GetName())
+	gvk, err := apiutil.GVKForObject(owner, client.Scheme())
+	if err != nil {
+		return fmt.Errorf("failed to get GVK for owner %s: %w", owner.GetName(), err)
+	}
+
+	ownerRef := fmt.Sprintf("%s/%s/%s/%s", gvk.Group, gvk.Kind, owner.GetNamespace(), owner.GetName())
 	if !objectOwners.Has(ownerRef) {
 		objectOwners.Add(ownerRef)
 		objectAnnotations[OwnerRefAnnotation] = strings.Join(objectOwners.List(), ",")
@@ -53,32 +60,53 @@ func AddOwnerRefAnnotation(ctx context.Context, client ctrlruntimeclient.Client,
 	return nil
 }
 
-func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Client, object, obj ctrlruntimeclient.Object) []reconcile.Request {
+func GetOwnerRefsAnnotationRequests(ctx context.Context, c ctrlruntimeclient.Client, object, owner ctrlruntimeclient.Object) []reconcile.Request {
 	requests := make([]reconcile.Request, 0)
+
+	ownerGVK, err := apiutil.GVKForObject(owner, c.Scheme())
+	if err != nil {
+		return requests
+	}
 
 	objectAnnotations := object.GetAnnotations()
 	if objectAnnotations == nil {
 		return requests
 	}
 
-	owners, ok := object.GetAnnotations()[OwnerRefAnnotation]
+	resources, ok := object.GetAnnotations()[OwnerRefAnnotation]
 	if !ok {
 		return requests
 	}
 
-	for _, owner := range strings.Split(owners, ",") {
-		s := strings.Split(owner, "/")
-		if len(s) != 2 {
-			continue
+	for _, resource := range strings.Split(resources, ",") {
+		parts := strings.Split(resource, "/")
+		if len(parts) != 4 {
+			continue // Skip if not in the expected format.
 		}
 
-		namespace, name := s[0], s[1]
-		if err := c.Get(ctx, ctrlruntimeclient.ObjectKey{Name: name, Namespace: namespace}, obj); err == nil {
+		group, kind, namespace, name := parts[0], parts[1], parts[2], parts[3]
+
+		if group != ownerGVK.Group || kind != ownerGVK.Kind {
+			continue // Skip if group or kind don't match.
+		}
+
+		if err := c.Get(ctx, ctrlruntimeclient.ObjectKey{Name: name, Namespace: namespace}, owner); err == nil {
 			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: name, Namespace: namespace}})
 		}
 	}
 
 	return requests
+}
+
+func OwnerRefAnnotationEventHandler[T ctrlruntimeclient.Object](c ctrlruntimeclient.Client, owner T) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, object ctrlruntimeclient.Object) []reconcile.Request {
+		ownerCopy, ok := owner.DeepCopyObject().(ctrlruntimeclient.Object)
+		if !ok {
+			return nil
+		}
+
+		return GetOwnerRefsAnnotationRequests(ctx, c, object, ownerCopy)
+	})
 }
 
 func TryAddOwnerRef(ctx context.Context, client ctrlruntimeclient.Client, owner ctrlruntimeclient.Object, object ctrlruntimeclient.Object, scheme *runtime.Scheme) error {
