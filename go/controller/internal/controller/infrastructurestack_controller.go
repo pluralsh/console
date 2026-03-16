@@ -413,7 +413,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 
 			rawData, ok := configMap.Data[env.ConfigMapRef.Key]
 			if !ok {
-				return nil, fmt.Errorf("can not find secret data for the key %s", env.ConfigMapRef.Key)
+			return nil, fmt.Errorf("can not find configmap data for the key %s", env.ConfigMapRef.Key)
 			}
 			value = rawData
 		}
