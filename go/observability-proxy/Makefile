@@ -5,11 +5,7 @@ include $(WORKSPACES_DIR)/common.mk
 include $(TOOLS_MAKEFILE)
 
 BINARY_NAME := observability-proxy
-GO_FILES := $(shell find . -name '*.go' -not -path './vendor/*')
-
 VERSION ?= $(shell git describe --tags --always --dirty)
-
-.DEFAULT_GOAL := help
 
 ##@ General
 

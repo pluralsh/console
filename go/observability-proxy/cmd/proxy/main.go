@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -19,8 +20,17 @@ import (
 
 func main() {
 	args.Init()
-	defer klog.Flush()
 
+	if err := run(); err != nil {
+		klog.Errorf("%v", err)
+		klog.Flush()
+		os.Exit(1)
+	}
+
+	klog.Flush()
+}
+
+func run() error {
 	klog.V(logging.LevelMinimal).Infof("starting observability-proxy listen=%s grpc_endpoint=%s", args.ListenAddr(), args.ConsoleGRPCEndpoint())
 	klog.V(logging.LevelDebug).Infof(
 		"runtime options configTTL=%s grpcTimeout=%s upstreamTimeout=%s meterInterval=%s",
@@ -32,8 +42,7 @@ func main() {
 
 	grpcClient, err := console.NewGRPCClient(args.ConsoleGRPCEndpoint(), args.GRPCTimeout())
 	if err != nil {
-		klog.Errorf("failed to create grpc client: %v", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to create grpc client: %w", err)
 	}
 	defer func() {
 		if closeErr := grpcClient.Close(); closeErr != nil {
@@ -85,17 +94,15 @@ func main() {
 		klog.V(logging.LevelMinimal).Infof("received signal %s, shutting down", sig)
 	case err = <-errCh:
 		if !errors.Is(err, http.ErrServerClosed) {
-			klog.Errorf("server failed: %v", err)
-			os.Exit(1)
+			return fmt.Errorf("server failed: %w", err)
 		}
 	}
-
-	runCancel()
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(shutdownCtx); err != nil {
-		klog.Errorf("shutdown failed: %v", err)
-		os.Exit(1)
+		return fmt.Errorf("shutdown failed: %w", err)
 	}
+
+	return nil
 }

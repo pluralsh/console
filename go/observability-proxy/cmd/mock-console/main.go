@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"os"
 
@@ -30,14 +31,22 @@ const (
 
 func main() {
 	klog.InitFlags(nil)
-	defer klog.Flush()
 
+	if err := run(); err != nil {
+		klog.Errorf("%v", err)
+		klog.Flush()
+		os.Exit(1)
+	}
+
+	klog.Flush()
+}
+
+func run() error {
 	addr := envOrDefault(envMockConsoleAddr, defaultMockConsoleAddr)
 
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
-		klog.Errorf("listen: %v", err)
-		os.Exit(1)
+		return fmt.Errorf("listen: %w", err)
 	}
 
 	grpcServer := grpc.NewServer()
@@ -45,9 +54,10 @@ func main() {
 
 	klog.V(logging.LevelMinimal).Infof("mock console listening on %s", addr)
 	if err := grpcServer.Serve(lis); err != nil {
-		klog.Errorf("serve grpc: %v", err)
-		os.Exit(1)
+		return fmt.Errorf("serve grpc: %w", err)
 	}
+
+	return nil
 }
 
 func (s *server) GetAiConfig(context.Context, *pb.AiConfigRequest) (*pb.AiConfig, error) {

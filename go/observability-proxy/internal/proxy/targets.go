@@ -61,9 +61,7 @@ func joinPath(base, suffix string) string {
 		return base
 	}
 
-	if strings.HasPrefix(suffix, "/") {
-		suffix = strings.TrimPrefix(suffix, "/")
-	}
+	suffix = strings.TrimPrefix(suffix, "/")
 
 	if base == "" || base == "/" {
 		return "/" + suffix
