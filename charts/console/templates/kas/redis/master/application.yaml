@@ -1,0 +1,582 @@
+{{- /*
+Copyright Broadcom, Inc. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if gt (int64 .Values.kas.redis.master.count) 0 -}}
+apiVersion: {{ include "common.capabilities.statefulset.apiVersion" . }}
+kind: {{ .Values.kas.redis.master.kind }}
+metadata:
+  name: {{ printf "%s-master" (include "redis.fullname" .) }}
+  namespace: {{ include "common.names.namespace" . | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
+    app.kubernetes.io/component: master
+  {{- if or .Values.kas.redis.commonAnnotations .Values.kas.redis.master.annotations }}
+  {{- $annotations := include "common.tplvalues.merge" ( dict "values" ( list .Values.kas.redis.master.annotations .Values.kas.redis.commonAnnotations ) "context" . ) }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" $annotations "context" $) | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not (eq .Values.kas.redis.master.kind "DaemonSet") }}
+  replicas: {{ .Values.kas.redis.master.count }}
+  {{- end }}
+  revisionHistoryLimit: {{ .Values.kas.redis.master.revisionHistoryLimit }}
+  {{- $podLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.kas.redis.master.podLabels .Values.kas.redis.commonLabels ) "context" . ) }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" $podLabels "context" $ ) | nindent 6 }}
+      app.kubernetes.io/component: master
+  {{- if (eq .Values.kas.redis.master.kind "StatefulSet") }}
+  serviceName: {{ printf "%s-headless" (include "redis.fullname" .) }}
+  {{- end }}
+  {{- if .Values.kas.redis.master.updateStrategy }}
+  {{- if (eq .Values.kas.redis.master.kind "Deployment") }}
+  strategy: {{- toYaml .Values.kas.redis.master.updateStrategy | nindent 4 }}
+  {{- else }}
+  updateStrategy: {{- toYaml .Values.kas.redis.master.updateStrategy | nindent 4 }}
+  {{- end }}
+  {{- if .Values.kas.redis.master.minReadySeconds }}
+  minReadySeconds: {{ .Values.kas.redis.master.minReadySeconds }}
+  {{- end }}
+  {{- end }}
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+        app.kubernetes.io/component: master
+        {{- if and .Values.kas.redis.metrics.enabled .Values.kas.redis.metrics.podLabels }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.metrics.podLabels "context" $ ) | nindent 8 }}
+        {{- end }}
+      annotations:
+      {{- if .Values.kas.redis.configmapChecksumAnnotations }}
+        {{- if (include "redis.createConfigmap" .) }}
+        checksum/configmap: {{ pick ( include (print $.Template.BasePath "/kas/redis/configmap.yaml") . | fromYaml ) "data" | toYaml | sha256sum }}
+        {{- end }}
+        checksum/health: {{ pick ( include (print $.Template.BasePath "/kas/redis/health-configmap.yaml") . | fromYaml ) "data" | toYaml | sha256sum }}
+        checksum/scripts: {{ pick ( include (print $.Template.BasePath "/kas/redis/scripts-configmap.yaml") . | fromYaml ) "data" | toYaml | sha256sum }}
+      {{- end }}
+      {{- if .Values.kas.redis.secretChecksumAnnotations }}
+        checksum/secret: {{ pick ( include (print $.Template.BasePath "/kas/redis/secret.yaml") . | fromYaml ) "data" | toYaml | sha256sum }}
+      {{- end }}
+      {{- if .Values.kas.redis.master.podAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.master.podAnnotations "context" $ ) | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.kas.redis.metrics.enabled .Values.kas.redis.metrics.podAnnotations }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.metrics.podAnnotations "context" $ ) | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- if .Values.kas.redis.master.extraPodSpec }}
+      {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.extraPodSpec "context" $) | nindent 6 }}
+      {{- end }}
+      {{- include "redis.imagePullSecrets" . | nindent 6 }}
+      {{- if .Values.kas.redis.master.hostAliases }}
+      hostAliases: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.hostAliases "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.kas.redis.master.podSecurityContext.enabled }}
+      securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.kas.redis.master.podSecurityContext "context" $) | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ template "redis.masterServiceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.kas.redis.master.automountServiceAccountToken }}
+      {{- if .Values.kas.redis.master.priorityClassName }}
+      priorityClassName: {{ .Values.kas.redis.master.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.kas.redis.master.affinity }}
+      affinity: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.affinity "context" $) | nindent 8 }}
+      {{- else }}
+      affinity:
+        podAffinity: {{- include "common.affinities.pods" (dict "type" .Values.kas.redis.master.podAffinityPreset "component" "master" "customLabels" $podLabels "context" $) | nindent 10 }}
+        podAntiAffinity: {{- include "common.affinities.pods" (dict "type" .Values.kas.redis.master.podAntiAffinityPreset "component" "master" "customLabels" $podLabels "context" $) | nindent 10 }}
+        nodeAffinity: {{- include "common.affinities.nodes" (dict "type" .Values.kas.redis.master.nodeAffinityPreset.type "key" .Values.kas.redis.master.nodeAffinityPreset.key "values" .Values.kas.redis.master.nodeAffinityPreset.values) | nindent 10 }}
+      {{- end }}
+      {{- if .Values.kas.redis.master.nodeSelector }}
+      nodeSelector: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.nodeSelector "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.kas.redis.master.tolerations }}
+      tolerations: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.tolerations "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.kas.redis.master.topologySpreadConstraints }}
+      topologySpreadConstraints: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.topologySpreadConstraints "context" $) | nindent 8 }}
+      {{- end }}
+      {{- if .Values.kas.redis.master.shareProcessNamespace }}
+      shareProcessNamespace: {{ .Values.kas.redis.master.shareProcessNamespace }}
+      {{- end }}
+      {{- if .Values.kas.redis.master.schedulerName }}
+      schedulerName: {{ .Values.kas.redis.master.schedulerName | quote }}
+      {{- end }}
+      {{- if .Values.kas.redis.master.dnsPolicy }}
+      dnsPolicy: {{ .Values.kas.redis.master.dnsPolicy }}
+      {{- end }}
+      {{- if .Values.kas.redis.master.dnsConfig }}
+      dnsConfig: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.dnsConfig "context" $) | nindent 8 }}
+      {{- end }}
+      enableServiceLinks: {{ .Values.kas.redis.master.enableServiceLinks }}
+      terminationGracePeriodSeconds: {{ .Values.kas.redis.master.terminationGracePeriodSeconds }}
+      containers:
+        - name: redis
+          image: {{ template "redis.image" . }}
+          imagePullPolicy: {{ .Values.kas.redis.image.pullPolicy | quote }}
+          {{- if .Values.kas.redis.master.lifecycleHooks }}
+          lifecycle: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.lifecycleHooks "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.kas.redis.master.containerSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.kas.redis.master.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.kas.redis.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.kas.redis.master.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.command "context" $) | nindent 12 }}
+          {{- else }}
+          command:
+            - /bin/bash
+          {{- end }}
+          {{- if .Values.kas.redis.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- else if .Values.kas.redis.master.args }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.args "context" $) | nindent 12 }}
+          {{- else }}
+          args:
+            - -ec
+            - /opt/bitnami/scripts/start-scripts/start-master.sh
+          {{- end }}
+          env:
+            - name: BITNAMI_DEBUG
+              value: {{ ternary "true" "false" (or .Values.kas.redis.image.debug .Values.kas.redis.diagnosticMode.enabled) | quote }}
+            - name: REDIS_REPLICATION_MODE
+              value: master
+            - name: ALLOW_EMPTY_PASSWORD
+              value: {{ ternary "no" "yes" .Values.kas.redis.auth.enabled | quote }}
+            {{- if include "common.fips.enabled" . }}
+            - name: OPENSSL_FIPS
+              value: {{ include "common.fips.config" (dict "tech" "openssl" "fips" .Values.kas.redis.master.fips "global" .Values.kas.redis.global) | quote }}
+            {{- end }}
+            {{- if .Values.kas.redis.auth.enabled }}
+            {{- if .Values.kas.redis.auth.usePasswordFiles }}
+            - name: REDIS_PASSWORD_FILE
+              value: "/opt/bitnami/redis/secrets/redis-password"
+            {{- else }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "redis.secretName" . }}
+                  key: {{ template "redis.secretPasswordKey" . }}
+            {{- end }}
+            {{- end }}
+            - name: REDIS_TLS_ENABLED
+              value: {{ ternary "yes" "no" .Values.kas.redis.tls.enabled | quote }}
+            {{- if .Values.kas.redis.tls.enabled }}
+            - name: REDIS_TLS_PORT
+              value: {{ .Values.kas.redis.master.containerPorts.redis | quote }}
+            - name:  REDIS_TLS_AUTH_CLIENTS
+              value: {{ ternary "yes" "no" .Values.kas.redis.tls.authClients | quote }}
+            - name:  REDIS_TLS_CERT_FILE
+              value: {{ template "redis.tlsCert" . }}
+            - name:  REDIS_TLS_KEY_FILE
+              value: {{ template "redis.tlsCertKey" . }}
+            {{- if not (empty (include "redis.tlsCACert" .)) }}
+            - name: REDIS_TLS_CA_FILE
+              value: {{ template "redis.tlsCACert" . }}
+            {{- end }}
+            {{- if .Values.kas.redis.tls.dhParamsFilename }}
+            - name:  REDIS_TLS_DH_PARAMS_FILE
+              value: {{ template "redis.tlsDHParams" . }}
+            {{- end }}
+            {{- else }}
+            - name: REDIS_PORT
+              value: {{ .Values.kas.redis.master.containerPorts.redis | quote }}
+            {{- end }}
+            {{- if .Values.kas.redis.master.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          {{- if or .Values.kas.redis.master.extraEnvVarsCM .Values.kas.redis.master.extraEnvVarsSecret }}
+          envFrom:
+            {{- if .Values.kas.redis.master.extraEnvVarsCM }}
+            - configMapRef:
+                name: {{ .Values.kas.redis.master.extraEnvVarsCM }}
+            {{- end }}
+            {{- if .Values.kas.redis.master.extraEnvVarsSecret }}
+            - secretRef:
+                name: {{ .Values.kas.redis.master.extraEnvVarsSecret }}
+            {{- end }}
+          {{- end }}
+          ports:
+            - name: redis
+              containerPort: {{ .Values.kas.redis.master.containerPorts.redis }}
+          {{- if not .Values.kas.redis.diagnosticMode.enabled }}
+          {{- if .Values.kas.redis.master.customStartupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.customStartupProbe "context" $) | nindent 12 }}
+          {{- else if .Values.kas.redis.master.startupProbe.enabled }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.kas.redis.master.startupProbe "enabled") "context" $) | nindent 12 }}
+            tcpSocket:
+              port: redis
+          {{- end }}
+          {{- if .Values.kas.redis.master.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.kas.redis.master.livenessProbe.enabled }}
+          livenessProbe:
+            initialDelaySeconds: {{ .Values.kas.redis.master.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.kas.redis.master.livenessProbe.periodSeconds }}
+            # One second longer than command timeout should prevent generation of zombie processes.
+            timeoutSeconds: {{ add1 .Values.kas.redis.master.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.kas.redis.master.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.kas.redis.master.livenessProbe.failureThreshold }}
+            exec:
+              command:
+                - /bin/bash
+                - -ec
+                - "/health/ping_liveness_local.sh {{ .Values.kas.redis.master.livenessProbe.timeoutSeconds }}"
+          {{- end }}
+          {{- if .Values.kas.redis.master.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.customReadinessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.kas.redis.master.readinessProbe.enabled }}
+          readinessProbe:
+            initialDelaySeconds: {{ .Values.kas.redis.master.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.kas.redis.master.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ add1 .Values.kas.redis.master.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.kas.redis.master.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.kas.redis.master.readinessProbe.failureThreshold }}
+            exec:
+              command:
+                - /bin/bash
+                - -ec
+                - "/health/ping_readiness_local.sh {{ .Values.kas.redis.master.readinessProbe.timeoutSeconds }}"
+          {{- end }}
+          {{- end }}
+          {{- if .Values.kas.redis.master.resources }}
+          resources: {{- toYaml .Values.kas.redis.master.resources | nindent 12 }}
+          {{- else if ne .Values.kas.redis.master.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.kas.redis.master.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: start-scripts
+              mountPath: /opt/bitnami/scripts/start-scripts
+            - name: health
+              mountPath: /health
+            {{- if and .Values.kas.redis.auth.enabled .Values.kas.redis.auth.usePasswordFiles }}
+            - name: redis-password
+              mountPath: /opt/bitnami/redis/secrets/
+            {{- end }}
+            - name: redis-data
+              mountPath: {{ .Values.kas.redis.master.persistence.path }}
+              {{- if .Values.kas.redis.master.persistence.subPath }}
+              subPath: {{ .Values.kas.redis.master.persistence.subPath }}
+              {{- else if .Values.kas.redis.master.persistence.subPathExpr }}
+              subPathExpr: {{ .Values.kas.redis.master.persistence.subPathExpr }}
+              {{- end }}
+            - name: config
+              mountPath: /opt/bitnami/redis/mounted-etc
+            {{- if and .Values.kas.redis.master.containerSecurityContext.enabled .Values.kas.redis.master.containerSecurityContext.readOnlyRootFilesystem }}
+            - name: empty-dir
+              mountPath: /opt/bitnami/redis/etc/
+              subPath: app-conf-dir
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: tmp-dir
+            {{- end }}
+            {{- if .Values.kas.redis.tls.enabled }}
+            - name: redis-certificates
+              mountPath: /opt/bitnami/redis/certs
+              readOnly: true
+            {{- end }}
+            {{- if .Values.kas.redis.master.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.master.extraVolumeMounts "context" $ ) | nindent 12 }}
+            {{- end }}
+        {{- if .Values.kas.redis.metrics.enabled }}
+        - name: metrics
+          image: {{ include "redis.metrics.image" . }}
+          imagePullPolicy: {{ .Values.kas.redis.metrics.image.pullPolicy | quote }}
+          {{- if .Values.kas.redis.metrics.containerSecurityContext.enabled }}
+          securityContext: {{- include "common.compatibility.renderSecurityContext" (dict "secContext" .Values.kas.redis.metrics.containerSecurityContext "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.kas.redis.diagnosticMode.enabled }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.diagnosticMode.command "context" $) | nindent 12 }}
+          {{- else if .Values.kas.redis.metrics.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.metrics.command "context" $) | nindent 12 }}
+          {{- else }}
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              {{- if and .Values.kas.redis.auth.enabled .Values.kas.redis.auth.usePasswordFiles }}
+              export REDIS_PASSWORD="$(< $REDIS_PASSWORD_FILE)"
+              {{- end }}
+              redis_exporter{{- range $key, $value := .Values.kas.redis.metrics.extraArgs }} --{{ $key }}={{ $value }}{{- end }}
+          {{- end }}
+          {{- if .Values.kas.redis.diagnosticMode.enabled }}
+          args: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.diagnosticMode.args "context" $) | nindent 12 }}
+          {{- end }}
+          env:
+            - name: REDIS_ALIAS
+              value: {{ template "redis.fullname" . }}
+            - name: REDIS_EXPORTER_WEB_LISTEN_ADDRESS
+              value: {{ printf ":%v" .Values.kas.redis.metrics.containerPorts.http }}
+            {{- if .Values.kas.redis.auth.enabled }}
+            - name: REDIS_USER
+              value: default
+            {{- if .Values.kas.redis.auth.usePasswordFiles }}
+            - name: REDIS_PASSWORD_FILE
+              value: "/secrets/redis-password"
+            {{- else }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "redis.secretName" . }}
+                  key: {{ template "redis.secretPasswordKey" . }}
+            {{- end }}
+            {{- end }}
+            {{- if include "common.fips.enabled" . }}
+            - name: OPENSSL_FIPS
+              value: {{ include "common.fips.config" (dict "tech" "openssl" "fips" .Values.kas.redis.metrics.fips "global" .Values.kas.redis.global) | quote }}
+            - name: GODEBUG
+              value: {{ include "common.fips.config" (dict "tech" "golang" "fips" .Values.kas.redis.metrics.fips "global" .Values.kas.redis.global) | quote }}
+            {{- end }}
+            {{- if .Values.kas.redis.tls.enabled }}
+            - name: REDIS_ADDR
+              value: rediss://{{ .Values.kas.redis.metrics.redisTargetHost }}:{{ .Values.kas.redis.master.containerPorts.redis }}
+            {{- if .Values.kas.redis.tls.authClients }}
+            - name: REDIS_EXPORTER_TLS_CLIENT_KEY_FILE
+              value: {{ template "redis.tlsCertKey" . }}
+            - name: REDIS_EXPORTER_TLS_CLIENT_CERT_FILE
+              value: {{ template "redis.tlsCert" . }}
+            {{- end }}
+            {{- if not (empty (include "redis.tlsCACert" .)) }}
+            - name: REDIS_EXPORTER_TLS_CA_CERT_FILE
+              value: {{ template "redis.tlsCACert" . }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.kas.redis.metrics.extraEnvVars }}
+            {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.metrics.extraEnvVars "context" $) | nindent 12 }}
+            {{- end }}
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.kas.redis.metrics.containerPorts.http }}
+          {{- if not .Values.kas.redis.diagnosticMode.enabled }}
+          {{- if .Values.kas.redis.metrics.customStartupProbe }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.metrics.customStartupProbe "context" $) | nindent 12 }}
+          {{- else if .Values.kas.redis.metrics.startupProbe.enabled }}
+          startupProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.kas.redis.metrics.startupProbe "enabled") "context" $) | nindent 12 }}
+            tcpSocket:
+              port: metrics
+          {{- end }}
+          {{- if .Values.kas.redis.metrics.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.metrics.customLivenessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.kas.redis.metrics.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.kas.redis.metrics.livenessProbe "enabled") "context" $) | nindent 12 }}
+            tcpSocket:
+              port: metrics
+          {{- end }}
+          {{- if .Values.kas.redis.metrics.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.metrics.customReadinessProbe "context" $) | nindent 12 }}
+          {{- else if .Values.kas.redis.metrics.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.kas.redis.metrics.readinessProbe "enabled") "context" $) | nindent 12 }}
+            httpGet:
+              path: /
+              port: metrics
+          {{- end }}
+          {{- end }}
+          {{- if .Values.kas.redis.metrics.resources }}
+          resources: {{- toYaml .Values.kas.redis.metrics.resources | nindent 12 }}
+          {{- else if ne .Values.kas.redis.metrics.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.kas.redis.metrics.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            {{- if and .Values.kas.redis.metrics.containerSecurityContext.enabled .Values.kas.redis.metrics.containerSecurityContext.readOnlyRootFilesystem }}
+            - name: empty-dir
+              mountPath: /tmp
+              subPath: app-tmp-dir
+            {{- end }}
+            {{- if and .Values.kas.redis.auth.enabled .Values.kas.redis.auth.usePasswordFiles }}
+            - name: redis-password
+              mountPath: /secrets/
+            {{- end }}
+            {{- if .Values.kas.redis.tls.enabled }}
+            - name: redis-certificates
+              mountPath: /opt/bitnami/redis/certs
+              readOnly: true
+            {{- end }}
+            {{- if .Values.kas.redis.metrics.extraVolumeMounts }}
+            {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.metrics.extraVolumeMounts "context" $ ) | nindent 12 }}
+            {{- end }}
+        {{- end }}
+        {{- if .Values.kas.redis.master.sidecars }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.sidecars "context" $) | nindent 8 }}
+        {{- end }}
+      {{- $needsVolumePermissions := and .Values.kas.redis.volumePermissions.enabled .Values.kas.redis.master.persistence.enabled .Values.kas.redis.master.podSecurityContext.enabled .Values.kas.redis.master.containerSecurityContext.enabled }}
+      {{- if or .Values.kas.redis.master.initContainers $needsVolumePermissions .Values.kas.redis.sysctl.enabled }}
+      initContainers:
+        {{- if .Values.kas.redis.master.initContainers }}
+        {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.initContainers "context" $) | nindent 8 }}
+        {{- end }}
+        {{- if $needsVolumePermissions }}
+        - name: volume-permissions
+          image: {{ include "redis.volumePermissions.image" . }}
+          imagePullPolicy: {{ .Values.kas.redis.volumePermissions.image.pullPolicy | quote }}
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              {{- if eq ( toString ( .Values.kas.redis.volumePermissions.containerSecurityContext.runAsUser )) "auto" }}
+              chown -R `id -u`:`id -G | cut -d " " -f2` {{ .Values.kas.redis.master.persistence.path }}
+              {{- else }}
+              chown -R {{ .Values.kas.redis.master.containerSecurityContext.runAsUser }}:{{ .Values.kas.redis.master.podSecurityContext.fsGroup }} {{ .Values.kas.redis.master.persistence.path }}
+              {{- end }}
+          {{- if eq ( toString ( .Values.kas.redis.volumePermissions.containerSecurityContext.runAsUser )) "auto" }}
+          securityContext: {{- omit .Values.kas.redis.volumePermissions.containerSecurityContext "runAsUser" | toYaml | nindent 12 }}
+          {{- else }}
+          securityContext: {{- .Values.kas.redis.volumePermissions.containerSecurityContext | toYaml | nindent 12 }}
+          {{- end }}
+          env:
+          {{- if .Values.kas.redis.volumePermissions.extraEnvVars }}
+          {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.volumePermissions.extraEnvVars "context" $) | nindent 12 }}
+          {{- end }}
+            {{- if include "common.fips.enabled" . }}
+            - name: OPENSSL_FIPS
+              value: {{ include "common.fips.config" (dict "tech" "openssl" "fips" .Values.kas.redis.volumePermissions.fips "global" .Values.kas.redis.global) | quote }}
+            {{- end }}
+          {{- if .Values.kas.redis.volumePermissions.resources }}
+          resources: {{- toYaml .Values.kas.redis.volumePermissions.resources | nindent 12 }}
+          {{- else if ne .Values.kas.redis.volumePermissions.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.kas.redis.volumePermissions.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: redis-data
+              mountPath: {{ .Values.kas.redis.master.persistence.path }}
+              {{- if .Values.kas.redis.master.persistence.subPath }}
+              subPath: {{ .Values.kas.redis.master.persistence.subPath }}
+              {{- else if .Values.kas.redis.master.persistence.subPathExpr }}
+              subPathExpr: {{ .Values.kas.redis.master.persistence.subPathExpr }}
+              {{- end }}
+        {{- end }}
+        {{- if .Values.kas.redis.sysctl.enabled }}
+        - name: init-sysctl
+          image: {{ include "redis.sysctl.image" . }}
+          imagePullPolicy: {{ default "" .Values.kas.redis.sysctl.image.pullPolicy | quote }}
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          {{- if .Values.kas.redis.sysctl.command }}
+          command: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.sysctl.command "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.kas.redis.sysctl.resources }}
+          resources: {{- toYaml .Values.kas.redis.sysctl.resources | nindent 12 }}
+          {{- else if ne .Values.kas.redis.sysctl.resourcesPreset "none" }}
+          resources: {{- include "common.resources.preset" (dict "type" .Values.kas.redis.sysctl.resourcesPreset) | nindent 12 }}
+          {{- end }}
+          {{- if include "common.fips.enabled" . }}
+          env:
+            - name: OPENSSL_FIPS
+              value: {{ include "common.fips.config" (dict "tech" "openssl" "fips" .Values.kas.redis.sysctl.fips "global" .Values.kas.redis.global) | quote }}
+          {{- end }}
+          {{- if .Values.kas.redis.sysctl.mountHostSys }}
+          volumeMounts:
+            - name: host-sys
+              mountPath: /host-sys
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      volumes:
+        - name: start-scripts
+          configMap:
+            name: {{ printf "%s-scripts" (include "redis.fullname" .) }}
+            defaultMode: 0755
+        - name: health
+          configMap:
+            name: {{ printf "%s-health" (include "redis.fullname" .) }}
+            defaultMode: 0755
+        {{- if and .Values.kas.redis.auth.enabled .Values.kas.redis.auth.usePasswordFiles }}
+        - name: redis-password
+          {{ if .Values.kas.redis.auth.usePasswordFileFromSecret }}
+          secret:
+            secretName: {{ template "redis.secretName" . }}
+            items:
+            - key: {{ template "redis.secretPasswordKey" . }}
+              path: redis-password
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- end }}
+        - name: config
+          configMap:
+            name: {{ include "redis.configmapName" . }}
+        {{- if .Values.kas.redis.sysctl.mountHostSys }}
+        - name: host-sys
+          hostPath:
+            path: /sys
+        {{- end }}
+        {{- if or (and .Values.kas.redis.master.containerSecurityContext.enabled .Values.kas.redis.master.containerSecurityContext.readOnlyRootFilesystem) (and .Values.kas.redis.metrics.enabled .Values.kas.redis.metrics.containerSecurityContext.enabled .Values.kas.redis.metrics.containerSecurityContext.readOnlyRootFilesystem) }}
+        - name: empty-dir
+          {{- if or .Values.kas.redis.master.persistence.medium .Values.kas.redis.master.persistence.sizeLimit }}
+          emptyDir:
+            {{- if .Values.kas.redis.master.persistence.medium }}
+            medium: {{ .Values.kas.redis.master.persistence.medium | quote }}
+            {{- end }}
+            {{- if .Values.kas.redis.master.persistence.sizeLimit }}
+            sizeLimit: {{ .Values.kas.redis.master.persistence.sizeLimit | quote }}
+            {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.kas.redis.tls.enabled }}
+        - name: redis-certificates
+          secret:
+            secretName: {{ include "redis.tlsSecretName" . }}
+            defaultMode: 256
+        {{- end }}
+        {{- if .Values.kas.redis.master.extraVolumes }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.master.extraVolumes "context" $ ) | nindent 8 }}
+        {{- end }}
+        {{- if .Values.kas.redis.metrics.extraVolumes }}
+        {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.metrics.extraVolumes "context" $ ) | nindent 8 }}
+        {{- end }}
+  {{- if or (not .Values.kas.redis.master.persistence.enabled) (eq .Values.kas.redis.master.kind "DaemonSet") }}
+        - name: redis-data
+          {{- if or .Values.kas.redis.master.persistence.medium .Values.kas.redis.master.persistence.sizeLimit }}
+          emptyDir:
+            {{- if .Values.kas.redis.master.persistence.medium }}
+            medium: {{ .Values.kas.redis.master.persistence.medium | quote }}
+            {{- end }}
+            {{- if .Values.kas.redis.master.persistence.sizeLimit }}
+            sizeLimit: {{ .Values.kas.redis.master.persistence.sizeLimit | quote }}
+            {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+  {{- else if .Values.kas.redis.master.persistence.existingClaim }}
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: {{ printf "%s" (tpl .Values.kas.redis.master.persistence.existingClaim .) }}
+  {{- else if (eq .Values.kas.redis.master.kind "Deployment") }}
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: {{ printf "redis-data-%s-master" (include "redis.fullname" .) }}
+  {{- else }}
+  {{- if .Values.kas.redis.master.persistentVolumeClaimRetentionPolicy.enabled }}
+  persistentVolumeClaimRetentionPolicy:
+    whenDeleted: {{ .Values.kas.redis.master.persistentVolumeClaimRetentionPolicy.whenDeleted }}
+    whenScaled: {{ .Values.kas.redis.master.persistentVolumeClaimRetentionPolicy.whenScaled }}
+  {{- end }}
+  volumeClaimTemplates:
+    - apiVersion: v1
+      kind: PersistentVolumeClaim
+      metadata:
+        name: redis-data
+        {{- $claimLabels := include "common.tplvalues.merge" ( dict "values" ( list .Values.kas.redis.master.persistence.labels .Values.kas.redis.commonLabels ) "context" . ) }}
+        labels: {{- include "common.labels.matchLabels" ( dict "customLabels" $claimLabels "context" $ ) | nindent 10 }}
+          app.kubernetes.io/component: master
+        {{- if .Values.kas.redis.master.persistence.annotations }}
+        annotations: {{- toYaml .Values.kas.redis.master.persistence.annotations | nindent 10 }}
+        {{- end }}
+      spec:
+        accessModes:
+        {{- range .Values.kas.redis.master.persistence.accessModes }}
+          - {{ . | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.kas.redis.master.persistence.size | quote }}
+        {{- if .Values.kas.redis.master.persistence.selector }}
+        selector: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.persistence.selector "context" $) | nindent 10 }}
+        {{- end }}
+        {{- if .Values.kas.redis.master.persistence.dataSource }}
+        dataSource: {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.master.persistence.dataSource "context" $) | nindent 10 }}
+        {{- end }}
+        {{- include "common.storage.class" (dict "persistence" .Values.kas.redis.master.persistence "global" .Values.kas.redis.global) | nindent 8 }}
+  {{- end }}
+{{- end }}

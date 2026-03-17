@@ -1,7 +1,4 @@
 dependencies:
-- name: kas
-  repository: file://../kas
-  version: 0.3.2
 - name: controller
   repository: file://../controller
   version: 0.0.176
@@ -11,5 +8,8 @@ dependencies:
 - name: dex
   repository: https://charts.dexidp.io
   version: 0.24.0
-digest: sha256:c8da8a2cc6a2c48e1c812fc8eb25c80bd514b9eed4832cd446ee5f4743e944c1
-generated: "2026-03-14T21:34:46.276459262Z"
+- name: common
+  repository: https://charts.bitnami.com/bitnami
+  version: 2.34.0
+digest: sha256:0d1f428d9316892a6c630dc06d0a959636dd2a6270d938c3cdf17f89e8e43342
+generated: "2026-03-16T12:51:05.914229+01:00"
