@@ -121,8 +121,7 @@ func TestAuthedTransport_RetriesOn500(t *testing.T) {
 		}),
 	}
 
-	req, err := http.NewRequest(http.MethodPost, "http://example.com/graphql",
-		io.NopCloser(strings.NewReader(`{"query":"{ hello }"}`)))
+	req, err := http.NewRequest(http.MethodGet, "http://example.com/graphql", nil)
 	require.NoError(t, err)
 
 	resp, err := transport.RoundTrip(req)
@@ -153,7 +152,7 @@ func TestAuthedTransport_RetriesReplayBody(t *testing.T) {
 	}
 
 	payload := `{"query":"{ ping }"}`
-	req, err := http.NewRequest(http.MethodPost, "http://example.com/graphql",
+	req, err := http.NewRequest(http.MethodGet, "http://example.com/graphql",
 		io.NopCloser(strings.NewReader(payload)))
 	require.NoError(t, err)
 
@@ -180,7 +179,7 @@ func TestAuthedTransport_ExhaustsRetriesOn500(t *testing.T) {
 		}),
 	}
 
-	req, err := http.NewRequest(http.MethodPost, "http://example.com/graphql", nil)
+	req, err := http.NewRequest(http.MethodGet, "http://example.com/graphql", nil)
 	require.NoError(t, err)
 
 	resp, err := transport.RoundTrip(req)
@@ -275,6 +274,64 @@ func TestAuthedTransport_NonRetryable4xx(t *testing.T) {
 
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 	assert.Equal(t, 1, callCount, "4xx should not be retried")
+}
+
+// TestAuthedTransport_DoesNotMutateCallerHeaders verifies that the caller's original request
+// headers are not modified after RoundTrip returns, even across multiple retry attempts.
+func TestAuthedTransport_DoesNotMutateCallerHeaders(t *testing.T) {
+	callCount := 0
+	transport := &authedTransport{
+		token:      "tok",
+		newBackoff: fastBackoff,
+		wrapped: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+			callCount++
+			if callCount < 2 {
+				return makeResponse(http.StatusInternalServerError, "error"), nil
+			}
+			return makeResponse(http.StatusOK, `{}`), nil
+		}),
+	}
+
+	req, err := http.NewRequest(http.MethodGet, "http://example.com/graphql", nil)
+	require.NoError(t, err)
+	// Pre-populate a header that must survive untouched.
+	req.Header.Set("X-Custom", "original")
+
+	resp, err := transport.RoundTrip(req)
+	require.NoError(t, err)
+	defer resp.Body.Close()
+
+	// Authorization and Accept-Encoding must not leak back onto the original request.
+	assert.Empty(t, req.Header.Get("Authorization"), "caller's request must not gain Authorization header")
+	assert.Empty(t, req.Header.Get("Accept-Encoding"), "caller's request must not gain Accept-Encoding header")
+	// Pre-existing headers must be preserved.
+	assert.Equal(t, "original", req.Header.Get("X-Custom"))
+	// Must not contain duplicate values after multiple attempts.
+	assert.Len(t, req.Header["X-Custom"], 1)
+}
+
+// TestAuthedTransport_Post500NotRetried verifies that a 500 from a non-idempotent method
+// (POST) is returned immediately as a permanent error without any retry.
+func TestAuthedTransport_Post500NotRetried(t *testing.T) {
+	callCount := 0
+	transport := &authedTransport{
+		token:      "tok",
+		newBackoff: fastBackoff,
+		wrapped: roundTripFunc(func(req *http.Request) (*http.Response, error) {
+			callCount++
+			return makeResponse(http.StatusInternalServerError, "error"), nil
+		}),
+	}
+
+	req, err := http.NewRequest(http.MethodPost, "http://example.com/graphql",
+		io.NopCloser(strings.NewReader(`{"query":"{ ping }"}`)))
+	require.NoError(t, err)
+
+	resp, err := transport.RoundTrip(req)
+	assert.Error(t, err)
+	assert.Nil(t, resp)
+	assert.ErrorContains(t, err, "500")
+	assert.Equal(t, 1, callCount, "POST 500 must not be retried")
 }
 
 // TestNewHttpClient verifies that NewHttpClient returns a properly configured client.

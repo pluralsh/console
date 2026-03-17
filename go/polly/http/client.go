@@ -45,29 +45,33 @@ func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	var resp *http.Response
 
 	operation := func() error {
+		// Clone the request so we never mutate the caller's original.
+		attempt := req.Clone(req.Context())
+
 		// Reset the body for each attempt.
 		if bodyBytes != nil {
-			req.Body = io.NopCloser(bytes.NewReader(bodyBytes))
+			attempt.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 		}
 
-		// Set auth header.
-		req.Header.Set("Authorization", "Token "+t.token)
-
-		// Set Accept-Encoding to support gzip response.
-		req.Header.Set("Accept-Encoding", "gzip")
+		// Set headers on the clone only.
+		attempt.Header.Set("Authorization", "Token "+t.token)
+		attempt.Header.Set("Accept-Encoding", "gzip")
 
 		var err error
-		resp, err = t.wrapped.RoundTrip(req)
+		resp, err = t.wrapped.RoundTrip(attempt)
 		if err != nil {
 			// Retry on transport-level errors.
 			return err
 		}
 
-		// Retry on 5xx server errors.
+		// Retry on 5xx server errors only for idempotent methods.
 		if resp.StatusCode >= 500 {
 			statusCode := resp.StatusCode
 			_ = resp.Body.Close()
 			resp = nil
+			if req.Method != http.MethodGet && req.Method != http.MethodHead {
+				return backoff.Permanent(fmt.Errorf("server returned status %d", statusCode))
+			}
 			return fmt.Errorf("server returned status %d", statusCode)
 		}
 
@@ -84,7 +88,7 @@ func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil
 	}
 
-	if err := backoff.Retry(operation, t.newBackoff()); err != nil {
+	if err := backoff.Retry(operation, newBackoff()); err != nil {
 		return nil, err
 	}
 
