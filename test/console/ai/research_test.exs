@@ -38,21 +38,21 @@ defmodule Console.AI.ResearchTest do
       research = insert(:infra_research, user: user, diagram: "diagram")
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
 
-      expect(HTTPoison, :post, fn _, _, _, _ ->
-        {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{choices: [
-          %{
-            message: %{
-              tool_calls: [%{
-                function: %{
-                  name: Console.AI.Tools.Agent.FixDiagram.name(),
-                  arguments: Jason.encode!(%{
-                    diagram: "```mermaid\ngraph TD\nA --> B\n```"
-                  })
-                }
-              }]
-            }
-          }
-        ]})}}
+      expect(ReqLLM, :generate_text, fn %{provider: :openai, model: "gpt-4.1-mini"}, _, _ ->
+        Jason.encode!(%{
+          object: "response",
+          output: [%{
+            type: "function_call",
+            call_id: "call_123",
+            id: "call_123",
+            status: "completed",
+            name: Console.AI.Tools.Agent.FixDiagram.name(),
+            arguments: Jason.encode!(%{
+              diagram: "```mermaid\ngraph TD\nA --> B\n```"
+            })
+          }]
+        })
+        |> ReqLLM.Response.decode_response("openai:gpt-4.1-mini")
       end)
 
       {:ok, research} = Research.fix_diagram("some error message", research.id, user)

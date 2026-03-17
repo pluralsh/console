@@ -6710,6 +6710,12 @@ export type OllamaSettings = {
   url: Scalars['String']['output'];
 };
 
+export enum OpenAiMethod {
+  Auto = 'AUTO',
+  Chat = 'CHAT',
+  Responses = 'RESPONSES'
+}
+
 /** OpenAI connection information */
 export type OpenaiSettings = {
   __typename?: 'OpenaiSettings';
@@ -6717,6 +6723,8 @@ export type OpenaiSettings = {
   baseUrl?: Maybe<Scalars['String']['output']>;
   /** the model to use for vector embeddings */
   embeddingModel?: Maybe<Scalars['String']['output']>;
+  /** the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions) */
+  method?: Maybe<OpenAiMethod>;
   /** the openai model version to use */
   model?: Maybe<Scalars['String']['output']>;
   /** addditional models to support within the integrated ai proxy */
@@ -6730,6 +6738,8 @@ export type OpenaiSettingsAttributes = {
   baseUrl?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
+  /** the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions) */
+  method?: InputMaybe<OpenAiMethod>;
   model?: InputMaybe<Scalars['String']['input']>;
   /** addditional models to support within the integrated ai proxy */
   proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;

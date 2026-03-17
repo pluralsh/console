@@ -178,6 +178,7 @@ defmodule Console.MixProject do
       {:hackney, "== 1.20.1"},
       {:bandit, "~> 1.8"},
       {:caramelize, "~> 1.2"},
+      {:req_llm, "~> 1.7"},
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},

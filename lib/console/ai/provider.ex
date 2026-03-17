@@ -76,10 +76,11 @@ defmodule Console.AI.Provider do
     end
   end
 
-  @decorate cacheable(cache: @local_cache, key: :context_window, ttl: :timer.minutes(30))
-  def context_window() do
+  @decorate cacheable(cache: @local_cache, key: {:context_window, client}, ttl: :timer.minutes(30))
+  def context_window(client \\ :default)
+  def context_window(client) do
     Settings.cached()
-    |> client()
+    |> client(client)
     |> case do
       {:ok, %mod{} = client} -> mod.context_window(client)
       _ -> @default_context_window

@@ -3919,6 +3919,12 @@ enum VectorStore {
   OPENSEARCH
 }
 
+enum OpenAiMethod {
+  CHAT
+  RESPONSES
+  AUTO
+}
+
 enum Provider {
   AWS
   GCP
@@ -4088,6 +4094,9 @@ input OpenaiSettingsAttributes {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions)"
+  method: OpenAiMethod
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
@@ -4447,6 +4456,9 @@ type OpenaiSettings {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions)"
+  method: OpenAiMethod
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]

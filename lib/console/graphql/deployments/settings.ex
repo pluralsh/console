@@ -7,6 +7,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   ecto_enum :ai_provider, DeploymentSettings.AIProvider
   ecto_enum :log_driver, DeploymentSettings.LogDriver
   ecto_enum :vector_store, DeploymentSettings.VectorStore
+  ecto_enum :open_ai_method, DeploymentSettings.OpenAIMethod
   ecto_enum :provider, CloudConnection.Provider
 
   input_object :project_attributes do
@@ -115,6 +116,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :model,           :string
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :method,          :open_ai_method, description: "the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions)"
     field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 
@@ -340,6 +342,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :model,           :string, description: "the openai model version to use"
     field :tool_model,      :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :embedding_model, :string, description: "the model to use for vector embeddings"
+    field :method,          :open_ai_method, description: "the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions)"
     field :proxy_models,    list_of(:string), description: "addditional models to support within the integrated ai proxy"
   end
 

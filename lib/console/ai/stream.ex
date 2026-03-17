@@ -2,7 +2,7 @@ defmodule Console.AI.Stream do
   alias Console.Schema.User
   alias ConsoleWeb.AIChannel
 
-  defstruct [:topic, role: :assistant, offset: 0, msg: 0]
+  defstruct [:topic, role: :assistant, offset: 0, msg: 0, index: 0]
 
   @stream {__MODULE__, :ai, :stream}
   @tool {__MODULE__, :ai, :tool}
@@ -26,9 +26,19 @@ defmodule Console.AI.Stream do
     Process.put(@tool, nil)
     case stream() do
       %__MODULE__{offset: off, msg: msg} = s ->
-        Process.put(@stream, %{s | offset: off + ind + 1, msg: msg + 1})
+        Process.put(@stream, %{s | offset: off + ind + 1, msg: msg + 1, index: 0})
       _ -> :ok
     end
+  end
+
+  def publish(c) do
+    %__MODULE__{topic: topic, offset: offset, msg: msg, role: role, index: index} = s = stream()
+    Process.put(@stream, %{s | index: index + 1})
+    Absinthe.Subscription.publish(
+      ConsoleWeb.Endpoint,
+      %{content: c, seq: index + offset, message: msg, role: role, tool: tool()},
+      [ai_stream: topic]
+    )
   end
 
   def publish(%__MODULE__{topic: topic, offset: offset, msg: msg, role: role}, c, ind)

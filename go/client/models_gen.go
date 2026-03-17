@@ -5526,6 +5526,8 @@ type OpenaiSettings struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions)
+	Method *OpenAiMethod `json:"method,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
@@ -5538,6 +5540,8 @@ type OpenaiSettingsAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions)
+	Method *OpenAiMethod `json:"method,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
@@ -13399,6 +13403,63 @@ func (e *OidcProviderType) UnmarshalJSON(b []byte) error {
 }
 
 func (e OidcProviderType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type OpenAiMethod string
+
+const (
+	OpenAiMethodChat      OpenAiMethod = "CHAT"
+	OpenAiMethodResponses OpenAiMethod = "RESPONSES"
+	OpenAiMethodAuto      OpenAiMethod = "AUTO"
+)
+
+var AllOpenAiMethod = []OpenAiMethod{
+	OpenAiMethodChat,
+	OpenAiMethodResponses,
+	OpenAiMethodAuto,
+}
+
+func (e OpenAiMethod) IsValid() bool {
+	switch e {
+	case OpenAiMethodChat, OpenAiMethodResponses, OpenAiMethodAuto:
+		return true
+	}
+	return false
+}
+
+func (e OpenAiMethod) String() string {
+	return string(e)
+}
+
+func (e *OpenAiMethod) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = OpenAiMethod(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid OpenAiMethod", str)
+	}
+	return nil
+}
+
+func (e OpenAiMethod) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *OpenAiMethod) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e OpenAiMethod) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

@@ -60,6 +60,7 @@ Mimic.copy(Console.ServiceNow.Client)
 Mimic.copy(CloudQuery.Client)
 Mimic.copy(Toolquery.ToolQuery.Stub)
 Mimic.copy(Console.Cache)
+Mimic.copy(ReqLLM)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)
