@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -33,5 +34,72 @@ func TestElasticRouteValidation(t *testing.T) {
 	mux.ServeHTTP(rec, req)
 	if rec.Code != http.StatusNotFound {
 		t.Fatalf("unexpected status: got %d want %d", rec.Code, http.StatusNotFound)
+	}
+}
+
+func TestPrometheusIngestForwardsExpectedUpstreamPath(t *testing.T) {
+	var gotPath string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer upstream.Close()
+
+	provider := staticProvider{
+		cfg: console.ObservabilityConfig{
+			PrometheusHost: upstream.URL + "/select/t/prometheus",
+			ElasticHost:    "http://example.com",
+		},
+	}
+	handler := NewHandler(provider, 5*time.Second)
+
+	mux := http.NewServeMux()
+	handler.Register(mux)
+
+	req := httptest.NewRequest(http.MethodPost, "/ext/v1/ingest/prometheus", strings.NewReader(""))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("unexpected status: got %d want %d", rec.Code, http.StatusNoContent)
+	}
+	if gotPath != "/insert/t/prometheus/api/v1/write" {
+		t.Fatalf("unexpected upstream path: got %q", gotPath)
+	}
+}
+
+func TestPrometheusQueryForwardsMappedPathAndQuery(t *testing.T) {
+	var gotPath string
+	var gotQuery string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotPath = r.URL.Path
+		gotQuery = r.URL.RawQuery
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer upstream.Close()
+
+	provider := staticProvider{
+		cfg: console.ObservabilityConfig{
+			PrometheusHost: upstream.URL + "/select/t/prometheus",
+			ElasticHost:    "http://example.com",
+		},
+	}
+	handler := NewHandler(provider, 5*time.Second)
+
+	mux := http.NewServeMux()
+	handler.Register(mux)
+
+	req := httptest.NewRequest(http.MethodGet, "/ext/v1/query/prometheus/api/v1/query?query=up", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("unexpected status: got %d want %d", rec.Code, http.StatusOK)
+	}
+	if gotPath != "/select/t/prometheus/api/v1/query" {
+		t.Fatalf("unexpected upstream path: got %q", gotPath)
+	}
+	if gotQuery != "query=up" {
+		t.Fatalf("unexpected upstream query: got %q", gotQuery)
 	}
 }

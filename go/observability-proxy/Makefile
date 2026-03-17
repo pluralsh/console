@@ -48,9 +48,12 @@ proto: ## generate protobuf code from shared proto
 docker-build: ## build proxy docker image
 	docker build -t ghcr.io/pluralsh/observability-proxy:$(VERSION) .
 
-.PHONY: up-docker
-up-docker: ## run local integration docker compose environment
-	docker compose -f docker-compose.yml up --build
+.PHONY: docker-compose
+docker-compose: ## run observability proxy stack with prometheus remote writer and mocked console
+	docker compose -f docker-compose.yml up \
+		--build \
+		--force-recreate \
+    	--remove-orphans
 
 .PHONY: down-docker
 down-docker: ## stop local integration docker compose environment

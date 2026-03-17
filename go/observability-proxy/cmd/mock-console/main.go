@@ -18,11 +18,21 @@ type server struct {
 	pb.UnimplementedPluralServerServer
 }
 
+const (
+	envMockConsoleAddr    = "MOCK_CONSOLE_ADDR"
+	envMockPrometheusHost = "MOCK_PROMETHEUS_HOST"
+	envMockElasticHost    = "MOCK_ELASTIC_HOST"
+
+	defaultMockConsoleAddr    = ":50051"
+	defaultMockPrometheusHost = "http://mock-prometheus:19090/select/default/prometheus"
+	defaultMockElasticHost    = "http://mock-elastic:19200"
+)
+
 func main() {
 	klog.InitFlags(nil)
 	defer klog.Flush()
 
-	addr := envOrDefault("MOCK_CONSOLE_ADDR", ":50051")
+	addr := envOrDefault(envMockConsoleAddr, defaultMockConsoleAddr)
 
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -49,15 +59,9 @@ func (s *server) ProxyAuthentication(context.Context, *pb.ProxyAuthenticationReq
 }
 
 func (s *server) GetObservabilityConfig(context.Context, *pb.ObservabilityConfigRequest) (*pb.ObservabilityConfig, error) {
-	promHost := os.Getenv("MOCK_PROMETHEUS_HOST")
-	if promHost == "" {
-		promHost = "http://mock-prometheus:19090/select/default/prometheus"
-	}
+	promHost := envOrDefault(envMockPrometheusHost, defaultMockPrometheusHost)
 
-	elasticHost := os.Getenv("MOCK_ELASTIC_HOST")
-	if elasticHost == "" {
-		elasticHost = "http://mock-elastic:19200"
-	}
+	elasticHost := envOrDefault(envMockElasticHost, defaultMockElasticHost)
 
 	if promHost == "" || elasticHost == "" {
 		return nil, status.Error(codes.FailedPrecondition, "mock hosts not configured")

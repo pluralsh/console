@@ -49,6 +49,11 @@ This starts:
 - `mock-elastic` HTTP echo upstream
 - `observability-proxy`
 
+`mock-console` supports compose-overridable env vars:
+- `MOCK_CONSOLE_ADDR` (default `:50051`)
+- `MOCK_PROMETHEUS_HOST` (default `http://mock-prometheus:19090/select/default/prometheus`)
+- `MOCK_ELASTIC_HOST` (default `http://mock-elastic:19200`)
+
 Example requests:
 
 ```bash
@@ -56,4 +61,35 @@ curl -i http://localhost:8080/ready
 curl -i -X POST http://localhost:8080/ext/v1/ingest/prometheus
 curl -i http://localhost:8080/ext/v1/ingest/elastic/
 curl -i http://localhost:8080/ext/v1/query/prometheus/api/v1/query?query=up
+```
+
+## Real E2E remote_write test (Prometheus -> local proxy)
+
+If you run `observability-proxy` locally against real Console gRPC + VM port-forwards,
+you can start a disposable Prometheus sender via compose profile `e2e-real`.
+
+Set credentials from `GetObservabilityConfig`:
+
+```bash
+export PROM_REMOTE_WRITE_USERNAME='<prom_username>'
+export PROM_REMOTE_WRITE_PASSWORD='<prom_password>'
+```
+
+Start Prometheus sender:
+
+```bash
+docker compose --profile e2e-real up prom-remote-write
+```
+
+This service:
+
+- scrapes itself (`job=self`)
+- remote_writes to `http://host.docker.internal:8080/ext/v1/ingest/prometheus`
+- uses `PROM_REMOTE_WRITE_USERNAME` / `PROM_REMOTE_WRITE_PASSWORD`
+
+You can then query through your local proxy:
+
+```bash
+curl -u "$PROM_REMOTE_WRITE_USERNAME:$PROM_REMOTE_WRITE_PASSWORD" \
+  "http://localhost:8080/ext/v1/query/prometheus/api/v1/query?query=up{job=\"self\"}"
 ```

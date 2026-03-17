@@ -128,7 +128,12 @@ func (h *Handler) forward(w http.ResponseWriter, r *http.Request, target *url.UR
 	proxy := &httputil.ReverseProxy{
 		Transport: h.transport,
 		Rewrite: func(preq *httputil.ProxyRequest) {
-			preq.SetURL(target)
+			// SetURL joins target path with inbound request path. For this proxy we
+			// already compute the full upstream path, so set URL components directly.
+			preq.Out.URL.Scheme = target.Scheme
+			preq.Out.URL.Host = target.Host
+			preq.Out.URL.Path = target.Path
+			preq.Out.URL.RawPath = target.RawPath
 			preq.Out.Host = target.Host
 			preq.SetXForwarded()
 			klog.V(logging.LevelTrace).Infof("rewritten request method=%s out_url=%s", preq.Out.Method, preq.Out.URL.String())
