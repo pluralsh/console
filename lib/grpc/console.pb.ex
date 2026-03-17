@@ -138,6 +138,22 @@ defmodule Plrl.ObservabilityConfig do
   field :prometheusHost, 7, proto3_optional: true, type: :string
 end
 
+defmodule Plrl.MeterMetricsRequest do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :bytes, 1, type: :int64
+end
+
+defmodule Plrl.MeterMetricsResponse do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :success, 1, type: :bool
+end
+
 defmodule Plrl.ObservabilityConfigRequest do
   @moduledoc false
 
@@ -148,6 +164,8 @@ defmodule Plrl.PluralServer.Service do
   @moduledoc false
 
   use GRPC.Service, name: "plrl.PluralServer", protoc_gen_elixir_version: "0.15.0"
+
+  rpc :MeterMetrics, Plrl.MeterMetricsRequest, Plrl.MeterMetricsResponse
 
   rpc :GetAiConfig, Plrl.AiConfigRequest, Plrl.AiConfig
 
