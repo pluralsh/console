@@ -7,7 +7,10 @@ RUN apk add --no-cache git
 COPY . .
 
 ARG PACKAGE=./cmd/proxy
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /out/observability-proxy ${PACKAGE}
+ARG TARGETOS=linux
+ARG TARGETARCH
+RUN CGO_ENABLED=0 GOOS="${TARGETOS}" GOARCH="${TARGETARCH:-$(go env GOARCH)}" \
+    go build -trimpath -ldflags="-s -w" -o /out/observability-proxy "${PACKAGE}"
 
 FROM gcr.io/distroless/static-debian12:nonroot
 
