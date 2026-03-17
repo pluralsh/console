@@ -177,8 +177,7 @@ observabilityProxy:
   configTTL: "60s"
   grpcTimeout: "10s"
   upstreamTimeout: "30s"
-  queryRPS: 10
-  queryBurst: 10
+  meterInterval: "30s"
   image:
     repository: observability-proxy
     tag: ~

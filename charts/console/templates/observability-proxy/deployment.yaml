@@ -62,8 +62,7 @@ spec:
         - --config-ttl={{ .Values.observabilityProxy.configTTL }}
         - --grpc-timeout={{ .Values.observabilityProxy.grpcTimeout }}
         - --upstream-timeout={{ .Values.observabilityProxy.upstreamTimeout }}
-        - --query-rps={{ .Values.observabilityProxy.queryRPS | quote }}
-        - --query-burst={{ .Values.observabilityProxy.queryBurst | quote }}
+        - --meter-interval={{ .Values.observabilityProxy.meterInterval }}
         {{- if .Values.observabilityProxy.image.extraArgs }}
         {{- toYaml .Values.observabilityProxy.image.extraArgs | nindent 8 }}
         {{- end }}
