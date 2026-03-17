@@ -7,8 +7,8 @@ services:
         PACKAGE: ./cmd/mock-console
     environment:
       MOCK_CONSOLE_ADDR: ${MOCK_CONSOLE_ADDR:-:50051}
-      MOCK_PROMETHEUS_HOST: ${MOCK_PROMETHEUS_HOST:-http://mock-prometheus:19090/select/default/prometheus}
-      MOCK_ELASTIC_HOST: ${MOCK_ELASTIC_HOST:-http://mock-elastic:19200}
+      MOCK_PROMETHEUS_HOST: ${MOCK_PROMETHEUS_HOST:-}
+      MOCK_ELASTIC_HOST: ${MOCK_ELASTIC_HOST:-}
 
   observability-proxy:
     build:
