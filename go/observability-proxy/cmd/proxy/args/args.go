@@ -3,7 +3,6 @@ package args
 import (
 	"flag"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/pluralsh/console/go/observability-proxy/internal/logging"
@@ -106,18 +105,4 @@ func envDurationOrDefault(key string, fallback time.Duration) time.Duration {
 	}
 
 	return dur
-}
-
-func envIntOrDefault(key string, fallback int) int {
-	value := os.Getenv(key)
-	if value == "" {
-		return fallback
-	}
-
-	parsed, err := strconv.Atoi(value)
-	if err == nil {
-		return parsed
-	}
-
-	return fallback
 }

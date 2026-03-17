@@ -61,6 +61,7 @@ func (r *UsageReporter) flush(ctx context.Context) {
 	if err := r.client.MeterMetrics(ctx, n); err != nil {
 		r.bytes.Add(n)
 		klog.V(logging.LevelInfo).Infof("failed to meter request bytes=%d: %v", n, err)
+		return
 	}
 
 	klog.V(logging.LevelDebug).Infof("flushed bytes=%d", n)
