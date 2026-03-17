@@ -26,7 +26,7 @@ Flags and environment variables:
 
 ## Logging
 
-Detailed logging guidelines are in [docs/logging.md](/home/floreks/projects/plural/console/go/observability-proxy/docs/logging.md).
+Detailed logging guidelines are in [docs/logging.md](docs/logging.md).
 
 ## Local development
 
