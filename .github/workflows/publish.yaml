@@ -8,7 +8,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - uses: erlef/setup-beam@v1
         with:
           version-file: .tool-versions
@@ -58,7 +58,7 @@ jobs:
       packages: "write"
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Docker meta
@@ -147,7 +147,7 @@ jobs:
       discussions: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
@@ -163,7 +163,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
           fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
@@ -221,7 +221,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
           fetch-depth: 0 # otherwise, you will failed to push refs to dest repo

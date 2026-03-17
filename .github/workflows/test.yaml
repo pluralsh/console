@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Docker meta
@@ -100,7 +100,7 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - uses: erlef/setup-beam@v1
         with:
           version-file: .tool-versions
@@ -150,7 +150,7 @@ jobs:
     name: Check that Schema is up to date
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - uses: erlef/setup-beam@v1
         with:
           version-file: .tool-versions
