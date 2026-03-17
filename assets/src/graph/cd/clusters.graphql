@@ -747,3 +747,46 @@ query ClusterNetworkGraph($clusterId: ID!, $time: DateTime) {
     }
   }
 }
+
+fragment ClusterKubernetesMetrics on Cluster {
+  id
+  componentMetrics(
+    group: $group
+    version: $version
+    kind: $kind
+    name: $name
+    namespace: $namespace
+    start: $start
+    stop: $stop
+    step: $step
+  ) {
+    cpu {
+      ...MetricResponse
+    }
+    mem {
+      ...MetricResponse
+    }
+    podCpu {
+      ...MetricResponse
+    }
+    podMem {
+      ...MetricResponse
+    }
+  }
+}
+
+query ClusterKubernetesMetrics(
+  $clusterId: ID!
+  $group: String!
+  $version: String!
+  $kind: String!
+  $name: String!
+  $namespace: String!
+  $start: DateTime
+  $stop: DateTime
+  $step: String
+) {
+  cluster(id: $clusterId) {
+    ...ClusterKubernetesMetrics
+  }
+}

@@ -1,0 +1,40 @@
+{{- if .Values.kas.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "kas.fullname" . }}
+  labels:
+    {{- include "kas.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "kas.deploymentName" . }}
+  minReplicas: {{ .Values.kas.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.kas.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.kas.autoscaling.targetCPUAverageValue }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: AverageValue
+          averageValue: {{ .Values.kas.autoscaling.targetCPUAverageValue }}
+    {{- end }}
+    {{- if .Values.kas.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.kas.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.kas.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.kas.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

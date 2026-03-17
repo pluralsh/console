@@ -24,14 +24,14 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: {{ .Release.Name }}-kas-service
+            name: {{ include "kas.serviceName" . }}
             port:
               number: {{ .Values.kas.service.agentProxyPort }}
       - path: {{ .Values.kas.api.path }}
         pathType: Prefix
         backend:
           service:
-            name: {{ .Release.Name }}-kas-service
+            name: {{ include "kas.serviceName" . }}
             port:
               number: {{ .Values.kas.api.port }}
       {{- if .Values.aiProxy.enabled }}
@@ -97,14 +97,14 @@ spec:
         pathType: ImplementationSpecific
         backend:
           service:
-            name: console-kas-service
+            name: {{ include "kas.serviceName" . }}
             port:
               number: 8154
       - path: /ext/kas(/|$)(.*)
         pathType: ImplementationSpecific
         backend:
           service:
-            name: console-kas-service
+            name: {{ include "kas.serviceName" . }}
             port:
               number: 8150
 {{ end }}
@@ -136,7 +136,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: console-kas-service
+            name: {{ include "kas.serviceName" . }}
             port:
               number: 8180
       - path: /ext

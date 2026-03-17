@@ -1,15 +1,15 @@
 dependencies:
-- name: kas
-  repository: file://../kas
-  version: 0.3.2
 - name: controller
   repository: file://../controller
-  version: 0.0.175
+  version: 0.0.176
 - name: flux2
   repository: https://fluxcd-community.github.io/helm-charts
   version: 2.14.0
 - name: dex
   repository: https://charts.dexidp.io
   version: 0.24.0
-digest: sha256:4d38e2e946cad15f9d4bf7fbf1c7bd0a50c656b90934039bff2229303e108b72
-generated: "2026-03-09T15:35:44.868647003Z"
+- name: common
+  repository: https://charts.bitnami.com/bitnami
+  version: 2.34.0
+digest: sha256:0d1f428d9316892a6c630dc06d0a959636dd2a6270d938c3cdf17f89e8e43342
+generated: "2026-03-16T12:51:05.914229+01:00"

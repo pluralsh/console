@@ -2,14 +2,11 @@ apiVersion: v2
 name: console
 description: >-
   deploys the plural console and additional dependencies, for use in bring-your-own-kube setups
-appVersion: 0.12.5
-version: 0.4.6
+appVersion: 0.12.6
+version: 0.4.7
 dependencies:
-  - name: kas
-    version: 0.3.2
-    repository: file://../kas
   - name: controller
-    version: 0.0.175
+    version: 0.0.176
     repository: file://../controller
     condition: controller.enabled
   - name: flux2
@@ -20,4 +17,7 @@ dependencies:
     version: 0.24.0
     repository: https://charts.dexidp.io
     condition: dex.enabled
+  - name: common
+    version: 2.34.0 # Closest to 2.33.2 used originally in the Redis chart.
+    repository: https://charts.bitnami.com/bitnami
 type: application

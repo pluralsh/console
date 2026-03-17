@@ -1,0 +1,43 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "kas.fullname" . }}
+  labels:
+    {{- include "kas.labels" . | nindent 4 }}
+  {{- with .Values.kas.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: {{ .Values.kas.ingress.ingressClass }}
+  rules:
+    - host: {{ .Values.kas.ingress.kas_dns | quote }}
+      http:
+        paths:
+          - path: "{{ $.Values.kas.ingress.kubernetesApiPath }}"
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "kas.serviceName" . }}
+                port:
+                  number: {{ .Values.kas.service.kubernetesApiPort }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "kas.serviceName" . }}
+                port:
+                  number: {{ .Values.kas.service.agentProxyPort }}
+          - path: {{ .Values.kas.agent.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "kas.serviceName" . }}
+                port:
+                  number: {{ .Values.kas.service.agentProxyPort }}
+  {{ if .Values.kas.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ .Values.kas.ingress.kas_dns | quote }}
+      secretName: {{ .Values.kas.ingress.tlsSecretName }}
+  {{ end }}

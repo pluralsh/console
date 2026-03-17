@@ -74,6 +74,8 @@ func (r *InfrastructureStackReconciler) Name() internaltypes.Reconciler {
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks/finalizers,verbs=update
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;patch
+// +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;patch
 
 // Reconcile is part of the main kubernetes reconciliation loop.
 func (r *InfrastructureStackReconciler) Reconcile(_ context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -236,6 +238,8 @@ func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                 // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.InfrastructureStackList))). // Reconcile objects on credentials change.
+		Watches(&corev1.ConfigMap{}, utils.OwnerRefAnnotationEventHandler(r.Client, new(v1alpha1.InfrastructureStack))).
+		Watches(&corev1.Secret{}, utils.OwnerRefAnnotationEventHandler(r.Client, new(v1alpha1.InfrastructureStack))).
 		For(&v1alpha1.InfrastructureStack{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)
 }
@@ -381,9 +385,11 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 			if err := r.Get(ctx, name, secret); err != nil {
 				return nil, err
 			}
-			// if err := utils.TryAddControllerRef(ctx, r.Client, stack, secret, r.Scheme); err != nil {
-			// 	return nil, err
-			// }
+
+			if err := utils.AddOwnerRefAnnotation(ctx, r.Client, stack, secret); err != nil {
+				return nil, err
+			}
+
 			isSecret = lo.ToPtr(true)
 			rawData, ok := secret.Data[env.SecretKeyRef.Key]
 			if !ok {
@@ -396,12 +402,14 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 			if err := r.Get(ctx, name, configMap); err != nil {
 				return nil, err
 			}
-			// if err := utils.TryAddControllerRef(ctx, r.Client, stack, configMap, r.Scheme); err != nil {
-			// 	return nil, err
-			// }
+
+			if err := utils.AddOwnerRefAnnotation(ctx, r.Client, stack, configMap); err != nil {
+				return nil, err
+			}
+
 			rawData, ok := configMap.Data[env.ConfigMapRef.Key]
 			if !ok {
-				return nil, fmt.Errorf("can not find secret data for the key %s", env.ConfigMapRef.Key)
+				return nil, fmt.Errorf("can not find config map data for the key %s", env.ConfigMapRef.Key)
 			}
 			value = rawData
 		}

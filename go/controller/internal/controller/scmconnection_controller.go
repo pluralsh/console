@@ -112,7 +112,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 		return common.HandleRequeue(nil, err, scm.SetCondition)
 	}
 
-	if err := common.TryAddOwnedByAnnotation(ctx, r.Client, scm, secret); err != nil {
+	if err := common.TryAddOwnedByAnnotation(ctx, r.Client, scm, secret); err != nil { //nolint:staticcheck
 		return common.HandleRequeue(nil, err, scm.SetCondition)
 	}
 
@@ -297,6 +297,6 @@ func (r *ScmConnectionReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		For(&v1alpha1.ScmConnection{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Watches(&corev1.Secret{}, common.OwnedByEventHandler(&metav1.GroupKind{Group: gvk.Group, Kind: gvk.Kind})).
+		Watches(&corev1.Secret{}, common.OwnedByEventHandler(&metav1.GroupKind{Group: gvk.Group, Kind: gvk.Kind})). //nolint:staticcheck
 		Complete(r)
 }
