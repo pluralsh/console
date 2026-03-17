@@ -90,19 +90,7 @@ replicas = get_env("REPLICAS", "1") |> String.to_integer()
 config :console,
   replicas: replicas
 
-config :libcluster,
-  topologies: [
-    console: [
-      strategy: Cluster.Strategy.Kubernetes,
-      config: [
-        mode: :ip,
-        kubernetes_node_basename: "console",
-        kubernetes_selector: "app=console",
-        kubernetes_namespace: get_env("NAMESPACE"),
-        polling_interval: 10_000
-      ]
-    ]
-  ]
+config :console, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY", "console-headless.#{get_env("NAMESPACE") || "plrl-console"}")
 
 config :console, Console.Guardian,
   issuer: get_env("HOST"),
