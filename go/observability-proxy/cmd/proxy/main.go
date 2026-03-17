@@ -22,12 +22,10 @@ func main() {
 
 	klog.V(logging.LevelMinimal).Infof("starting observability-proxy listen=%s grpc_endpoint=%s", args.ListenAddr(), args.ConsoleGRPCEndpoint())
 	klog.V(logging.LevelDebug).Infof(
-		"runtime options configTTL=%s grpcTimeout=%s upstreamTimeout=%s queryRPS=%d queryBurst=%d",
+		"runtime options configTTL=%s grpcTimeout=%s upstreamTimeout=%s",
 		args.ConfigTTL(),
 		args.GRPCTimeout(),
 		args.UpstreamTimeout(),
-		args.QueryRPS(),
-		args.QueryBurst(),
 	)
 
 	grpcClient, err := console.NewGRPCClient(args.ConsoleGRPCEndpoint(), args.GRPCTimeout())
@@ -43,7 +41,7 @@ func main() {
 
 	provider := console.NewCachingProvider(grpcClient, args.ConfigTTL())
 
-	// Prime config eagerly so readiness transitions quickly.
+	// Fetch config eagerly so readiness transitions quickly.
 	_, err = provider.GetConfig(context.Background())
 	if err != nil {
 		klog.Warningf("initial config fetch failed, service will remain unready until successful refresh: %v", err)
@@ -54,18 +52,8 @@ func main() {
 	h := proxy.NewHandler(provider, args.UpstreamTimeout())
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("ok"))
-	})
-	mux.HandleFunc("/ready", func(w http.ResponseWriter, _ *http.Request) {
-		if !provider.Ready() {
-			http.Error(w, "config not loaded", http.StatusServiceUnavailable)
-			return
-		}
-		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write([]byte("ready"))
-	})
+	mux.HandleFunc("/health", healthHandler())
+	mux.HandleFunc("/ready", readinessHandler(provider))
 	h.Register(mux)
 
 	srv := &http.Server{

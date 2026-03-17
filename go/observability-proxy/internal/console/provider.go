@@ -6,7 +6,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/pluralsh/console/go/observability-proxy/internal/logging"
 	pb "github.com/pluralsh/console/go/observability-proxy/internal/proto"
+	"k8s.io/klog/v2"
 )
 
 // ObservabilityConfig is the normalized upstream configuration used by the proxy.
@@ -93,6 +95,8 @@ func fromProto(resp *pb.ObservabilityConfig) (ObservabilityConfig, error) {
 	if resp == nil {
 		return ObservabilityConfig{}, fmt.Errorf("empty observability config")
 	}
+
+	klog.V(logging.LevelDebug).InfoS("received observability config", "config", resp)
 
 	cfg := ObservabilityConfig{
 		PrometheusHost:     resp.GetPrometheusHost(),

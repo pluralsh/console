@@ -16,8 +16,6 @@ const (
 	defaultConfigTTL       = 60 * time.Second
 	defaultGRPCTimeout     = 10 * time.Second
 	defaultUpstreamTimeout = 30 * time.Second
-	defaultQueryRPS        = 10
-	defaultQueryBurst      = 10
 )
 
 const (
@@ -26,8 +24,6 @@ const (
 	envConfigTTL       = "OBS_PROXY_CONFIG_TTL"
 	envGRPCTimeout     = "OBS_PROXY_GRPC_TIMEOUT"
 	envUpstreamTimeout = "OBS_PROXY_UPSTREAM_TIMEOUT"
-	envQueryRPS        = "OBS_PROXY_QUERY_RPS"
-	envQueryBurst      = "OBS_PROXY_QUERY_BURST"
 )
 
 var (
@@ -36,8 +32,6 @@ var (
 	argConfigTTL       = flag.Duration("config-ttl", envDurationOrDefault(envConfigTTL, defaultConfigTTL), "Config cache TTL")
 	argGRPCTimeout     = flag.Duration("grpc-timeout", envDurationOrDefault(envGRPCTimeout, defaultGRPCTimeout), "Console gRPC timeout")
 	argUpstreamTimeout = flag.Duration("upstream-timeout", envDurationOrDefault(envUpstreamTimeout, defaultUpstreamTimeout), "Upstream request timeout")
-	argQueryRPS        = flag.Int("query-rps", envIntOrDefault(envQueryRPS, defaultQueryRPS), "Per-IP query requests per second")
-	argQueryBurst      = flag.Int("query-burst", envIntOrDefault(envQueryBurst, defaultQueryBurst), "Per-IP query burst")
 )
 
 func Init() {
@@ -80,20 +74,6 @@ func UpstreamTimeout() time.Duration {
 		return defaultUpstreamTimeout
 	}
 	return *argUpstreamTimeout
-}
-
-func QueryRPS() int {
-	if *argQueryRPS <= 0 {
-		return defaultQueryRPS
-	}
-	return *argQueryRPS
-}
-
-func QueryBurst() int {
-	if *argQueryBurst <= 0 {
-		return defaultQueryBurst
-	}
-	return *argQueryBurst
 }
 
 func envOrDefault(key, fallback string) string {
