@@ -16,7 +16,7 @@
                         "description": "The description of the todo"
                     },
                     "status": {
-                        "type": "enum",
+                        "type": "string",
                         "enum": ["pending", "in_progress", "completed"],
                         "description": "The status of the todo"
                     }

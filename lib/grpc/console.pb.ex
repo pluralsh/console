@@ -124,12 +124,34 @@ defmodule Plrl.ProxyAuthenticationResponse do
   field :authenticated, 1, type: :bool
 end
 
+defmodule Plrl.ObservabilityConfig do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :prometheusUsername, 1, proto3_optional: true, type: :string
+  field :prometheusPassword, 2, proto3_optional: true, type: :string
+  field :elasticUsername, 3, proto3_optional: true, type: :string
+  field :elasticPassword, 4, proto3_optional: true, type: :string
+  field :elasticIndex, 5, proto3_optional: true, type: :string
+  field :elasticHost, 6, proto3_optional: true, type: :string
+  field :prometheusHost, 7, proto3_optional: true, type: :string
+end
+
+defmodule Plrl.ObservabilityConfigRequest do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+end
+
 defmodule Plrl.PluralServer.Service do
   @moduledoc false
 
   use GRPC.Service, name: "plrl.PluralServer", protoc_gen_elixir_version: "0.15.0"
 
   rpc :GetAiConfig, Plrl.AiConfigRequest, Plrl.AiConfig
+
+  rpc :GetObservabilityConfig, Plrl.ObservabilityConfigRequest, Plrl.ObservabilityConfig
 
   rpc :ProxyAuthentication, Plrl.ProxyAuthenticationRequest, Plrl.ProxyAuthenticationResponse
 end

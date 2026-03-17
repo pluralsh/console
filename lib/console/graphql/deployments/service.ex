@@ -583,7 +583,9 @@ defmodule Console.GraphQl.Deployments.Service do
   @desc "a file in a service's fully realized gitops tarball"
   object :service_file do
     field :path, non_null(:string)
-    field :content, non_null(:string)
+    field :content, non_null(:string) do
+      resolve fn %{content: content}, _, _ -> {:ok, Base.encode64(content)} end
+    end
   end
 
   connection node_type: :service_deployment

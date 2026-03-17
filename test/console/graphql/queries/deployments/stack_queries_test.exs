@@ -579,7 +579,8 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       assert Enum.find(files, & &1["path"] == "variables.tf")
 
       main_tf = Enum.find(files, & &1["path"] == "main.tf")
-      assert main_tf["content"] == "resource \"aws_instance\" \"example\" {}"
+      {:ok, content} = Base.decode64(main_tf["content"])
+      assert content == "resource \"aws_instance\" \"example\" {}"
     end
 
     test "non-writers cannot fetch stack files" do
