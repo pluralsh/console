@@ -31,6 +31,7 @@ This starts:
 - `mock-console` gRPC server serving `GetObservabilityConfig` and `MeterMetrics`
 - `observability-proxy`
 - `prom-remote-write` sender posting to the proxy
+- `elastic-bulk-write` sender posting to the proxy
 
 Example requests:
 

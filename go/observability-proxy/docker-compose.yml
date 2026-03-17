@@ -52,3 +52,24 @@ services:
       - ./scripts/prom-remote-write.sh:/scripts/prom-remote-write.sh:ro
     ports:
       - "19090:9090"
+
+  elastic-bulk-write:
+    image: curlimages/curl:8.13.0
+    depends_on:
+      - observability-proxy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    entrypoint:
+      - /bin/sh
+      - -ec
+    environment:
+      ELASTIC_PROXY_BULK_URL: ${ELASTIC_PROXY_BULK_URL:-http://host.docker.internal:8080/ext/v1/ingest/elastic/_bulk}
+      ELASTIC_WRITE_USERNAME: ${ELASTIC_WRITE_USERNAME:-}
+      ELASTIC_WRITE_PASSWORD: ${ELASTIC_WRITE_PASSWORD:-}
+      ELASTIC_WRITE_INDEX: ${ELASTIC_WRITE_INDEX:-obs_proxy_smoketest}
+      ELASTIC_WRITE_INTERVAL_SECONDS: ${ELASTIC_WRITE_INTERVAL_SECONDS:-5}
+      ELASTIC_WRITE_BATCH_SIZE: ${ELASTIC_WRITE_BATCH_SIZE:-10}
+    command:
+      - /scripts/elastic-bulk-writer.sh
+    volumes:
+      - ./scripts/elastic-bulk-writer.sh:/scripts/elastic-bulk-writer.sh:ro

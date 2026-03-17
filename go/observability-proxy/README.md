@@ -22,5 +22,6 @@ Design intent:
 - [Configuration](docs/configuration.md)
 - [Local development and docker-compose](docs/development.md)
 - [E2E remote_write flow](docs/e2e-remote-write.md)
+- [E2E Elastic bulk write flow](docs/e2e-elastic.md)
 - [Metering behavior](docs/metering.md)
 - [Logging policy](docs/logging.md)
