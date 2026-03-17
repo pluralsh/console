@@ -1,0 +1,89 @@
+{{- /*
+Copyright Broadcom, Inc. All Rights Reserved.
+SPDX-License-Identifier: APACHE-2.0
+*/}}
+
+{{- if and .Values.kas.redis.metrics.enabled .Values.kas.redis.metrics.podMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ template "redis.fullname" . }}
+  namespace: {{ default (include "common.names.namespace" .) .Values.kas.redis.metrics.podMonitor.namespace | quote }}
+  labels: {{- include "common.labels.standard" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 4 }}
+    {{- if .Values.kas.redis.metrics.podMonitor.additionalLabels }}
+    {{- include "common.tplvalues.render" (dict "value" .Values.kas.redis.metrics.podMonitor.additionalLabels "context" $) | nindent 4 }}
+    {{- end }}
+  {{- if .Values.kas.redis.commonAnnotations }}
+  annotations: {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.commonAnnotations "context" $ ) | nindent 4 }}
+  {{- end }}
+spec:
+  podMetricsEndpoints:
+    - port: {{ .Values.kas.redis.metrics.podMonitor.port }}
+      {{- if .Values.kas.redis.metrics.serviceMonitor.tlsConfig }}
+      scheme: https
+      tlsConfig: {{- toYaml .Values.kas.redis.metrics.serviceMonitor.tlsConfig | nindent 8 }}
+      {{- end }}
+      {{- if .Values.kas.redis.metrics.podMonitor.interval }}
+      interval: {{ .Values.kas.redis.metrics.podMonitor.interval }}
+      {{- end }}
+      {{- if .Values.kas.redis.metrics.podMonitor.scrapeTimeout }}
+      scrapeTimeout: {{ .Values.kas.redis.metrics.podMonitor.scrapeTimeout }}
+      {{- end }}
+      {{- if .Values.kas.redis.metrics.podMonitor.honorLabels }}
+      honorLabels: {{ .Values.kas.redis.metrics.podMonitor.honorLabels }}
+      {{- end }}
+      {{- with concat .Values.kas.redis.metrics.podMonitor.relabelings .Values.kas.redis.metrics.podMonitor.relabellings }}
+      relabelings: {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- if .Values.kas.redis.metrics.podMonitor.metricRelabelings }}
+      metricRelabelings: {{- toYaml .Values.kas.redis.metrics.podMonitor.metricRelabelings | nindent 6 }}
+      {{- end }}
+    {{- range .Values.kas.redis.metrics.podMonitor.additionalEndpoints }}
+    - port: {{ .port }}
+      {{- if .tlsConfig }}
+      scheme: https
+      tlsConfig: {{- toYaml .tlsConfig | nindent 8 }}
+      {{- end }}
+      {{- if .interval }}
+      interval: {{ .interval }}
+      {{- end }}
+      {{- if .path }}
+      path: {{ .path }}
+      {{- end }}
+      {{- if .honorLabels }}
+      honorLabels: {{ .honorLabels }}
+      {{- end }}
+      {{- with concat .relabelings .relabellings }}
+      relabelings: {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- if .metricRelabelings }}
+      metricRelabelings: {{- toYaml .metricRelabelings | nindent 6 }}
+      {{- end }}
+      {{- if .scrapeTimeout }}
+      scrapeTimeout: {{ .scrapeTimeout }}
+      {{- end }}
+      {{- if .params }}
+      params:
+        {{- range $key, $value := .params }}
+        {{ $key }}:
+          {{- range $value }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- if .Values.kas.redis.metrics.podMonitor.podTargetLabels }}
+  podTargetLabels: {{- toYaml .Values.kas.redis.metrics.podMonitor.podTargetLabels | nindent 4 }}
+  {{- end }}
+  {{- with .Values.kas.redis.metrics.podMonitor.sampleLimit -}}
+  sampleLimit: {{ . }}
+  {{- end }}
+  {{- with .Values.kas.redis.metrics.podMonitor.targetLimit -}}
+  targetLimit: {{ . }}
+  {{- end }}
+  namespaceSelector:
+    matchNames:
+      - {{ include "common.names.namespace" . | quote }}
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" ( dict "customLabels" .Values.kas.redis.commonLabels "context" $ ) | nindent 6 }}
+{{- end }}

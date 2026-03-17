@@ -1,0 +1,171 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kas.deploymentName" . }}
+  annotations:
+    platform.plural.sh/repository-url: https://github.com/pluralsh/console.git
+    deployment.plural.sh/sync-options: Force=True
+  labels:
+    {{- include "kas.labels" . | nindent 4 }}
+spec:
+  {{ if not .Values.kas.autoscaling.enabled }}
+  replicas: {{ .Values.kas.replicaCount }}
+  {{ end }}
+  selector:
+    matchLabels:
+      {{- include "kas.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/kas/configmap.yaml") . | sha256sum }}
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+        {{- if and .Values.kas.metrics.enabled (not .Values.kas.metrics.serviceMonitor.enabled) }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.kas.service.observabilityPort | quote }}
+        prometheus.io/path: {{ .Values.kas.metrics.path }}
+        {{- end }}
+        {{- with .Values.kas.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      labels:
+        {{- with .Values.kas.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- include "kas.selectorLabels" . | nindent 8 }}
+    spec:
+      automountServiceAccountToken: false
+      {{- with .Values.kas.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.kas.securityContext | nindent 8 }}
+      {{- with .Values.kas.priorityClassName }}
+      priorityClassName: {{ . }}
+      {{- end }}
+      serviceAccountName: {{ include "kas.serviceAccountName" . }}
+      {{ if .Values.kas.initContainers }}
+      initContainers:
+        {{ toYaml .Values.kas.initContainers | nindent 8 }}
+      {{ end }}
+      containers:
+        - name: kas
+          image: {{ .Values.kas.image.repository }}:{{ .Values.kas.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.kas.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.kas.podSecurityContext | nindent 12 }}
+          args:
+            - "--configuration-file=/etc/kas/config.yaml"
+            {{- range .Values.kas.extraArgs }}
+            - {{ . }}
+            {{- end }}
+          env:
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: OWN_PRIVATE_API_URL
+              value: "grpc://$(POD_IP):{{ .Values.kas.service.privateApiPort }}"
+          {{- if .Values.kas.extraEnv }}
+            {{- toYaml .Values.kas.extraEnv | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: {{ .Values.kas.service.agentPort }}
+            - containerPort: {{ .Values.kas.service.kubernetesApiPort }}
+            - containerPort: {{ .Values.kas.service.privateApiPort }}
+            - containerPort: {{ .Values.kas.service.observabilityPort }}
+            - containerPort: {{ .Values.kas.service.agentProxyPort }}
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: {{ .Values.kas.service.observabilityPort }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: {{ .Values.kas.service.observabilityPort }}
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            {{- toYaml .Values.kas.resources | nindent 12 }}
+          volumeMounts:
+          {{ if .Values.kas.global.additionalVolumeMounts }}
+          {{ toYaml .Values.kas.global.additionalVolumeMounts | nindent 10 }}
+          {{ end }}
+          - name: etc-kas
+            mountPath: /etc/kas
+            readOnly: true
+        - name: api
+          image: {{ .Values.kas.image.repository }}:{{ .Values.kas.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ .Values.kas.image.pullPolicy }}
+          command: ["/api"]
+          args:
+            - --act-as-proxy
+            - --apiserver-host=https://$(KAS_HOST)/k8s-proxy
+            - --apiserver-skip-tls-verify
+            - --metrics-provider=none
+            - --disable-csrf-protection
+            - --cluster-context-enabled=true
+            - --insecure-bind-address=0.0.0.0
+            - --token-exchange-endpoint=http://$(CONSOLE_HOST)/v1/dashboard/cluster
+          env:
+            - name: KAS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: console-env
+                  key: KAS_HOST
+            - name: CONSOLE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: console-env
+                  key: CONSOLE_HOST
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+      terminationGracePeriodSeconds: 300
+      volumes:
+      {{ if .Values.kas.global.additionalVolumes }}
+      {{ toYaml .Values.kas.global.additionalVolumes | nindent 6 }}
+      {{ end }}
+      - name: etc-kas
+        projected:
+          defaultMode: 0440
+          sources:
+            - configMap:
+                name: {{ template "kas.configMapName" . }}
+            {{- range $name, $value := (omit .Values.kas.secrets "create") }}
+            - secret:
+                name: {{ $name }}
+                items:
+                  - key: secret
+                    path: .{{ $name }}_secret
+            {{- end }}
+            - secret:
+                name: {{ include "redis.secretName" . }}
+                items:
+                  - key: redis-password
+                    path: redis_server_secret
+      {{- with .Values.kas.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.kas.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.kas.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
