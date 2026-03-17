@@ -144,3 +144,24 @@ func TestPrometheusIngestCountsRequestBytes(t *testing.T) {
 		t.Fatalf("unexpected meter call count: got %d want 1", addCalls.Load())
 	}
 }
+
+func TestPrometheusQueryMethodValidation(t *testing.T) {
+	provider := staticProvider{
+		cfg: console.ObservabilityConfig{
+			PrometheusHost: "http://example.com/select/t/prometheus",
+			ElasticHost:    "http://example.com",
+		},
+	}
+	handler := NewHandler(provider, 5*time.Second, nil)
+
+	mux := http.NewServeMux()
+	handler.Register(mux)
+
+	req := httptest.NewRequest(http.MethodDelete, "/ext/v1/query/prometheus/api/v1/query?query=up", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("unexpected status: got %d want %d", rec.Code, http.StatusMethodNotAllowed)
+	}
+}

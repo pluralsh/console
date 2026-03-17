@@ -106,6 +106,16 @@ func (h *Handler) elasticIngest(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) prometheusQuery(w http.ResponseWriter, r *http.Request) {
 	klog.V(logging.LevelVerbose).Infof("handling prometheus query method=%s path=%s", r.Method, r.URL.Path)
 
+	allowed := map[string]struct{}{
+		http.MethodGet:  {},
+		http.MethodPost: {},
+	}
+
+	if _, ok := allowed[r.Method]; !ok {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	cfg, err := h.configProvider.GetConfig(r.Context())
 	if err != nil {
 		http.Error(w, "observability config unavailable", http.StatusServiceUnavailable)

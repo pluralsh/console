@@ -3,7 +3,7 @@ module github.com/pluralsh/console/go/observability-proxy
 go 1.26.1
 
 require (
-	golang.org/x/time v0.13.0
+	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 	k8s.io/klog/v2 v2.140.0
