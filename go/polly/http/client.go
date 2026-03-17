@@ -37,8 +37,9 @@ func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 		_ = req.Body.Close()
 	}
 
-	if t.newBackoff == nil {
-		t.newBackoff = defaultBackoff
+	newBackoff := t.newBackoff
+	if newBackoff == nil {
+		newBackoff = defaultBackoff
 	}
 
 	var resp *http.Response
