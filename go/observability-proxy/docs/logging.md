@@ -30,7 +30,7 @@ Severity logs (`Errorf`, `Warningf`) are always emitted regardless of `-v`.
 
 - `debug` (`-v=4`)
   - Detailed troubleshooting signals and branch decisions.
-  - Examples: forwarding destination, rate-limit decisions, fallback behavior.
+  - Examples: forwarding destination, config fallback behavior, metering flush result.
   - Intended for temporary use during debugging.
 
 - `trace` (`-v=5`)

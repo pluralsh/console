@@ -12,6 +12,7 @@ import (
 	"github.com/pluralsh/console/go/observability-proxy/cmd/proxy/args"
 	"github.com/pluralsh/console/go/observability-proxy/internal/console"
 	"github.com/pluralsh/console/go/observability-proxy/internal/logging"
+	"github.com/pluralsh/console/go/observability-proxy/internal/metering"
 	"github.com/pluralsh/console/go/observability-proxy/internal/proxy"
 	"k8s.io/klog/v2"
 )
@@ -22,10 +23,11 @@ func main() {
 
 	klog.V(logging.LevelMinimal).Infof("starting observability-proxy listen=%s grpc_endpoint=%s", args.ListenAddr(), args.ConsoleGRPCEndpoint())
 	klog.V(logging.LevelDebug).Infof(
-		"runtime options configTTL=%s grpcTimeout=%s upstreamTimeout=%s",
+		"runtime options configTTL=%s grpcTimeout=%s upstreamTimeout=%s meterInterval=%s",
 		args.ConfigTTL(),
 		args.GRPCTimeout(),
 		args.UpstreamTimeout(),
+		args.MeterInterval(),
 	)
 
 	grpcClient, err := console.NewGRPCClient(args.ConsoleGRPCEndpoint(), args.GRPCTimeout())
@@ -40,6 +42,10 @@ func main() {
 	}()
 
 	provider := console.NewCachingProvider(grpcClient, args.ConfigTTL())
+	reporter := metering.NewUsageReporter(grpcClient, args.MeterInterval())
+	runCtx, runCancel := context.WithCancel(context.Background())
+	defer runCancel()
+	go reporter.Start(runCtx)
 
 	// Fetch config eagerly so readiness transitions quickly.
 	_, err = provider.GetConfig(context.Background())
@@ -49,7 +55,7 @@ func main() {
 		klog.V(logging.LevelInfo).Infof("initial observability config loaded successfully")
 	}
 
-	h := proxy.NewHandler(provider, args.UpstreamTimeout())
+	h := proxy.NewHandler(provider, args.UpstreamTimeout(), reporter.AddBytes)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", healthHandler())
@@ -83,6 +89,8 @@ func main() {
 			os.Exit(1)
 		}
 	}
+
+	runCancel()
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()

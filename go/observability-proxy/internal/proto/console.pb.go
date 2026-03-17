@@ -805,6 +805,94 @@ func (x *ObservabilityConfig) GetPrometheusHost() string {
 	return ""
 }
 
+type MeterMetricsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Bytes         int64                  `protobuf:"varint,1,opt,name=bytes,proto3" json:"bytes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MeterMetricsRequest) Reset() {
+	*x = MeterMetricsRequest{}
+	mi := &file_console_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MeterMetricsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MeterMetricsRequest) ProtoMessage() {}
+
+func (x *MeterMetricsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_console_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MeterMetricsRequest.ProtoReflect.Descriptor instead.
+func (*MeterMetricsRequest) Descriptor() ([]byte, []int) {
+	return file_console_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *MeterMetricsRequest) GetBytes() int64 {
+	if x != nil {
+		return x.Bytes
+	}
+	return 0
+}
+
+type MeterMetricsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *MeterMetricsResponse) Reset() {
+	*x = MeterMetricsResponse{}
+	mi := &file_console_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *MeterMetricsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MeterMetricsResponse) ProtoMessage() {}
+
+func (x *MeterMetricsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_console_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MeterMetricsResponse.ProtoReflect.Descriptor instead.
+func (*MeterMetricsResponse) Descriptor() ([]byte, []int) {
+	return file_console_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *MeterMetricsResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 type ObservabilityConfigRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -813,7 +901,7 @@ type ObservabilityConfigRequest struct {
 
 func (x *ObservabilityConfigRequest) Reset() {
 	*x = ObservabilityConfigRequest{}
-	mi := &file_console_proto_msgTypes[10]
+	mi := &file_console_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -825,7 +913,7 @@ func (x *ObservabilityConfigRequest) String() string {
 func (*ObservabilityConfigRequest) ProtoMessage() {}
 
 func (x *ObservabilityConfigRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_console_proto_msgTypes[10]
+	mi := &file_console_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -838,7 +926,7 @@ func (x *ObservabilityConfigRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ObservabilityConfigRequest.ProtoReflect.Descriptor instead.
 func (*ObservabilityConfigRequest) Descriptor() ([]byte, []int) {
-	return file_console_proto_rawDescGZIP(), []int{10}
+	return file_console_proto_rawDescGZIP(), []int{12}
 }
 
 var File_console_proto protoreflect.FileDescriptor
@@ -962,9 +1050,14 @@ const file_console_proto_rawDesc = "" +
 	"\x10_elasticPasswordB\x0f\n" +
 	"\r_elasticIndexB\x0e\n" +
 	"\f_elasticHostB\x11\n" +
-	"\x0f_prometheusHost\"\x1c\n" +
-	"\x1aObservabilityConfigRequest2\xf7\x01\n" +
-	"\fPluralServer\x124\n" +
+	"\x0f_prometheusHost\"+\n" +
+	"\x13MeterMetricsRequest\x12\x14\n" +
+	"\x05bytes\x18\x01 \x01(\x03R\x05bytes\"0\n" +
+	"\x14MeterMetricsResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x1c\n" +
+	"\x1aObservabilityConfigRequest2\xbe\x02\n" +
+	"\fPluralServer\x12E\n" +
+	"\fMeterMetrics\x12\x19.plrl.MeterMetricsRequest\x1a\x1a.plrl.MeterMetricsResponse\x124\n" +
 	"\vGetAiConfig\x12\x15.plrl.AiConfigRequest\x1a\x0e.plrl.AiConfig\x12U\n" +
 	"\x16GetObservabilityConfig\x12 .plrl.ObservabilityConfigRequest\x1a\x19.plrl.ObservabilityConfig\x12Z\n" +
 	"\x13ProxyAuthentication\x12 .plrl.ProxyAuthenticationRequest\x1a!.plrl.ProxyAuthenticationResponseB\x10Z\x0einternal/protob\x06proto3"
@@ -981,7 +1074,7 @@ func file_console_proto_rawDescGZIP() []byte {
 	return file_console_proto_rawDescData
 }
 
-var file_console_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_console_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_console_proto_goTypes = []any{
 	(*AiConfigRequest)(nil),             // 0: plrl.AiConfigRequest
 	(*AiConfig)(nil),                    // 1: plrl.AiConfig
@@ -993,9 +1086,11 @@ var file_console_proto_goTypes = []any{
 	(*ProxyAuthenticationRequest)(nil),  // 7: plrl.ProxyAuthenticationRequest
 	(*ProxyAuthenticationResponse)(nil), // 8: plrl.ProxyAuthenticationResponse
 	(*ObservabilityConfig)(nil),         // 9: plrl.ObservabilityConfig
-	(*ObservabilityConfigRequest)(nil),  // 10: plrl.ObservabilityConfigRequest
-	nil,                                 // 11: plrl.BedrockConfig.DeploymentsEntry
-	nil,                                 // 12: plrl.AzureOpenAiConfig.DeploymentsEntry
+	(*MeterMetricsRequest)(nil),         // 10: plrl.MeterMetricsRequest
+	(*MeterMetricsResponse)(nil),        // 11: plrl.MeterMetricsResponse
+	(*ObservabilityConfigRequest)(nil),  // 12: plrl.ObservabilityConfigRequest
+	nil,                                 // 13: plrl.BedrockConfig.DeploymentsEntry
+	nil,                                 // 14: plrl.AzureOpenAiConfig.DeploymentsEntry
 }
 var file_console_proto_depIdxs = []int32{
 	2,  // 0: plrl.AiConfig.openai:type_name -> plrl.OpenAiConfig
@@ -1003,16 +1098,18 @@ var file_console_proto_depIdxs = []int32{
 	4,  // 2: plrl.AiConfig.vertexAi:type_name -> plrl.VertexAiConfig
 	5,  // 3: plrl.AiConfig.bedrock:type_name -> plrl.BedrockConfig
 	6,  // 4: plrl.AiConfig.azure:type_name -> plrl.AzureOpenAiConfig
-	11, // 5: plrl.BedrockConfig.deployments:type_name -> plrl.BedrockConfig.DeploymentsEntry
-	12, // 6: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
-	0,  // 7: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
-	10, // 8: plrl.PluralServer.GetObservabilityConfig:input_type -> plrl.ObservabilityConfigRequest
-	7,  // 9: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
-	1,  // 10: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
-	9,  // 11: plrl.PluralServer.GetObservabilityConfig:output_type -> plrl.ObservabilityConfig
-	8,  // 12: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
-	10, // [10:13] is the sub-list for method output_type
-	7,  // [7:10] is the sub-list for method input_type
+	13, // 5: plrl.BedrockConfig.deployments:type_name -> plrl.BedrockConfig.DeploymentsEntry
+	14, // 6: plrl.AzureOpenAiConfig.deployments:type_name -> plrl.AzureOpenAiConfig.DeploymentsEntry
+	10, // 7: plrl.PluralServer.MeterMetrics:input_type -> plrl.MeterMetricsRequest
+	0,  // 8: plrl.PluralServer.GetAiConfig:input_type -> plrl.AiConfigRequest
+	12, // 9: plrl.PluralServer.GetObservabilityConfig:input_type -> plrl.ObservabilityConfigRequest
+	7,  // 10: plrl.PluralServer.ProxyAuthentication:input_type -> plrl.ProxyAuthenticationRequest
+	11, // 11: plrl.PluralServer.MeterMetrics:output_type -> plrl.MeterMetricsResponse
+	1,  // 12: plrl.PluralServer.GetAiConfig:output_type -> plrl.AiConfig
+	9,  // 13: plrl.PluralServer.GetObservabilityConfig:output_type -> plrl.ObservabilityConfig
+	8,  // 14: plrl.PluralServer.ProxyAuthentication:output_type -> plrl.ProxyAuthenticationResponse
+	11, // [11:15] is the sub-list for method output_type
+	7,  // [7:11] is the sub-list for method input_type
 	7,  // [7:7] is the sub-list for extension type_name
 	7,  // [7:7] is the sub-list for extension extendee
 	0,  // [0:7] is the sub-list for field type_name
@@ -1035,7 +1132,7 @@ func file_console_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_console_proto_rawDesc), len(file_console_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

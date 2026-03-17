@@ -54,6 +54,10 @@ func (s *server) GetAiConfig(context.Context, *pb.AiConfigRequest) (*pb.AiConfig
 	return &pb.AiConfig{Enabled: false}, nil
 }
 
+func (s *server) MeterMetrics(context.Context, *pb.MeterMetricsRequest) (*pb.MeterMetricsResponse, error) {
+	return &pb.MeterMetricsResponse{Success: true}, nil
+}
+
 func (s *server) ProxyAuthentication(context.Context, *pb.ProxyAuthenticationRequest) (*pb.ProxyAuthenticationResponse, error) {
 	return &pb.ProxyAuthenticationResponse{Authenticated: true}, nil
 }

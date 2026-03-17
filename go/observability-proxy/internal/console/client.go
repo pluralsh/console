@@ -14,6 +14,7 @@ import (
 // Client fetches observability configuration from Console.
 type Client interface {
 	GetObservabilityConfig(ctx context.Context) (*pb.ObservabilityConfig, error)
+	MeterMetrics(ctx context.Context, bytes int64) error
 	Close() error
 }
 
@@ -60,4 +61,19 @@ func (c *grpcClient) Close() error {
 	}
 
 	return c.conn.Close()
+}
+
+func (c *grpcClient) MeterMetrics(ctx context.Context, bytes int64) error {
+	reqCtx, cancel := context.WithTimeout(ctx, c.timeout)
+	defer cancel()
+
+	resp, err := c.client.MeterMetrics(reqCtx, &pb.MeterMetricsRequest{Bytes: bytes})
+	if err != nil {
+		return fmt.Errorf("meter metrics: %w", err)
+	}
+	if resp == nil || !resp.GetSuccess() {
+		return fmt.Errorf("meter metrics: unsuccessful response")
+	}
+
+	return nil
 }

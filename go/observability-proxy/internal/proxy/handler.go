@@ -3,6 +3,7 @@ package proxy
 import (
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -18,15 +19,20 @@ import (
 type Handler struct {
 	configProvider console.ConfigProvider
 	transport      *http.Transport
+	recordBytes    func(int64)
 }
 
-func NewHandler(provider console.ConfigProvider, upstreamTimeout time.Duration) *Handler {
+func NewHandler(provider console.ConfigProvider, upstreamTimeout time.Duration, recordBytes func(int64)) *Handler {
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.ResponseHeaderTimeout = upstreamTimeout
+	if recordBytes == nil {
+		recordBytes = func(int64) {}
+	}
 
 	return &Handler{
 		configProvider: provider,
 		transport:      transport,
+		recordBytes:    recordBytes,
 	}
 }
 
@@ -148,5 +154,31 @@ func (h *Handler) forward(w http.ResponseWriter, r *http.Request, target *url.UR
 		},
 	}
 
+	if r.ContentLength > 0 {
+		h.recordBytes(r.ContentLength)
+	} else if r.Body != nil {
+		r.Body = &countingReadCloser{
+			readCloser: r.Body,
+			onRead:     h.recordBytes,
+		}
+	}
+
 	proxy.ServeHTTP(w, r)
+}
+
+type countingReadCloser struct {
+	readCloser io.ReadCloser
+	onRead     func(int64)
+}
+
+func (c *countingReadCloser) Read(p []byte) (int, error) {
+	n, err := c.readCloser.Read(p)
+	if n > 0 {
+		c.onRead(int64(n))
+	}
+	return n, err
+}
+
+func (c *countingReadCloser) Close() error {
+	return c.readCloser.Close()
 }

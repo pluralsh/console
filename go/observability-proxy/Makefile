@@ -54,7 +54,3 @@ docker-compose: ## run observability proxy stack with prometheus remote writer a
 		--build \
 		--force-recreate \
     	--remove-orphans
-
-.PHONY: down-docker
-down-docker: ## stop local integration docker compose environment
-	docker compose -f docker-compose.yml down --remove-orphans

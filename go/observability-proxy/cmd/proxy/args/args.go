@@ -16,6 +16,7 @@ const (
 	defaultConfigTTL       = 60 * time.Second
 	defaultGRPCTimeout     = 10 * time.Second
 	defaultUpstreamTimeout = 30 * time.Second
+	defaultMeterInterval   = 30 * time.Second
 )
 
 const (
@@ -24,6 +25,7 @@ const (
 	envConfigTTL       = "OBS_PROXY_CONFIG_TTL"
 	envGRPCTimeout     = "OBS_PROXY_GRPC_TIMEOUT"
 	envUpstreamTimeout = "OBS_PROXY_UPSTREAM_TIMEOUT"
+	envMeterInterval   = "OBS_PROXY_METER_INTERVAL"
 )
 
 var (
@@ -32,6 +34,7 @@ var (
 	argConfigTTL       = flag.Duration("config-ttl", envDurationOrDefault(envConfigTTL, defaultConfigTTL), "Config cache TTL")
 	argGRPCTimeout     = flag.Duration("grpc-timeout", envDurationOrDefault(envGRPCTimeout, defaultGRPCTimeout), "Console gRPC timeout")
 	argUpstreamTimeout = flag.Duration("upstream-timeout", envDurationOrDefault(envUpstreamTimeout, defaultUpstreamTimeout), "Upstream request timeout")
+	argMeterInterval   = flag.Duration("meter-interval", envDurationOrDefault(envMeterInterval, defaultMeterInterval), "Interval for metering request bytes to Console")
 )
 
 func Init() {
@@ -74,6 +77,13 @@ func UpstreamTimeout() time.Duration {
 		return defaultUpstreamTimeout
 	}
 	return *argUpstreamTimeout
+}
+
+func MeterInterval() time.Duration {
+	if *argMeterInterval <= 0 {
+		return defaultMeterInterval
+	}
+	return *argMeterInterval
 }
 
 func envOrDefault(key, fallback string) string {

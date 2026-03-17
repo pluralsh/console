@@ -19,6 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
+	PluralServer_MeterMetrics_FullMethodName           = "/plrl.PluralServer/MeterMetrics"
 	PluralServer_GetAiConfig_FullMethodName            = "/plrl.PluralServer/GetAiConfig"
 	PluralServer_GetObservabilityConfig_FullMethodName = "/plrl.PluralServer/GetObservabilityConfig"
 	PluralServer_ProxyAuthentication_FullMethodName    = "/plrl.PluralServer/ProxyAuthentication"
@@ -30,6 +31,7 @@ const (
 //
 // The AI configuration service definition.
 type PluralServerClient interface {
+	MeterMetrics(ctx context.Context, in *MeterMetricsRequest, opts ...grpc.CallOption) (*MeterMetricsResponse, error)
 	GetAiConfig(ctx context.Context, in *AiConfigRequest, opts ...grpc.CallOption) (*AiConfig, error)
 	GetObservabilityConfig(ctx context.Context, in *ObservabilityConfigRequest, opts ...grpc.CallOption) (*ObservabilityConfig, error)
 	ProxyAuthentication(ctx context.Context, in *ProxyAuthenticationRequest, opts ...grpc.CallOption) (*ProxyAuthenticationResponse, error)
@@ -41,6 +43,16 @@ type pluralServerClient struct {
 
 func NewPluralServerClient(cc grpc.ClientConnInterface) PluralServerClient {
 	return &pluralServerClient{cc}
+}
+
+func (c *pluralServerClient) MeterMetrics(ctx context.Context, in *MeterMetricsRequest, opts ...grpc.CallOption) (*MeterMetricsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(MeterMetricsResponse)
+	err := c.cc.Invoke(ctx, PluralServer_MeterMetrics_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *pluralServerClient) GetAiConfig(ctx context.Context, in *AiConfigRequest, opts ...grpc.CallOption) (*AiConfig, error) {
@@ -79,6 +91,7 @@ func (c *pluralServerClient) ProxyAuthentication(ctx context.Context, in *ProxyA
 //
 // The AI configuration service definition.
 type PluralServerServer interface {
+	MeterMetrics(context.Context, *MeterMetricsRequest) (*MeterMetricsResponse, error)
 	GetAiConfig(context.Context, *AiConfigRequest) (*AiConfig, error)
 	GetObservabilityConfig(context.Context, *ObservabilityConfigRequest) (*ObservabilityConfig, error)
 	ProxyAuthentication(context.Context, *ProxyAuthenticationRequest) (*ProxyAuthenticationResponse, error)
@@ -92,6 +105,9 @@ type PluralServerServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPluralServerServer struct{}
 
+func (UnimplementedPluralServerServer) MeterMetrics(context.Context, *MeterMetricsRequest) (*MeterMetricsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method MeterMetrics not implemented")
+}
 func (UnimplementedPluralServerServer) GetAiConfig(context.Context, *AiConfigRequest) (*AiConfig, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAiConfig not implemented")
 }
@@ -120,6 +136,24 @@ func RegisterPluralServerServer(s grpc.ServiceRegistrar, srv PluralServerServer)
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&PluralServer_ServiceDesc, srv)
+}
+
+func _PluralServer_MeterMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MeterMetricsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PluralServerServer).MeterMetrics(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PluralServer_MeterMetrics_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PluralServerServer).MeterMetrics(ctx, req.(*MeterMetricsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _PluralServer_GetAiConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -183,6 +217,10 @@ var PluralServer_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "plrl.PluralServer",
 	HandlerType: (*PluralServerServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "MeterMetrics",
+			Handler:    _PluralServer_MeterMetrics_Handler,
+		},
 		{
 			MethodName: "GetAiConfig",
 			Handler:    _PluralServer_GetAiConfig_Handler,
