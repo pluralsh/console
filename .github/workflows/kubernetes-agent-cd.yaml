@@ -11,7 +11,8 @@ on:
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
-  REGISTRY_IMAGE: pluralsh/kubernetes-agent
+  REGISTRY_IMAGE: ghcr.io/pluralsh/kubernetes-agent
+  DOCKER_METADATA_PR_HEAD_SHA: 'true'
 jobs:
   test:
     name: Unit test
@@ -58,9 +59,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: |
-            ghcr.io/${{ env.REGISTRY_IMAGE }}
-            docker.io/${{ env.REGISTRY_IMAGE }}
+          images: ${{ env.REGISTRY_IMAGE }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -136,8 +135,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/${{ env.REGISTRY_IMAGE }}
-            docker.io/${{ env.REGISTRY_IMAGE }}
+            ghcr.io/pluralsh/kubernetes-agent
+            docker.io/pluralsh/kubernetes-agent
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest
