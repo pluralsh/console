@@ -43,6 +43,22 @@ spec:
             port:
               name: nexus-http
       {{- end }}
+      {{- if .Values.observabilityProxy.enabled }}
+      - path: /ext/v1/ingest
+        pathType: Prefix
+        backend:
+          service:
+            name: console-observability-proxy
+            port:
+              name: http
+      - path: /ext/v1/query
+        pathType: Prefix
+        backend:
+          service:
+            name: console-observability-proxy
+            port:
+              name: http
+      {{- end }}
       - path: /
         pathType: Prefix
         backend:

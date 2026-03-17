@@ -12,6 +12,7 @@ use (
 	./kubernetes-agent/api // github.com/pluralsh/console/go/kubernetes-agent/api
 	./kubernetes-agent/kas // github.com/pluralsh/console/go/kubernetes-agent/kas
 	./nexus // github.com/pluralsh/console/go/nexus
+	./observability-proxy // github.com/pluralsh/console/go/observability-proxy
 	./oci-auth // github.com/pluralsh/console/go/oci-auth
 	./polly // github.com/pluralsh/console/go/polly
 	./sign

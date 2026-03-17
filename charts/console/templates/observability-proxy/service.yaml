@@ -1,0 +1,20 @@
+{{- if .Values.observabilityProxy.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: console-observability-proxy
+  labels:
+{{ include "console.labels" . | indent 4 }}
+    app.kubernetes.io/component: observability-proxy
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 8080
+    targetPort: http
+    protocol: TCP
+  selector:
+    app.kubernetes.io/name: console
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: observability-proxy
+{{- end }}

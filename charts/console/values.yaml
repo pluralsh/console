@@ -169,6 +169,34 @@ aiProxy:
     observability:
       logLevel: info
 
+observabilityProxy:
+  enabled: false
+  replicaCount: 2
+  listenAddr: ":8080"
+  consoleGRPCEndpoint: "console:50051"
+  configTTL: "60s"
+  grpcTimeout: "10s"
+  upstreamTimeout: "30s"
+  queryRPS: 10
+  queryBurst: 10
+  image:
+    repository: observability-proxy
+    tag: ~
+    pullPolicy: IfNotPresent
+    extraArgs: []
+  resources: {}
+  podLabels: {}
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ~
+
 # initContainers is used to create a list of init containers for your console deployment
 initContainers: []
 

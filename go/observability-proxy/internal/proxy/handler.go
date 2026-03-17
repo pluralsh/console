@@ -1,0 +1,173 @@
+package proxy
+
+import (
+	"context"
+	"errors"
+	"net"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"strings"
+	"time"
+
+	"github.com/pluralsh/console/go/observability-proxy/internal/console"
+	"github.com/pluralsh/console/go/observability-proxy/internal/logging"
+	"github.com/pluralsh/console/go/observability-proxy/internal/ratelimit"
+	"k8s.io/klog/v2"
+)
+
+// Handler serves observability ingest and query proxy endpoints.
+type Handler struct {
+	configProvider console.ConfigProvider
+	queryLimiter   *ratelimit.IPLimiter
+	transport      *http.Transport
+}
+
+func NewHandler(provider console.ConfigProvider, upstreamTimeout time.Duration, queryLimiter *ratelimit.IPLimiter) *Handler {
+	transport := http.DefaultTransport.(*http.Transport).Clone()
+	transport.ResponseHeaderTimeout = upstreamTimeout
+
+	return &Handler{
+		configProvider: provider,
+		queryLimiter:   queryLimiter,
+		transport:      transport,
+	}
+}
+
+func (h *Handler) Register(mux *http.ServeMux) {
+	klog.V(logging.LevelInfo).Infof("registering observability proxy routes")
+	mux.HandleFunc("/ext/v1/ingest/prometheus", h.prometheusIngest)
+	mux.HandleFunc("/ext/v1/ingest/elastic", h.elasticIngest)
+	mux.HandleFunc("/ext/v1/ingest/elastic/", h.elasticIngest)
+	mux.HandleFunc("/ext/v1/query/prometheus", h.prometheusQuery)
+	mux.HandleFunc("/ext/v1/query/prometheus/", h.prometheusQuery)
+}
+
+func (h *Handler) prometheusIngest(w http.ResponseWriter, r *http.Request) {
+	klog.V(logging.LevelVerbose).Infof("handling prometheus ingest request method=%s path=%s", r.Method, r.URL.Path)
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	cfg, err := h.configProvider.GetConfig(r.Context())
+	if err != nil {
+		http.Error(w, "observability config unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	target, err := BuildPrometheusIngestTarget(cfg.PrometheusHost)
+	if err != nil {
+		klog.Errorf("invalid prometheus ingest target: %v", err)
+		http.Error(w, "prometheus ingest target unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	h.forward(w, r, target)
+}
+
+func (h *Handler) elasticIngest(w http.ResponseWriter, r *http.Request) {
+	klog.V(logging.LevelVerbose).Infof("handling elastic ingest request method=%s path=%s", r.Method, r.URL.Path)
+	suffix := strings.TrimPrefix(r.URL.Path, "/ext/v1/ingest/elastic")
+	if suffix == "" {
+		suffix = "/"
+	}
+
+	allowed := map[string]string{
+		"GET /":         "/",
+		"GET /_license": "/_license",
+		"POST /_bulk":   "/_bulk",
+	}
+
+	mappedSuffix, ok := allowed[r.Method+" "+suffix]
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	cfg, err := h.configProvider.GetConfig(r.Context())
+	if err != nil {
+		http.Error(w, "observability config unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	target, err := BuildElasticTarget(cfg.ElasticHost, mappedSuffix)
+	if err != nil {
+		klog.Errorf("invalid elastic target: %v", err)
+		http.Error(w, "elastic target unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	h.forward(w, r, target)
+}
+
+func (h *Handler) prometheusQuery(w http.ResponseWriter, r *http.Request) {
+	ip := clientIP(r)
+	if !h.queryLimiter.Allow(ip) {
+		klog.V(logging.LevelDebug).Infof("rate limited prometheus query method=%s path=%s ip=%s", r.Method, r.URL.Path, ip)
+		http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
+		return
+	}
+	klog.V(logging.LevelVerbose).Infof("handling prometheus query method=%s path=%s ip=%s", r.Method, r.URL.Path, ip)
+
+	cfg, err := h.configProvider.GetConfig(r.Context())
+	if err != nil {
+		http.Error(w, "observability config unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	target, err := BuildPrometheusQueryTarget(cfg.PrometheusHost, r.URL.Path)
+	if err != nil {
+		klog.Errorf("invalid prometheus query target: %v", err)
+		http.Error(w, "prometheus query target unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	h.forward(w, r, target)
+}
+
+func (h *Handler) forward(w http.ResponseWriter, r *http.Request, target *url.URL) {
+	klog.V(logging.LevelDebug).Infof(
+		"forwarding request method=%s path=%s upstream=%s://%s%s",
+		r.Method,
+		r.URL.Path,
+		target.Scheme,
+		target.Host,
+		target.Path,
+	)
+	proxy := &httputil.ReverseProxy{
+		Transport: h.transport,
+		Rewrite: func(preq *httputil.ProxyRequest) {
+			preq.SetURL(target)
+			preq.Out.Host = target.Host
+			preq.SetXForwarded()
+			klog.V(logging.LevelTrace).Infof("rewritten request method=%s out_url=%s", preq.Out.Method, preq.Out.URL.String())
+		},
+		ErrorHandler: func(writer http.ResponseWriter, _ *http.Request, err error) {
+			klog.Errorf("proxy upstream error: %v", err)
+			status := http.StatusBadGateway
+			if errors.Is(err, context.DeadlineExceeded) {
+				status = http.StatusGatewayTimeout
+			}
+			http.Error(writer, "upstream request failed", status)
+		},
+	}
+
+	proxy.ServeHTTP(w, r)
+}
+
+func clientIP(r *http.Request) string {
+	if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
+		first := strings.TrimSpace(strings.Split(forwarded, ",")[0])
+		if first != "" {
+			return first
+		}
+	}
+
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+
+	return host
+}

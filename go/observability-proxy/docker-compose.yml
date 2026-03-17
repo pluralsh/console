@@ -1,0 +1,51 @@
+services:
+  mock-console:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PACKAGE: ./cmd/mock-console
+    environment:
+      MOCK_PROMETHEUS_HOST: http://mock-prometheus:19090/select/default/prometheus
+      MOCK_ELASTIC_HOST: http://mock-elastic:19200
+
+  mock-prometheus:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PACKAGE: ./cmd/mock-upstream
+    environment:
+      MOCK_UPSTREAM_ADDR: :19090
+      MOCK_UPSTREAM_NAME: prometheus
+
+  mock-elastic:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PACKAGE: ./cmd/mock-upstream
+    environment:
+      MOCK_UPSTREAM_ADDR: :19200
+      MOCK_UPSTREAM_NAME: elastic
+
+  observability-proxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PACKAGE: ./cmd/proxy
+    depends_on:
+      - mock-console
+      - mock-prometheus
+      - mock-elastic
+    command:
+      - --listen-addr=:8080
+      - --console-grpc-endpoint=mock-console:50051
+      - --config-ttl=5s
+      - --grpc-timeout=5s
+      - --upstream-timeout=10s
+      - --query-rps=10
+      - --query-burst=10
+    ports:
+      - "8080:8080"
