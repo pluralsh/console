@@ -13,7 +13,6 @@ import (
 	"github.com/pluralsh/console/go/observability-proxy/internal/console"
 	"github.com/pluralsh/console/go/observability-proxy/internal/logging"
 	"github.com/pluralsh/console/go/observability-proxy/internal/proxy"
-	"github.com/pluralsh/console/go/observability-proxy/internal/ratelimit"
 	"k8s.io/klog/v2"
 )
 
