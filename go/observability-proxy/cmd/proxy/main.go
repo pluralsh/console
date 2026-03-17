@@ -52,8 +52,7 @@ func main() {
 		klog.V(logging.LevelInfo).Infof("initial observability config loaded successfully")
 	}
 
-	limiter := ratelimit.NewIPLimiter(args.QueryRPS(), args.QueryBurst())
-	h := proxy.NewHandler(provider, args.UpstreamTimeout(), limiter)
+	h := proxy.NewHandler(provider, args.UpstreamTimeout())
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {

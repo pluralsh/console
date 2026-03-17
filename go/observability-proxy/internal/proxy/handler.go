@@ -3,7 +3,6 @@ package proxy
 import (
 	"context"
 	"errors"
-	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -12,24 +11,21 @@ import (
 
 	"github.com/pluralsh/console/go/observability-proxy/internal/console"
 	"github.com/pluralsh/console/go/observability-proxy/internal/logging"
-	"github.com/pluralsh/console/go/observability-proxy/internal/ratelimit"
 	"k8s.io/klog/v2"
 )
 
 // Handler serves observability ingest and query proxy endpoints.
 type Handler struct {
 	configProvider console.ConfigProvider
-	queryLimiter   *ratelimit.IPLimiter
 	transport      *http.Transport
 }
 
-func NewHandler(provider console.ConfigProvider, upstreamTimeout time.Duration, queryLimiter *ratelimit.IPLimiter) *Handler {
+func NewHandler(provider console.ConfigProvider, upstreamTimeout time.Duration) *Handler {
 	transport := http.DefaultTransport.(*http.Transport).Clone()
 	transport.ResponseHeaderTimeout = upstreamTimeout
 
 	return &Handler{
 		configProvider: provider,
-		queryLimiter:   queryLimiter,
 		transport:      transport,
 	}
 }
@@ -102,13 +98,7 @@ func (h *Handler) elasticIngest(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) prometheusQuery(w http.ResponseWriter, r *http.Request) {
-	ip := clientIP(r)
-	if !h.queryLimiter.Allow(ip) {
-		klog.V(logging.LevelDebug).Infof("rate limited prometheus query method=%s path=%s ip=%s", r.Method, r.URL.Path, ip)
-		http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)
-		return
-	}
-	klog.V(logging.LevelVerbose).Infof("handling prometheus query method=%s path=%s ip=%s", r.Method, r.URL.Path, ip)
+	klog.V(logging.LevelVerbose).Infof("handling prometheus query method=%s path=%s", r.Method, r.URL.Path)
 
 	cfg, err := h.configProvider.GetConfig(r.Context())
 	if err != nil {
@@ -154,20 +144,4 @@ func (h *Handler) forward(w http.ResponseWriter, r *http.Request, target *url.UR
 	}
 
 	proxy.ServeHTTP(w, r)
-}
-
-func clientIP(r *http.Request) string {
-	if forwarded := r.Header.Get("X-Forwarded-For"); forwarded != "" {
-		first := strings.TrimSpace(strings.Split(forwarded, ",")[0])
-		if first != "" {
-			return first
-		}
-	}
-
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil {
-		return r.RemoteAddr
-	}
-
-	return host
 }
