@@ -4,6 +4,11 @@ defmodule Console.GRPC.Server do
   alias Console.Schema.{DeploymentSettings, User, Cluster}
   alias Console.Schema.DeploymentSettings.AI
 
+  def meter_metrics(%Plrl.MeterMetricsRequest{bytes: bytes}, _) do
+    Console.Prom.Meter.incr(max(bytes, 0))
+    %Plrl.MeterMetricsResponse{success: true}
+  end
+
   def get_ai_config(_req, _) do
     Settings.fetch()
     |> to_pb()
