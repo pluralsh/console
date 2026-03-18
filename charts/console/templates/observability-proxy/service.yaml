@@ -15,7 +15,6 @@ spec:
     targetPort: http
     protocol: TCP
   selector:
-    app.kubernetes.io/name: console
+    app.kubernetes.io/name: observability-proxy
     app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/component: observability-proxy
 {{- end }}
