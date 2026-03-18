@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/golang/groupcache/singleflight"
 	"github.com/pluralsh/console/go/observability-proxy/internal/logging"
 	pb "github.com/pluralsh/console/go/observability-proxy/internal/proto"
+	"golang.org/x/sync/singleflight"
 	"k8s.io/klog/v2"
 )
 
@@ -60,7 +60,7 @@ func (p *CachingProvider) GetConfig(_ context.Context) (ObservabilityConfig, err
 	p.mu.RUnlock()
 
 	// singleflight ensures that only one refresh is in flight at a time
-	val, err := p.sfGroup.Do("refresh", func() (interface{}, error) {
+	val, err, _ := p.sfGroup.Do("refresh", func() (interface{}, error) {
 		err := p.refresh(context.Background())
 		if err != nil {
 			return nil, err
