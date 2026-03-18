@@ -1,100 +1,92 @@
 package http
 
 import (
-	"bytes"
 	"compress/gzip"
+	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"time"
 
-	"github.com/cenkalti/backoff"
+	"github.com/hashicorp/go-retryablehttp"
 )
 
-type authedTransport struct {
-	token      string
-	wrapped    http.RoundTripper
-	newBackoff func() backoff.BackOff
+type tokenTransport struct {
+	token   string
+	wrapped http.RoundTripper
 }
 
-func defaultBackoff() backoff.BackOff {
-	b := backoff.NewExponentialBackOff()
-	b.InitialInterval = 500 * time.Millisecond
-	b.MaxInterval = 10 * time.Second
-	b.MaxElapsedTime = 60 * time.Second
-	return b
-}
+func (t *tokenTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	// Clone so we never mutate the caller's request.
+	attempt := req.Clone(req.Context())
+	attempt.Header.Set("Authorization", "Token "+t.token)
+	attempt.Header.Set("Accept-Encoding", "gzip")
 
-func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	// Buffer the body for the retry.
-	var bodyBytes []byte
-	if req.Body != nil {
-		var err error
-		bodyBytes, err = io.ReadAll(req.Body)
+	resp, err := t.wrapped.RoundTrip(attempt)
+	if err != nil {
+		return nil, err
+	}
+
+	// Transparently decompress gzip responses.
+	if resp.Header.Get("Content-Encoding") == "gzip" {
+		gr, err := gzip.NewReader(resp.Body)
 		if err != nil {
+			_ = resp.Body.Close()
 			return nil, err
 		}
-		_ = req.Body.Close()
-	}
-
-	newBackoff := t.newBackoff
-	if newBackoff == nil {
-		newBackoff = defaultBackoff
-	}
-
-	var resp *http.Response
-
-	operation := func() error {
-		// Clone the request so we never mutate the caller's original.
-		attempt := req.Clone(req.Context())
-
-		// Reset the body for each attempt.
-		if bodyBytes != nil {
-			attempt.Body = io.NopCloser(bytes.NewReader(bodyBytes))
-		}
-
-		// Set headers on the clone only.
-		attempt.Header.Set("Authorization", "Token "+t.token)
-		attempt.Header.Set("Accept-Encoding", "gzip")
-
-		var err error
-		resp, err = t.wrapped.RoundTrip(attempt)
-		if err != nil {
-			// Retry on transport-level errors.
-			return err
-		}
-
-		// Retry on 5xx server errors only for idempotent methods.
-		if resp.StatusCode >= 500 {
-			statusCode := resp.StatusCode
-			_ = resp.Body.Close()
-			resp = nil
-			if req.Method != http.MethodGet && req.Method != http.MethodHead {
-				return backoff.Permanent(fmt.Errorf("server returned status %d", statusCode))
-			}
-			return fmt.Errorf("server returned status %d", statusCode)
-		}
-
-		// If the response is gzipped, wrap it with a gzip reader.
-		if resp.Header.Get("Content-Encoding") == "gzip" {
-			resp.Body, err = gzip.NewReader(resp.Body)
-			if err != nil {
-				return backoff.Permanent(err)
-			}
-			// Remove the header so downstream code doesn't try to decompress again.
-			resp.Header.Del("Content-Encoding")
-		}
-
-		return nil
-	}
-
-	if err := backoff.Retry(operation, newBackoff()); err != nil {
-		return nil, err
+		resp.Body = gr
+		resp.Header.Del("Content-Encoding")
 	}
 
 	return resp, nil
 }
 
+// checkRetry mirrors the original retry policy:
+//   - transport errors → retry
+//   - 5xx + GET/HEAD   → retry (returns error on exhaustion)
+//   - 5xx + other      → immediate permanent error
+//   - everything else  → no retry
+func checkRetry(ctx context.Context, resp *http.Response, err error) (bool, error) {
+	if ctx.Err() != nil {
+		return false, ctx.Err()
+	}
+
+	if err != nil {
+		return true, err
+	}
+
+	if resp.StatusCode >= 500 {
+		statusErr := fmt.Errorf("server returned status %d", resp.StatusCode)
+		if resp.Request == nil || (resp.Request.Method != http.MethodGet && resp.Request.Method != http.MethodHead) {
+			return false, statusErr // non-idempotent: fail immediately
+		}
+		return true, statusErr // idempotent: keep retrying
+	}
+
+	return false, nil
+}
+
+// errorHandler ensures a nil response is returned alongside any error so
+// callers never have to deal with a (non-nil resp, non-nil err) pair.
+func errorHandler(resp *http.Response, err error, _ int) (*http.Response, error) {
+	if resp != nil {
+		_ = resp.Body.Close()
+	}
+	return nil, err
+}
+
+// newRetryableClient is the testable constructor; tests pass small wait values.
+func newRetryableClient(transport http.RoundTripper, retryMax int, retryWaitMin, retryWaitMax time.Duration) *http.Client {
+	rc := retryablehttp.NewClient()
+	rc.RetryMax = retryMax
+	rc.RetryWaitMin = retryWaitMin
+	rc.RetryWaitMax = retryWaitMax
+	rc.CheckRetry = checkRetry
+	rc.ErrorHandler = errorHandler
+	rc.HTTPClient = &http.Client{Transport: transport}
+	return rc.StandardClient()
+}
+
 func NewHttpClient(token string) *http.Client {
-	return &http.Client{Transport: &authedTransport{token: token, wrapped: http.DefaultTransport}}
+	transport := &tokenTransport{token: token, wrapped: http.DefaultTransport}
+	return newRetryableClient(transport, 10, 500*time.Millisecond, 10*time.Second)
 }
