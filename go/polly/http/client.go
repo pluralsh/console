@@ -82,11 +82,12 @@ func newRetryableClient(transport http.RoundTripper, retryMax int, retryWaitMin,
 	rc.RetryWaitMax = retryWaitMax
 	rc.CheckRetry = checkRetry
 	rc.ErrorHandler = errorHandler
+	rc.Logger = nil // disable logging
 	rc.HTTPClient = &http.Client{Transport: transport}
 	return rc.StandardClient()
 }
 
 func NewHttpClient(token string) *http.Client {
 	transport := &tokenTransport{token: token, wrapped: http.DefaultTransport}
-	return newRetryableClient(transport, 10, 500*time.Millisecond, 10*time.Second)
+	return newRetryableClient(transport, 3, 1*time.Second, 10*time.Second)
 }
