@@ -24,7 +24,7 @@ spec:
   {{- end }}
   {{- if .Values.observabilityProxy.enabled }}
   - port: 50051
-    targetPort: 50051
+    targetPort: grpc
     protocol: TCP
     name: grpc
   {{- end }}

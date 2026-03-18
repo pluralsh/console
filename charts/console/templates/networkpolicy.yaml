@@ -1,0 +1,35 @@
+{{- if .Values.networkPolicy.consoleInternalPorts.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: console-internal-ports
+  labels:
+{{ include "console.labels" . | indent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: console
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - ports:
+    - protocol: TCP
+      port: {{ .Values.service.port }}
+    - protocol: TCP
+      port: 9090
+    {{- if .Values.aiProxy.enabled }}
+    - protocol: TCP
+      port: 8080
+    {{- end }}
+  - from:
+    - podSelector:
+        matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: Exists
+    ports:
+    - protocol: TCP
+      port: 4369
+    - protocol: TCP
+      port: 50051
+{{- end }}

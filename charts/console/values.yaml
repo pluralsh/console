@@ -1038,3 +1038,10 @@ kas:
       suffix: ""
       annotationKey: external-dns.alpha.kubernetes.io/
       additionalAnnotations: { }
+
+# networkPolicy configures network policies for console pods.
+networkPolicy:
+  # consoleInternalPorts protects unauthenticated console internal ports.
+  consoleInternalPorts:
+    # enabled controls creation of the console internal ports NetworkPolicy.
+    enabled: true
