@@ -3,6 +3,7 @@ package proxy
 import (
 	"context"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -142,6 +143,46 @@ func TestPrometheusIngestCountsRequestBytes(t *testing.T) {
 	}
 	if addCalls.Load() != 1 {
 		t.Fatalf("unexpected meter call count: got %d want 1", addCalls.Load())
+	}
+}
+
+func TestPrometheusIngestDoesNotCountRequestBytesWhenUpstreamUnavailable(t *testing.T) {
+	l, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("failed to allocate listener: %v", err)
+	}
+	addr := l.Addr().String()
+	_ = l.Close()
+
+	var counted atomic.Int64
+	var addCalls atomic.Int64
+	provider := staticProvider{
+		cfg: console.ObservabilityConfig{
+			PrometheusHost: "http://" + addr + "/select/t/prometheus",
+			ElasticHost:    "http://example.com",
+		},
+	}
+	handler := NewHandler(provider, 5*time.Second, func(n int64) {
+		addCalls.Add(1)
+		counted.Add(n)
+	})
+
+	mux := http.NewServeMux()
+	handler.Register(mux)
+
+	body := "abc123"
+	req := httptest.NewRequest(http.MethodPost, "/ext/v1/ingest/prometheus", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadGateway {
+		t.Fatalf("unexpected status: got %d want %d", rec.Code, http.StatusBadGateway)
+	}
+	if counted.Load() != 0 {
+		t.Fatalf("unexpected counted bytes: got %d want 0", counted.Load())
+	}
+	if addCalls.Load() != 0 {
+		t.Fatalf("unexpected meter call count: got %d want 0", addCalls.Load())
 	}
 }
 

@@ -164,9 +164,7 @@ func (h *Handler) forward(w http.ResponseWriter, r *http.Request, target *url.UR
 		},
 	}
 
-	if r.ContentLength > 0 {
-		h.recordBytes(r.ContentLength)
-	} else if r.Body != nil {
+	if r.Body != nil {
 		r.Body = &countingReadCloser{
 			readCloser: r.Body,
 			onRead:     h.recordBytes,
