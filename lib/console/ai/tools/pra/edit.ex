@@ -27,6 +27,7 @@ defmodule Console.AI.Tools.Pra.Edit do
 
   def implement(_, %__MODULE__{dir: dir, path: path, previous: previous, replacement: replacement}) do
     with {:ok, path} <- relpath(dir, path),
-      do: Editor.replace(path, previous, replacement)
+         :ok <- Editor.replace(path, previous, replacement),
+      do: {:ok, "Successfully edited file #{path} with replacement #{replacement} in place of #{previous}"}
   end
 end

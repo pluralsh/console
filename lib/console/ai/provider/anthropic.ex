@@ -35,9 +35,6 @@ defmodule Console.AI.Anthropic do
 
   def proxy(_), do: {:error, "anthropic proxy not implemented"}
 
-  @doc """
-  Generate a openai completion
-  """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = openai, messages, opts) do
     messages
@@ -46,9 +43,6 @@ defmodule Console.AI.Anthropic do
     |> reqllm_result()
   end
 
-  @doc """
-  Calls an openai tool call interface w/ strict mode
-  """
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
   def tool_call(%__MODULE__{} = openai, messages, tools, _opts) do
     messages
@@ -60,7 +54,7 @@ defmodule Console.AI.Anthropic do
 
   def context_window(%__MODULE__{model: model}) do
     case LLMDB.model("anthropic:#{model}") do
-      {:ok, %LLMDB.Model{limits: %{context: context}}} -> context
+      {:ok, %LLMDB.Model{limits: %{context: context}}} when is_integer(context) -> context
       _ -> 256_000
     end
   end

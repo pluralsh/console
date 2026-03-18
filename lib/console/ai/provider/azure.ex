@@ -6,10 +6,7 @@ defmodule Console.AI.Azure do
   import Console.AI.Provider.Base
   alias Console.AI.{Utils, Stream}
 
-  require Logger
-
   @model "gpt-4.1-mini"
-  @tool_model "gpt-4.1-mini"
   @embedding_model "text-embedding-3-large"
 
   defstruct [:azure_token, :access_token, :api_version, :base_url, :model, :tool_model, :embedding_model, :deployments, :stream]
@@ -57,8 +54,10 @@ defmodule Console.AI.Azure do
 
   def embeddings(%__MODULE__{} = az, text) do
     chunked = Utils.chunk(text, 8000)
-    opts = [dimensions: Utils.embedding_dims(), provider_options: provider_options(az, az.embedding_model)]
-    case ReqLLM.embed("azure:#{az.embedding_model}", chunked, opts) do
+    provider_options(az, az.embedding_model)
+    |> Keyword.put(:dimensions, Utils.embedding_dims())
+    |> then(&ReqLLM.embed("azure:#{az.embedding_model}", chunked, &1))
+    |> case do
       {:ok, embeddings} -> {:ok, Enum.zip(chunked, embeddings)}
       error -> error
     end
@@ -66,7 +65,7 @@ defmodule Console.AI.Azure do
 
   def context_window(%__MODULE__{model: model}) do
     case LLMDB.model("azure:#{model}") do
-      {:ok, %LLMDB.Model{limits: %{context: context}}} -> context
+      {:ok, %LLMDB.Model{limits: %{context: context}}} when is_integer(context) -> context
       _ -> 256_000
     end
   end
@@ -74,7 +73,7 @@ defmodule Console.AI.Azure do
   def tools?(), do: true
 
   defp provider_options(%__MODULE__{base_url: base_url, access_token: key} = az, model) do
-    [base_url: noramlize_url(base_url), api_key: key, deployment: deployment(az, model)]
+    [base_url: normalize_url(base_url), api_key: key, deployment: deployment(az, model)]
     |> Enum.filter(fn {_, v} -> not is_nil(v) end)
   end
 
@@ -85,7 +84,5 @@ defmodule Console.AI.Azure do
     end
   end
 
-  defp noramlize_url(url) do
-    String.trim_trailing(url, "/deployments")
-  end
+  defp normalize_url(url), do: String.trim_trailing(url, "/deployments")
 end

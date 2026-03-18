@@ -32,13 +32,16 @@ defmodule Console.AI.Stream do
   end
 
   def publish(c) do
-    %__MODULE__{topic: topic, offset: offset, msg: msg, role: role, index: index} = s = stream()
-    Process.put(@stream, %{s | index: index + 1})
-    Absinthe.Subscription.publish(
-      ConsoleWeb.Endpoint,
-      %{content: c, seq: index + offset, message: msg, role: role, tool: tool()},
-      [ai_stream: topic]
-    )
+    case stream() do
+      %__MODULE__{topic: topic, offset: offset, msg: msg, role: role, index: index} = s ->
+        Process.put(@stream, %{s | index: index + 1})
+        Absinthe.Subscription.publish(
+          ConsoleWeb.Endpoint,
+          %{content: c, seq: index + offset, message: msg, role: role, tool: tool()},
+          [ai_stream: topic]
+        )
+      _ -> {:error, :no_stream_configured}
+    end
   end
 
   def publish(%__MODULE__{topic: topic, offset: offset, msg: msg, role: role}, c, ind)

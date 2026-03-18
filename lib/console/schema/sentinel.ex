@@ -143,7 +143,7 @@ defmodule Console.Schema.Sentinel do
   end
 
   def pollable(query \\ __MODULE__) do
-    from(s in query, where: not is_nil(s.next_run_at) or s.next_run_at < ^DateTime.utc_now())
+    from(s in query, where: not is_nil(s.next_run_at) and s.next_run_at < ^DateTime.utc_now())
   end
 
   def search(query \\ __MODULE__, search) do

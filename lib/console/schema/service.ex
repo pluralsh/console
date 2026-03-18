@@ -193,6 +193,7 @@ defmodule Console.Schema.Service do
     embeds_one :kustomize, Kustomize, on_replace: :update do
       field :path, :string
       field :enable_helm, :boolean, default: false
+      field :envsubst, :boolean, default: false
     end
 
     embeds_one :metadata, Metadata, on_replace: :update do
@@ -497,7 +498,7 @@ defmodule Console.Schema.Service do
 
   def kustomize_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(path enable_helm)a)
+    |> cast(attrs, ~w(path enable_helm envsubst)a)
     |> validate_required(~w(path)a)
   end
 

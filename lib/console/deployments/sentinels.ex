@@ -96,6 +96,15 @@ defmodule Console.Deployments.Sentinels do
   end
 
   @doc """
+  Marks a sentinel as having been run
+  """
+  @spec mark_ran(Sentinel.t) :: sentinel_resp
+  def mark_ran(%Sentinel{} = sentinel) do
+    Sentinel.changeset(sentinel, %{last_run_at: DateTime.utc_now()})
+    |> Repo.update()
+  end
+
+  @doc """
   Runs a sentinel directly
   """
   @spec run_sentinel(Sentinel.t) :: sentinel_run_resp

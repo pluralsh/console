@@ -37,7 +37,7 @@ defmodule Console.AI.Vertex do
     with {:ok, provider_options} <- provider_options(vtx) do
       messages
       |> reqllm_messages()
-      |> generate_text("google-vertex:#{normalize(vtx.model)}", vtx.stream, provider_options: provider_options, tools: tools(opts))
+      |> generate_text("google-vertex:#{normalize(vtx.model)}", vtx.stream, Keyword.put(provider_options, :tools, tools(opts)))
       |> reqllm_result()
     end
   end
@@ -50,7 +50,7 @@ defmodule Console.AI.Vertex do
     with {:ok, provider_options} <- provider_options(vtx) do
       messages
       |> reqllm_messages()
-      |> generate_text("google-vertex:#{normalize(vtx.tool_model)}", vtx.stream, provider_options: provider_options, tools: reqllm_tools(tools), tool_choice: :required)
+      |> generate_text("google-vertex:#{normalize(vtx.tool_model)}", vtx.stream, Keyword.put(provider_options, :tools, reqllm_tools(tools)))
       |> reqllm_result()
       |> tool_calls()
     end
@@ -59,7 +59,7 @@ defmodule Console.AI.Vertex do
   def embeddings(%__MODULE__{} = vtx, text) do
     chunked = Utils.chunk(text, 8000)
     with {:ok, provider_options} <- provider_options(vtx),
-         opts = [dimensions: Utils.embedding_dims(), provider_options: provider_options],
+         opts = Keyword.put(provider_options, :dimensions, Utils.embedding_dims()),
          {:ok, embeddings} <- ReqLLM.embed("google-vertex:#{normalize(vtx.embedding_model)}", chunked, opts) do
       {:ok, Enum.zip(chunked, embeddings)}
     end
@@ -67,7 +67,7 @@ defmodule Console.AI.Vertex do
 
   def context_window(%__MODULE__{model: model}) do
     case LLMDB.model("google-vertex:#{normalize(model)}") do
-      {:ok, %LLMDB.Model{limits: %{context: context}}} -> context
+      {:ok, %LLMDB.Model{limits: %{context: context}}} when is_integer(context) -> context
       _ -> 500_000
     end
   end

@@ -10,6 +10,7 @@ import {
   Flex,
   IconFrame,
   PrIcon,
+  prettifyRepoUrl,
   Sidecar,
   SidecarItem,
 } from '@pluralsh/design-system'
@@ -99,6 +100,16 @@ export function AgentRunSidecar({
                   <RuntimeIcon fullColor />
                   {capitalize(run.runtime.name)}
                 </Flex>
+              </SidecarItem>
+            )}
+            {run.repository && (
+              <SidecarItem heading="Repository">
+                <Body2P
+                  $color="text"
+                  css={TRUNCATE}
+                >
+                  {prettifyRepoUrl(run.repository)}
+                </Body2P>
               </SidecarItem>
             )}
             <SidecarItem heading="Status">

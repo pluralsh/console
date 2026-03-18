@@ -83,7 +83,11 @@ import { ClusterNetwork } from 'components/cd/cluster/ClusterNetwork'
 import { ClusterUpgradePlan } from 'components/cd/cluster/upgrade-plan/ClusterUpgradePlan.tsx'
 import { ServiceAlerts } from 'components/cd/services/service/ServiceAlerts.tsx'
 import { ServiceContexts } from 'components/cd/services/service/ServiceContexts.tsx'
-import { ServiceMetrics } from 'components/cd/services/service/ServiceMetrics.tsx'
+import {
+  ServiceMetrics,
+  ServiceMetricsHeatmap,
+  ServiceMetricsTimeseries,
+} from 'components/cd/services/service/ServiceMetrics.tsx'
 import { ServiceNetwork } from 'components/cd/services/service/ServiceNetwork.tsx'
 import { ServiceScalingRecs } from 'components/cd/services/service/ServiceScalingRecs.tsx'
 import { ServiceHelmSettings } from 'components/cd/services/service/settings/ServiceHelmSettings.tsx'
@@ -542,7 +546,25 @@ export const getServiceDetailsRoutes = (type: 'cd' | 'flow') => (
     <Route
       element={<ServiceMetrics />}
       path="metrics"
-    />
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to="timeseries"
+          />
+        }
+      />
+      <Route
+        element={<ServiceMetricsTimeseries />}
+        path="timeseries"
+      />
+      <Route
+        element={<ServiceMetricsHeatmap />}
+        path="heatmap"
+      />
+    </Route>
     <Route
       element={<ServiceNetwork />}
       path="network"

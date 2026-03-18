@@ -12,11 +12,14 @@ defmodule Console.AI.Bedrock do
 
   @type t :: %__MODULE__{}
 
+  @model "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
+  @embedding_model "cohere.embed-english-v3"
+
   def new(opts) do
     %__MODULE__{
-      model_id: opts.model_id,
-      tool_model_id: opts.tool_model_id,
-      embedding_model: opts.embedding_model,
+      model_id: opts.model_id || @model,
+      tool_model_id: opts.tool_model_id || @model,
+      embedding_model: opts.embedding_model || @embedding_model,
       aws_access_key_id: opts.aws_access_key_id,
       aws_secret_access_key: opts.aws_secret_access_key,
       access_token: opts.access_token,
@@ -34,7 +37,7 @@ defmodule Console.AI.Bedrock do
   def completion(%__MODULE__{} = bedrock, messages, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("bedrock:#{bedrock.model_id}", bedrock.stream, provider_options(bedrock) ++ [tools: tools(opts)])
+    |> generate_text("amazon-bedrock:#{bedrock.model_id}", bedrock.stream, Keyword.put(provider_options(bedrock), :tools, tools(opts)))
     |> reqllm_result()
   end
 
@@ -45,22 +48,24 @@ defmodule Console.AI.Bedrock do
   def tool_call(%__MODULE__{} = bedrock, messages, tools, _opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("bedrock:#{bedrock.tool_model_id}", bedrock.stream, provider_options(bedrock) ++ [tools: reqllm_tools(tools)])
+    |> generate_text("amazon-bedrock:#{bedrock.tool_model_id}", bedrock.stream, Keyword.put(provider_options(bedrock), :tools, reqllm_tools(tools)))
     |> reqllm_result()
     |> tool_calls()
   end
 
   def embeddings(%__MODULE__{} = bedrock, text) do
     chunked = Utils.chunk(text, 8000)
-    opts = [dimensions: Utils.embedding_dims(), provider_options: provider_options(bedrock)]
-    case ReqLLM.embed("bedrock:#{bedrock.embedding_model}", chunked, opts) do
+    provider_options(bedrock)
+    |> Keyword.put(:dimensions, Utils.embedding_dims())
+    |> then(&ReqLLM.embed("amazon-bedrock:#{bedrock.embedding_model}", chunked, &1))
+    |> case do
       {:ok, embeddings} -> {:ok, Enum.zip(chunked, embeddings)}
       error -> error
     end
   end
 
   def context_window(%__MODULE__{model_id: model}) do
-    case LLMDB.model("bedrock:#{model}") do
+    case LLMDB.model("amazon-bedrock:#{model}") do
       {:ok, %LLMDB.Model{limits: %{context: context}}} -> context
       _ -> 500_000
     end
@@ -70,14 +75,16 @@ defmodule Console.AI.Bedrock do
 
   def provider_options(%__MODULE__{region: region, access_token: token} = bedrock) do
     [region: region, access_token: token]
-    |> Enum.concat(aws_auth(bedrock))
+    |> Enum.concat(if is_nil(token), do: aws_auth(bedrock), else: [])
     |> Enum.filter(fn {_, v} -> not is_nil(v) end)
   end
 
-  def aws_auth(%__MODULE__{aws_access_key_id: aid, aws_secret_access_key: sak})
+  defp aws_auth(%__MODULE__{aws_access_key_id: aid, aws_secret_access_key: sak})
     when is_binary(aid) and is_binary(sak), do: [access_key_id: aid, secret_access_key: sak]
-  def aws_auth(%__MODULE__{}) do
+  defp aws_auth(_) do
     ExAws.Config.new("bedrock-runtime")
+    |> Map.take([:access_key_id, :secret_access_key, :security_token])
+    |> Console.move([:security_token], [:session_token])
     |> Map.to_list()
   end
 end

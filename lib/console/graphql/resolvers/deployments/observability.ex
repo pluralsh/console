@@ -105,6 +105,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     end
   end
 
+  def metrics(%Service{} = service, args, _) do
+    {start, stop, step} = prom_args(args)
+    Observability.query(service, start, stop, step)
+  end
+
   def cluster_logs(cluster, %{query: query} = args, _) do
     with_client(:loki, fn ->
       {start, end_ts} = timestamps(args)

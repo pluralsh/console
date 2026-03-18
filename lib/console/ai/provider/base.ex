@@ -11,10 +11,15 @@ defmodule Console.AI.Provider.Base do
   end
 
   def generate_text(messages, model, %Stream{}, opts) do
-    with {:ok, stream} <- ReqLLM.stream_text(model, messages, opts),
+    with {:ok, model} <- model(model),
+         {:ok, stream} <- stream_retrier(model, messages, opts),
       do: StreamResponse.process_stream(stream, on_result: &Stream.publish/1)
   end
-  def generate_text(messages, model, _, opts), do: ReqLLM.generate_text(model, messages, opts)
+
+  def generate_text(messages, model, _, opts) do
+    with {:ok, model} <- model(model),
+      do: ReqLLM.generate_text(model, messages, opts)
+  end
 
   def reqllm_messages(messages) do
     Enum.flat_map(messages, fn
@@ -69,6 +74,21 @@ defmodule Console.AI.Provider.Base do
   def tool_calls({:ok, binary}), do: {:error, "no tool calls in response, got: #{binary}"}
   def tool_calls(err), do: err
 
+  defp model(name) when is_binary(name), do: LLMDB.model(name)
+  defp model(%LLMDB.Model{} = model), do: {:ok, model}
+  defp model(model), do: {:error, "invalid model: #{inspect(model)}"}
+
   defp to_tool(%ToolCall{id: id, function: %{name: name, arguments: args}}),
     do: %Tool{id: id, name: name, arguments: JSON.decode!(args)}
+
+  defp stream_retrier(model, messages, opts, retries \\ 0)
+  defp stream_retrier(model, messages, opts, retries) when retries < 2 do
+    case ReqLLM.stream_text(model, messages, opts) do
+      {:ok, stream} -> {:ok, stream}
+      {:error, %Mint.TransportError{reason: e}} when e in ~w(timeout closed econnrefused)a ->
+        :timer.sleep(10 + :rand.uniform(10))
+        stream_retrier(model, messages, opts, retries + 1)
+      err -> err
+    end
+  end
 end

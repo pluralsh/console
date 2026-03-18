@@ -3296,9 +3296,9 @@ func (t *ScmConnectionFragment) GetUpdatedAt() *string {
 type PrAutomationFragment struct {
 	ID         string  "json:\"id\" graphql:\"id\""
 	Name       string  "json:\"name\" graphql:\"name\""
-	Title      string  "json:\"title\" graphql:\"title\""
+	Title      *string "json:\"title,omitempty\" graphql:\"title\""
 	Addon      *string "json:\"addon,omitempty\" graphql:\"addon\""
-	Message    string  "json:\"message\" graphql:\"message\""
+	Message    *string "json:\"message,omitempty\" graphql:\"message\""
 	Identifier *string "json:\"identifier,omitempty\" graphql:\"identifier\""
 	InsertedAt *string "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
 	UpdatedAt  *string "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
@@ -3316,7 +3316,7 @@ func (t *PrAutomationFragment) GetName() string {
 	}
 	return t.Name
 }
-func (t *PrAutomationFragment) GetTitle() string {
+func (t *PrAutomationFragment) GetTitle() *string {
 	if t == nil {
 		t = &PrAutomationFragment{}
 	}
@@ -3328,7 +3328,7 @@ func (t *PrAutomationFragment) GetAddon() *string {
 	}
 	return t.Addon
 }
-func (t *PrAutomationFragment) GetMessage() string {
+func (t *PrAutomationFragment) GetMessage() *string {
 	if t == nil {
 		t = &PrAutomationFragment{}
 	}
@@ -4051,13 +4051,13 @@ func (t *ObserverPipelineActionFragment) GetContext() map[string]any {
 }
 
 type ObserverPrActionFragment struct {
-	AutomationID   string         "json:\"automationId\" graphql:\"automationId\""
+	AutomationID   *string        "json:\"automationId,omitempty\" graphql:\"automationId\""
 	Repository     *string        "json:\"repository,omitempty\" graphql:\"repository\""
 	BranchTemplate *string        "json:\"branchTemplate,omitempty\" graphql:\"branchTemplate\""
 	Context        map[string]any "json:\"context\" graphql:\"context\""
 }
 
-func (t *ObserverPrActionFragment) GetAutomationID() string {
+func (t *ObserverPrActionFragment) GetAutomationID() *string {
 	if t == nil {
 		t = &ObserverPrActionFragment{}
 	}

@@ -65,8 +65,10 @@ defmodule Console.AI.OpenAI do
 
   def embeddings(%__MODULE__{} = openai, text) do
     chunked = Utils.chunk(text, 8000)
-    opts = [dimensions: Utils.embedding_dims(), provider_options: provider_options(openai)]
-    case ReqLLM.embed(openai_model(openai, :embedding_model), chunked, opts) do
+    provider_options(openai)
+    |> Keyword.put(:dimensions, Utils.embedding_dims())
+    |> then(&ReqLLM.embed(openai_model(openai, :embedding_model), chunked, &1))
+    |> case do
       {:ok, embeddings} -> {:ok, Enum.zip(chunked, embeddings)}
       error -> error
     end
@@ -74,7 +76,7 @@ defmodule Console.AI.OpenAI do
 
   def context_window(%__MODULE__{model: model}) do
     case LLMDB.model("openai:#{model}") do
-      {:ok, %LLMDB.Model{limits: %{context: context}}} -> context
+      {:ok, %LLMDB.Model{limits: %{context: context}}} when is_integer(context) -> context
       _ -> 500_000
     end
   end
@@ -82,14 +84,15 @@ defmodule Console.AI.OpenAI do
   def tools?(), do: true
 
   defp provider_options(%__MODULE__{base_url: base_url, access_key: key}) do
-    Enum.filter([base_url: base_url, api_key: key], fn {_, v} -> not is_nil(v) end)
+    Enum.filter([base_url: base_url, api_key: key || "ignore"], fn {_, v} -> not is_nil(v) end)
   end
 
   defp openai_model(%__MODULE__{base_url: base_url, method: method} = openai, model) when is_binary(base_url) do
+    model_name = Map.get(openai, model)
     ReqLLM.model!(%{
       provider: :openai,
-      extra: %{wire: %{protocol: guess_protocol(model, method)}},
-      model: Map.get(openai, model),
+      extra: %{wire: %{protocol: guess_protocol(model_name, method)}},
+      model: model_name,
     })
   end
   defp openai_model(%__MODULE__{} = openai, model), do: ReqLLM.model!({:openai, id: Map.get(openai, model)})
