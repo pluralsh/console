@@ -6,30 +6,33 @@ metadata:
   annotations:
 {{ include "console.annotations" . | nindent 4 }}
   labels:
-{{ include "console.labels" . | indent 4 }}
-    app.kubernetes.io/component: observability-proxy
+    helm.sh/chart: {{ include "console.chart" . }}
+    app.kubernetes.io/name: observability-proxy
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- with .Values.observabilityProxy.podLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   {{- if not .Values.observabilityProxy.autoscaling.enabled }}
   replicas: {{ .Values.observabilityProxy.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: console
+      app.kubernetes.io/name: observability-proxy
       app.kubernetes.io/instance: {{ .Release.Name }}
-      app.kubernetes.io/component: observability-proxy
   template:
     metadata:
-      labels:
-        app.kubernetes.io/name: console
-        app.kubernetes.io/instance: {{ .Release.Name }}
-        app.kubernetes.io/component: observability-proxy
-        {{- with .Values.observabilityProxy.podLabels }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
       {{- with .Values.observabilityProxy.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      labels:
+        helm.sh/chart: {{ include "console.chart" . }}
+        app.kubernetes.io/name: observability-proxy
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- with .Values.observabilityProxy.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: console
       {{- with .Values.imagePullSecrets }}

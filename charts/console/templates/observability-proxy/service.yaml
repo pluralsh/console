@@ -4,8 +4,9 @@ kind: Service
 metadata:
   name: console-observability-proxy
   labels:
-{{ include "console.labels" . | indent 4 }}
-    app.kubernetes.io/component: observability-proxy
+    helm.sh/chart: {{ include "console.chart" . }}
+    app.kubernetes.io/name: observability-proxy
+    app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   type: ClusterIP
   ports:
