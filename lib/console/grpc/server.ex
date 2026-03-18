@@ -4,9 +4,21 @@ defmodule Console.GRPC.Server do
   alias Console.Schema.{DeploymentSettings, User, Cluster}
   alias Console.Schema.DeploymentSettings.AI
 
+  def meter_metrics(%Plrl.MeterMetricsRequest{bytes: bytes}, _) do
+    Console.Prom.Meter.incr(max(bytes, 0))
+    %Plrl.MeterMetricsResponse{success: true}
+  end
+
   def get_ai_config(_req, _) do
     Settings.fetch()
     |> to_pb()
+  end
+
+  def get_observability_config(_req, _) do
+    inst = Console.cloud_instance()
+    %Plrl.ObservabilityConfig{}
+    |> add_prometheus_configs(inst)
+    |> add_elastic_configs(inst)
   end
 
   def proxy_authentication(%Plrl.ProxyAuthenticationRequest{token: token}, _) do
@@ -21,6 +33,26 @@ defmodule Console.GRPC.Server do
         %Plrl.ProxyAuthenticationResponse{authenticated: false}
     end
   end
+
+  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst) do
+    with {:ok, _, pass} <- Console.es_creds(),
+         {:ok, url, vtenant} <- Console.vmetrics_creds() do
+      %Plrl.ObservabilityConfig{pb | prometheusUsername: "plrl-#{inst}", prometheusPassword: pass, prometheusHost: "#{url}/select/#{vtenant}/prometheus"}
+    else
+      _ -> pb
+    end
+  end
+  defp add_prometheus_configs(%Plrl.ObservabilityConfig{} = pb, _), do: pb
+
+  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, inst) when is_binary(inst) do
+    case Console.es_creds() do
+      {:ok, url, pass} ->
+        %Plrl.ObservabilityConfig{pb | elasticUsername: "plrl-#{inst}", elasticPassword: pass, elasticIndex: "plrl-#{inst}-logs-*", elasticHost: url}
+      _ ->
+        pb
+    end
+  end
+  defp add_elastic_configs(%Plrl.ObservabilityConfig{} = pb, _), do: pb
 
   defp to_pb(%DeploymentSettings{ai: %{enabled: true} = ai}) do
     %Plrl.AiConfig{

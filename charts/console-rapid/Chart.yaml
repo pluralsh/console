@@ -4,9 +4,6 @@ description: rapid channel chart for the plural console (used for testing)
 appVersion: 0.12.6
 version: 0.4.7
 dependencies:
-  - name: kas
-    version: 0.3.2
-    repository: file://../kas
   - name: controller
     version: 0.0.176
     repository: file://../controller

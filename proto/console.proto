@@ -78,8 +78,30 @@ message ProxyAuthenticationResponse {
   bool authenticated = 1;
 }
 
+message ObservabilityConfig {
+  optional string prometheusUsername = 1;
+  optional string prometheusPassword = 2;
+  optional string elasticUsername = 3;
+  optional string elasticPassword = 4;
+  optional string elasticIndex = 5;
+  optional string elasticHost = 6;
+  optional string prometheusHost = 7;
+}
+
+message MeterMetricsRequest {
+  int64 bytes = 1;
+}
+
+message MeterMetricsResponse {
+  bool success = 1;
+}
+
+message ObservabilityConfigRequest {}
+
 // The AI configuration service definition.
 service PluralServer {
+  rpc MeterMetrics (MeterMetricsRequest) returns (MeterMetricsResponse);
   rpc GetAiConfig (AiConfigRequest) returns (AiConfig);
+  rpc GetObservabilityConfig (ObservabilityConfigRequest) returns (ObservabilityConfig);
   rpc ProxyAuthentication (ProxyAuthenticationRequest) returns (ProxyAuthenticationResponse);
 }

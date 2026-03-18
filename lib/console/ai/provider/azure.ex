@@ -77,18 +77,12 @@ defmodule Console.AI.Azure do
   def context_window(azure), do: OpenAI.context_window(OpenAI.new(azure))
 
   defp deployment_url(%__MODULE__{base_url: base_url, deployments: deployments}, model)
-    when is_binary(base_url) and is_binary(model) do
-    deployment =
-      case deployments do
-        %{} ->
-          case Map.get(deployments, model) do
-            val when is_binary(val) and byte_size(val) > 0 -> val
-            _ -> model
-          end
-        _ -> model
-      end
-
-    Path.join(base_url, deployment)
+      when is_binary(base_url) and is_binary(model) do
+    case deployments do
+      %{^model => deployment} when is_binary(deployment) and byte_size(deployment) > 0 ->
+        Path.join(base_url, deployment)
+      _ -> Path.join(base_url, model)
+    end
   end
 
   def tools?(), do: true
