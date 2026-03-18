@@ -1,6 +1,9 @@
 package main
 
 import (
+	"time"
+
+	"golang.org/x/time/rate"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -9,6 +12,22 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/types"
 )
+
+// newQueueRateLimiter returns a rate limiter tuned to avoid DDoSing the GQL API
+// server when errors occur.
+//
+// Compared to workqueue.DefaultTypedControllerRateLimiter:
+//   - Exponential base is 5 s instead of 5 ms so the first retry after an error
+//     already waits a meaningful amount of time rather than firing almost instantly.
+//   - Cap is 5 min instead of ~16 min.
+//   - Bucket is 2 items/s with a burst of 20 instead of 10/s with a burst of 100,
+//     which bounds the aggregate throughput when many controllers reconcile at once.
+func newQueueRateLimiter() workqueue.TypedRateLimiter[ctrl.Request] {
+	return workqueue.NewTypedMaxOfRateLimiter[ctrl.Request](
+		workqueue.NewTypedItemExponentialFailureRateLimiter[ctrl.Request](5*time.Second, 5*time.Minute),
+		&workqueue.TypedBucketRateLimiter[ctrl.Request]{Limiter: rate.NewLimiter(rate.Limit(2), 20)},
+	)
+}
 
 // register all controllers with the controller manager.
 func init() {
@@ -115,7 +134,7 @@ func init() {
 			ConsoleClient:    consoleClient,
 			CredentialsCache: credentialsCache,
 			Scheme:           mgr.GetScheme(),
-			FlowQueue:        workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
+			FlowQueue:        workqueue.NewTypedRateLimitingQueue(newQueueRateLimiter()),
 		}
 	})
 
@@ -143,7 +162,7 @@ func init() {
 			ConsoleClient:      consoleClient,
 			Scheme:             mgr.GetScheme(),
 			CredentialsCache:   credentialsCache,
-			GlobalServiceQueue: workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
+			GlobalServiceQueue: workqueue.NewTypedRateLimitingQueue(newQueueRateLimiter()),
 		}
 	})
 
@@ -268,7 +287,7 @@ func init() {
 			ConsoleClient:    consoleClient,
 			Scheme:           mgr.GetScheme(),
 			CredentialsCache: credentialsCache,
-			PipelineQueue:    workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
+			PipelineQueue:    workqueue.NewTypedRateLimitingQueue(newQueueRateLimiter()),
 		}
 	})
 
@@ -343,7 +362,7 @@ func init() {
 			ConsoleClient:    consoleClient,
 			Scheme:           mgr.GetScheme(),
 			CredentialsCache: credentialsCache,
-			ServiceQueue:     workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
+			ServiceQueue:     workqueue.NewTypedRateLimitingQueue(newQueueRateLimiter()),
 		}
 	})
 
@@ -366,7 +385,7 @@ func init() {
 				ConsoleClient:    consoleClient,
 				Scheme:           mgr.GetScheme(),
 				CredentialsCache: credentialsCache,
-				StackQueue:       workqueue.NewTypedRateLimitingQueue(workqueue.DefaultTypedControllerRateLimiter[ctrl.Request]()),
+				StackQueue:       workqueue.NewTypedRateLimitingQueue(newQueueRateLimiter()),
 			}
 		},
 	)
