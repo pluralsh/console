@@ -715,20 +715,20 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		}
 	}
 
-	if in.Nexus != nil {
-		token, err := in.Nexus.Token(ctx, c, namespace)
-		if err != nil {
-			return nil, err
-		}
-
-		attr.Nexus = &console.NexusSettingsAttributes{
-			URL:            in.Nexus.URL,
-			AccessToken:    lo.EmptyableToPtr(token),
-			Model:          in.Nexus.Model,
-			ToolModel:      in.Nexus.ToolModel,
-			EmbeddingModel: in.Nexus.EmbeddingModel,
-		}
-	}
+	//if in.Nexus != nil {
+	//	token, err := in.Nexus.Token(ctx, c, namespace)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//
+	//	attr.Nexus = &console.NexusSettingsAttributes{
+	//		URL:            in.Nexus.URL,
+	//		AccessToken:    lo.EmptyableToPtr(token),
+	//		Model:          in.Nexus.Model,
+	//		ToolModel:      in.Nexus.ToolModel,
+	//		EmbeddingModel: in.Nexus.EmbeddingModel,
+	//	}
+	//}
 
 	return attr, nil
 }
