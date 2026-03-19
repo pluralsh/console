@@ -60,6 +60,7 @@ export function WorkbenchRun() {
     skip: isMockMode || !runId,
     variables: { id: runId },
     fetchPolicy: 'cache-and-network',
+    pollInterval: 5_000,
   })
 
   useWorkbenchJobDeltaSubscription({

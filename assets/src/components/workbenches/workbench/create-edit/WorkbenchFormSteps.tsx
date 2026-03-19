@@ -6,14 +6,15 @@ import {
   Divider,
   Flex,
   FormField,
+  IconFrame,
   Input2,
+  isValidRepoUrl,
   ListBoxItem,
+  prettifyRepoUrl,
   Radio,
   RadioGroup,
   Select,
   Switch,
-  isValidRepoUrl,
-  prettifyRepoUrl,
 } from '@pluralsh/design-system'
 import {
   AgentRunMode,
@@ -21,6 +22,7 @@ import {
   useAgentRuntimeReposQuery,
   useGitRepositoriesQuery,
   useGitRepositoryQuery,
+  useWorkbenchToolsQuery,
 } from 'generated/graphql'
 import { produce } from 'immer'
 import { Dispatch, ReactNode, SetStateAction, useMemo, useState } from 'react'
@@ -43,6 +45,18 @@ import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { Link } from 'react-router-dom'
 import { WORKBENCHES_TOOLS_ABS_PATH } from 'routes/workbenchesRoutesConsts'
 import { WorkbenchFormState } from './WorkbenchCreateOrEdit'
+import {
+  CardGrid,
+  CardGridSkeleton,
+} from '../../../self-service/catalog/CatalogsGrid'
+import { GqlError } from '../../../utils/Alert'
+import { StackedText } from '../../../utils/table/StackedText'
+import {
+  categoryToLabel,
+  TOOL_TYPE_TO_LABEL,
+  WorkbenchToolIcon,
+} from '../../tools/workbenchToolsUtils'
+import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 
 type FormStateSetter = Dispatch<SetStateAction<WorkbenchFormState>>
 type WorkbenchFormStepProps = {
@@ -465,10 +479,30 @@ export function WorkbenchAccessPolicyStep({
 }
 
 export function WorkbenchAttachToolsStep({
-  formState: _formState,
-  setFormState: _setFormState,
+  formState,
+  setFormState,
 }: WorkbenchFormStepProps) {
-  return (
+  const update = createFormUpdater(setFormState)
+  const { data, error, loading, pageInfo, fetchNextPage } =
+    useFetchPaginatedData({
+      queryHook: useWorkbenchToolsQuery,
+      keyPath: ['workbenchTools'],
+    })
+  const toolAssociations = formState.toolAssociations
+
+  if (!formState) return null
+
+  const tools = mapExistingNodes(data?.workbenchTools)
+
+  if (!data && loading) {
+    return <CardGridSkeleton count={4} />
+  }
+
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  return !data ? (
     <EmptyStateCompact
       message="You have not set up any tools yet"
       description="You can set up tools by clicking the button below. Tools can also be added later."
@@ -483,8 +517,81 @@ export function WorkbenchAttachToolsStep({
         Set up tools
       </Button>
     </EmptyStateCompact>
+  ) : (
+    <CardGrid
+      onBottomReached={() =>
+        !loading && pageInfo?.hasNextPage && fetchNextPage()
+      }
+      styles={{
+        gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+      }}
+    >
+      {tools.map(({ id, name, tool: type, categories }) => (
+        <ToolCardSC
+          key={id}
+          clickable
+          selected={
+            toolAssociations?.map((ta) => ta?.toolId ?? '').includes(id) ??
+            false
+          }
+          onClick={() =>
+            update((wfs) => {
+              const exists =
+                wfs.toolAssociations?.map((t) => t?.toolId).includes(id) ??
+                false
+              if (exists) {
+                wfs.toolAssociations =
+                  wfs.toolAssociations?.filter((ta) => ta?.toolId !== id) ?? []
+                return
+              }
+
+              wfs.toolAssociations = [
+                ...(wfs.toolAssociations ?? []),
+                { toolId: id },
+              ]
+            })
+          }
+        >
+          <StackedText
+            first={name}
+            firstPartialType="body2Bold"
+            firstColor="text"
+            second={TOOL_TYPE_TO_LABEL[type]}
+            icon={
+              <IconFrame
+                circle
+                type="secondary"
+                icon={<WorkbenchToolIcon type={type} />}
+              />
+            }
+          />
+          <Flex
+            gap="xsmall"
+            wrap="wrap"
+          >
+            {categories?.filter(isNonNullable).map((cat, i) => (
+              <Chip
+                key={i}
+                size="small"
+              >
+                {categoryToLabel[cat]}
+              </Chip>
+            ))}
+          </Flex>
+        </ToolCardSC>
+      ))}
+    </CardGrid>
   )
 }
+
+const ToolCardSC = styled(Card)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  padding: theme.spacing.large,
+  minHeight: 120,
+  textDecoration: 'none',
+}))
 
 const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
