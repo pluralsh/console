@@ -2588,6 +2588,7 @@ type ServiceDeploymentExtended struct {
 	Flow          *ServiceDeploymentExtended_Flow            "json:\"flow,omitempty\" graphql:\"flow\""
 	SyncConfig    *ServiceDeploymentExtended_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
 	Metadata      *ServiceDeploymentExtended_Metadata        "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Imports       []*ServiceDeploymentExtended_Imports       "json:\"imports,omitempty\" graphql:\"imports\""
 }
 
 func (t *ServiceDeploymentExtended) GetCluster() *BaseClusterFragment {
@@ -2733,6 +2734,12 @@ func (t *ServiceDeploymentExtended) GetMetadata() *ServiceDeploymentExtended_Met
 		t = &ServiceDeploymentExtended{}
 	}
 	return t.Metadata
+}
+func (t *ServiceDeploymentExtended) GetImports() []*ServiceDeploymentExtended_Imports {
+	if t == nil {
+		t = &ServiceDeploymentExtended{}
+	}
+	return t.Imports
 }
 
 type ErrorFragment struct {
@@ -2888,10 +2895,12 @@ type BaseClusterFragment struct {
 	Handle         *string                      "json:\"handle,omitempty\" graphql:\"handle\""
 	Self           *bool                        "json:\"self,omitempty\" graphql:\"self\""
 	Version        *string                      "json:\"version,omitempty\" graphql:\"version\""
+	Distro         *ClusterDistro               "json:\"distro,omitempty\" graphql:\"distro\""
 	PingedAt       *string                      "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
 	CurrentVersion *string                      "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
 	KasURL         *string                      "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
 	Metadata       map[string]any               "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Tags           []*ClusterTags               "json:\"tags,omitempty\" graphql:\"tags\""
 	Credential     *ProviderCredentialFragment  "json:\"credential,omitempty\" graphql:\"credential\""
 	Provider       *BaseClusterProviderFragment "json:\"provider,omitempty\" graphql:\"provider\""
 	NodePools      []*NodePoolFragment          "json:\"nodePools,omitempty\" graphql:\"nodePools\""
@@ -2928,6 +2937,12 @@ func (t *BaseClusterFragment) GetVersion() *string {
 	}
 	return t.Version
 }
+func (t *BaseClusterFragment) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &BaseClusterFragment{}
+	}
+	return t.Distro
+}
 func (t *BaseClusterFragment) GetPingedAt() *string {
 	if t == nil {
 		t = &BaseClusterFragment{}
@@ -2951,6 +2966,12 @@ func (t *BaseClusterFragment) GetMetadata() map[string]any {
 		t = &BaseClusterFragment{}
 	}
 	return t.Metadata
+}
+func (t *BaseClusterFragment) GetTags() []*ClusterTags {
+	if t == nil {
+		t = &BaseClusterFragment{}
+	}
+	return t.Tags
 }
 func (t *BaseClusterFragment) GetCredential() *ProviderCredentialFragment {
 	if t == nil {
@@ -5212,6 +5233,24 @@ func (t *InfrastructureStackStatusFragment) GetStatus() *StackStatus {
 		t = &InfrastructureStackStatusFragment{}
 	}
 	return &t.Status
+}
+
+type InfrastructureStackTinyFragment struct {
+	ID   *string "json:\"id,omitempty\" graphql:\"id\""
+	Name string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *InfrastructureStackTinyFragment) GetID() *string {
+	if t == nil {
+		t = &InfrastructureStackTinyFragment{}
+	}
+	return t.ID
+}
+func (t *InfrastructureStackTinyFragment) GetName() string {
+	if t == nil {
+		t = &InfrastructureStackTinyFragment{}
+	}
+	return t.Name
 }
 
 type PolicyEngineFragment struct {
@@ -8010,6 +8049,24 @@ func (t *ServiceDeploymentExtended_Metadata) GetImages() []*string {
 		t = &ServiceDeploymentExtended_Metadata{}
 	}
 	return t.Images
+}
+
+type ServiceDeploymentExtended_Imports struct {
+	Outputs []*StackOutputFragment           "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *InfrastructureStackTinyFragment "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *ServiceDeploymentExtended_Imports) GetOutputs() []*StackOutputFragment {
+	if t == nil {
+		t = &ServiceDeploymentExtended_Imports{}
+	}
+	return t.Outputs
+}
+func (t *ServiceDeploymentExtended_Imports) GetStack() *InfrastructureStackTinyFragment {
+	if t == nil {
+		t = &ServiceDeploymentExtended_Imports{}
+	}
+	return t.Stack
 }
 
 type RevisionFragment_Git struct {
@@ -16055,6 +16112,24 @@ func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtend
 	return t.Images
 }
 
+type CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_Imports struct {
+	Outputs []*StackOutputFragment           "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *InfrastructureStackTinyFragment "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_Imports) GetOutputs() []*StackOutputFragment {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Outputs
+}
+func (t *CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_Imports) GetStack() *InfrastructureStackTinyFragment {
+	if t == nil {
+		t = &CreateServiceDeployment_CreateServiceDeployment_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Stack
+}
+
 type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
 	Folder string "json:\"folder\" graphql:\"folder\""
 	Ref    string "json:\"ref\" graphql:\"ref\""
@@ -16242,6 +16317,24 @@ func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploy
 		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Metadata{}
 	}
 	return t.Images
+}
+
+type CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Imports struct {
+	Outputs []*StackOutputFragment           "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *InfrastructureStackTinyFragment "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Imports) GetOutputs() []*StackOutputFragment {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Outputs
+}
+func (t *CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Imports) GetStack() *InfrastructureStackTinyFragment {
+	if t == nil {
+		t = &CreateServiceDeploymentWithHandle_CreateServiceDeployment_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Stack
 }
 
 type DeleteServiceDeployment_DeleteServiceDeployment_ServiceDeploymentFragment_Components struct {
@@ -16775,6 +16868,24 @@ func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtend
 	return t.Images
 }
 
+type UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Imports struct {
+	Outputs []*StackOutputFragment           "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *InfrastructureStackTinyFragment "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Imports) GetOutputs() []*StackOutputFragment {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Outputs
+}
+func (t *UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Imports) GetStack() *InfrastructureStackTinyFragment {
+	if t == nil {
+		t = &UpdateServiceDeployment_UpdateServiceDeployment_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Stack
+}
+
 type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
 	Folder string "json:\"folder\" graphql:\"folder\""
 	Ref    string "json:\"ref\" graphql:\"ref\""
@@ -16962,6 +17073,24 @@ func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploy
 		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Metadata{}
 	}
 	return t.Images
+}
+
+type UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Imports struct {
+	Outputs []*StackOutputFragment           "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *InfrastructureStackTinyFragment "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Imports) GetOutputs() []*StackOutputFragment {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Outputs
+}
+func (t *UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Imports) GetStack() *InfrastructureStackTinyFragment {
+	if t == nil {
+		t = &UpdateServiceDeploymentWithHandle_UpdateServiceDeployment_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Stack
 }
 
 type CloneServiceDeployment_CloneService_ServiceDeploymentFragment_Components struct {
@@ -18052,6 +18181,24 @@ func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Metada
 	return t.Images
 }
 
+type GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Imports struct {
+	Outputs []*StackOutputFragment           "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *InfrastructureStackTinyFragment "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Imports) GetOutputs() []*StackOutputFragment {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Outputs
+}
+func (t *GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Imports) GetStack() *InfrastructureStackTinyFragment {
+	if t == nil {
+		t = &GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Stack
+}
+
 type GetServiceDeploymentTiny_ServiceDeployment struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -18613,6 +18760,24 @@ func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtende
 		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Metadata{}
 	}
 	return t.Images
+}
+
+type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Imports struct {
+	Outputs []*StackOutputFragment           "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *InfrastructureStackTinyFragment "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Imports) GetOutputs() []*StackOutputFragment {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Outputs
+}
+func (t *GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Imports) GetStack() *InfrastructureStackTinyFragment {
+	if t == nil {
+		t = &GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Stack
 }
 
 type ListServiceDeployment_ServiceDeployments struct {
@@ -19284,6 +19449,24 @@ func (t *KickService_KickService_ServiceDeploymentExtended_Metadata) GetImages()
 	return t.Images
 }
 
+type KickService_KickService_ServiceDeploymentExtended_Imports struct {
+	Outputs []*StackOutputFragment           "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *InfrastructureStackTinyFragment "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *KickService_KickService_ServiceDeploymentExtended_Imports) GetOutputs() []*StackOutputFragment {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Outputs
+}
+func (t *KickService_KickService_ServiceDeploymentExtended_Imports) GetStack() *InfrastructureStackTinyFragment {
+	if t == nil {
+		t = &KickService_KickService_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Stack
+}
+
 type KickServiceByHandle_KickService_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
 	Folder string "json:\"folder\" graphql:\"folder\""
 	Ref    string "json:\"ref\" graphql:\"ref\""
@@ -19471,6 +19654,24 @@ func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_Metadata) Get
 		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_Metadata{}
 	}
 	return t.Images
+}
+
+type KickServiceByHandle_KickService_ServiceDeploymentExtended_Imports struct {
+	Outputs []*StackOutputFragment           "json:\"outputs,omitempty\" graphql:\"outputs\""
+	Stack   *InfrastructureStackTinyFragment "json:\"stack,omitempty\" graphql:\"stack\""
+}
+
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_Imports) GetOutputs() []*StackOutputFragment {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Outputs
+}
+func (t *KickServiceByHandle_KickService_ServiceDeploymentExtended_Imports) GetStack() *InfrastructureStackTinyFragment {
+	if t == nil {
+		t = &KickServiceByHandle_KickService_ServiceDeploymentExtended_Imports{}
+	}
+	return t.Stack
 }
 
 type GetClusterRegistrations_ClusterRegistrations_Edges struct {
@@ -36467,6 +36668,14 @@ fragment ServiceDeploymentExtended on ServiceDeployment {
 		images
 		fqdns
 	}
+	imports {
+		stack {
+			... InfrastructureStackTinyFragment
+		}
+		outputs {
+			... StackOutputFragment
+		}
+	}
 }
 fragment BaseClusterFragment on Cluster {
 	id
@@ -36474,10 +36683,14 @@ fragment BaseClusterFragment on Cluster {
 	handle
 	self
 	version
+	distro
 	pingedAt
 	currentVersion
 	kasUrl
 	metadata
+	tags {
+		... ClusterTags
+	}
 	credential {
 		... ProviderCredentialFragment
 	}
@@ -36490,6 +36703,10 @@ fragment BaseClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -36575,6 +36792,15 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	kind
 	backfill
 	jsonPointers
+}
+fragment InfrastructureStackTinyFragment on InfrastructureStack {
+	id
+	name
+}
+fragment StackOutputFragment on StackOutput {
+	name
+	value
+	secret
 }
 `
 
@@ -36673,6 +36899,14 @@ fragment ServiceDeploymentExtended on ServiceDeployment {
 		images
 		fqdns
 	}
+	imports {
+		stack {
+			... InfrastructureStackTinyFragment
+		}
+		outputs {
+			... StackOutputFragment
+		}
+	}
 }
 fragment BaseClusterFragment on Cluster {
 	id
@@ -36680,10 +36914,14 @@ fragment BaseClusterFragment on Cluster {
 	handle
 	self
 	version
+	distro
 	pingedAt
 	currentVersion
 	kasUrl
 	metadata
+	tags {
+		... ClusterTags
+	}
 	credential {
 		... ProviderCredentialFragment
 	}
@@ -36696,6 +36934,10 @@ fragment BaseClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -36781,6 +37023,15 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	kind
 	backfill
 	jsonPointers
+}
+fragment InfrastructureStackTinyFragment on InfrastructureStack {
+	id
+	name
+}
+fragment StackOutputFragment on StackOutput {
+	name
+	value
+	secret
 }
 `
 
@@ -37111,6 +37362,14 @@ fragment ServiceDeploymentExtended on ServiceDeployment {
 		images
 		fqdns
 	}
+	imports {
+		stack {
+			... InfrastructureStackTinyFragment
+		}
+		outputs {
+			... StackOutputFragment
+		}
+	}
 }
 fragment BaseClusterFragment on Cluster {
 	id
@@ -37118,10 +37377,14 @@ fragment BaseClusterFragment on Cluster {
 	handle
 	self
 	version
+	distro
 	pingedAt
 	currentVersion
 	kasUrl
 	metadata
+	tags {
+		... ClusterTags
+	}
 	credential {
 		... ProviderCredentialFragment
 	}
@@ -37134,6 +37397,10 @@ fragment BaseClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -37219,6 +37486,15 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	kind
 	backfill
 	jsonPointers
+}
+fragment InfrastructureStackTinyFragment on InfrastructureStack {
+	id
+	name
+}
+fragment StackOutputFragment on StackOutput {
+	name
+	value
+	secret
 }
 `
 
@@ -37317,6 +37593,14 @@ fragment ServiceDeploymentExtended on ServiceDeployment {
 		images
 		fqdns
 	}
+	imports {
+		stack {
+			... InfrastructureStackTinyFragment
+		}
+		outputs {
+			... StackOutputFragment
+		}
+	}
 }
 fragment BaseClusterFragment on Cluster {
 	id
@@ -37324,10 +37608,14 @@ fragment BaseClusterFragment on Cluster {
 	handle
 	self
 	version
+	distro
 	pingedAt
 	currentVersion
 	kasUrl
 	metadata
+	tags {
+		... ClusterTags
+	}
 	credential {
 		... ProviderCredentialFragment
 	}
@@ -37340,6 +37628,10 @@ fragment BaseClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -37425,6 +37717,15 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	kind
 	backfill
 	jsonPointers
+}
+fragment InfrastructureStackTinyFragment on InfrastructureStack {
+	id
+	name
+}
+fragment StackOutputFragment on StackOutput {
+	name
+	value
+	secret
 }
 `
 
@@ -38286,6 +38587,14 @@ fragment ServiceDeploymentExtended on ServiceDeployment {
 		images
 		fqdns
 	}
+	imports {
+		stack {
+			... InfrastructureStackTinyFragment
+		}
+		outputs {
+			... StackOutputFragment
+		}
+	}
 }
 fragment BaseClusterFragment on Cluster {
 	id
@@ -38293,10 +38602,14 @@ fragment BaseClusterFragment on Cluster {
 	handle
 	self
 	version
+	distro
 	pingedAt
 	currentVersion
 	kasUrl
 	metadata
+	tags {
+		... ClusterTags
+	}
 	credential {
 		... ProviderCredentialFragment
 	}
@@ -38309,6 +38622,10 @@ fragment BaseClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -38394,6 +38711,15 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	kind
 	backfill
 	jsonPointers
+}
+fragment InfrastructureStackTinyFragment on InfrastructureStack {
+	id
+	name
+}
+fragment StackOutputFragment on StackOutput {
+	name
+	value
+	secret
 }
 `
 
@@ -38682,6 +39008,14 @@ fragment ServiceDeploymentExtended on ServiceDeployment {
 		images
 		fqdns
 	}
+	imports {
+		stack {
+			... InfrastructureStackTinyFragment
+		}
+		outputs {
+			... StackOutputFragment
+		}
+	}
 }
 fragment BaseClusterFragment on Cluster {
 	id
@@ -38689,10 +39023,14 @@ fragment BaseClusterFragment on Cluster {
 	handle
 	self
 	version
+	distro
 	pingedAt
 	currentVersion
 	kasUrl
 	metadata
+	tags {
+		... ClusterTags
+	}
 	credential {
 		... ProviderCredentialFragment
 	}
@@ -38705,6 +39043,10 @@ fragment BaseClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -38790,6 +39132,15 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	kind
 	backfill
 	jsonPointers
+}
+fragment InfrastructureStackTinyFragment on InfrastructureStack {
+	id
+	name
+}
+fragment StackOutputFragment on StackOutput {
+	name
+	value
+	secret
 }
 `
 
@@ -39574,6 +39925,14 @@ fragment ServiceDeploymentExtended on ServiceDeployment {
 		images
 		fqdns
 	}
+	imports {
+		stack {
+			... InfrastructureStackTinyFragment
+		}
+		outputs {
+			... StackOutputFragment
+		}
+	}
 }
 fragment BaseClusterFragment on Cluster {
 	id
@@ -39581,10 +39940,14 @@ fragment BaseClusterFragment on Cluster {
 	handle
 	self
 	version
+	distro
 	pingedAt
 	currentVersion
 	kasUrl
 	metadata
+	tags {
+		... ClusterTags
+	}
 	credential {
 		... ProviderCredentialFragment
 	}
@@ -39597,6 +39960,10 @@ fragment BaseClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -39682,6 +40049,15 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	kind
 	backfill
 	jsonPointers
+}
+fragment InfrastructureStackTinyFragment on InfrastructureStack {
+	id
+	name
+}
+fragment StackOutputFragment on StackOutput {
+	name
+	value
+	secret
 }
 `
 
@@ -39779,6 +40155,14 @@ fragment ServiceDeploymentExtended on ServiceDeployment {
 		images
 		fqdns
 	}
+	imports {
+		stack {
+			... InfrastructureStackTinyFragment
+		}
+		outputs {
+			... StackOutputFragment
+		}
+	}
 }
 fragment BaseClusterFragment on Cluster {
 	id
@@ -39786,10 +40170,14 @@ fragment BaseClusterFragment on Cluster {
 	handle
 	self
 	version
+	distro
 	pingedAt
 	currentVersion
 	kasUrl
 	metadata
+	tags {
+		... ClusterTags
+	}
 	credential {
 		... ProviderCredentialFragment
 	}
@@ -39802,6 +40190,10 @@ fragment BaseClusterFragment on Cluster {
 	project {
 		... TinyProjectFragment
 	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
 }
 fragment ProviderCredentialFragment on ProviderCredential {
 	id
@@ -39887,6 +40279,15 @@ fragment DiffNormalizerFragment on DiffNormalizer {
 	kind
 	backfill
 	jsonPointers
+}
+fragment InfrastructureStackTinyFragment on InfrastructureStack {
+	id
+	name
+}
+fragment StackOutputFragment on StackOutput {
+	name
+	value
+	secret
 }
 `
 
