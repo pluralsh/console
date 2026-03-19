@@ -179,6 +179,17 @@ export function useCommands({
                 },
               ]
             : []),
+          ...(!featureFlags.Workbenches
+            ? [
+                {
+                  id: 'enable-workbenches',
+                  label: 'Enable Workbenches',
+                  icon: WorkbenchIcon,
+                  callback: () => setFeatureFlag('Workbenches', true),
+                  deps: [setFeatureFlag],
+                },
+              ]
+            : []),
         ],
       },
     ],

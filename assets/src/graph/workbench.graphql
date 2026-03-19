@@ -130,9 +130,79 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   status
 }
 
+fragment WorkbenchJobActivity on WorkbenchJobActivity {
+  id
+  type
+  status
+  prompt
+  insertedAt
+  result {
+    output
+    jobUpdate {
+      diff
+      workingTheory
+      conclusion
+    }
+    logs {
+      timestamp
+      message
+      labels
+    }
+    metrics {
+      timestamp
+      name
+      value
+      labels
+    }
+  }
+  thoughts {
+    id
+    content
+    insertedAt
+    attributes {
+      logs {
+        timestamp
+        message
+        labels
+      }
+      metrics {
+        timestamp
+        name
+        value
+        labels
+      }
+    }
+  }
+  agentRun {
+    id
+    pullRequests {
+      ...PullRequestBasic
+    }
+  }
+}
+
+fragment WorkbenchJobProgressTiny on WorkbenchJobProgress {
+  activityId
+  tool
+  text
+  arguments
+}
+
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
+  insertedAt
+  workbench {
+    id
+    name
+  }
   error
+  activities(first: 100) {
+    edges {
+      node {
+        ...WorkbenchJobActivity
+      }
+    }
+  }
   result {
     ...WorkbenchJobResult
   }
@@ -176,6 +246,30 @@ query WorkbenchRuns($id: ID!, $first: Int = 100, $after: String) {
 query WorkbenchRun($id: ID!) {
   workbenchJob(id: $id) {
     ...WorkbenchJob
+  }
+}
+
+subscription WorkbenchJobDelta($id: ID!) {
+  workbenchJobDelta(id: $id) {
+    delta
+    payload {
+      ...WorkbenchJob
+    }
+  }
+}
+
+subscription WorkbenchJobActivityDelta($jobId: ID!) {
+  workbenchJobActivityDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...WorkbenchJobActivity
+    }
+  }
+}
+
+subscription WorkbenchJobProgress($jobId: ID!) {
+  workbenchJobProgress(jobId: $jobId) {
+    ...WorkbenchJobProgressTiny
   }
 }
 

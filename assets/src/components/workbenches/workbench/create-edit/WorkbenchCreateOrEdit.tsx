@@ -100,6 +100,7 @@ export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
         initialFormState={sanitizeInitialForm(
           workbench ?? { id: '', name: '' }
         )}
+        mode={mode}
         loading={!data && loading}
       />
     </Flex>
@@ -109,14 +110,16 @@ export function WorkbenchCreateOrEdit({ mode }: { mode: 'create' | 'edit' }) {
 function WorkbenchForm({
   workbenchId,
   initialFormState,
+  mode,
   loading,
 }: {
   workbenchId: Nullable<string>
   initialFormState: WorkbenchFormState
+  mode: 'create' | 'edit'
   loading: boolean
 }) {
   const navigate = useNavigate()
-  const isCreateMode = !workbenchId
+  const isCreateMode = mode === 'create'
   const [formState, setFormState] =
     useState<WorkbenchFormState>(initialFormState)
   const [curStep, setCurStepState] =
@@ -154,10 +157,29 @@ function WorkbenchForm({
       awaitRefetchQueries: true,
     })
 
-  const [_updateWorkbench, { loading: _updateLoading, error: updateError }] =
-    useUpdateWorkbenchMutation()
-  // const mutationLoading = createLoading || updateLoading
+  const [updateWorkbench, { loading: updateLoading, error: updateError }] =
+    useUpdateWorkbenchMutation({
+      onCompleted: () => {
+        navigate(
+          workbenchId ? getWorkbenchAbsPath(workbenchId) : WORKBENCHES_ABS_PATH
+        )
+      },
+      refetchQueries: ['Workbenches'],
+      awaitRefetchQueries: true,
+    })
+  const mutationLoading = createLoading || updateLoading
   const mutationError = createError || updateError
+
+  const onSave = () => {
+    const attributes = formStateToAttributes(formState)
+    if (isCreateMode) {
+      createWorkbench({ variables: { attributes } })
+      return
+    }
+    updateWorkbench({
+      variables: { id: workbenchId ?? '', attributes },
+    })
+  }
 
   return (
     <Flex
@@ -209,16 +231,10 @@ function WorkbenchForm({
               {numUnvisitedSteps < 2 ? (
                 <Button
                   disabled={!allowSubmit}
-                  loading={createLoading}
-                  onClick={() =>
-                    createWorkbench({
-                      variables: {
-                        attributes: formStateToAttributes(formState),
-                      },
-                    })
-                  }
+                  loading={mutationLoading}
+                  onClick={onSave}
                 >
-                  Create workbench
+                  {isCreateMode ? 'Create workbench' : 'Update workbench'}
                 </Button>
               ) : (
                 <Button

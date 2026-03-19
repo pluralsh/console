@@ -1,0 +1,223 @@
+import { WorkbenchJobResultFragment } from '../../../../generated/graphql'
+import { RectangleSkeleton } from '../../../utils/SkeletonLoaders'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+
+function getWorkingTheory(result?: WorkbenchJobResultFragment | null) {
+  const text = result?.workingTheory?.trim()
+  return text?.length ? text : null
+}
+
+function getConclusion(result?: WorkbenchJobResultFragment | null) {
+  const text = result?.conclusion?.trim()
+  return text?.length ? text : null
+}
+
+export function WorkbenchRunResult({
+  loading,
+  result,
+}: {
+  loading: boolean
+  result?: WorkbenchJobResultFragment | null
+}) {
+  if (loading)
+    return (
+      <RectangleSkeleton
+        css={{
+          minHeight: '320px',
+          width: '100%',
+        }}
+        $height="100%"
+        $width="100%"
+      />
+    )
+
+  const workingTheory = getWorkingTheory(result)
+  const conclusion = getConclusion(result)
+
+  return (
+    <div
+      css={{
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        flex: 0.66,
+        minHeight: 0,
+      }}
+    >
+      <div
+        css={{
+          borderRadius: '6px',
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          minHeight: 0,
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '6px',
+            padding: '1px',
+            background:
+              'linear-gradient(117deg, rgba(97,112,255,0.95) 0%, rgba(227,169,102,0.95) 100%)',
+            WebkitMask:
+              'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+            WebkitMaskComposite: 'xor',
+            maskComposite: 'exclude',
+            pointerEvents: 'none',
+          },
+        }}
+      >
+        <div
+          css={{
+            borderRadius: '5px',
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            minHeight: 0,
+            overflow: 'hidden',
+            background: 'transparent',
+          }}
+        >
+          <div
+            css={{
+              color: '#a1a5b0',
+              fontSize: '12px',
+              fontWeight: 400,
+              letterSpacing: '1.25px',
+              lineHeight: '16px',
+              padding: '16px',
+              textTransform: 'uppercase',
+            }}
+          >
+            {conclusion && conclusion.length > 0
+              ? 'Conclusion'
+              : 'Working theory'}
+          </div>
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '16px',
+              padding: '0 16px 16px',
+              minHeight: 0,
+              flex: 1,
+            }}
+          >
+            <div
+              css={{
+                color: '#c5c9d2',
+                flex: 1,
+                minHeight: 0,
+                overflowY: 'auto',
+                paddingRight: '10px',
+                marginRight: '-10px',
+                scrollbarWidth: 'thin',
+                scrollbarColor: '#454954 transparent',
+                '&::-webkit-scrollbar': {
+                  width: '6px',
+                },
+                '&::-webkit-scrollbar-track': {
+                  background: 'transparent',
+                },
+                '&::-webkit-scrollbar-thumb': {
+                  backgroundColor: '#454954',
+                  borderRadius: '999px',
+                },
+              }}
+            >
+              {conclusion && conclusion.length > 0 ? (
+                <ResultMarkdown text={conclusion} />
+              ) : workingTheory && workingTheory.length > 0 ? (
+                <ResultMarkdown text={workingTheory} />
+              ) : (
+                <span
+                  css={{
+                    color: '#a1a5b0',
+                    fontSize: '12px',
+                    lineHeight: '16px',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  No output yet.
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ResultMarkdown({ text }: { text: string }) {
+  return (
+    <div
+      css={{
+        color: '#c5c9d2',
+        fontSize: '12px',
+        letterSpacing: '0.25px',
+        lineHeight: '20px',
+        '& p': {
+          margin: '0 0 8px',
+        },
+        '& ul, & ol': {
+          margin: '0 0 8px',
+          paddingLeft: '17px',
+        },
+        '& li': {
+          marginBottom: '0',
+        },
+        '& h1, & h2, & h3': {
+          color: '#c5c9d2',
+          fontSize: '16px',
+          fontWeight: 800,
+          letterSpacing: '0.25px',
+          lineHeight: '20px',
+          margin: '0 0 8px',
+        },
+        '& h2, & h3': {
+          fontSize: '12px',
+          fontWeight: 800,
+        },
+        '& a': {
+          color: '#c5c9d2',
+          textDecoration: 'underline',
+        },
+        '& em': {
+          fontStyle: 'italic',
+        },
+        '& strong': {
+          fontWeight: 800,
+        },
+        '& code': {
+          backgroundColor: '#171a21',
+          border: '1px solid #2a2e37',
+          borderRadius: '4px',
+          color: '#c5c9d2',
+          fontSize: '12px',
+          padding: '0 4px',
+        },
+        '& pre': {
+          margin: '0 0 8px',
+          overflowX: 'auto',
+        },
+      }}
+    >
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          p: ({ children }) => <p>{children}</p>,
+          h1: ({ children }) => <h1>{children}</h1>,
+          h2: ({ children }) => <h2>{children}</h2>,
+          h3: ({ children }) => <h3>{children}</h3>,
+        }}
+      >
+        {text}
+      </ReactMarkdown>
+    </div>
+  )
+}
