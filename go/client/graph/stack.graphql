@@ -22,6 +22,11 @@ fragment InfrastructureStackStatusFragment on InfrastructureStack {
     status
 }
 
+fragment InfrastructureStackTinyFragment on InfrastructureStack {
+    id
+    name
+}
+
 fragment PolicyEngineFragment on PolicyEngine {
     type
     maxSeverity
