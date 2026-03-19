@@ -1,0 +1,94 @@
+{{- if .Values.observabilityProxy.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: console-observability-proxy
+  annotations:
+{{ include "console.annotations" . | nindent 4 }}
+  labels:
+    helm.sh/chart: {{ include "console.chart" . }}
+    app.kubernetes.io/name: observability-proxy
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    {{- with .Values.observabilityProxy.podLabels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- if not .Values.observabilityProxy.autoscaling.enabled }}
+  replicas: {{ .Values.observabilityProxy.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: observability-proxy
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      {{- with .Values.observabilityProxy.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        helm.sh/chart: {{ include "console.chart" . }}
+        app.kubernetes.io/name: observability-proxy
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        {{- with .Values.observabilityProxy.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: console
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.observabilityProxy.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.observabilityProxy.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.observabilityProxy.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: observability-proxy
+        {{- if .Values.console.containerSecurityContext }}
+        securityContext:
+        {{- toYaml .Values.console.containerSecurityContext | nindent 10 }}
+        {{- end }}
+        image: "{{ .Values.global.registry }}/{{ .Values.observabilityProxy.image.repository }}:{{ .Values.observabilityProxy.image.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.observabilityProxy.image.pullPolicy }}
+        args:
+        - --listen-addr={{ .Values.observabilityProxy.listenAddr }}
+        - --console-grpc-endpoint={{ .Values.observabilityProxy.consoleGRPCEndpoint }}
+        - --config-ttl={{ .Values.observabilityProxy.configTTL }}
+        - --grpc-timeout={{ .Values.observabilityProxy.grpcTimeout }}
+        - --upstream-timeout={{ .Values.observabilityProxy.upstreamTimeout }}
+        - --meter-interval={{ .Values.observabilityProxy.meterInterval }}
+        {{- if .Values.observabilityProxy.image.extraArgs }}
+        {{- toYaml .Values.observabilityProxy.image.extraArgs | nindent 8 }}
+        {{- end }}
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        resources:
+          {{- toYaml .Values.observabilityProxy.resources | nindent 10 }}
+{{- end }}

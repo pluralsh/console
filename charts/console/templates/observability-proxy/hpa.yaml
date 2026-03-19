@@ -1,0 +1,34 @@
+{{- if and .Values.observabilityProxy.enabled .Values.observabilityProxy.autoscaling.enabled }}
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: console-observability-proxy
+  labels:
+    helm.sh/chart: {{ include "console.chart" . }}
+    app.kubernetes.io/name: observability-proxy
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: console-observability-proxy
+  minReplicas: {{ .Values.observabilityProxy.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.observabilityProxy.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.observabilityProxy.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.observabilityProxy.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.observabilityProxy.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.observabilityProxy.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

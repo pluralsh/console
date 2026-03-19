@@ -169,6 +169,33 @@ aiProxy:
     observability:
       logLevel: info
 
+observabilityProxy:
+  enabled: false
+  replicaCount: 2
+  listenAddr: ":8080"
+  consoleGRPCEndpoint: "console:50051"
+  configTTL: "60s"
+  grpcTimeout: "10s"
+  upstreamTimeout: "30s"
+  meterInterval: "30s"
+  image:
+    repository: observability-proxy
+    tag: ~
+    pullPolicy: IfNotPresent
+    extraArgs: []
+  resources: {}
+  podLabels: {}
+  podAnnotations: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 20
+    targetCPUUtilizationPercentage: 80
+    targetMemoryUtilizationPercentage: ~
+
 # initContainers is used to create a list of init containers for your console deployment
 initContainers: []
 
@@ -1011,3 +1038,10 @@ kas:
       suffix: ""
       annotationKey: external-dns.alpha.kubernetes.io/
       additionalAnnotations: { }
+
+# networkPolicy configures network policies for console pods.
+networkPolicy:
+  # consoleInternalPorts protects unauthenticated console internal ports.
+  consoleInternalPorts:
+    # enabled controls creation of the console internal ports NetworkPolicy.
+    enabled: true

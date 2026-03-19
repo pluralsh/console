@@ -119,6 +119,9 @@ spec:
         - name: epmd
           containerPort: 4369
           protocol: TCP
+        - name: grpc
+          containerPort: 50051
+          protocol: TCP
         livenessProbe:
         {{ toYaml .Values.livenessProbe | nindent 10 }}
         readinessProbe:
