@@ -2,12 +2,12 @@ import {
   CaretDownIcon,
   CheckIcon,
   CliIcon,
-  CloudIcon,
   EmptyState,
   ErrorIcon,
   Flex,
   SpinnerAlt,
   ToolKitIcon,
+  UnknownIcon,
 } from '@pluralsh/design-system'
 import {
   WorkbenchJobActivityFragment,
@@ -18,6 +18,7 @@ import { useState } from 'react'
 import { RectangleSkeleton } from '../../../utils/SkeletonLoaders'
 import { CaptionP } from '../../../utils/typography/Text'
 import { WorkbenchProgressMap } from './workbenchRunMockData'
+import styled from 'styled-components'
 
 type WorkbenchRunActivitiesState = 'empty' | 'running' | 'finished'
 
@@ -92,46 +93,10 @@ export function WorkbenchRunActivities({
       $height="100%"
     />
   ) : (
-    <div
-      css={{
-        border: '1px solid #2a2e37',
-        borderRadius: '6px',
-        padding: '24px 20px',
-        background:
-          'linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(70, 78, 255, 0.18) 100%), #0e1015',
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '12px',
-        minHeight: 0,
-        overflow: 'hidden',
-        transition:
-          'border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease',
-        boxShadow:
-          resolvedState === 'running'
-            ? '0 0 0 1px rgba(97, 112, 255, 0.15) inset'
-            : 'none',
-      }}
-    >
+    <ActivitiesPanelSC $isRunning={resolvedState === 'running'}>
       {hasActivities && (
-        <button
+        <ActivitiesSummaryButtonSC
           onClick={() => setExpanded((value) => !value)}
-          css={{
-            border: '1px solid #2a2e37',
-            borderRadius: '6px',
-            background: 'rgba(14, 16, 21, 0.7)',
-            color: '#c5c9d2',
-            padding: '10px 12px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            transition: 'background-color 180ms ease, border-color 180ms ease',
-            '&:hover': {
-              borderColor: '#3a3f4b',
-              backgroundColor: 'rgba(23, 26, 33, 0.82)',
-            },
-          }}
         >
           <Flex
             align="center"
@@ -145,146 +110,54 @@ export function WorkbenchRunActivities({
                 transition: 'transform 180ms ease',
               }}
             />
-            <span
-              css={{
-                fontSize: '14px',
-                lineHeight: '20px',
-                letterSpacing: '0.5px',
-              }}
-            >
-              {summaryText}
-            </span>
+            <SummaryTextSC>{summaryText}</SummaryTextSC>
           </Flex>
           <ActivitySummaryStatus state={resolvedState} />
-        </button>
+        </ActivitiesSummaryButtonSC>
       )}
       {!hasActivities ? (
-        <div
-          css={{
-            padding: '12px 4px',
-            transition: 'opacity 220ms ease',
-            height: '100%',
-            minHeight: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
+        <EmptyWrapSC>
           <EmptyState message="No activities have started yet." />
-        </div>
+        </EmptyWrapSC>
       ) : (
-        <div
-          css={{
-            display: expanded ? 'flex' : 'none',
-            minHeight: 0,
-            overflow: 'auto',
-            gap: '8px',
-          }}
-        >
-          <div
-            css={{
-              width: '18px',
-              position: 'relative',
-              flexShrink: 0,
-              marginTop: '28px',
-            }}
-          >
-            <div
-              css={{
-                position: 'absolute',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                top: '20px',
-                bottom: '20px',
-                width: '1px',
-                backgroundColor: '#454954',
-                opacity: 0.9,
-              }}
-            />
-            <div
-              css={{
-                position: 'absolute',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                top: 0,
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor:
-                  resolvedState === 'running' ? '#6170ff' : '#5a5f6e',
-                boxShadow:
-                  resolvedState === 'running'
-                    ? '0 0 0 2px rgba(97, 112, 255, 0.12)'
-                    : 'none',
-                transition:
-                  'background-color 220ms ease, box-shadow 220ms ease',
-                animation:
-                  resolvedState === 'running'
-                    ? 'workbenchRailPulse 1.8s ease-in-out infinite'
-                    : 'none',
-                '@keyframes workbenchRailPulse': {
-                  '0%, 100%': {
-                    boxShadow: '0 0 0 2px rgba(97, 112, 255, 0.12)',
-                  },
-                  '50%': {
-                    boxShadow: '0 0 0 5px rgba(97, 112, 255, 0.18)',
-                  },
-                },
-              }}
-            />
-            <div
-              css={{
-                position: 'absolute',
-                left: '50%',
-                transform: 'translateX(-50%)',
-                top: 'calc(100% - 8px)',
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: '#5a5f6e',
-              }}
-            />
-          </div>
-          <div
-            css={{
-              flex: 1,
-              minHeight: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '12px',
-              paddingTop: '16px',
-              paddingRight: '4px',
-            }}
-          >
-            {expanded &&
-              activities.map((activity, index) => {
-                const progress = progressByActivityId[activity.id] ?? []
-                const isActivityExpanded =
-                  activityExpanded[activity.id] ??
-                  (isActivityRunning(activity.status) ||
-                    resolvedState === 'finished')
+        <ActivitiesListWrapSC $expanded={expanded}>
+          <ActivitiesContentSC>
+            <RailSC>
+              <RailLineSC />
+              <RailHeadSC $isRunning={resolvedState === 'running'} />
+              <RailTailSC />
+            </RailSC>
+            <CardsWrapSC>
+              {expanded &&
+                activities.map((activity, index) => {
+                  const progress = progressByActivityId[activity.id] ?? []
+                  const isActivityExpanded =
+                    activityExpanded[activity.id] ??
+                    (isActivityRunning(activity.status) ||
+                      resolvedState === 'finished')
 
-                return (
-                  <ActivityCard
-                    key={activity.id}
-                    activity={activity}
-                    progress={progress}
-                    index={index}
-                    state={resolvedState}
-                    expanded={isActivityExpanded}
-                    onToggle={() =>
-                      setActivityExpanded((prev) => ({
-                        ...prev,
-                        [activity.id]: !isActivityExpanded,
-                      }))
-                    }
-                  />
-                )
-              })}
-          </div>
-        </div>
+                  return (
+                    <ActivityCard
+                      key={activity.id}
+                      activity={activity}
+                      progress={progress}
+                      index={index}
+                      state={resolvedState}
+                      expanded={isActivityExpanded}
+                      onToggle={() =>
+                        setActivityExpanded((prev) => ({
+                          ...prev,
+                          [activity.id]: !isActivityExpanded,
+                        }))
+                      }
+                    />
+                  )
+                })}
+            </CardsWrapSC>
+          </ActivitiesContentSC>
+        </ActivitiesListWrapSC>
       )}
-    </div>
+    </ActivitiesPanelSC>
   )
 }
 
@@ -307,52 +180,19 @@ function ActivityCard({
   const showDetails = expanded && (isRunning || state === 'finished')
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px',
-        opacity: 0,
-        transform: 'translateY(6px)',
-        animation: `workbenchActivityIn 260ms ${index * 40}ms ease forwards`,
-        '@keyframes workbenchActivityIn': {
-          from: { opacity: 0, transform: 'translateY(6px)' },
-          to: { opacity: 1, transform: 'translateY(0)' },
-        },
-      }}
-    >
-      <button
+    <ActivityItemSC $index={index}>
+      <ActivityToggleSC
         onClick={onToggle}
-        css={{
-          border: '1px solid #2a2e37',
-          borderRadius: '6px',
-          backgroundColor: isRunning ? '#171a21' : 'rgba(23, 26, 33, 0.72)',
-          padding: '8px 12px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          width: '100%',
-          transition:
-            'background-color 180ms ease, border-color 180ms ease, transform 180ms ease',
-          textAlign: 'left',
-          cursor: 'pointer',
-        }}
+        $isRunning={isRunning}
       >
         <Flex
           justifyContent="space-between"
           align="center"
           gap="small"
         >
-          <Flex
+          <ActivityHeaderSC
             align="center"
             gap="xsmall"
-            css={{
-              color: '#a1a5b0',
-              textTransform: 'uppercase',
-              letterSpacing: '1.25px',
-              fontSize: '12px',
-              lineHeight: '16px',
-            }}
           >
             <CaretDownIcon
               size={12}
@@ -363,55 +203,31 @@ function ActivityCard({
               }}
             />
             <ActivityTypeIcon type={activity.type} />
-            <span>{activity.type?.toLowerCase() ?? 'activity'}</span>
-          </Flex>
+            <ActivityTypeLabelSC>
+              {activity.type?.toLowerCase() ?? 'activity'}
+            </ActivityTypeLabelSC>
+          </ActivityHeaderSC>
           <ActivityStatusIcon status={activity.status} />
         </Flex>
-      </button>
+      </ActivityToggleSC>
 
-      <div
-        css={{
-          maxHeight: showDetails ? '220px' : '0',
-          opacity: showDetails ? 1 : 0,
-          overflow: 'hidden',
-          transition: 'max-height 220ms ease, opacity 180ms ease',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px',
-          paddingLeft: '32px',
-          paddingRight: '16px',
-        }}
-      >
-        <CaptionP
-          $color="text-light"
-          css={{
-            fontSize: '16px',
-            lineHeight: '24px',
-            letterSpacing: '0.25px',
-            margin: 0,
-          }}
-        >
+      <ActivityDetailsSC $show={showDetails}>
+        <ActivityTextSC $color="text-light">
           {activity.prompt || 'Running activity'}
-        </CaptionP>
+        </ActivityTextSC>
         {(progress.length > 0 ? progress : toFallbackOutput(activity)).map(
           (event, progressIdx) => (
-            <CaptionP
+            <ActivityTextSC
               key={`${activity.id}-${event.tool ?? 'output'}-${event.text}-${progressIdx}`}
               $color="text-long-form"
-              css={{
-                fontSize: '16px',
-                lineHeight: '24px',
-                letterSpacing: '0.25px',
-                margin: 0,
-              }}
             >
               {event.tool ? `${event.tool}: ` : ''}
               {event.text}
-            </CaptionP>
+            </ActivityTextSC>
           )
         )}
-      </div>
-    </div>
+      </ActivityDetailsSC>
+    </ActivityItemSC>
   )
 }
 
@@ -420,27 +236,19 @@ function ActivitySummaryStatus({
 }: {
   state: WorkbenchRunActivitiesState
 }) {
-  if (state === 'running')
-    return (
-      <SpinnerAlt
-        size={12}
-        css={{ color: '#aeb3c0' }}
-      />
-    )
-  if (state === 'finished')
-    return (
-      <CheckIcon
-        size={12}
-        color="icon-success"
-      />
-    )
-
-  return (
-    <CloudIcon
-      size={12}
-      color="icon-xlight"
-    />
-  )
+  switch (state) {
+    case 'running':
+      return <SpinnerAlt size={12} />
+    case 'finished':
+      return (
+        <CheckIcon
+          size={12}
+          color="icon-success"
+        />
+      )
+    default:
+      return <UnknownIcon size={12} />
+  }
 }
 
 function ActivityTypeIcon({
@@ -476,28 +284,7 @@ function ActivityStatusIcon({
   switch (status) {
     case WorkbenchJobActivityStatus.Pending:
     case WorkbenchJobActivityStatus.Running:
-      return (
-        <div
-          css={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            color: '#aeb3c0',
-            transition: 'opacity 180ms ease',
-          }}
-        >
-          <SpinnerAlt size={12} />
-          <span
-            css={{
-              textTransform: 'lowercase',
-              fontSize: '12px',
-              letterSpacing: '0.4px',
-            }}
-          >
-            {status.toLowerCase()}
-          </span>
-        </div>
-      )
+      return <SpinnerAlt size={12} />
     case WorkbenchJobActivityStatus.Successful:
       return (
         <CheckIcon
@@ -514,7 +301,7 @@ function ActivityStatusIcon({
       )
     default:
       return (
-        <CloudIcon
+        <UnknownIcon
           size={12}
           color="icon-xlight"
         />
@@ -542,3 +329,206 @@ function toFallbackOutput(
     },
   ]
 }
+
+const ActivitiesPanelSC = styled.div<{ $isRunning: boolean }>(
+  ({ $isRunning, theme }) => ({
+    border: theme.borders.default,
+    borderRadius: theme.borderRadiuses.medium,
+    padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px`,
+    background:
+      'linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(70, 78, 255, 0.18) 100%), #0e1015',
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.medium,
+    minHeight: 0,
+    overflow: 'hidden',
+    transition:
+      'border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease',
+    boxShadow: $isRunning
+      ? `0 0 0 1px ${theme.colors['border-primary']} inset`
+      : 'none',
+  })
+)
+
+const ActivitiesSummaryButtonSC = styled.button(({ theme }) => ({
+  border: theme.borders.default,
+  borderRadius: theme.borderRadiuses.medium,
+  background: theme.colors['fill-zero'],
+  color: theme.colors['text-light'],
+  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+  cursor: 'pointer',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  transition: 'background-color 180ms ease, border-color 180ms ease',
+  '&:hover': {
+    borderColor: theme.colors['border-fill-three'],
+    backgroundColor: theme.colors['fill-one'],
+  },
+}))
+
+const SummaryTextSC = styled.span(({ theme }) => ({
+  fontSize: '14px',
+  lineHeight: '20px',
+  letterSpacing: '0.5px',
+  color: theme.colors['text-light'],
+}))
+
+const EmptyWrapSC = styled.div(({ theme }) => ({
+  padding: `${theme.spacing.medium}px ${theme.spacing.xsmall}px`,
+  transition: 'opacity 220ms ease',
+  height: '100%',
+  minHeight: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}))
+
+const ActivitiesListWrapSC = styled.div<{ $expanded: boolean }>(
+  ({ $expanded }) => ({
+    display: $expanded ? 'block' : 'none',
+    flex: 1,
+    minHeight: 0,
+    overflow: 'auto',
+  })
+)
+
+const ActivitiesContentSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'stretch',
+  gap: theme.spacing.small,
+}))
+
+const RailSC = styled.div(({ theme }) => ({
+  width: '18px',
+  position: 'relative',
+  flexShrink: 0,
+  alignSelf: 'stretch',
+  marginTop: theme.spacing.large + 16,
+  marginBottom: theme.spacing.small + 18,
+}))
+
+const RailLineSC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  top: '20px',
+  bottom: '20px',
+  width: '1px',
+  backgroundColor: theme.colors['border-fill-three'],
+  opacity: 0.9,
+}))
+
+const RailHeadSC = styled.div<{ $isRunning: boolean }>(
+  ({ $isRunning, theme }) => ({
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    top: 0,
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    backgroundColor: $isRunning
+      ? theme.colors['border-primary']
+      : theme.colors['icon-disabled'],
+    boxShadow: $isRunning ? `0 0 0 2px ${theme.colors['fill-three']}` : 'none',
+    transition: 'background-color 220ms ease, box-shadow 220ms ease',
+    animation: $isRunning
+      ? 'workbenchRailPulse 1.8s ease-in-out infinite'
+      : 'none',
+    '@keyframes workbenchRailPulse': {
+      '0%, 100%': {
+        boxShadow: `0 0 0 2px ${theme.colors['fill-three']}`,
+      },
+      '50%': {
+        boxShadow: `0 0 0 5px ${theme.colors['fill-accent']}`,
+      },
+    },
+  })
+)
+
+const RailTailSC = styled.div(({ theme }) => ({
+  position: 'absolute',
+  left: '50%',
+  transform: 'translateX(-50%)',
+  bottom: 0,
+  width: '8px',
+  height: '8px',
+  borderRadius: '50%',
+  backgroundColor: theme.colors['icon-disabled'],
+}))
+
+const CardsWrapSC = styled.div(({ theme }) => ({
+  flex: 1,
+  minHeight: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  paddingTop: theme.spacing.large,
+  paddingRight: theme.spacing.xsmall,
+}))
+
+const ActivityItemSC = styled.div<{ $index: number }>(({ $index, theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  opacity: 0,
+  transform: 'translateY(6px)',
+  animation: `workbenchActivityIn 260ms ${$index * 40}ms ease forwards`,
+  '@keyframes workbenchActivityIn': {
+    from: { opacity: 0, transform: 'translateY(6px)' },
+    to: { opacity: 1, transform: 'translateY(0)' },
+  },
+}))
+
+const ActivityToggleSC = styled.button<{ $isRunning: boolean }>(
+  ({ $isRunning, theme }) => ({
+    border: theme.borders.default,
+    borderRadius: theme.borderRadiuses.medium,
+    backgroundColor: $isRunning
+      ? theme.colors['fill-one']
+      : theme.colors['fill-zero'],
+    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.small,
+    width: '100%',
+    transition:
+      'background-color 180ms ease, border-color 180ms ease, transform 180ms ease',
+    textAlign: 'left',
+    cursor: 'pointer',
+  })
+)
+
+const ActivityTypeLabelSC = styled.span({})
+
+const ActivityHeaderSC = styled(Flex)(({ theme }) => ({
+  color: theme.colors['text-xlight'],
+  textTransform: 'uppercase',
+  letterSpacing: '1.25px',
+  fontSize: '12px',
+  lineHeight: '16px',
+}))
+
+const ActivityTextSC = styled(CaptionP)({
+  margin: 0,
+  fontSize: '16px',
+  lineHeight: '24px',
+  letterSpacing: '0.25px',
+})
+
+const ActivityDetailsSC = styled.div<{ $show: boolean }>(
+  ({ $show, theme }) => ({
+    maxHeight: $show ? '220px' : '0',
+    opacity: $show ? 1 : 0,
+    overflow: 'hidden',
+    transition: 'max-height 220ms ease, opacity 180ms ease',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.xsmall,
+    paddingLeft: theme.spacing.large,
+    paddingRight: theme.spacing.medium,
+    paddingBottom: theme.spacing.small,
+  })
+)

@@ -10,7 +10,7 @@ import {
 import { isNonNullable } from '../../../../utils/isNonNullable'
 import { RectangleSkeleton } from '../../../utils/SkeletonLoaders'
 import { useEffect, useState } from 'react'
-import { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
 function toTodos(result?: WorkbenchJobResultFragment | null) {
   return (result?.todos ?? [])
@@ -31,7 +31,6 @@ export function WorkbenchRunTodos({
   loading: boolean
   result?: WorkbenchJobResultFragment | null
 }) {
-  const theme = useTheme()
   const todos = toTodos(result)
   const [expandedByKey, setExpandedByKey] = useState<Record<string, boolean>>(
     {}
@@ -60,63 +59,10 @@ export function WorkbenchRunTodos({
     )
 
   return (
-    <div
-      css={{
-        flex: 0.33,
-        minHeight: 0,
-        borderRadius: theme.borderRadiuses.large,
-        border: theme.borders.default,
-        position: 'relative',
-        width: '100%',
-      }}
-    >
-      <div
-        css={{
-          height: '100%',
-          borderRadius: '5px',
-          position: 'relative',
-          zIndex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          background: 'transparent',
-        }}
-      >
-        <div
-          css={{
-            color: '#a1a5b0',
-            fontSize: '12px',
-            fontWeight: 400,
-            letterSpacing: '1.25px',
-            lineHeight: '16px',
-            padding: '16px',
-            textTransform: 'uppercase',
-          }}
-        >
-          Agent todos
-        </div>
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '12px',
-            padding: '0 16px 16px',
-            maxHeight: '260px',
-            overflowY: 'auto',
-            scrollbarWidth: 'thin',
-            scrollbarColor: '#454954 transparent',
-            '&::-webkit-scrollbar': {
-              width: '6px',
-            },
-            '&::-webkit-scrollbar-track': {
-              background: 'transparent',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: '#454954',
-              borderRadius: '999px',
-            },
-          }}
-        >
+    <TodosPanelSC>
+      <TodosInnerSC>
+        <TodosTitleSC>Agent todos</TodosTitleSC>
+        <TodosListSC>
           {todos.length > 0 ? (
             todos.map((todo) => {
               const key = getTodoKey(todo)
@@ -137,20 +83,11 @@ export function WorkbenchRunTodos({
               )
             })
           ) : (
-            <span
-              css={{
-                color: '#a1a5b0',
-                fontSize: '12px',
-                letterSpacing: '0.5px',
-                lineHeight: '16px',
-              }}
-            >
-              No to-do items yet.
-            </span>
+            <TodosEmptySC>No to-do items yet.</TodosEmptySC>
           )}
-        </div>
-      </div>
-    </div>
+        </TodosListSC>
+      </TodosInnerSC>
+    </TodosPanelSC>
   )
 }
 
@@ -171,84 +108,151 @@ function TodoRow({
   const canToggle = hasDescription
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        gap: '8px',
-        alignItems: 'flex-start',
-      }}
-    >
-      <div css={{ marginTop: '2px', flexShrink: 0 }}>
+    <TodoRowSC>
+      <TodoIconWrapSC>
         {todo.done ? (
           <CheckOutlineIcon color="icon-light" />
         ) : (
           <CircleDashIcon color="icon-light" />
         )}
-      </div>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '4px',
-          minWidth: 0,
-          flex: 1,
-        }}
-      >
-        <button
+      </TodoIconWrapSC>
+      <TodoContentSC>
+        <TodoTitleButtonSC
           onClick={onToggle}
           disabled={!canToggle}
-          css={{
-            border: 'none',
-            background: 'transparent',
-            padding: 0,
-            margin: 0,
-            color: '#c5c9d2',
-            fontSize: '12px',
-            lineHeight: '16px',
-            width: '100%',
-            textAlign: 'left',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '8px',
-            cursor: canToggle ? 'pointer' : 'default',
-          }}
+          $canToggle={canToggle}
         >
-          <span
-            css={{
-              fontWeight: 700,
-            }}
-          >
-            {todo.name}
-          </span>
+          <TodoTitleSC>{todo.name}</TodoTitleSC>
           {hasDescription ? (
             <CaretDownIcon
               size={12}
               color="icon-xlight"
-              css={{
-                transform: expanded ? 'rotate(0deg)' : 'rotate(-90deg)',
-                transition: 'transform 180ms ease',
-                flexShrink: 0,
-              }}
+              css={todoCaretStyle(expanded)}
             />
           ) : null}
-        </button>
+        </TodoTitleButtonSC>
         {hasDescription && expanded ? (
-          <div
-            css={{
-              color: '#a1a5b0',
-              fontSize: '12px',
-              lineHeight: '16px',
-            }}
-          >
-            {todo.description}
-          </div>
+          <TodoDescriptionSC>{todo.description}</TodoDescriptionSC>
         ) : null}
-      </div>
-    </div>
+      </TodoContentSC>
+    </TodoRowSC>
   )
 }
 
 function getTodoKey(todo: WorkbenchJobResultTodoFragment) {
   return `${todo.name ?? 'todo'}-${todo.description ?? 'desc'}`
 }
+
+function todoCaretStyle(expanded: boolean) {
+  return {
+    transform: expanded ? 'rotate(0deg)' : 'rotate(-90deg)',
+    transition: 'transform 180ms ease',
+    flexShrink: 0,
+  }
+}
+
+const TodosPanelSC = styled.div(({ theme }) => ({
+  flex: 0.33,
+  minHeight: 0,
+  borderRadius: theme.borderRadiuses.large,
+  border: theme.borders.default,
+  position: 'relative',
+  width: '100%',
+}))
+
+const TodosInnerSC = styled.div(({ theme }) => ({
+  height: '100%',
+  borderRadius: theme.borderRadiuses.medium,
+  position: 'relative',
+  zIndex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: 'hidden',
+  background: 'transparent',
+}))
+
+const TodosTitleSC = styled.div(({ theme }) => ({
+  color: theme.colors['text-xlight'],
+  fontSize: '12px',
+  fontWeight: 400,
+  letterSpacing: '1.25px',
+  lineHeight: '16px',
+  padding: theme.spacing.large,
+  textTransform: 'uppercase',
+}))
+
+const TodosListSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+  padding: `0 ${theme.spacing.large}px ${theme.spacing.large}px`,
+  maxHeight: '260px',
+  overflowY: 'auto',
+  scrollbarWidth: 'thin',
+  scrollbarColor: `${theme.colors['border-fill-three']} transparent`,
+  '&::-webkit-scrollbar': {
+    width: '6px',
+  },
+  '&::-webkit-scrollbar-track': {
+    background: 'transparent',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    backgroundColor: theme.colors['border-fill-three'],
+    borderRadius: '999px',
+  },
+}))
+
+const TodosEmptySC = styled.span(({ theme }) => ({
+  color: theme.colors['text-xlight'],
+  fontSize: '12px',
+  letterSpacing: '0.5px',
+  lineHeight: '16px',
+}))
+
+const TodoRowSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.small,
+  alignItems: 'flex-start',
+}))
+
+const TodoIconWrapSC = styled.div({
+  marginTop: '2px',
+  flexShrink: 0,
+})
+
+const TodoContentSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  minWidth: 0,
+  flex: 1,
+}))
+
+const TodoTitleButtonSC = styled.button<{ $canToggle: boolean }>(
+  ({ $canToggle, theme }) => ({
+    border: 'none',
+    background: 'transparent',
+    padding: 0,
+    margin: 0,
+    color: theme.colors['text-light'],
+    fontSize: '12px',
+    lineHeight: '16px',
+    width: '100%',
+    textAlign: 'left',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: theme.spacing.small,
+    cursor: $canToggle ? 'pointer' : 'default',
+  })
+)
+
+const TodoTitleSC = styled.span({
+  fontWeight: 700,
+})
+
+const TodoDescriptionSC = styled.div(({ theme }) => ({
+  color: theme.colors['text-xlight'],
+  fontSize: '12px',
+  lineHeight: '16px',
+}))

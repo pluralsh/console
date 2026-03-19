@@ -30,31 +30,20 @@ import { mapExistingNodes } from '../../../../utils/graphql'
 import { WorkbenchRunActivities } from './WorkbenchRunActivities'
 import { WorkbenchRunTodos } from './WorkbenchRunTodos'
 import { WorkbenchRunResult } from './WorkbenchRunResult'
-import { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
 type WorkbenchRunDataSource = 'mock' | 'live'
-
-function resolveWorkbenchRunDataSource(
-  sourceParam: Nullable<string>
-): WorkbenchRunDataSource {
-  if (sourceParam === 'mock' || sourceParam === 'live') return sourceParam
-
-  const configuredSource = import.meta.env
-    .VITE_WORKBENCH_RUN_DATA_SOURCE as Nullable<string>
-
-  return configuredSource === 'live' ? 'live' : 'mock'
-}
 
 export function WorkbenchRun() {
   const {
     [WORKBENCH_PARAM_ID]: workbenchId = '',
     [WORKBENCH_RUNS_PARAM_RUN]: runId = '',
   } = useParams()
-  const dataSource = resolveWorkbenchRunDataSource('live')
+  const dataSource: WorkbenchRunDataSource = 'live'
   const isMockMode = dataSource === 'mock'
 
   const feeder = useMemo(
-    () => createWorkbenchRunMockFeeder({ loop: false, speed: 0.2 }),
+    () => createWorkbenchRunMockFeeder({ loop: true, speed: 0.2 }),
     []
   )
   const [run, setRun] = useState<WorkbenchJob | null>(null)
@@ -178,16 +167,7 @@ export function WorkbenchRun() {
   )
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        padding: '24px',
-        gap: '24px',
-        height: '100%',
-        minHeight: 0,
-      }}
-    >
+    <RunWrapperSC>
       <WorkbenchRunHeader
         loading={loading}
         job={run as WorkbenchJob}
@@ -198,15 +178,7 @@ export function WorkbenchRun() {
           error={error}
         />
       )}
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'row',
-          gap: '24px',
-          height: '100%',
-          minHeight: 0,
-        }}
-      >
+      <RunBodySC>
         <WorkbenchRunActivities
           loading={loading}
           activities={mapExistingNodes(run?.activities)}
@@ -217,8 +189,8 @@ export function WorkbenchRun() {
           loading={loading}
           result={run?.result}
         />
-      </div>
-    </div>
+      </RunBodySC>
+    </RunWrapperSC>
   )
 }
 
@@ -229,23 +201,9 @@ function WorkbenchRunHeader({
   loading: boolean
   job: WorkbenchJob
 }) {
-  const theme = useTheme()
-
   return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.medium,
-      }}
-    >
-      <div
-        css={{
-          display: 'flex',
-          flex: '1',
-          flexDirection: 'column',
-          gap: theme.spacing.medium,
-        }}
-      >
+    <HeaderSC>
+      <HeaderTextSC>
         <StackedText
           loading={loading}
           first={job?.workbench?.name}
@@ -255,16 +213,8 @@ function WorkbenchRunHeader({
           secondColor="text-xlight"
           secondPartialType="body2"
         />
-      </div>
-      <div
-        css={{
-          display: 'flex',
-          flex: '1',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: theme.spacing.small,
-        }}
-      >
+      </HeaderTextSC>
+      <HeaderActionsSC>
         <RunStatusChip
           loading={loading}
           size="large"
@@ -280,8 +230,8 @@ function WorkbenchRunHeader({
             />
           }
         />
-      </div>
-    </div>
+      </HeaderActionsSC>
+    </HeaderSC>
   )
 }
 
@@ -292,18 +242,8 @@ function WorkbenchRunSidecar({
   loading: boolean
   result?: WorkbenchJob['result']
 }) {
-  const theme = useTheme()
-
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        flex: 1,
-        minHeight: 0,
-        gap: theme.spacing.medium,
-      }}
-    >
+    <SidecarSC>
       <WorkbenchRunResult
         loading={loading}
         result={result}
@@ -312,7 +252,7 @@ function WorkbenchRunSidecar({
         loading={loading}
         result={result}
       />
-    </div>
+    </SidecarSC>
   )
 }
 
@@ -329,21 +269,22 @@ function upsertActivityInRun(
   if (index >= 0) {
     updatedEdges[index] = {
       __typename: 'WorkbenchJobActivityEdge',
-      node: activity,
-    }
+      node: activity as any,
+    } as any
   } else {
     updatedEdges.push({
       __typename: 'WorkbenchJobActivityEdge',
-      node: activity,
-    })
+      node: activity as any,
+    } as any)
   }
 
   return {
     ...run,
     activities: {
+      ...(run.activities ?? {}),
       __typename: 'WorkbenchJobActivityConnection',
       edges: updatedEdges,
-    },
+    } as any,
   }
 }
 
@@ -367,3 +308,48 @@ function appendProgressEvent(
     [progress.activityId]: [...current, progress],
   }
 }
+
+const RunWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  padding: theme.spacing.xlarge,
+  gap: theme.spacing.xlarge,
+  height: '100%',
+  minHeight: 0,
+}))
+
+const RunBodySC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'row',
+  gap: theme.spacing.xlarge,
+  height: '100%',
+  minHeight: 0,
+}))
+
+const HeaderSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.medium,
+}))
+
+const HeaderTextSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: '1',
+  flexDirection: 'column',
+  gap: theme.spacing.medium,
+}))
+
+const HeaderActionsSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flex: '1',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  gap: theme.spacing.small,
+}))
+
+const SidecarSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  flex: 1,
+  minHeight: 0,
+  gap: theme.spacing.medium,
+}))
