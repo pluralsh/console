@@ -32,16 +32,12 @@ import { WorkbenchRunTodos } from './WorkbenchRunTodos'
 import { WorkbenchRunResult } from './WorkbenchRunResult'
 import styled from 'styled-components'
 
-type WorkbenchRunDataSource = 'mock' | 'live'
-
 export function WorkbenchRun() {
   const {
     [WORKBENCH_PARAM_ID]: workbenchId = '',
     [WORKBENCH_RUNS_PARAM_RUN]: runId = '',
   } = useParams()
-  const dataSource: WorkbenchRunDataSource = 'live'
-  const isMockMode = dataSource === 'mock'
-
+  const isMockMode = false
   const feeder = useMemo(
     () => createWorkbenchRunMockFeeder({ loop: true, speed: 0.2 }),
     []
