@@ -15,6 +15,8 @@ EXPOSE 9418
 RUN apk update --no-cache
 # Upgrade OpenSSL packages to fix CVE related to stack buffer overflow in CMS AuthEnvelopedData parsing
 RUN apk upgrade --no-cache libssl3 libcrypto3
+# Upgrade libexpat to fix authorization bypass vulnerability allowing arbitrary SQL execution
+RUN apk upgrade --no-cache libexpat
 RUN apk add sudo git vim curl
 
 # create keys
@@ -49,6 +51,8 @@ EXPOSE 9418
 RUN apk update --no-cache
 # Upgrade OpenSSL packages to fix CVE related to stack buffer overflow in CMS AuthEnvelopedData parsing
 RUN apk upgrade --no-cache libssl3 libcrypto3
+# Upgrade libexpat to fix authorization bypass vulnerability allowing arbitrary SQL execution
+RUN apk upgrade --no-cache libexpat
 RUN apk add git
 
 COPY --from=builder /usr/bin/soft /usr/bin/
