@@ -22,7 +22,8 @@ type SplunkProvider struct {
 }
 
 type SplunkSearchResponse struct {
-	Result SplunkSearchResponseResult `json:"result"`
+	Preview bool                       `json:"preview"`
+	Result  SplunkSearchResponseResult `json:"result"`
 }
 
 type SplunkSearchResponseResult struct {
@@ -116,6 +117,10 @@ func (in *SplunkProvider) toLogsQueryOutput(responseBody string) (*toolquery.Log
 
 		var item SplunkSearchResponse
 		if err := json.Unmarshal([]byte(line), &item); err != nil {
+			continue
+		}
+
+		if item.Preview || item.Result.Message == "" || item.Result.Timestamp == "" {
 			continue
 		}
 
