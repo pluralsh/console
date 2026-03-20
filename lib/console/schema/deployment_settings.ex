@@ -6,6 +6,7 @@ defmodule Console.Schema.DeploymentSettings do
   defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5
   defenum LogDriver, victoria: 0, elastic: 1, opensearch: 2
   defenum VectorStore, elastic: 0, opensearch: 1
+  defenum OpenAIMethod, chat: 0, responses: 1, auto: 2
 
   defmodule Connection do
     use Piazza.Ecto.Schema
@@ -210,6 +211,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :model,           :string
         field :tool_model,      :string
         field :embedding_model, :string
+        field :method,          OpenAIMethod, default: :auto
 
         field :proxy_models, {:array, :string}
       end
@@ -350,7 +352,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:analysis_rates, with: &analysis_rates_changeset/2)
     |> cast_embed(:vector_store, with: &vector_store_changeset/2)
     |> cast_embed(:graph, with: &graph_store_changeset/2)
-    |> cast_embed(:openai, with: &ai_api_changeset/2)
+    |> cast_embed(:openai, with: &openai_changeset/2)
     |> cast_embed(:anthropic, with: &ai_api_changeset/2)
     |> cast_embed(:ollama, with: &ollama_changeset/2)
     |> cast_embed(:azure, with: &azure_openai_changeset/2)
@@ -364,6 +366,11 @@ defmodule Console.Schema.DeploymentSettings do
   defp ai_api_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(access_token model tool_model embedding_model base_url proxy_models)a)
+  end
+
+  defp openai_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(base_url access_token model tool_model embedding_model method proxy_models)a)
   end
 
   defp ollama_changeset(model, attrs) do

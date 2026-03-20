@@ -3,13 +3,13 @@ defmodule Console.AI.Azure do
   Implements our basic llm behaviour against the OpenAI api
   """
   @behaviour Console.AI.Provider
-  alias Console.AI.OpenAI
+  import Console.AI.Provider.Base
+  alias Console.AI.{Utils, Stream}
 
-  require Logger
+  @model "gpt-4.1-mini"
+  @embedding_model "text-embedding-3-large"
 
-  defstruct [:azure_token, :access_token, :api_version, :base_url, :model, :tool_model, :embedding_model, :deployments]
-
-  @api_vsn "2024-10-21"
+  defstruct [:azure_token, :access_token, :api_version, :base_url, :model, :tool_model, :embedding_model, :deployments, :stream]
 
   @type t :: %__MODULE__{}
 
@@ -18,72 +18,71 @@ defmodule Console.AI.Azure do
       azure_token: opts.access_token,
       access_token: opts.access_token,
       api_version: opts.api_version,
-      model: opts.model,
-      tool_model: opts.tool_model,
-      embedding_model: opts.embedding_model,
+      model: opts.model || @model,
+      tool_model: opts.tool_model || @model,
+      embedding_model: opts.embedding_model || @embedding_model,
       base_url: opts.endpoint,
-      deployments: opts.deployments
+      deployments: opts.deployments,
+      stream: Stream.stream(),
     }
   end
 
-  def proxy(%__MODULE__{} = azure) do
-    {:ok, %Console.AI.Proxy{
-      backend: :openai,
-      url: deployment_url(azure, azure.model || OpenAI.default_model()),
-      token: azure.azure_token,
-      params: %{"api-version" => azure.api_version || @api_vsn}
-    }}
-  end
+  def proxy(%__MODULE__{}), do: {:error, "proxy not implemented for this provider"}
 
   @doc """
-  Generate a openai completion from the azure openai credentials chain
+  Generate a openai completion
   """
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{api_version: vsn, model: model} = azure, messages, opts) do
-    model = model || OpenAI.default_model()
-
-    OpenAI.new(%{azure | base_url: deployment_url(azure, model)})
-    |> Map.put(:params, %{"api-version" => vsn || @api_vsn})
-    |> Map.put(:model, model)
-    |> OpenAI.completion(messages, opts)
+  def completion(%__MODULE__{} = az, messages, opts) do
+    messages
+    |> reqllm_messages()
+    |> generate_text("azure:#{az.model}", az.stream, provider_options(az, az.model) ++ [tools: tools(opts)])
+    |> reqllm_result()
   end
 
   @doc """
-  Generate a openai completion from the azure openai credentials chain
+  Calls an openai tool call interface w/ strict mode
   """
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
-  def tool_call(%__MODULE__{api_version: vsn, model: model, tool_model: tool_model} = azure, messages, tools, opts) do
-    model = tool_model || model || OpenAI.default_model()
-
-    OpenAI.new(%{azure | base_url: deployment_url(azure, model)})
-    |> Map.put(:params, %{"api-version" => vsn || @api_vsn})
-    |> Map.put(:model, model)
-    |> OpenAI.tool_call(messages, tools, opts)
+  def tool_call(%__MODULE__{} = az, messages, tools, _opts) do
+    messages
+    |> reqllm_messages()
+    |> generate_text("azure:#{az.tool_model}", az.stream, provider_options(az, az.tool_model) ++ [tools: reqllm_tools(tools)])
+    |> reqllm_result()
+    |> tool_calls()
   end
 
-  @doc """
-  Generate a openai completion from the azure openai credentials chain
-  """
-  @spec embeddings(t(), binary) :: {:ok, [{binary, [float]}]} | {:error, binary}
-  def embeddings(%__MODULE__{api_version: vsn, embedding_model: model} = azure, text) do
-    model = model || OpenAI.default_embedding_model()
-
-    OpenAI.new(%{azure | base_url: deployment_url(azure, model)})
-    |> Map.put(:params, %{"api-version" => vsn || @api_vsn})
-    |> Map.put(:embedding_model, model)
-    |> OpenAI.embeddings(text)
+  def embeddings(%__MODULE__{} = az, text) do
+    chunked = Utils.chunk(text, 8000)
+    provider_options(az, az.embedding_model)
+    |> Keyword.put(:dimensions, Utils.embedding_dims())
+    |> then(&ReqLLM.embed("azure:#{az.embedding_model}", chunked, &1))
+    |> case do
+      {:ok, embeddings} -> {:ok, Enum.zip(chunked, embeddings)}
+      error -> error
+    end
   end
 
-  def context_window(azure), do: OpenAI.context_window(OpenAI.new(azure))
-
-  defp deployment_url(%__MODULE__{base_url: base_url, deployments: deployments}, model)
-      when is_binary(base_url) and is_binary(model) do
-    case deployments do
-      %{^model => deployment} when is_binary(deployment) and byte_size(deployment) > 0 ->
-        Path.join(base_url, deployment)
-      _ -> Path.join(base_url, model)
+  def context_window(%__MODULE__{model: model}) do
+    case LLMDB.model("azure:#{model}") do
+      {:ok, %LLMDB.Model{limits: %{context: context}}} when is_integer(context) -> context
+      _ -> 256_000
     end
   end
 
   def tools?(), do: true
+
+  defp provider_options(%__MODULE__{base_url: base_url, access_token: key} = az, model) do
+    [base_url: normalize_url(base_url), api_key: key, deployment: deployment(az, model)]
+    |> Enum.filter(fn {_, v} -> not is_nil(v) end)
+  end
+
+  defp deployment(%__MODULE__{deployments: deployments}, model) do
+    case deployments do
+      %{^model => deployment} -> deployment
+      _ -> model
+    end
+  end
+
+  defp normalize_url(url), do: String.trim_trailing(url, "/deployments")
 end

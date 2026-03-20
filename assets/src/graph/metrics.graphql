@@ -49,3 +49,23 @@ query ServiceHeatMap($serviceId: ID!, $flavor: HeatMapFlavor!) {
     }
   }
 }
+
+query ServiceMetrics($id: ID!, $step: String, $start: DateTime) {
+  serviceDeployment(id: $id) {
+    id
+    serviceMetrics(step: $step, start: $start) {
+      cpu {
+        ...MetricResponse
+      }
+      mem {
+        ...MetricResponse
+      }
+      podCpu {
+        ...MetricResponse
+      }
+      podMem {
+        ...MetricResponse
+      }
+    }
+  }
+}

@@ -172,7 +172,7 @@ defmodule Console.AI.Fixer.Service do
     with {:ok, f} <- Services.tarfile(svc),
          {:ok, contents} <- Tar.tar_stream(f) do
       files = file_prompts(contents)
-      too_large = floor(Provider.context_window() * (opts[:ctx_window_scale] || 0.5))
+      too_large = floor(Provider.context_window(:tool) * (opts[:ctx_window_scale] || 0.5))
       case Enum.sum_by(files, &byte_size(Jason.encode!(&1))) do
         size when size > too_large ->
           keep_files = ~w(values.yaml values.yaml.liquid)a ++ (if svc.helm.lua_file, do: [svc.helm.lua_file], else: [])

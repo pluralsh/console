@@ -11,7 +11,7 @@ defmodule Console.AI.Tools.Pra.Ls do
 
   @schema Console.priv_file!("tools/pra/ls.json") |> Jason.decode!()
 
-  def name(_), do: "pra_ls"
+  def name(_), do: "ls"
   def description(_), do: "Lists the contents of a directory, with optional search to filter only files with matching content"
   def json_schema(_), do: @schema
 
@@ -39,7 +39,7 @@ defmodule Console.AI.Tools.Pra.Ls do
   end
 
   defp maybe_filter(paths, regex) when is_binary(regex) and byte_size(regex) > 0 do
-    with {:ok, regex} <- Regex.compile(regex, multiline: true) do
+    with {:ok, regex} <- Regex.compile(regex, [:multiline]) do
       Enum.filter(paths, fn path ->
         File.read!(path)
         |> then(&Regex.match?(regex, &1))
@@ -51,6 +51,6 @@ defmodule Console.AI.Tools.Pra.Ls do
   defp relative_paths(paths, dir) when is_list(paths) do
     Enum.map(paths, &Path.relative_to(&1, dir))
     |> Enum.sort()
-    |> then(& {:ok, &1})
+    |> Jason.encode()
   end
 end

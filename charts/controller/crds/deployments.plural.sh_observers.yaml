@@ -166,6 +166,21 @@ spec:
                               description: Actor specifies the actor to use for the
                                 created branch. Should be a user email in Plural.
                               type: string
+                            ai:
+                              description: Ai contains configuration for AI assistance
+                                in this PR automation.
+                              properties:
+                                enabled:
+                                  description: Whether AI assistance is enabled for
+                                    this automation.
+                                  type: boolean
+                                prompt:
+                                  description: The prompt to use to guide the AI code
+                                    change for this PR.
+                                  type: string
+                              required:
+                              - prompt
+                              type: object
                             branchTemplate:
                               description: |-
                                 BranchTemplate provides a template for generating branch names.
@@ -231,8 +246,6 @@ spec:
                                 Use this when you want to target a different repository than the one
                                 configured in the PR automation template.
                               type: string
-                          required:
-                          - prAutomationRef
                           type: object
                       type: object
                     type:

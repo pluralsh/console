@@ -3,72 +3,88 @@ defmodule Console.AI.Bedrock do
   Implements our basic llm behaviour against a self-hosted ollama deployment
   """
   @behaviour Console.AI.Provider
-  alias Console.AI.OpenAI
+  import Console.AI.Provider.Base
+  alias Console.AI.{Utils, Stream}
 
   require Logger
 
-  defstruct [:access_token, :model_id, :tool_model_id, :region, :embedding_model]
+  defstruct [:access_token, :model_id, :tool_model_id, :region, :embedding_model, :aws_access_key_id, :aws_secret_access_key, :stream]
 
   @type t :: %__MODULE__{}
 
+  @model "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
+  @embedding_model "cohere.embed-english-v3"
+
   def new(opts) do
     %__MODULE__{
-      model_id: opts.model_id,
-      tool_model_id: opts.tool_model_id,
-      embedding_model: opts.embedding_model,
+      model_id: opts.model_id || @model,
+      tool_model_id: opts.tool_model_id || @model,
+      embedding_model: opts.embedding_model || @embedding_model,
+      aws_access_key_id: opts.aws_access_key_id,
+      aws_secret_access_key: opts.aws_secret_access_key,
       access_token: opts.access_token,
       region: opts.region,
+      stream: Stream.stream(),
     }
   end
 
-  def proxy(%__MODULE__{access_token: token} = bedrock) do
-    {:ok, %Console.AI.Proxy{
-      url: openai_url(bedrock),
-      backend: :openai,
-      token: token,
-    }}
+  def proxy(%__MODULE__{}), do: {:error, "proxy not implemented for this provider"}
+
+  @doc """
+  Generate a openai completion
+  """
+  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
+  def completion(%__MODULE__{} = bedrock, messages, opts) do
+    messages
+    |> reqllm_messages()
+    |> generate_text("amazon-bedrock:#{bedrock.model_id}", bedrock.stream, Keyword.put(provider_options(bedrock), :tools, tools(opts)))
+    |> reqllm_result()
   end
 
   @doc """
-  Generate a anthropic completion from
+  Calls an openai tool call interface w/ strict mode
   """
-  @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{model_id: model, access_token: token} = bedrock, messages, opts) do
-    OpenAI.new(%{
-      base_url: openai_url(bedrock),
-      access_token: token,
-      model: model,
-      tool_model: bedrock.tool_model_id
-    })
-    |> OpenAI.completion(messages, opts)
-  end
-
-  def context_window(_), do: 250_000 * 4
-
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
-  def tool_call(%__MODULE__{model_id: model, access_token: token} = bedrock, messages, tools, opts) do
-    OpenAI.new(%{
-      base_url: openai_url(bedrock),
-      access_token: token,
-      model: model,
-      tool_model: bedrock.tool_model_id
-    })
-    |> OpenAI.tool_call(messages, tools, opts)
+  def tool_call(%__MODULE__{} = bedrock, messages, tools, _opts) do
+    messages
+    |> reqllm_messages()
+    |> generate_text("amazon-bedrock:#{bedrock.tool_model_id}", bedrock.stream, Keyword.put(provider_options(bedrock), :tools, reqllm_tools(tools)))
+    |> reqllm_result()
+    |> tool_calls()
   end
 
-  @spec embeddings(t(), binary) :: {:ok, [{binary, [float]}]} | {:error, binary}
-  def embeddings(%__MODULE__{model_id: model, access_token: token} = bedrock, text) do
-    OpenAI.new(%{
-      base_url: openai_url(bedrock),
-      access_token: token,
-      model: model,
-      embedding_model: bedrock.embedding_model
-    })
-    |> OpenAI.embeddings(text)
+  def embeddings(%__MODULE__{} = bedrock, text) do
+    chunked = Utils.chunk(text, 8000)
+    provider_options(bedrock)
+    |> Keyword.put(:dimensions, Utils.embedding_dims())
+    |> then(&ReqLLM.embed("amazon-bedrock:#{bedrock.embedding_model}", chunked, &1))
+    |> case do
+      {:ok, embeddings} -> {:ok, Enum.zip(chunked, embeddings)}
+      error -> error
+    end
+  end
+
+  def context_window(%__MODULE__{model_id: model}) do
+    case LLMDB.model("amazon-bedrock:#{model}") do
+      {:ok, %LLMDB.Model{limits: %{context: context}}} -> context
+      _ -> 500_000
+    end
   end
 
   def tools?(), do: true
 
-  defp openai_url(%__MODULE__{region: region}),
-    do: "https://bedrock-runtime.#{region}.amazonaws.com/openai/v1"
+  def provider_options(%__MODULE__{region: region, access_token: token} = bedrock) do
+    [region: region, access_token: token]
+    |> Enum.concat(if is_nil(token), do: aws_auth(bedrock), else: [])
+    |> Enum.filter(fn {_, v} -> not is_nil(v) end)
+  end
+
+  defp aws_auth(%__MODULE__{aws_access_key_id: aid, aws_secret_access_key: sak})
+    when is_binary(aid) and is_binary(sak), do: [access_key_id: aid, secret_access_key: sak]
+  defp aws_auth(_) do
+    ExAws.Config.new("bedrock-runtime")
+    |> Map.take([:access_key_id, :secret_access_key, :security_token])
+    |> Console.move([:security_token], [:session_token])
+    |> Map.to_list()
+  end
 end

@@ -5296,6 +5296,8 @@ export type Kustomize = {
   __typename?: 'Kustomize';
   /** if the kustomization will need to inflate a helm chart */
   enableHelm?: Maybe<Scalars['Boolean']['output']>;
+  /** if the kustomization will need to apply envsubst to the manifests */
+  envsubst?: Maybe<Scalars['Boolean']['output']>;
   /** the path to the kustomization file to use */
   path: Scalars['String']['output'];
 };
@@ -5303,6 +5305,8 @@ export type Kustomize = {
 export type KustomizeAttributes = {
   /** if the kustomization will need to inflate a helm chart */
   enableHelm?: InputMaybe<Scalars['Boolean']['input']>;
+  /** if the kustomization will need to apply envsubst to the manifests */
+  envsubst?: InputMaybe<Scalars['Boolean']['input']>;
   /** the path to the kustomization file to use */
   path: Scalars['String']['input'];
 };
@@ -6550,7 +6554,9 @@ export type ObserverPrAction = {
   __typename?: 'ObserverPrAction';
   /** the actor to use for the created branch, should be a user email in Plural */
   actor?: Maybe<Scalars['String']['output']>;
-  automationId: Scalars['ID']['output'];
+  /** configuration for an AI pr automation (eliminates the need for a full pr automation reference) */
+  ai?: Maybe<ObserverPrAiAction>;
+  automationId?: Maybe<Scalars['ID']['output']>;
   /** a template to use for the created branch, use $value to interject the observed value */
   branchTemplate?: Maybe<Scalars['String']['output']>;
   /** the context to apply, use $value to interject the observed value */
@@ -6562,12 +6568,29 @@ export type ObserverPrAction = {
 export type ObserverPrActionAttributes = {
   /** the actor to use for the created branch, should be a user email in Plural */
   actor?: InputMaybe<Scalars['String']['input']>;
-  automationId: Scalars['ID']['input'];
+  ai?: InputMaybe<ObserverPrAiActionAttributes>;
+  automationId?: InputMaybe<Scalars['ID']['input']>;
   /** a template to use for the created branch, use $value to interject the observed value */
   branchTemplate?: InputMaybe<Scalars['String']['input']>;
   /** the context to apply, use $value to interject the observed value */
   context: Scalars['Json']['input'];
   repository?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Configuration for AI assistance in a PR automation */
+export type ObserverPrAiAction = {
+  __typename?: 'ObserverPrAiAction';
+  /** whether AI assistance is enabled for this automation */
+  enabled?: Maybe<Scalars['Boolean']['output']>;
+  /** custom prompt to guide AI updates for this automation */
+  prompt: Scalars['String']['output'];
+};
+
+export type ObserverPrAiActionAttributes = {
+  /** whether AI assistance is enabled for this automation */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** custom prompt to guide AI updates for this automation */
+  prompt: Scalars['String']['input'];
 };
 
 /** Resets the current value of the observer */
@@ -6710,6 +6733,12 @@ export type OllamaSettings = {
   url: Scalars['String']['output'];
 };
 
+export enum OpenAiMethod {
+  Auto = 'AUTO',
+  Chat = 'CHAT',
+  Responses = 'RESPONSES'
+}
+
 /** OpenAI connection information */
 export type OpenaiSettings = {
   __typename?: 'OpenaiSettings';
@@ -6717,6 +6746,8 @@ export type OpenaiSettings = {
   baseUrl?: Maybe<Scalars['String']['output']>;
   /** the model to use for vector embeddings */
   embeddingModel?: Maybe<Scalars['String']['output']>;
+  /** the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions) */
+  method?: Maybe<OpenAiMethod>;
   /** the openai model version to use */
   model?: Maybe<Scalars['String']['output']>;
   /** addditional models to support within the integrated ai proxy */
@@ -6730,6 +6761,8 @@ export type OpenaiSettingsAttributes = {
   baseUrl?: InputMaybe<Scalars['String']['input']>;
   /** the model to use for vector embeddings */
   embeddingModel?: InputMaybe<Scalars['String']['input']>;
+  /** the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions) */
+  method?: InputMaybe<OpenAiMethod>;
   model?: InputMaybe<Scalars['String']['input']>;
   /** addditional models to support within the integrated ai proxy */
   proxyModels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -7550,7 +7583,7 @@ export type PrAutomation = {
   labels?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** a set of lua scripts to use to preprocess the PR automation */
   lua?: Maybe<PrLuaSpec>;
-  message: Scalars['String']['output'];
+  message?: Maybe<Scalars['String']['output']>;
   /** the name for this automation */
   name: Scalars['String']['output'];
   /** the project this automation lives w/in */
@@ -7565,7 +7598,7 @@ export type PrAutomation = {
   secrets?: Maybe<PrSecrets>;
   /** link to a service if this can update its configuration */
   service?: Maybe<ServiceDeployment>;
-  title: Scalars['String']['output'];
+  title?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   updates?: Maybe<PrUpdateSpec>;
   /** software vendoring logic to perform in this PR */
@@ -12856,6 +12889,7 @@ export type ServiceDeployment = {
   /** a relay connection of all revisions of this service, these are periodically pruned up to a history limit */
   revisions?: Maybe<RevisionConnection>;
   scalingRecommendations?: Maybe<Array<Maybe<ClusterScalingRecommendation>>>;
+  serviceMetrics?: Maybe<ServiceComponentMetrics>;
   /** latest git sha we pulled from */
   sha?: Maybe<Scalars['String']['output']>;
   /** the sources of this service */
@@ -12939,6 +12973,14 @@ export type ServiceDeploymentRevisionsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeploymentServiceMetricsArgs = {
+  start?: InputMaybe<Scalars['DateTime']['input']>;
+  step?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 export type ServiceDeploymentAttributes = {
@@ -17970,6 +18012,15 @@ export type ServiceHeatMapQueryVariables = Exact<{
 
 
 export type ServiceHeatMapQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, heatMap?: { __typename?: 'UtilizationHeatMap', cpu?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null, memory?: Array<{ __typename?: 'MetricPointResponse', metric?: Record<string, unknown> | null, value?: { __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null } | null> | null } | null } | null };
+
+export type ServiceMetricsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  step?: InputMaybe<Scalars['String']['input']>;
+  start?: InputMaybe<Scalars['DateTime']['input']>;
+}>;
+
+
+export type ServiceMetricsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, serviceMetrics?: { __typename?: 'ServiceComponentMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
 
 export type UrlSinkConfigurationFragment = { __typename?: 'UrlSinkConfiguration', url: string };
 
@@ -35321,6 +35372,65 @@ export type ServiceHeatMapQueryHookResult = ReturnType<typeof useServiceHeatMapQ
 export type ServiceHeatMapLazyQueryHookResult = ReturnType<typeof useServiceHeatMapLazyQuery>;
 export type ServiceHeatMapSuspenseQueryHookResult = ReturnType<typeof useServiceHeatMapSuspenseQuery>;
 export type ServiceHeatMapQueryResult = Apollo.QueryResult<ServiceHeatMapQuery, ServiceHeatMapQueryVariables>;
+export const ServiceMetricsDocument = gql`
+    query ServiceMetrics($id: ID!, $step: String, $start: DateTime) {
+  serviceDeployment(id: $id) {
+    id
+    serviceMetrics(step: $step, start: $start) {
+      cpu {
+        ...MetricResponse
+      }
+      mem {
+        ...MetricResponse
+      }
+      podCpu {
+        ...MetricResponse
+      }
+      podMem {
+        ...MetricResponse
+      }
+    }
+  }
+}
+    ${MetricResponseFragmentDoc}`;
+
+/**
+ * __useServiceMetricsQuery__
+ *
+ * To run a query within a React component, call `useServiceMetricsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceMetricsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceMetricsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      step: // value for 'step'
+ *      start: // value for 'start'
+ *   },
+ * });
+ */
+export function useServiceMetricsQuery(baseOptions: Apollo.QueryHookOptions<ServiceMetricsQuery, ServiceMetricsQueryVariables> & ({ variables: ServiceMetricsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceMetricsQuery, ServiceMetricsQueryVariables>(ServiceMetricsDocument, options);
+      }
+export function useServiceMetricsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceMetricsQuery, ServiceMetricsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceMetricsQuery, ServiceMetricsQueryVariables>(ServiceMetricsDocument, options);
+        }
+// @ts-ignore
+export function useServiceMetricsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceMetricsQuery, ServiceMetricsQueryVariables>): Apollo.UseSuspenseQueryResult<ServiceMetricsQuery, ServiceMetricsQueryVariables>;
+export function useServiceMetricsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ServiceMetricsQuery, ServiceMetricsQueryVariables>): Apollo.UseSuspenseQueryResult<ServiceMetricsQuery | undefined, ServiceMetricsQueryVariables>;
+export function useServiceMetricsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ServiceMetricsQuery, ServiceMetricsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceMetricsQuery, ServiceMetricsQueryVariables>(ServiceMetricsDocument, options);
+        }
+export type ServiceMetricsQueryHookResult = ReturnType<typeof useServiceMetricsQuery>;
+export type ServiceMetricsLazyQueryHookResult = ReturnType<typeof useServiceMetricsLazyQuery>;
+export type ServiceMetricsSuspenseQueryHookResult = ReturnType<typeof useServiceMetricsSuspenseQuery>;
+export type ServiceMetricsQueryResult = Apollo.QueryResult<ServiceMetricsQuery, ServiceMetricsQueryVariables>;
 export const UpsertNotificationRouterDocument = gql`
     mutation UpsertNotificationRouter($attributes: NotificationRouterAttributes!) {
   upsertNotificationRouter(attributes: $attributes) {
@@ -39527,6 +39637,7 @@ export const namedOperations = {
     ClusterHeatMap: 'ClusterHeatMap',
     ClusterNoisyNeighbors: 'ClusterNoisyNeighbors',
     ServiceHeatMap: 'ServiceHeatMap',
+    ServiceMetrics: 'ServiceMetrics',
     NotificationRouters: 'NotificationRouters',
     NotificationSinks: 'NotificationSinks',
     UnreadAppNotifications: 'UnreadAppNotifications',

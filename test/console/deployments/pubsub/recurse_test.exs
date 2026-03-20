@@ -596,22 +596,24 @@ defmodule Console.Deployments.PubSub.RecurseSyncTest do
         configuration: %{ai_approval: %{enabled: true, git: %{folder: "test", ref: "main"}, file: "contracts.yaml"}}
       )
       insert(:stack_state, plan: "terraform plan", run: stack_run)
-      expect(HTTPoison, :post, fn _, _, _, _ ->
-        {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{choices: [
+      expect(ReqLLM, :generate_text, fn %{model: "gpt-4.1-mini"}, _, _ ->
+        Jason.encode!(%{
+          object: "response",
+          output: [
             %{
-              message: %{
-                tool_calls: [%{
-                  function: %{
-                    name: "approve_stack",
-                    arguments: Jason.encode!(%{
-                      reason: "approved",
-                      result: "approved"
-                    })
-                  }
-              }]
+              type: "function_call",
+              call_id: "call_123",
+              id: "call_123",
+              status: "completed",
+              name: "approve_stack",
+              arguments: Jason.encode!(%{
+                reason: "approved",
+                result: "approved"
+              })
             }
-          }
-        ]})}}
+          ]
+        })
+        |> ReqLLM.Response.decode_response("openai:gpt-4.1-mini")
       end)
 
       event = %PubSub.StackRunUpdated{item: stack_run}

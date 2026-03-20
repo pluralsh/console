@@ -1347,6 +1347,11 @@
          "name": "ServiceHeatMap",
          "body": "query ServiceHeatMap($serviceId: ID!, $flavor: HeatMapFlavor!) {\n  serviceDeployment(id: $serviceId) {\n    id\n    heatMap(flavor: $flavor) {\n      ...UtilizationHeatMap\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment UtilizationHeatMap on UtilizationHeatMap {\n  cpu {\n    ...MetricPointResponse\n    __typename\n  }\n  memory {\n    ...MetricPointResponse\n    __typename\n  }\n  __typename\n}\n\nfragment MetricPointResponse on MetricPointResponse {\n  metric\n  value {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:68268b84b4c1910ef268d86028b5a8f20674cbe60096b76bc887bf384916b100": {
+         "type": "query",
+         "name": "ServiceMetrics",
+         "body": "query ServiceMetrics($id: ID!, $step: String, $start: DateTime) {\n  serviceDeployment(id: $id) {\n    id\n    serviceMetrics(step: $step, start: $start) {\n      cpu {\n        ...MetricResponse\n        __typename\n      }\n      mem {\n        ...MetricResponse\n        __typename\n      }\n      podCpu {\n        ...MetricResponse\n        __typename\n      }\n      podMem {\n        ...MetricResponse\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment MetricResponse on MetricResponse {\n  metric\n  values {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
+      },
       "sha256:612d068d4227e6b2c6d591591228637cab0f5a7b4b5c80be0465aa18da5ca889": {
          "type": "mutation",
          "name": "UpsertNotificationRouter",

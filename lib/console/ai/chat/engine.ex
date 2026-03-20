@@ -239,7 +239,7 @@ defmodule Console.AI.Chat.Engine do
 
   def fit_context_window(msgs, preface) do
     Enum.reduce(msgs, byte_size(preface), &msg_size(&1) + &2)
-    |> trim_messages(msgs, Provider.context_window())
+    |> trim_messages(msgs, Provider.context_window(:tool))
   end
 
   defp publish_tool_progress(stream, id, name) do

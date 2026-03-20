@@ -227,7 +227,7 @@ defmodule Console.Schema.PrAutomation do
     |> foreign_key_constraint(:connection_id)
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:catalog_id)
-    |> validate_required([:name, :title, :message, :connection_id])
+    |> validate_required([:name, :connection_id])
   end
 
   defp update_changeset(model, attrs) do

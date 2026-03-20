@@ -8,6 +8,8 @@ defmodule Console.AI.Workbench.Subagents.Plan do
 
   def run(%WorkbenchJob{status: s} = job, _) when s != :pending, do: {:ok, job}
   def run(%WorkbenchJob{prompt: prompt} = job, %Environment{} = environment) do
+    job = Repo.preload(job, [:result])
+
     tools(job, environment)
     |> MemoryEngine.new(20, system_prompt: @system, acc: %{}, callback: &callback(%{id: nil, workbench_job_id: job.id}, &1))
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
@@ -16,7 +18,7 @@ defmodule Console.AI.Workbench.Subagents.Plan do
       {:error, error} -> %{status: :failed, error: "error planning job: #{inspect(error)}"}
     end
     |> then(&WorkbenchJob.changeset(job, &1))
-    |> Console.Repo.update()
+    |> Repo.update()
   end
 
   defp reducer(messages, _) do

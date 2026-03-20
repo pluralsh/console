@@ -292,6 +292,17 @@ defmodule Console.Deployments.Observability do
     |> bulk_range_query(%{cluster: cluster, instance: node}, start, stop, step)
   end
 
+  def query(%Service{namespace: ns} = service, start, stop, step) do
+    service = Repo.preload(service, [:cluster])
+    bulk_range_query(
+      queries(:service),
+      [cluster: service.cluster.handle, namespace: ns],
+      start,
+      stop,
+      step
+    )
+  end
+
   def query(%ServiceComponent{} = component, start, stop, step) do
     component = Repo.preload(component, [service: :cluster])
     with {:ok, args} <- component_args(component) do

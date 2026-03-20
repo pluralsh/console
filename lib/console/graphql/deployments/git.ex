@@ -419,11 +419,17 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "Configuration for sending a pr in response to an observer"
   input_object :observer_pr_action_attributes do
-    field :automation_id,   non_null(:id)
+    field :automation_id,   :id
     field :repository,      :string
+    field :ai,              :observer_pr_ai_action_attributes
     field :actor,           :string, description: "the actor to use for the created branch, should be a user email in Plural"
     field :branch_template, :string, description: "a template to use for the created branch, use $value to interject the observed value"
     field :context,         non_null(:json), description: "the context to apply, use $value to interject the observed value"
+  end
+
+  input_object :observer_pr_ai_action_attributes do
+    field :enabled, :boolean, description: "whether AI assistance is enabled for this automation"
+    field :prompt,  non_null(:string), description: "custom prompt to guide AI updates for this automation"
   end
 
   @desc "Configuration for setting a pipeline context in an observer"
@@ -581,8 +587,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :name,          non_null(:string), description: "the name for this automation"
     field :role,          :pr_role, description: "An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster"
     field :documentation, :string
-    field :title,         non_null(:string)
-    field :message,       non_null(:string)
+    field :title,         :string
+    field :message,       :string
     field :updates,       :pr_update_spec
     field :creates,       :pr_create_spec
     field :deletes,       :pr_delete_spec
@@ -887,11 +893,18 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "Configuration for sending a pr in response to an observer"
   object :observer_pr_action do
-    field :automation_id,   non_null(:id)
+    field :automation_id,   :id
     field :repository,      :string
+    field :ai,              :observer_pr_ai_action, description: "configuration for an AI pr automation (eliminates the need for a full pr automation reference)"
     field :actor,           :string, description: "the actor to use for the created branch, should be a user email in Plural"
     field :branch_template, :string, description: "a template to use for the created branch, use $value to interject the observed value"
     field :context,         non_null(:map), description: "the context to apply, use $value to interject the observed value"
+  end
+
+  @desc "Configuration for AI assistance in a PR automation"
+  object :observer_pr_ai_action do
+    field :enabled, :boolean, description: "whether AI assistance is enabled for this automation"
+    field :prompt,  non_null(:string), description: "custom prompt to guide AI updates for this automation"
   end
 
   @desc "Configuration for setting a pipeline context in an observer"

@@ -16,7 +16,7 @@ defmodule Console.AI.Tools.Workbench.Skills do
     |> cast(attrs, [])
   end
 
-  def implement(_, %__MODULE__{skills: skills}, _) do
+  def implement(_, %__MODULE__{skills: skills}) do
     Enum.map(skills, fn {_, skill} -> Map.take(skill, [:name, :description]) end)
     |> Jason.encode()
   end

@@ -301,7 +301,7 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			ds.Spec.AI = &v1alpha1.AISettings{
 				Enabled:  lo.ToPtr(true),
 				Provider: lo.ToPtr(gqlclient.AiProviderOpenai),
-				OpenAI: &v1alpha1.AIProviderSettings{
+				OpenAI: &v1alpha1.OpenAISettings{
 					TokenSecretRef: corev1.SecretKeySelector{
 						LocalObjectReference: corev1.LocalObjectReference{
 							Name: "test",

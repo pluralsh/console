@@ -68,6 +68,11 @@ defmodule Console.Schema.Observer do
           field :branch_template, :string
           field :context,         :map
           field :actor,           :string
+
+          embeds_one :ai, AI, on_replace: :update do
+            field :enabled, :boolean, default: true
+            field :prompt,  :string
+          end
         end
 
         embeds_one :pipeline, PipelineAction, on_replace: :update do
@@ -192,7 +197,14 @@ defmodule Console.Schema.Observer do
   defp pr_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(automation_id repository branch_template context actor)a)
+    |> cast_embed(:ai, with: &pr_ai_changeset/2)
     |> validate_required(~w(automation_id context)a)
+  end
+
+  defp pr_ai_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(enabled prompt)a)
+    |> validate_required(~w(prompt)a)
   end
 
   defp pipeline_changeset(model, attrs) do

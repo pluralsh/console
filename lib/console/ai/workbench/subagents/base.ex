@@ -7,6 +7,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
     quote do
       import Console.AI.Workbench.Subagents.Base
       alias Console.AI.Chat.MemoryEngine
+      alias Console.Repo
     end
   end
 

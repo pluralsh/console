@@ -14,9 +14,9 @@ defmodule Console.AI.Tools.Pra.Commit do
 
   @schema Console.priv_file!("tools/pra/commit.json") |> Jason.decode!()
 
-  def name(_), do: "commit"
-  def description(_), do: "Commits the changes to the repository and creates a pull request using the provided title and message"
-  def json_schema(_), do: @schema
+  def name(), do: "commit"
+  def description(), do: "Commits the changes to the repository and creates a pull request using the provided title and message"
+  def json_schema(), do: @schema
 
   @valid ~w(title message)a
 
@@ -26,5 +26,5 @@ defmodule Console.AI.Tools.Pra.Commit do
     |> validate_required(@valid)
   end
 
-  def implement(_, %__MODULE__{} = commit), do: {:ok, commit}
+  def implement(%__MODULE__{} = commit), do: {:ok, commit}
 end
