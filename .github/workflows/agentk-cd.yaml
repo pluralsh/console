@@ -132,8 +132,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/${{ env.REGISTRY_IMAGE }}
-            docker.io/${{ env.REGISTRY_IMAGE }}
+            ghcr.io/pluralsh/agentk
+            docker.io/pluralsh/agentk
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest
