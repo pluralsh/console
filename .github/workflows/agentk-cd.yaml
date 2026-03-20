@@ -2,16 +2,15 @@ name: CD / Kubernetes Agent
 on:
   push:
     tags:
-      - 'v*.*.*'
+      # - 'v*.*.*'
+      - 'go/agentk/v*.*.*'
     paths:
-      - '.github/workflows/kubernetes-agent-cd.yaml'
+      - '.github/workflows/agentk-cd.yaml'
       - 'go/kubernetes-agent/**'
-      - 'go/polly/**'
-      - 'go/client/**'
 env:
   GOPATH: /home/runner/go/
   GOPROXY: "https://proxy.golang.org"
-  REGISTRY_IMAGE: ghcr.io/pluralsh/kubernetes-agent
+  REGISTRY_IMAGE: ghcr.io/pluralsh/agentk
   DOCKER_METADATA_PR_HEAD_SHA: 'true'
 jobs:
   test:
@@ -78,7 +77,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: go
-          file: go/kubernetes-agent/hack/docker/Dockerfile
+          file: go/kubernetes-agent/hack/docker/Dockerfile.agentk
           tags: ${{ env.REGISTRY_IMAGE }}
           labels: ${{ steps.meta.outputs.labels }}
           platforms: ${{ matrix.platforms.platform }}
@@ -133,8 +132,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/pluralsh/kubernetes-agent
-            docker.io/pluralsh/kubernetes-agent
+            ghcr.io/${{ env.REGISTRY_IMAGE }}
+            docker.io/${{ env.REGISTRY_IMAGE }}
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest
