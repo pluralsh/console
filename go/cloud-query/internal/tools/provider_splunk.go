@@ -10,9 +10,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pluralsh/console/go/cloud-query/internal/log"
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 	"github.com/pluralsh/console/go/cloud-query/internal/tools/clients"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"k8s.io/klog/v2"
 )
 
 type SplunkProvider struct {
@@ -165,7 +167,8 @@ func (in *SplunkProvider) toLabels(result SplunkSearchResponseResult) map[string
 func (in *SplunkProvider) parseTime(value any) (time.Time, error) {
 	raw := strings.TrimSpace(toString(value))
 	if raw == "" {
-		return time.Now().UTC(), nil
+		klog.V(log.LogLevelInfo).InfoS("empty splunk log timestamp value, defaulting to zero time")
+		return time.Time{}, nil
 	}
 
 	if unixFloat, err := strconv.ParseFloat(raw, 64); err == nil {
