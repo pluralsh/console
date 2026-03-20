@@ -4,7 +4,7 @@ go 1.26.1
 
 require (
 	golang.org/x/sync v0.18.0
-	google.golang.org/grpc v1.78.0
+	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11
 	k8s.io/klog/v2 v2.140.0
 )

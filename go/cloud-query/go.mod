@@ -12,7 +12,7 @@ require (
 	github.com/prometheus/common v0.66.1
 	github.com/samber/lo v1.52.0
 	github.com/spf13/pflag v1.0.10
-	google.golang.org/grpc v1.78.0
+	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/klog/v2 v2.130.1
