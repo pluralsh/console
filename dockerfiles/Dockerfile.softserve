@@ -17,6 +17,8 @@ RUN apk update --no-cache
 RUN apk upgrade --no-cache libssl3 libcrypto3
 # Upgrade libexpat to fix authorization bypass vulnerability allowing arbitrary SQL execution
 RUN apk upgrade --no-cache libexpat
+# Upgrade zlib to fix buffer overflow vulnerability in untgz utility (CVE in zlib <= 1.3.1)
+RUN apk upgrade --no-cache zlib
 RUN apk add sudo git vim curl
 
 # create keys
@@ -53,6 +55,8 @@ RUN apk update --no-cache
 RUN apk upgrade --no-cache libssl3 libcrypto3
 # Upgrade libexpat to fix authorization bypass vulnerability allowing arbitrary SQL execution
 RUN apk upgrade --no-cache libexpat
+# Upgrade zlib to fix buffer overflow vulnerability in untgz utility (CVE in zlib <= 1.3.1)
+RUN apk upgrade --no-cache zlib
 RUN apk add git
 
 COPY --from=builder /usr/bin/soft /usr/bin/
