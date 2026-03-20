@@ -43,6 +43,13 @@ message TempoConnection {
   optional string password = 5;
 }
 
+message SplunkConnection {
+  string url = 1;
+  optional string token = 2;
+  optional string username = 3;
+  optional string password = 4;
+}
+
 message ToolConnection {
   oneof connection {
     ElasticConnection elastic = 1;
@@ -50,6 +57,7 @@ message ToolConnection {
     PrometheusConnection prometheus = 3;
     LokiConnection loki = 4;
     TempoConnection tempo = 5;
+    SplunkConnection splunk = 6;
   }
 }
 

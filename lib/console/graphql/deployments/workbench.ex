@@ -84,6 +84,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :elastic,    :workbench_tool_elastic_connection_attributes, description: "elasticsearch connection (logs)"
     field :prometheus, :workbench_tool_prometheus_connection_attributes, description: "prometheus connection (metrics)"
     field :loki,       :workbench_tool_loki_connection_attributes, description: "loki connection (logs)"
+    field :splunk,     :workbench_tool_splunk_connection_attributes, description: "splunk connection (logs)"
     field :tempo,      :workbench_tool_tempo_connection_attributes, description: "tempo connection (traces)"
     field :datadog,    :workbench_tool_datadog_connection_attributes, description: "datadog connection (metrics, logs)"
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
@@ -119,6 +120,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :username,  :string, description: "basic auth username"
     field :password,  :string, description: "basic auth password"
     field :tenant_id, :string, description: "optional tenant id"
+  end
+
+  input_object :workbench_tool_splunk_connection_attributes do
+    field :url,       non_null(:string), description: "splunk base url"
+    field :token,     :string, description: "bearer token"
+    field :username,  :string, description: "basic auth username"
+    field :password,  :string, description: "basic auth password"
   end
 
   input_object :workbench_tool_datadog_connection_attributes do
@@ -351,6 +359,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :elastic,   :workbench_tool_elastic_connection, description: "elasticsearch connection (no secrets)"
     field :prometheus, :workbench_tool_prometheus_connection, description: "prometheus connection (no secrets)"
     field :loki,      :workbench_tool_loki_connection, description: "loki connection (no secrets)"
+    field :splunk,    :workbench_tool_splunk_connection, description: "splunk connection (no secrets)"
     field :tempo,     :workbench_tool_tempo_connection, description: "tempo connection (no secrets)"
     field :datadog,   :workbench_tool_datadog_connection, description: "datadog connection (no secrets)"
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
@@ -379,6 +388,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :url,       :string, description: "tempo base url"
     field :username,  :string, description: "basic auth username"
     field :tenant_id, :string, description: "optional tenant id"
+  end
+
+  object :workbench_tool_splunk_connection do
+    field :url,       :string, description: "splunk base url"
+    field :username,  :string, description: "basic auth username"
   end
 
   object :workbench_tool_datadog_connection do
