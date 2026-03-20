@@ -14,6 +14,8 @@ defmodule Console.AI.Vertex do
 
   @type t :: %__MODULE__{}
 
+  def defaults(), do: %{model: @default_model, tool_model: @default_model, embedding_model: @embedding_model}
+
   def new(opts) do
     %__MODULE__{
       service_account_json: opts.service_account_json,

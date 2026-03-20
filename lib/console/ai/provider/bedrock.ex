@@ -15,6 +15,8 @@ defmodule Console.AI.Bedrock do
   @model "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
   @embedding_model "cohere.embed-english-v3"
 
+  def defaults(), do: %{model: @model, tool_model: @model, embedding_model: @embedding_model}
+
   def new(opts) do
     %__MODULE__{
       model_id: opts.model_id || @model,

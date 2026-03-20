@@ -114,7 +114,7 @@ defmodule Console.AI.Chat.Engine do
     by_name = Map.new(impls, & {&1.name(), &1})
     stream = Stream.stream(:user)
     Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args}, acc ->
-      publish_tool_progress(stream, id, name)
+      # publish_tool_progress(stream, id, name)
       with {:ok, impl}    <- Map.fetch(by_name, name),
            {:ok, parsed}  <- Tool.validate(impl, args),
            {:ok, content} <- impl.implement(parsed) do
@@ -242,10 +242,10 @@ defmodule Console.AI.Chat.Engine do
     |> trim_messages(msgs, Provider.context_window(:tool))
   end
 
-  defp publish_tool_progress(stream, id, name) do
-    Stream.tool(id, name, true)
-    publish_to_stream(stream, "Tool is running...")
-  end
+  # defp publish_tool_progress(stream, id, name) do
+  #   Stream.tool(id, name, true)
+  #   publish_to_stream(stream, "Tool is running...")
+  # end
 
   defp publish_tool(stream, content, id, name) do
     Stream.tool(id, name, false)

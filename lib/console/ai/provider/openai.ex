@@ -18,6 +18,8 @@ defmodule Console.AI.OpenAI do
 
   @type t :: %__MODULE__{}
 
+  def defaults(), do: %{model: @model, tool_model: @model, embedding_model: @embedding_model}
+
   def new(opts) do
     %__MODULE__{
       access_key: Map.get(opts, :access_token),

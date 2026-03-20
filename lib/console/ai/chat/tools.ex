@@ -67,8 +67,8 @@ defmodule Console.AI.Chat.Tools do
   @code_pr_tools [Agent.Coding.GenericPr]
   @code_post_tools [Agent.Coding.Commit, Agent.Coding.StackFiles]
 
-  @kubernetes_code_pre_tools [Agent.ServiceComponent, Agent.Coding.ServiceFiles]
-  @kubernetes_code_post_tools [Agent.Coding.GenericPr]
+  @kubernetes_code_pre_tools [Agent.ServiceComponent, Agent.Coding.ServiceFiles, Agent.ApiSpec, Agent.Discovery]
+  @kubernetes_code_post_tools [Agent.Coding.GenericPr, Agent.ApiSpec, Agent.Discovery]
 
   @cluster_tools [Agent.Discovery, Agent.ApiSpec]
 
