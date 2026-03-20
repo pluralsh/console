@@ -1,7 +1,6 @@
 package tools
 
 import (
-	"encoding/json"
 	"testing"
 	"time"
 )
@@ -11,20 +10,14 @@ func TestSplunkToLogEntry_MessageFallbackFields(t *testing.T) {
 
 	provider := &SplunkProvider{}
 
-	raw, err := json.Marshal(map[string]any{
-		"_time": "1710000000.000000",
-		"event": "from-event",
+	entry, err := provider.toLogEntry(SplunkSearchResponseResult{
+		Timestamp: "1710000000.000000",
 	})
-	if err != nil {
-		t.Fatalf("json.Marshal() returned error: %v", err)
-	}
-
-	entry, err := provider.toLogEntry(raw)
 	if err != nil {
 		t.Fatalf("toLogEntry() returned error: %v", err)
 	}
-	if entry.Message != "from-event" {
-		t.Fatalf("toLogEntry() message = %q, want %q", entry.Message, "from-event")
+	if entry.Message != "" {
+		t.Fatalf("toLogEntry() message = %q, want empty string", entry.Message)
 	}
 }
 
@@ -33,20 +26,15 @@ func TestSplunkToLogEntry_MessageJSONFallback(t *testing.T) {
 
 	provider := &SplunkProvider{}
 
-	raw, err := json.Marshal(map[string]any{
-		"_time": "1710000000.000000",
-		"foo":   "bar",
+	entry, err := provider.toLogEntry(SplunkSearchResponseResult{
+		Timestamp: "1710000000.000000",
+		Message:   "from-raw",
 	})
-	if err != nil {
-		t.Fatalf("json.Marshal() returned error: %v", err)
-	}
-
-	entry, err := provider.toLogEntry(raw)
 	if err != nil {
 		t.Fatalf("toLogEntry() returned error: %v", err)
 	}
-	if entry.Message == "" {
-		t.Fatal("toLogEntry() message is empty, expected JSON fallback")
+	if entry.Message != "from-raw" {
+		t.Fatalf("toLogEntry() message = %q, want %q", entry.Message, "from-raw")
 	}
 }
 
