@@ -2122,6 +2122,7 @@ enum WorkbenchToolType {
   MCP
   LINEAR
   ATLASSIAN
+  SPLUNK
 }
 
 enum WorkbenchToolCategory {
@@ -2310,6 +2311,9 @@ input WorkbenchToolConfigurationAttributes {
   "loki connection (logs)"
   loki: WorkbenchToolLokiConnectionAttributes
 
+  "splunk connection (logs)"
+  splunk: WorkbenchToolSplunkConnectionAttributes
+
   "tempo connection (traces)"
   tempo: WorkbenchToolTempoConnectionAttributes
 
@@ -2386,6 +2390,20 @@ input WorkbenchToolTempoConnectionAttributes {
 
   "optional tenant id"
   tenantId: String
+}
+
+input WorkbenchToolSplunkConnectionAttributes {
+  "splunk base url"
+  url: String!
+
+  "bearer token"
+  token: String
+
+  "basic auth username"
+  username: String
+
+  "basic auth password"
+  password: String
 }
 
 input WorkbenchToolDatadogConnectionAttributes {
@@ -2783,6 +2801,9 @@ type WorkbenchToolConfiguration {
   "loki connection (no secrets)"
   loki: WorkbenchToolLokiConnection
 
+  "splunk connection (no secrets)"
+  splunk: WorkbenchToolSplunkConnection
+
   "tempo connection (no secrets)"
   tempo: WorkbenchToolTempoConnection
 
@@ -2838,6 +2859,14 @@ type WorkbenchToolTempoConnection {
 
   "optional tenant id"
   tenantId: String
+}
+
+type WorkbenchToolSplunkConnection {
+  "splunk base url"
+  url: String
+
+  "basic auth username"
+  username: String
 }
 
 type WorkbenchToolDatadogConnection {

@@ -9726,6 +9726,8 @@ type WorkbenchToolConfiguration struct {
 	Prometheus *WorkbenchToolPrometheusConnection `json:"prometheus,omitempty"`
 	// loki connection (no secrets)
 	Loki *WorkbenchToolLokiConnection `json:"loki,omitempty"`
+	// splunk connection (no secrets)
+	Splunk *WorkbenchToolSplunkConnection `json:"splunk,omitempty"`
 	// tempo connection (no secrets)
 	Tempo *WorkbenchToolTempoConnection `json:"tempo,omitempty"`
 	// datadog connection (no secrets)
@@ -9745,6 +9747,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Prometheus *WorkbenchToolPrometheusConnectionAttributes `json:"prometheus,omitempty"`
 	// loki connection (logs)
 	Loki *WorkbenchToolLokiConnectionAttributes `json:"loki,omitempty"`
+	// splunk connection (logs)
+	Splunk *WorkbenchToolSplunkConnectionAttributes `json:"splunk,omitempty"`
 	// tempo connection (traces)
 	Tempo *WorkbenchToolTempoConnectionAttributes `json:"tempo,omitempty"`
 	// datadog connection (metrics, logs)
@@ -9887,6 +9891,24 @@ type WorkbenchToolPrometheusConnectionAttributes struct {
 	Password *string `json:"password,omitempty"`
 	// optional tenant id (e.g. for Mimir)
 	TenantID *string `json:"tenantId,omitempty"`
+}
+
+type WorkbenchToolSplunkConnection struct {
+	// splunk base url
+	URL *string `json:"url,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+}
+
+type WorkbenchToolSplunkConnectionAttributes struct {
+	// splunk base url
+	URL string `json:"url"`
+	// bearer token
+	Token *string `json:"token,omitempty"`
+	// basic auth username
+	Username *string `json:"username,omitempty"`
+	// basic auth password
+	Password *string `json:"password,omitempty"`
 }
 
 type WorkbenchToolTempoConnection struct {
@@ -15948,6 +15970,7 @@ const (
 	WorkbenchToolTypeMcp        WorkbenchToolType = "MCP"
 	WorkbenchToolTypeLinear     WorkbenchToolType = "LINEAR"
 	WorkbenchToolTypeAtlassian  WorkbenchToolType = "ATLASSIAN"
+	WorkbenchToolTypeSplunk     WorkbenchToolType = "SPLUNK"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -15961,11 +15984,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeMcp,
 	WorkbenchToolTypeLinear,
 	WorkbenchToolTypeAtlassian,
+	WorkbenchToolTypeSplunk,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk:
 		return true
 	}
 	return false

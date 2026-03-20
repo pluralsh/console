@@ -15009,6 +15009,8 @@ export type WorkbenchToolConfiguration = {
   loki?: Maybe<WorkbenchToolLokiConnection>;
   /** prometheus connection (no secrets) */
   prometheus?: Maybe<WorkbenchToolPrometheusConnection>;
+  /** splunk connection (no secrets) */
+  splunk?: Maybe<WorkbenchToolSplunkConnection>;
   /** tempo connection (no secrets) */
   tempo?: Maybe<WorkbenchToolTempoConnection>;
 };
@@ -15028,6 +15030,8 @@ export type WorkbenchToolConfigurationAttributes = {
   loki?: InputMaybe<WorkbenchToolLokiConnectionAttributes>;
   /** prometheus connection (metrics) */
   prometheus?: InputMaybe<WorkbenchToolPrometheusConnectionAttributes>;
+  /** splunk connection (logs) */
+  splunk?: InputMaybe<WorkbenchToolSplunkConnectionAttributes>;
   /** tempo connection (traces) */
   tempo?: InputMaybe<WorkbenchToolTempoConnectionAttributes>;
 };
@@ -15183,6 +15187,25 @@ export type WorkbenchToolPrometheusConnectionAttributes = {
   username?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type WorkbenchToolSplunkConnection = {
+  __typename?: 'WorkbenchToolSplunkConnection';
+  /** splunk base url */
+  url?: Maybe<Scalars['String']['output']>;
+  /** basic auth username */
+  username?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchToolSplunkConnectionAttributes = {
+  /** basic auth password */
+  password?: InputMaybe<Scalars['String']['input']>;
+  /** bearer token */
+  token?: InputMaybe<Scalars['String']['input']>;
+  /** splunk base url */
+  url: Scalars['String']['input'];
+  /** basic auth username */
+  username?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type WorkbenchToolTempoConnection = {
   __typename?: 'WorkbenchToolTempoConnection';
   /** optional tenant id */
@@ -15216,6 +15239,7 @@ export enum WorkbenchToolType {
   Mcp = 'MCP',
   Prometheus = 'PROMETHEUS',
   Sentry = 'SENTRY',
+  Splunk = 'SPLUNK',
   Tempo = 'TEMPO'
 }
 
