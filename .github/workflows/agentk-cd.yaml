@@ -135,7 +135,7 @@ jobs:
             ghcr.io/pluralsh/agentk
             docker.io/pluralsh/agentk
           tags: |
-            type=semver,pattern={{version}}
+            type=semver,pattern={{version}},value=${{ github.ref_name }},match=go/agentk/v(\d+\.\d+\.\d+)$
             type=raw,value=latest
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
