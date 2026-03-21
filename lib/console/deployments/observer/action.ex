@@ -50,7 +50,7 @@ defmodule Console.Deployments.Observer.Action do
 
   defp pr_automation(%Observer.ObserverAction.Configuration.PrAction{ai: %{enabled: true, prompt: prompt}}) when is_binary(prompt) do
     conn = Tool.scm_connection()
-    {:ok, %PrAutomation{ai: %{enabled: true, prompt: prompt}, connection: conn, write_bindings: [], create_bindings: []}}
+    {:ok, %PrAutomation{ai: %PrAutomation.AI{enabled: true, prompt: prompt}, connection: conn, write_bindings: [], create_bindings: []}}
   end
   defp pr_automation(%Observer.ObserverAction.Configuration.PrAction{automation_id: id})
     when is_binary(id), do: {:ok, Git.get_pr_automation(id)}

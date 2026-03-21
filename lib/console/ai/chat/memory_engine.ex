@@ -30,6 +30,16 @@ defmodule Console.AI.Chat.MemoryEngine do
     |> loop()
   end
 
+  def last_message(messages) do
+    Enum.reverse(messages)
+    |> Enum.find(&match?({:assistant, content} when is_binary(content), &1))
+    |> case do
+      {:assistant, content} when is_binary(content) -> content
+      _ -> "no reason given for failure"
+    end
+    |> then(& {:cont, &1})
+  end
+
   defp loop(engine, iter \\ 0)
   defp loop(%__MODULE__{max_iterations: max, messages: [_ | _] = messages, system_prompt: preface, acc: acc} = engine, iter) when iter < max do
     messages

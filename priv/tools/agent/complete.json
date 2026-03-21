@@ -1,0 +1,12 @@
+{
+    "type": "object",
+    "properties": {
+        "conclusion": {
+            "type": "string",
+            "description": "A summary of the work you've completed or the results of the investigation you've conducted.  This should be sufficient to explain to the user what they might need for future work."
+        }
+    },
+    "required": [
+        "conclusion"
+    ]
+}

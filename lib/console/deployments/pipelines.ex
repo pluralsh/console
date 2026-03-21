@@ -196,7 +196,7 @@ defmodule Console.Deployments.Pipelines do
       branch  = "plrl/ai/#{service.name}/pipeline-#{stage.pipeline.name}-#{String.slice(service.id, 0..4)}-#{String.slice(ctx.id, 0..4)}"
       context = build_pr_context(ctx.context, svc, stage)
       pra     = %PrAutomation{
-        ai: %{enabled: true, prompt: prompt},
+        ai: %PrAutomation.AI{enabled: true, prompt: prompt},
         title: ai.title,
         message: ai.message,
         connection: conn,

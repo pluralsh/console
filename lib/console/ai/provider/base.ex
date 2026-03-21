@@ -13,7 +13,10 @@ defmodule Console.AI.Provider.Base do
   def generate_text(messages, model, %Stream{}, opts) do
     with {:ok, model} <- model(model),
          {:ok, stream} <- stream_retrier(model, messages, opts),
-      do: StreamResponse.process_stream(stream, on_result: &Stream.publish/1)
+         {:ok, result} <- StreamResponse.process_stream(stream, on_result: &Stream.publish/1) do
+      Stream.offset(1)
+      {:ok, result}
+    end
   end
 
   def generate_text(messages, model, _, opts) do

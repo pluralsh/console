@@ -25,8 +25,8 @@ defmodule Console.AI.Stream do
   def offset(ind) do
     Process.put(@tool, nil)
     case stream() do
-      %__MODULE__{offset: off, msg: msg} = s ->
-        Process.put(@stream, %{s | offset: off + ind + 1, msg: msg + 1, index: 0})
+      %__MODULE__{offset: off, msg: msg, index: index} = s ->
+        Process.put(@stream, %{s | offset: off + max(ind, index) + 1, msg: msg + 1, index: 0})
       _ -> :ok
     end
   end
