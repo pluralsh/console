@@ -316,16 +316,18 @@ defmodule Console.Deployments.Stacks do
         pull_request: %PullRequest{} = pr
       }, %ScmConnection{} = conn} ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
-        Dispatcher.review(conn, pr, pr_blob("insight", insight: insight, link: url))
+        Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state ai_comment_id)a)}, pr_blob("insight", insight: insight, link: url))
+        |> save_comment(run, :ai_comment_id)
       {%StackRun{
         id: id,
         stack_id: stack_id,
         status: status,
         state: %StackState{plan: plan},
         pull_request: %PullRequest{} = pr
-      }, %ScmConnection{} = conn}  when is_binary(plan) and status in ~w(pending_approval successful)a ->
+      }, %ScmConnection{} = conn} when is_binary(plan) and status in ~w(pending_approval successful)a ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
-        Dispatcher.review(conn, pr, pr_blob("stack_summary", plan: plan, link: url))
+        Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state comment_id)a)}, pr_blob("stack_summary", plan: plan, link: url))
+        |> save_comment(run, :comment_id)
       {%StackRun{
         id: id,
         stack_id: stack_id,
@@ -333,7 +335,8 @@ defmodule Console.Deployments.Stacks do
         pull_request: %PullRequest{} = pr
       }, %ScmConnection{} = conn} ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
-        Dispatcher.review(conn, pr, pr_blob("failed", link: url))
+        Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state comment_id)a)}, pr_blob("failed", link: url))
+        |> save_comment(run, :comment_id)
       {%StackRun{
         id: id,
         stack_id: stack_id,
@@ -341,10 +344,17 @@ defmodule Console.Deployments.Stacks do
         pull_request: %PullRequest{} = pr
       }, %ScmConnection{} = conn} ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
-        Dispatcher.review(conn, pr, pr_blob("succeeded", link: url))
+        Dispatcher.review(conn, %{pr | comment_id: Console.deep_get(run, ~w(scm_state comment_id)a)}, pr_blob("succeeded", link: url))
+        |> save_comment(run, :comment_id)
       _ -> {:error, "cannot post review for this stack run"}
     end
   end
+
+  defp save_comment({:ok, id}, %StackRun{} = run, field) when is_atom(field) do
+    StackRun.changeset(run, %{scm_state: %{field => id}})
+    |> Repo.update()
+  end
+  defp save_comment(err, _, _), do: err
 
   @doc """
   Updates the commit status for a given stack run

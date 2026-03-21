@@ -113,11 +113,11 @@ defmodule Console.AI.Chat.Engine do
   def call_plrl_tools(tools, impls) do
     by_name = Map.new(impls, & {&1.name(), &1})
     stream = Stream.stream(:user)
-    Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args}, acc ->
+    Enum.reduce_while(tools, [], fn %Tool{id: id, name: name, arguments: args} = tool, acc ->
       publish_tool_progress(stream, id, name)
       with {:ok, impl}    <- Map.fetch(by_name, name),
            {:ok, parsed}  <- Tool.validate(impl, args),
-           {:ok, content} <- impl.implement(parsed) do
+           {:ok, content} <- Tool.implement(impl, Map.put(parsed, :id, tool)) do
         case tool_msg(content, id, nil, name, args) do
           [_ | _] = msgs ->
             Enum.each(msgs, fn %{content: content} ->

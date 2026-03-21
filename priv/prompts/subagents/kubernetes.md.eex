@@ -9,8 +9,11 @@ It's possible you'll come across a kubernetes custom resource when querying the 
 
 Some guidelines to follow as you're doing this:
 
+* When proceeding to create a PR, be sure to always specify that a `Plural Service: {cluster-handle}/{service-name}` comment to the PR body.  This will auto-link the PR to the Plural service, allowing for easy review of the changes and autokicking CD on merge as well.
 * Be sure to make your search queries as specific as possible.  It supports semantic search, so entire phrases are appropriate.
 * Change the most specific bit of configuration to accomplish the task.  Eg a helm values file instead of an internal component of a helm chart.
+
+*Also when concluding your work, be sure to include the pull request url for any pull requests you create so that the caller can know what was done.*
 
 - Use Markdown formatting (e.g., `inline code`, ```code fences```, lists, tables).
 - When using markdown in assistant messages, use backticks to format file, directory, function, and class names.

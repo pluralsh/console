@@ -1,9 +1,10 @@
 defmodule Console.AI.Agents.Subagents.Kubernetes do
+  import Console.AI.Agents.Subagents.Utils, only: [publish_thought: 2]
   alias Console.AI.Chat.MemoryEngine
   alias Console.AI.Tools.Agent.{
     ServiceComponent,
     Coding.ServiceFiles,
-    GenericPr,
+    Coding.GenericPr,
     ApiSpec,
     Discovery,
     Complete
@@ -21,10 +22,10 @@ defmodule Console.AI.Agents.Subagents.Kubernetes do
 
   @prompt "Find the service that needs to be modified and make the changes requested"
 
-  @spec exec(binary) :: {:ok, Complete.t} | {:error, binary}
-  def exec(prompt) do
+  @spec exec(binary, Keyword.t) :: {:ok, Complete.t} | {:error, binary}
+  def exec(prompt, opts \\ []) when is_binary(prompt) do
     @tools
-    |> MemoryEngine.new(30, system_prompt: prompt(prompt: prompt))
+    |> MemoryEngine.new(30, system_prompt: prompt(prompt: prompt), callback: &publish_thought(opts[:tool_id], &1))
     |> MemoryEngine.reduce([{:user, @prompt}], &reducer/2)
     |> case do
       {:ok, %Complete{} = complete} -> {:ok, complete}

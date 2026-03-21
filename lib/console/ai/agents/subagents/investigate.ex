@@ -1,4 +1,5 @@
 defmodule Console.AI.Agents.Subagents.Investigate do
+  import Console.AI.Agents.Subagents.Utils, only: [publish_thought: 2]
   alias Console.AI.Chat.MemoryEngine
   alias Console.AI.Tools.Agent.{
     Stack,
@@ -15,10 +16,10 @@ defmodule Console.AI.Agents.Subagents.Investigate do
 
   @prompt "Investigate the system or infrastructure the user is asking about"
 
-  @spec exec(binary) :: {:ok, Complete.t} | {:error, binary}
-  def exec(prompt) do
+  @spec exec(binary, Keyword.t) :: {:ok, Complete.t} | {:error, binary}
+  def exec(prompt, opts \\ []) when is_binary(prompt) do
     @tools
-    |> MemoryEngine.new(30, system_prompt: prompt(prompt: prompt))
+    |> MemoryEngine.new(30, system_prompt: prompt(prompt: prompt), callback: &publish_thought(opts[:tool_id], &1))
     |> MemoryEngine.reduce([{:user, @prompt}], &reducer/2)
     |> case do
       {:ok, %Complete{} = complete} -> {:ok, complete}

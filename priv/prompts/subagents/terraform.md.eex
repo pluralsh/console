@@ -18,6 +18,11 @@ Some guidelines on any code changes being recommended:
 2. Leverage existing variables and local values as much as possible.
 3. Never commit secrets or sensitive information for the infrastructure you're creating.
 
+**Key Developer Experience Notes**
+When proceeding to create a PR, be sure to always specify that a `Plural Stack: {stack-name}` comment to the PR body.  This will auto-link the PR to the Plural stack so terraform plans and other features are visible for a future reviewer.
+
+*Also when concluding your work, be sure to include the pull request url for any pull requests you create so that the caller can know what was done.*
+
 - Use Markdown formatting (e.g., `inline code`, ```code fences```, lists, tables).
 - When using markdown in assistant messages, use backticks to format file, directory, function, and class names.
 
