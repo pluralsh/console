@@ -719,6 +719,7 @@ export type AgentSessionEdge = {
 
 export enum AgentSessionType {
   Chat = 'CHAT',
+  Configure = 'CONFIGURE',
   Kubernetes = 'KUBERNETES',
   Manifests = 'MANIFESTS',
   Provisioning = 'PROVISIONING',
@@ -11820,6 +11821,7 @@ export type RootSubscriptionType = {
   notificationDelta?: Maybe<NotificationDelta>;
   podDelta?: Maybe<PodDelta>;
   runLogsDelta?: Maybe<RunLogsDelta>;
+  toolThoughts?: Maybe<ToolThought>;
   workbenchJobActivityDelta?: Maybe<WorkbenchJobActivityDelta>;
   workbenchJobDelta?: Maybe<WorkbenchJobDelta>;
   workbenchJobProgress?: Maybe<WorkbenchJobProgress>;
@@ -11851,6 +11853,11 @@ export type RootSubscriptionTypeClusterUpgradeProgressArgs = {
 
 export type RootSubscriptionTypeRunLogsDeltaArgs = {
   stepId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeToolThoughtsArgs = {
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -13996,6 +14003,12 @@ export type ToolDelta = {
   id?: Maybe<Scalars['ID']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   pending?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type ToolThought = {
+  __typename?: 'ToolThought';
+  content?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
 };
 
 /** How to enforce uniqueness for a field */

@@ -1390,6 +1390,8 @@ type RootSubscriptionType {
     recommendationId: ID
   ): AiDelta
 
+  toolThoughts(threadId: ID): ToolThought
+
   agentMessageDelta(runId: ID!): AgentMessageDelta
 
   agentRunDelta(id: ID!): AgentRunDelta
@@ -12138,6 +12140,7 @@ enum AgentSessionType {
   MANIFESTS
   CHAT
   RESEARCH
+  CONFIGURE
 }
 
 enum InfraResearchStatus {
@@ -12627,6 +12630,11 @@ type AiDelta {
   message: Int
   role: AiRole
   tool: ToolDelta
+}
+
+type ToolThought {
+  id: ID!
+  content: String
 }
 
 type ChatConnection {

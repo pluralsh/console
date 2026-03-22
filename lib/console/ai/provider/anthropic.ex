@@ -20,6 +20,8 @@ defmodule Console.AI.Anthropic do
     body: %{}
   ]
 
+  def defaults(), do: %{model: @default_model, tool_model: @default_model}
+
   @type t :: %__MODULE__{}
 
   def new(opts) do

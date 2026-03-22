@@ -41,7 +41,10 @@ defmodule Console.AI.Tools.Agent.ApiSpec do
     case {session(), Tool.parent()} do
       {{:session, %AgentSession{cluster: %Cluster{} = cluster}}, _} -> cluster
       {_, %Cluster{} = cluster} -> cluster
-      {_, %Service{} = svc} -> Console.Repo.preload(svc, :cluster).cluster
+      {{:session, %AgentSession{service: %Service{} = svc}}, _} ->
+        Console.Repo.preload(svc, :cluster).cluster
+      {_, %Service{} = svc} ->
+        Console.Repo.preload(svc, :cluster).cluster
       _ -> nil
     end
   end

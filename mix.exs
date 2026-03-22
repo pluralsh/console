@@ -10,6 +10,8 @@ defmodule Console.MixProject do
         version =
           case System.cmd("git", ~w[describe --dirty=+dirty]) do
             {"go/client/" <> _, 0} -> "0.0.0"
+            {"go/agentk/" <> _, 0} -> "0.0.0"
+            {"go/agent/" <> _, 0} -> "0.0.0"
             {version, 0} ->
               String.trim_leading(String.trim(version), "v")
 

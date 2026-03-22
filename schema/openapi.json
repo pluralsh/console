@@ -325,7 +325,8 @@
               "search",
               "manifests",
               "chat",
-              "research"
+              "research",
+              "configure"
             ],
             "type": "string"
           },

@@ -742,7 +742,9 @@ defmodule Console.Deployments.StacksTest do
 
       expect(Tentacat.Pulls.Reviews, :create, fn _, _, _, _, _ -> {:ok, %{"id" => "id"}, :ok} end)
 
-      {:ok, "id"} = Stacks.post_comment(run)
+      {:ok, updated} = Stacks.post_comment(run)
+
+      assert updated.scm_state.comment_id == "id"
     end
   end
 

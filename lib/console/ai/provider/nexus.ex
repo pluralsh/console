@@ -27,6 +27,8 @@ defmodule Console.AI.Nexus do
 
   defstruct [:url, :token, :model, :tool_model, :embedding_model]
 
+  def defaults(), do: %{}
+
   @type t :: %__MODULE__{
           url: String.t() | nil,
           token: String.t() | nil,

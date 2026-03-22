@@ -1,5 +1,6 @@
 defmodule Console.GRPC.Server do
   use GRPC.Server, service: Plrl.PluralServer.Service
+  alias Console.AI.Provider
   alias Console.Deployments.{Settings, Agents}
   alias Console.Schema.{DeploymentSettings, User, Cluster}
   alias Console.Schema.DeploymentSettings.AI
@@ -68,33 +69,36 @@ defmodule Console.GRPC.Server do
   defp to_pb(nil), do: nil
 
   defp to_pb(%AI.OpenAi{} = openai) do
+    defaults = Provider.defaults(:openai)
     %Plrl.OpenAiConfig{
       apiKey: openai.access_token,
-      model: openai.model,
-      embeddingModel: openai.embedding_model,
-      toolModel: openai.tool_model,
+      model: openai.model || defaults[:model],
+      embeddingModel: openai.embedding_model || defaults[:embedding_model],
+      toolModel: openai.tool_model || defaults[:tool_model],
       baseUrl: openai.base_url,
       proxyModels: proxy_models(openai)
     }
   end
 
   defp to_pb(%AI.Anthropic{} = anthropic) do
+    defaults = Provider.defaults(:anthropic)
     %Plrl.AnthropicConfig{
       apiKey: anthropic.access_token,
-      model: anthropic.model,
-      toolModel: anthropic.tool_model,
+      model: anthropic.model || defaults[:model],
+      toolModel: anthropic.tool_model || defaults[:tool_model],
       baseUrl: anthropic.base_url,
       proxyModels: proxy_models(anthropic)
     }
   end
 
   defp to_pb(%AI.Vertex{} = vertex_ai) do
+    defaults = Provider.defaults(:vertex)
     %Plrl.VertexAiConfig{
       serviceAccountJson: vertex_ai.service_account_json,
-      model: vertex_ai.model,
-      toolModel: vertex_ai.tool_model,
+      model: vertex_ai.model || defaults[:model],
+      toolModel: vertex_ai.tool_model || defaults[:tool_model],
       endpoint: vertex_ai.endpoint,
-      embeddingModel: vertex_ai.embedding_model,
+      embeddingModel: vertex_ai.embedding_model || defaults[:embedding_model],
       project: vertex_ai.project,
       location: vertex_ai.location,
       proxyModels: proxy_models(vertex_ai)
@@ -102,10 +106,11 @@ defmodule Console.GRPC.Server do
   end
 
   defp to_pb(%AI.Bedrock{} = bedrock) do
+    defaults = Provider.defaults(:bedrock)
     %Plrl.BedrockConfig{
-      modelId: bedrock.model_id,
-      toolModelId: bedrock.tool_model_id,
-      embeddingModelId: bedrock.embedding_model,
+      modelId: bedrock.model_id || defaults[:model],
+      toolModelId: bedrock.tool_model_id || defaults[:tool_model],
+      embeddingModelId: bedrock.embedding_model || defaults[:embedding_model],
       region: bedrock.region,
       awsAccessKeyId: bedrock.aws_access_key_id,
       awsSecretAccessKey: bedrock.aws_secret_access_key,
@@ -115,11 +120,12 @@ defmodule Console.GRPC.Server do
   end
 
   defp to_pb(%AI.Azure{} = azure) do
+    defaults = Provider.defaults(:azure)
     %Plrl.AzureOpenAiConfig{
-      model: azure.model,
+      model: azure.model || defaults[:model],
       endpoint: azure.endpoint,
-      embeddingModel: azure.embedding_model,
-      toolModel: azure.tool_model,
+      embeddingModel: azure.embedding_model || defaults[:embedding_model],
+      toolModel: azure.tool_model || defaults[:tool_model],
       accessToken: azure.access_token,
       deployments: to_string_map(azure.deployments),
       proxyModels: proxy_models(azure)

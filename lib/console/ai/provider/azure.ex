@@ -13,6 +13,8 @@ defmodule Console.AI.Azure do
 
   @type t :: %__MODULE__{}
 
+  def defaults(), do: %{model: @model, tool_model: @model, embedding_model: @embedding_model}
+
   def new(opts) do
     %__MODULE__{
       azure_token: opts.access_token,

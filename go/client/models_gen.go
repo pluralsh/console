@@ -8896,6 +8896,11 @@ type ToolDelta struct {
 	Pending   *bool          `json:"pending,omitempty"`
 }
 
+type ToolThought struct {
+	ID      string  `json:"id"`
+	Content *string `json:"content,omitempty"`
+}
+
 // How to enforce uniqueness for a field
 type UniqByAttributes struct {
 	// the scope this name is uniq w/in
@@ -10331,6 +10336,7 @@ const (
 	AgentSessionTypeManifests    AgentSessionType = "MANIFESTS"
 	AgentSessionTypeChat         AgentSessionType = "CHAT"
 	AgentSessionTypeResearch     AgentSessionType = "RESEARCH"
+	AgentSessionTypeConfigure    AgentSessionType = "CONFIGURE"
 )
 
 var AllAgentSessionType = []AgentSessionType{
@@ -10341,11 +10347,12 @@ var AllAgentSessionType = []AgentSessionType{
 	AgentSessionTypeManifests,
 	AgentSessionTypeChat,
 	AgentSessionTypeResearch,
+	AgentSessionTypeConfigure,
 }
 
 func (e AgentSessionType) IsValid() bool {
 	switch e {
-	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests, AgentSessionTypeChat, AgentSessionTypeResearch:
+	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests, AgentSessionTypeChat, AgentSessionTypeResearch, AgentSessionTypeConfigure:
 		return true
 	}
 	return false
