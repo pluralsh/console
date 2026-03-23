@@ -5025,6 +5025,32 @@ entries:
   console-rapid:
   - apiVersion: v2
     appVersion: 0.12.8
+    created: "2026-03-23T01:52:42.360259603Z"
+    dependencies:
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.177
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.14.1
+    - condition: dex.enabled
+      name: dex
+      repository: https://charts.dexidp.io
+      version: 0.24.0
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      version: 2.34.0
+    description: rapid channel chart for the plural console (used for testing)
+    digest: 0c1fd892c777f20b344e2efedd159b2a7ebd1c62d111b5c294812ba2df043984
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.4.10/console-rapid-0.4.10.tgz
+    version: 0.4.10
+  - apiVersion: v2
+    appVersion: 0.12.8
     created: "2026-03-23T01:17:24.760806825Z"
     dependencies:
     - condition: controller.enabled
@@ -11333,4 +11359,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2026-03-23T01:17:24.923952681Z"
+generated: "2026-03-23T01:52:42.361098212Z"
