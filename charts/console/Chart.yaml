@@ -6,7 +6,7 @@ appVersion: 0.12.6
 version: 0.4.7
 dependencies:
   - name: controller
-    version: 0.0.176
+    version: 0.0.177
     repository: file://../controller
     condition: controller.enabled
   - name: flux2
