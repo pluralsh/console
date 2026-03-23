@@ -2,7 +2,7 @@ apiVersion: v2
 name: console-rapid
 description: rapid channel chart for the plural console (used for testing)
 appVersion: 0.12.8
-version: 0.4.8
+version: 0.4.9
 dependencies:
   - name: controller
     version: 0.0.177
@@ -16,4 +16,7 @@ dependencies:
     version: 0.24.0
     repository: https://charts.dexidp.io
     condition: dex.enabled
+  - name: common
+    version: 2.34.0 # Closest to 2.33.2 used originally in the Redis chart.
+    repository: https://charts.bitnami.com/bitnami
 type: application

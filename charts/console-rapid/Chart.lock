@@ -8,5 +8,8 @@ dependencies:
 - name: dex
   repository: https://charts.dexidp.io
   version: 0.24.0
-digest: sha256:abc602340c7ce1c56d4850144678b6da9b5a095433040303395705bf3e640da4
-generated: "2026-03-23T00:42:02.332779393Z"
+- name: common
+  repository: https://charts.bitnami.com/bitnami
+  version: 2.34.0
+digest: sha256:1a9cfe12a43bce3fe9a126aa7b4bc5768c7dd7d1e708c52c33f3219159cd42a3
+generated: "2026-03-22T21:38:02.540263-04:00"
