@@ -2630,7 +2630,7 @@ type WorkbenchJobResult {
   conclusion: String
 
   "todos for this result"
-  todos: [WorkbenchJobResultTodo]
+  todos: [AgentTodo]
 
   "metadata for this result"
   metadata: WorkbenchJobResultMetadata
@@ -2646,12 +2646,6 @@ type WorkbenchJobResult {
 type WorkbenchJobResultMetadata {
   "metrics for this result"
   metrics: [WorkbenchJobActivityMetric]
-}
-
-type WorkbenchJobResultTodo {
-  name: String
-  description: String
-  done: Boolean
 }
 
 type WorkbenchConfiguration {

@@ -101,8 +101,8 @@ fragment WorkbenchTool on WorkbenchTool {
   }
 }
 
-fragment WorkbenchJobResultTodo on WorkbenchJobResultTodo {
-  name
+fragment WorkbenchJobResultTodo on AgentTodo {
+  title
   description
   done
 }

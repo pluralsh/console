@@ -1782,10 +1782,10 @@
          "name": "WorkbenchJobs",
          "body": "query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    runs(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchJobTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchJobTiny on WorkbenchJob {\n  id\n  prompt\n  status\n  __typename\n}"
       },
-      "sha256:00ebd029e5f794d96e2f3b5334748af9e7019bb560a62c5b561999caf06f14a1": {
+      "sha256:5a016f51dc3d1b0b90f7a58a3b11afc934af27fc9512d965cc47d51762022842": {
          "type": "query",
          "name": "WorkbenchJob",
-         "body": "query WorkbenchJob($id: ID!) {\n  workbenchJob(id: $id) {\n    ...WorkbenchJob\n    __typename\n  }\n}\n\nfragment WorkbenchJob on WorkbenchJob {\n  ...WorkbenchJobTiny\n  error\n  result {\n    ...WorkbenchJobResult\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchJobTiny on WorkbenchJob {\n  id\n  prompt\n  status\n  __typename\n}\n\nfragment WorkbenchJobResult on WorkbenchJobResult {\n  id\n  workingTheory\n  conclusion\n  todos {\n    ...WorkbenchJobResultTodo\n    __typename\n  }\n  metadata {\n    metrics {\n      timestamp\n      name\n      value\n      labels\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchJobResultTodo on WorkbenchJobResultTodo {\n  name\n  description\n  done\n  __typename\n}"
+         "body": "query WorkbenchJob($id: ID!) {\n  workbenchJob(id: $id) {\n    ...WorkbenchJob\n    __typename\n  }\n}\n\nfragment WorkbenchJob on WorkbenchJob {\n  ...WorkbenchJobTiny\n  error\n  result {\n    ...WorkbenchJobResult\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchJobTiny on WorkbenchJob {\n  id\n  prompt\n  status\n  __typename\n}\n\nfragment WorkbenchJobResult on WorkbenchJobResult {\n  id\n  workingTheory\n  conclusion\n  todos {\n    ...WorkbenchJobResultTodo\n    __typename\n  }\n  metadata {\n    metrics {\n      timestamp\n      name\n      value\n      labels\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment WorkbenchJobResultTodo on AgentTodo {\n  title\n  description\n  done\n  __typename\n}"
       },
       "sha256:3f8516334f3bffd7f81439e92edb91f980b973f0e846f6b8d2d4c896bb77e926": {
          "type": "query",

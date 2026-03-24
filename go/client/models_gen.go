@@ -9644,7 +9644,7 @@ type WorkbenchJobResult struct {
 	// the conclusion for this result
 	Conclusion *string `json:"conclusion,omitempty"`
 	// todos for this result
-	Todos []*WorkbenchJobResultTodo `json:"todos,omitempty"`
+	Todos []*AgentTodo `json:"todos,omitempty"`
 	// metadata for this result
 	Metadata *WorkbenchJobResultMetadata `json:"metadata,omitempty"`
 	// the job this result belongs to
@@ -9656,12 +9656,6 @@ type WorkbenchJobResult struct {
 type WorkbenchJobResultMetadata struct {
 	// metrics for this result
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
-}
-
-type WorkbenchJobResultTodo struct {
-	Name        *string `json:"name,omitempty"`
-	Description *string `json:"description,omitempty"`
-	Done        *bool   `json:"done,omitempty"`
 }
 
 type WorkbenchJobThought struct {

@@ -4,7 +4,7 @@ defmodule Console.AI.Tools.Workbench.Notes do
 
   embedded_schema do
     embeds_one :status, Status, on_replace: :update do
-      field :todos, {:array, :map}
+      embeds_many :todos, AgentRun.Todo, on_replace: :delete
       field :working_theory, :string
     end
     field :prompt, :string

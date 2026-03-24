@@ -264,9 +264,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_job_result do
     field :id,             non_null(:string), description: "the id of the result"
-    field :working_theory,  :string, description: "the working theory for this result"
+    field :working_theory, :string, description: "the working theory for this result"
     field :conclusion,     :string, description: "the conclusion for this result"
-    field :todos,          list_of(:workbench_job_result_todo), description: "todos for this result"
+    field :todos,          list_of(:agent_todo), description: "todos for this result"
     field :metadata,       :workbench_job_result_metadata, description: "metadata for this result"
 
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the job this result belongs to"
@@ -276,12 +276,6 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_job_result_metadata do
     field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for this result"
-  end
-
-  object :workbench_job_result_todo do
-    field :name,        :string
-    field :description, :string
-    field :done,        :boolean
   end
 
   object :workbench_configuration do
