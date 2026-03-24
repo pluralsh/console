@@ -2,7 +2,7 @@ apiVersion: v2
 name: console-rapid
 description: rapid channel chart for the plural console (used for testing)
 appVersion: 0.12.9
-version: 0.4.11
+version: 0.4.12
 dependencies:
   - name: controller
     version: 0.0.178
