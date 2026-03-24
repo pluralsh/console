@@ -34,14 +34,10 @@
             },
             "required": []
         },
-        "prompt": {
-            "type": "string",
-            "description": "A quick prompt to record why you're updating the notes"
-        },
-        "output": {
+        "summary": {
             "type": "string",
             "description": "A summary of the notes change you made"
         }
     },
-    "required": ["status", "prompt", "output"]
+    "required": ["status", "summary"]
 }

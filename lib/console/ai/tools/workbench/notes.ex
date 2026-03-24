@@ -8,8 +8,7 @@ defmodule Console.AI.Tools.Workbench.Notes do
 
       field :working_theory, :string
     end
-    field :prompt, :string
-    field :output, :string
+    field :summary, :string
   end
 
   @json_schema Console.priv_file!("tools/workbench/notes.json") |> Jason.decode!()
@@ -20,9 +19,9 @@ defmodule Console.AI.Tools.Workbench.Notes do
 
   def changeset(model, attrs) do
     model
-    |> cast(attrs, [:prompt, :output])
+    |> cast(attrs, [:summary])
     |> cast_embed(:status, with: &status_changeset/2)
-    |> validate_required([:prompt, :output, :status])
+    |> validate_required([:summary, :status])
   end
 
   defp status_changeset(model, attrs) do

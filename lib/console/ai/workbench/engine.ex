@@ -112,11 +112,11 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
-  defp spawn_activity(%Notes{status: status, prompt: prompt, output: output} = call, %__MODULE__{job: job}) do
+  defp spawn_activity(%Notes{status: status, summary: summary} = call, %__MODULE__{job: job}) do
     Workbenches.update_job_status(%{
       status: Console.mapify(status),
-      prompt: prompt,
-      output: output,
+      prompt: summary,
+      output: summary,
       tool_call: tool_attrs(call)
     }, job)
   end
