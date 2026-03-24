@@ -1,10 +1,11 @@
 defmodule Console.AI.Tools.Workbench.Notes do
   use Console.AI.Tools.Workbench.Base
-  alias Console.Schema.AgentRun
+  alias Console.Schema.WorkbenchJobResult
 
   embedded_schema do
     embeds_one :status, Status, on_replace: :update do
-      field :todos, {:array, :map}
+      embeds_many :todos, WorkbenchJobResult.Todo, on_replace: :delete
+
       field :working_theory, :string
     end
     field :prompt, :string
@@ -27,7 +28,7 @@ defmodule Console.AI.Tools.Workbench.Notes do
   defp status_changeset(model, attrs) do
     model
     |> cast(attrs, [:working_theory])
-    |> cast_embed(:todos, with: &AgentRun.todo_changeset/2)
+    |> cast_embed(:todos, with: &WorkbenchJobResult.todo_changeset/2)
   end
 
   def implement(%__MODULE__{} = notes), do: {:ok, notes}
