@@ -126,7 +126,7 @@ export function Workbench() {
             <ListBoxItem
               key="delete"
               destructive
-              leftContent={<TrashCanIcon />}
+              leftContent={<TrashCanIcon color="icon-danger" />}
               label="Delete workbench"
             />
           </MoreMenu>

@@ -13,12 +13,13 @@ import {
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
-} from '../../../../generated/graphql'
+} from 'generated/graphql'
 import { useState } from 'react'
-import { RectangleSkeleton } from '../../../utils/SkeletonLoaders'
-import { CaptionP } from '../../../utils/typography/Text'
-import { WorkbenchProgressMap } from './workbenchRunMockData'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { CaptionP } from 'components/utils/typography/Text'
+
 import styled from 'styled-components'
+import { WorkbenchProgressMap } from './WorkbenchRun'
 
 type WorkbenchRunActivitiesState = 'empty' | 'running' | 'finished'
 
@@ -59,14 +60,12 @@ export function WorkbenchRunActivities({
   loading,
   activities,
   progressByActivityId,
-  state,
 }: {
   loading: boolean
   activities?: Array<WorkbenchJobActivityFragment>
   progressByActivityId: WorkbenchProgressMap
-  state?: WorkbenchRunActivitiesState
 }) {
-  const resolvedState = state ?? resolveActivitiesState(activities)
+  const resolvedState = resolveActivitiesState(activities)
   const [expanded, setExpanded] = useState(true)
   const [activityExpanded, setActivityExpanded] = useState<
     Record<string, boolean>
@@ -86,9 +85,7 @@ export function WorkbenchRunActivities({
 
   return loading ? (
     <RectangleSkeleton
-      css={{
-        flex: 1,
-      }}
+      css={{ flex: 1 }}
       $width="100%"
       $height="100%"
     />

@@ -24,11 +24,8 @@ export function WorkbenchRunResult({
   if (loading)
     return (
       <RectangleSkeleton
-        css={{
-          minHeight: '320px',
-          width: '100%',
-        }}
-        $height="100%"
+        css={{ height: 320 }}
+        $height={320}
         $width="100%"
       />
     )
@@ -85,7 +82,6 @@ const ResultPanelSC = styled.div({
   display: 'flex',
   flexDirection: 'column',
   flex: 0.66,
-  minHeight: 0,
 })
 
 const ResultBorderSC = styled.div(({ theme }) => ({

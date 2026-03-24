@@ -1,12 +1,17 @@
+import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
+import { GqlError } from 'components/utils/Alert'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { StackedText } from 'components/utils/table/StackedText'
 import {
   useWorkbenchJobActivityDeltaSubscription,
-  useWorkbenchJobDeltaSubscription,
   useWorkbenchJobProgressSubscription,
   useWorkbenchRunQuery,
-  WorkbenchJob,
   WorkbenchJobActivityFragment,
+  WorkbenchJobFragment,
   WorkbenchJobProgressTinyFragment,
-} from '../../../../generated/graphql'
+} from 'generated/graphql'
+import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
@@ -14,121 +19,72 @@ import {
   WORKBENCH_PARAM_ID,
   WORKBENCH_RUNS_PARAM_RUN,
   WORKBENCHES_ABS_PATH,
-} from '../../../../routes/workbenchesRoutesConsts'
-import { IconFrame, MoreIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
-import { MoreMenu } from '../../../utils/MoreMenu'
-import { StackedText } from '../../../utils/table/StackedText'
-import { useEffect, useMemo, useState } from 'react'
-import { GqlError } from '../../../utils/Alert'
-import {
-  createWorkbenchRunMockFeeder,
-  WorkbenchProgressMap,
-  WorkbenchRunMockPanelState,
-} from './workbenchRunMockData'
-import { mapExistingNodes } from '../../../../utils/graphql'
-import { WorkbenchRunActivities } from './WorkbenchRunActivities'
-import { WorkbenchRunTodos } from './WorkbenchRunTodos'
-import { WorkbenchRunResult } from './WorkbenchRunResult'
+} from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql'
+import { WorkbenchRunActivities } from './WorkbenchRunActivities'
+import { WorkbenchRunResult } from './WorkbenchRunResult'
+import { WorkbenchRunTodos } from './WorkbenchRunTodos'
 
+export type WorkbenchProgressMap = Record<
+  string,
+  Array<WorkbenchJobProgressTinyFragment>
+>
+
+// note: we're using the terms "run" and "job" interchangeably throughout workbenches
 export function WorkbenchRun() {
   const {
     [WORKBENCH_PARAM_ID]: workbenchId = '',
     [WORKBENCH_RUNS_PARAM_RUN]: runId = '',
   } = useParams()
-  const isMockMode = false
-  const feeder = useMemo(
-    () => createWorkbenchRunMockFeeder({ loop: true, speed: 0.2 }),
-    []
-  )
-  const [run, setRun] = useState<WorkbenchJob | null>(null)
   const [progressByActivityId, setProgressByActivityId] =
     useState<WorkbenchProgressMap>({})
-  const [panelStateOverride, setPanelStateOverride] =
-    useState<WorkbenchRunMockPanelState | null>(null)
 
   const {
     data: runQueryData,
     loading: runQueryLoading,
     error: runQueryError,
   } = useWorkbenchRunQuery({
-    skip: isMockMode || !runId,
+    skip: !runId,
     variables: { id: runId },
     fetchPolicy: 'cache-and-network',
     pollInterval: 5_000,
   })
+  const [run, setRun] = useState<Nullable<WorkbenchJobFragment>>(null)
 
-  useWorkbenchJobDeltaSubscription({
-    skip: isMockMode || !runId,
-    variables: { id: runId },
-    onData: ({ data: { data } }) => {
-      const payload = data?.workbenchJobDelta?.payload
-      if (payload) setRun(payload as WorkbenchJob)
-    },
-  })
+  useEffect(() => {
+    setRun(runQueryData?.workbenchJob ?? null)
+  }, [runQueryData?.workbenchJob])
 
   useWorkbenchJobActivityDeltaSubscription({
-    skip: isMockMode || !runId,
+    skip: !runId,
+    ignoreResults: true,
     variables: { jobId: runId },
     onData: ({ data: { data } }) => {
       const payload = data?.workbenchJobActivityDelta?.payload
       if (!payload) return
 
-      setRun((prev) =>
-        upsertActivityInRun(prev, payload as WorkbenchJobActivityFragment)
-      )
+      setRun((prev) => upsertActivityInRun(prev, payload))
     },
   })
 
   useWorkbenchJobProgressSubscription({
-    skip: isMockMode || !runId,
+    skip: !runId,
+    ignoreResults: true,
     variables: { jobId: runId },
     onData: ({ data: { data } }) => {
       const payload = data?.workbenchJobProgress
       if (!payload) return
 
-      setProgressByActivityId((prev) =>
-        appendProgressEvent(prev, payload as WorkbenchJobProgressTinyFragment)
-      )
+      setProgressByActivityId((prev) => appendProgressEvent(prev, payload))
     },
   })
 
-  useEffect(() => {
-    if (!isMockMode) return
-
-    const unsubscribe = feeder.subscribe((_, nextState) => {
-      setRun(nextState.run as WorkbenchJob | null)
-      setProgressByActivityId(nextState.progressByActivityId)
-      setPanelStateOverride(nextState.panelStateOverride)
-    })
-
-    feeder.reset()
-    const initialState = feeder.getState()
-    setRun(initialState.run as WorkbenchJob | null)
-    setProgressByActivityId(initialState.progressByActivityId)
-    setPanelStateOverride(initialState.panelStateOverride)
-    feeder.start()
-
-    return () => {
-      unsubscribe()
-      feeder.stop()
-    }
-  }, [feeder, isMockMode])
-
-  useEffect(() => {
-    if (isMockMode) return
-
-    setProgressByActivityId({})
-    setPanelStateOverride(null)
-    setRun((runQueryData?.workbenchJob as WorkbenchJob) ?? null)
-  }, [isMockMode, runId, runQueryData?.workbenchJob])
-
-  const loading = isMockMode ? !run : runQueryLoading && !run
+  const loading = runQueryLoading && !run
 
   const error = useMemo(
-    () => run?.error ?? (!isMockMode ? runQueryError : null),
-    [isMockMode, run?.error, runQueryError]
+    () => run?.error ?? runQueryError,
+    [run?.error, runQueryError]
   )
   const errorHeader = run?.error
     ? 'Workbench run reported an error'
@@ -142,121 +98,80 @@ export function WorkbenchRun() {
         { label: 'workbenches', url: WORKBENCHES_ABS_PATH },
         {
           label: run?.workbench?.name ?? 'workbench',
-          url: getWorkbenchAbsPath(run?.workbench?.id ?? workbenchId),
+          url: getWorkbenchAbsPath(workbenchId),
         },
         {
           label: run?.prompt ?? 'workbench run',
-          url: getWorkbenchRunAbsPath({
-            workbenchId: run?.workbench?.id ?? workbenchId,
-            runId: run?.id ?? runId,
-          }),
+          url: getWorkbenchRunAbsPath({ workbenchId, runId }),
         },
       ],
-      [
-        run?.workbench?.name,
-        run?.workbench?.id,
-        run?.prompt,
-        run?.id,
-        workbenchId,
-        runId,
-      ]
+      [run, workbenchId, runId]
     )
   )
 
   return (
-    <RunWrapperSC>
-      <WorkbenchRunHeader
-        loading={loading}
-        job={run as WorkbenchJob}
-      />
+    <>
       {error && (
         <GqlError
+          margin="large"
           header={errorHeader}
           error={error}
         />
       )}
-      <RunBodySC>
-        <WorkbenchRunActivities
-          loading={loading}
-          activities={mapExistingNodes(run?.activities)}
-          progressByActivityId={progressByActivityId}
-          state={panelStateOverride ?? undefined}
-        />
-        <WorkbenchRunSidecar
-          loading={loading}
-          result={run?.result}
-        />
-      </RunBodySC>
-    </RunWrapperSC>
-  )
-}
-
-function WorkbenchRunHeader({
-  loading,
-  job,
-}: {
-  loading: boolean
-  job: WorkbenchJob
-}) {
-  return (
-    <HeaderSC>
-      <HeaderTextSC>
-        <StackedText
-          loading={loading}
-          first={job?.workbench?.name}
-          firstColor="text"
-          firstPartialType="subtitle2"
-          second={job?.prompt}
-          secondColor="text-xlight"
-          secondPartialType="body2"
-        />
-      </HeaderTextSC>
-      <HeaderActionsSC>
-        <RunStatusChip
-          loading={loading}
-          size="large"
-          status={job?.status}
-        />
-        <MoreMenu
-          loading={loading}
-          triggerButton={
-            <IconFrame
-              clickable
-              type="secondary"
-              icon={<MoreIcon css={{ width: 16 }} />}
+      <WrapperSC>
+        <Flex
+          direction="column"
+          gap="large"
+          minWidth={560}
+          flex={5}
+        >
+          <StretchedFlex gap="xlarge">
+            <StackedText
+              truncate
+              loading={loading}
+              first={run?.workbench?.name}
+              firstColor="text"
+              firstPartialType="subtitle2"
+              second={run?.prompt}
+              secondColor="text-xlight"
+              secondPartialType="body2"
             />
-          }
-        />
-      </HeaderActionsSC>
-    </HeaderSC>
-  )
-}
-
-function WorkbenchRunSidecar({
-  loading,
-  result,
-}: {
-  loading: boolean
-  result?: WorkbenchJob['result']
-}) {
-  return (
-    <SidecarSC>
-      <WorkbenchRunResult
-        loading={loading}
-        result={result}
-      />
-      <WorkbenchRunTodos
-        loading={loading}
-        result={result}
-      />
-    </SidecarSC>
+            <RunStatusChip
+              loading={loading}
+              status={run?.status}
+            />
+          </StretchedFlex>
+          <WorkbenchRunActivities
+            loading={loading}
+            activities={mapExistingNodes(run?.activities)}
+            progressByActivityId={progressByActivityId}
+          />
+        </Flex>
+        <Flex
+          direction="column"
+          gap="medium"
+          minWidth={500}
+          flex={6}
+          height="100%"
+        >
+          <WorkbenchRunResult
+            loading={loading}
+            result={run?.result}
+          />
+          <WorkbenchRunTodos
+            loading={loading}
+            result={run?.result}
+          />
+        </Flex>
+      </WrapperSC>
+    </>
   )
 }
 
 function upsertActivityInRun(
-  run: WorkbenchJob | null,
+  run: Nullable<WorkbenchJobFragment>,
   activity: WorkbenchJobActivityFragment
-): WorkbenchJob | null {
+) {
   if (!run) return run
 
   const previousEdges = run.activities?.edges ?? []
@@ -271,8 +186,8 @@ function upsertActivityInRun(
   } else {
     updatedEdges.push({
       __typename: 'WorkbenchJobActivityEdge',
-      node: activity as any,
-    } as any)
+      node: activity,
+    })
   }
 
   return {
@@ -306,47 +221,12 @@ function appendProgressEvent(
   }
 }
 
-const RunWrapperSC = styled.div(({ theme }) => ({
+const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
-  padding: theme.spacing.xlarge,
-  gap: theme.spacing.xlarge,
+  gap: theme.spacing.large,
   height: '100%',
-  minHeight: 0,
-}))
-
-const RunBodySC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'row',
-  gap: theme.spacing.xlarge,
-  height: '100%',
-  minHeight: 0,
-}))
-
-const HeaderSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.medium,
-}))
-
-const HeaderTextSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flex: '1',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-}))
-
-const HeaderActionsSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flex: '1',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  gap: theme.spacing.small,
-}))
-
-const SidecarSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  flex: 1,
-  minHeight: 0,
-  gap: theme.spacing.medium,
+  width: '100%',
+  overflow: 'auto',
+  padding: theme.spacing.large,
+  paddingTop: 0,
 }))
