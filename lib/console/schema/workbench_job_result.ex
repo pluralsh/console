@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchJobResult do
   use Console.Schema.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, AgentRun}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
   alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.Metric
 
   defenum TodoStatus, pending: 0, in_progress: 1, completed: 2
