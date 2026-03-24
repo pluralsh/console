@@ -1044,4 +1044,4 @@ networkPolicy:
   # consoleInternalPorts protects unauthenticated console internal ports.
   consoleInternalPorts:
     # enabled controls creation of the console internal ports NetworkPolicy.
-    enabled: true
+    enabled: false
