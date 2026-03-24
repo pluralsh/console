@@ -1,15 +1,15 @@
 defmodule Console.AI.Tools.Workbench.Plan do
   use Console.AI.Tools.Workbench.Base
-  alias Console.Schema.AgentRun
+  alias Console.Schema.WorkbenchResult
 
   embedded_schema do
-    embeds_many :todos, AgentRun.Todo, on_replace: :delete
+    embeds_many :todos, WorkbenchResult.Todo, on_replace: :delete
   end
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, [])
-    |> cast_embed(:todos, with: &AgentRun.todo_changeset/2)
+    |> cast_embed(:todos, with: &WorkbenchResult.todo_changeset/2)
   end
 
   @json_schema Console.priv_file!("tools/workbench/plan.json") |> Jason.decode!()
