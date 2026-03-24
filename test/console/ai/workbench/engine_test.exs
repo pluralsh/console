@@ -27,7 +27,7 @@ defmodule Console.AI.Workbench.EngineTest do
         {:ok, "Plan complete", [
           %Tool{
             name: "workbench_plan",
-            arguments: %{"todos" => [%{title: "todo 1", description: "todo 1", done: false}]}
+            arguments: %{"todos" => [%{name: "todo 1", description: "todo 1", done: false}]}
           }
         ]}
       end)
