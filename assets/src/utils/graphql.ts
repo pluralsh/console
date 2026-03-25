@@ -1,8 +1,10 @@
+import type { DocumentNode } from 'graphql'
 import isString from 'lodash/isString'
 import uniqWith from 'lodash/uniqWith'
 
-import { isNonNullable } from './isNonNullable'
+import { ApolloCache, type Unmasked } from '@apollo/client'
 import { isEmpty, isNil } from 'lodash'
+import { isNonNullable } from './isNonNullable'
 
 export function updateFragment(cache, { fragment, id, update, fragmentName }) {
   const current = cache.readFragment({ id, fragment, fragmentName })
@@ -156,12 +158,23 @@ export function removeConnection(prev, val, key) {
   }
 }
 
-export function updateCache(cache, { query, variables, update }: any) {
-  const prev = cache.readQuery({ query, variables })
+export function updateCache<TQuery>(
+  cache: ApolloCache<object>,
+  {
+    query,
+    variables,
+    update,
+  }: {
+    query: DocumentNode
+    variables?: any
+    update: (prev: Unmasked<TQuery>) => Unmasked<TQuery>
+  }
+) {
+  const prev = cache.readQuery<TQuery>({ query, variables })
 
   if (!prev) return
 
-  cache.writeQuery({ query, variables, data: update(prev) })
+  cache.writeQuery<TQuery>({ query, variables, data: update(prev) })
 }
 
 export const prune = ({ __typename, ...rest }) => rest

@@ -1,76 +1,60 @@
+import { Card, EmptyState } from '@pluralsh/design-system'
+import { StepperAccordionSC } from 'components/utils/StepperAccordion'
 import {
-  Card,
-  CheckIcon,
-  CliIcon,
-  EmptyState,
-  ErrorIcon,
-  Flex,
-  SpinnerAlt,
-  ToolKitIcon,
-  UnknownIcon,
-} from '@pluralsh/design-system'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
-import {
-  StepperAccordionItemSC,
-  StepperAccordionSC,
-} from 'components/utils/StepperAccordion'
-import { Body2P, OverlineH3 } from 'components/utils/typography/Text'
-import {
-  WorkbenchJobActivityStatus,
-  WorkbenchJobActivityType,
-  WorkbenchJobFragment,
+  useWorkbenchJobActivitiesSuspenseQuery,
+  useWorkbenchJobActivityDeltaSubscription,
+  WorkbenchJobActivitiesDocument,
+  WorkbenchJobActivitiesQuery,
 } from 'generated/graphql'
-import { useMemo } from 'react'
+import { useState } from 'react'
 
-import { StretchedFlex } from 'components/utils/StretchedFlex'
-import styled, { useTheme } from 'styled-components'
-import { mapExistingNodes } from 'utils/graphql'
+import { useApolloClient } from '@apollo/client'
+import { VirtualList } from 'components/utils/VirtualList'
+import styled from 'styled-components'
+import {
+  appendConnectionToEnd,
+  mapExistingNodes,
+  updateCache,
+} from 'utils/graphql'
+import { isActivityRunning, WorkbenchJobActivity } from './WorkbenchJobActivity'
+import { AI_GRADIENT_BG } from 'components/ai/agent-runs/details/AIAgentRunMessages'
 
-const ACTIVITY_GAP = 'medium' as const
+export const ACTIVITY_GAP = 'medium' as const
 
-function isActivityRunning(status: WorkbenchJobActivityStatus) {
-  return (
-    status === WorkbenchJobActivityStatus.Pending ||
-    status === WorkbenchJobActivityStatus.Running
-  )
-}
+export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
+  const client = useApolloClient()
 
-export function WorkbenchJobActivities({
-  job,
-  loading,
-}: {
-  job: Nullable<WorkbenchJobFragment>
-  loading: boolean
-}) {
-  const { spacing, colors, borders, borderRadiuses } = useTheme()
+  const { data } = useWorkbenchJobActivitiesSuspenseQuery({
+    variables: { id: jobId },
+  })
+  const job = data?.workbenchJob
+  const activities = mapExistingNodes(job?.activities)
 
-  const activities = useMemo(
-    () => mapExistingNodes(job?.activities),
-    [job?.activities]
-  )
+  useWorkbenchJobActivityDeltaSubscription({
+    variables: { jobId },
+    onData: ({ data: { data } }) => {
+      updateCache<WorkbenchJobActivitiesQuery>(client.cache, {
+        query: WorkbenchJobActivitiesDocument,
+        variables: { id: jobId },
+        update: (prev) => ({
+          ...prev,
+          workbenchJob: appendConnectionToEnd(
+            prev.workbenchJob,
+            data?.workbenchJobActivityDelta?.payload,
+            'activities'
+          ),
+        }),
+      })
+    },
+  })
 
   const hasActivities = !!activities.length
 
-  const activityIdList = useMemo(
-    () => activities.map((activity) => activity.id),
-    [activities]
+  const [openIds, setOpenIds] = useState<string[]>(() =>
+    activities
+      .filter((activity) => isActivityRunning(activity.status))
+      .map((activity) => activity.id)
   )
-
-  const defaultOpenIds = useMemo(
-    () =>
-      activities
-        .filter((activity) => isActivityRunning(activity.status))
-        .map((activity) => activity.id),
-    [activities]
-  )
-
-  if (loading)
-    return (
-      <RectangleSkeleton
-        $width="100%"
-        $height="100%"
-      />
-    )
 
   return (
     <ActivitiesPanelSC>
@@ -81,112 +65,25 @@ export function WorkbenchJobActivities({
         <StepperAccordionSC
           type="multiple"
           $gap={ACTIVITY_GAP}
-          key={activityIdList.join('-')}
-          defaultValue={defaultOpenIds}
+          value={openIds}
+          onValueChange={setOpenIds}
+          css={{ height: '100%' }}
         >
-          {activities.map((activity) => {
-            const isRunning = isActivityRunning(activity.status)
-
-            return (
-              <StepperAccordionItemSC
-                key={activity.id}
-                value={activity.id}
-                caret="left"
-                padding="compact"
-                paddingArea="trigger-only"
-                $gap={ACTIVITY_GAP}
-                {...(isRunning && { $dotColor: 'icon-primary' })}
-                triggerWrapperStyles={{
-                  border: borders.default,
-                  borderRadius: borderRadiuses.medium,
-                  backgroundColor: colors[isRunning ? 'fill-one' : 'fill-zero'],
-                }}
-                trigger={
-                  <StretchedFlex gap="small">
-                    <OverlineH3 $shimmer={isRunning}>
-                      <ActivityTypeIcon type={activity.type} />
-                      <span>{activity.type?.toLowerCase() ?? 'activity'}</span>
-                    </OverlineH3>
-                    <ActivityStatusIcon status={activity.status} />
-                  </StretchedFlex>
-                }
-              >
-                <Flex
-                  direction="column"
-                  gap="xsmall"
-                  maxHeight={220}
-                  overflow="auto"
-                  css={{ padding: `${spacing.xsmall}px ${spacing.medium}px` }}
-                >
-                  <Body2P $color="text-light">
-                    {activity.prompt || 'Running activity'}
-                  </Body2P>
-                </Flex>
-              </StepperAccordionItemSC>
-            )
-          })}
+          <VirtualList
+            data={activities}
+            itemGap={ACTIVITY_GAP}
+            renderer={({ rowData, index }) => (
+              <WorkbenchJobActivity
+                activity={rowData}
+                progress={[]} // TODO
+                isLast={index === activities.length - 1}
+              />
+            )}
+          />
         </StepperAccordionSC>
       )}
     </ActivitiesPanelSC>
   )
-}
-
-function ActivityTypeIcon({
-  type,
-}: {
-  type: Nullable<WorkbenchJobActivityType>
-}) {
-  switch (type) {
-    case WorkbenchJobActivityType.Coding:
-      return (
-        <CliIcon
-          size={12}
-          color="icon-xlight"
-        />
-      )
-    case WorkbenchJobActivityType.Integration:
-      return (
-        <ToolKitIcon
-          size={12}
-          color="icon-xlight"
-        />
-      )
-    default:
-      return null
-  }
-}
-
-function ActivityStatusIcon({
-  status,
-}: {
-  status: WorkbenchJobActivityStatus
-}) {
-  switch (status) {
-    case WorkbenchJobActivityStatus.Pending:
-    case WorkbenchJobActivityStatus.Running:
-      return <SpinnerAlt size={12} />
-    case WorkbenchJobActivityStatus.Successful:
-      return (
-        <CheckIcon
-          size={12}
-          color="icon-success"
-        />
-      )
-    case WorkbenchJobActivityStatus.Failed:
-      return (
-        <ErrorIcon
-          size={12}
-          color="icon-danger"
-        />
-      )
-    default:
-      return (
-        <UnknownIcon
-          size={12}
-          color="icon-xlight"
-        />
-      )
-  }
 }
 
 const ActivitiesPanelSC = styled.div(({ theme }) => ({
@@ -194,8 +91,7 @@ const ActivitiesPanelSC = styled.div(({ theme }) => ({
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.medium,
   padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px`,
-  background:
-    'linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(70, 78, 255, 0.18) 100%), #0e1015',
+  background: AI_GRADIENT_BG,
   flex: 1,
   display: 'flex',
   flexDirection: 'column',

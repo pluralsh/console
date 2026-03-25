@@ -2,13 +2,11 @@ import { EmptyState, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
-import {
-  useWorkbenchJobQuery,
-  WorkbenchJobProgressTinyFragment,
-} from 'generated/graphql'
-import { useMemo } from 'react'
+import { useWorkbenchJobQuery } from 'generated/graphql'
+import { Suspense, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
@@ -20,11 +18,6 @@ import styled from 'styled-components'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { WorkbenchJobResult } from './WorkbenchJobResult'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
-
-export type WorkbenchProgressMap = Record<
-  string,
-  Array<WorkbenchJobProgressTinyFragment>
->
 
 export function WorkbenchJob() {
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
@@ -103,10 +96,16 @@ export function WorkbenchJob() {
               status={job?.status}
             />
           </StretchedFlex>
-          <WorkbenchJobActivities
-            job={job}
-            loading={isLoading}
-          />
+          <Suspense
+            fallback={
+              <RectangleSkeleton
+                $width="100%"
+                $height="100%"
+              />
+            }
+          >
+            <WorkbenchJobActivities jobId={jobId} />
+          </Suspense>
         </Flex>
         <Flex
           direction="column"

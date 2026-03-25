@@ -16,6 +16,8 @@ import { useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 
+export const AI_GRADIENT_BG = `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, rgba(74, 81, 242, 0.05) 100%)`
+
 export function AIAgentRunMessages({ run }: { run: AgentRunFragment }) {
   const { spacing, colors } = useTheme()
 
@@ -91,7 +93,7 @@ const GradientWrapperSC = styled.div(({ theme }) => ({
   minHeight: 610,
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.large,
-  background: `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, rgba(74, 81, 242, 0.05) 100%)`,
+  background: AI_GRADIENT_BG,
 }))
 
 const agentMsgToChatMsg = (msg: AgentMessageFragment): ChatFragment => ({

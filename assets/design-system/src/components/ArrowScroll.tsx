@@ -73,6 +73,7 @@ const WrapperSC = styled.div({
   width: '100%',
   overflow: 'hidden',
   minHeight: 'fit-content',
+  maxWidth: 'fit-content',
 })
 
 const ScrollAreaSC = styled.div({

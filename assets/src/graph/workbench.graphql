@@ -181,7 +181,7 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
   }
 }
 
-fragment WorkbenchJobProgressTiny on WorkbenchJobProgress {
+fragment WorkbenchJobProgress on WorkbenchJobProgress {
   activityId
   tool
   text
@@ -196,13 +196,6 @@ fragment WorkbenchJob on WorkbenchJob {
     name
   }
   error
-  activities(first: 100) {
-    edges {
-      node {
-        ...WorkbenchJobActivity
-      }
-    }
-  }
   result {
     ...WorkbenchJobResult
   }
@@ -249,6 +242,20 @@ query WorkbenchJob($id: ID!) {
   }
 }
 
+query WorkbenchJobActivities($id: ID!) {
+  workbenchJob(id: $id) {
+    id
+    prompt
+    activities(first: 100) {
+      edges {
+        node {
+          ...WorkbenchJobActivity
+        }
+      }
+    }
+  }
+}
+
 subscription WorkbenchJobDelta($id: ID!) {
   workbenchJobDelta(id: $id) {
     delta
@@ -269,7 +276,7 @@ subscription WorkbenchJobActivityDelta($jobId: ID!) {
 
 subscription WorkbenchJobProgress($jobId: ID!) {
   workbenchJobProgress(jobId: $jobId) {
-    ...WorkbenchJobProgressTiny
+    ...WorkbenchJobProgress
   }
 }
 
