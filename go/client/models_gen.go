@@ -9711,8 +9711,10 @@ type WorkbenchTool struct {
 	Project *Project `json:"project,omitempty"`
 	// tool configuration
 	Configuration *WorkbenchToolConfiguration `json:"configuration,omitempty"`
-	InsertedAt    *string                     `json:"insertedAt,omitempty"`
-	UpdatedAt     *string                     `json:"updatedAt,omitempty"`
+	// the mcp server for this tool
+	McpServer  *McpServer `json:"mcpServer,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchToolAssociationAttributes struct {
@@ -9745,6 +9747,8 @@ type WorkbenchToolAttributes struct {
 	Categories []*WorkbenchToolCategory `json:"categories,omitempty"`
 	// the project for this tool
 	ProjectID *string `json:"projectId,omitempty"`
+	// the mcp server for this tool
+	McpServerID *string `json:"mcpServerId,omitempty"`
 	// tool configuration (e.g. http)
 	Configuration *WorkbenchToolConfigurationAttributes `json:"configuration,omitempty"`
 }

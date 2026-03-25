@@ -2295,6 +2295,9 @@ input WorkbenchToolAttributes {
   "the project for this tool"
   projectId: ID
 
+  "the mcp server for this tool"
+  mcpServerId: ID
+
   "tool configuration (e.g. http)"
   configuration: WorkbenchToolConfigurationAttributes
 }
@@ -2766,6 +2769,9 @@ type WorkbenchTool {
 
   "tool configuration"
   configuration: WorkbenchToolConfiguration
+
+  "the mcp server for this tool"
+  mcpServer: McpServer
 
   insertedAt: DateTime
 
