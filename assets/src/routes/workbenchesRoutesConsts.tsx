@@ -15,17 +15,17 @@ export const WORKBENCHES_CREATE_ABS_PATH = `${WORKBENCHES_ABS_PATH}/${WORKBENCHE
 export const getWorkbenchAbsPath = (workbenchId: Nullable<string>) =>
   `${WORKBENCHES_ABS_PATH}/${workbenchId ?? ''}`
 
-export const getWorkbenchRunAbsPath = ({
+export const getWorkbenchJobAbsPath = ({
   workbenchId,
-  runId,
+  jobId,
 }: {
   workbenchId: string
-  runId: string
-}) => `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCH_RUNS_REL_PATH}/${runId}`
+  jobId: string
+}) => `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCH_JOBS_REL_PATH}/${jobId}`
 
-export const WORKBENCH_RUNS_REL_PATH = 'runs'
-export const WORKBENCH_RUNS_PARAM_RUN = 'runId'
-export const WORKBENCH_RUN_ABS_PATH = getWorkbenchRunAbsPath({
+export const WORKBENCH_JOBS_REL_PATH = 'jobs'
+export const WORKBENCH_JOBS_PARAM_JOB = 'jobId'
+export const WORKBENCH_JOB_ABS_PATH = getWorkbenchJobAbsPath({
   workbenchId: `:${WORKBENCH_PARAM_ID}`,
-  runId: `:${WORKBENCH_RUNS_PARAM_RUN}`,
+  jobId: `:${WORKBENCH_JOBS_PARAM_JOB}`,
 })

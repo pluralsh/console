@@ -6,8 +6,8 @@ import { Workbench } from 'components/workbenches/workbench/Workbench'
 import { WorkbenchCreateOrEdit } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
 import { Route } from 'react-router-dom'
 import {
+  WORKBENCH_JOB_ABS_PATH,
   WORKBENCH_PARAM_ID,
-  WORKBENCH_RUN_ABS_PATH,
   WORKBENCHES_ABS_PATH,
   WORKBENCHES_CREATE_REL_PATH,
   WORKBENCHES_EDIT_REL_PATH,
@@ -15,7 +15,7 @@ import {
   WORKBENCHES_TOOLS_PARAM_ID,
   WORKBENCHES_TOOLS_REL_PATH,
 } from './workbenchesRoutesConsts'
-import { WorkbenchRun } from 'components/workbenches/workbench/run/WorkbenchRun'
+import { WorkbenchJob } from 'components/workbenches/workbench/job/WorkbenchJob'
 
 export const workbenchesRoutes = [
   <Route
@@ -52,7 +52,7 @@ export const workbenchesRoutes = [
     element={<WorkbenchToolCreateOrEdit mode="edit" />}
   />,
   <Route
-    path={WORKBENCH_RUN_ABS_PATH}
-    element={<WorkbenchRun />}
+    path={WORKBENCH_JOB_ABS_PATH}
+    element={<WorkbenchJob />}
   />,
 ]

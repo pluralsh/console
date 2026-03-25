@@ -19,9 +19,9 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { CaptionP } from 'components/utils/typography/Text'
 
 import styled from 'styled-components'
-import { WorkbenchProgressMap } from './WorkbenchRun'
+import { WorkbenchProgressMap } from './WorkbenchJob'
 
-type WorkbenchRunActivitiesState = 'empty' | 'running' | 'finished'
+type WorkbenchJobActivitiesState = 'empty' | 'running' | 'finished'
 
 const terminalStatuses = new Set([
   WorkbenchJobActivityStatus.Successful,
@@ -31,7 +31,7 @@ const terminalStatuses = new Set([
 
 function resolveActivitiesState(
   activities?: Array<WorkbenchJobActivityFragment>
-): WorkbenchRunActivitiesState {
+): WorkbenchJobActivitiesState {
   if (!activities?.length) return 'empty'
 
   const hasActive = activities.some(
@@ -56,7 +56,7 @@ function isActivityRunning(status: WorkbenchJobActivityStatus) {
   )
 }
 
-export function WorkbenchRunActivities({
+export function WorkbenchJobActivities({
   loading,
   activities,
   progressByActivityId,
@@ -169,7 +169,7 @@ function ActivityCard({
   activity: WorkbenchJobActivityFragment
   progress: NonNullable<WorkbenchProgressMap[string]>
   index: number
-  state: WorkbenchRunActivitiesState
+  state: WorkbenchJobActivitiesState
   expanded: boolean
   onToggle: () => void
 }) {
@@ -231,7 +231,7 @@ function ActivityCard({
 function ActivitySummaryStatus({
   state,
 }: {
-  state: WorkbenchRunActivitiesState
+  state: WorkbenchJobActivitiesState
 }) {
   switch (state) {
     case 'running':

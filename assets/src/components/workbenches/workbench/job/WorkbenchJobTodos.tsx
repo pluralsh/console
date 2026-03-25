@@ -27,7 +27,7 @@ function toTodos(result?: WorkbenchJobResultFragment | null) {
     .filter((todo) => todo.name.length > 0 || todo.description.length > 0)
 }
 
-export function WorkbenchRunTodos({
+export function WorkbenchJobTodos({
   loading,
   result,
 }: {

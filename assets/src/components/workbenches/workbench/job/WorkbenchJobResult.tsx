@@ -1,5 +1,5 @@
-import { WorkbenchJobResultFragment } from '../../../../generated/graphql'
-import { RectangleSkeleton } from '../../../utils/SkeletonLoaders'
+import { WorkbenchJobResultFragment } from 'generated/graphql'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import styled from 'styled-components'
@@ -14,7 +14,7 @@ function getConclusion(result?: WorkbenchJobResultFragment | null) {
   return text?.length ? text : null
 }
 
-export function WorkbenchRunResult({
+export function WorkbenchJobResult({
   loading,
   result,
 }: {

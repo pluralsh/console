@@ -28,8 +28,8 @@ import {
   WORKBENCHES_EDIT_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
-import { WorkbenchRunCreateInput } from './WorkbenchRunCreateInput'
-import { WorkbenchRunsTable } from './WorkbenchRunsTable'
+import { WorkbenchJobCreateInput } from './WorkbenchJobCreateInput'
+import { WorkbenchJobsTable } from './WorkbenchJobsTable'
 
 export const getWorkbenchBreadcrumbs = (
   workbench: Nullable<WorkbenchTinyFragment>
@@ -132,20 +132,20 @@ export function Workbench() {
           </MoreMenu>
         </Flex>
       </StretchedFlex>
-      <WorkbenchRunCreateInput
+      <WorkbenchJobCreateInput
         workbenchId={id}
         workbenchLoading={isLoading}
       />
       <Divider backgroundColor="border" />
       <StackedText
-        first="Workbench Runs"
+        first="Workbench jobs"
         firstPartialType="body2Bold"
         firstColor="text"
-        second="Current and previous runs"
+        second="Current and previous jobs"
         secondPartialType="body2"
         secondColor="text-light"
       />
-      <WorkbenchRunsTable workbenchId={id} />
+      <WorkbenchJobsTable workbenchId={id} />
       <Confirm
         open={deleteModalOpen}
         close={() => setDeleteModalOpen(false)}

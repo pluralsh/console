@@ -6,7 +6,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import {
   useWorkbenchJobActivityDeltaSubscription,
   useWorkbenchJobProgressSubscription,
-  useWorkbenchRunQuery,
+  useWorkbenchJobQuery,
   WorkbenchJobActivityFragment,
   WorkbenchJobFragment,
   WorkbenchJobProgressTinyFragment,
@@ -15,63 +15,62 @@ import { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
-  getWorkbenchRunAbsPath,
+  getWorkbenchJobAbsPath,
+  WORKBENCH_JOBS_PARAM_JOB,
   WORKBENCH_PARAM_ID,
-  WORKBENCH_RUNS_PARAM_RUN,
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import { WorkbenchRunActivities } from './WorkbenchRunActivities'
-import { WorkbenchRunResult } from './WorkbenchRunResult'
-import { WorkbenchRunTodos } from './WorkbenchRunTodos'
+import { WorkbenchJobActivities } from './WorkbenchJobActivities'
+import { WorkbenchJobResult } from './WorkbenchJobResult'
+import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 
 export type WorkbenchProgressMap = Record<
   string,
   Array<WorkbenchJobProgressTinyFragment>
 >
 
-// note: we're using the terms "run" and "job" interchangeably throughout workbenches
-export function WorkbenchRun() {
+export function WorkbenchJob() {
   const {
     [WORKBENCH_PARAM_ID]: workbenchId = '',
-    [WORKBENCH_RUNS_PARAM_RUN]: runId = '',
+    [WORKBENCH_JOBS_PARAM_JOB]: jobId = '',
   } = useParams()
   const [progressByActivityId, setProgressByActivityId] =
     useState<WorkbenchProgressMap>({})
 
   const {
-    data: runQueryData,
-    loading: runQueryLoading,
-    error: runQueryError,
-  } = useWorkbenchRunQuery({
-    skip: !runId,
-    variables: { id: runId },
+    data: jobQueryData,
+    loading: jobQueryLoading,
+    error: jobQueryError,
+  } = useWorkbenchJobQuery({
+    skip: !jobId,
+    variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
     pollInterval: 5_000,
   })
-  const [run, setRun] = useState<Nullable<WorkbenchJobFragment>>(null)
+  const [job, setJob] = useState<Nullable<WorkbenchJobFragment>>(null)
 
   useEffect(() => {
-    setRun(runQueryData?.workbenchJob ?? null)
-  }, [runQueryData?.workbenchJob])
+    setJob(jobQueryData?.workbenchJob ?? null)
+  }, [jobQueryData?.workbenchJob])
 
   useWorkbenchJobActivityDeltaSubscription({
-    skip: !runId,
+    skip: !jobId,
     ignoreResults: true,
-    variables: { jobId: runId },
+    variables: { jobId },
     onData: ({ data: { data } }) => {
       const payload = data?.workbenchJobActivityDelta?.payload
       if (!payload) return
 
-      setRun((prev) => upsertActivityInRun(prev, payload))
+      setJob((prev) => upsertActivityInJob(prev, payload))
     },
   })
 
   useWorkbenchJobProgressSubscription({
-    skip: !runId,
+    skip: !jobId,
     ignoreResults: true,
-    variables: { jobId: runId },
+    variables: { jobId },
     onData: ({ data: { data } }) => {
       const payload = data?.workbenchJobProgress
       if (!payload) return
@@ -80,16 +79,16 @@ export function WorkbenchRun() {
     },
   })
 
-  const loading = runQueryLoading && !run
+  const loading = jobQueryLoading && !job
 
   const error = useMemo(
-    () => run?.error ?? runQueryError,
-    [run?.error, runQueryError]
+    () => job?.error ?? jobQueryError,
+    [job?.error, jobQueryError]
   )
-  const errorHeader = run?.error
-    ? 'Workbench run reported an error'
-    : runQueryError
-      ? 'Failed to load workbench run'
+  const errorHeader = job?.error
+    ? 'Workbench job reported an error'
+    : jobQueryError
+      ? 'Failed to load workbench job'
       : undefined
 
   useSetBreadcrumbs(
@@ -97,15 +96,15 @@ export function WorkbenchRun() {
       () => [
         { label: 'workbenches', url: WORKBENCHES_ABS_PATH },
         {
-          label: run?.workbench?.name ?? 'workbench',
+          label: job?.workbench?.name ?? 'workbench',
           url: getWorkbenchAbsPath(workbenchId),
         },
         {
-          label: run?.prompt ?? 'workbench run',
-          url: getWorkbenchRunAbsPath({ workbenchId, runId }),
+          label: job?.prompt ?? 'workbench job',
+          url: getWorkbenchJobAbsPath({ workbenchId, jobId }),
         },
       ],
-      [run, workbenchId, runId]
+      [job, workbenchId, jobId]
     )
   )
 
@@ -129,21 +128,21 @@ export function WorkbenchRun() {
             <StackedText
               truncate
               loading={loading}
-              first={run?.workbench?.name}
+              first={job?.workbench?.name}
               firstColor="text"
               firstPartialType="subtitle2"
-              second={run?.prompt}
+              second={job?.prompt}
               secondColor="text-xlight"
               secondPartialType="body2"
             />
             <RunStatusChip
               loading={loading}
-              status={run?.status}
+              status={job?.status}
             />
           </StretchedFlex>
-          <WorkbenchRunActivities
+          <WorkbenchJobActivities
             loading={loading}
-            activities={mapExistingNodes(run?.activities)}
+            activities={mapExistingNodes(job?.activities)}
             progressByActivityId={progressByActivityId}
           />
         </Flex>
@@ -154,13 +153,13 @@ export function WorkbenchRun() {
           flex={6}
           height="100%"
         >
-          <WorkbenchRunResult
+          <WorkbenchJobResult
             loading={loading}
-            result={run?.result}
+            result={job?.result}
           />
-          <WorkbenchRunTodos
+          <WorkbenchJobTodos
             loading={loading}
-            result={run?.result}
+            result={job?.result}
           />
         </Flex>
       </WrapperSC>
@@ -168,13 +167,13 @@ export function WorkbenchRun() {
   )
 }
 
-function upsertActivityInRun(
-  run: Nullable<WorkbenchJobFragment>,
+function upsertActivityInJob(
+  jobState: Nullable<WorkbenchJobFragment>,
   activity: WorkbenchJobActivityFragment
 ) {
-  if (!run) return run
+  if (!jobState) return jobState
 
-  const previousEdges = run.activities?.edges ?? []
+  const previousEdges = jobState.activities?.edges ?? []
   const updatedEdges = [...previousEdges]
   const index = updatedEdges.findIndex((edge) => edge?.node?.id === activity.id)
 
@@ -191,9 +190,9 @@ function upsertActivityInRun(
   }
 
   return {
-    ...run,
+    ...jobState,
     activities: {
-      ...(run.activities ?? {}),
+      ...(jobState.activities ?? {}),
       __typename: 'WorkbenchJobActivityConnection',
       edges: updatedEdges,
     } as any,

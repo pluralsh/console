@@ -18849,21 +18849,21 @@ export type WorkbenchQueryVariables = Exact<{
 
 export type WorkbenchQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', systemPrompt?: string | null, id: string, name: string, description?: string | null, agentRuntime?: { __typename?: 'AgentRuntime', id: string, name: string } | null, configuration?: { __typename?: 'WorkbenchConfiguration', infrastructure?: { __typename?: 'WorkbenchInfrastructure', services?: boolean | null, stacks?: boolean | null, kubernetes?: boolean | null } | null, coding?: { __typename?: 'WorkbenchCoding', mode?: AgentRunMode | null, repositories?: Array<string | null> | null } | null } | null, skills?: { __typename?: 'WorkbenchSkills', files?: Array<string | null> | null, ref?: { __typename?: 'GitRef', ref: string, folder: string } | null } | null, tools?: Array<{ __typename?: 'WorkbenchTool', id: string, name: string, tool: WorkbenchToolType, categories?: Array<WorkbenchToolCategory | null> | null, configuration?: { __typename?: 'WorkbenchToolConfiguration', http?: { __typename?: 'WorkbenchToolHttpConfiguration', url?: string | null, method?: string | null, body?: string | null, inputSchema?: Record<string, unknown> | null, headers?: Array<{ __typename?: 'WorkbenchToolHttpHeader', name?: string | null, value?: string | null } | null> | null } | null, datadog?: { __typename?: 'WorkbenchToolDatadogConnection', site?: string | null } | null, elastic?: { __typename?: 'WorkbenchToolElasticConnection', index: string, url: string, username: string } | null, loki?: { __typename?: 'WorkbenchToolLokiConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, prometheus?: { __typename?: 'WorkbenchToolPrometheusConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, tempo?: { __typename?: 'WorkbenchToolTempoConnection', url?: string | null, username?: string | null, tenantId?: string | null } | null, atlassian?: { __typename?: 'WorkbenchToolAtlassianConnection', email?: string | null, url: string } | null, linear?: { __typename?: 'WorkbenchToolLinearConnection', url: string } | null } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, repository?: { __typename?: 'GitRepository', id: string, url: string, httpsPath?: string | null } | null } | null };
 
-export type WorkbenchRunsQueryVariables = Exact<{
+export type WorkbenchJobsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type WorkbenchRunsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus } | null } | null> | null } | null } | null };
+export type WorkbenchJobsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus } | null } | null> | null } | null } | null };
 
-export type WorkbenchRunQueryVariables = Exact<{
+export type WorkbenchJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type WorkbenchRunQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, activities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null> | null, agentRun?: { __typename?: 'AgentRun', id: string, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null } | null } | null> | null } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null } | null };
+export type WorkbenchJobQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, activities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null> | null, agentRun?: { __typename?: 'AgentRun', id: string, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null } | null } | null> | null } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null } | null };
 
 export type WorkbenchJobDeltaSubscriptionVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -39155,8 +39155,8 @@ export type WorkbenchQueryHookResult = ReturnType<typeof useWorkbenchQuery>;
 export type WorkbenchLazyQueryHookResult = ReturnType<typeof useWorkbenchLazyQuery>;
 export type WorkbenchSuspenseQueryHookResult = ReturnType<typeof useWorkbenchSuspenseQuery>;
 export type WorkbenchQueryResult = Apollo.QueryResult<WorkbenchQuery, WorkbenchQueryVariables>;
-export const WorkbenchRunsDocument = gql`
-    query WorkbenchRuns($id: ID!, $first: Int = 100, $after: String) {
+export const WorkbenchJobsDocument = gql`
+    query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
     runs(first: $first, after: $after) {
@@ -39175,16 +39175,16 @@ export const WorkbenchRunsDocument = gql`
 ${WorkbenchJobTinyFragmentDoc}`;
 
 /**
- * __useWorkbenchRunsQuery__
+ * __useWorkbenchJobsQuery__
  *
- * To run a query within a React component, call `useWorkbenchRunsQuery` and pass it any options that fit your needs.
- * When your component renders, `useWorkbenchRunsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useWorkbenchJobsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useWorkbenchRunsQuery({
+ * const { data, loading, error } = useWorkbenchJobsQuery({
  *   variables: {
  *      id: // value for 'id'
  *      first: // value for 'first'
@@ -39192,27 +39192,27 @@ ${WorkbenchJobTinyFragmentDoc}`;
  *   },
  * });
  */
-export function useWorkbenchRunsQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchRunsQuery, WorkbenchRunsQueryVariables> & ({ variables: WorkbenchRunsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useWorkbenchJobsQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchJobsQuery, WorkbenchJobsQueryVariables> & ({ variables: WorkbenchJobsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<WorkbenchRunsQuery, WorkbenchRunsQueryVariables>(WorkbenchRunsDocument, options);
+        return Apollo.useQuery<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>(WorkbenchJobsDocument, options);
       }
-export function useWorkbenchRunsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchRunsQuery, WorkbenchRunsQueryVariables>) {
+export function useWorkbenchJobsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<WorkbenchRunsQuery, WorkbenchRunsQueryVariables>(WorkbenchRunsDocument, options);
+          return Apollo.useLazyQuery<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>(WorkbenchJobsDocument, options);
         }
 // @ts-ignore
-export function useWorkbenchRunsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchRunsQuery, WorkbenchRunsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchRunsQuery, WorkbenchRunsQueryVariables>;
-export function useWorkbenchRunsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchRunsQuery, WorkbenchRunsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchRunsQuery | undefined, WorkbenchRunsQueryVariables>;
-export function useWorkbenchRunsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchRunsQuery, WorkbenchRunsQueryVariables>) {
+export function useWorkbenchJobsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>;
+export function useWorkbenchJobsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobsQuery | undefined, WorkbenchJobsQueryVariables>;
+export function useWorkbenchJobsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<WorkbenchRunsQuery, WorkbenchRunsQueryVariables>(WorkbenchRunsDocument, options);
+          return Apollo.useSuspenseQuery<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>(WorkbenchJobsDocument, options);
         }
-export type WorkbenchRunsQueryHookResult = ReturnType<typeof useWorkbenchRunsQuery>;
-export type WorkbenchRunsLazyQueryHookResult = ReturnType<typeof useWorkbenchRunsLazyQuery>;
-export type WorkbenchRunsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchRunsSuspenseQuery>;
-export type WorkbenchRunsQueryResult = Apollo.QueryResult<WorkbenchRunsQuery, WorkbenchRunsQueryVariables>;
-export const WorkbenchRunDocument = gql`
-    query WorkbenchRun($id: ID!) {
+export type WorkbenchJobsQueryHookResult = ReturnType<typeof useWorkbenchJobsQuery>;
+export type WorkbenchJobsLazyQueryHookResult = ReturnType<typeof useWorkbenchJobsLazyQuery>;
+export type WorkbenchJobsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobsSuspenseQuery>;
+export type WorkbenchJobsQueryResult = Apollo.QueryResult<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>;
+export const WorkbenchJobDocument = gql`
+    query WorkbenchJob($id: ID!) {
   workbenchJob(id: $id) {
     ...WorkbenchJob
   }
@@ -39220,40 +39220,40 @@ export const WorkbenchRunDocument = gql`
     ${WorkbenchJobFragmentDoc}`;
 
 /**
- * __useWorkbenchRunQuery__
+ * __useWorkbenchJobQuery__
  *
- * To run a query within a React component, call `useWorkbenchRunQuery` and pass it any options that fit your needs.
- * When your component renders, `useWorkbenchRunQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useWorkbenchJobQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useWorkbenchRunQuery({
+ * const { data, loading, error } = useWorkbenchJobQuery({
  *   variables: {
  *      id: // value for 'id'
  *   },
  * });
  */
-export function useWorkbenchRunQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchRunQuery, WorkbenchRunQueryVariables> & ({ variables: WorkbenchRunQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+export function useWorkbenchJobQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchJobQuery, WorkbenchJobQueryVariables> & ({ variables: WorkbenchJobQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<WorkbenchRunQuery, WorkbenchRunQueryVariables>(WorkbenchRunDocument, options);
+        return Apollo.useQuery<WorkbenchJobQuery, WorkbenchJobQueryVariables>(WorkbenchJobDocument, options);
       }
-export function useWorkbenchRunLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchRunQuery, WorkbenchRunQueryVariables>) {
+export function useWorkbenchJobLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchJobQuery, WorkbenchJobQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<WorkbenchRunQuery, WorkbenchRunQueryVariables>(WorkbenchRunDocument, options);
+          return Apollo.useLazyQuery<WorkbenchJobQuery, WorkbenchJobQueryVariables>(WorkbenchJobDocument, options);
         }
 // @ts-ignore
-export function useWorkbenchRunSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchRunQuery, WorkbenchRunQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchRunQuery, WorkbenchRunQueryVariables>;
-export function useWorkbenchRunSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchRunQuery, WorkbenchRunQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchRunQuery | undefined, WorkbenchRunQueryVariables>;
-export function useWorkbenchRunSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchRunQuery, WorkbenchRunQueryVariables>) {
+export function useWorkbenchJobSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchJobQuery, WorkbenchJobQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobQuery, WorkbenchJobQueryVariables>;
+export function useWorkbenchJobSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobQuery, WorkbenchJobQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobQuery | undefined, WorkbenchJobQueryVariables>;
+export function useWorkbenchJobSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobQuery, WorkbenchJobQueryVariables>) {
           const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<WorkbenchRunQuery, WorkbenchRunQueryVariables>(WorkbenchRunDocument, options);
+          return Apollo.useSuspenseQuery<WorkbenchJobQuery, WorkbenchJobQueryVariables>(WorkbenchJobDocument, options);
         }
-export type WorkbenchRunQueryHookResult = ReturnType<typeof useWorkbenchRunQuery>;
-export type WorkbenchRunLazyQueryHookResult = ReturnType<typeof useWorkbenchRunLazyQuery>;
-export type WorkbenchRunSuspenseQueryHookResult = ReturnType<typeof useWorkbenchRunSuspenseQuery>;
-export type WorkbenchRunQueryResult = Apollo.QueryResult<WorkbenchRunQuery, WorkbenchRunQueryVariables>;
+export type WorkbenchJobQueryHookResult = ReturnType<typeof useWorkbenchJobQuery>;
+export type WorkbenchJobLazyQueryHookResult = ReturnType<typeof useWorkbenchJobLazyQuery>;
+export type WorkbenchJobSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobSuspenseQuery>;
+export type WorkbenchJobQueryResult = Apollo.QueryResult<WorkbenchJobQuery, WorkbenchJobQueryVariables>;
 export const WorkbenchJobDeltaDocument = gql`
     subscription WorkbenchJobDelta($id: ID!) {
   workbenchJobDelta(id: $id) {
@@ -39892,8 +39892,8 @@ export const namedOperations = {
     ClusterVulnerabilityAggregate: 'ClusterVulnerabilityAggregate',
     Workbenches: 'Workbenches',
     Workbench: 'Workbench',
-    WorkbenchRuns: 'WorkbenchRuns',
-    WorkbenchRun: 'WorkbenchRun',
+    WorkbenchJobs: 'WorkbenchJobs',
+    WorkbenchJob: 'WorkbenchJob',
     WorkbenchTools: 'WorkbenchTools',
     WorkbenchTool: 'WorkbenchTool'
   },

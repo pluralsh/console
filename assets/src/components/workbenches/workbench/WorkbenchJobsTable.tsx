@@ -5,20 +5,20 @@ import { GqlError } from 'components/utils/Alert'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   WorkbenchJobTinyFragment,
-  useWorkbenchRunsQuery,
+  useWorkbenchJobsQuery,
 } from 'generated/graphql'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { getWorkbenchRunAbsPath } from 'routes/workbenchesRoutesConsts'
+import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 
-export function WorkbenchRunsTable({ workbenchId }: { workbenchId: string }) {
+export function WorkbenchJobsTable({ workbenchId }: { workbenchId: string }) {
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: useWorkbenchRunsQuery, keyPath: ['workbench', 'runs'] },
+      { queryHook: useWorkbenchJobsQuery, keyPath: ['workbench', 'runs'] },
       { id: workbenchId }
     )
-  const runs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
+  const jobs = useMemo(() => mapExistingNodes(data?.workbench?.runs), [data])
 
   if (error) return <GqlError error={error} />
 
@@ -27,24 +27,23 @@ export function WorkbenchRunsTable({ workbenchId }: { workbenchId: string }) {
       hideHeader
       fullHeightWrap
       virtualizeRows
-      data={runs}
+      data={jobs}
       columns={columns}
       loading={!data && loading}
       hasNextPage={pageInfo?.hasNextPage}
       fetchNextPage={fetchNextPage}
       isFetchingNextPage={loading}
       onVirtualSliceChange={setVirtualSlice}
-      emptyStateProps={{ message: 'No runs found.' }}
+      emptyStateProps={{ message: 'No jobs found.' }}
       getRowLink={({ original }) => {
-        const { id: runId } = original as WorkbenchJobTinyFragment
-        return <Link to={getWorkbenchRunAbsPath({ workbenchId, runId })} />
+        const { id: jobId } = original as WorkbenchJobTinyFragment
+        return <Link to={getWorkbenchJobAbsPath({ workbenchId, jobId })} />
       }}
     />
   )
 }
 
 const columnHelper = createColumnHelper<WorkbenchJobTinyFragment>()
-
 const columns = [
   columnHelper.accessor(({ prompt }) => prompt, {
     id: 'prompt',

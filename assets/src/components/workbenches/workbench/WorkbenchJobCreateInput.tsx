@@ -5,11 +5,11 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useCreateWorkbenchJobMutation } from 'generated/graphql'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getWorkbenchRunAbsPath } from 'routes/workbenchesRoutesConsts'
+import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 
 const MAX_WIDTH = 924
 
-export function WorkbenchRunCreateInput({
+export function WorkbenchJobCreateInput({
   workbenchId,
   workbenchLoading,
 }: {
@@ -25,9 +25,9 @@ export function WorkbenchRunCreateInput({
     onCompleted: ({ createWorkbenchJob }) =>
       createWorkbenchJob?.id &&
       navigate(
-        getWorkbenchRunAbsPath({ workbenchId, runId: createWorkbenchJob.id })
+        getWorkbenchJobAbsPath({ workbenchId, jobId: createWorkbenchJob.id })
       ),
-    refetchQueries: ['WorkbenchRuns'],
+    refetchQueries: ['WorkbenchJobs'],
     awaitRefetchQueries: true,
   })
 
