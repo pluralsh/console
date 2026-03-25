@@ -7,7 +7,7 @@
         },
         "todos": {
             "type": "array",
-            "description": "The todos to update.  You can add/remove/update todos if the plan needs to change, but always pass the full list of todos",
+            "description": "The todos to update.  Pass these if there's still a todo to mark as done",
             "items": {
                 "type": "object",
                 "properties": {
