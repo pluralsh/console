@@ -14995,6 +14995,8 @@ export type WorkbenchTool = {
   /** the id of the tool */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the mcp server for this tool */
+  mcpServer?: Maybe<McpServer>;
   /** the name of the tool */
   name: Scalars['String']['output'];
   /** the project of this tool */
@@ -15031,6 +15033,8 @@ export type WorkbenchToolAttributes = {
   categories?: InputMaybe<Array<InputMaybe<WorkbenchToolCategory>>>;
   /** tool configuration (e.g. http) */
   configuration?: InputMaybe<WorkbenchToolConfigurationAttributes>;
+  /** the mcp server for this tool */
+  mcpServerId?: InputMaybe<Scalars['ID']['input']>;
   /** the name of the tool (a-z, 0-9, underscores) */
   name: Scalars['String']['input'];
   /** the project for this tool */
