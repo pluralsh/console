@@ -1,0 +1,30 @@
+{
+    "type": "object",
+    "properties": {
+        "summary": {
+            "type": "string",
+            "description": "A short summary of the insight. Markdown format is preferred."
+        },
+        "root_cause": {
+            "type": "string",
+            "description": "The root cause of the insight. Markdown format is preferred."
+        },
+        "key_evidence": {
+            "type": "array",
+            "description": "A list of key pieces of evidence supporting the root cause. Markdown format is preferred.",
+            "items": {
+                "type": "string",
+                "description": "A piece of evidence supporting the root cause. Markdown format is preferred."
+            }
+        },
+        "contextual_observations": {
+            "type": "array",
+            "description": "A list of contextual observations supporting the root cause. Markdown format is preferred.",
+            "items": {
+                "type": "string",
+                "description": "A contextual observation. Markdown format is preferred."
+            }
+        }
+    },
+    "required": ["summary", "root_cause", "key_evidence", "contextual_observations"]
+}
