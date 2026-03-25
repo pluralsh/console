@@ -42,6 +42,8 @@ defmodule Console.AI.Chat.MemoryEngine do
 
   defp loop(engine, iter \\ 0)
   defp loop(%__MODULE__{max_iterations: max, messages: [_ | _] = messages, system_prompt: preface, acc: acc} = engine, iter) when iter < max do
+    preface = build_preface(preface, Map.put(engine, :iteration, iter))
+
     messages
     |> Engine.fit_context_window(preface)
     |> Provider.completion(preface: preface, plural: engine.tools, client: :tool)
@@ -64,6 +66,9 @@ defmodule Console.AI.Chat.MemoryEngine do
     end)
   end
   defp loop(%__MODULE__{acc: acc}, _), do: {:ok, acc}
+
+  defp build_preface(str, _) when is_binary(str), do: str
+  defp build_preface(fun, engine) when is_function(fun, 1), do: fun.(engine)
 
   @spec call_tools(%__MODULE__{}, [Tool.t], [module]) :: {:ok, [%{role: Provider.sender, content: binary}]} | {:error, binary}
   defp call_tools(engine, tools, impls) do

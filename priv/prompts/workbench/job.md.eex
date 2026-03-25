@@ -20,3 +20,9 @@ Leverage any of those tools to accomplish this task.
 Once you've completed all the work you believe is necessary, call the `workbench_complete` tool to mark the conclusion of this job.
 
 **Only call `workbench_complete` if you believe all work has been completed, we can gather additional data and insights on future iterations.**
+
+<%= if @engine.iteration >= @engine.max_iterations - 5 do %>
+This workbench only supports <%= @engine.max_iterations %> iterations and <%= @engine.iteration %> iterations have been completed.
+
+Try to start wrapping up your work, and if nothing productive is left just call `workbench_complete` to mark the conclusion of this job.
+<% end %>
