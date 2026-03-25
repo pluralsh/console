@@ -72,8 +72,13 @@ defmodule Console.AI.Workbench.Engine do
     )
     |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
     |> case do
-      {:ok, %Complete{conclusion: conclusion, metrics: metrics}} ->
-        Workbenches.complete_job(%{conclusion: conclusion, metadata: %{metrics: metrics}}, job)
+      {:ok, %Complete{conclusion: conclusion, metrics: metrics, todos: todos}} ->
+        Console.drop_nils(%{
+          conclusion: conclusion,
+          todos: todos,
+          metadata: %{metrics: metrics},
+        })
+        |> Workbenches.complete_job(job)
       {:ok, l} when is_list(l) -> spawn_activities(l, engine)
       {:error, error} -> Workbenches.fail_job("Error running workbench: #{inspect(error)}", job)
     end
