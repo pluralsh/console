@@ -1,27 +1,22 @@
-import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { EmptyState, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
-  useWorkbenchJobActivityDeltaSubscription,
-  useWorkbenchJobProgressSubscription,
   useWorkbenchJobQuery,
-  WorkbenchJobActivityFragment,
-  WorkbenchJobFragment,
   WorkbenchJobProgressTinyFragment,
 } from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
   getWorkbenchJobAbsPath,
   WORKBENCH_JOBS_PARAM_JOB,
-  WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
-import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { WorkbenchJobResult } from './WorkbenchJobResult'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
@@ -32,89 +27,57 @@ export type WorkbenchProgressMap = Record<
 >
 
 export function WorkbenchJob() {
-  const {
-    [WORKBENCH_PARAM_ID]: workbenchId = '',
-    [WORKBENCH_JOBS_PARAM_JOB]: jobId = '',
-  } = useParams()
-  const [progressByActivityId, setProgressByActivityId] =
-    useState<WorkbenchProgressMap>({})
+  const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
 
   const {
-    data: jobQueryData,
-    loading: jobQueryLoading,
-    error: jobQueryError,
+    data,
+    loading,
+    error: queryError,
   } = useWorkbenchJobQuery({
     skip: !jobId,
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
-    pollInterval: 5_000,
+    pollInterval: POLL_INTERVAL,
   })
-  const [job, setJob] = useState<Nullable<WorkbenchJobFragment>>(null)
+  const job = data?.workbenchJob
+  const isLoading = loading && !job
 
-  useEffect(() => {
-    setJob(jobQueryData?.workbenchJob ?? null)
-  }, [jobQueryData?.workbenchJob])
-
-  useWorkbenchJobActivityDeltaSubscription({
-    skip: !jobId,
-    ignoreResults: true,
-    variables: { jobId },
-    onData: ({ data: { data } }) => {
-      const payload = data?.workbenchJobActivityDelta?.payload
-      if (!payload) return
-
-      setJob((prev) => upsertActivityInJob(prev, payload))
-    },
-  })
-
-  useWorkbenchJobProgressSubscription({
-    skip: !jobId,
-    ignoreResults: true,
-    variables: { jobId },
-    onData: ({ data: { data } }) => {
-      const payload = data?.workbenchJobProgress
-      if (!payload) return
-
-      setProgressByActivityId((prev) => appendProgressEvent(prev, payload))
-    },
-  })
-
-  const loading = jobQueryLoading && !job
-
-  const error = useMemo(
-    () => job?.error ?? jobQueryError,
-    [job?.error, jobQueryError]
-  )
-  const errorHeader = job?.error
-    ? 'Workbench job reported an error'
-    : jobQueryError
-      ? 'Failed to load workbench job'
-      : undefined
-
+  const [workbenchId, workbenchName, prompt] = [
+    job?.workbench?.id ?? '',
+    job?.workbench?.name ?? 'workbench',
+    job?.prompt ?? 'workbench job',
+  ]
   useSetBreadcrumbs(
     useMemo(
       () => [
         { label: 'workbenches', url: WORKBENCHES_ABS_PATH },
-        {
-          label: job?.workbench?.name ?? 'workbench',
-          url: getWorkbenchAbsPath(workbenchId),
-        },
-        {
-          label: job?.prompt ?? 'workbench job',
-          url: getWorkbenchJobAbsPath({ workbenchId, jobId }),
-        },
+        { label: workbenchName, url: getWorkbenchAbsPath(workbenchId) },
+        { label: prompt, url: getWorkbenchJobAbsPath({ workbenchId, jobId }) },
       ],
-      [job, workbenchId, jobId]
+      [prompt, jobId, workbenchId, workbenchName]
     )
   )
 
+  if (!(job || loading))
+    return !jobId ||
+      queryError?.message?.includes('could not find resource') ? (
+      <EmptyState message="Workbench job not found." />
+    ) : (
+      <GqlError
+        header="Failed to load workbench job"
+        margin="large"
+        error={queryError}
+      />
+    )
+
   return (
     <>
-      {error && (
+      {job?.error && (
         <GqlError
+          header="Workbench job reported an error"
+          error={job?.error}
           margin="large"
-          header={errorHeader}
-          error={error}
+          css={{ marginBottom: 0 }}
         />
       )}
       <WrapperSC>
@@ -127,7 +90,7 @@ export function WorkbenchJob() {
           <StretchedFlex gap="xlarge">
             <StackedText
               truncate
-              loading={loading}
+              loading={isLoading}
               first={job?.workbench?.name}
               firstColor="text"
               firstPartialType="subtitle2"
@@ -136,14 +99,13 @@ export function WorkbenchJob() {
               secondPartialType="body2"
             />
             <RunStatusChip
-              loading={loading}
+              loading={isLoading}
               status={job?.status}
             />
           </StretchedFlex>
           <WorkbenchJobActivities
-            loading={loading}
-            activities={mapExistingNodes(job?.activities)}
-            progressByActivityId={progressByActivityId}
+            job={job}
+            loading={isLoading}
           />
         </Flex>
         <Flex
@@ -154,70 +116,17 @@ export function WorkbenchJob() {
           height="100%"
         >
           <WorkbenchJobResult
-            loading={loading}
+            loading={isLoading}
             result={job?.result}
           />
           <WorkbenchJobTodos
-            loading={loading}
+            loading={isLoading}
             result={job?.result}
           />
         </Flex>
       </WrapperSC>
     </>
   )
-}
-
-function upsertActivityInJob(
-  jobState: Nullable<WorkbenchJobFragment>,
-  activity: WorkbenchJobActivityFragment
-) {
-  if (!jobState) return jobState
-
-  const previousEdges = jobState.activities?.edges ?? []
-  const updatedEdges = [...previousEdges]
-  const index = updatedEdges.findIndex((edge) => edge?.node?.id === activity.id)
-
-  if (index >= 0) {
-    updatedEdges[index] = {
-      __typename: 'WorkbenchJobActivityEdge',
-      node: activity as any,
-    } as any
-  } else {
-    updatedEdges.push({
-      __typename: 'WorkbenchJobActivityEdge',
-      node: activity,
-    })
-  }
-
-  return {
-    ...jobState,
-    activities: {
-      ...(jobState.activities ?? {}),
-      __typename: 'WorkbenchJobActivityConnection',
-      edges: updatedEdges,
-    } as any,
-  }
-}
-
-function appendProgressEvent(
-  progressByActivityId: WorkbenchProgressMap,
-  progress: WorkbenchJobProgressTinyFragment
-): WorkbenchProgressMap {
-  const current = progressByActivityId[progress.activityId] ?? []
-  const alreadyExists = current.some(
-    (event) =>
-      event.text === progress.text &&
-      event.tool === progress.tool &&
-      JSON.stringify(event.arguments ?? {}) ===
-        JSON.stringify(progress.arguments ?? {})
-  )
-
-  if (alreadyExists) return progressByActivityId
-
-  return {
-    ...progressByActivityId,
-    [progress.activityId]: [...current, progress],
-  }
 }
 
 const WrapperSC = styled.div(({ theme }) => ({
@@ -227,5 +136,4 @@ const WrapperSC = styled.div(({ theme }) => ({
   width: '100%',
   overflow: 'auto',
   padding: theme.spacing.large,
-  paddingTop: 0,
 }))

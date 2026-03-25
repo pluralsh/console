@@ -95,7 +95,7 @@ function CodeBlockLabel({
   )
 }
 
-function SimplifiedMarkdown({ text }: { text: string }) {
+export function SimplifiedMarkdown({ text }: { text: string }) {
   return (
     <SimpleMarkdownSC>
       <ReactMarkdown

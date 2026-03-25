@@ -4,17 +4,26 @@ import { InfraResearchStatus, useInfraResearchQuery } from 'generated/graphql'
 
 import { POLL_INTERVAL } from 'components/cluster/constants.ts'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders.tsx'
-import styled from 'styled-components'
-import { useChatbot } from '../AIContext.tsx'
+import {
+  StepperAccordionItemSC,
+  StepperAccordionSC,
+} from 'components/utils/StepperAccordion'
+import { TRUNCATE } from 'components/utils/truncate'
+import { Body2P } from 'components/utils/typography/Text'
 import { Body1P } from 'components/utils/typography/Text.tsx'
-import { isNonNullable } from 'utils/isNonNullable.ts'
-import { ChatbotMultiThreadViewer } from './multithread/ChatbotMultiThreadViewer.tsx'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getInfraResearchAbsPath } from 'routes/aiRoutesConsts.tsx'
-import { useMemo } from 'react'
+import styled, { useTheme } from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable.ts'
+import { useChatbot } from '../AIContext.tsx'
+import { MultiThreadViewerThreadMessages } from './multithread/MultiThreadViewerThreadMessages.tsx'
+
+const THREAD_GAP = 'small'
 
 export function ChatbotPanelInfraResearch() {
   const navigate = useNavigate()
+  const { borders, borderRadiuses } = useTheme()
   const { currentResearchId } = useChatbot()
 
   const { data, loading, error } = useInfraResearchQuery({
@@ -27,6 +36,7 @@ export function ChatbotPanelInfraResearch() {
     () => data?.infraResearch?.threads?.filter(isNonNullable) ?? [],
     [data]
   )
+  const threadIdList = threads.map((thread) => thread.id)
 
   const isLoading = !data && loading
   const isRunning = infraResearch?.status === InfraResearchStatus.Running
@@ -67,10 +77,40 @@ export function ChatbotPanelInfraResearch() {
           progress”.
         </Body1P>
       )}
-      <ChatbotMultiThreadViewer
-        threads={threads}
-        isExpectingStream={isRunning}
-      />
+      <StepperAccordionSC
+        type="multiple"
+        $gap={THREAD_GAP}
+        key={threadIdList.join('-')} // force re-render when threads change
+        defaultValue={threadIdList}
+      >
+        {threads.map((thread) => (
+          <StepperAccordionItemSC
+            key={thread.id}
+            value={thread.id}
+            caret="right"
+            padding="compact"
+            paddingArea="trigger-only"
+            $gap={THREAD_GAP}
+            triggerWrapperStyles={{
+              border: borders['fill-three'],
+              borderRadius: borderRadiuses.large,
+            }}
+            trigger={
+              <Body2P
+                $color="text-light"
+                css={TRUNCATE}
+              >
+                {thread.summary}
+              </Body2P>
+            }
+          >
+            <MultiThreadViewerThreadMessages
+              thread={thread}
+              isExpectingStream={isRunning}
+            />
+          </StepperAccordionItemSC>
+        ))}
+      </StepperAccordionSC>
     </GradientWrapperSC>
   )
 }
