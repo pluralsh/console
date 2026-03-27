@@ -2733,6 +2733,7 @@ type ContainerResourcesAttributes struct {
 
 // a shortform spec for job containers, designed for ease-of-use
 type ContainerSpec struct {
+	Name      *string             `json:"name,omitempty"`
 	Image     string              `json:"image"`
 	Args      []*string           `json:"args,omitempty"`
 	Env       []*ContainerEnv     `json:"env,omitempty"`

@@ -1879,13 +1879,15 @@ func (t *GateStatusFragment) GetJobRef() *JobReferenceFragment {
 }
 
 type JobSpecFragment struct {
-	Namespace      string                      "json:\"namespace\" graphql:\"namespace\""
-	Raw            *string                     "json:\"raw,omitempty\" graphql:\"raw\""
-	Containers     []*ContainerSpecFragment    "json:\"containers,omitempty\" graphql:\"containers\""
-	Labels         map[string]any              "json:\"labels,omitempty\" graphql:\"labels\""
-	Annotations    map[string]any              "json:\"annotations,omitempty\" graphql:\"annotations\""
-	ServiceAccount *string                     "json:\"serviceAccount,omitempty\" graphql:\"serviceAccount\""
-	Requests       *ContainerResourcesFragment "json:\"requests,omitempty\" graphql:\"requests\""
+	Namespace      string                         "json:\"namespace\" graphql:\"namespace\""
+	Raw            *string                        "json:\"raw,omitempty\" graphql:\"raw\""
+	Containers     []*ContainerSpecFragment       "json:\"containers,omitempty\" graphql:\"containers\""
+	Labels         map[string]any                 "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations    map[string]any                 "json:\"annotations,omitempty\" graphql:\"annotations\""
+	ServiceAccount *string                        "json:\"serviceAccount,omitempty\" graphql:\"serviceAccount\""
+	Requests       *ContainerResourcesFragment    "json:\"requests,omitempty\" graphql:\"requests\""
+	NodeSelector   map[string]any                 "json:\"nodeSelector,omitempty\" graphql:\"nodeSelector\""
+	Tolerations    []*JobSpecFragment_Tolerations "json:\"tolerations,omitempty\" graphql:\"tolerations\""
 }
 
 func (t *JobSpecFragment) GetNamespace() string {
@@ -1929,6 +1931,18 @@ func (t *JobSpecFragment) GetRequests() *ContainerResourcesFragment {
 		t = &JobSpecFragment{}
 	}
 	return t.Requests
+}
+func (t *JobSpecFragment) GetNodeSelector() map[string]any {
+	if t == nil {
+		t = &JobSpecFragment{}
+	}
+	return t.NodeSelector
+}
+func (t *JobSpecFragment) GetTolerations() []*JobSpecFragment_Tolerations {
+	if t == nil {
+		t = &JobSpecFragment{}
+	}
+	return t.Tolerations
 }
 
 type ContainerResourcesFragment struct {
@@ -1986,12 +2000,19 @@ func (t *JobReferenceFragment) GetNamespace() string {
 }
 
 type ContainerSpecFragment struct {
+	Name    *string                          "json:\"name,omitempty\" graphql:\"name\""
 	Image   string                           "json:\"image\" graphql:\"image\""
 	Args    []*string                        "json:\"args,omitempty\" graphql:\"args\""
 	Env     []*ContainerSpecFragment_Env     "json:\"env,omitempty\" graphql:\"env\""
 	EnvFrom []*ContainerSpecFragment_EnvFrom "json:\"envFrom,omitempty\" graphql:\"envFrom\""
 }
 
+func (t *ContainerSpecFragment) GetName() *string {
+	if t == nil {
+		t = &ContainerSpecFragment{}
+	}
+	return t.Name
+}
 func (t *ContainerSpecFragment) GetImage() string {
 	if t == nil {
 		t = &ContainerSpecFragment{}
@@ -7511,6 +7532,38 @@ func (t *PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragmen
 	return t.Secret
 }
 
+type PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -7545,6 +7598,38 @@ func (t *PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Containe
 		t = &PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type GateSpecFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
@@ -7583,6 +7668,38 @@ func (t *GateSpecFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_E
 	return t.Secret
 }
 
+type GateSpecFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GateSpecFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GateSpecFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GateSpecFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GateSpecFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -7617,6 +7734,38 @@ func (t *JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() s
 		t = &JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type ContainerSpecFragment_Env struct {
@@ -9279,6 +9428,38 @@ func (t *SentinelRunJobFragment_JobSpec_JobSpecFragment_Containers_ContainerSpec
 	return t.Secret
 }
 
+type SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type SentinelRunJobFragment_Reference struct {
 	Name      string "json:\"name\" graphql:\"name\""
 	Namespace string "json:\"namespace\" graphql:\"namespace\""
@@ -9378,6 +9559,38 @@ func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelC
 		t = &SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
@@ -9627,6 +9840,38 @@ func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_Sentinel
 	return t.Secret
 }
 
+type SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
 	Delay     *string   "json:\"delay,omitempty\" graphql:\"delay\""
 	DialFqdns []*string "json:\"dialFqdns,omitempty\" graphql:\"dialFqdns\""
@@ -9829,6 +10074,38 @@ func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelChe
 		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
@@ -10035,6 +10312,38 @@ func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_
 	return t.Secret
 }
 
+type SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
 	Delay     *string   "json:\"delay,omitempty\" graphql:\"delay\""
 	DialFqdns []*string "json:\"dialFqdns,omitempty\" graphql:\"dialFqdns\""
@@ -10239,6 +10548,38 @@ func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegra
 	return t.Secret
 }
 
+type SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
 	Delay     *string   "json:\"delay,omitempty\" graphql:\"delay\""
 	DialFqdns []*string "json:\"dialFqdns,omitempty\" graphql:\"dialFqdns\""
@@ -10423,6 +10764,38 @@ func (t *SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_C
 		t = &SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
@@ -10743,6 +11116,38 @@ func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpe
 	return t.Secret
 }
 
+type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -10890,6 +11295,38 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFra
 	return t.Secret
 }
 
+type StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -10981,6 +11418,38 @@ func (t *StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Cont
 		t = &StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terraform struct {
@@ -11076,6 +11545,38 @@ func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpe
 	return t.Secret
 }
 
+type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -11167,6 +11668,38 @@ func (t *InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_Containe
 		t = &InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
@@ -11316,6 +11849,38 @@ func (t *StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragm
 	return t.Secret
 }
 
+type StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -11409,6 +11974,38 @@ func (t *StackRunFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragme
 	return t.Secret
 }
 
+type StackRunFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type StackRunFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -11500,6 +12097,38 @@ func (t *StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpe
 		t = &StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
@@ -11649,6 +12278,38 @@ func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecF
 	return t.Secret
 }
 
+type StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -11740,6 +12401,38 @@ func (t *StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFr
 		t = &StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
@@ -19847,6 +20540,38 @@ func (t *GetClusterGates_ClusterGates_PipelineGateFragment_Spec_GateSpecFragment
 	return t.Secret
 }
 
+type GetClusterGates_ClusterGates_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetClusterGates_ClusterGates_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetClusterGates_ClusterGates_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetClusterGates_ClusterGates_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetClusterGates_ClusterGates_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetClusterGates_ClusterGates_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetClusterGates_ClusterGates_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetClusterGates_ClusterGates_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetClusterGates_ClusterGates_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -19881,6 +20606,38 @@ func (t *PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node
 		t = &PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &PagedClusterGates_PagedClusterGates_Edges_PipelineGateEdgeFragment_Node_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type PagedClusterGates_PagedClusterGates struct {
@@ -19966,6 +20723,38 @@ func (t *UpdateGate_UpdateGate_PipelineGateFragment_Spec_GateSpecFragment_Job_Jo
 	return t.Secret
 }
 
+type UpdateGate_UpdateGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *UpdateGate_UpdateGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &UpdateGate_UpdateGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *UpdateGate_UpdateGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &UpdateGate_UpdateGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *UpdateGate_UpdateGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &UpdateGate_UpdateGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *UpdateGate_UpdateGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &UpdateGate_UpdateGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type GetClusterGate_ClusterGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -20000,6 +20789,38 @@ func (t *GetClusterGate_ClusterGate_PipelineGateFragment_Spec_GateSpecFragment_J
 		t = &GetClusterGate_ClusterGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type GetClusterGate_ClusterGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetClusterGate_ClusterGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetClusterGate_ClusterGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetClusterGate_ClusterGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetClusterGate_ClusterGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetClusterGate_ClusterGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetClusterGate_ClusterGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetClusterGate_ClusterGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetClusterGate_ClusterGate_PipelineGateFragment_Spec_GateSpecFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type ListGitRepositories_GitRepositories struct {
@@ -21413,6 +22234,38 @@ func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRu
 	return t.Secret
 }
 
+type ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_Reference struct {
 	Name      string "json:\"name\" graphql:\"name\""
 	Namespace string "json:\"namespace\" graphql:\"namespace\""
@@ -21512,6 +22365,38 @@ func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRu
 		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type ListClusterSentinelRunJobs_ClusterSentinelRunJobs_Edges_Node_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
@@ -21743,6 +22628,38 @@ func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpec
 	return t.Secret
 }
 
+type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_Reference struct {
 	Name      string "json:\"name\" graphql:\"name\""
 	Namespace string "json:\"namespace\" graphql:\"namespace\""
@@ -21842,6 +22759,38 @@ func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_Sen
 		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type GetSentinelRunJob_SentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
@@ -22091,6 +23040,38 @@ func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFrag
 	return t.Secret
 }
 
+type GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type GetSentinelRun_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
 	Delay     *string   "json:\"delay,omitempty\" graphql:\"delay\""
 	DialFqdns []*string "json:\"dialFqdns,omitempty\" graphql:\"dialFqdns\""
@@ -22259,6 +23240,38 @@ func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_
 	return t.Secret
 }
 
+type UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_Reference struct {
 	Name      string "json:\"name\" graphql:\"name\""
 	Namespace string "json:\"namespace\" graphql:\"namespace\""
@@ -22358,6 +23371,38 @@ func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_
 		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type UpdateSentinelRunJobStatus_UpdateSentinelRunJob_SentinelRunJobFragment_SentinelRun_SentinelRunFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
@@ -22596,6 +23641,38 @@ func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFrag
 	return t.Secret
 }
 
+type CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type CreateSentinel_CreateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
 	Delay     *string   "json:\"delay,omitempty\" graphql:\"delay\""
 	DialFqdns []*string "json:\"dialFqdns,omitempty\" graphql:\"dialFqdns\""
@@ -22798,6 +23875,38 @@ func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFrag
 		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type UpdateSentinel_UpdateSentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
@@ -23013,6 +24122,38 @@ func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Conf
 		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Job_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type GetSentinel_Sentinel_SentinelFragment_Checks_SentinelCheckFragment_Configuration_SentinelCheckConfigurationFragment_IntegrationTest_SentinelCheckIntegrationTestConfigurationFragment_Cases_TestCaseConfigurationFragment_Coredns struct {
@@ -23323,6 +24464,38 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 	return t.Secret
 }
 
+type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -23414,6 +24587,38 @@ func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_Stac
 		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terraform struct {
@@ -23545,6 +24750,38 @@ func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFrag
 	return t.Secret
 }
 
+type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type ListClusterMinimalStacks_ClusterStackRuns_Edges_MinimalStackRunEdgeFragment_Node_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -23656,6 +24893,38 @@ func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStack
 	return t.Secret
 }
 
+type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -23765,6 +25034,38 @@ func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFrag
 		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_StackConfigurationFragment_Terraform struct {
@@ -23914,6 +25215,38 @@ func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment
 	return t.Secret
 }
 
+type GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type GetStackRun_StackRun_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -24005,6 +25338,38 @@ func (t *GetStackRun_StackRun_StackRunFragment_JobSpec_JobSpecFragment_Container
 		t = &GetStackRun_StackRun_StackRunFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type GetStackRun_StackRun_StackRunFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetStackRun_StackRun_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetStackRun_StackRun_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetStackRun_StackRun_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetStackRun_StackRun_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetStackRun_StackRun_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type GetStackRun_StackRun_StackRunFragment_Configuration_StackConfigurationFragment_Terraform struct {
@@ -24154,6 +25519,38 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStack
 	return t.Secret
 }
 
+type GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type GetStackRunBase_StackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -24245,6 +25642,38 @@ func (t *GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_C
 		t = &GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetStackRunBase_StackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type GetStackRunBase_StackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
@@ -24394,6 +25823,38 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_Infrastructure
 	return t.Secret
 }
 
+type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -24485,6 +25946,38 @@ func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragm
 		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &UpdateStackRun_UpdateStackRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type UpdateStackRun_UpdateStackRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
@@ -24580,6 +26073,38 @@ func (t *CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFrag
 	return t.Secret
 }
 
+type CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &CreateStack_CreateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type CreateStack_CreateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -24673,6 +26198,38 @@ func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFrag
 	return t.Secret
 }
 
+type UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &UpdateStack_UpdateStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type UpdateStack_UpdateStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -24764,6 +26321,38 @@ func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_
 		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type GetInfrastructureStack_InfrastructureStack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
@@ -24968,6 +26557,38 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stac
 	return t.Secret
 }
 
+type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -25059,6 +26680,38 @@ func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_JobS
 		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type ListStackRuns_InfrastructureStack_Runs_Edges_Node_StackRunFragment_Configuration_StackConfigurationFragment_Terraform struct {
@@ -25248,6 +26901,38 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFra
 	return t.Secret
 }
 
+type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
+}
+
 type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_Configuration_StackConfigurationFragment_Terraform struct {
 	ApproveEmpty *bool  "json:\"approveEmpty,omitempty\" graphql:\"approveEmpty\""
 	Parallelism  *int64 "json:\"parallelism,omitempty\" graphql:\"parallelism\""
@@ -25339,6 +27024,38 @@ func (t *TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Cont
 		t = &TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
+}
+
+type TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations struct {
+	Effect   *string "json:\"effect,omitempty\" graphql:\"effect\""
+	Key      *string "json:\"key,omitempty\" graphql:\"key\""
+	Operator *string "json:\"operator,omitempty\" graphql:\"operator\""
+	Value    *string "json:\"value,omitempty\" graphql:\"value\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetEffect() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Effect
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetKey() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Key
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetOperator() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Operator
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations) GetValue() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Tolerations{}
+	}
+	return t.Value
 }
 
 type TriggerRun_TriggerRun_StackRunBaseFragment_Configuration_StackConfigurationFragment_Terraform struct {
@@ -41122,8 +42839,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -41222,8 +42947,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -41356,8 +43089,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -41445,8 +43186,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -46241,8 +47990,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -46431,8 +48188,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -46661,8 +48426,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -46782,8 +48555,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -47037,8 +48818,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -47225,8 +49014,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -47438,8 +49235,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -47862,8 +49667,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -48136,8 +49949,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -48291,8 +50112,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -48470,8 +50299,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -48681,8 +50518,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -49001,8 +50846,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -49321,8 +51174,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -49599,8 +51460,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -49812,8 +51681,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -50080,8 +51957,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -50765,8 +52650,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
@@ -51089,8 +52982,16 @@ fragment JobSpecFragment on JobGateSpec {
 	requests {
 		... ContainerResourcesFragment
 	}
+	nodeSelector
+	tolerations {
+		key
+		operator
+		value
+		effect
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
+	name
 	image
 	args
 	env {
