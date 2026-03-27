@@ -7504,6 +7504,7 @@ type PodToleration {
 
 "a shortform spec for job containers, designed for ease-of-use"
 type ContainerSpec {
+  name: String
   image: String!
   args: [String]
   env: [ContainerEnv]

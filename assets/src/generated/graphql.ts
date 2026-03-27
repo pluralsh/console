@@ -3396,6 +3396,7 @@ export type ContainerSpec = {
   env?: Maybe<Array<Maybe<ContainerEnv>>>;
   envFrom?: Maybe<Array<Maybe<ContainerEnvFrom>>>;
   image: Scalars['String']['output'];
+  name?: Maybe<Scalars['String']['output']>;
   resources?: Maybe<ContainerResources>;
 };
 
