@@ -169,11 +169,18 @@ func (in *SplunkProvider) toLabels(result SplunkSearchResponseResult) map[string
 	labels["sourcetype"] = result.SourceType
 	labels["splunk_server"] = result.Server
 
+	// remove empty labels
+	for k, v := range labels {
+		if len(v) == 0 {
+			delete(labels, k)
+		}
+	}
+
 	return labels
 }
 
-func (in *SplunkProvider) parseTime(value any) (time.Time, error) {
-	raw := strings.TrimSpace(toString(value))
+func (in *SplunkProvider) parseTime(value string) (time.Time, error) {
+	raw := strings.TrimSpace(value)
 	if raw == "" {
 		klog.V(log.LogLevelInfo).InfoS("empty splunk log timestamp value, defaulting to zero time")
 		return time.Time{}, nil
@@ -199,17 +206,4 @@ func (in *SplunkProvider) parseTime(value any) (time.Time, error) {
 	}
 
 	return time.Time{}, fmt.Errorf("%w: unsupported _time format %q", ErrInvalidArgument, raw)
-}
-
-func toString(value any) string {
-	switch typed := value.(type) {
-	case nil:
-		return ""
-	case string:
-		return typed
-	case json.Number:
-		return typed.String()
-	default:
-		return fmt.Sprint(value)
-	}
 }
