@@ -324,6 +324,12 @@ query GetStackRunMinimal($id: ID!) {
     }
 }
 
+query GetStackRunApprovedAt($id: ID!) {
+    stackRun(id: $id) {
+        approvedAt
+    }
+}
+
 query GetStackRun($id: ID!) {
     stackRun(id: $id) {
         ...StackRunFragment
