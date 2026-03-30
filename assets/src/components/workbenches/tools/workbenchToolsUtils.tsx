@@ -71,6 +71,7 @@ export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Linear]: 'Linear',
   [WorkbenchToolType.Mcp]: 'MCP',
   [WorkbenchToolType.Sentry]: 'Sentry',
+  [WorkbenchToolType.Splunk]: 'Splunk',
 }
 
 export const TOOL_TYPE_TO_CATEGORIES: Record<
@@ -90,6 +91,7 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.Http]: [WorkbenchToolCategory.Integration],
   [WorkbenchToolType.Mcp]: [],
   [WorkbenchToolType.Sentry]: [WorkbenchToolCategory.ErrorTracking],
+  [WorkbenchToolType.Splunk]: [WorkbenchToolCategory.Logs],
 }
 
 /** Descriptions for configurable tool types (create cards). Single source for supported types + copy. */
