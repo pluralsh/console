@@ -180,6 +180,10 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
     const { email } = config?.atlassian ?? {}
     return { atlassian: { email: email ?? '' } }
   },
+  [WorkbenchToolType.Splunk]: (config) => {
+    const { url, username } = config?.splunk ?? {}
+    return { splunk: { url: url ?? '', username } }
+  },
   [WorkbenchToolType.Linear]: () => ({ linear: { accessToken: '' } }),
 }
 
