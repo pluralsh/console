@@ -252,6 +252,7 @@ type ConsoleClient interface {
 	ListClusterMinimalStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterMinimalStacks, error)
 	ListInfrastructureStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListInfrastructureStacks, error)
 	GetStackRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRunMinimal, error)
+	GetStackRunApprovedAt(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRunApprovedAt, error)
 	GetStackRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRun, error)
 	GetStackRunBase(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRunBase, error)
 	UpdateStackRun(ctx context.Context, id string, attributes StackRunAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateStackRun, error)
@@ -25125,6 +25126,17 @@ func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_Configuration_Stack
 	return t.PrivateKeyFile
 }
 
+type GetStackRunApprovedAt_StackRun struct {
+	ApprovedAt *string "json:\"approvedAt,omitempty\" graphql:\"approvedAt\""
+}
+
+func (t *GetStackRunApprovedAt_StackRun) GetApprovedAt() *string {
+	if t == nil {
+		t = &GetStackRunApprovedAt_StackRun{}
+	}
+	return t.ApprovedAt
+}
+
 type GetStackRun_StackRun_StackRunFragment_StateUrls_Terraform struct {
 	Address *string "json:\"address,omitempty\" graphql:\"address\""
 	Lock    *string "json:\"lock,omitempty\" graphql:\"lock\""
@@ -32064,6 +32076,17 @@ type GetStackRunMinimal struct {
 func (t *GetStackRunMinimal) GetStackRun() *StackRunMinimalFragment {
 	if t == nil {
 		t = &GetStackRunMinimal{}
+	}
+	return t.StackRun
+}
+
+type GetStackRunApprovedAt struct {
+	StackRun *GetStackRunApprovedAt_StackRun "json:\"stackRun,omitempty\" graphql:\"stackRun\""
+}
+
+func (t *GetStackRunApprovedAt) GetStackRun() *GetStackRunApprovedAt_StackRun {
+	if t == nil {
+		t = &GetStackRunApprovedAt{}
 	}
 	return t.StackRun
 }
@@ -50375,6 +50398,30 @@ func (c *Client) GetStackRunMinimal(ctx context.Context, id string, interceptors
 	return &res, nil
 }
 
+const GetStackRunApprovedAtDocument = `query GetStackRunApprovedAt ($id: ID!) {
+	stackRun(id: $id) {
+		approvedAt
+	}
+}
+`
+
+func (c *Client) GetStackRunApprovedAt(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRunApprovedAt, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetStackRunApprovedAt
+	if err := c.Client.Post(ctx, "GetStackRunApprovedAt", GetStackRunApprovedAtDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetStackRunDocument = `query GetStackRun ($id: ID!) {
 	stackRun(id: $id) {
 		... StackRunFragment
@@ -55075,6 +55122,7 @@ var DocumentOperationNames = map[string]string{
 	ListClusterMinimalStacksDocument:                  "ListClusterMinimalStacks",
 	ListInfrastructureStacksDocument:                  "ListInfrastructureStacks",
 	GetStackRunMinimalDocument:                        "GetStackRunMinimal",
+	GetStackRunApprovedAtDocument:                     "GetStackRunApprovedAt",
 	GetStackRunDocument:                               "GetStackRun",
 	GetStackRunBaseDocument:                           "GetStackRunBase",
 	UpdateStackRunDocument:                            "UpdateStackRun",
