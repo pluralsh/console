@@ -8,6 +8,7 @@ on:
       - ".github/workflows/helm-test-ci.yaml"
       - "go/helm-test/**"
       - "charts/console/**"
+      - "charts/console-rapid/**"
 permissions:
   contents: read
 
