@@ -171,6 +171,12 @@ defmodule Console.Schema.DeploymentSettings do
       field :recommendation_cushion,   :integer
     end
 
+    embeds_one :metrics, Metrics, on_replace: :update do
+      field :enabled,  :boolean
+      field :endpoint, :string
+      field :crontab,  :string
+    end
+
     embeds_one :ai, AI, on_replace: :update do
       field :enabled,            :boolean, default: false
       field :provider,           AIProvider, default: :openai
@@ -325,6 +331,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:smtp, with: &smtp_changeset/2)
     |> cast_embed(:stacks, with: &stacks_changeset/2)
     |> cast_embed(:cost, with: &cost_changeset/2)
+    |> cast_embed(:metrics, with: &metrics_changeset/2)
     |> cast_embed(:logging, with: &logging_changeset/2)
     |> change_markers(agent_helm_values: :helm_changed, agent_version: :version_changed)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
@@ -433,6 +440,31 @@ defmodule Console.Schema.DeploymentSettings do
   defp cost_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(enabled recommendation_threshold recommendation_cushion)a)
+  end
+
+  defp metrics_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(enabled endpoint crontab)a)
+    |> validate_required_if_enabled()
+    |> validate_crontab()
+  end
+
+  defp validate_required_if_enabled(changeset) do
+    case get_field(changeset, :enabled) do
+      true -> validate_required(changeset, [:endpoint, :crontab])
+      _ -> changeset
+    end
+  end
+
+  defp validate_crontab(changeset) do
+    case get_field(changeset, :crontab) do
+      nil -> changeset
+      crontab ->
+        case Crontab.CronExpression.Parser.parse(crontab) do
+          {:ok, _} -> changeset
+          {:error, _} -> add_error(changeset, :crontab, "is not a valid cron expression")
+        end
+    end
   end
 
   defp vector_store_changeset(model, attrs) do
