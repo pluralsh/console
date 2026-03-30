@@ -159,8 +159,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   defp for_parent(%Project{id: id}), do: Alert.for_project(id)
   defp for_parent(%Workbench{id: id}), do: Alert.for_workbench(id)
 
+  def get_monitor(%{id: id}, _), do: {:ok, Observability.get_monitor!(id)}
+
   def list_monitors(%Service{id: id}, args, _) do
     Monitor.for_service(id)
+    |> maybe_search(Monitor, args)
     |> Monitor.ordered()
     |> paginate(args)
   end

@@ -304,6 +304,8 @@ defmodule Console.GraphQl.Deployments.Service do
 
     @desc "list all monitors configured for this service"
     connection field :monitors, node_type: :monitor do
+      arg :q, :string, description: "search monitors by name"
+
       resolve &Deployments.list_monitors/3
     end
 

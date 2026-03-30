@@ -453,6 +453,12 @@ type RootQueryType {
 
   observabilityWebhooks(after: String, first: Int, before: String, last: Int): ObservabilityWebhookConnection
 
+  "List observability webhooks visible to the current user"
+  monitor(
+    "Fetch a single monitor by ID"
+    id: ID!
+  ): Monitor
+
   deploymentSettings: DeploymentSettings
 
   projects(after: String, first: Int, before: String, last: Int, q: String): ProjectConnection
@@ -8180,7 +8186,18 @@ type ServiceDeployment {
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
   "list all monitors configured for this service"
-  monitors(after: String, first: Int, before: String, last: Int): MonitorConnection
+  monitors(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search monitors by name"
+    q: String
+  ): MonitorConnection
 
   scalingRecommendations: [ClusterScalingRecommendation]
 

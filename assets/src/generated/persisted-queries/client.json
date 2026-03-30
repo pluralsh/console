@@ -1352,6 +1352,31 @@
          "name": "ServiceMetrics",
          "body": "query ServiceMetrics($id: ID!, $step: String, $start: DateTime) {\n  serviceDeployment(id: $id) {\n    id\n    serviceMetrics(step: $step, start: $start) {\n      cpu {\n        ...MetricResponse\n        __typename\n      }\n      mem {\n        ...MetricResponse\n        __typename\n      }\n      podCpu {\n        ...MetricResponse\n        __typename\n      }\n      podMem {\n        ...MetricResponse\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment MetricResponse on MetricResponse {\n  metric\n  values {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:f2d0c18af082c0b8e2910eceb74b1ccf56a903c2e811bc14d88a323a42e58f9e": {
+         "type": "query",
+         "name": "MonitorDetails",
+         "body": "query MonitorDetails($id: ID!) {\n  monitor(id: $id) {\n    ...Monitor\n    __typename\n  }\n}\n\nfragment Monitor on Monitor {\n  ...MonitorTiny\n  __typename\n}\n\nfragment MonitorTiny on Monitor {\n  id\n  name\n  threshold {\n    ...MonitorThreshold\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorThreshold on MonitorThreshold {\n  aggregate\n  value\n  __typename\n}"
+      },
+      "sha256:690a1d56c99c194082c0342a2a52f856f3e6c81354b0d43a852a97aaf19438c4": {
+         "type": "query",
+         "name": "ServiceMonitors",
+         "body": "query ServiceMonitors($serviceId: ID!, $q: String, $first: Int, $after: String) {\n  serviceDeployment(id: $serviceId) {\n    id\n    monitors(q: $q, first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...MonitorTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment MonitorTiny on Monitor {\n  id\n  name\n  threshold {\n    ...MonitorThreshold\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorThreshold on MonitorThreshold {\n  aggregate\n  value\n  __typename\n}"
+      },
+      "sha256:bd9d39558665c5f9b799a5d40d652bbbe4d0f86f6824835d7795588b78c97c34": {
+         "type": "mutation",
+         "name": "CreateMonitor",
+         "body": "mutation CreateMonitor($attributes: MonitorAttributes!) {\n  createMonitor(attributes: $attributes) {\n    ...MonitorTiny\n    __typename\n  }\n}\n\nfragment MonitorTiny on Monitor {\n  id\n  name\n  threshold {\n    ...MonitorThreshold\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorThreshold on MonitorThreshold {\n  aggregate\n  value\n  __typename\n}"
+      },
+      "sha256:6e2c4115cb9031c03625935487c837e89869a3273e891b502e533816f47db1f0": {
+         "type": "mutation",
+         "name": "UpdateMonitor",
+         "body": "mutation UpdateMonitor($id: ID!, $attributes: MonitorAttributes!) {\n  updateMonitor(id: $id, attributes: $attributes) {\n    ...MonitorTiny\n    __typename\n  }\n}\n\nfragment MonitorTiny on Monitor {\n  id\n  name\n  threshold {\n    ...MonitorThreshold\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorThreshold on MonitorThreshold {\n  aggregate\n  value\n  __typename\n}"
+      },
+      "sha256:18fe57023b819fa151bc692d88a5d55a735700ddbf9e4c0563fc9abf01c3d025": {
+         "type": "mutation",
+         "name": "DeleteMonitor",
+         "body": "mutation DeleteMonitor($id: ID!) {\n  deleteMonitor(id: $id) {\n    id\n    __typename\n  }\n}"
+      },
       "sha256:612d068d4227e6b2c6d591591228637cab0f5a7b4b5c80be0465aa18da5ca889": {
          "type": "mutation",
          "name": "UpsertNotificationRouter",
