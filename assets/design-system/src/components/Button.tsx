@@ -10,6 +10,7 @@ import {
 } from 'react'
 
 import { CSSProperties, styled, useTheme } from 'styled-components'
+import type { RelativeRoutingType } from 'react-router-dom'
 import { resolveSpacersAndSanitizeCss, SpacerProps } from '../theme/spacing'
 import { applyNodeToRefs } from '../utils/applyNodeToRefs'
 import Flex, { FlexProps } from './Flex'
@@ -48,6 +49,7 @@ export type ButtonProps = {
   href?: string
   target?: string
   rel?: string
+  relative?: RelativeRoutingType
 } & SpacerProps &
   Omit<ComponentPropsWithRef<'button'>, 'onClick' | 'disabled'> &
   // a few commonly used css props for QOL
