@@ -9,10 +9,15 @@ jobs:
   smoke-test:
     name: Verify Helm Template
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chart:
+          - charts/console
+          - charts/console-rapid
     steps:
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - uses: azure/setup-helm@v4.2.0
-      - run: helm template charts/console --set dashboard.app.security.csrfKey=dummycsrfkey
+      - run: helm template ${{ matrix.chart }} --set dashboard.app.security.csrfKey=dummycsrfkey
