@@ -8,6 +8,7 @@ import {
   PrometheusLogoIcon,
   TempoLogoIcon,
   ToolsIcon,
+  SplunkLogoIcon,
 } from '@pluralsh/design-system'
 import {
   WorkbenchToolCategory,
@@ -26,6 +27,7 @@ const CONFIGURABLE_WORKBENCH_TOOL_TYPES = [
   WorkbenchToolType.Tempo,
   WorkbenchToolType.Atlassian,
   WorkbenchToolType.Linear,
+  WorkbenchToolType.Splunk,
 ] as const
 
 const CONFIGURABLE_SET = new Set<WorkbenchToolType>(
@@ -44,6 +46,7 @@ export const CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY = {
   [WorkbenchToolType.Datadog]: 'datadog',
   [WorkbenchToolType.Linear]: 'linear',
   [WorkbenchToolType.Atlassian]: 'atlassian',
+  [WorkbenchToolType.Splunk]: 'splunk',
 } as const satisfies Record<
   ConfigurableWorkbenchToolType,
   keyof WorkbenchToolConfigurationAttributes
@@ -112,6 +115,7 @@ const CONFIGURABLE_TOOL_TYPE_CARD_DESCRIPTIONS: Record<
     'Connect to Linear for issue tracking and project management.',
   [WorkbenchToolType.Http]:
     'Call arbitrary HTTP endpoints- useful for custom integrations.',
+  [WorkbenchToolType.Splunk]: 'Query logs and search data in Splunk.',
 }
 
 export const categoryToLabel: Record<WorkbenchToolCategory, string> = {
@@ -163,4 +167,5 @@ const toolToIcon: Record<
   [WorkbenchToolType.Http]: ToolsIcon,
   [WorkbenchToolType.Atlassian]: AtlassianLogoIcon,
   [WorkbenchToolType.Linear]: LinearLogoIcon,
+  [WorkbenchToolType.Splunk]: SplunkLogoIcon,
 }

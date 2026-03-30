@@ -98,6 +98,10 @@ fragment WorkbenchTool on WorkbenchTool {
     linear {
       url
     }
+    splunk {
+      url
+      username
+    }
   }
 }
 
