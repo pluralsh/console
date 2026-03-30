@@ -165,16 +165,7 @@ export const getDirectory = ({
       label: <ErrorsLabelWithChip errors={serviceDeployment.errors} />,
       enabled: true,
     },
-    {
-      path: 'alerts',
-      label: (
-        <DirLabelWithChip
-          count={serviceDeployment.alerts?.edges?.length}
-          type="Alerts"
-        />
-      ),
-      enabled: true,
-    },
+    { path: 'observability', label: 'Observability', enabled: true },
     {
       path: 'recommendations',
       label: (
@@ -190,7 +181,6 @@ export const getDirectory = ({
       label: <InsightsTabLabel insight={serviceDeployment.insight} />,
       enabled: !!serviceDeployment.insight,
     },
-    { path: 'metrics', label: 'Metrics', enabled: metricsEnabled },
     { path: 'logs', label: 'Logs', enabled: logsEnabled },
     {
       path: 'network',

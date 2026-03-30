@@ -155,6 +155,8 @@ import {
 } from './cdRoutesConsts'
 import { FLOW_PARAM_ID_OR_NAME } from './flowRoutesConsts.tsx'
 import { pipelineRoutes } from './pipelineRoutes'
+import { ServiceObservability } from 'components/cd/services/service/ServiceObservability.tsx'
+import { ServiceMonitors } from 'components/cd/services/service/ServiceMonitors.tsx'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -532,39 +534,9 @@ export const getServiceDetailsRoutes = (type: 'cd' | 'flow') => (
       path="dryrun"
     />
     <Route
-      element={<ServiceAlerts />}
-      path="alerts"
-    />
-    <Route
-      path={ALERT_INSIGHT_REL_PATH}
-      element={<AlertInsight type="service" />}
-    />
-    <Route
       element={<ServiceScalingRecs />}
       path="recommendations"
     />
-    <Route
-      element={<ServiceMetrics />}
-      path="metrics"
-    >
-      <Route
-        index
-        element={
-          <Navigate
-            replace
-            to="timeseries"
-          />
-        }
-      />
-      <Route
-        element={<ServiceMetricsTimeseries />}
-        path="timeseries"
-      />
-      <Route
-        element={<ServiceMetricsHeatmap />}
-        path="heatmap"
-      />
-    </Route>
     <Route
       element={<ServiceNetwork />}
       path="network"
@@ -613,6 +585,54 @@ export const getServiceDetailsRoutes = (type: 'cd' | 'flow') => (
       <Route
         element={<ServiceContexts />}
         path={SERVICE_SETTINGS_CONTEXTS_REL_PATH}
+      />
+    </Route>
+    <Route
+      element={<ServiceObservability />}
+      path="observability"
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to="alerts"
+          />
+        }
+      />
+      <Route
+        element={<ServiceAlerts />}
+        path="alerts"
+      />
+      <Route
+        path={ALERT_INSIGHT_REL_PATH}
+        element={<AlertInsight type="service" />}
+      />
+      <Route
+        element={<ServiceMetrics />}
+        path="metrics"
+      >
+        <Route
+          index
+          element={
+            <Navigate
+              replace
+              to="timeseries"
+            />
+          }
+        />
+        <Route
+          element={<ServiceMetricsTimeseries />}
+          path="timeseries"
+        />
+        <Route
+          element={<ServiceMetricsHeatmap />}
+          path="heatmap"
+        />
+      </Route>
+      <Route
+        element={<ServiceMonitors />}
+        path="monitors"
       />
     </Route>
   </Route>
