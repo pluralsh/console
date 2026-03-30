@@ -18,6 +18,7 @@ import styled from 'styled-components'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { WorkbenchJobResult } from './WorkbenchJobResult'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
+import { truncate } from 'lodash'
 
 export function WorkbenchJob() {
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
@@ -45,7 +46,10 @@ export function WorkbenchJob() {
       () => [
         { label: 'workbenches', url: WORKBENCHES_ABS_PATH },
         { label: workbenchName, url: getWorkbenchAbsPath(workbenchId) },
-        { label: prompt, url: getWorkbenchJobAbsPath({ workbenchId, jobId }) },
+        {
+          label: truncate(prompt ?? '', { length: 50 }),
+          url: getWorkbenchJobAbsPath({ workbenchId, jobId }),
+        },
       ],
       [prompt, jobId, workbenchId, workbenchName]
     )

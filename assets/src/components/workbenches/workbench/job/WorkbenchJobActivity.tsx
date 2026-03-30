@@ -64,8 +64,13 @@ export function WorkbenchJobActivity({
         css={{ padding: `${spacing.xsmall}px ${spacing.medium}px` }}
       >
         <Body2P $color="text-light">
-          {activity.prompt || 'Running activity'}
+          <strong>Prompt:</strong> {activity.prompt}
         </Body2P>
+        {activity.result?.output && (
+          <Body2P $color="text-light">
+            <strong>Output:</strong> {activity.result.output}
+          </Body2P>
+        )}
         {/* TODO */}
         {progress.map((p, i) => (
           <Body2P key={i}>{p.text}</Body2P>

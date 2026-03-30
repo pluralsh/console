@@ -18901,7 +18901,7 @@ export type WorkbenchJobResultTodoFragment = { __typename?: 'WorkbenchJobResultT
 
 export type WorkbenchJobResultFragment = { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null };
 
-export type WorkbenchJobTinyFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus };
+export type WorkbenchJobTinyFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null };
 
 export type WorkbenchJobActivityFragment = { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null> | null, agentRun?: { __typename?: 'AgentRun', id: string, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null };
 
@@ -18933,7 +18933,7 @@ export type WorkbenchJobsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus } | null } | null> | null } | null } | null };
+export type WorkbenchJobsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23857,6 +23857,9 @@ export const WorkbenchJobTinyFragmentDoc = gql`
   id
   prompt
   status
+  workbench {
+    id
+  }
 }
     `;
 export const WorkbenchJobResultTodoFragmentDoc = gql`

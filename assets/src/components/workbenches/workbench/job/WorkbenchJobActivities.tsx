@@ -1,4 +1,4 @@
-import { Card, EmptyState } from '@pluralsh/design-system'
+import { Card, EmptyState, Markdown } from '@pluralsh/design-system'
 import { StepperAccordionSC } from 'components/utils/StepperAccordion'
 import {
   useWorkbenchJobActivitiesSuspenseQuery,
@@ -52,13 +52,11 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
 
   const [openIds, setOpenIds] = useState<string[]>(() =>
     activities
-      .filter((activity) => isActivityRunning(activity.status))
+      .filter((activity) => !isActivityRunning(activity.status))
       .map((activity) => activity.id)
   )
-
   return (
     <ActivitiesPanelSC>
-      <JobPromptCardSC>{job?.prompt || 'Workbench job'}</JobPromptCardSC>
       {!hasActivities ? (
         <EmptyState message="No activities have started yet." />
       ) : (
@@ -72,6 +70,11 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
           <VirtualList
             data={activities}
             itemGap={ACTIVITY_GAP}
+            topContent={
+              <JobPromptCardSC>
+                <Markdown text={job?.prompt ?? ''} />
+              </JobPromptCardSC>
+            }
             renderer={({ rowData, index }) => (
               <WorkbenchJobActivity
                 activity={rowData}
@@ -104,4 +107,5 @@ const JobPromptCardSC = styled(Card)(({ theme }) => ({
   ...theme.partials.text.body2,
   borderRadius: theme.borderRadiuses.medium,
   padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
+  wordBreak: 'break-word',
 }))
