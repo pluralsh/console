@@ -11,10 +11,17 @@ function logError(error: Error, info: ErrorInfo) {
   console.error(`Component stack:\n${info.componentStack}`)
 }
 
-export function PluralErrorBoundary({ children }: { children: ReactNode }) {
+export function PluralErrorBoundary({
+  children,
+  shouldLog = true,
+}: {
+  children: ReactNode
+  shouldLog?: boolean
+}) {
+  const onError = shouldLog ? logError : undefined
   return (
     <ErrorBoundary
-      onError={logError}
+      onError={onError}
       FallbackComponent={ErrorFallback}
     >
       {children}

@@ -44,6 +44,7 @@ export function ServiceMonitorCreateOrEdit({
     )
   return (
     <ServiceMonitorCreateOrEditInner
+      key={monitor?.id ?? 'create'}
       mode={mode}
       monitor={monitor}
       isLoading={!monitor && loading}
@@ -52,9 +53,9 @@ export function ServiceMonitorCreateOrEdit({
 }
 
 function ServiceMonitorCreateOrEditInner({
-  mode,
-  monitor: _,
-  isLoading: _a,
+  mode: _mode,
+  monitor: _monitor,
+  isLoading: _isLoading,
 }: {
   mode: 'create' | 'edit'
   monitor: Nullable<MonitorFragment>
@@ -63,6 +64,8 @@ function ServiceMonitorCreateOrEditInner({
   const { spacing } = useTheme()
   const [activeKey, setActiveKey] =
     useState<ServiceMonitorStepKey>('description')
+  // TODO: add form state
+
   return (
     <WrapperSC>
       <Flex direction="column">
@@ -80,7 +83,7 @@ function ServiceMonitorCreateOrEditInner({
                 icon={<ButtonMediumP $color="text">{i}</ButtonMediumP>}
               />
             }
-            // endIcon={<div>end</div>}
+            // endIcon={<div>end</div>} TODO
           >
             <Body2BoldP
               $color="text"
@@ -96,7 +99,10 @@ function ServiceMonitorCreateOrEditInner({
         />
         <Button>Create monitor</Button>
       </Flex>
-      ServiceMonitorCreateOrEditInner {mode}
+      {/* <ServiceMonitorForm
+        state={{}}
+        isLoading={isLoading}
+      /> */}
     </WrapperSC>
   )
 }
