@@ -19,9 +19,11 @@ defmodule Console.AI.Chat.System do
   @insight_chat Console.priv_file!("prompts/insight_chat.md")
   @research Console.priv_file!("prompts/research.md")
   @service_file Path.join([:code.priv_dir(:console), "prompts", "service.md.eex"])
+  @configure Console.priv_file!("prompts/configure.md")
 
   EEx.function_from_file(:defp, :service_prompt, @service_file, [:assigns])
 
+  def prompt(%ChatThread{session: %AgentSession{type: :configure}}), do: @configure
   def prompt(%ChatThread{service: %Service{} = svc}), do: service_prompt(svc: svc_context(svc))
   def prompt(%ChatThread{research_id: id}) when is_binary(id), do: @research
   def prompt(%ChatThread{insight: %AiInsight{text: t}}),

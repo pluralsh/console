@@ -201,6 +201,7 @@ defmodule Console.GraphQl.Deployments.Service do
   input_object :kustomize_attributes do
     field :path, non_null(:string), description: "the path to the kustomization file to use"
     field :enable_helm, :boolean, description: "if the kustomization will need to inflate a helm chart"
+    field :envsubst, :boolean, description: "if the kustomization will need to apply envsubst to the manifests"
   end
 
   @desc "metadata about the deployed contents of a service"
@@ -308,6 +309,14 @@ defmodule Console.GraphQl.Deployments.Service do
 
     field :scaling_recommendations, list_of(:cluster_scaling_recommendation), resolve: dataloader(Deployments)
 
+    field :service_metrics, :service_component_metrics do
+      arg :start,        :datetime
+      arg :stop,         :datetime
+      arg :step,         :string
+
+      resolve &Deployments.metrics/3
+    end
+
     field :component_metrics, :service_component_metrics do
       arg :component_id, non_null(:id)
       arg :start,        :datetime
@@ -413,8 +422,9 @@ defmodule Console.GraphQl.Deployments.Service do
 
   @desc "metadata needed for configuring kustomize"
   object :kustomize do
-    field :path, non_null(:string), description: "the path to the kustomization file to use"
+    field :path,        non_null(:string), description: "the path to the kustomization file to use"
     field :enable_helm, :boolean, description: "if the kustomization will need to inflate a helm chart"
+    field :envsubst,    :boolean, description: "if the kustomization will need to apply envsubst to the manifests"
   end
 
   @desc "representation of a kubernetes component deployed by a service"

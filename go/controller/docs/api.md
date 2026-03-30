@@ -96,7 +96,7 @@ _Appears in:_
 | `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
 | `toolProvider` _[AiProvider](#aiprovider)_ | ToolProvider to use for tool calling, in case you want to use a different LLM more optimized to those tasks |  | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
 | `embeddingProvider` _[AiProvider](#aiprovider)_ | EmbeddingProvider to use for generating embeddings. Oftentimes foundational<br />model providers do not have embeddings models, and it's better to simply use OpenAI. |  | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: \{\} <br /> |
-| `openAI` _[AIProviderSettings](#aiprovidersettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: \{\} <br /> |
+| `openAI` _[OpenAISettings](#openaisettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: \{\} <br /> |
 | `anthropic` _[AIProviderSettings](#aiprovidersettings)_ | Anthropic holds the Anthropic provider configuration. |  | Optional: \{\} <br /> |
 | `ollama` _[OllamaSettings](#ollamasettings)_ | Ollama holds configuration for a self-hosted Ollama deployment,<br />more details available at https://github.com/ollama/ollama |  | Optional: \{\} <br /> |
 | `azure` _[AzureOpenAISettings](#azureopenaisettings)_ | Azure holds configuration for using AzureOpenAI to generate LLM insights |  | Optional: \{\} <br /> |
@@ -2847,11 +2847,29 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef references the PR automation template to use for generating pull requests.<br />The automation template defines the repository, branch pattern, and file modifications<br />to apply when creating the pull request. |  | Required: \{\} <br /> |
+| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef references the PR automation template to use for generating pull requests.<br />The automation template defines the repository, branch pattern, and file modifications<br />to apply when creating the pull request. |  | Optional: \{\} <br /> |
+| `ai` _[ObserverPrAiAction](#observerpraiaction)_ | Ai contains configuration for AI assistance in this PR automation. |  | Optional: \{\} <br /> |
 | `repository` _string_ | Repository overrides the repository slug for the referenced PR automation.<br />Use this when you want to target a different repository than the one<br />configured in the PR automation template. |  | Optional: \{\} <br /> |
 | `branchTemplate` _string_ | BranchTemplate provides a template for generating branch names.<br />Use $value to inject the observed value into the branch name.<br />Example: "update-chart-to-$value" becomes "update-chart-to-1.2.3". |  | Optional: \{\} <br /> |
 | `context` _[RawExtension](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#rawextension-runtime-pkg)_ | Context is a templated context that becomes the input for the PR automation.<br />Use $value to interpolate the observed value into the context data.<br />This context is passed to the PR automation for template rendering and file modifications. |  | Optional: \{\} <br /> |
 | `actor` _string_ | Actor specifies the actor to use for the created branch. Should be a user email in Plural. |  | Optional: \{\} <br /> |
+
+
+#### ObserverPrAiAction
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverPrAction](#observerpraction)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Whether AI assistance is enabled for this automation. |  | Optional: \{\} <br /> |
+| `prompt` _string_ | The prompt to use to guide the AI code change for this PR. |  | Required: \{\} <br /> |
 
 
 #### ObserverSpec
@@ -2920,6 +2938,28 @@ _Appears in:_
 | `model` _string_ | Model is the Ollama model to use when querying the /chat api |  | Required: \{\} <br /> |
 | `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | AuthorizationSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header<br />to send to your ollama api in case authorization is required (eg for an instance hosted on a public network) |  | Optional: \{\} <br /> |
+
+
+#### OpenAISettings
+
+
+
+
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `model` _string_ | Model is the LLM model name to use. |  | Optional: \{\} <br /> |
+| `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
+| `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `proxyModels` _string array_ | ProxyModels are additional models to support within our integrated ai proxy. |  | Optional: \{\} <br /> |
+| `baseUrl` _string_ | BaseUrl is a custom base url to use, for reimplementations<br />of the same API scheme (for instance Together.ai uses the OpenAI API spec) |  | Optional: \{\} <br /> |
+| `method` _[OpenAiMethod](#openaimethod)_ | Method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chart completions apis, useful for configuring against common AI proxies) |  | Enum: [CHAT RESPONSES AUTO] <br />Optional: \{\} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: \{\} <br /> |
 
 
 #### OpensearchConnection
@@ -3603,9 +3643,9 @@ _Appears in:_
 | `darkIcon` _string_ | DarkIcon provides a URL to a dark-mode variant of the icon for improved<br />visibility in dark-themed user interfaces. |  | Optional: \{\} <br /> |
 | `documentation` _string_ | Documentation provides detailed explanation of what this automation does,<br />when to use it, and any prerequisites or considerations. |  | Optional: \{\} <br /> |
 | `identifier` _string_ | Identifier specifies the target repository in the format "organization/repository-name"<br />for GitHub, or equivalent formats for other SCM providers. |  | Optional: \{\} <br /> |
-| `message` _string_ | Message defines the commit message template that will be used in the generated PR.<br />Can include templated variables from user input. |  | Optional: \{\} <br /> |
+| `message` _string_ | Message defines the commit message template that will be used in the generated PR.<br />Can include templated variables from user input. If you're using an AI pr automation, the ai can provide this for you. |  | Optional: \{\} <br /> |
 | `name` _string_ | Name specifies the display name for this automation in the Console API.<br />If not provided, defaults to the Kubernetes resource name. |  | Optional: \{\} <br /> |
-| `title` _string_ | Title defines the template for the pull request title. Can include variables<br />that will be replaced with user-provided configuration values. |  | Optional: \{\} <br /> |
+| `title` _string_ | Title defines the template for the pull request title. Can include variables<br />that will be replaced with user-provided configuration values. If you're using an AI pr automation, the ai can provide this for you. |  | Optional: \{\} <br /> |
 | `patch` _boolean_ | Patch determines whether to generate a patch for this PR instead of<br />creating a full pull request. |  | Optional: \{\} <br /> |
 | `branchPrefix` _string_ | BranchPrefix specifies a prefix to use for the branch name, will be appended with a random string for deduplication. |  | Optional: \{\} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef references a specific cluster that this PR operates on. |  | Optional: \{\} <br /> |
@@ -4637,6 +4677,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `path` _string_ | The folder your base kustomization file lives within relative to your main git folder path.  It can be a subdirectory. |  |  |
 | `enableHelm` _boolean_ | EnableHelm indicates whether to enable Helm for this Kustomize deployment.<br />Used for inflating Helm charts. |  | Optional: \{\} <br /> |
+| `envsubst` _boolean_ | Envsubst indicates whether to apply envsubst replacements to the manifests, using the services attached configuration as the variables. |  | Optional: \{\} <br /> |
 
 
 #### ServiceSpec
@@ -5164,9 +5205,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `model` _string_ | Model is the Vertex AI model to use.  Must support the OpenAI completions api, see: https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/openai/overview |  | Optional: \{\} <br /> |
-| `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: \{\} <br /> |
-| `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings |  | Optional: \{\} <br /> |
+| `model` _string_ | Model is the Vertex AI model to use. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex |  | Optional: \{\} <br /> |
+| `toolModel` _string_ | ToolModel to use for tool calling, which is less frequent and often requires more advanced reasoning. This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex |  | Optional: \{\} <br /> |
+| `embeddingModel` _string_ | EmbeddingModel to use for generating embeddings.<br />This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex.<br />Default is gemini-embedding-001. |  | Optional: \{\} <br /> |
 | `proxyModels` _string array_ | ProxyModels are additional models to support within the integrated ai proxy. |  | Optional: \{\} <br /> |
 | `project` _string_ | Project is the GCP project you'll be using |  | Required: \{\} <br /> |
 | `location` _string_ | Location is the GCP region Vertex is queried from |  | Required: \{\} <br /> |

@@ -18,7 +18,7 @@ defmodule Console.Schema.Base do
   end
 
   def determine_next_run(cs, field \\ :crontab) do
-    with {crontab, run} when is_binary(crontab) and not is_nil(run) <- crontab_changed(cs, field),
+    with {crontab, run} when is_binary(crontab) and is_struct(run) <- crontab_changed(cs, field),
          {:ok, cron} <- Crontab.CronExpression.Parser.parse(crontab),
          {:ok, next} <- Crontab.Scheduler.get_next_run_date(cron, Timex.to_naive_datetime(run)) do
       put_change(cs, :next_run_at, next_run(next))
@@ -47,7 +47,7 @@ defmodule Console.Schema.Base do
   defp next_run(ndt) do
     DateTime.from_naive!(ndt, "Etc/UTC")
     |> Map.put(:microsecond, {0, 6})
-    |> Timex.shift(seconds: Console.jitter(60))
+    |> Timex.shift(seconds: :rand.uniform(60))
   end
 
   def immutable(cs, fields) do

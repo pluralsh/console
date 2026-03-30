@@ -140,7 +140,7 @@ defmodule Console.AI.Workbench.Engine do
 
   defp refresh_job(%WorkbenchJob{id: id}) do
     Console.Repo.get!(WorkbenchJob, id)
-    |> Repo.preload([:user, workbench: [:tools, :repository, :agent_runtime]])
+    |> Repo.preload([:user, :result, workbench: [:tools, :repository, :agent_runtime]])
   end
 
   defp tools(%WorkbenchJob{} = job, %Environment{skills: skills}) do

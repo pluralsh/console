@@ -10,6 +10,8 @@ defmodule Console.MixProject do
         version =
           case System.cmd("git", ~w[describe --dirty=+dirty]) do
             {"go/client/" <> _, 0} -> "0.0.0"
+            {"go/agentk/" <> _, 0} -> "0.0.0"
+            {"go/agent/" <> _, 0} -> "0.0.0"
             {version, 0} ->
               String.trim_leading(String.trim(version), "v")
 
@@ -178,6 +180,8 @@ defmodule Console.MixProject do
       {:hackney, "== 1.20.1"},
       {:bandit, "~> 1.8"},
       {:caramelize, "~> 1.2"},
+      {:req_llm, "~> 1.7"},
+      {:llm_db, git: "https://github.com/agentjido/llm_db.git", branch: "main", override: true},
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},

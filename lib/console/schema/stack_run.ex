@@ -40,6 +40,11 @@ defmodule Console.Schema.StackRun do
     embeds_one :job_spec,      JobSpec, on_replace: :update
     embeds_one :configuration, Stack.Configuration, on_replace: :update
 
+    embeds_one :scm_state, ScmState, on_replace: :update do
+      field :comment_id,    :string
+      field :ai_comment_id, :string
+    end
+
     embeds_one :job_ref, JobRef, on_replace: :update do
       field :name,      :string
       field :namespace, :string
@@ -141,6 +146,7 @@ defmodule Console.Schema.StackRun do
     |> cast_embed(:configuration)
     |> cast_embed(:policy_engine)
     |> cast_embed(:job_ref, with: &job_ref_changeset/2)
+    |> cast_embed(:scm_state, with: &scm_state_changeset/2)
     |> cast_assoc(:state)
     |> cast_assoc(:environment)
     |> cast_assoc(:steps)
@@ -163,6 +169,7 @@ defmodule Console.Schema.StackRun do
     |> cast_assoc(:violations)
     |> cast_embed(:approval_result, with: &approval_result_changeset/2)
     |> cast_embed(:job_ref, with: &job_ref_changeset/2)
+    |> cast_embed(:scm_state, with: &scm_state_changeset/2)
     |> validate_required(~w(status)a)
   end
 
@@ -194,5 +201,10 @@ defmodule Console.Schema.StackRun do
     model
     |> cast(attrs, ~w(reason result)a)
     |> validate_required(~w(reason result)a)
+  end
+
+  defp scm_state_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(comment_id ai_comment_id)a)
   end
 end

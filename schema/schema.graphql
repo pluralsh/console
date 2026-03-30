@@ -1390,6 +1390,8 @@ type RootSubscriptionType {
     recommendationId: ID
   ): AiDelta
 
+  toolThoughts(threadId: ID): ToolThought
+
   agentMessageDelta(runId: ID!): AgentMessageDelta
 
   agentRunDelta(id: ID!): AgentRunDelta
@@ -2294,6 +2296,9 @@ input WorkbenchToolAttributes {
   "the project for this tool"
   projectId: ID
 
+  "the mcp server for this tool"
+  mcpServerId: ID
+
   "tool configuration (e.g. http)"
   configuration: WorkbenchToolConfigurationAttributes
 }
@@ -2782,6 +2787,9 @@ type WorkbenchTool {
 
   "tool configuration"
   configuration: WorkbenchToolConfiguration
+
+  "the mcp server for this tool"
+  mcpServer: McpServer
 
   insertedAt: DateTime
 
@@ -3948,6 +3956,12 @@ enum VectorStore {
   OPENSEARCH
 }
 
+enum OpenAiMethod {
+  CHAT
+  RESPONSES
+  AUTO
+}
+
 enum Provider {
   AWS
   GCP
@@ -4117,6 +4131,9 @@ input OpenaiSettingsAttributes {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions)"
+  method: OpenAiMethod
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
@@ -4476,6 +4493,9 @@ type OpenaiSettings {
 
   "the model to use for vector embeddings"
   embeddingModel: String
+
+  "the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions)"
+  method: OpenAiMethod
 
   "addditional models to support within the integrated ai proxy"
   proxyModels: [String]
@@ -7513,6 +7533,7 @@ type PodToleration {
 
 "a shortform spec for job containers, designed for ease-of-use"
 type ContainerSpec {
+  name: String
   image: String!
   args: [String]
   env: [ContainerEnv]
@@ -8003,6 +8024,9 @@ input KustomizeAttributes {
 
   "if the kustomization will need to inflate a helm chart"
   enableHelm: Boolean
+
+  "if the kustomization will need to apply envsubst to the manifests"
+  envsubst: Boolean
 }
 
 "metadata about the deployed contents of a service"
@@ -8159,6 +8183,8 @@ type ServiceDeployment {
   monitors(after: String, first: Int, before: String, last: Int): MonitorConnection
 
   scalingRecommendations: [ClusterScalingRecommendation]
+
+  serviceMetrics(start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
 
   componentMetrics(componentId: ID!, start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
 
@@ -8319,6 +8345,9 @@ type Kustomize {
 
   "if the kustomization will need to inflate a helm chart"
   enableHelm: Boolean
+
+  "if the kustomization will need to apply envsubst to the manifests"
+  envsubst: Boolean
 }
 
 "representation of a kubernetes component deployed by a service"
@@ -11243,9 +11272,11 @@ input ObserverActionConfigurationAttributes {
 
 "Configuration for sending a pr in response to an observer"
 input ObserverPrActionAttributes {
-  automationId: ID!
+  automationId: ID
 
   repository: String
+
+  ai: ObserverPrAiActionAttributes
 
   "the actor to use for the created branch, should be a user email in Plural"
   actor: String
@@ -11255,6 +11286,14 @@ input ObserverPrActionAttributes {
 
   "the context to apply, use $value to interject the observed value"
   context: Json!
+}
+
+input ObserverPrAiActionAttributes {
+  "whether AI assistance is enabled for this automation"
+  enabled: Boolean
+
+  "custom prompt to guide AI updates for this automation"
+  prompt: String!
 }
 
 "Configuration for setting a pipeline context in an observer"
@@ -11487,9 +11526,9 @@ type PrAutomation {
 
   documentation: String
 
-  title: String!
+  title: String
 
-  message: String!
+  message: String
 
   updates: PrUpdateSpec
 
@@ -11904,9 +11943,12 @@ type ObserverActionConfiguration {
 
 "Configuration for sending a pr in response to an observer"
 type ObserverPrAction {
-  automationId: ID!
+  automationId: ID
 
   repository: String
+
+  "configuration for an AI pr automation (eliminates the need for a full pr automation reference)"
+  ai: ObserverPrAiAction
 
   "the actor to use for the created branch, should be a user email in Plural"
   actor: String
@@ -11916,6 +11958,15 @@ type ObserverPrAction {
 
   "the context to apply, use $value to interject the observed value"
   context: Map!
+}
+
+"Configuration for AI assistance in a PR automation"
+type ObserverPrAiAction {
+  "whether AI assistance is enabled for this automation"
+  enabled: Boolean
+
+  "custom prompt to guide AI updates for this automation"
+  prompt: String!
 }
 
 "Configuration for setting a pipeline context in an observer"
@@ -12125,6 +12176,7 @@ enum AgentSessionType {
   MANIFESTS
   CHAT
   RESEARCH
+  CONFIGURE
 }
 
 enum InfraResearchStatus {
@@ -12614,6 +12666,11 @@ type AiDelta {
   message: Int
   role: AiRole
   tool: ToolDelta
+}
+
+type ToolThought {
+  id: ID!
+  content: String
 }
 
 type ChatConnection {

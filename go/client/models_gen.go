@@ -2733,6 +2733,7 @@ type ContainerResourcesAttributes struct {
 
 // a shortform spec for job containers, designed for ease-of-use
 type ContainerSpec struct {
+	Name      *string             `json:"name,omitempty"`
 	Image     string              `json:"image"`
 	Args      []*string           `json:"args,omitempty"`
 	Env       []*ContainerEnv     `json:"env,omitempty"`
@@ -4330,6 +4331,8 @@ type Kustomize struct {
 	Path string `json:"path"`
 	// if the kustomization will need to inflate a helm chart
 	EnableHelm *bool `json:"enableHelm,omitempty"`
+	// if the kustomization will need to apply envsubst to the manifests
+	Envsubst *bool `json:"envsubst,omitempty"`
 }
 
 type KustomizeAttributes struct {
@@ -4337,6 +4340,8 @@ type KustomizeAttributes struct {
 	Path string `json:"path"`
 	// if the kustomization will need to inflate a helm chart
 	EnableHelm *bool `json:"enableHelm,omitempty"`
+	// if the kustomization will need to apply envsubst to the manifests
+	Envsubst *bool `json:"envsubst,omitempty"`
 }
 
 type LabelInput struct {
@@ -5392,8 +5397,10 @@ type ObserverPipelineActionAttributes struct {
 
 // Configuration for sending a pr in response to an observer
 type ObserverPrAction struct {
-	AutomationID string  `json:"automationId"`
+	AutomationID *string `json:"automationId,omitempty"`
 	Repository   *string `json:"repository,omitempty"`
+	// configuration for an AI pr automation (eliminates the need for a full pr automation reference)
+	Ai *ObserverPrAiAction `json:"ai,omitempty"`
 	// the actor to use for the created branch, should be a user email in Plural
 	Actor *string `json:"actor,omitempty"`
 	// a template to use for the created branch, use $value to interject the observed value
@@ -5404,14 +5411,30 @@ type ObserverPrAction struct {
 
 // Configuration for sending a pr in response to an observer
 type ObserverPrActionAttributes struct {
-	AutomationID string  `json:"automationId"`
-	Repository   *string `json:"repository,omitempty"`
+	AutomationID *string                       `json:"automationId,omitempty"`
+	Repository   *string                       `json:"repository,omitempty"`
+	Ai           *ObserverPrAiActionAttributes `json:"ai,omitempty"`
 	// the actor to use for the created branch, should be a user email in Plural
 	Actor *string `json:"actor,omitempty"`
 	// a template to use for the created branch, use $value to interject the observed value
 	BranchTemplate *string `json:"branchTemplate,omitempty"`
 	// the context to apply, use $value to interject the observed value
 	Context string `json:"context"`
+}
+
+// Configuration for AI assistance in a PR automation
+type ObserverPrAiAction struct {
+	// whether AI assistance is enabled for this automation
+	Enabled *bool `json:"enabled,omitempty"`
+	// custom prompt to guide AI updates for this automation
+	Prompt string `json:"prompt"`
+}
+
+type ObserverPrAiActionAttributes struct {
+	// whether AI assistance is enabled for this automation
+	Enabled *bool `json:"enabled,omitempty"`
+	// custom prompt to guide AI updates for this automation
+	Prompt string `json:"prompt"`
 }
 
 // Resets the current value of the observer
@@ -5526,6 +5549,8 @@ type OpenaiSettings struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions)
+	Method *OpenAiMethod `json:"method,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
@@ -5538,6 +5563,8 @@ type OpenaiSettingsAttributes struct {
 	ToolModel *string `json:"toolModel,omitempty"`
 	// the model to use for vector embeddings
 	EmbeddingModel *string `json:"embeddingModel,omitempty"`
+	// the method to use for openai api calls (defaults to auto, but can be used to restrict to only responses or chat completions)
+	Method *OpenAiMethod `json:"method,omitempty"`
 	// addditional models to support within the integrated ai proxy
 	ProxyModels []*string `json:"proxyModels,omitempty"`
 }
@@ -6212,8 +6239,8 @@ type PrAutomation struct {
 	// An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster
 	Role          *PrRole       `json:"role,omitempty"`
 	Documentation *string       `json:"documentation,omitempty"`
-	Title         string        `json:"title"`
-	Message       string        `json:"message"`
+	Title         *string       `json:"title,omitempty"`
+	Message       *string       `json:"message,omitempty"`
 	Updates       *PrUpdateSpec `json:"updates,omitempty"`
 	Creates       *PrCreateSpec `json:"creates,omitempty"`
 	Deletes       *PrDeleteSpec `json:"deletes,omitempty"`
@@ -7971,6 +7998,7 @@ type ServiceDeployment struct {
 	// list all monitors configured for this service
 	Monitors               *MonitorConnection              `json:"monitors,omitempty"`
 	ScalingRecommendations []*ClusterScalingRecommendation `json:"scalingRecommendations,omitempty"`
+	ServiceMetrics         *ServiceComponentMetrics        `json:"serviceMetrics,omitempty"`
 	ComponentMetrics       *ServiceComponentMetrics        `json:"componentMetrics,omitempty"`
 	// A pod-level set of utilization metrics for this cluster for rendering a heat map
 	HeatMap *UtilizationHeatMap `json:"heatMap,omitempty"`
@@ -8869,6 +8897,11 @@ type ToolDelta struct {
 	Pending   *bool          `json:"pending,omitempty"`
 }
 
+type ToolThought struct {
+	ID      string  `json:"id"`
+	Content *string `json:"content,omitempty"`
+}
+
 // How to enforce uniqueness for a field
 type UniqByAttributes struct {
 	// the scope this name is uniq w/in
@@ -9679,8 +9712,10 @@ type WorkbenchTool struct {
 	Project *Project `json:"project,omitempty"`
 	// tool configuration
 	Configuration *WorkbenchToolConfiguration `json:"configuration,omitempty"`
-	InsertedAt    *string                     `json:"insertedAt,omitempty"`
-	UpdatedAt     *string                     `json:"updatedAt,omitempty"`
+	// the mcp server for this tool
+	McpServer  *McpServer `json:"mcpServer,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchToolAssociationAttributes struct {
@@ -9713,6 +9748,8 @@ type WorkbenchToolAttributes struct {
 	Categories []*WorkbenchToolCategory `json:"categories,omitempty"`
 	// the project for this tool
 	ProjectID *string `json:"projectId,omitempty"`
+	// the mcp server for this tool
+	McpServerID *string `json:"mcpServerId,omitempty"`
 	// tool configuration (e.g. http)
 	Configuration *WorkbenchToolConfigurationAttributes `json:"configuration,omitempty"`
 }
@@ -10326,6 +10363,7 @@ const (
 	AgentSessionTypeManifests    AgentSessionType = "MANIFESTS"
 	AgentSessionTypeChat         AgentSessionType = "CHAT"
 	AgentSessionTypeResearch     AgentSessionType = "RESEARCH"
+	AgentSessionTypeConfigure    AgentSessionType = "CONFIGURE"
 )
 
 var AllAgentSessionType = []AgentSessionType{
@@ -10336,11 +10374,12 @@ var AllAgentSessionType = []AgentSessionType{
 	AgentSessionTypeManifests,
 	AgentSessionTypeChat,
 	AgentSessionTypeResearch,
+	AgentSessionTypeConfigure,
 }
 
 func (e AgentSessionType) IsValid() bool {
 	switch e {
-	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests, AgentSessionTypeChat, AgentSessionTypeResearch:
+	case AgentSessionTypeTerraform, AgentSessionTypeKubernetes, AgentSessionTypeProvisioning, AgentSessionTypeSearch, AgentSessionTypeManifests, AgentSessionTypeChat, AgentSessionTypeResearch, AgentSessionTypeConfigure:
 		return true
 	}
 	return false
@@ -13421,6 +13460,63 @@ func (e *OidcProviderType) UnmarshalJSON(b []byte) error {
 }
 
 func (e OidcProviderType) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type OpenAiMethod string
+
+const (
+	OpenAiMethodChat      OpenAiMethod = "CHAT"
+	OpenAiMethodResponses OpenAiMethod = "RESPONSES"
+	OpenAiMethodAuto      OpenAiMethod = "AUTO"
+)
+
+var AllOpenAiMethod = []OpenAiMethod{
+	OpenAiMethodChat,
+	OpenAiMethodResponses,
+	OpenAiMethodAuto,
+}
+
+func (e OpenAiMethod) IsValid() bool {
+	switch e {
+	case OpenAiMethodChat, OpenAiMethodResponses, OpenAiMethodAuto:
+		return true
+	}
+	return false
+}
+
+func (e OpenAiMethod) String() string {
+	return string(e)
+}
+
+func (e *OpenAiMethod) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = OpenAiMethod(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid OpenAiMethod", str)
+	}
+	return nil
+}
+
+func (e OpenAiMethod) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *OpenAiMethod) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e OpenAiMethod) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

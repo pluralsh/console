@@ -8,6 +8,8 @@ defmodule Console.AI.Ollama do
 
   defstruct [:url, :model, :tool_model, :authorization]
 
+  def defaults(), do: %{}
+
   @type t :: %__MODULE__{}
 
   @base_headers [{"content-type", "application/json"}]

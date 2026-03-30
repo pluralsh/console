@@ -95,8 +95,9 @@ config :console, Console.Cron.Scheduler,
   ]
 
 config :ex_aws,
-  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :pod_identity, :instance_role],
-  secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :pod_identity, :instance_role]
+  access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :pod_identity, {:awscli, "profile_name", 30}, :instance_role],
+  secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :pod_identity, {:awscli, "profile_name", 30}, :instance_role],
+  awscli_auth_adapter: ExAws.STS.AuthCache.AssumeRoleWebIdentityAdapter
 
 config :console, :watchers, [Console.Watchers.Upgrade]
 

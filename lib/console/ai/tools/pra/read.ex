@@ -10,7 +10,7 @@ defmodule Console.AI.Tools.Pra.Read do
 
   @schema Console.priv_file!("tools/pra/read.json") |> Jason.decode!()
 
-  def name(_), do: "pra_read"
+  def name(_), do: "read"
   def description(_), do: "Reads the contents of a file at the given path"
   def json_schema(_), do: @schema
 

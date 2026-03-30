@@ -76,6 +76,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tool,          non_null(:workbench_tool_type), description: "the type of tool"
     field :categories,    list_of(:workbench_tool_category), description: "categories for the tool"
     field :project_id,    :id, description: "the project for this tool"
+    field :mcp_server_id, :id, description: "the mcp server for this tool"
     field :configuration, :workbench_tool_configuration_attributes, description: "tool configuration (e.g. http)"
   end
 
@@ -350,6 +351,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :categories,    list_of(:workbench_tool_category), description: "categories for the tool"
     field :project,       :project, resolve: dataloader(Deployments), description: "the project of this tool"
     field :configuration, :workbench_tool_configuration, description: "tool configuration"
+    field :mcp_server,    :mcp_server, resolve: dataloader(Deployments), description: "the mcp server for this tool"
 
     timestamps()
   end

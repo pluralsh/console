@@ -42,37 +42,39 @@ defmodule Console.Cost.PrTest do
       expect(Console.Deployments.Pr.Git, :push, fn _, "plrl/ai/pr-test" <> _ -> {:ok, ""} end)
       expect(File, :write, fn _, "first" -> :ok end)
       expect(File, :write, fn _, "second" -> :ok end)
-      expect(HTTPoison, :post, fn _, _, _, _ ->
-        {:ok, %HTTPoison.Response{status_code: 200, body: Jason.encode!(%{choices: [
+      expect(ReqLLM, :generate_text, fn %{model: "gpt-4.1-mini"}, _, _ ->
+        Jason.encode!(%{
+          object: "response",
+          output: [
             %{
-              message: %{
-                tool_calls: [%{
-                  function: %{
-                    name: "create_pr",
-                    arguments: Jason.encode!(%{
-                      repo_url: "git@github.com:pluralsh/console.git",
-                      branch_name: "pr-test",
-                      pr_description: "some pr",
-                      pr_title: "some pr",
-                      commit_message: "a commit",
-                      file_updates: [
-                        %{
-                          file_name: "file.yaml",
-                          replacement: "first",
-                          previous: "second"
-                        },
-                        %{
-                          file_name: "file2.yaml",
-                          replacement: "second",
-                          previous: "first"
-                        }
-                      ]
-                    })
+              type: "function_call",
+              call_id: "call_123",
+              id: "call_123",
+              status: "completed",
+              name: "create_pr",
+              arguments: Jason.encode!(%{
+                repo_url: "git@github.com:pluralsh/console.git",
+                branch_name: "pr-test",
+                pr_description: "some pr",
+                pr_title: "some pr",
+                commit_message: "a commit",
+                file_updates: [
+                  %{
+                    file_name: "file.yaml",
+                    replacement: "first",
+                    previous: "second"
+                  },
+                  %{
+                    file_name: "file2.yaml",
+                    replacement: "second",
+                    previous: "first"
                   }
-              }]
+                ]
+              })
             }
-          }
-        ]})}}
+          ]
+        })
+        |> ReqLLM.Response.decode_response("openai:gpt-4.1-mini")
       end)
 
       user = insert(:user)

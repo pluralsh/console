@@ -117,7 +117,7 @@ defimpl Console.AI.PubSub.Vectorizable, for: Console.PubSub.ServiceComponentsUpd
           ]
         _ -> :ok
       end
-    end, ttl: :timer.minutes(10))
+    end, ttl: :timer.hours(1))
   end
   def resource(_), do: :ok
 end

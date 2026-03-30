@@ -40,6 +40,8 @@ defmodule Console.AI.Provider do
   - When using markdown in assistant messages, use backticks to format file, directory, function, and class names.
   """
 
+  @callback defaults() :: map
+
   @callback completion(struct, history, keyword) :: completion_result
 
   @callback tool_call(struct, history, [atom], keyword) :: {:ok, binary | tool_result} | error
@@ -76,10 +78,11 @@ defmodule Console.AI.Provider do
     end
   end
 
-  @decorate cacheable(cache: @local_cache, key: :context_window, ttl: :timer.minutes(30))
-  def context_window() do
+  @decorate cacheable(cache: @local_cache, key: {:context_window, client}, ttl: :timer.minutes(30))
+  def context_window(client \\ :default)
+  def context_window(client) do
     Settings.cached()
-    |> client()
+    |> client(client)
     |> case do
       {:ok, %mod{} = client} -> mod.context_window(client)
       _ -> @default_context_window
@@ -132,6 +135,14 @@ defmodule Console.AI.Provider do
 
   def summary(text), do: completion([{:user, text}], preface: @summary)
 
+  def defaults(:openai), do: OpenAI.defaults()
+  def defaults(:anthropic), do: Anthropic.defaults()
+  def defaults(:ollama), do: Ollama.defaults()
+  def defaults(:azure), do: Azure.defaults()
+  def defaults(:bedrock), do: Bedrock.defaults()
+  def defaults(:vertex), do: Vertex.defaults()
+  def defaults(:nexus), do: Nexus.defaults()
+
   defp embedding_client(%DeploymentSettings{ai: %AI{embedding_provider: p}} = settings) when not is_nil(p),
     do: client(put_in(settings.ai.provider, p))
   defp embedding_client(settings), do: client(settings)
@@ -144,8 +155,6 @@ defmodule Console.AI.Provider do
   defp client(settings, :embedding), do: embedding_client(settings)
   defp client(settings, _), do: client(settings)
 
-  defp client(%DeploymentSettings{ai: %AI{nexus: %{url: url} = nexus}}) when is_binary(url),
-    do: {:ok, Nexus.new(nexus)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :openai, openai: %{} = openai}}),
     do: {:ok, OpenAI.new(openai)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :anthropic, anthropic: %{} = anthropic}}),
@@ -158,6 +167,8 @@ defmodule Console.AI.Provider do
     do: {:ok, Bedrock.new(bedrock)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :vertex, vertex: %{} = vertex}}),
     do: {:ok, Vertex.new(vertex)}
+  defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :nexus, nexus: %{url: url} = nexus}}) when is_binary(url),
+    do: {:ok, Nexus.new(nexus)}
   defp client(_), do: {:error, "ai not enabled for this Plural Console instance"}
 
   defp handle_tool_calls([arg | _] = calls, tools) when is_map(arg) do

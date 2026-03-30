@@ -47,8 +47,7 @@ defmodule Console.Schema.Monitor do
   end
 
   def pollable(query \\ __MODULE__) do
-    now = DateTime.utc_now()
-    from(m in query, where: not is_nil(m.next_run_at) and m.next_run_at <= ^now)
+    from(m in query, where: not is_nil(m.next_run_at) and m.next_run_at <= ^DateTime.utc_now())
   end
 
   def ordered(query \\ __MODULE__, order \\ [asc: :next_run_at]) do

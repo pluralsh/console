@@ -2,7 +2,7 @@ defmodule Console.AI.Stream do
   alias Console.Schema.User
   alias ConsoleWeb.AIChannel
 
-  defstruct [:topic, role: :assistant, offset: 0, msg: 0]
+  defstruct [:topic, role: :assistant, offset: 0, msg: 0, index: 0, subagent: false]
 
   @stream {__MODULE__, :ai, :stream}
   @tool {__MODULE__, :ai, :tool}
@@ -15,6 +15,13 @@ defmodule Console.AI.Stream do
 
   def tool(id, name, pending \\ false), do: Process.put(@tool, %{id: id, name: name, pending: pending})
 
+  def subagent(enabled \\ true) do
+    case Process.get(@stream) do
+      %__MODULE__{} = s -> Process.put(@stream, %{s | subagent: enabled})
+      _ -> :ok
+    end
+  end
+
   def stream(role) do
     case Process.get(@stream) do
       %__MODULE__{} = s -> %{s | role: role}
@@ -25,9 +32,34 @@ defmodule Console.AI.Stream do
   def offset(ind) do
     Process.put(@tool, nil)
     case stream() do
-      %__MODULE__{offset: off, msg: msg} = s ->
-        Process.put(@stream, %{s | offset: off + ind + 1, msg: msg + 1})
+      %__MODULE__{offset: off, msg: msg, index: index} = s ->
+        Process.put(@stream, %{s | offset: off + max(ind, index) + 1, msg: msg + 1, index: 0})
       _ -> :ok
+    end
+  end
+
+  def publish(c) do
+    case stream() do
+      %__MODULE__{topic: topic, offset: offset, msg: msg, role: role, index: index, subagent: false} = s ->
+        Process.put(@stream, %{s | index: index + 1})
+        Absinthe.Subscription.publish(
+          ConsoleWeb.Endpoint,
+          %{content: c, seq: index + offset, message: msg, role: role, tool: tool()},
+          [ai_stream: topic]
+        )
+      _ -> {:error, :no_stream_configured}
+    end
+  end
+
+  def thought(tool_id, content) do
+    case stream() do
+      %__MODULE__{topic: topic} ->
+        Absinthe.Subscription.publish(
+          ConsoleWeb.Endpoint,
+          %{id: tool_id, content: content},
+          [ai_stream: "#{topic}:tool_thoughts"]
+        )
+      _ -> {:error, :no_stream_configured}
     end
   end
 

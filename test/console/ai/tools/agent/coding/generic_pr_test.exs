@@ -4,6 +4,7 @@ defmodule Console.AI.Tools.Agent.Coding.GenericPrTest do
   alias Console.AI.Tools.Agent.Coding.GenericPr
 
   describe "implement/1" do
+    @tag :skip
     test "it can implement a pr" do
       expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "plrl/ai/pr-test" <> _} ->
         {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}

@@ -385,6 +385,11 @@ defmodule Console.GraphQl.AI do
     field :tool,      :tool_delta
   end
 
+  object :tool_thought do
+    field :id,        non_null(:id)
+    field :content,   :string
+  end
+
   connection node_type: :chat
   connection node_type: :chat_thread
   connection node_type: :ai_pin
@@ -698,6 +703,16 @@ defmodule Console.GraphQl.AI do
           {:ok, topic: Stream.topic(:cost, id, user)}
         %{scope_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:freeform, id, user)}
+        _, _ -> {:error, "no id provided for this subscription"}
+      end
+    end
+
+    field :tool_thoughts, :tool_thought do
+      arg :thread_id, :id
+
+      config fn
+        %{thread_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
+          {:ok, topic: "#{Stream.topic(:thread, id, user)}:tool_thoughts"}
         _, _ -> {:error, "no id provided for this subscription"}
       end
     end

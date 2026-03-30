@@ -13,7 +13,7 @@ defmodule Console.AI.Agents.Pr do
   @spec exec(binary, binary) :: {:ok, Commit.t} | {:error, binary}
   def exec(dir, prompt) do
     tools(dir)
-    |> MemoryEngine.new(30, system_prompt: prompt(prompt))
+    |> MemoryEngine.new(30, system_prompt: prompt(prompt: prompt))
     |> MemoryEngine.reduce([{:user, @prompt}], &reducer/2)
     |> case do
       {:ok, %Commit{} = commit} -> {:ok, commit}
@@ -25,18 +25,8 @@ defmodule Console.AI.Agents.Pr do
   defp reducer(messages, _) do
     case Enum.find(messages, &match?(%Commit{}, &1)) do
       %Commit{} = commit -> {:halt, commit}
-      _ -> last_message(messages)
+      _ -> MemoryEngine.last_message(messages)
     end
-  end
-
-  defp last_message(messages) do
-    Enum.reverse(messages)
-    |> Enum.find(&match?({:assistant, content} when is_binary(content), &1))
-    |> case do
-      {:assistant, content} when is_binary(content) -> content
-      _ -> "no reason given for failure"
-    end
-    |> then(& {:cont, &1})
   end
 
   defp tools(dir) do

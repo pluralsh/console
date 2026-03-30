@@ -56,6 +56,13 @@ fragment JobSpecFragment on JobGateSpec {
     annotations
     serviceAccount
     requests { ...ContainerResourcesFragment }
+    nodeSelector
+    tolerations {
+        key
+        operator
+        value
+        effect
+    }
 }
 
 fragment ContainerResourcesFragment on ContainerResources {
@@ -74,6 +81,7 @@ fragment JobReferenceFragment on JobReference {
 }
 
 fragment ContainerSpecFragment on ContainerSpec {
+    name
     image
     args
     env {

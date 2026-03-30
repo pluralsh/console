@@ -124,7 +124,7 @@ type PrAutomationSpec struct {
 	Identifier *string `json:"identifier,omitempty"`
 
 	// Message defines the commit message template that will be used in the generated PR.
-	// Can include templated variables from user input.
+	// Can include templated variables from user input. If you're using an AI pr automation, the ai can provide this for you.
 	// +kubebuilder:validation:Optional
 	Message *string `json:"message,omitempty"`
 
@@ -134,7 +134,7 @@ type PrAutomationSpec struct {
 	Name *string `json:"name,omitempty"`
 
 	// Title defines the template for the pull request title. Can include variables
-	// that will be replaced with user-provided configuration values.
+	// that will be replaced with user-provided configuration values. If you're using an AI pr automation, the ai can provide this for you.
 	// +kubebuilder:validation:Optional
 	Title *string `json:"title,omitempty"`
 

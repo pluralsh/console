@@ -286,6 +286,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
   @desc "a shortform spec for job containers, designed for ease-of-use"
   object :container_spec do
+    field :name,      :string
     field :image,     non_null(:string)
     field :args,      list_of(:string)
     field :env,       list_of(:container_env)

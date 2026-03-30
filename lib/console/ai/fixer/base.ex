@@ -35,7 +35,7 @@ defmodule Console.AI.Fixer.Base do
   def svc_code_prompt(f, svc, opts \\ [])
   def svc_code_prompt(f, %Service{helm: %Service.Helm{}} = svc, opts) do
     subfolder = folder(svc)
-    too_large = floor(Provider.context_window() * (opts[:ctx_window_scale] || 0.5))
+    too_large = floor(Provider.context_window(:tool) * (opts[:ctx_window_scale] || 0.5))
     with {:ok, contents} <- Tar.tar_stream(f) do
       prompt = Enum.filter(contents, fn {k, val} -> !blacklist(k) and String.valid?(val, :fast_ascii) end)
                |> Enum.map(fn {p, content} -> {:user, maybe_encode(%{file: Path.join(subfolder, p), content: content})} end)

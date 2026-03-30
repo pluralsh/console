@@ -363,6 +363,51 @@ spec:
                         - ELASTIC
                         type: string
                     type: object
+                  nexus:
+                    description: Nexus holds configuration for using the Nexus embeddings
+                      proxy
+                    properties:
+                      embeddingModel:
+                        description: EmbeddingModel to use for generating embeddings
+                        type: string
+                      model:
+                        description: Model to use for completions
+                        type: string
+                      tokenSecretRef:
+                        description: |-
+                          TokenSecretRef is a reference to the local secret holding the access token
+                          for the Nexus proxy
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      toolModel:
+                        description: ToolModel to use for tool calling
+                        type: string
+                      url:
+                        description: URL is the URL of the Nexus proxy
+                        type: string
+                    required:
+                    - url
+                    type: object
                   ollama:
                     description: |-
                       Ollama holds configuration for a self-hosted Ollama deployment,
@@ -419,6 +464,16 @@ spec:
                         type: string
                       embeddingModel:
                         description: EmbeddingModel to use for generating embeddings
+                        type: string
+                      method:
+                        description: Method to use for openai api calls (defaults
+                          to auto, but can be used to restrict to only responses or
+                          chart completions apis, useful for configuring against common
+                          AI proxies)
+                        enum:
+                        - CHAT
+                        - RESPONSES
+                        - AUTO
                         type: string
                       model:
                         description: Model is the LLM model name to use.
@@ -649,7 +704,10 @@ spec:
                       to generate LLM insights
                     properties:
                       embeddingModel:
-                        description: EmbeddingModel to use for generating embeddings
+                        description: |-
+                          EmbeddingModel to use for generating embeddings.
+                          This should be a model listed currently on models.dev, for instance here: https://models.dev/?search=google-vertex.
+                          Default is gemini-embedding-001.
                         type: string
                       endpoint:
                         description: Endpoint is a custom endpoint for self-deployed
@@ -660,8 +718,9 @@ spec:
                           from
                         type: string
                       model:
-                        description: 'Model is the Vertex AI model to use.  Must support
-                          the OpenAI completions api, see: https://cloud.google.com/vertex-ai/generative-ai/docs/migrate/openai/overview'
+                        description: 'Model is the Vertex AI model to use. This should
+                          be a model listed currently on models.dev, for instance
+                          here: https://models.dev/?search=google-vertex'
                         type: string
                       project:
                         description: Project is the GCP project you'll be using
@@ -699,8 +758,10 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       toolModel:
-                        description: ToolModel to use for tool calling, which is less
-                          frequent and often requires more advanced reasoning
+                        description: 'ToolModel to use for tool calling, which is
+                          less frequent and often requires more advanced reasoning.
+                          This should be a model listed currently on models.dev, for
+                          instance here: https://models.dev/?search=google-vertex'
                         type: string
                     required:
                     - location
