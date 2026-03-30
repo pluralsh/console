@@ -1,4 +1,4 @@
-import { EmptyState, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { EmptyState, Flex } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
 import FractionalChip from 'components/utils/FractionalChip'
 import { SubtabDirectory, SubTabs } from 'components/utils/SubTabs'
@@ -6,13 +6,10 @@ import {
   ServiceDeploymentDetailsFragment,
   ServiceDeploymentStatus,
 } from 'generated/graphql'
-import { useCurrentFlow } from 'components/flows/hooks/useCurrentFlow'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo } from 'react'
-import { Navigate, Outlet, useMatch, useParams } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import {
-  CD_SERVICE_PATH_MATCHER_ABS,
-  FLOW_SERVICE_PATH_MATCHER_ABS,
   SERVICE_SETTINGS_CONTEXTS_REL_PATH,
   SERVICE_SETTINGS_DEPENDENCIES_REL_PATH,
   SERVICE_SETTINGS_GIT_REL_PATH,
@@ -21,7 +18,7 @@ import {
   SERVICE_SETTINGS_SECRETS_REL_PATH,
   SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH,
 } from 'routes/cdRoutesConsts'
-import { getServiceDetailsBreadcrumbs } from '../ServiceDetails'
+import { useServiceSubPageBreadcrumbs } from '../ServiceDetails'
 import { useServiceContext } from '../ServiceDetailsContext'
 
 type ServicePersonaType =
@@ -85,33 +82,9 @@ const getDirectory = ({
   ]
 }
 
-const getServiceSettingsBreadcrumbs = ({
-  cluster,
-  service,
-  flow,
-  tab,
-}: Parameters<typeof getServiceDetailsBreadcrumbs>[0]) => {
-  const detailsCrumbs = getServiceDetailsBreadcrumbs({
-    cluster,
-    service,
-    flow,
-  })
-  const detailsUrl = detailsCrumbs.at(-1)?.url
-  return [
-    ...detailsCrumbs,
-    { label: 'settings', url: `${detailsUrl}/settings` },
-    { label: tab ?? '', url: `${detailsUrl}/settings/${tab}` },
-  ]
-}
-
 export function ServiceSettings() {
   const ctx = useServiceContext()
-  const { serviceId } = useParams()
-  const { flowIdOrName, flowData } = useCurrentFlow()
-  const { tab } =
-    useMatch(
-      `${flowIdOrName ? FLOW_SERVICE_PATH_MATCHER_ABS : CD_SERVICE_PATH_MATCHER_ABS}/settings/:tab/*`
-    )?.params ?? {}
+  const { tab } = useServiceSubPageBreadcrumbs('settings')
 
   const personaType = useServicePersonaType()
 
@@ -120,18 +93,6 @@ export function ServiceSettings() {
       ctx.service ? getDirectory({ service: ctx.service, personaType }) : [],
     [ctx.service, personaType]
   )
-
-  const breadcrumbs = useMemo(
-    () =>
-      getServiceSettingsBreadcrumbs({
-        cluster: ctx.service?.cluster,
-        service: ctx.service ?? { id: serviceId ?? '' },
-        flow: flowData?.flow,
-        tab,
-      }),
-    [ctx.service, flowData?.flow, serviceId, tab]
-  )
-  useSetBreadcrumbs(breadcrumbs)
 
   if (
     personaType === 'secrets-only' &&

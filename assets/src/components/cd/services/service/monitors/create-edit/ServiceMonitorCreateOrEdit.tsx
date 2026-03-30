@@ -11,8 +11,12 @@ import { SidebarBtnSC } from 'components/workbenches/workbench/create-edit/Workb
 import { MonitorFragment, useMonitorDetailsQuery } from 'generated/graphql'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { SERVICE_MONITOR_PARAM_ID } from 'routes/cdRoutesConsts'
+import {
+  SERVICE_MONITOR_PARAM_ID,
+  SERVICE_OBSERVABILITY_REL_PATH,
+} from 'routes/cdRoutesConsts'
 import { styled, useTheme } from 'styled-components'
+import { useServiceSubPageBreadcrumbs } from '../../ServiceDetails'
 
 type ServiceMonitorStepKey = 'description' | 'threshold-config' | 'log-query'
 
@@ -21,6 +25,8 @@ export function ServiceMonitorCreateOrEdit({
 }: {
   mode: 'create' | 'edit'
 }) {
+  useServiceSubPageBreadcrumbs(SERVICE_OBSERVABILITY_REL_PATH)
+
   const id = useParams()[SERVICE_MONITOR_PARAM_ID] ?? ''
   const { data, loading, error } = useMonitorDetailsQuery({
     skip: !id || mode === 'create',
