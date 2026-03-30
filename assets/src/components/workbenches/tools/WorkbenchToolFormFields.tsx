@@ -79,6 +79,8 @@ export function WorkbenchToolFormFields({
       return render(type, AtlassianFormFields)
     case WorkbenchToolType.Linear:
       return render(type, LinearFormFields)
+    case WorkbenchToolType.Splunk:
+      return render(type, SplunkFormFields)
   }
 }
 
@@ -352,6 +354,41 @@ function LinearFormFields({
       value={c.accessToken ?? ''}
       onChange={(e) => set({ ...c, accessToken: e.target.value })}
     />
+  )
+}
+
+function SplunkFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Splunk>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        required
+        placeholder="Splunk base URL"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Username"
+        placeholder="Basic auth username"
+        value={c.username ?? ''}
+        onChange={(e) => set({ ...c, username: e.target.value || undefined })}
+      />
+      <InputField
+        label="Password"
+        revealer
+        value={c.password ?? ''}
+        onChange={(e) => set({ ...c, password: e.target.value || undefined })}
+      />
+      <InputField
+        label="Bearer token"
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value || undefined })}
+      />
+    </>
   )
 }
 

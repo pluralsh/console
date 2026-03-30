@@ -1,13 +1,7 @@
-import {
-  Button,
-  Flex,
-  IconFrame,
-  SidePanelOpenIcon,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { Flex, IconFrame, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Subtitle1H1 } from 'components/utils/typography/Text'
@@ -26,15 +20,15 @@ import {
   WORKBENCHES_TOOLS_PARAM_ID,
   WORKBENCHES_TOOLS_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { deepOmitBlank } from 'utils/graphql'
+import { getWorkbenchesBreadcrumbs } from '../Workbenches'
+import { WorkbenchToolForm, WorkbenchToolFormState } from './WorkbenchToolForm'
 import {
-  isConfigurableWorkbenchToolType,
   CONFIGURABLE_TOOL_TYPE_TO_CONFIG_KEY,
+  isConfigurableWorkbenchToolType,
   WorkbenchToolIcon,
 } from './workbenchToolsUtils'
-import { WorkbenchToolForm, WorkbenchToolFormState } from './WorkbenchToolForm'
-import { getWorkbenchesBreadcrumbs } from '../Workbenches'
 
 export const WORKBENCHES_TOOLS_TYPE_PARAM = 'type'
 
@@ -49,7 +43,7 @@ export function WorkbenchToolCreateOrEdit({
   mode: 'create' | 'edit'
 }) {
   const navigate = useNavigate()
-  const { borderRadiuses, borders } = useTheme()
+  // const { borderRadiuses, borders } = useTheme()
   const id = useParams()[WORKBENCHES_TOOLS_PARAM_ID]
   const [searchParams, setSearchParams] = useSearchParams()
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(mode), [mode]))
@@ -151,7 +145,8 @@ export function WorkbenchToolCreateOrEdit({
             onCancel={() => navigate(WORKBENCHES_TOOLS_ABS_PATH)}
             onSave={onSave}
           />
-          <Button
+          {/* TODO */}
+          {/* <Button
             secondary
             startIcon={<SidePanelOpenIcon />}
             css={{
@@ -161,7 +156,7 @@ export function WorkbenchToolCreateOrEdit({
             }}
           >
             Setup guide
-          </Button>
+          </Button> */}
         </Flex>
       )}
     </WrapperSC>
