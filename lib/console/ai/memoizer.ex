@@ -1,28 +1,7 @@
 defmodule Console.AI.Memoizer do
-  import Console.AI.Evidence.Base, only: [append: 2]
   alias Console.Repo
-  alias Console.AI.{Evidence, Provider, Tool, Chat.Engine}
+  alias Console.AI.{Evidence, Provider, Tool, Chat.Engine, Tools.Insight}
   alias Console.Schema.{Service, AiInsight, Stack, Cluster, ClusterInsightComponent, ServiceComponent}
-
-  @format {:user, """
-  Please format the result in the following way using markdown:
-
-  # Summary
-
-  {one paragraph summary of the issue described}
-
-  # Root Cause
-
-  {one paragraph summary of the root cause of the issue being faced}
-
-  # Key Evidence
-
-  {numbered list of supporting evidence for this root cause}
-
-  # Contextual Observations
-
-  {bulleted list of contextual information that also could be helpful}
-  """}
 
   @spec generate(struct) :: {:ok, AiInsight.t} | {:error, binary}
   def generate(model) do
@@ -66,10 +45,9 @@ defmodule Console.AI.Memoizer do
     end
   end
 
-  defp insight_attrs(%{insight_id: id} = model, history, attrs, sha) do
-    history = if Evidence.custom(model), do: history, else: append(history, @format)
+  defp insight_attrs(%{insight_id: id}, history, attrs, sha) do
     history = Engine.fit_context_window(history, Provider.system())
-    with {:ok, insight} <- Provider.completion(history),
+    with {:ok, insight} <- Provider.simple_tool_call(history, Insight),
          {:ok, summary} <- Provider.summary(insight) do
       %{
         ai_poll_at: next_poll_at(),

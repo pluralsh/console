@@ -4,12 +4,8 @@ import { useCallback, useMemo, useState } from 'react'
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
-import {
-  ActionToastInfo,
-  SimpleToastChip,
-} from 'components/utils/SimpleToastChip'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { Body2P, StrongSC } from 'components/utils/typography/Text'
 import { LogFacetInput, useLogAggregationQuery } from 'generated/graphql'
 import styled from 'styled-components'
 import { toISOStringOrUndef } from 'utils/datetime'
@@ -36,7 +32,7 @@ export function Logs({
   serviceId?: string
   clusterId?: string
 }) {
-  const [toast, setToast] = useState<ActionToastInfo | null>(null)
+  const { popToast } = useSimpleToast()
 
   const [labels, setLabels] = useState<LogFacetInput[]>([])
   const [q, setQ] = useState('')
@@ -81,13 +77,17 @@ export function Logs({
 
   const addLabel = useCallback(
     (key: string, value: string) => {
-      if (!labels.some((l) => l.key === key)) {
-        setLabels([...labels, { key, value }])
-        setToast({ name: key, action: 'added', color: 'icon-success' })
-      } else
-        setToast({ name: key, action: 'already added', color: 'icon-danger' })
+      const alreadyAdded = labels.some((l) => l.key === key)
+      if (!alreadyAdded) setLabels([...labels, { key, value }])
+      popToast({
+        prefix: 'Filter',
+        name: key,
+        action: alreadyAdded ? 'already added' : 'added',
+        color: alreadyAdded ? 'icon-danger' : 'icon-success',
+        delayTimeout: 2000,
+      })
     },
-    [labels, setLabels]
+    [labels, popToast]
   )
   const removeLabel = useCallback(
     (key: string) => setLabels(labels.filter((l) => l.key !== key)),
@@ -180,17 +180,6 @@ export function Logs({
             </Flex>
           ))}
       </Flex>
-      <SimpleToastChip
-        key={JSON.stringify(toast)}
-        show={!!toast}
-        delayTimeout={2000}
-        onClose={() => setToast(null)}
-      >
-        <Body2P $color="text-light">
-          Filter <StrongSC $color="text">{toast?.name}</StrongSC>{' '}
-          <StrongSC $color={toast?.color}>{toast?.action}</StrongSC>
-        </Body2P>
-      </SimpleToastChip>
     </MainContentWrapperSC>
   )
 }

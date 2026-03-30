@@ -33,7 +33,7 @@ defmodule Console.AI.PubSub.Vector.Consumer do
   def insert(%Indexable{data: res, filters: fs}) do
     Console.debounce({:vectorizer, :erlang.phash2({res, fs})}, fn ->
       VectorStore.insert(res, filters: fs)
-    end)
+    end, ttl: :timer.hours(5))
   end
 
   def insert(pass), do: pass

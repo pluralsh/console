@@ -62,6 +62,7 @@ export function ChatbotPanelThread({
   )
   useAiChatStreamSubscription({
     variables: { threadId },
+    ignoreResults: true,
     onData: ({ data: { data } }) => {
       setStreaming(true)
       const newDelta = data?.aiStream

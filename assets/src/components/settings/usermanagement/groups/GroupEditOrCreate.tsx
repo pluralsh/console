@@ -3,7 +3,6 @@ import {
   Flex,
   ReturnIcon,
   SearchIcon,
-  SemanticColorKey,
   Spinner,
   Switch,
   ValidatedInput,
@@ -22,16 +21,12 @@ import {
 
 import { GqlError } from '../../../utils/Alert'
 
+import { BindingInput } from 'components/utils/BindingInput'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
 import { GroupMembers } from './GroupMembers'
 import { GROUP_CREATE_ID_KEY, GroupEditT } from './Groups'
-import {
-  ActionToastInfo,
-  SimpleToastChip,
-} from 'components/utils/SimpleToastChip'
-import { Body2BoldP } from 'components/utils/typography/Text'
-import { BindingInput } from 'components/utils/BindingInput'
 
 export function GroupEditOrCreate({
   group,
@@ -42,8 +37,8 @@ export function GroupEditOrCreate({
 }) {
   const { colors } = useTheme()
   const isCreating = group === GROUP_CREATE_ID_KEY
+  const { popToast } = useSimpleToast()
 
-  const [toast, setToast] = useState<ActionToastInfo | null>(null)
   const [newGroupUsers, setNewGroupUsers] = useState<UserFragment[]>([])
 
   const { state, update, hasUpdates } = useUpdateState(
@@ -53,19 +48,13 @@ export function GroupEditOrCreate({
 
   const allowSubmit = hasUpdates && !!name
 
-  const popToast = (
-    name: Nullable<string>,
-    action: string,
-    color: SemanticColorKey
-  ) => setToast({ name, action, color })
-
   const [
     createGroup,
     { loading: createGroupLoading, error: createGroupError },
   ] = useCreateGroupMutation({
     onCompleted: ({ createGroup }) => {
       setGroupEdit(createGroup)
-      popToast(createGroup?.name, 'created', 'icon-info')
+      popToast({ name, action: 'created', color: 'icon-info' })
     },
     refetchQueries: ['Groups'],
   })
@@ -74,8 +63,9 @@ export function GroupEditOrCreate({
     { loading: updateGroupLoading, error: updateGroupError },
   ] = useUpdateGroupMutation({
     onCompleted: ({ updateGroup }) => {
+      const name = updateGroup?.name ?? 'Group'
       setGroupEdit(updateGroup)
-      popToast(updateGroup?.name, 'updated', 'icon-info')
+      popToast({ name, action: 'updated', color: 'icon-info' })
     },
     refetchQueries: ['Groups'],
   })
@@ -84,7 +74,11 @@ export function GroupEditOrCreate({
     { loading: createGroupMemberLoading, error: createGroupMemberError },
   ] = useCreateGroupMemberMutation({
     onCompleted: ({ createGroupMember }) =>
-      popToast(createGroupMember?.user?.name, 'added', 'icon-success'),
+      popToast({
+        name: createGroupMember?.user?.name ?? undefined,
+        action: 'added',
+        color: 'icon-success',
+      }),
     refetchQueries: ['GroupMembers'],
     awaitRefetchQueries: true,
   })
@@ -152,7 +146,6 @@ export function GroupEditOrCreate({
             addMember={addMember}
             removeMember={removeMember}
             newGroupUsers={newGroupUsers}
-            popToast={popToast}
           />
         </>
       )}
@@ -184,15 +177,6 @@ export function GroupEditOrCreate({
           {isCreating ? 'Create group' : 'Save'}
         </Button>
       </Flex>
-      <SimpleToastChip
-        key={JSON.stringify(toast)}
-        show={!!toast}
-        delayTimeout={2500}
-        onClose={() => setToast(null)}
-      >
-        {toast?.name}{' '}
-        <Body2BoldP $color={toast?.color}>{toast?.action}</Body2BoldP>
-      </SimpleToastChip>
     </Flex>
   )
 }

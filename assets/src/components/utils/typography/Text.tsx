@@ -27,6 +27,10 @@ export const CaptionP = styled.p<TextProps>((props) => ({
   ...props.theme.partials.text.caption,
   ...sharedTextStyles(props),
 }))
+export const ButtonSmallP = styled.p<TextProps>((props) => ({
+  ...props.theme.partials.text.buttonSmall,
+  ...sharedTextStyles(props),
+}))
 export const BadgeLabelP = styled.p<TextProps>((props) => ({
   ...props.theme.partials.text.badgeLabel,
   ...sharedTextStyles(props),
@@ -42,11 +46,11 @@ export const OverlineH3 = styled.h3<TextProps>((props) => ({
   ...props.theme.partials.text.overline,
   ...sharedTextStyles(props),
 }))
-export const Subtitle1H1 = styled.h1<TextProps>((props) => ({
+export const Subtitle1H1 = styled.h2<TextProps>((props) => ({
   ...props.theme.partials.text.subtitle1,
   ...sharedTextStyles(props),
 }))
-export const Subtitle2H1 = styled.h1<TextProps>((props) => ({
+export const Subtitle2H1 = styled.h3<TextProps>((props) => ({
   ...props.theme.partials.text.subtitle2,
   ...sharedTextStyles(props),
 }))

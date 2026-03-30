@@ -18826,7 +18826,11 @@ export type WorkbenchJobResultFragment = { __typename?: 'WorkbenchJobResult', id
 
 export type WorkbenchJobTinyFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus };
 
-export type WorkbenchJobFragment = { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null };
+export type WorkbenchJobActivityFragment = { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null> | null, agentRun?: { __typename?: 'AgentRun', id: string, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null };
+
+export type WorkbenchJobProgressFragment = { __typename?: 'WorkbenchJobProgress', activityId: string, tool?: string | null, text?: string | null, arguments?: Record<string, unknown> | null };
+
+export type WorkbenchJobFragment = { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null };
 
 export type WorkbenchesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -18859,7 +18863,35 @@ export type WorkbenchJobQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null } | null };
+export type WorkbenchJobQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null } | null };
+
+export type WorkbenchJobActivitiesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchJobActivitiesQuery = { __typename?: 'RootQueryType', workbenchJob?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, activities?: { __typename?: 'WorkbenchJobActivityConnection', edges?: Array<{ __typename?: 'WorkbenchJobActivityEdge', node?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null> | null, agentRun?: { __typename?: 'AgentRun', id: string, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null } | null } | null> | null } | null } | null };
+
+export type WorkbenchJobDeltaSubscriptionVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchJobDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobDelta?: { __typename?: 'WorkbenchJobDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null } | null } | null };
+
+export type WorkbenchJobActivityDeltaSubscriptionVariables = Exact<{
+  jobId: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchJobActivityDeltaSubscription = { __typename?: 'RootSubscriptionType', workbenchJobActivityDelta?: { __typename?: 'WorkbenchJobActivityDelta', delta?: Delta | null, payload?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null> | null, agentRun?: { __typename?: 'AgentRun', id: string, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null } | null } | null };
+
+export type WorkbenchJobProgressSubscriptionVariables = Exact<{
+  jobId: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchJobProgressSubscription = { __typename?: 'RootSubscriptionType', workbenchJobProgress?: { __typename?: 'WorkbenchJobProgress', activityId: string, tool?: string | null, text?: string | null, arguments?: Record<string, unknown> | null } | null };
 
 export type WorkbenchToolsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -23659,6 +23691,66 @@ export const WorkbenchFragmentDoc = gql`
     ${WorkbenchTinyFragmentDoc}
 ${WorkbenchToolFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
+export const WorkbenchJobActivityFragmentDoc = gql`
+    fragment WorkbenchJobActivity on WorkbenchJobActivity {
+  id
+  type
+  status
+  prompt
+  insertedAt
+  result {
+    output
+    jobUpdate {
+      diff
+      workingTheory
+      conclusion
+    }
+    logs {
+      timestamp
+      message
+      labels
+    }
+    metrics {
+      timestamp
+      name
+      value
+      labels
+    }
+  }
+  thoughts {
+    id
+    content
+    insertedAt
+    attributes {
+      logs {
+        timestamp
+        message
+        labels
+      }
+      metrics {
+        timestamp
+        name
+        value
+        labels
+      }
+    }
+  }
+  agentRun {
+    id
+    pullRequests {
+      ...PullRequestBasic
+    }
+  }
+}
+    ${PullRequestBasicFragmentDoc}`;
+export const WorkbenchJobProgressFragmentDoc = gql`
+    fragment WorkbenchJobProgress on WorkbenchJobProgress {
+  activityId
+  tool
+  text
+  arguments
+}
+    `;
 export const WorkbenchJobTinyFragmentDoc = gql`
     fragment WorkbenchJobTiny on WorkbenchJob {
   id
@@ -23694,6 +23786,11 @@ export const WorkbenchJobResultFragmentDoc = gql`
 export const WorkbenchJobFragmentDoc = gql`
     fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
+  insertedAt
+  workbench {
+    id
+    name
+  }
   error
   result {
     ...WorkbenchJobResult
@@ -39156,6 +39253,153 @@ export type WorkbenchJobQueryHookResult = ReturnType<typeof useWorkbenchJobQuery
 export type WorkbenchJobLazyQueryHookResult = ReturnType<typeof useWorkbenchJobLazyQuery>;
 export type WorkbenchJobSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobSuspenseQuery>;
 export type WorkbenchJobQueryResult = Apollo.QueryResult<WorkbenchJobQuery, WorkbenchJobQueryVariables>;
+export const WorkbenchJobActivitiesDocument = gql`
+    query WorkbenchJobActivities($id: ID!) {
+  workbenchJob(id: $id) {
+    id
+    prompt
+    activities(first: 100) {
+      edges {
+        node {
+          ...WorkbenchJobActivity
+        }
+      }
+    }
+  }
+}
+    ${WorkbenchJobActivityFragmentDoc}`;
+
+/**
+ * __useWorkbenchJobActivitiesQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchJobActivitiesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobActivitiesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchJobActivitiesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchJobActivitiesQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchJobActivitiesQuery, WorkbenchJobActivitiesQueryVariables> & ({ variables: WorkbenchJobActivitiesQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchJobActivitiesQuery, WorkbenchJobActivitiesQueryVariables>(WorkbenchJobActivitiesDocument, options);
+      }
+export function useWorkbenchJobActivitiesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchJobActivitiesQuery, WorkbenchJobActivitiesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchJobActivitiesQuery, WorkbenchJobActivitiesQueryVariables>(WorkbenchJobActivitiesDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchJobActivitiesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchJobActivitiesQuery, WorkbenchJobActivitiesQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobActivitiesQuery, WorkbenchJobActivitiesQueryVariables>;
+export function useWorkbenchJobActivitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobActivitiesQuery, WorkbenchJobActivitiesQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchJobActivitiesQuery | undefined, WorkbenchJobActivitiesQueryVariables>;
+export function useWorkbenchJobActivitiesSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchJobActivitiesQuery, WorkbenchJobActivitiesQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchJobActivitiesQuery, WorkbenchJobActivitiesQueryVariables>(WorkbenchJobActivitiesDocument, options);
+        }
+export type WorkbenchJobActivitiesQueryHookResult = ReturnType<typeof useWorkbenchJobActivitiesQuery>;
+export type WorkbenchJobActivitiesLazyQueryHookResult = ReturnType<typeof useWorkbenchJobActivitiesLazyQuery>;
+export type WorkbenchJobActivitiesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobActivitiesSuspenseQuery>;
+export type WorkbenchJobActivitiesQueryResult = Apollo.QueryResult<WorkbenchJobActivitiesQuery, WorkbenchJobActivitiesQueryVariables>;
+export const WorkbenchJobDeltaDocument = gql`
+    subscription WorkbenchJobDelta($id: ID!) {
+  workbenchJobDelta(id: $id) {
+    delta
+    payload {
+      ...WorkbenchJob
+    }
+  }
+}
+    ${WorkbenchJobFragmentDoc}`;
+
+/**
+ * __useWorkbenchJobDeltaSubscription__
+ *
+ * To run a query within a React component, call `useWorkbenchJobDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchJobDeltaSubscription({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchJobDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<WorkbenchJobDeltaSubscription, WorkbenchJobDeltaSubscriptionVariables> & ({ variables: WorkbenchJobDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<WorkbenchJobDeltaSubscription, WorkbenchJobDeltaSubscriptionVariables>(WorkbenchJobDeltaDocument, options);
+      }
+export type WorkbenchJobDeltaSubscriptionHookResult = ReturnType<typeof useWorkbenchJobDeltaSubscription>;
+export type WorkbenchJobDeltaSubscriptionResult = Apollo.SubscriptionResult<WorkbenchJobDeltaSubscription>;
+export const WorkbenchJobActivityDeltaDocument = gql`
+    subscription WorkbenchJobActivityDelta($jobId: ID!) {
+  workbenchJobActivityDelta(jobId: $jobId) {
+    delta
+    payload {
+      ...WorkbenchJobActivity
+    }
+  }
+}
+    ${WorkbenchJobActivityFragmentDoc}`;
+
+/**
+ * __useWorkbenchJobActivityDeltaSubscription__
+ *
+ * To run a query within a React component, call `useWorkbenchJobActivityDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobActivityDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchJobActivityDeltaSubscription({
+ *   variables: {
+ *      jobId: // value for 'jobId'
+ *   },
+ * });
+ */
+export function useWorkbenchJobActivityDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<WorkbenchJobActivityDeltaSubscription, WorkbenchJobActivityDeltaSubscriptionVariables> & ({ variables: WorkbenchJobActivityDeltaSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<WorkbenchJobActivityDeltaSubscription, WorkbenchJobActivityDeltaSubscriptionVariables>(WorkbenchJobActivityDeltaDocument, options);
+      }
+export type WorkbenchJobActivityDeltaSubscriptionHookResult = ReturnType<typeof useWorkbenchJobActivityDeltaSubscription>;
+export type WorkbenchJobActivityDeltaSubscriptionResult = Apollo.SubscriptionResult<WorkbenchJobActivityDeltaSubscription>;
+export const WorkbenchJobProgressDocument = gql`
+    subscription WorkbenchJobProgress($jobId: ID!) {
+  workbenchJobProgress(jobId: $jobId) {
+    ...WorkbenchJobProgress
+  }
+}
+    ${WorkbenchJobProgressFragmentDoc}`;
+
+/**
+ * __useWorkbenchJobProgressSubscription__
+ *
+ * To run a query within a React component, call `useWorkbenchJobProgressSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchJobProgressSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchJobProgressSubscription({
+ *   variables: {
+ *      jobId: // value for 'jobId'
+ *   },
+ * });
+ */
+export function useWorkbenchJobProgressSubscription(baseOptions: Apollo.SubscriptionHookOptions<WorkbenchJobProgressSubscription, WorkbenchJobProgressSubscriptionVariables> & ({ variables: WorkbenchJobProgressSubscriptionVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<WorkbenchJobProgressSubscription, WorkbenchJobProgressSubscriptionVariables>(WorkbenchJobProgressDocument, options);
+      }
+export type WorkbenchJobProgressSubscriptionHookResult = ReturnType<typeof useWorkbenchJobProgressSubscription>;
+export type WorkbenchJobProgressSubscriptionResult = Apollo.SubscriptionResult<WorkbenchJobProgressSubscription>;
 export const WorkbenchToolsDocument = gql`
     query WorkbenchTools($first: Int = 100, $after: String, $q: String) {
   workbenchTools(first: $first, after: $after, q: $q) {
@@ -39700,6 +39944,7 @@ export const namedOperations = {
     Workbench: 'Workbench',
     WorkbenchJobs: 'WorkbenchJobs',
     WorkbenchJob: 'WorkbenchJob',
+    WorkbenchJobActivities: 'WorkbenchJobActivities',
     WorkbenchTools: 'WorkbenchTools',
     WorkbenchTool: 'WorkbenchTool'
   },
@@ -39861,7 +40106,10 @@ export const namedOperations = {
     AgentRunChat: 'AgentRunChat',
     AgentRunDelta: 'AgentRunDelta',
     AIChatStream: 'AIChatStream',
-    LogsDelta: 'LogsDelta'
+    LogsDelta: 'LogsDelta',
+    WorkbenchJobDelta: 'WorkbenchJobDelta',
+    WorkbenchJobActivityDelta: 'WorkbenchJobActivityDelta',
+    WorkbenchJobProgress: 'WorkbenchJobProgress'
   },
   Fragment: {
     AgentRunTiny: 'AgentRunTiny',
@@ -40145,6 +40393,8 @@ export const namedOperations = {
     WorkbenchJobResultTodo: 'WorkbenchJobResultTodo',
     WorkbenchJobResult: 'WorkbenchJobResult',
     WorkbenchJobTiny: 'WorkbenchJobTiny',
+    WorkbenchJobActivity: 'WorkbenchJobActivity',
+    WorkbenchJobProgress: 'WorkbenchJobProgress',
     WorkbenchJob: 'WorkbenchJob'
   }
 }

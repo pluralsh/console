@@ -5,6 +5,28 @@
             "type": "string",
             "description": "The conclusion to this workbench job you want to record"
         },
+        "todos": {
+            "type": "array",
+            "description": "The todos to update.  Pass these if there's still a todo to mark as done",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the todo"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "The description of the todo"
+                    },
+                    "done": {
+                        "type": "boolean",
+                        "description": "Whether the todo is done"
+                    }
+                },
+                "required": ["name", "description", "done"]
+            }
+        },
         "metrics": {
             "type": "array",
             "description": "Key metrics relevant to the conclusion to persist on the final result",

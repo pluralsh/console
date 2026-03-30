@@ -31,7 +31,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 
 import { useChatbot } from 'components/ai/AIContext'
 import { getServiceComponentPath } from 'routes/cdRoutesConsts'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import { ButtonGroup } from '../../../utils/ButtonGroup.tsx'
 import { ComponentList } from './component/ComponentList.tsx'
@@ -99,8 +99,8 @@ export function ServiceComponents() {
         scrollable
         heading={headingContent ?? 'Components'}
         headingContent={
-          <ArrowScroll>
-            <FiltersWrapperSC>
+          <ArrowScroll css={{ width: 'fit-content' }}>
+            <Flex gap="medium">
               {!filtersHidden && (
                 <>
                   <IconExpander
@@ -155,7 +155,7 @@ export function ServiceComponents() {
                   Chat with {service.name}
                 </Button>
               )}
-            </FiltersWrapperSC>
+            </Flex>
           </ArrowScroll>
         }
       >
@@ -182,14 +182,6 @@ export function ServiceComponents() {
     </ServiceComponentsContext>
   )
 }
-
-const FiltersWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  overflowX: 'auto',
-  width: '100%',
-  gap: theme.spacing.medium,
-  paddingRight: theme.spacing.large,
-}))
 
 function ComponentsViewSwitch({ tab, setTab }): ReactNode {
   return (

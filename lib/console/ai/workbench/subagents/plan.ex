@@ -25,7 +25,7 @@ defmodule Console.AI.Workbench.Subagents.Plan do
     case Enum.find(messages, &match?(%Plan{}, &1)) do
       %Plan{todos: todos} -> {:halt, %{
         status: :running,
-        result: %{todos: Enum.map(todos, &Map.take(&1, [:title, :description, :done]))}
+        result: %{todos: Enum.map(todos, &Map.take(&1, [:name, :description, :done]))}
       }}
       _ -> last_message(messages, & {:cont, %{status: :failed, error: &1}})
     end

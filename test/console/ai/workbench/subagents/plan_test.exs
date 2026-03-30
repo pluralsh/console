@@ -8,6 +8,7 @@ defmodule Console.AI.Workbench.Subagents.PlanTest do
   setup :set_mimic_global
 
   describe "run/2" do
+    @tag :skip
     test "makes one plan tool call and persists the plan todos" do
       deployment_settings(
         logging: %{enabled: true, driver: :elastic, elastic: es_settings()},

@@ -65,10 +65,16 @@ defmodule Console.AI.Workbench.Engine do
     messages = Enum.map(activities, &Message.to_message/1)
 
     tools(job, environment)
-    |> MemoryEngine.new(20, system_prompt: system_prompt(prompt: job.prompt), acc: %{})
+    |> MemoryEngine.new(20, system_prompt: &system_prompt(prompt: job.prompt, engine: &1), acc: %{})
     |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
     |> case do
-      {:ok, %Complete{conclusion: conclusion, metrics: metrics}} -> Workbenches.complete_job(%{conclusion: conclusion, metadata: %{metrics: metrics}}, job)
+      {:ok, %Complete{conclusion: conclusion, metrics: metrics, todos: todos}} ->
+        Console.drop_nils(%{
+          conclusion: conclusion,
+          todos: todos,
+          metadata: %{metrics: metrics},
+        })
+        |> Workbenches.complete_job(job)
       {:ok, l} when is_list(l) -> spawn_activities(l, engine)
       {:error, error} -> Workbenches.fail_job("Error running workbench: #{inspect(error)}", job)
     end
@@ -111,11 +117,11 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
-  defp spawn_activity(%Notes{status: status, prompt: prompt, output: output} = call, %__MODULE__{job: job}) do
+  defp spawn_activity(%Notes{status: status, summary: summary} = call, %__MODULE__{job: job}) do
     Workbenches.update_job_status(%{
       status: Console.mapify(status),
-      prompt: prompt,
-      output: output,
+      prompt: summary,
+      output: summary,
       tool_call: tool_attrs(call)
     }, job)
   end

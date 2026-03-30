@@ -136,7 +136,7 @@ function TabList({
   return (
     <WrapWithIf
       condition={scrollable}
-      wrapper={<ArrowScroll css={{ minHeight: 'max-content' }} />}
+      wrapper={<ArrowScroll />}
     >
       <Flex
         {...tabListProps}
@@ -145,12 +145,7 @@ function TabList({
         alignItems={
           stateProps.orientation === 'vertical' ? 'flex-start' : 'flex-end'
         }
-        css={{
-          ...(scrollable && {
-            overflow: 'auto',
-            whiteSpace: 'nowrap',
-          }),
-        }}
+        css={{ ...(scrollable && { whiteSpace: 'nowrap' }) }}
         ref={mergedRef as any}
       >
         {tabChildren}

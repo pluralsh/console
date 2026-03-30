@@ -1,0 +1,15 @@
+## Summary
+
+<%= @summary %>
+
+## Root Cause
+
+<%= @root_cause %>
+
+## Key Evidence
+
+<%= Enum.map(@key_evidence, &"* #{&1}") |> Enum.join("\n") %>
+
+## Contextual Observations
+
+<%= Enum.map(@contextual_observations, &"* #{&1}") |> Enum.join("\n") %>

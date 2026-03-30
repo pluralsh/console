@@ -1,10 +1,11 @@
 defmodule Console.AI.Tools.Workbench.Complete do
   use Console.AI.Tools.Workbench.Base
-  alias Console.Schema.WorkbenchJobActivity
+  alias Console.Schema.{WorkbenchJobActivity, WorkbenchJobResult}
   alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.Metric
 
   embedded_schema do
     field :conclusion, :string
+    embeds_many :todos, WorkbenchJobResult.Todo, on_replace: :delete
     embeds_many :metrics, Metric, on_replace: :delete
   end
 
@@ -18,6 +19,7 @@ defmodule Console.AI.Tools.Workbench.Complete do
     model
     |> cast(attrs, [:conclusion])
     |> cast_embed(:metrics, with: &WorkbenchJobActivity.metric_changeset/2)
+    |> cast_embed(:todos, with: &WorkbenchJobResult.todo_changeset/2)
     |> validate_required([:conclusion])
   end
 

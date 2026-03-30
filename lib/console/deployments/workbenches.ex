@@ -278,7 +278,7 @@ defmodule Console.Deployments.Workbenches do
         result: %{
           output: output,
           job_update: %{
-            diff: TextDiff.format(result.working_theory, status[:working_theory], color: true)
+            diff: TextDiff.format(result.working_theory || "", status[:working_theory] || "", color: true)
                   |> IO.iodata_to_binary(),
             working_theory: status[:working_theory]
           }

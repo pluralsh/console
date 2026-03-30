@@ -1,8 +1,10 @@
+import type { DocumentNode } from 'graphql'
 import isString from 'lodash/isString'
 import uniqWith from 'lodash/uniqWith'
 
+import { ApolloCache, type Unmasked } from '@apollo/client'
+import { isEmpty, isNil } from 'lodash'
 import { isNonNullable } from './isNonNullable'
-import { isEmpty } from 'lodash'
 
 export function updateFragment(cache, { fragment, id, update, fragmentName }) {
   const current = cache.readFragment({ id, fragment, fragmentName })
@@ -156,12 +158,23 @@ export function removeConnection(prev, val, key) {
   }
 }
 
-export function updateCache(cache, { query, variables, update }: any) {
-  const prev = cache.readQuery({ query, variables })
+export function updateCache<TQuery>(
+  cache: ApolloCache<object>,
+  {
+    query,
+    variables,
+    update,
+  }: {
+    query: DocumentNode
+    variables?: any
+    update: (prev: Unmasked<TQuery>) => Unmasked<TQuery>
+  }
+) {
+  const prev = cache.readQuery<TQuery>({ query, variables })
 
   if (!prev) return
 
-  cache.writeQuery({ query, variables, data: update(prev) })
+  cache.writeQuery<TQuery>({ query, variables, data: update(prev) })
 }
 
 export const prune = ({ __typename, ...rest }) => rest
@@ -196,27 +209,43 @@ export function mapExistingNodes<N>(connection?: Connection<N> | null) {
   return (edges || []).map((edge) => edge?.node).filter(isNonNullable)
 }
 
-// strips __typename's and removes any value in an object where isEmpty is true (except for booleans)
-export function deepOmitFalsy<T extends Nullable<Record<string, any>>>(
-  obj: T
+// shared recursive cleaner: strips __typename and omits values matching the predicate
+function deepClean<T extends Nullable<Record<string, any>>>(
+  obj: T,
+  shouldOmit: (value: unknown) => boolean
 ): T {
   if (obj == null || typeof obj !== 'object' || Array.isArray(obj)) return obj
 
-  const result = {} as Record<string, any>
+  const result = {} as Record<string, unknown>
   for (const [key, value] of Object.entries(obj)) {
     if (key === '__typename') continue
-    let processedVal = value
-    // process arrays and objects recursively, then check final reduced value
-    if (Array.isArray(value))
-      processedVal = value
-        .map((item) => deepOmitFalsy(item))
-        .filter((item) => !isEmpty(item))
-    else if (value && typeof value === 'object')
-      processedVal = deepOmitFalsy(value)
 
-    if (!isEmpty(processedVal) || typeof processedVal === 'boolean')
-      result[key] = processedVal
+    let processed = value
+    if (Array.isArray(value))
+      processed = value
+        .map((item) =>
+          item && typeof item === 'object' ? deepClean(item, shouldOmit) : item
+        )
+        .filter((item) => !shouldOmit(item))
+    else if (value && typeof value === 'object')
+      processed = deepClean(value, shouldOmit)
+
+    if (!shouldOmit(processed)) result[key] = processed
   }
 
   return result as T
 }
+
+// strips just __typename's, null/undefined, and empty strings recursively.
+export const deepOmitBlank = <T extends Nullable<Record<string, any>>>(
+  obj: T
+): Partial<T> => deepClean(obj, (v) => isNil(v) || v === '')
+
+// strips __typename's and removes any value in an object where isEmpty is true (except for booleans and numbers)
+export const deepOmitFalsy = <T extends Nullable<Record<string, any>>>(
+  obj: T
+): Partial<T> =>
+  deepClean(
+    obj,
+    (v) => isEmpty(v) && typeof v !== 'boolean' && typeof v !== 'number'
+  )

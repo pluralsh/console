@@ -129,13 +129,24 @@ defmodule Console.AI.PubSub.ConsumerSyncTest do
       stack = insert(:stack, repository: git)
       run   = insert(:stack_run, status: :pending_approval, stack: stack, repository: git, git: %{ref: "master", folder: "plural/terraform/aws"})
       state = insert(:stack_state, run: run, plan: "some large plan")
-      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :tool_call, fn _, _, [_], _ ->
+        {:ok, [%Console.AI.Tool{
+          name: "plural_insight",
+          arguments: %{
+            "summary" => "summary",
+            "root_cause" => "root cause",
+            "key_evidence" => ["key evidence"],
+            "contextual_observations" => ["contextual observations"]
+          }
+        }]}
+      end)
+      expect(Console.AI.OpenAI, :completion, fn _, _, _ -> {:ok, "openai completion"} end)
 
       event = %PubSub.StackRunUpdated{item: run}
       {:ok, res} = Consumer.handle_event(event)
 
       assert res.id == refetch(state).insight_id
-      assert res.text == "openai completion"
+      assert is_binary(res.text)
     end
 
     test "it will figure out what a terraform plan does for pr runs too" do
@@ -149,13 +160,24 @@ defmodule Console.AI.PubSub.ConsumerSyncTest do
         pull_request: insert(:pull_request)
       )
       state = insert(:stack_state, run: run, plan: "some large plan")
-      expect(Console.AI.OpenAI, :completion, 2, fn _, _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :tool_call, fn _, _, [_], _ ->
+        {:ok,  [%Console.AI.Tool{
+          name: "plural_insight",
+          arguments: %{
+            "summary" => "summary",
+            "root_cause" => "root cause",
+            "key_evidence" => ["key evidence"],
+            "contextual_observations" => ["contextual observations"]
+          }
+        }]}
+      end)
+      expect(Console.AI.OpenAI, :completion, fn _, _, _ -> {:ok, "openai completion"} end)
 
       event = %PubSub.StackRunUpdated{item: run}
       {:ok, res} = Consumer.handle_event(event)
 
       assert res.id == refetch(state).insight_id
-      assert res.text == "openai completion"
+      assert is_binary(res.text)
 
       assert_receive {:event, %PubSub.StackStateInsight{item: {_, ^res}}}
     end
