@@ -55,6 +55,17 @@ defmodule Toolquery.TempoConnection do
   field :password, 5, proto3_optional: true, type: :string
 end
 
+defmodule Toolquery.SplunkConnection do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :url, 1, type: :string
+  field :token, 2, proto3_optional: true, type: :string
+  field :username, 3, proto3_optional: true, type: :string
+  field :password, 4, proto3_optional: true, type: :string
+end
+
 defmodule Toolquery.ToolConnection do
   @moduledoc false
 
@@ -67,6 +78,7 @@ defmodule Toolquery.ToolConnection do
   field :prometheus, 3, type: Toolquery.PrometheusConnection, oneof: 0
   field :loki, 4, type: Toolquery.LokiConnection, oneof: 0
   field :tempo, 5, type: Toolquery.TempoConnection, oneof: 0
+  field :splunk, 6, type: Toolquery.SplunkConnection, oneof: 0
 end
 
 defmodule Toolquery.TimeRange do

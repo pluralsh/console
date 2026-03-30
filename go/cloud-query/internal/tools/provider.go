@@ -40,6 +40,8 @@ func newLogsProvider(conn *toolquery.ToolConnection) (LogsProvider, error) {
 		return NewLokiProvider(provider.Loki), nil
 	case *toolquery.ToolConnection_Datadog:
 		return NewDatadogProvider(provider.Datadog), nil
+	case *toolquery.ToolConnection_Splunk:
+		return NewSplunkProvider(provider.Splunk), nil
 	default:
 		return nil, nil
 	}

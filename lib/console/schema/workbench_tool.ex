@@ -4,7 +4,7 @@ defmodule Console.Schema.WorkbenchTool do
   alias Console.Deployments.Policies.Rbac
   alias Piazza.Ecto.EncryptedString
 
-  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7, linear: 8, atlassian: 9
+  defenum Tool, http: 0, elastic: 1, datadog: 2, prometheus: 3, loki: 4, tempo: 5, sentry: 6, mcp: 7, linear: 8, atlassian: 9, splunk: 10
   defenum Category, metrics: 0, logs: 1, integration: 2, ticketing: 3, traces: 4, error_tracking: 5
   defenum HttpMethod, get: 0, post: 1, put: 2, delete: 3, patch: 4
 
@@ -52,6 +52,13 @@ defmodule Console.Schema.WorkbenchTool do
         field :tenant_id, :string
         field :username,  :string
         field :password,  EncryptedString
+      end
+
+      embeds_one :splunk, SplunkConnection, on_replace: :update do
+        field :url,      :string
+        field :token,    EncryptedString
+        field :username, :string
+        field :password, EncryptedString
       end
 
       embeds_one :tempo, TempoConnection, on_replace: :update do
@@ -186,6 +193,7 @@ defmodule Console.Schema.WorkbenchTool do
     |> cast_embed(:elastic, with: &elastic_configuration_changeset/2)
     |> cast_embed(:prometheus, with: &prom_configuration_changeset/2)
     |> cast_embed(:loki, with: &prom_configuration_changeset/2)
+    |> cast_embed(:splunk, with: &splunk_configuration_changeset/2)
     |> cast_embed(:tempo, with: &prom_configuration_changeset/2)
     |> cast_embed(:datadog, with: &datadog_configuration_changeset/2)
     |> cast_embed(:sentry, with: &sentry_configuration_changeset/2)
@@ -217,6 +225,19 @@ defmodule Console.Schema.WorkbenchTool do
     model
     |> cast(attrs, ~w(site api_key app_key)a)
     |> validate_required([:api_key])
+  end
+
+  defp splunk_configuration_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url token username password)a)
+    |> then(fn cs ->
+      case {get_field(cs, :token), get_field(cs, :username), get_field(cs, :password)} do
+        {token, _, _} when is_binary(token) and token != "" -> cs
+        {_, user, pass} when is_binary(user) and user != "" and is_binary(pass) and pass != "" -> cs
+        _ -> add_error(cs, :token, "either token or username/password must be set")
+      end
+    end)
+    |> validate_required([:url])
   end
 
   defp elastic_configuration_changeset(model, attrs) do

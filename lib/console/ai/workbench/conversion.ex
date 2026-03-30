@@ -5,6 +5,7 @@ defmodule Console.AI.Workbench.Conversion do
     DatadogConnection,
     PrometheusConnection,
     LokiConnection,
+    SplunkConnection,
     TempoConnection,
     ElasticConnection,
   }
@@ -40,6 +41,17 @@ defmodule Console.AI.Workbench.Conversion do
         username: loki.username,
         password: loki.password,
         tenant_id: loki.tenant_id,
+      }
+    }}
+  end
+
+  def to_proto(%WorkbenchTool{tool: :splunk, configuration: %{splunk: %{} = splunk}}) do
+    {:ok, %ToolConnection{
+      connection: %SplunkConnection{
+        url: splunk.url,
+        token: splunk.token,
+        username: splunk.username,
+        password: splunk.password,
       }
     }}
   end
