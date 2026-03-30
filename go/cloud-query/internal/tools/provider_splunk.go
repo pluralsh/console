@@ -108,6 +108,7 @@ func (in *SplunkProvider) toSplunkTime(ts time.Time) string {
 func (in *SplunkProvider) toLogsQueryOutput(responseBody string) (*toolquery.LogsQueryOutput, error) {
 	logs := make([]*toolquery.LogEntry, 0)
 	scanner := bufio.NewScanner(strings.NewReader(responseBody))
+	scanner.Buffer(make([]byte, bufio.MaxScanTokenSize), 10*1024*1024) // 10MB
 
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())

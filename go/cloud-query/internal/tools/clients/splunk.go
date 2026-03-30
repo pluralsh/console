@@ -26,8 +26,10 @@ func NewSplunkClient(baseURL, token, username, password string) *SplunkClient {
 	}
 
 	if len(token) > 0 {
+		// Set both headers for backwards compatibility.
 		client.SetAuthToken(token)
 		client.SetAuthScheme("Bearer")
+		client.SetHeader("Authorization", "Splunk "+token)
 	} else if len(username) > 0 && len(password) > 0 {
 		client.SetBasicAuth(username, password)
 	}
