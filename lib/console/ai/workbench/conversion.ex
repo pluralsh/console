@@ -13,69 +13,69 @@ defmodule Console.AI.Workbench.Conversion do
   @spec to_proto(WorkbenchTool.t()) :: {:ok, %ToolConnection{}} | {:error, String.t()}
   def to_proto(%WorkbenchTool{tool: :datadog, configuration: %{datadog: %{} = dd}}) do
     {:ok, %ToolConnection{
-      connection: %DatadogConnection{
+      connection: {:datadog, %DatadogConnection{
         site: dd.site,
         apiKey: dd.api_key,
         appKey: dd.app_key,
-      }
+      }}
     }}
   end
 
   def to_proto(%WorkbenchTool{tool: :prometheus, configuration: %{prometheus: %{} = prom}}) do
     {:ok, %ToolConnection{
-      connection: %PrometheusConnection{
+      connection: {:prometheus, %PrometheusConnection{
         url: prom.url,
         token: prom.token,
         username: prom.username,
         password: prom.password,
         tenant_id: prom.tenant_id,
-      }
+      }}
     }}
   end
 
   def to_proto(%WorkbenchTool{tool: :loki, configuration: %{loki: %{} = loki}}) do
     {:ok, %ToolConnection{
-      connection: %LokiConnection{
+      connection: {:loki, %LokiConnection{
         url: loki.url,
         token: loki.token,
         username: loki.username,
         password: loki.password,
         tenant_id: loki.tenant_id,
-      }
+      }}
     }}
   end
 
   def to_proto(%WorkbenchTool{tool: :splunk, configuration: %{splunk: %{} = splunk}}) do
     {:ok, %ToolConnection{
-      connection: %SplunkConnection{
+      connection: {:splunk, %SplunkConnection{
         url: splunk.url,
         token: splunk.token,
         username: splunk.username,
         password: splunk.password,
-      }
+      }}
     }}
   end
 
   def to_proto(%WorkbenchTool{tool: :tempo, configuration: %{tempo: %{} = tempo}}) do
     {:ok, %ToolConnection{
-      connection: %TempoConnection{
+      connection: {:tempo, %TempoConnection{
         url: tempo.url,
         token: tempo.token,
         username: tempo.username,
         password: tempo.password,
         tenant_id: tempo.tenant_id,
-      }
+      }}
     }}
   end
 
   def to_proto(%WorkbenchTool{tool: :elastic, configuration: %{elastic: %{} = elastic}}) do
     {:ok, %ToolConnection{
-      connection: %ElasticConnection{
+      connection: {:elastic, %ElasticConnection{
         url:      elastic.url,
         username: elastic.username,
         password: elastic.password,
         index:    elastic.index,
-      }
+      }}
     }}
   end
 
