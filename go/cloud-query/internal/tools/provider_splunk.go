@@ -127,8 +127,10 @@ func (in *SplunkProvider) toLogsQueryOutput(responseBody string) (*toolquery.Log
 
 		entry, err := in.toLogEntry(item.Result)
 		if err != nil {
-			return nil, err
+			klog.Errorf("error parsing splunk log: %v", err)
+			continue
 		}
+
 		logs = append(logs, entry)
 	}
 
