@@ -134,7 +134,6 @@ func (in *ElasticProvider) newElasticClient() (*elasticsearch.TypedClient, error
 	}
 
 	cfg.Header = http.Header{}
-	cfg.Header.Add("Accept", "application/json")
 	cfg.Header.Add("Content-Type", "application/json")
 	cfg.Header.Add("X-Elastic-Product", "Elasticsearch")
 
