@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strings"
 	"time"
 
@@ -47,6 +46,8 @@ func (in *ElasticProvider) Logs(ctx context.Context, input *toolquery.LogsQueryI
 
 	resp, err := in.client.Search().
 		Index(in.conn.GetIndex()).
+		Header("Accept", "application/json").
+		Header("Content-Type", "application/json").
 		Request(in.toRequest(input)).
 		Do(ctx)
 	if err != nil {
@@ -126,16 +127,10 @@ func (in *ElasticProvider) newElasticClient() (*elasticsearch.TypedClient, error
 		return nil, fmt.Errorf("%w: missing password", ErrInvalidArgument)
 	}
 
-	cfg := elasticsearch.Config{
+	return elasticsearch.NewTypedClient(elasticsearch.Config{
 		Addresses:               []string{in.conn.GetUrl()},
 		Username:                in.conn.GetUsername(),
 		Password:                in.conn.GetPassword(),
 		EnableCompatibilityMode: false,
-	}
-
-	cfg.Header = http.Header{}
-	cfg.Header.Add("Content-Type", "application/json")
-	cfg.Header.Add("X-Elastic-Product", "Elasticsearch")
-
-	return elasticsearch.NewTypedClient(cfg)
+	})
 }
