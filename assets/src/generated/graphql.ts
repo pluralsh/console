@@ -14682,6 +14682,8 @@ export type WorkbenchConfiguration = {
   coding?: Maybe<WorkbenchCoding>;
   /** infrastructure capabilities */
   infrastructure?: Maybe<WorkbenchInfrastructure>;
+  /** observability capabilities */
+  observability?: Maybe<WorkbenchObservability>;
 };
 
 export type WorkbenchConfigurationAttributes = {
@@ -14689,6 +14691,8 @@ export type WorkbenchConfigurationAttributes = {
   coding?: InputMaybe<WorkbenchCodingAttributes>;
   /** infrastructure capabilities (services, stacks, kubernetes) */
   infrastructure?: InputMaybe<WorkbenchInfrastructureAttributes>;
+  /** observability capabilities (logs, metrics) */
+  observability?: InputMaybe<WorkbenchObservabilityAttributes>;
 };
 
 export type WorkbenchConnection = {
@@ -14978,6 +14982,21 @@ export type WorkbenchJobThoughtAttributes = {
   logs?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
   /** metrics for the thought */
   metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
+};
+
+export type WorkbenchObservability = {
+  __typename?: 'WorkbenchObservability';
+  /** logs capability enabled */
+  logs?: Maybe<Scalars['Boolean']['output']>;
+  /** metrics capability enabled */
+  metrics?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type WorkbenchObservabilityAttributes = {
+  /** enable logs capability */
+  logs?: InputMaybe<Scalars['Boolean']['input']>;
+  /** enable metrics capability */
+  metrics?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type WorkbenchSkills = {

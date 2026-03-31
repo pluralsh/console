@@ -2222,6 +2222,9 @@ input WorkbenchConfigurationAttributes {
 
   "coding capabilities (mode, repositories)"
   coding: WorkbenchCodingAttributes
+
+  "observability capabilities (logs, metrics)"
+  observability: WorkbenchObservabilityAttributes
 }
 
 input WorkbenchInfrastructureAttributes {
@@ -2241,6 +2244,14 @@ input WorkbenchCodingAttributes {
 
   "allowed repository identifiers"
   repositories: [String]
+}
+
+input WorkbenchObservabilityAttributes {
+  "enable logs capability"
+  logs: Boolean
+
+  "enable metrics capability"
+  metrics: Boolean
 }
 
 input WorkbenchSkillsAttributes {
@@ -2687,6 +2698,9 @@ type WorkbenchConfiguration {
 
   "coding capabilities"
   coding: WorkbenchCoding
+
+  "observability capabilities"
+  observability: WorkbenchObservability
 }
 
 type WorkbenchInfrastructure {
@@ -2706,6 +2720,14 @@ type WorkbenchCoding {
 
   "allowed repository identifiers"
   repositories: [String]
+}
+
+type WorkbenchObservability {
+  "logs capability enabled"
+  logs: Boolean
+
+  "metrics capability enabled"
+  metrics: Boolean
 }
 
 type WorkbenchSkills {

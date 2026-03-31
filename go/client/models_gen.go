@@ -9445,6 +9445,8 @@ type WorkbenchConfiguration struct {
 	Infrastructure *WorkbenchInfrastructure `json:"infrastructure,omitempty"`
 	// coding capabilities
 	Coding *WorkbenchCoding `json:"coding,omitempty"`
+	// observability capabilities
+	Observability *WorkbenchObservability `json:"observability,omitempty"`
 }
 
 type WorkbenchConfigurationAttributes struct {
@@ -9452,6 +9454,8 @@ type WorkbenchConfigurationAttributes struct {
 	Infrastructure *WorkbenchInfrastructureAttributes `json:"infrastructure,omitempty"`
 	// coding capabilities (mode, repositories)
 	Coding *WorkbenchCodingAttributes `json:"coding,omitempty"`
+	// observability capabilities (logs, metrics)
+	Observability *WorkbenchObservabilityAttributes `json:"observability,omitempty"`
 }
 
 type WorkbenchConnection struct {
@@ -9683,6 +9687,20 @@ type WorkbenchJobThoughtAttributes struct {
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs for the thought
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+}
+
+type WorkbenchObservability struct {
+	// logs capability enabled
+	Logs *bool `json:"logs,omitempty"`
+	// metrics capability enabled
+	Metrics *bool `json:"metrics,omitempty"`
+}
+
+type WorkbenchObservabilityAttributes struct {
+	// enable logs capability
+	Logs *bool `json:"logs,omitempty"`
+	// enable metrics capability
+	Metrics *bool `json:"metrics,omitempty"`
 }
 
 type WorkbenchSkills struct {

@@ -28,6 +28,11 @@ defmodule Console.Schema.Workbench do
         field :kubernetes, :boolean
       end
 
+      embeds_one :observability, Observability, on_replace: :update do
+        field :logs,    :boolean
+        field :metrics, :boolean
+      end
+
       embeds_one :coding, Coding, on_replace: :update do
         field :mode,         AgentRun.Mode
         field :repositories, {:array, :string}
@@ -135,6 +140,7 @@ defmodule Console.Schema.Workbench do
     |> cast(attrs, [])
     |> cast_embed(:infrastructure, with: &infrastructure_changeset/2)
     |> cast_embed(:coding, with: &coding_changeset/2)
+    |> cast_embed(:observability, with: &observability_changeset/2)
   end
 
   def infrastructure_changeset(model, attrs \\ %{}) do
@@ -145,5 +151,10 @@ defmodule Console.Schema.Workbench do
   def coding_changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(mode repositories)a)
+  end
+
+  def observability_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(logs metrics)a)
   end
 end
