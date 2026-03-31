@@ -16,6 +16,11 @@ fragment LogFacetDetail on LogFacetDetail {
   count
 }
 
+fragment LogAggregationBucket on LogAggregationBucket {
+  timestamp
+  count
+}
+
 query LogAggregation(
   $clusterId: ID
   $limit: Int
@@ -51,5 +56,25 @@ query LogLabels(
     time: $time
   ) {
     ...LogFacetDetail
+  }
+}
+
+query LogAggregationBuckets(
+  $serviceId: ID
+  $clusterId: ID
+  $query: String
+  $time: LogTimeRange
+  $aggregation: LogAggregationInput
+  $facets: [LogFacetInput]
+) {
+  logAggregationBuckets(
+    serviceId: $serviceId
+    clusterId: $clusterId
+    query: $query
+    time: $time
+    aggregation: $aggregation
+    facets: $facets
+  ) {
+    ...LogAggregationBucket
   }
 }

@@ -1332,6 +1332,11 @@
          "name": "LogLabels",
          "body": "query LogLabels($field: String!, $clusterId: ID, $serviceId: ID, $query: String, $time: LogTimeRange) {\n  logLabels(\n    field: $field\n    clusterId: $clusterId\n    serviceId: $serviceId\n    query: $query\n    time: $time\n  ) {\n    ...LogFacetDetail\n    __typename\n  }\n}\n\nfragment LogFacetDetail on LogFacetDetail {\n  label\n  count\n  __typename\n}"
       },
+      "sha256:433a7e3bc2a206e3b6704db521c9ef9e954b63cba0018f83bdef58081c124c3d": {
+         "type": "query",
+         "name": "LogAggregationBuckets",
+         "body": "query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $aggregation: LogAggregationInput, $facets: [LogFacetInput]) {\n  logAggregationBuckets(\n    serviceId: $serviceId\n    clusterId: $clusterId\n    query: $query\n    time: $time\n    aggregation: $aggregation\n    facets: $facets\n  ) {\n    ...LogAggregationBucket\n    __typename\n  }\n}\n\nfragment LogAggregationBucket on LogAggregationBucket {\n  timestamp\n  count\n  __typename\n}"
+      },
       "sha256:d86d6daf39197ee5434862f7fe0b278a785a959a1ec0c86634d7af08735d43f3": {
          "type": "query",
          "name": "ClusterHeatMap",
@@ -1352,25 +1357,25 @@
          "name": "ServiceMetrics",
          "body": "query ServiceMetrics($id: ID!, $step: String, $start: DateTime) {\n  serviceDeployment(id: $id) {\n    id\n    serviceMetrics(step: $step, start: $start) {\n      cpu {\n        ...MetricResponse\n        __typename\n      }\n      mem {\n        ...MetricResponse\n        __typename\n      }\n      podCpu {\n        ...MetricResponse\n        __typename\n      }\n      podMem {\n        ...MetricResponse\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment MetricResponse on MetricResponse {\n  metric\n  values {\n    timestamp\n    value\n    __typename\n  }\n  __typename\n}"
       },
-      "sha256:f2d0c18af082c0b8e2910eceb74b1ccf56a903c2e811bc14d88a323a42e58f9e": {
+      "sha256:27da7505f91aac814fdb3acfae0fe7722fae1751298087c28244784dca9c063a": {
          "type": "query",
          "name": "MonitorDetails",
-         "body": "query MonitorDetails($id: ID!) {\n  monitor(id: $id) {\n    ...Monitor\n    __typename\n  }\n}\n\nfragment Monitor on Monitor {\n  ...MonitorTiny\n  __typename\n}\n\nfragment MonitorTiny on Monitor {\n  id\n  name\n  threshold {\n    ...MonitorThreshold\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorThreshold on MonitorThreshold {\n  aggregate\n  value\n  __typename\n}"
+         "body": "query MonitorDetails($id: ID!) {\n  monitor(id: $id) {\n    ...Monitor\n    __typename\n  }\n}\n\nfragment Monitor on Monitor {\n  ...MonitorTiny\n  alertTemplate\n  description\n  evaluationCron\n  query {\n    log {\n      ...MonitorLogQuery\n      __typename\n    }\n    __typename\n  }\n  service {\n    id\n    __typename\n  }\n  severity\n  type\n  workbench {\n    id\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorTiny on Monitor {\n  id\n  name\n  evaluationCron\n  threshold {\n    ...MonitorThreshold\n    __typename\n  }\n  query {\n    log {\n      query\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorThreshold on MonitorThreshold {\n  aggregate\n  value\n  __typename\n}\n\nfragment MonitorLogQuery on MonitorLogQuery {\n  bucketSize\n  duration\n  facets {\n    key\n    value\n    __typename\n  }\n  operator\n  query\n  __typename\n}"
       },
-      "sha256:690a1d56c99c194082c0342a2a52f856f3e6c81354b0d43a852a97aaf19438c4": {
+      "sha256:776285e9bb29cf7c7168f28ffa979c8c3e557448adc0568834f4ff9bf79b5b5f": {
          "type": "query",
          "name": "ServiceMonitors",
-         "body": "query ServiceMonitors($serviceId: ID!, $q: String, $first: Int, $after: String) {\n  serviceDeployment(id: $serviceId) {\n    id\n    monitors(q: $q, first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...MonitorTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment MonitorTiny on Monitor {\n  id\n  name\n  threshold {\n    ...MonitorThreshold\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorThreshold on MonitorThreshold {\n  aggregate\n  value\n  __typename\n}"
+         "body": "query ServiceMonitors($serviceId: ID!, $q: String, $first: Int, $after: String) {\n  serviceDeployment(id: $serviceId) {\n    id\n    monitors(q: $q, first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...MonitorTiny\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment MonitorTiny on Monitor {\n  id\n  name\n  evaluationCron\n  threshold {\n    ...MonitorThreshold\n    __typename\n  }\n  query {\n    log {\n      query\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorThreshold on MonitorThreshold {\n  aggregate\n  value\n  __typename\n}"
       },
-      "sha256:bd9d39558665c5f9b799a5d40d652bbbe4d0f86f6824835d7795588b78c97c34": {
+      "sha256:d7059b5f69221f61c69856de3a515685b60c69447c486949db50c96dbe450e21": {
          "type": "mutation",
          "name": "CreateMonitor",
-         "body": "mutation CreateMonitor($attributes: MonitorAttributes!) {\n  createMonitor(attributes: $attributes) {\n    ...MonitorTiny\n    __typename\n  }\n}\n\nfragment MonitorTiny on Monitor {\n  id\n  name\n  threshold {\n    ...MonitorThreshold\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorThreshold on MonitorThreshold {\n  aggregate\n  value\n  __typename\n}"
+         "body": "mutation CreateMonitor($attributes: MonitorAttributes!) {\n  createMonitor(attributes: $attributes) {\n    ...MonitorTiny\n    __typename\n  }\n}\n\nfragment MonitorTiny on Monitor {\n  id\n  name\n  evaluationCron\n  threshold {\n    ...MonitorThreshold\n    __typename\n  }\n  query {\n    log {\n      query\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorThreshold on MonitorThreshold {\n  aggregate\n  value\n  __typename\n}"
       },
-      "sha256:6e2c4115cb9031c03625935487c837e89869a3273e891b502e533816f47db1f0": {
+      "sha256:921a53fceb0ec20ded65a792936faf1889bbcbf16456ae8e618392b677d85994": {
          "type": "mutation",
          "name": "UpdateMonitor",
-         "body": "mutation UpdateMonitor($id: ID!, $attributes: MonitorAttributes!) {\n  updateMonitor(id: $id, attributes: $attributes) {\n    ...MonitorTiny\n    __typename\n  }\n}\n\nfragment MonitorTiny on Monitor {\n  id\n  name\n  threshold {\n    ...MonitorThreshold\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorThreshold on MonitorThreshold {\n  aggregate\n  value\n  __typename\n}"
+         "body": "mutation UpdateMonitor($id: ID!, $attributes: MonitorAttributes!) {\n  updateMonitor(id: $id, attributes: $attributes) {\n    ...MonitorTiny\n    __typename\n  }\n}\n\nfragment MonitorTiny on Monitor {\n  id\n  name\n  evaluationCron\n  threshold {\n    ...MonitorThreshold\n    __typename\n  }\n  query {\n    log {\n      query\n      __typename\n    }\n    __typename\n  }\n  __typename\n}\n\nfragment MonitorThreshold on MonitorThreshold {\n  aggregate\n  value\n  __typename\n}"
       },
       "sha256:18fe57023b819fa151bc692d88a5d55a735700ddbf9e4c0563fc9abf01c3d025": {
          "type": "mutation",

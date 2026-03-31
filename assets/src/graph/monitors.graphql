@@ -2,17 +2,50 @@ fragment MonitorThreshold on MonitorThreshold {
   aggregate
   value
 }
+
 fragment MonitorTiny on Monitor {
   id
   name
+  evaluationCron
   threshold {
     ...MonitorThreshold
   }
+  query {
+    log {
+      query
+    }
+  }
+}
+
+fragment MonitorLogQuery on MonitorLogQuery {
+  bucketSize
+  duration
+  facets {
+    key
+    value
+  }
+  operator
+  query
 }
 
 fragment Monitor on Monitor {
   ...MonitorTiny
-  # TODO
+  alertTemplate
+  description
+  evaluationCron
+  query {
+    log {
+      ...MonitorLogQuery
+    }
+  }
+  service {
+    id
+  }
+  severity
+  type
+  workbench {
+    id
+  }
 }
 
 query MonitorDetails($id: ID!) {

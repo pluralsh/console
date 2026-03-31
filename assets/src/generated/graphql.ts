@@ -18032,6 +18032,8 @@ export type LogFacetFragment = { __typename?: 'LogFacet', key: string, value?: s
 
 export type LogFacetDetailFragment = { __typename?: 'LogFacetDetail', label: string, count: number };
 
+export type LogAggregationBucketFragment = { __typename?: 'LogAggregationBucket', timestamp?: string | null, count?: number | null };
+
 export type LogAggregationQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -18054,6 +18056,18 @@ export type LogLabelsQueryVariables = Exact<{
 
 
 export type LogLabelsQuery = { __typename?: 'RootQueryType', logLabels?: Array<{ __typename?: 'LogFacetDetail', label: string, count: number } | null> | null };
+
+export type LogAggregationBucketsQueryVariables = Exact<{
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  time?: InputMaybe<LogTimeRange>;
+  aggregation?: InputMaybe<LogAggregationInput>;
+  facets?: InputMaybe<Array<InputMaybe<LogFacetInput>> | InputMaybe<LogFacetInput>>;
+}>;
+
+
+export type LogAggregationBucketsQuery = { __typename?: 'RootQueryType', logAggregationBuckets?: Array<{ __typename?: 'LogAggregationBucket', timestamp?: string | null, count?: number | null } | null> | null };
 
 export type MetricResponseFragment = { __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null };
 
@@ -18095,16 +18109,18 @@ export type ServiceMetricsQuery = { __typename?: 'RootQueryType', serviceDeploym
 
 export type MonitorThresholdFragment = { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number };
 
-export type MonitorTinyFragment = { __typename?: 'Monitor', id: string, name: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } };
+export type MonitorTinyFragment = { __typename?: 'Monitor', id: string, name: string, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } };
 
-export type MonitorFragment = { __typename?: 'Monitor', id: string, name: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } };
+export type MonitorLogQueryFragment = { __typename?: 'MonitorLogQuery', bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, query: string, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null };
+
+export type MonitorFragment = { __typename?: 'Monitor', alertTemplate?: string | null, description?: string | null, evaluationCron: string, severity: AlertSeverity, type: MonitorType, id: string, name: string, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } }, service?: { __typename?: 'ServiceDeployment', id: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } };
 
 export type MonitorDetailsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type MonitorDetailsQuery = { __typename?: 'RootQueryType', monitor?: { __typename?: 'Monitor', id: string, name: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } } | null };
+export type MonitorDetailsQuery = { __typename?: 'RootQueryType', monitor?: { __typename?: 'Monitor', alertTemplate?: string | null, description?: string | null, evaluationCron: string, severity: AlertSeverity, type: MonitorType, id: string, name: string, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } }, service?: { __typename?: 'ServiceDeployment', id: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } } | null };
 
 export type ServiceMonitorsQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
@@ -18114,14 +18130,14 @@ export type ServiceMonitorsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceMonitorsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, monitors?: { __typename?: 'MonitorConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'MonitorEdge', node?: { __typename?: 'Monitor', id: string, name: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } } | null } | null> | null } | null } | null };
+export type ServiceMonitorsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, monitors?: { __typename?: 'MonitorConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'MonitorEdge', node?: { __typename?: 'Monitor', id: string, name: string, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null } | null> | null } | null } | null };
 
 export type CreateMonitorMutationVariables = Exact<{
   attributes: MonitorAttributes;
 }>;
 
 
-export type CreateMonitorMutation = { __typename?: 'RootMutationType', createMonitor?: { __typename?: 'Monitor', id: string, name: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } } | null };
+export type CreateMonitorMutation = { __typename?: 'RootMutationType', createMonitor?: { __typename?: 'Monitor', id: string, name: string, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null };
 
 export type UpdateMonitorMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -18129,7 +18145,7 @@ export type UpdateMonitorMutationVariables = Exact<{
 }>;
 
 
-export type UpdateMonitorMutation = { __typename?: 'RootMutationType', updateMonitor?: { __typename?: 'Monitor', id: string, name: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } } | null };
+export type UpdateMonitorMutation = { __typename?: 'RootMutationType', updateMonitor?: { __typename?: 'Monitor', id: string, name: string, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null };
 
 export type DeleteMonitorMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23000,6 +23016,12 @@ export const LogFacetDetailFragmentDoc = gql`
   count
 }
     `;
+export const LogAggregationBucketFragmentDoc = gql`
+    fragment LogAggregationBucket on LogAggregationBucket {
+  timestamp
+  count
+}
+    `;
 export const MetricPointResponseFragmentDoc = gql`
     fragment MetricPointResponse on MetricPointResponse {
   metric
@@ -23029,16 +23051,51 @@ export const MonitorTinyFragmentDoc = gql`
     fragment MonitorTiny on Monitor {
   id
   name
+  evaluationCron
   threshold {
     ...MonitorThreshold
   }
+  query {
+    log {
+      query
+    }
+  }
 }
     ${MonitorThresholdFragmentDoc}`;
+export const MonitorLogQueryFragmentDoc = gql`
+    fragment MonitorLogQuery on MonitorLogQuery {
+  bucketSize
+  duration
+  facets {
+    key
+    value
+  }
+  operator
+  query
+}
+    `;
 export const MonitorFragmentDoc = gql`
     fragment Monitor on Monitor {
   ...MonitorTiny
+  alertTemplate
+  description
+  evaluationCron
+  query {
+    log {
+      ...MonitorLogQuery
+    }
+  }
+  service {
+    id
+  }
+  severity
+  type
+  workbench {
+    id
+  }
 }
-    ${MonitorTinyFragmentDoc}`;
+    ${MonitorTinyFragmentDoc}
+${MonitorLogQueryFragmentDoc}`;
 export const UrlSinkConfigurationFragmentDoc = gql`
     fragment UrlSinkConfiguration on UrlSinkConfiguration {
   url
@@ -35472,6 +35529,61 @@ export type LogLabelsQueryHookResult = ReturnType<typeof useLogLabelsQuery>;
 export type LogLabelsLazyQueryHookResult = ReturnType<typeof useLogLabelsLazyQuery>;
 export type LogLabelsSuspenseQueryHookResult = ReturnType<typeof useLogLabelsSuspenseQuery>;
 export type LogLabelsQueryResult = Apollo.QueryResult<LogLabelsQuery, LogLabelsQueryVariables>;
+export const LogAggregationBucketsDocument = gql`
+    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $aggregation: LogAggregationInput, $facets: [LogFacetInput]) {
+  logAggregationBuckets(
+    serviceId: $serviceId
+    clusterId: $clusterId
+    query: $query
+    time: $time
+    aggregation: $aggregation
+    facets: $facets
+  ) {
+    ...LogAggregationBucket
+  }
+}
+    ${LogAggregationBucketFragmentDoc}`;
+
+/**
+ * __useLogAggregationBucketsQuery__
+ *
+ * To run a query within a React component, call `useLogAggregationBucketsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLogAggregationBucketsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLogAggregationBucketsQuery({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *      clusterId: // value for 'clusterId'
+ *      query: // value for 'query'
+ *      time: // value for 'time'
+ *      aggregation: // value for 'aggregation'
+ *      facets: // value for 'facets'
+ *   },
+ * });
+ */
+export function useLogAggregationBucketsQuery(baseOptions?: Apollo.QueryHookOptions<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>(LogAggregationBucketsDocument, options);
+      }
+export function useLogAggregationBucketsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>(LogAggregationBucketsDocument, options);
+        }
+// @ts-ignore
+export function useLogAggregationBucketsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>): Apollo.UseSuspenseQueryResult<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>;
+export function useLogAggregationBucketsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>): Apollo.UseSuspenseQueryResult<LogAggregationBucketsQuery | undefined, LogAggregationBucketsQueryVariables>;
+export function useLogAggregationBucketsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>(LogAggregationBucketsDocument, options);
+        }
+export type LogAggregationBucketsQueryHookResult = ReturnType<typeof useLogAggregationBucketsQuery>;
+export type LogAggregationBucketsLazyQueryHookResult = ReturnType<typeof useLogAggregationBucketsLazyQuery>;
+export type LogAggregationBucketsSuspenseQueryHookResult = ReturnType<typeof useLogAggregationBucketsSuspenseQuery>;
+export type LogAggregationBucketsQueryResult = Apollo.QueryResult<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>;
 export const ClusterHeatMapDocument = gql`
     query ClusterHeatMap($clusterId: ID!, $flavor: HeatMapFlavor!) {
   cluster(id: $clusterId) {
@@ -40221,6 +40333,7 @@ export const namedOperations = {
     TemporaryToken: 'TemporaryToken',
     LogAggregation: 'LogAggregation',
     LogLabels: 'LogLabels',
+    LogAggregationBuckets: 'LogAggregationBuckets',
     ClusterHeatMap: 'ClusterHeatMap',
     ClusterNoisyNeighbors: 'ClusterNoisyNeighbors',
     ServiceHeatMap: 'ServiceHeatMap',
@@ -40665,11 +40778,13 @@ export const namedOperations = {
     LogLine: 'LogLine',
     LogFacet: 'LogFacet',
     LogFacetDetail: 'LogFacetDetail',
+    LogAggregationBucket: 'LogAggregationBucket',
     MetricResponse: 'MetricResponse',
     MetricPointResponse: 'MetricPointResponse',
     UtilizationHeatMap: 'UtilizationHeatMap',
     MonitorThreshold: 'MonitorThreshold',
     MonitorTiny: 'MonitorTiny',
+    MonitorLogQuery: 'MonitorLogQuery',
     Monitor: 'Monitor',
     UrlSinkConfiguration: 'UrlSinkConfiguration',
     SinkConfiguration: 'SinkConfiguration',

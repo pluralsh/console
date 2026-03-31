@@ -453,7 +453,7 @@ function InputField({ label, hint, required, ...props }: InputFieldProps) {
   )
 }
 
-const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
+export const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
   background: theme.colors['fill-zero'],
 }))

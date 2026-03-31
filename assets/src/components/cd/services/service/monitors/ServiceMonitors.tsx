@@ -1,13 +1,29 @@
-import { Button, Input2, SearchIcon, Table } from '@pluralsh/design-system'
+import {
+  Button,
+  Flex,
+  IconFrame,
+  Input2,
+  PencilIcon,
+  SearchIcon,
+  Spinner,
+  Table,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
+import { Confirm } from 'components/utils/Confirm'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { Body1P } from 'components/utils/typography/Text'
-import { MonitorTinyFragment, useServiceMonitorsQuery } from 'generated/graphql'
+import { Body1P, StrongSC } from 'components/utils/typography/Text'
+import {
+  MonitorTinyFragment,
+  useDeleteMonitorMutation,
+  useServiceMonitorsQuery,
+} from 'generated/graphql'
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { SERVICE_PARAM_ID } from 'routes/cdRoutesConsts'
 import styled from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
@@ -73,6 +89,82 @@ const cols = [
     id: 'name',
     header: 'Name',
     cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor(({ threshold }) => threshold, {
+    id: 'threshold',
+    header: 'Threshold',
+    cell: ({ getValue }) => {
+      const { value, aggregate } = getValue() ?? {}
+      return value && aggregate ? (
+        <span>{`${aggregate} = ${value}`}</span>
+      ) : (
+        '--'
+      )
+    },
+  }),
+  columnHelper.accessor(({ evaluationCron }) => evaluationCron, {
+    id: 'evaluationCron',
+    header: 'Schedule cron',
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor(({ query }) => query.log.query, {
+    id: 'query',
+    header: 'Log query',
+    cell: ({ getValue }) => `"${getValue()}"`,
+  }),
+  columnHelper.accessor((monitor) => monitor, {
+    id: 'actions',
+    header: '',
+    cell: function Cell({ getValue }) {
+      const navigate = useNavigate()
+      const { id, name } = getValue()
+      const [deleteOpen, setDeleteOpen] = useState(false)
+      const { popToast } = useSimpleToast()
+      const [deleteMonitor, { loading }] = useDeleteMonitorMutation({
+        variables: { id },
+        onCompleted: () => {
+          setDeleteOpen(false)
+          popToast({ name, action: 'deleted', color: 'icon-danger' })
+        },
+        onError: () =>
+          popToast({ name, action: 'failed to delete', color: 'icon-danger' }),
+        refetchQueries: ['ServiceMonitors'],
+        awaitRefetchQueries: true,
+      })
+      return (
+        <Flex
+          gap="xsmall"
+          alignSelf="flex-end"
+        >
+          <IconFrame
+            clickable
+            icon={<PencilIcon />}
+            onClick={() => navigate(id)}
+            tooltip="Edit monitor"
+          />
+          <IconFrame
+            clickable
+            icon={loading ? <Spinner /> : <TrashCanIcon color="icon-danger" />}
+            onClick={() => setDeleteOpen(true)}
+            tooltip="Delete"
+          />
+          <Confirm
+            destructive
+            open={deleteOpen}
+            close={() => setDeleteOpen(false)}
+            submit={() => deleteMonitor()}
+            title="Delete monitor"
+            text={
+              <span>
+                Are you sure you want to delete{' '}
+                <StrongSC $color="text-danger">{name}</StrongSC>?
+              </span>
+            }
+            label="Delete"
+          />
+        </Flex>
+      )
+    },
   }),
 ]
 

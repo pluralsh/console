@@ -11,6 +11,9 @@ import {
 } from 'react'
 
 import { useLabel } from 'react-aria'
+import IconFrame from './IconFrame'
+import { InfoOutlineIcon } from '../icons'
+import { useTheme } from 'styled-components'
 
 type FormFieldProps = DivProps &
   PropsWithChildren<{
@@ -19,6 +22,7 @@ type FormFieldProps = DivProps &
     labellingProps?: AriaLabelingProps
     caption?: ReactNode
     hint?: ReactNode
+    infoTooltip?: ReactNode
     length?: number
     maxLength?: number
     required?: boolean
@@ -49,6 +53,7 @@ function FormField({
   labellingProps = {},
   caption,
   hint,
+  infoTooltip,
   error,
   length,
   maxLength,
@@ -56,7 +61,8 @@ function FormField({
   small,
   ...props
 }: FormFieldProps) {
-  const hasLabel = label || required
+  const { spacing } = useTheme()
+  const hasLabel = label || required || infoTooltip
   const hasTopContent = hasLabel || caption
   const hasBottomContent = !isNil(hint) || typeof maxLength === 'number'
   const useLabelProps = useLabel({
@@ -97,6 +103,17 @@ function FormField({
             >
               {label}
               {required ? '*' : ''}
+              {infoTooltip && (
+                <IconFrame
+                  clickable
+                  icon={<InfoOutlineIcon color="text-light" />}
+                  size="xsmall"
+                  color="text-light"
+                  tooltip={infoTooltip}
+                  tooltipProps={{ style: { maxWidth: 450 } }}
+                  css={{ display: 'inline-flex', marginLeft: spacing.xxsmall }}
+                />
+              )}
             </Label>
           )}
           {caption && (

@@ -8,6 +8,7 @@ export type SimpleToastPayload = {
   /** Custom content; if omitted, name/action/color are used to render default action text */
   content?: ReactNode
   prefix?: ReactNode
+  suffix?: string
   name?: Nullable<string>
   action?: string
   color?: SemanticColorKey
@@ -55,6 +56,7 @@ export function SimpleToastProvider({ children }: { children: ReactNode }) {
     name,
     action,
     prefix,
+    suffix,
     color = 'text',
     delayTimeout = DEFAULT_DELAY_TIMEOUT,
     clickable = false,
@@ -77,6 +79,7 @@ export function SimpleToastProvider({ children }: { children: ReactNode }) {
             {prefix && <span>{prefix} </span>}
             {name && <StrongSC $color="text">{name} </StrongSC>}
             <StrongSC $color={color}>{action}</StrongSC>
+            {suffix && <span> {suffix}</span>}
           </Body2P>
         )}
       </SimpleToastChip>

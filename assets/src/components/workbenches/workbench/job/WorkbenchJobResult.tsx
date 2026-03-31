@@ -15,7 +15,6 @@ export function WorkbenchJobResult({
   if (loading)
     return (
       <RectangleSkeleton
-        css={{ height: 320 }}
         $height={320}
         $width="100%"
       />
