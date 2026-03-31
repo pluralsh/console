@@ -118,12 +118,15 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp spawn_activity(%Notes{status: status, summary: summary} = call, %__MODULE__{job: job}) do
-    Workbenches.update_job_status(%{
-      status: Console.mapify(status),
+    Console.mapify(status)
+    |> Map.drop([:id])
+    |> then(& %{
+      status: &1,
       prompt: summary,
       output: summary,
       tool_call: tool_attrs(call)
-    }, job)
+    })
+    |> Workbenches.update_job_status(job)
   end
 
   defp spawn_activity(_, _), do: :ignore

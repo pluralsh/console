@@ -16,7 +16,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
       field :arguments, :map
     end
 
-    embeds_one :result, WorkbenchJobResult, on_replace: :update do
+    embeds_one :result, WorkbenchJobResult, on_replace: :update, primary_key: false do
       field :output,          :string
 
       embeds_one :job_update, JobUpdate, on_replace: :update do
