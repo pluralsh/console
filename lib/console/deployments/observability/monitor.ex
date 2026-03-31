@@ -4,6 +4,7 @@ defmodule Console.Deployments.Observability.Monitor do
   alias Console.Logs.Query, as: LQ
   alias Console.Logs.{Provider, Time}
   require EEx
+  require Logger
 
   def alert_attrs(%Monitor{id: id, name: name} = monitor, results) do
     with {:ok, msg} <- description(monitor.alert_template, monitor, results) do
@@ -70,7 +71,7 @@ defmodule Console.Deployments.Observability.Monitor do
   defp description(template, monitor, results) when is_binary(template) and byte_size(template) > 0 do
     result_map = Console.mapify(results) |> Console.string_map()
     with {:ok, tpl} <- Solid.parse(template),
-         {:ok, res} <- Solid.render(tpl, %{"monitor" => monitor_context(monitor), "results" => result_map}, @solid_opts) do
+         {:ok, res, _} <- Solid.render(tpl, %{"monitor" => monitor_context(monitor), "results" => result_map}, @solid_opts) do
       {:ok, IO.iodata_to_binary(res)}
     else
       err ->
