@@ -22,7 +22,7 @@ defmodule Console.AI.Workbench.Subagents.Integration do
         status: :successful,
         result: %{output: output}
       }}
-      _ -> last_message(messages, & {:cont, %{status: :failed, error: &1}})
+      _ -> last_message(messages, & {:cont, %{status: :failed, result: %{error: &1}}})
     end
   end
 

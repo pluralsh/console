@@ -2628,6 +2628,9 @@ type WorkbenchJobActivityResult {
   "output from the activity"
   output: String
 
+  "error from the activity"
+  error: String
+
   "job update (diff, theory, conclusion) when present"
   jobUpdate: WorkbenchJobActivityJobUpdate
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -125,9 +126,17 @@ func (in *ElasticProvider) newElasticClient() (*elasticsearch.TypedClient, error
 		return nil, fmt.Errorf("%w: missing password", ErrInvalidArgument)
 	}
 
-	return elasticsearch.NewTypedClient(elasticsearch.Config{
-		Addresses: []string{in.conn.GetUrl()},
-		Username:  in.conn.GetUsername(),
-		Password:  in.conn.GetPassword(),
-	})
+	cfg := elasticsearch.Config{
+		Addresses:               []string{in.conn.GetUrl()},
+		Username:                in.conn.GetUsername(),
+		Password:                in.conn.GetPassword(),
+		EnableCompatibilityMode: false,
+	}
+
+	cfg.Header = http.Header{}
+	cfg.Header.Add("Accept", "application/json")
+	cfg.Header.Add("Content-Type", "application/json")
+	cfg.Header.Add("X-Elastic-Product", "Elasticsearch")
+
+	return elasticsearch.NewTypedClient(cfg)
 }

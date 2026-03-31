@@ -18,6 +18,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
 
     embeds_one :result, WorkbenchJobResult, on_replace: :update, primary_key: false do
       field :output,          :string
+      field :error,           :string
 
       embeds_one :job_update, JobUpdate, on_replace: :update do
         field :diff,            :string
@@ -88,7 +89,7 @@ defmodule Console.Schema.WorkbenchJobActivity do
 
   defp result_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(output)a)
+    |> cast(attrs, ~w(output error)a)
     |> cast_embed(:job_update, with: &job_update_changeset/2)
     |> cast_embed(:metrics, with: &metric_changeset/2)
     |> cast_embed(:logs, with: &log_changeset/2)

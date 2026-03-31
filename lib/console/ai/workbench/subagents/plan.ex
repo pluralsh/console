@@ -27,7 +27,7 @@ defmodule Console.AI.Workbench.Subagents.Plan do
         status: :running,
         result: %{todos: Enum.map(todos, &Map.take(&1, [:name, :description, :done]))}
       }}
-      _ -> last_message(messages, & {:cont, %{status: :failed, error: &1}})
+      _ -> last_message(messages, & {:cont, %{status: :failed, result: %{error: &1}}})
     end
   end
 

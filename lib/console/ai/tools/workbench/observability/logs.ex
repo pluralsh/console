@@ -30,7 +30,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   def implement(_, %__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
          {:ok, input} <- input(tool),
-         {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input),
+         {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input) |> IO.inspect(label: "logs output"),
       do: Protobuf.JSON.encode(output)
   end
 

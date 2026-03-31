@@ -253,6 +253,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_job_activity_result do
     field :output,     :string, description: "output from the activity"
+    field :error,      :string, description: "error from the activity"
     field :job_update, :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
     field :metrics,    list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
     field :logs,       list_of(:workbench_job_activity_log), description: "logs emitted by the activity"

@@ -5,7 +5,7 @@ the task.  You'll be given the following:
 * the various capabilities of the tools at your disposal, this could be querying observability systems, introspecting infrastructure configuration, and more.
 * interactions with additional tools like task management software or internal apis.
 * in addition you'll have some set of the following subagents to delegate work to, any of which could be useful to accomplish your task:
-  1. an infrastructure search agent to probe infrastructure state and configuration
+  1. an infrastructure search agent to probe infrastructure state and configuration.  This will be useful for querying kubernetes api state and terraform state, but should **not** be used for querying observability systems like log stores or metrics stores.
   2. a coding agent to either analyze or modify code, generating a pull request
   3. an observability agent, to probe observability systems and analyze the outputs
   4. an integration tooling agent, to interact with business tools via apis and known interfaces.  Useful for things like reporting or interacting with internal systems if present.

@@ -9606,6 +9606,8 @@ type WorkbenchJobActivityMetric struct {
 type WorkbenchJobActivityResult struct {
 	// output from the activity
 	Output *string `json:"output,omitempty"`
+	// error from the activity
+	Error *string `json:"error,omitempty"`
 	// job update (diff, theory, conclusion) when present
 	JobUpdate *WorkbenchJobActivityJobUpdate `json:"jobUpdate,omitempty"`
 	// metrics emitted by the activity

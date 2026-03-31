@@ -14864,6 +14864,8 @@ export type WorkbenchJobActivityMetric = {
 
 export type WorkbenchJobActivityResult = {
   __typename?: 'WorkbenchJobActivityResult';
+  /** error from the activity */
+  error?: Maybe<Scalars['String']['output']>;
   /** job update (diff, theory, conclusion) when present */
   jobUpdate?: Maybe<WorkbenchJobActivityJobUpdate>;
   /** logs emitted by the activity */

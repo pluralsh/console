@@ -247,7 +247,7 @@ defmodule Console.Deployments.Workbenches do
     %{workbench_job: job} = Repo.preload(activity, :workbench_job)
     start_transaction()
     |> add_operation(:activity, fn _ ->
-      Ecto.Changeset.change(activity, attrs)
+      WorkbenchJobActivity.changeset(activity, attrs)
       |> Repo.update()
     end)
     |> add_operation(:job, fn _ ->
