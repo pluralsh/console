@@ -7,7 +7,6 @@ import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
 import { HomeFilterOptionCard } from '../HomeFilterOptionCard'
-import { truncatedGraphLabel } from 'components/utils/UtilizationHeatmap'
 import { isEmpty } from 'lodash'
 import { EmptyHeatmapSvg } from './ClusterHealthScoresHeatmapEmpty'
 import { HOME_CHARTS_COLORS } from 'components/home/HomeFilterOptionCard'
@@ -40,7 +39,6 @@ export function ClusterHealthScoresHeatmap({
       rounded
       data={data}
       colors={(d) => getColor(d).hex()}
-      label={truncatedGraphLabel}
       onClick={({ id }) => onClick(id)} // id will be the cluster name
       valueFormat={(value) => `${101 - value}`}
       tooltip={({ node }) => (
