@@ -27,10 +27,11 @@ defmodule Console.AI.Workbench.Environment do
     |> Enum.concat(infra_agents(bench))
   end
 
-  def categories(%WorkbenchJob{workbench: %Workbench{tools: tools}}) do
-    Enum.flat_map(tools, fn {_, tool} -> tool.categories || [] end)
+  def categories(%WorkbenchJob{workbench: %Workbench{tools: tools}}) when is_list(tools) do
+    Enum.flat_map(tools, & &1.categories || [])
     |> Enum.uniq()
   end
+  def categories(_), do: []
 
   defp to_map(m) when is_map(m), do: m
   defp to_map(l) when is_list(l), do: Map.new(l, & {&1.name, &1})
