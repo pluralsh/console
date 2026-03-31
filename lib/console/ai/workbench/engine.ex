@@ -155,10 +155,11 @@ defmodule Console.AI.Workbench.Engine do
 
   defp tools(%WorkbenchJob{} = job, %Environment{skills: skills}) do
     subagents = Environment.subagents(job)
+    categories = Environment.categories(job)
     [
       %Skills{skills: skills},
       %Skill{skills: skills},
-      %Subagents{subagents: subagents},
+      %Subagents{subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       Notes,

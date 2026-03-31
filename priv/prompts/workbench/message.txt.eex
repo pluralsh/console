@@ -11,6 +11,6 @@ Initial prompt:
 Conclusion:
 
 ```
-<%= @activity.result && @activity.result.output %>
+<%= @activity.result.output || @activity.result.error %>
 ```
 <% end %>

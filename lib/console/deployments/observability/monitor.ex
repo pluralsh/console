@@ -69,12 +69,13 @@ defmodule Console.Deployments.Observability.Monitor do
 
   defp description(template, monitor, results) when is_binary(template) and byte_size(template) > 0 do
     result_map = Console.mapify(results) |> Console.string_map()
-    with {:parse, {:ok, tpl}} <- {:parse, Solid.parse(template)},
-         {:render, {:ok, res, _}} <- {:render, Solid.render(tpl, %{"monitor" => monitor_context(monitor), "results" => result_map}, @solid_opts)} do
+    with {:ok, tpl} <- Solid.parse(template),
+         {:ok, res} <- Solid.render(tpl, %{"monitor" => monitor_context(monitor), "results" => result_map}, @solid_opts) do
       {:ok, IO.iodata_to_binary(res)}
     else
-      {:parse, {:error, %Solid.TemplateError{} = err}} -> {:error, Solid.TemplateError.message(err)}
-      {:render, {:error, errs, _}} -> {:error, Enum.map(errs, &inspect/1) |> Enum.join(", ")}
+      err ->
+        Logger.warning("Error rendering monitor description: #{inspect(err)}")
+        {:ok, "#{template}\n\n(P.S. there was an error in monitor template rendering: #{inspect(err)})"}
     end
   end
   defp description(_, monitor, results), do: {:ok, monitor_md(monitor: monitor, results: results)}
