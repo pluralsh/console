@@ -9,7 +9,7 @@ import {
   useLogAggregationBucketsQuery,
 } from 'generated/graphql'
 import { isEmpty, isNil } from 'lodash'
-import { useMemo } from 'react'
+import { useCallback, useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useDebounce } from 'usehooks-ts'
 import { COLORS } from 'utils/color'
@@ -55,6 +55,34 @@ export function ServiceMonitorPreview({ state }: { state: MonitorAttributes }) {
     [buckets]
   )
 
+  const thresholdLayer = useCallback(
+    ({ yScale }: { yScale: (v: number) => number }) => {
+      const y = yScale(threshold.value)
+      const x = -40
+      return (
+        <text
+          y={y}
+          textAnchor="end"
+          css={{ fill: colors['border-danger'], fontSize: 11 }}
+        >
+          <tspan
+            x={x}
+            dy="-0.5em"
+          >
+            Threshold
+          </tspan>
+          <tspan
+            x={x}
+            dy="1em"
+          >
+            ({threshold.aggregate} = {threshold.value})
+          </tspan>
+        </text>
+      )
+    },
+    [colors, threshold.aggregate, threshold.value]
+  )
+
   if (!data && loading)
     return (
       <RectangleSkeleton
@@ -79,7 +107,20 @@ export function ServiceMonitorPreview({ state }: { state: MonitorAttributes }) {
         data={graphData}
         tooltip={SliceTooltip}
         colors={COLORS}
-        margin={{ top: 20, right: 20, bottom: 60, left: 50 }}
+        layers={[
+          'grid',
+          'axes',
+          'areas',
+          'crosshair',
+          'lines',
+          'markers',
+          thresholdLayer,
+          'points',
+          'slices',
+          'mesh',
+          'legends',
+        ]}
+        margin={{ top: 20, right: 20, bottom: 60, left: 120 }}
         xScale={{ type: 'time', format: 'native' }}
         yScale={{ type: 'linear', min: 0, max: 'auto' }}
         xFormat={dateFormat}
@@ -97,9 +138,6 @@ export function ServiceMonitorPreview({ state }: { state: MonitorAttributes }) {
               stroke: colors['border-danger'],
               strokeDasharray: '6 4',
             },
-            legend: `Threshold (${threshold.aggregate} = ${threshold.value})`,
-            legendPosition: 'top-left',
-            textStyle: { fill: colors['border-danger'], fontSize: 12 },
           },
         ]}
       />

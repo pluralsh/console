@@ -33,7 +33,7 @@ export const DURATION_OPTIONS = [
   '12h',
   '1d',
 ]
-export const BUCKET_SIZE_OPTIONS = ['1m', '5m', '15m', '30m', '1h']
+export const BUCKET_SIZE_OPTIONS = ['5m', '15m', '30m', '1h']
 
 export function ServiceMonitorForm({
   state,
