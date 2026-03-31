@@ -11,6 +11,15 @@ defmodule Console.AI.Workbench.Subagents.Base do
     end
   end
 
+  def drop_empty(%{} = map) do
+    Enum.filter(map, fn
+      {_, nil} -> false
+      {_, []} -> false
+      _ -> true
+    end)
+    |> Map.new()
+  end
+
   def callback(%{id: id, workbench_job_id: workbench_job_id}, {:content, content}) when is_binary(content),
     do: publish_absinthe(%{activity_id: id, text: content}, workbench_job_progress: "workbench_jobs:#{workbench_job_id}:progress")
   def callback(%{id: id, workbench_job_id: workbench_job_id}, {:tool, content, %{name: name, arguments: args} = tool})

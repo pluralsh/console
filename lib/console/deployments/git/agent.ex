@@ -99,13 +99,20 @@ defmodule Console.Deployments.Git.Agent do
   def start_link(%GitRepository{} = repo) do
     GenServer.start_link(__MODULE__, repo, name: via(repo))
   end
+  def start_link(id) when is_binary(id), do: GenServer.start_link(__MODULE__, id, name: via(id))
 
+  defp via(id) when is_binary(id), do: {:via, Registry, {registry(), {:git, id}}}
   defp via(%GitRepository{id: id}), do: {:via, Registry, {registry(), {:git, id}}}
 
   def local_agents(), do: :pg.get_local_members(__MODULE__)
   def all_agents(), do: :pg.get_members(__MODULE__)
 
-  def init(repo) do
+  def init(id) when is_binary(id) do
+    Repo.get(GitRepository, id)
+    |> init()
+  end
+
+  def init(%GitRepository{} = repo) do
     {:ok, dir} = Briefly.create(directory: true)
     {:ok, repo} = save_private_key(%{repo | dir: dir})
     Logger.info "starting git agent for #{repo.url} on node #{node()}"

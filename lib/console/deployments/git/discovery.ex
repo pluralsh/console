@@ -84,8 +84,8 @@ defmodule Console.Deployments.Git.Discovery do
     end
   end
 
-  def start_and_run(%GitRepository{} = repo, fun) when is_function(fun, 1) do
-    case Supervisor.start_child(repo) do
+  def start_and_run(%GitRepository{id: id}, fun) when is_function(fun, 1) do
+    case Supervisor.start_child(id) do
       {:ok, pid} -> fun.(pid)
       {:error, {:already_started, pid}} -> fun.(pid)
       err -> err

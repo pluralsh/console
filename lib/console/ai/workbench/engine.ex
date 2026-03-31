@@ -9,6 +9,7 @@ defmodule Console.AI.Workbench.Engine do
      message history to the memory engine to inform the next iteration of the loop.
   3. A complete tool is used to mark the conclusion of the job.
   """
+  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
@@ -69,7 +70,7 @@ defmodule Console.AI.Workbench.Engine do
     |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{conclusion: conclusion, metrics: metrics, todos: todos}} ->
-        Console.drop_nils(%{
+        drop_empty(%{
           conclusion: conclusion,
           todos: todos,
           metadata: %{metrics: metrics},
