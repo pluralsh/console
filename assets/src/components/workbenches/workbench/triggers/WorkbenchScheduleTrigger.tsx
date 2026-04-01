@@ -17,14 +17,16 @@ import {
   useWorkbenchCronsQuery,
   WorkbenchCronFragment,
 } from 'generated/graphql'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
+import { WorkbenchScheduleTriggerCreateForm } from './WorkbenchScheduleTriggerCreateForm'
 
 export function WorkbenchScheduleTrigger() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
+  const [isCreatingSchedule, setIsCreatingSchedule] = useState(false)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -35,6 +37,12 @@ export function WorkbenchScheduleTrigger() {
   const crons = useMemo(() => mapExistingNodes(data?.workbench?.crons), [data])
 
   if (error) return <GqlError error={error} />
+  if (isCreatingSchedule)
+    return (
+      <WorkbenchScheduleTriggerCreateForm
+        onCancel={() => setIsCreatingSchedule(false)}
+      />
+    )
 
   return (
     <StretchedFlex
@@ -46,7 +54,9 @@ export function WorkbenchScheduleTrigger() {
         <Body2P $color="text-light">
           Add schedules to trigger this workbench.
         </Body2P>
-        <Button>Add cron schedule</Button>
+        <Button onClick={() => setIsCreatingSchedule(true)}>
+          Add cron schedule
+        </Button>
       </StretchedFlex>
       <Table
         css={{ width: '100%' }}
@@ -60,7 +70,7 @@ export function WorkbenchScheduleTrigger() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        emptyStateProps={{ message: 'No cron schedules found.' }}
+        emptyStateProps={{ message: 'No cron schedules found' }}
       />
     </StretchedFlex>
   )
