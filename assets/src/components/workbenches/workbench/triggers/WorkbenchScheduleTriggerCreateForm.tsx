@@ -111,9 +111,11 @@ export function WorkbenchScheduleTriggerCreateForm({
           minRows={3}
           maxRows={6}
           value={formState.prompt}
-          onChange={(e) =>
-            setFormState((prev) => ({ ...prev, prompt: e.currentTarget.value }))
-          }
+          onChange={(e) => {
+            const prompt = e.target.value
+
+            setFormState((prev) => ({ ...prev, prompt }))
+          }}
           placeholder="Ask the agent use an integrated tool or service on your cluster"
         />
       </FormField>
