@@ -1,9 +1,12 @@
 import { Confirm } from 'components/utils/Confirm'
+import { DEFAULT_PAGE_SIZE } from 'components/utils/table/useFetchPaginatedData'
 import {
   useDeleteWorkbenchCronMutation,
   WorkbenchCronFragment,
   WorkbenchCronsDocument,
+  WorkbenchCronsQuery,
 } from 'generated/graphql'
+import { removeConnection, updateCache } from 'utils/graphql'
 
 export function WorkbenchScheduleDeleteModal({
   workbenchId,
@@ -18,13 +21,23 @@ export function WorkbenchScheduleDeleteModal({
 }) {
   const [deleteWorkbenchCron, { loading, error }] =
     useDeleteWorkbenchCronMutation({
-      refetchQueries: [
-        {
+      update: (cache, { data }) => {
+        const deletedCron = data?.deleteWorkbenchCron
+        if (!deletedCron) return
+
+        updateCache<WorkbenchCronsQuery>(cache, {
           query: WorkbenchCronsDocument,
-          variables: { id: workbenchId, first: 100 },
-        },
-      ],
-      awaitRefetchQueries: true,
+          variables: { id: workbenchId, first: DEFAULT_PAGE_SIZE },
+          update: (prev) => {
+            if (!prev.workbench) return prev
+
+            return {
+              ...prev,
+              workbench: removeConnection(prev.workbench, deletedCron, 'crons'),
+            }
+          },
+        })
+      },
       onCompleted: onClose,
     })
 

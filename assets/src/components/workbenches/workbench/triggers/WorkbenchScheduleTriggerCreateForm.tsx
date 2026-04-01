@@ -8,15 +8,18 @@ import {
   ReturnIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { DEFAULT_PAGE_SIZE } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P, CaptionP, InlineA } from 'components/utils/typography/Text'
 import CronExpressionParser from 'cron-parser'
 import cronstrue from 'cronstrue'
 import {
   useCreateWorkbenchCronMutation,
   WorkbenchCronsDocument,
+  WorkbenchCronsQuery,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { dayjsExtended as dayjs } from 'utils/datetime'
+import { appendConnectionToEnd, updateCache } from 'utils/graphql'
 import { StickyActionsFooterSC } from '../create-edit/WorkbenchCreateOrEdit'
 import { useTheme } from 'styled-components'
 
@@ -49,13 +52,27 @@ export function WorkbenchScheduleTriggerCreateForm({
   )
   const [createWorkbenchCron, { loading: isSaving, error: createError }] =
     useCreateWorkbenchCronMutation({
-      refetchQueries: [
-        {
+      update: (cache, { data }) => {
+        const createdCron = data?.createWorkbenchCron
+        if (!createdCron) return
+
+        updateCache<WorkbenchCronsQuery>(cache, {
           query: WorkbenchCronsDocument,
-          variables: { id: workbenchId, first: 100 },
-        },
-      ],
-      awaitRefetchQueries: true,
+          variables: { id: workbenchId, first: DEFAULT_PAGE_SIZE },
+          update: (prev) => {
+            if (!prev.workbench) return prev
+
+            return {
+              ...prev,
+              workbench: appendConnectionToEnd(
+                prev.workbench,
+                createdCron,
+                'crons'
+              ),
+            }
+          },
+        })
+      },
       onCompleted: onCancel,
     })
   const canSave = !!formState.crontab.trim() // !!formState.name.trim() && !!formState.crontab.trim()
