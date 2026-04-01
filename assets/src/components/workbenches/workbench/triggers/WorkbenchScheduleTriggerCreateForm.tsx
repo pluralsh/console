@@ -166,14 +166,10 @@ export function WorkbenchScheduleTriggerCreateForm({
         </FormField>
       </Flex>
       <StickyActionsFooterSC>
-        <Button
-          destructive
-          onClick={onCancel}
-          disabled={isSaving}
+        <Flex
+          gap="small"
+          css={{ marginLeft: 'auto' }}
         >
-          Cancel
-        </Button>
-        <Flex gap="small">
           <Button
             secondary
             startIcon={<ReturnIcon />}
