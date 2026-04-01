@@ -5,6 +5,8 @@ export const WORKBENCH_PARAM_ID = 'workbenchId'
 export const WORKBENCHES_CREATE_REL_PATH = 'create'
 export const WORKBENCHES_EDIT_REL_PATH = 'edit'
 export const WORKBENCHES_TRIGGERS_REL_PATH = 'triggers'
+export const WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH = 'schedule'
+export const WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH = 'webhook'
 
 export const WORKBENCHES_TOOLS_REL_PATH = 'tools'
 export const WORKBENCHES_TOOLS_ABS_PATH = `${WORKBENCHES_ABS_PATH}/${WORKBENCHES_TOOLS_REL_PATH}`
