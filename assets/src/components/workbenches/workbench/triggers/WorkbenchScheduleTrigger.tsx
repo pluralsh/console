@@ -40,6 +40,7 @@ export function WorkbenchScheduleTrigger() {
   if (isCreatingSchedule)
     return (
       <WorkbenchScheduleTriggerCreateForm
+        workbenchId={workbenchId}
         onCancel={() => setIsCreatingSchedule(false)}
       />
     )

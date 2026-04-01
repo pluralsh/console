@@ -6,11 +6,15 @@ import {
   Input,
   Input2,
   ReturnIcon,
-  Switch,
 } from '@pluralsh/design-system'
+import { GqlError } from 'components/utils/Alert'
 import { Body2P, CaptionP, InlineA } from 'components/utils/typography/Text'
 import CronExpressionParser from 'cron-parser'
 import cronstrue from 'cronstrue'
+import {
+  useCreateWorkbenchCronMutation,
+  WorkbenchCronsDocument,
+} from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { dayjsExtended as dayjs } from 'utils/datetime'
 import { StickyActionsFooterSC } from '../create-edit/WorkbenchCreateOrEdit'
@@ -21,22 +25,24 @@ const CRON_SHORTCUTS_URL =
 const CRON_PLACEHOLDER = '*/5 * * * *'
 
 type ScheduleTriggerFormState = {
-  active: boolean
-  name: string
+  // active: boolean
+  // name: string
   prompt: string
   crontab: string
 }
 
 export function WorkbenchScheduleTriggerCreateForm({
+  workbenchId,
   onCancel,
 }: {
+  workbenchId: string
   onCancel: () => void
 }) {
   const theme = useTheme()
 
   const [formState, setFormState] = useState<ScheduleTriggerFormState>({
-    active: true,
-    name: '',
+    // active: true,
+    // name: '',
     prompt: '',
     crontab: '',
   })
@@ -45,6 +51,32 @@ export function WorkbenchScheduleTriggerCreateForm({
     () => buildCronPreview(formState.crontab),
     [formState.crontab]
   )
+  const [createWorkbenchCron, { loading: isSaving, error: createError }] =
+    useCreateWorkbenchCronMutation({
+      refetchQueries: [
+        {
+          query: WorkbenchCronsDocument,
+          variables: { id: workbenchId, first: 100 },
+        },
+      ],
+      awaitRefetchQueries: true,
+      onCompleted: onCancel,
+    })
+  const canSave = !!formState.crontab.trim() // !!formState.name.trim() && !!formState.crontab.trim()
+
+  const handleSave = () => {
+    if (!canSave || isSaving) return
+
+    createWorkbenchCron({
+      variables: {
+        workbenchId,
+        attributes: {
+          crontab: formState.crontab.trim(),
+          prompt: formState.prompt.trim() || undefined,
+        },
+      },
+    })
+  }
 
   return (
     <Flex
@@ -53,25 +85,26 @@ export function WorkbenchScheduleTriggerCreateForm({
       height="100%"
       css={{ width: '100%' }}
     >
-      <Switch
-        checked={formState.active}
-        onChange={(active) =>
-          setFormState((prev) => ({ ...prev, active: !!active }))
-        }
-      >
-        Schedule active
-      </Switch>
-      <FormField
-        required
-        label="Schedule name"
-      >
-        <Input2
-          value={formState.name}
-          onChange={(e) =>
-            setFormState((prev) => ({ ...prev, name: e.target.value }))
-          }
-        />
-      </FormField>
+      {createError && <GqlError error={createError} />}
+      {/*<Switch*/}
+      {/*  checked={formState.active}*/}
+      {/*  onChange={(active) =>*/}
+      {/*    setFormState((prev) => ({ ...prev, active: !!active }))*/}
+      {/*  }*/}
+      {/*>*/}
+      {/*  Schedule active*/}
+      {/*</Switch>*/}
+      {/*<FormField*/}
+      {/*  required*/}
+      {/*  label="Schedule name"*/}
+      {/*>*/}
+      {/*  <Input2*/}
+      {/*    value={formState.name}*/}
+      {/*    onChange={(e) =>*/}
+      {/*      setFormState((prev) => ({ ...prev, name: e.target.value }))*/}
+      {/*    }*/}
+      {/*  />*/}
+      {/*</FormField>*/}
       <FormField label="Prompt">
         <Input
           multiline
@@ -156,6 +189,7 @@ export function WorkbenchScheduleTriggerCreateForm({
         <Button
           destructive
           onClick={onCancel}
+          disabled={isSaving}
         >
           Cancel
         </Button>
@@ -164,10 +198,17 @@ export function WorkbenchScheduleTriggerCreateForm({
             secondary
             startIcon={<ReturnIcon />}
             onClick={onCancel}
+            disabled={isSaving}
           >
             Back to all schedules
           </Button>
-          <Button onClick={() => {}}>Save</Button>
+          <Button
+            onClick={handleSave}
+            loading={isSaving}
+            disabled={!canSave}
+          >
+            Save
+          </Button>
         </Flex>
       </StickyActionsFooterSC>
     </Flex>
