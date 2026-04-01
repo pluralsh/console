@@ -169,9 +169,9 @@ defmodule Console.Logs.Provider.Elastic do
     do: %{bool: %{must: %{match: %{message: %{query: q, analyzer: "stop", operator: Query.elastic_operator(op)}}}}}
   defp maybe_query(_), do: %{bool: %{}}
 
-  defp maybe_dur(dir, ts, duration) when is_binary(duration) do
+  defp maybe_dur(dir, ts, duration) when is_binary(duration) or is_map(duration) do
     opp = Query.opposite(dir)
-    dur = Timex.Duration.parse!(String.upcase(duration))
+    dur = Console.Logs.Time.safe_duration(duration)
     %{dir => ts, opp => Query.add_duration(opp, ts, dur)}
   end
   defp maybe_dur(dir, ts, _), do: %{dir => ts}

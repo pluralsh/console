@@ -26,12 +26,17 @@ defmodule Console.Deployments.KubeVersions.Table do
     defstruct [:version, :extended, :extended_from]
 
     def new(attrs) do
-      %__MODULE__{
+      backfill_extended(%__MODULE__{
         version: attrs["version"],
         extended: attrs["extended"],
         extended_from: parse_date(attrs["extended_from"])
-      }
+      })
     end
+
+    defp backfill_extended(%__MODULE__{extended: true} = vsn), do: vsn
+    defp backfill_extended(%__MODULE__{extended_from: %DateTime{} = dt} = vsn),
+      do: %{vsn | extended: Timex.after?(DateTime.utc_now(), dt)}
+    defp backfill_extended(vsn), do: vsn
 
     defp parse_date(from) when is_binary(from) do
       with {:ok, ts} <- Timex.parse(from, "{YYYY}-{0M}-{0D}"),

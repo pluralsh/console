@@ -9,6 +9,7 @@ defmodule Console.AI.Workbench.Engine do
      message history to the memory engine to inform the next iteration of the loop.
   3. A complete tool is used to mark the conclusion of the job.
   """
+  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
@@ -69,7 +70,7 @@ defmodule Console.AI.Workbench.Engine do
     |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{conclusion: conclusion, metrics: metrics, todos: todos}} ->
-        Console.drop_nils(%{
+        drop_empty(%{
           conclusion: conclusion,
           todos: todos,
           metadata: %{metrics: metrics},
@@ -118,12 +119,15 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp spawn_activity(%Notes{status: status, summary: summary} = call, %__MODULE__{job: job}) do
-    Workbenches.update_job_status(%{
-      status: Console.mapify(status),
+    Console.mapify(status)
+    |> Map.drop([:id])
+    |> then(& %{
+      status: &1,
       prompt: summary,
       output: summary,
       tool_call: tool_attrs(call)
-    }, job)
+    })
+    |> Workbenches.update_job_status(job)
   end
 
   defp spawn_activity(_, _), do: :ignore
@@ -151,10 +155,11 @@ defmodule Console.AI.Workbench.Engine do
 
   defp tools(%WorkbenchJob{} = job, %Environment{skills: skills}) do
     subagents = Environment.subagents(job)
+    categories = Environment.categories(job)
     [
       %Skills{skills: skills},
       %Skill{skills: skills},
-      %Subagents{subagents: subagents},
+      %Subagents{subagents: subagents, categories: categories},
       %Subagent{subagents: subagents},
       %FetchNotes{job: job},
       Notes,

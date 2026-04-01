@@ -4,6 +4,7 @@ import {
   CloseIcon,
   ComboBox,
   Flex,
+  FlexProps,
   ListBoxFooterPlus,
   ListBoxItem,
   Select,
@@ -177,6 +178,7 @@ export function LogsLabelsPicker({
   time,
   addLabel,
   selectedLabels,
+  ...props
 }: {
   logs: LogLineFragment[]
   clusterId?: string
@@ -185,7 +187,7 @@ export function LogsLabelsPicker({
   time?: LogTimeRange
   addLabel: (key: string, value: string) => void
   selectedLabels: LogFacetInput[]
-}) {
+} & FlexProps) {
   const [field, setField] = useState('')
   const [comboBoxInput, setComboBoxInput] = useState('')
 
@@ -221,7 +223,7 @@ export function LogsLabelsPicker({
   }
 
   return (
-    <Flex>
+    <Flex {...props}>
       <FillLevelDiv fillLevel={1}>
         <Select
           width={240}
@@ -256,32 +258,34 @@ export function LogsLabelsPicker({
           ))}
         </Select>
       </FillLevelDiv>
-      <ComboBox
-        isDisabled={!field}
-        startIcon={null}
-        showArrow={false}
-        allowsEmptyCollection
-        loading={loading}
-        inputValue={comboBoxInput}
-        onInputChange={setComboBoxInput}
-        onSelectionChange={(key) => {
-          if (!field || !key) return
-          addLabel(field, `${key}`)
-          clearSelections()
-        }}
-        inputProps={{
-          placeholder: 'Value',
-          style: { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 },
-        }}
-      >
-        {filteredLabelOptions.map(({ label }) => (
-          <ListBoxItem
-            key={label}
-            label={label}
-            textValue={label}
-          />
-        ))}
-      </ComboBox>
+      <div css={{ flex: 1 }}>
+        <ComboBox
+          isDisabled={!field}
+          startIcon={null}
+          showArrow={false}
+          allowsEmptyCollection
+          loading={loading}
+          inputValue={comboBoxInput}
+          onInputChange={setComboBoxInput}
+          onSelectionChange={(key) => {
+            if (!field || !key) return
+            addLabel(field, `${key}`)
+            clearSelections()
+          }}
+          inputProps={{
+            placeholder: 'Value',
+            style: { borderTopLeftRadius: 0, borderBottomLeftRadius: 0 },
+          }}
+        >
+          {filteredLabelOptions.map(({ label }) => (
+            <ListBoxItem
+              key={label}
+              label={label}
+              textValue={label}
+            />
+          ))}
+        </ComboBox>
+      </div>
     </Flex>
   )
 }

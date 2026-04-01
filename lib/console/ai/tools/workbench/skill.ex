@@ -20,7 +20,7 @@ defmodule Console.AI.Tools.Workbench.Skill do
 
   def implement(_, %__MODULE__{skills: %{} = skills, name: name}) do
     case Map.get(skills, name) do
-      %{contents: contents} -> {:ok, contents}
+      %Console.AI.Workbench.Skill{contents: contents} -> {:ok, contents}
       _ -> {:error, "Skill #{name} not found"}
     end
   end

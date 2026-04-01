@@ -429,6 +429,14 @@ defmodule Console.GraphQl.Deployments.Observability do
 
       resolve &Deployments.list_observability_webhooks/2
     end
+
+    field :monitor, :monitor do
+      @desc "Fetch a single monitor by ID"
+      middleware Authenticated
+      arg :id, non_null(:id), description: "ID of the monitor to fetch"
+
+      resolve &Deployments.get_monitor/2
+    end
   end
 
   @desc "Mutations for managing observability providers, webhooks, alerts, and monitors"

@@ -46,6 +46,8 @@ func (in *ElasticProvider) Logs(ctx context.Context, input *toolquery.LogsQueryI
 
 	resp, err := in.client.Search().
 		Index(in.conn.GetIndex()).
+		Header("Accept", "application/json").
+		Header("Content-Type", "application/json").
 		Request(in.toRequest(input)).
 		Do(ctx)
 	if err != nil {
@@ -80,6 +82,20 @@ func (in *ElasticProvider) toLogsQueryOutput(resp *search.Response) (*toolquery.
 
 func (in *ElasticProvider) toRequest(input *toolquery.LogsQueryInput) *search.Request {
 	query := strings.TrimSpace(input.Query)
+
+	facets := []types.Query{}
+	if len(input.GetFacets()) > 0 {
+		facets = lo.Map(input.GetFacets(), func(facet *toolquery.LogsQueryFacet, _ int) types.Query {
+			return types.Query{
+				Term: map[string]types.TermQuery{
+					facet.GetName(): {
+						Value: facet.GetValue(),
+					},
+				},
+			}
+		})
+	}
+
 	request := &search.Request{
 		Query: &types.Query{
 			Bool: &types.BoolQuery{
@@ -92,7 +108,7 @@ func (in *ElasticProvider) toRequest(input *toolquery.LogsQueryInput) *search.Re
 							QueryStringQueryCaster(),
 					},
 				},
-				Filter: []types.Query{
+				Filter: append([]types.Query{
 					{Range: map[string]types.RangeQuery{
 						"@timestamp": types.DateRangeQuery{
 							Gte: lo.ToPtr(input.GetRange().GetStart().AsTime().UTC().Format(time.RFC3339Nano)),
@@ -100,7 +116,7 @@ func (in *ElasticProvider) toRequest(input *toolquery.LogsQueryInput) *search.Re
 						},
 					}},
 					{Exists: &types.ExistsQuery{Field: "message"}},
-				},
+				}, facets...),
 			},
 		},
 	}
@@ -126,8 +142,9 @@ func (in *ElasticProvider) newElasticClient() (*elasticsearch.TypedClient, error
 	}
 
 	return elasticsearch.NewTypedClient(elasticsearch.Config{
-		Addresses: []string{in.conn.GetUrl()},
-		Username:  in.conn.GetUsername(),
-		Password:  in.conn.GetPassword(),
+		Addresses:               []string{in.conn.GetUrl()},
+		Username:                in.conn.GetUsername(),
+		Password:                in.conn.GetPassword(),
+		EnableCompatibilityMode: false,
 	})
 }

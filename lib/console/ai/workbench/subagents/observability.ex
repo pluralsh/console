@@ -21,9 +21,9 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     case Enum.find(messages, &match?(%ObservabilityResult{}, &1)) do
       %ObservabilityResult{} = result -> {:halt, %{
         status: :successful,
-        result: Console.mapify(result)
+        result: Console.mapify(result) |> Map.drop([:id])
       }}
-      _ -> last_message(messages, & {:cont, %{status: :failed, error: &1}})
+      _ -> last_message(messages, & {:cont, %{status: :failed, result: %{error: &1}}})
     end
   end
 

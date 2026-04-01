@@ -75,29 +75,13 @@ func (in *SplunkProvider) Logs(ctx context.Context, input *toolquery.LogsQueryIn
 
 func (in *SplunkProvider) queryParams(input *toolquery.LogsQueryInput) url.Values {
 	values := url.Values{
-		"search":        {in.searchString(input.Query, input.GetLimit())},
+		"search":        {splunkSearchWithFacets(input.Query, input.GetLimit(), input.GetFacets())},
 		"earliest_time": {in.toSplunkTime(input.GetRange().GetStart().AsTime())},
 		"latest_time":   {in.toSplunkTime(input.GetRange().GetEnd().AsTime())},
 		"output_mode":   {"json"},
 	}
 
 	return values
-}
-
-func (in *SplunkProvider) searchString(query string, limit int32) string {
-	trimmed := strings.TrimSpace(query)
-	if strings.HasPrefix(trimmed, "search ") {
-		if limit > 0 {
-			return fmt.Sprintf("%s | head %d", trimmed, limit)
-		}
-		return trimmed
-	}
-
-	base := "search " + trimmed
-	if limit > 0 {
-		return fmt.Sprintf("%s | head %d", base, limit)
-	}
-	return base
 }
 
 func (in *SplunkProvider) toSplunkTime(ts time.Time) string {

@@ -7,6 +7,7 @@ import {
   WorkbenchJobTinyFragment,
   useWorkbenchJobsQuery,
 } from 'generated/graphql'
+import { truncate } from 'lodash'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
@@ -45,10 +46,10 @@ export function WorkbenchJobsTable({ workbenchId }: { workbenchId: string }) {
 
 const columnHelper = createColumnHelper<WorkbenchJobTinyFragment>()
 const columns = [
-  columnHelper.accessor(({ prompt }) => prompt, {
-    id: 'prompt',
-    meta: { gridTemplate: '1fr' },
-  }),
+  columnHelper.accessor(
+    ({ prompt }) => truncate(prompt ?? '', { length: 150 }),
+    { id: 'prompt', meta: { gridTemplate: '1fr' } }
+  ),
   columnHelper.accessor(({ status }) => status, {
     id: 'status',
     cell: ({ getValue }) => <RunStatusChip status={getValue()} />,

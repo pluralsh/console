@@ -101,6 +101,15 @@ defmodule Toolquery.MetricsQueryInput do
   field :step, 4, proto3_optional: true, type: :string
 end
 
+defmodule Toolquery.LogsQueryFacet do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :name, 1, type: :string
+  field :value, 2, type: :string
+end
+
 defmodule Toolquery.LogsQueryInput do
   @moduledoc false
 
@@ -110,6 +119,7 @@ defmodule Toolquery.LogsQueryInput do
   field :query, 2, type: :string
   field :range, 3, type: Toolquery.TimeRange
   field :limit, 4, proto3_optional: true, type: :int32
+  field :facets, 5, repeated: true, type: Toolquery.LogsQueryFacet
 end
 
 defmodule Toolquery.TracesQueryInput do

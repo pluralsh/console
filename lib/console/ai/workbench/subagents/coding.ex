@@ -20,7 +20,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
   defp reducer(activity, messages, _) do
     case Enum.find(messages, &match?(%AgentRun{}, &1)) do
       %AgentRun{} = run -> {:halt, persist_and_poll_run(activity,run)}
-      _ -> last_message(messages, & {:cont, %{status: :failed, error: &1}})
+      _ -> last_message(messages, & {:cont, %{status: :failed, result: %{error: &1}}})
     end
   end
 

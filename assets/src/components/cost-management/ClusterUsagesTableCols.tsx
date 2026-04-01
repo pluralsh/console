@@ -23,6 +23,7 @@ export const ColCluster = (
 ).accessor(({ cluster }) => cluster?.name, {
   id: 'cluster',
   header: 'Cluster',
+  enableSorting: true,
   meta: { gridTemplate: '1fr' },
   cell: function Cell({ getValue }) {
     const name = getValue() ?? '--'
@@ -48,6 +49,7 @@ export const ColNamespace = (
 ).accessor(({ namespace }) => namespace, {
   id: 'namespace',
   header: 'Namespace',
+  enableSorting: true,
   meta: { gridTemplate: '1fr' },
   cell: function Cell({ getValue }) {
     const namespace = getValue()
@@ -61,6 +63,8 @@ export const ColNodeCost = (
 ).accessor(({ nodeCost }) => nodeCost, {
   id: 'nodeCost',
   header: 'Node cost',
+  enableSorting: true,
+  sortingFn: 'basic',
   cell: function Cell({ getValue }) {
     const nodeCost = getValue()
 
@@ -75,6 +79,8 @@ export const ColNodeCost = (
 export const ColCpuCost = columnHelper.accessor(({ cpuCost }) => cpuCost, {
   id: 'cpuCost',
   header: 'CPU cost',
+  enableSorting: true,
+  sortingFn: 'basic',
   cell: function Cell({ getValue }) {
     const cpuCost = getValue()
 
@@ -91,6 +97,8 @@ export const ColStorageCost = columnHelper.accessor(
   {
     id: 'storageCost',
     header: 'Storage cost',
+    enableSorting: true,
+    sortingFn: 'basic',
     cell: function Cell({ getValue }) {
       const storage = getValue()
 
@@ -104,6 +112,8 @@ export const ColLoadBalancerCost = columnHelper.accessor(
   {
     id: 'loadBalancerCost',
     header: 'Load balancer cost',
+    enableSorting: true,
+    sortingFn: 'basic',
     cell: function Cell({ getValue }) {
       const loadBalancerCost = getValue()
 
@@ -115,11 +125,12 @@ export const ColLoadBalancerCost = columnHelper.accessor(
 )
 
 export const ColNetworkCost = columnHelper.accessor(
-  ({ ingressCost, egressCost }) =>
-    (ingressCost || egressCost) && { ingressCost, egressCost },
+  ({ ingressCost, egressCost }) => (ingressCost ?? 0) / (egressCost ?? 0),
   {
     id: 'networkCost',
     header: 'Network cost',
+    enableSorting: true,
+    sortingFn: 'basic',
     cell: function Cell({ row: { original } }) {
       const { ingressCost, egressCost } = original
 
@@ -135,19 +146,20 @@ export const ColNetworkCost = columnHelper.accessor(
 export const ColCpuEfficiency = columnHelper.accessor(
   (usage) => {
     const efficiency = (usage.cpuUtil ?? NaN) / (usage.cpu ?? NaN)
-    return isNaN(efficiency) ? NaN : Math.round(efficiency * 100)
+    return !Number.isFinite(efficiency) ? null : Math.round(efficiency * 100)
   },
   {
     id: 'cpuEfficiency',
     header: 'CPU efficiency',
+    enableSorting: true,
+    sortingFn: 'basic',
+
     cell: function Cell({ getValue }) {
       const efficiency = getValue()
 
       return (
         <SimpleTextWrapperSC>
-          {isNaN(efficiency) || efficiency === Infinity
-            ? '--'
-            : `${efficiency}%`}
+          {efficiency == null ? '--' : `${efficiency}%`}
         </SimpleTextWrapperSC>
       )
     },
@@ -159,6 +171,8 @@ export const ColMemoryCost = columnHelper.accessor(
   {
     id: 'memoryCost',
     header: 'Memory cost',
+    enableSorting: true,
+    sortingFn: 'basic',
     cell: function Cell({ getValue }) {
       const memoryCost = getValue()
 
@@ -174,20 +188,20 @@ export const ColMemoryCost = columnHelper.accessor(
 export const ColMemoryEfficiency = columnHelper.accessor(
   (usage) => {
     const efficiency = (usage.memUtil ?? NaN) / (usage.memory ?? NaN)
-    return isNaN(efficiency) ? NaN : Math.round(efficiency * 100)
+    return !Number.isFinite(efficiency) ? null : Math.round(efficiency * 100)
   },
   {
     id: 'memoryEfficiency',
     header: 'Memory efficiency',
+    enableSorting: true,
+    sortingFn: 'basic',
     meta: { gridTemplate: 'auto' },
     cell: function Cell({ getValue }) {
       const efficiency = getValue()
 
       return (
         <SimpleTextWrapperSC>
-          {isNaN(efficiency) || efficiency === Infinity
-            ? '--'
-            : `${efficiency}%`}
+          {efficiency == null ? '--' : `${efficiency}%`}
         </SimpleTextWrapperSC>
       )
     },

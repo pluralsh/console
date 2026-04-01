@@ -46,6 +46,10 @@ defmodule Console.Schema.Monitor do
     from(m in query, where: m.service_id == ^id)
   end
 
+  def search(query \\ __MODULE__, search) do
+    from(m in query, where: ilike(m.name, ^"%#{search}%"))
+  end
+
   def pollable(query \\ __MODULE__) do
     from(m in query, where: not is_nil(m.next_run_at) and m.next_run_at <= ^DateTime.utc_now())
   end

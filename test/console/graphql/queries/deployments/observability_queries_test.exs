@@ -33,4 +33,50 @@ defmodule Console.GraphQl.Deployments.ObservabilityQueriesTest do
              |> ids_equal(providers)
     end
   end
+
+  describe "monitor" do
+    test "it can fetch a monitor by id" do
+      monitor = insert(:monitor)
+
+      {:ok, %{data: %{"monitor" => found}}} = run_query("""
+        query Monitor($id: ID!) {
+          monitor(id: $id) {
+            id
+            name
+            threshold {
+              aggregate
+              value
+            }
+          }
+        }
+      """, %{"id" => monitor.id}, %{current_user: admin_user()})
+
+      assert found["id"] == monitor.id
+      assert found["name"] == monitor.name
+      assert found["threshold"]["aggregate"] == "MAX"
+      assert found["threshold"]["value"] == 1.0
+    end
+  end
+
+  describe "serviceDeployment monitors" do
+    test "it can search monitors by name" do
+      service = insert(:service)
+      m1 = insert(:monitor, name: "cpu-high", service: service)
+      _m2 = insert(:monitor, name: "mem-high", service: service)
+
+      {:ok, %{data: %{"serviceDeployment" => %{"monitors" => found}}}} = run_query("""
+        query Monitors($id: ID!, $q: String) {
+          serviceDeployment(id: $id) {
+            monitors(first: 10, q: $q) {
+              edges { node { id name } }
+            }
+          }
+        }
+      """, %{"id" => service.id, "q" => "cpu"}, %{current_user: admin_user()})
+
+      monitors = from_connection(found)
+      assert length(monitors) == 1
+      assert hd(monitors)["id"] == m1.id
+    end
+  end
 end

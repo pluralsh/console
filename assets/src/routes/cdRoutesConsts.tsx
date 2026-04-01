@@ -71,6 +71,10 @@ export const FLOW_SERVICE_PATH_MATCHER_ABS =
 export const SERVICE_COMPONENTS_PATH = 'components'
 export const SERVICE_PRS_PATH = 'prs'
 
+export const SERVICE_OBSERVABILITY_REL_PATH = 'observability' as const
+export const SERVICE_MONITORS_REL_PATH = 'monitors' as const
+export const SERVICE_MONITOR_PARAM_ID = 'monitorId' as const
+
 export const COMPONENT_PARAM_ID = `componentId` as const
 export const CD_SERVICE_COMPONENT_PATH_MATCHER_ABS = `${CD_SERVICE_PATH_MATCHER_ABS}/${SERVICE_COMPONENTS_PATH}/:${COMPONENT_PARAM_ID}`
 export const FLOW_SERVICE_COMPONENT_PATH_MATCHER_ABS = `${FLOW_SERVICE_PATH_MATCHER_ABS}/${SERVICE_COMPONENTS_PATH}/:${COMPONENT_PARAM_ID}`

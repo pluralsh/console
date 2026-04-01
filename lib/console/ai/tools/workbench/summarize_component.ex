@@ -6,7 +6,7 @@ defmodule Console.AI.Tools.Workbench.SummarizeComponent do
   alias Console.AI.Summary.Summarizable
 
   embedded_schema do
-    field :prompt, :string
+    field :prompt,       :string
     field :component_id, :string
   end
 
@@ -16,6 +16,7 @@ defmodule Console.AI.Tools.Workbench.SummarizeComponent do
     model
     |> cast(attrs, @valid)
     |> validate_required([:prompt, :component_id])
+    |> check_uuid(:component_id)
   end
 
   @json_schema Console.priv_file!("tools/explain/summarize_component.json") |> Jason.decode!()

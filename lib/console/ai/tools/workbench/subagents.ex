@@ -3,6 +3,7 @@ defmodule Console.AI.Tools.Workbench.Subagents do
 
   embedded_schema do
     field :subagents, {:array, Console.AI.Tools.Workbench.Subagent.Subagent}, virtual: true
+    field :categories, {:array, Console.Schema.WorkbenchTool.Category}, virtual: true
   end
 
   @json_schema Console.priv_file!("tools/empty.json") |> Jason.decode!()
@@ -16,17 +17,22 @@ defmodule Console.AI.Tools.Workbench.Subagents do
     |> cast(attrs, [])
   end
 
-  def implement(_, %__MODULE__{subagents: subagents}) do
+  def implement(_, %__MODULE__{subagents: subagents, categories: categories}) do
     Enum.map(subagents, fn subagent -> %{
       name: subagent,
-      description: subagent_description(subagent)
+      description: subagent_description(subagent, categories)
     } end)
     |> Jason.encode()
   end
 
-  defp subagent_description(:coding), do: "Invoke a coding subagent to analyze or modify code, generating a pull request."
-  defp subagent_description(:infrastructure), do: "Invoke an infrastructure subagent to make a infrastructure change."
-  defp subagent_description(:observability), do: "Invoke an observability subagent to query and analyze observability data."
-  defp subagent_description(:integration), do: "Invoke an integration subagent to interact with internal or external tools and systems, not directly related to dev infrastructure."
-  defp subagent_description(_), do: "Unknown subagent"
+  defp subagent_description(:coding, _), do: "Invoke a coding subagent to analyze or modify code, generating a pull request."
+  defp subagent_description(:infrastructure, _), do: "Invoke an infrastructure subagent to determine infrastructure state and configuration."
+  defp subagent_description(:observability, categories), do: "Invoke an observability subagent to query and analyze observability data.  Supported tool capabilities are: #{observability_categories(categories)}"
+  defp subagent_description(:integration, _), do: "Invoke an integration subagent to interact with internal or external tools and systems, not directly related to dev infrastructure."
+  defp subagent_description(_, _), do: "Unknown subagent"
+
+  defp observability_categories(cats) do
+    Enum.filter(cats, & &1 in [:metrics, :logs, :traces])
+    |> Enum.join(", ")
+  end
 end

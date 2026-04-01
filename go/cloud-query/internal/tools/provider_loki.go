@@ -34,7 +34,7 @@ func (in *LokiProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInpu
 
 	resp, err := client.Logs(
 		ctx,
-		input.Query,
+		mergeLokiQueryWithFacets(input.Query, input.GetFacets()),
 		strconv.FormatInt(input.GetRange().GetStart().AsTime().UnixNano(), 10),
 		strconv.FormatInt(input.GetRange().GetEnd().AsTime().UnixNano(), 10),
 		strconv.Itoa(int(input.GetLimit())))

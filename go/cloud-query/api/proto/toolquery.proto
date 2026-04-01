@@ -73,11 +73,17 @@ message MetricsQueryInput {
   optional string step = 4;
 }
 
+message LogsQueryFacet {
+  string name = 1;
+  string value = 2;
+}
+
 message LogsQueryInput {
   ToolConnection connection = 1;
   string query = 2;
   TimeRange range = 3;
   optional int32 limit = 4;
+  repeated LogsQueryFacet facets = 5;
 }
 
 message TracesQueryInput {

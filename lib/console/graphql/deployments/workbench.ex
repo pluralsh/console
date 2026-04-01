@@ -31,6 +31,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_configuration_attributes do
     field :infrastructure, :workbench_infrastructure_attributes, description: "infrastructure capabilities (services, stacks, kubernetes)"
     field :coding,         :workbench_coding_attributes, description: "coding capabilities (mode, repositories)"
+    field :observability,  :workbench_observability_attributes, description: "observability capabilities (logs, metrics)"
   end
 
   input_object :workbench_infrastructure_attributes do
@@ -42,6 +43,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_coding_attributes do
     field :mode,         :agent_run_mode, description: "the mode of the coding agent (e.g. analyze, write)"
     field :repositories, list_of(:string), description: "allowed repository identifiers"
+  end
+
+  input_object :workbench_observability_attributes do
+    field :logs,    :boolean, description: "enable logs capability"
+    field :metrics, :boolean, description: "enable metrics capability"
   end
 
   input_object :workbench_skills_attributes do
@@ -247,6 +253,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_job_activity_result do
     field :output,     :string, description: "output from the activity"
+    field :error,      :string, description: "error from the activity"
     field :job_update, :workbench_job_activity_job_update, description: "job update (diff, theory, conclusion) when present"
     field :metrics,    list_of(:workbench_job_activity_metric), description: "metrics emitted by the activity"
     field :logs,       list_of(:workbench_job_activity_log), description: "logs emitted by the activity"
@@ -296,6 +303,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_configuration do
     field :infrastructure, :workbench_infrastructure, description: "infrastructure capabilities"
     field :coding,         :workbench_coding, description: "coding capabilities"
+    field :observability,  :workbench_observability, description: "observability capabilities"
   end
 
   object :workbench_infrastructure do
@@ -307,6 +315,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_coding do
     field :mode,         :agent_run_mode, description: "the mode of the coding agent"
     field :repositories, list_of(:string), description: "allowed repository identifiers"
+  end
+
+  object :workbench_observability do
+    field :logs,    :boolean, description: "logs capability enabled"
+    field :metrics, :boolean, description: "metrics capability enabled"
   end
 
   object :workbench_skills do

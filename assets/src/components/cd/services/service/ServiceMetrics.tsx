@@ -2,18 +2,19 @@ import {
   Card,
   EmptyState,
   Flex,
+  HeatMapIcon,
   ListBoxItem,
   Select,
+  TimeSeriesIcon,
 } from '@pluralsh/design-system'
-import { Graph } from 'components/utils/Graph'
-import GraphHeader from 'components/utils/GraphHeader'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import RangePicker from 'components/utils/RangePicker'
-import { SubTabs } from 'components/utils/SubTabs'
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import {
   useLoadingDeploymentSettings,
   useMetricsEnabled,
 } from 'components/contexts/DeploymentSettingsContext'
+import { Graph } from 'components/utils/Graph'
+import GraphHeader from 'components/utils/GraphHeader'
+import RangePicker from 'components/utils/RangePicker'
 import {
   HeatMapFlavor,
   MetricResponseFragment,
@@ -21,39 +22,60 @@ import {
   useServiceMetricsQuery,
 } from 'generated/graphql'
 import { capitalize, isEmpty } from 'lodash'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 
 import { CaptionP, Subtitle2H1 } from 'components/utils/typography/Text'
 import { useMemo, useState } from 'react'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import {
+  Outlet,
+  useLocation,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
+import { dayjsExtended as dayjs, DURATIONS } from 'utils/datetime'
 import { isNonNullable } from 'utils/isNonNullable'
 import { Prometheus } from 'utils/prometheus.ts'
-import { dayjsExtended as dayjs, DURATIONS } from 'utils/datetime'
 
 import { GqlError } from 'components/utils/Alert'
+import { ButtonGroup } from 'components/utils/ButtonGroup.tsx'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { UtilizationHeatmap } from 'components/utils/UtilizationHeatmap'
 
 const HEATMAP_HEIGHT = 350
-const METRICS_TABS = [
-  { path: 'timeseries', label: 'Timeseries' },
-  { path: 'heatmap', label: 'Heat map' },
+const METRICS_DIRECTORY = [
+  { path: 'timeseries', icon: <TimeSeriesIcon />, tooltip: 'Timeseries' },
+  { path: 'heatmap', icon: <HeatMapIcon />, tooltip: 'Heat map' },
 ]
 
 export function ServiceMetrics() {
   const metricsEnabled = useMetricsEnabled()
   const loadingDeploymentSettings = useLoadingDeploymentSettings()
+  const { pathname } = useLocation()
 
-  if (!(metricsEnabled || loadingDeploymentSettings)) {
-    return <EmptyState message="Metrics are not enabled." />
-  }
-
-  return (
-    <WrapperSC>
-      <SubTabs directory={METRICS_TABS} />
-      <Outlet context={{ metricsEnabled, loadingDeploymentSettings }} />
-    </WrapperSC>
+  const currentTab = useMemo(
+    () =>
+      METRICS_DIRECTORY.find(({ path }) => pathname.endsWith(path))?.path ??
+      'timeseries',
+    [pathname]
   )
+
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <ButtonGroup
+          directory={METRICS_DIRECTORY}
+          tab={currentTab}
+          toPath={(path) => `metrics/${path}`}
+        />
+      ),
+      [currentTab]
+    )
+  )
+
+  if (!(metricsEnabled || loadingDeploymentSettings))
+    return <EmptyState message="Metrics are not enabled." />
+
+  return <Outlet context={{ metricsEnabled, loadingDeploymentSettings }} />
 }
 
 function ServiceMetricsHeatmap() {
@@ -103,7 +125,7 @@ function ServiceMetricsHeatmap() {
         align="center"
         justifyContent="space-between"
       >
-        <Subtitle2H1>Memory & CPU utliization</Subtitle2H1>
+        <Subtitle2H1>Memory & CPU utilization</Subtitle2H1>
         <Flex
           gap="small"
           align="center"
@@ -209,9 +231,7 @@ function Graphs({
     [cpu, mem]
   )
 
-  if (!memValues && !cpuValues) {
-    return null
-  }
+  if (!memValues && !cpuValues) return null
 
   return (
     <div
@@ -224,12 +244,9 @@ function Graphs({
       }}
     >
       {cpuValues && (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-          }}
+        <Flex
+          direction="column"
+          grow={1}
         >
           <GraphHeader title="Overall CPU Usage (cores)" />
           <Graph
@@ -237,15 +254,12 @@ function Graphs({
             yFormat={(v) => Prometheus.format(v, 'cpu')}
             tickRotation={undefined}
           />
-        </div>
+        </Flex>
       )}
       {memValues && (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-          }}
+        <Flex
+          direction="column"
+          grow={1}
         >
           <GraphHeader title="Overall Memory Usage (bytes)" />
           <Graph
@@ -253,7 +267,7 @@ function Graphs({
             yFormat={(v) => Prometheus.format(v, 'memory')}
             tickRotation={undefined}
           />
-        </div>
+        </Flex>
       )}
     </div>
   )
@@ -266,7 +280,6 @@ function PodGraphs({
   cpu: MetricResponseFragment[]
   mem: MetricResponseFragment[]
 }) {
-  const theme = useTheme()
   const { cpuGraph, memGraph } = useMemo(() => {
     const cpuGraph = cpu.map(({ metric, values }) => ({
       id: (metric as any)?.pod,
@@ -280,27 +293,19 @@ function PodGraphs({
     return { cpuGraph, memGraph }
   }, [cpu, mem])
 
-  if (!memGraph && !cpuGraph) {
-    return null
-  }
+  if (!memGraph && !cpuGraph) return null
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.large,
-        flexGrow: 1,
-        height: 320,
-        padding: theme.spacing.large,
-      }}
+    <Flex
+      gap="large"
+      grow={1}
+      height={320}
+      padding="large"
     >
       {!isEmpty(cpuGraph) && (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-          }}
+        <Flex
+          direction="column"
+          grow={1}
         >
           <GraphHeader title="Pod CPU Usage (cores)" />
           <Graph
@@ -308,15 +313,12 @@ function PodGraphs({
             yFormat={(v) => Prometheus.format(v, 'cpu')}
             tickRotation={undefined}
           />
-        </div>
+        </Flex>
       )}
       {!isEmpty(memGraph) && (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-          }}
+        <Flex
+          direction="column"
+          grow={1}
         >
           <GraphHeader title="Pod Memory Usage (bytes)" />
           <Graph
@@ -324,9 +326,9 @@ function PodGraphs({
             yFormat={(v) => Prometheus.format(v, 'memory')}
             tickRotation={undefined}
           />
-        </div>
+        </Flex>
       )}
-    </div>
+    </Flex>
   )
 }
 
@@ -383,15 +385,13 @@ function ServiceMetricsTimeseries() {
     )
   }
 
-  if (loading && !data) return <LoadingIndicator />
-
   return (
     <Flex
       direction="column"
-      gap="medium"
+      gap="small"
       height="100%"
       width="100%"
-      overflow="hidden"
+      overflow="auto"
     >
       <RangePicker
         duration={duration}
@@ -399,29 +399,18 @@ function ServiceMetricsTimeseries() {
         position="sticky"
         top={0}
       />
-      {metricsError ? (
+      {!data && loading ? (
+        <RectangleSkeleton
+          $height="100%"
+          $width="100%"
+        />
+      ) : metricsError ? (
         <GqlError error={metricsError} />
       ) : (
-        <Card
-          css={{
-            padding: theme.spacing.medium,
-            overflow: 'auto',
-            gap: theme.spacing.small,
-            maxHeight: '100%',
-          }}
-        >
-          {content}
-        </Card>
+        <Card css={{ padding: theme.spacing.medium }}>{content}</Card>
       )}
     </Flex>
   )
 }
 
 export { ServiceMetricsHeatmap, ServiceMetricsTimeseries }
-
-const WrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.large,
-  height: '100%',
-}))

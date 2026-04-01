@@ -1,0 +1,93 @@
+fragment MonitorThreshold on MonitorThreshold {
+  aggregate
+  value
+}
+
+fragment MonitorTiny on Monitor {
+  id
+  name
+  evaluationCron
+  threshold {
+    ...MonitorThreshold
+  }
+  query {
+    log {
+      query
+    }
+  }
+}
+
+fragment MonitorLogQuery on MonitorLogQuery {
+  bucketSize
+  duration
+  facets {
+    key
+    value
+  }
+  operator
+  query
+}
+
+fragment Monitor on Monitor {
+  ...MonitorTiny
+  alertTemplate
+  description
+  evaluationCron
+  query {
+    log {
+      ...MonitorLogQuery
+    }
+  }
+  service {
+    id
+  }
+  severity
+  type
+  workbench {
+    id
+  }
+}
+
+query MonitorDetails($id: ID!) {
+  monitor(id: $id) {
+    ...Monitor
+  }
+}
+
+query ServiceMonitors(
+  $serviceId: ID!
+  $q: String
+  $first: Int
+  $after: String
+) {
+  serviceDeployment(id: $serviceId) {
+    id
+    monitors(q: $q, first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...MonitorTiny
+        }
+      }
+    }
+  }
+}
+
+mutation CreateMonitor($attributes: MonitorAttributes!) {
+  createMonitor(attributes: $attributes) {
+    ...MonitorTiny
+  }
+}
+
+mutation UpdateMonitor($id: ID!, $attributes: MonitorAttributes!) {
+  updateMonitor(id: $id, attributes: $attributes) {
+    ...MonitorTiny
+  }
+}
+mutation DeleteMonitor($id: ID!) {
+  deleteMonitor(id: $id) {
+    id
+  }
+}

@@ -79,6 +79,8 @@ export function WorkbenchToolFormFields({
       return render(type, AtlassianFormFields)
     case WorkbenchToolType.Linear:
       return render(type, LinearFormFields)
+    case WorkbenchToolType.Splunk:
+      return render(type, SplunkFormFields)
   }
 }
 
@@ -355,6 +357,41 @@ function LinearFormFields({
   )
 }
 
+function SplunkFormFields({
+  config: c,
+  setConfig: set,
+}: ToolFormFieldProps<WorkbenchToolType.Splunk>) {
+  return (
+    <>
+      <InputField
+        label="URL"
+        required
+        placeholder="Splunk base URL"
+        value={c.url ?? ''}
+        onChange={(e) => set({ ...c, url: e.target.value })}
+      />
+      <InputField
+        label="Username"
+        placeholder="Basic auth username"
+        value={c.username ?? ''}
+        onChange={(e) => set({ ...c, username: e.target.value || undefined })}
+      />
+      <InputField
+        label="Password"
+        revealer
+        value={c.password ?? ''}
+        onChange={(e) => set({ ...c, password: e.target.value || undefined })}
+      />
+      <InputField
+        label="Bearer token"
+        revealer
+        value={c.token ?? ''}
+        onChange={(e) => set({ ...c, token: e.target.value || undefined })}
+      />
+    </>
+  )
+}
+
 function JsonEditorField({
   hint,
   value,
@@ -416,7 +453,7 @@ function InputField({ label, hint, required, ...props }: InputFieldProps) {
   )
 }
 
-const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
+export const EditableDivWrapperSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.medium,
   background: theme.colors['fill-zero'],
 }))

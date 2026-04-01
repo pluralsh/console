@@ -132,6 +132,9 @@ fragment WorkbenchJobTiny on WorkbenchJob {
   id
   prompt
   status
+  workbench {
+    id
+  }
 }
 
 fragment WorkbenchJobActivity on WorkbenchJobActivity {

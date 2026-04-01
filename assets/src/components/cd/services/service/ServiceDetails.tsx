@@ -7,6 +7,7 @@ import {
   ServiceDeploymentDetailsFragment,
   ServiceError,
   useServiceDeploymentQuery,
+  useServiceDeploymentTinyQuery,
 } from 'generated/graphql'
 
 import {
@@ -83,6 +84,37 @@ export const getServiceDetailsBreadcrumbs = ({
       ? [{ label: tab, ...(tab !== 'pods' && { url: `${pathPrefix}/${tab}` }) }]
       : []),
   ]
+}
+
+export function useServiceSubPageBreadcrumbs(section: string) {
+  const { serviceId } = useParams()
+  const { data } = useServiceDeploymentTinyQuery({
+    variables: { id: serviceId ?? '' },
+    skip: !serviceId,
+  })
+  const { serviceDeployment: service } = data ?? {}
+  const { flowIdOrName, flowData } = useCurrentFlow()
+  const { tab } =
+    useMatch(
+      `${flowIdOrName ? FLOW_SERVICE_PATH_MATCHER_ABS : CD_SERVICE_PATH_MATCHER_ABS}/${section}/:tab/*`
+    )?.params ?? {}
+
+  useSetBreadcrumbs(
+    useMemo(() => {
+      const detailsCrumbs = getServiceDetailsBreadcrumbs({
+        cluster: service?.cluster,
+        service: service ?? { id: serviceId ?? '' },
+        flow: flowData?.flow,
+      })
+      return [
+        ...detailsCrumbs,
+        { label: section, url: `${detailsCrumbs.at(-1)?.url}/${section}` },
+        { label: tab ?? '' },
+      ]
+    }, [service, flowData?.flow, serviceId, tab, section])
+  )
+
+  return { tab }
 }
 
 export const ErrorsLabelWithChip = memo(
@@ -165,16 +197,7 @@ export const getDirectory = ({
       label: <ErrorsLabelWithChip errors={serviceDeployment.errors} />,
       enabled: true,
     },
-    {
-      path: 'alerts',
-      label: (
-        <DirLabelWithChip
-          count={serviceDeployment.alerts?.edges?.length}
-          type="Alerts"
-        />
-      ),
-      enabled: true,
-    },
+    { path: 'observability', label: 'Observability', enabled: true },
     {
       path: 'recommendations',
       label: (
@@ -190,7 +213,6 @@ export const getDirectory = ({
       label: <InsightsTabLabel insight={serviceDeployment.insight} />,
       enabled: !!serviceDeployment.insight,
     },
-    { path: 'metrics', label: 'Metrics', enabled: metricsEnabled },
     { path: 'logs', label: 'Logs', enabled: logsEnabled },
     {
       path: 'network',

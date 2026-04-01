@@ -453,6 +453,12 @@ type RootQueryType {
 
   observabilityWebhooks(after: String, first: Int, before: String, last: Int): ObservabilityWebhookConnection
 
+  "List observability webhooks visible to the current user"
+  monitor(
+    "Fetch a single monitor by ID"
+    id: ID!
+  ): Monitor
+
   deploymentSettings: DeploymentSettings
 
   projects(after: String, first: Int, before: String, last: Int, q: String): ProjectConnection
@@ -2216,6 +2222,9 @@ input WorkbenchConfigurationAttributes {
 
   "coding capabilities (mode, repositories)"
   coding: WorkbenchCodingAttributes
+
+  "observability capabilities (logs, metrics)"
+  observability: WorkbenchObservabilityAttributes
 }
 
 input WorkbenchInfrastructureAttributes {
@@ -2235,6 +2244,14 @@ input WorkbenchCodingAttributes {
 
   "allowed repository identifiers"
   repositories: [String]
+}
+
+input WorkbenchObservabilityAttributes {
+  "enable logs capability"
+  logs: Boolean
+
+  "enable metrics capability"
+  metrics: Boolean
 }
 
 input WorkbenchSkillsAttributes {
@@ -2611,6 +2628,9 @@ type WorkbenchJobActivityResult {
   "output from the activity"
   output: String
 
+  "error from the activity"
+  error: String
+
   "job update (diff, theory, conclusion) when present"
   jobUpdate: WorkbenchJobActivityJobUpdate
 
@@ -2681,6 +2701,9 @@ type WorkbenchConfiguration {
 
   "coding capabilities"
   coding: WorkbenchCoding
+
+  "observability capabilities"
+  observability: WorkbenchObservability
 }
 
 type WorkbenchInfrastructure {
@@ -2700,6 +2723,14 @@ type WorkbenchCoding {
 
   "allowed repository identifiers"
   repositories: [String]
+}
+
+type WorkbenchObservability {
+  "logs capability enabled"
+  logs: Boolean
+
+  "metrics capability enabled"
+  metrics: Boolean
 }
 
 type WorkbenchSkills {
@@ -8180,7 +8211,18 @@ type ServiceDeployment {
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
   "list all monitors configured for this service"
-  monitors(after: String, first: Int, before: String, last: Int): MonitorConnection
+  monitors(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "search monitors by name"
+    q: String
+  ): MonitorConnection
 
   scalingRecommendations: [ClusterScalingRecommendation]
 

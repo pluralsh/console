@@ -141,6 +141,9 @@ import {
   PODS_REL_PATH,
   REPOS_REL_PATH,
   SERVICE_COMPONENTS_PATH,
+  SERVICE_MONITOR_PARAM_ID,
+  SERVICE_MONITORS_REL_PATH,
+  SERVICE_OBSERVABILITY_REL_PATH,
   SERVICE_PARAM_ID,
   SERVICE_PRS_PATH,
   SERVICE_SETTINGS_CONTEXTS_REL_PATH,
@@ -155,6 +158,9 @@ import {
 } from './cdRoutesConsts'
 import { FLOW_PARAM_ID_OR_NAME } from './flowRoutesConsts.tsx'
 import { pipelineRoutes } from './pipelineRoutes'
+import { ServiceObservability } from 'components/cd/services/service/ServiceObservability.tsx'
+import { ServiceMonitors } from 'components/cd/services/service/monitors/ServiceMonitors.tsx'
+import { ServiceMonitorCreateOrEdit } from 'components/cd/services/service/monitors/create-edit/ServiceMonitorCreateOrEdit.tsx'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -497,126 +503,158 @@ export const getPodDetailsRoutes = (
   </Route>
 )
 
-export const getServiceDetailsRoutes = (type: 'cd' | 'flow') => (
-  <Route
-    path={type === 'cd' ? CD_SERVICE_REL_PATH : FLOW_SERVICE_PATH_MATCHER_ABS}
-    element={<ServiceDetails />}
-  >
-    <Route
-      index
-      element={
-        <Navigate
-          replace
-          to={SERVICE_COMPONENTS_PATH}
+export const getServiceDetailsRoutes = (type: 'cd' | 'flow') => {
+  const basePath =
+    type === 'cd' ? CD_SERVICE_REL_PATH : FLOW_SERVICE_PATH_MATCHER_ABS
+  return (
+    <>
+      <Route
+        path={basePath}
+        element={<ServiceDetails />}
+      >
+        <Route
+          index
+          element={
+            <Navigate
+              replace
+              to={SERVICE_COMPONENTS_PATH}
+            />
+          }
         />
-      }
-    />
-    <Route
-      element={<ServiceComponents />}
-      path={SERVICE_COMPONENTS_PATH}
-    />
-    <Route
-      element={<ServiceErrors />}
-      path="errors"
-    />
-    <Route
-      element={<ServicePRs />}
-      path={SERVICE_PRS_PATH}
-    />
-    <Route
-      element={<ServiceLogs />}
-      path="logs"
-    />
-    <Route
-      element={<ServiceDryRun />}
-      path="dryrun"
-    />
-    <Route
-      element={<ServiceAlerts />}
-      path="alerts"
-    />
-    <Route
-      path={ALERT_INSIGHT_REL_PATH}
-      element={<AlertInsight type="service" />}
-    />
-    <Route
-      element={<ServiceScalingRecs />}
-      path="recommendations"
-    />
-    <Route
-      element={<ServiceMetrics />}
-      path="metrics"
-    >
-      <Route
-        index
-        element={
-          <Navigate
-            replace
-            to="timeseries"
+        <Route
+          element={<ServiceComponents />}
+          path={SERVICE_COMPONENTS_PATH}
+        />
+        <Route
+          element={<ServiceErrors />}
+          path="errors"
+        />
+        <Route
+          element={<ServicePRs />}
+          path={SERVICE_PRS_PATH}
+        />
+        <Route
+          element={<ServiceLogs />}
+          path="logs"
+        />
+        <Route
+          element={<ServiceDryRun />}
+          path="dryrun"
+        />
+        <Route
+          element={<ServiceScalingRecs />}
+          path="recommendations"
+        />
+        <Route
+          element={<ServiceNetwork />}
+          path="network"
+        />
+        <Route
+          element={<ServiceInsights />}
+          path="insights"
+        />
+        <Route
+          element={<ServiceSettings />}
+          path="settings"
+        >
+          <Route
+            index
+            element={
+              <Navigate
+                replace
+                to={SERVICE_SETTINGS_GIT_REL_PATH}
+              />
+            }
           />
-        }
-      />
-      <Route
-        element={<ServiceMetricsTimeseries />}
-        path="timeseries"
-      />
-      <Route
-        element={<ServiceMetricsHeatmap />}
-        path="heatmap"
-      />
-    </Route>
-    <Route
-      element={<ServiceNetwork />}
-      path="network"
-    />
-    <Route
-      element={<ServiceInsights />}
-      path="insights"
-    />
-    <Route
-      element={<ServiceSettings />}
-      path="settings"
-    >
-      <Route
-        index
-        element={
-          <Navigate
-            replace
-            to={SERVICE_SETTINGS_GIT_REL_PATH}
+          <Route
+            element={<ServiceGitSettings />}
+            path={SERVICE_SETTINGS_GIT_REL_PATH}
           />
-        }
+          <Route
+            element={<ServiceHelmSettings />}
+            path={SERVICE_SETTINGS_HELM_REL_PATH}
+          />
+          <Route
+            element={<ServiceSecrets />}
+            path={SERVICE_SETTINGS_SECRETS_REL_PATH}
+          />
+          <Route
+            element={<ServiceRevisions />}
+            path={SERVICE_SETTINGS_REVISIONS_REL_PATH}
+          />
+          <Route
+            element={<ServiceDependencies />}
+            path={SERVICE_SETTINGS_DEPENDENCIES_REL_PATH}
+          />
+          <Route
+            element={<ServiceStackImports />}
+            path={SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH}
+          />
+          <Route
+            element={<ServiceContexts />}
+            path={SERVICE_SETTINGS_CONTEXTS_REL_PATH}
+          />
+        </Route>
+        <Route
+          element={<ServiceObservability />}
+          path={SERVICE_OBSERVABILITY_REL_PATH}
+        >
+          <Route
+            index
+            element={
+              <Navigate
+                replace
+                to="alerts"
+              />
+            }
+          />
+          <Route
+            element={<ServiceAlerts />}
+            path="alerts"
+          />
+          <Route
+            path={ALERT_INSIGHT_REL_PATH}
+            element={<AlertInsight type="service" />}
+          />
+          <Route
+            element={<ServiceMetrics />}
+            path="metrics"
+          >
+            <Route
+              index
+              element={
+                <Navigate
+                  replace
+                  to="timeseries"
+                />
+              }
+            />
+            <Route
+              element={<ServiceMetricsTimeseries />}
+              path="timeseries"
+            />
+            <Route
+              element={<ServiceMetricsHeatmap />}
+              path="heatmap"
+            />
+          </Route>
+          <Route
+            element={<ServiceMonitors />}
+            path={SERVICE_MONITORS_REL_PATH}
+          />
+        </Route>
+      </Route>
+      <Route
+        element={<ServiceMonitorCreateOrEdit mode="create" />}
+        path={`${basePath}/${SERVICE_OBSERVABILITY_REL_PATH}/${SERVICE_MONITORS_REL_PATH}/create`}
       />
       <Route
-        element={<ServiceGitSettings />}
-        path={SERVICE_SETTINGS_GIT_REL_PATH}
+        element={<ServiceMonitorCreateOrEdit mode="edit" />}
+        path={`${basePath}/${SERVICE_OBSERVABILITY_REL_PATH}/${SERVICE_MONITORS_REL_PATH}/:${SERVICE_MONITOR_PARAM_ID}`}
       />
-      <Route
-        element={<ServiceHelmSettings />}
-        path={SERVICE_SETTINGS_HELM_REL_PATH}
-      />
-      <Route
-        element={<ServiceSecrets />}
-        path={SERVICE_SETTINGS_SECRETS_REL_PATH}
-      />
-      <Route
-        element={<ServiceRevisions />}
-        path={SERVICE_SETTINGS_REVISIONS_REL_PATH}
-      />
-      <Route
-        element={<ServiceDependencies />}
-        path={SERVICE_SETTINGS_DEPENDENCIES_REL_PATH}
-      />
-      <Route
-        element={<ServiceStackImports />}
-        path={SERVICE_SETTINGS_STACK_IMPORTS_REL_PATH}
-      />
-      <Route
-        element={<ServiceContexts />}
-        path={SERVICE_SETTINGS_CONTEXTS_REL_PATH}
-      />
-    </Route>
-  </Route>
-)
+    </>
+  )
+}
 
 export const cdRoutes = [
   <Route

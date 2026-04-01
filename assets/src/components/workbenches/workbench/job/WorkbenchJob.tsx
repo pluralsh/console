@@ -6,6 +6,7 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useWorkbenchJobQuery } from 'generated/graphql'
+import { truncate } from 'lodash'
 import { Suspense, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import {
@@ -18,6 +19,7 @@ import styled from 'styled-components'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { WorkbenchJobResult } from './WorkbenchJobResult'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
+import { PluralErrorBoundary } from 'components/cd/PluralErrorBoundary'
 
 export function WorkbenchJob() {
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
@@ -45,7 +47,10 @@ export function WorkbenchJob() {
       () => [
         { label: 'workbenches', url: WORKBENCHES_ABS_PATH },
         { label: workbenchName, url: getWorkbenchAbsPath(workbenchId) },
-        { label: prompt, url: getWorkbenchJobAbsPath({ workbenchId, jobId }) },
+        {
+          label: truncate(prompt ?? '', { length: 50 }),
+          url: getWorkbenchJobAbsPath({ workbenchId, jobId }),
+        },
       ],
       [prompt, jobId, workbenchId, workbenchName]
     )
@@ -96,16 +101,18 @@ export function WorkbenchJob() {
               status={job?.status}
             />
           </StretchedFlex>
-          <Suspense
-            fallback={
-              <RectangleSkeleton
-                $width="100%"
-                $height="100%"
-              />
-            }
-          >
-            <WorkbenchJobActivities jobId={jobId} />
-          </Suspense>
+          <PluralErrorBoundary shouldLog={false}>
+            <Suspense
+              fallback={
+                <RectangleSkeleton
+                  $width="100%"
+                  $height="100%"
+                />
+              }
+            >
+              <WorkbenchJobActivities jobId={jobId} />
+            </Suspense>
+          </PluralErrorBoundary>
         </Flex>
         <Flex
           direction="column"

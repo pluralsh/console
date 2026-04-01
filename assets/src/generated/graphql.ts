@@ -10309,6 +10309,8 @@ export type RootQueryType = {
   mcpToken?: Maybe<Scalars['String']['output']>;
   me?: Maybe<User>;
   metric?: Maybe<Array<Maybe<MetricResponse>>>;
+  /** List observability webhooks visible to the current user */
+  monitor?: Maybe<Monitor>;
   /** tells you what cluster a deploy token points to */
   myCluster?: Maybe<Cluster>;
   namespaces?: Maybe<Array<Maybe<Namespace>>>;
@@ -11137,6 +11139,11 @@ export type RootQueryTypeMetricArgs = {
   offset?: InputMaybe<Scalars['Int']['input']>;
   query: Scalars['String']['input'];
   step?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeMonitorArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -12959,6 +12966,7 @@ export type ServiceDeploymentMonitorsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -14674,6 +14682,8 @@ export type WorkbenchConfiguration = {
   coding?: Maybe<WorkbenchCoding>;
   /** infrastructure capabilities */
   infrastructure?: Maybe<WorkbenchInfrastructure>;
+  /** observability capabilities */
+  observability?: Maybe<WorkbenchObservability>;
 };
 
 export type WorkbenchConfigurationAttributes = {
@@ -14681,6 +14691,8 @@ export type WorkbenchConfigurationAttributes = {
   coding?: InputMaybe<WorkbenchCodingAttributes>;
   /** infrastructure capabilities (services, stacks, kubernetes) */
   infrastructure?: InputMaybe<WorkbenchInfrastructureAttributes>;
+  /** observability capabilities (logs, metrics) */
+  observability?: InputMaybe<WorkbenchObservabilityAttributes>;
 };
 
 export type WorkbenchConnection = {
@@ -14852,6 +14864,8 @@ export type WorkbenchJobActivityMetric = {
 
 export type WorkbenchJobActivityResult = {
   __typename?: 'WorkbenchJobActivityResult';
+  /** error from the activity */
+  error?: Maybe<Scalars['String']['output']>;
   /** job update (diff, theory, conclusion) when present */
   jobUpdate?: Maybe<WorkbenchJobActivityJobUpdate>;
   /** logs emitted by the activity */
@@ -14970,6 +14984,21 @@ export type WorkbenchJobThoughtAttributes = {
   logs?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
   /** metrics for the thought */
   metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
+};
+
+export type WorkbenchObservability = {
+  __typename?: 'WorkbenchObservability';
+  /** logs capability enabled */
+  logs?: Maybe<Scalars['Boolean']['output']>;
+  /** metrics capability enabled */
+  metrics?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type WorkbenchObservabilityAttributes = {
+  /** enable logs capability */
+  logs?: InputMaybe<Scalars['Boolean']['input']>;
+  /** enable metrics capability */
+  metrics?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type WorkbenchSkills = {
@@ -18003,6 +18032,8 @@ export type LogFacetFragment = { __typename?: 'LogFacet', key: string, value?: s
 
 export type LogFacetDetailFragment = { __typename?: 'LogFacetDetail', label: string, count: number };
 
+export type LogAggregationBucketFragment = { __typename?: 'LogAggregationBucket', timestamp?: string | null, count?: number | null };
+
 export type LogAggregationQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -18025,6 +18056,18 @@ export type LogLabelsQueryVariables = Exact<{
 
 
 export type LogLabelsQuery = { __typename?: 'RootQueryType', logLabels?: Array<{ __typename?: 'LogFacetDetail', label: string, count: number } | null> | null };
+
+export type LogAggregationBucketsQueryVariables = Exact<{
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  time?: InputMaybe<LogTimeRange>;
+  aggregation?: InputMaybe<LogAggregationInput>;
+  facets?: InputMaybe<Array<InputMaybe<LogFacetInput>> | InputMaybe<LogFacetInput>>;
+}>;
+
+
+export type LogAggregationBucketsQuery = { __typename?: 'RootQueryType', logAggregationBuckets?: Array<{ __typename?: 'LogAggregationBucket', timestamp?: string | null, count?: number | null } | null> | null };
 
 export type MetricResponseFragment = { __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null };
 
@@ -18063,6 +18106,53 @@ export type ServiceMetricsQueryVariables = Exact<{
 
 
 export type ServiceMetricsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, serviceMetrics?: { __typename?: 'ServiceComponentMetrics', cpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, mem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podCpu?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null, podMem?: Array<{ __typename?: 'MetricResponse', metric?: Record<string, unknown> | null, values?: Array<{ __typename?: 'MetricResult', timestamp?: any | null, value?: string | null } | null> | null } | null> | null } | null } | null };
+
+export type MonitorThresholdFragment = { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number };
+
+export type MonitorTinyFragment = { __typename?: 'Monitor', id: string, name: string, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } };
+
+export type MonitorLogQueryFragment = { __typename?: 'MonitorLogQuery', bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, query: string, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null };
+
+export type MonitorFragment = { __typename?: 'Monitor', alertTemplate?: string | null, description?: string | null, evaluationCron: string, severity: AlertSeverity, type: MonitorType, id: string, name: string, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } }, service?: { __typename?: 'ServiceDeployment', id: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } };
+
+export type MonitorDetailsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type MonitorDetailsQuery = { __typename?: 'RootQueryType', monitor?: { __typename?: 'Monitor', alertTemplate?: string | null, description?: string | null, evaluationCron: string, severity: AlertSeverity, type: MonitorType, id: string, name: string, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } }, service?: { __typename?: 'ServiceDeployment', id: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } } | null };
+
+export type ServiceMonitorsQueryVariables = Exact<{
+  serviceId: Scalars['ID']['input'];
+  q?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ServiceMonitorsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, monitors?: { __typename?: 'MonitorConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'MonitorEdge', node?: { __typename?: 'Monitor', id: string, name: string, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null } | null> | null } | null } | null };
+
+export type CreateMonitorMutationVariables = Exact<{
+  attributes: MonitorAttributes;
+}>;
+
+
+export type CreateMonitorMutation = { __typename?: 'RootMutationType', createMonitor?: { __typename?: 'Monitor', id: string, name: string, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null };
+
+export type UpdateMonitorMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: MonitorAttributes;
+}>;
+
+
+export type UpdateMonitorMutation = { __typename?: 'RootMutationType', updateMonitor?: { __typename?: 'Monitor', id: string, name: string, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null };
+
+export type DeleteMonitorMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteMonitorMutation = { __typename?: 'RootMutationType', deleteMonitor?: { __typename?: 'Monitor', id: string } | null };
 
 export type UrlSinkConfigurationFragment = { __typename?: 'UrlSinkConfiguration', url: string };
 
@@ -18848,7 +18938,7 @@ export type WorkbenchJobResultTodoFragment = { __typename?: 'WorkbenchJobResultT
 
 export type WorkbenchJobResultFragment = { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null };
 
-export type WorkbenchJobTinyFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus };
+export type WorkbenchJobTinyFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null };
 
 export type WorkbenchJobActivityFragment = { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null> | null, agentRun?: { __typename?: 'AgentRun', id: string, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null } | null };
 
@@ -18880,7 +18970,7 @@ export type WorkbenchJobsQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchJobsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus } | null } | null> | null } | null } | null };
+export type WorkbenchJobsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -22926,6 +23016,12 @@ export const LogFacetDetailFragmentDoc = gql`
   count
 }
     `;
+export const LogAggregationBucketFragmentDoc = gql`
+    fragment LogAggregationBucket on LogAggregationBucket {
+  timestamp
+  count
+}
+    `;
 export const MetricPointResponseFragmentDoc = gql`
     fragment MetricPointResponse on MetricPointResponse {
   metric
@@ -22945,6 +23041,61 @@ export const UtilizationHeatMapFragmentDoc = gql`
   }
 }
     ${MetricPointResponseFragmentDoc}`;
+export const MonitorThresholdFragmentDoc = gql`
+    fragment MonitorThreshold on MonitorThreshold {
+  aggregate
+  value
+}
+    `;
+export const MonitorTinyFragmentDoc = gql`
+    fragment MonitorTiny on Monitor {
+  id
+  name
+  evaluationCron
+  threshold {
+    ...MonitorThreshold
+  }
+  query {
+    log {
+      query
+    }
+  }
+}
+    ${MonitorThresholdFragmentDoc}`;
+export const MonitorLogQueryFragmentDoc = gql`
+    fragment MonitorLogQuery on MonitorLogQuery {
+  bucketSize
+  duration
+  facets {
+    key
+    value
+  }
+  operator
+  query
+}
+    `;
+export const MonitorFragmentDoc = gql`
+    fragment Monitor on Monitor {
+  ...MonitorTiny
+  alertTemplate
+  description
+  evaluationCron
+  query {
+    log {
+      ...MonitorLogQuery
+    }
+  }
+  service {
+    id
+  }
+  severity
+  type
+  workbench {
+    id
+  }
+}
+    ${MonitorTinyFragmentDoc}
+${MonitorLogQueryFragmentDoc}`;
 export const UrlSinkConfigurationFragmentDoc = gql`
     fragment UrlSinkConfiguration on UrlSinkConfiguration {
   url
@@ -23784,6 +23935,9 @@ export const WorkbenchJobTinyFragmentDoc = gql`
   id
   prompt
   status
+  workbench {
+    id
+  }
 }
     `;
 export const WorkbenchJobResultTodoFragmentDoc = gql`
@@ -35375,6 +35529,61 @@ export type LogLabelsQueryHookResult = ReturnType<typeof useLogLabelsQuery>;
 export type LogLabelsLazyQueryHookResult = ReturnType<typeof useLogLabelsLazyQuery>;
 export type LogLabelsSuspenseQueryHookResult = ReturnType<typeof useLogLabelsSuspenseQuery>;
 export type LogLabelsQueryResult = Apollo.QueryResult<LogLabelsQuery, LogLabelsQueryVariables>;
+export const LogAggregationBucketsDocument = gql`
+    query LogAggregationBuckets($serviceId: ID, $clusterId: ID, $query: String, $time: LogTimeRange, $aggregation: LogAggregationInput, $facets: [LogFacetInput]) {
+  logAggregationBuckets(
+    serviceId: $serviceId
+    clusterId: $clusterId
+    query: $query
+    time: $time
+    aggregation: $aggregation
+    facets: $facets
+  ) {
+    ...LogAggregationBucket
+  }
+}
+    ${LogAggregationBucketFragmentDoc}`;
+
+/**
+ * __useLogAggregationBucketsQuery__
+ *
+ * To run a query within a React component, call `useLogAggregationBucketsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useLogAggregationBucketsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLogAggregationBucketsQuery({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *      clusterId: // value for 'clusterId'
+ *      query: // value for 'query'
+ *      time: // value for 'time'
+ *      aggregation: // value for 'aggregation'
+ *      facets: // value for 'facets'
+ *   },
+ * });
+ */
+export function useLogAggregationBucketsQuery(baseOptions?: Apollo.QueryHookOptions<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>(LogAggregationBucketsDocument, options);
+      }
+export function useLogAggregationBucketsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>(LogAggregationBucketsDocument, options);
+        }
+// @ts-ignore
+export function useLogAggregationBucketsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>): Apollo.UseSuspenseQueryResult<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>;
+export function useLogAggregationBucketsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>): Apollo.UseSuspenseQueryResult<LogAggregationBucketsQuery | undefined, LogAggregationBucketsQueryVariables>;
+export function useLogAggregationBucketsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>(LogAggregationBucketsDocument, options);
+        }
+export type LogAggregationBucketsQueryHookResult = ReturnType<typeof useLogAggregationBucketsQuery>;
+export type LogAggregationBucketsLazyQueryHookResult = ReturnType<typeof useLogAggregationBucketsLazyQuery>;
+export type LogAggregationBucketsSuspenseQueryHookResult = ReturnType<typeof useLogAggregationBucketsSuspenseQuery>;
+export type LogAggregationBucketsQueryResult = Apollo.QueryResult<LogAggregationBucketsQuery, LogAggregationBucketsQueryVariables>;
 export const ClusterHeatMapDocument = gql`
     query ClusterHeatMap($clusterId: ID!, $flavor: HeatMapFlavor!) {
   cluster(id: $clusterId) {
@@ -35574,6 +35783,206 @@ export type ServiceMetricsQueryHookResult = ReturnType<typeof useServiceMetricsQ
 export type ServiceMetricsLazyQueryHookResult = ReturnType<typeof useServiceMetricsLazyQuery>;
 export type ServiceMetricsSuspenseQueryHookResult = ReturnType<typeof useServiceMetricsSuspenseQuery>;
 export type ServiceMetricsQueryResult = Apollo.QueryResult<ServiceMetricsQuery, ServiceMetricsQueryVariables>;
+export const MonitorDetailsDocument = gql`
+    query MonitorDetails($id: ID!) {
+  monitor(id: $id) {
+    ...Monitor
+  }
+}
+    ${MonitorFragmentDoc}`;
+
+/**
+ * __useMonitorDetailsQuery__
+ *
+ * To run a query within a React component, call `useMonitorDetailsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMonitorDetailsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMonitorDetailsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useMonitorDetailsQuery(baseOptions: Apollo.QueryHookOptions<MonitorDetailsQuery, MonitorDetailsQueryVariables> & ({ variables: MonitorDetailsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<MonitorDetailsQuery, MonitorDetailsQueryVariables>(MonitorDetailsDocument, options);
+      }
+export function useMonitorDetailsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<MonitorDetailsQuery, MonitorDetailsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<MonitorDetailsQuery, MonitorDetailsQueryVariables>(MonitorDetailsDocument, options);
+        }
+// @ts-ignore
+export function useMonitorDetailsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<MonitorDetailsQuery, MonitorDetailsQueryVariables>): Apollo.UseSuspenseQueryResult<MonitorDetailsQuery, MonitorDetailsQueryVariables>;
+export function useMonitorDetailsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MonitorDetailsQuery, MonitorDetailsQueryVariables>): Apollo.UseSuspenseQueryResult<MonitorDetailsQuery | undefined, MonitorDetailsQueryVariables>;
+export function useMonitorDetailsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<MonitorDetailsQuery, MonitorDetailsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<MonitorDetailsQuery, MonitorDetailsQueryVariables>(MonitorDetailsDocument, options);
+        }
+export type MonitorDetailsQueryHookResult = ReturnType<typeof useMonitorDetailsQuery>;
+export type MonitorDetailsLazyQueryHookResult = ReturnType<typeof useMonitorDetailsLazyQuery>;
+export type MonitorDetailsSuspenseQueryHookResult = ReturnType<typeof useMonitorDetailsSuspenseQuery>;
+export type MonitorDetailsQueryResult = Apollo.QueryResult<MonitorDetailsQuery, MonitorDetailsQueryVariables>;
+export const ServiceMonitorsDocument = gql`
+    query ServiceMonitors($serviceId: ID!, $q: String, $first: Int, $after: String) {
+  serviceDeployment(id: $serviceId) {
+    id
+    monitors(q: $q, first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...MonitorTiny
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${MonitorTinyFragmentDoc}`;
+
+/**
+ * __useServiceMonitorsQuery__
+ *
+ * To run a query within a React component, call `useServiceMonitorsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceMonitorsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceMonitorsQuery({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *      q: // value for 'q'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useServiceMonitorsQuery(baseOptions: Apollo.QueryHookOptions<ServiceMonitorsQuery, ServiceMonitorsQueryVariables> & ({ variables: ServiceMonitorsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceMonitorsQuery, ServiceMonitorsQueryVariables>(ServiceMonitorsDocument, options);
+      }
+export function useServiceMonitorsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceMonitorsQuery, ServiceMonitorsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceMonitorsQuery, ServiceMonitorsQueryVariables>(ServiceMonitorsDocument, options);
+        }
+// @ts-ignore
+export function useServiceMonitorsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceMonitorsQuery, ServiceMonitorsQueryVariables>): Apollo.UseSuspenseQueryResult<ServiceMonitorsQuery, ServiceMonitorsQueryVariables>;
+export function useServiceMonitorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ServiceMonitorsQuery, ServiceMonitorsQueryVariables>): Apollo.UseSuspenseQueryResult<ServiceMonitorsQuery | undefined, ServiceMonitorsQueryVariables>;
+export function useServiceMonitorsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<ServiceMonitorsQuery, ServiceMonitorsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceMonitorsQuery, ServiceMonitorsQueryVariables>(ServiceMonitorsDocument, options);
+        }
+export type ServiceMonitorsQueryHookResult = ReturnType<typeof useServiceMonitorsQuery>;
+export type ServiceMonitorsLazyQueryHookResult = ReturnType<typeof useServiceMonitorsLazyQuery>;
+export type ServiceMonitorsSuspenseQueryHookResult = ReturnType<typeof useServiceMonitorsSuspenseQuery>;
+export type ServiceMonitorsQueryResult = Apollo.QueryResult<ServiceMonitorsQuery, ServiceMonitorsQueryVariables>;
+export const CreateMonitorDocument = gql`
+    mutation CreateMonitor($attributes: MonitorAttributes!) {
+  createMonitor(attributes: $attributes) {
+    ...MonitorTiny
+  }
+}
+    ${MonitorTinyFragmentDoc}`;
+export type CreateMonitorMutationFn = Apollo.MutationFunction<CreateMonitorMutation, CreateMonitorMutationVariables>;
+
+/**
+ * __useCreateMonitorMutation__
+ *
+ * To run a mutation, you first call `useCreateMonitorMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateMonitorMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createMonitorMutation, { data, loading, error }] = useCreateMonitorMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateMonitorMutation(baseOptions?: Apollo.MutationHookOptions<CreateMonitorMutation, CreateMonitorMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateMonitorMutation, CreateMonitorMutationVariables>(CreateMonitorDocument, options);
+      }
+export type CreateMonitorMutationHookResult = ReturnType<typeof useCreateMonitorMutation>;
+export type CreateMonitorMutationResult = Apollo.MutationResult<CreateMonitorMutation>;
+export type CreateMonitorMutationOptions = Apollo.BaseMutationOptions<CreateMonitorMutation, CreateMonitorMutationVariables>;
+export const UpdateMonitorDocument = gql`
+    mutation UpdateMonitor($id: ID!, $attributes: MonitorAttributes!) {
+  updateMonitor(id: $id, attributes: $attributes) {
+    ...MonitorTiny
+  }
+}
+    ${MonitorTinyFragmentDoc}`;
+export type UpdateMonitorMutationFn = Apollo.MutationFunction<UpdateMonitorMutation, UpdateMonitorMutationVariables>;
+
+/**
+ * __useUpdateMonitorMutation__
+ *
+ * To run a mutation, you first call `useUpdateMonitorMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateMonitorMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateMonitorMutation, { data, loading, error }] = useUpdateMonitorMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateMonitorMutation(baseOptions?: Apollo.MutationHookOptions<UpdateMonitorMutation, UpdateMonitorMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateMonitorMutation, UpdateMonitorMutationVariables>(UpdateMonitorDocument, options);
+      }
+export type UpdateMonitorMutationHookResult = ReturnType<typeof useUpdateMonitorMutation>;
+export type UpdateMonitorMutationResult = Apollo.MutationResult<UpdateMonitorMutation>;
+export type UpdateMonitorMutationOptions = Apollo.BaseMutationOptions<UpdateMonitorMutation, UpdateMonitorMutationVariables>;
+export const DeleteMonitorDocument = gql`
+    mutation DeleteMonitor($id: ID!) {
+  deleteMonitor(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteMonitorMutationFn = Apollo.MutationFunction<DeleteMonitorMutation, DeleteMonitorMutationVariables>;
+
+/**
+ * __useDeleteMonitorMutation__
+ *
+ * To run a mutation, you first call `useDeleteMonitorMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteMonitorMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteMonitorMutation, { data, loading, error }] = useDeleteMonitorMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteMonitorMutation(baseOptions?: Apollo.MutationHookOptions<DeleteMonitorMutation, DeleteMonitorMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteMonitorMutation, DeleteMonitorMutationVariables>(DeleteMonitorDocument, options);
+      }
+export type DeleteMonitorMutationHookResult = ReturnType<typeof useDeleteMonitorMutation>;
+export type DeleteMonitorMutationResult = Apollo.MutationResult<DeleteMonitorMutation>;
+export type DeleteMonitorMutationOptions = Apollo.BaseMutationOptions<DeleteMonitorMutation, DeleteMonitorMutationVariables>;
 export const UpsertNotificationRouterDocument = gql`
     mutation UpsertNotificationRouter($attributes: NotificationRouterAttributes!) {
   upsertNotificationRouter(attributes: $attributes) {
@@ -39924,10 +40333,13 @@ export const namedOperations = {
     TemporaryToken: 'TemporaryToken',
     LogAggregation: 'LogAggregation',
     LogLabels: 'LogLabels',
+    LogAggregationBuckets: 'LogAggregationBuckets',
     ClusterHeatMap: 'ClusterHeatMap',
     ClusterNoisyNeighbors: 'ClusterNoisyNeighbors',
     ServiceHeatMap: 'ServiceHeatMap',
     ServiceMetrics: 'ServiceMetrics',
+    MonitorDetails: 'MonitorDetails',
+    ServiceMonitors: 'ServiceMonitors',
     NotificationRouters: 'NotificationRouters',
     NotificationSinks: 'NotificationSinks',
     UnreadAppNotifications: 'UnreadAppNotifications',
@@ -40080,6 +40492,9 @@ export const namedOperations = {
     Logout: 'Logout',
     SignUp: 'SignUp',
     LoginLink: 'LoginLink',
+    CreateMonitor: 'CreateMonitor',
+    UpdateMonitor: 'UpdateMonitor',
+    DeleteMonitor: 'DeleteMonitor',
     UpsertNotificationRouter: 'UpsertNotificationRouter',
     DeleteNotificationRouter: 'DeleteNotificationRouter',
     UpsertNotificationSink: 'UpsertNotificationSink',
@@ -40363,9 +40778,14 @@ export const namedOperations = {
     LogLine: 'LogLine',
     LogFacet: 'LogFacet',
     LogFacetDetail: 'LogFacetDetail',
+    LogAggregationBucket: 'LogAggregationBucket',
     MetricResponse: 'MetricResponse',
     MetricPointResponse: 'MetricPointResponse',
     UtilizationHeatMap: 'UtilizationHeatMap',
+    MonitorThreshold: 'MonitorThreshold',
+    MonitorTiny: 'MonitorTiny',
+    MonitorLogQuery: 'MonitorLogQuery',
+    Monitor: 'Monitor',
     UrlSinkConfiguration: 'UrlSinkConfiguration',
     SinkConfiguration: 'SinkConfiguration',
     NotificationSink: 'NotificationSink',
