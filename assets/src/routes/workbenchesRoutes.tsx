@@ -14,8 +14,10 @@ import {
   WORKBENCHES_TOOLS_ABS_PATH,
   WORKBENCHES_TOOLS_PARAM_ID,
   WORKBENCHES_TOOLS_REL_PATH,
+  WORKBENCHES_TRIGGERS_REL_PATH,
 } from './workbenchesRoutesConsts'
 import { WorkbenchJob } from 'components/workbenches/workbench/job/WorkbenchJob'
+import { WorkbenchTriggers } from '../components/workbenches/workbench/triggers/WorkbenchTriggers.tsx'
 
 export const workbenchesRoutes = [
   <Route
@@ -42,6 +44,10 @@ export const workbenchesRoutes = [
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
     element={<WorkbenchCreateOrEdit mode="edit" />}
+  />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_TRIGGERS_REL_PATH}`}
+    element={<WorkbenchTriggers />}
   />,
   <Route
     path={`${WORKBENCHES_TOOLS_ABS_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}

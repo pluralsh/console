@@ -26,6 +26,7 @@ import {
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
   WORKBENCHES_EDIT_REL_PATH,
+  WORKBENCHES_TRIGGERS_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { WorkbenchJobCreateInput } from './WorkbenchJobCreateInput'
@@ -111,13 +112,14 @@ export function Workbench() {
           >
             Edit workbench
           </Button>
-          {/* TODO: implement triggers */}
-          {/* <Button
+          <Button
             small
             secondary
+            as={Link}
+            to={WORKBENCHES_TRIGGERS_REL_PATH}
           >
             Triggers
-          </Button> */}
+          </Button>
           <MoreMenu
             disabled={!workbench}
             triggerProps={{ iconFrameType: 'secondary' }}
