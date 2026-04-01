@@ -49,7 +49,10 @@ defmodule Console.AI.Workbench.EngineTest do
         {:ok, "complete", [
           %Tool{
             name: "workbench_complete",
-            arguments: %{"conclusion" => "complete"}
+            arguments: %{
+              "conclusion" => "complete",
+              "todos" => [%{name: "todo 1", description: "todo 1", done: true}]
+            }
           }
         ]}
       end)

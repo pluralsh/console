@@ -13,13 +13,13 @@ defmodule Console.AI.Tools.Workbench.Complete do
 
   def name(), do: "workbench_complete"
   def json_schema(), do: @json_schema
-  def description(), do: "Complete the workbench job, with the final conclusion given and any relevant metrics to include in the result"
+  def description(), do: "Complete the workbench job, with the final conclusion given and any relevant metrics to include in the result.  Be sure to always mark the final status of all todos as well."
 
   def changeset(model, attrs) do
     model
     |> cast(attrs, [:conclusion])
     |> cast_embed(:metrics, with: &WorkbenchJobActivity.metric_changeset/2)
-    |> cast_embed(:todos, with: &WorkbenchJobResult.todo_changeset/2)
+    |> cast_embed(:todos, with: &WorkbenchJobResult.todo_changeset/2, required: true)
     |> validate_required([:conclusion])
   end
 

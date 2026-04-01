@@ -38,7 +38,7 @@ defmodule Console.AI.Azure do
   def completion(%__MODULE__{} = az, messages, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("azure:#{az.model}", az.stream, provider_options(az, az.model) ++ [tools: tools(opts)])
+    |> generate_text("azure:#{select_model(az, opts[:client])}", az.stream, provider_options(az, az.model) ++ [tools: tools(opts)])
     |> reqllm_result()
   end
 

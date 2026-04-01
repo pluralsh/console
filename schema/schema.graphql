@@ -2555,6 +2555,9 @@ type WorkbenchJob {
   "the result for this job (sideloadable)"
   result: WorkbenchJobResult
 
+  "pull requests associated with this workbench job"
+  pullRequests: [PullRequest]
+
   "the alert this run was spawned from"
   alert: Alert
 
@@ -2604,6 +2607,12 @@ type WorkbenchJobThought {
 
   "the thought content"
   content: String
+
+  "the tool invoked when this thought was emitted, if any"
+  toolName: String
+
+  "arguments passed to the tool, if any"
+  toolArgs: Map
 
   "metrics and logs for the thought"
   attributes: WorkbenchJobThoughtAttributes

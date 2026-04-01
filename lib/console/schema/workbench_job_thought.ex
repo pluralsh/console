@@ -5,6 +5,8 @@ defmodule Console.Schema.WorkbenchJobThought do
 
   schema "workbench_job_thoughts" do
     field :content,    :binary
+    field :tool_name,  :string
+    field :tool_args,  :map
 
     embeds_one :attributes, Attributes, on_replace: :update do
       embeds_many :metrics, Metric, on_replace: :delete
@@ -24,7 +26,7 @@ defmodule Console.Schema.WorkbenchJobThought do
     from(t in query, order_by: ^order)
   end
 
-  @valid ~w(content activity_id)a
+  @valid ~w(content activity_id tool_name tool_args)a
 
   def changeset(model, attrs \\ %{}) do
     model

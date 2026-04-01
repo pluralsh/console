@@ -29,6 +29,15 @@ defmodule Console.AI.Tools.Agent.UpdateGraph do
     |> cast(attrs, @valid)
     |> cast_embed(:vertices, with: &vertex_changeset/2)
     |> cast_embed(:edges, with: &edge_changeset/2)
+    |> either_stacks_or_services()
+  end
+
+  defp either_stacks_or_services(cs) do
+    case {get_field(cs, :service_ids), get_field(cs, :stack_ids)} do
+      {[_ | _], _} -> cs
+      {_, [_ | _]} -> cs
+      _ -> add_error(cs, :service_ids, "you must provide either service_ids or stack_ids")
+    end
   end
 
   defp vertex_changeset(model, attrs) do

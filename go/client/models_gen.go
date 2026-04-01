@@ -9541,6 +9541,8 @@ type WorkbenchJob struct {
 	User *User `json:"user,omitempty"`
 	// the result for this job (sideloadable)
 	Result *WorkbenchJobResult `json:"result,omitempty"`
+	// pull requests associated with this workbench job
+	PullRequests []*PullRequest `json:"pullRequests,omitempty"`
 	// the alert this run was spawned from
 	Alert *Alert `json:"alert,omitempty"`
 	// the issue this run was spawned from
@@ -9678,6 +9680,10 @@ type WorkbenchJobThought struct {
 	ID string `json:"id"`
 	// the thought content
 	Content *string `json:"content,omitempty"`
+	// the tool invoked when this thought was emitted, if any
+	ToolName *string `json:"toolName,omitempty"`
+	// arguments passed to the tool, if any
+	ToolArgs map[string]any `json:"toolArgs,omitempty"`
 	// metrics and logs for the thought
 	Attributes *WorkbenchJobThoughtAttributes `json:"attributes,omitempty"`
 	// the activity this thought belongs to

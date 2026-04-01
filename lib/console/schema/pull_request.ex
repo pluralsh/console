@@ -9,7 +9,8 @@ defmodule Console.Schema.PullRequest do
     PrGovernance,
     AgentSession,
     AgentRun,
-    User
+    User,
+    WorkbenchJob
   }
 
   defenum Status, open: 0, merged: 1, closed: 2
@@ -43,14 +44,15 @@ defmodule Console.Schema.PullRequest do
     field :fresh,              :boolean, virtual: true, default: false
     field :governance_changed, :boolean, virtual: true, default: false
 
-    belongs_to :cluster,    Cluster
-    belongs_to :service,    Service
-    belongs_to :stack,      Stack
-    belongs_to :flow,       Flow
-    belongs_to :governance, PrGovernance
-    belongs_to :session,    AgentSession
-    belongs_to :agent_run,  AgentRun
-    belongs_to :author,    User
+    belongs_to :cluster,        Cluster
+    belongs_to :service,        Service
+    belongs_to :stack,          Stack
+    belongs_to :flow,           Flow
+    belongs_to :governance,     PrGovernance
+    belongs_to :session,        AgentSession
+    belongs_to :agent_run,      AgentRun
+    belongs_to :author,         User
+    belongs_to :workbench_job,  WorkbenchJob
 
     has_many :notifications_bindings, PolicyBinding,
       on_replace: :delete,
@@ -157,6 +159,7 @@ defmodule Console.Schema.PullRequest do
     agent_run_id
     merge_cron
     merge_attempt_at
+    workbench_job_id
   )a
 
   def changeset(model, attrs \\ %{}) do

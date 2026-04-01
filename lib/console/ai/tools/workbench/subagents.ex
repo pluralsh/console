@@ -12,10 +12,7 @@ defmodule Console.AI.Tools.Workbench.Subagents do
   def json_schema(_), do: @json_schema
   def description(_), do: "Get the subagents available to you to invoke."
 
-  def changeset(model, attrs) do
-    model
-    |> cast(attrs, [])
-  end
+  def changeset(model, attrs), do: cast(model, attrs, [])
 
   def implement(_, %__MODULE__{subagents: subagents, categories: categories}) do
     Enum.map(subagents, fn subagent -> %{
@@ -28,11 +25,12 @@ defmodule Console.AI.Tools.Workbench.Subagents do
   defp subagent_description(:coding, _), do: "Invoke a coding subagent to analyze or modify code, generating a pull request."
   defp subagent_description(:infrastructure, _), do: "Invoke an infrastructure subagent to determine infrastructure state and configuration."
   defp subagent_description(:observability, categories), do: "Invoke an observability subagent to query and analyze observability data.  Supported tool capabilities are: #{observability_categories(categories)}"
-  defp subagent_description(:integration, _), do: "Invoke an integration subagent to interact with internal or external tools and systems, not directly related to dev infrastructure."
+  defp subagent_description(:integration, _), do: "Invoke an integration subagent to interact with enterprise systems, usually not directly related to devops infrastructure. Often Task tracking tools, knowledge bases or internal compliance software that's not SRE related."
   defp subagent_description(_, _), do: "Unknown subagent"
 
-  defp observability_categories(cats) do
+  defp observability_categories(cats) when is_list(cats) do
     Enum.filter(cats, & &1 in [:metrics, :logs, :traces])
     |> Enum.join(", ")
   end
+  defp observability_categories(_), do: "not specified but likely supports metrics, logs, traces or error tracking"
 end

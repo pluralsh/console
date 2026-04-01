@@ -173,10 +173,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :configuration, :workbench_configuration, description: "workbench configuration"
     field :skills,        :workbench_skills, description: "skills configuration"
 
-    field :project,       :project,        resolve: dataloader(Deployments), description: "the project of this workbench"
-    field :repository,    :git_repository, resolve: dataloader(Deployments), description: "the git repository for this workbench"
-    field :agent_runtime, :agent_runtime,  resolve: dataloader(Deployments), description: "the agent runtime for this workbench"
-    field :tools,         list_of(:workbench_tool),    resolve: dataloader(Deployments), description: "tools associated with this workbench"
+    field :project,       :project,                  resolve: dataloader(Deployments), description: "the project of this workbench"
+    field :repository,    :git_repository,           resolve: dataloader(Deployments), description: "the git repository for this workbench"
+    field :agent_runtime, :agent_runtime,            resolve: dataloader(Deployments), description: "the agent runtime for this workbench"
+    field :tools,         list_of(:workbench_tool),  resolve: dataloader(Deployments), description: "tools associated with this workbench"
 
     field :read_bindings, list_of(:policy_binding),  resolve: dataloader(Deployments), description: "read policy for this service"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this service"
@@ -211,6 +211,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :workbench,    :workbench, resolve: dataloader(Deployments), description: "the workbench this run belongs to"
     field :user,         :user, resolve: dataloader(User), description: "the user who created this run"
     field :result,       :workbench_job_result, resolve: dataloader(Deployments), description: "the result for this job (sideloadable)"
+    field :pull_requests, list_of(:pull_request), resolve: dataloader(Deployments), description: "pull requests associated with this workbench job"
 
     field :alert,        :alert, resolve: dataloader(Deployments), description: "the alert this run was spawned from"
     field :issue,        :issue, resolve: dataloader(Deployments), description: "the issue this run was spawned from"
@@ -239,6 +240,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
   object :workbench_job_thought do
     field :id,         non_null(:string), description: "the id of the thought"
     field :content,    :string, description: "the thought content"
+    field :tool_name,  :string, description: "the tool invoked when this thought was emitted, if any"
+    field :tool_args,  :map, description: "arguments passed to the tool, if any"
     field :attributes, :workbench_job_thought_attributes, description: "metrics and logs for the thought"
 
     field :activity, :workbench_job_activity, resolve: dataloader(Deployments), description: "the activity this thought belongs to"

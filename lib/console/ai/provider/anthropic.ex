@@ -38,18 +38,21 @@ defmodule Console.AI.Anthropic do
   def proxy(_), do: {:error, "anthropic proxy not implemented"}
 
   @spec completion(t(), Console.AI.Provider.history, keyword) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{} = openai, messages, opts) do
+  def completion(%__MODULE__{} = anthropic, messages, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("anthropic:#{openai.model}", openai.stream, provider_options(openai) ++ [tools: tools(opts)])
+    |> generate_text("anthropic:#{model(anthropic, opts[:client])}", anthropic.stream, provider_options(anthropic) ++ [tools: tools(opts)])
     |> reqllm_result()
   end
 
+  defp model(%{tool_model: tool_model}, :tool) when is_binary(tool_model), do: tool_model
+  defp model(%{model: model}, _), do: model
+
   @spec tool_call(t(), Console.AI.Provider.history, [atom], keyword) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
-  def tool_call(%__MODULE__{} = openai, messages, tools, _opts) do
+  def tool_call(%__MODULE__{} = anthropic, messages, tools, _opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("anthropic:#{openai.tool_model}", openai.stream, provider_options(openai) ++ [tools: reqllm_tools(tools)])
+    |> generate_text("anthropic:#{anthropic.tool_model}", anthropic.stream, provider_options(anthropic) ++ [tools: reqllm_tools(tools)])
     |> reqllm_result()
     |> tool_calls()
   end

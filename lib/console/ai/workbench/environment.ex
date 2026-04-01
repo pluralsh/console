@@ -88,8 +88,8 @@ defmodule Console.AI.Workbench.Environment do
   defp infra_agents(_), do: []
 
   defp tool_agents(tools) do
-    Enum.flat_map(tools, fn
-      {_, %{categories: [_ | _] = categories}} -> categories
+    Enum.flat_map(tools || [], fn
+      %{categories: [_ | _] = categories} -> categories
       _ -> [:integration]
     end)
     |> Enum.map(&category_to_subagent/1)

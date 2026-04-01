@@ -171,6 +171,8 @@ defmodule Console do
     end
   end
 
+  def identity(v), do: v
+
   def dedupe(attrs, key, val) do
     as_string = Atom.to_string(key)
     case attrs do

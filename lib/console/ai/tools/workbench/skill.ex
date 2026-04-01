@@ -10,7 +10,7 @@ defmodule Console.AI.Tools.Workbench.Skill do
 
   def name(_), do: "workbench_skill"
   def json_schema(_), do: @json_schema
-  def description(_), do: "Get a full description of a specific skill by name."
+  def description(_), do: "Get a full description of a specific skill by name.  Use the workbench_skills tool to get a list of skills first."
 
   def changeset(model, attrs) do
     model

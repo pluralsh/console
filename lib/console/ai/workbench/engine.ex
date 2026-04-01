@@ -66,7 +66,11 @@ defmodule Console.AI.Workbench.Engine do
     messages = Enum.map(activities, &Message.to_message/1)
 
     tools(job, environment)
-    |> MemoryEngine.new(20, system_prompt: &system_prompt(prompt: job.prompt, engine: &1), acc: %{})
+    |> MemoryEngine.new(20,
+      system_prompt: &system_prompt(prompt: job.prompt, engine: &1),
+      acc: %{},
+      tool_fmt: &tool_fmt/1
+    )
     |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{conclusion: conclusion, metrics: metrics, todos: todos}} ->
@@ -81,6 +85,11 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
+  defp tool_fmt(%Notes{}), do: "recorded notes for progress done so far"
+  defp tool_fmt(%Subagent{subagent: name}), do: "launched #{name} subagent, waiting for the result"
+  defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
+  defp tool_fmt(pass), do: pass
+
   defp reducer(messages, _) do
     Enum.reduce_while(messages, [], fn
       %Complete{} = complete, _ -> {:halt, complete}
@@ -90,7 +99,7 @@ defmodule Console.AI.Workbench.Engine do
     end)
     |> case do
       %Complete{} = complete -> {:halt, complete}
-      l when is_list(l) -> {:halt, l}
+      [_ | _] = l -> {:halt, l}
       _ -> {:cont, []}
     end
   end
@@ -122,7 +131,7 @@ defmodule Console.AI.Workbench.Engine do
     Console.mapify(status)
     |> Map.drop([:id])
     |> then(& %{
-      status: &1,
+      status: drop_empty(&1),
       prompt: summary,
       output: summary,
       tool_call: tool_attrs(call)

@@ -15,7 +15,7 @@ defmodule Console.AI.Tools.Workbench.Notes do
 
   def name(), do: "workbench_notes"
   def json_schema(), do: @json_schema
-  def description(), do: "Record notes about the current task and plan."
+  def description(), do: "Record notes about the current task and plan.  Call this as work is completed throughout this job's duration."
 
   def changeset(model, attrs) do
     model

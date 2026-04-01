@@ -12,14 +12,15 @@ defmodule Console.AI.Bedrock do
 
   @type t :: %__MODULE__{}
 
+  @small_model "global.anthropic.claude-haiku-4-5-20251001-v1:0"
   @model "global.anthropic.claude-sonnet-4-5-20250929-v1:0"
   @embedding_model "cohere.embed-english-v3"
 
-  def defaults(), do: %{model: @model, tool_model: @model, embedding_model: @embedding_model}
+  def defaults(), do: %{model: @small_model, tool_model: @model, embedding_model: @embedding_model}
 
   def new(opts) do
     %__MODULE__{
-      model_id: opts.model_id || @model,
+      model_id: opts.model_id || @small_model,
       tool_model_id: opts.tool_model_id || @model,
       embedding_model: opts.embedding_model || @embedding_model,
       aws_access_key_id: opts.aws_access_key_id,
@@ -39,7 +40,7 @@ defmodule Console.AI.Bedrock do
   def completion(%__MODULE__{} = bedrock, messages, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text("amazon-bedrock:#{bedrock.model_id}", bedrock.stream, Keyword.put(provider_options(bedrock), :tools, tools(opts)))
+    |> generate_text("amazon-bedrock:#{select_model(bedrock, opts[:client])}", bedrock.stream, Keyword.put(provider_options(bedrock), :tools, tools(opts)))
     |> reqllm_result()
   end
 
