@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
-	"github.com/pluralsh/console/go/cloud-query/internal/tools/clients"
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/client"
 )
 
 type LokiProvider struct {
@@ -29,7 +29,7 @@ func (in *LokiProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInpu
 		return nil, ErrInvalidArgument
 	}
 
-	client := clients.NewLokiClient(in.conn.GetUrl(), in.conn.GetToken(), in.conn.GetUsername(), in.conn.GetPassword(), in.conn.GetTenantId())
+	client := client.NewLokiClient(in.conn.GetUrl(), in.conn.GetToken(), in.conn.GetUsername(), in.conn.GetPassword(), in.conn.GetTenantId())
 	defer client.Close()
 
 	resp, err := client.Logs(
@@ -45,7 +45,7 @@ func (in *LokiProvider) Logs(ctx context.Context, input *toolquery.LogsQueryInpu
 	return in.toLogsQueryOutput(resp)
 }
 
-func (in *LokiProvider) toLogsQueryOutput(resp *clients.LokiLogsResponse) (*toolquery.LogsQueryOutput, error) {
+func (in *LokiProvider) toLogsQueryOutput(resp *client.LokiLogsResponse) (*toolquery.LogsQueryOutput, error) {
 	logs := make([]*toolquery.LogEntry, 0)
 
 	for _, result := range resp.Data.Result {
