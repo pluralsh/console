@@ -55,9 +55,9 @@ export type ServiceMonitorStepKey =
   | 'log-query'
 
 const STEPS: { key: ServiceMonitorStepKey; label: string }[] = [
-  { key: 'description', label: 'Description' },
-  { key: 'threshold-config', label: 'Threshold config' },
   { key: 'log-query', label: 'Log query' },
+  { key: 'threshold-config', label: 'Threshold config' },
+  { key: 'description', label: 'Description' },
 ] as const
 
 export function ServiceMonitorCreateOrEdit({
@@ -106,7 +106,7 @@ function ServiceMonitorCreateOrEditInner({
   const serviceId = useParams()[SERVICE_PARAM_ID] ?? ''
   const { spacing, breakpoints } = useTheme()
   const [curStep, setCurStepState] =
-    useState<ServiceMonitorStepKey>('description')
+    useState<ServiceMonitorStepKey>('log-query')
   const [visitedSteps, setVisitedSteps] = useState<Set<ServiceMonitorStepKey>>(
     () => new Set()
   )

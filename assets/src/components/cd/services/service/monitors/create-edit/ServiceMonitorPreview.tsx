@@ -33,6 +33,7 @@ export function ServiceMonitorPreview({ state }: { state: MonitorAttributes }) {
       aggregation: { bucketSize },
       facets,
     },
+    fetchPolicy: 'network-only', // caching kinda breaks on these because there's no ids to index on
   })
 
   const buckets = useMemo(
