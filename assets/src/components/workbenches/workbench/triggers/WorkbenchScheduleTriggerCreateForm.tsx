@@ -107,6 +107,7 @@ export function WorkbenchScheduleTriggerCreateForm({
             css={{
               color: theme.colors['code-block-purple'],
               '& input': {
+                minHeight: 54,
                 paddingLeft: 16,
                 paddingRight: 16,
               },
