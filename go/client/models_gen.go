@@ -9789,6 +9789,8 @@ type WorkbenchToolConfiguration struct {
 	Tempo *WorkbenchToolTempoConnection `json:"tempo,omitempty"`
 	// datadog connection (no secrets)
 	Datadog *WorkbenchToolDatadogConnection `json:"datadog,omitempty"`
+	// dynatrace connection (no secrets)
+	Dynatrace *WorkbenchToolDynatraceConnection `json:"dynatrace,omitempty"`
 	// linear connection (no secrets)
 	Linear *WorkbenchToolLinearConnection `json:"linear,omitempty"`
 	// atlassian connection (no secrets)
@@ -9810,6 +9812,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Tempo *WorkbenchToolTempoConnectionAttributes `json:"tempo,omitempty"`
 	// datadog connection (metrics, logs)
 	Datadog *WorkbenchToolDatadogConnectionAttributes `json:"datadog,omitempty"`
+	// dynatrace connection (metrics, logs, traces)
+	Dynatrace *WorkbenchToolDynatraceConnectionAttributes `json:"dynatrace,omitempty"`
 	// linear connection (ticketing)
 	Linear *WorkbenchToolLinearConnectionAttributes `json:"linear,omitempty"`
 	// atlassian/jira connection (ticketing)
@@ -9833,6 +9837,18 @@ type WorkbenchToolDatadogConnectionAttributes struct {
 	APIKey *string `json:"apiKey,omitempty"`
 	// datadog application key
 	AppKey *string `json:"appKey,omitempty"`
+}
+
+type WorkbenchToolDynatraceConnection struct {
+	// dynatrace base url (credentials never exposed)
+	URL *string `json:"url,omitempty"`
+}
+
+type WorkbenchToolDynatraceConnectionAttributes struct {
+	// dynatrace base url
+	URL string `json:"url"`
+	// dynatrace API token
+	APIToken string `json:"apiToken"`
 }
 
 type WorkbenchToolEdge struct {
@@ -16087,6 +16103,7 @@ const (
 	WorkbenchToolTypeLinear     WorkbenchToolType = "LINEAR"
 	WorkbenchToolTypeAtlassian  WorkbenchToolType = "ATLASSIAN"
 	WorkbenchToolTypeSplunk     WorkbenchToolType = "SPLUNK"
+	WorkbenchToolTypeDynatrace  WorkbenchToolType = "DYNATRACE"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -16101,11 +16118,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeLinear,
 	WorkbenchToolTypeAtlassian,
 	WorkbenchToolTypeSplunk,
+	WorkbenchToolTypeDynatrace,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace:
 		return true
 	}
 	return false

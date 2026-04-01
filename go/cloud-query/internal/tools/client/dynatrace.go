@@ -88,7 +88,31 @@ func (in *DynatraceClient) MetricsSearch(ctx context.Context, query string) (*Dy
 	return &resp, nil
 }
 
-func (in *DynatraceClient) QueryGrail(ctx context.Context, query string, from, to string) (*toolquery.LogsQueryOutput, error) {
+func (in *DynatraceClient) Logs(ctx context.Context, query string, from, to string) (*toolquery.LogsQueryOutput, error) {
+	return in.queryGrail(ctx, query, from, to)
+}
+
+func (in *DynatraceClient) Traces(ctx context.Context, query string, from, to string) (*toolquery.TracesQueryOutput, error) {
+	res, err := in.queryGrail(ctx, query, from, to)
+	if err != nil {
+		return nil, err
+	}
+
+	output := &toolquery.TracesQueryOutput{}
+	for _, log := range res.Logs {
+		output.Spans = append(output.Spans, &toolquery.TraceSpan{
+			TraceId: log.Labels["trace_id"],
+			SpanId:  log.Labels["span_id"],
+			Name:    log.Message,
+			Start:   log.Timestamp,
+			End:     log.Timestamp,
+			Tags:    log.Labels,
+		})
+	}
+	return output, nil
+}
+
+func (in *DynatraceClient) queryGrail(ctx context.Context, query string, from, to string) (*toolquery.LogsQueryOutput, error) {
 	var dqlResp DynatraceDqlResponse
 	body := map[string]any{
 		"query":                 query,
@@ -135,29 +159,5 @@ func (in *DynatraceClient) QueryGrail(ctx context.Context, query string, from, t
 		}
 	}
 
-	return output, nil
-}
-
-func (in *DynatraceClient) Logs(ctx context.Context, query string, from, to string) (*toolquery.LogsQueryOutput, error) {
-	return in.QueryGrail(ctx, query, from, to)
-}
-
-func (in *DynatraceClient) Traces(ctx context.Context, query string, from, to string) (*toolquery.TracesQueryOutput, error) {
-	res, err := in.QueryGrail(ctx, query, from, to)
-	if err != nil {
-		return nil, err
-	}
-
-	output := &toolquery.TracesQueryOutput{}
-	for _, log := range res.Logs {
-		output.Spans = append(output.Spans, &toolquery.TraceSpan{
-			TraceId: log.Labels["trace_id"],
-			SpanId:  log.Labels["span_id"],
-			Name:    log.Message,
-			Start:   log.Timestamp,
-			End:     log.Timestamp,
-			Tags:    log.Labels,
-		})
-	}
 	return output, nil
 }
