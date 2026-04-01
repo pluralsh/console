@@ -195,6 +195,16 @@ fragment WorkbenchJobProgress on WorkbenchJobProgress {
   arguments
 }
 
+fragment WorkbenchCron on WorkbenchCron {
+  id
+  crontab
+  prompt
+  lastRunAt
+  nextRunAt
+  insertedAt
+  updatedAt
+}
+
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
   insertedAt
@@ -237,6 +247,22 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
       edges {
         node {
           ...WorkbenchJobTiny
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    crons(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchCron
         }
       }
     }

@@ -18944,6 +18944,8 @@ export type WorkbenchJobActivityFragment = { __typename?: 'WorkbenchJobActivity'
 
 export type WorkbenchJobProgressFragment = { __typename?: 'WorkbenchJobProgress', activityId: string, tool?: string | null, text?: string | null, arguments?: Record<string, unknown> | null };
 
+export type WorkbenchCronFragment = { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
+
 export type WorkbenchJobFragment = { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null };
 
 export type WorkbenchesQueryVariables = Exact<{
@@ -18971,6 +18973,15 @@ export type WorkbenchJobsQueryVariables = Exact<{
 
 
 export type WorkbenchJobsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null } | null } | null> | null } | null } | null };
+
+export type WorkbenchCronsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type WorkbenchCronsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, crons?: { __typename?: 'WorkbenchCronConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23928,6 +23939,17 @@ export const WorkbenchJobProgressFragmentDoc = gql`
   tool
   text
   arguments
+}
+    `;
+export const WorkbenchCronFragmentDoc = gql`
+    fragment WorkbenchCron on WorkbenchCron {
+  id
+  crontab
+  prompt
+  lastRunAt
+  nextRunAt
+  insertedAt
+  updatedAt
 }
     `;
 export const WorkbenchJobTinyFragmentDoc = gql`
@@ -39647,6 +39669,62 @@ export type WorkbenchJobsQueryHookResult = ReturnType<typeof useWorkbenchJobsQue
 export type WorkbenchJobsLazyQueryHookResult = ReturnType<typeof useWorkbenchJobsLazyQuery>;
 export type WorkbenchJobsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobsSuspenseQuery>;
 export type WorkbenchJobsQueryResult = Apollo.QueryResult<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>;
+export const WorkbenchCronsDocument = gql`
+    query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    crons(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchCron
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${WorkbenchCronFragmentDoc}`;
+
+/**
+ * __useWorkbenchCronsQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchCronsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchCronsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchCronsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useWorkbenchCronsQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchCronsQuery, WorkbenchCronsQueryVariables> & ({ variables: WorkbenchCronsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>(WorkbenchCronsDocument, options);
+      }
+export function useWorkbenchCronsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>(WorkbenchCronsDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchCronsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>;
+export function useWorkbenchCronsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchCronsQuery | undefined, WorkbenchCronsQueryVariables>;
+export function useWorkbenchCronsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>(WorkbenchCronsDocument, options);
+        }
+export type WorkbenchCronsQueryHookResult = ReturnType<typeof useWorkbenchCronsQuery>;
+export type WorkbenchCronsLazyQueryHookResult = ReturnType<typeof useWorkbenchCronsLazyQuery>;
+export type WorkbenchCronsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchCronsSuspenseQuery>;
+export type WorkbenchCronsQueryResult = Apollo.QueryResult<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>;
 export const WorkbenchJobDocument = gql`
     query WorkbenchJob($id: ID!) {
   workbenchJob(id: $id) {
@@ -40383,6 +40461,7 @@ export const namedOperations = {
     Workbenches: 'Workbenches',
     Workbench: 'Workbench',
     WorkbenchJobs: 'WorkbenchJobs',
+    WorkbenchCrons: 'WorkbenchCrons',
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchJobActivities: 'WorkbenchJobActivities',
     WorkbenchTools: 'WorkbenchTools',
@@ -40843,6 +40922,7 @@ export const namedOperations = {
     WorkbenchJobTiny: 'WorkbenchJobTiny',
     WorkbenchJobActivity: 'WorkbenchJobActivity',
     WorkbenchJobProgress: 'WorkbenchJobProgress',
+    WorkbenchCron: 'WorkbenchCron',
     WorkbenchJob: 'WorkbenchJob'
   }
 }
