@@ -75,7 +75,7 @@ export function WorkbenchScheduleTriggerCreateForm({
       },
       onCompleted: onCancel,
     })
-  const canSave = !!formState.crontab.trim() // !!formState.name.trim() && !!formState.crontab.trim()
+  const canSave = !!formState.crontab.trim()
 
   const handleSave = () => {
     if (!canSave || isSaving) return
