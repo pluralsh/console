@@ -7,11 +7,13 @@ import {
 
 export function WorkbenchScheduleDeleteModal({
   workbenchId,
-  cronToDelete,
+  open,
+  cron,
   onClose,
 }: {
   workbenchId: string
-  cronToDelete: Nullable<WorkbenchCronFragment>
+  open: boolean
+  cron: Nullable<WorkbenchCronFragment>
   onClose: () => void
 }) {
   const [deleteWorkbenchCron, { loading, error }] =
@@ -28,15 +30,15 @@ export function WorkbenchScheduleDeleteModal({
 
   return (
     <Confirm
-      open={!!cronToDelete}
+      open={open}
       close={onClose}
       destructive
       label="Delete schedule"
       loading={loading}
       error={error}
       submit={() => {
-        if (!cronToDelete) return
-        deleteWorkbenchCron({ variables: { id: cronToDelete.id } })
+        if (!cron) return
+        deleteWorkbenchCron({ variables: { id: cron.id } })
       }}
       title="Delete schedule"
       text={<span>Are you sure you want to delete this schedule?</span>}

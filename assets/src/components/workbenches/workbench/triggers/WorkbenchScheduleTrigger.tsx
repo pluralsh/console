@@ -27,7 +27,8 @@ import { WorkbenchScheduleTriggerCreateForm } from './WorkbenchScheduleTriggerCr
 export function WorkbenchScheduleTrigger() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const [isCreatingSchedule, setIsCreatingSchedule] = useState(false)
-  const [cronToDelete, setCronToDelete] =
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedCron, setSelectedCron] =
     useState<Nullable<WorkbenchCronFragment>>(null)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -41,7 +42,10 @@ export function WorkbenchScheduleTrigger() {
   const columns = useMemo(
     () =>
       getColumns({
-        onDelete: setCronToDelete,
+        onDelete: (cron) => {
+          setSelectedCron(cron)
+          setIsDeleteModalOpen(true)
+        },
       }),
     []
   )
@@ -85,8 +89,12 @@ export function WorkbenchScheduleTrigger() {
       />
       <WorkbenchScheduleDeleteModal
         workbenchId={workbenchId}
-        cronToDelete={cronToDelete}
-        onClose={() => setCronToDelete(null)}
+        open={isDeleteModalOpen}
+        cron={selectedCron}
+        onClose={() => {
+          setIsDeleteModalOpen(false)
+          setSelectedCron(null)
+        }}
       />
     </StretchedFlex>
   )
