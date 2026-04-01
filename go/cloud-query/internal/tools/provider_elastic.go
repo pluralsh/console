@@ -82,6 +82,18 @@ func (in *ElasticProvider) toLogsQueryOutput(resp *search.Response) (*toolquery.
 
 func (in *ElasticProvider) toRequest(input *toolquery.LogsQueryInput) *search.Request {
 	query := strings.TrimSpace(input.Query)
+
+	facets := []types.Query{}
+	if len(input.GetFacets()) > 0 {
+		facets = lo.Map(input.GetFacets(), func(facet *toolquery.LogsQueryFacet, _ int) types.Query {
+			return types.Query{
+				Term: map[string]types.TermQuery{
+					facet.GetName(): types.TermQuery{Value: facet.GetValue()},
+				},
+			}
+		})
+	}
+
 	request := &search.Request{
 		Query: &types.Query{
 			Bool: &types.BoolQuery{
@@ -94,7 +106,7 @@ func (in *ElasticProvider) toRequest(input *toolquery.LogsQueryInput) *search.Re
 							QueryStringQueryCaster(),
 					},
 				},
-				Filter: []types.Query{
+				Filter: append([]types.Query{
 					{Range: map[string]types.RangeQuery{
 						"@timestamp": types.DateRangeQuery{
 							Gte: lo.ToPtr(input.GetRange().GetStart().AsTime().UTC().Format(time.RFC3339Nano)),
@@ -102,7 +114,7 @@ func (in *ElasticProvider) toRequest(input *toolquery.LogsQueryInput) *search.Re
 						},
 					}},
 					{Exists: &types.ExistsQuery{Field: "message"}},
-				},
+				}, facets...),
 			},
 		},
 	}

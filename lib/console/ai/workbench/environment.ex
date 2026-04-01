@@ -28,7 +28,7 @@ defmodule Console.AI.Workbench.Environment do
   end
 
   def categories(%WorkbenchJob{workbench: %Workbench{tools: tools}}) when is_list(tools) do
-    Enum.flat_map(tools, & &1.categories || [])
+    Enum.flat_map(tools, & (&1.categories || []))
     |> Enum.uniq()
   end
   def categories(_), do: []
