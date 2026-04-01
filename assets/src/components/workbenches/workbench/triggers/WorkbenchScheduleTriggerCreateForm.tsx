@@ -8,7 +8,7 @@ import {
   ReturnIcon,
   Switch,
 } from '@pluralsh/design-system'
-import { Body2P, InlineA } from 'components/utils/typography/Text'
+import { Body2P, CaptionP, InlineA } from 'components/utils/typography/Text'
 import CronExpressionParser from 'cron-parser'
 import cronstrue from 'cronstrue'
 import { useMemo, useState } from 'react'
@@ -20,6 +20,13 @@ const CRON_SHORTCUTS_URL =
   'https://github.com/harrisiirak/cron-parser?tab=readme-ov-file#predefined-expressions'
 const CRON_PLACEHOLDER = '*/5 * * * *'
 
+type ScheduleTriggerFormState = {
+  active: boolean
+  name: string
+  prompt: string
+  crontab: string
+}
+
 export function WorkbenchScheduleTriggerCreateForm({
   onCancel,
 }: {
@@ -27,7 +34,7 @@ export function WorkbenchScheduleTriggerCreateForm({
 }) {
   const theme = useTheme()
 
-  const [formState, setFormState] = useState({
+  const [formState, setFormState] = useState<ScheduleTriggerFormState>({
     active: true,
     name: '',
     prompt: '',
@@ -79,35 +86,33 @@ export function WorkbenchScheduleTriggerCreateForm({
       </FormField>
       <Flex
         align="flex-start"
-        gap="medium"
+        gap="small"
       >
-        <div css={{ flex: 1 }}>
-          <FormField
-            label="Cron expression"
-            hint={
-              <span>
-                Enter a cron expression or use shortcuts like @hourly, @daily,
-                @reboot. See all{' '}
-                <InlineA href={CRON_SHORTCUTS_URL}>shortcuts</InlineA>.
-              </span>
+        <FormField
+          label="Cron expression"
+          hint={
+            <CaptionP as="span">
+              Enter a cron expression or use shortcuts like @hourly, @daily,
+              @reboot. See all{' '}
+              <InlineA href={CRON_SHORTCUTS_URL}>shortcuts</InlineA>.
+            </CaptionP>
+          }
+        >
+          <Input2
+            value={formState.crontab}
+            onChange={(e) =>
+              setFormState((prev) => ({ ...prev, crontab: e.target.value }))
             }
-          >
-            <Input2
-              value={formState.crontab}
-              onChange={(e) =>
-                setFormState((prev) => ({ ...prev, crontab: e.target.value }))
-              }
-              placeholder={CRON_PLACEHOLDER}
-              css={{
-                color: theme.colors['code-block-purple'],
-                '& input': {
-                  paddingLeft: 16,
-                  paddingRight: 16,
-                },
-              }}
-            />
-          </FormField>
-        </div>
+            placeholder={CRON_PLACEHOLDER}
+            css={{
+              color: theme.colors['code-block-purple'],
+              '& input': {
+                paddingLeft: 16,
+                paddingRight: 16,
+              },
+            }}
+          />
+        </FormField>
         <FormField
           label="Preview"
           css={{ minWidth: 350 }}
@@ -121,14 +126,28 @@ export function WorkbenchScheduleTriggerCreateForm({
             }}
           >
             <Body2P>{preview.description}</Body2P>
-            {preview.nextTimes.map((time, index) => (
-              <Body2P key={time}>
-                <span css={{ color: theme.colors['text-xlight'] }}>
-                  {index === 0 ? 'next at' : 'then at'}{' '}
-                </span>
-                {formatPreviewTimestamp(time, theme)}
-              </Body2P>
-            ))}
+            {preview.nextTimes.map((time, index) => {
+              const parsedTime = formatPreviewTimestamp(time)
+
+              return (
+                <Body2P key={time}>
+                  <span css={{ color: theme.colors['text-xlight'] }}>
+                    {index === 0 ? 'next at' : 'then at'}{' '}
+                  </span>
+                  {parsedTime ? (
+                    <>
+                      {parsedTime.datePart}{' '}
+                      <span css={{ color: theme.colors['code-block-purple'] }}>
+                        {parsedTime.hourPart}
+                      </span>{' '}
+                      {parsedTime.zonePart}
+                    </>
+                  ) : (
+                    time
+                  )}
+                </Body2P>
+              )
+            })}
           </Card>
         </FormField>
       </Flex>
@@ -189,20 +208,16 @@ function formatCronDateUtc(value: { toISOString: () => string | null }) {
   return dayjs(iso).utc().format('YYYY-MM-DD HH:mm:ss [UTC]')
 }
 
-function formatPreviewTimestamp(
-  time: string,
-  theme: ReturnType<typeof useTheme>
-) {
-  const match = /^(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}) (UTC)$/.exec(time)
-  if (!match) return time
+function formatPreviewTimestamp(time: string): Nullable<{
+  datePart: string
+  hourPart: string
+  zonePart: string
+}> {
+  const parts = time.split(' ')
+  if (parts.length !== 3) return null
 
-  const [, datePart, hourPart, zonePart] = match
+  const [datePart, hourPart, zonePart] = parts
+  if (!datePart || !hourPart || !zonePart) return null
 
-  return (
-    <>
-      {datePart}{' '}
-      <span css={{ color: theme.colors['code-block-purple'] }}>{hourPart}</span>{' '}
-      {zonePart}
-    </>
-  )
+  return { datePart, hourPart, zonePart }
 }
