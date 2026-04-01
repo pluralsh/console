@@ -203,6 +203,16 @@ Used for fetching Redis ACL user passwords from Kubernetes Secrets
 {{- end }}
 {{- end }}
 
+{{/*
+Return standard labels without helm.sh/chart to prevent unnecessary
+application restarts on chart version bumps.
+*/}}
+{{- define "redis.labels.withoutChartVersion" -}}
+{{- $labels := include "common.labels.standard" ( dict "customLabels" .customLabels "context" .context ) | fromYaml -}}
+{{- $_ := unset $labels "helm.sh/chart" -}}
+{{- $labels | toYaml -}}
+{{- end -}}
+
 {{/* Define the suffix utilized for external-dns */}}
 {{- define "redis.externalDNS.suffix" -}}
 {{ printf "%s.%s" (include "redis.fullname" .) .Values.kas.redis.useExternalDNS.suffix }}
