@@ -26,7 +26,6 @@ const CRON_PLACEHOLDER = '*/5 * * * *'
 
 type ScheduleTriggerFormState = {
   // active: boolean
-  // name: string
   prompt: string
   crontab: string
 }
@@ -42,7 +41,6 @@ export function WorkbenchScheduleTriggerCreateForm({
 
   const [formState, setFormState] = useState<ScheduleTriggerFormState>({
     // active: true,
-    // name: '',
     prompt: '',
     crontab: '',
   })
@@ -94,17 +92,6 @@ export function WorkbenchScheduleTriggerCreateForm({
       {/*>*/}
       {/*  Schedule active*/}
       {/*</Switch>*/}
-      {/*<FormField*/}
-      {/*  required*/}
-      {/*  label="Schedule name"*/}
-      {/*>*/}
-      {/*  <Input2*/}
-      {/*    value={formState.name}*/}
-      {/*    onChange={(e) =>*/}
-      {/*      setFormState((prev) => ({ ...prev, name: e.target.value }))*/}
-      {/*    }*/}
-      {/*  />*/}
-      {/*</FormField>*/}
       <FormField label="Prompt">
         <Input
           multiline

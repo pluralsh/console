@@ -4,18 +4,16 @@ import {
   WorkbenchCronFragment,
   WorkbenchCronsDocument,
 } from 'generated/graphql'
-import { useParams } from 'react-router-dom'
-import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 
 export function WorkbenchScheduleDeleteModal({
+  workbenchId,
   cronToDelete,
   onClose,
 }: {
+  workbenchId: string
   cronToDelete: Nullable<WorkbenchCronFragment>
   onClose: () => void
 }) {
-  const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
-
   const [deleteWorkbenchCron, { loading, error }] =
     useDeleteWorkbenchCronMutation({
       refetchQueries: [

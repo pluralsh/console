@@ -85,6 +85,7 @@ export function WorkbenchScheduleTrigger() {
         emptyStateProps={{ message: 'No cron schedules found' }}
       />
       <WorkbenchScheduleDeleteModal
+        workbenchId={workbenchId}
         cronToDelete={cronToDelete}
         onClose={() => setCronToDelete(null)}
       />
