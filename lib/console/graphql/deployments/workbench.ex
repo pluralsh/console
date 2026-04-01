@@ -94,6 +94,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :splunk,     :workbench_tool_splunk_connection_attributes, description: "splunk connection (logs)"
     field :tempo,      :workbench_tool_tempo_connection_attributes, description: "tempo connection (traces)"
     field :datadog,    :workbench_tool_datadog_connection_attributes, description: "datadog connection (metrics, logs)"
+    field :dynatrace,  :workbench_tool_dynatrace_connection_attributes, description: "dynatrace connection (metrics, logs, traces)"
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
     field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
   end
@@ -140,6 +141,11 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :site,    :string, description: "datadog site (e.g. datadoghq.com)"
     field :api_key, :string, description: "datadog API key"
     field :app_key, :string, description: "datadog application key"
+  end
+
+  input_object :workbench_tool_dynatrace_connection_attributes do
+    field :url,       non_null(:string), description: "dynatrace base url"
+    field :api_token, non_null(:string), description: "dynatrace API token"
   end
 
   input_object :workbench_tool_linear_connection_attributes do
@@ -377,6 +383,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :splunk,    :workbench_tool_splunk_connection, description: "splunk connection (no secrets)"
     field :tempo,     :workbench_tool_tempo_connection, description: "tempo connection (no secrets)"
     field :datadog,   :workbench_tool_datadog_connection, description: "datadog connection (no secrets)"
+    field :dynatrace, :workbench_tool_dynatrace_connection, description: "dynatrace connection (no secrets)"
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
   end
@@ -412,6 +419,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_tool_datadog_connection do
     field :site, :string, description: "datadog site (API/app keys never exposed)"
+  end
+
+  object :workbench_tool_dynatrace_connection do
+    field :url, :string, description: "dynatrace base url (credentials never exposed)"
   end
 
   object :workbench_tool_linear_connection do

@@ -77,6 +77,7 @@ Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metri
 | Elasticsearch | No | Yes | No | Elasticsearch typed client v9 Search API (API key required) |
 | Loki | No | Yes | No | REST client to `/loki/api/v1/query_range` (bearer token; optional `X-Scope-OrgID`) |
 | Tempo | No | No | Yes | REST client to `/api/search` and `/api/traces/{traceID}` (bearer token; optional `X-Scope-OrgID`) |
+| Dynatrace | Yes | Yes | Yes | Dynatrace Metrics (v2) and Grail (v2) APIs (Bearer token required) |
 
 For provider-specific request payloads, query formats, and examples, see the [API Reference Documentation](docs/api-reference.md).
 

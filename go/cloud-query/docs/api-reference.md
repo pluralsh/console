@@ -296,6 +296,7 @@ ToolQuery support varies by operation:
 | Elasticsearch | No | Yes | No | Elasticsearch typed Search API with query string |
 | Loki | No | Yes | No | Loki HTTP `query_range` API |
 | Tempo | No | No | Yes | Tempo HTTP search + trace fetch |
+| Dynatrace | Yes | Yes | Yes | Dynatrace Metrics (v2) and Grail (v2) APIs |
 
 ## Client and Endpoint Details
 
@@ -309,6 +310,7 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
 - Elasticsearch: `elastic/go-elasticsearch` v9 typed client, `Search` (Elasticsearch `/_search`) with a `query_string` query and `@timestamp` range filter. Requires API key.
 - Loki: REST client to `/loki/api/v1/query_range`, bearer token auth, optional `X-Scope-OrgID` header for tenancy.
 - Tempo: REST client to `/api/search` and `/api/traces/{traceID}`, bearer token auth, optional `X-Scope-OrgID` header for tenancy.
+- Dynatrace: REST client to `/api/v2/metrics` and `/api/v2/query/execute` (Grail), bearer token auth.
 
 ## Service Definition
 
@@ -353,6 +355,11 @@ message TempoConnection {
   string token = 2;
   optional string tenant_id = 3;
 }
+
+message DynatraceConnection {
+  string url = 1;
+  string apiToken = 2;
+}
 ```
 
 Implementation notes:
@@ -372,6 +379,7 @@ message ToolConnection {
     PrometheusConnection prometheus = 3;
     LokiConnection loki = 4;
     TempoConnection tempo = 5;
+    DynatraceConnection dynatrace = 6;
   }
 }
 
@@ -593,6 +601,45 @@ grpcurl -d '{
 }
 ```
 
+### Dynatrace
+
+Dynatrace metrics query uses the Metrics v2 API and requires a `metricSelector`.
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "dynatrace": {
+      "url": "https://abc12345.live.dynatrace.com",
+      "apiToken": "<API_TOKEN>"
+    }
+  },
+  "query": "builtin:host.cpu.usage",
+  "range": {
+    "start": "2024-03-20T10:00:00Z",
+    "end": "2024-03-20T11:00:00Z"
+  }
+}' -plaintext localhost:9192 toolquery.ToolQuery/Metrics
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    {
+      "labels": {
+        "dt.entity.host": "HOST-12345678"
+      },
+      "timestamp": "2024-03-20T10:00:00Z",
+      "name": "builtin:host.cpu.usage",
+      "value": 15.5
+    }
+  ]
+}
+```
+
 ## Logs
 
 #### Request
@@ -779,6 +826,45 @@ grpcurl -d '{
 }
 ```
 
+### Dynatrace
+
+Dynatrace logs query uses the Grail (DQL) API.
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "dynatrace": {
+      "url": "https://abc12345.live.dynatrace.com",
+      "apiToken": "<API_TOKEN>"
+    }
+  },
+  "query": "fetch logs | limit 1",
+  "range": {
+    "start": "2024-03-20T10:00:00Z",
+    "end": "2024-03-20T11:00:00Z"
+  }
+}' -plaintext localhost:9192 toolquery.ToolQuery/Logs
+```
+
+#### Output
+
+```json
+{
+  "logs": [
+    {
+      "labels": {
+        "dt.process_name": "deployment-operator",
+        "dt.entity.host": "HOST-12345678"
+      },
+      "timestamp": "2024-03-20T10:15:00Z",
+      "message": "Starting deployment sync..."
+    }
+  ]
+}
+```
+
 ## Traces
 
 #### Request
@@ -930,6 +1016,47 @@ grpcurl -d '{
       "service": "deployment-operator",
       "start": "2026-02-18T12:07:30.533Z",
       "end": "2026-02-18T12:07:30.533Z"
+    }
+  ]
+}
+```
+
+### Dynatrace
+
+Dynatrace traces query also uses the Grail (DQL) API but maps results to spans.
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "dynatrace": {
+      "url": "https://abc12345.live.dynatrace.com",
+      "apiToken": "<API_TOKEN>"
+    }
+  },
+  "query": "fetch spans | limit 1",
+  "range": {
+    "start": "2024-03-20T10:00:00Z",
+    "end": "2024-03-20T11:00:00Z"
+  }
+}' -plaintext localhost:9192 toolquery.ToolQuery/Traces
+```
+
+#### Output
+
+```json
+{
+  "spans": [
+    {
+      "tags": {
+        "dt.entity.service": "SERVICE-12345"
+      },
+      "trace_id": "trace-123",
+      "span_id": "span-456",
+      "name": "GET /api/v1/resource",
+      "start": "2024-03-20T10:05:00Z",
+      "end": "2024-03-20T10:05:00Z"
     }
   ]
 }
