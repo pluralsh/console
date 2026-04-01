@@ -124,6 +124,7 @@ export function WorkbenchScheduleTriggerCreateForm({
         gap="small"
       >
         <FormField
+          required
           label="Cron expression"
           hint={
             <CaptionP as="span">
