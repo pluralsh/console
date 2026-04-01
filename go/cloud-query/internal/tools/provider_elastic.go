@@ -88,7 +88,9 @@ func (in *ElasticProvider) toRequest(input *toolquery.LogsQueryInput) *search.Re
 		facets = lo.Map(input.GetFacets(), func(facet *toolquery.LogsQueryFacet, _ int) types.Query {
 			return types.Query{
 				Term: map[string]types.TermQuery{
-					facet.GetName(): types.TermQuery{Value: facet.GetValue()},
+					facet.GetName(): {
+						Value: facet.GetValue(),
+					},
 				},
 			}
 		})

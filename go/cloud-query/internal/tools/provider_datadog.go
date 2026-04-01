@@ -124,7 +124,7 @@ func (in *DatadogProvider) Logs(ctx context.Context, input *toolquery.LogsQueryI
 	filter := datadogV2.NewLogsQueryFilter()
 	filter.SetFrom(input.GetRange().GetStart().AsTime().UTC().Format(time.RFC3339Nano))
 	filter.SetTo(input.GetRange().GetEnd().AsTime().UTC().Format(time.RFC3339Nano))
-	filter.SetQuery(input.Query)
+	filter.SetQuery(datadogLogsQueryWithFacets(input.Query, input.GetFacets()))
 
 	request := datadogV2.NewLogsListRequest()
 	request.SetFilter(*filter)
