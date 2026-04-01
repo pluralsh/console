@@ -18111,18 +18111,18 @@ export type ServiceMetricsQuery = { __typename?: 'RootQueryType', serviceDeploym
 
 export type MonitorThresholdFragment = { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number };
 
-export type MonitorTinyFragment = { __typename?: 'Monitor', id: string, name: string, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } };
+export type MonitorTinyFragment = { __typename?: 'Monitor', id: string, name: string, state?: AlertState | null, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } };
 
 export type MonitorLogQueryFragment = { __typename?: 'MonitorLogQuery', bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, query: string, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null };
 
-export type MonitorFragment = { __typename?: 'Monitor', alertTemplate?: string | null, description?: string | null, evaluationCron: string, severity: AlertSeverity, type: MonitorType, id: string, name: string, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } }, service?: { __typename?: 'ServiceDeployment', id: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } };
+export type MonitorFragment = { __typename?: 'Monitor', alertTemplate?: string | null, description?: string | null, evaluationCron: string, severity: AlertSeverity, type: MonitorType, id: string, name: string, state?: AlertState | null, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } }, service?: { __typename?: 'ServiceDeployment', id: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } };
 
 export type MonitorDetailsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type MonitorDetailsQuery = { __typename?: 'RootQueryType', monitor?: { __typename?: 'Monitor', alertTemplate?: string | null, description?: string | null, evaluationCron: string, severity: AlertSeverity, type: MonitorType, id: string, name: string, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } }, service?: { __typename?: 'ServiceDeployment', id: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } } | null };
+export type MonitorDetailsQuery = { __typename?: 'RootQueryType', monitor?: { __typename?: 'Monitor', alertTemplate?: string | null, description?: string | null, evaluationCron: string, severity: AlertSeverity, type: MonitorType, id: string, name: string, state?: AlertState | null, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string, bucketSize: string, duration?: string | null, operator?: MonitorOperator | null, facets?: Array<{ __typename?: 'MonitorFacet', key: string, value: string } | null> | null } }, service?: { __typename?: 'ServiceDeployment', id: string } | null, workbench?: { __typename?: 'Workbench', id: string } | null, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number } } | null };
 
 export type ServiceMonitorsQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
@@ -18132,14 +18132,14 @@ export type ServiceMonitorsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceMonitorsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, monitors?: { __typename?: 'MonitorConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'MonitorEdge', node?: { __typename?: 'Monitor', id: string, name: string, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null } | null> | null } | null } | null };
+export type ServiceMonitorsQuery = { __typename?: 'RootQueryType', serviceDeployment?: { __typename?: 'ServiceDeployment', id: string, monitors?: { __typename?: 'MonitorConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'MonitorEdge', node?: { __typename?: 'Monitor', id: string, name: string, state?: AlertState | null, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null } | null> | null } | null } | null };
 
 export type CreateMonitorMutationVariables = Exact<{
   attributes: MonitorAttributes;
 }>;
 
 
-export type CreateMonitorMutation = { __typename?: 'RootMutationType', createMonitor?: { __typename?: 'Monitor', id: string, name: string, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null };
+export type CreateMonitorMutation = { __typename?: 'RootMutationType', createMonitor?: { __typename?: 'Monitor', id: string, name: string, state?: AlertState | null, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null };
 
 export type UpdateMonitorMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -18147,7 +18147,7 @@ export type UpdateMonitorMutationVariables = Exact<{
 }>;
 
 
-export type UpdateMonitorMutation = { __typename?: 'RootMutationType', updateMonitor?: { __typename?: 'Monitor', id: string, name: string, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null };
+export type UpdateMonitorMutation = { __typename?: 'RootMutationType', updateMonitor?: { __typename?: 'Monitor', id: string, name: string, state?: AlertState | null, evaluationCron: string, threshold: { __typename?: 'MonitorThreshold', aggregate: MonitorAggregate, value: number }, query: { __typename?: 'MonitorQuery', log: { __typename?: 'MonitorLogQuery', query: string } } } | null };
 
 export type DeleteMonitorMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -23053,6 +23053,7 @@ export const MonitorTinyFragmentDoc = gql`
     fragment MonitorTiny on Monitor {
   id
   name
+  state
   evaluationCron
   threshold {
     ...MonitorThreshold

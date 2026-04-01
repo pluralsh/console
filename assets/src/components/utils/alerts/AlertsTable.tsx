@@ -3,14 +3,13 @@ import {
   Button,
   Chip,
   ChipSeverity,
-  ErrorIcon,
   EyeIcon,
   Flex,
   IconFrame,
   Table,
   Tooltip,
 } from '@pluralsh/design-system'
-import { AlertFragment, AlertSeverity, AlertState } from 'generated/graphql'
+import { AlertFragment, AlertSeverity } from 'generated/graphql'
 
 import { createColumnHelper } from '@tanstack/react-table'
 import { ColExpander } from 'components/cd/cluster/pod/PodContainers'
@@ -23,6 +22,7 @@ import { GqlError } from '../Alert'
 import { StackedText } from '../table/StackedText'
 import { VirtualSlice } from '../table/useFetchPaginatedData'
 import { InlineA } from '../typography/Text'
+import { AlertStateChip } from './AlertStateChip'
 import { AlertsTableExpander } from './AlertsTableExpander'
 import { useState } from 'react'
 import { AlertResolutionModal } from './AlertResolutionModal'
@@ -100,23 +100,7 @@ const cols = [
     id: 'state',
     header: 'State',
     cell: function Cell({ getValue }) {
-      const state = getValue()
-      return (
-        <Chip
-          css={{ width: 'max-content' }}
-          size="small"
-          severity={state === AlertState.Firing ? 'danger' : 'neutral'}
-          inactive={state !== AlertState.Firing}
-        >
-          <Flex
-            gap="xsmall"
-            align="center"
-          >
-            {state === AlertState.Firing && <ErrorIcon size={12} />}
-            {state === AlertState.Firing ? 'Firing' : 'Non-firing'}
-          </Flex>
-        </Chip>
-      )
+      return <AlertStateChip state={getValue()} />
     },
   }),
   columnHelper.accessor((alert) => alert.severity, {

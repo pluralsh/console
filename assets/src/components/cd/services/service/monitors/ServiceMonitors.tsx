@@ -12,6 +12,7 @@ import {
 import { createColumnHelper } from '@tanstack/react-table'
 import { useThrottle } from 'components/hooks/useThrottle'
 import { GqlError } from 'components/utils/Alert'
+import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import { Confirm } from 'components/utils/Confirm'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
@@ -89,6 +90,14 @@ const cols = [
     id: 'name',
     header: 'Name',
     cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor(({ state }) => state, {
+    id: 'state',
+    header: 'State',
+    cell: ({ getValue }) => {
+      const state = getValue()
+      return state ? <AlertStateChip state={state} /> : '--'
+    },
   }),
   columnHelper.accessor(({ threshold }) => threshold, {
     id: 'threshold',

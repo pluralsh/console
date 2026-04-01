@@ -181,7 +181,6 @@ defmodule Console.MixProject do
       {:bandit, "~> 1.8"},
       {:caramelize, "~> 1.2"},
       {:req_llm, "~> 1.9"},
-      {:llm_db, git: "https://github.com/agentjido/llm_db.git", branch: "main", override: true},
 
       # if using the Mint adapter:
       {:castore, "~> 1.0", override: true},

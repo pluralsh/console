@@ -6,6 +6,7 @@ fragment MonitorThreshold on MonitorThreshold {
 fragment MonitorTiny on Monitor {
   id
   name
+  state
   evaluationCron
   threshold {
     ...MonitorThreshold
