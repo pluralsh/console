@@ -59,6 +59,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
     %WorkbenchJobThought{activity_id: activity_id}
     |> WorkbenchJobThought.changeset(%{content: content, attributes: attributes})
     |> Repo.insert()
+    |> IO.inspect(label: "Saved thought")
   end
   def save_thought(_, _, _), do: :ok
 

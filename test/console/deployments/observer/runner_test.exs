@@ -161,7 +161,7 @@ defmodule Console.Deployments.Observer.RunnerTest do
 
       agent_run = Console.Repo.get(Console.Schema.AgentRun, obs.agent_run_id)
       assert agent_run.runtime_id == runtime.id
-      assert agent_run.prompt =~ ~r/some prompt with [0-9]\.[0-9]\.[0-9] template/
+      assert agent_run.prompt =~ ~r/some prompt with [0-9]+\.[0-9]+\.[0-9]+ template/
       assert agent_run.repository == "https://github.com/pluralsh/console.git"
     end
   end

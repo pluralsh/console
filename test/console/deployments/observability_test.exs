@@ -339,6 +339,8 @@ defmodule Console.Deployments.ObservabilityTest do
       assert length(alert.timeseries.metrics) == 1
 
       assert alert.message == "Monitor cpu-high is firing for #{service.name}"
+
+      assert refetch(monitor).state == :firing
     end
 
     test "creates a firing alert when alert templates are unused" do

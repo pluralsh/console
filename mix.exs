@@ -163,7 +163,7 @@ defmodule Console.MixProject do
       {:remote_ip, "~> 1.2.0"},
       {:erlsom, "~> 1.5.1"},
       {:inflex, "~> 2.0.0"},
-      {:websockex, "~> 0.4.3"},
+      {:websockex, "~> 0.5.1", override: true},
       {:briefly, "~> 0.5.0"},
       {:libring, "~> 1.7"},
       {:http_stream, "~> 1.0.0"},
@@ -180,7 +180,7 @@ defmodule Console.MixProject do
       {:hackney, "== 1.20.1"},
       {:bandit, "~> 1.8"},
       {:caramelize, "~> 1.2"},
-      {:req_llm, "~> 1.7"},
+      {:req_llm, "~> 1.9"},
       {:llm_db, git: "https://github.com/agentjido/llm_db.git", branch: "main", override: true},
 
       # if using the Mint adapter:

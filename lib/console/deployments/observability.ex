@@ -111,7 +111,17 @@ defmodule Console.Deployments.Observability do
     monitor = Repo.preload(monitor, [:alert, service: :cluster])
     with {:ok, result, results} <- MonitorImpl.query(monitor),
          {:ok, attrs} <- monitor_attrs(monitor, result, results) do
-      monitor_alert(monitor, attrs, result)
+      start_transaction()
+      |> add_operation(:update, fn _ -> monitor_alert(monitor, attrs, result) end)
+      |> add_operation(:monitor, fn _ ->
+        Monitor.changeset(monitor, %{state: result})
+        |> Repo.update()
+      end)
+      |> execute(extract: :update)
+      |> case do
+        {:ok, :ignore} -> :ignore
+        res -> res
+      end
     end
   end
 
@@ -125,7 +135,7 @@ defmodule Console.Deployments.Observability do
     |> Repo.insert_or_update()
     |> notify(:create)
   end
-  defp monitor_alert(_, _, _), do: :ignore
+  defp monitor_alert(_, _, _), do: {:ok, :ignore}
 
   defp monitor_attrs(%Monitor{} = monitor, :firing, results), do: MonitorImpl.alert_attrs(monitor, results)
   defp monitor_attrs(%Monitor{id: id}, :resolved, _), do: {:ok, %{monitor_id: id, state: :resolved, fingerprint: id}}

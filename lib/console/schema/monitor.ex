@@ -11,6 +11,7 @@ defmodule Console.Schema.Monitor do
     field :description,     :string
     field :alert_template,  :binary
     field :severity,        Alert.Severity, default: :low
+    field :state,           Alert.State, default: :resolved
     field :type,            Type, default: :log
     field :evaluation_cron, :string
     field :next_run_at,     :utc_datetime_usec
@@ -68,6 +69,7 @@ defmodule Console.Schema.Monitor do
     last_run_at
     service_id
     workbench_id
+    state
   )a
 
   def changeset(model, attrs \\ %{}) do

@@ -108,7 +108,7 @@ defmodule Console.AI.Research.Agent do
       """}
     ]
 
-    with {:ok, result} <- Provider.simple_tool_call(messages, FinishInvestigation, preface: @preface),
+    with {:ok, result} <- Provider.simple_tool_call(messages, FinishInvestigation, preface: @preface) |> IO.inspect(label: "Result"),
          {:ok, research} <- update_research(research, %{
                               status: :completed,
                               analysis: %{
