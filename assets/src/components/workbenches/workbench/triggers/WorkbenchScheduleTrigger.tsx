@@ -152,26 +152,17 @@ function cronToExplanation({
     : 'Next run not scheduled yet'
 
   if (!crontab) return fallback
+
   const parts = crontab.trim().split(/\s+/)
   if (parts.length < 5) return fallback
 
-  const [minute, hour, dayOfMonth] = parts
-  if (!isInteger(minute) || !isInteger(hour) || !isInteger(dayOfMonth))
+  const [minute, hour, dayOfMonth] = parts.map(Number)
+  if ([minute, hour, dayOfMonth].some((n) => !Number.isInteger(n))) {
     return fallback
+  }
 
-  const hourNumber = Number(hour)
-  const minuteNumber = Number(minute)
-  const dayNumber = Number(dayOfMonth)
-
-  const suffix = hourNumber >= 12 ? 'PM' : 'AM'
-  const hour12 = hourNumber % 12 || 12
-  const minutePadded = `${minuteNumber}`.padStart(2, '0')
-  const atTime = `${hour12}:${minutePadded} ${suffix}`
-  const base = `At ${atTime} on, day ${dayNumber} of the month`
+  const atTime = `${hour % 12 || 12}:${String(minute).padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`
+  const base = `At ${atTime} on, day ${dayOfMonth} of the month`
 
   return nextRunText ? `${base}, next at ${nextRunText}` : base
-}
-
-function isInteger(value: string) {
-  return /^\d+$/.test(value)
 }
