@@ -4,6 +4,7 @@ import {
   Card,
   CheckOutlineIcon,
   CircleDashIcon,
+  CloseIcon,
   ErrorOutlineIcon,
   Flex,
   IconFrame,
@@ -21,6 +22,7 @@ import {
   MonitorAggregate,
   MonitorAttributes,
   MonitorFragment,
+  MonitorLogQueryFragment,
   MonitorOperator,
   MonitorType,
   useCreateMonitorMutation,
@@ -45,6 +47,7 @@ import {
 import { isNil } from 'lodash'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { ServiceMonitorPreview } from './ServiceMonitorPreview'
+import { isNonNullable } from 'utils/isNonNullable'
 
 export type ServiceMonitorStepKey =
   | 'description'
@@ -52,9 +55,9 @@ export type ServiceMonitorStepKey =
   | 'log-query'
 
 const STEPS: { key: ServiceMonitorStepKey; label: string }[] = [
-  { key: 'description', label: 'Description' },
-  { key: 'threshold-config', label: 'Threshold config' },
   { key: 'log-query', label: 'Log query' },
+  { key: 'threshold-config', label: 'Threshold config' },
+  { key: 'description', label: 'Description' },
 ] as const
 
 export function ServiceMonitorCreateOrEdit({
@@ -103,7 +106,7 @@ function ServiceMonitorCreateOrEditInner({
   const serviceId = useParams()[SERVICE_PARAM_ID] ?? ''
   const { spacing, breakpoints } = useTheme()
   const [curStep, setCurStepState] =
-    useState<ServiceMonitorStepKey>('description')
+    useState<ServiceMonitorStepKey>('log-query')
   const [visitedSteps, setVisitedSteps] = useState<Set<ServiceMonitorStepKey>>(
     () => new Set()
   )
@@ -111,9 +114,10 @@ function ServiceMonitorCreateOrEditInner({
     setVisitedSteps((prev) => prev.add(curStep))
     setCurStepState(newStep)
   }
-  const { state, update, hasUpdates } = useUpdateState<MonitorAttributes>(
-    sanitizeInitialFormState(monitor, serviceId)
-  )
+  const { state, update, hasUpdates, reset } =
+    useUpdateState<MonitorAttributes>(
+      sanitizeInitialFormState(monitor, serviceId)
+    )
   const allowSubmit = hasUpdates && isFormValid(state)
   const onSuccess = (shouldNav: boolean) => {
     if (shouldNav) navigate('..', { relative: 'path' })
@@ -176,15 +180,29 @@ function ServiceMonitorCreateOrEditInner({
           secondary
           css={{ marginTop: 'auto', marginBottom: spacing.xsmall }}
         />
-        <Button
-          disabled={!allowSubmit}
-          loading={mutationLoading}
-          onClick={() =>
-            mode === 'create' ? createMonitor() : updateMonitor()
-          }
-        >
-          {mode === 'create' ? 'Create' : 'Update'} monitor
-        </Button>
+        <Flex gap="xsmall">
+          {mode === 'edit' && (
+            <IconFrame
+              clickable
+              size="large"
+              type="floating"
+              disabled={!hasUpdates}
+              onClick={reset}
+              icon={<CloseIcon />}
+              tooltip="Clear changes"
+            />
+          )}
+          <Button
+            flex={1}
+            disabled={!allowSubmit}
+            loading={mutationLoading}
+            onClick={() =>
+              mode === 'create' ? createMonitor() : updateMonitor()
+            }
+          >
+            {mode === 'create' ? 'Create' : 'Update'} monitor
+          </Button>
+        </Flex>
       </Flex>
       <Flex
         direction="column"
@@ -255,7 +273,7 @@ const sanitizeInitialFormState = (
       bucketSize: log?.bucketSize ?? BUCKET_SIZE_OPTIONS[0],
       duration: log?.duration ?? DURATION_OPTIONS[0],
       operator: log?.operator ?? MonitorOperator.And,
-      facets: log?.facets ?? [],
+      facets: facetArrToAttributeArr(log?.facets ?? []),
       query: log?.query ?? '',
     },
   }
@@ -275,6 +293,9 @@ const sanitizeInitialFormState = (
     ...(monitor?.workbench?.id && { workbenchId: monitor.workbench.id }),
   }
 }
+
+const facetArrToAttributeArr = (arr: MonitorLogQueryFragment['facets']) =>
+  arr?.filter(isNonNullable)?.map(({ key, value }) => ({ key, value })) ?? []
 
 const getStepIcon = (key: ServiceMonitorStepKey, state: MonitorAttributes) => {
   const { name, evaluationCron, threshold, query } = state

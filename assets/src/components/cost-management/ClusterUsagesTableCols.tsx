@@ -125,7 +125,7 @@ export const ColLoadBalancerCost = columnHelper.accessor(
 )
 
 export const ColNetworkCost = columnHelper.accessor(
-  ({ ingressCost, egressCost }) => (ingressCost ?? 0) / (egressCost ?? 0),
+  ({ ingressCost, egressCost }) => (ingressCost ?? 0) + (egressCost ?? 0),
   {
     id: 'networkCost',
     header: 'Network cost',
