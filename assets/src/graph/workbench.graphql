@@ -388,3 +388,9 @@ mutation CreateWorkbenchCron(
     ...WorkbenchCron
   }
 }
+
+mutation DeleteWorkbenchCron($id: ID!) {
+  deleteWorkbenchCron(id: $id) {
+    id
+  }
+}

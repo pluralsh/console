@@ -22,11 +22,14 @@ import { useParams } from 'react-router-dom'
 import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
+import { WorkbenchScheduleDeleteModal } from './WorkbenchScheduleDeleteModal'
 import { WorkbenchScheduleTriggerCreateForm } from './WorkbenchScheduleTriggerCreateForm'
 
 export function WorkbenchScheduleTrigger() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const [isCreatingSchedule, setIsCreatingSchedule] = useState(false)
+  const [cronToDelete, setCronToDelete] =
+    useState<Nullable<WorkbenchCronFragment>>(null)
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -35,6 +38,14 @@ export function WorkbenchScheduleTrigger() {
     )
 
   const crons = useMemo(() => mapExistingNodes(data?.workbench?.crons), [data])
+
+  const columns = useMemo(
+    () =>
+      getColumns({
+        onDelete: setCronToDelete,
+      }),
+    []
+  )
 
   if (error) return <GqlError error={error} />
   if (isCreatingSchedule)
@@ -73,54 +84,64 @@ export function WorkbenchScheduleTrigger() {
         onVirtualSliceChange={setVirtualSlice}
         emptyStateProps={{ message: 'No cron schedules found' }}
       />
+      <WorkbenchScheduleDeleteModal
+        cronToDelete={cronToDelete}
+        onClose={() => setCronToDelete(null)}
+      />
     </StretchedFlex>
   )
 }
 
 const columnHelper = createColumnHelper<WorkbenchCronFragment>()
-const columns = [
-  columnHelper.accessor((cron) => cron, {
-    id: 'details',
-    meta: { gridTemplate: '1fr' },
-    cell: ({ getValue }) => {
-      const cron = getValue()
-      return (
-        <StackedText
-          first={cron.prompt || cron.crontab || 'Cron schedule'}
-          second={cronToExplanation(cron)}
-        />
-      )
-    },
-  }),
-  columnHelper.display({
-    id: 'actions',
-    meta: { gridTemplate: '180px' },
-    cell: () => (
-      <Flex
-        align="center"
-        justify="flex-end"
-        gap="xsmall"
-      >
-        <Switch
-          checked
-          onChange={() => {}}
-        />
-        <IconFrame
-          clickable
-          tooltip="Edit schedule"
-          icon={<PencilIcon />}
-          onClick={() => {}}
-        />
-        <IconFrame
-          clickable
-          tooltip="Delete schedule"
-          icon={<TrashCanIcon color="icon-danger" />}
-          onClick={() => {}}
-        />
-      </Flex>
-    ),
-  }),
-]
+function getColumns({
+  onDelete,
+}: {
+  onDelete: (cron: WorkbenchCronFragment) => void
+}) {
+  return [
+    columnHelper.accessor((cron) => cron, {
+      id: 'details',
+      meta: { gridTemplate: '1fr' },
+      cell: ({ getValue }) => {
+        const cron = getValue()
+        return (
+          <StackedText
+            first={cron.prompt || cron.crontab || 'Cron schedule'}
+            second={cronToExplanation(cron)}
+          />
+        )
+      },
+    }),
+    columnHelper.display({
+      id: 'actions',
+      meta: { gridTemplate: '180px' },
+      cell: ({ row }) => (
+        <Flex
+          align="center"
+          justify="flex-end"
+          gap="xsmall"
+        >
+          <Switch
+            checked
+            onChange={() => {}}
+          />
+          <IconFrame
+            clickable
+            tooltip="Edit schedule"
+            icon={<PencilIcon />}
+            onClick={() => {}}
+          />
+          <IconFrame
+            clickable
+            tooltip="Delete schedule"
+            icon={<TrashCanIcon color="icon-danger" />}
+            onClick={() => onDelete(row.original)}
+          />
+        </Flex>
+      ),
+    }),
+  ]
+}
 
 function cronToExplanation({
   crontab,

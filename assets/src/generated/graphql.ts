@@ -19095,6 +19095,13 @@ export type CreateWorkbenchCronMutationVariables = Exact<{
 
 export type CreateWorkbenchCronMutation = { __typename?: 'RootMutationType', createWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
+export type DeleteWorkbenchCronMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteWorkbenchCronMutation = { __typename?: 'RootMutationType', deleteWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string } | null };
+
 export const PullRequestBasicFragmentDoc = gql`
     fragment PullRequestBasic on PullRequest {
   id
@@ -40291,6 +40298,39 @@ export function useCreateWorkbenchCronMutation(baseOptions?: Apollo.MutationHook
 export type CreateWorkbenchCronMutationHookResult = ReturnType<typeof useCreateWorkbenchCronMutation>;
 export type CreateWorkbenchCronMutationResult = Apollo.MutationResult<CreateWorkbenchCronMutation>;
 export type CreateWorkbenchCronMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchCronMutation, CreateWorkbenchCronMutationVariables>;
+export const DeleteWorkbenchCronDocument = gql`
+    mutation DeleteWorkbenchCron($id: ID!) {
+  deleteWorkbenchCron(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteWorkbenchCronMutationFn = Apollo.MutationFunction<DeleteWorkbenchCronMutation, DeleteWorkbenchCronMutationVariables>;
+
+/**
+ * __useDeleteWorkbenchCronMutation__
+ *
+ * To run a mutation, you first call `useDeleteWorkbenchCronMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteWorkbenchCronMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteWorkbenchCronMutation, { data, loading, error }] = useDeleteWorkbenchCronMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteWorkbenchCronMutation(baseOptions?: Apollo.MutationHookOptions<DeleteWorkbenchCronMutation, DeleteWorkbenchCronMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteWorkbenchCronMutation, DeleteWorkbenchCronMutationVariables>(DeleteWorkbenchCronDocument, options);
+      }
+export type DeleteWorkbenchCronMutationHookResult = ReturnType<typeof useDeleteWorkbenchCronMutation>;
+export type DeleteWorkbenchCronMutationResult = Apollo.MutationResult<DeleteWorkbenchCronMutation>;
+export type DeleteWorkbenchCronMutationOptions = Apollo.BaseMutationOptions<DeleteWorkbenchCronMutation, DeleteWorkbenchCronMutationVariables>;
 export const namedOperations = {
   Query: {
     AgentRuns: 'AgentRuns',
@@ -40665,7 +40705,8 @@ export const namedOperations = {
     UpdateWorkbenchTool: 'UpdateWorkbenchTool',
     DeleteWorkbenchTool: 'DeleteWorkbenchTool',
     CreateWorkbenchJob: 'CreateWorkbenchJob',
-    CreateWorkbenchCron: 'CreateWorkbenchCron'
+    CreateWorkbenchCron: 'CreateWorkbenchCron',
+    DeleteWorkbenchCron: 'DeleteWorkbenchCron'
   },
   Subscription: {
     AgentRunChat: 'AgentRunChat',

@@ -1891,6 +1891,11 @@
          "type": "mutation",
          "name": "CreateWorkbenchCron",
          "body": "mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {\n  createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {\n    ...WorkbenchCron\n    __typename\n  }\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
+      },
+      "sha256:b3965ac95b88758d9754efae4af12fc0cea16c124dd7fdd6dba1c30bcab3ad28": {
+         "type": "mutation",
+         "name": "DeleteWorkbenchCron",
+         "body": "mutation DeleteWorkbenchCron($id: ID!) {\n  deleteWorkbenchCron(id: $id) {\n    id\n    __typename\n  }\n}"
       }
    }
 }
