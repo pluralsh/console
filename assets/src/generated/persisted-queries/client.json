@@ -1886,6 +1886,11 @@
          "type": "mutation",
          "name": "CreateWorkbenchJob",
          "body": "mutation CreateWorkbenchJob($workbenchId: ID!, $attributes: WorkbenchJobAttributes!) {\n  createWorkbenchJob(workbenchId: $workbenchId, attributes: $attributes) {\n    id\n    status\n    prompt\n    insertedAt\n    __typename\n  }\n}"
+      },
+      "sha256:2e157582bb9af080a192cfa5fd5962df5587a249d527069b907fc433cf3a9946": {
+         "type": "mutation",
+         "name": "CreateWorkbenchCron",
+         "body": "mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {\n  createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {\n    ...WorkbenchCron\n    __typename\n  }\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
       }
    }
 }

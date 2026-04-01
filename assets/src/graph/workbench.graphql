@@ -379,3 +379,12 @@ mutation CreateWorkbenchJob(
     insertedAt
   }
 }
+
+mutation CreateWorkbenchCron(
+  $workbenchId: ID!
+  $attributes: WorkbenchCronAttributes!
+) {
+  createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
+    ...WorkbenchCron
+  }
+}
