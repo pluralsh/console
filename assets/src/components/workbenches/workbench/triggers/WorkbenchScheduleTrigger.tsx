@@ -3,15 +3,14 @@ import {
   Flex,
   IconFrame,
   PencilIcon,
-  Switch,
   Table,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P } from 'components/utils/typography/Text'
+import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import {
   useWorkbenchCronsQuery,
@@ -102,11 +101,12 @@ function getColumns({
   return [
     columnHelper.accessor((cron) => cron, {
       id: 'details',
-      meta: { gridTemplate: '1fr' },
+      meta: { truncate: true, gridTemplate: 'minmax(0, 1fr)' },
       cell: ({ getValue }) => {
         const cron = getValue()
         return (
           <StackedText
+            truncate
             first={cron.prompt || cron.crontab || 'Cron schedule'}
             second={cronToExplanation(cron)}
           />
@@ -115,17 +115,13 @@ function getColumns({
     }),
     columnHelper.display({
       id: 'actions',
-      meta: { gridTemplate: '180px' },
+      meta: { gridTemplate: '100px' },
       cell: ({ row }) => (
         <Flex
           align="center"
           justify="flex-end"
           gap="xsmall"
         >
-          <Switch
-            checked
-            onChange={() => {}}
-          />
           <IconFrame
             clickable
             tooltip="Edit schedule"

@@ -25,7 +25,6 @@ const CRON_SHORTCUTS_URL =
 const CRON_PLACEHOLDER = '*/5 * * * *'
 
 type ScheduleTriggerFormState = {
-  // active: boolean
   prompt: string
   crontab: string
 }
@@ -40,7 +39,6 @@ export function WorkbenchScheduleTriggerCreateForm({
   const theme = useTheme()
 
   const [formState, setFormState] = useState<ScheduleTriggerFormState>({
-    // active: true,
     prompt: '',
     crontab: '',
   })
@@ -84,14 +82,6 @@ export function WorkbenchScheduleTriggerCreateForm({
       css={{ width: '100%' }}
     >
       {createError && <GqlError error={createError} />}
-      {/*<Switch*/}
-      {/*  checked={formState.active}*/}
-      {/*  onChange={(active) =>*/}
-      {/*    setFormState((prev) => ({ ...prev, active: !!active }))*/}
-      {/*  }*/}
-      {/*>*/}
-      {/*  Schedule active*/}
-      {/*</Switch>*/}
       <FormField label="Prompt">
         <Input
           multiline
