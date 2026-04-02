@@ -1916,6 +1916,11 @@
          "type": "mutation",
          "name": "CreateWorkbenchWebhook",
          "body": "mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {\n  createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {\n    ...WorkbenchWebhook\n    __typename\n  }\n}\n\nfragment WorkbenchWebhook on WorkbenchWebhook {\n  id\n  name\n  matches {\n    regex\n    substring\n    caseInsensitive\n    __typename\n  }\n  insertedAt\n  updatedAt\n  webhook {\n    id\n    name\n    type\n    url\n    __typename\n  }\n  issueWebhook {\n    id\n    name\n    url\n    __typename\n  }\n  __typename\n}"
+      },
+      "sha256:7edf5fffd988f47929583aa662e6c0ff58c1100bd7e12afb9ea24cba54982650": {
+         "type": "mutation",
+         "name": "DeleteWorkbenchWebhook",
+         "body": "mutation DeleteWorkbenchWebhook($id: ID!) {\n  deleteWorkbenchWebhook(id: $id) {\n    id\n    __typename\n  }\n}"
       }
    }
 }

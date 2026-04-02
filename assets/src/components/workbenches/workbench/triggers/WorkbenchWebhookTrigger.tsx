@@ -32,6 +32,7 @@ import {
   WorkbenchScheduleEmptyState,
   WorkbenchWebhookEmptyState,
 } from './WorkbenchTriggersEmptyStates'
+import { WorkbenchWebhookDeleteModal } from './WorkbenchWebhookDeleteModal'
 import { WorkbenchWebhookTriggerForm } from './WorkbenchWebhookTriggerForm'
 import { WorkbenchTriggersOutletContext } from './WorkbenchTriggers'
 import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
@@ -43,6 +44,9 @@ export function WorkbenchWebhookTrigger() {
   const { hasSchedules, refetchSummary } =
     useOutletContext<WorkbenchTriggersOutletContext>()
   const [addingWebhook, setAddingWebhook] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedWebhook, setSelectedWebhook] =
+    useState<Nullable<WorkbenchWebhookFragment>>(null)
   const createFromQuery =
     searchParams.get(WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM) === 'true'
 
@@ -72,7 +76,10 @@ export function WorkbenchWebhookTrigger() {
     () =>
       getColumns({
         onEdit: () => {},
-        onDelete: () => {},
+        onDelete: (webhook) => {
+          setSelectedWebhook(webhook)
+          setIsDeleteModalOpen(true)
+        },
       }),
     []
   )
@@ -147,6 +154,17 @@ export function WorkbenchWebhookTrigger() {
           onVirtualSliceChange={setVirtualSlice}
         />
       </FormCardSC>
+      <WorkbenchWebhookDeleteModal
+        open={isDeleteModalOpen}
+        webhook={selectedWebhook}
+        onDeleted={async () => {
+          await Promise.all([refetchSummary(), refetch()])
+        }}
+        onClose={() => {
+          setIsDeleteModalOpen(false)
+          setSelectedWebhook(null)
+        }}
+      />
     </StretchedFlex>
   )
 }
