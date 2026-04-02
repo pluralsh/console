@@ -44,6 +44,8 @@ export function WorkbenchWebhookTrigger() {
   const { hasSchedules, refetchSummary } =
     useOutletContext<WorkbenchTriggersOutletContext>()
   const [addingWebhook, setAddingWebhook] = useState(false)
+  const [editingWebhook, setEditingWebhook] =
+    useState<Nullable<WorkbenchWebhookFragment>>(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedWebhook, setSelectedWebhook] =
     useState<Nullable<WorkbenchWebhookFragment>>(null)
@@ -75,7 +77,10 @@ export function WorkbenchWebhookTrigger() {
   const columns = useMemo(
     () =>
       getColumns({
-        onEdit: () => {},
+        onEdit: (webhook) => {
+          setEditingWebhook(webhook)
+          setAddingWebhook(false)
+        },
         onDelete: (webhook) => {
           setSelectedWebhook(webhook)
           setIsDeleteModalOpen(true)
@@ -85,13 +90,15 @@ export function WorkbenchWebhookTrigger() {
   )
 
   if (error) return <GqlError error={error} />
-  if (addingWebhook || createFromQuery)
+  if (addingWebhook || createFromQuery || editingWebhook)
     return (
       <FormCardSC>
         <WorkbenchWebhookTriggerForm
           workbenchId={workbenchId}
+          webhook={editingWebhook}
           onCancel={() => {
             setAddingWebhook(false)
+            setEditingWebhook(null)
             if (createFromQuery) {
               navigate('.', { replace: true })
             }
@@ -99,6 +106,7 @@ export function WorkbenchWebhookTrigger() {
           onCompleted={async () => {
             await Promise.all([refetchSummary(), refetch()])
             setAddingWebhook(false)
+            setEditingWebhook(null)
             if (createFromQuery) {
               navigate('.', { replace: true })
             }
@@ -137,7 +145,14 @@ export function WorkbenchWebhookTrigger() {
             >
               Create new webhook
             </Button>
-            <Button onClick={() => setAddingWebhook(true)}>Add webhook</Button>
+            <Button
+              onClick={() => {
+                setEditingWebhook(null)
+                setAddingWebhook(true)
+              }}
+            >
+              Add webhook
+            </Button>
           </Flex>
         </StretchedFlex>
         <Table

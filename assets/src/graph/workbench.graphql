@@ -471,6 +471,15 @@ mutation CreateWorkbenchWebhook(
   }
 }
 
+mutation UpdateWorkbenchWebhook(
+  $id: ID!
+  $attributes: WorkbenchWebhookAttributes!
+) {
+  updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+    ...WorkbenchWebhook
+  }
+}
+
 mutation DeleteWorkbenchWebhook($id: ID!) {
   deleteWorkbenchWebhook(id: $id) {
     id

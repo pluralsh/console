@@ -19136,6 +19136,14 @@ export type CreateWorkbenchWebhookMutationVariables = Exact<{
 
 export type CreateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', createWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null } | null };
 
+export type UpdateWorkbenchWebhookMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: WorkbenchWebhookAttributes;
+}>;
+
+
+export type UpdateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', updateWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null } | null };
+
 export type DeleteWorkbenchWebhookMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -40579,6 +40587,40 @@ export function useCreateWorkbenchWebhookMutation(baseOptions?: Apollo.MutationH
 export type CreateWorkbenchWebhookMutationHookResult = ReturnType<typeof useCreateWorkbenchWebhookMutation>;
 export type CreateWorkbenchWebhookMutationResult = Apollo.MutationResult<CreateWorkbenchWebhookMutation>;
 export type CreateWorkbenchWebhookMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchWebhookMutation, CreateWorkbenchWebhookMutationVariables>;
+export const UpdateWorkbenchWebhookDocument = gql`
+    mutation UpdateWorkbenchWebhook($id: ID!, $attributes: WorkbenchWebhookAttributes!) {
+  updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+    ...WorkbenchWebhook
+  }
+}
+    ${WorkbenchWebhookFragmentDoc}`;
+export type UpdateWorkbenchWebhookMutationFn = Apollo.MutationFunction<UpdateWorkbenchWebhookMutation, UpdateWorkbenchWebhookMutationVariables>;
+
+/**
+ * __useUpdateWorkbenchWebhookMutation__
+ *
+ * To run a mutation, you first call `useUpdateWorkbenchWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateWorkbenchWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateWorkbenchWebhookMutation, { data, loading, error }] = useUpdateWorkbenchWebhookMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateWorkbenchWebhookMutation(baseOptions?: Apollo.MutationHookOptions<UpdateWorkbenchWebhookMutation, UpdateWorkbenchWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateWorkbenchWebhookMutation, UpdateWorkbenchWebhookMutationVariables>(UpdateWorkbenchWebhookDocument, options);
+      }
+export type UpdateWorkbenchWebhookMutationHookResult = ReturnType<typeof useUpdateWorkbenchWebhookMutation>;
+export type UpdateWorkbenchWebhookMutationResult = Apollo.MutationResult<UpdateWorkbenchWebhookMutation>;
+export type UpdateWorkbenchWebhookMutationOptions = Apollo.BaseMutationOptions<UpdateWorkbenchWebhookMutation, UpdateWorkbenchWebhookMutationVariables>;
 export const DeleteWorkbenchWebhookDocument = gql`
     mutation DeleteWorkbenchWebhook($id: ID!) {
   deleteWorkbenchWebhook(id: $id) {
@@ -40992,6 +41034,7 @@ export const namedOperations = {
     UpdateWorkbenchCron: 'UpdateWorkbenchCron',
     DeleteWorkbenchCron: 'DeleteWorkbenchCron',
     CreateWorkbenchWebhook: 'CreateWorkbenchWebhook',
+    UpdateWorkbenchWebhook: 'UpdateWorkbenchWebhook',
     DeleteWorkbenchWebhook: 'DeleteWorkbenchWebhook'
   },
   Subscription: {

@@ -11,8 +11,10 @@ import { GqlError } from 'components/utils/Alert'
 import {
   useCreateWorkbenchWebhookMutation,
   useObservabilityWebhooksQuery,
+  useUpdateWorkbenchWebhookMutation,
+  WorkbenchWebhookFragment,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { StickyActionsFooterSC } from '../create-edit/WorkbenchCreateOrEdit'
 
@@ -23,18 +25,24 @@ type WebhookTriggerFormState = {
 
 export function WorkbenchWebhookTriggerForm({
   workbenchId,
+  webhook,
   onCancel,
   onCompleted,
 }: {
   workbenchId: string
+  webhook?: Nullable<WorkbenchWebhookFragment>
   onCancel: () => void
   onCompleted: () => void | Promise<void>
 }) {
-  const [formState, setFormState] = useState<WebhookTriggerFormState>({
-    name: '',
-    webhookId: '',
-  })
+  const editing = !!webhook
+  const [formState, setFormState] = useState<WebhookTriggerFormState>(() =>
+    getInitialFormState(webhook)
+  )
   const [finalizing, setFinalizing] = useState(false)
+
+  useEffect(() => {
+    setFormState(getInitialFormState(webhook))
+  }, [webhook])
 
   const {
     data,
@@ -43,6 +51,8 @@ export function WorkbenchWebhookTriggerForm({
   } = useObservabilityWebhooksQuery({ variables: { first: 100 } })
   const [createWorkbenchWebhook, createState] =
     useCreateWorkbenchWebhookMutation()
+  const [updateWorkbenchWebhook, updateState] =
+    useUpdateWorkbenchWebhookMutation()
 
   const webhooks = useMemo(
     () => mapExistingNodes(data?.observabilityWebhooks),
@@ -51,9 +61,11 @@ export function WorkbenchWebhookTriggerForm({
 
   const label = formState.name.trim()
   const webhookId = formState.webhookId
-  const isSaving = createState.loading || finalizing
-  const error = webhooksError ?? createState.error
-  const canSave = !!label && !!webhookId && !isSaving
+  const existingIssueWebhookId = webhook?.issueWebhook?.id
+  const isSaving = createState.loading || updateState.loading || finalizing
+  const error = webhooksError ?? createState.error ?? updateState.error
+  const canSave =
+    !!label && (!!webhookId || !!existingIssueWebhookId) && !isSaving
 
   const handleSave = async () => {
     if (!canSave) return
@@ -61,15 +73,30 @@ export function WorkbenchWebhookTriggerForm({
     setFinalizing(true)
 
     try {
-      await createWorkbenchWebhook({
-        variables: {
-          workbenchId,
-          attributes: {
-            name: label,
-            webhookId,
+      const attributes = {
+        name: label,
+        ...(webhookId
+          ? { webhookId }
+          : existingIssueWebhookId
+            ? { issueWebhookId: existingIssueWebhookId }
+            : {}),
+      }
+
+      if (editing && webhook) {
+        await updateWorkbenchWebhook({
+          variables: {
+            id: webhook.id,
+            attributes,
           },
-        },
-      })
+        })
+      } else {
+        await createWorkbenchWebhook({
+          variables: {
+            workbenchId,
+            attributes,
+          },
+        })
+      }
 
       await onCompleted()
     } catch {
@@ -142,4 +169,13 @@ export function WorkbenchWebhookTriggerForm({
       </StickyActionsFooterSC>
     </Flex>
   )
+}
+
+function getInitialFormState(
+  webhook?: Nullable<WorkbenchWebhookFragment>
+): WebhookTriggerFormState {
+  return {
+    name: webhook?.name ?? '',
+    webhookId: webhook?.webhook?.id ?? '',
+  }
 }
