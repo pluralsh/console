@@ -27,6 +27,7 @@ const DIRECTORY = [
 export type WorkbenchTriggersOutletContext = {
   hasSchedules: boolean
   hasWebhooks: boolean
+  refetchSummary: () => Promise<unknown>
 }
 
 export function WorkbenchTriggers() {
@@ -36,10 +37,9 @@ export function WorkbenchTriggers() {
     useMatch(`${pathPrefix}/:tab`)?.params.tab ??
     WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH
 
-  const { data, loading, error } = useWorkbenchTriggersSummaryQuery({
+  const { data, loading, error, refetch } = useWorkbenchTriggersSummaryQuery({
     variables: { id: id ?? '' },
     skip: !id,
-    fetchPolicy: 'network-only',
   })
 
   const workbench = data?.workbench
@@ -47,8 +47,12 @@ export function WorkbenchTriggers() {
   const hasWebhooks = mapExistingNodes(workbench?.webhooks).length > 0
 
   const outletContext = useMemo<WorkbenchTriggersOutletContext>(
-    () => ({ hasSchedules, hasWebhooks }),
-    [hasSchedules, hasWebhooks]
+    () => ({
+      hasSchedules,
+      hasWebhooks,
+      refetchSummary: () => refetch(),
+    }),
+    [hasSchedules, hasWebhooks, refetch]
   )
 
   useSetBreadcrumbs(
