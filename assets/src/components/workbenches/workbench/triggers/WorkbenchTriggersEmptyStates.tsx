@@ -5,12 +5,14 @@ import styled from 'styled-components'
 const OuterCardSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
+  width: '100%',
   gap: theme.spacing.small,
-  padding: theme.spacing.medium,
+  padding: theme.spacing.xlarge,
 }))
 
 const InnerCardSC = styled(Card)(() => ({
   border: 'none',
+  width: '100%',
   padding: 0,
 }))
 

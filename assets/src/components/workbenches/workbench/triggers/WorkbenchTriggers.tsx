@@ -15,7 +15,6 @@ import { mapExistingNodes } from 'utils/graphql'
 
 import { getWorkbenchBreadcrumbs } from '../Workbench'
 import {
-  FormCardSC,
   SidebarBtnSC,
   WorkbenchSplitLayoutSC,
 } from '../create-edit/WorkbenchCreateOrEdit'
@@ -26,7 +25,8 @@ const DIRECTORY = [
 ]
 
 export type WorkbenchTriggersOutletContext = {
-  hasTriggers: boolean
+  hasSchedules: boolean
+  hasWebhooks: boolean
 }
 
 export function WorkbenchTriggers() {
@@ -47,7 +47,7 @@ export function WorkbenchTriggers() {
   const hasWebhooks = mapExistingNodes(workbench?.webhooks).length > 0
 
   const outletContext = useMemo<WorkbenchTriggersOutletContext>(
-    () => ({ hasTriggers: hasSchedules || hasWebhooks }),
+    () => ({ hasSchedules, hasWebhooks }),
     [hasSchedules, hasWebhooks]
   )
 
@@ -97,9 +97,7 @@ export function WorkbenchTriggers() {
             </SidebarBtnSC>
           ))}
         </Flex>
-        <FormCardSC>
-          <Outlet context={outletContext} />
-        </FormCardSC>
+        <Outlet context={outletContext} />
       </WorkbenchSplitLayoutSC>
     </Flex>
   )
