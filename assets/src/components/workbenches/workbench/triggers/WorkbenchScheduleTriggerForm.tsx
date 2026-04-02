@@ -60,6 +60,10 @@ export function WorkbenchScheduleTriggerForm({
     () => buildCronPreview(formState.crontab),
     [formState.crontab]
   )
+  const prompt = formState.prompt.trim()
+  const crontab = formState.crontab.trim()
+  const isCronValid = !!crontab && validateCronExpression(crontab)
+  const hasCronError = !!crontab && !isCronValid
   const [createWorkbenchCron, createState] = useCreateWorkbenchCronMutation({
     update: (cache, { data }) => {
       const createdCron = data?.createWorkbenchCron
@@ -117,14 +121,14 @@ export function WorkbenchScheduleTriggerForm({
   })
   const isSaving = createState.loading || updateState.loading
   const error = createState.error ?? updateState.error
-  const canSave = !!formState.crontab.trim()
+  const canSave = !!prompt && isCronValid
 
   const handleSave = () => {
     if (!canSave || isSaving) return
 
     const attributes = {
-      crontab: formState.crontab.trim(),
-      prompt: formState.prompt.trim() || undefined,
+      crontab,
+      prompt,
     }
 
     if (isEditMode && cron) {
@@ -181,6 +185,7 @@ export function WorkbenchScheduleTriggerForm({
         gap="small"
       >
         <FormField
+          error={hasCronError}
           label={
             <>
               Cron expression*
@@ -194,15 +199,32 @@ export function WorkbenchScheduleTriggerForm({
             </>
           }
           hint={
-            <CaptionP as="span">
-              Enter a cron expression or use shortcuts like @hourly, @daily,
-              @weekdays. See all{' '}
-              <InlineA href={CRON_SHORTCUTS_URL}>shortcuts</InlineA>.
-            </CaptionP>
+            hasCronError ? (
+              <CaptionP
+                as="span"
+                $color="text-danger"
+              >
+                Enter a valid cron expression. See all{' '}
+                <InlineA
+                  href={CRON_SHORTCUTS_URL}
+                  style={{ color: 'inherit' }}
+                >
+                  shortcuts
+                </InlineA>
+                .
+              </CaptionP>
+            ) : (
+              <CaptionP as="span">
+                Enter a cron expression or use shortcuts like @hourly, @daily,
+                @weekdays. See all{' '}
+                <InlineA href={CRON_SHORTCUTS_URL}>shortcuts</InlineA>.
+              </CaptionP>
+            )
           }
         >
           <Input2
             value={formState.crontab}
+            error={hasCronError}
             onChange={(e) =>
               setFormState((prev) => ({ ...prev, crontab: e.target.value }))
             }
@@ -212,7 +234,9 @@ export function WorkbenchScheduleTriggerForm({
               fontFamily: theme.fontFamilies.mono,
               '&:focus-within': {
                 border: theme.borders['outline-focused'],
-                borderColor: theme.colors['code-block-purple'],
+                borderColor: hasCronError
+                  ? theme.colors['border-danger']
+                  : theme.colors['code-block-purple'],
               },
               '& input': {
                 minHeight: 54,
@@ -285,6 +309,19 @@ export function WorkbenchScheduleTriggerForm({
       </StickyActionsFooterSC>
     </Flex>
   )
+}
+
+function validateCronExpression(expression: string) {
+  try {
+    CronExpressionParser.parse(expression, {
+      currentDate: new Date(),
+      tz: 'UTC',
+    })
+
+    return true
+  } catch {
+    return false
+  }
 }
 
 function getInitialFormState(
