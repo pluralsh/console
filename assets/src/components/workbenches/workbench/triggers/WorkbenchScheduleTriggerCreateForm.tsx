@@ -3,9 +3,11 @@ import {
   Card,
   Flex,
   FormField,
+  InfoOutlineIcon,
   Input,
   Input2,
   ReturnIcon,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { DEFAULT_PAGE_SIZE } from 'components/utils/table/useFetchPaginatedData'
@@ -99,7 +101,20 @@ export function WorkbenchScheduleTriggerCreateForm({
       css={{ width: '100%' }}
     >
       {createError && <GqlError error={createError} />}
-      <FormField label="Prompt">
+      <FormField
+        label={
+          <>
+            Prompt*
+            <Tooltip label="The instruction your Workbench agent will follow each time this job runs.">
+              <InfoOutlineIcon
+                color="icon-light"
+                marginLeft="xxsmall"
+                size={12}
+              />
+            </Tooltip>
+          </>
+        }
+      >
         <Input
           multiline
           minRows={3}
@@ -118,12 +133,22 @@ export function WorkbenchScheduleTriggerCreateForm({
         gap="small"
       >
         <FormField
-          required
-          label="Cron expression"
+          label={
+            <>
+              Cron expression*
+              <Tooltip label="Defines the interval at which your agent will execute the prompt.">
+                <InfoOutlineIcon
+                  color="icon-light"
+                  marginLeft="xxsmall"
+                  size={12}
+                />
+              </Tooltip>
+            </>
+          }
           hint={
             <CaptionP as="span">
               Enter a cron expression or use shortcuts like @hourly, @daily,
-              @reboot. See all{' '}
+              @weekdays. See all{' '}
               <InlineA href={CRON_SHORTCUTS_URL}>shortcuts</InlineA>.
             </CaptionP>
           }
@@ -212,12 +237,10 @@ function buildCronPreview(expressionInput: string) {
   const expression = expressionInput.trim() || CRON_PLACEHOLDER
 
   try {
-    const description =
-      expression === '@reboot'
-        ? 'At reboot'
-        : cronstrue.toString(expression, { throwExceptionOnParseError: true })
-    const nextTimes =
-      expression === '@reboot' ? [] : getNextTriggerTimesUtc(expression, 3)
+    const description = cronstrue.toString(expression, {
+      throwExceptionOnParseError: true,
+    })
+    const nextTimes = getNextTriggerTimesUtc(expression, 3)
 
     return { description, nextTimes }
   } catch {
