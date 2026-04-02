@@ -204,12 +204,13 @@ Used for fetching Redis ACL user passwords from Kubernetes Secrets
 {{- end }}
 
 {{/*
-Return standard labels without helm.sh/chart to prevent unnecessary
-application restarts on chart version bumps.
+Return standard labels without helm.sh/chart and app.kubernetes.io/version
+to prevent unnecessary application restarts on chart version bumps.
 */}}
 {{- define "redis.labels.withoutChartVersion" -}}
 {{- $labels := include "common.labels.standard" ( dict "customLabels" .customLabels "context" .context ) | fromYaml -}}
 {{- $_ := unset $labels "helm.sh/chart" -}}
+{{- $_ := unset $labels "app.kubernetes.io/version" -}}
 {{- $labels | toYaml -}}
 {{- end -}}
 
