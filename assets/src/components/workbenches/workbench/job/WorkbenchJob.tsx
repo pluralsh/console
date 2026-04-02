@@ -83,7 +83,7 @@ export function WorkbenchJob() {
           direction="column"
           gap="large"
           minWidth={560}
-          flex={5}
+          flex={7}
         >
           <StretchedFlex gap="xlarge">
             <StackedText
@@ -118,7 +118,7 @@ export function WorkbenchJob() {
           direction="column"
           gap="medium"
           minWidth={500}
-          flex={6}
+          flex={3}
           height="100%"
         >
           <WorkbenchJobResult
@@ -141,5 +141,6 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   width: '100%',
   overflow: 'auto',
+  maxWidth: theme.breakpoints.desktopLarge,
   padding: theme.spacing.large,
 }))
