@@ -104,6 +104,7 @@ function ServiceMonitorCreateOrEditInner({
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const serviceId = useParams()[SERVICE_PARAM_ID] ?? ''
+  const [clearCount, setClearCount] = useState(0)
   const { spacing, breakpoints } = useTheme()
   const [curStep, setCurStepState] =
     useState<ServiceMonitorStepKey>('log-query')
@@ -159,12 +160,10 @@ function ServiceMonitorCreateOrEditInner({
               />
             }
             endIcon={
-              mode === 'create' ? (
-                visitedSteps.has(key) ? (
-                  getStepIcon(key, state)
-                ) : (
-                  <CircleDashIcon size={12} />
-                )
+              visitedSteps.has(key) ? (
+                getStepIcon(key, state, mode === 'edit')
+              ) : mode === 'create' ? (
+                <CircleDashIcon size={12} />
               ) : null
             }
           >
@@ -187,7 +186,10 @@ function ServiceMonitorCreateOrEditInner({
               size="large"
               type="floating"
               disabled={!hasUpdates}
-              onClick={reset}
+              onClick={() => {
+                reset()
+                setClearCount((prev) => prev + 1)
+              }}
               icon={<CloseIcon />}
               tooltip="Clear changes"
             />
@@ -213,6 +215,7 @@ function ServiceMonitorCreateOrEditInner({
       >
         {mutationError && <GqlError error={mutationError} />}
         <ServiceMonitorForm
+          key={clearCount} // forces state reset when changes are cleared, particularly useful for editable divs
           state={state}
           update={update}
           curStep={curStep}
@@ -249,7 +252,7 @@ function BackButton(props: ButtonProps) {
 const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.xlarge,
-  height: '100%',
+  maxHeight: '100%',
   width: '100%',
   padding: theme.spacing.large,
   overflow: 'auto',
@@ -297,11 +300,15 @@ const sanitizeInitialFormState = (
 const facetArrToAttributeArr = (arr: MonitorLogQueryFragment['facets']) =>
   arr?.filter(isNonNullable)?.map(({ key, value }) => ({ key, value })) ?? []
 
-const getStepIcon = (key: ServiceMonitorStepKey, state: MonitorAttributes) => {
+const getStepIcon = (
+  key: ServiceMonitorStepKey,
+  state: MonitorAttributes,
+  onlyShowFailures: boolean = false
+) => {
   const { name, evaluationCron, threshold, query } = state
   const { value, aggregate } = threshold
   const { query: q, bucketSize, duration, operator } = query.log
-  const validIcon = (
+  const validIcon = onlyShowFailures ? null : (
     <CheckOutlineIcon
       size={12}
       color="icon-success"

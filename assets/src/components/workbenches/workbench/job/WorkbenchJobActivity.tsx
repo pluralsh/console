@@ -1,13 +1,20 @@
 import {
-  CheckIcon,
-  CliIcon,
-  ErrorIcon,
+  AccordionItem,
+  ChecklistCheckedIcon,
+  CheckOutlineIcon,
+  CloudLoggingIcon,
+  FailedFilledIcon,
   Flex,
+  IconProps,
+  InfrastructureIcon,
+  NotebookIcon,
   SpinnerAlt,
+  TicketIcon,
   ToolKitIcon,
   UnknownIcon,
+  VisualInspectionIcon,
 } from '@pluralsh/design-system'
-import { StepperAccordionItemSC } from 'components/utils/StepperAccordion'
+import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { Body2P, OverlineH3 } from 'components/utils/typography/Text'
 import {
@@ -16,40 +23,38 @@ import {
   WorkbenchJobActivityType,
   WorkbenchJobProgressFragment,
 } from 'generated/graphql'
+import { ComponentType } from 'react'
 import { useTheme } from 'styled-components'
-import { ACTIVITY_GAP } from './WorkbenchJobActivities'
 
 export function WorkbenchJobActivity({
   activity,
   progress,
-  isLast,
 }: {
   activity: WorkbenchJobActivityFragment
   progress: WorkbenchJobProgressFragment[]
-  isLast?: boolean
 }) {
-  const { colors, spacing, borders, borderRadiuses } = useTheme()
+  const { spacing } = useTheme()
   const isRunning = isActivityRunning(activity.status)
-
+  const TypeIcon =
+    activityTypeToIcon[activity.type ?? WorkbenchJobActivityType.Integration]
   return (
-    <StepperAccordionItemSC
+    <AccordionItem
       key={activity.id}
       value={activity.id}
       caret="left"
       padding="compact"
       paddingArea="trigger-only"
-      $gap={ACTIVITY_GAP}
-      $isLast={isLast}
-      {...(isRunning && { $dotColor: 'icon-primary' })}
-      triggerWrapperStyles={{
-        border: borders.default,
-        borderRadius: borderRadiuses.medium,
-        backgroundColor: colors[isRunning ? 'fill-one' : 'fill-zero'],
-      }}
       trigger={
         <StretchedFlex gap="small">
-          <OverlineH3 $shimmer={isRunning}>
-            <ActivityTypeIcon type={activity.type} />
+          <OverlineH3
+            $color="text-primary-disabled"
+            $shimmer={isRunning}
+            css={{ display: 'flex', alignItems: 'center', gap: spacing.xsmall }}
+          >
+            <TypeIcon
+              size={12}
+              color="icon-xlight"
+            />
             <span>{activity.type?.toLowerCase() ?? 'activity'}</span>
           </OverlineH3>
           <ActivityStatusIcon status={activity.status} />
@@ -68,7 +73,8 @@ export function WorkbenchJobActivity({
         </Body2P>
         {activity.result?.output && (
           <Body2P $color="text-light">
-            <strong>Output:</strong> {activity.result.output}
+            <strong>Output:</strong>{' '}
+            <SimplifiedMarkdown text={activity.result.output} />
           </Body2P>
         )}
         {/* TODO */}
@@ -76,34 +82,22 @@ export function WorkbenchJobActivity({
           <Body2P key={i}>{p.text}</Body2P>
         ))}
       </Flex>
-    </StepperAccordionItemSC>
+    </AccordionItem>
   )
 }
 
-function ActivityTypeIcon({
-  type,
-}: {
-  type: Nullable<WorkbenchJobActivityType>
-}) {
-  switch (type) {
-    case WorkbenchJobActivityType.Coding:
-      return (
-        <CliIcon
-          size={12}
-          color="icon-xlight"
-        />
-      )
-    case WorkbenchJobActivityType.Integration:
-      return (
-        <ToolKitIcon
-          size={12}
-          color="icon-xlight"
-        />
-      )
-    default:
-      return null
-  }
-}
+const activityTypeToIcon: Record<
+  WorkbenchJobActivityType,
+  ComponentType<IconProps>
+> = {
+  [WorkbenchJobActivityType.Coding]: CloudLoggingIcon,
+  [WorkbenchJobActivityType.Infrastructure]: InfrastructureIcon,
+  [WorkbenchJobActivityType.Memo]: NotebookIcon,
+  [WorkbenchJobActivityType.Observability]: VisualInspectionIcon,
+  [WorkbenchJobActivityType.Plan]: ChecklistCheckedIcon,
+  [WorkbenchJobActivityType.Ticketing]: TicketIcon,
+  [WorkbenchJobActivityType.Integration]: ToolKitIcon,
+} as const satisfies Record<WorkbenchJobActivityType, ComponentType<IconProps>>
 
 function ActivityStatusIcon({
   status,
@@ -116,14 +110,14 @@ function ActivityStatusIcon({
       return <SpinnerAlt size={12} />
     case WorkbenchJobActivityStatus.Successful:
       return (
-        <CheckIcon
+        <CheckOutlineIcon
           size={12}
           color="icon-success"
         />
       )
     case WorkbenchJobActivityStatus.Failed:
       return (
-        <ErrorIcon
+        <FailedFilledIcon
           size={12}
           color="icon-danger"
         />
