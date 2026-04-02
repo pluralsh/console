@@ -84,18 +84,10 @@ export function WorkbenchWebhookTriggerForm({
 
       if (editing && webhook) {
         await updateWorkbenchWebhook({
-          variables: {
-            id: webhook.id,
-            attributes,
-          },
+          variables: { id: webhook.id, attributes },
         })
       } else {
-        await createWorkbenchWebhook({
-          variables: {
-            workbenchId,
-            attributes,
-          },
-        })
+        await createWorkbenchWebhook({ variables: { workbenchId, attributes } })
       }
 
       await onCompleted()
@@ -112,10 +104,7 @@ export function WorkbenchWebhookTriggerForm({
       css={{ width: '100%' }}
     >
       {error && <GqlError error={error} />}
-      <FormField
-        label="Label*"
-        hint="Used as the trigger name for this workbench webhook."
-      >
+      <FormField label="Webhook label*">
         <Input2
           value={formState.name}
           onChange={(e) =>
@@ -125,15 +114,14 @@ export function WorkbenchWebhookTriggerForm({
         />
       </FormField>
       <FormField
-        label="Webhook*"
-        hint="Select an existing observability webhook."
+        label="Select webhook*"
+        hint="New webhooks added will appear in this list."
       >
         <Select
           selectedKey={formState.webhookId || null}
           onSelectionChange={(key) =>
             setFormState((prev) => ({ ...prev, webhookId: String(key ?? '') }))
           }
-          selectionMode="single"
           label="Webhook"
           isDisabled={webhooksLoading || webhooks.length === 0}
         >
