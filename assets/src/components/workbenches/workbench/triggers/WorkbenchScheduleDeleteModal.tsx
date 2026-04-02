@@ -5,6 +5,8 @@ import {
   WorkbenchCronFragment,
   WorkbenchCronsDocument,
   WorkbenchCronsQuery,
+  WorkbenchTriggersSummaryDocument,
+  WorkbenchTriggersSummaryQuery,
 } from 'generated/graphql'
 import { removeConnection, updateCache } from 'utils/graphql'
 
@@ -34,6 +36,27 @@ export function WorkbenchScheduleDeleteModal({
             return {
               ...prev,
               workbench: removeConnection(prev.workbench, deletedCron, 'crons'),
+            }
+          },
+        })
+
+        updateCache<WorkbenchTriggersSummaryQuery>(cache, {
+          query: WorkbenchTriggersSummaryDocument,
+          variables: { id: workbenchId },
+          update: (prev) => {
+            if (!prev.workbench?.crons?.edges) return prev
+
+            return {
+              ...prev,
+              workbench: {
+                ...prev.workbench,
+                crons: {
+                  ...prev.workbench.crons,
+                  edges: prev.workbench.crons.edges.filter(
+                    (edge) => edge?.node?.id !== deletedCron.id
+                  ),
+                },
+              },
             }
           },
         })

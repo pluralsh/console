@@ -17,15 +17,32 @@ import {
   WorkbenchCronFragment,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
+import {
+  useOutletContext,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
+import {
+  WORKBENCH_PARAM_ID,
+  WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM,
+} from 'routes/workbenchesRoutesConsts'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchScheduleDeleteModal } from './WorkbenchScheduleDeleteModal'
+import {
+  WorkbenchScheduleEmptyState,
+  WorkbenchWebhookEmptyState,
+} from './WorkbenchTriggersEmptyStates'
 import { WorkbenchScheduleTriggerForm } from './WorkbenchScheduleTriggerForm'
+import { WorkbenchTriggersOutletContext } from './WorkbenchTriggers'
+import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
 
 export function WorkbenchScheduleTrigger() {
+  const navigate = useNavigate()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
+  const [searchParams] = useSearchParams()
+  const { hasWebhooks } = useOutletContext<WorkbenchTriggersOutletContext>()
   const [creatingCron, setCreatingCron] = useState(false)
   const [editingCron, setEditingCron] =
     useState<Nullable<WorkbenchCronFragment>>(null)
@@ -40,6 +57,9 @@ export function WorkbenchScheduleTrigger() {
     )
 
   const crons = useMemo(() => mapExistingNodes(data?.workbench?.crons), [data])
+  const hasSchedules = crons.length > 0
+  const createFromQuery =
+    searchParams.get(WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM) === 'true'
 
   const columns = useMemo(
     () =>
@@ -57,16 +77,33 @@ export function WorkbenchScheduleTrigger() {
   )
 
   if (error) return <GqlError error={error} />
-  if (creatingCron || editingCron)
+  if (creatingCron || createFromQuery || editingCron)
     return (
-      <WorkbenchScheduleTriggerForm
-        workbenchId={workbenchId}
-        cron={editingCron}
-        onCancel={() => {
-          setCreatingCron(false)
-          setEditingCron(null)
-        }}
-      />
+      <FormCardSC>
+        <WorkbenchScheduleTriggerForm
+          workbenchId={workbenchId}
+          cron={editingCron}
+          onCancel={() => {
+            setCreatingCron(false)
+            setEditingCron(null)
+            if (createFromQuery) {
+              navigate('.', { replace: true })
+            }
+          }}
+        />
+      </FormCardSC>
+    )
+
+  if (!hasSchedules)
+    return (
+      <Flex
+        direction="column"
+        gap="medium"
+        flex={1}
+      >
+        <WorkbenchScheduleEmptyState />
+        {!hasWebhooks && <WorkbenchWebhookEmptyState />}
+      </Flex>
     )
 
   return (
@@ -75,33 +112,34 @@ export function WorkbenchScheduleTrigger() {
       align="stretch"
       gap="large"
     >
-      <StretchedFlex>
-        <Body2P $color="text-light">
-          Add schedules to trigger this workbench.
-        </Body2P>
-        <Button
-          onClick={() => {
-            setEditingCron(null)
-            setCreatingCron(true)
-          }}
-        >
-          Add cron schedule
-        </Button>
-      </StretchedFlex>
-      <Table
-        css={{ width: '100%' }}
-        hideHeader
-        fullHeightWrap
-        virtualizeRows
-        data={crons}
-        columns={columns}
-        loading={!data && loading}
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        onVirtualSliceChange={setVirtualSlice}
-        emptyStateProps={{ message: 'No cron schedules found' }}
-      />
+      <FormCardSC>
+        <StretchedFlex>
+          <Body2P $color="text-light">
+            Add schedules to trigger this workbench.
+          </Body2P>
+          <Button
+            onClick={() => {
+              setEditingCron(null)
+              setCreatingCron(true)
+            }}
+          >
+            Add cron schedule
+          </Button>
+        </StretchedFlex>
+        <Table
+          css={{ width: '100%' }}
+          hideHeader
+          fullHeightWrap
+          virtualizeRows
+          data={crons}
+          columns={columns}
+          loading={!data && loading}
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
+        />
+      </FormCardSC>
       <WorkbenchScheduleDeleteModal
         workbenchId={workbenchId}
         open={isDeleteModalOpen}

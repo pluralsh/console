@@ -20,6 +20,8 @@ import {
   WorkbenchCronFragment,
   WorkbenchCronsDocument,
   WorkbenchCronsQuery,
+  WorkbenchTriggersSummaryDocument,
+  WorkbenchTriggersSummaryQuery,
 } from 'generated/graphql'
 import { useEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -84,6 +86,25 @@ export function WorkbenchScheduleTriggerForm({
               createdCron,
               'crons'
             ),
+          }
+        },
+      })
+
+      updateCache<WorkbenchTriggersSummaryQuery>(cache, {
+        query: WorkbenchTriggersSummaryDocument,
+        variables: { id: workbenchId },
+        update: (prev) => {
+          if (!prev.workbench) return prev
+
+          return {
+            ...prev,
+            workbench: {
+              ...prev.workbench,
+              crons: {
+                ...prev.workbench.crons,
+                edges: [{ __typename: 'WorkbenchCronEdge', node: createdCron }],
+              },
+            },
           }
         },
       })
