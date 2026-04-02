@@ -1,5 +1,4 @@
-import { Card, Markdown } from '@pluralsh/design-system'
-import { StepperAccordionSC } from 'components/utils/StepperAccordion'
+import { Accordion, Card, Markdown } from '@pluralsh/design-system'
 import {
   useWorkbenchJobActivitiesSuspenseQuery,
   useWorkbenchJobActivityDeltaSubscription,
@@ -55,33 +54,36 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   )
   return (
     <ActivitiesPanelSC>
-      <StepperAccordionSC
+      <ActivitiesAccordionSC
         type="multiple"
-        $gap={ACTIVITY_GAP}
         value={openIds}
         onValueChange={setOpenIds}
-        css={{ height: '100%' }}
       >
         <VirtualList
+          isReversed
           data={activities}
-          itemGap={ACTIVITY_GAP}
           topContent={
             <JobPromptCardSC>
               <Markdown text={job?.prompt ?? ''} />
             </JobPromptCardSC>
           }
-          renderer={({ rowData, index }) => (
+          renderer={({ rowData }) => (
             <WorkbenchJobActivity
               activity={rowData}
               progress={[]} // TODO
-              isLast={index === activities.length - 1}
             />
           )}
         />
-      </StepperAccordionSC>
+      </ActivitiesAccordionSC>
     </ActivitiesPanelSC>
   )
 }
+
+const ActivitiesAccordionSC = styled(Accordion)({
+  border: 'none',
+  background: 'none',
+  height: '100%',
+})
 
 const ActivitiesPanelSC = styled.div(({ theme }) => ({
   position: 'relative',
@@ -102,4 +104,5 @@ const JobPromptCardSC = styled(Card)(({ theme }) => ({
   borderRadius: theme.borderRadiuses.medium,
   padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
   wordBreak: 'break-word',
+  marginBottom: theme.spacing.small,
 }))

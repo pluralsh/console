@@ -25,6 +25,7 @@ import {
 } from 'generated/graphql'
 import { ComponentType } from 'react'
 import { useTheme } from 'styled-components'
+import { MemoActivityResult } from './WorkbenchJobActivityResults'
 
 export function WorkbenchJobActivity({
   activity,
@@ -66,24 +67,31 @@ export function WorkbenchJobActivity({
         gap="xsmall"
         maxHeight={220}
         overflow="auto"
-        css={{ padding: `${spacing.xsmall}px ${spacing.medium}px` }}
+        css={{ padding: spacing.xsmall, paddingLeft: spacing.xlarge }}
       >
-        <Body2P $color="text-light">
-          <strong>Prompt:</strong> {activity.prompt}
-        </Body2P>
-        {activity.result?.output && (
-          <Body2P $color="text-light">
-            <strong>Output:</strong>{' '}
-            <SimplifiedMarkdown text={activity.result.output} />
-          </Body2P>
-        )}
         {/* TODO */}
         {progress.map((p, i) => (
           <Body2P key={i}>{p.text}</Body2P>
         ))}
+        <WorkbenchJobActivityResult activity={activity} />
       </Flex>
     </AccordionItem>
   )
+}
+
+function WorkbenchJobActivityResult({
+  activity,
+}: {
+  activity: WorkbenchJobActivityFragment
+}) {
+  const { type, result } = activity
+  if (!result) return null
+  switch (type) {
+    case WorkbenchJobActivityType.Memo:
+      return <MemoActivityResult result={result} />
+    default:
+      return <SimplifiedMarkdown text={result.output ?? ''} />
+  }
 }
 
 const activityTypeToIcon: Record<
