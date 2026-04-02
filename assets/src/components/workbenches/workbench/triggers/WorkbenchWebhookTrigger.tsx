@@ -175,7 +175,7 @@ function getColumns({
               webhook.issueWebhook?.name ||
               'Webhook trigger'
             }
-            second={webhookToExplanation(webhook)}
+            second={webhookURL(webhook)}
           />
         )
       },
@@ -207,7 +207,7 @@ function getColumns({
   ]
 }
 
-function webhookToExplanation(webhook: WorkbenchWebhookFragment) {
+function webhookURL(webhook: WorkbenchWebhookFragment) {
   if (webhook.issueWebhook) return webhook.issueWebhook.url
 
   if (webhook.webhook) return webhook.webhook.url
