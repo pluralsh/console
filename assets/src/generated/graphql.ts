@@ -19095,6 +19095,14 @@ export type CreateWorkbenchCronMutationVariables = Exact<{
 
 export type CreateWorkbenchCronMutation = { __typename?: 'RootMutationType', createWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
+export type UpdateWorkbenchCronMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: WorkbenchCronAttributes;
+}>;
+
+
+export type UpdateWorkbenchCronMutation = { __typename?: 'RootMutationType', updateWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+
 export type DeleteWorkbenchCronMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -40298,6 +40306,40 @@ export function useCreateWorkbenchCronMutation(baseOptions?: Apollo.MutationHook
 export type CreateWorkbenchCronMutationHookResult = ReturnType<typeof useCreateWorkbenchCronMutation>;
 export type CreateWorkbenchCronMutationResult = Apollo.MutationResult<CreateWorkbenchCronMutation>;
 export type CreateWorkbenchCronMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchCronMutation, CreateWorkbenchCronMutationVariables>;
+export const UpdateWorkbenchCronDocument = gql`
+    mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {
+  updateWorkbenchCron(id: $id, attributes: $attributes) {
+    ...WorkbenchCron
+  }
+}
+    ${WorkbenchCronFragmentDoc}`;
+export type UpdateWorkbenchCronMutationFn = Apollo.MutationFunction<UpdateWorkbenchCronMutation, UpdateWorkbenchCronMutationVariables>;
+
+/**
+ * __useUpdateWorkbenchCronMutation__
+ *
+ * To run a mutation, you first call `useUpdateWorkbenchCronMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateWorkbenchCronMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateWorkbenchCronMutation, { data, loading, error }] = useUpdateWorkbenchCronMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateWorkbenchCronMutation(baseOptions?: Apollo.MutationHookOptions<UpdateWorkbenchCronMutation, UpdateWorkbenchCronMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateWorkbenchCronMutation, UpdateWorkbenchCronMutationVariables>(UpdateWorkbenchCronDocument, options);
+      }
+export type UpdateWorkbenchCronMutationHookResult = ReturnType<typeof useUpdateWorkbenchCronMutation>;
+export type UpdateWorkbenchCronMutationResult = Apollo.MutationResult<UpdateWorkbenchCronMutation>;
+export type UpdateWorkbenchCronMutationOptions = Apollo.BaseMutationOptions<UpdateWorkbenchCronMutation, UpdateWorkbenchCronMutationVariables>;
 export const DeleteWorkbenchCronDocument = gql`
     mutation DeleteWorkbenchCron($id: ID!) {
   deleteWorkbenchCron(id: $id) {
@@ -40706,6 +40748,7 @@ export const namedOperations = {
     DeleteWorkbenchTool: 'DeleteWorkbenchTool',
     CreateWorkbenchJob: 'CreateWorkbenchJob',
     CreateWorkbenchCron: 'CreateWorkbenchCron',
+    UpdateWorkbenchCron: 'UpdateWorkbenchCron',
     DeleteWorkbenchCron: 'DeleteWorkbenchCron'
   },
   Subscription: {
