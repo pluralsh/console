@@ -48,6 +48,9 @@ fragment StackTiny on InfrastructureStack {
   insight {
     ...AiInsightSummary
   }
+  parent {
+    id
+  }
 }
 
 fragment Stack on InfrastructureStack {
