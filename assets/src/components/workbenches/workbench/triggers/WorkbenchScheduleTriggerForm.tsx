@@ -60,10 +60,12 @@ export function WorkbenchScheduleTriggerForm({
     () => buildCronPreview(formState.crontab),
     [formState.crontab]
   )
+
   const prompt = formState.prompt.trim()
   const crontab = formState.crontab.trim()
   const isCronValid = !!crontab && validateCronExpression(crontab)
   const hasCronError = !!crontab && !isCronValid
+
   const [createWorkbenchCron, createState] = useCreateWorkbenchCronMutation({
     update: (cache, { data }) => {
       const createdCron = data?.createWorkbenchCron
@@ -88,6 +90,7 @@ export function WorkbenchScheduleTriggerForm({
     },
     onCompleted: onCancel,
   })
+
   const [updateWorkbenchCron, updateState] = useUpdateWorkbenchCronMutation({
     update: (cache, { data }) => {
       const updatedCron = data?.updateWorkbenchCron
@@ -119,6 +122,7 @@ export function WorkbenchScheduleTriggerForm({
     },
     onCompleted: onCancel,
   })
+
   const isSaving = createState.loading || updateState.loading
   const error = createState.error ?? updateState.error
   const canSave = !!prompt && isCronValid
@@ -126,23 +130,14 @@ export function WorkbenchScheduleTriggerForm({
   const handleSave = () => {
     if (!canSave || isSaving) return
 
-    const attributes = {
-      crontab,
-      prompt,
-    }
+    const attributes = { crontab, prompt }
 
     if (isEditMode && cron) {
       updateWorkbenchCron({ variables: { id: cron.id, attributes } })
-
       return
     }
 
-    createWorkbenchCron({
-      variables: {
-        workbenchId,
-        attributes,
-      },
-    })
+    createWorkbenchCron({ variables: { workbenchId, attributes } })
   }
 
   return (
