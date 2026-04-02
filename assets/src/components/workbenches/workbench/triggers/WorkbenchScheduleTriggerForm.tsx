@@ -16,14 +16,16 @@ import CronExpressionParser from 'cron-parser'
 import cronstrue from 'cronstrue'
 import {
   useCreateWorkbenchCronMutation,
+  useUpdateWorkbenchCronMutation,
+  WorkbenchCronFragment,
   WorkbenchCronsDocument,
   WorkbenchCronsQuery,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useTheme } from 'styled-components'
 import { dayjsExtended as dayjs } from 'utils/datetime'
 import { appendConnectionToEnd, updateCache } from 'utils/graphql'
 import { StickyActionsFooterSC } from '../create-edit/WorkbenchCreateOrEdit'
-import { useTheme } from 'styled-components'
 
 const CRON_SHORTCUTS_URL =
   'https://github.com/harrisiirak/cron-parser?tab=readme-ov-file#predefined-expressions'
@@ -34,61 +36,107 @@ type ScheduleTriggerFormState = {
   crontab: string
 }
 
-export function WorkbenchScheduleTriggerCreateForm({
+export function WorkbenchScheduleTriggerForm({
   workbenchId,
+  cron,
   onCancel,
 }: {
   workbenchId: string
+  cron?: Nullable<WorkbenchCronFragment>
   onCancel: () => void
 }) {
   const theme = useTheme()
+  const isEditMode = !!cron
 
-  const [formState, setFormState] = useState<ScheduleTriggerFormState>({
-    prompt: '',
-    crontab: '',
-  })
+  const [formState, setFormState] = useState<ScheduleTriggerFormState>(() =>
+    getInitialFormState(cron)
+  )
+
+  useEffect(() => {
+    setFormState(getInitialFormState(cron))
+  }, [cron])
 
   const preview = useMemo(
     () => buildCronPreview(formState.crontab),
     [formState.crontab]
   )
-  const [createWorkbenchCron, { loading: isSaving, error: createError }] =
-    useCreateWorkbenchCronMutation({
-      update: (cache, { data }) => {
-        const createdCron = data?.createWorkbenchCron
-        if (!createdCron) return
+  const [createWorkbenchCron, createState] = useCreateWorkbenchCronMutation({
+    update: (cache, { data }) => {
+      const createdCron = data?.createWorkbenchCron
+      if (!createdCron) return
 
-        updateCache<WorkbenchCronsQuery>(cache, {
-          query: WorkbenchCronsDocument,
-          variables: { id: workbenchId, first: DEFAULT_PAGE_SIZE },
-          update: (prev) => {
-            if (!prev.workbench) return prev
+      updateCache<WorkbenchCronsQuery>(cache, {
+        query: WorkbenchCronsDocument,
+        variables: { id: workbenchId, first: DEFAULT_PAGE_SIZE },
+        update: (prev) => {
+          if (!prev.workbench) return prev
 
-            return {
-              ...prev,
-              workbench: appendConnectionToEnd(
-                prev.workbench,
-                createdCron,
-                'crons'
-              ),
-            }
-          },
-        })
-      },
-      onCompleted: onCancel,
-    })
+          return {
+            ...prev,
+            workbench: appendConnectionToEnd(
+              prev.workbench,
+              createdCron,
+              'crons'
+            ),
+          }
+        },
+      })
+    },
+    onCompleted: onCancel,
+  })
+  const [updateWorkbenchCron, updateState] = useUpdateWorkbenchCronMutation({
+    update: (cache, { data }) => {
+      const updatedCron = data?.updateWorkbenchCron
+      if (!updatedCron) return
+
+      updateCache<WorkbenchCronsQuery>(cache, {
+        query: WorkbenchCronsDocument,
+        variables: { id: workbenchId, first: DEFAULT_PAGE_SIZE },
+        update: (prev) => {
+          if (!prev.workbench?.crons) return prev
+
+          return {
+            ...prev,
+            workbench: {
+              ...prev.workbench,
+              crons: {
+                ...prev.workbench.crons,
+                edges:
+                  prev.workbench.crons.edges?.map((edge) =>
+                    edge?.node?.id === updatedCron.id
+                      ? { ...edge, node: updatedCron }
+                      : edge
+                  ) ?? [],
+              },
+            },
+          }
+        },
+      })
+    },
+    onCompleted: onCancel,
+  })
+  const isSaving = createState.loading || updateState.loading
+  const error = createState.error ?? updateState.error
   const canSave = !!formState.crontab.trim()
 
   const handleSave = () => {
     if (!canSave || isSaving) return
 
+    const attributes = {
+      crontab: formState.crontab.trim(),
+      prompt: formState.prompt.trim() || undefined,
+    }
+
+    if (isEditMode && cron) {
+      updateWorkbenchCron({ variables: { id: cron.id, attributes } })
+
+      return
+    }
+
     createWorkbenchCron({
       variables: {
         workbenchId,
-        attributes: {
-          crontab: formState.crontab.trim(),
-          prompt: formState.prompt.trim() || undefined,
-        },
+        attributes,
       },
     })
   }
@@ -100,7 +148,7 @@ export function WorkbenchScheduleTriggerCreateForm({
       height="100%"
       css={{ width: '100%' }}
     >
-      {createError && <GqlError error={createError} />}
+      {error && <GqlError error={error} />}
       <FormField
         label={
           <>
@@ -170,6 +218,7 @@ export function WorkbenchScheduleTriggerCreateForm({
                 minHeight: 54,
                 paddingLeft: 16,
                 paddingRight: 16,
+                fontFamily: theme.fontFamilies.mono,
               },
             }}
           />
@@ -236,6 +285,15 @@ export function WorkbenchScheduleTriggerCreateForm({
       </StickyActionsFooterSC>
     </Flex>
   )
+}
+
+function getInitialFormState(
+  cron?: Nullable<WorkbenchCronFragment>
+): ScheduleTriggerFormState {
+  return {
+    prompt: cron?.prompt ?? '',
+    crontab: cron?.crontab ?? '',
+  }
 }
 
 function buildCronPreview(expressionInput: string) {

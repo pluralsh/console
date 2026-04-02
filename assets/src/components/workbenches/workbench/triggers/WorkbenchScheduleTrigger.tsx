@@ -22,11 +22,13 @@ import { WORKBENCH_PARAM_ID } from 'routes/workbenchesRoutesConsts'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchScheduleDeleteModal } from './WorkbenchScheduleDeleteModal'
-import { WorkbenchScheduleTriggerCreateForm } from './WorkbenchScheduleTriggerCreateForm'
+import { WorkbenchScheduleTriggerForm } from './WorkbenchScheduleTriggerForm'
 
 export function WorkbenchScheduleTrigger() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
-  const [isCreatingSchedule, setIsCreatingSchedule] = useState(false)
+  const [creatingCron, setCreatingCron] = useState(false)
+  const [editingCron, setEditingCron] =
+    useState<Nullable<WorkbenchCronFragment>>(null)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [selectedCron, setSelectedCron] =
     useState<Nullable<WorkbenchCronFragment>>(null)
@@ -42,6 +44,10 @@ export function WorkbenchScheduleTrigger() {
   const columns = useMemo(
     () =>
       getColumns({
+        onEdit: (cron) => {
+          setEditingCron(cron)
+          setCreatingCron(false)
+        },
         onDelete: (cron) => {
           setSelectedCron(cron)
           setIsDeleteModalOpen(true)
@@ -51,11 +57,15 @@ export function WorkbenchScheduleTrigger() {
   )
 
   if (error) return <GqlError error={error} />
-  if (isCreatingSchedule)
+  if (creatingCron || editingCron)
     return (
-      <WorkbenchScheduleTriggerCreateForm
+      <WorkbenchScheduleTriggerForm
         workbenchId={workbenchId}
-        onCancel={() => setIsCreatingSchedule(false)}
+        cron={editingCron}
+        onCancel={() => {
+          setCreatingCron(false)
+          setEditingCron(null)
+        }}
       />
     )
 
@@ -69,7 +79,12 @@ export function WorkbenchScheduleTrigger() {
         <Body2P $color="text-light">
           Add schedules to trigger this workbench.
         </Body2P>
-        <Button onClick={() => setIsCreatingSchedule(true)}>
+        <Button
+          onClick={() => {
+            setEditingCron(null)
+            setCreatingCron(true)
+          }}
+        >
           Add cron schedule
         </Button>
       </StretchedFlex>
@@ -102,8 +117,10 @@ export function WorkbenchScheduleTrigger() {
 
 const columnHelper = createColumnHelper<WorkbenchCronFragment>()
 function getColumns({
+  onEdit,
   onDelete,
 }: {
+  onEdit: (cron: WorkbenchCronFragment) => void
   onDelete: (cron: WorkbenchCronFragment) => void
 }) {
   return [
@@ -134,7 +151,7 @@ function getColumns({
             clickable
             tooltip="Edit schedule"
             icon={<PencilIcon />}
-            onClick={() => {}}
+            onClick={() => onEdit(row.original)}
           />
           <IconFrame
             clickable
