@@ -7,6 +7,7 @@ import {
   WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM,
   WORKBENCHES_TRIGGERS_REL_PATH,
   WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH,
+  WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 
@@ -55,6 +56,9 @@ export function WorkbenchScheduleEmptyState() {
 }
 
 export function WorkbenchWebhookEmptyState() {
+  const navigate = useNavigate()
+  const workbenchId = useParams()[WORKBENCH_PARAM_ID]
+
   return (
     <OuterCardSC>
       <Body2BoldP>Webhooks</Body2BoldP>
@@ -74,7 +78,11 @@ export function WorkbenchWebhookEmptyState() {
             </Button>
             <Button
               small
-              onClick={() => {}}
+              onClick={() => {
+                navigate(
+                  `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_TRIGGERS_REL_PATH}/${WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true`
+                )
+              }}
             >
               Select existing webhook
             </Button>
