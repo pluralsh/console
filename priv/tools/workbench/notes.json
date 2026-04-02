@@ -13,7 +13,7 @@
                         "properties": {
                             "name": {
                                 "type": "string",
-                                "description": "The name of the todo"
+                                "description": "The name of the todo.  This should be space separated words and all lowercase."
                             },
                             "description": {
                                 "type": "string",

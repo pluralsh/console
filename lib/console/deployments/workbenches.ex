@@ -221,6 +221,32 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Creates a new message for a job. Requires read access to the job.
+  """
+  @spec create_message(map, binary, User.t()) :: activity_resp
+  def create_message(attrs, %WorkbenchJob{user_id: id} = job, %User{id: id} = user) do
+    start_transaction()
+    |> add_operation(:job, fn _ ->
+      case WorkbenchJob.idle?(job) do
+        true -> {:ok, job}
+        false -> {:error, "job is currently active, please wait for it to complete before prompting"}
+      end
+    end)
+    |> add_operation(:activity, fn %{job: job} ->
+      %WorkbenchJobActivity{workbench_job_id: job.id, type: :user, status: :successful}
+      |> WorkbenchJobActivity.changeset(attrs)
+      |> Repo.insert()
+    end)
+    |> execute(extract: :activity)
+    |> notify(:create, user)
+  end
+  def create_message(attrs, id, %User{} = user) when is_binary(id) do
+    get_workbench_job!(id)
+    |> then(&create_message(attrs, &1, user))
+  end
+  def create_message(_, _, _), do: {:error, "you can only create messages for your own jobs"}
+
+  @doc """
   Creates a new activity for a job, and bookkeeps job status and timestamp.
   """
   @spec create_job_activity(map, WorkbenchJob.t()) :: activity_resp
@@ -342,6 +368,8 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchWebhookUpdated, webhook, actor: user)
   defp notify({:ok, %WorkbenchWebhook{} = webhook}, :delete, user),
     do: handle_notify(PubSub.WorkbenchWebhookDeleted, webhook, actor: user)
+  defp notify({:ok, %WorkbenchJobActivity{} = activity}, :create, user),
+    do: handle_notify(PubSub.WorkbenchJobActivityCreated, activity, actor: user)
   defp notify(pass, _, _), do: pass
 
   defp notify({:ok, %WorkbenchJobActivity{} = activity}, :create),

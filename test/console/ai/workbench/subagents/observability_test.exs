@@ -34,6 +34,13 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
           "labels" => %{"env" => "test"}
         }
       ]
+      sample_logs = [
+        %{
+          "timestamp" => "2025-02-25T12:00:01Z",
+          "message" => "connection reset",
+          "labels" => %{"pod" => "api-1"}
+        }
+      ]
       result_output = "Investigation complete. CPU usage is at 50%."
 
       expect(Provider, :completion, fn _, _ ->
@@ -55,7 +62,7 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
             arguments: %{
               "output" => result_output,
               "metrics" => sample_metrics,
-              "logs" => []
+              "logs" => sample_logs
             },
             id: "2"
           }
@@ -90,7 +97,10 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
       assert result_metric.name == "cpu_usage"
       assert result_metric.value == 0.5
       assert result_metric.labels == %{"env" => "test"}
-      assert result[:result][:logs] == []
+      assert length(result[:result][:logs]) == 1
+      [result_log] = result[:result][:logs]
+      assert result_log.message == "connection reset"
+      assert result_log.labels == %{"pod" => "api-1"}
 
       {:ok, updated} = Workbenches.update_job_activity(result, activity)
       assert updated.status == :successful
@@ -100,6 +110,10 @@ defmodule Console.AI.Workbench.Subagents.ObservabilityTest do
       assert persisted_metric.name == "cpu_usage"
       assert persisted_metric.value == 0.5
       assert persisted_metric.labels == %{"env" => "test"}
+      assert length(updated.result.logs) == 1
+      [persisted_log] = updated.result.logs
+      assert persisted_log.message == "connection reset"
+      assert persisted_log.labels == %{"pod" => "api-1"}
     end
   end
 end

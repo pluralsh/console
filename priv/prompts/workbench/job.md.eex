@@ -33,6 +33,8 @@ As work is completed, be sure to call the `workbench_notes` tool to record progr
 Only call `workbench_complete` if you believe all work has been completed, we can gather additional data and insights on future iterations.  In general, if a pull request has been created to fix the issue,
 you should almost always consider the work complete (unless additional pull requests are needed).  You cannot confirm the fix is active, since the pr needs to be merged out of band, and deployed independently.
 
+You should not need to ever invoke a repeated chain of note calls.  If that's all the work that's being done, you've likely completed everything and can proceed to workbench_complete.
+
 ## Parallelism Guidance
 
 We can manage multiple subagents in parallel, but you should avoid spawning multiple of the same subagent type at once, simply because they will duplicate work.  You can instead wait until they complete,

@@ -9667,6 +9667,8 @@ type WorkbenchJobResult struct {
 type WorkbenchJobResultMetadata struct {
 	// metrics for this result
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
+	// logs for this result
+	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
 }
 
 type WorkbenchJobResultTodo struct {
@@ -9697,6 +9699,11 @@ type WorkbenchJobThoughtAttributes struct {
 	Metrics []*WorkbenchJobActivityMetric `json:"metrics,omitempty"`
 	// logs for the thought
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
+}
+
+type WorkbenchMessageAttributes struct {
+	// the prompt for the message
+	Prompt string `json:"prompt"`
 }
 
 type WorkbenchObservability struct {
@@ -15841,6 +15848,8 @@ const (
 	WorkbenchJobActivityTypeInfrastructure WorkbenchJobActivityType = "INFRASTRUCTURE"
 	WorkbenchJobActivityTypeMemo           WorkbenchJobActivityType = "MEMO"
 	WorkbenchJobActivityTypePlan           WorkbenchJobActivityType = "PLAN"
+	WorkbenchJobActivityTypeUser           WorkbenchJobActivityType = "USER"
+	WorkbenchJobActivityTypeMemory         WorkbenchJobActivityType = "MEMORY"
 )
 
 var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
@@ -15851,11 +15860,13 @@ var AllWorkbenchJobActivityType = []WorkbenchJobActivityType{
 	WorkbenchJobActivityTypeInfrastructure,
 	WorkbenchJobActivityTypeMemo,
 	WorkbenchJobActivityTypePlan,
+	WorkbenchJobActivityTypeUser,
+	WorkbenchJobActivityTypeMemory,
 }
 
 func (e WorkbenchJobActivityType) IsValid() bool {
 	switch e {
-	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan:
+	case WorkbenchJobActivityTypeCoding, WorkbenchJobActivityTypeObservability, WorkbenchJobActivityTypeIntegration, WorkbenchJobActivityTypeTicketing, WorkbenchJobActivityTypeInfrastructure, WorkbenchJobActivityTypeMemo, WorkbenchJobActivityTypePlan, WorkbenchJobActivityTypeUser, WorkbenchJobActivityTypeMemory:
 		return true
 	}
 	return false

@@ -1249,6 +1249,14 @@ type RootMutationType {
     attributes: WorkbenchJobAttributes!
   ): WorkbenchJob
 
+  createWorkbenchMessage(
+    "the job to create a message for"
+    jobId: ID!
+
+    "message attributes (e.g. prompt)"
+    attributes: WorkbenchMessageAttributes!
+  ): WorkbenchJobActivity
+
   cancelAgentRun(id: ID!): AgentRun
 
   createAgentRun(runtimeId: ID!, attributes: AgentRunAttributes!): AgentRun
@@ -2174,6 +2182,8 @@ enum WorkbenchJobActivityType {
   INFRASTRUCTURE
   MEMO
   PLAN
+  USER
+  MEMORY
 }
 
 input WorkbenchJobAttributes {
@@ -2477,6 +2487,11 @@ input WorkbenchToolHttpHeaderAttributes {
   value: String
 }
 
+input WorkbenchMessageAttributes {
+  "the prompt for the message"
+  prompt: String!
+}
+
 type Workbench {
   "the id of the workbench"
   id: String!
@@ -2696,6 +2711,9 @@ type WorkbenchJobResult {
 type WorkbenchJobResultMetadata {
   "metrics for this result"
   metrics: [WorkbenchJobActivityMetric]
+
+  "logs for this result"
+  logs: [WorkbenchJobActivityLog]
 }
 
 type WorkbenchJobResultTodo {

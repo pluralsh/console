@@ -1,7 +1,7 @@
 defmodule Console.Schema.WorkbenchJobResult do
   use Console.Schema.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
-  alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.Metric
+  alias Console.Schema.WorkbenchJobActivity.WorkbenchJobResult.{Metric, Log}
 
   defenum TodoStatus, pending: 0, in_progress: 1, completed: 2
 
@@ -10,12 +10,14 @@ defmodule Console.Schema.WorkbenchJobResult do
 
     embedded_schema do
       embeds_many :metrics, Metric, on_replace: :delete
+      embeds_many :logs,    Log, on_replace: :delete
     end
 
     def changeset(model, attrs \\ %{}) do
       model
       |> cast(attrs, [])
       |> cast_embed(:metrics, with: &WorkbenchJobActivity.metric_changeset/2)
+      |> cast_embed(:logs, with: &WorkbenchJobActivity.log_changeset/2)
     end
   end
 

@@ -165,6 +165,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :value, :string
   end
 
+  input_object :workbench_message_attributes do
+    field :prompt, non_null(:string), description: "the prompt for the message"
+  end
+
   object :workbench do
     field :id,            non_null(:string), description: "the id of the workbench"
     field :name,          non_null(:string), description: "the name of the workbench"
@@ -295,6 +299,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_job_result_metadata do
     field :metrics, list_of(:workbench_job_activity_metric), description: "metrics for this result"
+    field :logs,    list_of(:workbench_job_activity_log), description: "logs for this result"
   end
 
   object :workbench_job_result_todo do
@@ -670,6 +675,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :attributes,   non_null(:workbench_job_attributes), description: "job attributes (e.g. prompt)"
 
       resolve &Deployments.create_workbench_job/2
+    end
+
+    field :create_workbench_message, :workbench_job_activity do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :job_id, non_null(:id), description: "the job to create a message for"
+      arg :attributes, non_null(:workbench_message_attributes), description: "message attributes (e.g. prompt)"
+
+      resolve &Deployments.create_workbench_message/2
     end
   end
 

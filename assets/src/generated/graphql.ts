@@ -8605,6 +8605,7 @@ export type RootMutationType = {
   createWorkbenchCron?: Maybe<WorkbenchCron>;
   /** Creates a new workbench job. Requires read access to the workbench. */
   createWorkbenchJob?: Maybe<WorkbenchJob>;
+  createWorkbenchMessage?: Maybe<WorkbenchJobActivity>;
   createWorkbenchTool?: Maybe<WorkbenchTool>;
   createWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   deleteAccessToken?: Maybe<AccessToken>;
@@ -9210,6 +9211,12 @@ export type RootMutationTypeCreateWorkbenchCronArgs = {
 export type RootMutationTypeCreateWorkbenchJobArgs = {
   attributes: WorkbenchJobAttributes;
   workbenchId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateWorkbenchMessageArgs = {
+  attributes: WorkbenchMessageAttributes;
+  jobId: Scalars['ID']['input'];
 };
 
 
@@ -14893,9 +14900,11 @@ export enum WorkbenchJobActivityType {
   Infrastructure = 'INFRASTRUCTURE',
   Integration = 'INTEGRATION',
   Memo = 'MEMO',
+  Memory = 'MEMORY',
   Observability = 'OBSERVABILITY',
   Plan = 'PLAN',
-  Ticketing = 'TICKETING'
+  Ticketing = 'TICKETING',
+  User = 'USER'
 }
 
 export type WorkbenchJobAttributes = {
@@ -14949,6 +14958,8 @@ export type WorkbenchJobResult = {
 
 export type WorkbenchJobResultMetadata = {
   __typename?: 'WorkbenchJobResultMetadata';
+  /** logs for this result */
+  logs?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
   /** metrics for this result */
   metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
 };
@@ -14992,6 +15003,11 @@ export type WorkbenchJobThoughtAttributes = {
   logs?: Maybe<Array<Maybe<WorkbenchJobActivityLog>>>;
   /** metrics for the thought */
   metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
+};
+
+export type WorkbenchMessageAttributes = {
+  /** the prompt for the message */
+  prompt: Scalars['String']['input'];
 };
 
 export type WorkbenchObservability = {

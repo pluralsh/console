@@ -322,3 +322,11 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.IssueCreated, Console.PubSu
 
   EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/issue.md.eex", [:assigns])
 end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobActivityCreated do
+  def process(%{item: %{type: :user}}), do: Console.Pipelines.AI.Workbench.Producer.kick()
+end
+
+defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobCreated do
+  def process(_), do: Console.Pipelines.AI.Workbench.Producer.kick()
+end
