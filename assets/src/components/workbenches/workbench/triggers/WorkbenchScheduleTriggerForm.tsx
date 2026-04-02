@@ -10,7 +10,6 @@ import {
   Tooltip,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import { DEFAULT_PAGE_SIZE } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P, CaptionP, InlineA } from 'components/utils/typography/Text'
 import CronExpressionParser from 'cron-parser'
 import cronstrue from 'cronstrue'
@@ -18,15 +17,10 @@ import {
   useCreateWorkbenchCronMutation,
   useUpdateWorkbenchCronMutation,
   WorkbenchCronFragment,
-  WorkbenchCronsDocument,
-  WorkbenchCronsQuery,
-  WorkbenchTriggersSummaryDocument,
-  WorkbenchTriggersSummaryQuery,
 } from 'generated/graphql'
 import { useEffect, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { dayjsExtended as dayjs } from 'utils/datetime'
-import { appendConnectionToEnd, updateCache } from 'utils/graphql'
 import { StickyActionsFooterSC } from '../create-edit/WorkbenchCreateOrEdit'
 
 const CRON_SHORTCUTS_URL =
@@ -42,13 +36,15 @@ export function WorkbenchScheduleTriggerForm({
   workbenchId,
   cron,
   onCancel,
+  onCompleted,
 }: {
   workbenchId: string
   cron?: Nullable<WorkbenchCronFragment>
   onCancel: () => void
+  onCompleted: () => void | Promise<void>
 }) {
   const theme = useTheme()
-  const isEditMode = !!cron
+  const editing = !!cron
 
   const [formState, setFormState] = useState<ScheduleTriggerFormState>(() =>
     getInitialFormState(cron)
@@ -67,98 +63,30 @@ export function WorkbenchScheduleTriggerForm({
   const crontab = formState.crontab.trim()
   const isCronValid = !!crontab && validateCronExpression(crontab)
   const hasCronError = !!crontab && !isCronValid
-
-  const [createWorkbenchCron, createState] = useCreateWorkbenchCronMutation({
-    update: (cache, { data }) => {
-      const createdCron = data?.createWorkbenchCron
-      if (!createdCron) return
-
-      updateCache<WorkbenchCronsQuery>(cache, {
-        query: WorkbenchCronsDocument,
-        variables: { id: workbenchId, first: DEFAULT_PAGE_SIZE },
-        update: (prev) => {
-          if (!prev.workbench) return prev
-
-          return {
-            ...prev,
-            workbench: appendConnectionToEnd(
-              prev.workbench,
-              createdCron,
-              'crons'
-            ),
-          }
-        },
-      })
-
-      updateCache<WorkbenchTriggersSummaryQuery>(cache, {
-        query: WorkbenchTriggersSummaryDocument,
-        variables: { id: workbenchId },
-        update: (prev) => {
-          if (!prev.workbench) return prev
-
-          return {
-            ...prev,
-            workbench: {
-              ...prev.workbench,
-              crons: {
-                ...prev.workbench.crons,
-                edges: [{ __typename: 'WorkbenchCronEdge', node: createdCron }],
-              },
-            },
-          }
-        },
-      })
-    },
-    onCompleted: onCancel,
-  })
-
-  const [updateWorkbenchCron, updateState] = useUpdateWorkbenchCronMutation({
-    update: (cache, { data }) => {
-      const updatedCron = data?.updateWorkbenchCron
-      if (!updatedCron) return
-
-      updateCache<WorkbenchCronsQuery>(cache, {
-        query: WorkbenchCronsDocument,
-        variables: { id: workbenchId, first: DEFAULT_PAGE_SIZE },
-        update: (prev) => {
-          if (!prev.workbench?.crons) return prev
-
-          return {
-            ...prev,
-            workbench: {
-              ...prev.workbench,
-              crons: {
-                ...prev.workbench.crons,
-                edges:
-                  prev.workbench.crons.edges?.map((edge) =>
-                    edge?.node?.id === updatedCron.id
-                      ? { ...edge, node: updatedCron }
-                      : edge
-                  ) ?? [],
-              },
-            },
-          }
-        },
-      })
-    },
-    onCompleted: onCancel,
-  })
-
-  const isSaving = createState.loading || updateState.loading
+  const [finalizing, setFinalizing] = useState(false)
+  const [createWorkbenchCron, createState] = useCreateWorkbenchCronMutation()
+  const [updateWorkbenchCron, updateState] = useUpdateWorkbenchCronMutation()
+  const isSaving = createState.loading || updateState.loading || finalizing
   const error = createState.error ?? updateState.error
   const canSave = !!prompt && isCronValid
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!canSave || isSaving) return
 
     const attributes = { crontab, prompt }
+    setFinalizing(true)
 
-    if (isEditMode && cron) {
-      updateWorkbenchCron({ variables: { id: cron.id, attributes } })
-      return
+    try {
+      if (editing && cron) {
+        await updateWorkbenchCron({ variables: { id: cron.id, attributes } })
+      } else {
+        await createWorkbenchCron({ variables: { workbenchId, attributes } })
+      }
+
+      await onCompleted()
+    } catch {
+      setFinalizing(false)
     }
-
-    createWorkbenchCron({ variables: { workbenchId, attributes } })
   }
 
   return (
@@ -315,7 +243,7 @@ export function WorkbenchScheduleTriggerForm({
             Back to all schedules
           </Button>
           <Button
-            onClick={handleSave}
+            onClick={() => handleSave()}
             loading={isSaving}
             disabled={!canSave}
           >

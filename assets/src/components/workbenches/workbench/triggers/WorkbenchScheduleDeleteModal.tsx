@@ -1,81 +1,52 @@
 import { Confirm } from 'components/utils/Confirm'
-import { DEFAULT_PAGE_SIZE } from 'components/utils/table/useFetchPaginatedData'
+import { useState } from 'react'
 import {
   useDeleteWorkbenchCronMutation,
   WorkbenchCronFragment,
-  WorkbenchCronsDocument,
-  WorkbenchCronsQuery,
-  WorkbenchTriggersSummaryDocument,
-  WorkbenchTriggersSummaryQuery,
 } from 'generated/graphql'
-import { removeConnection, updateCache } from 'utils/graphql'
 
 export function WorkbenchScheduleDeleteModal({
-  workbenchId,
   open,
   cron,
   onClose,
+  onDeleted,
 }: {
-  workbenchId: string
   open: boolean
   cron: Nullable<WorkbenchCronFragment>
   onClose: () => void
+  onDeleted?: () => void | Promise<void>
 }) {
-  const [deleteWorkbenchCron, { loading, error }] =
-    useDeleteWorkbenchCronMutation({
-      update: (cache, { data }) => {
-        const deletedCron = data?.deleteWorkbenchCron
-        if (!deletedCron) return
+  const [finalizing, setFinalizing] = useState(false)
+  const [mutation, { loading, error }] = useDeleteWorkbenchCronMutation()
 
-        updateCache<WorkbenchCronsQuery>(cache, {
-          query: WorkbenchCronsDocument,
-          variables: { id: workbenchId, first: DEFAULT_PAGE_SIZE },
-          update: (prev) => {
-            if (!prev.workbench) return prev
+  const handleClose = () => {
+    setFinalizing(false)
+    onClose()
+  }
 
-            return {
-              ...prev,
-              workbench: removeConnection(prev.workbench, deletedCron, 'crons'),
-            }
-          },
-        })
+  const handleDelete = async () => {
+    if (!cron || finalizing) return
 
-        updateCache<WorkbenchTriggersSummaryQuery>(cache, {
-          query: WorkbenchTriggersSummaryDocument,
-          variables: { id: workbenchId },
-          update: (prev) => {
-            if (!prev.workbench?.crons?.edges) return prev
+    setFinalizing(true)
 
-            return {
-              ...prev,
-              workbench: {
-                ...prev.workbench,
-                crons: {
-                  ...prev.workbench.crons,
-                  edges: prev.workbench.crons.edges.filter(
-                    (edge) => edge?.node?.id !== deletedCron.id
-                  ),
-                },
-              },
-            }
-          },
-        })
-      },
-      onCompleted: onClose,
-    })
+    try {
+      await mutation({ variables: { id: cron.id } })
+      await onDeleted?.()
+      handleClose()
+    } catch {
+      setFinalizing(false)
+    }
+  }
 
   return (
     <Confirm
       open={open}
-      close={onClose}
+      close={handleClose}
       destructive
       label="Delete schedule"
-      loading={loading}
+      loading={loading || finalizing}
       error={error}
-      submit={() => {
-        if (!cron) return
-        deleteWorkbenchCron({ variables: { id: cron.id } })
-      }}
+      submit={() => handleDelete()}
       title="Delete schedule"
       text={<span>Are you sure you want to delete this schedule?</span>}
     />

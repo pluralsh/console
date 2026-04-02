@@ -42,7 +42,8 @@ export function WorkbenchScheduleTrigger() {
   const navigate = useNavigate()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const [searchParams] = useSearchParams()
-  const { hasWebhooks } = useOutletContext<WorkbenchTriggersOutletContext>()
+  const { hasWebhooks, refetchSummary } =
+    useOutletContext<WorkbenchTriggersOutletContext>()
   const [creatingCron, setCreatingCron] = useState(false)
   const [editingCron, setEditingCron] =
     useState<Nullable<WorkbenchCronFragment>>(null)
@@ -50,11 +51,18 @@ export function WorkbenchScheduleTrigger() {
   const [selectedCron, setSelectedCron] =
     useState<Nullable<WorkbenchCronFragment>>(null)
 
-  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
-    useFetchPaginatedData(
-      { queryHook: useWorkbenchCronsQuery, keyPath: ['workbench', 'crons'] },
-      { id: workbenchId }
-    )
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData(
+    { queryHook: useWorkbenchCronsQuery, keyPath: ['workbench', 'crons'] },
+    { id: workbenchId }
+  )
 
   const crons = useMemo(() => mapExistingNodes(data?.workbench?.crons), [data])
   const hasSchedules = crons.length > 0
@@ -84,6 +92,14 @@ export function WorkbenchScheduleTrigger() {
           workbenchId={workbenchId}
           cron={editingCron}
           onCancel={() => {
+            setCreatingCron(false)
+            setEditingCron(null)
+            if (createFromQuery) {
+              navigate('.', { replace: true })
+            }
+          }}
+          onCompleted={async () => {
+            await Promise.all([refetchSummary(), refetch()])
             setCreatingCron(false)
             setEditingCron(null)
             if (createFromQuery) {
@@ -141,9 +157,11 @@ export function WorkbenchScheduleTrigger() {
         />
       </FormCardSC>
       <WorkbenchScheduleDeleteModal
-        workbenchId={workbenchId}
         open={isDeleteModalOpen}
         cron={selectedCron}
+        onDeleted={async () => {
+          await Promise.all([refetchSummary(), refetch()])
+        }}
         onClose={() => {
           setIsDeleteModalOpen(false)
           setSelectedCron(null)
