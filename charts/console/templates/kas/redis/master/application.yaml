@@ -39,7 +39,7 @@ spec:
   {{- end }}
   template:
     metadata:
-      labels: {{- include "common.labels.standard" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
+      labels: {{- include "redis.labels.withoutChartVersion" ( dict "customLabels" $podLabels "context" $ ) | nindent 8 }}
         app.kubernetes.io/component: master
         {{- if and .Values.kas.redis.metrics.enabled .Values.kas.redis.metrics.podLabels }}
         {{- include "common.tplvalues.render" ( dict "value" .Values.kas.redis.metrics.podLabels "context" $ ) | nindent 8 }}
