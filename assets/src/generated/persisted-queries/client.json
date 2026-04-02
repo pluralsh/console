@@ -1817,10 +1817,10 @@
          "name": "WorkbenchCrons",
          "body": "query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    crons(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchCron\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
-      "sha256:6035900291c991c4508d29d24100b77c00c15138dd0e721020387c3d9461eeb5": {
+      "sha256:2600252f7c303a79ed2f6121ff363af53a781fed7bcad21a338cac14b676541b": {
          "type": "query",
          "name": "WorkbenchWebhooks",
-         "body": "query WorkbenchWebhooks($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    webhooks(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchWebhook\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchWebhook on WorkbenchWebhook {\n  id\n  name\n  insertedAt\n  updatedAt\n  webhook {\n    id\n    name\n    type\n    __typename\n  }\n  issueWebhook {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+         "body": "query WorkbenchWebhooks($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    webhooks(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchWebhook\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchWebhook on WorkbenchWebhook {\n  id\n  name\n  matches {\n    regex\n    substring\n    caseInsensitive\n    __typename\n  }\n  insertedAt\n  updatedAt\n  webhook {\n    id\n    name\n    type\n    url\n    __typename\n  }\n  issueWebhook {\n    id\n    name\n    url\n    __typename\n  }\n  __typename\n}"
       },
       "sha256:719a9241ffd9ad9439b41a39d960bd39b3b87d850c7c64af313b1917a6b8a64d": {
          "type": "query",
@@ -1912,10 +1912,10 @@
          "name": "DeleteWorkbenchCron",
          "body": "mutation DeleteWorkbenchCron($id: ID!) {\n  deleteWorkbenchCron(id: $id) {\n    id\n    __typename\n  }\n}"
       },
-      "sha256:835f9b0033a5a222528c660d0abbb2a0a637379ce65b2e3a4a40819f2ed939d1": {
+      "sha256:2198e0b81c041faca6eb98a16abcb38b2e4b123d880e4b6771afa4cce2ce574f": {
          "type": "mutation",
          "name": "CreateWorkbenchWebhook",
-         "body": "mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {\n  createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {\n    ...WorkbenchWebhook\n    __typename\n  }\n}\n\nfragment WorkbenchWebhook on WorkbenchWebhook {\n  id\n  name\n  insertedAt\n  updatedAt\n  webhook {\n    id\n    name\n    type\n    __typename\n  }\n  issueWebhook {\n    id\n    name\n    __typename\n  }\n  __typename\n}"
+         "body": "mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {\n  createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {\n    ...WorkbenchWebhook\n    __typename\n  }\n}\n\nfragment WorkbenchWebhook on WorkbenchWebhook {\n  id\n  name\n  matches {\n    regex\n    substring\n    caseInsensitive\n    __typename\n  }\n  insertedAt\n  updatedAt\n  webhook {\n    id\n    name\n    type\n    url\n    __typename\n  }\n  issueWebhook {\n    id\n    name\n    url\n    __typename\n  }\n  __typename\n}"
       }
    }
 }

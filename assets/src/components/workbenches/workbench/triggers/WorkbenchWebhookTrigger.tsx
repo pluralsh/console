@@ -208,21 +208,9 @@ function getColumns({
 }
 
 function webhookToExplanation(webhook: WorkbenchWebhookFragment) {
-  if (webhook.issueWebhook) {
-    return `Issue webhook: ${webhook.issueWebhook.name}`
-  }
+  if (webhook.issueWebhook) return webhook.issueWebhook.url
 
-  if (webhook.webhook) {
-    return `${formatWebhookType(webhook.webhook.type)} webhook: ${webhook.webhook.name}`
-  }
+  if (webhook.webhook) return webhook.webhook.url
 
-  return 'Connected webhook trigger'
-}
-
-function formatWebhookType(type: string) {
-  return type
-    .toLowerCase()
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
+  return undefined
 }

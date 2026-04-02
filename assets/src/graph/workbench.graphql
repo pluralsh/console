@@ -208,16 +208,23 @@ fragment WorkbenchCron on WorkbenchCron {
 fragment WorkbenchWebhook on WorkbenchWebhook {
   id
   name
+  matches {
+    regex
+    substring
+    caseInsensitive
+  }
   insertedAt
   updatedAt
   webhook {
     id
     name
     type
+    url
   }
   issueWebhook {
     id
     name
+    url
   }
 }
 
