@@ -1817,6 +1817,11 @@
          "name": "WorkbenchCrons",
          "body": "query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {\n  workbench(id: $id) {\n    id\n    crons(first: $first, after: $after) {\n      pageInfo {\n        ...PageInfo\n        __typename\n      }\n      edges {\n        node {\n          ...WorkbenchCron\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
       },
+      "sha256:719a9241ffd9ad9439b41a39d960bd39b3b87d850c7c64af313b1917a6b8a64d": {
+         "type": "query",
+         "name": "WorkbenchTriggersSummary",
+         "body": "query WorkbenchTriggersSummary($id: ID!) {\n  workbench(id: $id) {\n    id\n    name\n    description\n    crons(first: 1) {\n      edges {\n        node {\n          id\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    webhooks(first: 1) {\n      edges {\n        node {\n          id\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}"
+      },
       "sha256:cbb0cfc220c7ae0d70b8748385930ea1a2478556ec8838b48664605934e65254": {
          "type": "query",
          "name": "WorkbenchJob",

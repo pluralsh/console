@@ -269,6 +269,28 @@ query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+query WorkbenchTriggersSummary($id: ID!) {
+  workbench(id: $id) {
+    id
+    name
+    description
+    crons(first: 1) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    webhooks(first: 1) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
+}
+
 query WorkbenchJob($id: ID!) {
   workbenchJob(id: $id) {
     ...WorkbenchJob

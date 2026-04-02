@@ -1,7 +1,7 @@
 import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
-import { useWorkbenchQuery } from 'generated/graphql'
+import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import { Link, Outlet, useMatch, useParams } from 'react-router-dom'
 import {
@@ -11,6 +11,7 @@ import {
   WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH,
   WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
+import { mapExistingNodes } from 'utils/graphql'
 
 import { getWorkbenchBreadcrumbs } from '../Workbench'
 import {
@@ -24,6 +25,10 @@ const DIRECTORY = [
   { path: WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH, label: 'Webhook trigger' },
 ]
 
+export type WorkbenchTriggersOutletContext = {
+  hasTriggers: boolean
+}
+
 export function WorkbenchTriggers() {
   const id = useParams()[WORKBENCH_PARAM_ID]
   const pathPrefix = `${getWorkbenchAbsPath(id)}/${WORKBENCHES_TRIGGERS_REL_PATH}`
@@ -31,13 +36,20 @@ export function WorkbenchTriggers() {
     useMatch(`${pathPrefix}/:tab`)?.params.tab ??
     WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH
 
-  const { data, loading, error } = useWorkbenchQuery({
-    variables: { id },
+  const { data, loading, error } = useWorkbenchTriggersSummaryQuery({
+    variables: { id: id ?? '' },
     skip: !id,
     fetchPolicy: 'network-only',
   })
 
   const workbench = data?.workbench
+  const hasSchedules = mapExistingNodes(workbench?.crons).length > 0
+  const hasWebhooks = mapExistingNodes(workbench?.webhooks).length > 0
+
+  const outletContext = useMemo<WorkbenchTriggersOutletContext>(
+    () => ({ hasTriggers: hasSchedules || hasWebhooks }),
+    [hasSchedules, hasWebhooks]
+  )
 
   useSetBreadcrumbs(
     useMemo(
@@ -86,7 +98,7 @@ export function WorkbenchTriggers() {
           ))}
         </Flex>
         <FormCardSC>
-          <Outlet />
+          <Outlet context={outletContext} />
         </FormCardSC>
       </WorkbenchSplitLayoutSC>
     </Flex>

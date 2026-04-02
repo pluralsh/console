@@ -18983,6 +18983,13 @@ export type WorkbenchCronsQueryVariables = Exact<{
 
 export type WorkbenchCronsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, crons?: { __typename?: 'WorkbenchCronConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
 
+export type WorkbenchTriggersSummaryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchTriggersSummaryQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, crons?: { __typename?: 'WorkbenchCronConnection', edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string } | null } | null> | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string } | null } | null> | null } | null } | null };
+
 export type WorkbenchJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -39748,6 +39755,65 @@ export type WorkbenchCronsQueryHookResult = ReturnType<typeof useWorkbenchCronsQ
 export type WorkbenchCronsLazyQueryHookResult = ReturnType<typeof useWorkbenchCronsLazyQuery>;
 export type WorkbenchCronsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchCronsSuspenseQuery>;
 export type WorkbenchCronsQueryResult = Apollo.QueryResult<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>;
+export const WorkbenchTriggersSummaryDocument = gql`
+    query WorkbenchTriggersSummary($id: ID!) {
+  workbench(id: $id) {
+    id
+    name
+    description
+    crons(first: 1) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    webhooks(first: 1) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchTriggersSummaryQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchTriggersSummaryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchTriggersSummaryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchTriggersSummaryQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchTriggersSummaryQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables> & ({ variables: WorkbenchTriggersSummaryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>(WorkbenchTriggersSummaryDocument, options);
+      }
+export function useWorkbenchTriggersSummaryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>(WorkbenchTriggersSummaryDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchTriggersSummarySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>;
+export function useWorkbenchTriggersSummarySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchTriggersSummaryQuery | undefined, WorkbenchTriggersSummaryQueryVariables>;
+export function useWorkbenchTriggersSummarySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>(WorkbenchTriggersSummaryDocument, options);
+        }
+export type WorkbenchTriggersSummaryQueryHookResult = ReturnType<typeof useWorkbenchTriggersSummaryQuery>;
+export type WorkbenchTriggersSummaryLazyQueryHookResult = ReturnType<typeof useWorkbenchTriggersSummaryLazyQuery>;
+export type WorkbenchTriggersSummarySuspenseQueryHookResult = ReturnType<typeof useWorkbenchTriggersSummarySuspenseQuery>;
+export type WorkbenchTriggersSummaryQueryResult = Apollo.QueryResult<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>;
 export const WorkbenchJobDocument = gql`
     query WorkbenchJob($id: ID!) {
   workbenchJob(id: $id) {
@@ -40586,6 +40652,7 @@ export const namedOperations = {
     Workbench: 'Workbench',
     WorkbenchJobs: 'WorkbenchJobs',
     WorkbenchCrons: 'WorkbenchCrons',
+    WorkbenchTriggersSummary: 'WorkbenchTriggersSummary',
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchJobActivities: 'WorkbenchJobActivities',
     WorkbenchTools: 'WorkbenchTools',
