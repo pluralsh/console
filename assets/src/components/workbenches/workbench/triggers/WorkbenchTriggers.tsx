@@ -1,5 +1,6 @@
 import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
 import { useMemo } from 'react'
@@ -101,7 +102,14 @@ export function WorkbenchTriggers() {
             </SidebarBtnSC>
           ))}
         </Flex>
-        <Outlet context={outletContext} />
+        {!data && loading ? (
+          <RectangleSkeleton
+            $width="100%"
+            $height="100%"
+          />
+        ) : (
+          <Outlet context={outletContext} />
+        )}
       </WorkbenchSplitLayoutSC>
     </Flex>
   )
