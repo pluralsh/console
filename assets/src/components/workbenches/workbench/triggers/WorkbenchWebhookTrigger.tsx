@@ -147,12 +147,14 @@ export function WorkbenchWebhookTrigger() {
           </Body2P>
           <Flex gap="small">
             <Button
+              small
               secondary
               onClick={() => {}}
             >
               Create new webhook
             </Button>
             <Button
+              small
               onClick={() => {
                 setEditingWebhook(null)
                 setAddingWebhook(true)

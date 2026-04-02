@@ -141,6 +141,7 @@ export function WorkbenchScheduleTrigger() {
             Add schedules to trigger this workbench.
           </Body2P>
           <Button
+            small
             onClick={() => {
               setEditingCron(null)
               setCreatingCron(true)
