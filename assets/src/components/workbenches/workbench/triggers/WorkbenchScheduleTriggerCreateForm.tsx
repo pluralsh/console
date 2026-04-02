@@ -161,6 +161,10 @@ export function WorkbenchScheduleTriggerCreateForm({
             placeholder={CRON_PLACEHOLDER}
             css={{
               color: theme.colors['code-block-purple'],
+              '&:focus-within': {
+                border: theme.borders['outline-focused'],
+                borderColor: theme.colors['code-block-purple'],
+              },
               '& input': {
                 minHeight: 54,
                 paddingLeft: 16,
