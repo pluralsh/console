@@ -44,7 +44,7 @@ export function WorkbenchScheduleTrigger() {
   const navigate = useNavigate()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const [searchParams] = useSearchParams()
-  const { hasWebhooks, refetchSummary } =
+  const { hasSchedules, hasWebhooks, refetchSummary } =
     useOutletContext<WorkbenchTriggersOutletContext>()
   const [creatingCron, setCreatingCron] = useState(false)
   const [editingCron, setEditingCron] =
@@ -67,7 +67,6 @@ export function WorkbenchScheduleTrigger() {
   )
 
   const crons = useMemo(() => mapExistingNodes(data?.workbench?.crons), [data])
-  const hasSchedules = crons.length > 0
   const createFromQuery =
     searchParams.get(WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM) === 'true'
 

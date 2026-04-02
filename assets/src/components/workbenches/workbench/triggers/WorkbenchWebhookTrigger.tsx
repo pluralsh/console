@@ -43,7 +43,7 @@ export function WorkbenchWebhookTrigger() {
   const navigate = useNavigate()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const [searchParams] = useSearchParams()
-  const { hasSchedules, refetchSummary } =
+  const { hasSchedules, hasWebhooks, refetchSummary } =
     useOutletContext<WorkbenchTriggersOutletContext>()
   const [addingWebhook, setAddingWebhook] = useState(false)
   const [editingWebhook, setEditingWebhook] =
@@ -74,7 +74,6 @@ export function WorkbenchWebhookTrigger() {
     () => mapExistingNodes(data?.workbench?.webhooks),
     [data]
   )
-  const hasWebhooks = webhooks.length > 0
 
   const columns = useMemo(
     () =>
