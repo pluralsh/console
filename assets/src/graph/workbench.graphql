@@ -205,6 +205,22 @@ fragment WorkbenchCron on WorkbenchCron {
   updatedAt
 }
 
+fragment WorkbenchWebhook on WorkbenchWebhook {
+  id
+  name
+  insertedAt
+  updatedAt
+  webhook {
+    id
+    name
+    type
+  }
+  issueWebhook {
+    id
+    name
+  }
+}
+
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
   insertedAt
@@ -263,6 +279,22 @@ query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
       edges {
         node {
           ...WorkbenchCron
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchWebhooks($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    webhooks(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchWebhook
         }
       }
     }
@@ -420,5 +452,14 @@ mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {
 mutation DeleteWorkbenchCron($id: ID!) {
   deleteWorkbenchCron(id: $id) {
     id
+  }
+}
+
+mutation CreateWorkbenchWebhook(
+  $workbenchId: ID!
+  $attributes: WorkbenchWebhookAttributes!
+) {
+  createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
+    ...WorkbenchWebhook
   }
 }
