@@ -27,6 +27,7 @@ import {
   WORKBENCH_PARAM_ID,
   WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
+import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import {
   WorkbenchScheduleEmptyState,
@@ -38,6 +39,7 @@ import { WorkbenchTriggersOutletContext } from './WorkbenchTriggers'
 import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
 
 export function WorkbenchWebhookTrigger() {
+  const theme = useTheme()
   const navigate = useNavigate()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const [searchParams] = useSearchParams()
@@ -134,7 +136,12 @@ export function WorkbenchWebhookTrigger() {
       gap="large"
     >
       <FormCardSC>
-        <StretchedFlex>
+        <StretchedFlex
+          css={{
+            paddingLeft: theme.spacing.xxxsmall,
+            paddingRight: theme.spacing.xxxsmall,
+          }}
+        >
           <Body2P $color="text-light">
             Add webhooks to trigger this workbench.
           </Body2P>

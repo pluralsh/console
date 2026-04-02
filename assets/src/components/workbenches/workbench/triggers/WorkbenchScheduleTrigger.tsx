@@ -27,6 +27,7 @@ import {
   WORKBENCH_PARAM_ID,
   WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
+import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { WorkbenchScheduleDeleteModal } from './WorkbenchScheduleDeleteModal'
@@ -39,6 +40,7 @@ import { WorkbenchTriggersOutletContext } from './WorkbenchTriggers'
 import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
 
 export function WorkbenchScheduleTrigger() {
+  const theme = useTheme()
   const navigate = useNavigate()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const [searchParams] = useSearchParams()
@@ -129,7 +131,12 @@ export function WorkbenchScheduleTrigger() {
       gap="large"
     >
       <FormCardSC>
-        <StretchedFlex>
+        <StretchedFlex
+          css={{
+            paddingLeft: theme.spacing.xxxsmall,
+            paddingRight: theme.spacing.xxxsmall,
+          }}
+        >
           <Body2P $color="text-light">
             Add schedules to trigger this workbench.
           </Body2P>
