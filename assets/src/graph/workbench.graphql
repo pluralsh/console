@@ -259,6 +259,16 @@ fragment WorkbenchJob on WorkbenchJob {
     name
   }
   error
+  alert {
+    ...Alert
+  }
+  issue {
+    id
+    title
+    status
+    url
+    provider
+  }
   result {
     ...WorkbenchJobResult
   }
