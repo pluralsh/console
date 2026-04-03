@@ -758,6 +758,8 @@ type Alert struct {
 	Project *Project `json:"project,omitempty"`
 	// The flow this alert was associated with
 	Flow *Flow `json:"flow,omitempty"`
+	// The workbench this alert was associated with
+	Workbench *Workbench `json:"workbench,omitempty"`
 	// Time series metrics and threshold used when this alert was evaluated
 	Timeseries *AlertTimeseries `json:"timeseries,omitempty"`
 	InsertedAt *string          `json:"insertedAt,omitempty"`
@@ -9399,6 +9401,7 @@ type Workbench struct {
 	Crons         *WorkbenchCronConnection    `json:"crons,omitempty"`
 	Webhooks      *WorkbenchWebhookConnection `json:"webhooks,omitempty"`
 	Alerts        *AlertConnection            `json:"alerts,omitempty"`
+	Issues        *IssueConnection            `json:"issues,omitempty"`
 	InsertedAt    *string                     `json:"insertedAt,omitempty"`
 	UpdatedAt     *string                     `json:"updatedAt,omitempty"`
 }

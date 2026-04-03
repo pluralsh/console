@@ -2537,6 +2537,8 @@ type Workbench {
 
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
+  issues(after: String, first: Int, before: String, last: Int): IssueConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -5154,6 +5156,9 @@ type Alert {
 
   "The flow this alert was associated with"
   flow: Flow
+
+  "The workbench this alert was associated with"
+  workbench: Workbench
 
   "Time series metrics and threshold used when this alert was evaluated"
   timeseries: AlertTimeseries

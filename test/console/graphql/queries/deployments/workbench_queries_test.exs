@@ -278,6 +278,27 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert from_connection(found["alerts"])
              |> ids_equal(alerts)
     end
+
+    test "it can fetch workbench issues" do
+      workbench = insert(:workbench)
+      issues = insert_list(3, :issue, workbench: workbench)
+      insert_list(2, :issue, workbench: insert(:workbench))
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            issues(first: 5) {
+              edges { node { id title status } }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      assert from_connection(found["issues"])
+             |> ids_equal(issues)
+    end
   end
 
   describe "workbenchJob" do

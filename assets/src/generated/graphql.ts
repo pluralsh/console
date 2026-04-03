@@ -968,6 +968,8 @@ export type Alert = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** Link back to the originating dashboard or alert view in the provider */
   url?: Maybe<Scalars['String']['output']>;
+  /** The workbench this alert was associated with */
+  workbench?: Maybe<Workbench>;
 };
 
 export type AlertConnection = {
@@ -14592,6 +14594,7 @@ export type Workbench = {
   /** the id of the workbench */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  issues?: Maybe<IssueConnection>;
   /** the name of the workbench */
   name: Scalars['String']['output'];
   /** the project of this workbench */
@@ -14623,6 +14626,14 @@ export type WorkbenchAlertsArgs = {
 
 
 export type WorkbenchCronsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchIssuesArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;

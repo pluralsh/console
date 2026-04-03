@@ -201,6 +201,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.list_alerts/3
     end
 
+    connection field :issues, node_type: :issue do
+      resolve &Deployments.list_issues/3
+    end
+
     timestamps()
   end
 
