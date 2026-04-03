@@ -239,6 +239,16 @@ fragment WorkbenchIssue on Issue {
   url
   insertedAt
   updatedAt
+  workbench {
+    id
+    runs(first: 1) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
 }
 
 fragment WorkbenchJob on WorkbenchJob {

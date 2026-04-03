@@ -1,4 +1,12 @@
-import { Chip, ChipSeverity, Table, Tooltip } from '@pluralsh/design-system'
+import {
+  ArrowTopRightIcon,
+  CancelledFilledIcon,
+  Chip,
+  CircleDashIcon,
+  Flex,
+  Table,
+  Tooltip,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
@@ -8,48 +16,57 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { InlineA } from 'components/utils/typography/Text'
 import {
   IssueStatus,
-  IssueWebhookProvider,
+  WorkbenchIssueFragment,
   useWorkbenchesIssuesQuery,
 } from 'generated/graphql'
 import { startCase, truncate } from 'lodash'
-import { useMemo } from 'react'
+import { ReactNode, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
+import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 
-type WorkbenchIssue = {
-  id: string
-  title: string
-  externalId: string
-  provider: IssueWebhookProvider
-  status: IssueStatus
-  url: string
-  insertedAt?: string | null
-  updatedAt?: string | null
+const columnHelper = createColumnHelper<WorkbenchIssueFragment>()
+
+const statusToChipIcon: Partial<Record<IssueStatus, ReactNode>> = {
+  [IssueStatus.InProgress]: (
+    <CircleDashIcon
+      size={12}
+      color="icon-light"
+    />
+  ),
+  [IssueStatus.Cancelled]: (
+    <CancelledFilledIcon
+      size={12}
+      color="icon-xlight"
+    />
+  ),
 }
 
-const columnHelper = createColumnHelper<WorkbenchIssue>()
-
-const statusToChipSeverity: Record<IssueStatus, ChipSeverity> = {
-  [IssueStatus.Open]: 'warning',
-  [IssueStatus.InProgress]: 'info',
-  [IssueStatus.Completed]: 'success',
-  [IssueStatus.Cancelled]: 'neutral',
-}
+const completedStatuses = new Set([
+  IssueStatus.Completed,
+  IssueStatus.Cancelled,
+])
 
 const columns = [
   columnHelper.accessor((issue) => issue, {
     id: 'title',
     header: 'Issue',
-    meta: { gridTemplate: 'minmax(220px, 1fr)', truncate: true },
+    meta: { gridTemplate: 'minmax(220px, 2fr)', truncate: true },
     cell: function Cell({ getValue }) {
       const issue = getValue()
 
       return (
         <StackedText
           first={issue.title}
-          second={issue.externalId}
-          firstPartialType="body2Bold"
-          firstColor="text"
+          second={
+            issue.insertedAt
+              ? formatDateTime(issue.insertedAt, 'M/D/YYYY h:mma')
+              : ''
+          }
+          firstPartialType="body2LooseLineHeight"
+          firstColor="text-light"
           secondPartialType="caption"
           secondColor="text-xlight"
           truncate
@@ -57,40 +74,10 @@ const columns = [
       )
     },
   }),
-  columnHelper.accessor((issue) => issue.status, {
-    id: 'status',
-    header: 'Status',
-    cell: function Cell({ getValue }) {
-      const status = getValue()
-
-      return (
-        <Chip
-          size="small"
-          severity={statusToChipSeverity[status]}
-        >
-          {startCase(status.toLowerCase())}
-        </Chip>
-      )
-    },
-  }),
-  columnHelper.accessor((issue) => issue.provider, {
-    id: 'provider',
-    header: 'Provider',
-    cell: function Cell({ getValue }) {
-      return startCase(getValue().toLowerCase())
-    },
-  }),
-  columnHelper.accessor((issue) => issue.updatedAt ?? issue.insertedAt, {
-    id: 'updatedAt',
-    header: 'Updated',
-    cell: function Cell({ getValue }) {
-      return getValue() ? formatDateTime(getValue(), 'M/D/YYYY h:mma') : '-'
-    },
-  }),
   columnHelper.accessor((issue) => issue.url, {
     id: 'url',
-    header: 'URL',
-    meta: { gridTemplate: 'minmax(220px, 1fr)' },
+    header: '',
+    meta: { gridTemplate: 'minmax(220px, 2fr)' },
     cell: function Cell({ getValue }) {
       const url = getValue()
 
@@ -99,8 +86,75 @@ const columns = [
           placement="top"
           label={url}
         >
-          <InlineA href={url}>{truncate(url, { length: 42 })}</InlineA>
+          <Flex gap="small">
+            <InlineA href={url}>
+              <Flex
+                gap="xsmall"
+                align="center"
+              >
+                {truncate(url, { length: 42 })}
+              </Flex>
+            </InlineA>
+            <ArrowTopRightIcon />
+          </Flex>
         </Tooltip>
+      )
+    },
+  }),
+  columnHelper.accessor((issue) => issue.status, {
+    id: 'ticketStatus',
+    header: 'Ticket status',
+    meta: { gridTemplate: 'minmax(100px, 1fr)' },
+    cell: function Cell({ getValue }) {
+      const status = getValue()
+      const theme = useTheme()
+
+      return (
+        <Chip
+          size="small"
+          severity="neutral"
+        >
+          <Flex
+            gap="xsmall"
+            align="center"
+          >
+            {statusToChipIcon[status]}
+            <span
+              css={
+                completedStatuses.has(status)
+                  ? { color: theme.colors['text-light'] }
+                  : undefined
+              }
+            >
+              {startCase(status.toLowerCase())}
+            </span>
+          </Flex>
+        </Chip>
+      )
+    },
+  }),
+  columnHelper.accessor((issue) => issue, {
+    id: 'viewJob',
+    header: '',
+    meta: { gridTemplate: 'auto' },
+    cell: function Cell({ getValue }) {
+      const navigate = useNavigate()
+      const issue = getValue()
+      const workbenchId = issue.workbench?.id
+      const firstJobId = issue.workbench?.runs?.edges?.[0]?.node?.id
+
+      if (!workbenchId || !firstJobId) return null
+
+      return (
+        <Chip
+          clickable
+          onclick={() =>
+            navigate(getWorkbenchJobAbsPath({ workbenchId, jobId: firstJobId }))
+          }
+          size="large"
+        >
+          View job
+        </Chip>
       )
     },
   }),
@@ -123,7 +177,6 @@ export function WorkbenchesIssues() {
       <Table
         fullHeightWrap
         virtualizeRows
-        rowBg="base"
         data={issues}
         columns={columns}
         hasNextPage={pageInfo?.hasNextPage}
