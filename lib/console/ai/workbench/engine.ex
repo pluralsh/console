@@ -186,5 +186,5 @@ defmodule Console.AI.Workbench.Engine do
   defp continue_prompt(%__MODULE__{activities: [_, _ | _]}), do: "Ok, let's keep working" # the first activity is the plan
   defp continue_prompt(_), do: "Ok, let's start working"
 
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "job.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "job.md.eex"]), [:assigns], trim: true)
 end

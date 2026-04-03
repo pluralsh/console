@@ -13,4 +13,20 @@ Conclusion:
 ```
 <%= @activity.result.output || @activity.result.error %>
 ```
+
+<%= if is_list(@activity.result.logs) and !Enum.empty?(@activity.result.logs) do %>
+There were also some important log lines emitted by the activity, in json format:
+
+```json
+<%= Jason.encode!(@activity.result.logs) %>
+```
+<% end %>
+
+<%= if is_list(@activity.result.metrics) and !Enum.empty?(@activity.result.metrics) do %>
+There were also some important metrics emitted by the activity, in json format:
+
+```json
+<%= Jason.encode!(@activity.result.metrics) %>
+```
+<% end %>
 <% end %>

@@ -35,5 +35,5 @@ defmodule Console.AI.Tools.Insight do
     |> then(& {:ok, &1})
   end
 
-  EEx.function_from_file(:defp, :insight_template, Path.join([:code.priv_dir(:console), "insight.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :insight_template, Path.join([:code.priv_dir(:console), "insight.md.eex"]), [:assigns], trim: true)
 end

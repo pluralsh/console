@@ -109,7 +109,7 @@ defmodule Console.AI.Agents.Upgrade do
   defp tools(%ClusterUpgradeStep{type: :cloud_addon}), do: [Stack, StackFiles, ServiceFiles, CodingAgent]
   defp tools(%ClusterUpgradeStep{type: :infrastructure}), do: [Stack, ServiceComponent, StackFiles, ServiceFiles, CodingAgent]
 
-  EEx.function_from_file(:defp, :addon_prompt, Console.priv_filename(["prompts", "upgrade", "addon.md.eex"]), [:assigns])
-  EEx.function_from_file(:defp, :cloud_addon_prompt, Console.priv_filename(["prompts", "upgrade", "cloud_addon.md.eex"]), [:assigns])
-  EEx.function_from_file(:defp, :infrastructure_prompt, Console.priv_filename(["prompts", "upgrade", "infrastructure.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :addon_prompt, Console.priv_filename(["prompts", "upgrade", "addon.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :cloud_addon_prompt, Console.priv_filename(["prompts", "upgrade", "cloud_addon.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :infrastructure_prompt, Console.priv_filename(["prompts", "upgrade", "infrastructure.md.eex"]), [:assigns], trim: true)
 end

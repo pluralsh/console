@@ -51,5 +51,5 @@ defmodule Console.AI.Workbench.Subagents.Integration do
     |> Enum.filter(& &1)
   end
 
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "integration.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "integration.md.eex"]), [:assigns], trim: true)
 end

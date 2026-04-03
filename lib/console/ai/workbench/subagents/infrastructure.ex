@@ -47,5 +47,5 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   defp k8s_tools(%Workbench{configuration: %{infrastructure: %{kubernetes: true}}}), do: [SummarizeComponent]
   defp k8s_tools(_), do: []
 
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "infrastructure.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "infrastructure.md.eex"]), [:assigns], trim: true)
 end

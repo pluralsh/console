@@ -37,5 +37,5 @@ defmodule Console.AI.Agents.Subagents.Terraform do
     end
   end
 
-  EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "subagents", "terraform.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "subagents", "terraform.md.eex"]), [:assigns], trim: true)
 end

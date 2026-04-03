@@ -58,5 +58,5 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   defp to_tool(%WorkbenchTool{} = tool, :traces), do: [%Traces{tool: tool}]
   defp to_tool(_, _), do: []
 
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "observability.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "observability.md.eex"]), [:assigns], trim: true)
 end

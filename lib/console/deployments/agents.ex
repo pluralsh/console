@@ -375,7 +375,7 @@ defmodule Console.Deployments.Agents do
     end
   end
 
-  EEx.function_from_file(:defp, :pr_blob, Path.join([:code.priv_dir(:console), "pr", "agent_review.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :pr_blob, Path.join([:code.priv_dir(:console), "pr", "agent_review.md.eex"]), [:assigns], trim: true)
 
   defp notify({:ok, %AgentRun{} = run}, :create),
     do: handle_notify(PubSub.AgentRunCreated, run)

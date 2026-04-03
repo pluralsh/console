@@ -21,7 +21,7 @@ defmodule Console.AI.Chat.System do
   @service_file Path.join([:code.priv_dir(:console), "prompts", "service.md.eex"])
   @configure Console.priv_file!("prompts/configure.md")
 
-  EEx.function_from_file(:defp, :service_prompt, @service_file, [:assigns])
+  EEx.function_from_file(:defp, :service_prompt, @service_file, [:assigns], trim: true)
 
   def prompt(%ChatThread{session: %AgentSession{type: :configure}}), do: @configure
   def prompt(%ChatThread{service: %Service{} = svc}), do: service_prompt(svc: svc_context(svc))

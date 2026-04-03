@@ -41,5 +41,5 @@ defmodule Console.AI.Agents.Subagents.Kubernetes do
     end
   end
 
-  EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "subagents", "kubernetes.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "subagents", "kubernetes.md.eex"]), [:assigns], trim: true)
 end
