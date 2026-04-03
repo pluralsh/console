@@ -1,5 +1,6 @@
 import { ResponsiveLine } from '@nivo/line'
 import { Button, FileDiffIcon, IconFrame, Modal } from '@pluralsh/design-system'
+import { LogLine } from 'components/cd/logs/LogLine'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import DiffViewer from 'components/utils/DiffViewer'
 import { dateFormat, useGraphTheme } from 'components/utils/Graph'
@@ -7,6 +8,7 @@ import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { Body2P } from 'components/utils/typography/Text'
 import {
   WorkbenchJobActivityFragment,
+  WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
 } from 'generated/graphql'
 import { groupBy, isEmpty, isNil } from 'lodash'
@@ -68,6 +70,21 @@ export function MemoActivityResult({
       )}
     </StretchedFlex>
   )
+}
+
+export function JobActivityLogs({
+  logs,
+}: {
+  logs: WorkbenchJobActivityLogFragment[]
+}) {
+  if (isEmpty(logs)) return null
+
+  return logs.map((log, i) => (
+    <LogLine
+      key={i}
+      line={{ log: log.message, timestamp: log.timestamp }}
+    />
+  ))
 }
 
 export function JobActivityMetrics({

@@ -102,7 +102,7 @@ const columns = [
       return (
         <Chip
           clickable
-          onclick={() =>
+          onClick={() =>
             navigate(getWorkbenchJobAbsPath({ workbenchId, jobId: firstJobId }))
           }
           size="large"

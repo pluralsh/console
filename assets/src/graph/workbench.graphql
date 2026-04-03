@@ -118,6 +118,12 @@ fragment WorkbenchJobActivityMetric on WorkbenchJobActivityMetric {
   labels
 }
 
+fragment WorkbenchJobActivityLog on WorkbenchJobActivityLog {
+  timestamp
+  message
+  labels
+}
+
 fragment WorkbenchJobResult on WorkbenchJobResult {
   id
   workingTheory
@@ -155,9 +161,7 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
       conclusion
     }
     logs {
-      timestamp
-      message
-      labels
+      ...WorkbenchJobActivityLog
     }
     metrics {
       ...WorkbenchJobActivityMetric
@@ -171,15 +175,10 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
     insertedAt
     attributes {
       logs {
-        timestamp
-        message
-        labels
+        ...WorkbenchJobActivityLog
       }
       metrics {
-        timestamp
-        name
-        value
-        labels
+        ...WorkbenchJobActivityMetric
       }
     }
   }

@@ -28,6 +28,7 @@ import { ComponentType } from 'react'
 import { useTheme } from 'styled-components'
 import { isNonNullable } from 'utils/isNonNullable'
 import {
+  JobActivityLogs,
   JobActivityMetrics,
   MemoActivityResult,
 } from './WorkbenchJobActivityResults'
@@ -104,6 +105,7 @@ function WorkbenchJobActivityResult({
           <JobActivityMetrics
             metrics={result.metrics?.filter(isNonNullable) ?? []}
           />
+          <JobActivityLogs logs={result.logs?.filter(isNonNullable) ?? []} />
         </Flex>
       )
   }

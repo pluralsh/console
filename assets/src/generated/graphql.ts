@@ -18973,6 +18973,8 @@ export type WorkbenchJobResultTodoFragment = { __typename?: 'WorkbenchJobResultT
 
 export type WorkbenchJobActivityMetricFragment = { __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null };
 
+export type WorkbenchJobActivityLogFragment = { __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null };
+
 export type WorkbenchJobResultFragment = { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null };
 
 export type WorkbenchJobTinyFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null };
@@ -24013,6 +24015,13 @@ export const WorkbenchFragmentDoc = gql`
     ${WorkbenchTinyFragmentDoc}
 ${WorkbenchToolFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
+export const WorkbenchJobActivityLogFragmentDoc = gql`
+    fragment WorkbenchJobActivityLog on WorkbenchJobActivityLog {
+  timestamp
+  message
+  labels
+}
+    `;
 export const WorkbenchJobActivityMetricFragmentDoc = gql`
     fragment WorkbenchJobActivityMetric on WorkbenchJobActivityMetric {
   timestamp
@@ -24036,9 +24045,7 @@ export const WorkbenchJobActivityFragmentDoc = gql`
       conclusion
     }
     logs {
-      timestamp
-      message
-      labels
+      ...WorkbenchJobActivityLog
     }
     metrics {
       ...WorkbenchJobActivityMetric
@@ -24052,15 +24059,10 @@ export const WorkbenchJobActivityFragmentDoc = gql`
     insertedAt
     attributes {
       logs {
-        timestamp
-        message
-        labels
+        ...WorkbenchJobActivityLog
       }
       metrics {
-        timestamp
-        name
-        value
-        labels
+        ...WorkbenchJobActivityMetric
       }
     }
   }
@@ -24071,7 +24073,8 @@ export const WorkbenchJobActivityFragmentDoc = gql`
     }
   }
 }
-    ${WorkbenchJobActivityMetricFragmentDoc}
+    ${WorkbenchJobActivityLogFragmentDoc}
+${WorkbenchJobActivityMetricFragmentDoc}
 ${PullRequestBasicFragmentDoc}`;
 export const WorkbenchJobProgressFragmentDoc = gql`
     fragment WorkbenchJobProgress on WorkbenchJobProgress {
@@ -41605,6 +41608,7 @@ export const namedOperations = {
     WorkbenchTool: 'WorkbenchTool',
     WorkbenchJobResultTodo: 'WorkbenchJobResultTodo',
     WorkbenchJobActivityMetric: 'WorkbenchJobActivityMetric',
+    WorkbenchJobActivityLog: 'WorkbenchJobActivityLog',
     WorkbenchJobResult: 'WorkbenchJobResult',
     WorkbenchJobTiny: 'WorkbenchJobTiny',
     WorkbenchJobActivity: 'WorkbenchJobActivity',
