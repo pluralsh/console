@@ -278,6 +278,22 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+query WorkbenchAlerts($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    alerts(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...Alert
+        }
+      }
+    }
+  }
+}
+
 query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id
