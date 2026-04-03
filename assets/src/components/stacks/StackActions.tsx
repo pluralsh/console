@@ -72,16 +72,6 @@ export default function StackActions({
 
   return (
     <>
-      {stack?.parent?.id && (
-        <Button
-          secondary
-          as={Link}
-          to={getServiceDetailsPath({ serviceId: stack.parent.id })}
-          endIcon={<ArrowTopRightIcon />}
-        >
-          Go to parent
-        </Button>
-      )}
       {deleting ? (
         <>
           <RestoreStackButton
@@ -141,6 +131,16 @@ export default function StackActions({
             />
           </MoreMenu>
         </Flex>
+      )}
+      {stack?.parent?.id && (
+        <Button
+          secondary
+          as={Link}
+          to={getServiceDetailsPath({ serviceId: stack.parent.id })}
+          endIcon={<ArrowTopRightIcon />}
+        >
+          Parent
+        </Button>
       )}
       <StackCustomRunModal
         open={menuKey === MenuItemKey.CustomRun}
