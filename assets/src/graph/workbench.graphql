@@ -230,6 +230,17 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
   }
 }
 
+fragment WorkbenchIssue on Issue {
+  id
+  title
+  externalId
+  provider
+  status
+  url
+  insertedAt
+  updatedAt
+}
+
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
   insertedAt
@@ -302,6 +313,19 @@ query WorkbenchAlerts($id: ID!, $first: Int = 100, $after: String) {
         node {
           ...Alert
         }
+      }
+    }
+  }
+}
+
+query WorkbenchesIssues($first: Int = 100, $after: String) {
+  workbenchIssues(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...WorkbenchIssue
       }
     }
   }
