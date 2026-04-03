@@ -62,6 +62,10 @@ defmodule Console.Schema.WorkbenchJob do
     from(j in query, order_by: ^order)
   end
 
+  def expired(query \\ __MODULE__) do
+    from(j in query, where: j.inserted_at < ago(14, "day"))
+  end
+
   def preloaded(query \\ __MODULE__, preloads \\ [:result]) do
     from(j in query, preload: ^preloads)
   end
