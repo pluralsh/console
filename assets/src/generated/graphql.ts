@@ -18971,6 +18971,8 @@ export type WorkbenchToolFragment = { __typename?: 'WorkbenchTool', id: string, 
 
 export type WorkbenchJobResultTodoFragment = { __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null };
 
+export type WorkbenchJobActivityMetricFragment = { __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null };
+
 export type WorkbenchJobResultFragment = { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null };
 
 export type WorkbenchJobTinyFragment = { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null };
@@ -24011,6 +24013,14 @@ export const WorkbenchFragmentDoc = gql`
     ${WorkbenchTinyFragmentDoc}
 ${WorkbenchToolFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
+export const WorkbenchJobActivityMetricFragmentDoc = gql`
+    fragment WorkbenchJobActivityMetric on WorkbenchJobActivityMetric {
+  timestamp
+  name
+  value
+  labels
+}
+    `;
 export const WorkbenchJobActivityFragmentDoc = gql`
     fragment WorkbenchJobActivity on WorkbenchJobActivity {
   id
@@ -24031,10 +24041,7 @@ export const WorkbenchJobActivityFragmentDoc = gql`
       labels
     }
     metrics {
-      timestamp
-      name
-      value
-      labels
+      ...WorkbenchJobActivityMetric
     }
   }
   thoughts {
@@ -24064,7 +24071,8 @@ export const WorkbenchJobActivityFragmentDoc = gql`
     }
   }
 }
-    ${PullRequestBasicFragmentDoc}`;
+    ${WorkbenchJobActivityMetricFragmentDoc}
+${PullRequestBasicFragmentDoc}`;
 export const WorkbenchJobProgressFragmentDoc = gql`
     fragment WorkbenchJobProgress on WorkbenchJobProgress {
   activityId
@@ -24157,14 +24165,12 @@ export const WorkbenchJobResultFragmentDoc = gql`
   }
   metadata {
     metrics {
-      timestamp
-      name
-      value
-      labels
+      ...WorkbenchJobActivityMetric
     }
   }
 }
-    ${WorkbenchJobResultTodoFragmentDoc}`;
+    ${WorkbenchJobResultTodoFragmentDoc}
+${WorkbenchJobActivityMetricFragmentDoc}`;
 export const WorkbenchJobFragmentDoc = gql`
     fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
@@ -41598,6 +41604,7 @@ export const namedOperations = {
     WorkbenchToolTiny: 'WorkbenchToolTiny',
     WorkbenchTool: 'WorkbenchTool',
     WorkbenchJobResultTodo: 'WorkbenchJobResultTodo',
+    WorkbenchJobActivityMetric: 'WorkbenchJobActivityMetric',
     WorkbenchJobResult: 'WorkbenchJobResult',
     WorkbenchJobTiny: 'WorkbenchJobTiny',
     WorkbenchJobActivity: 'WorkbenchJobActivity',

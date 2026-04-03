@@ -111,6 +111,13 @@ fragment WorkbenchJobResultTodo on WorkbenchJobResultTodo {
   done
 }
 
+fragment WorkbenchJobActivityMetric on WorkbenchJobActivityMetric {
+  timestamp
+  name
+  value
+  labels
+}
+
 fragment WorkbenchJobResult on WorkbenchJobResult {
   id
   workingTheory
@@ -120,10 +127,7 @@ fragment WorkbenchJobResult on WorkbenchJobResult {
   }
   metadata {
     metrics {
-      timestamp
-      name
-      value
-      labels
+      ...WorkbenchJobActivityMetric
     }
   }
 }
@@ -156,10 +160,7 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
       labels
     }
     metrics {
-      timestamp
-      name
-      value
-      labels
+      ...WorkbenchJobActivityMetric
     }
   }
   thoughts {

@@ -1,4 +1,10 @@
-import { Code, getLastStringChild, Modal } from '@pluralsh/design-system'
+import {
+  Accordion,
+  AccordionItem,
+  Code,
+  getLastStringChild,
+  Modal,
+} from '@pluralsh/design-system'
 import { CaptionP, InlineA } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
 import { ReactElement, ReactNode, useState } from 'react'
@@ -77,6 +83,28 @@ function CodeBlockLabel({
     : language
       ? `${language.toUpperCase()} BLOCK`
       : 'CODE BLOCK'
+
+  if (language === 'bash' || language === 'sh')
+    return (
+      <Accordion
+        type="multiple"
+        css={{ background: 'none', border: 'none' }}
+      >
+        <AccordionItem
+          value="code"
+          trigger={<CaptionP $color="text-xlight">{label}</CaptionP>}
+          padding="none"
+          caret="none"
+        >
+          <Code
+            showHeader={false}
+            language={language}
+          >
+            {content}
+          </Code>
+        </AccordionItem>
+      </Accordion>
+    )
 
   return (
     <>

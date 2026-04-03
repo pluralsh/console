@@ -1,5 +1,6 @@
 import {
   AccordionItem,
+  BrainIcon,
   ChecklistCheckedIcon,
   CheckOutlineIcon,
   CloudLoggingIcon,
@@ -13,7 +14,6 @@ import {
   ToolKitIcon,
   UnknownIcon,
   VisualInspectionIcon,
-  BrainIcon,
 } from '@pluralsh/design-system'
 import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
@@ -26,7 +26,11 @@ import {
 } from 'generated/graphql'
 import { ComponentType } from 'react'
 import { useTheme } from 'styled-components'
-import { MemoActivityResult } from './WorkbenchJobActivityResults'
+import { isNonNullable } from 'utils/isNonNullable'
+import {
+  JobActivityMetrics,
+  MemoActivityResult,
+} from './WorkbenchJobActivityResults'
 
 export function WorkbenchJobActivity({
   activity,
@@ -91,7 +95,17 @@ function WorkbenchJobActivityResult({
     case WorkbenchJobActivityType.Memo:
       return <MemoActivityResult result={result} />
     default:
-      return <SimplifiedMarkdown text={result.output ?? ''} />
+      return (
+        <Flex
+          direction="column"
+          gap="medium"
+        >
+          <SimplifiedMarkdown text={result.output ?? ''} />
+          <JobActivityMetrics
+            metrics={result.metrics?.filter(isNonNullable) ?? []}
+          />
+        </Flex>
+      )
   }
 }
 
