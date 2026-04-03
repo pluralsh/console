@@ -1,5 +1,5 @@
 import { Code, getLastStringChild, Modal } from '@pluralsh/design-system'
-import { CaptionP } from 'components/utils/typography/Text'
+import { CaptionP, InlineA } from 'components/utils/typography/Text'
 import { ChatFragment, ChatType } from 'generated/graphql'
 import { ReactElement, ReactNode, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
@@ -136,7 +136,15 @@ export function SimplifiedMarkdown({ text }: { text: string }) {
           p: ({ children }) => <ParagraphSC>{children}</ParagraphSC>,
           strong: ({ children }) => <strong>{children}</strong>,
           em: ({ children }) => <span>{children}</span>,
-          a: ({ children }) => <span>{children}</span>,
+          a: ({ children, href }) => (
+            <InlineA
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {children}
+            </InlineA>
+          ),
           ul: ({ children }) => <ListSC>{children}</ListSC>,
           ol: ({ children }) => <ListSC as="ol">{children}</ListSC>,
           li: ({ children }) => <li>{children}</li>,
