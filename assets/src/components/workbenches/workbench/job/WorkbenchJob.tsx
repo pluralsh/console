@@ -24,10 +24,7 @@ import {
   MOCK_WORKBENCH_JOB_TRIGGER_ALERT,
   WorkbenchJobTriggerAlert,
 } from './WorkbenchJobTriggerAlert'
-import {
-  MOCK_WORKBENCH_JOB_TRIGGER_ISSUE,
-  WorkbenchJobTriggerIssue,
-} from './WorkbenchJobTriggerIssue'
+import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
 
 export function WorkbenchJob() {
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
@@ -132,12 +129,7 @@ export function WorkbenchJob() {
           <WorkbenchJobTriggerAlert
             alert={job?.alert ?? MOCK_WORKBENCH_JOB_TRIGGER_ALERT}
           />
-          <WorkbenchJobTriggerIssue
-            issue={{
-              ...MOCK_WORKBENCH_JOB_TRIGGER_ISSUE,
-              ...job?.issue,
-            }}
-          />
+          <WorkbenchJobTriggerIssue issue={job?.issue} />
           <WorkbenchJobResult
             loading={isLoading}
             result={job?.result}
