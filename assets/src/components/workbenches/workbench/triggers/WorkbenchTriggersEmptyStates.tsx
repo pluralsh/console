@@ -72,6 +72,7 @@ export function WorkbenchWebhookEmptyState() {
             <Button
               secondary
               small
+              disabled
               onClick={() => {}}
             >
               Create new webhook

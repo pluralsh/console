@@ -148,6 +148,7 @@ export function WorkbenchWebhookTrigger() {
             <Button
               small
               secondary
+              disabled
               onClick={() => {}}
             >
               Create new webhook
