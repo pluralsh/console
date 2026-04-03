@@ -44,7 +44,7 @@ defmodule Console.Schema.WorkbenchJob do
       where: j.status == ^:pending or (
         j.status == ^:running
           and is_nil(j.completed_at)
-          and (is_nil(j.updated_at) or j.updated_at < ago(15, "minute"))
+          and (is_nil(j.updated_at) or j.updated_at < ago(3, "minute"))
       ),
       order_by: [asc: :inserted_at]
     )

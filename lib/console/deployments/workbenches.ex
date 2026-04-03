@@ -221,6 +221,32 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Kicks a job by updating the updated_at timestamp to 20 minutes ago.
+  """
+  @spec kick_job(WorkbenchJob.t() | binary, User.t()) :: job_resp
+  def kick_job(%WorkbenchJob{user_id: id} = job, %User{id: id}) do
+    job
+    |> Ecto.Changeset.change(%{updated_at: Timex.now() |> Timex.shift(minutes: -20)})
+    |> Repo.update()
+    |> notify(:update)
+  end
+  def kick_job(id, user) when is_binary(id) do
+    get_workbench_job!(id)
+    |> kick_job(user)
+  end
+  def kick_job(_, _), do: {:error, "you can only kick your own jobs"}
+
+  @doc """
+  Heartbeats a job by updating the updated_at timestamp to the current time.
+  """
+  @spec heartbeat(WorkbenchJob.t()) :: job_resp
+  def heartbeat(%WorkbenchJob{} = job) do
+    job
+    |> Ecto.Changeset.change(%{updated_at: Timex.now()})
+    |> Repo.update(allow_stale: true)
+  end
+
+  @doc """
   Creates a new message for a job. Requires read access to the job.
   """
   @spec create_message(map, binary, User.t()) :: activity_resp

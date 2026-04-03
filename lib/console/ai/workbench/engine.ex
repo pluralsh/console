@@ -22,7 +22,8 @@ defmodule Console.AI.Workbench.Engine do
   alias Console.AI.Workbench.{
     Environment,
     Message,
-    Supervisor
+    Supervisor,
+    Heartbeat
   }
   alias Console.AI.Tools.Workbench.{
     Complete,
@@ -42,7 +43,8 @@ defmodule Console.AI.Workbench.Engine do
     %{user: user, workbench: workbench} = job = Repo.preload(job, [:user, workbench: [:repository, :agent_runtime, [tools: :mcp_server]]])
 
     user = Console.Services.Rbac.preload(user)
-    with {:ok, skills} <- SkillsUtil.skills(workbench),
+    with {:ok, _} <- Heartbeat.start_link(job),
+         {:ok, skills} <- SkillsUtil.skills(workbench),
          env = Environment.new(job, workbench.tools, skills),
          {:ok, _} <- Supervisor.start_link(env) do
       Console.AI.Tool.context(user: user, runtime: workbench.agent_runtime)
@@ -70,7 +72,7 @@ defmodule Console.AI.Workbench.Engine do
       system_prompt: &system_prompt(prompt: job.prompt, engine: &1),
       acc: %{},
       tool_fmt: &tool_fmt/1,
-      callback: IO.inspect(&1, label: "memory engine callback")
+      callback: &IO.inspect(&1, label: "memory engine callback")
     )
     |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
     |> case do
