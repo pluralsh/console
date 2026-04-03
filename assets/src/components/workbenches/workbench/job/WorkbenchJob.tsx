@@ -20,10 +20,7 @@ import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { WorkbenchJobResult } from './WorkbenchJobResult'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 import { PluralErrorBoundary } from 'components/cd/PluralErrorBoundary'
-import {
-  MOCK_WORKBENCH_JOB_TRIGGER_ALERT,
-  WorkbenchJobTriggerAlert,
-} from './WorkbenchJobTriggerAlert'
+import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
 import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
 
 export function WorkbenchJob() {
@@ -126,9 +123,7 @@ export function WorkbenchJob() {
           flex={3}
           height="100%"
         >
-          <WorkbenchJobTriggerAlert
-            alert={job?.alert ?? MOCK_WORKBENCH_JOB_TRIGGER_ALERT}
-          />
+          <WorkbenchJobTriggerAlert alert={job?.alert} />
           <WorkbenchJobTriggerIssue issue={job?.issue} />
           <WorkbenchJobResult
             loading={isLoading}

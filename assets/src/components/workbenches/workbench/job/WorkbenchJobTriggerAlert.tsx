@@ -1,97 +1,116 @@
 import {
+  AccordionItem,
   ArrowTopRightIcon,
   Chip,
-  ChipSeverity,
   Flex,
   MegaphoneIcon,
+  Prop,
 } from '@pluralsh/design-system'
-import { WorkbenchTriggerCardIcon } from 'components/workbenches/common/WorkbenchTriggerCardIcon'
+import {
+  TriggerAccordionSC,
+  TriggerCardSC,
+  TriggerCardIconWrapperSC,
+  TriggerPropsRowSC,
+} from 'components/workbenches/common/WorkbenchTriggerCard'
+import { alertSeverityToChipSeverity } from 'components/utils/alerts/AlertsTable'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
-import { Body2BoldP, InlineA } from 'components/utils/typography/Text'
-import { AlertSeverity, AlertState } from 'generated/graphql'
+import { Body2BoldP, CaptionP, InlineA } from 'components/utils/typography/Text'
+import { WorkbenchJobFragment } from 'generated/graphql'
 import { startCase } from 'lodash'
 import styled from 'styled-components'
-
-export type WorkbenchJobTriggerAlertData = {
-  title?: Nullable<string>
-  severity: AlertSeverity
-  state: AlertState
-  url?: Nullable<string>
-}
-
-export const MOCK_WORKBENCH_JOB_TRIGGER_ALERT: WorkbenchJobTriggerAlertData = {
-  title: 'Pod restart rate elevated in workbench-agent',
-  severity: AlertSeverity.High,
-  state: AlertState.Firing,
-  url: 'https://example.com/alerts/workbench-agent',
-}
-
-const severityToChipSeverity: Record<AlertSeverity, ChipSeverity> = {
-  [AlertSeverity.Critical]: 'critical',
-  [AlertSeverity.High]: 'danger',
-  [AlertSeverity.Medium]: 'warning',
-  [AlertSeverity.Low]: 'success',
-  [AlertSeverity.Undefined]: 'neutral',
-}
+import { formatDateTime } from 'utils/datetime'
 
 export function WorkbenchJobTriggerAlert({
   alert,
 }: {
-  alert: WorkbenchJobTriggerAlertData
+  alert?: Nullable<WorkbenchJobFragment['alert']>
 }) {
+  if (!alert) return null
+
   return (
-    <CardSC>
-      <Flex
-        align="center"
-        gap="medium"
+    <TriggerCardSC>
+      <TriggerAccordionSC
+        type="multiple"
+        defaultValue={['alert-details']}
       >
-        <WorkbenchTriggerCardIcon>
-          <MegaphoneIcon />
-        </WorkbenchTriggerCardIcon>
-        <Body2BoldP $color="text-light">Alert</Body2BoldP>
-      </Flex>
-      <Flex
-        direction="column"
-        gap="xsmall"
-      >
-        <Flex
-          gap="small"
-          align="center"
-          wrap="wrap"
-        >
-          <Chip
-            size="small"
-            severity={severityToChipSeverity[alert.severity]}
-          >
-            {startCase(alert.severity.toLowerCase())}
-          </Chip>
-          <AlertStateChip state={alert.state} />
-        </Flex>
-        {alert.url ? (
-          <InlineA href={alert.url}>
+        <AccordionItem
+          value="alert-details"
+          padding="none"
+          caret="right-quarter"
+          trigger={
             <Flex
-              gap="xsmall"
               align="center"
+              gap="medium"
             >
-              {alert.title}
-              <ArrowTopRightIcon size={12} />
+              <TriggerCardIconWrapperSC>
+                <MegaphoneIcon />
+              </TriggerCardIconWrapperSC>
+              <Body2BoldP $color="text-light">Alert</Body2BoldP>
             </Flex>
-          </InlineA>
-        ) : (
-          <span>{alert.title}</span>
-        )}
-      </Flex>
-    </CardSC>
+          }
+        >
+          <TriggerContentSC
+            direction="column"
+            gap="medium"
+          >
+            <Flex
+              justify="space-between"
+              align="center"
+              gap="small"
+            >
+              {alert.url ? (
+                <Flex
+                  direction="column"
+                  gap="xxsmall"
+                >
+                  <InlineA href={alert.url}>{alert.url}</InlineA>
+                  <CaptionP $color="text-xlight">{alert.title}</CaptionP>
+                </Flex>
+              ) : (
+                <CaptionP $color="text-xlight">{alert.title}</CaptionP>
+              )}
+              {alert.url ? <ArrowTopRightIcon size={12} /> : null}
+            </Flex>
+            <TriggerPropsRowSC>
+              {alert.updatedAt && (
+                <Prop
+                  title="Date"
+                  margin={0}
+                >
+                  {formatDateTime(alert.updatedAt, 'M/D/YYYY h:mma')}
+                </Prop>
+              )}
+              <Prop
+                title="Severity"
+                margin={0}
+              >
+                <Chip
+                  size="small"
+                  severity={alertSeverityToChipSeverity[alert.severity]}
+                >
+                  {startCase(alert.severity.toLowerCase())}
+                </Chip>
+              </Prop>
+              <Prop
+                title="Status"
+                margin={0}
+              >
+                <AlertStateChip state={alert.state} />
+              </Prop>
+              <Prop
+                title="Provider"
+                margin={0}
+              >
+                {startCase(alert.type.toLowerCase())}
+              </Prop>
+            </TriggerPropsRowSC>
+          </TriggerContentSC>
+        </AccordionItem>
+      </TriggerAccordionSC>
+    </TriggerCardSC>
   )
 }
 
-const CardSC = styled.div(({ theme }) => ({
-  width: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.medium,
-  padding: theme.spacing.large,
-  borderRadius: theme.borderRadiuses.large,
-  border: theme.borders.input,
-  backgroundColor: theme.colors['fill-zero'],
+const TriggerContentSC = styled(Flex)(({ theme }) => ({
+  marginTop: theme.spacing.small,
 }))

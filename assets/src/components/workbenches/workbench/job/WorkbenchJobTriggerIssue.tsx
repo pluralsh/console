@@ -1,5 +1,4 @@
 import {
-  Accordion,
   AccordionItem,
   ArrowTopRightIcon,
   DocumentIcon,
@@ -8,7 +7,12 @@ import {
   GitLabLogoIcon,
   Prop,
 } from '@pluralsh/design-system'
-import { WorkbenchTriggerCardIcon } from 'components/workbenches/common/WorkbenchTriggerCardIcon'
+import {
+  TriggerAccordionSC,
+  TriggerCardSC,
+  TriggerCardIconWrapperSC,
+  TriggerPropsRowSC,
+} from 'components/workbenches/common/WorkbenchTriggerCard'
 import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import { Body2BoldP, CaptionP, InlineA } from 'components/utils/typography/Text'
 import { IssueWebhookProvider, WorkbenchJobFragment } from 'generated/graphql'
@@ -37,8 +41,8 @@ export function WorkbenchJobTriggerIssue({
   const ProviderIcon = providerToIcon[issue.provider]
 
   return (
-    <CardSC>
-      <IssueAccordionSC
+    <TriggerCardSC>
+      <TriggerAccordionSC
         type="multiple"
         defaultValue={['issue-details']}
       >
@@ -51,20 +55,20 @@ export function WorkbenchJobTriggerIssue({
               align="center"
               gap="medium"
             >
-              <WorkbenchTriggerCardIcon>
+              <TriggerCardIconWrapperSC>
                 <DocumentIcon />
-              </WorkbenchTriggerCardIcon>
+              </TriggerCardIconWrapperSC>
               <Body2BoldP $color="text-light">Issue</Body2BoldP>
             </Flex>
           }
         >
-          <ContentSC
+          <TriggerContentSC
             direction="column"
             gap="medium"
           >
             <Flex
               justify="space-between"
-              align="flex-start"
+              align="center"
               gap="small"
             >
               <Flex
@@ -76,7 +80,7 @@ export function WorkbenchJobTriggerIssue({
               </Flex>
               <ArrowTopRightIcon size={12} />
             </Flex>
-            <PropsRowSC>
+            <TriggerPropsRowSC>
               {issue.insertedAt && (
                 <Prop
                   title="Date"
@@ -108,37 +112,14 @@ export function WorkbenchJobTriggerIssue({
                   {startCase(issue.provider.toLowerCase())}
                 </Flex>
               </Prop>
-            </PropsRowSC>
-          </ContentSC>
+            </TriggerPropsRowSC>
+          </TriggerContentSC>
         </AccordionItem>
-      </IssueAccordionSC>
-    </CardSC>
+      </TriggerAccordionSC>
+    </TriggerCardSC>
   )
 }
 
-const CardSC = styled.div(({ theme }) => ({
-  width: '100%',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.small,
-  padding: `${theme.spacing.small}px ${theme.spacing.large}px`,
-  borderRadius: theme.borderRadiuses.large,
-  border: theme.borders.input,
-  backgroundColor: theme.colors['fill-zero'],
-}))
-
-const PropsRowSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexWrap: 'wrap',
-  gap: theme.spacing.medium,
-}))
-
-const ContentSC = styled(Flex)(({ theme }) => ({
+const TriggerContentSC = styled(Flex)(({ theme }) => ({
   marginTop: theme.spacing.small,
 }))
-
-const IssueAccordionSC = styled(Accordion)({
-  background: 'none',
-  border: 'none',
-  marginTop: 0,
-})

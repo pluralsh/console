@@ -29,6 +29,15 @@ import { AlertResolutionModal } from './AlertResolutionModal'
 
 const columnHelper = createColumnHelper<AlertFragment>()
 
+export const alertSeverityToChipSeverity: Record<AlertSeverity, ChipSeverity> =
+  {
+    [AlertSeverity.Critical]: 'critical',
+    [AlertSeverity.High]: 'danger',
+    [AlertSeverity.Medium]: 'warning',
+    [AlertSeverity.Low]: 'success',
+    [AlertSeverity.Undefined]: 'neutral',
+  }
+
 export function AlertsTable({
   alerts,
   loading,
@@ -72,14 +81,6 @@ export function AlertsTable({
   )
 }
 
-const severityToChipSeverity: Record<AlertSeverity, ChipSeverity> = {
-  [AlertSeverity.Critical]: 'critical',
-  [AlertSeverity.High]: 'danger',
-  [AlertSeverity.Medium]: 'warning',
-  [AlertSeverity.Low]: 'success',
-  [AlertSeverity.Undefined]: 'neutral',
-}
-
 const cols = [
   ColExpander,
   columnHelper.accessor((alert) => alert.title, {
@@ -110,7 +111,7 @@ const cols = [
       return (
         <Chip
           size="small"
-          severity={severityToChipSeverity[getValue()]}
+          severity={alertSeverityToChipSeverity[getValue()]}
         >
           {upperFirst(getValue().toLowerCase())}
         </Chip>
