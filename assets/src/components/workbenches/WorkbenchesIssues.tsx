@@ -5,6 +5,7 @@ import {
   CircleDashIcon,
   Flex,
   Table,
+  TicketIcon,
   Tooltip,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -173,7 +174,10 @@ export function WorkbenchesIssues() {
 
   return (
     <WorkbenchTabWrapper>
-      <WorkbenchTabHeader title="Issues" />
+      <WorkbenchTabHeader
+        title="Issues"
+        icon={<TicketIcon />}
+      />
       <Table
         fullHeightWrap
         virtualizeRows
