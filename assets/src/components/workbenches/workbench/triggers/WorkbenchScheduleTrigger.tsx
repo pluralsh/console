@@ -236,9 +236,7 @@ function cronToExplanation({
   const nextRunText = nextRunAt
     ? formatDateTime(nextRunAt, 'MMM D, YYYY [at] h:mm A')
     : null
-  const fallback = nextRunText
-    ? `Next at ${nextRunText}`
-    : 'Next run not scheduled yet'
+  const fallback = `Next ${nextRunText ? `at ${nextRunText}` : 'run not scheduled yet'}`
 
   if (!crontab) return fallback
 
