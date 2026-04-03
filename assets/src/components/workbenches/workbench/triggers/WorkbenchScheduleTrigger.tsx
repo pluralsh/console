@@ -7,6 +7,7 @@ import {
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
+import cronstrue from 'cronstrue'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { Body2P } from 'components/utils/typography/Text'
@@ -241,16 +242,13 @@ function cronToExplanation({
 
   if (!crontab) return fallback
 
-  const parts = crontab.trim().split(/\s+/)
-  if (parts.length < 5) return fallback
+  try {
+    const description = cronstrue.toString(crontab.trim(), {
+      throwExceptionOnParseError: true,
+    })
 
-  const [minute, hour, dayOfMonth] = parts.map(Number)
-  if ([minute, hour, dayOfMonth].some((n) => !Number.isInteger(n))) {
+    return nextRunText ? `${description}, next at ${nextRunText}` : description
+  } catch {
     return fallback
   }
-
-  const atTime = `${hour % 12 || 12}:${String(minute).padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`
-  const base = `At ${atTime} on, day ${dayOfMonth} of the month`
-
-  return nextRunText ? `${base}, next at ${nextRunText}` : base
 }
