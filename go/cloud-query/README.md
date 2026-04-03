@@ -79,6 +79,24 @@ Cloud-Query also exposes ToolQuery gRPC endpoints for observability tools (metri
 | Tempo | No | No | Yes | REST client to `/api/search` and `/api/traces/{traceID}` (bearer token; optional `X-Scope-OrgID`) |
 | Dynatrace | Yes | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`, bearer token required) |
 
+### Tool Provider Credentials and Permissions
+
+- `Dynatrace`:
+  - Use a Dynatrace Platform token (`platformToken`).
+  - Required scopes:
+    - `storage:logs:read`
+    - `storage:metrics:read`
+    - `storage:spans:read`
+    - `storage:entities:read`
+    - `storage:buckets:read`
+- `Datadog`:
+  - Requires `apiKey` and `appKey` for ToolQuery operations.
+- `Elasticsearch`:
+  - Requires an API key with read access to queried indices.
+- `Prometheus` / `Loki` / `Tempo`:
+  - Use bearer token and/or basic auth credentials when required by your backend.
+  - If multi-tenant, also configure `tenant_id` (`X-Scope-OrgID`).
+
 For provider-specific request payloads, query formats, and examples, see the [API Reference Documentation](docs/api-reference.md).
 
 ## Documentation
