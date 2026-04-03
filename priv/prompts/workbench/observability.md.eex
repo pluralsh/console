@@ -16,6 +16,14 @@ in the skills.
 To determine the authoritative current time, use the `current_time` tool.  Don't guess timestamps when making observability queries, either base it off hard
 data or use queries relative to the current time.
 
+**IDEAL OUTPUT**
+You should always return a markdown formatted conclusion based on the investigation.  That said, it's also extremely important to include either:
+
+* the time series data that proves that conclusion
+* the log data that informs that conclusion
+
+If either were present in the investigation, *always* include them in your result. If neither are relevant, you can omit them.
+
 The overarching task is as follows:
 
 <%= @prompt %>
