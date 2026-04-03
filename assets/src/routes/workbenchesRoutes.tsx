@@ -2,6 +2,7 @@ import { Workbenches } from 'components/workbenches/Workbenches'
 import { WorkbenchesList } from 'components/workbenches/WorkbenchesList'
 import { WorkbenchToolCreateOrEdit } from 'components/workbenches/tools/WorkbenchToolCreateOrEdit'
 import { WorkbenchTools } from 'components/workbenches/tools/WorkbenchTools'
+import { WorkbenchesAlerts } from 'components/workbenches/alerts/WorkbenchesAlerts'
 import { Workbench } from 'components/workbenches/workbench/Workbench'
 import { WorkbenchCreateOrEdit } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
 import { WorkbenchScheduleTrigger } from 'components/workbenches/workbench/triggers/WorkbenchScheduleTrigger'
@@ -11,6 +12,7 @@ import {
   WORKBENCH_JOB_ABS_PATH,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
+  WORKBENCHES_ALERTS_REL_PATH,
   WORKBENCHES_CREATE_REL_PATH,
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_TOOLS_ABS_PATH,
@@ -35,6 +37,10 @@ export const workbenchesRoutes = [
     <Route
       path={WORKBENCHES_TOOLS_REL_PATH}
       element={<WorkbenchTools />}
+    />
+    <Route
+      path={WORKBENCHES_ALERTS_REL_PATH}
+      element={<WorkbenchesAlerts />}
     />
   </Route>,
   <Route

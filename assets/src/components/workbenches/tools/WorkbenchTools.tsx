@@ -12,6 +12,8 @@ import {
   CardGrid,
   CardGridSkeleton,
 } from 'components/self-service/catalog/CatalogsGrid'
+import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
+import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -42,16 +44,10 @@ export function WorkbenchTools() {
   const tools = mapExistingNodes(data?.workbenchTools)
 
   return (
-    <WrapperSC>
-      <StackedText
-        first="Tools"
-        firstPartialType="subtitle1"
-        firstColor="text"
-        second="Integrate external observability provider tools with your workbenches."
-        secondPartialType="body1"
-        secondColor="text-xlight"
-        gap="xsmall"
-        css={{ maxWidth: 840 }}
+    <WorkbenchTabWrapper>
+      <WorkbenchTabHeader
+        title="Tools"
+        description="Setup and integrate your observability, infra, code, and custom tools using MCP, APIs, and webhooks natively with Plural."
       />
       <Subtitle1H1>Connection types</Subtitle1H1>
       <ArrowScroll
@@ -174,7 +170,7 @@ export function WorkbenchTools() {
           </CardGrid>
         )
       )}
-    </WrapperSC>
+    </WorkbenchTabWrapper>
   )
 }
 
@@ -185,11 +181,4 @@ const ToolCardSC = styled(Card)(({ theme }) => ({
   padding: theme.spacing.large,
   minHeight: 120,
   textDecoration: 'none',
-}))
-
-const WrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.large,
-  minHeight: 700,
 }))

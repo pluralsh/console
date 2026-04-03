@@ -5,12 +5,13 @@ import {
   Flex,
   IconFrame,
   PlusIcon,
-  WorkbenchIcon,
 } from '@pluralsh/design-system'
+import * as DesignSystem from '@pluralsh/design-system'
 import {
   CardGrid,
   CardGridSkeleton,
 } from 'components/self-service/catalog/CatalogsGrid'
+import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { GqlError } from 'components/utils/Alert'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
@@ -18,10 +19,14 @@ import { Body2P, CaptionP } from 'components/utils/typography/Text'
 import { WorkbenchTinyFragment, useWorkbenchesQuery } from 'generated/graphql'
 import { Link } from 'react-router-dom'
 import { WORKBENCHES_CREATE_REL_PATH } from 'routes/workbenchesRoutesConsts'
+import { ComponentType } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchToolIcon } from './tools/workbenchToolsUtils'
+
+const WorkbenchIcon = (DesignSystem as { WorkbenchIcon?: ComponentType })
+  .WorkbenchIcon
 
 export function WorkbenchesList() {
   const { data, error, loading, pageInfo, fetchNextPage } =
@@ -33,27 +38,10 @@ export function WorkbenchesList() {
 
   return (
     <WrapperSC>
-      <StackedText
-        first={
-          <Flex
-            align="center"
-            height={40}
-            gap="xsmall"
-          >
-            <IconFrame
-              size="small"
-              icon={<WorkbenchIcon />}
-            />
-            <span>Workbenches</span>
-          </Flex>
-        }
-        firstPartialType="body2Bold"
-        firstColor="text"
-        second="Configurable, reusable agent definitions for common DevOps tasks. Each workbench bundles prompts, tools, and skills that can spawn multiple agents on demand."
-        secondPartialType="body2"
-        secondColor="text-light"
-        gap="xsmall"
-        css={{ maxWidth: 840 }}
+      <WorkbenchTabHeader
+        title="Workbenches"
+        icon={WorkbenchIcon ? <WorkbenchIcon /> : undefined}
+        description="Configurable, reusable agent definitions for common DevOps tasks. Each workbench bundles prompts, tools, and skills that can spawn multiple agents on demand."
       />
       {error && <GqlError error={error} />}
       {!data && loading ? (
