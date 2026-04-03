@@ -1,14 +1,13 @@
 import {
   ArrowTopRightIcon,
-  CancelledFilledIcon,
   Chip,
-  CircleDashIcon,
   Flex,
   Table,
   TicketIcon,
   Tooltip,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
+import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import { WorkbenchTabHeader } from 'components/workbenches/common/WorkbenchTabHeader'
 import { WorkbenchTabWrapper } from 'components/workbenches/common/WorkbenchTabWrapper'
 import { GqlError } from 'components/utils/Alert'
@@ -16,39 +15,17 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { InlineA } from 'components/utils/typography/Text'
 import {
-  IssueStatus,
   WorkbenchIssueFragment,
   useWorkbenchesIssuesQuery,
 } from 'generated/graphql'
-import { startCase, truncate } from 'lodash'
-import { ReactNode, useMemo } from 'react'
+import { truncate } from 'lodash'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 import { mapExistingNodes } from 'utils/graphql'
 
 const columnHelper = createColumnHelper<WorkbenchIssueFragment>()
-
-const statusToChipIcon: Partial<Record<IssueStatus, ReactNode>> = {
-  [IssueStatus.InProgress]: (
-    <CircleDashIcon
-      size={12}
-      color="icon-light"
-    />
-  ),
-  [IssueStatus.Cancelled]: (
-    <CancelledFilledIcon
-      size={12}
-      color="icon-xlight"
-    />
-  ),
-}
-
-const completedStatuses = new Set([
-  IssueStatus.Completed,
-  IssueStatus.Cancelled,
-])
 
 const columns = [
   columnHelper.accessor((issue) => issue, {
@@ -107,31 +84,7 @@ const columns = [
     header: 'Ticket status',
     meta: { gridTemplate: 'minmax(100px, 1fr)' },
     cell: function Cell({ getValue }) {
-      const status = getValue()
-      const theme = useTheme()
-
-      return (
-        <Chip
-          size="small"
-          severity="neutral"
-        >
-          <Flex
-            gap="xsmall"
-            align="center"
-          >
-            {statusToChipIcon[status]}
-            <span
-              css={
-                completedStatuses.has(status)
-                  ? { color: theme.colors['text-light'] }
-                  : undefined
-              }
-            >
-              {startCase(status.toLowerCase())}
-            </span>
-          </Flex>
-        </Chip>
-      )
+      return <IssueStatusChip status={getValue()} />
     },
   }),
   columnHelper.accessor((issue) => issue, {
