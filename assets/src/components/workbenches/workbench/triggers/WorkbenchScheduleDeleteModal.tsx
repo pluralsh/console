@@ -1,54 +1,56 @@
 import { Confirm } from 'components/utils/Confirm'
-import { useState } from 'react'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
+import { StrongSC } from 'components/utils/typography/Text'
 import {
   useDeleteWorkbenchCronMutation,
   WorkbenchCronFragment,
 } from 'generated/graphql'
+import { SCHEDULE_TRIGGER_REFETCH_QUERIES } from './WorkbenchTriggers'
+import { truncate } from 'lodash'
 
 export function WorkbenchScheduleDeleteModal({
   open,
   cron,
   onClose,
-  onDeleted,
 }: {
   open: boolean
   cron: Nullable<WorkbenchCronFragment>
   onClose: () => void
-  onDeleted?: () => void | Promise<void>
 }) {
-  const [finalizing, setFinalizing] = useState(false)
-  const [mutation, { loading, error }] = useDeleteWorkbenchCronMutation()
-
-  const handleClose = () => {
-    setFinalizing(false)
-    onClose()
-  }
-
-  const handleDelete = async () => {
-    if (!cron || finalizing) return
-
-    setFinalizing(true)
-
-    try {
-      await mutation({ variables: { id: cron.id } })
-      await onDeleted?.()
-      handleClose()
-    } catch {
-      setFinalizing(false)
-    }
-  }
+  const { popToast } = useSimpleToast()
+  const [mutation, { loading, error }] = useDeleteWorkbenchCronMutation({
+    variables: { id: cron?.id ?? '' },
+    onCompleted: () => {
+      popToast({
+        name: cron?.prompt ?? '',
+        action: 'deleted',
+        color: 'icon-danger',
+      })
+      onClose()
+    },
+    refetchQueries: SCHEDULE_TRIGGER_REFETCH_QUERIES,
+    awaitRefetchQueries: true,
+  })
 
   return (
     <Confirm
       open={open}
-      close={handleClose}
+      close={onClose}
       destructive
       label="Delete schedule"
-      loading={loading || finalizing}
+      loading={loading}
       error={error}
-      submit={() => handleDelete()}
+      submit={() => mutation()}
       title="Delete schedule"
-      text={<span>Are you sure you want to delete this schedule?</span>}
+      text={
+        <span>
+          Are you sure you want to delete schedule{' '}
+          <StrongSC $color="text-danger">
+            {truncate(cron?.prompt ?? '', { length: 30 })}
+          </StrongSC>
+          ?
+        </span>
+      }
     />
   )
 }

@@ -10,20 +10,15 @@ import { createColumnHelper } from '@tanstack/react-table'
 import cronstrue from 'cronstrue'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
-import { Body2P } from 'components/utils/typography/Text'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { Body2P } from 'components/utils/typography/Text'
 import {
   useWorkbenchCronsQuery,
   WorkbenchCronFragment,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
-import {
-  useOutletContext,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   WORKBENCH_PARAM_ID,
   WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM,
@@ -31,97 +26,58 @@ import {
 import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
-import { WorkbenchScheduleDeleteModal } from './WorkbenchScheduleDeleteModal'
-import {
-  WorkbenchScheduleEmptyState,
-  WorkbenchWebhookEmptyState,
-} from './WorkbenchTriggersEmptyStates'
-import { WorkbenchScheduleTriggerForm } from './WorkbenchScheduleTriggerForm'
-import { WorkbenchTriggersOutletContext } from './WorkbenchTriggers'
 import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
+import { WorkbenchScheduleDeleteModal } from './WorkbenchScheduleDeleteModal'
+import { WorkbenchScheduleTriggerForm } from './WorkbenchScheduleTriggerForm'
 
 export function WorkbenchScheduleTrigger() {
   const theme = useTheme()
-  const navigate = useNavigate()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
-  const [searchParams] = useSearchParams()
-  const { hasSchedules, hasWebhooks, refetchSummary } =
-    useOutletContext<WorkbenchTriggersOutletContext>()
-  const [creatingCron, setCreatingCron] = useState(false)
-  const [editingCron, setEditingCron] =
-    useState<Nullable<WorkbenchCronFragment>>(null)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [selectedCron, setSelectedCron] =
+  const [searchParams, setSearchParams] = useSearchParams()
+  const isCreating =
+    searchParams.get(WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM) === 'true'
+  const [editingCronId, setEditingCronId] = useState<Nullable<string>>(null)
+  const [deletingCron, setDeletingCron] =
     useState<Nullable<WorkbenchCronFragment>>(null)
 
-  const {
-    data,
-    loading,
-    error,
-    refetch,
-    pageInfo,
-    fetchNextPage,
-    setVirtualSlice,
-  } = useFetchPaginatedData(
-    { queryHook: useWorkbenchCronsQuery, keyPath: ['workbench', 'crons'] },
-    { id: workbenchId }
-  )
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      { queryHook: useWorkbenchCronsQuery, keyPath: ['workbench', 'crons'] },
+      { id: workbenchId }
+    )
 
   const crons = useMemo(() => mapExistingNodes(data?.workbench?.crons), [data])
-  const createFromQuery =
-    searchParams.get(WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM) === 'true'
+
+  const editingCron = useMemo(
+    () => crons.find((cron) => cron.id === editingCronId),
+    [crons, editingCronId]
+  )
 
   const columns = useMemo(
     () =>
       getColumns({
-        onEdit: (cron) => {
-          setEditingCron(cron)
-          setCreatingCron(false)
-        },
-        onDelete: (cron) => {
-          setSelectedCron(cron)
-          setIsDeleteModalOpen(true)
-        },
+        onEdit: (cron) => setEditingCronId(cron.id),
+        onDelete: (cron) => setDeletingCron(cron),
       }),
     []
   )
+  const clearForm = () => {
+    setEditingCronId(null)
+    setSearchParams({}, { replace: true })
+  }
 
   if (error) return <GqlError error={error} />
-  if (creatingCron || createFromQuery || editingCron)
+  if (isCreating || editingCron)
     return (
       <FormCardSC>
         <WorkbenchScheduleTriggerForm
+          key={JSON.stringify(editingCron) ?? 'new'}
           workbenchId={workbenchId}
           cron={editingCron}
-          onCancel={() => {
-            setCreatingCron(false)
-            setEditingCron(null)
-            if (createFromQuery) {
-              navigate('.', { replace: true })
-            }
-          }}
-          onCompleted={async () => {
-            await Promise.all([refetchSummary(), refetch()])
-            setCreatingCron(false)
-            setEditingCron(null)
-            if (createFromQuery) {
-              navigate('.', { replace: true })
-            }
-          }}
+          onCancel={clearForm}
+          onCompleted={editingCron ? undefined : clearForm}
         />
       </FormCardSC>
-    )
-
-  if (!hasSchedules)
-    return (
-      <Flex
-        direction="column"
-        gap="medium"
-        flex={1}
-      >
-        <WorkbenchScheduleEmptyState />
-        {!hasWebhooks && <WorkbenchWebhookEmptyState />}
-      </Flex>
     )
 
   return (
@@ -143,15 +99,17 @@ export function WorkbenchScheduleTrigger() {
           <Button
             small
             onClick={() => {
-              setEditingCron(null)
-              setCreatingCron(true)
+              setEditingCronId(null)
+              setSearchParams(
+                { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' },
+                { replace: true }
+              )
             }}
           >
             Add cron schedule
           </Button>
         </StretchedFlex>
         <Table
-          css={{ width: '100%' }}
           hideHeader
           fullHeightWrap
           virtualizeRows
@@ -165,15 +123,9 @@ export function WorkbenchScheduleTrigger() {
         />
       </FormCardSC>
       <WorkbenchScheduleDeleteModal
-        open={isDeleteModalOpen}
-        cron={selectedCron}
-        onDeleted={async () => {
-          await Promise.all([refetchSummary(), refetch()])
-        }}
-        onClose={() => {
-          setIsDeleteModalOpen(false)
-          setSelectedCron(null)
-        }}
+        open={!!deletingCron}
+        cron={deletingCron}
+        onClose={() => setDeletingCron(null)}
       />
     </StretchedFlex>
   )

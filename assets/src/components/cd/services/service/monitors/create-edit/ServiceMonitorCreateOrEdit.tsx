@@ -148,7 +148,6 @@ function ServiceMonitorCreateOrEditInner({
         {STEPS.map(({ key, label }, i) => (
           <SidebarBtnSC
             key={key}
-            tertiary
             onClick={() => setCurStep(key)}
             $active={key === curStep}
             innerFlexProps={{ flex: 1 }}

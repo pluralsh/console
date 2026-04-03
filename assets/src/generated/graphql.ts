@@ -19211,7 +19211,7 @@ export type DeleteWorkbenchWebhookMutationVariables = Exact<{
 }>;
 
 
-export type DeleteWorkbenchWebhookMutation = { __typename?: 'RootMutationType', deleteWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string } | null };
+export type DeleteWorkbenchWebhookMutation = { __typename?: 'RootMutationType', deleteWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null } | null };
 
 export const PullRequestBasicFragmentDoc = gql`
     fragment PullRequestBasic on PullRequest {
@@ -40888,6 +40888,7 @@ export const DeleteWorkbenchWebhookDocument = gql`
     mutation DeleteWorkbenchWebhook($id: ID!) {
   deleteWorkbenchWebhook(id: $id) {
     id
+    name
   }
 }
     `;

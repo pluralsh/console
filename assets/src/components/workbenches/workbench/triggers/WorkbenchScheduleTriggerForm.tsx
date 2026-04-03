@@ -3,13 +3,12 @@ import {
   Card,
   Flex,
   FormField,
-  InfoOutlineIcon,
   Input,
   Input2,
   ReturnIcon,
-  Tooltip,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { Body2P, CaptionP, InlineA } from 'components/utils/typography/Text'
 import CronExpressionParser from 'cron-parser'
 import cronstrue from 'cronstrue'
@@ -18,10 +17,12 @@ import {
   useUpdateWorkbenchCronMutation,
   WorkbenchCronFragment,
 } from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
+import { isEqual, truncate } from 'lodash'
+import { useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { dayjsExtended as dayjs } from 'utils/datetime'
 import { StickyActionsFooterSC } from '../create-edit/WorkbenchCreateOrEdit'
+import { SCHEDULE_TRIGGER_REFETCH_QUERIES } from './WorkbenchTriggers'
 
 const CRON_SHORTCUTS_URL =
   'https://github.com/harrisiirak/cron-parser?tab=readme-ov-file#predefined-expressions'
@@ -41,7 +42,7 @@ export function WorkbenchScheduleTriggerForm({
   workbenchId: string
   cron?: Nullable<WorkbenchCronFragment>
   onCancel: () => void
-  onCompleted: () => void | Promise<void>
+  onCompleted?: Nullable<() => void>
 }) {
   const theme = useTheme()
   const editing = !!cron
@@ -49,10 +50,7 @@ export function WorkbenchScheduleTriggerForm({
   const [formState, setFormState] = useState<ScheduleTriggerFormState>(() =>
     getInitialFormState(cron)
   )
-
-  useEffect(() => {
-    setFormState(getInitialFormState(cron))
-  }, [cron])
+  const { popToast } = useSimpleToast()
 
   const preview = useMemo(
     () => buildCronPreview(formState.crontab),
@@ -63,30 +61,39 @@ export function WorkbenchScheduleTriggerForm({
   const crontab = formState.crontab.trim()
   const isCronValid = !!crontab && validateCronExpression(crontab)
   const hasCronError = !!crontab && !isCronValid
-  const [finalizing, setFinalizing] = useState(false)
-  const [createWorkbenchCron, createState] = useCreateWorkbenchCronMutation()
-  const [updateWorkbenchCron, updateState] = useUpdateWorkbenchCronMutation()
-  const isSaving = createState.loading || updateState.loading || finalizing
+
+  const canSave =
+    !!prompt && isCronValid && !isEqual(formState, getInitialFormState(cron))
+  const attributes = { crontab, prompt }
+
+  const handleCompleted = () => {
+    onCompleted?.()
+    popToast({
+      name: truncate(prompt, { length: 30 }),
+      action: editing ? 'updated' : 'created',
+      color: 'icon-success',
+    })
+  }
+  const [createWorkbenchCron, createState] = useCreateWorkbenchCronMutation({
+    variables: { workbenchId, attributes },
+    onCompleted: handleCompleted,
+    refetchQueries: SCHEDULE_TRIGGER_REFETCH_QUERIES,
+    awaitRefetchQueries: true,
+  })
+  const [updateWorkbenchCron, updateState] = useUpdateWorkbenchCronMutation({
+    variables: { id: cron?.id ?? '', attributes },
+    onCompleted: handleCompleted,
+    refetchQueries: SCHEDULE_TRIGGER_REFETCH_QUERIES,
+    awaitRefetchQueries: true,
+  })
+
+  const isSaving = createState.loading || updateState.loading
   const error = createState.error ?? updateState.error
-  const canSave = !!prompt && isCronValid
 
-  const handleSave = async () => {
-    if (!canSave || isSaving) return
-
-    const attributes = { crontab, prompt }
-    setFinalizing(true)
-
-    try {
-      if (editing && cron) {
-        await updateWorkbenchCron({ variables: { id: cron.id, attributes } })
-      } else {
-        await createWorkbenchCron({ variables: { workbenchId, attributes } })
-      }
-
-      await onCompleted()
-    } catch {
-      setFinalizing(false)
-    }
+  const handleSave = () => {
+    if (!canSave) return
+    if (editing && cron) updateWorkbenchCron()
+    else createWorkbenchCron()
   }
 
   return (
@@ -94,22 +101,13 @@ export function WorkbenchScheduleTriggerForm({
       direction="column"
       gap="large"
       height="100%"
-      css={{ width: '100%' }}
+      width="100%"
     >
       {error && <GqlError error={error} />}
       <FormField
-        label={
-          <>
-            Prompt*
-            <Tooltip label="The instruction your Workbench agent will follow each time this job runs.">
-              <InfoOutlineIcon
-                color="icon-light"
-                marginLeft="xxsmall"
-                size={12}
-              />
-            </Tooltip>
-          </>
-        }
+        required
+        infoTooltip="The instruction your Workbench agent will follow each time this job runs."
+        label="Prompt"
       >
         <Input
           multiline
@@ -129,19 +127,10 @@ export function WorkbenchScheduleTriggerForm({
         gap="small"
       >
         <FormField
+          required
           error={hasCronError}
-          label={
-            <>
-              Cron expression*
-              <Tooltip label="Defines the interval at which your agent will execute the prompt.">
-                <InfoOutlineIcon
-                  color="icon-light"
-                  marginLeft="xxsmall"
-                  size={12}
-                />
-              </Tooltip>
-            </>
-          }
+          infoTooltip="Defines the interval at which your agent will execute the prompt."
+          label="Cron expression"
           hint={
             hasCronError ? (
               <CaptionP
@@ -229,27 +218,22 @@ export function WorkbenchScheduleTriggerForm({
           </Card>
         </FormField>
       </Flex>
-      <StickyActionsFooterSC>
-        <Flex
-          gap="small"
-          css={{ marginLeft: 'auto' }}
+      <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
+        <Button
+          secondary
+          startIcon={<ReturnIcon />}
+          onClick={onCancel}
+          disabled={isSaving}
         >
-          <Button
-            secondary
-            startIcon={<ReturnIcon />}
-            onClick={onCancel}
-            disabled={isSaving}
-          >
-            Back to all schedules
-          </Button>
-          <Button
-            onClick={() => handleSave()}
-            loading={isSaving}
-            disabled={!canSave}
-          >
-            Save
-          </Button>
-        </Flex>
+          Back to all schedules
+        </Button>
+        <Button
+          onClick={() => handleSave()}
+          loading={isSaving}
+          disabled={!canSave}
+        >
+          Save
+        </Button>
       </StickyActionsFooterSC>
     </Flex>
   )

@@ -560,5 +560,6 @@ mutation UpdateWorkbenchWebhook(
 mutation DeleteWorkbenchWebhook($id: ID!) {
   deleteWorkbenchWebhook(id: $id) {
     id
+    name
   }
 }

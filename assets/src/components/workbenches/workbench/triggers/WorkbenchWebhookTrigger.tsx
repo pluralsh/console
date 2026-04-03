@@ -10,122 +10,78 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
-import { Body2P } from 'components/utils/typography/Text'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { Body2P } from 'components/utils/typography/Text'
 import {
   useWorkbenchWebhooksQuery,
   WorkbenchWebhookFragment,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
-import {
-  useNavigate,
-  useOutletContext,
-  useParams,
-  useSearchParams,
-} from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   WORKBENCH_PARAM_ID,
   WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
-import {
-  WorkbenchScheduleEmptyState,
-  WorkbenchWebhookEmptyState,
-} from './WorkbenchTriggersEmptyStates'
+import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
 import { WorkbenchWebhookDeleteModal } from './WorkbenchWebhookDeleteModal'
 import { WorkbenchWebhookTriggerForm } from './WorkbenchWebhookTriggerForm'
-import { WorkbenchTriggersOutletContext } from './WorkbenchTriggers'
-import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
 
 export function WorkbenchWebhookTrigger() {
   const theme = useTheme()
-  const navigate = useNavigate()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
-  const [searchParams] = useSearchParams()
-  const { hasSchedules, hasWebhooks, refetchSummary } =
-    useOutletContext<WorkbenchTriggersOutletContext>()
-  const [addingWebhook, setAddingWebhook] = useState(false)
-  const [editingWebhook, setEditingWebhook] =
-    useState<Nullable<WorkbenchWebhookFragment>>(null)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [selectedWebhook, setSelectedWebhook] =
-    useState<Nullable<WorkbenchWebhookFragment>>(null)
-  const createFromQuery =
+  const [searchParams, setSearchParams] = useSearchParams()
+  const isCreating =
     searchParams.get(WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM) === 'true'
+  const [editingWebhookId, setEditingWebhookId] =
+    useState<Nullable<string>>(null)
+  const [deletingWebhook, setDeletingWebhook] =
+    useState<Nullable<WorkbenchWebhookFragment>>(null)
 
-  const {
-    data,
-    loading,
-    error,
-    refetch,
-    pageInfo,
-    fetchNextPage,
-    setVirtualSlice,
-  } = useFetchPaginatedData(
-    {
-      queryHook: useWorkbenchWebhooksQuery,
-      keyPath: ['workbench', 'webhooks'],
-    },
-    { id: workbenchId }
-  )
-
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      {
+        queryHook: useWorkbenchWebhooksQuery,
+        keyPath: ['workbench', 'webhooks'],
+      },
+      { id: workbenchId }
+    )
   const webhooks = useMemo(
     () => mapExistingNodes(data?.workbench?.webhooks),
     [data]
   )
 
+  const editingWebhook = useMemo(
+    () => webhooks.find((webhook) => webhook.id === editingWebhookId),
+    [webhooks, editingWebhookId]
+  )
+
   const columns = useMemo(
     () =>
       getColumns({
-        onEdit: (webhook) => {
-          setEditingWebhook(webhook)
-          setAddingWebhook(false)
-        },
-        onDelete: (webhook) => {
-          setSelectedWebhook(webhook)
-          setIsDeleteModalOpen(true)
-        },
+        onEdit: (webhook) => setEditingWebhookId(webhook.id),
+        onDelete: (webhook) => setDeletingWebhook(webhook),
       }),
     []
   )
+  const clearForm = () => {
+    setEditingWebhookId(null)
+    setSearchParams({}, { replace: true })
+  }
 
   if (error) return <GqlError error={error} />
-  if (addingWebhook || createFromQuery || editingWebhook)
+  if (isCreating || editingWebhook)
     return (
       <FormCardSC>
         <WorkbenchWebhookTriggerForm
+          key={JSON.stringify(editingWebhook) ?? 'new'}
           workbenchId={workbenchId}
           webhook={editingWebhook}
-          onCancel={() => {
-            setAddingWebhook(false)
-            setEditingWebhook(null)
-            if (createFromQuery) {
-              navigate('.', { replace: true })
-            }
-          }}
-          onCompleted={async () => {
-            await Promise.all([refetchSummary(), refetch()])
-            setAddingWebhook(false)
-            setEditingWebhook(null)
-            if (createFromQuery) {
-              navigate('.', { replace: true })
-            }
-          }}
+          onCancel={clearForm}
+          onCompleted={editingWebhook ? undefined : clearForm} // don't nav back on edit
         />
       </FormCardSC>
-    )
-
-  if (!hasWebhooks)
-    return (
-      <Flex
-        direction="column"
-        gap="medium"
-        flex={1}
-      >
-        <WorkbenchWebhookEmptyState />
-        {!hasSchedules && <WorkbenchScheduleEmptyState />}
-      </Flex>
     )
 
   return (
@@ -144,28 +100,20 @@ export function WorkbenchWebhookTrigger() {
           <Body2P $color="text-light">
             Add webhooks to trigger this workbench.
           </Body2P>
-          <Flex gap="small">
-            <Button
-              small
-              secondary
-              disabled
-              onClick={() => {}}
-            >
-              Create new webhook
-            </Button>
-            <Button
-              small
-              onClick={() => {
-                setEditingWebhook(null)
-                setAddingWebhook(true)
-              }}
-            >
-              Add webhook
-            </Button>
-          </Flex>
+          <Button
+            small
+            onClick={() => {
+              setEditingWebhookId(null)
+              setSearchParams(
+                { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' },
+                { replace: true }
+              )
+            }}
+          >
+            Add webhook
+          </Button>
         </StretchedFlex>
         <Table
-          css={{ width: '100%' }}
           hideHeader
           fullHeightWrap
           virtualizeRows
@@ -179,15 +127,9 @@ export function WorkbenchWebhookTrigger() {
         />
       </FormCardSC>
       <WorkbenchWebhookDeleteModal
-        open={isDeleteModalOpen}
-        webhook={selectedWebhook}
-        onDeleted={async () => {
-          await Promise.all([refetchSummary(), refetch()])
-        }}
-        onClose={() => {
-          setIsDeleteModalOpen(false)
-          setSelectedWebhook(null)
-        }}
+        open={!!deletingWebhook}
+        webhook={deletingWebhook}
+        onClose={() => setDeletingWebhook(null)}
       />
     </StretchedFlex>
   )
