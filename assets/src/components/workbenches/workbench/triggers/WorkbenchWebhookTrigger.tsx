@@ -1,0 +1,258 @@
+import {
+  Button,
+  Flex,
+  IconFrame,
+  PencilIcon,
+  Table,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
+import { GqlError } from 'components/utils/Alert'
+import { StretchedFlex } from 'components/utils/StretchedFlex'
+import { StackedText } from 'components/utils/table/StackedText'
+import { Body2P } from 'components/utils/typography/Text'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  useWorkbenchWebhooksQuery,
+  WorkbenchWebhookFragment,
+} from 'generated/graphql'
+import { useMemo, useState } from 'react'
+import {
+  useNavigate,
+  useOutletContext,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
+import {
+  WORKBENCH_PARAM_ID,
+  WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM,
+} from 'routes/workbenchesRoutesConsts'
+import { useTheme } from 'styled-components'
+import { mapExistingNodes } from 'utils/graphql'
+import {
+  WorkbenchScheduleEmptyState,
+  WorkbenchWebhookEmptyState,
+} from './WorkbenchTriggersEmptyStates'
+import { WorkbenchWebhookDeleteModal } from './WorkbenchWebhookDeleteModal'
+import { WorkbenchWebhookTriggerForm } from './WorkbenchWebhookTriggerForm'
+import { WorkbenchTriggersOutletContext } from './WorkbenchTriggers'
+import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
+
+export function WorkbenchWebhookTrigger() {
+  const theme = useTheme()
+  const navigate = useNavigate()
+  const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
+  const [searchParams] = useSearchParams()
+  const { hasSchedules, hasWebhooks, refetchSummary } =
+    useOutletContext<WorkbenchTriggersOutletContext>()
+  const [addingWebhook, setAddingWebhook] = useState(false)
+  const [editingWebhook, setEditingWebhook] =
+    useState<Nullable<WorkbenchWebhookFragment>>(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedWebhook, setSelectedWebhook] =
+    useState<Nullable<WorkbenchWebhookFragment>>(null)
+  const createFromQuery =
+    searchParams.get(WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM) === 'true'
+
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData(
+    {
+      queryHook: useWorkbenchWebhooksQuery,
+      keyPath: ['workbench', 'webhooks'],
+    },
+    { id: workbenchId }
+  )
+
+  const webhooks = useMemo(
+    () => mapExistingNodes(data?.workbench?.webhooks),
+    [data]
+  )
+
+  const columns = useMemo(
+    () =>
+      getColumns({
+        onEdit: (webhook) => {
+          setEditingWebhook(webhook)
+          setAddingWebhook(false)
+        },
+        onDelete: (webhook) => {
+          setSelectedWebhook(webhook)
+          setIsDeleteModalOpen(true)
+        },
+      }),
+    []
+  )
+
+  if (error) return <GqlError error={error} />
+  if (addingWebhook || createFromQuery || editingWebhook)
+    return (
+      <FormCardSC>
+        <WorkbenchWebhookTriggerForm
+          workbenchId={workbenchId}
+          webhook={editingWebhook}
+          onCancel={() => {
+            setAddingWebhook(false)
+            setEditingWebhook(null)
+            if (createFromQuery) {
+              navigate('.', { replace: true })
+            }
+          }}
+          onCompleted={async () => {
+            await Promise.all([refetchSummary(), refetch()])
+            setAddingWebhook(false)
+            setEditingWebhook(null)
+            if (createFromQuery) {
+              navigate('.', { replace: true })
+            }
+          }}
+        />
+      </FormCardSC>
+    )
+
+  if (!hasWebhooks)
+    return (
+      <Flex
+        direction="column"
+        gap="medium"
+        flex={1}
+      >
+        <WorkbenchWebhookEmptyState />
+        {!hasSchedules && <WorkbenchScheduleEmptyState />}
+      </Flex>
+    )
+
+  return (
+    <StretchedFlex
+      direction="column"
+      align="stretch"
+      gap="large"
+    >
+      <FormCardSC>
+        <StretchedFlex
+          css={{
+            paddingLeft: theme.spacing.xxxsmall,
+            paddingRight: theme.spacing.xxxsmall,
+          }}
+        >
+          <Body2P $color="text-light">
+            Add webhooks to trigger this workbench.
+          </Body2P>
+          <Flex gap="small">
+            <Button
+              small
+              secondary
+              disabled
+              onClick={() => {}}
+            >
+              Create new webhook
+            </Button>
+            <Button
+              small
+              onClick={() => {
+                setEditingWebhook(null)
+                setAddingWebhook(true)
+              }}
+            >
+              Add webhook
+            </Button>
+          </Flex>
+        </StretchedFlex>
+        <Table
+          css={{ width: '100%' }}
+          hideHeader
+          fullHeightWrap
+          virtualizeRows
+          data={webhooks}
+          columns={columns}
+          loading={!data && loading}
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
+        />
+      </FormCardSC>
+      <WorkbenchWebhookDeleteModal
+        open={isDeleteModalOpen}
+        webhook={selectedWebhook}
+        onDeleted={async () => {
+          await Promise.all([refetchSummary(), refetch()])
+        }}
+        onClose={() => {
+          setIsDeleteModalOpen(false)
+          setSelectedWebhook(null)
+        }}
+      />
+    </StretchedFlex>
+  )
+}
+
+const columnHelper = createColumnHelper<WorkbenchWebhookFragment>()
+function getColumns({
+  onEdit,
+  onDelete,
+}: {
+  onEdit: (webhook: WorkbenchWebhookFragment) => void
+  onDelete: (webhook: WorkbenchWebhookFragment) => void
+}) {
+  return [
+    columnHelper.accessor((webhook) => webhook, {
+      id: 'details',
+      meta: { truncate: true, gridTemplate: 'minmax(0, 1fr)' },
+      cell: ({ getValue }) => {
+        const webhook = getValue()
+
+        return (
+          <StackedText
+            truncate
+            first={
+              webhook.name ||
+              webhook.webhook?.name ||
+              webhook.issueWebhook?.name ||
+              'Webhook trigger'
+            }
+            second={webhookURL(webhook)}
+          />
+        )
+      },
+    }),
+    columnHelper.display({
+      id: 'actions',
+      meta: { gridTemplate: '100px' },
+      cell: ({ row }) => (
+        <Flex
+          align="center"
+          justify="flex-end"
+          gap="xsmall"
+        >
+          <IconFrame
+            clickable
+            tooltip="Edit webhook"
+            icon={<PencilIcon />}
+            onClick={() => onEdit(row.original)}
+          />
+          <IconFrame
+            clickable
+            tooltip="Delete webhook"
+            icon={<TrashCanIcon color="icon-danger" />}
+            onClick={() => onDelete(row.original)}
+          />
+        </Flex>
+      ),
+    }),
+  ]
+}
+
+function webhookURL(webhook: WorkbenchWebhookFragment) {
+  if (webhook.issueWebhook) return webhook.issueWebhook.url
+
+  if (webhook.webhook) return webhook.webhook.url
+
+  return undefined
+}

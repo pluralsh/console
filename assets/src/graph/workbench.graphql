@@ -197,6 +197,39 @@ fragment WorkbenchJobProgress on WorkbenchJobProgress {
   arguments
 }
 
+fragment WorkbenchCron on WorkbenchCron {
+  id
+  crontab
+  prompt
+  lastRunAt
+  nextRunAt
+  insertedAt
+  updatedAt
+}
+
+fragment WorkbenchWebhook on WorkbenchWebhook {
+  id
+  name
+  matches {
+    regex
+    substring
+    caseInsensitive
+  }
+  insertedAt
+  updatedAt
+  webhook {
+    id
+    name
+    type
+    url
+  }
+  issueWebhook {
+    id
+    name
+    url
+  }
+}
+
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
   insertedAt
@@ -239,6 +272,60 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
       edges {
         node {
           ...WorkbenchJobTiny
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    crons(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchCron
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchWebhooks($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    webhooks(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchWebhook
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchTriggersSummary($id: ID!) {
+  workbench(id: $id) {
+    id
+    name
+    description
+    crons(first: 1) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    webhooks(first: 1) {
+      edges {
+        node {
+          id
         }
       }
     }
@@ -353,5 +440,50 @@ mutation CreateWorkbenchJob(
     status
     prompt
     insertedAt
+  }
+}
+
+mutation CreateWorkbenchCron(
+  $workbenchId: ID!
+  $attributes: WorkbenchCronAttributes!
+) {
+  createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
+    ...WorkbenchCron
+  }
+}
+
+mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {
+  updateWorkbenchCron(id: $id, attributes: $attributes) {
+    ...WorkbenchCron
+  }
+}
+
+mutation DeleteWorkbenchCron($id: ID!) {
+  deleteWorkbenchCron(id: $id) {
+    id
+  }
+}
+
+mutation CreateWorkbenchWebhook(
+  $workbenchId: ID!
+  $attributes: WorkbenchWebhookAttributes!
+) {
+  createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
+    ...WorkbenchWebhook
+  }
+}
+
+mutation UpdateWorkbenchWebhook(
+  $id: ID!
+  $attributes: WorkbenchWebhookAttributes!
+) {
+  updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+    ...WorkbenchWebhook
+  }
+}
+
+mutation DeleteWorkbenchWebhook($id: ID!) {
+  deleteWorkbenchWebhook(id: $id) {
+    id
   }
 }
