@@ -256,6 +256,19 @@ query Workbenches($first: Int = 100, $after: String, $q: String) {
   }
 }
 
+query WorkbenchesAlerts($first: Int = 100, $after: String) {
+  workbenchAlerts(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Alert
+      }
+    }
+  }
+}
+
 query Workbench($id: ID, $name: String) {
   workbench(id: $id, name: $name) {
     ...Workbench
