@@ -90,7 +90,7 @@ func TestDynatraceClient_MetricsSearchEncoding(t *testing.T) {
 				t.Fatalf("failed to decode execute body: %v", err)
 			}
 
-			const expectedQuery = `metrics | filter contains(metric.key, "builtin:host.cpu.usage:splitBy(\"dt.entity.host\")") | limit 3`
+			const expectedQuery = `metrics | filter contains(metric.key, "builtin:host.cpu.usage:splitBy(\"dt.entity.host\")", caseSensitive: false) | limit 3`
 			if body["query"] != expectedQuery {
 				t.Fatalf("unexpected query in execute body: %v", body["query"])
 			}
@@ -146,7 +146,7 @@ func TestDynatraceClient_Traces(t *testing.T) {
 		w.Header().Set("Content-Type", "application/json")
 		if strings.HasSuffix(r.URL.Path, "query:execute") {
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"requestToken": "token-123"}`))
+			w.Write([]byte(`{"requestToken":"token-123","state":"RUNNING"}`))
 			return
 		}
 		if strings.HasSuffix(r.URL.Path, "query:poll") {
@@ -193,8 +193,19 @@ func TestDynatraceClient_Logs(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if strings.HasSuffix(r.URL.Path, "query:execute") {
+			var body map[string]any
+			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+				t.Fatalf("failed to decode execute body: %v", err)
+			}
+
+			if body["query"] == "invalid query" {
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte(`{"error":{"message":"invalid query"}}`))
+				return
+			}
+
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"requestToken": "token-123"}`))
+			w.Write([]byte(`{"requestToken":"token-123","state":"RUNNING"}`))
 			return
 		}
 		if strings.HasSuffix(r.URL.Path, "query:poll") {

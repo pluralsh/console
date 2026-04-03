@@ -105,8 +105,8 @@ func TestDynatraceProvider_MetricsSearchFromDqlRecords(t *testing.T) {
 				"result":{
 					"records":[
 						{"metric.key":"dt.host.cpu.usage"},
-						{"metric":{"key":"dt.host.mem.usage"}},
-						{"name":"fallback.metric.name"}
+						{"metric.key":"dt.host.mem.usage"},
+						{"metric.key":"fallback.metric.name"}
 					]
 				}
 			}`))
