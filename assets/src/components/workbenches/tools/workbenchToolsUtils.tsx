@@ -6,9 +6,9 @@ import {
   LinearLogoIcon,
   LokiLogoIcon,
   PrometheusLogoIcon,
+  SplunkLogoIcon,
   TempoLogoIcon,
   ToolsIcon,
-  SplunkLogoIcon,
 } from '@pluralsh/design-system'
 import {
   WorkbenchToolCategory,
@@ -75,6 +75,7 @@ export const TOOL_TYPE_TO_LABEL: Record<WorkbenchToolType, string> = {
   [WorkbenchToolType.Mcp]: 'MCP',
   [WorkbenchToolType.Sentry]: 'Sentry',
   [WorkbenchToolType.Splunk]: 'Splunk',
+  [WorkbenchToolType.Dynatrace]: 'Dynatrace',
 }
 
 export const TOOL_TYPE_TO_CATEGORIES: Record<
@@ -95,6 +96,11 @@ export const TOOL_TYPE_TO_CATEGORIES: Record<
   [WorkbenchToolType.Mcp]: [],
   [WorkbenchToolType.Sentry]: [WorkbenchToolCategory.ErrorTracking],
   [WorkbenchToolType.Splunk]: [WorkbenchToolCategory.Logs],
+  [WorkbenchToolType.Dynatrace]: [
+    WorkbenchToolCategory.Metrics,
+    WorkbenchToolCategory.Logs,
+    WorkbenchToolCategory.Traces,
+  ],
 }
 
 /** Descriptions for configurable tool types (create cards). Single source for supported types + copy. */
