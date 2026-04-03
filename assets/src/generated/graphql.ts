@@ -18968,6 +18968,10 @@ export type WorkbenchJobActivityFragment = { __typename?: 'WorkbenchJobActivity'
 
 export type WorkbenchJobProgressFragment = { __typename?: 'WorkbenchJobProgress', activityId: string, tool?: string | null, text?: string | null, arguments?: Record<string, unknown> | null };
 
+export type WorkbenchCronFragment = { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null };
+
+export type WorkbenchWebhookFragment = { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null };
+
 export type WorkbenchJobFragment = { __typename?: 'WorkbenchJob', insertedAt?: string | null, error?: string | null, id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string, name: string } | null, result?: { __typename?: 'WorkbenchJobResult', id: string, workingTheory?: string | null, conclusion?: string | null, todos?: Array<{ __typename?: 'WorkbenchJobResultTodo', name?: string | null, description?: string | null, done?: boolean | null } | null> | null, metadata?: { __typename?: 'WorkbenchJobResultMetadata', metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null };
 
 export type WorkbenchesQueryVariables = Exact<{
@@ -18995,6 +18999,31 @@ export type WorkbenchJobsQueryVariables = Exact<{
 
 
 export type WorkbenchJobsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string, prompt?: string | null, status: WorkbenchJobStatus, workbench?: { __typename?: 'Workbench', id: string } | null } | null } | null> | null } | null } | null };
+
+export type WorkbenchCronsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type WorkbenchCronsQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, crons?: { __typename?: 'WorkbenchCronConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
+
+export type WorkbenchWebhooksQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type WorkbenchWebhooksQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, webhooks?: { __typename?: 'WorkbenchWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null } | null } | null> | null } | null } | null };
+
+export type WorkbenchTriggersSummaryQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type WorkbenchTriggersSummaryQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, crons?: { __typename?: 'WorkbenchCronConnection', edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string } | null } | null> | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -19099,6 +19128,52 @@ export type CreateWorkbenchJobMutationVariables = Exact<{
 
 
 export type CreateWorkbenchJobMutation = { __typename?: 'RootMutationType', createWorkbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, prompt?: string | null, insertedAt?: string | null } | null };
+
+export type CreateWorkbenchCronMutationVariables = Exact<{
+  workbenchId: Scalars['ID']['input'];
+  attributes: WorkbenchCronAttributes;
+}>;
+
+
+export type CreateWorkbenchCronMutation = { __typename?: 'RootMutationType', createWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type UpdateWorkbenchCronMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: WorkbenchCronAttributes;
+}>;
+
+
+export type UpdateWorkbenchCronMutation = { __typename?: 'RootMutationType', updateWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type DeleteWorkbenchCronMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteWorkbenchCronMutation = { __typename?: 'RootMutationType', deleteWorkbenchCron?: { __typename?: 'WorkbenchCron', id: string } | null };
+
+export type CreateWorkbenchWebhookMutationVariables = Exact<{
+  workbenchId: Scalars['ID']['input'];
+  attributes: WorkbenchWebhookAttributes;
+}>;
+
+
+export type CreateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', createWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null } | null };
+
+export type UpdateWorkbenchWebhookMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: WorkbenchWebhookAttributes;
+}>;
+
+
+export type UpdateWorkbenchWebhookMutation = { __typename?: 'RootMutationType', updateWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null } | null };
+
+export type DeleteWorkbenchWebhookMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteWorkbenchWebhookMutation = { __typename?: 'RootMutationType', deleteWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string } | null };
 
 export const PullRequestBasicFragmentDoc = gql`
     fragment PullRequestBasic on PullRequest {
@@ -23958,6 +24033,41 @@ export const WorkbenchJobProgressFragmentDoc = gql`
   tool
   text
   arguments
+}
+    `;
+export const WorkbenchCronFragmentDoc = gql`
+    fragment WorkbenchCron on WorkbenchCron {
+  id
+  crontab
+  prompt
+  lastRunAt
+  nextRunAt
+  insertedAt
+  updatedAt
+}
+    `;
+export const WorkbenchWebhookFragmentDoc = gql`
+    fragment WorkbenchWebhook on WorkbenchWebhook {
+  id
+  name
+  matches {
+    regex
+    substring
+    caseInsensitive
+  }
+  insertedAt
+  updatedAt
+  webhook {
+    id
+    name
+    type
+    url
+  }
+  issueWebhook {
+    id
+    name
+    url
+  }
 }
     `;
 export const WorkbenchJobTinyFragmentDoc = gql`
@@ -39677,6 +39787,177 @@ export type WorkbenchJobsQueryHookResult = ReturnType<typeof useWorkbenchJobsQue
 export type WorkbenchJobsLazyQueryHookResult = ReturnType<typeof useWorkbenchJobsLazyQuery>;
 export type WorkbenchJobsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchJobsSuspenseQuery>;
 export type WorkbenchJobsQueryResult = Apollo.QueryResult<WorkbenchJobsQuery, WorkbenchJobsQueryVariables>;
+export const WorkbenchCronsDocument = gql`
+    query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    crons(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchCron
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${WorkbenchCronFragmentDoc}`;
+
+/**
+ * __useWorkbenchCronsQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchCronsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchCronsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchCronsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useWorkbenchCronsQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchCronsQuery, WorkbenchCronsQueryVariables> & ({ variables: WorkbenchCronsQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>(WorkbenchCronsDocument, options);
+      }
+export function useWorkbenchCronsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>(WorkbenchCronsDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchCronsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>;
+export function useWorkbenchCronsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchCronsQuery | undefined, WorkbenchCronsQueryVariables>;
+export function useWorkbenchCronsSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>(WorkbenchCronsDocument, options);
+        }
+export type WorkbenchCronsQueryHookResult = ReturnType<typeof useWorkbenchCronsQuery>;
+export type WorkbenchCronsLazyQueryHookResult = ReturnType<typeof useWorkbenchCronsLazyQuery>;
+export type WorkbenchCronsSuspenseQueryHookResult = ReturnType<typeof useWorkbenchCronsSuspenseQuery>;
+export type WorkbenchCronsQueryResult = Apollo.QueryResult<WorkbenchCronsQuery, WorkbenchCronsQueryVariables>;
+export const WorkbenchWebhooksDocument = gql`
+    query WorkbenchWebhooks($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    webhooks(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchWebhook
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${WorkbenchWebhookFragmentDoc}`;
+
+/**
+ * __useWorkbenchWebhooksQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchWebhooksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchWebhooksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchWebhooksQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useWorkbenchWebhooksQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables> & ({ variables: WorkbenchWebhooksQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>(WorkbenchWebhooksDocument, options);
+      }
+export function useWorkbenchWebhooksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>(WorkbenchWebhooksDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchWebhooksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>;
+export function useWorkbenchWebhooksSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchWebhooksQuery | undefined, WorkbenchWebhooksQueryVariables>;
+export function useWorkbenchWebhooksSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>(WorkbenchWebhooksDocument, options);
+        }
+export type WorkbenchWebhooksQueryHookResult = ReturnType<typeof useWorkbenchWebhooksQuery>;
+export type WorkbenchWebhooksLazyQueryHookResult = ReturnType<typeof useWorkbenchWebhooksLazyQuery>;
+export type WorkbenchWebhooksSuspenseQueryHookResult = ReturnType<typeof useWorkbenchWebhooksSuspenseQuery>;
+export type WorkbenchWebhooksQueryResult = Apollo.QueryResult<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>;
+export const WorkbenchTriggersSummaryDocument = gql`
+    query WorkbenchTriggersSummary($id: ID!) {
+  workbench(id: $id) {
+    id
+    name
+    description
+    crons(first: 1) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+    webhooks(first: 1) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useWorkbenchTriggersSummaryQuery__
+ *
+ * To run a query within a React component, call `useWorkbenchTriggersSummaryQuery` and pass it any options that fit your needs.
+ * When your component renders, `useWorkbenchTriggersSummaryQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useWorkbenchTriggersSummaryQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useWorkbenchTriggersSummaryQuery(baseOptions: Apollo.QueryHookOptions<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables> & ({ variables: WorkbenchTriggersSummaryQueryVariables; skip?: boolean; } | { skip: boolean; }) ) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>(WorkbenchTriggersSummaryDocument, options);
+      }
+export function useWorkbenchTriggersSummaryLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>(WorkbenchTriggersSummaryDocument, options);
+        }
+// @ts-ignore
+export function useWorkbenchTriggersSummarySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>;
+export function useWorkbenchTriggersSummarySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>): Apollo.UseSuspenseQueryResult<WorkbenchTriggersSummaryQuery | undefined, WorkbenchTriggersSummaryQueryVariables>;
+export function useWorkbenchTriggersSummarySuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>(WorkbenchTriggersSummaryDocument, options);
+        }
+export type WorkbenchTriggersSummaryQueryHookResult = ReturnType<typeof useWorkbenchTriggersSummaryQuery>;
+export type WorkbenchTriggersSummaryLazyQueryHookResult = ReturnType<typeof useWorkbenchTriggersSummaryLazyQuery>;
+export type WorkbenchTriggersSummarySuspenseQueryHookResult = ReturnType<typeof useWorkbenchTriggersSummarySuspenseQuery>;
+export type WorkbenchTriggersSummaryQueryResult = Apollo.QueryResult<WorkbenchTriggersSummaryQuery, WorkbenchTriggersSummaryQueryVariables>;
 export const WorkbenchJobDocument = gql`
     query WorkbenchJob($id: ID!) {
   workbenchJob(id: $id) {
@@ -40201,6 +40482,208 @@ export function useCreateWorkbenchJobMutation(baseOptions?: Apollo.MutationHookO
 export type CreateWorkbenchJobMutationHookResult = ReturnType<typeof useCreateWorkbenchJobMutation>;
 export type CreateWorkbenchJobMutationResult = Apollo.MutationResult<CreateWorkbenchJobMutation>;
 export type CreateWorkbenchJobMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchJobMutation, CreateWorkbenchJobMutationVariables>;
+export const CreateWorkbenchCronDocument = gql`
+    mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {
+  createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
+    ...WorkbenchCron
+  }
+}
+    ${WorkbenchCronFragmentDoc}`;
+export type CreateWorkbenchCronMutationFn = Apollo.MutationFunction<CreateWorkbenchCronMutation, CreateWorkbenchCronMutationVariables>;
+
+/**
+ * __useCreateWorkbenchCronMutation__
+ *
+ * To run a mutation, you first call `useCreateWorkbenchCronMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateWorkbenchCronMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createWorkbenchCronMutation, { data, loading, error }] = useCreateWorkbenchCronMutation({
+ *   variables: {
+ *      workbenchId: // value for 'workbenchId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateWorkbenchCronMutation(baseOptions?: Apollo.MutationHookOptions<CreateWorkbenchCronMutation, CreateWorkbenchCronMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateWorkbenchCronMutation, CreateWorkbenchCronMutationVariables>(CreateWorkbenchCronDocument, options);
+      }
+export type CreateWorkbenchCronMutationHookResult = ReturnType<typeof useCreateWorkbenchCronMutation>;
+export type CreateWorkbenchCronMutationResult = Apollo.MutationResult<CreateWorkbenchCronMutation>;
+export type CreateWorkbenchCronMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchCronMutation, CreateWorkbenchCronMutationVariables>;
+export const UpdateWorkbenchCronDocument = gql`
+    mutation UpdateWorkbenchCron($id: ID!, $attributes: WorkbenchCronAttributes!) {
+  updateWorkbenchCron(id: $id, attributes: $attributes) {
+    ...WorkbenchCron
+  }
+}
+    ${WorkbenchCronFragmentDoc}`;
+export type UpdateWorkbenchCronMutationFn = Apollo.MutationFunction<UpdateWorkbenchCronMutation, UpdateWorkbenchCronMutationVariables>;
+
+/**
+ * __useUpdateWorkbenchCronMutation__
+ *
+ * To run a mutation, you first call `useUpdateWorkbenchCronMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateWorkbenchCronMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateWorkbenchCronMutation, { data, loading, error }] = useUpdateWorkbenchCronMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateWorkbenchCronMutation(baseOptions?: Apollo.MutationHookOptions<UpdateWorkbenchCronMutation, UpdateWorkbenchCronMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateWorkbenchCronMutation, UpdateWorkbenchCronMutationVariables>(UpdateWorkbenchCronDocument, options);
+      }
+export type UpdateWorkbenchCronMutationHookResult = ReturnType<typeof useUpdateWorkbenchCronMutation>;
+export type UpdateWorkbenchCronMutationResult = Apollo.MutationResult<UpdateWorkbenchCronMutation>;
+export type UpdateWorkbenchCronMutationOptions = Apollo.BaseMutationOptions<UpdateWorkbenchCronMutation, UpdateWorkbenchCronMutationVariables>;
+export const DeleteWorkbenchCronDocument = gql`
+    mutation DeleteWorkbenchCron($id: ID!) {
+  deleteWorkbenchCron(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteWorkbenchCronMutationFn = Apollo.MutationFunction<DeleteWorkbenchCronMutation, DeleteWorkbenchCronMutationVariables>;
+
+/**
+ * __useDeleteWorkbenchCronMutation__
+ *
+ * To run a mutation, you first call `useDeleteWorkbenchCronMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteWorkbenchCronMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteWorkbenchCronMutation, { data, loading, error }] = useDeleteWorkbenchCronMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteWorkbenchCronMutation(baseOptions?: Apollo.MutationHookOptions<DeleteWorkbenchCronMutation, DeleteWorkbenchCronMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteWorkbenchCronMutation, DeleteWorkbenchCronMutationVariables>(DeleteWorkbenchCronDocument, options);
+      }
+export type DeleteWorkbenchCronMutationHookResult = ReturnType<typeof useDeleteWorkbenchCronMutation>;
+export type DeleteWorkbenchCronMutationResult = Apollo.MutationResult<DeleteWorkbenchCronMutation>;
+export type DeleteWorkbenchCronMutationOptions = Apollo.BaseMutationOptions<DeleteWorkbenchCronMutation, DeleteWorkbenchCronMutationVariables>;
+export const CreateWorkbenchWebhookDocument = gql`
+    mutation CreateWorkbenchWebhook($workbenchId: ID!, $attributes: WorkbenchWebhookAttributes!) {
+  createWorkbenchWebhook(workbenchId: $workbenchId, attributes: $attributes) {
+    ...WorkbenchWebhook
+  }
+}
+    ${WorkbenchWebhookFragmentDoc}`;
+export type CreateWorkbenchWebhookMutationFn = Apollo.MutationFunction<CreateWorkbenchWebhookMutation, CreateWorkbenchWebhookMutationVariables>;
+
+/**
+ * __useCreateWorkbenchWebhookMutation__
+ *
+ * To run a mutation, you first call `useCreateWorkbenchWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateWorkbenchWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createWorkbenchWebhookMutation, { data, loading, error }] = useCreateWorkbenchWebhookMutation({
+ *   variables: {
+ *      workbenchId: // value for 'workbenchId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateWorkbenchWebhookMutation(baseOptions?: Apollo.MutationHookOptions<CreateWorkbenchWebhookMutation, CreateWorkbenchWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateWorkbenchWebhookMutation, CreateWorkbenchWebhookMutationVariables>(CreateWorkbenchWebhookDocument, options);
+      }
+export type CreateWorkbenchWebhookMutationHookResult = ReturnType<typeof useCreateWorkbenchWebhookMutation>;
+export type CreateWorkbenchWebhookMutationResult = Apollo.MutationResult<CreateWorkbenchWebhookMutation>;
+export type CreateWorkbenchWebhookMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchWebhookMutation, CreateWorkbenchWebhookMutationVariables>;
+export const UpdateWorkbenchWebhookDocument = gql`
+    mutation UpdateWorkbenchWebhook($id: ID!, $attributes: WorkbenchWebhookAttributes!) {
+  updateWorkbenchWebhook(id: $id, attributes: $attributes) {
+    ...WorkbenchWebhook
+  }
+}
+    ${WorkbenchWebhookFragmentDoc}`;
+export type UpdateWorkbenchWebhookMutationFn = Apollo.MutationFunction<UpdateWorkbenchWebhookMutation, UpdateWorkbenchWebhookMutationVariables>;
+
+/**
+ * __useUpdateWorkbenchWebhookMutation__
+ *
+ * To run a mutation, you first call `useUpdateWorkbenchWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateWorkbenchWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateWorkbenchWebhookMutation, { data, loading, error }] = useUpdateWorkbenchWebhookMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateWorkbenchWebhookMutation(baseOptions?: Apollo.MutationHookOptions<UpdateWorkbenchWebhookMutation, UpdateWorkbenchWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateWorkbenchWebhookMutation, UpdateWorkbenchWebhookMutationVariables>(UpdateWorkbenchWebhookDocument, options);
+      }
+export type UpdateWorkbenchWebhookMutationHookResult = ReturnType<typeof useUpdateWorkbenchWebhookMutation>;
+export type UpdateWorkbenchWebhookMutationResult = Apollo.MutationResult<UpdateWorkbenchWebhookMutation>;
+export type UpdateWorkbenchWebhookMutationOptions = Apollo.BaseMutationOptions<UpdateWorkbenchWebhookMutation, UpdateWorkbenchWebhookMutationVariables>;
+export const DeleteWorkbenchWebhookDocument = gql`
+    mutation DeleteWorkbenchWebhook($id: ID!) {
+  deleteWorkbenchWebhook(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteWorkbenchWebhookMutationFn = Apollo.MutationFunction<DeleteWorkbenchWebhookMutation, DeleteWorkbenchWebhookMutationVariables>;
+
+/**
+ * __useDeleteWorkbenchWebhookMutation__
+ *
+ * To run a mutation, you first call `useDeleteWorkbenchWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteWorkbenchWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteWorkbenchWebhookMutation, { data, loading, error }] = useDeleteWorkbenchWebhookMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteWorkbenchWebhookMutation(baseOptions?: Apollo.MutationHookOptions<DeleteWorkbenchWebhookMutation, DeleteWorkbenchWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteWorkbenchWebhookMutation, DeleteWorkbenchWebhookMutationVariables>(DeleteWorkbenchWebhookDocument, options);
+      }
+export type DeleteWorkbenchWebhookMutationHookResult = ReturnType<typeof useDeleteWorkbenchWebhookMutation>;
+export type DeleteWorkbenchWebhookMutationResult = Apollo.MutationResult<DeleteWorkbenchWebhookMutation>;
+export type DeleteWorkbenchWebhookMutationOptions = Apollo.BaseMutationOptions<DeleteWorkbenchWebhookMutation, DeleteWorkbenchWebhookMutationVariables>;
 export const namedOperations = {
   Query: {
     AgentRuns: 'AgentRuns',
@@ -40413,6 +40896,9 @@ export const namedOperations = {
     Workbenches: 'Workbenches',
     Workbench: 'Workbench',
     WorkbenchJobs: 'WorkbenchJobs',
+    WorkbenchCrons: 'WorkbenchCrons',
+    WorkbenchWebhooks: 'WorkbenchWebhooks',
+    WorkbenchTriggersSummary: 'WorkbenchTriggersSummary',
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchJobActivities: 'WorkbenchJobActivities',
     WorkbenchTools: 'WorkbenchTools',
@@ -40573,7 +41059,13 @@ export const namedOperations = {
     CreateWorkbenchTool: 'CreateWorkbenchTool',
     UpdateWorkbenchTool: 'UpdateWorkbenchTool',
     DeleteWorkbenchTool: 'DeleteWorkbenchTool',
-    CreateWorkbenchJob: 'CreateWorkbenchJob'
+    CreateWorkbenchJob: 'CreateWorkbenchJob',
+    CreateWorkbenchCron: 'CreateWorkbenchCron',
+    UpdateWorkbenchCron: 'UpdateWorkbenchCron',
+    DeleteWorkbenchCron: 'DeleteWorkbenchCron',
+    CreateWorkbenchWebhook: 'CreateWorkbenchWebhook',
+    UpdateWorkbenchWebhook: 'UpdateWorkbenchWebhook',
+    DeleteWorkbenchWebhook: 'DeleteWorkbenchWebhook'
   },
   Subscription: {
     AgentRunChat: 'AgentRunChat',
@@ -40873,6 +41365,8 @@ export const namedOperations = {
     WorkbenchJobTiny: 'WorkbenchJobTiny',
     WorkbenchJobActivity: 'WorkbenchJobActivity',
     WorkbenchJobProgress: 'WorkbenchJobProgress',
+    WorkbenchCron: 'WorkbenchCron',
+    WorkbenchWebhook: 'WorkbenchWebhook',
     WorkbenchJob: 'WorkbenchJob'
   }
 }

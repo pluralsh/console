@@ -182,13 +182,7 @@ function WorkbenchForm({
   }
 
   return (
-    <Flex
-      gap="medium"
-      height="100%"
-      minWidth={750}
-      maxWidth={968}
-      minHeight={0}
-    >
+    <WorkbenchSplitLayoutSC>
       <Flex
         direction="column"
         width={200}
@@ -250,7 +244,7 @@ function WorkbenchForm({
           </FormCardSC>
         )
       )}
-    </Flex>
+    </WorkbenchSplitLayoutSC>
   )
 }
 
@@ -299,6 +293,7 @@ export const SidebarBtnSC = styled(Button)<{ $active: boolean }>(
     ...theme.partials.text.caption,
     justifyContent: 'space-between',
     color: theme.colors.text,
+    textDecoration: 'none',
     padding: theme.spacing.xsmall,
     ...($active && {
       background: theme.colors['fill-one-selected'],
@@ -316,6 +311,15 @@ export const FormCardSC = styled(Card)(({ theme }) => ({
   flex: 1,
   overflow: 'auto',
   height: '100%',
+}))
+
+export const WorkbenchSplitLayoutSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  gap: theme.spacing.medium,
+  height: '100%',
+  minWidth: 750,
+  maxWidth: 968,
+  minHeight: 0,
 }))
 
 export const StickyActionsFooterSC = styled.div(({ theme }) => ({

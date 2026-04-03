@@ -10756,6 +10756,8 @@ __metadata:
     classnames: 2.3.2
     cmdk: 1.0.0
     country-code-lookup: 0.0.23
+    cron-parser: 5.5.0
+    cronstrue: 3.14.0
     dayjs: 1.11.13
     diff: 7.0.0
     ejs: 4.0.1
@@ -11023,6 +11025,24 @@ __metadata:
     safe-buffer: ^5.0.1
     sha.js: ^2.4.8
   checksum: ba12bb2257b585a0396108c72830e85f882ab659c3320c83584b1037f8ab72415095167ced80dc4ce8e446a8ecc4b2acf36d87befe0707d73b26cf9dc77440ed
+  languageName: node
+  linkType: hard
+
+"cron-parser@npm:5.5.0":
+  version: 5.5.0
+  resolution: "cron-parser@npm:5.5.0"
+  dependencies:
+    luxon: ^3.7.1
+  checksum: 8099951989aa76da077ccff179e5143e0ad04eed7b4e702a71a39b7752a1da352e5aed19da1afdcee6f8db8c6b1c05d03bd82b12419451b4e29f6aa4c5a02686
+  languageName: node
+  linkType: hard
+
+"cronstrue@npm:3.14.0":
+  version: 3.14.0
+  resolution: "cronstrue@npm:3.14.0"
+  bin:
+    cronstrue: bin/cli.js
+  checksum: 04664963d1c486ba3ac372049fa1250ecac76a642492cb4175527080616a8bd992dfbaae63ce9d130da8feddab0f0796dfe846b665367d0ec5c1d28b0b2405c6
   languageName: node
   linkType: hard
 
@@ -15775,6 +15795,13 @@ __metadata:
   dependencies:
     yallist: ^4.0.0
   checksum: f97f499f898f23e4585742138a22f22526254fdba6d75d41a1c2526b3b6cc5747ef59c5612ba7375f42aca4f8461950e925ba08c991ead0651b4918b7c978297
+  languageName: node
+  linkType: hard
+
+"luxon@npm:^3.7.1":
+  version: 3.7.2
+  resolution: "luxon@npm:3.7.2"
+  checksum: fc115fd6a7acc2adb7df3476d20c672beb2985d2a034294282f2c31de8c07f29a15460f5a2b7dd0107797be0dab545ddbc64862662b059fb18c1931a726064f4
   languageName: node
   linkType: hard
 

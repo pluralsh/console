@@ -4,7 +4,9 @@ import { WorkbenchToolCreateOrEdit } from 'components/workbenches/tools/Workbenc
 import { WorkbenchTools } from 'components/workbenches/tools/WorkbenchTools'
 import { Workbench } from 'components/workbenches/workbench/Workbench'
 import { WorkbenchCreateOrEdit } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
-import { Route } from 'react-router-dom'
+import { WorkbenchScheduleTrigger } from 'components/workbenches/workbench/triggers/WorkbenchScheduleTrigger'
+import { WorkbenchWebhookTrigger } from 'components/workbenches/workbench/triggers/WorkbenchWebhookTrigger'
+import { Navigate, Route } from 'react-router-dom'
 import {
   WORKBENCH_JOB_ABS_PATH,
   WORKBENCH_PARAM_ID,
@@ -14,8 +16,12 @@ import {
   WORKBENCHES_TOOLS_ABS_PATH,
   WORKBENCHES_TOOLS_PARAM_ID,
   WORKBENCHES_TOOLS_REL_PATH,
+  WORKBENCHES_TRIGGERS_REL_PATH,
+  WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH,
+  WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH,
 } from './workbenchesRoutesConsts'
 import { WorkbenchJob } from 'components/workbenches/workbench/job/WorkbenchJob'
+import { WorkbenchTriggers } from '../components/workbenches/workbench/triggers/WorkbenchTriggers.tsx'
 
 export const workbenchesRoutes = [
   <Route
@@ -43,6 +49,28 @@ export const workbenchesRoutes = [
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
     element={<WorkbenchCreateOrEdit mode="edit" />}
   />,
+  <Route
+    path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_TRIGGERS_REL_PATH}`}
+    element={<WorkbenchTriggers />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          to={WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH}
+          replace
+        />
+      }
+    />
+    <Route
+      path={WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH}
+      element={<WorkbenchScheduleTrigger />}
+    />
+    <Route
+      path={WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH}
+      element={<WorkbenchWebhookTrigger />}
+    />
+  </Route>,
   <Route
     path={`${WORKBENCHES_TOOLS_ABS_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
     element={<WorkbenchToolCreateOrEdit mode="create" />}
