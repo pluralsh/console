@@ -176,6 +176,7 @@ func (r *DynatraceMetricsSearchRecord) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &fields); err != nil {
 		return err
 	}
+
 	delete(fields, "metric.key")
 	r.Fields = fields
 
@@ -194,13 +195,13 @@ type DynatraceLogsQueryRecord struct {
 }
 
 type DynatraceTraceRecord struct {
-	SpanName          string         `json:"span.name"`
-	StartTimeUnixNano int64          `json:"start_time_unix_nano"`
-	EndTimeUnixNano   int64          `json:"end_time_unix_nano"`
-	TraceID           string         `json:"trace_id"`
-	SpanID            string         `json:"span_id"`
-	Timestamp         string         `json:"timestamp"`
-	Fields            map[string]any `json:"-"`
+	SpanName  string         `json:"span.name"`
+	StartTime string         `json:"start_time"`
+	EndTime   string         `json:"end_time"`
+	Duration  string         `json:"duration"`
+	TraceID   string         `json:"trace.id"`
+	SpanID    string         `json:"span.id"`
+	Fields    map[string]any `json:"-"`
 }
 
 func (r *DynatraceTraceRecord) UnmarshalJSON(data []byte) error {
@@ -218,12 +219,12 @@ func (r *DynatraceTraceRecord) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &fields); err != nil {
 		return err
 	}
-	delete(fields, "span.name")
-	delete(fields, "start_time_unix_nano")
-	delete(fields, "end_time_unix_nano")
-	delete(fields, "trace_id")
-	delete(fields, "span_id")
-	delete(fields, "timestamp")
+
+	knownFields := []string{"span.name", "start_time", "end_time", "duration", "trace.id", "span.id"}
+	for _, field := range knownFields {
+		delete(fields, field)
+	}
+
 	r.Fields = fields
 
 	return nil
@@ -402,16 +403,11 @@ func (r *DynatraceTraceRecord) ToTraceSpan() *toolquery.TraceSpan {
 		Tags:    make(map[string]string),
 	}
 
-	if r.StartTimeUnixNano > 0 {
-		span.Start = timestamppb.New(time.Unix(0, r.StartTimeUnixNano))
+	if ts, ok := parseTimestamp(r.StartTime); ok {
+		span.Start = timestamppb.New(ts)
 	}
-	if r.EndTimeUnixNano > 0 {
-		span.End = timestamppb.New(time.Unix(0, r.EndTimeUnixNano))
-	}
-	if span.Start == nil {
-		if ts, ok := parseTimestamp(r.Timestamp); ok {
-			span.Start = timestamppb.New(ts)
-		}
+	if ts, ok := parseTimestamp(r.EndTime); ok {
+		span.End = timestamppb.New(ts)
 	}
 
 	for k, v := range r.Fields {
@@ -422,7 +418,11 @@ func (r *DynatraceTraceRecord) ToTraceSpan() *toolquery.TraceSpan {
 		span.Start = timestamppb.New(time.Now())
 	}
 	if span.End == nil {
-		span.End = span.Start
+		if duration, ok := parseDynatraceDuration(r.Duration); ok {
+			span.End = timestamppb.New(span.Start.AsTime().Add(duration))
+		} else {
+			span.End = span.Start
+		}
 	}
 
 	return span

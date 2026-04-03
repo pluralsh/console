@@ -615,11 +615,7 @@ grpcurl -d '{
       "apiToken": "<API_TOKEN>"
     }
   },
-  "query": "builtin:host.cpu.usage",
-  "range": {
-    "start": "2024-03-20T10:00:00Z",
-    "end": "2024-03-20T11:00:00Z"
-  }
+  "query": "timeseries from:now()-10m, avg(dt.host.cpu.usage), by:{host.name} | limit 1"
 }' -plaintext localhost:9192 toolquery.ToolQuery/Metrics
 ```
 
@@ -840,11 +836,7 @@ grpcurl -d '{
       "apiToken": "<API_TOKEN>"
     }
   },
-  "query": "fetch logs | limit 1",
-  "range": {
-    "start": "2024-03-20T10:00:00Z",
-    "end": "2024-03-20T11:00:00Z"
-  }
+  "query": "fetch logs | limit 1"
 }' -plaintext localhost:9192 toolquery.ToolQuery/Logs
 ```
 
@@ -1035,11 +1027,7 @@ grpcurl -d '{
       "apiToken": "<API_TOKEN>"
     }
   },
-  "query": "fetch spans | limit 1",
-  "range": {
-    "start": "2024-03-20T10:00:00Z",
-    "end": "2024-03-20T11:00:00Z"
-  }
+  "query": "fetch spans | limit 1"
 }' -plaintext localhost:9192 toolquery.ToolQuery/Traces
 ```
 
@@ -1054,7 +1042,7 @@ grpcurl -d '{
       },
       "trace_id": "trace-123",
       "span_id": "span-456",
-      "name": "GET /api/v1/resource",
+      "name": "GET",
       "start": "2024-03-20T10:05:00Z",
       "end": "2024-03-20T10:05:00Z"
     }

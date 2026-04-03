@@ -157,10 +157,10 @@ func TestDynatraceClient_Traces(t *testing.T) {
 					"records": [
 						{
 							"span.name": "test-span",
-							"start_time_unix_nano": 1617282000000000000,
-							"end_time_unix_nano": 1617282001000000000,
-							"trace_id": "trace-1",
-							"span_id": "span-1"
+							"start_time": "2021-04-01T15:00:00.000000000Z",
+							"end_time": "2021-04-01T15:00:01.000000000Z",
+							"trace.id": "trace-1",
+							"span.id": "span-1"
 						}
 					]
 				}
