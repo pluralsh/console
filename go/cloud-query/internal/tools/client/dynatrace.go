@@ -2,38 +2,21 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
-	"google.golang.org/protobuf/types/known/timestamppb"
 	"resty.dev/v3"
 
-	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/datasource"
 )
 
-type DynatraceMetricsResponse struct {
-	Result []struct {
-		MetricId string `json:"metricId"`
-		Data     []struct {
-			Dimensions map[string]string `json:"dimensions"`
-			Timestamps []int64           `json:"timestamps"`
-			Values     []float64         `json:"values"`
-		} `json:"data"`
-	} `json:"result"`
-}
-
-type DynatraceMetricsSearchResponse struct {
-	Metrics []struct {
-		MetricId string `json:"metricId"`
-	} `json:"metrics"`
-}
-
-type DynatraceDqlResponse struct {
-	Results []struct {
-		Records []map[string]any `json:"records"`
-	} `json:"results"`
-}
+const (
+	DynatraceDqlExecuteEndpoint = "/platform/storage/query/v1/query:execute"
+	DynatraceDqlPollEndpoint    = "/platform/storage/query/v1/query:poll"
+)
 
 type DynatraceClient struct {
 	*resty.Client
@@ -48,116 +31,129 @@ func NewDynatraceClient(baseUrl, apiToken string) *DynatraceClient {
 	return &DynatraceClient{Client: client, baseUrl: strings.TrimSuffix(baseUrl, "/")}
 }
 
-func (in *DynatraceClient) Metrics(ctx context.Context, query string, from, to int64) (*DynatraceMetricsResponse, error) {
-	var resp DynatraceMetricsResponse
-	response, err := in.R().
-		SetContext(ctx).
-		SetQueryParams(map[string]string{
-			"metricSelector": query,
-			"from":           fmt.Sprintf("%d", from),
-			"to":             fmt.Sprintf("%d", to),
-		}).
-		SetResult(&resp).
-		Get(in.baseUrl + "/api/v2/metrics/query")
-
-	if err != nil {
+func (in *DynatraceClient) Metrics(ctx context.Context, query string) (*datasource.DynatraceMetricsQueryResponse, error) {
+	var resp datasource.DynatraceMetricsQueryResponse
+	if err := in.queryGrail(ctx, query, &resp); err != nil {
 		return nil, err
-	}
-	if response.IsError() {
-		return nil, fmt.Errorf("dynatrace metrics query failed: status=%d body=%s", response.StatusCode(), response.String())
 	}
 
 	return &resp, nil
 }
 
-func (in *DynatraceClient) MetricsSearch(ctx context.Context, query string) (*DynatraceMetricsSearchResponse, error) {
-	var resp DynatraceMetricsSearchResponse
-	response, err := in.R().
-		SetContext(ctx).
-		SetQueryParam("text", query).
-		SetResult(&resp).
-		Get(in.baseUrl + "/api/v2/metrics")
+func (in *DynatraceClient) MetricsSearch(ctx context.Context, query string, limit int64) (*datasource.DynatraceMetricsSearchResponse, error) {
+	var resp datasource.DynatraceMetricsSearchResponse
 
-	if err != nil {
-		return nil, err
+	dql := fmt.Sprintf("metrics | filter contains(metric.key, %s, caseSensitive: false)", strconv.Quote(query))
+	if limit > 0 {
+		dql = fmt.Sprintf("%s | limit %d", dql, limit)
 	}
-	if response.IsError() {
-		return nil, fmt.Errorf("dynatrace metrics search failed: status=%d body=%s", response.StatusCode(), response.String())
+
+	if err := in.queryGrail(ctx, dql, &resp); err != nil {
+		return nil, err
 	}
 
 	return &resp, nil
 }
 
-func (in *DynatraceClient) Logs(ctx context.Context, query string, from, to string) (*toolquery.LogsQueryOutput, error) {
-	return in.queryGrail(ctx, query, from, to)
-}
-
-func (in *DynatraceClient) Traces(ctx context.Context, query string, from, to string) (*toolquery.TracesQueryOutput, error) {
-	res, err := in.queryGrail(ctx, query, from, to)
-	if err != nil {
+func (in *DynatraceClient) Logs(ctx context.Context, query string) (*datasource.DynatraceLogsQueryResponse, error) {
+	var resp datasource.DynatraceLogsQueryResponse
+	if err := in.queryGrail(ctx, query, &resp); err != nil {
 		return nil, err
 	}
 
-	output := &toolquery.TracesQueryOutput{}
-	for _, log := range res.Logs {
-		output.Spans = append(output.Spans, &toolquery.TraceSpan{
-			TraceId: log.Labels["trace_id"],
-			SpanId:  log.Labels["span_id"],
-			Name:    log.Message,
-			Start:   log.Timestamp,
-			End:     log.Timestamp,
-			Tags:    log.Labels,
-		})
-	}
-	return output, nil
+	return &resp, nil
 }
 
-func (in *DynatraceClient) queryGrail(ctx context.Context, query string, from, to string) (*toolquery.LogsQueryOutput, error) {
-	var dqlResp DynatraceDqlResponse
-	body := map[string]any{
-		"query":                 query,
-		"defaultTimeframeStart": from,
-		"defaultTimeframeEnd":   to,
+func (in *DynatraceClient) Traces(ctx context.Context, query string) (*datasource.DynatraceTracesQueryResponse, error) {
+	var resp datasource.DynatraceTracesQueryResponse
+	if err := in.queryGrail(ctx, query, &resp); err != nil {
+		return nil, err
 	}
 
+	return &resp, nil
+}
+
+func (in *DynatraceClient) queryGrail(ctx context.Context, query string, result any) error {
+	body := map[string]any{"query": query}
+
+	var execResp datasource.DynatraceExecutionResponse
 	response, err := in.R().
 		SetContext(ctx).
 		SetBody(body).
-		SetResult(&dqlResp).
-		Post(in.baseUrl + "/api/v2/query/execute")
-
+		SetResult(&execResp).
+		Post(in.baseUrl + DynatraceDqlExecuteEndpoint)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if response.IsError() {
-		return nil, fmt.Errorf("dynatrace grail query failed: status=%d body=%s", response.StatusCode(), response.String())
+		return fmt.Errorf("dynatrace grail query execution failed: status=%d body=%s", response.StatusCode(), response.String())
 	}
 
-	output := &toolquery.LogsQueryOutput{}
-	for _, res := range dqlResp.Results {
-		for _, record := range res.Records {
-			entry := &toolquery.LogEntry{
-				Labels: make(map[string]string),
+	if err = in.validateState(execResp.State); err != nil {
+		return err
+	}
+
+	if execResp.State == datasource.DynatraceQueryStateSucceeded {
+		payload, err := json.Marshal(execResp)
+		if err != nil {
+			return err
+		}
+
+		return json.Unmarshal(payload, result)
+	}
+
+	if execResp.RequestToken == "" {
+		return fmt.Errorf("dynatrace grail query execution did not return request token")
+	}
+
+	for {
+		var pollResp datasource.DynatracePollResponse
+		response, err = in.R().
+			SetContext(ctx).
+			SetQueryParam("request-token", execResp.RequestToken).
+			SetResult(&pollResp).
+			Get(in.baseUrl + DynatraceDqlPollEndpoint)
+
+		if err != nil {
+			return err
+		}
+		if response.IsError() {
+			return fmt.Errorf("dynatrace grail query polling failed: status=%d body=%s", response.StatusCode(), response.String())
+		}
+
+		if err = in.validateState(pollResp.State); err != nil {
+			return err
+		}
+
+		if pollResp.State == datasource.DynatraceQueryStateSucceeded {
+			payload, err := json.Marshal(pollResp)
+			if err != nil {
+				return err
 			}
-			for k, v := range record {
-				if k == "content" || k == "message" {
-					entry.Message = fmt.Sprint(v)
-				} else if k == "timestamp" {
-					if tsStr, ok := v.(string); ok {
-						if t, err := time.Parse(time.RFC3339, tsStr); err == nil {
-							entry.Timestamp = timestamppb.New(t)
-						}
-					}
-				} else {
-					entry.Labels[k] = fmt.Sprint(v)
-				}
-			}
-			if entry.Timestamp == nil {
-				entry.Timestamp = timestamppb.New(time.Now())
-			}
-			output.Logs = append(output.Logs, entry)
+
+			return json.Unmarshal(payload, result)
+		}
+
+		// If we got here, the query is still running
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(time.Second):
+			// poll again
 		}
 	}
+}
 
-	return output, nil
+func (in *DynatraceClient) validateState(state datasource.DynatraceQueryState) error {
+	switch state {
+	case datasource.DynatraceQueryStateSucceeded,
+		datasource.DynatraceQueryStateRunning:
+		return nil
+	case datasource.DynatraceQueryStateFailed,
+		datasource.DynatraceQueryStateCancelled,
+		datasource.DynatraceQueryStateResultGone:
+		return fmt.Errorf("dynatrace grail query ended with state=%s", state)
+	default:
+		return fmt.Errorf("invalid dynatrace grail query state: %s", state)
+	}
 }
