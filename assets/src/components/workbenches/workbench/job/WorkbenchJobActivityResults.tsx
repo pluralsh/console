@@ -1,5 +1,11 @@
 import { ResponsiveLine } from '@nivo/line'
-import { Button, FileDiffIcon, IconFrame, Modal } from '@pluralsh/design-system'
+import {
+  Button,
+  FileDiffIcon,
+  Flex,
+  IconFrame,
+  Modal,
+} from '@pluralsh/design-system'
 import { LogLine } from 'components/cd/logs/LogLine'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import DiffViewer from 'components/utils/DiffViewer'
@@ -79,12 +85,16 @@ export function JobActivityLogs({
 }) {
   if (isEmpty(logs)) return null
 
-  return logs.map((log, i) => (
-    <LogLine
-      key={i}
-      line={{ log: log.message, timestamp: log.timestamp }}
-    />
-  ))
+  return (
+    <Flex direction="column">
+      {logs.map((log, i) => (
+        <LogLine
+          key={i}
+          line={{ log: log.message, timestamp: log.timestamp }}
+        />
+      ))}
+    </Flex>
+  )
 }
 
 export function JobActivityMetrics({
