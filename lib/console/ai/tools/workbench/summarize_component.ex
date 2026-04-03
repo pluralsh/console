@@ -28,7 +28,7 @@ defmodule Console.AI.Tools.Workbench.SummarizeComponent do
   def implement(%__MODULE__{prompt: prompt, component_id: component_id}) do
     with {:actor, %User{} = user} <- {:actor, Tool.actor()},
          {:comp, %ServiceComponent{} = comp} <- {:comp, Repo.get(ServiceComponent, component_id) |> Repo.preload(service: :cluster)},
-         {:allow, true} <- {:allow, Policies.can?(user, comp.service, :read)},
+         {:allow, {:ok, _}} <- {:allow, Policies.allow(comp.service, user, :read)},
          _ <- Console.AI.Evidence.Base.save_kubeconfig(comp.service.cluster),
          {:summary, {:ok, summary, true}} <- {:summary, Summarizable.summarize(comp, prompt)} do
       {:ok, summary}

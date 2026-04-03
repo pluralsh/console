@@ -35,7 +35,10 @@ defmodule Console.AI.Workbench.Subagents.Plan do
     [
       %Skills{skills: skills},
       %Skill{skills: skills},
-      %Subagents{subagents: Environment.subagents(job)},
+      %Subagents{
+        subagents: Environment.subagents(job),
+        categories: Environment.categories(job)
+      },
       Plan
     ]
   end

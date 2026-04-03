@@ -38,6 +38,10 @@ defmodule Console.Pipelines.PollProducer do
         {:producer, %State{}}
       end
 
+      def kick(), do: GenStage.cast(self(), :kick)
+
+      def handle_cast(:kick, state), do: handle_info(:poll, state)
+
       def handle_info(:poll, %State{demand: demand} = state) do
         events = poll(min(demand, 30))
         Logger.info "poll success for #{__MODULE__}: #{length(events)} events"

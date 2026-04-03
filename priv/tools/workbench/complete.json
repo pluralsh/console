@@ -48,7 +48,8 @@
                     },
                     "labels": {
                         "type": "object",
-                        "description": "Labels for the metric"
+                        "description": "Labels for the metric",
+                        "additionalProperties": true
                     }
                 },
                 "required": [
@@ -56,9 +57,34 @@
                     "value"
                 ]
             }
+        },
+        "logs": {
+            "type": "array",
+            "description": "Log lines relevant to the conclusion to persist on the final result metadata",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "timestamp": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "The timestamp of the log"
+                    },
+                    "message": {
+                        "type": "string",
+                        "description": "The message of the log"
+                    },
+                    "labels": {
+                        "type": "object",
+                        "description": "Labels for the log",
+                        "additionalProperties": true
+                    }
+                },
+                "required": ["timestamp", "message"]
+            }
         }
     },
     "required": [
-        "conclusion"
+        "conclusion",
+        "todos"
     ]
 }

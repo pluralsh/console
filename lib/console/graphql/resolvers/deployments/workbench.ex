@@ -128,6 +128,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def delete_workbench_webhook(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench_webhook(id, user)
 
+  def create_workbench_message(%{job_id: job_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_message(attrs, job_id, user)
+
   defp workbench_filters(query, args) do
     Enum.reduce(args, query, fn
       {:project_id, project_id}, q when is_binary(project_id) -> Workbench.for_project(q, project_id)

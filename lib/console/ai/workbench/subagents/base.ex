@@ -40,7 +40,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
 
   @spec poll_run(AgentRun.t, integer) :: {:failed | :timeout | :success, AgentRun.t}
   def poll_run(run, iter \\ 0)
-  def poll_run(%AgentRun{} = run, iters) when iters >= 60, do: {:timeout, run}
+  def poll_run(%AgentRun{} = run, iters) when iters >= 60 * 6, do: {:timeout, run}
   def poll_run(%AgentRun{mode: :write, pull_requests: [_ | _]} = run, _), do: {:success, run}
   def poll_run(%AgentRun{mode: :analyze, analysis: %AgentRun.Analysis{}} = run, _), do: {:success, run}
   def poll_run(%AgentRun{status: :successful} = run, _), do: {:success, run}
@@ -54,10 +54,15 @@ defmodule Console.AI.Workbench.Subagents.Base do
     |> poll_run(iter + 1)
   end
 
-  def save_thought(activity_id, content, %{attributes: %{} = attributes})
+  def save_thought(activity_id, content, %{name: name, arguments: args, attributes: %{} = attributes})
       when is_binary(content) and is_binary(activity_id) do
     %WorkbenchJobThought{activity_id: activity_id}
-    |> WorkbenchJobThought.changeset(%{content: content, attributes: attributes})
+    |> WorkbenchJobThought.changeset(%{
+      content: content,
+      attributes: attributes,
+      tool_name: name,
+      tool_args: args
+    })
     |> Repo.insert()
   end
   def save_thought(_, _, _), do: :ok

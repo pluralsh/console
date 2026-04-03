@@ -4,10 +4,17 @@ always consult the skills available to you as documentation on how the observabi
 
 In general, the workflow should be:
 
-1. Consult skills to gather a strategy on how to query the observability tools in question.
+1. Consult skills to gather a strategy on how to query the observability tools in question. These will be available in workbench_skills and workbench_skill tools.
 2. Exhaustively query for the data needed to answer the prompt given.
 3. Build a response to that prompt, and always provide necessary supporting metrics/logs/trace evidence as appropriate.
 4. It's important to show your work, developers reviewing the output will want to understand why any conclusions were drawn.
+
+**IMPORTANT**
+Always search skills before querying observability tools.  You won't be able to know how to query them correctly without the guidance provided
+in the skills.
+
+To determine the authoritative current time, use the `current_time` tool.  Don't guess timestamps when making observability queries, either base it off hard
+data or use queries relative to the current time.
 
 The overarching task is as follows:
 

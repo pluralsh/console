@@ -1,16 +1,17 @@
 defmodule Console.AI.Workbench.Environment do
-  alias Console.Schema.{WorkbenchJob, Workbench, WorkbenchTool}
+  alias Console.Schema.{WorkbenchJob, Workbench, WorkbenchTool, WorkbenchJobActivity}
   alias Console.AI.Workbench.Skill
 
   @type t :: %__MODULE__{
     job: WorkbenchJob.t,
     tools: %{binary => WorkbenchTool.t},
-    skills: %{binary => Skill.t}
+    skills: %{binary => Skill.t},
+    activities: [WorkbenchJobActivity.t]
   }
 
   defguardp is_map_or_list(m) when is_map(m) or is_list(m)
 
-  defstruct [:job, :tools, :skills]
+  defstruct [:job, :tools, :skills, :activities]
 
   def new(%WorkbenchJob{} = job, tools, skills) when is_map_or_list(tools) and is_map_or_list(skills) do
     %__MODULE__{
@@ -88,8 +89,8 @@ defmodule Console.AI.Workbench.Environment do
   defp infra_agents(_), do: []
 
   defp tool_agents(tools) do
-    Enum.flat_map(tools, fn
-      {_, %{categories: [_ | _] = categories}} -> categories
+    Enum.flat_map(tools || [], fn
+      %{categories: [_ | _] = categories} -> categories
       _ -> [:integration]
     end)
     |> Enum.map(&category_to_subagent/1)

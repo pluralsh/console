@@ -7,12 +7,12 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
   alias Console.AI.Workbench.Conversion
 
   embedded_schema do
-    field :tool, :map, virtual: true
-    field :query, :string
+    field :tool,   :map, virtual: true
+    field :query,  :string
     field :limit,  :integer
 
     embeds_many :facets, Facet, on_replace: :delete, primary_key: false do
-      field :name, :string
+      field :name,  :string
       field :value, :string
     end
 
@@ -41,8 +41,8 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
 
   def implement(_, %__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
-         {:ok, input} <- input(tool),
-         {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input) |> IO.inspect(label: "logs output"),
+         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
+         {:ok, %LogsQueryOutput{} = output} <- Stub.logs(conn, input),
       do: Protobuf.JSON.encode(output)
   end
 

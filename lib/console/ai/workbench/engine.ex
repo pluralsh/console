@@ -65,21 +65,30 @@ defmodule Console.AI.Workbench.Engine do
   defp loop(%__MODULE__{job: job, environment: environment, activities: activities} = engine) do
     messages = Enum.map(activities, &Message.to_message/1)
 
-    tools(job, environment)
-    |> MemoryEngine.new(20, system_prompt: &system_prompt(prompt: job.prompt, engine: &1), acc: %{})
+    tools(job, environment, activities)
+    |> MemoryEngine.new(20,
+      system_prompt: &system_prompt(prompt: job.prompt, engine: &1),
+      acc: %{},
+      tool_fmt: &tool_fmt/1
+    )
     |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
     |> case do
-      {:ok, %Complete{conclusion: conclusion, metrics: metrics, todos: todos}} ->
+      {:ok, %Complete{conclusion: conclusion, metrics: metrics, logs: logs, todos: todos}} ->
         drop_empty(%{
           conclusion: conclusion,
           todos: todos,
-          metadata: %{metrics: metrics},
+          metadata: drop_empty(%{metrics: metrics, logs: logs}),
         })
         |> Workbenches.complete_job(job)
       {:ok, l} when is_list(l) -> spawn_activities(l, engine)
       {:error, error} -> Workbenches.fail_job("Error running workbench: #{inspect(error)}", job)
     end
   end
+
+  defp tool_fmt(%Notes{}), do: "recorded notes for progress done so far"
+  defp tool_fmt(%Subagent{subagent: name}), do: "launched #{name} subagent, waiting for the result"
+  defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
+  defp tool_fmt(pass), do: pass
 
   defp reducer(messages, _) do
     Enum.reduce_while(messages, [], fn
@@ -90,7 +99,7 @@ defmodule Console.AI.Workbench.Engine do
     end)
     |> case do
       %Complete{} = complete -> {:halt, complete}
-      l when is_list(l) -> {:halt, l}
+      [_ | _] = l -> {:halt, l}
       _ -> {:cont, []}
     end
   end
@@ -106,14 +115,14 @@ defmodule Console.AI.Workbench.Engine do
     |> loop()
   end
 
-  @supported_subagents ~w(infrastructure integration coding observability)a
+  @supported_subagents ~w(infrastructure integration coding observability memory)a
 
-  defp spawn_activity(%Subagent{subagent: type, prompt: prompt} = call, %__MODULE__{job: job, environment: environment})
+  defp spawn_activity(%Subagent{subagent: type, prompt: prompt} = call, %__MODULE__{job: job, environment: environment, activities: activities})
       when type in @supported_subagents do
     module = subagent_module(type)
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: type, prompt: prompt, tool_call: tool_attrs(call)}, job) do
-      module.run(activity, job, environment)
+      module.run(activity, job, %{environment | activities: activities})
       |> Workbenches.update_job_activity(activity)
     end
   end
@@ -122,7 +131,7 @@ defmodule Console.AI.Workbench.Engine do
     Console.mapify(status)
     |> Map.drop([:id])
     |> then(& %{
-      status: &1,
+      status: drop_empty(&1),
       prompt: summary,
       output: summary,
       tool_call: tool_attrs(call)
@@ -136,6 +145,7 @@ defmodule Console.AI.Workbench.Engine do
   defp subagent_module(:integration), do: SA.Integration
   defp subagent_module(:coding), do: SA.Coding
   defp subagent_module(:observability), do: SA.Observability
+  defp subagent_module(:memory), do: SA.Memory
 
   defp tool_attrs(%{id: %Console.AI.Tool{id: id, name: name, arguments: arguments}}) when is_binary(id) and is_binary(name),
     do: %{call_id: id, name: name, arguments: arguments}
@@ -153,8 +163,8 @@ defmodule Console.AI.Workbench.Engine do
     |> Repo.preload([:user, :result, workbench: [:tools, :repository, :agent_runtime]])
   end
 
-  defp tools(%WorkbenchJob{} = job, %Environment{skills: skills}) do
-    subagents = Environment.subagents(job)
+  defp tools(%WorkbenchJob{} = job, %Environment{skills: skills}, activities) do
+    subagents = Environment.subagents(job) |> maybe_add_memory(activities)
     categories = Environment.categories(job)
     [
       %Skills{skills: skills},
@@ -166,6 +176,9 @@ defmodule Console.AI.Workbench.Engine do
       Complete,
     ]
   end
+
+  defp maybe_add_memory(subagents, activities) when length(activities) > 5, do: [:memory | subagents]
+  defp maybe_add_memory(subagents, _), do: subagents
 
   defp continue_prompt(%__MODULE__{activities: [_, _ | _]}), do: "Ok, let's keep working" # the first activity is the plan
   defp continue_prompt(_), do: "Ok, let's start working"

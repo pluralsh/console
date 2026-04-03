@@ -49,9 +49,12 @@ defmodule Console.AI.OpenAI do
   def completion(%__MODULE__{} = openai, messages, opts) do
     messages
     |> reqllm_messages()
-    |> generate_text(openai_model(openai, :model), openai.stream, provider_options(openai) ++ [tools: tools(opts)])
+    |> generate_text(openai_model(openai, model_type(opts[:client])), openai.stream, provider_options(openai) ++ [tools: tools(opts)])
     |> reqllm_result()
   end
+
+  defp model_type(:tool), do: :tool_model
+  defp model_type(_), do: :model
 
   @doc """
   Calls an openai tool call interface w/ strict mode

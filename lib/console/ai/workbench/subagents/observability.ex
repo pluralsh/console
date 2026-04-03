@@ -2,7 +2,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
   alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
   alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill}
-  alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces}
+  alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces, Time}
   alias Console.AI.Workbench.{Environment, MCP}
 
   require EEx
@@ -28,26 +28,26 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   end
 
   defp tools(%Environment{skills: skills, tools: tools, job: job}) do
-    workbench_tools(tools)
+    obs_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
     |> Enum.concat([
       %Skills{skills: skills},
       %Skill{skills: skills},
-      ObservabilityResult
+      ObservabilityResult,
+      Time
     ])
   end
 
   @allowed_tools MapSet.new(~w(metrics logs traces)a)
 
-  defp workbench_tools(tools) do
+  defp obs_tools(tools) do
     Enum.map(tools, &elem(&1, 1))
     |> Enum.filter(fn
-      %WorkbenchTool{categories: categories} when is_list(categories) ->
-        MapSet.subset?(MapSet.new(categories), @allowed_tools)
+      %WorkbenchTool{categories: [_ | _] = categories} -> MapSet.subset?(MapSet.new(categories), @allowed_tools)
       _ -> false
     end)
     |> Enum.flat_map(fn
-      %WorkbenchTool{categories: categories} = tool when is_list(categories) ->
+      %WorkbenchTool{categories: [_ | _] = categories} = tool ->
         Enum.flat_map(categories, fn c -> to_tool(tool, c) end)
       _ -> []
     end)

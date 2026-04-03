@@ -6,7 +6,8 @@ defmodule Console.Schema.WorkbenchJob do
     WorkbenchJobActivity,
     User,
     Alert,
-    Issue
+    Issue,
+    PullRequest
   }
 
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
@@ -24,10 +25,18 @@ defmodule Console.Schema.WorkbenchJob do
     belongs_to :alert,     Alert
     belongs_to :issue,     Issue
 
-    has_one  :result, WorkbenchJobResult, on_replace: :update
-    has_many :activities, WorkbenchJobActivity, on_replace: :delete
+    has_one  :result,        WorkbenchJobResult, on_replace: :update
+    has_many :activities,    WorkbenchJobActivity, on_replace: :delete
+    has_many :pull_requests, PullRequest, on_replace: :delete
 
     timestamps()
+  end
+
+  def idle?(%__MODULE__{status: s}) when s in ~w(pending failed cancelled successful)a, do: true
+  def idle?(%__MODULE__{updated_at: at, inserted_at: iat}) do
+    Timex.now()
+    |> Timex.shift(minutes: -15)
+    |> Timex.after?(at || iat)
   end
 
   def pollable(query \\ __MODULE__) do

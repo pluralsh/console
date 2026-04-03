@@ -2,6 +2,7 @@ defmodule Console.Deployments.WorkbenchesTest do
   use Console.DataCase, async: true
   alias Console.PubSub
   alias Console.Deployments.Workbenches
+  alias Console.Schema.WorkbenchJob
 
   describe "create_workbench/2" do
     test "project writers can create a workbench" do
@@ -295,6 +296,70 @@ defmodule Console.Deployments.WorkbenchesTest do
       workbench = insert(:workbench)
 
       {:error, _} = Workbenches.create_workbench_job(%{prompt: "test prompt"}, workbench.id, user)
+    end
+  end
+
+  describe "create_message/3" do
+    test "job owner can create a user message for their job" do
+      user = insert(:user)
+      job = insert(:workbench_job, user: user)
+
+      {:ok, activity} =
+        Workbenches.create_message(%{prompt: "follow-up from user"}, job.id, user)
+
+      assert activity.workbench_job_id == job.id
+      assert activity.prompt == "follow-up from user"
+      assert activity.type == :user
+      assert activity.status == :successful
+      assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
+    end
+
+    test "job owner can create a message when passing the job struct" do
+      user = insert(:user)
+      job = insert(:workbench_job, user: user)
+
+      {:ok, activity} =
+        Workbenches.create_message(%{prompt: "via struct"}, job, user)
+
+      assert activity.workbench_job_id == job.id
+      assert activity.prompt == "via struct"
+    end
+
+    test "another user cannot create messages for someone else's job" do
+      owner = insert(:user)
+      other = insert(:user)
+      job = insert(:workbench_job, user: owner)
+
+      assert {:error, "you can only create messages for your own jobs"} =
+               Workbenches.create_message(%{prompt: "unauthorized"}, job.id, other)
+
+      refute_receive {:event, %PubSub.WorkbenchJobActivityCreated{}}
+    end
+
+    test "creates a message when the job is idle" do
+      user = insert(:user)
+      job = insert(:workbench_job, user: user, status: :successful)
+
+      assert WorkbenchJob.idle?(job)
+
+      {:ok, activity} =
+        Workbenches.create_message(%{prompt: "idle follow-up"}, job, user)
+
+      assert activity.prompt == "idle follow-up"
+      assert activity.type == :user
+      assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
+    end
+
+    test "returns an error when the job is active (not idle)" do
+      user = insert(:user)
+      job = insert(:workbench_job, user: user, status: :running)
+
+      refute WorkbenchJob.idle?(job)
+
+      assert {:error, "job is currently active, please wait for it to complete before prompting"} =
+               Workbenches.create_message(%{prompt: "while running"}, job, user)
+
+      refute_receive {:event, %PubSub.WorkbenchJobActivityCreated{}}
     end
   end
 

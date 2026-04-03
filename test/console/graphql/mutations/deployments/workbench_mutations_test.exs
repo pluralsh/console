@@ -383,6 +383,29 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
     end
   end
 
+  describe "createWorkbenchMessage" do
+    test "it can create a user message on an idle job owned by the current user" do
+      user = admin_user()
+      workbench = insert(:workbench)
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :successful)
+
+      {:ok, %{data: %{"createWorkbenchMessage" => activity}}} = run_query("""
+        mutation CreateWorkbenchMessage($jobId: ID!, $attributes: WorkbenchMessageAttributes!) {
+          createWorkbenchMessage(jobId: $jobId, attributes: $attributes) {
+            id
+            prompt
+            type
+            status
+          }
+        }
+      """, %{"jobId" => job.id, "attributes" => %{"prompt" => "from graphql"}}, %{current_user: user})
+
+      assert activity["prompt"] == "from graphql"
+      assert activity["type"] == "USER"
+      assert activity["status"] == "SUCCESSFUL"
+    end
+  end
+
   describe "createWorkbenchCron" do
     test "it can create a workbench cron" do
       workbench = insert(:workbench)

@@ -30,7 +30,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
 
   def implement(_, %__MODULE__{} = tool) do
     with {:ok, conn} <- Client.connect(),
-         {:ok, input} <- input(tool),
+         {:ok, input} <- input(Map.put_new(tool, :time_range, TimeRange.default())),
          {:ok, %MetricsQueryOutput{} = output} <- Stub.metrics(conn, input),
       do: Protobuf.JSON.encode(output)
   end

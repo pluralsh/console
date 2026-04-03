@@ -7,6 +7,7 @@ defmodule Console.AI.Vertex do
   alias Console.AI.{Utils, Stream}
   alias Console.AI.GothManager
 
+  @small_model "claude-haiku-4-5@20251001"
   @default_model "claude-sonnet-4-5@20250929"
   @embedding_model "gemini-embedding-001"
 
@@ -14,12 +15,12 @@ defmodule Console.AI.Vertex do
 
   @type t :: %__MODULE__{}
 
-  def defaults(), do: %{model: @default_model, tool_model: @default_model, embedding_model: @embedding_model}
+  def defaults(), do: %{model: @small_model, tool_model: @default_model, embedding_model: @embedding_model}
 
   def new(opts) do
     %__MODULE__{
       service_account_json: opts.service_account_json,
-      model: opts.model || @default_model,
+      model: opts.model || @small_model,
       tool_model: opts.tool_model || @default_model,
       embedding_model: opts.embedding_model || @embedding_model,
       project: opts.project,
@@ -39,7 +40,7 @@ defmodule Console.AI.Vertex do
     with {:ok, provider_options} <- provider_options(vtx) do
       messages
       |> reqllm_messages()
-      |> generate_text("google-vertex:#{normalize(vtx.model)}", vtx.stream, Keyword.put(provider_options, :tools, tools(opts)))
+      |> generate_text("google-vertex:#{normalize(select_model(vtx, opts[:client]))}", vtx.stream, Keyword.put(provider_options, :tools, tools(opts)))
       |> reqllm_result()
     end
   end

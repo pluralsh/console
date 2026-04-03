@@ -2,6 +2,10 @@ defmodule Console.AI.Provider.Base do
   alias ReqLLM.{Context, Response, ToolCall, StreamResponse}
   alias Console.AI.{Tool, Stream}
 
+  def select_model(%{tool_model: tool_model}, :tool) when is_binary(tool_model), do: tool_model
+  def select_model(%{tool_model_id: tool_model}, :tool) when is_binary(tool_model), do: tool_model
+  def select_model(%{model: model}, _), do: model
+
   def tools(opts) do
     plural = Keyword.get(opts, :plural)
     tools  = Keyword.get(opts, :tools)

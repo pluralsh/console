@@ -49,7 +49,17 @@ defmodule Console.AI.Workbench.EngineTest do
         {:ok, "complete", [
           %Tool{
             name: "workbench_complete",
-            arguments: %{"conclusion" => "complete"}
+            arguments: %{
+              "conclusion" => "complete",
+              "todos" => [%{name: "todo 1", description: "todo 1", done: true}],
+              "logs" => [
+                %{
+                  "timestamp" => "2025-02-25T12:00:00Z",
+                  "message" => "shutdown complete",
+                  "labels" => %{"service" => "worker"}
+                }
+              ]
+            }
           }
         ]}
       end)
@@ -60,9 +70,13 @@ defmodule Console.AI.Workbench.EngineTest do
       {:ok, engine} = Engine.new(job)
       {:ok, result} = Engine.run(engine)
 
-      result = Console.Repo.preload(result, [:result])
+      result = Console.Repo.preload(result, :result)
       assert result.status == :successful
       assert result.result.conclusion == "complete"
+      assert result.result.metadata
+      assert [log] = result.result.metadata.logs
+      assert log.message == "shutdown complete"
+      assert log.labels == %{"service" => "worker"}
     end
   end
 end

@@ -1,6 +1,5 @@
 defmodule Console.AI.Tools.Workbench.Observability.TimeRange do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use Console.Schema.Base
   alias Toolquery.TimeRange
 
   embedded_schema do
@@ -10,9 +9,18 @@ defmodule Console.AI.Tools.Workbench.Observability.TimeRange do
 
   @valid ~w(start end)a
 
+  def default(past \\ 30) do
+    %__MODULE__{
+      start: Timex.now() |> Timex.shift(minutes: -past),
+      end: Timex.now(),
+    }
+  end
+
   def changeset(model, attrs) do
     model
     |> cast(attrs, @valid)
+    |> put_new_change(:start, fn -> Timex.now() |> Timex.shift(minutes: -30) end)
+    |> put_new_change(:end, fn -> Timex.now() end)
   end
 
   def to_proto(%__MODULE__{start: start_ts, end: end_ts}) do

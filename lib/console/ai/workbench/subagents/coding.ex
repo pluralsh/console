@@ -1,6 +1,6 @@
 defmodule Console.AI.Workbench.Subagents.Coding do
   use Console.AI.Workbench.Subagents.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, AgentRun}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, AgentRun, PullRequest}
   alias Console.AI.Tools.Workbench.{Skills, Skill, CodingAgent}
   alias Console.Deployments.Workbenches
   alias Console.AI.Workbench.Environment
@@ -34,11 +34,18 @@ defmodule Console.AI.Workbench.Subagents.Coding do
       {:timeout, _} -> %{status: :failed, error: "agent run #{id} timed out"}
       {:failed, %AgentRun{error: error}} -> %{status: :failed, error: "Agent run failed: #{error}"}
       {:success, %AgentRun{mode: :write, pull_requests: [_ | _] = prs}} ->
+        mark_prs(prs, activity)
         %{status: :successful, agent_run_id: id, result: %{output: String.trim(analysis_prompt(analysis: nil, pull_requests: prs))}}
       {:success, %AgentRun{mode: :analyze, analysis: %AgentRun.Analysis{} = analysis}} ->
         %{status: :successful, agent_run_id: id, result: %{output: String.trim(analysis_prompt(pull_requests: nil, analysis: analysis))}}
       {:success, _} -> %{status: :successful, agent_run_id: id, result: %{output: "Agent run completed successfully"}}
     end
+  end
+
+  defp mark_prs(prs, %WorkbenchJobActivity{workbench_job_id: id}) do
+    Enum.map(prs, & &1.id)
+    |> PullRequest.for_ids()
+    |> Repo.update_all(set: [workbench_job_id: id])
   end
 
   defp tools(%Environment{skills: skills}) do

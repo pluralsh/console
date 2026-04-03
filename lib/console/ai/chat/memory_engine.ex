@@ -7,7 +7,7 @@ defmodule Console.AI.Chat.MemoryEngine do
   alias Console.AI.{Provider, Tool}
   alias Console.AI.Chat.Engine
 
-  defstruct [:tools, :system_prompt, :max_iterations, :reducer, :callback, messages: [], acc: []]
+  defstruct [:tools, :system_prompt, :max_iterations, :reducer, :callback, messages: [], acc: [], tool_fmt: &Console.identity/1]
 
   def new(tools, max_iterations, opts \\ []) when is_integer(max_iterations) and max_iterations > 0 do
     struct(__MODULE__, Keyword.merge(opts, [tools: tools, max_iterations: max_iterations]))
@@ -45,6 +45,7 @@ defmodule Console.AI.Chat.MemoryEngine do
     preface = build_preface(preface, Map.put(engine, :iteration, iter))
 
     messages
+    |> Enum.map(&msg(&1, :tool))
     |> Engine.fit_context_window(preface)
     |> Provider.completion(preface: preface, plural: engine.tools, client: :tool)
     |> case do
@@ -57,15 +58,20 @@ defmodule Console.AI.Chat.MemoryEngine do
       err -> err
     end
     |> then(fn
-      l when is_list(l) ->
-        case engine.reducer.(l, acc) do
-          {:halt, res} -> {:ok, res}
-          {:cont, acc} -> loop(%{engine | acc: acc, messages: messages ++ l}, iter + 1)
-        end
+      l when is_list(l) -> finalize_loop(l, engine, acc, iter)
       err -> err
     end)
   end
   defp loop(%__MODULE__{acc: acc}, _), do: {:ok, acc}
+
+  defp finalize_loop(msgs, %__MODULE__{reducer: fun, messages: messages} = engine, acc, iter) when is_function(fun, 2) do
+    Enum.map(msgs, &msg(&1, :result))
+    |> fun.(acc)
+    |> case do
+      {:halt, res} -> {:ok, res}
+      {:cont, acc} -> loop(%{engine | acc: acc, messages: messages ++ msgs}, iter + 1)
+    end
+  end
 
   defp build_preface(str, _) when is_binary(str), do: str
   defp build_preface(fun, engine) when is_function(fun, 1), do: fun.(engine)
@@ -77,14 +83,14 @@ defmodule Console.AI.Chat.MemoryEngine do
       with {:ok, impl}    <- Map.fetch(by_name, name),
            {:ok, parsed}  <- Tool.validate(impl, args),
            {:ok, content} <- Tool.implement(impl, Map.put(parsed, :id, tool)) do
-        {:cont, [callback(engine, tool_msg(content, id, name, args)) | acc]}
+        {:cont, [callback(engine, tool_msg(content, id, name, args, engine.tool_fmt)) | acc]}
       else
         :error ->
-          {:halt, [callback(engine, tool_msg("failed to call tool: #{name}, tool not found", id, name, args)) | acc]}
+          {:halt, [callback(engine, tool_msg("failed to call tool: #{name}, tool not found", id, name, args, engine.tool_fmt)) | acc]}
         {:error, %Ecto.Changeset{} = cs} ->
-          {:cont, [callback(engine, tool_msg("failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", id, name, args)) | acc]}
+          {:cont, [callback(engine, tool_msg("failed to call tool: #{name}, errors: #{Enum.join(resolve_changeset(cs), ", ")}", id, name, args, engine.tool_fmt)) | acc]}
         err ->
-          {:halt, [callback(engine, tool_msg("failed to call tool: #{name}, result: #{inspect(err)}", id, name, args)) | acc]}
+          {:halt, [callback(engine, tool_msg("failed to call tool: #{name}, result: #{inspect(err)}", id, name, args, engine.tool_fmt)) | acc]}
       end
     end)
     |> then(fn
@@ -99,12 +105,21 @@ defmodule Console.AI.Chat.MemoryEngine do
   end
   defp callback(_, msg), do: msg
 
-  defp tool_msg(content, id, name, args, attrs \\ %{})
-  defp tool_msg(content, id, name, args, attrs) when is_binary(content),
+  defp tool_msg(content, id, name, args, fun, attrs \\ %{})
+  defp tool_msg(content, id, name, args, _, attrs) when is_binary(content),
     do: {:tool, content, %{call_id: id, name: name, arguments: args, attributes: attrs}}
-  defp tool_msg(%{content: content} = msg, id, name, args, _),
+  defp tool_msg(%{content: content} = msg, id, name, args, _, _),
     do: {:tool, content, %{call_id: id, name: name, arguments: args, attributes: Map.delete(msg, :content)}}
-  defp tool_msg(result, _, _, _, _), do: result
+  defp tool_msg(result, id, name, args, fmt, attrs) when is_function(fmt, 1) do
+    case fmt.(result) do
+      content when is_binary(content) -> {result, {:tool, content, %{call_id: id, name: name, arguments: args, attributes: attrs}}}
+      _ -> result
+    end
+  end
+
+  defp msg({res, {:tool, _, _}}, :result), do: res
+  defp msg({_, {:tool, _, _} = tool}, :tool), do: tool
+  defp msg(pass, _), do: pass
 
   defp maybe_prepend(msg, messages) when is_binary(msg) and byte_size(msg) > 0, do: [{:assistant, msg} | messages]
   defp maybe_prepend(_, messages), do: messages
