@@ -13,6 +13,7 @@ import {
   ToolKitIcon,
   UnknownIcon,
   VisualInspectionIcon,
+  BrainIcon,
 } from '@pluralsh/design-system'
 import { SimplifiedMarkdown } from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
@@ -105,6 +106,8 @@ const activityTypeToIcon: Record<
   [WorkbenchJobActivityType.Plan]: ChecklistCheckedIcon,
   [WorkbenchJobActivityType.Ticketing]: TicketIcon,
   [WorkbenchJobActivityType.Integration]: ToolKitIcon,
+  [WorkbenchJobActivityType.Memory]: BrainIcon,
+  [WorkbenchJobActivityType.User]: BrainIcon,
 } as const satisfies Record<WorkbenchJobActivityType, ComponentType<IconProps>>
 
 function ActivityStatusIcon({
