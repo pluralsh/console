@@ -1,7 +1,7 @@
 defmodule Console.Schema.Issue do
   use Console.Schema.Base
 
-  alias Console.Schema.{Workbench, Flow, IssueWebhook}
+  alias Console.Schema.{Workbench, WorkbenchJob, Flow, IssueWebhook}
 
   defenum Status, open: 0, in_progress: 1, cancelled: 2, completed: 3
 
@@ -13,8 +13,9 @@ defmodule Console.Schema.Issue do
     field :title,       :string
     field :body,        :string
 
-    belongs_to :workbench, Workbench
-    belongs_to :flow,      Flow
+    belongs_to :workbench,  Workbench
+    belongs_to :flow,       Flow
+    has_one :workbench_job, WorkbenchJob
 
     timestamps()
   end

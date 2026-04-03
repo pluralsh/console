@@ -1609,6 +1609,9 @@ type Issue {
   "the workbench this issue is associated with"
   workbench: Workbench
 
+  "the workbench job this issue is associated with"
+  workbenchJob: WorkbenchJob
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -5159,6 +5162,9 @@ type Alert {
 
   "The workbench this alert was associated with"
   workbench: Workbench
+
+  "The workbench job this alert was associated with"
+  workbenchJob: WorkbenchJob
 
   "Time series metrics and threshold used when this alert was evaluated"
   timeseries: AlertTimeseries

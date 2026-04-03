@@ -10,6 +10,7 @@ defmodule Console.Schema.Alert do
     AlertResolution,
     Flow,
     Workbench,
+    WorkbenchJob,
     Monitor
   }
 
@@ -65,7 +66,8 @@ defmodule Console.Schema.Alert do
     belongs_to :workbench, Workbench
     belongs_to :monitor,   Monitor
 
-    has_one :resolution, AlertResolution
+    has_one :resolution,    AlertResolution
+    has_one :workbench_job, WorkbenchJob
 
     has_many :tags, Tag, on_replace: :delete
 

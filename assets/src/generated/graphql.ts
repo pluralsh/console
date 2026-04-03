@@ -970,6 +970,8 @@ export type Alert = {
   url?: Maybe<Scalars['String']['output']>;
   /** The workbench this alert was associated with */
   workbench?: Maybe<Workbench>;
+  /** The workbench job this alert was associated with */
+  workbenchJob?: Maybe<WorkbenchJob>;
 };
 
 export type AlertConnection = {
@@ -5095,6 +5097,8 @@ export type Issue = {
   url: Scalars['String']['output'];
   /** the workbench this issue is associated with */
   workbench?: Maybe<Workbench>;
+  /** the workbench job this issue is associated with */
+  workbenchJob?: Maybe<WorkbenchJob>;
 };
 
 export type IssueConnection = {
