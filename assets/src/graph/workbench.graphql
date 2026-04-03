@@ -265,6 +265,8 @@ fragment WorkbenchJob on WorkbenchJob {
   issue {
     id
     title
+    externalId
+    insertedAt
     status
     url
     provider
