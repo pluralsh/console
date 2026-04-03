@@ -3,7 +3,7 @@ defmodule Console.AI.Workbench.Heartbeat do
   alias Console.Schema.WorkbenchJob
   alias Console.Deployments.Workbenches
 
-  @poll :timer.minutes(1)
+  @poll :timer.seconds(30)
 
   def start_link(%WorkbenchJob{} = job) do
     GenServer.start_link(__MODULE__, job)
