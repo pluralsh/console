@@ -61,11 +61,9 @@ export function WorkbenchWebhookTriggerForm({
 
   const label = formState.name.trim()
   const webhookId = formState.webhookId
-  const existingIssueWebhookId = webhook?.issueWebhook?.id
   const isSaving = createState.loading || updateState.loading || finalizing
   const error = webhooksError ?? createState.error ?? updateState.error
-  const canSave =
-    !!label && (!!webhookId || !!existingIssueWebhookId) && !isSaving
+  const canSave = !!label && !!webhookId && !isSaving
 
   const handleSave = async () => {
     if (!canSave) return
@@ -73,14 +71,7 @@ export function WorkbenchWebhookTriggerForm({
     setFinalizing(true)
 
     try {
-      const attributes = {
-        name: label,
-        ...(webhookId
-          ? { webhookId }
-          : existingIssueWebhookId
-            ? { issueWebhookId: existingIssueWebhookId }
-            : {}),
-      }
+      const attributes = { name: label, webhookId }
 
       if (editing && webhook) {
         await updateWorkbenchWebhook({
