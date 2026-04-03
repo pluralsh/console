@@ -52,7 +52,7 @@ message SplunkConnection {
 
 message DynatraceConnection {
   string url = 1;
-  string apiToken = 2;
+   string platformToken = 2;
 }
 
 message ToolConnection {

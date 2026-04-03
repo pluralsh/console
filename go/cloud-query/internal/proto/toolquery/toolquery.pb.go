@@ -449,7 +449,7 @@ func (x *SplunkConnection) GetPassword() string {
 type DynatraceConnection struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
-	ApiToken      string                 `protobuf:"bytes,2,opt,name=apiToken,proto3" json:"apiToken,omitempty"`
+	PlatformToken string                 `protobuf:"bytes,2,opt,name=platformToken,proto3" json:"platformToken,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -491,9 +491,9 @@ func (x *DynatraceConnection) GetUrl() string {
 	return ""
 }
 
-func (x *DynatraceConnection) GetApiToken() string {
+func (x *DynatraceConnection) GetPlatformToken() string {
 	if x != nil {
-		return x.ApiToken
+		return x.PlatformToken
 	}
 	return ""
 }
@@ -1546,10 +1546,10 @@ const file_toolquery_proto_rawDesc = "" +
 	"\bpassword\x18\x04 \x01(\tH\x02R\bpassword\x88\x01\x01B\b\n" +
 	"\x06_tokenB\v\n" +
 	"\t_usernameB\v\n" +
-	"\t_password\"C\n" +
+	"\t_password\"M\n" +
 	"\x13DynatraceConnection\x12\x10\n" +
-	"\x03url\x18\x01 \x01(\tR\x03url\x12\x1a\n" +
-	"\bapiToken\x18\x02 \x01(\tR\bapiToken\"\xb1\x03\n" +
+	"\x03url\x18\x01 \x01(\tR\x03url\x12$\n" +
+	"\rplatformToken\x18\x02 \x01(\tR\rplatformToken\"\xb1\x03\n" +
 	"\x0eToolConnection\x128\n" +
 	"\aelastic\x18\x01 \x01(\v2\x1c.toolquery.ElasticConnectionH\x00R\aelastic\x128\n" +
 	"\adatadog\x18\x02 \x01(\v2\x1c.toolquery.DatadogConnectionH\x00R\adatadog\x12A\n" +

@@ -296,7 +296,7 @@ ToolQuery support varies by operation:
 | Elasticsearch | No | Yes | No | Elasticsearch typed Search API with query string |
 | Loki | No | Yes | No | Loki HTTP `query_range` API |
 | Tempo | No | No | Yes | Tempo HTTP search + trace fetch |
-| Dynatrace | Yes | Yes | Yes | Dynatrace Metrics (v2) and Grail (v2) APIs |
+| Dynatrace | Yes | Yes | Yes | Dynatrace Grail Query API (DQL via `/platform/storage/query/v1/query:*`) |
 
 ## Client and Endpoint Details
 
@@ -310,7 +310,7 @@ ToolQuery uses the following clients/SDKs and endpoints for each integration:
 - Elasticsearch: `elastic/go-elasticsearch` v9 typed client, `Search` (Elasticsearch `/_search`) with a `query_string` query and `@timestamp` range filter. Requires API key.
 - Loki: REST client to `/loki/api/v1/query_range`, bearer token auth, optional `X-Scope-OrgID` header for tenancy.
 - Tempo: REST client to `/api/search` and `/api/traces/{traceID}`, bearer token auth, optional `X-Scope-OrgID` header for tenancy.
-- Dynatrace: REST client to `/api/v2/metrics` and `/api/v2/query/execute` (Grail), bearer token auth.
+- Dynatrace: REST client to `/platform/storage/query/v1/query:execute` and `/platform/storage/query/v1/query:poll` (Grail DQL), bearer token auth.
 
 ## Service Definition
 
@@ -358,7 +358,7 @@ message TempoConnection {
 
 message DynatraceConnection {
   string url = 1;
-  string apiToken = 2;
+  string platformToken = 2;
 }
 ```
 
@@ -379,7 +379,7 @@ message ToolConnection {
     PrometheusConnection prometheus = 3;
     LokiConnection loki = 4;
     TempoConnection tempo = 5;
-    DynatraceConnection dynatrace = 6;
+    DynatraceConnection dynatrace = 7;
   }
 }
 
@@ -603,7 +603,9 @@ grpcurl -d '{
 
 ### Dynatrace
 
-Dynatrace metrics query uses the Metrics v2 API and requires a `metricSelector`.
+Dynatrace metrics query uses the Grail (DQL) API.
+The `query` must start with `timeseries`.
+`range` and `step` request fields are not supported for Dynatrace and must be expressed in DQL (`from:`, `to:`, `interval:`).
 
 #### Example request
 
@@ -612,7 +614,7 @@ grpcurl -d '{
   "connection": {
     "dynatrace": {
       "url": "https://abc12345.live.dynatrace.com",
-      "apiToken": "<API_TOKEN>"
+      "platformToken": "<PLATFORM_TOKEN>"
     }
   },
   "query": "timeseries from:now()-10m, avg(dt.host.cpu.usage), by:{host.name} | limit 1"
@@ -632,6 +634,100 @@ grpcurl -d '{
       "name": "builtin:host.cpu.usage",
       "value": 15.5
     }
+  ]
+}
+```
+
+## Metrics Search
+
+`MetricsSearch` returns metric names only.
+
+### Prometheus
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "prometheus": {
+      "url": "http://vmauth-vm-auth.monitoring:8427/select/0/prometheus",
+      "username": "<USERNAME>",
+      "password": "<PASSWORD>"
+    }
+  },
+  "query": "container_cpu_usage_seconds_total",
+  "limit": 5
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsSearch
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    { "name": "container_cpu_usage_seconds_total" },
+    { "name": "container_cpu_user_seconds_total" }
+  ]
+}
+```
+
+### Datadog
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "datadog": {
+      "apiKey": "<API_KEY>",
+      "appKey": "<APP_KEY>"
+    }
+  },
+  "query": "system.cpu",
+  "limit": 3
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsSearch
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    { "name": "system.cpu.idle" },
+    { "name": "system.cpu.iowait" },
+    { "name": "system.cpu.system" }
+  ]
+}
+```
+
+### Dynatrace
+
+Dynatrace metrics search uses a plain search term and Cloud Query composes DQL internally:
+`metrics | filter contains(metric.key, "<query>", caseSensitive: false) [| limit N]`.
+
+#### Example request
+
+```bash
+grpcurl -d '{
+  "connection": {
+    "dynatrace": {
+      "url": "https://abc12345.live.dynatrace.com",
+      "platformToken": "<PLATFORM_TOKEN>"
+    }
+  },
+  "query": "builtin:host.cpu.usage",
+  "limit": 3
+}' -plaintext localhost:9192 toolquery.ToolQuery/MetricsSearch
+```
+
+#### Output
+
+```json
+{
+  "metrics": [
+    { "name": "builtin:host.cpu.usage" },
+    { "name": "builtin:host.mem.usage" },
+    { "name": "fallback.metric.name" }
   ]
 }
 ```
@@ -825,6 +921,8 @@ grpcurl -d '{
 ### Dynatrace
 
 Dynatrace logs query uses the Grail (DQL) API.
+The `query` must start with `fetch logs`.
+`range` and `limit` request fields are not supported for Dynatrace logs and must be expressed in DQL (`from:`, `to:`, `| limit`).
 
 #### Example request
 
@@ -833,7 +931,7 @@ grpcurl -d '{
   "connection": {
     "dynatrace": {
       "url": "https://abc12345.live.dynatrace.com",
-      "apiToken": "<API_TOKEN>"
+      "platformToken": "<PLATFORM_TOKEN>"
     }
   },
   "query": "fetch logs | limit 1"
@@ -1015,7 +1113,10 @@ grpcurl -d '{
 
 ### Dynatrace
 
-Dynatrace traces query also uses the Grail (DQL) API but maps results to spans.
+Dynatrace traces query uses the Grail (DQL) API and maps span records to `TraceSpan`.
+Expected DQL fields for mapping are: `trace.id`, `span.id`, `span.name`, `start_time`, `end_time`, `duration`.
+The `query` must start with `fetch spans`.
+`range` and `limit` request fields are not supported for Dynatrace traces and must be expressed in DQL (`from:`, `to:`, `| limit`).
 
 #### Example request
 
@@ -1024,7 +1125,7 @@ grpcurl -d '{
   "connection": {
     "dynatrace": {
       "url": "https://abc12345.live.dynatrace.com",
-      "apiToken": "<API_TOKEN>"
+      "platformToken": "<PLATFORM_TOKEN>"
     }
   },
   "query": "fetch spans | limit 1"
@@ -1038,13 +1139,15 @@ grpcurl -d '{
   "spans": [
     {
       "tags": {
-        "dt.entity.service": "SERVICE-12345"
+        "dt.entity.service": "SERVICE-12345",
+        "k8s.namespace.name": "datadog",
+        "http.request.method": "GET"
       },
-      "trace_id": "trace-123",
-      "span_id": "span-456",
+      "trace_id": "b7584e49925d0d6894c154f55c7d360e",
+      "span_id": "cc82a11e223cd2c6",
       "name": "GET",
-      "start": "2024-03-20T10:05:00Z",
-      "end": "2024-03-20T10:05:00Z"
+      "start": "2026-04-03T12:57:20.556086Z",
+      "end": "2026-04-03T12:57:20.556304Z"
     }
   ]
 }

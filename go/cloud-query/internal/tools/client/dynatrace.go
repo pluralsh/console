@@ -24,9 +24,9 @@ type DynatraceClient struct {
 	baseUrl string
 }
 
-func NewDynatraceClient(baseUrl, apiToken string) *DynatraceClient {
+func NewDynatraceClient(baseUrl, platformToken string) *DynatraceClient {
 	client := resty.New()
-	client.SetHeader("Authorization", "Bearer "+apiToken)
+	client.SetHeader("Authorization", "Bearer "+platformToken)
 
 	return &DynatraceClient{Client: client, baseUrl: strings.TrimSuffix(baseUrl, "/")}
 }

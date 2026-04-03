@@ -144,8 +144,8 @@ defmodule Console.GraphQl.Deployments.Workbench do
   end
 
   input_object :workbench_tool_dynatrace_connection_attributes do
-    field :url,       non_null(:string), description: "dynatrace base url"
-    field :api_token, non_null(:string), description: "dynatrace API token"
+    field :url,            non_null(:string), description: "dynatrace base url"
+    field :platform_token, non_null(:string), description: "dynatrace platform token"
   end
 
   input_object :workbench_tool_linear_connection_attributes do

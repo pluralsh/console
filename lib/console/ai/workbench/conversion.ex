@@ -8,6 +8,7 @@ defmodule Console.AI.Workbench.Conversion do
     SplunkConnection,
     TempoConnection,
     ElasticConnection,
+    DynatraceConnection,
   }
 
   @spec to_proto(WorkbenchTool.t()) :: {:ok, %ToolConnection{}} | {:error, String.t()}
@@ -75,6 +76,15 @@ defmodule Console.AI.Workbench.Conversion do
         username: elastic.username,
         password: elastic.password,
         index:    elastic.index,
+      }}
+    }}
+  end
+
+  def to_proto(%WorkbenchTool{tool: :dynatrace, configuration: %{dynatrace: %{} = dynatrace}}) do
+    {:ok, %ToolConnection{
+      connection: {:dynatrace, %DynatraceConnection{
+        url: dynatrace.url,
+        platformToken: dynatrace.platform_token,
       }}
     }}
   end

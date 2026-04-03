@@ -15157,8 +15157,8 @@ export type WorkbenchToolDynatraceConnection = {
 };
 
 export type WorkbenchToolDynatraceConnectionAttributes = {
-  /** dynatrace API token */
-  apiToken: Scalars['String']['input'];
+  /** dynatrace platform token */
+  platformToken: Scalars['String']['input'];
   /** dynatrace base url */
   url: Scalars['String']['input'];
 };

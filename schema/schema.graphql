@@ -2447,8 +2447,8 @@ input WorkbenchToolDynatraceConnectionAttributes {
   "dynatrace base url"
   url: String!
 
-  "dynatrace API token"
-  apiToken: String!
+  "dynatrace platform token"
+  platformToken: String!
 }
 
 input WorkbenchToolLinearConnectionAttributes {

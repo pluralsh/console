@@ -76,8 +76,8 @@ defmodule Console.Schema.WorkbenchTool do
       end
 
       embeds_one :dynatrace, DynatraceConnection, on_replace: :update do
-        field :url,       :string
-        field :api_token, EncryptedString
+        field :url,            :string
+        field :platform_token, EncryptedString
       end
 
       embeds_one :http, HttpConfiguration, on_replace: :update do
@@ -236,8 +236,8 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp dynatrace_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url api_token)a)
-    |> validate_required([:url, :api_token])
+    |> cast(attrs, ~w(url platform_token)a)
+    |> validate_required([:url, :platform_token])
   end
 
   defp splunk_configuration_changeset(model, attrs) do

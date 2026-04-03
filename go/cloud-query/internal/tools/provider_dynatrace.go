@@ -14,7 +14,7 @@ type DynatraceProvider struct {
 }
 
 func NewDynatraceProvider(conn *toolquery.DynatraceConnection) *DynatraceProvider {
-	return &DynatraceProvider{client: client.NewDynatraceClient(conn.Url, conn.ApiToken)}
+	return &DynatraceProvider{client: client.NewDynatraceClient(conn.Url, conn.PlatformToken)}
 }
 
 func (in *DynatraceProvider) Metrics(ctx context.Context, input *toolquery.MetricsQueryInput) (*toolquery.MetricsQueryOutput, error) {

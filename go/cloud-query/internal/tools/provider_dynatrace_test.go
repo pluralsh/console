@@ -61,8 +61,8 @@ func TestDynatraceProvider_MetricsFromDqlRecords(t *testing.T) {
 	defer ts.Close()
 
 	provider := NewDynatraceProvider(&toolquery.DynatraceConnection{
-		Url:      ts.URL,
-		ApiToken: "test-token",
+		Url:           ts.URL,
+		PlatformToken: "test-token",
 	})
 
 	resp, err := provider.Metrics(context.Background(), &toolquery.MetricsQueryInput{
@@ -117,8 +117,8 @@ func TestDynatraceProvider_MetricsSearchFromDqlRecords(t *testing.T) {
 	defer ts.Close()
 
 	provider := NewDynatraceProvider(&toolquery.DynatraceConnection{
-		Url:      ts.URL,
-		ApiToken: "test-token",
+		Url:           ts.URL,
+		PlatformToken: "test-token",
 	})
 
 	resp, err := provider.MetricsSearch(context.Background(), &toolquery.MetricsSearchInput{

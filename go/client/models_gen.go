@@ -9847,8 +9847,8 @@ type WorkbenchToolDynatraceConnection struct {
 type WorkbenchToolDynatraceConnectionAttributes struct {
 	// dynatrace base url
 	URL string `json:"url"`
-	// dynatrace API token
-	APIToken string `json:"apiToken"`
+	// dynatrace platform token
+	PlatformToken string `json:"platformToken"`
 }
 
 type WorkbenchToolEdge struct {
