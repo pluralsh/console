@@ -176,7 +176,7 @@ observabilityProxy:
   consoleGRPCEndpoint: "console:50051"
   configTTL: "60s"
   grpcTimeout: "10s"
-  upstreamTimeout: "30s"
+  upstreamTimeout: "120s"
   meterInterval: "30s"
   image:
     repository: observability-proxy
@@ -284,6 +284,7 @@ ingress:
     cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/affinity: cookie
     nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/proxy-body-size: '50m'
     nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
     nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
     nginx.ingress.kubernetes.io/session-cookie-path: /socket
