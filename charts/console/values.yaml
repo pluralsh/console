@@ -195,6 +195,30 @@ observabilityProxy:
     maxReplicas: 20
     targetCPUUtilizationPercentage: 80
     targetMemoryUtilizationPercentage: ~
+  # ingress is used to configure a dedicated ingress for observability-proxy with custom timeout and body size settings.
+  # When enabled, the observability-proxy paths (/ext/v1/ingest, /ext/v1/query) are routed through this ingress
+  # instead of the main console ingress, allowing for tuned settings suitable for large observability payloads.
+  ingress:
+    # enabled controls whether a dedicated ingress is created for observability-proxy.
+    # If false, observability-proxy paths are handled by the main console ingress.
+    enabled: false
+    # ingressClass specifies the ingress class to use (defaults to main ingress class if not set)
+    ingressClass: ~
+    # proxyReadTimeout is the nginx read timeout in seconds for upstream responses (nginx.ingress.kubernetes.io/proxy-read-timeout)
+    proxyReadTimeout: "300"
+    # proxySendTimeout is the nginx send timeout in seconds for upstream requests (nginx.ingress.kubernetes.io/proxy-send-timeout)
+    proxySendTimeout: "300"
+    # proxyConnectTimeout is the nginx connect timeout in seconds (nginx.ingress.kubernetes.io/proxy-connect-timeout)
+    proxyConnectTimeout: "60"
+    # proxyBodySize is the maximum allowed size of the client request body (nginx.ingress.kubernetes.io/proxy-body-size)
+    # Set to "0" for unlimited. Useful for large metric/log payloads.
+    proxyBodySize: "100m"
+    # annotations allows specifying additional custom annotations for the observability-proxy ingress
+    annotations: {}
+    # tls configures TLS for the observability-proxy ingress
+    tls:
+      # enabled controls whether TLS is enabled (uses the same secret as console ingress)
+      enabled: true
 
 # initContainers is used to create a list of init containers for your console deployment
 initContainers: []

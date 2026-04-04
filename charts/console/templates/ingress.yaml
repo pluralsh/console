@@ -43,7 +43,7 @@ spec:
             port:
               name: nexus-http
       {{- end }}
-      {{- if .Values.observabilityProxy.enabled }}
+      {{- if and .Values.observabilityProxy.enabled (not .Values.observabilityProxy.ingress.enabled) }}
       - path: /ext/v1/ingest
         pathType: Prefix
         backend:

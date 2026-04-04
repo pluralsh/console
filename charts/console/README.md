@@ -83,4 +83,13 @@ to generate your values file and install from there.
 | serviceAccount.create | bool | `true` |  |
 | shutdownDelay | int | `30` |  |
 | tolerations | list | `[]` |  |
+| observabilityProxy.enabled | bool | `false` | Enable the observability-proxy deployment |
+| observabilityProxy.ingress.enabled | bool | `false` | Enable a dedicated ingress for observability-proxy with custom timeout/body size settings |
+| observabilityProxy.ingress.ingressClass | string | `nil` | Ingress class (defaults to main ingress class) |
+| observabilityProxy.ingress.proxyReadTimeout | string | `"300"` | Nginx proxy read timeout in seconds |
+| observabilityProxy.ingress.proxySendTimeout | string | `"300"` | Nginx proxy send timeout in seconds |
+| observabilityProxy.ingress.proxyConnectTimeout | string | `"60"` | Nginx proxy connect timeout in seconds |
+| observabilityProxy.ingress.proxyBodySize | string | `"100m"` | Max client request body size (use "0" for unlimited) |
+| observabilityProxy.ingress.annotations | object | `{}` | Additional custom annotations for the ingress |
+| observabilityProxy.ingress.tls.enabled | bool | `true` | Enable TLS for the observability-proxy ingress |
 

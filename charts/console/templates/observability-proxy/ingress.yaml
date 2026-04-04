@@ -1,0 +1,44 @@
+{{- if and .Values.observabilityProxy.enabled .Values.observabilityProxy.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: console-observability-proxy
+  labels:
+    helm.sh/chart: {{ include "console.chart" . }}
+    app.kubernetes.io/name: observability-proxy
+    app.kubernetes.io/instance: {{ .Release.Name }}
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: {{ .Values.observabilityProxy.ingress.proxyReadTimeout | quote }}
+    nginx.ingress.kubernetes.io/proxy-send-timeout: {{ .Values.observabilityProxy.ingress.proxySendTimeout | quote }}
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: {{ .Values.observabilityProxy.ingress.proxyConnectTimeout | quote }}
+    nginx.ingress.kubernetes.io/proxy-body-size: {{ .Values.observabilityProxy.ingress.proxyBodySize | quote }}
+    {{- with .Values.observabilityProxy.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  ingressClassName: {{ .Values.observabilityProxy.ingress.ingressClass | default .Values.ingress.ingressClass }}
+  {{- if .Values.observabilityProxy.ingress.tls.enabled }}
+  tls:
+  - hosts:
+    - {{ .Values.ingress.console_dns | quote }}
+    secretName: console-tls
+  {{- end }}
+  rules:
+  - host: {{ .Values.ingress.console_dns | quote }}
+    http:
+      paths:
+      - path: /ext/v1/ingest
+        pathType: Prefix
+        backend:
+          service:
+            name: console-observability-proxy
+            port:
+              name: http
+      - path: /ext/v1/query
+        pathType: Prefix
+        backend:
+          service:
+            name: console-observability-proxy
+            port:
+              name: http
+{{- end }}
