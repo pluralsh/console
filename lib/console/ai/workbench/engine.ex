@@ -71,8 +71,7 @@ defmodule Console.AI.Workbench.Engine do
     |> MemoryEngine.new(20,
       system_prompt: &system_prompt(prompt: job.prompt, engine: &1),
       acc: %{},
-      tool_fmt: &tool_fmt/1,
-      callback: &IO.inspect(&1, label: "memory engine callback")
+      tool_fmt: &tool_fmt/1
     )
     |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
     |> case do
