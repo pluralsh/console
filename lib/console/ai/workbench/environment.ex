@@ -1,8 +1,9 @@
 defmodule Console.AI.Workbench.Environment do
-  alias Console.Schema.{WorkbenchJob, Workbench, WorkbenchTool, WorkbenchJobActivity}
+  alias Console.Schema.{WorkbenchJob, Workbench, WorkbenchTool, WorkbenchJobActivity, User}
   alias Console.AI.Workbench.Skill
 
   @type t :: %__MODULE__{
+    user: User.t,
     job: WorkbenchJob.t,
     tools: %{binary => WorkbenchTool.t},
     skills: %{binary => Skill.t},
@@ -11,10 +12,11 @@ defmodule Console.AI.Workbench.Environment do
 
   defguardp is_map_or_list(m) when is_map(m) or is_list(m)
 
-  defstruct [:job, :tools, :skills, :activities]
+  defstruct [:job, :tools, :skills, :activities, :user]
 
   def new(%WorkbenchJob{} = job, tools, skills) when is_map_or_list(tools) and is_map_or_list(skills) do
     %__MODULE__{
+      user: job.user,
       job: job,
       tools: to_map(tools),
       skills: to_map(skills)

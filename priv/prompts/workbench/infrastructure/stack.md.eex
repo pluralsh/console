@@ -1,0 +1,43 @@
+Here's the GitOps structure of the following stack
+
+# Attributes
+
+```json
+<%= Map.take(@stack, [:id, :name, :type, :approval, :workdir]) |> Jason.encode!(pretty: true) %>
+```
+
+# Repository
+
+This is where the <%= @stack.type %> code lives.
+
+```json
+<%= Jason.encode!(%{
+    url: @stack.repository.url,
+    ref: @stack.git.ref,
+    folder: @stack.git.folder
+}, pretty: true) %>
+```
+<%= if @stack.workdir do %>
+Working directory: <%= @stack.workdir %>
+<% end %>
+
+<%= if @stack.parent do %>
+# Parent
+
+The stack is managed as an InfrastructureStack kubernetes custom resource in the following Plural Service:
+
+(this is often useful for understanding how terraform variables or other configuration is managed, since they'll be added at the CR level here)
+
+```json
+<%= Jason.encode!(%{
+    id: @stack.parent.id,
+    name: @stack.parent.name,
+    cluster: %{
+        name: @stack.parent.cluster.name,
+        handle: @stack.parent.cluster.handle
+    }
+}, pretty: true) %>
+```
+
+You can always query details about the parent service to investigate further.
+<% end %>

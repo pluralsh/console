@@ -1,7 +1,16 @@
 defmodule Console.AI.Workbench.Subagents.Infrastructure do
   use Console.AI.Workbench.Subagents.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, Workbench}
-  alias Console.AI.Tools.Workbench.{SummarizeComponent, Result, Skills, Skill}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, Workbench, User}
+  alias Console.AI.Tools.Workbench.{
+    SummarizeComponent,
+    Result,
+    Skills,
+    Skill,
+    Infrastructure.KubeGet,
+    Infrastructure.KubeList,
+    Infrastructure.ServiceFiles,
+    Infrastructure.StackFiles
+  }
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
   alias Console.AI.Workbench.Environment
 
@@ -27,10 +36,10 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     end
   end
 
-  defp tools(%WorkbenchJob{workbench: bench}, %Environment{skills: skills}) do
+  defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills}) do
     svc_tools(bench)
     |> Enum.concat(stack_tools(bench))
-    |> Enum.concat(k8s_tools(bench))
+    |> Enum.concat(k8s_tools(bench, user))
     |> Enum.concat([
       %Skills{skills: skills},
       %Skill{skills: skills},
@@ -38,14 +47,20 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     ])
   end
 
-  defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}), do:  [ServiceComponent]
+  defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}), do:  [ServiceComponent, ServiceFiles]
   defp svc_tools(_), do: []
 
-  defp stack_tools(%Workbench{configuration: %{infrastructure: %{stacks: true}}}), do: [Stack]
+  defp stack_tools(%Workbench{configuration: %{infrastructure: %{stacks: true}}}), do: [Stack, StackFiles]
   defp stack_tools(_), do: []
 
-  defp k8s_tools(%Workbench{configuration: %{infrastructure: %{kubernetes: true}}}), do: [SummarizeComponent]
-  defp k8s_tools(_), do: []
+  defp k8s_tools(%Workbench{configuration: %{infrastructure: %{kubernetes: true}}}, %User{} = user) do
+    [
+      SummarizeComponent,
+      %KubeGet{user: user},
+      %KubeList{user: user}
+    ]
+  end
+  defp k8s_tools(_, _), do: []
 
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "infrastructure.md.eex"]), [:assigns], trim: true)
 end
