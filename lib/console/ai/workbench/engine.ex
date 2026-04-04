@@ -13,10 +13,7 @@ defmodule Console.AI.Workbench.Engine do
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
-  alias Console.Schema.{
-    WorkbenchJob,
-    WorkbenchJobActivity
-  }
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
   alias Console.AI.Workbench.Skills, as: SkillsUtil
   alias Console.AI.Workbench.Subagents, as: SA
   alias Console.AI.Workbench.{
@@ -40,7 +37,8 @@ defmodule Console.AI.Workbench.Engine do
   defstruct [:job, :user, :environment, activities: [], iterations: 0, max: 200]
 
   def new(%WorkbenchJob{} = job) do
-    %{user: user, workbench: workbench} = job = Repo.preload(job, [:user, workbench: [:repository, :agent_runtime, [tools: :mcp_server]]])
+    %{user: user, workbench: workbench} = job =
+      Repo.preload(job, [:user, workbench: [:repository, :agent_runtime, [tools: :mcp_server]]])
 
     user = Console.Services.Rbac.preload(user)
     with {:ok, _} <- Heartbeat.start_link(job),
@@ -75,10 +73,11 @@ defmodule Console.AI.Workbench.Engine do
     )
     |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
     |> case do
-      {:ok, %Complete{conclusion: conclusion, metrics: metrics, logs: logs, todos: todos}} ->
+      {:ok, %Complete{conclusion: conclusion, metrics: metrics, logs: logs, todos: todos, topology: topology}} ->
         drop_empty(%{
           conclusion: conclusion,
           todos: todos,
+          topology: topology,
           metadata: drop_empty(%{metrics: metrics, logs: logs}),
         })
         |> Workbenches.complete_job(job)

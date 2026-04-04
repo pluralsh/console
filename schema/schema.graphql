@@ -2699,6 +2699,9 @@ type WorkbenchJobResult {
   "the conclusion for this result"
   conclusion: String
 
+  "a mermaid diagram of the topology of the system in question in this investigation"
+  topology: String
+
   "todos for this result"
   todos: [WorkbenchJobResultTodo]
 

@@ -5,6 +5,7 @@ defmodule Console.AI.Tools.Workbench.Complete do
 
   embedded_schema do
     field :conclusion, :string
+    field :topology, :string
     embeds_many :todos, WorkbenchJobResult.Todo, on_replace: :delete
     embeds_many :metrics, Metric, on_replace: :delete
     embeds_many :logs, Log, on_replace: :delete
@@ -18,7 +19,7 @@ defmodule Console.AI.Tools.Workbench.Complete do
 
   def changeset(model, attrs) do
     model
-    |> cast(attrs, [:conclusion])
+    |> cast(attrs, [:conclusion, :topology])
     |> cast_embed(:metrics, with: &WorkbenchJobActivity.metric_changeset/2)
     |> cast_embed(:logs, with: &WorkbenchJobActivity.log_changeset/2)
     |> cast_embed(:todos, with: &WorkbenchJobResult.todo_changeset/2, required: true)

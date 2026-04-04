@@ -14964,6 +14964,8 @@ export type WorkbenchJobResult = {
   metadata?: Maybe<WorkbenchJobResultMetadata>;
   /** todos for this result */
   todos?: Maybe<Array<Maybe<WorkbenchJobResultTodo>>>;
+  /** a mermaid diagram of the topology of the system in question in this investigation */
+  topology?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the job this result belongs to */
   workbenchJob?: Maybe<WorkbenchJob>;

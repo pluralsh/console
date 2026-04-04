@@ -293,6 +293,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :id,             non_null(:string), description: "the id of the result"
     field :working_theory,  :string, description: "the working theory for this result"
     field :conclusion,     :string, description: "the conclusion for this result"
+    field :topology,       :string, description: "a mermaid diagram of the topology of the system in question in this investigation"
     field :todos,          list_of(:workbench_job_result_todo), description: "todos for this result"
     field :metadata,       :workbench_job_result_metadata, description: "metadata for this result"
 

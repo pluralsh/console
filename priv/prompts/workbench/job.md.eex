@@ -29,11 +29,21 @@ Once you've completed all the work you believe is necessary, call the `workbench
 
 As work is completed, be sure to call the `workbench_notes` tool to record progress and update your working theory for future reference and transparency to users.
 
+## Final Result
+
+As work is being done, you can use the `working_theory` field to record the current best guess at the solution to your task.  This is useful for tracking work for users, and as a memo to track your work for future investigation.
+
+Also, there's a topology field, which accepts a mermaid formatted diagram.  Use this to express the current state of the system in question, including all main components at issue.  It will make it much easier for users to
+understand the correctness of any theory by visualizing what is at play.  You can modify this as work is being done, and also at completion to ensure your final conclusions are reflected in the diagram.
+
 ## Completion Criteria
-Only call `workbench_complete` if you believe all work has been completed, we can gather additional data and insights on future iterations.  In general, if a pull request has been created to fix the issue,
-you should almost always consider the work complete (unless additional pull requests are needed).  You cannot confirm the fix is active, since the pr needs to be merged out of band, and deployed independently.
+Only call `workbench_complete` if you believe all work has been completed, we can gather additional data and insights on future iterations.
+
+**In general, if a pull request has been created to fix the issue, you should almost always consider the work complete (unless additional pull requests are needed)**.  You cannot confirm the fix is active, since the pr needs to be merged out of band, and deployed independently.
 
 You should not need to ever invoke a repeated chain of note calls.  If that's all the work that's being done, you've likely completed everything and can proceed to workbench_complete.
+
+Once work is done, wrap up all todos, write a final conclusion, and if relevant, finalize the topology diagram for this investigation.
 
 ## Parallelism Guidance
 

@@ -9661,6 +9661,8 @@ type WorkbenchJobResult struct {
 	WorkingTheory *string `json:"workingTheory,omitempty"`
 	// the conclusion for this result
 	Conclusion *string `json:"conclusion,omitempty"`
+	// a mermaid diagram of the topology of the system in question in this investigation
+	Topology *string `json:"topology,omitempty"`
 	// todos for this result
 	Todos []*WorkbenchJobResultTodo `json:"todos,omitempty"`
 	// metadata for this result
