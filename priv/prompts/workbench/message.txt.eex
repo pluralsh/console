@@ -1,6 +1,6 @@
 We finished executing an activity for this workbench.  Here are the details:
 
-Activity type: <%= @activity.type %>
+Activity type: <%= if @activity.type == :memo, do: "notes", else: @activity.type %>
 Activity status: <%= @activity.status %>
 Initial prompt:
 
@@ -28,5 +28,13 @@ There were also some important metrics emitted by the activity, in json format:
 ```json
 <%= Console.clean(@activity.result.metrics) |> Jason.encode!() %>
 ```
+
+<%= if @activity.result.job_update do %>
+The key job attributes you updated were:
+
+```json
+<%= Console.clean(@activity.result.job_update) |> Jason.encode!() %>
+```
+<% end %>
 <% end %>
 <% end %>

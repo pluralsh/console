@@ -86,7 +86,7 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
-  defp tool_fmt(%Notes{}), do: "recorded notes for progress done so far"
+  defp tool_fmt(%Notes{} = notes), do: notes_message(notes: notes)
   defp tool_fmt(%Subagent{subagent: name}), do: "launched #{name} subagent, waiting for the result"
   defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
   defp tool_fmt(pass), do: pass
@@ -184,5 +184,6 @@ defmodule Console.AI.Workbench.Engine do
   defp continue_prompt(%__MODULE__{activities: [_, _ | _]}), do: "Ok, let's keep working" # the first activity is the plan
   defp continue_prompt(_), do: "Ok, let's start working"
 
+  EEx.function_from_file(:defp, :notes_message, Console.priv_filename(["prompts", "workbench", "notes_message.md.eex"]), [:assigns], trim: true)
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "job.md.eex"]), [:assigns], trim: true)
 end

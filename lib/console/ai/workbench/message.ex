@@ -2,7 +2,6 @@ defmodule Console.AI.Workbench.Message do
   alias Console.Schema.WorkbenchJobActivity
 
   require EEx
-
   def to_message(%WorkbenchJobActivity{type: :user, prompt: p}), do: {:user, p}
   def to_message(%WorkbenchJobActivity{tool_call: %{call_id: id, name: name, arguments: arguments}} = activity),
     do: {:tool, message_prompt(activity: activity), %{call_id: id, name: name, arguments: arguments}}

@@ -323,18 +323,15 @@ defmodule Console.Deployments.Workbenches do
       |> Repo.update()
     end)
     |> add_operation(:activity, fn _ ->
+      status =
+        TextDiff.format(result.working_theory || "", status[:working_theory] || "", color: true)
+        |> IO.iodata_to_binary()
+        |> then(&Map.put(status, :diff, &1))
       create_job_activity(%{
         status: :successful,
         type: :memo,
         prompt: prompt,
-        result: %{
-          output: output,
-          job_update: %{
-            diff: TextDiff.format(result.working_theory || "", status[:working_theory] || "", color: true)
-                  |> IO.iodata_to_binary(),
-            working_theory: status[:working_theory]
-          }
-        }
+        result: %{output: output, job_update: status}
       }, job)
     end)
     |> execute(extract: :activity)
