@@ -26,6 +26,7 @@ defmodule Console.AI.Workbench.EngineTest do
       expect(Provider, :completion, fn _, _ ->
         {:ok, "Plan complete", [
           %Tool{
+            id: "1",
             name: "workbench_plan",
             arguments: %{"todos" => [%{name: "todo 1", description: "todo 1", done: false}]}
           }
@@ -33,8 +34,19 @@ defmodule Console.AI.Workbench.EngineTest do
       end)
 
       expect(Provider, :completion, fn _, _ ->
+        {:ok, "make notes", [
+          %Tool{
+            id: "2",
+            name: "workbench_notes",
+            arguments: %{"status" => %{working_theory: "working theory"}, "summary" => "make notes"}
+          }
+        ]}
+      end)
+
+      expect(Provider, :completion, fn _, _ ->
         {:ok, "try infrastructure", [
           %Tool{
+            id: "3",
             name: "workbench_subagent",
             arguments: %{"prompt" => "try infrastructure", "subagent" => "infrastructure"}
           }
@@ -77,6 +89,15 @@ defmodule Console.AI.Workbench.EngineTest do
       assert [log] = result.result.metadata.logs
       assert log.message == "shutdown complete"
       assert log.labels == %{"service" => "worker"}
+
+      activities = Console.Repo.all(Console.Schema.WorkbenchJobActivity)
+      memo = Enum.find(activities, & &1.type == :memo)
+      assert memo.prompt == "make notes"
+      assert memo.tool_call.name == "workbench_notes"
+
+      infra = Enum.find(activities, & &1.type == :infrastructure)
+      assert infra.prompt == "try infrastructure"
+      assert infra.tool_call.name == "workbench_subagent"
     end
   end
 end

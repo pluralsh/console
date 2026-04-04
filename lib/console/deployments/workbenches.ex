@@ -314,7 +314,7 @@ defmodule Console.Deployments.Workbenches do
   Updates the status of a job, and creates a new recording the change made.
   """
   @spec update_job_status(%{status: map, prompt: binary, output: binary}, WorkbenchJob.t()) :: activity_resp
-  def update_job_status(%{status: %{} = status, prompt: prompt, output: output}, %WorkbenchJob{} = job)
+  def update_job_status(%{status: %{} = status, prompt: prompt, output: output} = args, %WorkbenchJob{} = job)
     when is_binary(prompt) and is_binary(output) do
     %{result: result} = Repo.preload(job, :result)
     start_transaction()
@@ -331,7 +331,8 @@ defmodule Console.Deployments.Workbenches do
         status: :successful,
         type: :memo,
         prompt: prompt,
-        result: %{output: output, job_update: status}
+        result: %{output: output, job_update: status},
+        tool_call: args[:tool_call]
       }, job)
     end)
     |> execute(extract: :activity)

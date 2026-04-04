@@ -15,4 +15,7 @@ Some guidelines to follow as you're doing this:
 
 It can also be useful to include a mermaid diagram of the topology of the infrastructure in question, as it will be used at a higher level to graph the overall theory of how to solve this task.
 
+If you've identified any Plural Service or Plural Stack related to this infrastructure being investigated, be sure to explicitly call them out by name in your conclusion.  This will be useful in future
+iterations, especially for providing `Plural Stack: {stack-name}` and `Plural Service: {cluster-handle}/{service-name}` tags to the PR body when creating a pull request.
+
 **IMPORTANT**: Once you've completed all the work you plan to do, always call the `subagent_result` tool to complete the subagent session.

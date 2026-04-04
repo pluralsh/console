@@ -37,4 +37,6 @@ The key job attributes you updated were:
 ```
 <% end %>
 <% end %>
+<% else %>
+Subagent is still running, waiting for the result...
 <% end %>
