@@ -361,4 +361,31 @@ defmodule Console.Deployments.CronTest do
       assert refetch(keep)
     end
   end
+
+  describe "#prune_dangling_policy_bindings/0" do
+    test "it will prune dangling policy bindings" do
+      user = insert(:user)
+
+      # Create a project with write_bindings - these should be kept
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      %{write_bindings: [kept_binding]} = Console.Repo.preload(project, [:write_bindings])
+
+      # Create orphaned policy bindings with random policy_ids that don't exist anywhere
+      orphaned = for _ <- 1..3 do
+        %Console.Schema.PolicyBinding{}
+        |> Console.Schema.PolicyBinding.changeset(%{
+          policy_id: Ecto.UUID.generate(),
+          user_id: user.id
+        })
+        |> Console.Repo.insert!()
+      end
+      :ok = Cron.prune_dangling_policy_bindings()
+
+      # Referenced binding should still exist
+      assert refetch(kept_binding)
+
+      # Orphaned bindings should be deleted
+      for binding <- orphaned, do: refute refetch(binding)
+    end
+  end
 end
