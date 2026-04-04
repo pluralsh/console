@@ -15,9 +15,15 @@ The coding agent completed its task.  Here are the results:
 
 <%= if is_list(@pull_requests) and length(@pull_requests) > 0 do %>
 <% pr = hd(@pull_requests) %>
-# Pull Request
+# Pull Request (<%= pr.status %>)
 
-Title: <%= pr.title %>
-URL: <%= pr.url %>
+## PR Title
+<%= pr.title %>
+
+## PR Description
+<%= pr.body %>
+
+## PR URL
+<%= pr.url %>
 
 <% end %>

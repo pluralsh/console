@@ -38,5 +38,5 @@ defmodule Console.AI.Agents.Pr do
     ]
   end
 
-  EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "pr", "agent.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "pr", "agent.md.eex"]), [:assigns], trim: true)
 end

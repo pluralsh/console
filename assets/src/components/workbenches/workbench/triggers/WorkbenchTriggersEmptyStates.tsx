@@ -39,7 +39,6 @@ export function WorkbenchScheduleEmptyState() {
           css={{ margin: '0 auto', width: 500 }}
         >
           <Button
-            secondary
             small
             onClick={() => {
               navigate(
@@ -70,14 +69,6 @@ export function WorkbenchWebhookEmptyState() {
         >
           <Flex gap="small">
             <Button
-              secondary
-              small
-              disabled
-              onClick={() => {}}
-            >
-              Create new webhook
-            </Button>
-            <Button
               small
               onClick={() => {
                 navigate(
@@ -85,7 +76,7 @@ export function WorkbenchWebhookEmptyState() {
                 )
               }}
             >
-              Select existing webhook
+              Create new webhook
             </Button>
           </Flex>
         </EmptyState>

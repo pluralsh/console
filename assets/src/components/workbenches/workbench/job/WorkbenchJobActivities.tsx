@@ -1,5 +1,4 @@
-import { Card, EmptyState, Markdown } from '@pluralsh/design-system'
-import { StepperAccordionSC } from 'components/utils/StepperAccordion'
+import { Accordion, Card, Markdown } from '@pluralsh/design-system'
 import {
   useWorkbenchJobActivitiesSuspenseQuery,
   useWorkbenchJobActivityDeltaSubscription,
@@ -9,6 +8,7 @@ import {
 import { useState } from 'react'
 
 import { useApolloClient } from '@apollo/client'
+import { AI_GRADIENT_BG } from 'components/ai/agent-runs/details/AIAgentRunMessages'
 import { VirtualList } from 'components/utils/VirtualList'
 import styled from 'styled-components'
 import {
@@ -17,7 +17,6 @@ import {
   updateCache,
 } from 'utils/graphql'
 import { isActivityRunning, WorkbenchJobActivity } from './WorkbenchJobActivity'
-import { AI_GRADIENT_BG } from 'components/ai/agent-runs/details/AIAgentRunMessages'
 
 export const ACTIVITY_GAP = 'medium' as const
 
@@ -48,8 +47,6 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
     },
   })
 
-  const hasActivities = !!activities.length
-
   const [openIds, setOpenIds] = useState<string[]>(() =>
     activities
       .filter((activity) => !isActivityRunning(activity.status))
@@ -57,37 +54,36 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   )
   return (
     <ActivitiesPanelSC>
-      {!hasActivities ? (
-        <EmptyState message="No activities have started yet." />
-      ) : (
-        <StepperAccordionSC
-          type="multiple"
-          $gap={ACTIVITY_GAP}
-          value={openIds}
-          onValueChange={setOpenIds}
-          css={{ height: '100%' }}
-        >
-          <VirtualList
-            data={activities}
-            itemGap={ACTIVITY_GAP}
-            topContent={
-              <JobPromptCardSC>
-                <Markdown text={job?.prompt ?? ''} />
-              </JobPromptCardSC>
-            }
-            renderer={({ rowData, index }) => (
-              <WorkbenchJobActivity
-                activity={rowData}
-                progress={[]} // TODO
-                isLast={index === activities.length - 1}
-              />
-            )}
-          />
-        </StepperAccordionSC>
-      )}
+      <ActivitiesAccordionSC
+        type="multiple"
+        value={openIds}
+        onValueChange={setOpenIds}
+      >
+        <VirtualList
+          isReversed
+          data={activities}
+          topContent={
+            <JobPromptCardSC>
+              <Markdown text={job?.prompt ?? ''} />
+            </JobPromptCardSC>
+          }
+          renderer={({ rowData }) => (
+            <WorkbenchJobActivity
+              activity={rowData}
+              progress={[]} // TODO
+            />
+          )}
+        />
+      </ActivitiesAccordionSC>
     </ActivitiesPanelSC>
   )
 }
+
+const ActivitiesAccordionSC = styled(Accordion)({
+  border: 'none',
+  background: 'none',
+  height: '100%',
+})
 
 const ActivitiesPanelSC = styled.div(({ theme }) => ({
   position: 'relative',
@@ -108,4 +104,5 @@ const JobPromptCardSC = styled(Card)(({ theme }) => ({
   borderRadius: theme.borderRadiuses.medium,
   padding: `${theme.spacing.medium}px ${theme.spacing.large}px`,
   wordBreak: 'break-word',
+  marginBottom: theme.spacing.small,
 }))

@@ -1,5 +1,8 @@
 import {
+  ArrowTopRightIcon,
+  Button,
   CaretDownIcon,
+  Flex,
   IconFrame,
   ListBoxItem,
   Spinner,
@@ -17,6 +20,8 @@ import { MoreMenu } from '../utils/MoreMenu'
 import StackCustomRun from './customrun/StackCustomRun'
 import StackCustomRunModal from './customrun/StackCustomRunModal'
 import RestoreStackButton from './RestoreStackButton'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
+import { Link } from 'react-router-dom'
 
 enum MenuItemKey {
   None = '',
@@ -67,26 +72,6 @@ export default function StackActions({
 
   return (
     <>
-      {error && (
-        <Toast
-          severity="danger"
-          margin="xlarge"
-          marginVertical="xxxlarge"
-        >
-          Error: {error.message}
-        </Toast>
-      )}
-      {showRestoreToast && (
-        <Toast
-          position={'bottom'}
-          onClose={() => setShowRestoreToast(false)}
-          closeTimeout={5000}
-          margin="large"
-          severity="success"
-        >
-          Stack &quot;{stack?.name}&quot; restored.
-        </Toast>
-      )}
       {deleting ? (
         <>
           <RestoreStackButton
@@ -96,12 +81,9 @@ export default function StackActions({
           <StackCustomRun stackId={stack?.id ?? ''} />
         </>
       ) : (
-        <div
-          css={{
-            display: 'flex',
-            alignItems: 'center',
-            borderRadius: theme.borderRadiuses.medium,
-          }}
+        <Flex
+          align="center"
+          borderRadius={theme.borderRadiuses.medium}
         >
           <KickButton
             floating
@@ -148,13 +130,41 @@ export default function StackActions({
               rightContent={loading ? <Spinner /> : null}
             />
           </MoreMenu>
-        </div>
+        </Flex>
+      )}
+      {stack?.parent?.id && (
+        <Button
+          secondary
+          as={Link}
+          to={getServiceDetailsPath({ serviceId: stack.parent.id })}
+          endIcon={<ArrowTopRightIcon />}
+        >
+          Parent
+        </Button>
       )}
       <StackCustomRunModal
         open={menuKey === MenuItemKey.CustomRun}
         onClose={closeMenu}
         stackId={stack?.id ?? ''}
       />
+      <Toast
+        show={!!error}
+        severity="danger"
+        margin="xlarge"
+        marginVertical="xxxlarge"
+      >
+        Error: {error?.message}
+      </Toast>
+      <Toast
+        show={showRestoreToast}
+        position="bottom"
+        onClose={() => setShowRestoreToast(false)}
+        closeTimeout={5000}
+        margin="large"
+        severity="success"
+      >
+        Stack &quot;{stack?.name}&quot; restored.
+      </Toast>
     </>
   )
 }

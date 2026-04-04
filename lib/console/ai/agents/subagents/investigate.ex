@@ -35,5 +35,5 @@ defmodule Console.AI.Agents.Subagents.Investigate do
     end
   end
 
-  EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "subagents", "investigate.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :prompt, Console.priv_filename(["prompts", "subagents", "investigate.md.eex"]), [:assigns], trim: true)
 end

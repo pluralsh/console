@@ -1609,6 +1609,9 @@ type Issue {
   "the workbench this issue is associated with"
   workbench: Workbench
 
+  "the workbench job this issue is associated with"
+  workbenchJob: WorkbenchJob
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -2537,6 +2540,8 @@ type Workbench {
 
   alerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
+  issues(after: String, first: Int, before: String, last: Int): IssueConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -2693,6 +2698,9 @@ type WorkbenchJobResult {
 
   "the conclusion for this result"
   conclusion: String
+
+  "a mermaid diagram of the topology of the system in question in this investigation"
+  topology: String
 
   "todos for this result"
   todos: [WorkbenchJobResultTodo]
@@ -5154,6 +5162,12 @@ type Alert {
 
   "The flow this alert was associated with"
   flow: Flow
+
+  "The workbench this alert was associated with"
+  workbench: Workbench
+
+  "The workbench job this alert was associated with"
+  workbenchJob: WorkbenchJob
 
   "Time series metrics and threshold used when this alert was evaluated"
   timeseries: AlertTimeseries

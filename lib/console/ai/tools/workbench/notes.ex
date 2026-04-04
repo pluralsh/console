@@ -7,6 +7,7 @@ defmodule Console.AI.Tools.Workbench.Notes do
       embeds_many :todos, WorkbenchJobResult.Todo, on_replace: :delete
 
       field :working_theory, :string
+      field :topology, :string
     end
     field :summary, :string
   end
@@ -26,7 +27,7 @@ defmodule Console.AI.Tools.Workbench.Notes do
 
   defp status_changeset(model, attrs) do
     model
-    |> cast(attrs, [:working_theory])
+    |> cast(attrs, [:working_theory, :topology])
     |> cast_embed(:todos, with: &WorkbenchJobResult.todo_changeset/2)
   end
 

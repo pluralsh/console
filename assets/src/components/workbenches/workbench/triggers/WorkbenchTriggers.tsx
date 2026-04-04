@@ -4,10 +4,17 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
 import { useMemo } from 'react'
-import { Link, Outlet, useMatch, useParams } from 'react-router-dom'
+import {
+  Link,
+  Outlet,
+  useMatch,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
   WORKBENCH_PARAM_ID,
+  WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM,
   WORKBENCHES_TRIGGERS_REL_PATH,
   WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH,
   WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH,
@@ -19,17 +26,25 @@ import {
   SidebarBtnSC,
   WorkbenchSplitLayoutSC,
 } from '../create-edit/WorkbenchCreateOrEdit'
+import {
+  WorkbenchScheduleEmptyState,
+  WorkbenchWebhookEmptyState,
+} from './WorkbenchTriggersEmptyStates'
+
+export const WEBHOOK_TRIGGER_REFETCH_QUERIES = [
+  'WorkbenchTriggersSummary',
+  'WorkbenchWebhooks',
+]
+
+export const SCHEDULE_TRIGGER_REFETCH_QUERIES = [
+  'WorkbenchTriggersSummary',
+  'WorkbenchCrons',
+]
 
 const DIRECTORY = [
   { path: WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH, label: 'Schedule trigger' },
   { path: WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH, label: 'Webhook trigger' },
 ]
-
-export type WorkbenchTriggersOutletContext = {
-  hasSchedules: boolean
-  hasWebhooks: boolean
-  refetchSummary: () => Promise<unknown>
-}
 
 export function WorkbenchTriggers() {
   const id = useParams()[WORKBENCH_PARAM_ID]
@@ -37,8 +52,11 @@ export function WorkbenchTriggers() {
   const tab =
     useMatch(`${pathPrefix}/:tab`)?.params.tab ??
     WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH
+  const [searchParams] = useSearchParams()
+  const isCreating =
+    searchParams.get(WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM) === 'true'
 
-  const { data, loading, error, refetch } = useWorkbenchTriggersSummaryQuery({
+  const { data, loading, error } = useWorkbenchTriggersSummaryQuery({
     variables: { id: id ?? '' },
     skip: !id,
   })
@@ -46,15 +64,10 @@ export function WorkbenchTriggers() {
   const workbench = data?.workbench
   const hasSchedules = mapExistingNodes(workbench?.crons).length > 0
   const hasWebhooks = mapExistingNodes(workbench?.webhooks).length > 0
-
-  const outletContext = useMemo<WorkbenchTriggersOutletContext>(
-    () => ({
-      hasSchedules,
-      hasWebhooks,
-      refetchSummary: () => refetch(),
-    }),
-    [hasSchedules, hasWebhooks, refetch]
-  )
+  const showEmptyState =
+    !isCreating &&
+    ((tab === WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH && !hasSchedules) ||
+      (tab === WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH && !hasWebhooks))
 
   useSetBreadcrumbs(
     useMemo(
@@ -93,7 +106,6 @@ export function WorkbenchTriggers() {
           {DIRECTORY.map(({ path, label }) => (
             <SidebarBtnSC
               key={path}
-              tertiary
               as={Link}
               to={path}
               $active={path === tab}
@@ -107,8 +119,26 @@ export function WorkbenchTriggers() {
             $width="100%"
             $height="100%"
           />
+        ) : showEmptyState ? (
+          <Flex
+            direction="column"
+            gap="medium"
+            flex={1}
+          >
+            {tab === WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH ? (
+              <>
+                {!hasSchedules && <WorkbenchScheduleEmptyState />}
+                {!hasWebhooks && <WorkbenchWebhookEmptyState />}
+              </>
+            ) : (
+              <>
+                {!hasWebhooks && <WorkbenchWebhookEmptyState />}
+                {!hasSchedules && <WorkbenchScheduleEmptyState />}
+              </>
+            )}
+          </Flex>
         ) : (
-          <Outlet context={outletContext} />
+          <Outlet />
         )}
       </WorkbenchSplitLayoutSC>
     </Flex>

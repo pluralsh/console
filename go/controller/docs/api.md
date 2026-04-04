@@ -1125,6 +1125,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `name` _string_ | Name of the container. |  | Optional: \{\} <br />Type: string <br /> |
 | `image` _string_ |  |  | Required: \{\} <br />Type: string <br /> |
 | `args` _string array_ |  |  | Optional: \{\} <br /> |
 | `env` _[Env](#env) array_ |  |  | Optional: \{\} <br /> |

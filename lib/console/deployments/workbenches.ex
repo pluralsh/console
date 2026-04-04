@@ -221,6 +221,32 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Kicks a job by updating the updated_at timestamp to 20 minutes ago.
+  """
+  @spec kick_job(WorkbenchJob.t() | binary, User.t()) :: job_resp
+  def kick_job(%WorkbenchJob{user_id: id} = job, %User{id: id}) do
+    job
+    |> Ecto.Changeset.change(%{updated_at: Timex.now() |> Timex.shift(minutes: -20)})
+    |> Repo.update()
+    |> notify(:update)
+  end
+  def kick_job(id, user) when is_binary(id) do
+    get_workbench_job!(id)
+    |> kick_job(user)
+  end
+  def kick_job(_, _), do: {:error, "you can only kick your own jobs"}
+
+  @doc """
+  Heartbeats a job by updating the updated_at timestamp to the current time.
+  """
+  @spec heartbeat(WorkbenchJob.t()) :: job_resp
+  def heartbeat(%WorkbenchJob{} = job) do
+    job
+    |> Ecto.Changeset.change(%{updated_at: Timex.now()})
+    |> Repo.update(allow_stale: true)
+  end
+
+  @doc """
   Creates a new message for a job. Requires read access to the job.
   """
   @spec create_message(map, binary, User.t()) :: activity_resp
@@ -288,7 +314,7 @@ defmodule Console.Deployments.Workbenches do
   Updates the status of a job, and creates a new recording the change made.
   """
   @spec update_job_status(%{status: map, prompt: binary, output: binary}, WorkbenchJob.t()) :: activity_resp
-  def update_job_status(%{status: %{} = status, prompt: prompt, output: output}, %WorkbenchJob{} = job)
+  def update_job_status(%{status: %{} = status, prompt: prompt, output: output} = args, %WorkbenchJob{} = job)
     when is_binary(prompt) and is_binary(output) do
     %{result: result} = Repo.preload(job, :result)
     start_transaction()
@@ -297,18 +323,16 @@ defmodule Console.Deployments.Workbenches do
       |> Repo.update()
     end)
     |> add_operation(:activity, fn _ ->
+      status =
+        TextDiff.format(result.working_theory || "", status[:working_theory] || "", color: true)
+        |> IO.iodata_to_binary()
+        |> then(&Map.put(status, :diff, &1))
       create_job_activity(%{
         status: :successful,
         type: :memo,
         prompt: prompt,
-        result: %{
-          output: output,
-          job_update: %{
-            diff: TextDiff.format(result.working_theory || "", status[:working_theory] || "", color: true)
-                  |> IO.iodata_to_binary(),
-            working_theory: status[:working_theory]
-          }
-        }
+        result: %{output: output, job_update: status},
+        tool_call: args[:tool_call]
       }, job)
     end)
     |> execute(extract: :activity)

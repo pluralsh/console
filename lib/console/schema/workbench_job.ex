@@ -35,7 +35,7 @@ defmodule Console.Schema.WorkbenchJob do
   def idle?(%__MODULE__{status: s}) when s in ~w(pending failed cancelled successful)a, do: true
   def idle?(%__MODULE__{updated_at: at, inserted_at: iat}) do
     Timex.now()
-    |> Timex.shift(minutes: -15)
+    |> Timex.shift(minutes: -1)
     |> Timex.after?(at || iat)
   end
 
@@ -44,7 +44,7 @@ defmodule Console.Schema.WorkbenchJob do
       where: j.status == ^:pending or (
         j.status == ^:running
           and is_nil(j.completed_at)
-          and (is_nil(j.updated_at) or j.updated_at < ago(15, "minute"))
+          and (is_nil(j.updated_at) or j.updated_at < ago(1, "minute"))
       ),
       order_by: [asc: :inserted_at]
     )
@@ -60,6 +60,10 @@ defmodule Console.Schema.WorkbenchJob do
 
   def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
     from(j in query, order_by: ^order)
+  end
+
+  def expired(query \\ __MODULE__) do
+    from(j in query, where: j.inserted_at < ago(14, "day"))
   end
 
   def preloaded(query \\ __MODULE__, preloads \\ [:result]) do

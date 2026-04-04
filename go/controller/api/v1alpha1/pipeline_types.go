@@ -245,6 +245,11 @@ type JobSpec struct {
 }
 
 type Container struct {
+	// Name of the container.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	Name *string `json:"name,omitempty"`
+
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Image string `json:"image"`

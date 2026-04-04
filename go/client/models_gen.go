@@ -758,6 +758,10 @@ type Alert struct {
 	Project *Project `json:"project,omitempty"`
 	// The flow this alert was associated with
 	Flow *Flow `json:"flow,omitempty"`
+	// The workbench this alert was associated with
+	Workbench *Workbench `json:"workbench,omitempty"`
+	// The workbench job this alert was associated with
+	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
 	// Time series metrics and threshold used when this alert was evaluated
 	Timeseries *AlertTimeseries `json:"timeseries,omitempty"`
 	InsertedAt *string          `json:"insertedAt,omitempty"`
@@ -4159,9 +4163,11 @@ type Issue struct {
 	// the flow this issue is associated with
 	Flow *Flow `json:"flow,omitempty"`
 	// the workbench this issue is associated with
-	Workbench  *Workbench `json:"workbench,omitempty"`
-	InsertedAt *string    `json:"insertedAt,omitempty"`
-	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+	Workbench *Workbench `json:"workbench,omitempty"`
+	// the workbench job this issue is associated with
+	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
+	InsertedAt   *string       `json:"insertedAt,omitempty"`
+	UpdatedAt    *string       `json:"updatedAt,omitempty"`
 }
 
 type IssueConnection struct {
@@ -9399,6 +9405,7 @@ type Workbench struct {
 	Crons         *WorkbenchCronConnection    `json:"crons,omitempty"`
 	Webhooks      *WorkbenchWebhookConnection `json:"webhooks,omitempty"`
 	Alerts        *AlertConnection            `json:"alerts,omitempty"`
+	Issues        *IssueConnection            `json:"issues,omitempty"`
 	InsertedAt    *string                     `json:"insertedAt,omitempty"`
 	UpdatedAt     *string                     `json:"updatedAt,omitempty"`
 }
@@ -9654,6 +9661,8 @@ type WorkbenchJobResult struct {
 	WorkingTheory *string `json:"workingTheory,omitempty"`
 	// the conclusion for this result
 	Conclusion *string `json:"conclusion,omitempty"`
+	// a mermaid diagram of the topology of the system in question in this investigation
+	Topology *string `json:"topology,omitempty"`
 	// todos for this result
 	Todos []*WorkbenchJobResultTodo `json:"todos,omitempty"`
 	// metadata for this result

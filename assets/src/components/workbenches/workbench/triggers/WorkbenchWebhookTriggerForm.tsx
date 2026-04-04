@@ -8,15 +8,18 @@ import {
   Select,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
+import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import {
   useCreateWorkbenchWebhookMutation,
   useObservabilityWebhooksQuery,
   useUpdateWorkbenchWebhookMutation,
   WorkbenchWebhookFragment,
 } from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { StickyActionsFooterSC } from '../create-edit/WorkbenchCreateOrEdit'
+import { WEBHOOK_TRIGGER_REFETCH_QUERIES } from './WorkbenchTriggers'
+import { isEqual } from 'lodash'
 
 type WebhookTriggerFormState = {
   name: string
@@ -32,27 +35,19 @@ export function WorkbenchWebhookTriggerForm({
   workbenchId: string
   webhook?: Nullable<WorkbenchWebhookFragment>
   onCancel: () => void
-  onCompleted: () => void | Promise<void>
+  onCompleted?: Nullable<() => void>
 }) {
   const editing = !!webhook
   const [formState, setFormState] = useState<WebhookTriggerFormState>(() =>
     getInitialFormState(webhook)
   )
-  const [finalizing, setFinalizing] = useState(false)
-
-  useEffect(() => {
-    setFormState(getInitialFormState(webhook))
-  }, [webhook])
+  const { popToast } = useSimpleToast()
 
   const {
     data,
     loading: webhooksLoading,
     error: webhooksError,
   } = useObservabilityWebhooksQuery({ variables: { first: 100 } })
-  const [createWorkbenchWebhook, createState] =
-    useCreateWorkbenchWebhookMutation()
-  const [updateWorkbenchWebhook, updateState] =
-    useUpdateWorkbenchWebhookMutation()
 
   const webhooks = useMemo(
     () => mapExistingNodes(data?.observabilityWebhooks),
@@ -61,30 +56,41 @@ export function WorkbenchWebhookTriggerForm({
 
   const label = formState.name.trim()
   const webhookId = formState.webhookId
-  const isSaving = createState.loading || updateState.loading || finalizing
+
+  const canSave =
+    !!label && !!webhookId && !isEqual(formState, getInitialFormState(webhook))
+  const attributes = { name: label, webhookId }
+
+  const handleCompleted = () => {
+    onCompleted?.()
+    popToast({
+      name: label,
+      action: editing ? 'updated' : 'created',
+      color: 'icon-success',
+    })
+  }
+  const [createWorkbenchWebhook, createState] =
+    useCreateWorkbenchWebhookMutation({
+      variables: { workbenchId, attributes },
+      onCompleted: handleCompleted,
+      refetchQueries: WEBHOOK_TRIGGER_REFETCH_QUERIES,
+      awaitRefetchQueries: true,
+    })
+  const [updateWorkbenchWebhook, updateState] =
+    useUpdateWorkbenchWebhookMutation({
+      variables: { id: webhook?.id ?? '', attributes },
+      onCompleted: handleCompleted,
+      refetchQueries: WEBHOOK_TRIGGER_REFETCH_QUERIES,
+      awaitRefetchQueries: true,
+    })
+
+  const isSaving = createState.loading || updateState.loading
   const error = webhooksError ?? createState.error ?? updateState.error
-  const canSave = !!label && !!webhookId && !isSaving
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!canSave) return
-
-    setFinalizing(true)
-
-    try {
-      const attributes = { name: label, webhookId }
-
-      if (editing && webhook) {
-        await updateWorkbenchWebhook({
-          variables: { id: webhook.id, attributes },
-        })
-      } else {
-        await createWorkbenchWebhook({ variables: { workbenchId, attributes } })
-      }
-
-      await onCompleted()
-    } catch {
-      setFinalizing(false)
-    }
+    if (editing && webhook) updateWorkbenchWebhook()
+    else createWorkbenchWebhook()
   }
 
   return (
@@ -92,10 +98,13 @@ export function WorkbenchWebhookTriggerForm({
       direction="column"
       gap="large"
       height="100%"
-      css={{ width: '100%' }}
+      width="100%"
     >
       {error && <GqlError error={error} />}
-      <FormField label="Webhook label*">
+      <FormField
+        required
+        label="Webhook label"
+      >
         <Input2
           value={formState.name}
           onChange={(e) =>
@@ -105,7 +114,8 @@ export function WorkbenchWebhookTriggerForm({
         />
       </FormField>
       <FormField
-        label="Select webhook*"
+        required
+        label="Select webhook"
         hint="New webhooks added will appear in this list."
       >
         <Select
@@ -124,27 +134,22 @@ export function WorkbenchWebhookTriggerForm({
           ))}
         </Select>
       </FormField>
-      <StickyActionsFooterSC>
-        <Flex
-          gap="small"
-          css={{ marginLeft: 'auto' }}
+      <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
+        <Button
+          secondary
+          startIcon={<ReturnIcon />}
+          onClick={onCancel}
+          disabled={isSaving}
         >
-          <Button
-            secondary
-            startIcon={<ReturnIcon />}
-            onClick={onCancel}
-            disabled={isSaving}
-          >
-            Back to all webhooks
-          </Button>
-          <Button
-            onClick={() => handleSave()}
-            loading={isSaving}
-            disabled={!canSave}
-          >
-            Save
-          </Button>
-        </Flex>
+          Back to all webhooks
+        </Button>
+        <Button
+          onClick={() => handleSave()}
+          loading={isSaving}
+          disabled={!canSave}
+        >
+          Save
+        </Button>
       </StickyActionsFooterSC>
     </Flex>
   )

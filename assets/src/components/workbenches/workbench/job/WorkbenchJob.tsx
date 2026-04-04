@@ -20,6 +20,8 @@ import { WorkbenchJobActivities } from './WorkbenchJobActivities'
 import { WorkbenchJobResult } from './WorkbenchJobResult'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 import { PluralErrorBoundary } from 'components/cd/PluralErrorBoundary'
+import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
+import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
 
 export function WorkbenchJob() {
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
@@ -83,7 +85,7 @@ export function WorkbenchJob() {
           direction="column"
           gap="large"
           minWidth={560}
-          flex={5}
+          flex={7}
         >
           <StretchedFlex gap="xlarge">
             <StackedText
@@ -118,9 +120,11 @@ export function WorkbenchJob() {
           direction="column"
           gap="medium"
           minWidth={500}
-          flex={6}
+          flex={3}
           height="100%"
         >
+          <WorkbenchJobTriggerAlert alert={job?.alert} />
+          <WorkbenchJobTriggerIssue issue={job?.issue} />
           <WorkbenchJobResult
             loading={isLoading}
             result={job?.result}
@@ -141,5 +145,6 @@ const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
   width: '100%',
   overflow: 'auto',
+  maxWidth: theme.breakpoints.desktopLarge,
   padding: theme.spacing.large,
 }))

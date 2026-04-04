@@ -361,4 +361,16 @@ defmodule Console.Deployments.CronTest do
       assert refetch(keep)
     end
   end
+
+  describe "#prune_workbench_jobs/0" do
+    test "it will prune workbench jobs older than the retention window" do
+      remove = insert_list(2, :workbench_job, inserted_at: Timex.now() |> Timex.shift(days: -15))
+      keep = insert_list(2, :workbench_job, inserted_at: Timex.now() |> Timex.shift(days: -1))
+
+      {2, _} = Cron.prune_workbench_jobs()
+
+      for job <- remove, do: refute refetch(job)
+      for job <- keep, do: assert refetch(job)
+    end
+  end
 end

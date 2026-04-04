@@ -152,6 +152,6 @@ defmodule Console.Deployments.Pr.Governance.Impl.ServiceNow do
     do: model
   defp change_model(_), do: "Standard"
 
-  EEx.function_from_file(:defp, :snow_prompt, Path.join([:code.priv_dir(:console), "prompts", "governance", "snow.md.eex"]), [:assigns])
-  EEx.function_from_file(:defp, :pr_message, Path.join([:code.priv_dir(:console), "pr", "governance.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :snow_prompt, Path.join([:code.priv_dir(:console), "prompts", "governance", "snow.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :pr_message, Path.join([:code.priv_dir(:console), "pr", "governance.md.eex"]), [:assigns], trim: true)
 end

@@ -111,6 +111,19 @@ fragment WorkbenchJobResultTodo on WorkbenchJobResultTodo {
   done
 }
 
+fragment WorkbenchJobActivityMetric on WorkbenchJobActivityMetric {
+  timestamp
+  name
+  value
+  labels
+}
+
+fragment WorkbenchJobActivityLog on WorkbenchJobActivityLog {
+  timestamp
+  message
+  labels
+}
+
 fragment WorkbenchJobResult on WorkbenchJobResult {
   id
   workingTheory
@@ -120,10 +133,7 @@ fragment WorkbenchJobResult on WorkbenchJobResult {
   }
   metadata {
     metrics {
-      timestamp
-      name
-      value
-      labels
+      ...WorkbenchJobActivityMetric
     }
   }
 }
@@ -151,15 +161,10 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
       conclusion
     }
     logs {
-      timestamp
-      message
-      labels
+      ...WorkbenchJobActivityLog
     }
     metrics {
-      timestamp
-      name
-      value
-      labels
+      ...WorkbenchJobActivityMetric
     }
   }
   thoughts {
@@ -170,15 +175,10 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
     insertedAt
     attributes {
       logs {
-        timestamp
-        message
-        labels
+        ...WorkbenchJobActivityLog
       }
       metrics {
-        timestamp
-        name
-        value
-        labels
+        ...WorkbenchJobActivityMetric
       }
     }
   }
@@ -230,6 +230,27 @@ fragment WorkbenchWebhook on WorkbenchWebhook {
   }
 }
 
+fragment WorkbenchIssue on Issue {
+  id
+  title
+  externalId
+  provider
+  status
+  url
+  insertedAt
+  updatedAt
+  workbench {
+    id
+    runs(first: 1) {
+      edges {
+        node {
+          id
+        }
+      }
+    }
+  }
+}
+
 fragment WorkbenchJob on WorkbenchJob {
   ...WorkbenchJobTiny
   insertedAt
@@ -238,6 +259,18 @@ fragment WorkbenchJob on WorkbenchJob {
     name
   }
   error
+  alert {
+    ...Alert
+  }
+  issue {
+    id
+    title
+    externalId
+    insertedAt
+    status
+    url
+    provider
+  }
   result {
     ...WorkbenchJobResult
   }
@@ -251,6 +284,19 @@ query Workbenches($first: Int = 100, $after: String, $q: String) {
     edges {
       node {
         ...WorkbenchTiny
+      }
+    }
+  }
+}
+
+query WorkbenchesAlerts($first: Int = 100, $after: String) {
+  workbenchAlerts(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Alert
       }
     }
   }
@@ -273,6 +319,35 @@ query WorkbenchJobs($id: ID!, $first: Int = 100, $after: String) {
         node {
           ...WorkbenchJobTiny
         }
+      }
+    }
+  }
+}
+
+query WorkbenchAlerts($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    alerts(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...Alert
+        }
+      }
+    }
+  }
+}
+
+query WorkbenchesIssues($first: Int = 100, $after: String) {
+  workbenchIssues(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...WorkbenchIssue
       }
     }
   }
@@ -485,5 +560,6 @@ mutation UpdateWorkbenchWebhook(
 mutation DeleteWorkbenchWebhook($id: ID!) {
   deleteWorkbenchWebhook(id: $id) {
     id
+    name
   }
 }

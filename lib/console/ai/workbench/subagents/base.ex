@@ -14,6 +14,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
   def drop_empty(%{} = map) do
     Enum.filter(map, fn
       {_, nil} -> false
+      {_, ""} -> false
       {_, []} -> false
       _ -> true
     end)

@@ -35,5 +35,5 @@ defmodule Console.AI.Workbench.Subagents.Memory do
     ]
   end
 
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "memory.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "memory.md.eex"]), [:assigns], trim: true)
 end

@@ -1,5 +1,7 @@
 import { Workbenches } from 'components/workbenches/Workbenches'
 import { WorkbenchesList } from 'components/workbenches/WorkbenchesList'
+import { WorkbenchesAlerts } from 'components/workbenches/WorkbenchesAlerts'
+import { WorkbenchesIssues } from 'components/workbenches/WorkbenchesIssues'
 import { WorkbenchToolCreateOrEdit } from 'components/workbenches/tools/WorkbenchToolCreateOrEdit'
 import { WorkbenchTools } from 'components/workbenches/tools/WorkbenchTools'
 import { Workbench } from 'components/workbenches/workbench/Workbench'
@@ -11,8 +13,10 @@ import {
   WORKBENCH_JOB_ABS_PATH,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
+  WORKBENCHES_ALERTS_REL_PATH,
   WORKBENCHES_CREATE_REL_PATH,
   WORKBENCHES_EDIT_REL_PATH,
+  WORKBENCHES_ISSUES_REL_PATH,
   WORKBENCHES_TOOLS_ABS_PATH,
   WORKBENCHES_TOOLS_PARAM_ID,
   WORKBENCHES_TOOLS_REL_PATH,
@@ -35,6 +39,14 @@ export const workbenchesRoutes = [
     <Route
       path={WORKBENCHES_TOOLS_REL_PATH}
       element={<WorkbenchTools />}
+    />
+    <Route
+      path={WORKBENCHES_ALERTS_REL_PATH}
+      element={<WorkbenchesAlerts />}
+    />
+    <Route
+      path={WORKBENCHES_ISSUES_REL_PATH}
+      element={<WorkbenchesIssues />}
     />
   </Route>,
   <Route

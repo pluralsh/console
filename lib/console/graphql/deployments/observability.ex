@@ -339,6 +339,14 @@ defmodule Console.GraphQl.Deployments.Observability do
       resolve: dataloader(Deployments),
       description: "The flow this alert was associated with"
 
+    field :workbench, :workbench,
+      resolve: dataloader(Deployments),
+      description: "The workbench this alert was associated with"
+
+    field :workbench_job, :workbench_job,
+      resolve: dataloader(Deployments),
+      description: "The workbench job this alert was associated with"
+
     field :timeseries, :alert_timeseries,
       description: "Time series metrics and threshold used when this alert was evaluated"
 

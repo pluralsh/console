@@ -27,6 +27,10 @@
                         "required": ["name", "description", "done"]
                     }
                 },
+                "topology": {
+                    "type": "string",
+                    "description": "A mermaid diagram of the topology of the system in question in this investigation"
+                },
                 "working_theory": {
                     "type": "string",
                     "description": "The current working theory you might want to update.  Pass the old theory if no changes are needed."

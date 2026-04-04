@@ -137,7 +137,17 @@ function getMenuItems({
       path: FLOWS_ABS_PATH,
       hotkeys: ['shift F'],
     },
-
+    ...(featureFlags.Workbenches
+      ? [
+          {
+            text: 'Workbenches',
+            expandedLabel: 'Workbenches',
+            icon: <WorkbenchIcon />,
+            path: WORKBENCHES_ABS_PATH,
+            hotkeys: ['shift W'],
+          },
+        ]
+      : []),
     {
       text: 'Self service',
       expandedLabel: 'Self service',
@@ -178,17 +188,6 @@ function getMenuItems({
       path: SECURITY_ABS_PATH,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
-    ...(featureFlags.Workbenches
-      ? [
-          {
-            text: 'Workbenches',
-            expandedLabel: 'Workbenches',
-            icon: <WorkbenchIcon />,
-            path: WORKBENCHES_ABS_PATH,
-            hotkeys: ['shift W'],
-          },
-        ]
-      : []),
     {
       text: 'Cost management',
       expandedLabel: 'Cost management',

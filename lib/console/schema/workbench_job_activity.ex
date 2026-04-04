@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchJobActivity do
   use Console.Schema.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobThought, AgentRun}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobThought, AgentRun, WorkbenchJobResult}
 
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
   defenum Type, coding: 0, observability: 1, integration: 2, ticketing: 3, infrastructure: 4, memo: 5, plan: 6, user: 7, memory: 8
@@ -24,6 +24,9 @@ defmodule Console.Schema.WorkbenchJobActivity do
         field :diff,            :string
         field :working_theory,  :string
         field :conclusion,      :string
+        field :topology,        :string
+
+        embeds_many :todos, Console.Schema.WorkbenchJobResult.Todo, on_replace: :delete
       end
 
       embeds_many :metrics, Metric, on_replace: :delete do
@@ -97,7 +100,8 @@ defmodule Console.Schema.WorkbenchJobActivity do
 
   defp job_update_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(diff working_theory conclusion)a)
+    |> cast(attrs, ~w(diff working_theory conclusion topology)a)
+    |> cast_embed(:todos, with: &WorkbenchJobResult.todo_changeset/2)
   end
 
   def metric_changeset(model, attrs) do

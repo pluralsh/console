@@ -24,6 +24,7 @@ defmodule Console.Schema.WorkbenchJobResult do
   schema "workbench_job_results" do
     field :working_theory, :binary
     field :conclusion,     :binary
+    field :topology,       :binary
 
     embeds_many :todos, Todo, on_replace: :delete do
       field :name,        :string
@@ -46,7 +47,7 @@ defmodule Console.Schema.WorkbenchJobResult do
     from(r in query, order_by: ^order)
   end
 
-  @valid ~w(working_theory conclusion workbench_job_id)a
+  @valid ~w(working_theory conclusion topology workbench_job_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

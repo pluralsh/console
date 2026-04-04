@@ -5,6 +5,10 @@
             "type": "string",
             "description": "The conclusion to this workbench job you want to record"
         },
+        "topology": {
+            "type": "string",
+            "description": "A mermaid diagram of the topology of the system in question in this investigation.  Pass the old topology if no changes are needed."
+        },
         "todos": {
             "type": "array",
             "description": "The todos to update.  Pass these if there's still a todo to mark as done",

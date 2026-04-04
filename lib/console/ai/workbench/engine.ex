@@ -13,16 +13,14 @@ defmodule Console.AI.Workbench.Engine do
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
-  alias Console.Schema.{
-    WorkbenchJob,
-    WorkbenchJobActivity
-  }
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity}
   alias Console.AI.Workbench.Skills, as: SkillsUtil
   alias Console.AI.Workbench.Subagents, as: SA
   alias Console.AI.Workbench.{
     Environment,
     Message,
-    Supervisor
+    Supervisor,
+    Heartbeat
   }
   alias Console.AI.Tools.Workbench.{
     Complete,
@@ -39,10 +37,12 @@ defmodule Console.AI.Workbench.Engine do
   defstruct [:job, :user, :environment, activities: [], iterations: 0, max: 200]
 
   def new(%WorkbenchJob{} = job) do
-    %{user: user, workbench: workbench} = job = Repo.preload(job, [:user, workbench: [:repository, :agent_runtime, [tools: :mcp_server]]])
+    %{user: user, workbench: workbench} = job =
+      Repo.preload(job, [:user, workbench: [:repository, :agent_runtime, [tools: :mcp_server]]])
 
     user = Console.Services.Rbac.preload(user)
-    with {:ok, skills} <- SkillsUtil.skills(workbench),
+    with {:ok, _} <- Heartbeat.start_link(job),
+         {:ok, skills} <- SkillsUtil.skills(workbench),
          env = Environment.new(job, workbench.tools, skills),
          {:ok, _} <- Supervisor.start_link(env) do
       Console.AI.Tool.context(user: user, runtime: workbench.agent_runtime)
@@ -73,10 +73,11 @@ defmodule Console.AI.Workbench.Engine do
     )
     |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
     |> case do
-      {:ok, %Complete{conclusion: conclusion, metrics: metrics, logs: logs, todos: todos}} ->
+      {:ok, %Complete{conclusion: conclusion, metrics: metrics, logs: logs, todos: todos, topology: topology}} ->
         drop_empty(%{
           conclusion: conclusion,
           todos: todos,
+          topology: topology,
           metadata: drop_empty(%{metrics: metrics, logs: logs}),
         })
         |> Workbenches.complete_job(job)
@@ -85,7 +86,7 @@ defmodule Console.AI.Workbench.Engine do
     end
   end
 
-  defp tool_fmt(%Notes{}), do: "recorded notes for progress done so far"
+  defp tool_fmt(%Notes{} = notes), do: notes_message(notes: notes)
   defp tool_fmt(%Subagent{subagent: name}), do: "launched #{name} subagent, waiting for the result"
   defp tool_fmt(%Complete{}), do: "concluded work on this pass, workbench job is completed"
   defp tool_fmt(pass), do: pass
@@ -183,5 +184,6 @@ defmodule Console.AI.Workbench.Engine do
   defp continue_prompt(%__MODULE__{activities: [_, _ | _]}), do: "Ok, let's keep working" # the first activity is the plan
   defp continue_prompt(_), do: "Ok, let's start working"
 
-  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "job.md.eex"]), [:assigns])
+  EEx.function_from_file(:defp, :notes_message, Console.priv_filename(["prompts", "workbench", "notes_message.md.eex"]), [:assigns], trim: true)
+  EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "job.md.eex"]), [:assigns], trim: true)
 end

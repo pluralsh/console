@@ -1,6 +1,6 @@
 We finished executing an activity for this workbench.  Here are the details:
 
-Activity type: <%= @activity.type %>
+Activity type: <%= if @activity.type == :memo, do: "notes", else: @activity.type %>
 Activity status: <%= @activity.status %>
 Initial prompt:
 
@@ -13,4 +13,30 @@ Conclusion:
 ```
 <%= @activity.result.output || @activity.result.error %>
 ```
+
+<%= if is_list(@activity.result.logs) and !Enum.empty?(@activity.result.logs) do %>
+There were also some important log lines emitted by the activity, in json format:
+
+```json
+<%= Console.clean(@activity.result.logs) |> Jason.encode!() %>
+```
+<% end %>
+
+<%= if is_list(@activity.result.metrics) and !Enum.empty?(@activity.result.metrics) do %>
+There were also some important metrics emitted by the activity, in json format:
+
+```json
+<%= Console.clean(@activity.result.metrics) |> Jason.encode!() %>
+```
+
+<%= if @activity.result.job_update do %>
+The key job attributes you updated were:
+
+```json
+<%= Console.clean(@activity.result.job_update) |> Jason.encode!() %>
+```
+<% end %>
+<% end %>
+<% else %>
+Subagent is still running, waiting for the result...
 <% end %>

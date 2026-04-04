@@ -301,7 +301,7 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.AlertCreated do
 
   defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 
-  EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/alert.md.eex", [:assigns])
+  EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/alert.md.eex", [:assigns], trim: true)
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.IssueCreated, Console.PubSub.IssueUpdated] do
@@ -320,7 +320,7 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.IssueCreated, Console.PubSu
 
   defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 
-  EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/issue.md.eex", [:assigns])
+  EEx.function_from_file(:defp, :prompt, "priv/prompts/workbench/issue.md.eex", [:assigns], trim: true)
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobActivityCreated do

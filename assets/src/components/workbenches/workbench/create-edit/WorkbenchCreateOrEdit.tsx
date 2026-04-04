@@ -261,7 +261,6 @@ function SidebarItem({
 }) {
   return (
     <SidebarBtnSC
-      tertiary
       onClick={onClick}
       $active={active}
       endIcon={
@@ -295,10 +294,12 @@ export const SidebarBtnSC = styled(Button)<{ $active: boolean }>(
     color: theme.colors.text,
     textDecoration: 'none',
     padding: theme.spacing.xsmall,
+    background: 'transparent',
     ...($active && {
       background: theme.colors['fill-one-selected'],
       pointerEvents: 'none',
     }),
+    '&:hover': { background: theme.colors['fill-zero-hover'] },
   })
 )
 
@@ -326,6 +327,7 @@ export const StickyActionsFooterSC = styled.div(({ theme }) => ({
   position: 'sticky',
   display: 'flex',
   justifyContent: 'space-between',
+  gap: theme.spacing.medium,
   bottom: 0,
   marginTop: 'auto',
   zIndex: theme.zIndexes.tooltip,
