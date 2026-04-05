@@ -9,6 +9,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
     WorkbenchJobActivity,
     WorkbenchTool,
     WorkbenchCron,
+    WorkbenchPrompt,
     WorkbenchWebhook
   }
 
@@ -46,6 +47,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def list_workbench_crons(workbench, args, _) do
     WorkbenchCron.for_workbench(workbench.id)
     |> WorkbenchCron.ordered()
+    |> paginate(args)
+  end
+
+  def list_workbench_prompts(workbench, args, _) do
+    WorkbenchPrompt.for_workbench(workbench.id)
+    |> WorkbenchPrompt.ordered()
     |> paginate(args)
   end
 
@@ -118,6 +125,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def delete_workbench_cron(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench_cron(id, user)
+
+  def create_workbench_prompt(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.create_workbench_prompt(attrs, workbench_id, user)
+
+  def update_workbench_prompt(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Workbenches.update_workbench_prompt(attrs, id, user)
+
+  def delete_workbench_prompt(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.delete_workbench_prompt(id, user)
 
   def create_workbench_webhook(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_webhook(attrs, workbench_id, user)

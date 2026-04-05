@@ -1216,6 +1216,14 @@ defmodule Console.Factory do
       crontab: "*/5 * * * *",
       prompt: "test prompt",
       next_run_at: Timex.now(),
+      workbench: build(:workbench),
+      user: build(:user)
+    }
+  end
+
+  def workbench_prompt_factory do
+    %Schema.WorkbenchPrompt{
+      prompt: "saved prompt text",
       workbench: build(:workbench)
     }
   end

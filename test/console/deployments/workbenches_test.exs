@@ -570,6 +570,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       }, workbench.id, user)
 
       assert cron.workbench_id == workbench.id
+      assert cron.user_id == user.id
       assert cron.crontab == "*/5 * * * *"
       assert cron.prompt == "run analysis"
       assert cron.next_run_at
@@ -644,6 +645,86 @@ defmodule Console.Deployments.WorkbenchesTest do
       {:error, _} = Workbenches.delete_workbench_cron(cron.id, user)
 
       assert refetch(cron)
+    end
+  end
+
+  describe "create_workbench_prompt/3" do
+    test "users with read access to the workbench can create a prompt" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, prompt} = Workbenches.create_workbench_prompt(%{prompt: "hello"}, workbench.id, user)
+
+      assert prompt.workbench_id == workbench.id
+      assert prompt.prompt == "hello"
+      assert_receive {:event, %PubSub.WorkbenchPromptCreated{item: ^prompt}}
+    end
+
+    test "users with write access to the workbench can create a prompt" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, prompt} = Workbenches.create_workbench_prompt(%{prompt: "from writer"}, workbench.id, user)
+
+      assert prompt.workbench_id == workbench.id
+      assert prompt.prompt == "from writer"
+    end
+
+    test "users without workbench access cannot create a prompt" do
+      user = insert(:user)
+      workbench = insert(:workbench)
+
+      {:error, _} = Workbenches.create_workbench_prompt(%{prompt: "nope"}, workbench.id, user)
+    end
+  end
+
+  describe "update_workbench_prompt/3" do
+    test "users with read access can update a prompt" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      prompt = insert(:workbench_prompt, workbench: workbench, prompt: "old")
+
+      {:ok, updated} = Workbenches.update_workbench_prompt(%{prompt: "new text"}, prompt.id, user)
+
+      assert updated.id == prompt.id
+      assert updated.prompt == "new text"
+      assert_receive {:event, %PubSub.WorkbenchPromptUpdated{item: ^updated}}
+    end
+
+    test "users without access cannot update a prompt" do
+      user = insert(:user)
+      prompt = insert(:workbench_prompt, prompt: "secret")
+
+      {:error, _} = Workbenches.update_workbench_prompt(%{prompt: "hacked"}, prompt.id, user)
+
+      assert refetch(prompt).prompt == "secret"
+    end
+  end
+
+  describe "delete_workbench_prompt/2" do
+    test "users with read access can delete a prompt" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      prompt = insert(:workbench_prompt, workbench: workbench)
+
+      {:ok, deleted} = Workbenches.delete_workbench_prompt(prompt.id, user)
+
+      assert deleted.id == prompt.id
+      refute refetch(prompt)
+      assert_receive {:event, %PubSub.WorkbenchPromptDeleted{item: ^deleted}}
+    end
+
+    test "users without access cannot delete a prompt" do
+      user = insert(:user)
+      prompt = insert(:workbench_prompt)
+
+      {:error, _} = Workbenches.delete_workbench_prompt(prompt.id, user)
+
+      assert refetch(prompt)
     end
   end
 

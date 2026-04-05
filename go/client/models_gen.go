@@ -9427,6 +9427,7 @@ type Workbench struct {
 	WriteBindings []*PolicyBinding            `json:"writeBindings,omitempty"`
 	Runs          *WorkbenchJobConnection     `json:"runs,omitempty"`
 	Crons         *WorkbenchCronConnection    `json:"crons,omitempty"`
+	Prompts       *WorkbenchPromptConnection  `json:"prompts,omitempty"`
 	Webhooks      *WorkbenchWebhookConnection `json:"webhooks,omitempty"`
 	Alerts        *AlertConnection            `json:"alerts,omitempty"`
 	Issues        *IssueConnection            `json:"issues,omitempty"`
@@ -9751,6 +9752,32 @@ type WorkbenchObservabilityAttributes struct {
 	Logs *bool `json:"logs,omitempty"`
 	// enable metrics capability
 	Metrics *bool `json:"metrics,omitempty"`
+}
+
+type WorkbenchPrompt struct {
+	// the id of the saved prompt
+	ID string `json:"id"`
+	// the saved prompt text
+	Prompt *string `json:"prompt,omitempty"`
+	// the workbench this prompt belongs to
+	Workbench  *Workbench `json:"workbench,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchPromptAttributes struct {
+	// the saved prompt text
+	Prompt string `json:"prompt"`
+}
+
+type WorkbenchPromptConnection struct {
+	PageInfo PageInfo               `json:"pageInfo"`
+	Edges    []*WorkbenchPromptEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchPromptEdge struct {
+	Node   *WorkbenchPrompt `json:"node,omitempty"`
+	Cursor *string          `json:"cursor,omitempty"`
 }
 
 type WorkbenchSkills struct {

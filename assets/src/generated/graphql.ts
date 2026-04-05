@@ -8637,6 +8637,8 @@ export type RootMutationType = {
   /** Creates a new workbench job. Requires read access to the workbench. */
   createWorkbenchJob?: Maybe<WorkbenchJob>;
   createWorkbenchMessage?: Maybe<WorkbenchJobActivity>;
+  /** Creates a saved prompt for a workbench. Requires read access to the workbench. */
+  createWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
   createWorkbenchTool?: Maybe<WorkbenchTool>;
   createWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   deleteAccessToken?: Maybe<AccessToken>;
@@ -8700,6 +8702,8 @@ export type RootMutationType = {
   deleteVirtualCluster?: Maybe<Cluster>;
   deleteWorkbench?: Maybe<Workbench>;
   deleteWorkbenchCron?: Maybe<WorkbenchCron>;
+  /** Deletes a saved workbench prompt. Requires read access to the workbench. */
+  deleteWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
   deleteWorkbenchTool?: Maybe<WorkbenchTool>;
   deleteWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   delinkBackups?: Maybe<Cluster>;
@@ -8822,6 +8826,8 @@ export type RootMutationType = {
   updateUser?: Maybe<User>;
   updateWorkbench?: Maybe<Workbench>;
   updateWorkbenchCron?: Maybe<WorkbenchCron>;
+  /** Updates a saved workbench prompt. Requires read access to the workbench. */
+  updateWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
   updateWorkbenchTool?: Maybe<WorkbenchTool>;
   updateWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   upsertAgentRuntime?: Maybe<AgentRuntime>;
@@ -9251,6 +9257,12 @@ export type RootMutationTypeCreateWorkbenchMessageArgs = {
 };
 
 
+export type RootMutationTypeCreateWorkbenchPromptArgs = {
+  attributes: WorkbenchPromptAttributes;
+  workbenchId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateWorkbenchToolArgs = {
   attributes?: InputMaybe<WorkbenchToolAttributes>;
 };
@@ -9555,6 +9567,11 @@ export type RootMutationTypeDeleteWorkbenchArgs = {
 
 
 export type RootMutationTypeDeleteWorkbenchCronArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteWorkbenchPromptArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -10100,6 +10117,12 @@ export type RootMutationTypeUpdateWorkbenchArgs = {
 
 export type RootMutationTypeUpdateWorkbenchCronArgs = {
   attributes: WorkbenchCronAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateWorkbenchPromptArgs = {
+  attributes: WorkbenchPromptAttributes;
   id: Scalars['ID']['input'];
 };
 
@@ -14628,6 +14651,7 @@ export type Workbench = {
   name: Scalars['String']['output'];
   /** the project of this workbench */
   project?: Maybe<Project>;
+  prompts?: Maybe<WorkbenchPromptConnection>;
   /** read policy for this service */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the git repository for this workbench */
@@ -14663,6 +14687,14 @@ export type WorkbenchCronsArgs = {
 
 
 export type WorkbenchIssuesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchPromptsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -15065,6 +15097,35 @@ export type WorkbenchObservabilityAttributes = {
   logs?: InputMaybe<Scalars['Boolean']['input']>;
   /** enable metrics capability */
   metrics?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type WorkbenchPrompt = {
+  __typename?: 'WorkbenchPrompt';
+  /** the id of the saved prompt */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the saved prompt text */
+  prompt?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the workbench this prompt belongs to */
+  workbench?: Maybe<Workbench>;
+};
+
+export type WorkbenchPromptAttributes = {
+  /** the saved prompt text */
+  prompt: Scalars['String']['input'];
+};
+
+export type WorkbenchPromptConnection = {
+  __typename?: 'WorkbenchPromptConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchPromptEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchPromptEdge = {
+  __typename?: 'WorkbenchPromptEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchPrompt>;
 };
 
 export type WorkbenchSkills = {

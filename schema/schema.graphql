@@ -1229,6 +1229,20 @@ type RootMutationType {
 
   deleteWorkbenchCron(id: ID!): WorkbenchCron
 
+  "Creates a saved prompt for a workbench. Requires read access to the workbench."
+  createWorkbenchPrompt(
+    "the workbench to save a prompt for"
+    workbenchId: ID!
+
+    attributes: WorkbenchPromptAttributes!
+  ): WorkbenchPrompt
+
+  "Updates a saved workbench prompt. Requires read access to the workbench."
+  updateWorkbenchPrompt(id: ID!, attributes: WorkbenchPromptAttributes!): WorkbenchPrompt
+
+  "Deletes a saved workbench prompt. Requires read access to the workbench."
+  deleteWorkbenchPrompt(id: ID!): WorkbenchPrompt
+
   createWorkbenchWebhook(
     "the workbench to create a webhook for"
     workbenchId: ID!
@@ -2289,6 +2303,11 @@ input WorkbenchCronAttributes {
   prompt: String
 }
 
+input WorkbenchPromptAttributes {
+  "the saved prompt text"
+  prompt: String!
+}
+
 input WorkbenchWebhookMatchesAttributes {
   "regex pattern to match in webhook body"
   regex: String
@@ -2547,6 +2566,8 @@ type Workbench {
   runs(after: String, first: Int, before: String, last: Int): WorkbenchJobConnection
 
   crons(after: String, first: Int, before: String, last: Int): WorkbenchCronConnection
+
+  prompts(after: String, first: Int, before: String, last: Int): WorkbenchPromptConnection
 
   webhooks(after: String, first: Int, before: String, last: Int): WorkbenchWebhookConnection
 
@@ -2812,6 +2833,21 @@ type WorkbenchCron {
   updatedAt: DateTime
 }
 
+type WorkbenchPrompt {
+  "the id of the saved prompt"
+  id: String!
+
+  "the saved prompt text"
+  prompt: String
+
+  "the workbench this prompt belongs to"
+  workbench: Workbench
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type WorkbenchWebhookMatches {
   "regex pattern to match"
   regex: String
@@ -3033,6 +3069,11 @@ type WorkbenchJobActivityConnection {
 type WorkbenchCronConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchCronEdge]
+}
+
+type WorkbenchPromptConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchPromptEdge]
 }
 
 type WorkbenchWebhookConnection {
@@ -14610,6 +14651,11 @@ type SentinelEdge {
 
 type WorkbenchWebhookEdge {
   node: WorkbenchWebhook
+  cursor: String
+}
+
+type WorkbenchPromptEdge {
+  node: WorkbenchPrompt
   cursor: String
 }
 

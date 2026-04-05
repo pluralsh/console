@@ -64,6 +64,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt,  :string, description: "the prompt to run when the cron triggers"
   end
 
+  input_object :workbench_prompt_attributes do
+    field :prompt, non_null(:string), description: "the saved prompt text"
+  end
+
   input_object :workbench_webhook_matches_attributes do
     field :regex,            :string, description: "regex pattern to match in webhook body"
     field :substring,        :string, description: "substring to match in webhook body"
@@ -197,6 +201,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     connection field :crons, node_type: :workbench_cron do
       resolve &Deployments.list_workbench_crons/3
+    end
+
+    connection field :prompts, node_type: :workbench_prompt do
+      resolve &Deployments.list_workbench_prompts/3
     end
 
     connection field :webhooks, node_type: :workbench_webhook do
@@ -358,6 +366,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     timestamps()
   end
 
+  object :workbench_prompt do
+    field :id,     non_null(:string), description: "the id of the saved prompt"
+    field :prompt, :string, description: "the saved prompt text"
+
+    field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this prompt belongs to"
+
+    timestamps()
+  end
+
   object :workbench_webhook_matches do
     field :regex,            :string, description: "regex pattern to match"
     field :substring,        :string, description: "substring to match"
@@ -475,6 +492,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench_job_activity
   connection node_type: :workbench_job_thought
   connection node_type: :workbench_cron
+  connection node_type: :workbench_prompt
   connection node_type: :workbench_webhook
 
   delta :workbench_job
@@ -647,6 +665,41 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench_cron/2
+    end
+
+    @desc "Creates a saved prompt for a workbench. Requires read access to the workbench."
+    field :create_workbench_prompt, :workbench_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :workbench_id, non_null(:id), description: "the workbench to save a prompt for"
+      arg :attributes, non_null(:workbench_prompt_attributes)
+
+      resolve &Deployments.create_workbench_prompt/2
+    end
+
+    @desc "Updates a saved workbench prompt. Requires read access to the workbench."
+    field :update_workbench_prompt, :workbench_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_prompt_attributes)
+
+      resolve &Deployments.update_workbench_prompt/2
+    end
+
+    @desc "Deletes a saved workbench prompt. Requires read access to the workbench."
+    field :delete_workbench_prompt, :workbench_prompt do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_prompt/2
     end
 
     field :create_workbench_webhook, :workbench_webhook do

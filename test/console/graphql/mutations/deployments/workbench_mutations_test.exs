@@ -535,6 +535,126 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
     end
   end
 
+  describe "createWorkbenchPrompt" do
+    test "it can create a saved prompt with read access to the workbench" do
+      workbench = insert(:workbench)
+
+      {:ok, %{data: %{"createWorkbenchPrompt" => prompt}}} = run_query("""
+        mutation CreateWorkbenchPrompt($workbenchId: ID!, $attributes: WorkbenchPromptAttributes!) {
+          createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            prompt
+            workbench { id }
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"prompt" => "saved hello"}}, %{current_user: admin_user()})
+
+      assert prompt["workbench"]["id"] == workbench.id
+      assert prompt["prompt"] == "saved hello"
+    end
+
+    test "project readers can create a prompt" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, %{data: %{"createWorkbenchPrompt" => prompt}}} = run_query("""
+        mutation CreateWorkbenchPrompt($workbenchId: ID!, $attributes: WorkbenchPromptAttributes!) {
+          createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            prompt
+            workbench { id }
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"prompt" => "from reader"}}, %{current_user: user})
+
+      assert prompt["workbench"]["id"] == workbench.id
+      assert prompt["prompt"] == "from reader"
+    end
+
+    test "users without read access cannot create a prompt" do
+      user = insert(:user)
+      workbench = insert(:workbench)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation CreateWorkbenchPrompt($workbenchId: ID!, $attributes: WorkbenchPromptAttributes!) {
+          createWorkbenchPrompt(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            prompt
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"prompt" => "nope"}}, %{current_user: user})
+    end
+  end
+
+  describe "updateWorkbenchPrompt" do
+    test "it can update a saved prompt" do
+      workbench = insert(:workbench)
+      p = insert(:workbench_prompt, workbench: workbench, prompt: "old")
+
+      {:ok, %{data: %{"updateWorkbenchPrompt" => updated}}} = run_query("""
+        mutation UpdateWorkbenchPrompt($id: ID!, $attributes: WorkbenchPromptAttributes!) {
+          updateWorkbenchPrompt(id: $id, attributes: $attributes) {
+            id
+            prompt
+          }
+        }
+      """, %{"id" => p.id, "attributes" => %{"prompt" => "new content"}}, %{current_user: admin_user()})
+
+      assert updated["id"] == p.id
+      assert updated["prompt"] == "new content"
+    end
+
+    test "users without access cannot update a prompt" do
+      user = insert(:user)
+      p = insert(:workbench_prompt, prompt: "unchanged")
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation UpdateWorkbenchPrompt($id: ID!, $attributes: WorkbenchPromptAttributes!) {
+          updateWorkbenchPrompt(id: $id, attributes: $attributes) {
+            id
+            prompt
+          }
+        }
+      """, %{"id" => p.id, "attributes" => %{"prompt" => "hacked"}}, %{current_user: user})
+
+      assert refetch(p).prompt == "unchanged"
+    end
+  end
+
+  describe "deleteWorkbenchPrompt" do
+    test "it can delete a saved prompt" do
+      workbench = insert(:workbench)
+      p = insert(:workbench_prompt, workbench: workbench)
+
+      {:ok, %{data: %{"deleteWorkbenchPrompt" => deleted}}} = run_query("""
+        mutation DeleteWorkbenchPrompt($id: ID!) {
+          deleteWorkbenchPrompt(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => p.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == p.id
+      refute refetch(p)
+    end
+
+    test "users without access cannot delete a prompt" do
+      user = insert(:user)
+      p = insert(:workbench_prompt)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation DeleteWorkbenchPrompt($id: ID!) {
+          deleteWorkbenchPrompt(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => p.id}, %{current_user: user})
+
+      assert refetch(p)
+    end
+  end
+
   describe "createWorkbenchWebhook" do
     test "it can create a workbench webhook with observability webhook" do
       workbench = insert(:workbench)

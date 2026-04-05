@@ -10,6 +10,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchJobActivity,
     WorkbenchJobResult,
     WorkbenchCron,
+    WorkbenchPrompt,
     WorkbenchWebhook,
   }
   alias Console.Deployments.Settings
@@ -21,6 +22,7 @@ defmodule Console.Deployments.Workbenches do
   @type job_resp :: {:ok, WorkbenchJob.t()} | error
   @type activity_resp :: {:ok, WorkbenchJobActivity.t()} | error
   @type cron_resp :: {:ok, WorkbenchCron.t()} | error
+  @type prompt_resp :: {:ok, WorkbenchPrompt.t()} | error
   @type webhook_resp :: {:ok, WorkbenchWebhook.t()} | error
 
   @cache_adapter Console.conf(:cache_adapter)
@@ -42,6 +44,8 @@ defmodule Console.Deployments.Workbenches do
 
   def get_workbench_cron!(id), do: Repo.get!(WorkbenchCron, id)
   def get_workbench_cron(id), do: Repo.get(WorkbenchCron, id)
+  def get_workbench_prompt!(id), do: Repo.get!(WorkbenchPrompt, id)
+  def get_workbench_prompt(id), do: Repo.get(WorkbenchPrompt, id)
   def get_workbench_webhook!(id), do: Repo.get!(WorkbenchWebhook, id)
   def get_workbench_webhook(id), do: Repo.get(WorkbenchWebhook, id)
 
@@ -124,8 +128,8 @@ defmodule Console.Deployments.Workbenches do
   Requires write permission on the workbench.
   """
   @spec create_workbench_cron(map, binary, User.t()) :: cron_resp
-  def create_workbench_cron(attrs, workbench_id, %User{} = user) do
-    %WorkbenchCron{workbench_id: workbench_id}
+  def create_workbench_cron(attrs, workbench_id, %User{id: uid} = user) do
+    %WorkbenchCron{workbench_id: workbench_id, user_id: uid}
     |> WorkbenchCron.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:insert)
@@ -138,8 +142,8 @@ defmodule Console.Deployments.Workbenches do
   @spec update_workbench_cron(map, binary, User.t()) :: cron_resp
   def update_workbench_cron(attrs, id, %User{} = user) do
     get_workbench_cron!(id)
+    |> WorkbenchCron.changeset(attrs)
     |> allow(user, :write)
-    |> when_ok(&WorkbenchCron.changeset(&1, attrs))
     |> when_ok(:update)
     |> notify(:update, user)
   end
@@ -151,6 +155,41 @@ defmodule Console.Deployments.Workbenches do
   def delete_workbench_cron(id, %User{} = user) do
     get_workbench_cron!(id)
     |> allow(user, :write)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Creates a saved prompt for a workbench. Requires read access to the workbench.
+  """
+  @spec create_workbench_prompt(map, binary, User.t()) :: prompt_resp
+  def create_workbench_prompt(attrs, workbench_id, %User{} = user) do
+    %WorkbenchPrompt{workbench_id: workbench_id}
+    |> WorkbenchPrompt.changeset(attrs)
+    |> allow(user, :read)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Updates a saved workbench prompt. Requires read access to the workbench.
+  """
+  @spec update_workbench_prompt(map, binary, User.t()) :: prompt_resp
+  def update_workbench_prompt(attrs, id, %User{} = user) do
+    get_workbench_prompt!(id)
+    |> WorkbenchPrompt.changeset(attrs)
+    |> allow(user, :read)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
+  Deletes a saved workbench prompt. Requires read access to the workbench.
+  """
+  @spec delete_workbench_prompt(binary, User.t()) :: prompt_resp
+  def delete_workbench_prompt(id, %User{} = user) do
+    get_workbench_prompt!(id)
+    |> allow(user, :read)
     |> when_ok(:delete)
     |> notify(:delete, user)
   end
@@ -386,6 +425,12 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchCronUpdated, cron, actor: user)
   defp notify({:ok, %WorkbenchCron{} = cron}, :delete, user),
     do: handle_notify(PubSub.WorkbenchCronDeleted, cron, actor: user)
+  defp notify({:ok, %WorkbenchPrompt{} = prompt}, :create, user),
+    do: handle_notify(PubSub.WorkbenchPromptCreated, prompt, actor: user)
+  defp notify({:ok, %WorkbenchPrompt{} = prompt}, :update, user),
+    do: handle_notify(PubSub.WorkbenchPromptUpdated, prompt, actor: user)
+  defp notify({:ok, %WorkbenchPrompt{} = prompt}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchPromptDeleted, prompt, actor: user)
   defp notify({:ok, %WorkbenchWebhook{} = webhook}, :create, user),
     do: handle_notify(PubSub.WorkbenchWebhookCreated, webhook, actor: user)
   defp notify({:ok, %WorkbenchWebhook{} = webhook}, :update, user),
