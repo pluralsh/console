@@ -85,8 +85,12 @@ defmodule Console.AI.Provider.Base do
   defp model(%LLMDB.Model{} = model), do: {:ok, model}
   defp model(model), do: {:error, "invalid model: #{inspect(model)}"}
 
-  defp to_tool(%ToolCall{id: id, function: %{name: name, arguments: args}}),
-    do: %Tool{id: id, name: name, arguments: JSON.decode!(args)}
+  defp to_tool(%ToolCall{id: id, function: %{name: name, arguments: args}}) do
+    case JSON.decode(args) do
+      {:ok, args} -> %Tool{id: id, name: name, arguments: args}
+      _ -> %Tool{id: id, name: name, arguments: %{}}
+    end
+  end
 
   defp stream_retrier(model, messages, opts, retries \\ 0)
   defp stream_retrier(model, messages, opts, retries) when retries < 2 do

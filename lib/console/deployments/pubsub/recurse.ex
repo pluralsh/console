@@ -325,6 +325,7 @@ end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobActivityCreated do
   def process(%{item: %{type: :user}}), do: Console.Pipelines.AI.Workbench.Producer.kick()
+  def process(_), do: :ok
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.WorkbenchJobCreated do
