@@ -1,11 +1,16 @@
 import { ResponsiveLine } from '@nivo/line'
 import {
   Button,
+  Card,
   FileDiffIcon,
   Flex,
   IconFrame,
   Modal,
 } from '@pluralsh/design-system'
+import {
+  SimpleAccordion,
+  SimplifiedMarkdown,
+} from 'components/ai/chatbot/multithread/MultiThreadViewerMessage'
 import { LogLine } from 'components/cd/logs/LogLine'
 import { SliceTooltip } from 'components/utils/ChartTooltip'
 import DiffViewer from 'components/utils/DiffViewer'
@@ -17,10 +22,10 @@ import {
   WorkbenchJobActivityLogFragment,
   WorkbenchJobActivityMetricFragment,
 } from 'generated/graphql'
-import { groupBy, isEmpty, isNil } from 'lodash'
+import { groupBy, isEmpty, isNil, truncate } from 'lodash'
 import { useMemo, useState } from 'react'
 import { DiffMethod } from 'react-diff-viewer'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { COLORS } from 'utils/color'
 import { toDateOrUndef } from 'utils/datetime'
 import { getOldContentFromTextDiff } from 'utils/textDiff'
@@ -136,6 +141,25 @@ export function JobActivityMetrics({
         axisBottom={{ format: '%H:%M:%S', tickRotation: 10 }}
       />
     </MetricsChartSC>
+  )
+}
+
+export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
+  const { spacing } = useTheme()
+  if (!prompt) return null
+  return (
+    <SimpleAccordion
+      label={
+        <span>
+          <strong>Prompt: </strong>
+          {truncate(prompt, { length: 30 })}
+        </span>
+      }
+    >
+      <Card css={{ padding: spacing.medium, background: 'none' }}>
+        <SimplifiedMarkdown text={prompt} />
+      </Card>
+    </SimpleAccordion>
   )
 }
 

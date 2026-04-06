@@ -30,6 +30,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import {
   JobActivityLogs,
   JobActivityMetrics,
+  JobActivityPrompt,
   MemoActivityResult,
 } from './WorkbenchJobActivityResults'
 
@@ -90,7 +91,7 @@ function WorkbenchJobActivityResult({
 }: {
   activity: WorkbenchJobActivityFragment
 }) {
-  const { type, result } = activity
+  const { type, result, prompt } = activity
   if (!result) return null
   switch (type) {
     case WorkbenchJobActivityType.Memo:
@@ -101,6 +102,7 @@ function WorkbenchJobActivityResult({
           direction="column"
           gap="medium"
         >
+          <JobActivityPrompt prompt={prompt} />
           <SimplifiedMarkdown text={result.output ?? ''} />
           <JobActivityMetrics
             metrics={result.metrics?.filter(isNonNullable) ?? []}

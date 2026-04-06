@@ -86,24 +86,14 @@ function CodeBlockLabel({
 
   if (language === 'bash' || language === 'sh')
     return (
-      <Accordion
-        type="multiple"
-        css={{ background: 'none', border: 'none' }}
-      >
-        <AccordionItem
-          value="code"
-          trigger={<CaptionP $color="text-xlight">{label}</CaptionP>}
-          padding="none"
-          caret="none"
+      <SimpleAccordion label={label}>
+        <Code
+          showHeader={false}
+          language={language}
         >
-          <Code
-            showHeader={false}
-            language={language}
-          >
-            {content}
-          </Code>
-        </AccordionItem>
-      </Accordion>
+          {content}
+        </Code>
+      </SimpleAccordion>
     )
 
   return (
@@ -182,6 +172,33 @@ export function SimplifiedMarkdown({ text }: { text: string }) {
         {text}
       </ReactMarkdown>
     </SimpleMarkdownSC>
+  )
+}
+
+export function SimpleAccordion({
+  label,
+  defaultOpen = false,
+  children,
+}: {
+  label: ReactNode
+  defaultOpen?: boolean
+  children: ReactNode
+}) {
+  return (
+    <Accordion
+      type="single"
+      value={defaultOpen ? 'val' : undefined}
+      css={{ background: 'none', border: 'none' }}
+    >
+      <AccordionItem
+        value="val"
+        trigger={<CaptionP $color="text-xlight">{label}</CaptionP>}
+        padding="none"
+        caret="none"
+      >
+        {children}
+      </AccordionItem>
+    </Accordion>
   )
 }
 
