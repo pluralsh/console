@@ -15,7 +15,7 @@ defmodule Console.AI.Workbench.Subagents.Plan do
     |> MemoryEngine.reduce([{:user, prompt}], &reducer/2)
     |> case do
       {:ok, attrs} -> attrs
-      {:error, error} -> %{status: :failed, error: "error planning job: #{inspect(error)}"}
+      {:error, error} -> %{status: :failed, result: %{error: "error planning job: #{inspect(error)}"}}
     end
     |> then(&WorkbenchJob.changeset(job, &1))
     |> Repo.update()
