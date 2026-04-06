@@ -153,7 +153,7 @@ export function JobActivityPrompt({ prompt }: { prompt: Nullable<string> }) {
       label={
         <span>
           <strong>Prompt: </strong>
-          {truncate(prompt, { length: 30 })}
+          {truncate(prompt, { length: 40 })}
         </span>
       }
     >
