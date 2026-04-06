@@ -22,6 +22,8 @@ import { WorkbenchJobTodos } from './WorkbenchJobTodos'
 import { PluralErrorBoundary } from 'components/cd/PluralErrorBoundary'
 import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
 import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
+import { WorkbenchJobPrs } from './WorkbenchJobPrs'
+import { isNonNullable } from 'utils/isNonNullable'
 
 export function WorkbenchJob() {
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
@@ -123,6 +125,9 @@ export function WorkbenchJob() {
           flex={!!job?.result?.conclusion ? 8 : 3}
           height="100%"
         >
+          <WorkbenchJobPrs
+            prs={job?.pullRequests?.filter(isNonNullable) ?? []}
+          />
           <WorkbenchJobTriggerAlert alert={job?.alert} />
           <WorkbenchJobTriggerIssue issue={job?.issue} />
           <WorkbenchJobResult

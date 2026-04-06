@@ -274,6 +274,9 @@ fragment WorkbenchJob on WorkbenchJob {
   result {
     ...WorkbenchJobResult
   }
+  pullRequests {
+    ...PullRequestBasic
+  }
 }
 
 query Workbenches($first: Int = 100, $after: String, $q: String) {

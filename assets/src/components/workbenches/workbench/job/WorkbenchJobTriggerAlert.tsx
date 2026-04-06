@@ -6,16 +6,16 @@ import {
   MegaphoneIcon,
   Prop,
 } from '@pluralsh/design-system'
-import {
-  TriggerAccordionSC,
-  TriggerCardSC,
-  TriggerCardIconWrapperSC,
-  TriggerPropsRowSC,
-} from 'components/workbenches/common/WorkbenchTriggerCard'
 import { alertSeverityToChipSeverity } from 'components/utils/alerts/AlertsTable'
 import { AlertStateChip } from 'components/utils/alerts/AlertStateChip'
 import { Body2BoldP, CaptionP, InlineA } from 'components/utils/typography/Text'
-import { WorkbenchJobFragment } from 'generated/graphql'
+import {
+  TriggerAccordionSC,
+  TriggerCardIconWrapperSC,
+  TriggerCardSC,
+  TriggerPropsRowSC,
+} from 'components/workbenches/common/WorkbenchTriggerCard'
+import { AlertFragment } from 'generated/graphql'
 import { startCase } from 'lodash'
 import styled from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
@@ -23,7 +23,7 @@ import { formatDateTime } from 'utils/datetime'
 export function WorkbenchJobTriggerAlert({
   alert,
 }: {
-  alert?: Nullable<WorkbenchJobFragment['alert']>
+  alert?: Nullable<AlertFragment>
 }) {
   if (!alert) return null
 
