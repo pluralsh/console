@@ -16,7 +16,7 @@ import {
   mapExistingNodes,
   updateCache,
 } from 'utils/graphql'
-import { isActivityRunning, WorkbenchJobActivity } from './WorkbenchJobActivity'
+import { WorkbenchJobActivity } from './WorkbenchJobActivity'
 
 export const ACTIVITY_GAP = 'medium' as const
 
@@ -48,9 +48,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   })
 
   const [openIds, setOpenIds] = useState<string[]>(() =>
-    activities
-      .filter((activity) => !isActivityRunning(activity.status))
-      .map((activity) => activity.id)
+    activities.map((activity) => activity.id)
   )
   return (
     <ActivitiesPanelSC>
@@ -69,6 +67,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
           }
           renderer={({ rowData }) => (
             <WorkbenchJobActivity
+              isOpen={openIds.includes(rowData.id)}
               activity={rowData}
               progress={[]} // TODO
             />

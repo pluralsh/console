@@ -33,10 +33,11 @@ import { getOldContentFromTextDiff } from 'utils/textDiff'
 type ActivityResult = NonNullable<WorkbenchJobActivityFragment['result']>
 
 export function MemoActivityResult({
-  result: { jobUpdate, output },
+  result,
 }: {
-  result: ActivityResult
+  result: Nullable<ActivityResult>
 }) {
+  const { jobUpdate, output } = result ?? {}
   const [showDiff, setShowDiff] = useState(false)
 
   const newValue = jobUpdate?.workingTheory ?? jobUpdate?.conclusion ?? ''

@@ -45,6 +45,7 @@ const ResultPanelSC = styled.div(({ theme }) => ({
   position: 'relative',
   overflow: 'hidden',
   padding: theme.spacing.large,
+  minHeight: 400,
   '&::before': {
     borderRadius: theme.borderRadiuses.large,
     content: '""',

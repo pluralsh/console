@@ -10,7 +10,7 @@ import { ChatFragment, ChatType } from 'generated/graphql'
 import { ReactElement, ReactNode, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { ToolCallContent } from '../ToolCallContent'
 
 export function MultiThreadViewerMessage({
@@ -41,6 +41,7 @@ export function SimpleToolCall({
   attributes: ChatFragment['attributes']
   isPending?: boolean
 }) {
+  const { colors } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const toolName = attributes?.tool?.name ?? ''
 
@@ -51,7 +52,8 @@ export function SimpleToolCall({
           $shimmer={isPending}
           $color="text-xlight"
         >
-          {isPending ? 'CALLING' : 'CALLED'} TOOL {toolName}
+          {isPending ? 'Calling' : 'Called'} tool{' '}
+          <span css={{ color: colors['text-light'] }}>{toolName}</span>
         </CaptionP>
       </ClickableLabelSC>
       <Modal
@@ -202,7 +204,7 @@ export function SimpleAccordion({
   )
 }
 
-const ClickableLabelSC = styled.button(({ theme }) => ({
+export const ClickableLabelSC = styled.button(({ theme }) => ({
   background: 'none',
   border: 'none',
   padding: 0,

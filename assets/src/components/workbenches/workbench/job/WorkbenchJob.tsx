@@ -124,6 +124,7 @@ export function WorkbenchJob() {
           minWidth={500}
           flex={!!job?.result?.conclusion ? 8 : 3}
           height="100%"
+          overflow="auto"
         >
           <WorkbenchJobPrs
             prs={job?.pullRequests?.filter(isNonNullable) ?? []}

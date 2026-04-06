@@ -105,6 +105,13 @@ fragment WorkbenchTool on WorkbenchTool {
   }
 }
 
+fragment WorkbenchJobThought on WorkbenchJobThought {
+  id
+  content
+  toolName
+  toolArgs
+}
+
 fragment WorkbenchJobResultTodo on WorkbenchJobResultTodo {
   name
   description
@@ -153,8 +160,12 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
   status
   prompt
   insertedAt
+  thoughts {
+    ...WorkbenchJobThought
+  }
   result {
     output
+    error
     jobUpdate {
       diff
       workingTheory
@@ -183,10 +194,7 @@ fragment WorkbenchJobActivity on WorkbenchJobActivity {
     }
   }
   agentRun {
-    id
-    pullRequests {
-      ...PullRequestBasic
-    }
+    ...AgentRun
   }
 }
 
