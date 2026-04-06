@@ -11,6 +11,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchJobResult,
     WorkbenchCron,
     WorkbenchPrompt,
+    WorkbenchSkill,
     WorkbenchWebhook,
   }
   alias Console.Deployments.Settings
@@ -23,6 +24,7 @@ defmodule Console.Deployments.Workbenches do
   @type activity_resp :: {:ok, WorkbenchJobActivity.t()} | error
   @type cron_resp :: {:ok, WorkbenchCron.t()} | error
   @type prompt_resp :: {:ok, WorkbenchPrompt.t()} | error
+  @type skill_resp :: {:ok, WorkbenchSkill.t()} | error
   @type webhook_resp :: {:ok, WorkbenchWebhook.t()} | error
 
   @cache_adapter Console.conf(:cache_adapter)
@@ -46,6 +48,8 @@ defmodule Console.Deployments.Workbenches do
   def get_workbench_cron(id), do: Repo.get(WorkbenchCron, id)
   def get_workbench_prompt!(id), do: Repo.get!(WorkbenchPrompt, id)
   def get_workbench_prompt(id), do: Repo.get(WorkbenchPrompt, id)
+  def get_workbench_skill!(id), do: Repo.get!(WorkbenchSkill, id)
+  def get_workbench_skill(id), do: Repo.get(WorkbenchSkill, id)
   def get_workbench_webhook!(id), do: Repo.get!(WorkbenchWebhook, id)
   def get_workbench_webhook(id), do: Repo.get(WorkbenchWebhook, id)
 
@@ -190,6 +194,41 @@ defmodule Console.Deployments.Workbenches do
   def delete_workbench_prompt(id, %User{} = user) do
     get_workbench_prompt!(id)
     |> allow(user, :read)
+    |> when_ok(:delete)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Creates a saved workbench skill. Requires write access to the workbench.
+  """
+  @spec create_workbench_skill(map, binary, User.t()) :: skill_resp
+  def create_workbench_skill(attrs, workbench_id, %User{} = user) do
+    %WorkbenchSkill{workbench_id: workbench_id}
+    |> WorkbenchSkill.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+    |> notify(:create, user)
+  end
+
+  @doc """
+  Updates a saved workbench skill. Requires write access to the workbench.
+  """
+  @spec update_workbench_skill(map, binary, User.t()) :: skill_resp
+  def update_workbench_skill(attrs, id, %User{} = user) do
+    get_workbench_skill!(id)
+    |> WorkbenchSkill.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
+  Deletes a saved workbench skill. Requires write access to the workbench.
+  """
+  @spec delete_workbench_skill(binary, User.t()) :: skill_resp
+  def delete_workbench_skill(id, %User{} = user) do
+    get_workbench_skill!(id)
+    |> allow(user, :write)
     |> when_ok(:delete)
     |> notify(:delete, user)
   end
@@ -431,6 +470,12 @@ defmodule Console.Deployments.Workbenches do
     do: handle_notify(PubSub.WorkbenchPromptUpdated, prompt, actor: user)
   defp notify({:ok, %WorkbenchPrompt{} = prompt}, :delete, user),
     do: handle_notify(PubSub.WorkbenchPromptDeleted, prompt, actor: user)
+  defp notify({:ok, %WorkbenchSkill{} = skill}, :create, user),
+    do: handle_notify(PubSub.WorkbenchSkillCreated, skill, actor: user)
+  defp notify({:ok, %WorkbenchSkill{} = skill}, :update, user),
+    do: handle_notify(PubSub.WorkbenchSkillUpdated, skill, actor: user)
+  defp notify({:ok, %WorkbenchSkill{} = skill}, :delete, user),
+    do: handle_notify(PubSub.WorkbenchSkillDeleted, skill, actor: user)
   defp notify({:ok, %WorkbenchWebhook{} = webhook}, :create, user),
     do: handle_notify(PubSub.WorkbenchWebhookCreated, webhook, actor: user)
   defp notify({:ok, %WorkbenchWebhook{} = webhook}, :update, user),

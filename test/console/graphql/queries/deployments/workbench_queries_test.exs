@@ -207,6 +207,36 @@ defmodule Console.GraphQl.Deployments.WorkbenchQueriesTest do
       assert Enum.any?(nodes, & &1["prompt"] == "second")
     end
 
+    test "it can fetch workbench skills" do
+      workbench = insert(:workbench)
+      s1 = insert(:workbench_skill, workbench: workbench, name: "skill-one", description: "first", contents: "echo one")
+      s2 = insert(:workbench_skill, workbench: workbench, name: "skill-two", description: "second", contents: "echo two")
+
+      {:ok, %{data: %{"workbench" => found}}} = run_query("""
+        query Workbench($id: ID!) {
+          workbench(id: $id) {
+            id
+            workbenchSkills(first: 5) {
+              edges {
+                node {
+                  id
+                  name
+                  description
+                  contents
+                }
+              }
+            }
+          }
+        }
+      """, %{"id" => workbench.id}, %{current_user: admin_user()})
+
+      assert found["id"] == workbench.id
+      nodes = from_connection(found["workbenchSkills"])
+      assert ids_equal(nodes, [s1, s2])
+      assert Enum.any?(nodes, & &1["name"] == "skill-one" and &1["description"] == "first" and &1["contents"] == "echo one")
+      assert Enum.any?(nodes, & &1["name"] == "skill-two" and &1["description"] == "second" and &1["contents"] == "echo two")
+    end
+
     test "it can fetch workbench webhooks" do
       workbench = insert(:workbench)
       webhook1 = insert(:workbench_webhook, workbench: workbench, name: "wh-one")

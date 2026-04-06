@@ -1,8 +1,8 @@
 defmodule Console.AI.Workbench.Subagents.Observability do
   use Console.AI.Workbench.Subagents.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
+  alias Console.Schema.{Workbench, WorkbenchJob, WorkbenchJobActivity, WorkbenchTool}
   alias Console.AI.Tools.Workbench.{ObservabilityResult, Skills, Skill}
-  alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces, Time}
+  alias Console.AI.Tools.Workbench.Observability.{Metrics, MetricsSearch, Logs, Traces, Time, Plrl}
   alias Console.AI.Workbench.{Environment, MCP}
 
   require EEx
@@ -30,6 +30,8 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   defp tools(%Environment{skills: skills, tools: tools, job: job}) do
     obs_tools(tools)
     |> Enum.concat(MCP.expand_tools(Environment.subagent_tools(tools, :observability), job))
+    |> Enum.concat(plrl_log_tools(job))
+    |> Enum.concat(plrl_metric_tools(job))
     |> Enum.concat([
       %Skills{skills: skills},
       %Skill{skills: skills},
@@ -38,12 +40,26 @@ defmodule Console.AI.Workbench.Subagents.Observability do
     ])
   end
 
+  defp plrl_log_tools(%WorkbenchJob{user: user, workbench: %Workbench{configuration: %{observability: %{logs: true}}}}) do
+    [
+      %Plrl.Logs{user: user},
+      %Plrl.LogsAggregate{user: user},
+      %Plrl.LogLabels{user: user}
+    ]
+  end
+  defp plrl_log_tools(_), do: []
+
+  defp plrl_metric_tools(%WorkbenchJob{workbench: %Workbench{configuration: %{observability: %{metrics: true}}}}),
+    do: [Plrl.Metrics]
+  defp plrl_metric_tools(_), do: []
+
   @allowed_tools MapSet.new(~w(metrics logs traces)a)
 
   defp obs_tools(tools) do
     Enum.map(tools, &elem(&1, 1))
     |> Enum.filter(fn
-      %WorkbenchTool{categories: [_ | _] = categories} -> MapSet.subset?(MapSet.new(categories), @allowed_tools)
+      %WorkbenchTool{tool: t, categories: [_ | _] = categories} when t != :mcp ->
+        MapSet.subset?(MapSet.new(categories), @allowed_tools)
       _ -> false
     end)
     |> Enum.flat_map(fn

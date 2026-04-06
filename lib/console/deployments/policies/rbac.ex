@@ -52,6 +52,7 @@ defmodule Console.Deployments.Policies.Rbac do
     WorkbenchTool,
     WorkbenchCron,
     WorkbenchPrompt,
+    WorkbenchSkill,
     WorkbenchWebhook,
     IssueWebhook,
     Monitor
@@ -144,6 +145,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(cron, user, action, & &1.workbench)
   def evaluate(%WorkbenchPrompt{} = prompt, user, action),
     do: recurse(prompt, user, action, & &1.workbench)
+  def evaluate(%WorkbenchSkill{} = skill, user, action),
+    do: recurse(skill, user, action, & &1.workbench)
   def evaluate(%WorkbenchWebhook{} = webhook, user, action),
     do: recurse(webhook, user, action, & &1.workbench)
   def evaluate(%Monitor{} = monitor, %User{} = user, action),
@@ -283,6 +286,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(cron, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(%WorkbenchPrompt{} = prompt),
     do: Repo.preload(prompt, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
+  def preload(%WorkbenchSkill{} = skill),
+    do: Repo.preload(skill, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(%WorkbenchWebhook{} = webhook),
     do: Repo.preload(webhook, [workbench: [:read_bindings, :write_bindings, project: @bindings]])
   def preload(%Monitor{} = monitor),

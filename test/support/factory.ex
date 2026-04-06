@@ -1228,6 +1228,15 @@ defmodule Console.Factory do
     }
   end
 
+  def workbench_skill_factory do
+    %Schema.WorkbenchSkill{
+      name: sequence(:workbench_skill_name, &"workbench-skill-#{&1}"),
+      description: "saved skill description",
+      contents: "saved skill contents",
+      workbench: build(:workbench)
+    }
+  end
+
   def workbench_webhook_factory do
     %Schema.WorkbenchWebhook{
       name: sequence(:workbench_webhook, & "workbench-webhook-#{&1}"),

@@ -9424,15 +9424,16 @@ type Workbench struct {
 	// read policy for this service
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy of this service
-	WriteBindings []*PolicyBinding            `json:"writeBindings,omitempty"`
-	Runs          *WorkbenchJobConnection     `json:"runs,omitempty"`
-	Crons         *WorkbenchCronConnection    `json:"crons,omitempty"`
-	Prompts       *WorkbenchPromptConnection  `json:"prompts,omitempty"`
-	Webhooks      *WorkbenchWebhookConnection `json:"webhooks,omitempty"`
-	Alerts        *AlertConnection            `json:"alerts,omitempty"`
-	Issues        *IssueConnection            `json:"issues,omitempty"`
-	InsertedAt    *string                     `json:"insertedAt,omitempty"`
-	UpdatedAt     *string                     `json:"updatedAt,omitempty"`
+	WriteBindings   []*PolicyBinding            `json:"writeBindings,omitempty"`
+	Runs            *WorkbenchJobConnection     `json:"runs,omitempty"`
+	Crons           *WorkbenchCronConnection    `json:"crons,omitempty"`
+	Prompts         *WorkbenchPromptConnection  `json:"prompts,omitempty"`
+	WorkbenchSkills *WorkbenchSkillConnection   `json:"workbenchSkills,omitempty"`
+	Webhooks        *WorkbenchWebhookConnection `json:"webhooks,omitempty"`
+	Alerts          *AlertConnection            `json:"alerts,omitempty"`
+	Issues          *IssueConnection            `json:"issues,omitempty"`
+	InsertedAt      *string                     `json:"insertedAt,omitempty"`
+	UpdatedAt       *string                     `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchAttributes struct {
@@ -9778,6 +9779,40 @@ type WorkbenchPromptConnection struct {
 type WorkbenchPromptEdge struct {
 	Node   *WorkbenchPrompt `json:"node,omitempty"`
 	Cursor *string          `json:"cursor,omitempty"`
+}
+
+type WorkbenchSkill struct {
+	// the id of the saved skill
+	ID string `json:"id"`
+	// the saved skill name
+	Name *string `json:"name,omitempty"`
+	// the saved skill description
+	Description *string `json:"description,omitempty"`
+	// the saved skill contents
+	Contents *string `json:"contents,omitempty"`
+	// the workbench this skill belongs to
+	Workbench  *Workbench `json:"workbench,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
+}
+
+type WorkbenchSkillAttributes struct {
+	// the saved skill name
+	Name string `json:"name"`
+	// the saved skill description
+	Description *string `json:"description,omitempty"`
+	// the saved skill contents
+	Contents string `json:"contents"`
+}
+
+type WorkbenchSkillConnection struct {
+	PageInfo PageInfo              `json:"pageInfo"`
+	Edges    []*WorkbenchSkillEdge `json:"edges,omitempty"`
+}
+
+type WorkbenchSkillEdge struct {
+	Node   *WorkbenchSkill `json:"node,omitempty"`
+	Cursor *string         `json:"cursor,omitempty"`
 }
 
 type WorkbenchSkills struct {

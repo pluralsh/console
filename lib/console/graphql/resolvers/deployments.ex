@@ -115,6 +115,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     WorkbenchTool,
     WorkbenchCron,
     WorkbenchPrompt,
+    WorkbenchSkill,
     WorkbenchWebhook,
     ObservabilityWebhook,
     IssueWebhook,
@@ -223,6 +224,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(WorkbenchTool, _), do: WorkbenchTool
   def query(WorkbenchCron, _), do: WorkbenchCron.ordered()
   def query(WorkbenchPrompt, _), do: WorkbenchPrompt.ordered()
+  def query(WorkbenchSkill, _), do: WorkbenchSkill.ordered()
   def query(WorkbenchWebhook, _), do: WorkbenchWebhook
   def query(ObservabilityWebhook, _), do: ObservabilityWebhook.ordered()
   def query(IssueWebhook, _), do: IssueWebhook.ordered()

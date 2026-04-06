@@ -68,6 +68,12 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt, non_null(:string), description: "the saved prompt text"
   end
 
+  input_object :workbench_skill_attributes do
+    field :name,        non_null(:string), description: "the saved skill name"
+    field :description, :string, description: "the saved skill description"
+    field :contents,    non_null(:string), description: "the saved skill contents"
+  end
+
   input_object :workbench_webhook_matches_attributes do
     field :regex,            :string, description: "regex pattern to match in webhook body"
     field :substring,        :string, description: "substring to match in webhook body"
@@ -205,6 +211,10 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
     connection field :prompts, node_type: :workbench_prompt do
       resolve &Deployments.list_workbench_prompts/3
+    end
+
+    connection field :workbench_skills, node_type: :workbench_skill do
+      resolve &Deployments.list_workbench_skills/3
     end
 
     connection field :webhooks, node_type: :workbench_webhook do
@@ -375,6 +385,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
     timestamps()
   end
 
+  object :workbench_skill do
+    field :id,          non_null(:string), description: "the id of the saved skill"
+    field :name,        :string, description: "the saved skill name"
+    field :description, :string, description: "the saved skill description"
+    field :contents,    :string, description: "the saved skill contents"
+
+    field :workbench, :workbench, resolve: dataloader(Deployments), description: "the workbench this skill belongs to"
+
+    timestamps()
+  end
+
   object :workbench_webhook_matches do
     field :regex,            :string, description: "regex pattern to match"
     field :substring,        :string, description: "substring to match"
@@ -493,6 +514,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
   connection node_type: :workbench_job_thought
   connection node_type: :workbench_cron
   connection node_type: :workbench_prompt
+  connection node_type: :workbench_skill
   connection node_type: :workbench_webhook
 
   delta :workbench_job
@@ -700,6 +722,41 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench_prompt/2
+    end
+
+    @desc "Creates a saved skill for a workbench. Requires write access to the workbench."
+    field :create_workbench_skill, :workbench_skill do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :workbench_id, non_null(:id), description: "the workbench to save a skill for"
+      arg :attributes, non_null(:workbench_skill_attributes)
+
+      resolve &Deployments.create_workbench_skill/2
+    end
+
+    @desc "Updates a saved workbench skill. Requires write access to the workbench."
+    field :update_workbench_skill, :workbench_skill do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+      arg :attributes, non_null(:workbench_skill_attributes)
+
+      resolve &Deployments.update_workbench_skill/2
+    end
+
+    @desc "Deletes a saved workbench skill. Requires write access to the workbench."
+    field :delete_workbench_skill, :workbench_skill do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_workbench_skill/2
     end
 
     field :create_workbench_webhook, :workbench_webhook do

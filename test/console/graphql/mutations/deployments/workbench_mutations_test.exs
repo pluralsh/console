@@ -655,6 +655,120 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
     end
   end
 
+  describe "createWorkbenchSkill" do
+    test "it can create a saved skill with write access to the workbench" do
+      workbench = insert(:workbench)
+
+      {:ok, %{data: %{"createWorkbenchSkill" => skill}}} = run_query("""
+        mutation CreateWorkbenchSkill($workbenchId: ID!, $attributes: WorkbenchSkillAttributes!) {
+          createWorkbenchSkill(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            name
+            description
+            contents
+            workbench { id }
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"name" => "my-skill", "description" => "desc", "contents" => "echo hello"}}, %{current_user: admin_user()})
+
+      assert skill["workbench"]["id"] == workbench.id
+      assert skill["name"] == "my-skill"
+      assert skill["description"] == "desc"
+      assert skill["contents"] == "echo hello"
+    end
+
+    test "project readers cannot create a skill" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation CreateWorkbenchSkill($workbenchId: ID!, $attributes: WorkbenchSkillAttributes!) {
+          createWorkbenchSkill(workbenchId: $workbenchId, attributes: $attributes) {
+            id
+            name
+          }
+        }
+      """, %{"workbenchId" => workbench.id, "attributes" => %{"name" => "forbidden", "contents" => "nope"}}, %{current_user: user})
+    end
+  end
+
+  describe "updateWorkbenchSkill" do
+    test "it can update a saved skill" do
+      workbench = insert(:workbench)
+      skill = insert(:workbench_skill, workbench: workbench, name: "old", description: "old", contents: "before")
+
+      {:ok, %{data: %{"updateWorkbenchSkill" => updated}}} = run_query("""
+        mutation UpdateWorkbenchSkill($id: ID!, $attributes: WorkbenchSkillAttributes!) {
+          updateWorkbenchSkill(id: $id, attributes: $attributes) {
+            id
+            name
+            description
+            contents
+          }
+        }
+      """, %{"id" => skill.id, "attributes" => %{"name" => "new", "description" => "new-desc", "contents" => "after"}}, %{current_user: admin_user()})
+
+      assert updated["id"] == skill.id
+      assert updated["name"] == "new"
+      assert updated["description"] == "new-desc"
+      assert updated["contents"] == "after"
+    end
+
+    test "project readers cannot update a skill" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      skill = insert(:workbench_skill, workbench: workbench, name: "secret", contents: "secret")
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation UpdateWorkbenchSkill($id: ID!, $attributes: WorkbenchSkillAttributes!) {
+          updateWorkbenchSkill(id: $id, attributes: $attributes) {
+            id
+            name
+          }
+        }
+      """, %{"id" => skill.id, "attributes" => %{"name" => "hacked", "contents" => "hacked"}}, %{current_user: user})
+
+      assert refetch(skill).name == "secret"
+    end
+  end
+
+  describe "deleteWorkbenchSkill" do
+    test "it can delete a saved skill" do
+      workbench = insert(:workbench)
+      skill = insert(:workbench_skill, workbench: workbench)
+
+      {:ok, %{data: %{"deleteWorkbenchSkill" => deleted}}} = run_query("""
+        mutation DeleteWorkbenchSkill($id: ID!) {
+          deleteWorkbenchSkill(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => skill.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == skill.id
+      refute refetch(skill)
+    end
+
+    test "project readers cannot delete a skill" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      skill = insert(:workbench_skill, workbench: workbench)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation DeleteWorkbenchSkill($id: ID!) {
+          deleteWorkbenchSkill(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => skill.id}, %{current_user: user})
+
+      assert refetch(skill)
+    end
+  end
+
   describe "createWorkbenchWebhook" do
     test "it can create a workbench webhook with observability webhook" do
       workbench = insert(:workbench)

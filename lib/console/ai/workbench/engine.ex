@@ -38,7 +38,7 @@ defmodule Console.AI.Workbench.Engine do
 
   def new(%WorkbenchJob{} = job) do
     %{user: user, workbench: workbench} = job =
-      Repo.preload(job, [:user, workbench: [:repository, :agent_runtime, [tools: :mcp_server]]])
+      Repo.preload(job, [user: [:groups], workbench: [:workbench_skills, :repository, :agent_runtime, [tools: :mcp_server]]])
 
     user = Console.Services.Rbac.preload(user)
     with {:ok, _} <- Heartbeat.start_link(job),

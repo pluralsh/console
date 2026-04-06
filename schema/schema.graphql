@@ -1243,6 +1243,20 @@ type RootMutationType {
   "Deletes a saved workbench prompt. Requires read access to the workbench."
   deleteWorkbenchPrompt(id: ID!): WorkbenchPrompt
 
+  "Creates a saved skill for a workbench. Requires write access to the workbench."
+  createWorkbenchSkill(
+    "the workbench to save a skill for"
+    workbenchId: ID!
+
+    attributes: WorkbenchSkillAttributes!
+  ): WorkbenchSkill
+
+  "Updates a saved workbench skill. Requires write access to the workbench."
+  updateWorkbenchSkill(id: ID!, attributes: WorkbenchSkillAttributes!): WorkbenchSkill
+
+  "Deletes a saved workbench skill. Requires write access to the workbench."
+  deleteWorkbenchSkill(id: ID!): WorkbenchSkill
+
   createWorkbenchWebhook(
     "the workbench to create a webhook for"
     workbenchId: ID!
@@ -2308,6 +2322,17 @@ input WorkbenchPromptAttributes {
   prompt: String!
 }
 
+input WorkbenchSkillAttributes {
+  "the saved skill name"
+  name: String!
+
+  "the saved skill description"
+  description: String
+
+  "the saved skill contents"
+  contents: String!
+}
+
 input WorkbenchWebhookMatchesAttributes {
   "regex pattern to match in webhook body"
   regex: String
@@ -2568,6 +2593,8 @@ type Workbench {
   crons(after: String, first: Int, before: String, last: Int): WorkbenchCronConnection
 
   prompts(after: String, first: Int, before: String, last: Int): WorkbenchPromptConnection
+
+  workbenchSkills(after: String, first: Int, before: String, last: Int): WorkbenchSkillConnection
 
   webhooks(after: String, first: Int, before: String, last: Int): WorkbenchWebhookConnection
 
@@ -2848,6 +2875,27 @@ type WorkbenchPrompt {
   updatedAt: DateTime
 }
 
+type WorkbenchSkill {
+  "the id of the saved skill"
+  id: String!
+
+  "the saved skill name"
+  name: String
+
+  "the saved skill description"
+  description: String
+
+  "the saved skill contents"
+  contents: String
+
+  "the workbench this skill belongs to"
+  workbench: Workbench
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type WorkbenchWebhookMatches {
   "regex pattern to match"
   regex: String
@@ -3074,6 +3122,11 @@ type WorkbenchCronConnection {
 type WorkbenchPromptConnection {
   pageInfo: PageInfo!
   edges: [WorkbenchPromptEdge]
+}
+
+type WorkbenchSkillConnection {
+  pageInfo: PageInfo!
+  edges: [WorkbenchSkillEdge]
 }
 
 type WorkbenchWebhookConnection {
@@ -14651,6 +14704,11 @@ type SentinelEdge {
 
 type WorkbenchWebhookEdge {
   node: WorkbenchWebhook
+  cursor: String
+}
+
+type WorkbenchSkillEdge {
+  node: WorkbenchSkill
   cursor: String
 }
 

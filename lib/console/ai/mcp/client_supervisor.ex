@@ -29,8 +29,8 @@ defmodule Console.AI.MCP.ClientSupervisor do
     |> Map.put(:restart, :transient)
   end
 
-  defp client_module(:sse), do: Console.AI.MCP.LegacyClient
-  defp client_module(_), do: Console.AI.MCP.Client
+  def client_module(:sse), do: Console.AI.MCP.LegacyClient
+  def client_module(_), do: Console.AI.MCP.Client
 
   defp auth_headers(%ChatThread{user: %User{} = user}, %McpServer{authentication: %{plural: true}}) do
     {:ok, jwt, _} = MCP.mint(user)

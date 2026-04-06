@@ -728,6 +728,104 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
+  describe "create_workbench_skill/3" do
+    test "users with write access to the workbench can create a skill" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:ok, skill} =
+        Workbenches.create_workbench_skill(
+          %{name: "debug-skill", description: "debug helper", contents: "run diagnostics"},
+          workbench.id,
+          user
+        )
+
+      assert skill.workbench_id == workbench.id
+      assert skill.name == "debug-skill"
+      assert skill.description == "debug helper"
+      assert skill.contents == "run diagnostics"
+      assert_receive {:event, %PubSub.WorkbenchSkillCreated{item: ^skill}}
+    end
+
+    test "users with read access cannot create a skill" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+
+      {:error, _} =
+        Workbenches.create_workbench_skill(
+          %{name: "nope", contents: "forbidden"},
+          workbench.id,
+          user
+        )
+    end
+  end
+
+  describe "update_workbench_skill/3" do
+    test "users with write access can update a skill" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      skill = insert(:workbench_skill, workbench: workbench, name: "old", contents: "before")
+
+      {:ok, updated} =
+        Workbenches.update_workbench_skill(
+          %{name: "new", description: "new desc", contents: "after"},
+          skill.id,
+          user
+        )
+
+      assert updated.id == skill.id
+      assert updated.name == "new"
+      assert updated.description == "new desc"
+      assert updated.contents == "after"
+      assert_receive {:event, %PubSub.WorkbenchSkillUpdated{item: ^updated}}
+    end
+
+    test "users without write access cannot update a skill" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      skill = insert(:workbench_skill, workbench: workbench, name: "secret", contents: "secret body")
+
+      {:error, _} =
+        Workbenches.update_workbench_skill(
+          %{name: "hacked", contents: "hacked"},
+          skill.id,
+          user
+        )
+
+      assert refetch(skill).name == "secret"
+    end
+  end
+
+  describe "delete_workbench_skill/2" do
+    test "users with write access can delete a skill" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      skill = insert(:workbench_skill, workbench: workbench)
+
+      {:ok, deleted} = Workbenches.delete_workbench_skill(skill.id, user)
+
+      assert deleted.id == skill.id
+      refute refetch(skill)
+      assert_receive {:event, %PubSub.WorkbenchSkillDeleted{item: ^deleted}}
+    end
+
+    test "users without write access cannot delete a skill" do
+      user = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: user.id}])
+      workbench = insert(:workbench, project: project)
+      skill = insert(:workbench_skill, workbench: workbench)
+
+      {:error, _} = Workbenches.delete_workbench_skill(skill.id, user)
+
+      assert refetch(skill)
+    end
+  end
+
   describe "create_workbench_webhook/3" do
     test "project writers can create a webhook with observability webhook" do
       user = insert(:user)

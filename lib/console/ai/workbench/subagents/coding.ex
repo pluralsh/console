@@ -48,9 +48,9 @@ defmodule Console.AI.Workbench.Subagents.Coding do
     |> Repo.update_all(set: [workbench_job_id: id])
   end
 
-  defp tools(%Environment{skills: skills}) do
+  defp tools(%Environment{skills: skills, job: job}) do
     [
-      CodingAgent,
+      %CodingAgent{workbench: job.workbench},
       %Skills{skills: skills},
       %Skill{skills: skills},
     ]

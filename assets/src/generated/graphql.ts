@@ -8639,6 +8639,8 @@ export type RootMutationType = {
   createWorkbenchMessage?: Maybe<WorkbenchJobActivity>;
   /** Creates a saved prompt for a workbench. Requires read access to the workbench. */
   createWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
+  /** Creates a saved skill for a workbench. Requires write access to the workbench. */
+  createWorkbenchSkill?: Maybe<WorkbenchSkill>;
   createWorkbenchTool?: Maybe<WorkbenchTool>;
   createWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   deleteAccessToken?: Maybe<AccessToken>;
@@ -8704,6 +8706,8 @@ export type RootMutationType = {
   deleteWorkbenchCron?: Maybe<WorkbenchCron>;
   /** Deletes a saved workbench prompt. Requires read access to the workbench. */
   deleteWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
+  /** Deletes a saved workbench skill. Requires write access to the workbench. */
+  deleteWorkbenchSkill?: Maybe<WorkbenchSkill>;
   deleteWorkbenchTool?: Maybe<WorkbenchTool>;
   deleteWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   delinkBackups?: Maybe<Cluster>;
@@ -8828,6 +8832,8 @@ export type RootMutationType = {
   updateWorkbenchCron?: Maybe<WorkbenchCron>;
   /** Updates a saved workbench prompt. Requires read access to the workbench. */
   updateWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
+  /** Updates a saved workbench skill. Requires write access to the workbench. */
+  updateWorkbenchSkill?: Maybe<WorkbenchSkill>;
   updateWorkbenchTool?: Maybe<WorkbenchTool>;
   updateWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   upsertAgentRuntime?: Maybe<AgentRuntime>;
@@ -9263,6 +9269,12 @@ export type RootMutationTypeCreateWorkbenchPromptArgs = {
 };
 
 
+export type RootMutationTypeCreateWorkbenchSkillArgs = {
+  attributes: WorkbenchSkillAttributes;
+  workbenchId: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeCreateWorkbenchToolArgs = {
   attributes?: InputMaybe<WorkbenchToolAttributes>;
 };
@@ -9572,6 +9584,11 @@ export type RootMutationTypeDeleteWorkbenchCronArgs = {
 
 
 export type RootMutationTypeDeleteWorkbenchPromptArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteWorkbenchSkillArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -10123,6 +10140,12 @@ export type RootMutationTypeUpdateWorkbenchCronArgs = {
 
 export type RootMutationTypeUpdateWorkbenchPromptArgs = {
   attributes: WorkbenchPromptAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateWorkbenchSkillArgs = {
+  attributes: WorkbenchSkillAttributes;
   id: Scalars['ID']['input'];
 };
 
@@ -14665,6 +14688,7 @@ export type Workbench = {
   tools?: Maybe<Array<Maybe<WorkbenchTool>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   webhooks?: Maybe<WorkbenchWebhookConnection>;
+  workbenchSkills?: Maybe<WorkbenchSkillConnection>;
   /** write policy of this service */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
@@ -14711,6 +14735,14 @@ export type WorkbenchRunsArgs = {
 
 
 export type WorkbenchWebhooksArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type WorkbenchWorkbenchSkillsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -15126,6 +15158,43 @@ export type WorkbenchPromptEdge = {
   __typename?: 'WorkbenchPromptEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<WorkbenchPrompt>;
+};
+
+export type WorkbenchSkill = {
+  __typename?: 'WorkbenchSkill';
+  /** the saved skill contents */
+  contents?: Maybe<Scalars['String']['output']>;
+  /** the saved skill description */
+  description?: Maybe<Scalars['String']['output']>;
+  /** the id of the saved skill */
+  id: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the saved skill name */
+  name?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the workbench this skill belongs to */
+  workbench?: Maybe<Workbench>;
+};
+
+export type WorkbenchSkillAttributes = {
+  /** the saved skill contents */
+  contents: Scalars['String']['input'];
+  /** the saved skill description */
+  description?: InputMaybe<Scalars['String']['input']>;
+  /** the saved skill name */
+  name: Scalars['String']['input'];
+};
+
+export type WorkbenchSkillConnection = {
+  __typename?: 'WorkbenchSkillConnection';
+  edges?: Maybe<Array<Maybe<WorkbenchSkillEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type WorkbenchSkillEdge = {
+  __typename?: 'WorkbenchSkillEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<WorkbenchSkill>;
 };
 
 export type WorkbenchSkills = {

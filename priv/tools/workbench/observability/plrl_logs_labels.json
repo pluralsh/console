@@ -1,0 +1,56 @@
+{
+    "type": "object",
+    "properties": {
+        "service_id": {
+            "type": "string",
+            "description": "Plural service ID used to authorize log access and scope results to that service. Provide this or cluster_id."
+        },
+        "cluster_id": {
+            "type": "string",
+            "description": "Plural cluster ID used to authorize log access and scope results to that cluster. Provide this or service_id."
+        },
+        "query": {
+            "type": "string",
+            "description": "Query string to filter log lines before aggregating facet values (syntax depends on the configured log backend)."
+        },
+        "field": {
+            "type": "string",
+            "description": "Facet or label field name. When set, returns distinct values for that field; when omitted, behavior follows the labels API for discovering available facets."
+        },
+        "facets": {
+            "type": "array",
+            "description": "Facet filters to narrow the log set used when listing facet values.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the facet"
+                    },
+                    "value": {
+                        "type": "string",
+                        "description": "The value of the facet"
+                    }
+                }
+            }
+        },
+        "limit": {
+            "type": "integer",
+            "description": "The maximum number of label/facet values to return"
+        },
+        "time_range": {
+            "type": "object",
+            "description": "Optional time window; if omitted, defaults to roughly the last 30 minutes.",
+            "properties": {
+                "start": {
+                    "type": "string",
+                    "description": "The start time to use to filter logs. Provide in ISO8601 format."
+                },
+                "end": {
+                    "type": "string",
+                    "description": "The end time to use to filter logs. Provide in ISO8601 format."
+                }
+            }
+        }
+    }
+}
