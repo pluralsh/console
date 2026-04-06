@@ -2,12 +2,11 @@ import { EmptyState, Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { RunStatusChip } from 'components/ai/infra-research/details/InfraResearch'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { GqlError } from 'components/utils/Alert'
-import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
 import { useWorkbenchJobQuery } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { Suspense, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
@@ -16,14 +15,13 @@ import {
   WORKBENCHES_ABS_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable'
 import { WorkbenchJobActivities } from './WorkbenchJobActivities'
+import { WorkbenchJobPrs } from './WorkbenchJobPrs'
 import { WorkbenchJobResult } from './WorkbenchJobResult'
 import { WorkbenchJobTodos } from './WorkbenchJobTodos'
-import { PluralErrorBoundary } from 'components/cd/PluralErrorBoundary'
 import { WorkbenchJobTriggerAlert } from './WorkbenchJobTriggerAlert'
 import { WorkbenchJobTriggerIssue } from './WorkbenchJobTriggerIssue'
-import { WorkbenchJobPrs } from './WorkbenchJobPrs'
-import { isNonNullable } from 'utils/isNonNullable'
 
 export function WorkbenchJob() {
   const { [WORKBENCH_JOBS_PARAM_JOB]: jobId = '' } = useParams()
@@ -105,18 +103,7 @@ export function WorkbenchJob() {
               status={job?.status}
             />
           </StretchedFlex>
-          <PluralErrorBoundary shouldLog={false}>
-            <Suspense
-              fallback={
-                <RectangleSkeleton
-                  $width="100%"
-                  $height="100%"
-                />
-              }
-            >
-              <WorkbenchJobActivities jobId={jobId} />
-            </Suspense>
-          </PluralErrorBoundary>
+          <WorkbenchJobActivities jobId={jobId} />
         </Flex>
         <Flex
           direction="column"

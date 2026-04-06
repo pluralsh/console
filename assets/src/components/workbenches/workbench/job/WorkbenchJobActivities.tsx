@@ -1,6 +1,6 @@
 import { Accordion, Card, Markdown } from '@pluralsh/design-system'
 import {
-  useWorkbenchJobActivitiesSuspenseQuery,
+  useWorkbenchJobActivitiesQuery,
   useWorkbenchJobActivityDeltaSubscription,
   WorkbenchJobActivitiesDocument,
   WorkbenchJobActivitiesQuery,
@@ -17,14 +17,18 @@ import {
   updateCache,
 } from 'utils/graphql'
 import { WorkbenchJobActivity } from './WorkbenchJobActivity'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
+import { GqlError } from 'components/utils/Alert'
 
 export const ACTIVITY_GAP = 'medium' as const
 
 export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   const client = useApolloClient()
 
-  const { data } = useWorkbenchJobActivitiesSuspenseQuery({
+  const { data, loading, error } = useWorkbenchJobActivitiesQuery({
     variables: { id: jobId },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: 30_000,
   })
   const job = data?.workbenchJob
   const activities = mapExistingNodes(job?.activities)
@@ -50,6 +54,17 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   const [openIds, setOpenIds] = useState<string[]>(() =>
     activities.map((activity) => activity.id)
   )
+
+  if (!data && loading)
+    return (
+      <RectangleSkeleton
+        $width="100%"
+        $height="100%"
+      />
+    )
+
+  if (error) return <GqlError error={error} />
+
   return (
     <ActivitiesPanelSC>
       <ActivitiesAccordionSC
