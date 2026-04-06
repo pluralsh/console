@@ -30,8 +30,8 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   end
   defp validate_mode(cs, _), do: cs
 
-  defp validate_repository(cs, %Workbench{configuration: %{coding: %{repositories: [_ | _] =repos}}}),
-    do: validate_inclusion(cs, :repository, repos)
+  # defp validate_repository(cs, %Workbench{configuration: %{coding: %{repositories: [_ | _] = repos}}}),
+  #   do: validate_inclusion(cs, :repository, repos)
   defp validate_repository(cs, _), do: cs
 
   @json_schema Console.priv_file!("tools/workbench/coding_agent.json") |> Jason.decode!()
