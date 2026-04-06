@@ -14,6 +14,15 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :prompt, :string, description: "the prompt for this job"
   end
 
+  input_object :workbench_job_update_attributes do
+    field :result, :workbench_result_attributes, description: "the result for this job"
+  end
+
+  input_object :workbench_result_attributes do
+    field :topology, non_null(:string),
+      description: "mermaid diagram text for the job result topology (only field clients may set via this mutation)"
+  end
+
   input_object :workbench_attributes do
     field :name,              non_null(:string), description: "the name of the workbench (must be unique)"
     field :description,       :string, description: "the description of the workbench"
@@ -694,7 +703,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,
-        action: :read
+        action: :write
       arg :workbench_id, non_null(:id), description: "the workbench to save a prompt for"
       arg :attributes, non_null(:workbench_prompt_attributes)
 
@@ -706,7 +715,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,
-        action: :read
+        action: :write
       arg :id, non_null(:id)
       arg :attributes, non_null(:workbench_prompt_attributes)
 
@@ -718,7 +727,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,
-        action: :read
+        action: :write
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench_prompt/2
@@ -796,7 +805,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,
-        action: :read
+        action: :write
       arg :workbench_id, non_null(:id), description: "the workbench to create a job for"
       arg :attributes,   non_null(:workbench_job_attributes), description: "job attributes (e.g. prompt)"
 
@@ -807,11 +816,24 @@ defmodule Console.GraphQl.Deployments.Workbench do
       middleware Authenticated
       middleware Scope,
         resource: :workbench,
-        action: :read
+        action: :write
       arg :job_id, non_null(:id), description: "the job to create a message for"
       arg :attributes, non_null(:workbench_message_attributes), description: "message attributes (e.g. prompt)"
 
       resolve &Deployments.create_workbench_message/2
+    end
+
+    @desc "Updates only the topology field on the job's result. Requires read access to the job's workbench; only the job owner may update."
+    field :update_workbench_job, :workbench_job do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :job_id,     non_null(:id), description: "the workbench job to update"
+      arg :attributes, non_null(:workbench_job_update_attributes),
+        description: "attributes to update on the job (only the result topology is accepted)"
+
+      resolve &Deployments.update_workbench_job/2
     end
   end
 

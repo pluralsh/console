@@ -299,6 +299,22 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Updates a workbench job. Requires read access to the workbench.
+  """
+  @spec update_workbench_job(map, WorkbenchJob.t() | binary, User.t()) :: job_resp
+  def update_workbench_job(attrs, %WorkbenchJob{user_id: id} = job, %User{id: id} = user) do
+    Repo.preload(job, :result)
+    |> WorkbenchJob.update_changeset(attrs)
+    |> Repo.update()
+    |> notify(:update, user)
+  end
+  def update_workbench_job(attrs, id, user) when is_binary(id) do
+    get_workbench_job!(id)
+    |> then(&update_workbench_job(attrs, &1, user))
+  end
+  def update_workbench_job(_, _, _), do: {:error, "you can only update your own jobs"}
+
+  @doc """
   Kicks a job by updating the updated_at timestamp to 20 minutes ago.
   """
   @spec kick_job(WorkbenchJob.t() | binary, User.t()) :: job_resp

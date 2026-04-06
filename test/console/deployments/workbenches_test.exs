@@ -299,6 +299,61 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
+  describe "update_workbench_job/3" do
+    test "job owner can update result topology and keeps other result fields" do
+      user = insert(:user)
+
+      job =
+        insert(:workbench_job,
+          user: user,
+          result:
+            build(:workbench_job_result,
+              working_theory: "keep me",
+              conclusion: "also keep",
+              topology: nil
+            )
+        )
+
+      {:ok, updated} =
+        Workbenches.update_workbench_job(
+          %{result: %{topology: "graph TD; A-->B"}},
+          job.id,
+          user
+        )
+
+      assert updated.id == job.id
+      result = Console.Repo.preload(refetch(updated), :result).result
+      assert result.topology == "graph TD; A-->B"
+      assert result.working_theory == "keep me"
+      assert result.conclusion == "also keep"
+    end
+
+    test "job owner can update when passing the job struct" do
+      user = insert(:user)
+      job = insert(:workbench_job, user: user, result: build(:workbench_job_result, topology: "old"))
+
+      {:ok, updated} =
+        Workbenches.update_workbench_job(%{result: %{topology: "new diagram"}}, job, user)
+
+      assert Console.Repo.preload(updated, :result).result.topology == "new diagram"
+    end
+
+    test "another user cannot update someone else's job" do
+      owner = insert(:user)
+      other = insert(:user)
+      job = insert(:workbench_job, user: owner)
+
+      assert {:error, "you can only update your own jobs"} =
+               Workbenches.update_workbench_job(
+                 %{result: %{topology: "hacked"}},
+                 job.id,
+                 other
+               )
+
+      assert refetch(job.result).topology != "hacked"
+    end
+  end
+
   describe "create_message/3" do
     test "job owner can create a user message for their job" do
       user = insert(:user)

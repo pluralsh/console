@@ -82,4 +82,10 @@ defmodule Console.Schema.WorkbenchJob do
     |> foreign_key_constraint(:issue_id)
     |> validate_required([:status, :workbench_id, :user_id])
   end
+
+  def update_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_assoc(:result)
+  end
 end

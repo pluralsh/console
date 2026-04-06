@@ -406,6 +406,66 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
     end
   end
 
+  describe "updateWorkbenchJob" do
+    test "job owner with workbench read access can set result topology" do
+      user = admin_user()
+      workbench = insert(:workbench)
+
+      job =
+        insert(:workbench_job,
+          user: user,
+          workbench: workbench,
+          result:
+            build(:workbench_job_result,
+              working_theory: "theory",
+              conclusion: "conclusion",
+              topology: nil
+            )
+        )
+
+      {:ok, %{data: %{"updateWorkbenchJob" => updated}}} = run_query("""
+        mutation UpdateJobTopology($jobId: ID!, $attributes: WorkbenchJobUpdateAttributes!) {
+          updateWorkbenchJob(jobId: $jobId, attributes: $attributes) {
+            id
+            result {
+              topology
+              workingTheory
+              conclusion
+            }
+          }
+        }
+      """, %{
+        "jobId" => job.id,
+        "attributes" => %{"result" => %{"topology" => "graph LR; X-->Y"}}
+      }, %{current_user: user})
+
+      assert updated["id"] == job.id
+      assert updated["result"]["topology"] == "graph LR; X-->Y"
+      assert updated["result"]["workingTheory"] == "theory"
+      assert updated["result"]["conclusion"] == "conclusion"
+    end
+
+    test "non-owner cannot update topology even with workbench access" do
+      owner = insert(:user)
+      other = insert(:user)
+      project = insert(:project, read_bindings: [%{user_id: other.id}])
+      workbench = insert(:workbench, project: project)
+      job = insert(:workbench_job, user: owner, workbench: workbench)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation UpdateJobTopology($jobId: ID!, $attributes: WorkbenchJobUpdateAttributes!) {
+          updateWorkbenchJob(jobId: $jobId, attributes: $attributes) {
+            id
+          }
+        }
+      """, %{"jobId" => job.id, "attributes" => %{"result" => %{"topology" => "graph TD; A-->B"}}},
+        %{current_user: other}
+      )
+
+      assert refetch(job.result).topology != "graph TD; A-->B"
+    end
+  end
+
   describe "createWorkbenchCron" do
     test "it can create a workbench cron" do
       workbench = insert(:workbench)
