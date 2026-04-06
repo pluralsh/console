@@ -120,7 +120,7 @@ export function WorkbenchJob() {
           direction="column"
           gap="medium"
           minWidth={500}
-          flex={3}
+          flex={!!job?.result?.conclusion ? 8 : 3}
           height="100%"
         >
           <WorkbenchJobTriggerAlert alert={job?.alert} />
