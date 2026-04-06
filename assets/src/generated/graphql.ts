@@ -8830,6 +8830,8 @@ export type RootMutationType = {
   updateUser?: Maybe<User>;
   updateWorkbench?: Maybe<Workbench>;
   updateWorkbenchCron?: Maybe<WorkbenchCron>;
+  /** Updates only the topology field on the job's result. Requires read access to the job's workbench; only the job owner may update. */
+  updateWorkbenchJob?: Maybe<WorkbenchJob>;
   /** Updates a saved workbench prompt. Requires read access to the workbench. */
   updateWorkbenchPrompt?: Maybe<WorkbenchPrompt>;
   /** Updates a saved workbench skill. Requires write access to the workbench. */
@@ -10135,6 +10137,12 @@ export type RootMutationTypeUpdateWorkbenchArgs = {
 export type RootMutationTypeUpdateWorkbenchCronArgs = {
   attributes: WorkbenchCronAttributes;
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateWorkbenchJobArgs = {
+  attributes: WorkbenchJobUpdateAttributes;
+  jobId: Scalars['ID']['input'];
 };
 
 
@@ -15111,6 +15119,11 @@ export type WorkbenchJobThoughtAttributes = {
   metrics?: Maybe<Array<Maybe<WorkbenchJobActivityMetric>>>;
 };
 
+export type WorkbenchJobUpdateAttributes = {
+  /** the result for this job */
+  result?: InputMaybe<WorkbenchResultAttributes>;
+};
+
 export type WorkbenchMessageAttributes = {
   /** the prompt for the message */
   prompt: Scalars['String']['input'];
@@ -15158,6 +15171,11 @@ export type WorkbenchPromptEdge = {
   __typename?: 'WorkbenchPromptEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<WorkbenchPrompt>;
+};
+
+export type WorkbenchResultAttributes = {
+  /** mermaid diagram text for the job result topology (only field clients may set via this mutation) */
+  topology: Scalars['String']['input'];
 };
 
 export type WorkbenchSkill = {

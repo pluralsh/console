@@ -9736,6 +9736,11 @@ type WorkbenchJobThoughtAttributes struct {
 	Logs []*WorkbenchJobActivityLog `json:"logs,omitempty"`
 }
 
+type WorkbenchJobUpdateAttributes struct {
+	// the result for this job
+	Result *WorkbenchResultAttributes `json:"result,omitempty"`
+}
+
 type WorkbenchMessageAttributes struct {
 	// the prompt for the message
 	Prompt string `json:"prompt"`
@@ -9779,6 +9784,11 @@ type WorkbenchPromptConnection struct {
 type WorkbenchPromptEdge struct {
 	Node   *WorkbenchPrompt `json:"node,omitempty"`
 	Cursor *string          `json:"cursor,omitempty"`
+}
+
+type WorkbenchResultAttributes struct {
+	// mermaid diagram text for the job result topology (only field clients may set via this mutation)
+	Topology string `json:"topology"`
 }
 
 type WorkbenchSkill struct {

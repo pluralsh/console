@@ -1285,6 +1285,15 @@ type RootMutationType {
     attributes: WorkbenchMessageAttributes!
   ): WorkbenchJobActivity
 
+  "Updates only the topology field on the job's result. Requires read access to the job's workbench; only the job owner may update."
+  updateWorkbenchJob(
+    "the workbench job to update"
+    jobId: ID!
+
+    "attributes to update on the job (only the result topology is accepted)"
+    attributes: WorkbenchJobUpdateAttributes!
+  ): WorkbenchJob
+
   cancelAgentRun(id: ID!): AgentRun
 
   createAgentRun(runtimeId: ID!, attributes: AgentRunAttributes!): AgentRun
@@ -2221,6 +2230,16 @@ enum WorkbenchJobActivityType {
 input WorkbenchJobAttributes {
   "the prompt for this job"
   prompt: String
+}
+
+input WorkbenchJobUpdateAttributes {
+  "the result for this job"
+  result: WorkbenchResultAttributes
+}
+
+input WorkbenchResultAttributes {
+  "mermaid diagram text for the job result topology (only field clients may set via this mutation)"
+  topology: String!
 }
 
 input WorkbenchAttributes {
