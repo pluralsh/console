@@ -590,3 +590,12 @@ mutation DeleteWorkbenchWebhook($id: ID!) {
     name
   }
 }
+
+mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
+  createIssueWebhook(attributes: $attributes) {
+    id
+    name
+    provider
+    url
+  }
+}

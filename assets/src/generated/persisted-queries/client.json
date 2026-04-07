@@ -1946,6 +1946,11 @@
          "type": "mutation",
          "name": "DeleteWorkbenchWebhook",
          "body": "mutation DeleteWorkbenchWebhook($id: ID!) {\n  deleteWorkbenchWebhook(id: $id) {\n    id\n    name\n    __typename\n  }\n}"
+      },
+      "sha256:d6e640c4f225eb58605c970fb843fb87041195d4f214f22419fccc474f768c09": {
+         "type": "mutation",
+         "name": "CreateIssueWebhook",
+         "body": "mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {\n  createIssueWebhook(attributes: $attributes) {\n    id\n    name\n    provider\n    url\n    __typename\n  }\n}"
       }
    }
 }

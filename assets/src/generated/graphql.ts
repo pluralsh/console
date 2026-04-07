@@ -19431,6 +19431,13 @@ export type DeleteWorkbenchWebhookMutationVariables = Exact<{
 
 export type DeleteWorkbenchWebhookMutation = { __typename?: 'RootMutationType', deleteWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null } | null };
 
+export type CreateIssueWebhookMutationVariables = Exact<{
+  attributes: IssueWebhookAttributes;
+}>;
+
+
+export type CreateIssueWebhookMutation = { __typename?: 'RootMutationType', createIssueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string } | null };
+
 export const ClusterMinimalFragmentDoc = gql`
     fragment ClusterMinimal on Cluster {
   id
@@ -41211,6 +41218,42 @@ export function useDeleteWorkbenchWebhookMutation(baseOptions?: Apollo.MutationH
 export type DeleteWorkbenchWebhookMutationHookResult = ReturnType<typeof useDeleteWorkbenchWebhookMutation>;
 export type DeleteWorkbenchWebhookMutationResult = Apollo.MutationResult<DeleteWorkbenchWebhookMutation>;
 export type DeleteWorkbenchWebhookMutationOptions = Apollo.BaseMutationOptions<DeleteWorkbenchWebhookMutation, DeleteWorkbenchWebhookMutationVariables>;
+export const CreateIssueWebhookDocument = gql`
+    mutation CreateIssueWebhook($attributes: IssueWebhookAttributes!) {
+  createIssueWebhook(attributes: $attributes) {
+    id
+    name
+    provider
+    url
+  }
+}
+    `;
+export type CreateIssueWebhookMutationFn = Apollo.MutationFunction<CreateIssueWebhookMutation, CreateIssueWebhookMutationVariables>;
+
+/**
+ * __useCreateIssueWebhookMutation__
+ *
+ * To run a mutation, you first call `useCreateIssueWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateIssueWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createIssueWebhookMutation, { data, loading, error }] = useCreateIssueWebhookMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateIssueWebhookMutation(baseOptions?: Apollo.MutationHookOptions<CreateIssueWebhookMutation, CreateIssueWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateIssueWebhookMutation, CreateIssueWebhookMutationVariables>(CreateIssueWebhookDocument, options);
+      }
+export type CreateIssueWebhookMutationHookResult = ReturnType<typeof useCreateIssueWebhookMutation>;
+export type CreateIssueWebhookMutationResult = Apollo.MutationResult<CreateIssueWebhookMutation>;
+export type CreateIssueWebhookMutationOptions = Apollo.BaseMutationOptions<CreateIssueWebhookMutation, CreateIssueWebhookMutationVariables>;
 export const namedOperations = {
   Query: {
     AgentRuns: 'AgentRuns',
@@ -41596,7 +41639,8 @@ export const namedOperations = {
     DeleteWorkbenchCron: 'DeleteWorkbenchCron',
     CreateWorkbenchWebhook: 'CreateWorkbenchWebhook',
     UpdateWorkbenchWebhook: 'UpdateWorkbenchWebhook',
-    DeleteWorkbenchWebhook: 'DeleteWorkbenchWebhook'
+    DeleteWorkbenchWebhook: 'DeleteWorkbenchWebhook',
+    CreateIssueWebhook: 'CreateIssueWebhook'
   },
   Subscription: {
     AgentRunChat: 'AgentRunChat',
