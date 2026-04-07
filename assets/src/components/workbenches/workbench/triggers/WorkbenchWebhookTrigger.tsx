@@ -39,6 +39,7 @@ import { WorkbenchWebhookDeleteModal } from './WorkbenchWebhookDeleteModal'
 import { WorkbenchWebhookTriggerForm } from './WorkbenchWebhookTriggerForm'
 
 export function WorkbenchWebhookTrigger() {
+  const navigate = useNavigate()
   const theme = useTheme()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const [searchParams, setSearchParams] = useSearchParams()
@@ -179,18 +180,31 @@ export function WorkbenchWebhookTrigger() {
               >
                 Add webhooks to trigger this workbench.
               </Body2P>
-              <Button
-                small
-                onClick={() => {
-                  setEditingWebhookId(null)
-                  setSearchParams(
-                    { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' },
-                    { replace: true }
-                  )
-                }}
-              >
-                Add webhook
-              </Button>
+              <Flex gap="small">
+                <Button
+                  small
+                  secondary
+                  onClick={() => {
+                    navigate(
+                      `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true&${WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM}=true`
+                    )
+                  }}
+                >
+                  Create new webhook
+                </Button>
+                <Button
+                  small
+                  onClick={() => {
+                    setEditingWebhookId(null)
+                    setSearchParams(
+                      { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' },
+                      { replace: true }
+                    )
+                  }}
+                >
+                  Add webhook
+                </Button>
+              </Flex>
             </StretchedFlex>
             <Table
               hideHeader
