@@ -10,11 +10,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pluralsh/console/go/cloud-query/internal/log"
-	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
-	"github.com/pluralsh/console/go/cloud-query/internal/tools/clients"
 	"google.golang.org/protobuf/types/known/timestamppb"
 	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/cloud-query/internal/log"
+	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/client"
 )
 
 type SplunkProvider struct {
@@ -57,7 +58,7 @@ func (in *SplunkProvider) Logs(ctx context.Context, input *toolquery.LogsQueryIn
 		return nil, fmt.Errorf("%w: missing auth (token or username/password required)", ErrInvalidArgument)
 	}
 
-	client := clients.NewSplunkClient(
+	client := client.NewSplunkClient(
 		in.conn.GetUrl(),
 		in.conn.GetToken(),
 		in.conn.GetUsername(),

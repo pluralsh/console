@@ -66,6 +66,15 @@ defmodule Toolquery.SplunkConnection do
   field :password, 4, proto3_optional: true, type: :string
 end
 
+defmodule Toolquery.DynatraceConnection do
+  @moduledoc false
+
+  use Protobuf, protoc_gen_elixir_version: "0.15.0", syntax: :proto3
+
+  field :url, 1, type: :string
+  field :platformToken, 2, type: :string
+end
+
 defmodule Toolquery.ToolConnection do
   @moduledoc false
 
@@ -79,6 +88,7 @@ defmodule Toolquery.ToolConnection do
   field :loki, 4, type: Toolquery.LokiConnection, oneof: 0
   field :tempo, 5, type: Toolquery.TempoConnection, oneof: 0
   field :splunk, 6, type: Toolquery.SplunkConnection, oneof: 0
+  field :dynatrace, 7, type: Toolquery.DynatraceConnection, oneof: 0
 end
 
 defmodule Toolquery.TimeRange do

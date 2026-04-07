@@ -23,6 +23,8 @@ func newMetricsProvider(conn *toolquery.ToolConnection) MetricsProvider {
 		return NewPrometheusProvider(provider.Prometheus)
 	case *toolquery.ToolConnection_Datadog:
 		return NewDatadogProvider(provider.Datadog)
+	case *toolquery.ToolConnection_Dynatrace:
+		return NewDynatraceProvider(provider.Dynatrace)
 	default:
 		return nil
 	}
@@ -40,6 +42,8 @@ func newLogsProvider(conn *toolquery.ToolConnection) (LogsProvider, error) {
 		return NewLokiProvider(provider.Loki), nil
 	case *toolquery.ToolConnection_Datadog:
 		return NewDatadogProvider(provider.Datadog), nil
+	case *toolquery.ToolConnection_Dynatrace:
+		return NewDynatraceProvider(provider.Dynatrace), nil
 	case *toolquery.ToolConnection_Splunk:
 		return NewSplunkProvider(provider.Splunk), nil
 	default:
@@ -57,6 +61,8 @@ func newTracesProvider(conn *toolquery.ToolConnection) TracesProvider {
 		return NewTempoProvider(provider.Tempo)
 	case *toolquery.ToolConnection_Datadog:
 		return NewDatadogProvider(provider.Datadog)
+	case *toolquery.ToolConnection_Dynatrace:
+		return NewDynatraceProvider(provider.Dynatrace)
 	default:
 		return nil
 	}

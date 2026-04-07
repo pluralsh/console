@@ -50,6 +50,11 @@ message SplunkConnection {
   optional string password = 4;
 }
 
+message DynatraceConnection {
+  string url = 1;
+   string platformToken = 2;
+}
+
 message ToolConnection {
   oneof connection {
     ElasticConnection elastic = 1;
@@ -58,6 +63,7 @@ message ToolConnection {
     LokiConnection loki = 4;
     TempoConnection tempo = 5;
     SplunkConnection splunk = 6;
+    DynatraceConnection dynatrace = 7;
   }
 }
 

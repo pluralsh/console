@@ -15129,6 +15129,8 @@ export type WorkbenchToolConfiguration = {
   atlassian?: Maybe<WorkbenchToolAtlassianConnection>;
   /** datadog connection (no secrets) */
   datadog?: Maybe<WorkbenchToolDatadogConnection>;
+  /** dynatrace connection (no secrets) */
+  dynatrace?: Maybe<WorkbenchToolDynatraceConnection>;
   /** elasticsearch connection (no secrets) */
   elastic?: Maybe<WorkbenchToolElasticConnection>;
   /** http tool configuration */
@@ -15150,6 +15152,8 @@ export type WorkbenchToolConfigurationAttributes = {
   atlassian?: InputMaybe<WorkbenchToolAtlassianConnectionAttributes>;
   /** datadog connection (metrics, logs) */
   datadog?: InputMaybe<WorkbenchToolDatadogConnectionAttributes>;
+  /** dynatrace connection (metrics, logs, traces) */
+  dynatrace?: InputMaybe<WorkbenchToolDynatraceConnectionAttributes>;
   /** elasticsearch connection (logs) */
   elastic?: InputMaybe<WorkbenchToolElasticConnectionAttributes>;
   /** http tool configuration */
@@ -15185,6 +15189,19 @@ export type WorkbenchToolDatadogConnectionAttributes = {
   appKey?: InputMaybe<Scalars['String']['input']>;
   /** datadog site (e.g. datadoghq.com) */
   site?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type WorkbenchToolDynatraceConnection = {
+  __typename?: 'WorkbenchToolDynatraceConnection';
+  /** dynatrace base url (credentials never exposed) */
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchToolDynatraceConnectionAttributes = {
+  /** dynatrace platform token */
+  platformToken: Scalars['String']['input'];
+  /** dynatrace base url */
+  url: Scalars['String']['input'];
 };
 
 export type WorkbenchToolEdge = {
@@ -15362,6 +15379,7 @@ export type WorkbenchToolTempoConnectionAttributes = {
 export enum WorkbenchToolType {
   Atlassian = 'ATLASSIAN',
   Datadog = 'DATADOG',
+  Dynatrace = 'DYNATRACE',
   Elastic = 'ELASTIC',
   Http = 'HTTP',
   Linear = 'LINEAR',

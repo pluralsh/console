@@ -2142,6 +2142,7 @@ enum WorkbenchToolType {
   LINEAR
   ATLASSIAN
   SPLUNK
+  DYNATRACE
 }
 
 enum WorkbenchToolCategory {
@@ -2355,6 +2356,9 @@ input WorkbenchToolConfigurationAttributes {
   "datadog connection (metrics, logs)"
   datadog: WorkbenchToolDatadogConnectionAttributes
 
+  "dynatrace connection (metrics, logs, traces)"
+  dynatrace: WorkbenchToolDynatraceConnectionAttributes
+
   "linear connection (ticketing)"
   linear: WorkbenchToolLinearConnectionAttributes
 
@@ -2450,6 +2454,14 @@ input WorkbenchToolDatadogConnectionAttributes {
 
   "datadog application key"
   appKey: String
+}
+
+input WorkbenchToolDynatraceConnectionAttributes {
+  "dynatrace base url"
+  url: String!
+
+  "dynatrace platform token"
+  platformToken: String!
 }
 
 input WorkbenchToolLinearConnectionAttributes {
@@ -2884,6 +2896,9 @@ type WorkbenchToolConfiguration {
   "datadog connection (no secrets)"
   datadog: WorkbenchToolDatadogConnection
 
+  "dynatrace connection (no secrets)"
+  dynatrace: WorkbenchToolDynatraceConnection
+
   "linear connection (no secrets)"
   linear: WorkbenchToolLinearConnection
 
@@ -2946,6 +2961,11 @@ type WorkbenchToolSplunkConnection {
 type WorkbenchToolDatadogConnection {
   "datadog site (API\/app keys never exposed)"
   site: String
+}
+
+type WorkbenchToolDynatraceConnection {
+  "dynatrace base url (credentials never exposed)"
+  url: String
 }
 
 type WorkbenchToolLinearConnection {

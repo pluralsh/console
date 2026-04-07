@@ -12,9 +12,8 @@ import (
 	"github.com/samber/lo"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/pluralsh/console/go/cloud-query/internal/tools/clients"
-
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
+	"github.com/pluralsh/console/go/cloud-query/internal/tools/client"
 )
 
 type PrometheusProvider struct {
@@ -32,7 +31,7 @@ func (in *PrometheusProvider) newClient() (v1.API, error) {
 
 	apiClient, err := api.NewClient(api.Config{
 		Address: in.conn.GetUrl(),
-		Client:  clients.NewPrometheusHTTPClient(in.conn),
+		Client:  client.NewPrometheusHTTPClient(in.conn),
 	})
 	if err != nil {
 		return nil, err
