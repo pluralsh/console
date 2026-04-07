@@ -1264,6 +1264,9 @@ type RootMutationType {
     attributes: WorkbenchWebhookAttributes!
   ): WorkbenchWebhook
 
+  "Fetches a workbench webhook by id. Requires read access to the workbench."
+  getWorkbenchWebhook(id: ID!): WorkbenchWebhook
+
   updateWorkbenchWebhook(id: ID!, attributes: WorkbenchWebhookAttributes!): WorkbenchWebhook
 
   deleteWorkbenchWebhook(id: ID!): WorkbenchWebhook

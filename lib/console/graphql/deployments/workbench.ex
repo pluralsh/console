@@ -779,6 +779,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       resolve &Deployments.create_workbench_webhook/2
     end
 
+    @desc "Fetches a workbench webhook by id. Requires read access to the workbench."
+    field :get_workbench_webhook, :workbench_webhook do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.get_workbench_webhook/2
+    end
+
     field :update_workbench_webhook, :workbench_webhook do
       middleware Authenticated
       middleware Scope,

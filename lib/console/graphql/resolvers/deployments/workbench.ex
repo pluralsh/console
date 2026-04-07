@@ -154,6 +154,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def create_workbench_webhook(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_webhook(attrs, workbench_id, user)
 
+  def get_workbench_webhook(%{id: id}, %{context: %{current_user: user}}) do
+    Workbenches.get_workbench_webhook!(id)
+    |> allow(user, :read)
+  end
+
   def update_workbench_webhook(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.update_workbench_webhook(attrs, id, user)
 

@@ -1017,6 +1017,40 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
     end
   end
 
+  describe "getWorkbenchWebhook" do
+    test "it can fetch a workbench webhook by id with read access" do
+      workbench = insert(:workbench)
+      webhook = insert(:workbench_webhook, workbench: workbench, name: "trigger-name")
+
+      {:ok, %{data: %{"getWorkbenchWebhook" => found}}} = run_query("""
+        mutation GetWorkbenchWebhook($id: ID!) {
+          getWorkbenchWebhook(id: $id) {
+            id
+            name
+            workbench { id }
+          }
+        }
+      """, %{"id" => webhook.id}, %{current_user: admin_user()})
+
+      assert found["id"] == webhook.id
+      assert found["name"] == "trigger-name"
+      assert found["workbench"]["id"] == workbench.id
+    end
+
+    test "users without read access cannot fetch a workbench webhook" do
+      user = insert(:user)
+      webhook = insert(:workbench_webhook)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation GetWorkbenchWebhook($id: ID!) {
+          getWorkbenchWebhook(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => webhook.id}, %{current_user: user})
+    end
+  end
+
   describe "deleteWorkbenchWebhook" do
     test "it can delete a workbench webhook" do
       workbench = insert(:workbench)

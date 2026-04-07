@@ -8724,6 +8724,8 @@ export type RootMutationType = {
   fixResearchDiagram?: Maybe<InfraResearch>;
   /** forces a pipeline gate to be in open state */
   forceGate?: Maybe<PipelineGate>;
+  /** Fetches a workbench webhook by id. Requires read access to the workbench. */
+  getWorkbenchWebhook?: Maybe<WorkbenchWebhook>;
   /** Chat mutation that can also execute MCP servers in line with the overall completion */
   hybridChat?: Maybe<Array<Maybe<Chat>>>;
   impersonateServiceAccount?: Maybe<User>;
@@ -9641,6 +9643,11 @@ export type RootMutationTypeFixResearchDiagramArgs = {
 export type RootMutationTypeForceGateArgs = {
   id: Scalars['ID']['input'];
   state?: InputMaybe<GateState>;
+};
+
+
+export type RootMutationTypeGetWorkbenchWebhookArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
