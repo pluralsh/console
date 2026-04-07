@@ -57,6 +57,11 @@ export function WorkbenchJobActivity({
 }) {
   const { spacing } = useTheme()
   const isRunning = isActivityRunning(activity.status)
+
+  if (activity.type === WorkbenchJobActivityType.Conclusion) {
+    return <WorkbenchJobActivityResult activity={activity} />
+  }
+
   const TypeIcon =
     activityTypeToIcon[activity.type ?? WorkbenchJobActivityType.Integration]
   const { agentRun } = activity
