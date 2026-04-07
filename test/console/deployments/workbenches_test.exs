@@ -399,6 +399,26 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
+  describe "heartbeat/1" do
+    test "sets status to running and refreshes updated_at" do
+      job = insert(:workbench_job, status: :pending)
+      past = Timex.now() |> Timex.shift(seconds: -30)
+
+      {:ok, job} =
+        job
+        |> Ecto.Changeset.change(%{updated_at: past})
+        |> Console.Repo.update()
+
+      {:ok, updated} = Workbenches.heartbeat(job)
+
+      assert updated.status == :running
+      assert Timex.after?(updated.updated_at, past)
+
+      job = refetch(job)
+      assert job.status == :running
+    end
+  end
+
   describe "create_message/3" do
     test "job owner can create a user message for their job" do
       user = insert(:user)
@@ -498,8 +518,8 @@ defmodule Console.Deployments.WorkbenchesTest do
     end
   end
 
-  describe "update_job_activity/3" do
-    test "updates an activity and refreshes job updated_at and status to running" do
+  describe "update_job_activity/2" do
+    test "updates an activity" do
       job = insert(:workbench_job, status: :pending)
       activity = insert(:workbench_job_activity, workbench_job: job, type: :coding, status: :running)
 
@@ -515,12 +535,12 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 
       job = refetch(job)
-      assert job.updated_at
-      assert job.status == :running
+      assert job.status == :pending
     end
 
     test "updates only the given attributes" do
       job = insert(:workbench_job)
+      job_updated_at = job.updated_at
       activity =
         insert(:workbench_job_activity, workbench_job: job, type: :observability, status: :pending)
 
@@ -532,7 +552,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert updated.type == :observability
       assert_receive {:event, %PubSub.WorkbenchJobActivityUpdated{item: ^updated}}
 
-      assert refetch(job).updated_at
+      assert DateTime.compare(refetch(job).updated_at, job_updated_at) == :eq
     end
   end
 

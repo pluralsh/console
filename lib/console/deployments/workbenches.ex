@@ -344,12 +344,12 @@ defmodule Console.Deployments.Workbenches do
   def kick_job(_, _), do: {:error, "you can only kick your own jobs"}
 
   @doc """
-  Heartbeats a job by updating the updated_at timestamp to the current time.
+  Heartbeats a job by setting status to running and updating the updated_at timestamp to the current time.
   """
   @spec heartbeat(WorkbenchJob.t()) :: job_resp
   def heartbeat(%WorkbenchJob{id: id}) do
     get_workbench_job!(id)
-    |> Ecto.Changeset.change(%{updated_at: Timex.now()})
+    |> Ecto.Changeset.change(%{status: :running, updated_at: Timex.now()})
     |> Repo.update(allow_stale: true)
   end
 
@@ -402,21 +402,13 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
-  Updates an existing activity for a job, and bookkeeps job status and timestamp.
+  Updates an existing activity for a job.
   """
   @spec update_job_activity(map, WorkbenchJobActivity.t()) :: activity_resp
   def update_job_activity(attrs, %WorkbenchJobActivity{} = activity) do
-    %{workbench_job: job} = Repo.preload(activity, :workbench_job)
-    start_transaction()
-    |> add_operation(:activity, fn _ ->
-      WorkbenchJobActivity.changeset(activity, attrs)
-      |> Repo.update()
-    end)
-    |> add_operation(:job, fn _ ->
-      Ecto.Changeset.change(job, %{status: :running, updated_at: DateTime.utc_now()})
-      |> Repo.update()
-    end)
-    |> execute(extract: :activity)
+    activity
+    |> WorkbenchJobActivity.changeset(attrs)
+    |> Repo.update()
     |> notify(:update)
   end
 
