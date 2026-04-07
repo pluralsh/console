@@ -835,6 +835,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
       resolve &Deployments.update_workbench_job/2
     end
+
+    @desc "Cancels a workbench job. Allowed for the job owner or users with write access to the workbench."
+    field :cancel_workbench_job, :workbench_job do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :write
+      arg :job_id, non_null(:id), description: "the workbench job to cancel"
+
+      resolve &Deployments.cancel_workbench_job/2
+    end
   end
 
   object :workbench_subscriptions do

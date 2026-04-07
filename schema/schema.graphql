@@ -1294,6 +1294,12 @@ type RootMutationType {
     attributes: WorkbenchJobUpdateAttributes!
   ): WorkbenchJob
 
+  "Cancels a workbench job. Allowed for the job owner or users with write access to the workbench."
+  cancelWorkbenchJob(
+    "the workbench job to cancel"
+    jobId: ID!
+  ): WorkbenchJob
+
   cancelAgentRun(id: ID!): AgentRun
 
   createAgentRun(runtimeId: ID!, attributes: AgentRunAttributes!): AgentRun

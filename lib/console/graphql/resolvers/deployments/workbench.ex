@@ -166,6 +166,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def update_workbench_job(%{job_id: id, attributes: attributes}, %{context: %{current_user: user}}),
     do: Workbenches.update_workbench_job(attributes, id, user)
 
+  def cancel_workbench_job(%{job_id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.cancel_workbench_job(id, user)
+
   defp workbench_filters(query, args) do
     Enum.reduce(args, query, fn
       {:project_id, project_id}, q when is_binary(project_id) -> Workbench.for_project(q, project_id)

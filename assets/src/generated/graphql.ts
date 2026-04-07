@@ -8563,6 +8563,8 @@ export type RootMutationType = {
   cancelAgentRun?: Maybe<AgentRun>;
   /** Cancels a chat message, if the user has access to the thread, by just deleting the chat record */
   cancelChat?: Maybe<Chat>;
+  /** Cancels a workbench job. Allowed for the job owner or users with write access to the workbench. */
+  cancelWorkbenchJob?: Maybe<WorkbenchJob>;
   /** saves a set of messages and generates a new one transactionally */
   chat?: Maybe<Chat>;
   /** Wipes your current chat history blank */
@@ -8920,6 +8922,11 @@ export type RootMutationTypeCancelAgentRunArgs = {
 
 export type RootMutationTypeCancelChatArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCancelWorkbenchJobArgs = {
+  jobId: Scalars['ID']['input'];
 };
 
 

@@ -343,14 +343,59 @@ defmodule Console.Deployments.WorkbenchesTest do
       other = insert(:user)
       job = insert(:workbench_job, user: owner)
 
-      assert {:error, "you can only update your own jobs"} =
-               Workbenches.update_workbench_job(
-                 %{result: %{topology: "hacked"}},
-                 job.id,
-                 other
-               )
+      {:error, _} = Workbenches.update_workbench_job(
+        %{result: %{topology: "hacked"}},
+        job.id,
+        other
+      )
 
       assert refetch(job.result).topology != "hacked"
+    end
+  end
+
+  describe "cancel_workbench_job/2" do
+    test "job owner can cancel with only read access to the workbench" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :running)
+
+      {:ok, cancelled} = Workbenches.cancel_workbench_job(job.id, user)
+
+      assert cancelled.id == job.id
+      assert cancelled.status == :cancelled
+      assert refetch(job).status == :cancelled
+    end
+
+    test "user with workbench write access can cancel another user's job" do
+      owner = insert(:user)
+      writer = insert(:user)
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: owner.id}],
+          write_bindings: [%{user_id: writer.id}]
+        )
+
+      job = insert(:workbench_job, user: owner, workbench: workbench, status: :running)
+
+      {:ok, cancelled} = Workbenches.cancel_workbench_job(job.id, writer)
+
+      assert cancelled.status == :cancelled
+      assert refetch(job).status == :cancelled
+    end
+
+    test "user with only read access cannot cancel someone else's job" do
+      owner = insert(:user)
+      reader = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: owner.id}, %{user_id: reader.id}]
+        )
+
+      job = insert(:workbench_job, user: owner, workbench: workbench, status: :running)
+
+      assert {:error, "forbidden"} = Workbenches.cancel_workbench_job(job.id, reader)
+      assert refetch(job).status == :running
     end
   end
 
@@ -385,8 +430,7 @@ defmodule Console.Deployments.WorkbenchesTest do
       other = insert(:user)
       job = insert(:workbench_job, user: owner)
 
-      assert {:error, "you can only create messages for your own jobs"} =
-               Workbenches.create_message(%{prompt: "unauthorized"}, job.id, other)
+      {:error, _} = Workbenches.create_message(%{prompt: "unauthorized"}, job.id, other)
 
       refute_receive {:event, %PubSub.WorkbenchJobActivityCreated{}}
     end

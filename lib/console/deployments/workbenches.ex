@@ -302,10 +302,11 @@ defmodule Console.Deployments.Workbenches do
   Updates a workbench job. Requires read access to the workbench.
   """
   @spec update_workbench_job(map, WorkbenchJob.t() | binary, User.t()) :: job_resp
-  def update_workbench_job(attrs, %WorkbenchJob{user_id: id} = job, %User{id: id} = user) do
+  def update_workbench_job(attrs, %WorkbenchJob{} = job, %User{} = user) do
     Repo.preload(job, :result)
     |> WorkbenchJob.update_changeset(attrs)
-    |> Repo.update()
+    |> allow(user, :edit)
+    |> when_ok(:update)
     |> notify(:update, user)
   end
   def update_workbench_job(attrs, id, user) when is_binary(id) do
@@ -313,6 +314,18 @@ defmodule Console.Deployments.Workbenches do
     |> then(&update_workbench_job(attrs, &1, user))
   end
   def update_workbench_job(_, _, _), do: {:error, "you can only update your own jobs"}
+
+  @doc """
+  Cancels a workbench job. Requires write access to the job, or for the user to be the owner of the job.
+  """
+  @spec cancel_workbench_job(binary, User.t()) :: job_resp
+  def cancel_workbench_job(id, %User{} = user) do
+    get_workbench_job!(id)
+    |> WorkbenchJob.changeset(%{status: :cancelled})
+    |> allow(user, :edit)
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
 
   @doc """
   Kicks a job by updating the updated_at timestamp to 20 minutes ago.
@@ -334,8 +347,8 @@ defmodule Console.Deployments.Workbenches do
   Heartbeats a job by updating the updated_at timestamp to the current time.
   """
   @spec heartbeat(WorkbenchJob.t()) :: job_resp
-  def heartbeat(%WorkbenchJob{} = job) do
-    job
+  def heartbeat(%WorkbenchJob{id: id}) do
+    get_workbench_job!(id)
     |> Ecto.Changeset.change(%{updated_at: Timex.now()})
     |> Repo.update(allow_stale: true)
   end
@@ -344,9 +357,13 @@ defmodule Console.Deployments.Workbenches do
   Creates a new message for a job. Requires read access to the job.
   """
   @spec create_message(map, binary, User.t()) :: activity_resp
-  def create_message(attrs, %WorkbenchJob{user_id: id} = job, %User{id: id} = user) do
+  def create_message(attrs, %WorkbenchJob{} = job, %User{} = user) do
     start_transaction()
     |> add_operation(:job, fn _ ->
+      allow(job, user, :edit)
+      |> error("you can only create messages for your own jobs")
+    end)
+    |> add_operation(:idle, fn _ ->
       case WorkbenchJob.idle?(job) do
         true -> {:ok, job}
         false -> {:error, "job is currently active, please wait for it to complete before prompting"}
@@ -364,7 +381,6 @@ defmodule Console.Deployments.Workbenches do
     get_workbench_job!(id)
     |> then(&create_message(attrs, &1, user))
   end
-  def create_message(_, _, _), do: {:error, "you can only create messages for your own jobs"}
 
   @doc """
   Creates a new activity for a job, and bookkeeps job status and timestamp.

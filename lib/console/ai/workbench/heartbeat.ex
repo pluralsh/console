@@ -3,7 +3,7 @@ defmodule Console.AI.Workbench.Heartbeat do
   alias Console.Schema.WorkbenchJob
   alias Console.Deployments.Workbenches
 
-  @poll :timer.seconds(30)
+  @poll :timer.seconds(15)
 
   def start_link(%WorkbenchJob{} = job) do
     GenServer.start_link(__MODULE__, job)
@@ -16,7 +16,10 @@ defmodule Console.AI.Workbench.Heartbeat do
   end
 
   def handle_info(:heartbeat, job) do
-    Workbenches.heartbeat(job)
-    {:noreply, job}
+    case Workbenches.heartbeat(job) do
+      {:ok, %WorkbenchJob{status: :cancelled}} -> {:stop, :normal, job}
+      {:ok, %WorkbenchJob{} = job} -> {:noreply, job}
+      _ -> {:noreply, job}
+    end
   end
 end

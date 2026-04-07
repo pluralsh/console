@@ -466,6 +466,75 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
     end
   end
 
+  describe "cancelWorkbenchJob" do
+    test "job owner can cancel the job" do
+      user = insert(:user)
+      workbench = insert(:workbench, read_bindings: [%{user_id: user.id}])
+      job = insert(:workbench_job, user: user, workbench: workbench, status: :running)
+
+      {:ok, %{data: %{"cancelWorkbenchJob" => updated}}} = run_query("""
+        mutation CancelWorkbenchJob($jobId: ID!) {
+          cancelWorkbenchJob(jobId: $jobId) {
+            id
+            status
+          }
+        }
+      """, %{"jobId" => job.id}, %{current_user: user})
+
+      assert updated["id"] == job.id
+      assert updated["status"] == "CANCELLED"
+      assert refetch(job).status == :cancelled
+    end
+
+    test "workbench writer can cancel another user's job" do
+      owner = insert(:user)
+      writer = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: owner.id}],
+          write_bindings: [%{user_id: writer.id}]
+        )
+
+      job = insert(:workbench_job, user: owner, workbench: workbench, status: :running)
+
+      {:ok, %{data: %{"cancelWorkbenchJob" => updated}}} = run_query("""
+        mutation CancelWorkbenchJob($jobId: ID!) {
+          cancelWorkbenchJob(jobId: $jobId) {
+            id
+            status
+          }
+        }
+      """, %{"jobId" => job.id}, %{current_user: writer})
+
+      assert updated["status"] == "CANCELLED"
+      assert refetch(job).status == :cancelled
+    end
+
+    test "reader who is not the owner cannot cancel" do
+      owner = insert(:user)
+      reader = insert(:user)
+
+      workbench =
+        insert(:workbench,
+          read_bindings: [%{user_id: owner.id}, %{user_id: reader.id}]
+        )
+
+      job = insert(:workbench_job, user: owner, workbench: workbench, status: :running)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation CancelWorkbenchJob($jobId: ID!) {
+          cancelWorkbenchJob(jobId: $jobId) {
+            id
+            status
+          }
+        }
+      """, %{"jobId" => job.id}, %{current_user: reader})
+
+      assert refetch(job).status == :running
+    end
+  end
+
   describe "createWorkbenchCron" do
     test "it can create a workbench cron" do
       workbench = insert(:workbench)
