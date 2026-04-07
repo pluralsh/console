@@ -41,6 +41,7 @@ import { WEBHOOK_TRIGGER_REFETCH_QUERIES } from './WorkbenchTriggers'
 import { isEqual, isEmpty } from 'lodash'
 import { InlineA } from 'components/utils/typography/Text'
 import { useTheme } from 'styled-components'
+import { WorkbenchCreateWebhookForm } from './WorkbenchCreateWebhookForm'
 
 type MatchType = 'regex' | 'substring'
 
@@ -111,6 +112,7 @@ export function WorkbenchWebhookTriggerForm({
   const [formState, setFormState] = useState<WebhookTriggerFormState>(() =>
     getInitialFormState(webhook)
   )
+  const [isCreatingWebhook, setIsCreatingWebhook] = useState(false)
   const { popToast } = useSimpleToast()
 
   // TODO: Add pagination for webhook queries.
@@ -118,12 +120,14 @@ export function WorkbenchWebhookTriggerForm({
     data: obsData,
     loading: obsLoading,
     error: obsError,
+    refetch: refetchObservabilityWebhooks,
   } = useObservabilityWebhooksQuery({ variables: { first: 100 } })
 
   const {
     data: issueData,
     loading: issueLoading,
     error: issueWebhooksError,
+    refetch: refetchIssueWebhooks,
   } = useIssueWebhooksQuery({ variables: { first: 100 } })
 
   const observabilityWebhooks = useMemo(
@@ -196,7 +200,26 @@ export function WorkbenchWebhookTriggerForm({
     else createWorkbenchWebhook()
   }
 
-  const handleCreateWebhook = () => {}
+  const handleCreateWebhook = () => {
+    setIsCreatingWebhook(true)
+  }
+
+  // Keeping it here instead as a separate route to be able to easily switch back to the form.
+  // It's a bit of a hack but edit form doesn't fetch edited webhook data as there is no query yet.
+  // It would make going back to edit form with selected webhook data populated a bit more complex.
+  if (isCreatingWebhook) {
+    return (
+      <WorkbenchCreateWebhookForm
+        onBack={() => setIsCreatingWebhook(false)}
+        onCreated={(selectedWebhookKey) => {
+          setFormState((prev) => ({ ...prev, selectedWebhookKey }))
+          setIsCreatingWebhook(false)
+        }}
+        refetchObservabilityWebhooks={refetchObservabilityWebhooks}
+        refetchIssueWebhooks={refetchIssueWebhooks}
+      />
+    )
+  }
 
   return (
     <Flex
