@@ -10,7 +10,6 @@ import {
   Input2,
   isValidRepoUrl,
   ListBoxItem,
-  prettifyRepoUrl,
   Radio,
   RadioGroup,
   Select,
@@ -356,7 +355,7 @@ export function WorkbenchCodingAgentStep({
             {allowedRepos.map((url) => (
               <ListBoxItem
                 key={url}
-                label={prettifyRepoUrl(url)}
+                label={url}
               />
             ))}
           </Select>
@@ -410,7 +409,7 @@ export function WorkbenchCodingAgentStep({
                     clickable
                     onClick={() => removeRepo(url)}
                   >
-                    {prettifyRepoUrl(url)}
+                    {url}
                   </Chip>
                 ))}
               </Flex>
