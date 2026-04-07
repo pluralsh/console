@@ -5,19 +5,10 @@ import {
   getWorkbenchAbsPath,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM,
-  WORKBENCHES_TRIGGERS_REL_PATH,
-  WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH,
-  WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH,
+  WORKBENCHES_CRON_SCHEDULES_REL_PATH,
+  WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
-
-const OuterCardSC = styled(Card)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  width: '100%',
-  gap: theme.spacing.small,
-  padding: theme.spacing.xlarge,
-}))
 
 const InnerCardSC = styled(Card)(() => ({
   border: 'none',
@@ -30,27 +21,24 @@ export function WorkbenchScheduleEmptyState() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID]
 
   return (
-    <OuterCardSC>
-      <Body2BoldP>Schedules</Body2BoldP>
-      <InnerCardSC>
-        <EmptyState
-          message="No schedules yet"
-          description="Create a schedule for the workbench with prompt"
-          css={{ margin: '0 auto', width: 500 }}
+    <InnerCardSC>
+      <EmptyState
+        message="No schedules yet"
+        description="Create a schedule for the workbench with prompt"
+        css={{ margin: '0 auto', width: 500 }}
+      >
+        <Button
+          small
+          onClick={() => {
+            navigate(
+              `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_CRON_SCHEDULES_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true`
+            )
+          }}
         >
-          <Button
-            small
-            onClick={() => {
-              navigate(
-                `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_TRIGGERS_REL_PATH}/${WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true`
-              )
-            }}
-          >
-            Create new schedule
-          </Button>
-        </EmptyState>
-      </InnerCardSC>
-    </OuterCardSC>
+          Create new schedule
+        </Button>
+      </EmptyState>
+    </InnerCardSC>
   )
 }
 
@@ -59,28 +47,25 @@ export function WorkbenchWebhookEmptyState() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID]
 
   return (
-    <OuterCardSC>
-      <Body2BoldP>Webhooks</Body2BoldP>
-      <InnerCardSC>
-        <EmptyState
-          message="No webhooks yet"
-          description="No webhook connected. Select an existing webhook or create a new one."
-          css={{ margin: '0 auto', width: 500 }}
-        >
-          <Flex gap="small">
-            <Button
-              small
-              onClick={() => {
-                navigate(
-                  `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_TRIGGERS_REL_PATH}/${WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true`
-                )
-              }}
-            >
-              Create new webhook
-            </Button>
-          </Flex>
-        </EmptyState>
-      </InnerCardSC>
-    </OuterCardSC>
+    <InnerCardSC>
+      <EmptyState
+        message="No webhooks yet"
+        description="No webhook connected. Select an existing webhook or create a new one."
+        css={{ margin: '0 auto', width: 500 }}
+      >
+        <Flex gap="small">
+          <Button
+            small
+            onClick={() => {
+              navigate(
+                `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true`
+              )
+            }}
+          >
+            Create new webhook
+          </Button>
+        </Flex>
+      </EmptyState>
+    </InnerCardSC>
   )
 }

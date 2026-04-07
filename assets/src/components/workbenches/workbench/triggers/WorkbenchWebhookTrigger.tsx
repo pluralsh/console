@@ -5,6 +5,7 @@ import {
   PencilIcon,
   Table,
   TrashCanIcon,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
@@ -13,6 +14,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { Body2P } from 'components/utils/typography/Text'
 import {
+  useWorkbenchQuery,
   useWorkbenchWebhooksQuery,
   WorkbenchWebhookFragment,
 } from 'generated/graphql'
@@ -24,9 +26,11 @@ import {
 } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
+import { getWorkbenchBreadcrumbs } from '../Workbench'
 import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
 import { WorkbenchWebhookDeleteModal } from './WorkbenchWebhookDeleteModal'
 import { WorkbenchWebhookTriggerForm } from './WorkbenchWebhookTriggerForm'
+import { WorkbenchWebhookEmptyState } from './WorkbenchTriggersEmptyStates'
 
 export function WorkbenchWebhookTrigger() {
   const theme = useTheme()
@@ -39,6 +43,16 @@ export function WorkbenchWebhookTrigger() {
   const [deletingWebhook, setDeletingWebhook] =
     useState<Nullable<WorkbenchWebhookFragment>>(null)
 
+  const {
+    data: workbenchData,
+    loading: workbenchLoading,
+    error: workbenchError,
+  } = useWorkbenchQuery({
+    variables: { id: workbenchId },
+    skip: !workbenchId,
+  })
+  const workbench = workbenchData?.workbench
+
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
@@ -50,6 +64,16 @@ export function WorkbenchWebhookTrigger() {
   const webhooks = useMemo(
     () => mapExistingNodes(data?.workbench?.webhooks),
     [data]
+  )
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...getWorkbenchBreadcrumbs(workbench),
+        { label: 'webhook trigger' },
+      ],
+      [workbench]
+    )
   )
 
   const editingWebhook = useMemo(
@@ -70,68 +94,87 @@ export function WorkbenchWebhookTrigger() {
     setSearchParams({}, { replace: true })
   }
 
+  const showForm = isCreating || !!editingWebhook
+  const showEmptyState = !!data && webhooks.length === 0
+
+  if (workbenchError) return <GqlError error={workbenchError} />
+
   if (error) return <GqlError error={error} />
-  if (isCreating || editingWebhook)
-    return (
-      <FormCardSC>
-        <WorkbenchWebhookTriggerForm
-          key={JSON.stringify(editingWebhook) ?? 'new'}
-          workbenchId={workbenchId}
-          webhook={editingWebhook}
-          onCancel={clearForm}
-          onCompleted={editingWebhook ? undefined : clearForm} // don't nav back on edit
-        />
-      </FormCardSC>
-    )
 
   return (
-    <StretchedFlex
+    <Flex
       direction="column"
-      align="stretch"
       gap="large"
+      height="100%"
+      width="100%"
+      overflow="auto"
+      padding="large"
     >
-      <FormCardSC>
+      <StackedText
+        loading={!workbenchData && workbenchLoading}
+        first={workbench?.name}
+        second={workbench?.description}
+      />
+      {showForm ? (
+        <FormCardSC>
+          <WorkbenchWebhookTriggerForm
+            key={JSON.stringify(editingWebhook) ?? 'new'}
+            workbenchId={workbenchId}
+            webhook={editingWebhook}
+            onCancel={clearForm}
+            onCompleted={editingWebhook ? undefined : clearForm}
+          />
+        </FormCardSC>
+      ) : showEmptyState ? (
+        <WorkbenchWebhookEmptyState />
+      ) : (
         <StretchedFlex
-          css={{
-            paddingLeft: theme.spacing.xxxsmall,
-            paddingRight: theme.spacing.xxxsmall,
-          }}
+          direction="column"
+          align="stretch"
+          gap="large"
         >
-          <Body2P $color="text-light">
-            Add webhooks to trigger this workbench.
-          </Body2P>
-          <Button
-            small
-            onClick={() => {
-              setEditingWebhookId(null)
-              setSearchParams(
-                { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' },
-                { replace: true }
-              )
+          <StretchedFlex
+            css={{
+              paddingLeft: theme.spacing.xxxsmall,
+              paddingRight: theme.spacing.xxxsmall,
             }}
           >
-            Add webhook
-          </Button>
+            <Body2P $color="text-light">
+              Add webhooks to trigger this workbench.
+            </Body2P>
+            <Button
+              small
+              onClick={() => {
+                setEditingWebhookId(null)
+                setSearchParams(
+                  { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' },
+                  { replace: true }
+                )
+              }}
+            >
+              Add webhook
+            </Button>
+          </StretchedFlex>
+          <Table
+            hideHeader
+            fullHeightWrap
+            virtualizeRows
+            data={webhooks}
+            columns={columns}
+            loading={!data && loading}
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            onVirtualSliceChange={setVirtualSlice}
+          />
         </StretchedFlex>
-        <Table
-          hideHeader
-          fullHeightWrap
-          virtualizeRows
-          data={webhooks}
-          columns={columns}
-          loading={!data && loading}
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onVirtualSliceChange={setVirtualSlice}
-        />
-      </FormCardSC>
+      )}
       <WorkbenchWebhookDeleteModal
         open={!!deletingWebhook}
         webhook={deletingWebhook}
         onClose={() => setDeletingWebhook(null)}
       />
-    </StretchedFlex>
+    </Flex>
   )
 }
 

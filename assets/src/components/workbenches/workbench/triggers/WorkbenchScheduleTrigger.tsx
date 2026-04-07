@@ -5,6 +5,7 @@ import {
   PencilIcon,
   Table,
   TrashCanIcon,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import cronstrue from 'cronstrue'
@@ -15,6 +16,7 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { Body2P } from 'components/utils/typography/Text'
 import {
   useWorkbenchCronsQuery,
+  useWorkbenchQuery,
   WorkbenchCronFragment,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
@@ -26,9 +28,11 @@ import {
 import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
+import { getWorkbenchBreadcrumbs } from '../Workbench'
 import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
 import { WorkbenchScheduleDeleteModal } from './WorkbenchScheduleDeleteModal'
 import { WorkbenchScheduleTriggerForm } from './WorkbenchScheduleTriggerForm'
+import { WorkbenchScheduleEmptyState } from './WorkbenchTriggersEmptyStates'
 
 export function WorkbenchScheduleTrigger() {
   const theme = useTheme()
@@ -40,6 +44,16 @@ export function WorkbenchScheduleTrigger() {
   const [deletingCron, setDeletingCron] =
     useState<Nullable<WorkbenchCronFragment>>(null)
 
+  const {
+    data: workbenchData,
+    loading: workbenchLoading,
+    error: workbenchError,
+  } = useWorkbenchQuery({
+    variables: { id: workbenchId },
+    skip: !workbenchId,
+  })
+  const workbench = workbenchData?.workbench
+
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       { queryHook: useWorkbenchCronsQuery, keyPath: ['workbench', 'crons'] },
@@ -47,6 +61,16 @@ export function WorkbenchScheduleTrigger() {
     )
 
   const crons = useMemo(() => mapExistingNodes(data?.workbench?.crons), [data])
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...getWorkbenchBreadcrumbs(workbench),
+        { label: 'cron schedules' },
+      ],
+      [workbench]
+    )
+  )
 
   const editingCron = useMemo(
     () => crons.find((cron) => cron.id === editingCronId),
@@ -66,68 +90,86 @@ export function WorkbenchScheduleTrigger() {
     setSearchParams({}, { replace: true })
   }
 
+  const showForm = isCreating || !!editingCron
+  const showEmptyState = !!data && crons.length === 0
+
+  if (workbenchError) return <GqlError error={workbenchError} />
   if (error) return <GqlError error={error} />
-  if (isCreating || editingCron)
-    return (
-      <FormCardSC>
-        <WorkbenchScheduleTriggerForm
-          key={JSON.stringify(editingCron) ?? 'new'}
-          workbenchId={workbenchId}
-          cron={editingCron}
-          onCancel={clearForm}
-          onCompleted={editingCron ? undefined : clearForm}
-        />
-      </FormCardSC>
-    )
 
   return (
-    <StretchedFlex
+    <Flex
       direction="column"
-      align="stretch"
       gap="large"
+      height="100%"
+      width="100%"
+      overflow="auto"
+      padding="large"
     >
-      <FormCardSC>
+      <StackedText
+        loading={!workbenchData && workbenchLoading}
+        first={workbench?.name}
+        second={workbench?.description}
+      />
+      {showForm ? (
+        <FormCardSC>
+          <WorkbenchScheduleTriggerForm
+            key={JSON.stringify(editingCron) ?? 'new'}
+            workbenchId={workbenchId}
+            cron={editingCron}
+            onCancel={clearForm}
+            onCompleted={editingCron ? undefined : clearForm}
+          />
+        </FormCardSC>
+      ) : showEmptyState ? (
+        <WorkbenchScheduleEmptyState />
+      ) : (
         <StretchedFlex
-          css={{
-            paddingLeft: theme.spacing.xxxsmall,
-            paddingRight: theme.spacing.xxxsmall,
-          }}
+          direction="column"
+          align="stretch"
+          gap="large"
         >
-          <Body2P $color="text-light">
-            Add schedules to trigger this workbench.
-          </Body2P>
-          <Button
-            small
-            onClick={() => {
-              setEditingCronId(null)
-              setSearchParams(
-                { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' },
-                { replace: true }
-              )
+          <StretchedFlex
+            css={{
+              paddingLeft: theme.spacing.xxxsmall,
+              paddingRight: theme.spacing.xxxsmall,
             }}
           >
-            Add cron schedule
-          </Button>
+            <Body2P $color="text-light">
+              Add schedules to trigger this workbench.
+            </Body2P>
+            <Button
+              small
+              onClick={() => {
+                setEditingCronId(null)
+                setSearchParams(
+                  { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' },
+                  { replace: true }
+                )
+              }}
+            >
+              Add cron schedule
+            </Button>
+          </StretchedFlex>
+          <Table
+            hideHeader
+            fullHeightWrap
+            virtualizeRows
+            data={crons}
+            columns={columns}
+            loading={!data && loading}
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            onVirtualSliceChange={setVirtualSlice}
+          />
         </StretchedFlex>
-        <Table
-          hideHeader
-          fullHeightWrap
-          virtualizeRows
-          data={crons}
-          columns={columns}
-          loading={!data && loading}
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onVirtualSliceChange={setVirtualSlice}
-        />
-      </FormCardSC>
+      )}
       <WorkbenchScheduleDeleteModal
         open={!!deletingCron}
         cron={deletingCron}
         onClose={() => setDeletingCron(null)}
       />
-    </StretchedFlex>
+    </Flex>
   )
 }
 

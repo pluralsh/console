@@ -26,9 +26,8 @@ import {
   WORKBENCH_PARAM_ID,
   WORKBENCHES_ABS_PATH,
   WORKBENCHES_EDIT_REL_PATH,
-  WORKBENCHES_TRIGGERS_REL_PATH,
-  WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH,
-  WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH,
+  WORKBENCHES_CRON_SCHEDULES_REL_PATH,
+  WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
 import { WorkbenchJobCreateInput } from './WorkbenchJobCreateInput'
@@ -118,7 +117,7 @@ export function Workbench() {
             small
             secondary
             as={Link}
-            to={`${WORKBENCHES_TRIGGERS_REL_PATH}/${WORKBENCHES_TRIGGERS_SCHEDULE_REL_PATH}`}
+            to={WORKBENCHES_CRON_SCHEDULES_REL_PATH}
           >
             Cron schedules
           </Button>
@@ -126,7 +125,7 @@ export function Workbench() {
             small
             secondary
             as={Link}
-            to={`${WORKBENCHES_TRIGGERS_REL_PATH}/${WORKBENCHES_TRIGGERS_WEBHOOK_REL_PATH}`}
+            to={WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}
           >
             Webhook trigger
           </Button>
