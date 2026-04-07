@@ -141,18 +141,23 @@ export function WorkbenchWebhookTrigger() {
               workbenchId={workbenchId}
               webhook={editingWebhook}
               createWebhook={isCreatingWebhook}
+              createWebhookBackToList={!isCreating}
               onCreateWebhook={() =>
                 setSearchParams(
                   {
-                    [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true',
                     [WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM]: 'true',
+                    ...(isCreating
+                      ? { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' }
+                      : {}),
                   },
                   { replace: true }
                 )
               }
               onCancelCreateWebhook={() =>
                 setSearchParams(
-                  { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' },
+                  isCreating
+                    ? { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' }
+                    : {},
                   { replace: true }
                 )
               }
@@ -186,7 +191,7 @@ export function WorkbenchWebhookTrigger() {
                   secondary
                   onClick={() => {
                     navigate(
-                      `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true&${WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM}=true`
+                      `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM}=true`
                     )
                   }}
                 >
@@ -338,7 +343,7 @@ function WorkbenchWebhookEmptyState({ workbenchId }: { workbenchId: string }) {
             secondary
             onClick={() => {
               navigate(
-                `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true&${WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM}=true`
+                `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM}=true`
               )
             }}
           >

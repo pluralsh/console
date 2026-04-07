@@ -100,6 +100,7 @@ export function WorkbenchWebhookTriggerForm({
   workbenchId,
   webhook,
   createWebhook,
+  createWebhookBackToList,
   onCreateWebhook,
   onCancelCreateWebhook,
   onCancel,
@@ -108,6 +109,7 @@ export function WorkbenchWebhookTriggerForm({
   workbenchId: string
   webhook?: Nullable<WorkbenchWebhookFragment>
   createWebhook?: boolean
+  createWebhookBackToList?: boolean
   onCreateWebhook?: () => void
   onCancelCreateWebhook?: () => void
   onCancel: () => void
@@ -212,6 +214,7 @@ export function WorkbenchWebhookTriggerForm({
     return (
       <WorkbenchCreateWebhookForm
         onBack={() => onCancelCreateWebhook?.()}
+        backToList={createWebhookBackToList}
         onCreated={(selectedWebhookKey) => {
           setFormState((prev) => ({ ...prev, selectedWebhookKey }))
           onCancelCreateWebhook?.()

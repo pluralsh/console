@@ -6,6 +6,7 @@ import {
   GitLabLogoIcon,
   Input2,
   ListBoxItem,
+  ReturnIcon,
   Select,
   TicketIcon,
   VisualInspectionIcon,
@@ -73,11 +74,13 @@ function getWebhookTypeIcon(type: CreateWebhookType) {
 
 export function WorkbenchCreateWebhookForm({
   onBack,
+  backToList,
   onCreated,
   refetchObservabilityWebhooks,
   refetchIssueWebhooks,
 }: {
   onBack: () => void
+  backToList?: boolean
   onCreated: (selectedWebhookKey: string) => void
   refetchObservabilityWebhooks: () => Promise<unknown>
   refetchIssueWebhooks: () => Promise<unknown>
@@ -329,10 +332,11 @@ export function WorkbenchCreateWebhookForm({
       <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
         <Button
           secondary
+          startIcon={backToList ? <ReturnIcon /> : undefined}
           onClick={onBack}
           disabled={isSaving}
         >
-          Back
+          {backToList ? 'Back to all webhooks' : 'Back'}
         </Button>
         <Button
           onClick={() => void handleCreateNewWebhook()}
