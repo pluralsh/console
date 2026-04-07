@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Workbench.Subagents do
     |> Jason.encode()
   end
 
-  defp subagent_description(:coding, _), do: "Invoke a coding subagent to analyze or modify code, generating a pull request."
+  defp subagent_description(:coding, _), do: "Invoke a coding subagent to analyze or modify code, generating a pull request.  You should make it explicit you want only read-only analysis or a PR when prompting this subagent."
   defp subagent_description(:infrastructure, _), do: "Invoke an infrastructure subagent to determine infrastructure state and configuration."
   defp subagent_description(:observability, categories), do: "Invoke an observability subagent to query and analyze observability data.  Supported tool capabilities are: #{observability_categories(categories)}"
   defp subagent_description(:integration, _), do: "Invoke an integration subagent to interact with enterprise systems, usually not directly related to devops infrastructure. Often Task tracking tools, knowledge bases or internal compliance software that's not SRE related."
