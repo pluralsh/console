@@ -111,7 +111,7 @@ export function Workbench() {
             as={Link}
             to={WORKBENCHES_EDIT_REL_PATH}
           >
-            Edit workbench
+            Edit
           </Button>
           <Button
             small
@@ -119,7 +119,7 @@ export function Workbench() {
             as={Link}
             to={WORKBENCHES_CRON_SCHEDULES_REL_PATH}
           >
-            Cron schedules
+            Crons
           </Button>
           <Button
             small
@@ -127,7 +127,7 @@ export function Workbench() {
             as={Link}
             to={WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}
           >
-            Webhook trigger
+            Webhooks
           </Button>
           <MoreMenu
             disabled={!workbench}
