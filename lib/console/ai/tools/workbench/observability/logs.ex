@@ -1,6 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Observability.Logs do
   use Console.AI.Tools.Workbench.Base
-  alias Console.AI.Tools.Workbench.Observability.TimeRange
+  alias Console.AI.Tools.Workbench.Observability.{TimeRange, Metrics}
   alias CloudQuery.Client
   alias Toolquery.ToolQuery.{Stub}
   alias Toolquery.{LogsQueryInput, LogsQueryOutput, LogsQueryFacet}
@@ -23,7 +23,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Logs do
 
   def json_schema(_), do: Console.priv_file!("tools/workbench/observability/logs.json") |> Jason.decode!()
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_logs_#{n}"
-  def description(%__MODULE__{tool: %{name: n}}), do: "Gather logs from the #{n} observability connection"
+  def description(%__MODULE__{tool: %{name: n} = t}), do: String.trim("Gather logs from the #{n} observability connection. #{Metrics.provider_hint(t)}")
 
   def changeset(model, attrs) do
     model

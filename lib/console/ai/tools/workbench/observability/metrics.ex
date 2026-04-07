@@ -18,7 +18,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
 
   def json_schema(_), do: Console.priv_file!("tools/workbench/observability/metrics.json") |> Jason.decode!()
   def name(%__MODULE__{tool: %{name: n}}), do: "workbench_observability_metrics_#{n}"
-  def description(%__MODULE__{tool: %{name: n}}), do: "Gather metrics from the #{n} observability connection"
+  def description(%__MODULE__{tool: %{name: n} = t}), do: String.trim("Gather metrics from the #{n} observability connection. #{provider_hint(t)}")
 
   def changeset(model, attrs) do
     model
@@ -45,4 +45,11 @@ defmodule Console.AI.Tools.Workbench.Observability.Metrics do
       }}
     end
   end
+
+
+  @known_providers ~w(prometheus datadog elastic loki splunk tempo dynatrace newrelic)a
+
+  def provider_hint(%Console.Schema.WorkbenchTool{tool: type}) when type in @known_providers,
+    do: "This tool is configured against #{type}, and so you should be able to use its documented query format as needed."
+  def provider_hint(_), do: ""
 end

@@ -50,7 +50,7 @@ defmodule Console.AI.Workbench.Subagents.Observability do
   defp plrl_log_tools(_), do: []
 
   defp plrl_metric_tools(%WorkbenchJob{workbench: %Workbench{configuration: %{observability: %{metrics: true}}}}),
-    do: [Plrl.Metrics]
+    do: [Plrl.Metrics, Plrl.MetricsSearch]
   defp plrl_metric_tools(_), do: []
 
   @allowed_tools MapSet.new(~w(metrics logs traces)a)

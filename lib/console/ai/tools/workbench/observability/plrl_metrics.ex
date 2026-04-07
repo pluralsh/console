@@ -16,7 +16,7 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Metrics do
 
   def json_schema(), do: Console.priv_file!("tools/workbench/observability/metrics.json") |> Jason.decode!()
   def name(), do: "plrl_metrics"
-  def description(), do: "Gather metrics from the Plural observability connection"
+  def description(), do: "Gather metrics from the (prometheus-compatible) Plural observability connection"
 
   def changeset(model, attrs) do
     model
@@ -25,14 +25,14 @@ defmodule Console.AI.Tools.Workbench.Observability.Plrl.Metrics do
     |> validate_required([:query])
   end
 
-  def implement(%__MODULE__{} = tool) do
+  def implement(%__MODULE__{query: q, step: s, time_range: tr}) do
     with {:ok, conn} <- build_tool_connection() do
-      metrics = %Metrics{tool: conn, query: tool.query, step: tool.step, time_range: tool.time_range}
+      metrics = %Metrics{tool: conn, query: q, step: s, time_range: tr}
       Metrics.implement(metrics, metrics)
     end
   end
 
-  defp build_tool_connection() do
+  def build_tool_connection() do
     case Settings.fetch() do
       %DeploymentSettings{prometheus_connection: %{url: url, user: user, password: pass}}
           when is_binary(url) and is_binary(user) and is_binary(pass) ->
