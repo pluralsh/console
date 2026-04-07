@@ -33,14 +33,19 @@ defmodule Console.AI.Provider.Base do
       {:system, content} -> [Context.system(content)]
       {:user, content} -> [Context.user(content)]
       {:assistant, content} -> [Context.assistant(content)]
-      {:tool, content, %{call_id: id, name: name, arguments: args}} when is_binary(id) and is_binary(content) ->
+      {:tool, content, %{call_id: id, name: name, arguments: args}} when is_binary(content) ->
+        id = tid(id)
         [Context.assistant("", tool_calls: [ToolCall.new(id, name, Jason.encode!(args))]), Context.tool_result(id, content)]
-      {:tool, content, %{call_id: id, name: name, arguments: args}} when is_binary(id) ->
+      {:tool, content, %{call_id: id, name: name, arguments: args}} ->
+        id = tid(id)
         [Context.assistant("", tool_calls: [ToolCall.new(id, name, Jason.encode!(args))]), Context.tool_result(id, Poison.encode!(content))]
       {:tool, content} -> [Context.tool_result("unknown", content)]
     end)
     |> Context.new()
   end
+
+  defp tid(id) when is_binary(id), do: id
+  defp tid(_id), do: Ecto.UUID.generate()
 
   def reqllm_tools(tools) do
     Enum.map(tools, fn

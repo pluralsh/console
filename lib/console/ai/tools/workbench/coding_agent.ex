@@ -40,14 +40,11 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
   def name(_), do: "workbench_coding_agent"
   def description(_), do: "Invokes a coding agent to make a code change with the given prompt and repository.  Only use this once you've gathered enough information to craft an effective prompt.  This can only be called once so ensure you chose the mode based on the user's intention."
 
-  def implement(_, %__MODULE__{mode: mode, repository: repository, prompt: prompt}) do
+  def implement(_, %__MODULE__{id: tool, mode: mode, repository: repo, prompt: prompt}) do
     with {:user, %User{} = user} <- {:user, Tool.actor()},
-         {:runtime, %AgentRuntime{} = runtime} <- {:runtime, Tool.agent_runtime()} do
-      Agents.create_agent_run(%{
-        repository: repository,
-        prompt: prompt,
-        mode: mode
-      }, runtime.id, user)
+         {:runtime, %AgentRuntime{} = runtime} <- {:runtime, Tool.agent_runtime()},
+         {:ok, run} <- Agents.create_agent_run(%{repository: repo, prompt: prompt, mode: mode}, runtime.id, user) do
+      {:ok, %{run | tool: tool}}
     else
       {:user, _} -> {:error, "no actor found for this session"}
       {:runtime, _} -> {:error, "no runtime found, you need to manually specify this in the chat context menu"}
