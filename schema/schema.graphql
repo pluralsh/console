@@ -2234,6 +2234,7 @@ enum WorkbenchJobActivityType {
   PLAN
   USER
   MEMORY
+  CONCLUSION
 }
 
 input WorkbenchJobAttributes {

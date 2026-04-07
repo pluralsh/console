@@ -452,13 +452,25 @@ defmodule Console.Deployments.Workbenches do
 
   @spec complete_job(map, WorkbenchJob.t()) :: job_resp
   def complete_job(attrs, %WorkbenchJob{} = job) do
-    Repo.preload(job, :result)
-    |> WorkbenchJob.changeset(%{
-      status: :successful,
-      completed_at: DateTime.utc_now(),
-      result: Console.mapify(attrs)
-    })
-    |> Repo.update()
+    start_transaction()
+    |> add_operation(:activity, fn _ ->
+      create_job_activity(%{
+        status: :successful,
+        type: :conclusion,
+        prompt: "completing job...",
+        result: %{ouput: attrs[:conclusion] || "no conclusion provided"}
+      }, job)
+    end)
+    |> add_operation(:job, fn _ ->
+      Repo.preload(job, :result)
+      |> WorkbenchJob.changeset(%{
+        status: :successful,
+        completed_at: DateTime.utc_now(),
+        result: Console.mapify(attrs)
+      })
+      |> Console.Repo.update()
+    end)
+    |> execute(extract: :job)
     |> notify(:update)
   end
 

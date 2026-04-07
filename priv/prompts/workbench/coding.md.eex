@@ -31,3 +31,4 @@ Some rules you should communicate to the coding agent to help it make high quali
 
 1. For Helm/K8s changes, bias towards modifying existing helm values files, inline configuration against CRs or whatever might be present in the repo.  Engineers are going to want to minimize change, and you shouldn't bring a sledge hammer when a scalpel is fine.
 2. For Terraform changes, you'll likely need to navigate between both modifying terraform code in-line but also looking to the InfrastructureStack custom resource that defines how terraform is instantiated, including setting variables for a stack.
+3. If you're working within the same repo and want to make multiple changes (even if disconnected), still try to make them a single PR to minimize the number of PRs users need to review.

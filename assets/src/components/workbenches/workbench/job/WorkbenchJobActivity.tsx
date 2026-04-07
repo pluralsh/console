@@ -200,6 +200,7 @@ const activityTypeToIcon: Record<
   [WorkbenchJobActivityType.Integration]: ToolKitIcon,
   [WorkbenchJobActivityType.Memory]: BrainIcon,
   [WorkbenchJobActivityType.User]: BrainIcon,
+  [WorkbenchJobActivityType.Conclusion]: CheckOutlineIcon,
 } as const satisfies Record<WorkbenchJobActivityType, ComponentType<IconProps>>
 
 function ActivityStatusIcon({

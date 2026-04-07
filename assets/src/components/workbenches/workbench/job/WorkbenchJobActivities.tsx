@@ -4,6 +4,8 @@ import {
   useWorkbenchJobActivityDeltaSubscription,
   WorkbenchJobActivitiesDocument,
   WorkbenchJobActivitiesQuery,
+  WorkbenchJobActivityType,
+  WorkbenchJobActivityFragment,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 
@@ -22,6 +24,22 @@ import { GqlError } from 'components/utils/Alert'
 
 export const ACTIVITY_GAP = 'medium' as const
 
+function findClosedActivities(
+  activities: WorkbenchJobActivityFragment[]
+): string[] {
+  const result: string[] = []
+  let found = false
+  if (!activities || !activities.length) return []
+  for (let i = activities.length - 1; i >= 0; i--) {
+    if (activities[i].type !== WorkbenchJobActivityType.Memo && !found) {
+      found = true
+      continue
+    }
+    result.push(activities[i].id)
+  }
+  return result
+}
+
 export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   const client = useApolloClient()
 
@@ -34,7 +52,9 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   const activities = mapExistingNodes(job?.activities)
 
   // easier to track closed ids in state since we want them all open by default
-  const [closedIds, setClosedIds] = useState<Set<string>>(() => new Set())
+  const [closedIds, setClosedIds] = useState<Set<string>>(
+    () => new Set(findClosedActivities(activities))
+  )
   const openIds = useMemo(
     () => activities.filter((a) => !closedIds.has(a.id)).map((a) => a.id),
     [activities, closedIds]
