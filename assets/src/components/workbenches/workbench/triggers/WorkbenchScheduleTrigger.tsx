@@ -270,7 +270,7 @@ function WorkbenchScheduleEmptyState() {
     <Card>
       <EmptyState
         message="No schedules yet"
-        description="Create a schedule for the workbench with prompt"
+        description="Create a schedule for the workbench with prompt."
         css={{ margin: '0 auto', width: 500 }}
       >
         <Button

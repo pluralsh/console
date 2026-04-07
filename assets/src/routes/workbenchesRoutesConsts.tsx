@@ -7,6 +7,7 @@ export const WORKBENCHES_EDIT_REL_PATH = 'edit'
 export const WORKBENCHES_CRON_SCHEDULES_REL_PATH = 'cron-schedules'
 export const WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH = 'webhook-triggers'
 export const WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM = 'create'
+export const WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM = 'createWebhook'
 
 export const WORKBENCHES_TOOLS_REL_PATH = 'tools'
 export const WORKBENCHES_ALERTS_REL_PATH = 'alerts'

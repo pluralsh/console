@@ -99,11 +99,17 @@ function getIssueWebhookProviderIcon(provider: Nullable<string>) {
 export function WorkbenchWebhookTriggerForm({
   workbenchId,
   webhook,
+  createWebhook,
+  onCreateWebhook,
+  onCancelCreateWebhook,
   onCancel,
   onCompleted,
 }: {
   workbenchId: string
   webhook?: Nullable<WorkbenchWebhookFragment>
+  createWebhook?: boolean
+  onCreateWebhook?: () => void
+  onCancelCreateWebhook?: () => void
   onCancel: () => void
   onCompleted?: Nullable<() => void>
 }) {
@@ -112,7 +118,6 @@ export function WorkbenchWebhookTriggerForm({
   const [formState, setFormState] = useState<WebhookTriggerFormState>(() =>
     getInitialFormState(webhook)
   )
-  const [isCreatingWebhook, setIsCreatingWebhook] = useState(false)
   const { popToast } = useSimpleToast()
 
   // TODO: Add pagination for webhook queries.
@@ -200,20 +205,16 @@ export function WorkbenchWebhookTriggerForm({
     else createWorkbenchWebhook()
   }
 
-  const handleCreateWebhook = () => {
-    setIsCreatingWebhook(true)
-  }
-
   // Keeping it here instead as a separate route to be able to easily switch back to the form.
   // It's a bit of a hack but edit form doesn't fetch edited webhook data as there is no query yet.
   // It would make going back to edit form with selected webhook data populated a bit more complex.
-  if (isCreatingWebhook) {
+  if (createWebhook) {
     return (
       <WorkbenchCreateWebhookForm
-        onBack={() => setIsCreatingWebhook(false)}
+        onBack={() => onCancelCreateWebhook?.()}
         onCreated={(selectedWebhookKey) => {
           setFormState((prev) => ({ ...prev, selectedWebhookKey }))
-          setIsCreatingWebhook(false)
+          onCancelCreateWebhook?.()
         }}
         refetchObservabilityWebhooks={refetchObservabilityWebhooks}
         refetchIssueWebhooks={refetchIssueWebhooks}
@@ -261,7 +262,7 @@ export function WorkbenchWebhookTriggerForm({
             href=""
             onClick={(e) => {
               e.preventDefault()
-              handleCreateWebhook()
+              onCreateWebhook?.()
             }}
             css={{ display: 'flex', alignItems: 'center', gap: '4px' }}
           >
@@ -325,7 +326,7 @@ export function WorkbenchWebhookTriggerForm({
                   href=""
                   onClick={(e) => {
                     e.preventDefault()
-                    handleCreateWebhook()
+                    onCreateWebhook?.()
                   }}
                   css={{
                     display: 'flex',

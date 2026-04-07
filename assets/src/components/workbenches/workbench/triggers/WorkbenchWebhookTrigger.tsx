@@ -26,6 +26,7 @@ import {
   getWorkbenchAbsPath,
   WORKBENCH_PARAM_ID,
   WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM,
+  WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM,
   WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
@@ -41,6 +42,8 @@ export function WorkbenchWebhookTrigger() {
   const [searchParams, setSearchParams] = useSearchParams()
   const isCreating =
     searchParams.get(WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM) === 'true'
+  const isCreatingWebhook =
+    searchParams.get(WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM) === 'true'
   const [editingWebhookId, setEditingWebhookId] =
     useState<Nullable<string>>(null)
   const [deletingWebhook, setDeletingWebhook] =
@@ -97,7 +100,7 @@ export function WorkbenchWebhookTrigger() {
     setSearchParams({}, { replace: true })
   }
 
-  const showForm = isCreating || !!editingWebhook
+  const showForm = isCreating || isCreatingWebhook || !!editingWebhook
   const showEmptyState = !!data && webhooks.length === 0
 
   if (workbenchError) return <GqlError error={workbenchError} />
@@ -134,12 +137,28 @@ export function WorkbenchWebhookTrigger() {
               key={JSON.stringify(editingWebhook) ?? 'new'}
               workbenchId={workbenchId}
               webhook={editingWebhook}
+              createWebhook={isCreatingWebhook}
+              onCreateWebhook={() =>
+                setSearchParams(
+                  {
+                    [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true',
+                    [WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM]: 'true',
+                  },
+                  { replace: true }
+                )
+              }
+              onCancelCreateWebhook={() =>
+                setSearchParams(
+                  { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' },
+                  { replace: true }
+                )
+              }
               onCancel={clearForm}
               onCompleted={editingWebhook ? undefined : clearForm}
             />
           </FormCardSC>
         ) : showEmptyState ? (
-          <WorkbenchWebhookEmptyState />
+          <WorkbenchWebhookEmptyState workbenchId={workbenchId} />
         ) : (
           <StretchedFlex
             direction="column"
@@ -259,9 +278,8 @@ function webhookURL(webhook: WorkbenchWebhookFragment) {
   return undefined
 }
 
-function WorkbenchWebhookEmptyState() {
+function WorkbenchWebhookEmptyState({ workbenchId }: { workbenchId: string }) {
   const navigate = useNavigate()
-  const workbenchId = useParams()[WORKBENCH_PARAM_ID]
 
   return (
     <Card>
@@ -273,13 +291,24 @@ function WorkbenchWebhookEmptyState() {
         <Flex gap="small">
           <Button
             small
+            secondary
             onClick={() => {
               navigate(
-                `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true`
+                `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true&${WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM}=true`
               )
             }}
           >
             Create new webhook
+          </Button>
+          <Button
+            small
+            onClick={() =>
+              navigate(
+                `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true`
+              )
+            }
+          >
+            Select existing webhook
           </Button>
         </Flex>
       </EmptyState>
