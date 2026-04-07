@@ -242,7 +242,6 @@ export function WorkbenchWebhookTriggerForm({
             }}
             css={{ display: 'flex', alignItems: 'center', gap: '4px' }}
           >
-            <PlusIcon size={14} />
             Create new webhook
           </InlineA>
         </Flex>
