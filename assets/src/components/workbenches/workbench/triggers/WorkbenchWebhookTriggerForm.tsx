@@ -8,7 +8,6 @@ import {
   GitHubLogoIcon,
   GitLabLogoIcon,
   GrafanaLogoIcon,
-  TicketIcon,
   Input2,
   ListBoxItem,
   NewrelicLogoIcon,
@@ -18,8 +17,9 @@ import {
   SentryLogoIcon,
   Tab,
   TabList,
+  VisualInspectionIcon,
   WebhooksIcon,
-  EyeClosedIcon,
+  TicketIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -108,6 +108,7 @@ export function WorkbenchWebhookTriggerForm({
   )
   const { popToast } = useSimpleToast()
 
+  // TODO: Add pagination for webhook queries.
   const {
     data: obsData,
     loading: obsLoading,
@@ -234,7 +235,17 @@ export function WorkbenchWebhookTriggerForm({
               <ListBoxItem
                 key={`obs:${wh.id}`}
                 leftContent={getObservabilityWebhookTypeIcon(wh.type)}
-                rightContent={<Chip size="small">Observability</Chip>}
+                rightContent={
+                  <Chip
+                    size="small"
+                    inactive
+                    icon={<VisualInspectionIcon />}
+                    iconColor="icon-xlight"
+                    css={{ borderRadius: 11 }}
+                  >
+                    Observability
+                  </Chip>
+                }
                 label={wh.name}
               />
             )),
@@ -242,7 +253,17 @@ export function WorkbenchWebhookTriggerForm({
               <ListBoxItem
                 key={`issue:${wh.id}`}
                 leftContent={getIssueWebhookProviderIcon(wh.provider)}
-                rightContent={<Chip size="small">Ticketing</Chip>}
+                rightContent={
+                  <Chip
+                    size="small"
+                    inactive
+                    icon={<TicketIcon />}
+                    iconColor="icon-xlight"
+                    css={{ borderRadius: 11 }}
+                  >
+                    Ticketing
+                  </Chip>
+                }
                 label={wh.name}
               />
             )),
