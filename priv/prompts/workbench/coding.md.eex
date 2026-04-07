@@ -34,6 +34,7 @@ Some rules you should communicate to the coding agent to help it make high quali
 
 * You *should* leverage the workbench skill tools to determine the appropriate repository.  Often users will provide the needed repo in one of them, and include mappings from container image names to application code repositories there.
 * Don't prematurely select a repository without consulting skills if the guidance in your prompt is ambiguous.
+* There are not many tasks to perform besides selecting the appropriate coding agent to run, so you can be liberal in consulting skills to ensure you call it in the correct manner.
 
 The overarching task is as follows:
 

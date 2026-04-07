@@ -38,7 +38,7 @@ defmodule Console.AI.Tools.Workbench.CodingAgent do
 
   def json_schema(_), do: @json_schema
   def name(_), do: "workbench_coding_agent"
-  def description(_), do: "Invokes a coding agent to make a code change with the given prompt and repository.  Only use this once you've gathered enough information to craft an effective prompt.  This can only be called once so ensure you chose the mode based on the user's intention."
+  def description(_), do: "Invokes a coding agent to make a code change with the given prompt and repository.  Only use this once you've gathered enough information to craft an effective prompt to either analyze the code in question or modify it and generate a reviewable PR."
 
   def implement(_, %__MODULE__{id: tool, mode: mode, repository: repo, prompt: prompt}) do
     with {:user, %User{} = user} <- {:user, Tool.actor()},
