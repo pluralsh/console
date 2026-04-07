@@ -147,7 +147,10 @@ export function WorkbenchScheduleTrigger() {
                 paddingRight: theme.spacing.xxxsmall,
               }}
             >
-              <Body2P $color="text-light">
+              <Body2P
+                $color="text-light"
+                css={{ margin: 0 }}
+              >
                 Add schedules to trigger this workbench.
               </Body2P>
               <Button
