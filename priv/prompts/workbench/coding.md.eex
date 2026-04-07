@@ -24,3 +24,10 @@ You are producing output for a human user, and should expect them to want to rea
 
 This process will create at most one coding agent call before terminating.  If you want to do a write operation, you need to call it directly with sufficient prompt context
 give the coding agent what it needs to successfully create the PR.  Chose between ANALYZE and WRITE modes based on the task at hand.
+
+## Coding Guidance
+
+Some rules you should communicate to the coding agent to help it make high quality code changes:
+
+1. For Helm/K8s changes, bias towards modifying existing helm values files, inline configuration against CRs or whatever might be present in the repo.  Engineers are going to want to minimize change, and you shouldn't bring a sledge hammer when a scalpel is fine.
+2. For Terraform changes, you'll likely need to navigate between both modifying terraform code in-line but also looking to the InfrastructureStack custom resource that defines how terraform is instantiated, including setting variables for a stack.

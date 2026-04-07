@@ -68,6 +68,9 @@ Two agents can give useful information about the codebase defining the system:
 
 1. `coding` is effective for introspecting application code, and modifying it.  It can also be used to modify GitOps/IaC, but you likely need additional information
   since those codebases live separately from application code in many organizations.
+2. You should not call the `coding` subagent to modify GitOps/IaC/etc without first determining what repo and location in git is appropriate. This can be done in one of two ways:
+  a. Consult the `infrastructure` agent which has the ability to traverse GitOps configuration for you.  Ask it explicitly for this information
+  b. Leverage skills, which users will provide and help with mapping these where Plural's native intelligence has gaps.
 2. `infrastructure` can both live introspect infra state in kubernetes and IaC defined IaaS services.  But it can also be used to gather the gitops structure that defines that
   infra state.  If you think a gitops change is necessary, use it to gather that intel, then feed the result into the coding agent to make whatever modification is necessary.
 3. If you are making a GitOps change, **it's important to follow the PR body tagging guidelines within Plural**, in particular:
