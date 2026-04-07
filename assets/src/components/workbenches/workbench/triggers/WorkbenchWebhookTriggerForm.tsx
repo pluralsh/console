@@ -14,6 +14,7 @@ import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import {
   useCreateWorkbenchWebhookMutation,
+  useIssueWebhooksQuery,
   useObservabilityWebhooksQuery,
   useUpdateWorkbenchWebhookMutation,
   WorkbenchWebhookFragment,
@@ -22,17 +23,27 @@ import { Key, useMemo, useRef, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { StickyActionsFooterSC } from '../create-edit/WorkbenchCreateOrEdit'
 import { WEBHOOK_TRIGGER_REFETCH_QUERIES } from './WorkbenchTriggers'
-import { isEqual } from 'lodash'
+import { isEqual, isEmpty } from 'lodash'
 
 type MatchType = 'regex' | 'substring'
 
+// Prefixed key used in the Select: 'obs:{id}' for observability webhooks, 'issue:{id}' for issue webhooks
 type WebhookTriggerFormState = {
   name: string
-  webhookId: string
+  selectedWebhookKey: string
   matchType: MatchType
   regex: string
   substring: string
   caseInsensitive: boolean
+}
+
+function parseWebhookKey(key: string): {
+  webhookId?: string
+  issueWebhookId?: string
+} {
+  if (key.startsWith('obs:')) return { webhookId: key.slice(4) }
+  if (key.startsWith('issue:')) return { issueWebhookId: key.slice(6) }
+  return {}
 }
 
 export function WorkbenchWebhookTriggerForm({
@@ -53,26 +64,38 @@ export function WorkbenchWebhookTriggerForm({
   const { popToast } = useSimpleToast()
 
   const {
-    data,
-    loading: webhooksLoading,
-    error: webhooksError,
+    data: obsData,
+    loading: obsLoading,
+    error: obsError,
   } = useObservabilityWebhooksQuery({ variables: { first: 100 } })
 
-  const webhooks = useMemo(
-    () => mapExistingNodes(data?.observabilityWebhooks),
-    [data]
+  const {
+    data: issueData,
+    loading: issueLoading,
+    error: issueWebhooksError,
+  } = useIssueWebhooksQuery({ variables: { first: 100 } })
+
+  const observabilityWebhooks = useMemo(
+    () => mapExistingNodes(obsData?.observabilityWebhooks),
+    [obsData]
   )
+  const issueWebhooks = useMemo(
+    () => mapExistingNodes(issueData?.issueWebhooks),
+    [issueData]
+  )
+  const webhooksLoading = obsLoading || issueLoading
+
   const tabStateRef = useRef<any>(undefined)
 
   const label = formState.name.trim()
-  const webhookId = formState.webhookId
+  const selectedWebhookKey = formState.selectedWebhookKey
   const regex = formState.regex.trim()
   const substring = formState.substring.trim()
   const activeMatchValue = formState.matchType === 'regex' ? regex : substring
 
   const attributes = {
     name: label,
-    webhookId,
+    ...parseWebhookKey(selectedWebhookKey),
     matches: activeMatchValue
       ? formState.matchType === 'regex'
         ? { regex: activeMatchValue }
@@ -85,7 +108,7 @@ export function WorkbenchWebhookTriggerForm({
 
   const canSave =
     !!label &&
-    !!webhookId &&
+    !!selectedWebhookKey &&
     !!activeMatchValue &&
     !isEqual(attributes, getAttributesFromState(getInitialFormState(webhook)))
 
@@ -113,7 +136,8 @@ export function WorkbenchWebhookTriggerForm({
     })
 
   const isSaving = createState.loading || updateState.loading
-  const error = webhooksError ?? createState.error ?? updateState.error
+  const error =
+    obsError ?? issueWebhooksError ?? createState.error ?? updateState.error
 
   const handleSave = () => {
     if (!canSave) return
@@ -147,19 +171,35 @@ export function WorkbenchWebhookTriggerForm({
         hint="New webhooks added will appear in this list."
       >
         <Select
-          selectedKey={formState.webhookId || null}
+          selectedKey={formState.selectedWebhookKey || null}
           onSelectionChange={(key) =>
-            setFormState((prev) => ({ ...prev, webhookId: String(key ?? '') }))
+            setFormState((prev) => ({
+              ...prev,
+              selectedWebhookKey: String(key ?? ''),
+            }))
           }
           label="Webhook"
-          isDisabled={webhooksLoading || webhooks.length === 0}
+          isDisabled={
+            webhooksLoading ||
+            (isEmpty(observabilityWebhooks) && isEmpty(issueWebhooks))
+          }
         >
-          {webhooks.map((webhook) => (
-            <ListBoxItem
-              key={webhook.id}
-              label={webhook.name}
-            />
-          ))}
+          {[
+            ...observabilityWebhooks.map((wh) => (
+              <ListBoxItem
+                key={`obs:${wh.id}`}
+                label={wh.name}
+                description={wh.type}
+              />
+            )),
+            ...issueWebhooks.map((wh) => (
+              <ListBoxItem
+                key={`issue:${wh.id}`}
+                label={wh.name}
+                description={wh.provider}
+              />
+            )),
+          ]}
         </Select>
       </FormField>
       <TabList
@@ -256,9 +296,14 @@ function getInitialFormState(
 ): WebhookTriggerFormState {
   const matchType: MatchType = webhook?.matches?.regex ? 'regex' : 'substring'
 
+  let selectedWebhookKey = ''
+  if (webhook?.webhook?.id) selectedWebhookKey = `obs:${webhook.webhook.id}`
+  else if (webhook?.issueWebhook?.id)
+    selectedWebhookKey = `issue:${webhook.issueWebhook.id}`
+
   return {
     name: webhook?.name ?? '',
-    webhookId: webhook?.webhook?.id ?? '',
+    selectedWebhookKey,
     matchType,
     regex: webhook?.matches?.regex ?? '',
     substring: webhook?.matches?.substring ?? '',
@@ -268,14 +313,13 @@ function getInitialFormState(
 
 function getAttributesFromState(formState: WebhookTriggerFormState) {
   const name = formState.name.trim()
-  const webhookId = formState.webhookId
   const regex = formState.regex.trim()
   const substring = formState.substring.trim()
   const activeMatchValue = formState.matchType === 'regex' ? regex : substring
 
   return {
     name,
-    webhookId,
+    ...parseWebhookKey(formState.selectedWebhookKey),
     matches: activeMatchValue
       ? formState.matchType === 'regex'
         ? { regex: activeMatchValue }
