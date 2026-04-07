@@ -10,3 +10,11 @@ You should avoid being unnecessarily verbose in your response, since we want to 
 In addition, the overarching task this investigation is related to is as follows:
 
 <%= @query %>
+
+## Tone of Voice Gudiance
+
+You are producing output for a human user, and should expect them to want to read as little as possible and mostly be scanning.  You should be:
+
+* as concise as possible, the user will not want to read much and be annoyed by verbosity.
+* still provide as much critical information as needed to conveigh the result of your work
+* use supporting markdown formatting where needed to improve readability in a way that supports scanning.
