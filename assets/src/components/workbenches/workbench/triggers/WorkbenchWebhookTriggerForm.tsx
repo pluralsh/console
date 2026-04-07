@@ -9,9 +9,11 @@ import {
   GitLabLogoIcon,
   GrafanaLogoIcon,
   Input2,
+  ListBoxFooter,
   ListBoxItem,
   NewrelicLogoIcon,
   PagerdutyLogoIcon,
+  PlusIcon,
   ReturnIcon,
   Select,
   SentryLogoIcon,
@@ -37,6 +39,8 @@ import { mapExistingNodes } from 'utils/graphql'
 import { StickyActionsFooterSC } from '../create-edit/WorkbenchCreateOrEdit'
 import { WEBHOOK_TRIGGER_REFETCH_QUERIES } from './WorkbenchTriggers'
 import { isEqual, isEmpty } from 'lodash'
+import { InlineA } from 'components/utils/typography/Text'
+import { useTheme } from 'styled-components'
 
 type MatchType = 'regex' | 'substring'
 
@@ -102,6 +106,7 @@ export function WorkbenchWebhookTriggerForm({
   onCancel: () => void
   onCompleted?: Nullable<() => void>
 }) {
+  const theme = useTheme()
   const editing = !!webhook
   const [formState, setFormState] = useState<WebhookTriggerFormState>(() =>
     getInitialFormState(webhook)
@@ -191,6 +196,8 @@ export function WorkbenchWebhookTriggerForm({
     else createWorkbenchWebhook()
   }
 
+  const handleCreateWebhook = () => {}
+
   return (
     <Flex
       direction="column"
@@ -211,65 +218,107 @@ export function WorkbenchWebhookTriggerForm({
           placeholder="Webhook label"
         />
       </FormField>
-      <FormField
-        required
-        label="Select webhook"
-        hint="New webhooks added will appear in this list."
+      <Flex
+        direction="column"
+        gap="small"
       >
-        <Select
-          selectedKey={formState.selectedWebhookKey || null}
-          onSelectionChange={(key) =>
-            setFormState((prev) => ({
-              ...prev,
-              selectedWebhookKey: String(key ?? ''),
-            }))
-          }
-          label="Webhook"
-          isDisabled={
-            webhooksLoading ||
-            (isEmpty(observabilityWebhooks) && isEmpty(issueWebhooks))
-          }
+        <Flex
+          align="center"
+          justify="space-between"
         >
-          {[
-            ...observabilityWebhooks.map((wh) => (
-              <ListBoxItem
-                key={`obs:${wh.id}`}
-                leftContent={getObservabilityWebhookTypeIcon(wh.type)}
-                rightContent={
-                  <Chip
-                    size="small"
-                    inactive
-                    icon={<VisualInspectionIcon />}
-                    iconColor="icon-xlight"
-                    css={{ borderRadius: 11 }}
-                  >
-                    Observability
-                  </Chip>
-                }
-                label={wh.name}
-              />
-            )),
-            ...issueWebhooks.map((wh) => (
-              <ListBoxItem
-                key={`issue:${wh.id}`}
-                leftContent={getIssueWebhookProviderIcon(wh.provider)}
-                rightContent={
-                  <Chip
-                    size="small"
-                    inactive
-                    icon={<TicketIcon />}
-                    iconColor="icon-xlight"
-                    css={{ borderRadius: 11 }}
-                  >
-                    Ticketing
-                  </Chip>
-                }
-                label={wh.name}
-              />
-            )),
-          ]}
-        </Select>
-      </FormField>
+          <div
+            css={{
+              fontSize: '14px',
+              fontWeight: 600,
+            }}
+          >
+            Select webhook*
+          </div>
+          <InlineA
+            href=""
+            onClick={(e) => {
+              e.preventDefault()
+              handleCreateWebhook()
+            }}
+            css={{ display: 'flex', alignItems: 'center', gap: '4px' }}
+          >
+            <PlusIcon size={14} />
+            Create new webhook
+          </InlineA>
+        </Flex>
+        <FormField hint="New webhooks added will appear in this list.">
+          <Select
+            selectedKey={formState.selectedWebhookKey || null}
+            onSelectionChange={(key) =>
+              setFormState((prev) => ({
+                ...prev,
+                selectedWebhookKey: String(key ?? ''),
+              }))
+            }
+            label="Webhook"
+            isDisabled={
+              webhooksLoading ||
+              (isEmpty(observabilityWebhooks) && isEmpty(issueWebhooks))
+            }
+          >
+            {[
+              ...observabilityWebhooks.map((wh) => (
+                <ListBoxItem
+                  key={`obs:${wh.id}`}
+                  leftContent={getObservabilityWebhookTypeIcon(wh.type)}
+                  rightContent={
+                    <Chip
+                      size="small"
+                      inactive
+                      icon={<VisualInspectionIcon />}
+                      iconColor="icon-xlight"
+                      css={{ borderRadius: 11 }}
+                    >
+                      Observability
+                    </Chip>
+                  }
+                  label={wh.name}
+                />
+              )),
+              ...issueWebhooks.map((wh) => (
+                <ListBoxItem
+                  key={`issue:${wh.id}`}
+                  leftContent={getIssueWebhookProviderIcon(wh.provider)}
+                  rightContent={
+                    <Chip
+                      size="small"
+                      inactive
+                      icon={<TicketIcon />}
+                      iconColor="icon-xlight"
+                      css={{ borderRadius: 11 }}
+                    >
+                      Ticketing
+                    </Chip>
+                  }
+                  label={wh.name}
+                />
+              )),
+              <ListBoxFooter key="create-webhook-footer">
+                <InlineA
+                  href=""
+                  onClick={(e) => {
+                    e.preventDefault()
+                    handleCreateWebhook()
+                  }}
+                  css={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: theme.spacing.small,
+                  }}
+                >
+                  <PlusIcon size={14} />
+                  Create new webhook
+                </InlineA>
+              </ListBoxFooter>,
+            ]}
+          </Select>
+        </FormField>
+      </Flex>
       <TabList
         stateRef={tabStateRef}
         stateProps={{
