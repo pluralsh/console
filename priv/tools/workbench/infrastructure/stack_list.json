@@ -1,0 +1,17 @@
+{
+    "type": "object",
+    "properties": {
+        "q": {
+            "type": "string",
+            "description": "Optional prefix search on stack name"
+        },
+        "project_id": {
+            "type": "string",
+            "description": "Optional filter by project UUID"
+        },
+        "status": {
+            "type": "string",
+            "description": "Optional filter by stack status (e.g. running, failed, successful)"
+        }
+    }
+}

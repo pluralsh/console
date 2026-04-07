@@ -9,7 +9,13 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     Infrastructure.KubeGet,
     Infrastructure.KubeList,
     Infrastructure.ServiceFiles,
-    Infrastructure.StackFiles
+    Infrastructure.StackFiles,
+    Infrastructure.Cluster,
+    Infrastructure.ClusterList,
+    Infrastructure.ClusterServices,
+    Infrastructure.ServiceInspect,
+    Infrastructure.StackList,
+    Infrastructure.StackInspect
   }
   alias Console.AI.Tools.Agent.{ServiceComponent, Stack}
   alias Console.AI.Workbench.Environment
@@ -37,8 +43,8 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
   end
 
   defp tools(%WorkbenchJob{workbench: bench, user: user}, %Environment{skills: skills}) do
-    svc_tools(bench)
-    |> Enum.concat(stack_tools(bench))
+    svc_tools(bench, user)
+    |> Enum.concat(stack_tools(bench, user))
     |> Enum.concat(k8s_tools(bench, user))
     |> Enum.concat([
       %Skills{skills: skills},
@@ -47,11 +53,27 @@ defmodule Console.AI.Workbench.Subagents.Infrastructure do
     ])
   end
 
-  defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}), do:  [ServiceComponent, ServiceFiles]
-  defp svc_tools(_), do: []
+  defp svc_tools(%Workbench{configuration: %{infrastructure: %{services: true}}}, user) do
+    [
+      ServiceComponent,
+      ServiceFiles,
+      %ServiceInspect{user: user},
+      %ClusterServices{user: user},
+      %Cluster{user: user},
+      %ClusterList{user: user}
+    ]
+  end
+  defp svc_tools(_, _), do: []
 
-  defp stack_tools(%Workbench{configuration: %{infrastructure: %{stacks: true}}}), do: [Stack, StackFiles]
-  defp stack_tools(_), do: []
+  defp stack_tools(%Workbench{configuration: %{infrastructure: %{stacks: true}}}, user) do
+    [
+      Stack,
+      StackFiles,
+      %StackInspect{user: user},
+      %StackList{user: user}
+    ]
+  end
+  defp stack_tools(_, _), do: []
 
   defp k8s_tools(%Workbench{configuration: %{infrastructure: %{kubernetes: true}}}, %User{} = user) do
     [

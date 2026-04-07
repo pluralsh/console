@@ -41,3 +41,30 @@ The stack is managed as an InfrastructureStack kubernetes custom resource in the
 
 You can always query details about the parent service to investigate further.
 <% end %>
+
+<%= if @failed_run do %>
+# Latest failed run
+
+The stack status is **failed**. This section summarizes the most recent **failed** stack run including log output
+
+Run id: `<%= @failed_run.run_id %>`
+Failed command: `<%= @failed_run.failing_step.cmd %> <%= Enum.join(@failed_run.failing_step.args, " ") %>`
+<%= if !Enum.empty?(@failed_run.run_errors) do %>
+## Run-level errors
+<%= for error <- @failed_run.run_errors do %>
+* <%= error.message %>
+<% end %>
+<% end %>
+
+<%= if !Enum.empty?(@failed_run.failing_step.logs) do %>
+## Logs (failing step)
+
+```
+<%= @failed_run.failing_step.logs
+    |> Enum.map(& &1.logs)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.join("\n")
+    |> Console.truncate(48_000) %>
+```
+<% end %>
+<% end %>

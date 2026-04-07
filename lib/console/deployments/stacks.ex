@@ -76,6 +76,23 @@ defmodule Console.Deployments.Stacks do
     |> Repo.one()
   end
 
+  @doc """
+  The most recent failed `StackRun` for a stack (same selection as `Console.AI.Fixer.Stack`).
+  Preloads `errors` and `steps` with `logs` for each step.
+  """
+  @spec last_failed_run(binary) :: StackRun.t() | nil
+  def last_failed_run(stack_id) do
+    StackRun.for_stack(stack_id)
+    |> StackRun.for_status(:failed)
+    |> StackRun.ordered(desc: :id)
+    |> StackRun.limit(1)
+    |> Repo.one()
+    |> case do
+      %StackRun{} = run -> Repo.preload(run, [:errors, steps: :logs])
+      nil -> nil
+    end
+  end
+
   def preloaded(%Stack{} = stack), do: Repo.preload(stack, @preloads)
 
   @spec authorized(binary, Cluster.t) :: run_resp

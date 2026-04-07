@@ -1,0 +1,67 @@
+Here are the details for the Plural service **<%= @service.name %>** (namespace: `<%= @service.namespace %>`):
+
+# Identity
+
+```json
+<%= Jason.encode!(%{
+  id: @service.id,
+  name: @service.name,
+  namespace: @service.namespace,
+  status: @service.status,
+  protect: @service.protect,
+  errors: Enum.map(@service.errors, & %{message: &1.message})
+}, pretty: true) %>
+```
+
+# Cluster
+
+```json
+<%= Jason.encode!(%{
+  id: @service.cluster.id,
+  handle: @service.cluster.handle,
+  name: @service.cluster.name
+}, pretty: true) %>
+```
+
+<%= if @service.repository do %>
+# Repository
+
+```json
+<%= Jason.encode!(%{url: @service.repository.url}, pretty: true) %>
+```
+<% end %>
+
+<%= if @service.git && @service.git.ref do %>
+## Git Location
+
+```json
+<%= Jason.encode!(Map.from_struct(@service.git) |> Map.take([:ref, :folder, :files]), pretty: true) %>
+```
+<% end %>
+
+<%= if @service.helm do %>
+## Helm
+
+```json
+<%= Console.drop_nils(%{
+  chart: @service.helm.chart,
+  version: @service.helm.version,
+  release: @service.helm.release,
+  values_files: @service.helm.values_files,
+  values: @service.helm.values,
+  url: @service.helm.url
+}) |> Jason.encode!(pretty: true) %>
+```
+<% end %>
+
+<%= if @service.kustomize do %>
+## Kustomize Configuration
+
+```json
+<%= Jason.encode!(%{
+  path: @service.kustomize.path,
+  enable_helm: @service.kustomize.enable_helm,
+  envsubst: @service.kustomize.envsubst
+}, pretty: true) %>
+```
+<% end %>

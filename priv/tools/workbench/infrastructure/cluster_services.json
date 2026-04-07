@@ -1,0 +1,14 @@
+{
+    "type": "object",
+    "properties": {
+        "cluster": {
+            "type": "string",
+            "description": "Plural cluster handle to list services for"
+        },
+        "q": {
+            "type": "string",
+            "description": "Optional prefix search on service name"
+        }
+    },
+    "required": ["cluster"]
+}
