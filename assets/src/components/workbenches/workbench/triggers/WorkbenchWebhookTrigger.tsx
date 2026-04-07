@@ -6,7 +6,9 @@ import {
   IconFrame,
   PencilIcon,
   Table,
+  TicketIcon,
   TrashCanIcon,
+  VisualInspectionIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -224,6 +226,22 @@ function getColumns({
 }) {
   return [
     columnHelper.accessor((webhook) => webhook, {
+      id: 'icons',
+      meta: { gridTemplate: '46px' },
+      cell: ({ getValue }) => {
+        const webhook = getValue()
+
+        return (
+          <IconFrame
+            type="secondary"
+            css={{ borderRadius: '50%' }}
+            icon={webhookTypeIcon(webhook)}
+            tooltip={webhookTypeLabel(webhook)}
+          />
+        )
+      },
+    }),
+    columnHelper.accessor((webhook) => webhook, {
       id: 'details',
       meta: { truncate: true, gridTemplate: 'minmax(0, 1fr)' },
       cell: ({ getValue }) => {
@@ -276,6 +294,18 @@ function webhookURL(webhook: WorkbenchWebhookFragment) {
   if (webhook.webhook) return webhook.webhook.url
 
   return undefined
+}
+
+function webhookTypeIcon(webhook: WorkbenchWebhookFragment) {
+  if (webhook.issueWebhook) return <TicketIcon />
+
+  return <VisualInspectionIcon />
+}
+
+function webhookTypeLabel(webhook: WorkbenchWebhookFragment) {
+  if (webhook.issueWebhook) return 'Ticketing'
+
+  return 'Observability'
 }
 
 function WorkbenchWebhookEmptyState({ workbenchId }: { workbenchId: string }) {
