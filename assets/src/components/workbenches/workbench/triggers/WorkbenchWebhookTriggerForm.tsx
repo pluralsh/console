@@ -1,14 +1,25 @@
 import {
   Button,
   Checkbox,
+  Chip,
+  DatadogLogoIcon,
   Flex,
   FormField,
+  GitHubLogoIcon,
+  GitLabLogoIcon,
+  GrafanaLogoIcon,
+  TicketIcon,
   Input2,
   ListBoxItem,
+  NewrelicLogoIcon,
+  PagerdutyLogoIcon,
   ReturnIcon,
   Select,
+  SentryLogoIcon,
   Tab,
   TabList,
+  WebhooksIcon,
+  EyeClosedIcon,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
@@ -18,6 +29,8 @@ import {
   useObservabilityWebhooksQuery,
   useUpdateWorkbenchWebhookMutation,
   WorkbenchWebhookFragment,
+  IssueWebhookProvider,
+  ObservabilityWebhookType,
 } from 'generated/graphql'
 import { Key, useMemo, useRef, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
@@ -44,6 +57,38 @@ function parseWebhookKey(key: string): {
   if (key.startsWith('obs:')) return { webhookId: key.slice(4) }
   if (key.startsWith('issue:')) return { issueWebhookId: key.slice(6) }
   return {}
+}
+
+function getObservabilityWebhookTypeIcon(type: Nullable<string>) {
+  switch (type) {
+    case ObservabilityWebhookType.Grafana:
+      return <GrafanaLogoIcon fullColor />
+    case ObservabilityWebhookType.Datadog:
+      return <DatadogLogoIcon fullColor />
+    case ObservabilityWebhookType.Newrelic:
+      return <NewrelicLogoIcon fullColor />
+    case ObservabilityWebhookType.Pagerduty:
+      return <PagerdutyLogoIcon fullColor />
+    case ObservabilityWebhookType.Sentry:
+      return <SentryLogoIcon />
+    case ObservabilityWebhookType.Plural:
+    default:
+      return <WebhooksIcon />
+  }
+}
+
+function getIssueWebhookProviderIcon(provider: Nullable<string>) {
+  switch (provider) {
+    case IssueWebhookProvider.Github:
+      return <GitHubLogoIcon />
+    case IssueWebhookProvider.Gitlab:
+      return <GitLabLogoIcon />
+    case IssueWebhookProvider.Jira:
+    case IssueWebhookProvider.Linear:
+    case IssueWebhookProvider.Asana:
+    default:
+      return <WebhooksIcon />
+  }
 }
 
 export function WorkbenchWebhookTriggerForm({
@@ -188,15 +233,17 @@ export function WorkbenchWebhookTriggerForm({
             ...observabilityWebhooks.map((wh) => (
               <ListBoxItem
                 key={`obs:${wh.id}`}
+                leftContent={getObservabilityWebhookTypeIcon(wh.type)}
+                rightContent={<Chip size="small">Observability</Chip>}
                 label={wh.name}
-                description={wh.type}
               />
             )),
             ...issueWebhooks.map((wh) => (
               <ListBoxItem
                 key={`issue:${wh.id}`}
+                leftContent={getIssueWebhookProviderIcon(wh.provider)}
+                rightContent={<Chip size="small">Ticketing</Chip>}
                 label={wh.name}
-                description={wh.provider}
               />
             )),
           ]}
