@@ -19266,6 +19266,14 @@ export type WorkbenchWebhooksQueryVariables = Exact<{
 
 export type WorkbenchWebhooksQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, webhooks?: { __typename?: 'WorkbenchWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null } | null } | null> | null } | null } | null };
 
+export type IssueWebhooksQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type IssueWebhooksQuery = { __typename?: 'RootQueryType', issueWebhooks?: { __typename?: 'IssueWebhookConnection', edges?: Array<{ __typename?: 'IssueWebhookEdge', node?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider, url: string } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
 export type WorkbenchTriggersSummaryQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -40363,6 +40371,60 @@ export type WorkbenchWebhooksQueryHookResult = ReturnType<typeof useWorkbenchWeb
 export type WorkbenchWebhooksLazyQueryHookResult = ReturnType<typeof useWorkbenchWebhooksLazyQuery>;
 export type WorkbenchWebhooksSuspenseQueryHookResult = ReturnType<typeof useWorkbenchWebhooksSuspenseQuery>;
 export type WorkbenchWebhooksQueryResult = Apollo.QueryResult<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>;
+export const IssueWebhooksDocument = gql`
+    query IssueWebhooks($first: Int, $after: String) {
+  issueWebhooks(first: $first, after: $after) {
+    edges {
+      node {
+        id
+        name
+        provider
+        url
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+    ${PageInfoFragmentDoc}`;
+
+/**
+ * __useIssueWebhooksQuery__
+ *
+ * To run a query within a React component, call `useIssueWebhooksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIssueWebhooksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIssueWebhooksQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useIssueWebhooksQuery(baseOptions?: Apollo.QueryHookOptions<IssueWebhooksQuery, IssueWebhooksQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<IssueWebhooksQuery, IssueWebhooksQueryVariables>(IssueWebhooksDocument, options);
+      }
+export function useIssueWebhooksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<IssueWebhooksQuery, IssueWebhooksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<IssueWebhooksQuery, IssueWebhooksQueryVariables>(IssueWebhooksDocument, options);
+        }
+// @ts-ignore
+export function useIssueWebhooksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<IssueWebhooksQuery, IssueWebhooksQueryVariables>): Apollo.UseSuspenseQueryResult<IssueWebhooksQuery, IssueWebhooksQueryVariables>;
+export function useIssueWebhooksSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<IssueWebhooksQuery, IssueWebhooksQueryVariables>): Apollo.UseSuspenseQueryResult<IssueWebhooksQuery | undefined, IssueWebhooksQueryVariables>;
+export function useIssueWebhooksSuspenseQuery(baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<IssueWebhooksQuery, IssueWebhooksQueryVariables>) {
+          const options = baseOptions === Apollo.skipToken ? baseOptions : {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<IssueWebhooksQuery, IssueWebhooksQueryVariables>(IssueWebhooksDocument, options);
+        }
+export type IssueWebhooksQueryHookResult = ReturnType<typeof useIssueWebhooksQuery>;
+export type IssueWebhooksLazyQueryHookResult = ReturnType<typeof useIssueWebhooksLazyQuery>;
+export type IssueWebhooksSuspenseQueryHookResult = ReturnType<typeof useIssueWebhooksSuspenseQuery>;
+export type IssueWebhooksQueryResult = Apollo.QueryResult<IssueWebhooksQuery, IssueWebhooksQueryVariables>;
 export const WorkbenchTriggersSummaryDocument = gql`
     query WorkbenchTriggersSummary($id: ID!) {
   workbench(id: $id) {
@@ -41366,6 +41428,7 @@ export const namedOperations = {
     WorkbenchesIssues: 'WorkbenchesIssues',
     WorkbenchCrons: 'WorkbenchCrons',
     WorkbenchWebhooks: 'WorkbenchWebhooks',
+    IssueWebhooks: 'IssueWebhooks',
     WorkbenchTriggersSummary: 'WorkbenchTriggersSummary',
     WorkbenchJob: 'WorkbenchJob',
     WorkbenchJobActivities: 'WorkbenchJobActivities',

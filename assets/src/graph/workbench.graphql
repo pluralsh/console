@@ -396,6 +396,22 @@ query WorkbenchWebhooks($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+query IssueWebhooks($first: Int, $after: String) {
+  issueWebhooks(first: $first, after: $after) {
+    edges {
+      node {
+        id
+        name
+        provider
+        url
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
 query WorkbenchTriggersSummary($id: ID!) {
   workbench(id: $id) {
     id
