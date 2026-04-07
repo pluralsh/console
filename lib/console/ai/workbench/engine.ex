@@ -71,7 +71,7 @@ defmodule Console.AI.Workbench.Engine do
       acc: %{},
       tool_fmt: &tool_fmt/1
     )
-    |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine)} | messages]), &reducer/2)
+    |> MemoryEngine.reduce(Enum.reverse([{:user, continue_prompt(engine: engine)} | messages]), &reducer/2)
     |> case do
       {:ok, %Complete{conclusion: conclusion, metrics: metrics, logs: logs, todos: todos, topology: topology}} ->
         drop_empty(%{
@@ -181,9 +181,7 @@ defmodule Console.AI.Workbench.Engine do
   defp maybe_add_memory(subagents, activities) when length(activities) > 5, do: [:memory | subagents]
   defp maybe_add_memory(subagents, _), do: subagents
 
-  defp continue_prompt(%__MODULE__{activities: [_, _ | _]}), do: "Ok, let's keep working" # the first activity is the plan
-  defp continue_prompt(_), do: "Ok, let's start working"
-
+  EEx.function_from_file(:defp, :continue_prompt, Console.priv_filename(["prompts", "workbench", "continue.md.eex"]), [:assigns], trim: true)
   EEx.function_from_file(:defp, :notes_message, Console.priv_filename(["prompts", "workbench", "notes_message.md.eex"]), [:assigns], trim: true)
   EEx.function_from_file(:defp, :system_prompt, Console.priv_filename(["prompts", "workbench", "job.md.eex"]), [:assigns], trim: true)
 end
