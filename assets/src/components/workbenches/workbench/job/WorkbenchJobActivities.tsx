@@ -5,7 +5,7 @@ import {
   WorkbenchJobActivitiesDocument,
   WorkbenchJobActivitiesQuery,
 } from 'generated/graphql'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useApolloClient } from '@apollo/client'
 import { AI_GRADIENT_BG } from 'components/ai/agent-runs/details/AIAgentRunMessages'
@@ -33,6 +33,13 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   const job = data?.workbenchJob
   const activities = mapExistingNodes(job?.activities)
 
+  // easier to track closed ids in state since we want them all open by default
+  const [closedIds, setClosedIds] = useState<Set<string>>(() => new Set())
+  const openIds = useMemo(
+    () => activities.filter((a) => !closedIds.has(a.id)).map((a) => a.id),
+    [activities, closedIds]
+  )
+
   useWorkbenchJobActivityDeltaSubscription({
     variables: { jobId },
     onData: ({ data: { data } }) => {
@@ -51,10 +58,6 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
     },
   })
 
-  const [openIds, setOpenIds] = useState<string[]>(() =>
-    activities.map((activity) => activity.id)
-  )
-
   if (!data && loading)
     return (
       <RectangleSkeleton
@@ -70,7 +73,15 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
       <ActivitiesAccordionSC
         type="multiple"
         value={openIds}
-        onValueChange={setOpenIds}
+        onValueChange={(newOpenIds: string[]) => {
+          setClosedIds(
+            new Set(
+              activities
+                .map((a) => a.id)
+                .filter((id) => !newOpenIds.includes(id))
+            )
+          )
+        }}
       >
         <VirtualList
           isReversed
