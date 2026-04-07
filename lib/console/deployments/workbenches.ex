@@ -458,7 +458,7 @@ defmodule Console.Deployments.Workbenches do
         status: :successful,
         type: :conclusion,
         prompt: "completing job...",
-        result: %{ouput: attrs[:conclusion] || "no conclusion provided"}
+        result: %{output: attrs[:conclusion] || "no conclusion provided"}
       }, job)
     end)
     |> add_operation(:job, fn _ ->

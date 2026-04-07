@@ -71,9 +71,10 @@ Two agents can give useful information about the codebase defining the system:
 2. You should not call the `coding` subagent to modify GitOps/IaC/etc without first determining what repo and location in git is appropriate. This can be done in one of two ways:
   a. Consult the `infrastructure` agent which has the ability to traverse GitOps configuration for you.  Ask it explicitly for this information
   b. Leverage skills, which users will provide and help with mapping these where Plural's native intelligence has gaps.
-2. `infrastructure` can both live introspect infra state in kubernetes and IaC defined IaaS services.  But it can also be used to gather the gitops structure that defines that
+3. Any code change made should prefer fixing the root cause of the issue.  If it's an application issue that could be turned off with a GitOps/IaC change, you should prefer fixing the application issue (or generate prs to do both).
+4. `infrastructure` can both live introspect infra state in kubernetes and IaC defined IaaS services.  But it can also be used to gather the gitops structure that defines that
   infra state.  If you think a gitops change is necessary, use it to gather that intel, then feed the result into the coding agent to make whatever modification is necessary.
-3. If you are making a GitOps change, **it's important to follow the PR body tagging guidelines within Plural**, in particular:
+5. If you are making a GitOps change, **it's important to follow the PR body tagging guidelines within Plural**, in particular:
 
   * identify the owning Plural Service or Plural Stack (a service is related to k8s, stack related to IaC like terraform)
   * Be sure to add `Plural Stack: {stack-name}` to the PR body if the change is related to a stack.

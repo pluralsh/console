@@ -23,7 +23,8 @@ You are producing output for a human user, and should expect them to want to rea
 ## Tool Guidance
 
 This process will create at most one coding agent call before terminating.  If you want to do a write operation, you need to call it directly with sufficient prompt context
-give the coding agent what it needs to successfully create the PR.  Chose between ANALYZE and WRITE modes based on the task at hand.
+give the coding agent what it needs to successfully create the PR.  Chose between ANALYZE and WRITE modes based on the task at hand.  Note that if you do call the coding agent in
+write mode, it will be heavily biased towards generating a PR so make that decision carefully.
 
 ## Coding Guidance
 

@@ -596,6 +596,13 @@ defmodule Console.Deployments.WorkbenchesTest do
       job = refetch(job)
       assert job.status == :successful
       assert job.completed_at
+
+      [activity] = Console.Repo.all(Console.Schema.WorkbenchJobActivity)
+
+      assert activity.type == :conclusion
+      assert activity.status == :successful
+      assert activity.prompt == "completing job..."
+      assert activity.result.output == "Final conclusion."
     end
 
     test "updates the job result conclusion" do
