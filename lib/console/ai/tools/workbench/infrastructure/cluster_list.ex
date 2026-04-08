@@ -1,5 +1,6 @@
 defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
   use Console.AI.Tools.Agent.Base
+  alias Console.Deployments.Clusters
   alias Console.Repo
   alias Console.Schema.{Cluster, User}
 
@@ -43,8 +44,29 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.ClusterList do
       self: c.self,
       virtual: c.virtual,
       installed: c.installed,
+      current_version: c.current_version,
+      version: c.version,
+      upgrade_plan: upgrade_plan_brief(c.upgrade_plan),
+      extended_support: extended_support_brief(Clusters.extended_support(c)),
       project: c.project && %{id: c.project.id, name: c.project.name},
       tags: Enum.map(c.tags || [], &%{name: &1.name, value: &1.value})
     }
+  end
+
+  defp upgrade_plan_brief(nil), do: nil
+
+  defp upgrade_plan_brief(plan) do
+    %{
+      compatibilities: plan.compatibilities,
+      deprecations: plan.deprecations,
+      incompatibilities: plan.incompatibilities,
+      kubelet_skew: plan.kubelet_skew
+    }
+  end
+
+  defp extended_support_brief(nil), do: nil
+
+  defp extended_support_brief(%{extended: _, extended_from: _} = info) do
+    %{extended: info.extended, extended_from: info.extended_from}
   end
 end

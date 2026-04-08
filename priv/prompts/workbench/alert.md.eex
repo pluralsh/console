@@ -18,3 +18,13 @@ There's also an associated stacktrace, which I'll provide in JSON format:
 <%= Jason.encode!(Console.mapify(@alert.stacktrace)) %>
 ```
 <% end %>
+
+<%= if @alert.payload do %>
+# Payload
+
+For reference, this is the webhook result from the original <%= @alert.type %> webhook:
+
+```json
+<%= Jason.encode!(@alert.payload) %>
+```
+<% end %>

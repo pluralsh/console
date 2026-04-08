@@ -30,7 +30,9 @@ defmodule Console.AI.Tools.Workbench.Infrastructure.Cluster do
     |> Repo.preload([:tags, :project])
     |> Policies.allow(user, :read)
     |> case do
-      {:ok, cluster} -> {:ok, cluster_prompt(cluster: cluster)}
+      {:ok, cluster} ->
+        {:ok, cluster_prompt(cluster: cluster, upgrade_plan: Clusters.upgrade_plan(cluster))}
+
       nil -> {:error, "could not find cluster with handle #{handle}"}
       error -> error
     end

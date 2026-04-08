@@ -3,3 +3,13 @@ You've been assigned the following issue from <%= @issue.provider %>, please inv
 # <%= @issue.title %>
 
 <%= @issue.body %>
+
+<%= if @issue.payload do %>
+# Full Webhook Payload
+
+For reference, this is the webhook result from the original <%= @issue.provider %> webhook:
+
+```json
+<%= Jason.encode!(@issue.payload) %>
+```
+<% end %>

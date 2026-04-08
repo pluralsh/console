@@ -7,3 +7,9 @@ Kubernetes distribution: <%= @cluster.distro %>
 Metadata: <%= Jason.encode!(@cluster.metadata || %{}) %>
 Tags: <%= Enum.map(@cluster.tags, & %{name: &1.name, value: &1.value}) |> Jason.encode!() %>
 Project: <%= @cluster.project.name %>
+
+# Upgrade plan
+
+```json
+<%= Console.mapify(@upgrade_plan) |> Jason.encode!(pretty: true) %>
+```
