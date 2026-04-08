@@ -664,6 +664,42 @@ defmodule Console.GraphQl.Deployments.WorkbenchMutationsTest do
     end
   end
 
+  describe "workbenchCron" do
+    test "it can fetch a workbench cron by id with read access" do
+      workbench = insert(:workbench)
+      cron = insert(:workbench_cron, workbench: workbench, crontab: "*/5 * * * *", prompt: "trigger-name")
+
+      {:ok, %{data: %{"workbenchCron" => found}}} = run_query("""
+        mutation GetWorkbenchCron($id: ID!) {
+          workbenchCron(id: $id) {
+            id
+            crontab
+            prompt
+            workbench { id }
+          }
+        }
+      """, %{"id" => cron.id}, %{current_user: admin_user()})
+
+      assert found["id"] == cron.id
+      assert found["crontab"] == "*/5 * * * *"
+      assert found["prompt"] == "trigger-name"
+      assert found["workbench"]["id"] == workbench.id
+    end
+
+    test "users without read access cannot fetch a workbench cron" do
+      user = insert(:user)
+      cron = insert(:workbench_cron)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation GetWorkbenchCron($id: ID!) {
+          workbenchCron(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => cron.id}, %{current_user: user})
+    end
+  end
+
   describe "createWorkbenchPrompt" do
     test "it can create a saved prompt with read access to the workbench" do
       workbench = insert(:workbench)

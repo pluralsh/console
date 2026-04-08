@@ -601,6 +601,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
       resolve &Deployments.all_workbench_issues/2
     end
+
   end
 
   object :workbench_mutations do
@@ -696,6 +697,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_workbench_cron/2
+    end
+
+    @desc "Fetches a workbench cron by id. Requires read access to the workbench."
+    field :workbench_cron, :workbench_cron do
+      middleware Authenticated
+      middleware Scope,
+        resource: :workbench,
+        action: :read
+      arg :id, non_null(:id)
+
+      resolve &Deployments.workbench_cron/2
     end
 
     @desc "Creates a saved prompt for a workbench. Requires read access to the workbench."

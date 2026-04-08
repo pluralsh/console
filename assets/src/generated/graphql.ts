@@ -8864,6 +8864,8 @@ export type RootMutationType = {
   upsertUser?: Maybe<User>;
   upsertVirtualCluster?: Maybe<Cluster>;
   upsertVulnerabilities?: Maybe<Scalars['Int']['output']>;
+  /** Fetches a workbench cron by id. Requires read access to the workbench. */
+  workbenchCron?: Maybe<WorkbenchCron>;
 };
 
 
@@ -10288,6 +10290,11 @@ export type RootMutationTypeUpsertVirtualClusterArgs = {
 
 export type RootMutationTypeUpsertVulnerabilitiesArgs = {
   vulnerabilities?: InputMaybe<Array<InputMaybe<VulnerabilityReportAttributes>>>;
+};
+
+
+export type RootMutationTypeWorkbenchCronArgs = {
+  id: Scalars['ID']['input'];
 };
 
 export type RootQueryType = {

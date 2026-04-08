@@ -133,6 +133,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   def delete_workbench_cron(%{id: id}, %{context: %{current_user: user}}),
     do: Workbenches.delete_workbench_cron(id, user)
 
+  def workbench_cron(%{id: id}, %{context: %{current_user: user}}),
+    do: Workbenches.fetch_workbench_cron(id, user)
+
   def create_workbench_prompt(%{workbench_id: workbench_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Workbenches.create_workbench_prompt(attrs, workbench_id, user)
 

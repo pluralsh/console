@@ -164,6 +164,15 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Fetches a workbench cron by id. Requires read permission on the workbench.
+  """
+  @spec fetch_workbench_cron(binary, User.t()) :: cron_resp
+  def fetch_workbench_cron(id, %User{} = user) do
+    get_workbench_cron!(id)
+    |> allow(user, :read)
+  end
+
+  @doc """
   Creates a saved prompt for a workbench. Requires read access to the workbench.
   """
   @spec create_workbench_prompt(map, binary, User.t()) :: prompt_resp

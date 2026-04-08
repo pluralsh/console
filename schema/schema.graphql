@@ -1229,6 +1229,9 @@ type RootMutationType {
 
   deleteWorkbenchCron(id: ID!): WorkbenchCron
 
+  "Fetches a workbench cron by id. Requires read access to the workbench."
+  workbenchCron(id: ID!): WorkbenchCron
+
   "Creates a saved prompt for a workbench. Requires read access to the workbench."
   createWorkbenchPrompt(
     "the workbench to save a prompt for"
