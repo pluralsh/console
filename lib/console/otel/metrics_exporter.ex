@@ -11,7 +11,7 @@ defmodule Console.Otel.MetricsExporter do
   require Logger
 
   defmodule State do
-    defstruct [:last_run_at, :timer_ref, :check_ref]
+    defstruct [:last_run_at, :timer_ref]
   end
 
   @check_interval :timer.seconds(30)

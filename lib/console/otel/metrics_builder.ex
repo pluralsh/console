@@ -18,7 +18,6 @@ defmodule Console.Otel.MetricsBuilder do
     |> Repo.stream(method: :keyset)
     |> Console.throttle(count: 500, pause: 50)
     |> Stream.map(&build_service_metric(&1, timestamp))
-    |> Stream.reject(&is_nil/1)
   end
 
   @doc """
