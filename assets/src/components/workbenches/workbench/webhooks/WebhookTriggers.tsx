@@ -32,11 +32,11 @@ import {
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
-import { WebhookDeleteModal } from './WebhookDeleteModal'
+import { WebhookTriggerDeleteModal } from './WebhookTriggerDeleteModal'
 import isEmpty from 'lodash/isEmpty'
 import { webhookTypeIcon, webhookTypeLabel, webhookURL } from './utils'
 
-export function Webhooks() {
+export function WebhookTriggers() {
   const navigate = useNavigate()
   const theme = useTheme()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
@@ -227,7 +227,7 @@ export function Webhooks() {
           </StretchedFlex>
         )}
       </Flex>
-      <WebhookDeleteModal
+      <WebhookTriggerDeleteModal
         open={!!deletingWebhook}
         webhook={deletingWebhook}
         onClose={() => setDeletingWebhook(null)}

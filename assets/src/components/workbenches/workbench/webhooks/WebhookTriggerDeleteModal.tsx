@@ -6,7 +6,7 @@ import {
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StrongSC } from 'components/utils/typography/Text'
 
-export function WebhookDeleteModal({
+export function WebhookTriggerDeleteModal({
   open,
   webhook,
   onClose,

@@ -7,10 +7,10 @@ import { WorkbenchTools } from 'components/workbenches/tools/WorkbenchTools'
 import { Workbench } from 'components/workbenches/workbench/Workbench'
 import { WorkbenchCreateOrEdit } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
 import { CronSchedules } from 'components/workbenches/workbench/crons/CronSchedules'
-import { Webhooks } from 'components/workbenches/workbench/webhooks/Webhooks'
-import { WebhookCreateForm } from 'components/workbenches/workbench/webhooks/WebhookCreateForm'
-import { CronScheduleForm } from 'components/workbenches/workbench/crons/CronScheduleForm'
+import { WebhookTriggers } from 'components/workbenches/workbench/webhooks/WebhookTriggers'
 import { WebhookForm } from 'components/workbenches/workbench/webhooks/WebhookForm'
+import { CronScheduleForm } from 'components/workbenches/workbench/crons/CronScheduleForm'
+import { WebhookTriggerForm } from 'components/workbenches/workbench/webhooks/WebhookTriggerForm'
 import { Route } from 'react-router-dom'
 import {
   WORKBENCH_JOB_ABS_PATH,
@@ -79,19 +79,19 @@ export const workbenchesRoutes = [
   />,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}`}
-    element={<Webhooks />}
+    element={<WebhookTriggers />}
   />,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
-    element={<WebhookForm mode="create" />}
+    element={<WebhookTriggerForm mode="create" />}
   />,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}/${WORKBENCHES_WEBHOOK_TRIGGERS_CREATE_WEBHOOK_REL_PATH}`}
-    element={<WebhookCreateForm />}
+    element={<WebhookForm />}
   />,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}/:${WORKBENCHES_WEBHOOK_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
-    element={<WebhookForm mode="edit" />}
+    element={<WebhookTriggerForm mode="edit" />}
   />,
   <Route
     path={`${WORKBENCHES_TOOLS_ABS_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
