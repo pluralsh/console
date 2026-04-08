@@ -213,6 +213,7 @@ export function Webhooks() {
             </StretchedFlex>
             <Table
               hideHeader
+              loose
               fullHeightWrap
               virtualizeRows
               data={webhooks}

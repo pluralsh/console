@@ -158,6 +158,7 @@ export function CronSchedules() {
             </StretchedFlex>
             <Table
               hideHeader
+              loose
               fullHeightWrap
               virtualizeRows
               data={crons}
