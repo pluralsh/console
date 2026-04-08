@@ -9,7 +9,11 @@ import {
   Markdown,
   SidePanelOpenIcon,
 } from '@pluralsh/design-system'
-import { CHATBOT_HEADER_HEIGHT } from 'components/ai/chatbot/Chatbot'
+import {
+  CHATBOT_HEADER_HEIGHT,
+  DragHandleSC,
+  ResizeGripSC,
+} from 'components/ai/chatbot/Chatbot'
 import { useResizablePane } from 'components/ai/chatbot/useResizeableChatPane'
 import {
   ReactNode,
@@ -25,7 +29,6 @@ import styled from 'styled-components'
 const DEFAULT_TITLE = 'Setup guide'
 const MIN_WIDTH = 500
 const MAX_WIDTH_VW = 40
-const HANDLE_THICKNESS = 20
 
 type SetupGuidePanelData = {
   documentationUrl?: string
@@ -244,45 +247,3 @@ const PanelHeaderSC = styled.div(({ theme }) => ({
   borderBottom: theme.borders.default,
   flexShrink: 0,
 }))
-
-const ResizeGripSC = styled.div(({ theme }) => ({
-  borderLeft: theme.borders.default,
-  height: 40,
-  left: 2,
-  position: 'absolute',
-  top: 'calc(50% - 20px)',
-  width: 5,
-
-  '&:after': {
-    borderLeft: theme.borders.default,
-    content: '""',
-    height: 30,
-    left: 2,
-    position: 'absolute',
-    top: 'calc(50% - 15px)',
-    width: 5,
-  },
-}))
-
-const DragHandleSC = styled.div<{ $isDragging: boolean }>(
-  ({ theme, $isDragging }) => ({
-    position: 'absolute',
-    zIndex: theme.zIndexes.modal,
-    left: -HANDLE_THICKNESS / 2,
-    top: 0,
-    width: HANDLE_THICKNESS,
-    height: '100%',
-    cursor: 'ew-resize',
-    background: 'transparent',
-    display: 'flex',
-    justifyContent: 'center',
-    '&:focus-visible': { outline: theme.borders['outline-focused'] },
-    '&::before': {
-      content: '""',
-      pointerEvents: 'none',
-      width: HANDLE_THICKNESS / 4,
-      background: $isDragging ? theme.colors['icon-primary'] : 'transparent',
-      transition: 'background 0.2s ease-in-out',
-    },
-  })
-)

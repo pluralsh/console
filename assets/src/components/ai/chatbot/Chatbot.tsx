@@ -138,7 +138,7 @@ const MainContentWrapperSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-accent'],
 }))
 
-const ResizeGripSC = styled.div(({ theme }) => ({
+export const ResizeGripSC = styled.div(({ theme }) => ({
   borderLeft: theme.borders.default,
   height: 40,
   left: 2,
@@ -157,7 +157,7 @@ const ResizeGripSC = styled.div(({ theme }) => ({
   },
 }))
 
-const DragHandleSC = styled.div<{ $isDragging: boolean }>(
+export const DragHandleSC = styled.div<{ $isDragging: boolean }>(
   ({ theme, $isDragging }) => ({
     position: 'absolute',
     zIndex: theme.zIndexes.modal,
