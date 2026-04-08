@@ -189,7 +189,7 @@ config :req_llm,
     pools: %{
       :default => [
         protocols: [:http1],
-        size: 1,
+        size: 10,
         count: 100,
         pool_max_idle_time: :timer.seconds(30),
         conn_max_idle_time: :timer.seconds(30)
