@@ -429,17 +429,28 @@ query WorkbenchTriggersSummary($id: ID!) {
     id
     name
     description
-    crons(first: 1) {
+    crons(first: 30) {
       edges {
         node {
           id
+          crontab
+          nextRunAt
         }
       }
     }
-    webhooks(first: 1) {
+    webhooks(first: 30) {
       edges {
         node {
           id
+          name
+          webhook {
+            id
+            name
+          }
+          issueWebhook {
+            id
+            name
+          }
         }
       }
     }
