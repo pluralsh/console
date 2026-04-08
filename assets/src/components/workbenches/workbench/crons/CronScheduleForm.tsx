@@ -43,7 +43,7 @@ import {
 } from './utils'
 
 const CRON_SHORTCUTS_URL =
-  'https://github.com/harrisiirak/cron-parser?tab=readme-ov-file#predefined-expressions'
+  'https://github.com/harrisiirak/cron-parser?tab=readme-ov-file#predefined-expressions' // TODO: Use our own docs once we have them.
 
 type CronScheduleFormState = {
   prompt: string
