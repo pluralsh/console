@@ -19308,7 +19308,7 @@ export type WorkbenchTriggersSummaryQueryVariables = Exact<{
 }>;
 
 
-export type WorkbenchTriggersSummaryQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, crons?: { __typename?: 'WorkbenchCronConnection', edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, nextRunAt?: string | null } | null } | null> | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string } | null } | null } | null> | null } | null } | null };
+export type WorkbenchTriggersSummaryQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, name: string, description?: string | null, crons?: { __typename?: 'WorkbenchCronConnection', edges?: Array<{ __typename?: 'WorkbenchCronEdge', node?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, nextRunAt?: string | null } | null } | null> | null } | null, webhooks?: { __typename?: 'WorkbenchWebhookConnection', edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, provider: IssueWebhookProvider } | null } | null } | null> | null } | null } | null };
 
 export type WorkbenchJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -40550,10 +40550,12 @@ export const WorkbenchTriggersSummaryDocument = gql`
           webhook {
             id
             name
+            type
           }
           issueWebhook {
             id
             name
+            provider
           }
         }
       }

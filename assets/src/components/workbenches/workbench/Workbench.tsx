@@ -32,6 +32,7 @@ import {
 import styled from 'styled-components'
 import { WorkbenchJobCreateInput } from './WorkbenchJobCreateInput'
 import { WorkbenchJobsTable } from './WorkbenchJobsTable'
+import { WorkbenchTriggers } from './WorkbenchTriggers'
 
 export const getWorkbenchBreadcrumbs = (
   workbench: Nullable<WorkbenchTinyFragment>
@@ -156,6 +157,7 @@ export function Workbench() {
         secondPartialType="body2"
         secondColor="text-light"
       />
+      <WorkbenchTriggers workbenchId={id} />
       <WorkbenchJobsTable workbenchId={id} />
       <Confirm
         open={deleteModalOpen}

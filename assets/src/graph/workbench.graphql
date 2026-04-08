@@ -446,10 +446,12 @@ query WorkbenchTriggersSummary($id: ID!) {
           webhook {
             id
             name
+            type
           }
           issueWebhook {
             id
             name
+            provider
           }
         }
       }
