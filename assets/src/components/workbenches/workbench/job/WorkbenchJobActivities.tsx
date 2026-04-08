@@ -8,10 +8,9 @@ import {
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
 } from 'generated/graphql'
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useApolloClient } from '@apollo/client'
-import { AI_GRADIENT_BG } from 'components/ai/agent-runs/details/AIAgentRunMessages'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
@@ -38,10 +37,6 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   const lastId = lastActivityId(activities)
 
   const [openIds, setOpenIds] = useState<Set<string>>(new Set<string>())
-  const addOpenIds = useCallback(
-    (newOpenIds: string[]) => setOpenIds(openIds.union(new Set(newOpenIds))),
-    [openIds]
-  )
 
   const allOpenIds = useMemo(() => {
     const allIds = new Set<string>(
@@ -92,7 +87,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
       <ActivitiesAccordionSC
         type="multiple"
         values={allOpenIds}
-        onValueChange={addOpenIds}
+        onValueChange={(values) => setOpenIds(new Set(values))}
       >
         <VirtualList
           isReversed
@@ -126,7 +121,7 @@ const ActivitiesPanelSC = styled.div(({ theme }) => ({
   border: theme.borders.default,
   borderRadius: theme.borderRadiuses.medium,
   padding: `${theme.spacing.xlarge}px ${theme.spacing.large}px`,
-  background: AI_GRADIENT_BG,
+  background: theme.colors['fill-zero'],
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
