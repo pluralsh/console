@@ -947,6 +947,8 @@ export type Alert = {
   insight?: Maybe<AiInsight>;
   /** Detailed message or summary supplied by the provider */
   message?: Maybe<Scalars['String']['output']>;
+  /** Raw webhook payload received for this alert */
+  payload?: Maybe<Scalars['Map']['output']>;
   /** The project this alert was associated with */
   project?: Maybe<Project>;
   /** The human‑authored resolution for this alert, if one exists */
@@ -5090,6 +5092,8 @@ export type Issue = {
   /** the unique identifier of the issue */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** raw webhook payload received for this issue */
+  payload?: Maybe<Scalars['Map']['output']>;
   /** the provider (e.g., Linear, GitHub) that originated this issue */
   provider: IssueWebhookProvider;
   /** the current status of the issue (e.g., open, in progress, completed, cancelled) */
@@ -14948,6 +14952,8 @@ export type WorkbenchJobActivity = {
   __typename?: 'WorkbenchJobActivity';
   /** the agent run that executed this activity */
   agentRun?: Maybe<AgentRun>;
+  /** all agent runs associated with this activity (sideloadable) */
+  agentRuns?: Maybe<Array<Maybe<AgentRun>>>;
   /** the id of the activity */
   id: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;

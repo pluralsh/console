@@ -1652,6 +1652,9 @@ type Issue {
   "the detailed description or body content of the issue"
   body: String!
 
+  "raw webhook payload received for this issue"
+  payload: Map
+
   "the flow this issue is associated with"
   flow: Flow
 
@@ -2707,6 +2710,9 @@ type WorkbenchJobActivity {
 
   "the agent run that executed this activity"
   agentRun: AgentRun
+
+  "all agent runs associated with this activity (sideloadable)"
+  agentRuns: [AgentRun]
 
   insertedAt: DateTime
 
@@ -5314,6 +5320,9 @@ type Alert {
 
   "Arbitrary key\/value annotations attached to this alert"
   annotations: Map
+
+  "Raw webhook payload received for this alert"
+  payload: Map
 
   "Link back to the originating dashboard or alert view in the provider"
   url: String

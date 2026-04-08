@@ -13,6 +13,7 @@ defmodule Console.Deployments.Workbenches do
     WorkbenchPrompt,
     WorkbenchSkill,
     WorkbenchWebhook,
+    WorkbenchJobActivityAgentRun
   }
   alias Console.Deployments.Settings
   alias Console.PubSub
@@ -426,6 +427,30 @@ defmodule Console.Deployments.Workbenches do
     activity
     |> WorkbenchJobActivity.changeset(attrs)
     |> Repo.update()
+    |> notify(:update)
+  end
+
+  @doc """
+  Associates an agent run with a workbench activity: inserts the join row (idempotent) and sets
+  `agent_run_id` and `status: :running` on the activity.
+  """
+  @spec associate_agent_run(WorkbenchJobActivity.t(), binary) :: activity_resp
+  def associate_agent_run(%WorkbenchJobActivity{} = activity, run_id) when is_binary(run_id) do
+    start_transaction()
+    |> add_operation(:association, fn _ ->
+      %WorkbenchJobActivityAgentRun{}
+      |> WorkbenchJobActivityAgentRun.changeset(%{
+        workbench_job_activity_id: activity.id,
+        agent_run_id: run_id
+      })
+      |> Repo.insert(on_conflict: :nothing, conflict_target: [:workbench_job_activity_id, :agent_run_id])
+    end)
+    |> add_operation(:activity, fn _ ->
+      activity
+      |> WorkbenchJobActivity.changeset(%{status: :running, agent_run_id: run_id})
+      |> Repo.update()
+    end)
+    |> execute(extract: :activity)
     |> notify(:update)
   end
 

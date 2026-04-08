@@ -30,10 +30,7 @@ defmodule Console.AI.Workbench.Subagents.Coding do
   defp stop_msg(_), do: false
 
   defp persist_and_poll_run(activity, %AgentRun{id: id} = run) do
-    Workbenches.update_job_activity(%{
-      status: :running,
-      agent_run_id: id
-    }, activity)
+    Workbenches.associate_agent_run(activity, id)
 
     case poll_run(run) do
       {:timeout, _} -> {:user, "agent run #{id} timed out"}

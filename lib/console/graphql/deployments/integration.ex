@@ -90,6 +90,9 @@ defmodule Console.GraphQl.Deployments.Integration do
     field :body, non_null(:string),
       description: "the detailed description or body content of the issue"
 
+    field :payload, :map,
+      description: "raw webhook payload received for this issue"
+
     field :flow,          :flow, resolve: dataloader(Deployments), description: "the flow this issue is associated with"
     field :workbench,     :workbench, resolve: dataloader(Deployments), description: "the workbench this issue is associated with"
     field :workbench_job, :workbench_job, resolve: dataloader(Deployments), description: "the workbench job this issue is associated with"

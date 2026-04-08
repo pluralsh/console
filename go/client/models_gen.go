@@ -742,6 +742,8 @@ type Alert struct {
 	Fingerprint *string `json:"fingerprint,omitempty"`
 	// Arbitrary key/value annotations attached to this alert
 	Annotations map[string]any `json:"annotations,omitempty"`
+	// Raw webhook payload received for this alert
+	Payload map[string]any `json:"payload,omitempty"`
 	// Link back to the originating dashboard or alert view in the provider
 	URL *string `json:"url,omitempty"`
 	// Key/value tags associated with this alert, often used for filtering clusters
@@ -4164,6 +4166,8 @@ type Issue struct {
 	Title string `json:"title"`
 	// the detailed description or body content of the issue
 	Body string `json:"body"`
+	// raw webhook payload received for this issue
+	Payload map[string]any `json:"payload,omitempty"`
 	// the flow this issue is associated with
 	Flow *Flow `json:"flow,omitempty"`
 	// the workbench this issue is associated with
@@ -9601,9 +9605,11 @@ type WorkbenchJobActivity struct {
 	// the job this activity belongs to
 	WorkbenchJob *WorkbenchJob `json:"workbenchJob,omitempty"`
 	// the agent run that executed this activity
-	AgentRun   *AgentRun `json:"agentRun,omitempty"`
-	InsertedAt *string   `json:"insertedAt,omitempty"`
-	UpdatedAt  *string   `json:"updatedAt,omitempty"`
+	AgentRun *AgentRun `json:"agentRun,omitempty"`
+	// all agent runs associated with this activity (sideloadable)
+	AgentRuns  []*AgentRun `json:"agentRuns,omitempty"`
+	InsertedAt *string     `json:"insertedAt,omitempty"`
+	UpdatedAt  *string     `json:"updatedAt,omitempty"`
 }
 
 type WorkbenchJobActivityConnection struct {

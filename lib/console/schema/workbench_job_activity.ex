@@ -1,6 +1,6 @@
 defmodule Console.Schema.WorkbenchJobActivity do
   use Console.Schema.Base
-  alias Console.Schema.{WorkbenchJob, WorkbenchJobThought, AgentRun, WorkbenchJobResult}
+  alias Console.Schema.{WorkbenchJob, WorkbenchJobThought, AgentRun, WorkbenchJobResult, WorkbenchJobActivityAgentRun}
 
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3, cancelled: 4
   defenum Type, coding: 0, observability: 1, integration: 2, ticketing: 3, infrastructure: 4, memo: 5, plan: 6, user: 7, memory: 8, conclusion: 9
@@ -45,6 +45,11 @@ defmodule Console.Schema.WorkbenchJobActivity do
 
     belongs_to :workbench_job, WorkbenchJob
     belongs_to :agent_run, AgentRun
+
+    has_many :agent_run_associations, WorkbenchJobActivityAgentRun,
+      on_replace: :delete,
+      foreign_key: :workbench_job_activity_id
+    has_many :agent_runs, through: [:agent_run_associations, :agent_run]
 
     has_many :thoughts, WorkbenchJobThought,
       on_replace: :delete,
