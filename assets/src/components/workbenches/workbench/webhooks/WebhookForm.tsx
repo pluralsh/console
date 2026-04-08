@@ -25,7 +25,7 @@ import {
 } from 'generated/graphql'
 import { capitalize } from 'lodash'
 import queryString from 'query-string'
-import { useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchWebhookTriggersAbsPath,
@@ -40,6 +40,7 @@ import {
 import { WebhookTriggerFormState } from './WebhookTriggerForm'
 import { getObservabilityWebhookTypeIcon } from '../../../settings/global/observability/EditObservabilityWebhook'
 import { getIssueWebhookProviderIcon } from './utils'
+import { useWebhookSetupGuidePanel } from './WebhookSetupGuidePanel'
 
 type CreateWebhookType = 'observability' | 'issue'
 
@@ -57,6 +58,66 @@ type CreateWebhookFormState = {
 type RouteState = {
   returnPath?: string
   draftState?: WebhookTriggerFormState
+}
+
+type SetupGuideSelection = {
+  webhookType: CreateWebhookType
+  observabilityType: Nullable<ObservabilityWebhookType>
+  issueProvider: Nullable<IssueWebhookProvider>
+}
+
+const OBSERVABILITY_SETUP_GUIDE_PATHS: Record<
+  ObservabilityWebhookType,
+  string
+> = {
+  [ObservabilityWebhookType.Datadog]: '/setup-guides/webhooks/datadog.md',
+  [ObservabilityWebhookType.Grafana]: '/setup-guides/webhooks/grafana.md',
+  [ObservabilityWebhookType.Newrelic]: '/setup-guides/webhooks/newrelic.md',
+  [ObservabilityWebhookType.Pagerduty]: '/setup-guides/webhooks/pagerduty.md',
+  [ObservabilityWebhookType.Plural]: '/setup-guides/webhooks/plural.md',
+  [ObservabilityWebhookType.Sentry]: '/setup-guides/webhooks/sentry.md',
+}
+
+const ISSUE_SETUP_GUIDE_PATHS: Record<IssueWebhookProvider, string> = {
+  [IssueWebhookProvider.Asana]: '/setup-guides/webhooks/asana.md',
+  [IssueWebhookProvider.Github]: '/setup-guides/webhooks/github.md',
+  [IssueWebhookProvider.Gitlab]: '/setup-guides/webhooks/gitlab.md',
+  [IssueWebhookProvider.Jira]: '/setup-guides/webhooks/jira.md',
+  [IssueWebhookProvider.Linear]: '/setup-guides/webhooks/linear.md',
+}
+
+const OBSERVABILITY_SETUP_GUIDE_DOCUMENTATION_URLS: Partial<
+  Record<ObservabilityWebhookType, string>
+> = {
+  [ObservabilityWebhookType.Datadog]:
+    'https://docs.plural.sh/plural-features/observability/observability-webhooks/datadog',
+  [ObservabilityWebhookType.Grafana]:
+    'https://docs.plural.sh/plural-features/observability/observability-webhooks/grafana',
+}
+
+function getSetupGuideMarkdownPath({
+  webhookType,
+  observabilityType,
+  issueProvider,
+}: SetupGuideSelection): Nullable<string> {
+  if (webhookType === 'observability') {
+    if (!observabilityType) return null
+
+    return OBSERVABILITY_SETUP_GUIDE_PATHS[observabilityType] ?? null
+  }
+
+  if (!issueProvider) return null
+
+  return ISSUE_SETUP_GUIDE_PATHS[issueProvider] ?? null
+}
+
+function getSetupGuideDocumentationUrl({
+  webhookType,
+  observabilityType,
+}: SetupGuideSelection): string | undefined {
+  if (webhookType !== 'observability' || !observabilityType) return undefined
+
+  return OBSERVABILITY_SETUP_GUIDE_DOCUMENTATION_URLS[observabilityType]
 }
 
 function getInitialCreateWebhookFormState(): CreateWebhookFormState {
@@ -104,6 +165,20 @@ export function WebhookForm() {
   const location = useLocation()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const routeState = location.state as Nullable<RouteState>
+  const {
+    open,
+    openSetupGuidePanel,
+    setOpen: setSetupGuidePanelOpen,
+  } = useWebhookSetupGuidePanel()
+  const [setupGuideSelection, setSetupGuideSelection] =
+    useState<SetupGuideSelection>({
+      webhookType: 'observability',
+      observabilityType: null,
+      issueProvider: null,
+    })
+  const setupGuideMarkdownPath = getSetupGuideMarkdownPath(setupGuideSelection)
+  const setupGuideDocumentationUrl =
+    getSetupGuideDocumentationUrl(setupGuideSelection)
   const listPath = getWorkbenchWebhookTriggersAbsPath(workbenchId)
   const returnPath = routeState?.returnPath ?? listPath
 
@@ -133,6 +208,28 @@ export function WebhookForm() {
 
   const error = workbenchError
 
+  useEffect(() => () => setSetupGuidePanelOpen(false), [setSetupGuidePanelOpen])
+
+  useEffect(() => {
+    if (!open) return
+
+    if (!setupGuideMarkdownPath) {
+      setSetupGuidePanelOpen(false)
+      return
+    }
+
+    openSetupGuidePanel({
+      documentationUrl: setupGuideDocumentationUrl,
+      markdownPath: setupGuideMarkdownPath,
+    })
+  }, [
+    open,
+    setupGuideMarkdownPath,
+    setupGuideDocumentationUrl,
+    openSetupGuidePanel,
+    setSetupGuidePanelOpen,
+  ])
+
   if (error) return <GqlError error={error} />
 
   return (
@@ -154,60 +251,81 @@ export function WebhookForm() {
         secondColor="text-xlight"
         gap="xxsmall"
       />
-      <Flex gap="medium">
+      <Flex
+        gap="medium"
+        width="100%"
+      >
         <Flex
           direction="column"
           width="100%"
-          css={{ maxWidth: 750 }}
         >
-          {!workbenchData && workbenchLoading ? (
-            <RectangleSkeleton
-              $width="100%"
-              $height="100%"
-            />
-          ) : (
-            <FormCardSC>
-              <CreateWebhookForm
-                onReturn={() =>
-                  navigate(returnPath, {
-                    state: { draftState: routeState?.draftState },
-                  })
-                }
-                returnPathIsList={returnPath === listPath}
-                onCreated={(selectedWebhookKey) => {
-                  navigate(
-                    buildReturnPath({
-                      returnPath,
-                      selectedWebhook: selectedWebhookKey,
-                    }),
-                    {
-                      state: { draftState: routeState?.draftState },
+          <Flex gap="medium">
+            <Flex
+              direction="column"
+              width="100%"
+              css={{ maxWidth: 750 }}
+            >
+              {!workbenchData && workbenchLoading ? (
+                <RectangleSkeleton
+                  $width="100%"
+                  $height="100%"
+                />
+              ) : (
+                <FormCardSC>
+                  <CreateWebhookForm
+                    onGuideSelectionChange={setSetupGuideSelection}
+                    onReturn={() =>
+                      navigate(returnPath, {
+                        state: { draftState: routeState?.draftState },
+                      })
                     }
-                  )
-                }}
-              />
-            </FormCardSC>
-          )}
+                    returnPathIsList={returnPath === listPath}
+                    onCreated={(selectedWebhookKey) => {
+                      navigate(
+                        buildReturnPath({
+                          returnPath,
+                          selectedWebhook: selectedWebhookKey,
+                        }),
+                        {
+                          state: { draftState: routeState?.draftState },
+                        }
+                      )
+                    }}
+                  />
+                </FormCardSC>
+              )}
+            </Flex>
+            {!open && !!setupGuideMarkdownPath && (
+              <div css={{ width: 200 }}>
+                <Button
+                  secondary
+                  startIcon={<SidePanelOpenIcon />}
+                  onClick={() =>
+                    openSetupGuidePanel({
+                      documentationUrl: setupGuideDocumentationUrl,
+                      markdownPath: setupGuideMarkdownPath,
+                    })
+                  }
+                  width="100%"
+                >
+                  Setup Guide
+                </Button>
+              </div>
+            )}
+          </Flex>
         </Flex>
-        <div css={{ width: 200 }}>
-          <Button
-            secondary
-            startIcon={<SidePanelOpenIcon />}
-            width="100%"
-          >
-            Setup Guide
-          </Button>
-        </div>
       </Flex>
     </Flex>
   )
 }
 
 function CreateWebhookForm({
+  onGuideSelectionChange,
   onReturn,
   returnPathIsList,
   onCreated,
 }: {
+  onGuideSelectionChange: (selection: SetupGuideSelection) => void
   onReturn: () => void
   returnPathIsList?: boolean
   onCreated: (selectedWebhookKey: string) => void
@@ -243,6 +361,19 @@ function CreateWebhookForm({
     formState.webhookType === 'observability'
       ? canCreateObservabilityWebhook
       : canCreateIssueWebhook
+
+  useEffect(() => {
+    onGuideSelectionChange({
+      webhookType: formState.webhookType,
+      observabilityType: formState.observabilityType,
+      issueProvider: formState.issueProvider,
+    })
+  }, [
+    formState.webhookType,
+    formState.observabilityType,
+    formState.issueProvider,
+    onGuideSelectionChange,
+  ])
 
   const handleCreateNewWebhook = async () => {
     if (!canCreateWebhook) return

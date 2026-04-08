@@ -1,5 +1,9 @@
-import { Flex, MarkdocContextProvider } from '@pluralsh/design-system'
-import { Suspense, useRef } from 'react'
+import {
+  Flex,
+  MarkdocContextProvider,
+  usePrevious,
+} from '@pluralsh/design-system'
+import { Suspense, useEffect, useRef } from 'react'
 
 import { BillingSubscriptionProvider } from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
@@ -21,7 +25,11 @@ import { SelectedProjectProvider } from '../contexts/ProjectsContext'
 import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
 
 import { CLOSE_CHAT_ACTION_PANEL_EVENT } from 'components/ai/AIAgentSessions'
-import { AIContextProvider, useChatbot } from 'components/ai/AIContext'
+import {
+  AIContextProvider,
+  useChatbot,
+  useChatbotContext,
+} from 'components/ai/AIContext'
 import { ChatbotPanel } from 'components/ai/chatbot/Chatbot'
 import { CommandPaletteProvider } from 'components/commandpalette/CommandPaletteContext'
 import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
@@ -29,6 +37,11 @@ import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent'
 import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
 import { ApplicationUpdateToast } from './ApplicationUpdateToast'
 import Header from './Header'
+import {
+  WebhookSetupGuidePanel,
+  WebhookSetupGuidePanelProvider,
+  useWebhookSetupGuidePanel,
+} from '../workbenches/workbench/webhooks/WebhookSetupGuidePanel'
 import { Sidebar, SidebarProvider } from './Sidebar'
 import Subheader from './Subheader'
 import { SentryInitializer } from '../SentryInitializer'
@@ -54,7 +67,9 @@ export default function Console() {
                                 <FeatureFlagProvider>
                                   <CommandPaletteProvider>
                                     <SimpleToastProvider>
-                                      <ConsoleContent />
+                                      <WebhookSetupGuidePanelProvider>
+                                        <ConsoleContent />
+                                      </WebhookSetupGuidePanelProvider>
                                     </SimpleToastProvider>
                                   </CommandPaletteProvider>
                                 </FeatureFlagProvider>
@@ -79,6 +94,21 @@ function ConsoleContent() {
   const isProduction = import.meta.env.MODE === 'production'
   const isCloudSetupUnfinished = useCloudSetupUnfinished()
   const { setActionsPanelOpen } = useChatbot()
+  const { open: isAiPanelOpen, setOpen: setAiPanelOpen } = useChatbotContext()
+  const { open: isSetupGuidePanelOpen, setOpen: setSetupGuidePanelOpen } =
+    useWebhookSetupGuidePanel()
+  const prevIsSetupGuidePanelOpen = usePrevious(isSetupGuidePanelOpen)
+
+  useEffect(() => {
+    if (isAiPanelOpen) setSetupGuidePanelOpen(false)
+  }, [isAiPanelOpen, setSetupGuidePanelOpen])
+
+  // Guard with previous value so this only fires on false to true transition.
+  // Without this guard it would re-run (and close AI) on every AI context re-render while custom is open.
+  useEffect(() => {
+    if (isSetupGuidePanelOpen && prevIsSetupGuidePanelOpen === false)
+      setAiPanelOpen(false)
+  }, [isSetupGuidePanelOpen, prevIsSetupGuidePanelOpen, setAiPanelOpen])
 
   // need to do this natively instead of using onPointerDown so that clicking portaled elements like modals don't close the actions panel
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -127,6 +157,7 @@ function ConsoleContent() {
           </Flex>
         </Flex>
       </Flex>
+      <WebhookSetupGuidePanel />
       <ChatbotPanel />
     </Flex>
   )
