@@ -75,8 +75,7 @@ defmodule Console.Otel.MetricsExporter do
         ref = Process.send_after(self(), :export, delay)
         %{state | timer_ref: ref}
 
-      :error ->
-        state
+      :error -> state
     end
   end
 
@@ -105,26 +104,21 @@ defmodule Console.Otel.MetricsExporter do
   defp do_export(endpoint) do
     timestamp = DateTime.utc_now()
 
-    # Transaction is required for Repo.stream cursor support
-    Repo.transaction(fn ->
-      []
-      |> Stream.concat(MetricsBuilder.service_metrics_stream(timestamp))
-      |> Stream.concat(MetricsBuilder.cluster_metrics_stream(timestamp))
-      |> Stream.chunk_every(@chunk_size)
-      |> Enum.reduce(0, fn chunk, count ->
-        case Exporter.export(endpoint, chunk) do
-          :ok ->
-            count + length(chunk)
+    []
+    |> Stream.concat(MetricsBuilder.service_metrics_stream(timestamp))
+    |> Stream.concat(MetricsBuilder.cluster_metrics_stream(timestamp))
+    |> Stream.chunk_every(@chunk_size)
+    |> Enum.reduce(0, fn chunk, count ->
+      case Exporter.export(endpoint, chunk) do
+        :ok ->
+          count + length(chunk)
 
-          {:error, reason} ->
-            Logger.error("Failed to export chunk: #{inspect(reason)}")
-            count
-        end
-      end)
-      |> then(&Logger.info("Exported #{&1} metrics to #{endpoint}"))
+        {:error, reason} ->
+          Logger.error("Failed to export chunk: #{inspect(reason)}")
+          count
+      end
     end)
-
-    :ok
+    |> then(&Logger.info("Exported #{&1} metrics to #{endpoint}"))
   end
 
   defp leader?(), do: Console.ClusterRing.node(:otel_metrics) == node()
