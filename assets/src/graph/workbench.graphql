@@ -396,6 +396,12 @@ query WorkbenchWebhooks($id: ID!, $first: Int = 100, $after: String) {
   }
 }
 
+mutation GetWorkbenchWebhook($id: ID!) {
+  getWorkbenchWebhook(id: $id) {
+    ...WorkbenchWebhook
+  }
+}
+
 query IssueWebhooks($first: Int, $after: String) {
   issueWebhooks(first: $first, after: $after) {
     edges {

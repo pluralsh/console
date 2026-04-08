@@ -6,9 +6,7 @@ import {
   IconFrame,
   PencilIcon,
   Table,
-  TicketIcon,
   TrashCanIcon,
-  VisualInspectionIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -25,16 +23,20 @@ import {
 import { useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
+  getWorkbenchWebhookTriggerCreateWebhookAbsPath,
   getWorkbenchWebhookTriggerCreateAbsPath,
   getWorkbenchWebhookTriggerEditAbsPath,
+  getWorkbenchWebhookTriggersAbsPath,
   WORKBENCH_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
-import { WorkbenchWebhookDeleteModal } from './WorkbenchWebhookDeleteModal'
+import { WebhookDeleteModal } from './WebhookDeleteModal'
+import isEmpty from 'lodash/isEmpty'
+import { webhookTypeIcon, webhookTypeLabel, webhookURL } from './utils'
 
-export function WorkbenchWebhookTrigger() {
+export function Webhooks() {
   const navigate = useNavigate()
   const theme = useTheme()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
@@ -49,6 +51,7 @@ export function WorkbenchWebhookTrigger() {
     variables: { id: workbenchId },
     skip: !workbenchId,
   })
+
   const workbench = workbenchData?.workbench
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
@@ -59,6 +62,7 @@ export function WorkbenchWebhookTrigger() {
       },
       { id: workbenchId }
     )
+
   const webhooks = useMemo(
     () => mapExistingNodes(data?.workbench?.webhooks),
     [data]
@@ -88,7 +92,6 @@ export function WorkbenchWebhookTrigger() {
       }),
     [navigate, workbenchId]
   )
-  const showEmptyState = !!data && webhooks.length === 0
 
   if (workbenchError) return <GqlError error={workbenchError} />
 
@@ -118,8 +121,46 @@ export function WorkbenchWebhookTrigger() {
         width="100%"
         css={{ maxWidth: 750 }}
       >
-        {showEmptyState ? (
-          <WorkbenchWebhookEmptyState workbenchId={workbenchId} />
+        {!!data && isEmpty(webhooks) ? (
+          <Card>
+            <EmptyState
+              message="No webhooks yet"
+              description="No webhook connected. Select an existing webhook or create a new one."
+              css={{ margin: '0 auto', width: 500 }}
+            >
+              <Flex gap="small">
+                <Button
+                  small
+                  secondary
+                  onClick={() => {
+                    navigate(
+                      getWorkbenchWebhookTriggerCreateWebhookAbsPath(
+                        workbenchId
+                      ),
+                      {
+                        state: {
+                          returnPath:
+                            getWorkbenchWebhookTriggersAbsPath(workbenchId),
+                        },
+                      }
+                    )
+                  }}
+                >
+                  Create new webhook
+                </Button>
+                <Button
+                  small
+                  onClick={() =>
+                    navigate(
+                      getWorkbenchWebhookTriggerCreateAbsPath(workbenchId)
+                    )
+                  }
+                >
+                  Select existing webhook
+                </Button>
+              </Flex>
+            </EmptyState>
+          </Card>
         ) : (
           <StretchedFlex
             direction="column"
@@ -144,9 +185,14 @@ export function WorkbenchWebhookTrigger() {
                   secondary
                   onClick={() => {
                     navigate(
-                      getWorkbenchWebhookTriggerCreateAbsPath(workbenchId),
+                      getWorkbenchWebhookTriggerCreateWebhookAbsPath(
+                        workbenchId
+                      ),
                       {
-                        state: { createWebhook: true },
+                        state: {
+                          returnPath:
+                            getWorkbenchWebhookTriggersAbsPath(workbenchId),
+                        },
                       }
                     )
                   }}
@@ -180,7 +226,7 @@ export function WorkbenchWebhookTrigger() {
           </StretchedFlex>
         )}
       </Flex>
-      <WorkbenchWebhookDeleteModal
+      <WebhookDeleteModal
         open={!!deletingWebhook}
         webhook={deletingWebhook}
         onClose={() => setDeletingWebhook(null)}
@@ -259,60 +305,4 @@ function getColumns({
       ),
     }),
   ]
-}
-
-function webhookURL(webhook: WorkbenchWebhookFragment) {
-  if (webhook.issueWebhook) return webhook.issueWebhook.url
-
-  if (webhook.webhook) return webhook.webhook.url
-
-  return undefined
-}
-
-function webhookTypeIcon(webhook: WorkbenchWebhookFragment) {
-  if (webhook.issueWebhook) return <TicketIcon />
-
-  return <VisualInspectionIcon />
-}
-
-function webhookTypeLabel(webhook: WorkbenchWebhookFragment) {
-  if (webhook.issueWebhook) return 'Ticketing'
-
-  return 'Observability'
-}
-
-function WorkbenchWebhookEmptyState({ workbenchId }: { workbenchId: string }) {
-  const navigate = useNavigate()
-
-  return (
-    <Card>
-      <EmptyState
-        message="No webhooks yet"
-        description="No webhook connected. Select an existing webhook or create a new one."
-        css={{ margin: '0 auto', width: 500 }}
-      >
-        <Flex gap="small">
-          <Button
-            small
-            secondary
-            onClick={() => {
-              navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId), {
-                state: { createWebhook: true },
-              })
-            }}
-          >
-            Create new webhook
-          </Button>
-          <Button
-            small
-            onClick={() =>
-              navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
-            }
-          >
-            Select existing webhook
-          </Button>
-        </Flex>
-      </EmptyState>
-    </Card>
-  )
 }

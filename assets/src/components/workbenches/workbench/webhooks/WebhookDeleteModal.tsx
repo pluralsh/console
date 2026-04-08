@@ -3,11 +3,10 @@ import {
   useDeleteWorkbenchWebhookMutation,
   WorkbenchWebhookFragment,
 } from 'generated/graphql'
-import { WEBHOOK_TRIGGER_REFETCH_QUERIES } from './WorkbenchTriggers'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StrongSC } from 'components/utils/typography/Text'
 
-export function WorkbenchWebhookDeleteModal({
+export function WebhookDeleteModal({
   open,
   webhook,
   onClose,
@@ -27,7 +26,7 @@ export function WorkbenchWebhookDeleteModal({
       })
       onClose()
     },
-    refetchQueries: WEBHOOK_TRIGGER_REFETCH_QUERIES,
+    refetchQueries: ['WorkbenchWebhooks', 'WorkbenchTriggersSummary'],
     awaitRefetchQueries: true,
   })
 

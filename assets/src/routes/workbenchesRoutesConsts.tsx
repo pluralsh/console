@@ -8,6 +8,9 @@ export const WORKBENCHES_CREATE_REL_PATH = 'create'
 export const WORKBENCHES_EDIT_REL_PATH = 'edit'
 export const WORKBENCHES_CRON_SCHEDULES_REL_PATH = 'cron-schedules'
 export const WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH = 'webhook-triggers'
+export const WORKBENCHES_WEBHOOK_TRIGGERS_CREATE_WEBHOOK_REL_PATH =
+  'create-webhook'
+export const WORKBENCHES_WEBHOOK_SELECTED_QUERY_PARAM = 'selectedWebhook'
 
 export const WORKBENCHES_TOOLS_REL_PATH = 'tools'
 export const WORKBENCHES_ALERTS_REL_PATH = 'alerts'
@@ -49,6 +52,11 @@ export const getWorkbenchWebhookTriggerCreateAbsPath = (
   workbenchId: Nullable<string>
 ) =>
   `${getWorkbenchWebhookTriggersAbsPath(workbenchId)}/${WORKBENCHES_CREATE_REL_PATH}`
+
+export const getWorkbenchWebhookTriggerCreateWebhookAbsPath = (
+  workbenchId: Nullable<string>
+) =>
+  `${getWorkbenchWebhookTriggersAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_CREATE_WEBHOOK_REL_PATH}`
 
 export const getWorkbenchWebhookTriggerEditAbsPath = ({
   workbenchId,

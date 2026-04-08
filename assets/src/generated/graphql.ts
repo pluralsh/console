@@ -19274,6 +19274,13 @@ export type WorkbenchWebhooksQueryVariables = Exact<{
 
 export type WorkbenchWebhooksQuery = { __typename?: 'RootQueryType', workbench?: { __typename?: 'Workbench', id: string, webhooks?: { __typename?: 'WorkbenchWebhookConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'WorkbenchWebhookEdge', node?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null } | null } | null> | null } | null } | null };
 
+export type GetWorkbenchWebhookMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetWorkbenchWebhookMutation = { __typename?: 'RootMutationType', getWorkbenchWebhook?: { __typename?: 'WorkbenchWebhook', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, matches?: { __typename?: 'WorkbenchWebhookMatches', regex?: string | null, substring?: string | null, caseInsensitive?: boolean | null } | null, webhook?: { __typename?: 'ObservabilityWebhook', id: string, name: string, type: ObservabilityWebhookType, url: string } | null, issueWebhook?: { __typename?: 'IssueWebhook', id: string, name: string, url: string } | null } | null };
+
 export type IssueWebhooksQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -40386,6 +40393,39 @@ export type WorkbenchWebhooksQueryHookResult = ReturnType<typeof useWorkbenchWeb
 export type WorkbenchWebhooksLazyQueryHookResult = ReturnType<typeof useWorkbenchWebhooksLazyQuery>;
 export type WorkbenchWebhooksSuspenseQueryHookResult = ReturnType<typeof useWorkbenchWebhooksSuspenseQuery>;
 export type WorkbenchWebhooksQueryResult = Apollo.QueryResult<WorkbenchWebhooksQuery, WorkbenchWebhooksQueryVariables>;
+export const GetWorkbenchWebhookDocument = gql`
+    mutation GetWorkbenchWebhook($id: ID!) {
+  getWorkbenchWebhook(id: $id) {
+    ...WorkbenchWebhook
+  }
+}
+    ${WorkbenchWebhookFragmentDoc}`;
+export type GetWorkbenchWebhookMutationFn = Apollo.MutationFunction<GetWorkbenchWebhookMutation, GetWorkbenchWebhookMutationVariables>;
+
+/**
+ * __useGetWorkbenchWebhookMutation__
+ *
+ * To run a mutation, you first call `useGetWorkbenchWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGetWorkbenchWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [getWorkbenchWebhookMutation, { data, loading, error }] = useGetWorkbenchWebhookMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetWorkbenchWebhookMutation(baseOptions?: Apollo.MutationHookOptions<GetWorkbenchWebhookMutation, GetWorkbenchWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GetWorkbenchWebhookMutation, GetWorkbenchWebhookMutationVariables>(GetWorkbenchWebhookDocument, options);
+      }
+export type GetWorkbenchWebhookMutationHookResult = ReturnType<typeof useGetWorkbenchWebhookMutation>;
+export type GetWorkbenchWebhookMutationResult = Apollo.MutationResult<GetWorkbenchWebhookMutation>;
+export type GetWorkbenchWebhookMutationOptions = Apollo.BaseMutationOptions<GetWorkbenchWebhookMutation, GetWorkbenchWebhookMutationVariables>;
 export const IssueWebhooksDocument = gql`
     query IssueWebhooks($first: Int, $after: String) {
   issueWebhooks(first: $first, after: $after) {
@@ -41635,6 +41675,7 @@ export const namedOperations = {
     UpdateUser: 'UpdateUser',
     DeleteUser: 'DeleteUser',
     CreateInvite: 'CreateInvite',
+    GetWorkbenchWebhook: 'GetWorkbenchWebhook',
     CreateWorkbench: 'CreateWorkbench',
     UpdateWorkbench: 'UpdateWorkbench',
     DeleteWorkbench: 'DeleteWorkbench',

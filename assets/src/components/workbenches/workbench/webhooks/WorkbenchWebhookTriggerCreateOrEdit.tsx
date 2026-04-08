@@ -1,4 +1,3 @@
-import { gql, useMutation } from '@apollo/client'
 import {
   Button,
   EmptyState,
@@ -10,40 +9,32 @@ import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
+  useGetWorkbenchWebhookMutation,
   useWorkbenchQuery,
-  WorkbenchWebhookFragment,
-  WorkbenchWebhookFragmentDoc,
 } from 'generated/graphql'
-import { useEffect, useMemo, useState } from 'react'
-import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useMemo } from 'react'
 import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
+import {
+  getWorkbenchWebhookTriggerCreateWebhookAbsPath,
   getWorkbenchWebhookTriggersAbsPath,
   WORKBENCH_PARAM_ID,
+  WORKBENCHES_WEBHOOK_SELECTED_QUERY_PARAM,
   WORKBENCHES_WEBHOOK_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
 import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
-import { WorkbenchWebhookTriggerForm } from './WorkbenchWebhookTriggerForm'
+import {
+  WorkbenchWebhookTriggerForm,
+  WebhookTriggerFormState,
+} from './WorkbenchWebhookTriggerForm'
 
-type GetWorkbenchWebhookForEditMutation = {
-  getWorkbenchWebhook?: Nullable<WorkbenchWebhookFragment>
-}
-
-type GetWorkbenchWebhookForEditMutationVariables = {
-  id: string
-}
-
-const GetWorkbenchWebhookForEditDocument = gql`
-  mutation GetWorkbenchWebhookForEdit($id: ID!) {
-    getWorkbenchWebhook(id: $id) {
-      ...WorkbenchWebhook
-    }
-  }
-  ${WorkbenchWebhookFragmentDoc}
-`
-
-type CreateRouteState = {
-  createWebhook?: boolean
+type RouteState = {
+  draftState?: WebhookTriggerFormState
 }
 
 export function WorkbenchWebhookTriggerCreateOrEdit({
@@ -51,14 +42,14 @@ export function WorkbenchWebhookTriggerCreateOrEdit({
 }: {
   mode: 'create' | 'edit'
 }) {
-  const navigate = useNavigate()
   const location = useLocation()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const webhookId = useParams()[WORKBENCHES_WEBHOOK_PARAM_ID]
-  const routeState = location.state as Nullable<CreateRouteState>
-  const [createWebhook, setCreateWebhook] = useState(
-    !!routeState?.createWebhook
-  )
+  const routeState = location.state as Nullable<RouteState>
+  const selectedWebhookKey =
+    searchParams.get(WORKBENCHES_WEBHOOK_SELECTED_QUERY_PARAM) ?? undefined
 
   const {
     data: workbenchData,
@@ -70,15 +61,12 @@ export function WorkbenchWebhookTriggerCreateOrEdit({
   })
   const workbench = workbenchData?.workbench
 
-  const [fetchWorkbenchWebhook, fetchWorkbenchWebhookState] = useMutation<
-    GetWorkbenchWebhookForEditMutation,
-    GetWorkbenchWebhookForEditMutationVariables
-  >(GetWorkbenchWebhookForEditDocument)
+  const [fetchWorkbenchWebhook, fetchWorkbenchWebhookState] =
+    useGetWorkbenchWebhookMutation()
 
   useEffect(() => {
-    if (mode !== 'edit' || !webhookId) return
-
-    void fetchWorkbenchWebhook({ variables: { id: webhookId } })
+    if (mode === 'edit' && !!webhookId)
+      fetchWorkbenchWebhook({ variables: { id: webhookId } })
   }, [fetchWorkbenchWebhook, mode, webhookId])
 
   const webhook = fetchWorkbenchWebhookState.data?.getWorkbenchWebhook
@@ -98,6 +86,7 @@ export function WorkbenchWebhookTriggerCreateOrEdit({
   )
 
   if (workbenchError) return <GqlError error={workbenchError} />
+
   if (fetchWorkbenchWebhookState.error)
     return <GqlError error={fetchWorkbenchWebhookState.error} />
 
@@ -151,11 +140,22 @@ export function WorkbenchWebhookTriggerCreateOrEdit({
         ) : (
           <FormCardSC>
             <WorkbenchWebhookTriggerForm
+              key={`${mode}-${webhook?.id ?? 'new'}-${selectedWebhookKey ?? ''}`}
               workbenchId={workbenchId}
               webhook={webhook}
-              createWebhook={createWebhook}
-              onCreateWebhook={() => setCreateWebhook(true)}
-              onCancelCreateWebhook={() => setCreateWebhook(false)}
+              initialFormState={routeState?.draftState}
+              selectedWebhookKey={selectedWebhookKey}
+              onCreateWebhook={(nextDraftState) => {
+                navigate(
+                  getWorkbenchWebhookTriggerCreateWebhookAbsPath(workbenchId),
+                  {
+                    state: {
+                      returnPath: `${location.pathname}${location.search}`,
+                      draftState: nextDraftState,
+                    },
+                  }
+                )
+              }}
               onCancel={() =>
                 navigate(getWorkbenchWebhookTriggersAbsPath(workbenchId))
               }

@@ -5,10 +5,9 @@ import {
   useDeleteWorkbenchCronMutation,
   WorkbenchCronFragment,
 } from 'generated/graphql'
-import { SCHEDULE_TRIGGER_REFETCH_QUERIES } from './WorkbenchTriggers'
 import { truncate } from 'lodash'
 
-export function WorkbenchScheduleDeleteModal({
+export function CronScheduleDeleteModal({
   open,
   cron,
   onClose,
@@ -28,7 +27,7 @@ export function WorkbenchScheduleDeleteModal({
       })
       onClose()
     },
-    refetchQueries: SCHEDULE_TRIGGER_REFETCH_QUERIES,
+    refetchQueries: ['WorkbenchCrons', 'WorkbenchTriggersSummary'],
     awaitRefetchQueries: true,
   })
 

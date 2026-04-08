@@ -37,16 +37,14 @@ import {
 import { Key, useMemo, useRef, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { StickyActionsFooterSC } from '../create-edit/WorkbenchCreateOrEdit'
-import { WEBHOOK_TRIGGER_REFETCH_QUERIES } from './WorkbenchTriggers'
 import { isEqual, isEmpty } from 'lodash'
 import { InlineA } from 'components/utils/typography/Text'
 import { useTheme } from 'styled-components'
-import { WorkbenchCreateWebhookForm } from './WorkbenchCreateWebhookForm'
 
 type MatchType = 'regex' | 'substring'
 
 // Prefixed key used in the Select: 'obs:{id}' for observability webhooks, 'issue:{id}' for issue webhooks
-type WebhookTriggerFormState = {
+export type WebhookTriggerFormState = {
   name: string
   selectedWebhookKey: string
   matchType: MatchType
@@ -99,27 +97,26 @@ function getIssueWebhookProviderIcon(provider: Nullable<string>) {
 export function WorkbenchWebhookTriggerForm({
   workbenchId,
   webhook,
-  createWebhook,
-  createWebhookBackToList,
+  initialFormState,
+  selectedWebhookKey,
   onCreateWebhook,
-  onCancelCreateWebhook,
   onCancel,
   onCompleted,
 }: {
   workbenchId: string
   webhook?: Nullable<WorkbenchWebhookFragment>
-  createWebhook?: boolean
-  createWebhookBackToList?: boolean
-  onCreateWebhook?: () => void
-  onCancelCreateWebhook?: () => void
+  initialFormState?: WebhookTriggerFormState
+  selectedWebhookKey?: string
+  onCreateWebhook?: (formState: WebhookTriggerFormState) => void
   onCancel: () => void
   onCompleted?: Nullable<() => void>
 }) {
   const theme = useTheme()
   const editing = !!webhook
-  const [formState, setFormState] = useState<WebhookTriggerFormState>(() =>
-    getInitialFormState(webhook)
-  )
+  const [formState, setFormState] = useState<WebhookTriggerFormState>(() => ({
+    ...(initialFormState ?? getInitialFormState(webhook)),
+    ...(selectedWebhookKey ? { selectedWebhookKey } : {}),
+  }))
   const { popToast } = useSimpleToast()
 
   // TODO: Add pagination for webhook queries.
@@ -127,14 +124,12 @@ export function WorkbenchWebhookTriggerForm({
     data: obsData,
     loading: obsLoading,
     error: obsError,
-    refetch: refetchObservabilityWebhooks,
   } = useObservabilityWebhooksQuery({ variables: { first: 100 } })
 
   const {
     data: issueData,
     loading: issueLoading,
     error: issueWebhooksError,
-    refetch: refetchIssueWebhooks,
   } = useIssueWebhooksQuery({ variables: { first: 100 } })
 
   const observabilityWebhooks = useMemo(
@@ -145,19 +140,20 @@ export function WorkbenchWebhookTriggerForm({
     () => mapExistingNodes(issueData?.issueWebhooks),
     [issueData]
   )
+
   const webhooksLoading = obsLoading || issueLoading
 
   const tabStateRef = useRef<any>(undefined)
 
   const label = formState.name.trim()
-  const selectedWebhookKey = formState.selectedWebhookKey
+  const selectedWebhookKeyValue = formState.selectedWebhookKey
   const regex = formState.regex.trim()
   const substring = formState.substring.trim()
   const activeMatchValue = formState.matchType === 'regex' ? regex : substring
 
   const attributes = {
     name: label,
-    ...parseWebhookKey(selectedWebhookKey),
+    ...parseWebhookKey(selectedWebhookKeyValue),
     matches: activeMatchValue
       ? formState.matchType === 'regex'
         ? { regex: activeMatchValue }
@@ -170,7 +166,7 @@ export function WorkbenchWebhookTriggerForm({
 
   const canSave =
     !!label &&
-    !!selectedWebhookKey &&
+    !!selectedWebhookKeyValue &&
     !!activeMatchValue &&
     !isEqual(attributes, getAttributesFromState(getInitialFormState(webhook)))
 
@@ -186,14 +182,14 @@ export function WorkbenchWebhookTriggerForm({
     useCreateWorkbenchWebhookMutation({
       variables: { workbenchId, attributes },
       onCompleted: handleCompleted,
-      refetchQueries: WEBHOOK_TRIGGER_REFETCH_QUERIES,
+      refetchQueries: ['WorkbenchWebhooks', 'WorkbenchTriggersSummary'],
       awaitRefetchQueries: true,
     })
   const [updateWorkbenchWebhook, updateState] =
     useUpdateWorkbenchWebhookMutation({
       variables: { id: webhook?.id ?? '', attributes },
       onCompleted: handleCompleted,
-      refetchQueries: WEBHOOK_TRIGGER_REFETCH_QUERIES,
+      refetchQueries: ['WorkbenchWebhooks', 'WorkbenchTriggersSummary'],
       awaitRefetchQueries: true,
     })
 
@@ -205,21 +201,6 @@ export function WorkbenchWebhookTriggerForm({
     if (!canSave) return
     if (editing && webhook) updateWorkbenchWebhook()
     else createWorkbenchWebhook()
-  }
-
-  if (createWebhook) {
-    return (
-      <WorkbenchCreateWebhookForm
-        onBack={() => onCancelCreateWebhook?.()}
-        backToList={createWebhookBackToList}
-        onCreated={(selectedWebhookKey) => {
-          setFormState((prev) => ({ ...prev, selectedWebhookKey }))
-          onCancelCreateWebhook?.()
-        }}
-        refetchObservabilityWebhooks={refetchObservabilityWebhooks}
-        refetchIssueWebhooks={refetchIssueWebhooks}
-      />
-    )
   }
 
   return (
@@ -262,7 +243,7 @@ export function WorkbenchWebhookTriggerForm({
             href=""
             onClick={(e) => {
               e.preventDefault()
-              onCreateWebhook?.()
+              onCreateWebhook?.(formState)
             }}
             css={{ display: 'flex', alignItems: 'center', gap: '4px' }}
           >
@@ -326,7 +307,7 @@ export function WorkbenchWebhookTriggerForm({
                   href=""
                   onClick={(e) => {
                     e.preventDefault()
-                    onCreateWebhook?.()
+                    onCreateWebhook?.(formState)
                   }}
                   css={{
                     display: 'flex',

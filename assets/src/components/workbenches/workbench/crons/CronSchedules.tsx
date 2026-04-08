@@ -10,7 +10,6 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import cronstrue from 'cronstrue'
 import { GqlError } from 'components/utils/Alert'
 import { StretchedFlex } from 'components/utils/StretchedFlex'
 import { StackedText } from 'components/utils/table/StackedText'
@@ -29,12 +28,13 @@ import {
   WORKBENCH_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
-import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
-import { WorkbenchScheduleDeleteModal } from './WorkbenchScheduleDeleteModal'
+import { CronScheduleDeleteModal } from './CronScheduleDeleteModal'
+import { isEmpty } from 'lodash'
+import { cronToExplanation } from './utils'
 
-export function WorkbenchScheduleTrigger() {
+export function CronSchedules() {
   const navigate = useNavigate()
   const theme = useTheme()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
@@ -83,9 +83,9 @@ export function WorkbenchScheduleTrigger() {
       }),
     [navigate, workbenchId]
   )
-  const showEmptyState = !!data && crons.length === 0
 
   if (workbenchError) return <GqlError error={workbenchError} />
+
   if (error) return <GqlError error={error} />
 
   return (
@@ -112,8 +112,23 @@ export function WorkbenchScheduleTrigger() {
         width="100%"
         css={{ maxWidth: 750 }}
       >
-        {showEmptyState ? (
-          <WorkbenchScheduleEmptyState />
+        {!!data && isEmpty(crons) ? (
+          <Card>
+            <EmptyState
+              message="No schedules yet"
+              description="Create a schedule for the workbench with prompt."
+              css={{ margin: '0 auto', width: 500 }}
+            >
+              <Button
+                small
+                onClick={() => {
+                  navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
+                }}
+              >
+                Create new schedule
+              </Button>
+            </EmptyState>
+          </Card>
         ) : (
           <StretchedFlex
             direction="column"
@@ -156,7 +171,7 @@ export function WorkbenchScheduleTrigger() {
           </StretchedFlex>
         )}
       </Flex>
-      <WorkbenchScheduleDeleteModal
+      <CronScheduleDeleteModal
         open={!!deletingCron}
         cron={deletingCron}
         onClose={() => setDeletingCron(null)}
@@ -213,50 +228,4 @@ function getColumns({
       ),
     }),
   ]
-}
-
-function cronToExplanation({
-  crontab,
-  nextRunAt,
-}: Pick<WorkbenchCronFragment, 'crontab' | 'nextRunAt'>) {
-  const nextRunText = nextRunAt
-    ? formatDateTime(nextRunAt, 'MMM D, YYYY [at] h:mm A')
-    : null
-  const fallback = `Next ${nextRunText ? `at ${nextRunText}` : 'run not scheduled yet'}`
-
-  if (!crontab) return fallback
-
-  try {
-    const description = cronstrue.toString(crontab.trim(), {
-      throwExceptionOnParseError: true,
-    })
-
-    return nextRunText ? `${description}, next at ${nextRunText}` : description
-  } catch {
-    return fallback
-  }
-}
-
-function WorkbenchScheduleEmptyState() {
-  const navigate = useNavigate()
-  const workbenchId = useParams()[WORKBENCH_PARAM_ID]
-
-  return (
-    <Card>
-      <EmptyState
-        message="No schedules yet"
-        description="Create a schedule for the workbench with prompt."
-        css={{ margin: '0 auto', width: 500 }}
-      >
-        <Button
-          small
-          onClick={() => {
-            navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
-          }}
-        >
-          Create new schedule
-        </Button>
-      </EmptyState>
-    </Card>
-  )
 }

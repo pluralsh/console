@@ -11,20 +11,38 @@ import {
   TicketIcon,
   VisualInspectionIcon,
   WebhooksIcon,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { GqlError } from 'components/utils/Alert'
+import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
+import { StackedText } from 'components/utils/table/StackedText'
 import {
   IssueWebhookProvider,
   ObservabilityWebhookType,
   useCreateIssueWebhookMutation,
+  useIssueWebhooksQuery,
+  useObservabilityWebhooksQuery,
   useUpsertObservabilityWebhookMutation,
+  useWorkbenchQuery,
 } from 'generated/graphql'
-import { StickyActionsFooterSC } from '../create-edit/WorkbenchCreateOrEdit'
-import { useState } from 'react'
-import { getObservabilityWebhookTypeIcon } from '../../../settings/global/observability/EditObservabilityWebhook'
 import { capitalize } from 'lodash'
+import queryString from 'query-string'
+import { useState, useMemo } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import {
+  getWorkbenchWebhookTriggersAbsPath,
+  WORKBENCH_PARAM_ID,
+  WORKBENCHES_WEBHOOK_SELECTED_QUERY_PARAM,
+} from 'routes/workbenchesRoutesConsts'
+import { getWorkbenchBreadcrumbs } from '../Workbench'
+import {
+  FormCardSC,
+  StickyActionsFooterSC,
+} from '../create-edit/WorkbenchCreateOrEdit'
+import { WebhookTriggerFormState } from './WorkbenchWebhookTriggerForm'
+import { getObservabilityWebhookTypeIcon } from '../../../settings/global/observability/EditObservabilityWebhook'
 
 type CreateWebhookType = 'observability' | 'issue'
 
@@ -37,6 +55,11 @@ type CreateWebhookFormState = {
   issueName: string
   issueUrl: string
   issueSecret: string
+}
+
+type RouteState = {
+  returnPath?: string
+  draftState?: WebhookTriggerFormState
 }
 
 function getInitialCreateWebhookFormState(): CreateWebhookFormState {
@@ -72,15 +95,142 @@ function getWebhookTypeIcon(type: CreateWebhookType) {
   return <VisualInspectionIcon />
 }
 
-export function WorkbenchCreateWebhookForm({
-  onBack,
-  backToList,
+function buildReturnPath({
+  returnPath,
+  selectedWebhook,
+}: {
+  returnPath: string
+  selectedWebhook?: string
+}) {
+  if (!selectedWebhook) return returnPath
+
+  const { url, query, fragmentIdentifier } = queryString.parseUrl(returnPath)
+
+  return queryString.stringifyUrl({
+    url,
+    query: {
+      ...query,
+      [WORKBENCHES_WEBHOOK_SELECTED_QUERY_PARAM]: selectedWebhook,
+    },
+    fragmentIdentifier,
+  })
+}
+
+export function WorkbenchWebhookTriggerCreateWebhook() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
+  const routeState = location.state as Nullable<RouteState>
+  const listPath = getWorkbenchWebhookTriggersAbsPath(workbenchId)
+  const returnPath = routeState?.returnPath ?? listPath
+
+  const {
+    data: workbenchData,
+    loading: workbenchLoading,
+    error: workbenchError,
+  } = useWorkbenchQuery({
+    variables: { id: workbenchId },
+    skip: !workbenchId,
+  })
+  const workbench = workbenchData?.workbench
+
+  const {
+    refetch: refetchObservabilityWebhooks,
+    error: observabilityWebhooksError,
+  } = useObservabilityWebhooksQuery({ variables: { first: 100 } })
+
+  const { refetch: refetchIssueWebhooks, error: issueWebhooksError } =
+    useIssueWebhooksQuery({ variables: { first: 100 } })
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...getWorkbenchBreadcrumbs(workbench),
+        {
+          label: 'webhook trigger',
+          url: getWorkbenchWebhookTriggersAbsPath(workbenchId),
+        },
+        { label: 'create webhook' },
+      ],
+      [workbench, workbenchId]
+    )
+  )
+
+  const error =
+    workbenchError ?? observabilityWebhooksError ?? issueWebhooksError
+
+  if (error) return <GqlError error={error} />
+
+  return (
+    <Flex
+      direction="column"
+      gap="large"
+      height="100%"
+      width="100%"
+      overflow="auto"
+      padding="large"
+    >
+      <StackedText
+        loading={!workbenchData && workbenchLoading}
+        first={workbench?.name}
+        firstPartialType="subtitle2"
+        firstColor="text"
+        second={workbench?.description}
+        secondPartialType="body2"
+        secondColor="text-xlight"
+        gap="xxsmall"
+      />
+      <Flex
+        direction="column"
+        width="100%"
+        css={{ maxWidth: 750 }}
+      >
+        {!workbenchData && workbenchLoading ? (
+          <RectangleSkeleton
+            $width="100%"
+            $height="100%"
+          />
+        ) : (
+          <FormCardSC>
+            <CreateWebhookForm
+              onReturn={() =>
+                navigate(returnPath, {
+                  state: { draftState: routeState?.draftState },
+                })
+              }
+              returnPathIsList={returnPath === listPath}
+              onCreated={(selectedWebhookKey) => {
+                navigate(
+                  buildReturnPath({
+                    returnPath,
+                    selectedWebhook: selectedWebhookKey,
+                  }),
+                  {
+                    state: { draftState: routeState?.draftState },
+                  }
+                )
+              }}
+              refetchObservabilityWebhooks={() =>
+                refetchObservabilityWebhooks()
+              }
+              refetchIssueWebhooks={() => refetchIssueWebhooks()}
+            />
+          </FormCardSC>
+        )}
+      </Flex>
+    </Flex>
+  )
+}
+
+function CreateWebhookForm({
+  onReturn,
+  returnPathIsList,
   onCreated,
   refetchObservabilityWebhooks,
   refetchIssueWebhooks,
 }: {
-  onBack: () => void
-  backToList?: boolean
+  onReturn: () => void
+  returnPathIsList?: boolean
   onCreated: (selectedWebhookKey: string) => void
   refetchObservabilityWebhooks: () => Promise<unknown>
   refetchIssueWebhooks: () => Promise<unknown>
@@ -332,11 +482,11 @@ export function WorkbenchCreateWebhookForm({
       <StickyActionsFooterSC css={{ justifyContent: 'flex-end' }}>
         <Button
           secondary
-          startIcon={backToList ? <ReturnIcon /> : undefined}
-          onClick={onBack}
+          startIcon={returnPathIsList ? <ReturnIcon /> : undefined}
+          onClick={onReturn}
           disabled={isSaving}
         >
-          {backToList ? 'Back to all webhooks' : 'Back'}
+          {returnPathIsList ? 'Back to all webhooks' : 'Back'}
         </Button>
         <Button
           onClick={() => void handleCreateNewWebhook()}
