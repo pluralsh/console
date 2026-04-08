@@ -318,7 +318,7 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
         {isLoading ? (
           <RectangleSkeleton
             $width="100%"
-            $height="100%"
+            $height={300}
           />
         ) : (
           <FormCardSC>

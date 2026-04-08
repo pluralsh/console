@@ -268,7 +268,7 @@ export function WebhookForm() {
               {!workbenchData && workbenchLoading ? (
                 <RectangleSkeleton
                   $width="100%"
-                  $height="100%"
+                  $height={300}
                 />
               ) : (
                 <FormCardSC>
