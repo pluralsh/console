@@ -355,9 +355,17 @@ defmodule Console.Deployments.Workbenches do
   @doc """
   Heartbeats a job by setting status to running and updating the updated_at timestamp to the current time.
   """
-  @spec heartbeat(WorkbenchJob.t()) :: job_resp
-  def heartbeat(%WorkbenchJob{id: id}) do
-    get_workbench_job!(id)
+  @spec heartbeat(WorkbenchJob.t(), boolean) :: job_resp
+  def heartbeat(%WorkbenchJob{id: id}, boot \\ false) do
+    case {get_workbench_job!(id), boot} do
+      {job, true} -> mark_running(job)
+      {%WorkbenchJob{status: s}, _} when s in ~w(successful failed cancelled)a -> {:ok, job}
+      {job, _} -> mark_running(job)
+    end
+  end
+
+  defp mark_running(%WorkbenchJob{} = job) do
+    job
     |> Ecto.Changeset.change(%{status: :running, updated_at: Timex.now()})
     |> Repo.update(allow_stale: true)
   end

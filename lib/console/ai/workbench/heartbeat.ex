@@ -12,14 +12,14 @@ defmodule Console.AI.Workbench.Heartbeat do
   def init(job) do
     :timer.send_interval(@poll, :heartbeat)
     send self(), :heartbeat
-    {:ok, job}
+    {:ok, {job, true}}
   end
 
-  def handle_info(:heartbeat, job) do
-    case Workbenches.heartbeat(job) do
-      {:ok, %WorkbenchJob{status: :cancelled}} -> {:stop, :normal, job}
-      {:ok, %WorkbenchJob{} = job} -> {:noreply, job}
-      _ -> {:noreply, job}
+  def handle_info(:heartbeat, {job, booted}) do
+    case Workbenches.heartbeat(job, booted) do
+      {:ok, %WorkbenchJob{status: :cancelled}} -> {:stop, :normal, {job, false}}
+      {:ok, %WorkbenchJob{} = job} -> {:noreply, {job, false}}
+      _ -> {:noreply, {job, false}}
     end
   end
 end
