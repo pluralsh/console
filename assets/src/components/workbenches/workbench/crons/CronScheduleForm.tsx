@@ -161,7 +161,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
 
   if (mode === 'edit' && !cronsLoading && !cron)
     return (
-      <EmptyState message="Schedule not found.">
+      <EmptyState message="Schedule not found">
         <Button
           startIcon={<ReturnIcon />}
           onClick={() =>

@@ -8,9 +8,9 @@ import { Workbench } from 'components/workbenches/workbench/Workbench'
 import { WorkbenchCreateOrEdit } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
 import { CronSchedules } from 'components/workbenches/workbench/crons/CronSchedules'
 import { Webhooks } from 'components/workbenches/workbench/webhooks/Webhooks'
-import { WorkbenchWebhookTriggerCreateWebhook } from 'components/workbenches/workbench/webhooks/WorkbenchWebhookTriggerCreateWebhook'
+import { WebhookCreateForm } from 'components/workbenches/workbench/webhooks/WebhookCreateForm'
 import { CronScheduleForm } from 'components/workbenches/workbench/crons/CronScheduleForm'
-import { WorkbenchWebhookTriggerCreateOrEdit } from 'components/workbenches/workbench/webhooks/WorkbenchWebhookTriggerCreateOrEdit'
+import { WebhookForm } from 'components/workbenches/workbench/webhooks/WebhookForm'
 import { Route } from 'react-router-dom'
 import {
   WORKBENCH_JOB_ABS_PATH,
@@ -83,15 +83,15 @@ export const workbenchesRoutes = [
   />,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}
-    element={<WorkbenchWebhookTriggerCreateOrEdit mode="create" />}
+    element={<WebhookForm mode="create" />}
   />,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}/${WORKBENCHES_WEBHOOK_TRIGGERS_CREATE_WEBHOOK_REL_PATH}`}
-    element={<WorkbenchWebhookTriggerCreateWebhook />}
+    element={<WebhookCreateForm />}
   />,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}/:${WORKBENCHES_WEBHOOK_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
-    element={<WorkbenchWebhookTriggerCreateOrEdit mode="edit" />}
+    element={<WebhookForm mode="edit" />}
   />,
   <Route
     path={`${WORKBENCHES_TOOLS_ABS_PATH}/${WORKBENCHES_CREATE_REL_PATH}`}

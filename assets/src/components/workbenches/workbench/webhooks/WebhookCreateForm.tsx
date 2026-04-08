@@ -41,7 +41,7 @@ import {
   FormCardSC,
   StickyActionsFooterSC,
 } from '../create-edit/WorkbenchCreateOrEdit'
-import { WebhookTriggerFormState } from './WorkbenchWebhookTriggerForm'
+import { WebhookTriggerFormState } from './WebhookForm'
 import { getObservabilityWebhookTypeIcon } from '../../../settings/global/observability/EditObservabilityWebhook'
 
 type CreateWebhookType = 'observability' | 'issue'
@@ -116,7 +116,7 @@ function buildReturnPath({
   })
 }
 
-export function WorkbenchWebhookTriggerCreateWebhook() {
+export function WebhookCreateForm() {
   const navigate = useNavigate()
   const location = useLocation()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
