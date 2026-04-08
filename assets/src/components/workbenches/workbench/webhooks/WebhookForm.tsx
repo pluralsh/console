@@ -2,27 +2,19 @@ import {
   Button,
   Checkbox,
   Chip,
-  DatadogLogoIcon,
   EmptyState,
   Flex,
   FormField,
-  GitHubLogoIcon,
-  GitLabLogoIcon,
-  GrafanaLogoIcon,
   Input2,
   ListBoxFooter,
   ListBoxItem,
-  NewrelicLogoIcon,
-  PagerdutyLogoIcon,
   PlusIcon,
   ReturnIcon,
   Select,
-  SentryLogoIcon,
   Tab,
   TabList,
   TicketIcon,
   VisualInspectionIcon,
-  WebhooksIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
@@ -30,8 +22,6 @@ import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { useSimpleToast } from 'components/utils/SimpleToastContext'
 import { StackedText } from 'components/utils/table/StackedText'
 import {
-  IssueWebhookProvider,
-  ObservabilityWebhookType,
   WorkbenchWebhookFragment,
   useCreateWorkbenchWebhookMutation,
   useGetWorkbenchWebhookMutation,
@@ -63,6 +53,10 @@ import {
   FormCardSC,
   StickyActionsFooterSC,
 } from '../create-edit/WorkbenchCreateOrEdit'
+import {
+  getIssueWebhookProviderIcon,
+  getObservabilityWebhookTypeIcon,
+} from './utils'
 
 type MatchType = 'regex' | 'substring'
 
@@ -83,38 +77,6 @@ function parseWebhookKey(key: string): {
   if (key.startsWith('obs:')) return { webhookId: key.slice(4) }
   if (key.startsWith('issue:')) return { issueWebhookId: key.slice(6) }
   return {}
-}
-
-function getObservabilityWebhookTypeIcon(type: Nullable<string>) {
-  switch (type) {
-    case ObservabilityWebhookType.Grafana:
-      return <GrafanaLogoIcon fullColor />
-    case ObservabilityWebhookType.Datadog:
-      return <DatadogLogoIcon fullColor />
-    case ObservabilityWebhookType.Newrelic:
-      return <NewrelicLogoIcon fullColor />
-    case ObservabilityWebhookType.Pagerduty:
-      return <PagerdutyLogoIcon fullColor />
-    case ObservabilityWebhookType.Sentry:
-      return <SentryLogoIcon />
-    case ObservabilityWebhookType.Plural:
-    default:
-      return <WebhooksIcon />
-  }
-}
-
-function getIssueWebhookProviderIcon(provider: Nullable<string>) {
-  switch (provider) {
-    case IssueWebhookProvider.Github:
-      return <GitHubLogoIcon />
-    case IssueWebhookProvider.Gitlab:
-      return <GitLabLogoIcon />
-    case IssueWebhookProvider.Jira:
-    case IssueWebhookProvider.Linear:
-    case IssueWebhookProvider.Asana:
-    default:
-      return <WebhooksIcon />
-  }
 }
 
 type RouteState = {

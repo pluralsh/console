@@ -2,15 +2,12 @@ import {
   Button,
   Flex,
   FormField,
-  GitHubLogoIcon,
-  GitLabLogoIcon,
   Input2,
   ListBoxItem,
   ReturnIcon,
   Select,
   TicketIcon,
   VisualInspectionIcon,
-  WebhooksIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
@@ -41,6 +38,7 @@ import {
 } from '../create-edit/WorkbenchCreateOrEdit'
 import { WebhookTriggerFormState } from './WebhookForm'
 import { getObservabilityWebhookTypeIcon } from '../../../settings/global/observability/EditObservabilityWebhook'
+import { getIssueWebhookProviderIcon } from './utils'
 
 type CreateWebhookType = 'observability' | 'issue'
 
@@ -70,20 +68,6 @@ function getInitialCreateWebhookFormState(): CreateWebhookFormState {
     issueName: '',
     issueUrl: '',
     issueSecret: '',
-  }
-}
-
-function getIssueWebhookProviderIcon(provider: Nullable<string>) {
-  switch (provider) {
-    case IssueWebhookProvider.Github:
-      return <GitHubLogoIcon />
-    case IssueWebhookProvider.Gitlab:
-      return <GitLabLogoIcon />
-    case IssueWebhookProvider.Jira:
-    case IssueWebhookProvider.Linear:
-    case IssueWebhookProvider.Asana:
-    default:
-      return <WebhooksIcon />
   }
 }
 
