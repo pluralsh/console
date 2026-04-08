@@ -16,13 +16,13 @@ import { StackedText } from 'components/utils/table/StackedText'
 import { Body2P, CaptionP, InlineA } from 'components/utils/typography/Text'
 import {
   useCreateWorkbenchCronMutation,
+  useGetWorkbenchCronMutation,
   useUpdateWorkbenchCronMutation,
-  useWorkbenchCronsQuery,
   useWorkbenchQuery,
   WorkbenchCronFragment,
 } from 'generated/graphql'
 import { isEqual, truncate } from 'lodash'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchCronSchedulesAbsPath,
@@ -30,7 +30,6 @@ import {
   WORKBENCHES_CRON_PARAM_ID,
 } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
-import { mapExistingNodes } from 'utils/graphql'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
 import {
   FormCardSC,
@@ -71,31 +70,23 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
   })
   const workbench = workbenchData?.workbench
 
-  // FIXME: Add query that just fetches the single cron by ID, now only the first page is loaded.
-  const {
-    data: cronsData,
-    loading: cronsLoading,
-    error: cronsError,
-  } = useWorkbenchCronsQuery({
-    variables: { id: workbenchId },
-    skip: mode !== 'edit' || !workbenchId,
+  const [
+    fetchCron,
+    { data: cronData, loading: cronLoading, error: cronsError },
+  ] = useGetWorkbenchCronMutation({
     onCompleted: (data) => {
-      const loadedCron = mapExistingNodes(data?.workbench?.crons).find(
-        (item) => item.id === cronId
-      )
+      const loadedCron = data?.workbenchCron
 
       if (!loadedCron) return
       setFormState(getInitialFormState(loadedCron))
     },
   })
 
-  const cron = useMemo(() => {
-    if (mode !== 'edit') return null
+  useEffect(() => {
+    if (mode === 'edit' && !!cronId) fetchCron({ variables: { id: cronId } })
+  }, [cronId, fetchCron, mode])
 
-    return mapExistingNodes(cronsData?.workbench?.crons).find(
-      (item) => item.id === cronId
-    )
-  }, [cronsData, cronId, mode])
+  const cron = mode === 'edit' ? (cronData?.workbenchCron ?? null) : null
 
   const preview = useMemo(
     () => buildCronPreview(formState.crontab),
@@ -159,7 +150,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
 
   if (cronsError) return <GqlError error={cronsError} />
 
-  if (mode === 'edit' && !cronsLoading && !cron)
+  if (mode === 'edit' && !cronLoading && !cron)
     return (
       <EmptyState message="Schedule not found">
         <Button
@@ -175,7 +166,7 @@ export function CronScheduleForm({ mode }: { mode: 'create' | 'edit' }) {
 
   const isLoading =
     (!workbenchData && workbenchLoading) ||
-    (mode === 'edit' && !cronsData && cronsLoading)
+    (mode === 'edit' && !cronData && cronLoading)
 
   return (
     <Flex
