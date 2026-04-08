@@ -11,6 +11,8 @@ import {
   getObservabilityWebhookTypeIcon,
 } from './webhooks/utils'
 import { mapExistingNodes } from 'utils/graphql'
+import { TRUNCATE } from 'components/utils/truncate'
+import { isEmpty } from 'lodash'
 
 export function WorkbenchTriggers({ workbenchId }: { workbenchId: string }) {
   const theme = useTheme()
@@ -60,7 +62,7 @@ export function WorkbenchTriggers({ workbenchId }: { workbenchId: string }) {
         display: 'flex',
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: theme.spacing.medium,
+        gap: theme.spacing.large,
         padding: theme.spacing.medium,
       }}
     >
@@ -86,21 +88,25 @@ export function WorkbenchTriggers({ workbenchId }: { workbenchId: string }) {
           ) : null}
         </Prop>
       )}
-      {webhooks.length > 0 && (
+      {!isEmpty(webhooks) && (
         <Prop
           title="Webhooks"
           margin={0}
-          overflow="hidden"
         >
           <Flex
             gap="small"
             flexWrap="nowrap"
-            overflow="hidden"
+            width="100%"
           >
             {webhooks.map((webhook) => (
               <Flex
                 key={webhook.id}
-                gap="xxxsmall"
+                gap="xxsmall"
+                align="center"
+                css={{
+                  maxWidth: 120,
+                  flex: '0 1 auto',
+                }}
               >
                 <IconFrame
                   icon={
@@ -112,10 +118,7 @@ export function WorkbenchTriggers({ workbenchId }: { workbenchId: string }) {
                   }
                   size="xsmall"
                 />
-                {webhook.name ||
-                  webhook.webhook?.name ||
-                  webhook.issueWebhook?.name ||
-                  'Webhook trigger'}
+                <span css={{ ...TRUNCATE }}>{webhook.name}</span>
               </Flex>
             ))}
           </Flex>
