@@ -143,7 +143,8 @@ export function WebhookSetupGuidePanel() {
         caret="none"
         padding="none"
         trigger={null}
-        css={{ height: '100%' }}
+        css={{ height: '100%', width: '100%' }}
+        additionalContentStyles={{ overflow: 'visible' }}
       >
         <div
           css={{ position: 'relative', height: '100%' }}
@@ -154,6 +155,7 @@ export function WebhookSetupGuidePanel() {
           }
         >
           <PanelWrapperSC>
+            <ResizeGripSC />
             <PanelHeaderSC>
               <Button
                 small
@@ -241,6 +243,25 @@ const PanelHeaderSC = styled.div(({ theme }) => ({
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
   borderBottom: theme.borders.default,
   flexShrink: 0,
+}))
+
+const ResizeGripSC = styled.div(({ theme }) => ({
+  borderLeft: theme.borders.default,
+  height: 40,
+  left: 2,
+  position: 'absolute',
+  top: 'calc(50% - 20px)',
+  width: 5,
+
+  '&:after': {
+    borderLeft: theme.borders.default,
+    content: '""',
+    height: 30,
+    left: 2,
+    position: 'absolute',
+    top: 'calc(50% - 15px)',
+    width: 5,
+  },
 }))
 
 const DragHandleSC = styled.div<{ $isDragging: boolean }>(
