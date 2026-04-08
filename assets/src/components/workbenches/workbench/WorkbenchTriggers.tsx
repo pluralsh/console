@@ -1,9 +1,11 @@
-import { Card, Chip, Flex, IconFrame, Prop } from '@pluralsh/design-system'
+import { Card, Flex, IconFrame, Prop } from '@pluralsh/design-system'
+import { Body2P } from 'components/utils/typography/Text'
 import { useWorkbenchTriggersSummaryQuery } from 'generated/graphql'
 import minBy from 'lodash/minBy'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { cronToExplanation } from './crons/utils'
+import { dayjsExtended as dayjs } from 'utils/datetime'
+import { formatPreviewTimestamp } from './crons/utils'
 import {
   getIssueWebhookProviderIcon,
   getObservabilityWebhookTypeIcon,
@@ -35,6 +37,19 @@ export function WorkbenchTriggers({ workbenchId }: { workbenchId: string }) {
       }) ?? null,
     [crons]
   )
+  const nextRunTime = useMemo(() => {
+    if (!nextCron?.nextRunAt) return null
+
+    const parsed = dayjs(nextCron.nextRunAt)
+    if (!parsed.isValid()) return nextCron.nextRunAt
+
+    return parsed.utc().format('YYYY-MM-DD HH:mm:ss [UTC]')
+  }, [nextCron])
+
+  const nextRunTimeParts = useMemo(
+    () => (nextRunTime ? formatPreviewTimestamp(nextRunTime) : null),
+    [nextRunTime]
+  )
 
   if (!nextCron && webhooks.length === 0) return null
 
@@ -54,7 +69,21 @@ export function WorkbenchTriggers({ workbenchId }: { workbenchId: string }) {
           title="Cron schedule"
           margin={0}
         >
-          {cronToExplanation(nextCron)}
+          {nextRunTimeParts ? (
+            <Body2P css={{ lineHeight: '20px' }}>
+              <span css={{ color: theme.colors['text-xlight'] }}>next at </span>
+              {nextRunTimeParts.datePart}{' '}
+              <span css={{ color: theme.colors['code-block-purple'] }}>
+                {nextRunTimeParts.hourPart}
+              </span>{' '}
+              {nextRunTimeParts.zonePart}
+            </Body2P>
+          ) : nextRunTime ? (
+            <Body2P css={{ lineHeight: '20px' }}>
+              <span css={{ color: theme.colors['text-xlight'] }}>next at </span>
+              {nextRunTime}
+            </Body2P>
+          ) : null}
         </Prop>
       )}
       {webhooks.length > 0 && (

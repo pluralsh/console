@@ -149,6 +149,7 @@ export function Workbench() {
         workbenchLoading={isLoading}
       />
       <Divider backgroundColor="border" />
+      <WorkbenchTriggers workbenchId={id} />
       <StackedText
         first="Workbench jobs"
         firstPartialType="body2Bold"
@@ -157,7 +158,6 @@ export function Workbench() {
         secondPartialType="body2"
         secondColor="text-light"
       />
-      <WorkbenchTriggers workbenchId={id} />
       <WorkbenchJobsTable workbenchId={id} />
       <Confirm
         open={deleteModalOpen}
