@@ -359,7 +359,7 @@ defmodule Console.Deployments.Workbenches do
   def heartbeat(%WorkbenchJob{id: id}, boot \\ false) do
     case {get_workbench_job!(id), boot} do
       {job, true} -> mark_running(job)
-      {%WorkbenchJob{status: s}, _} when s in ~w(successful failed cancelled)a -> {:ok, job}
+      {%WorkbenchJob{status: s} = job, _} when s in ~w(successful failed cancelled)a -> {:ok, job}
       {job, _} -> mark_running(job)
     end
   end
