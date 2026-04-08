@@ -5,9 +5,10 @@ import {
   WorkbenchJobActivitiesDocument,
   WorkbenchJobActivitiesQuery,
   WorkbenchJobActivityFragment,
+  WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import { useApolloClient } from '@apollo/client'
 import { AI_GRADIENT_BG } from 'components/ai/agent-runs/details/AIAgentRunMessages'
@@ -34,14 +35,29 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   })
   const job = data?.workbenchJob
   const activities = mapExistingNodes(job?.activities)
+  const lastId = lastActivityId(activities)
 
-  const [closedIds, setClosedIds] = useState<Set<string> | null>(null)
-  if (closedIds === null && !!data) setClosedIds(defaultClosedIds(activities))
-
-  const openIds = useMemo(
-    () => activities.filter((a) => !closedIds?.has(a.id)).map((a) => a.id),
-    [activities, closedIds]
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set<string>())
+  const addOpenIds = useCallback(
+    (newOpenIds: string[]) => setOpenIds(openIds.union(new Set(newOpenIds))),
+    [openIds]
   )
+
+  const allOpenIds = useMemo(() => {
+    const allIds = new Set<string>(
+      activities
+        .filter(
+          (a) =>
+            a.status === WorkbenchJobActivityStatus.Pending ||
+            a.status === WorkbenchJobActivityStatus.Running
+        )
+        .map((a) => a.id)
+    ).union(openIds)
+
+    if (lastId) allIds.add(lastId)
+
+    return allIds
+  }, [lastId, openIds, activities])
 
   useWorkbenchJobActivityDeltaSubscription({
     variables: { jobId },
@@ -75,16 +91,8 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
     <ActivitiesPanelSC>
       <ActivitiesAccordionSC
         type="multiple"
-        value={openIds}
-        onValueChange={(newOpenIds: string[]) => {
-          setClosedIds(
-            new Set(
-              activities
-                .filter((a) => !newOpenIds.includes(a.id))
-                .map((a) => a.id)
-            )
-          )
-        }}
+        values={allOpenIds}
+        onValueChange={addOpenIds}
       >
         <VirtualList
           isReversed
@@ -96,7 +104,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
           }
           renderer={({ rowData }) => (
             <WorkbenchJobActivity
-              isOpen={openIds.includes(rowData.id)}
+              isOpen={allOpenIds.has(rowData.id)}
               activity={rowData}
               progress={[]} // TODO
             />
@@ -135,11 +143,12 @@ const JobPromptCardSC = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing.small,
 }))
 
-const defaultClosedIds = (
+const lastActivityId = (
   activities: WorkbenchJobActivityFragment[]
-): Set<string> => {
+): string | null => {
   const last = activities.findLast(
     (a) => a.type !== WorkbenchJobActivityType.Memo
   )
-  return new Set(activities.filter((a) => a.id !== last?.id).map((a) => a.id))
+  if (last) return last.id
+  return null
 }
