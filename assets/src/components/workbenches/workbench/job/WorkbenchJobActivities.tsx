@@ -42,7 +42,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   const job = data?.workbenchJob
   const activities = mapExistingNodes(job?.activities)
 
-  const [closedIds, setClosedIds] = useState<Set<string>>(new Set<string>())
+  const [closedIds, setClosedIds] = useState<Set<string> | null>(null)
   if (closedIds === null && !!data) setClosedIds(defaultClosedIds(activities))
 
   const openIds = useMemo(
@@ -58,7 +58,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
         id &&
         isActivityTerminal(data?.workbenchJobActivityDelta?.payload?.status)
       )
-        setClosedIds(new Set(closedIds.add(id)))
+        setClosedIds(new Set(closedIds ? closedIds.add(id) : new Set([id])))
 
       updateCache<WorkbenchJobActivitiesQuery>(client.cache, {
         query: WorkbenchJobActivitiesDocument,
