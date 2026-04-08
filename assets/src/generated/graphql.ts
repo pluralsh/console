@@ -11952,6 +11952,7 @@ export type RootSubscriptionType = {
   workbenchJobActivityDelta?: Maybe<WorkbenchJobActivityDelta>;
   workbenchJobDelta?: Maybe<WorkbenchJobDelta>;
   workbenchJobProgress?: Maybe<WorkbenchJobProgress>;
+  workbenchTextStream?: Maybe<WorkbenchTextStream>;
 };
 
 
@@ -11999,6 +12000,11 @@ export type RootSubscriptionTypeWorkbenchJobDeltaArgs = {
 
 
 export type RootSubscriptionTypeWorkbenchJobProgressArgs = {
+  jobId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeWorkbenchTextStreamArgs = {
   jobId: Scalars['ID']['input'];
 };
 
@@ -15256,6 +15262,12 @@ export type WorkbenchSkillsAttributes = {
   files?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** git reference for skills */
   ref?: InputMaybe<GitRefAttributes>;
+};
+
+export type WorkbenchTextStream = {
+  __typename?: 'WorkbenchTextStream';
+  activityId?: Maybe<Scalars['ID']['output']>;
+  text?: Maybe<Scalars['String']['output']>;
 };
 
 export type WorkbenchTool = {

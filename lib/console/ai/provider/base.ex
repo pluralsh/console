@@ -14,10 +14,10 @@ defmodule Console.AI.Provider.Base do
     |> reqllm_tools()
   end
 
-  def generate_text(messages, model, %Stream{}, opts) do
+  def generate_text(messages, model, %Stream{} = s, opts) do
     with {:ok, model} <- model(model),
          {:ok, stream} <- stream_retrier(model, messages, opts),
-         {:ok, result} <- StreamResponse.process_stream(stream, on_result: &Stream.publish/1) do
+         {:ok, result} <- StreamResponse.process_stream(stream, Stream.stream_options(s)) do
       Stream.offset(1)
       {:ok, result}
     end

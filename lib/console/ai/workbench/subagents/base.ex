@@ -1,7 +1,8 @@
 defmodule Console.AI.Workbench.Subagents.Base do
   import Console.AI.Agents.Base, only: [publish_absinthe: 2]
   alias Console.Repo
-  alias Console.Schema.{AgentRun, WorkbenchJobThought}
+  alias Console.AI.Stream
+  alias Console.Schema.{AgentRun, WorkbenchJobThought, WorkbenchJob, WorkbenchJobActivity}
 
   defmacro __using__(_) do
     quote do
@@ -19,6 +20,20 @@ defmodule Console.AI.Workbench.Subagents.Base do
       _ -> true
     end)
     |> Map.new()
+  end
+
+  def stream_callbacks(%WorkbenchJob{id: id}) do
+    Stream.stream_callbacks(
+      on_result: &callback(%{text: &1}, workbench_text_stream: "workbench_jobs:#{id}:text_stream"),
+      on_thinking: &callback(%{text: &1}, workbench_text_stream: "workbench_jobs:#{id}:text_stream")
+    )
+  end
+
+  def stream_callbacks(%WorkbenchJobActivity{workbench_job_id: jid, id: id}) do
+    Stream.stream_callbacks(
+      on_result: &callback(%{text: &1, activity_id: id}, workbench_text_stream: "workbench_jobs:#{jid}:text_stream"),
+      on_thinking: &callback(%{text: &1, activity_id: id}, workbench_text_stream: "workbench_jobs:#{jid}:text_stream")
+    )
   end
 
   def callback(%{id: id, workbench_job_id: workbench_job_id}, {:content, content}) when is_binary(content),

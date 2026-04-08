@@ -1465,6 +1465,8 @@ type RootSubscriptionType {
 
   workbenchJobProgress(jobId: ID!): WorkbenchJobProgress
 
+  workbenchTextStream(jobId: ID!): WorkbenchTextStream
+
   clusterUpgradeProgress(upgradeId: ID!): ClusterUpgradeProgress
 }
 
@@ -3130,6 +3132,11 @@ type WorkbenchJobProgress {
   text: String
   tool: String
   arguments: Map
+}
+
+type WorkbenchTextStream {
+  activityId: ID
+  text: String
 }
 
 type WorkbenchConnection {

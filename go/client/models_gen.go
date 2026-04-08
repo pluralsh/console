@@ -9845,6 +9845,11 @@ type WorkbenchSkillsAttributes struct {
 	Files []*string `json:"files,omitempty"`
 }
 
+type WorkbenchTextStream struct {
+	ActivityID *string `json:"activityId,omitempty"`
+	Text       *string `json:"text,omitempty"`
+}
+
 type WorkbenchTool struct {
 	// the id of the tool
 	ID string `json:"id"`

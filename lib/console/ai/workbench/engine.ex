@@ -9,7 +9,7 @@ defmodule Console.AI.Workbench.Engine do
      message history to the memory engine to inform the next iteration of the loop.
   3. A complete tool is used to mark the conclusion of the job.
   """
-  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1]
+  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, stream_callbacks: 1]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
@@ -55,6 +55,7 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   def run(%__MODULE__{job: job} = engine) do
+    stream_callbacks(job)
     with {:ok, job} <- SA.Plan.run(job, engine.environment) do
       loop(%{engine | activities: list_activities(job)})
     end
@@ -123,6 +124,7 @@ defmodule Console.AI.Workbench.Engine do
     module = subagent_module(type)
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: type, prompt: prompt, tool_call: tool_attrs(call)}, job) do
+      stream_callbacks(activity)
       module.run(activity, job, %{environment | activities: activities})
       |> Workbenches.update_job_activity(activity)
     end
