@@ -23,6 +23,8 @@ import { useTheme } from 'styled-components'
 import { dayjsExtended as dayjs } from 'utils/datetime'
 import { StickyActionsFooterSC } from '../create-edit/WorkbenchCreateOrEdit'
 import { SCHEDULE_TRIGGER_REFETCH_QUERIES } from './WorkbenchTriggers'
+import { getWorkbenchCronSchedulesAbsPath } from 'routes/workbenchesRoutesConsts'
+import { useNavigate } from 'react-router-dom'
 
 const CRON_SHORTCUTS_URL =
   'https://github.com/harrisiirak/cron-parser?tab=readme-ov-file#predefined-expressions'
@@ -36,14 +38,11 @@ type ScheduleTriggerFormState = {
 export function WorkbenchScheduleTriggerForm({
   workbenchId,
   cron,
-  onCancel,
-  onCompleted,
 }: {
   workbenchId: string
   cron?: Nullable<WorkbenchCronFragment>
-  onCancel: () => void
-  onCompleted?: Nullable<() => void>
 }) {
+  const navigate = useNavigate()
   const theme = useTheme()
   const editing = !!cron
 
@@ -67,7 +66,7 @@ export function WorkbenchScheduleTriggerForm({
   const attributes = { crontab, prompt }
 
   const handleCompleted = () => {
-    onCompleted?.()
+    navigate(getWorkbenchCronSchedulesAbsPath(workbenchId))
     popToast({
       name: truncate(prompt, { length: 30 }),
       action: editing ? 'updated' : 'created',
@@ -222,7 +221,9 @@ export function WorkbenchScheduleTriggerForm({
         <Button
           secondary
           startIcon={<ReturnIcon />}
-          onClick={onCancel}
+          onClick={() =>
+            navigate(getWorkbenchCronSchedulesAbsPath(workbenchId))
+          }
           disabled={isSaving}
         >
           Back to all schedules

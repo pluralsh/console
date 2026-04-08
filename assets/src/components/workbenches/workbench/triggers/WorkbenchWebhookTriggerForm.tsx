@@ -207,9 +207,6 @@ export function WorkbenchWebhookTriggerForm({
     else createWorkbenchWebhook()
   }
 
-  // Keeping it here instead as a separate route to be able to easily switch back to the form.
-  // It's a bit of a hack but edit form doesn't fetch edited webhook data as there is no query yet.
-  // It would make going back to edit form with selected webhook data populated a bit more complex.
   if (createWebhook) {
     return (
       <WorkbenchCreateWebhookForm

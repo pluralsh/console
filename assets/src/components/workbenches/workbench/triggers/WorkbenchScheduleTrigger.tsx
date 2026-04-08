@@ -22,28 +22,22 @@ import {
   WorkbenchCronFragment,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
-  getWorkbenchAbsPath,
+  getWorkbenchCronScheduleCreateAbsPath,
+  getWorkbenchCronScheduleEditAbsPath,
   WORKBENCH_PARAM_ID,
-  WORKBENCHES_CRON_SCHEDULES_REL_PATH,
-  WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM,
 } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
 import { formatDateTime } from 'utils/datetime'
 import { mapExistingNodes } from 'utils/graphql'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
-import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
 import { WorkbenchScheduleDeleteModal } from './WorkbenchScheduleDeleteModal'
-import { WorkbenchScheduleTriggerForm } from './WorkbenchScheduleTriggerForm'
 
 export function WorkbenchScheduleTrigger() {
+  const navigate = useNavigate()
   const theme = useTheme()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
-  const [searchParams, setSearchParams] = useSearchParams()
-  const isCreating =
-    searchParams.get(WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM) === 'true'
-  const [editingCronId, setEditingCronId] = useState<Nullable<string>>(null)
   const [deletingCron, setDeletingCron] =
     useState<Nullable<WorkbenchCronFragment>>(null)
 
@@ -75,25 +69,20 @@ export function WorkbenchScheduleTrigger() {
     )
   )
 
-  const editingCron = useMemo(
-    () => crons.find((cron) => cron.id === editingCronId),
-    [crons, editingCronId]
-  )
-
   const columns = useMemo(
     () =>
       getColumns({
-        onEdit: (cron) => setEditingCronId(cron.id),
+        onEdit: (cron) =>
+          navigate(
+            getWorkbenchCronScheduleEditAbsPath({
+              workbenchId,
+              cronId: cron.id,
+            })
+          ),
         onDelete: (cron) => setDeletingCron(cron),
       }),
-    []
+    [navigate, workbenchId]
   )
-  const clearForm = () => {
-    setEditingCronId(null)
-    setSearchParams({}, { replace: true })
-  }
-
-  const showForm = isCreating || !!editingCron
   const showEmptyState = !!data && crons.length === 0
 
   if (workbenchError) return <GqlError error={workbenchError} />
@@ -123,17 +112,7 @@ export function WorkbenchScheduleTrigger() {
         width="100%"
         css={{ maxWidth: 750 }}
       >
-        {showForm ? (
-          <FormCardSC>
-            <WorkbenchScheduleTriggerForm
-              key={JSON.stringify(editingCron) ?? 'new'}
-              workbenchId={workbenchId}
-              cron={editingCron}
-              onCancel={clearForm}
-              onCompleted={editingCron ? undefined : clearForm}
-            />
-          </FormCardSC>
-        ) : showEmptyState ? (
+        {showEmptyState ? (
           <WorkbenchScheduleEmptyState />
         ) : (
           <StretchedFlex
@@ -156,11 +135,7 @@ export function WorkbenchScheduleTrigger() {
               <Button
                 small
                 onClick={() => {
-                  setEditingCronId(null)
-                  setSearchParams(
-                    { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' },
-                    { replace: true }
-                  )
+                  navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
                 }}
               >
                 Add cron schedule
@@ -276,9 +251,7 @@ function WorkbenchScheduleEmptyState() {
         <Button
           small
           onClick={() => {
-            navigate(
-              `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_CRON_SCHEDULES_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true`
-            )
+            navigate(getWorkbenchCronScheduleCreateAbsPath(workbenchId))
           }}
         >
           Create new schedule

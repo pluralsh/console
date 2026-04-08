@@ -23,32 +23,21 @@ import {
   WorkbenchWebhookFragment,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
-  getWorkbenchAbsPath,
+  getWorkbenchWebhookTriggerCreateAbsPath,
+  getWorkbenchWebhookTriggerEditAbsPath,
   WORKBENCH_PARAM_ID,
-  WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM,
-  WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM,
-  WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 import { getWorkbenchBreadcrumbs } from '../Workbench'
-import { FormCardSC } from '../create-edit/WorkbenchCreateOrEdit'
 import { WorkbenchWebhookDeleteModal } from './WorkbenchWebhookDeleteModal'
-import { WorkbenchWebhookTriggerForm } from './WorkbenchWebhookTriggerForm'
 
 export function WorkbenchWebhookTrigger() {
   const navigate = useNavigate()
   const theme = useTheme()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
-  const [searchParams, setSearchParams] = useSearchParams()
-  const isCreating =
-    searchParams.get(WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM) === 'true'
-  const isCreatingWebhook =
-    searchParams.get(WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM) === 'true'
-  const [editingWebhookId, setEditingWebhookId] =
-    useState<Nullable<string>>(null)
   const [deletingWebhook, setDeletingWebhook] =
     useState<Nullable<WorkbenchWebhookFragment>>(null)
 
@@ -85,25 +74,20 @@ export function WorkbenchWebhookTrigger() {
     )
   )
 
-  const editingWebhook = useMemo(
-    () => webhooks.find((webhook) => webhook.id === editingWebhookId),
-    [webhooks, editingWebhookId]
-  )
-
   const columns = useMemo(
     () =>
       getColumns({
-        onEdit: (webhook) => setEditingWebhookId(webhook.id),
+        onEdit: (webhook) =>
+          navigate(
+            getWorkbenchWebhookTriggerEditAbsPath({
+              workbenchId,
+              webhookId: webhook.id,
+            })
+          ),
         onDelete: (webhook) => setDeletingWebhook(webhook),
       }),
-    []
+    [navigate, workbenchId]
   )
-  const clearForm = () => {
-    setEditingWebhookId(null)
-    setSearchParams({}, { replace: true })
-  }
-
-  const showForm = isCreating || isCreatingWebhook || !!editingWebhook
   const showEmptyState = !!data && webhooks.length === 0
 
   if (workbenchError) return <GqlError error={workbenchError} />
@@ -134,38 +118,7 @@ export function WorkbenchWebhookTrigger() {
         width="100%"
         css={{ maxWidth: 750 }}
       >
-        {showForm ? (
-          <FormCardSC>
-            <WorkbenchWebhookTriggerForm
-              key={JSON.stringify(editingWebhook) ?? 'new'}
-              workbenchId={workbenchId}
-              webhook={editingWebhook}
-              createWebhook={isCreatingWebhook}
-              createWebhookBackToList={!isCreating}
-              onCreateWebhook={() =>
-                setSearchParams(
-                  {
-                    [WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM]: 'true',
-                    ...(isCreating
-                      ? { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' }
-                      : {}),
-                  },
-                  { replace: true }
-                )
-              }
-              onCancelCreateWebhook={() =>
-                setSearchParams(
-                  isCreating
-                    ? { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' }
-                    : {},
-                  { replace: true }
-                )
-              }
-              onCancel={clearForm}
-              onCompleted={editingWebhook ? undefined : clearForm}
-            />
-          </FormCardSC>
-        ) : showEmptyState ? (
+        {showEmptyState ? (
           <WorkbenchWebhookEmptyState workbenchId={workbenchId} />
         ) : (
           <StretchedFlex
@@ -191,7 +144,10 @@ export function WorkbenchWebhookTrigger() {
                   secondary
                   onClick={() => {
                     navigate(
-                      `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM}=true`
+                      getWorkbenchWebhookTriggerCreateAbsPath(workbenchId),
+                      {
+                        state: { createWebhook: true },
+                      }
                     )
                   }}
                 >
@@ -200,10 +156,8 @@ export function WorkbenchWebhookTrigger() {
                 <Button
                   small
                   onClick={() => {
-                    setEditingWebhookId(null)
-                    setSearchParams(
-                      { [WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM]: 'true' },
-                      { replace: true }
+                    navigate(
+                      getWorkbenchWebhookTriggerCreateAbsPath(workbenchId)
                     )
                   }}
                 >
@@ -342,9 +296,9 @@ function WorkbenchWebhookEmptyState({ workbenchId }: { workbenchId: string }) {
             small
             secondary
             onClick={() => {
-              navigate(
-                `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_WEBHOOK_QUERY_PARAM}=true`
-              )
+              navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId), {
+                state: { createWebhook: true },
+              })
             }}
           >
             Create new webhook
@@ -352,9 +306,7 @@ function WorkbenchWebhookEmptyState({ workbenchId }: { workbenchId: string }) {
           <Button
             small
             onClick={() =>
-              navigate(
-                `${getWorkbenchAbsPath(workbenchId)}/${WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH}?${WORKBENCHES_TRIGGERS_CREATE_QUERY_PARAM}=true`
-              )
+              navigate(getWorkbenchWebhookTriggerCreateAbsPath(workbenchId))
             }
           >
             Select existing webhook
