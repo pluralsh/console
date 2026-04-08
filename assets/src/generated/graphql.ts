@@ -19263,6 +19263,13 @@ export type WorkbenchesIssuesQueryVariables = Exact<{
 
 export type WorkbenchesIssuesQuery = { __typename?: 'RootQueryType', workbenchIssues?: { __typename?: 'IssueConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'IssueEdge', node?: { __typename?: 'Issue', id: string, title: string, externalId: string, provider: IssueWebhookProvider, status: IssueStatus, url: string, insertedAt?: string | null, updatedAt?: string | null, workbench?: { __typename?: 'Workbench', id: string, runs?: { __typename?: 'WorkbenchJobConnection', edges?: Array<{ __typename?: 'WorkbenchJobEdge', node?: { __typename?: 'WorkbenchJob', id: string } | null } | null> | null } | null } | null } | null } | null> | null } | null };
 
+export type GetWorkbenchCronMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GetWorkbenchCronMutation = { __typename?: 'RootMutationType', workbenchCron?: { __typename?: 'WorkbenchCron', id: string, crontab?: string | null, prompt?: string | null, lastRunAt?: string | null, nextRunAt?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+
 export type WorkbenchCronsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -40288,6 +40295,39 @@ export type WorkbenchesIssuesQueryHookResult = ReturnType<typeof useWorkbenchesI
 export type WorkbenchesIssuesLazyQueryHookResult = ReturnType<typeof useWorkbenchesIssuesLazyQuery>;
 export type WorkbenchesIssuesSuspenseQueryHookResult = ReturnType<typeof useWorkbenchesIssuesSuspenseQuery>;
 export type WorkbenchesIssuesQueryResult = Apollo.QueryResult<WorkbenchesIssuesQuery, WorkbenchesIssuesQueryVariables>;
+export const GetWorkbenchCronDocument = gql`
+    mutation GetWorkbenchCron($id: ID!) {
+  workbenchCron(id: $id) {
+    ...WorkbenchCron
+  }
+}
+    ${WorkbenchCronFragmentDoc}`;
+export type GetWorkbenchCronMutationFn = Apollo.MutationFunction<GetWorkbenchCronMutation, GetWorkbenchCronMutationVariables>;
+
+/**
+ * __useGetWorkbenchCronMutation__
+ *
+ * To run a mutation, you first call `useGetWorkbenchCronMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useGetWorkbenchCronMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [getWorkbenchCronMutation, { data, loading, error }] = useGetWorkbenchCronMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetWorkbenchCronMutation(baseOptions?: Apollo.MutationHookOptions<GetWorkbenchCronMutation, GetWorkbenchCronMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<GetWorkbenchCronMutation, GetWorkbenchCronMutationVariables>(GetWorkbenchCronDocument, options);
+      }
+export type GetWorkbenchCronMutationHookResult = ReturnType<typeof useGetWorkbenchCronMutation>;
+export type GetWorkbenchCronMutationResult = Apollo.MutationResult<GetWorkbenchCronMutation>;
+export type GetWorkbenchCronMutationOptions = Apollo.BaseMutationOptions<GetWorkbenchCronMutation, GetWorkbenchCronMutationVariables>;
 export const WorkbenchCronsDocument = gql`
     query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
@@ -41682,6 +41722,7 @@ export const namedOperations = {
     UpdateUser: 'UpdateUser',
     DeleteUser: 'DeleteUser',
     CreateInvite: 'CreateInvite',
+    GetWorkbenchCron: 'GetWorkbenchCron',
     GetWorkbenchWebhook: 'GetWorkbenchWebhook',
     CreateWorkbench: 'CreateWorkbench',
     UpdateWorkbench: 'UpdateWorkbench',

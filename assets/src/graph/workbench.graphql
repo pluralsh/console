@@ -364,6 +364,12 @@ query WorkbenchesIssues($first: Int = 100, $after: String) {
   }
 }
 
+mutation GetWorkbenchCron($id: ID!) {
+  workbenchCron(id: $id) {
+    ...WorkbenchCron
+  }
+}
+
 query WorkbenchCrons($id: ID!, $first: Int = 100, $after: String) {
   workbench(id: $id) {
     id

@@ -1827,6 +1827,11 @@
          "name": "WorkbenchesIssues",
          "body": "query WorkbenchesIssues($first: Int = 100, $after: String) {\n  workbenchIssues(first: $first, after: $after) {\n    pageInfo {\n      ...PageInfo\n      __typename\n    }\n    edges {\n      node {\n        ...WorkbenchIssue\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment PageInfo on PageInfo {\n  hasNextPage\n  endCursor\n  hasPreviousPage\n  startCursor\n  __typename\n}\n\nfragment WorkbenchIssue on Issue {\n  id\n  title\n  externalId\n  provider\n  status\n  url\n  insertedAt\n  updatedAt\n  workbench {\n    id\n    runs(first: 1) {\n      edges {\n        node {\n          id\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  __typename\n}"
       },
+      "sha256:5563c9fb9619eb108ef47eaa50daa19c038925a4aa2d4611ee311c67a4ef1ab7": {
+         "type": "mutation",
+         "name": "GetWorkbenchCron",
+         "body": "mutation GetWorkbenchCron($id: ID!) {\n  workbenchCron(id: $id) {\n    ...WorkbenchCron\n    __typename\n  }\n}\n\nfragment WorkbenchCron on WorkbenchCron {\n  id\n  crontab\n  prompt\n  lastRunAt\n  nextRunAt\n  insertedAt\n  updatedAt\n  __typename\n}"
+      },
       "sha256:c72fb2a7d5f15fa359f0641fa1a7627842eb6937b73188271c288728d444d6aa": {
          "type": "query",
          "name": "WorkbenchCrons",
