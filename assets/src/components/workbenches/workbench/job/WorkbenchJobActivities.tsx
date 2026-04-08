@@ -8,7 +8,7 @@ import {
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
 } from 'generated/graphql'
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { useApolloClient } from '@apollo/client'
 import { GqlError } from 'components/utils/Alert'
@@ -41,40 +41,24 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   })
   const job = data?.workbenchJob
   const activities = mapExistingNodes(job?.activities)
-  const lastId = lastActivityId(activities)
 
-  const [openIds, setOpenIds] = useState<Set<string>>(new Set<string>())
-  const closeActivity = useCallback(
-    (closeId: string) => {
-      setOpenIds(new Set(openIds.values().filter((id) => id !== closeId)))
-    },
-    [openIds]
+  const [closedIds, setClosedIds] = useState<Set<string>>(new Set<string>())
+  if (closedIds === null && !!data) setClosedIds(defaultClosedIds(activities))
+
+  const openIds = useMemo(
+    () => activities.filter((a) => !closedIds?.has(a.id)).map((a) => a.id),
+    [activities, closedIds]
   )
-
-  const allOpenIds = useMemo(() => {
-    const allIds = new Set<string>(
-      activities
-        .filter(
-          (a) =>
-            a.status === WorkbenchJobActivityStatus.Pending ||
-            a.status === WorkbenchJobActivityStatus.Running
-        )
-        .map((a) => a.id)
-    ).union(openIds)
-
-    if (lastId) allIds.add(lastId)
-
-    return allIds
-  }, [lastId, openIds, activities])
 
   useWorkbenchJobActivityDeltaSubscription({
     variables: { jobId },
     onData: ({ data: { data } }) => {
+      const id = data?.workbenchJobActivityDelta?.payload?.id
       if (
+        id &&
         isActivityTerminal(data?.workbenchJobActivityDelta?.payload?.status)
-      ) {
-        closeActivity(data?.workbenchJobActivityDelta?.payload?.id)
-      }
+      )
+        setClosedIds(new Set(closedIds.add(id)))
 
       updateCache<WorkbenchJobActivitiesQuery>(client.cache, {
         query: WorkbenchJobActivitiesDocument,
@@ -105,8 +89,16 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
     <ActivitiesPanelSC>
       <ActivitiesAccordionSC
         type="multiple"
-        values={allOpenIds}
-        onValueChange={(values) => setOpenIds(new Set(values))}
+        value={openIds}
+        onValueChange={(newOpenIds: string[]) => {
+          setClosedIds(
+            new Set(
+              activities
+                .filter((a) => !newOpenIds.includes(a.id))
+                .map((a) => a.id)
+            )
+          )
+        }}
       >
         <VirtualList
           isReversed
@@ -118,7 +110,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
           }
           renderer={({ rowData }) => (
             <WorkbenchJobActivity
-              isOpen={allOpenIds.has(rowData.id)}
+              isOpen={openIds.includes(rowData.id)}
               activity={rowData}
               progress={[]} // TODO
             />
@@ -165,4 +157,16 @@ const lastActivityId = (
   )
   if (last) return last.id
   return null
+}
+
+const defaultClosedIds = (
+  activities: WorkbenchJobActivityFragment[]
+): Set<string> => {
+  const lastId = lastActivityId(activities)
+
+  return new Set(
+    activities
+      .filter((a) => a.id !== lastId && isActivityTerminal(a.status))
+      .map((a) => a.id)
+  )
 }
