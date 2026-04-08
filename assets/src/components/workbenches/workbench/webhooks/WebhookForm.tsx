@@ -6,6 +6,7 @@ import {
   ListBoxItem,
   ReturnIcon,
   Select,
+  SidePanelOpenIcon,
   TicketIcon,
   VisualInspectionIcon,
   useSetBreadcrumbs,
@@ -153,39 +154,50 @@ export function WebhookForm() {
         secondColor="text-xlight"
         gap="xxsmall"
       />
-      <Flex
-        direction="column"
-        width="100%"
-        css={{ maxWidth: 750 }}
-      >
-        {!workbenchData && workbenchLoading ? (
-          <RectangleSkeleton
-            $width="100%"
-            $height="100%"
-          />
-        ) : (
-          <FormCardSC>
-            <CreateWebhookForm
-              onReturn={() =>
-                navigate(returnPath, {
-                  state: { draftState: routeState?.draftState },
-                })
-              }
-              returnPathIsList={returnPath === listPath}
-              onCreated={(selectedWebhookKey) => {
-                navigate(
-                  buildReturnPath({
-                    returnPath,
-                    selectedWebhook: selectedWebhookKey,
-                  }),
-                  {
-                    state: { draftState: routeState?.draftState },
-                  }
-                )
-              }}
+      <Flex gap="medium">
+        <Flex
+          direction="column"
+          width="100%"
+          css={{ maxWidth: 750 }}
+        >
+          {!workbenchData && workbenchLoading ? (
+            <RectangleSkeleton
+              $width="100%"
+              $height="100%"
             />
-          </FormCardSC>
-        )}
+          ) : (
+            <FormCardSC>
+              <CreateWebhookForm
+                onReturn={() =>
+                  navigate(returnPath, {
+                    state: { draftState: routeState?.draftState },
+                  })
+                }
+                returnPathIsList={returnPath === listPath}
+                onCreated={(selectedWebhookKey) => {
+                  navigate(
+                    buildReturnPath({
+                      returnPath,
+                      selectedWebhook: selectedWebhookKey,
+                    }),
+                    {
+                      state: { draftState: routeState?.draftState },
+                    }
+                  )
+                }}
+              />
+            </FormCardSC>
+          )}
+        </Flex>
+        <div css={{ width: 200 }}>
+          <Button
+            secondary
+            startIcon={<SidePanelOpenIcon />}
+            width="100%"
+          >
+            Setup Guide
+          </Button>
+        </div>
       </Flex>
     </Flex>
   )
