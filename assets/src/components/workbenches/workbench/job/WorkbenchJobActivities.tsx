@@ -8,7 +8,7 @@ import {
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import { useApolloClient } from '@apollo/client'
 import { GqlError } from 'components/utils/Alert'
@@ -24,6 +24,13 @@ import { WorkbenchJobActivity } from './WorkbenchJobActivity'
 
 export const ACTIVITY_GAP = 'medium' as const
 
+function isActivityTerminal(status: WorkbenchJobActivityStatus | undefined) {
+  return (
+    status === WorkbenchJobActivityStatus.Successful ||
+    status === WorkbenchJobActivityStatus.Failed
+  )
+}
+
 export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   const client = useApolloClient()
 
@@ -37,6 +44,12 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   const lastId = lastActivityId(activities)
 
   const [openIds, setOpenIds] = useState<Set<string>>(new Set<string>())
+  const closeActivity = useCallback(
+    (closeId: string) => {
+      setOpenIds(new Set(openIds.values().filter((id) => id !== closeId)))
+    },
+    [openIds]
+  )
 
   const allOpenIds = useMemo(() => {
     const allIds = new Set<string>(
@@ -57,6 +70,12 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   useWorkbenchJobActivityDeltaSubscription({
     variables: { jobId },
     onData: ({ data: { data } }) => {
+      if (
+        isActivityTerminal(data?.workbenchJobActivityDelta?.payload?.status)
+      ) {
+        closeActivity(data?.workbenchJobActivityDelta?.payload?.id)
+      }
+
       updateCache<WorkbenchJobActivitiesQuery>(client.cache, {
         query: WorkbenchJobActivitiesDocument,
         variables: { id: jobId },
