@@ -22,8 +22,6 @@ import {
   IssueWebhookProvider,
   ObservabilityWebhookType,
   useCreateIssueWebhookMutation,
-  useIssueWebhooksQuery,
-  useObservabilityWebhooksQuery,
   useUpsertObservabilityWebhookMutation,
   useWorkbenchQuery,
 } from 'generated/graphql'
@@ -134,14 +132,6 @@ export function WebhookCreateForm() {
   })
   const workbench = workbenchData?.workbench
 
-  const {
-    refetch: refetchObservabilityWebhooks,
-    error: observabilityWebhooksError,
-  } = useObservabilityWebhooksQuery({ variables: { first: 100 } })
-
-  const { refetch: refetchIssueWebhooks, error: issueWebhooksError } =
-    useIssueWebhooksQuery({ variables: { first: 100 } })
-
   useSetBreadcrumbs(
     useMemo(
       () => [
@@ -156,8 +146,7 @@ export function WebhookCreateForm() {
     )
   )
 
-  const error =
-    workbenchError ?? observabilityWebhooksError ?? issueWebhooksError
+  const error = workbenchError
 
   if (error) return <GqlError error={error} />
 
@@ -210,10 +199,6 @@ export function WebhookCreateForm() {
                   }
                 )
               }}
-              refetchObservabilityWebhooks={() =>
-                refetchObservabilityWebhooks()
-              }
-              refetchIssueWebhooks={() => refetchIssueWebhooks()}
             />
           </FormCardSC>
         )}
@@ -226,14 +211,10 @@ function CreateWebhookForm({
   onReturn,
   returnPathIsList,
   onCreated,
-  refetchObservabilityWebhooks,
-  refetchIssueWebhooks,
 }: {
   onReturn: () => void
   returnPathIsList?: boolean
   onCreated: (selectedWebhookKey: string) => void
-  refetchObservabilityWebhooks: () => Promise<unknown>
-  refetchIssueWebhooks: () => Promise<unknown>
 }) {
   const { popToast } = useSimpleToast()
   const [formState, setFormState] = useState<CreateWebhookFormState>(
@@ -279,12 +260,13 @@ function CreateWebhookForm({
             secret: formState.observabilitySecret.trim(),
           },
         },
+        refetchQueries: ['WorkbenchWebhooks', 'WorkbenchTriggersSummary'],
+        awaitRefetchQueries: true,
       })
 
       const createdWebhook = response.data?.upsertObservabilityWebhook
       if (!createdWebhook) return
 
-      await refetchObservabilityWebhooks()
       onCreated(`obs:${createdWebhook.id}`)
       popToast({
         name: createdWebhook.name,
@@ -304,12 +286,13 @@ function CreateWebhookForm({
           secret: formState.issueSecret.trim(),
         },
       },
+      refetchQueries: ['WorkbenchWebhooks', 'WorkbenchTriggersSummary'],
+      awaitRefetchQueries: true,
     })
 
     const createdWebhook = response.data?.createIssueWebhook
     if (!createdWebhook) return
 
-    await refetchIssueWebhooks()
     onCreated(`issue:${createdWebhook.id}`)
     popToast({
       name: createdWebhook.name,
