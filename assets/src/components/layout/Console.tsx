@@ -1,9 +1,5 @@
-import {
-  Flex,
-  MarkdocContextProvider,
-  usePrevious,
-} from '@pluralsh/design-system'
-import { Suspense, useEffect, useRef } from 'react'
+import { Flex, MarkdocContextProvider } from '@pluralsh/design-system'
+import { Suspense, useRef } from 'react'
 
 import { BillingSubscriptionProvider } from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
@@ -25,28 +21,22 @@ import { SelectedProjectProvider } from '../contexts/ProjectsContext'
 import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
 
 import { CLOSE_CHAT_ACTION_PANEL_EVENT } from 'components/ai/AIAgentSessions'
-import {
-  AIContextProvider,
-  useChatbot,
-  useChatbotContext,
-} from 'components/ai/AIContext'
-import { ChatbotPanel } from 'components/ai/chatbot/Chatbot'
+import { useChatbot } from 'components/ai/AIContext'
 import { CommandPaletteProvider } from 'components/commandpalette/CommandPaletteContext'
 import { FeatureFlagProvider } from 'components/flows/FeatureFlagContext'
 import { useNativeDomEvent } from 'components/hooks/useNativeDomEvent'
-import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
-import { ApplicationUpdateToast } from './ApplicationUpdateToast'
-import Header from './Header'
-import {
-  WebhookSetupGuidePanel,
-  WebhookSetupGuidePanelProvider,
-  useWebhookSetupGuidePanel,
-} from '../workbenches/workbench/webhooks/WebhookSetupGuidePanel'
-import { Sidebar, SidebarProvider } from './Sidebar'
-import Subheader from './Subheader'
-import { SentryInitializer } from '../SentryInitializer'
 import { AccessTokenProvider } from 'components/profile/access-tokens/AccessTokenContext'
 import { SimpleToastProvider } from 'components/utils/SimpleToastContext'
+import { CloudConsoleWelcomeModal } from '../cloud-setup/CloudConsoleWelcomeModal'
+import { SentryInitializer } from '../SentryInitializer'
+import { ApplicationUpdateToast } from './ApplicationUpdateToast'
+import Header from './Header'
+import { Sidebar, SidebarProvider } from './Sidebar'
+import Subheader from './Subheader'
+import {
+  TopLevelSidePanel,
+  TopLevelSidePanelProviders,
+} from './TopLevelSidePanel'
 
 export default function Console() {
   return (
@@ -63,17 +53,15 @@ export default function Console() {
                         <AccessTokenProvider>
                           <DeploymentSettingsProvider>
                             <SidebarProvider>
-                              <AIContextProvider>
+                              <TopLevelSidePanelProviders>
                                 <FeatureFlagProvider>
                                   <CommandPaletteProvider>
                                     <SimpleToastProvider>
-                                      <WebhookSetupGuidePanelProvider>
-                                        <ConsoleContent />
-                                      </WebhookSetupGuidePanelProvider>
+                                      <ConsoleContent />
                                     </SimpleToastProvider>
                                   </CommandPaletteProvider>
                                 </FeatureFlagProvider>
-                              </AIContextProvider>
+                              </TopLevelSidePanelProviders>
                             </SidebarProvider>
                           </DeploymentSettingsProvider>
                         </AccessTokenProvider>
@@ -94,21 +82,6 @@ function ConsoleContent() {
   const isProduction = import.meta.env.MODE === 'production'
   const isCloudSetupUnfinished = useCloudSetupUnfinished()
   const { setActionsPanelOpen } = useChatbot()
-  const { open: isAiPanelOpen, setOpen: setAiPanelOpen } = useChatbotContext()
-  const { open: isSetupGuidePanelOpen, setOpen: setSetupGuidePanelOpen } =
-    useWebhookSetupGuidePanel()
-  const prevIsSetupGuidePanelOpen = usePrevious(isSetupGuidePanelOpen)
-
-  useEffect(() => {
-    if (isAiPanelOpen) setSetupGuidePanelOpen(false)
-  }, [isAiPanelOpen, setSetupGuidePanelOpen])
-
-  // Guard with previous value so this only fires on false to true transition.
-  // Without this guard it would re-run (and close AI) on every AI context re-render while custom is open.
-  useEffect(() => {
-    if (isSetupGuidePanelOpen && prevIsSetupGuidePanelOpen === false)
-      setAiPanelOpen(false)
-  }, [isSetupGuidePanelOpen, prevIsSetupGuidePanelOpen, setAiPanelOpen])
 
   // need to do this natively instead of using onPointerDown so that clicking portaled elements like modals don't close the actions panel
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -157,8 +130,7 @@ function ConsoleContent() {
           </Flex>
         </Flex>
       </Flex>
-      <WebhookSetupGuidePanel />
-      <ChatbotPanel />
+      <TopLevelSidePanel />
     </Flex>
   )
 }

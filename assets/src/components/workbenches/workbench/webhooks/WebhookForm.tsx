@@ -25,7 +25,7 @@ import {
 } from 'generated/graphql'
 import { capitalize } from 'lodash'
 import queryString from 'query-string'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useEffectEvent, useMemo, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   getWorkbenchWebhookTriggersAbsPath,
@@ -165,11 +165,8 @@ export function WebhookForm() {
   const location = useLocation()
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
   const routeState = location.state as Nullable<RouteState>
-  const {
-    open,
-    openSetupGuidePanel,
-    setOpen: setSetupGuidePanelOpen,
-  } = useWebhookSetupGuidePanel()
+  const { isOpen, openSetupGuidePanel, closeSetupGuidePanel } =
+    useWebhookSetupGuidePanel()
   const [setupGuideSelection, setSetupGuideSelection] =
     useState<SetupGuideSelection>({
       webhookType: 'observability',
@@ -208,13 +205,15 @@ export function WebhookForm() {
 
   const error = workbenchError
 
-  useEffect(() => () => setSetupGuidePanelOpen(false), [setSetupGuidePanelOpen])
+  const onUnmount = useEffectEvent(() => {
+    if (isOpen) closeSetupGuidePanel()
+  })
+  useEffect(() => () => onUnmount(), [])
 
   useEffect(() => {
-    if (!open) return
-
+    if (!isOpen) return
     if (!setupGuideMarkdownPath) {
-      setSetupGuidePanelOpen(false)
+      closeSetupGuidePanel()
       return
     }
 
@@ -223,11 +222,11 @@ export function WebhookForm() {
       markdownPath: setupGuideMarkdownPath,
     })
   }, [
-    open,
+    isOpen,
     setupGuideMarkdownPath,
     setupGuideDocumentationUrl,
     openSetupGuidePanel,
-    setSetupGuidePanelOpen,
+    closeSetupGuidePanel,
   ])
 
   if (error) return <GqlError error={error} />

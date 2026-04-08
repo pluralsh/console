@@ -28,6 +28,10 @@ import { useTheme } from 'styled-components'
 import usePersistedState from '../hooks/usePersistedState.tsx'
 import { SidebarContext } from 'components/layout/Sidebar.tsx'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment.tsx'
+import {
+  type SidePanel,
+  useTopLevelSidePanel,
+} from 'components/layout/TopLevelSidePanel.tsx'
 
 export enum AIVerbosityLevel {
   High = 'High',
@@ -121,10 +125,13 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
   )
 }
 
+const SIDE_PANEL_TYPE: SidePanel = 'ai-chat'
+
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const { spacing } = useTheme()
   const { setIsExpanded: setSidebarExpanded } = use(SidebarContext)
-  const [open, setOpenState] = usePersistedState('plural-ai-chat-open', false)
+  const { sidePanel, setSidePanel } = useTopLevelSidePanel()
+  const open = sidePanel === SIDE_PANEL_TYPE
   const [viewType, setViewType] = usePersistedState<AIViewTypes>(
     'plural-ai-view-type',
     AIViewTypes.ChatThread
@@ -198,8 +205,10 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
       value={{
         open,
         setOpen: (open) => {
-          setOpenState(open)
-          if (open) setSidebarExpanded(false)
+          if (open) {
+            setSidePanel(SIDE_PANEL_TYPE)
+            setSidebarExpanded(false)
+          } else setSidePanel(null)
         },
         currentThread,
         currentThreadLoading,

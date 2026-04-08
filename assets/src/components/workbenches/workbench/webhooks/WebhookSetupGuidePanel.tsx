@@ -1,6 +1,4 @@
 import {
-  Accordion,
-  AccordionItem,
   ArrowTopRightIcon,
   Button,
   CloseIcon,
@@ -10,16 +8,17 @@ import {
   SidePanelOpenIcon,
 } from '@pluralsh/design-system'
 import {
-  CHATBOT_HEADER_HEIGHT,
-  DragHandleSC,
-  ResizeGripSC,
-} from 'components/ai/chatbot/Chatbot'
-import { useResizablePane } from 'components/ai/chatbot/useResizeableChatPane'
+  SIDE_PANEL_HEADER_HEIGHT,
+  SidePanelContent,
+} from 'components/ai/chatbot/SidePanelShared'
+import {
+  SidePanel,
+  useTopLevelSidePanel,
+} from 'components/layout/TopLevelSidePanel'
 import {
   ReactNode,
   createContext,
   use,
-  useCallback,
   useEffect,
   useMemo,
   useState,
@@ -27,8 +26,7 @@ import {
 import styled from 'styled-components'
 
 const DEFAULT_TITLE = 'Setup guide'
-const MIN_WIDTH = 500
-const MAX_WIDTH_VW = 40
+const SIDE_PANEL_TYPE: SidePanel = 'webhook-setup-guide'
 
 type SetupGuidePanelData = {
   documentationUrl?: string
@@ -36,22 +34,22 @@ type SetupGuidePanelData = {
 }
 
 type SetupGuidePanelContextT = {
-  open: boolean
+  isOpen: boolean
   documentationUrl?: string
   markdownPath: Nullable<string>
   openSetupGuidePanel: (panel: SetupGuidePanelData) => void
-  setOpen: (open: boolean) => void
+  closeSetupGuidePanel: () => void
 }
 
 const WebhookSetupGuidePanelContext = createContext<SetupGuidePanelContextT>({
-  open: false,
+  isOpen: false,
   documentationUrl: undefined,
   markdownPath: null,
   openSetupGuidePanel: () =>
     console.error(
       'openSetupGuidePanel must be used within a SetupGuidePanelProvider'
     ),
-  setOpen: () =>
+  closeSetupGuidePanel: () =>
     console.error('setOpen must be used within a SetupGuidePanelProvider'),
 })
 
@@ -60,25 +58,25 @@ export function WebhookSetupGuidePanelProvider({
 }: {
   children: ReactNode
 }) {
-  const [open, setOpen] = useState(false)
+  const { sidePanel, setSidePanel } = useTopLevelSidePanel()
   const [documentationUrl, setDocumentationUrl] = useState<string | undefined>()
   const [markdownPath, setMarkdownPath] = useState<Nullable<string>>(null)
 
-  const openSetupGuidePanel = useCallback((panel: SetupGuidePanelData) => {
-    setDocumentationUrl(panel.documentationUrl)
-    setMarkdownPath(panel.markdownPath)
-    setOpen(true)
-  }, [])
+  const isOpen = sidePanel === SIDE_PANEL_TYPE
 
   const ctx = useMemo(
     () => ({
-      open,
+      isOpen,
       documentationUrl,
       markdownPath,
-      openSetupGuidePanel,
-      setOpen,
+      openSetupGuidePanel: (panel: SetupGuidePanelData) => {
+        setDocumentationUrl(panel.documentationUrl)
+        setMarkdownPath(panel.markdownPath)
+        setSidePanel(SIDE_PANEL_TYPE)
+      },
+      closeSetupGuidePanel: () => setSidePanel(null),
     }),
-    [open, documentationUrl, markdownPath, openSetupGuidePanel, setOpen]
+    [isOpen, documentationUrl, markdownPath, setSidePanel]
   )
 
   return (
@@ -92,17 +90,15 @@ export function useWebhookSetupGuidePanel() {
   return use(WebhookSetupGuidePanelContext)
 }
 
-export function WebhookSetupGuidePanel() {
-  const { open, documentationUrl, markdownPath, setOpen } =
+export function WebhookSetupGuidePanelContent() {
+  const { isOpen, documentationUrl, markdownPath, closeSetupGuidePanel } =
     useWebhookSetupGuidePanel()
-  const { calculatedPanelWidth, dragHandleProps, isDragging } =
-    useResizablePane(MIN_WIDTH, MAX_WIDTH_VW)
   const [markdownText, setMarkdownText] = useState('')
   const [isMarkdownLoading, setIsMarkdownLoading] = useState(false)
   const [markdownError, setMarkdownError] = useState<Nullable<string>>(null)
 
   useEffect(() => {
-    if (!open || !markdownPath) {
+    if (!isOpen || !markdownPath) {
       setMarkdownText('')
       setMarkdownError(null)
       setIsMarkdownLoading(false)
@@ -132,109 +128,65 @@ export function WebhookSetupGuidePanel() {
       .finally(() => setIsMarkdownLoading(false))
 
     return () => controller.abort()
-  }, [open, markdownPath])
+  }, [isOpen, markdownPath])
 
   return (
-    <Accordion
-      type="single"
-      value={`${open}`}
-      orientation="horizontal"
-      css={{ border: 'none', zIndex: 1 }}
-    >
-      <AccordionItem
-        value={`${true}`}
-        caret="none"
-        padding="none"
-        trigger={null}
-        css={{ height: '100%', width: '100%' }}
-        additionalContentStyles={{ overflow: 'visible' }}
-      >
-        <div
-          css={{ position: 'relative', height: '100%' }}
-          style={
-            {
-              '--setup-guide-panel-width': `${calculatedPanelWidth}px`,
-            } as React.CSSProperties
+    <SidePanelContent>
+      <PanelHeaderSC>
+        <Button
+          small
+          tertiary
+          startIcon={
+            <SidePanelOpenIcon css={{ transform: 'rotate(180deg)' }} />
           }
+          onClick={closeSetupGuidePanel}
         >
-          <PanelWrapperSC>
-            <ResizeGripSC />
-            <PanelHeaderSC>
-              <Button
-                small
-                tertiary
-                startIcon={
-                  <SidePanelOpenIcon css={{ transform: 'rotate(180deg)' }} />
-                }
-                onClick={() => setOpen(false)}
-              >
-                {DEFAULT_TITLE}
-              </Button>
-              <Flex
-                align="center"
-                gap="xsmall"
-              >
-                {documentationUrl && (
-                  <Button
-                    small
-                    tertiary
-                    endIcon={<ArrowTopRightIcon />}
-                    onClick={() =>
-                      window.open(
-                        documentationUrl,
-                        '_blank',
-                        'noopener,noreferrer'
-                      )
-                    }
-                  >
-                    Open full doc
-                  </Button>
-                )}
-                <IconFrame
-                  clickable
-                  icon={<CloseIcon />}
-                  onClick={() => setOpen(false)}
-                  tooltip="Close panel"
-                />
-              </Flex>
-            </PanelHeaderSC>
-            <Flex
-              direction="column"
-              minHeight={0}
-              overflow="auto"
-              padding="medium"
-              color="text"
+          {DEFAULT_TITLE}
+        </Button>
+        <Flex
+          align="center"
+          gap="xsmall"
+        >
+          {documentationUrl && (
+            <Button
+              small
+              tertiary
+              as="a"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textTransform: 'none' }}
+              href={documentationUrl}
+              endIcon={<ArrowTopRightIcon />}
             >
-              {isMarkdownLoading ? (
-                'Loading setup guide...'
-              ) : markdownError ? (
-                markdownError
-              ) : (
-                <Markdown text={markdownText} />
-              )}
-            </Flex>
-          </PanelWrapperSC>
-          <DragHandleSC
-            tabIndex={0}
-            {...dragHandleProps}
-            $isDragging={isDragging}
+              Open full doc
+            </Button>
+          )}
+          <IconFrame
+            clickable
+            icon={<CloseIcon />}
+            onClick={closeSetupGuidePanel}
+            tooltip="Close panel"
           />
-        </div>
-      </AccordionItem>
-    </Accordion>
+        </Flex>
+      </PanelHeaderSC>
+      <Flex
+        direction="column"
+        minHeight={0}
+        overflow="auto"
+        padding="medium"
+        color="text"
+      >
+        {isMarkdownLoading ? (
+          'Loading setup guide...'
+        ) : markdownError ? (
+          markdownError
+        ) : (
+          <Markdown text={markdownText} />
+        )}
+      </Flex>
+    </SidePanelContent>
   )
 }
-
-const PanelWrapperSC = styled.div(({ theme }) => ({
-  position: 'relative',
-  zIndex: theme.zIndexes.modal,
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  width: 'var(--setup-guide-panel-width)',
-  borderLeft: theme.borders.default,
-  background: theme.colors['fill-accent'],
-}))
 
 const PanelHeaderSC = styled.div(({ theme }) => ({
   ...theme.partials.text.overline,
@@ -242,7 +194,7 @@ const PanelHeaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  minHeight: CHATBOT_HEADER_HEIGHT,
+  minHeight: SIDE_PANEL_HEADER_HEIGHT,
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
   borderBottom: theme.borders.default,
   flexShrink: 0,

@@ -27,7 +27,7 @@ import { getResourceLinkPath, TableEntryResourceLink } from '../AITableEntry'
 import { RunStatusChip } from '../infra-research/details/InfraResearch.tsx'
 import { AgentSelect } from './AgentSelect.tsx'
 import { AgentSessionTypeSelect } from './AgentSessionTypeSelect.tsx'
-import { CHATBOT_HEADER_HEIGHT } from './Chatbot.tsx'
+import { SIDE_PANEL_HEADER_HEIGHT } from './SidePanelShared.tsx'
 import { ChatbotThreadMoreMenu } from './ChatbotThreadMoreMenu'
 
 export function ChatbotHeader() {
@@ -180,5 +180,5 @@ const MainHeaderSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   padding: theme.spacing.medium,
   borderBottom: theme.borders.default,
-  maxHeight: CHATBOT_HEADER_HEIGHT,
+  maxHeight: SIDE_PANEL_HEADER_HEIGHT,
 }))
