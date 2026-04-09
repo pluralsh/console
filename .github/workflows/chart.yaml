@@ -32,7 +32,7 @@ jobs:
           helm repo add dexidp https://charts.dexidp.io
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm repo add plural https://pluralsh.github.io/module-library
-          helm repo add plural https://k8s.ory.sh/helm/charts
+          helm repo add ory https://k8s.ory.sh/helm/charts
       - name: Run chart-releaser
         id: release
         uses: helm/chart-releaser-action@v1.5.0
