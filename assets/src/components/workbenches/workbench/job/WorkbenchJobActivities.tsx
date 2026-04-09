@@ -8,6 +8,8 @@ import {
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
+  WorkbenchJobFragment,
+  WorkbenchJobStatus,
 } from 'generated/graphql'
 import { useMemo, useRef, useState } from 'react'
 
@@ -142,7 +144,11 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
         loading={createMessageLoading}
         setValue={setNewMessage}
         onSubmit={() => createMessage()}
-        allowSubmit={!!newMessage}
+        allowSubmit={
+          !!newMessage &&
+          job?.status !== WorkbenchJobStatus.Successful &&
+          job?.status !== WorkbenchJobStatus.Failed
+        }
         wrapperStyles={{ minHeight: 90 }}
       />
     </Flex>

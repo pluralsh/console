@@ -481,6 +481,7 @@ query WorkbenchJob($id: ID!) {
 query WorkbenchJobActivities($id: ID!) {
   workbenchJob(id: $id) {
     id
+    status
     prompt
     activities(first: 100) {
       edges {
