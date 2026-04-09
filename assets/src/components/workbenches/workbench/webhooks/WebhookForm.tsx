@@ -294,7 +294,7 @@ export function WebhookForm() {
                 </FormCardSC>
               )}
             </Flex>
-            {!open && !!setupGuideMarkdownPath && (
+            {!isOpen && !!setupGuideMarkdownPath && (
               <div css={{ width: 200 }}>
                 <Button
                   secondary
