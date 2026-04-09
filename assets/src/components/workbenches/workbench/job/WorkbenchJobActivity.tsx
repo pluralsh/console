@@ -39,6 +39,7 @@ import {
   JobActivityMetrics,
   JobActivityPrompt,
   MemoActivityResult,
+  UserActivityResult,
 } from './WorkbenchJobActivityResults'
 import { GqlError } from 'components/utils/Alert'
 import { isEmpty } from 'lodash'
@@ -58,9 +59,10 @@ export function WorkbenchJobActivity({
   const { spacing } = useTheme()
   const isRunning = isActivityRunning(activity.status)
 
-  if (activity.type === WorkbenchJobActivityType.Conclusion) {
+  if (activity.type === WorkbenchJobActivityType.Conclusion)
     return <WorkbenchJobActivityResult activity={activity} />
-  }
+  if (activity.type === WorkbenchJobActivityType.User)
+    return <UserActivityResult activity={activity} />
 
   const TypeIcon =
     activityTypeToIcon[activity.type ?? WorkbenchJobActivityType.Integration]

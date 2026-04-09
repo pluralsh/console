@@ -19441,6 +19441,14 @@ export type CreateWorkbenchJobMutationVariables = Exact<{
 
 export type CreateWorkbenchJobMutation = { __typename?: 'RootMutationType', createWorkbenchJob?: { __typename?: 'WorkbenchJob', id: string, status: WorkbenchJobStatus, prompt?: string | null, insertedAt?: string | null } | null };
 
+export type CreateWorkbenchMessageMutationVariables = Exact<{
+  jobId: Scalars['ID']['input'];
+  attributes: WorkbenchMessageAttributes;
+}>;
+
+
+export type CreateWorkbenchMessageMutation = { __typename?: 'RootMutationType', createWorkbenchMessage?: { __typename?: 'WorkbenchJobActivity', id: string, type?: WorkbenchJobActivityType | null, status: WorkbenchJobActivityStatus, prompt?: string | null, insertedAt?: string | null, thoughts?: Array<{ __typename?: 'WorkbenchJobThought', id: string, content?: string | null, toolName?: string | null, toolArgs?: Record<string, unknown> | null, insertedAt?: string | null, attributes?: { __typename?: 'WorkbenchJobThoughtAttributes', logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null } | null> | null, result?: { __typename?: 'WorkbenchJobActivityResult', output?: string | null, error?: string | null, jobUpdate?: { __typename?: 'WorkbenchJobActivityJobUpdate', diff?: string | null, workingTheory?: string | null, conclusion?: string | null } | null, logs?: Array<{ __typename?: 'WorkbenchJobActivityLog', timestamp?: string | null, message?: string | null, labels?: Record<string, unknown> | null } | null> | null, metrics?: Array<{ __typename?: 'WorkbenchJobActivityMetric', timestamp?: string | null, name?: string | null, value?: number | null, labels?: Record<string, unknown> | null } | null> | null } | null, agentRun?: { __typename?: 'AgentRun', id: string, status: AgentRunStatus, mode: AgentRunMode, prompt: string, shared?: boolean | null, error?: string | null, repository: string, branch?: string | null, insertedAt?: string | null, updatedAt?: string | null, messages?: Array<{ __typename?: 'AgentMessage', id: string, seq: number, role: AiRole, message: string, cost?: { __typename?: 'AgentMessageCost', total: number, tokens?: { __typename?: 'AgentMessageTokens', input?: number | null, output?: number | null, reasoning?: number | null } | null } | null, metadata?: { __typename?: 'AgentMessageMetadata', reasoning?: { __typename?: 'AgentMessageReasoning', text?: string | null, start?: number | null, end?: number | null } | null, file?: { __typename?: 'AgentMessageFile', name?: string | null, text?: string | null, start?: number | null, end?: number | null } | null, tool?: { __typename?: 'AgentMessageTool', name?: string | null, state?: AgentMessageToolState | null, input?: string | null, output?: string | null } | null } | null } | null> | null, todos?: Array<{ __typename?: 'AgentTodo', title: string, description: string, done?: boolean | null } | null> | null, analysis?: { __typename?: 'AgentAnalysis', summary: string, analysis: string, bullets?: Array<string | null> | null } | null, runtime?: { __typename?: 'AgentRuntime', id: string, name: string, type: AgentRuntimeType } | null, pullRequests?: Array<{ __typename?: 'PullRequest', id: string, url: string, title?: string | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null } | null> | null, podReference?: { __typename?: 'AgentPodReference', name: string, namespace: string } | null } | null } | null };
+
 export type CreateWorkbenchCronMutationVariables = Exact<{
   workbenchId: Scalars['ID']['input'];
   attributes: WorkbenchCronAttributes;
@@ -41210,6 +41218,40 @@ export function useCreateWorkbenchJobMutation(baseOptions?: Apollo.MutationHookO
 export type CreateWorkbenchJobMutationHookResult = ReturnType<typeof useCreateWorkbenchJobMutation>;
 export type CreateWorkbenchJobMutationResult = Apollo.MutationResult<CreateWorkbenchJobMutation>;
 export type CreateWorkbenchJobMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchJobMutation, CreateWorkbenchJobMutationVariables>;
+export const CreateWorkbenchMessageDocument = gql`
+    mutation CreateWorkbenchMessage($jobId: ID!, $attributes: WorkbenchMessageAttributes!) {
+  createWorkbenchMessage(jobId: $jobId, attributes: $attributes) {
+    ...WorkbenchJobActivity
+  }
+}
+    ${WorkbenchJobActivityFragmentDoc}`;
+export type CreateWorkbenchMessageMutationFn = Apollo.MutationFunction<CreateWorkbenchMessageMutation, CreateWorkbenchMessageMutationVariables>;
+
+/**
+ * __useCreateWorkbenchMessageMutation__
+ *
+ * To run a mutation, you first call `useCreateWorkbenchMessageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateWorkbenchMessageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createWorkbenchMessageMutation, { data, loading, error }] = useCreateWorkbenchMessageMutation({
+ *   variables: {
+ *      jobId: // value for 'jobId'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateWorkbenchMessageMutation(baseOptions?: Apollo.MutationHookOptions<CreateWorkbenchMessageMutation, CreateWorkbenchMessageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateWorkbenchMessageMutation, CreateWorkbenchMessageMutationVariables>(CreateWorkbenchMessageDocument, options);
+      }
+export type CreateWorkbenchMessageMutationHookResult = ReturnType<typeof useCreateWorkbenchMessageMutation>;
+export type CreateWorkbenchMessageMutationResult = Apollo.MutationResult<CreateWorkbenchMessageMutation>;
+export type CreateWorkbenchMessageMutationOptions = Apollo.BaseMutationOptions<CreateWorkbenchMessageMutation, CreateWorkbenchMessageMutationVariables>;
 export const CreateWorkbenchCronDocument = gql`
     mutation CreateWorkbenchCron($workbenchId: ID!, $attributes: WorkbenchCronAttributes!) {
   createWorkbenchCron(workbenchId: $workbenchId, attributes: $attributes) {
@@ -41832,6 +41874,7 @@ export const namedOperations = {
     UpdateWorkbenchTool: 'UpdateWorkbenchTool',
     DeleteWorkbenchTool: 'DeleteWorkbenchTool',
     CreateWorkbenchJob: 'CreateWorkbenchJob',
+    CreateWorkbenchMessage: 'CreateWorkbenchMessage',
     CreateWorkbenchCron: 'CreateWorkbenchCron',
     UpdateWorkbenchCron: 'UpdateWorkbenchCron',
     DeleteWorkbenchCron: 'DeleteWorkbenchCron',

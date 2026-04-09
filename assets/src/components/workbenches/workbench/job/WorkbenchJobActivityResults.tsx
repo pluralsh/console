@@ -84,6 +84,26 @@ export function MemoActivityResult({
   )
 }
 
+export function UserActivityResult({
+  activity,
+}: {
+  activity: WorkbenchJobActivityFragment
+}) {
+  const { prompt } = activity
+  return (
+    <PromptCardSC>
+      <SimplifiedMarkdown text={prompt ?? ''} />
+    </PromptCardSC>
+  )
+}
+
+const PromptCardSC = styled(Card)(({ theme }) => ({
+  padding: theme.spacing.medium,
+  width: 'fit-content',
+  marginLeft: 'auto',
+  marginBottom: theme.spacing.medium,
+}))
+
 export function JobActivityLogs({
   logs,
 }: {

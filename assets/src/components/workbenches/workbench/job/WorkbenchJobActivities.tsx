@@ -1,5 +1,6 @@
-import { Accordion, Card, Markdown } from '@pluralsh/design-system'
+import { Accordion, Card, Flex, Markdown } from '@pluralsh/design-system'
 import {
+  useCreateWorkbenchMessageMutation,
   useWorkbenchJobActivitiesQuery,
   useWorkbenchJobActivityDeltaSubscription,
   WorkbenchJobActivitiesDocument,
@@ -8,9 +9,13 @@ import {
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
 } from 'generated/graphql'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 
-import { useApolloClient } from '@apollo/client'
+import { ApolloCache, useApolloClient } from '@apollo/client'
+import {
+  ChatInputSimple,
+  ChatInputSimpleRef,
+} from 'components/ai/chatbot/input/ChatInput'
 import { GqlError } from 'components/utils/Alert'
 import { RectangleSkeleton } from 'components/utils/SkeletonLoaders'
 import { VirtualList } from 'components/utils/VirtualList'
@@ -33,7 +38,8 @@ function isActivityTerminal(status: WorkbenchJobActivityStatus | undefined) {
 
 export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   const client = useApolloClient()
-
+  const [newMessage, setNewMessage] = useState('')
+  const chatInputRef = useRef<ChatInputSimpleRef>(null)
   const { data, loading, error } = useWorkbenchJobActivitiesQuery({
     variables: { id: jobId },
     fetchPolicy: 'cache-and-network',
@@ -60,18 +66,24 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
       )
         setClosedIds(new Set(closedIds ? closedIds.add(id) : new Set([id])))
 
-      updateCache<WorkbenchJobActivitiesQuery>(client.cache, {
-        query: WorkbenchJobActivitiesDocument,
-        variables: { id: jobId },
-        update: (prev) => ({
-          ...prev,
-          workbenchJob: appendConnectionToEnd(
-            prev.workbenchJob,
-            data?.workbenchJobActivityDelta?.payload,
-            'activities'
-          ),
-        }),
-      })
+      appendActivityToCache(
+        client.cache,
+        jobId,
+        data?.workbenchJobActivityDelta?.payload
+      )
+    },
+  })
+
+  const [
+    createMessage,
+    { loading: createMessageLoading, error: createMessageError },
+  ] = useCreateWorkbenchMessageMutation({
+    variables: { jobId, attributes: { prompt: newMessage } },
+    update: (cache, { data }) =>
+      appendActivityToCache(cache, jobId, data?.createWorkbenchMessage),
+    onCompleted: () => {
+      setNewMessage('')
+      chatInputRef.current?.resetInput?.()
     },
   })
 
@@ -86,38 +98,54 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
   if (error) return <GqlError error={error} />
 
   return (
-    <ActivitiesPanelSC>
-      <ActivitiesAccordionSC
-        type="multiple"
-        value={openIds}
-        onValueChange={(newOpenIds: string[]) => {
-          setClosedIds(
-            new Set(
-              activities
-                .filter((a) => !newOpenIds.includes(a.id))
-                .map((a) => a.id)
+    <Flex
+      direction="column"
+      gap="medium"
+      height="100%"
+    >
+      {createMessageError && <GqlError error={createMessageError} />}
+      <ActivitiesPanelSC>
+        <ActivitiesAccordionSC
+          type="multiple"
+          value={openIds}
+          onValueChange={(newOpenIds: string[]) => {
+            setClosedIds(
+              new Set(
+                activities
+                  .filter((a) => !newOpenIds.includes(a.id))
+                  .map((a) => a.id)
+              )
             )
-          )
-        }}
-      >
-        <VirtualList
-          isReversed
-          data={activities}
-          topContent={
-            <JobPromptCardSC>
-              <Markdown text={job?.prompt ?? ''} />
-            </JobPromptCardSC>
-          }
-          renderer={({ rowData }) => (
-            <WorkbenchJobActivity
-              isOpen={openIds.includes(rowData.id)}
-              activity={rowData}
-              progress={[]} // TODO
-            />
-          )}
-        />
-      </ActivitiesAccordionSC>
-    </ActivitiesPanelSC>
+          }}
+        >
+          <VirtualList
+            isReversed
+            data={activities}
+            topContent={
+              <JobPromptCardSC>
+                <Markdown text={job?.prompt ?? ''} />
+              </JobPromptCardSC>
+            }
+            renderer={({ rowData }) => (
+              <WorkbenchJobActivity
+                isOpen={openIds.includes(rowData.id)}
+                activity={rowData}
+                progress={[]} // TODO
+              />
+            )}
+          />
+        </ActivitiesAccordionSC>
+      </ActivitiesPanelSC>
+      <ChatInputSimple
+        ref={chatInputRef}
+        placeholder="Send an additional message to this job"
+        loading={createMessageLoading}
+        setValue={setNewMessage}
+        onSubmit={() => createMessage()}
+        allowSubmit={!!newMessage}
+        wrapperStyles={{ minHeight: 90 }}
+      />
+    </Flex>
   )
 }
 
@@ -170,3 +198,21 @@ const defaultClosedIds = (
       .map((a) => a.id)
   )
 }
+
+const appendActivityToCache = (
+  cache: ApolloCache<object>,
+  jobId: string,
+  activity: Nullable<WorkbenchJobActivityFragment>
+) =>
+  updateCache<WorkbenchJobActivitiesQuery>(cache, {
+    query: WorkbenchJobActivitiesDocument,
+    variables: { id: jobId },
+    update: (prev) => ({
+      ...prev,
+      workbenchJob: appendConnectionToEnd(
+        prev.workbenchJob,
+        activity,
+        'activities'
+      ),
+    }),
+  })

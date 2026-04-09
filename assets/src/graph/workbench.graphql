@@ -583,6 +583,15 @@ mutation CreateWorkbenchJob(
   }
 }
 
+mutation CreateWorkbenchMessage(
+  $jobId: ID!
+  $attributes: WorkbenchMessageAttributes!
+) {
+  createWorkbenchMessage(jobId: $jobId, attributes: $attributes) {
+    ...WorkbenchJobActivity
+  }
+}
+
 mutation CreateWorkbenchCron(
   $workbenchId: ID!
   $attributes: WorkbenchCronAttributes!
