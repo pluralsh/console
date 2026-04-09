@@ -55,6 +55,17 @@ message DynatraceConnection {
    string platformToken = 2;
 }
 
+message CloudwatchConnection {
+  string region = 1;
+  repeated string log_group_names = 2;
+  optional string access_key_id = 3;
+  optional string secret_access_key = 4;
+  optional string session_token = 5;
+  optional string role_arn = 6;
+  optional string external_id = 7;
+  optional string role_session_name = 8;
+}
+
 message ToolConnection {
   oneof connection {
     ElasticConnection elastic = 1;
@@ -64,6 +75,7 @@ message ToolConnection {
     TempoConnection tempo = 5;
     SplunkConnection splunk = 6;
     DynatraceConnection dynatrace = 7;
+    CloudwatchConnection cloudwatch = 8;
   }
 }
 

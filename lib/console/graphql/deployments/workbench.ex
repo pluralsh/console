@@ -95,6 +95,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tempo,      :workbench_tool_tempo_connection_attributes, description: "tempo connection (traces)"
     field :datadog,    :workbench_tool_datadog_connection_attributes, description: "datadog connection (metrics, logs)"
     field :dynatrace,  :workbench_tool_dynatrace_connection_attributes, description: "dynatrace connection (metrics, logs, traces)"
+    field :cloudwatch, :workbench_tool_cloudwatch_connection_attributes, description: "cloudwatch connection (metrics, logs)"
     field :linear,     :workbench_tool_linear_connection_attributes, description: "linear connection (ticketing)"
     field :atlassian,  :workbench_tool_atlassian_connection_attributes, description: "atlassian/jira connection (ticketing)"
   end
@@ -146,6 +147,17 @@ defmodule Console.GraphQl.Deployments.Workbench do
   input_object :workbench_tool_dynatrace_connection_attributes do
     field :url,            non_null(:string), description: "dynatrace base url"
     field :platform_token, non_null(:string), description: "dynatrace platform token"
+  end
+
+  input_object :workbench_tool_cloudwatch_connection_attributes do
+    field :region,            non_null(:string), description: "aws region (e.g. us-east-1)"
+    field :log_group_names,   list_of(:string), description: "optional default log groups for CloudWatch Logs Insights"
+    field :access_key_id,     :string, description: "optional static AWS access key id"
+    field :secret_access_key, :string, description: "optional static AWS secret access key"
+    field :session_token,     :string, description: "optional AWS session token for temporary credentials"
+    field :role_arn,          :string, description: "optional IAM role ARN to assume"
+    field :external_id,       :string, description: "optional external id for assume role"
+    field :role_session_name, :string, description: "optional role session name for assume role"
   end
 
   input_object :workbench_tool_linear_connection_attributes do
@@ -397,6 +409,7 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :tempo,     :workbench_tool_tempo_connection, description: "tempo connection (no secrets)"
     field :datadog,   :workbench_tool_datadog_connection, description: "datadog connection (no secrets)"
     field :dynatrace, :workbench_tool_dynatrace_connection, description: "dynatrace connection (no secrets)"
+    field :cloudwatch, :workbench_tool_cloudwatch_connection, description: "cloudwatch connection (no secrets)"
     field :linear,    :workbench_tool_linear_connection, description: "linear connection (no secrets)"
     field :atlassian, :workbench_tool_atlassian_connection, description: "atlassian connection (no secrets)"
   end
@@ -436,6 +449,13 @@ defmodule Console.GraphQl.Deployments.Workbench do
 
   object :workbench_tool_dynatrace_connection do
     field :url, :string, description: "dynatrace base url (credentials never exposed)"
+  end
+
+  object :workbench_tool_cloudwatch_connection do
+    field :region, :string, description: "aws region"
+    field :log_group_names, list_of(:string), description: "default log groups for logs insights queries"
+    field :role_arn, :string, description: "assumed role ARN when configured"
+    field :role_session_name, :string, description: "assume-role session name"
   end
 
   object :workbench_tool_linear_connection do
