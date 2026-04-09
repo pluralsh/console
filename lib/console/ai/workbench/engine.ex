@@ -56,9 +56,10 @@ defmodule Console.AI.Workbench.Engine do
 
   def run(%__MODULE__{job: job} = engine) do
     stream_callbacks(job)
-    with {:ok, job} <- SA.Plan.run(job, engine.environment) do
-      loop(%{engine | activities: list_activities(job)})
-    end
+    # with {:ok, job} <- SA.Plan.run(job, engine.environment) do
+    #   loop(%{engine | activities: list_activities(job)})
+    # end
+    loop(%{engine | activities: list_activities(job)})
   end
 
   defp loop(%__MODULE__{iterations: iter, max: max, job: job})

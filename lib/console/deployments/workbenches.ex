@@ -338,6 +338,17 @@ defmodule Console.Deployments.Workbenches do
   end
 
   @doc """
+  Fails a workbench job. Requires write access to the job, or for the user to be the owner of the job.
+  """
+  @spec fail_job(WorkbenchJob.t()) :: job_resp
+  def fail_job(%WorkbenchJob{} = job) do
+    job
+    |> WorkbenchJob.changeset(%{status: :failed})
+    |> Repo.update()
+    |> notify(:update)
+  end
+
+  @doc """
   Kicks a job by updating the updated_at timestamp to 20 minutes ago.
   """
   @spec kick_job(WorkbenchJob.t() | binary, User.t()) :: job_resp

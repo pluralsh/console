@@ -41,11 +41,7 @@ defmodule Console.Schema.WorkbenchJob do
 
   def pollable(query \\ __MODULE__) do
     from(j in query,
-      where: j.status == ^:pending or (
-        j.status == ^:running
-          and is_nil(j.completed_at)
-          and (is_nil(j.updated_at) or j.updated_at < ago(1, "minute"))
-      ),
+      where: j.status == ^:pending,
       order_by: [asc: :inserted_at]
     )
   end

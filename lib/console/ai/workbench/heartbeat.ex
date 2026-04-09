@@ -10,8 +10,8 @@ defmodule Console.AI.Workbench.Heartbeat do
   end
 
   def init(job) do
+    Process.flag(:trap_exit, true)
     :timer.send_interval(@poll, :heartbeat)
-    send self(), :heartbeat
     {:ok, {job, true}}
   end
 
@@ -20,6 +20,13 @@ defmodule Console.AI.Workbench.Heartbeat do
       {:ok, %WorkbenchJob{status: :cancelled}} -> {:stop, :normal, {job, false}}
       {:ok, %WorkbenchJob{} = job} -> {:noreply, {job, false}}
       _ -> {:noreply, {job, false}}
+    end
+  end
+
+  def terminate(_, {job, _}) do
+    case Workbenches.get_workbench_job(job.id) do
+      %WorkbenchJob{status: :running} = job -> Workbenches.fail_job("job crashed prematurely",job)
+      _ -> :ok
     end
   end
 end
