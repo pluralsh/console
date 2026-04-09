@@ -8,7 +8,6 @@ import {
   WorkbenchJobActivityFragment,
   WorkbenchJobActivityStatus,
   WorkbenchJobActivityType,
-  WorkbenchJobFragment,
   WorkbenchJobStatus,
 } from 'generated/graphql'
 import { useMemo, useRef, useState } from 'react'
