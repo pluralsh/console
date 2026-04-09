@@ -191,8 +191,8 @@ config :req_llm,
         protocols: [:http1],
         size: 10,
         count: 100,
-        pool_max_idle_time: :timer.seconds(30),
-        conn_max_idle_time: :timer.seconds(30)
+        poll_max_idle_time: :infinity,
+        conn_max_idle_time: :timer.seconds(360)
       ]
     }
   ]
