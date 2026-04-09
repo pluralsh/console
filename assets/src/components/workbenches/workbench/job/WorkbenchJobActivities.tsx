@@ -141,7 +141,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
           />
         </ActivitiesAccordionSC>
       </ActivitiesPanelSC>
-      {!jobCompleted && (
+      {jobCompleted && (
         <ChatInputSimple
           ref={chatInputRef}
           placeholder="Send an additional message to this job"
