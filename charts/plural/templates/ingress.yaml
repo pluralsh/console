@@ -1,0 +1,94 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: plural
+  labels:
+{{ include "plural.labels" . | indent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - {{ .Values.ingress.dns }}
+    - {{ .Values.ingress.dkr_dns }}
+    secretName: plural-tls
+  rules:
+  - host: {{ .Values.ingress.dns }}
+    http:
+      paths:
+      - path: /artifacts/.*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: plural-api
+            port:
+              name: http
+      - path: /cm/.*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: plural-api
+            port:
+              name: http
+      - path: /gql
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: plural-api
+            port:
+              name: http
+      - path: /graphiql
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: plural-api
+            port:
+              name: http
+      - path: /auth/.*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: plural-api
+            port:
+              name: http
+      - path: /api/.*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: plural-api
+            port:
+              name: http
+      - path: /webhooks/.*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: plural-api
+            port:
+              name: http
+      - path: /socket.*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: plural-rtc
+            port:
+              name: http
+      - pathType: ImplementationSpecific
+        backend:
+          service:
+            name: plural-www
+            port:
+              name: http
+  - host: {{ .Values.ingress.dkr_dns }}
+    http:
+      paths:
+      - pathType: ImplementationSpecific
+        backend:
+          service:
+            name: plural-registry
+            port:
+              name: http
+{{- end }}
