@@ -224,7 +224,7 @@ func (in *CloudwatchProvider) newAWSConfig(ctx context.Context) (aws.Config, err
 	}
 	if accessKeyID != "" {
 		loadOptions = append(loadOptions, config.WithCredentialsProvider(
-			credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, in.conn.GetSessionToken()),
+			credentials.NewStaticCredentialsProvider(accessKeyID, secretAccessKey, ""),
 		))
 	}
 
