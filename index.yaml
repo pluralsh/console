@@ -11538,6 +11538,29 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/ollama-chart-v0.63.0/ollama-0.63.0.tgz
     version: 0.63.0
+  plural:
+  - apiVersion: v2
+    appVersion: 0.11.8
+    created: "2026-04-09T03:24:16.630799391Z"
+    dependencies:
+    - name: hydra
+      repository: https://k8s.ory.sh/helm/charts
+      version: 0.26.5
+    - condition: test-base.enabled
+      name: test-base
+      repository: https://pluralsh.github.io/module-library
+      version: 0.1.10
+    description: A helm chart for installing plural
+    digest: 54289eacf3606cab1e511037d29398a6b35929f721b13c0718103cfbaffb636d
+    maintainers:
+    - email: mjg@plural.sh
+      name: michaeljguarino
+    name: plural
+    sources:
+    - https://github.com/pluralsh/plural
+    urls:
+    - https://github.com/pluralsh/console/releases/download/plural-chart-v0.10.108/plural-0.10.108.tgz
+    version: 0.10.108
   stateless:
   - apiVersion: v2
     appVersion: 1.16.0
@@ -11631,4 +11654,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2026-04-04T16:48:14.180516624Z"
+generated: "2026-04-09T03:24:16.631941003Z"
