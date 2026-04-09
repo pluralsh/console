@@ -252,6 +252,7 @@ fragment WorkbenchIssue on Issue {
   }
   workbenchJob {
     id
+    status
   }
 }
 
