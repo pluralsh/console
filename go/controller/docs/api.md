@@ -1388,6 +1388,7 @@ _Appears in:_
 | `ai` _[AISettings](#aisettings)_ | AI settings specifies a configuration for LLM provider clients |  | Optional: \{\} <br /> |
 | `logging` _[LoggingSettings](#loggingsettings)_ | Logging settings for connections to log aggregation datastores |  | Optional: \{\} <br /> |
 | `cost` _[CostSettings](#costsettings)_ | Cost settings for managing Plural's cost management features |  | Optional: \{\} <br /> |
+| `metrics` _[MetricsSettings](#metricssettings)_ | Metrics settings for OpenTelemetry metrics export |  | Optional: \{\} <br /> |
 | `deploymentRepositoryRef` _[NamespacedName](#namespacedname)_ | DeploymentRepositoryRef is a pointer to the deployment GIT repository to use |  | Optional: \{\} <br /> |
 | `scaffoldsRepositoryRef` _[NamespacedName](#namespacedname)_ | ScaffoldsRepositoryRef is a pointer to the Scaffolds GIT repository to use |  | Optional: \{\} <br /> |
 | `reconciliation` _[Reconciliation](#reconciliation)_ | Reconciliation settings for this resource.<br />Controls drift detection and reconciliation intervals. |  | Optional: \{\} <br /> |
@@ -2304,6 +2305,24 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name is a short, unique human-readable name used to identify this cluster. |  | Required: \{\} <br /> |
 | `namespace` _string_ | Namespace specifies an optional namespace for categorizing or scoping related resources.<br />If empty then the ClusterSync's namespace will be used. |  | Optional: \{\} <br /> |
+
+
+#### MetricsSettings
+
+
+
+MetricsSettings holds configuration for OpenTelemetry metrics export.
+
+
+
+_Appears in:_
+- [DeploymentSettingsSpec](#deploymentsettingsspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled defines whether to enable the metrics export or not. | false | Optional: \{\} <br /> |
+| `endpoint` _string_ | Endpoint is the OpenTelemetry collector endpoint to send metrics to. |  | Optional: \{\} <br /> |
+| `crontab` _string_ | Crontab is the cron expression for how often to export metrics.<br />Example: "*/5 * * * *" for every 5 minutes. |  | Optional: \{\} <br /> |
 
 
 #### NamespaceCredentials

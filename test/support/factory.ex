@@ -261,6 +261,16 @@ defmodule Console.Factory do
     }
   end
 
+  def upgrade_insight_factory do
+    %Schema.UpgradeInsight{
+      name: sequence(:upgrade_insight, &"insight-#{&1}"),
+      version: "1.29",
+      status: :passing,
+      description: "Test upgrade insight",
+      cluster: build(:cluster)
+    }
+  end
+
   def api_deprecation_factory do
     %Schema.ApiDeprecation{
       blocking: false,

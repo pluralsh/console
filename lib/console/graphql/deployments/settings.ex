@@ -31,11 +31,19 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :ai, :ai_settings_attributes, description: "configuration for LLM provider clients"
     field :cost, :cost_settings_attributes, description: "settings for cost management functionality"
+    field :metrics, :metrics_settings_attributes, description: "settings for OpenTelemetry metrics export"
 
     field :read_bindings,          list_of(:policy_binding_attributes)
     field :write_bindings,         list_of(:policy_binding_attributes)
     field :git_bindings,           list_of(:policy_binding_attributes)
     field :create_bindings,        list_of(:policy_binding_attributes)
+  end
+
+  @desc "Settings for OpenTelemetry metrics export"
+  input_object :metrics_settings_attributes do
+    field :enabled,  :boolean, description: "whether to enable metrics export"
+    field :endpoint, :string, description: "the OpenTelemetry collector endpoint to send metrics to"
+    field :crontab,  :string, description: "cron expression for how often to export metrics (e.g. '*/5 * * * *')"
   end
 
   input_object :http_connection_attributes do
@@ -265,6 +273,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :ai,                    :ai_settings, description: "settings for LLM provider clients"
     field :cost,                  :cost_settings, description: "settings for cost management"
     field :logging,               :logging_settings, description: "settings for connections to log aggregation datastores"
+    field :metrics,               :metrics_settings, description: "settings for OpenTelemetry metrics export"
     field :mgmt_repo,             :string, description: "the root repo you used to run `plural up`"
 
     field :onboarded, :boolean, description: "whether the console has been onboarded and getting started pages need to be shown"
@@ -314,6 +323,13 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :enabled, :boolean
     field :recommendation_threshold, :integer, description: "the percentage change needed to generate a recommendation, default 30%"
     field :recommendation_cushion, :integer, description: "the percentage cushion above baseline usage to give when generation recommendations, default 20%"
+  end
+
+  @desc "Settings for OpenTelemetry metrics export"
+  object :metrics_settings do
+    field :enabled,  :boolean, description: "whether metrics export is enabled"
+    field :endpoint, :string, description: "the OpenTelemetry collector endpoint"
+    field :crontab,  :string, description: "cron expression for export schedule"
   end
 
   @desc "Settings for configuring access to common LLM providers"

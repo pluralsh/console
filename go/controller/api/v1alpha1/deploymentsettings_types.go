@@ -161,6 +161,11 @@ type DeploymentSettingsSpec struct {
 	// +kubebuilder:validation:Optional
 	Cost *CostSettings `json:"cost,omitempty"`
 
+	// Metrics settings for OpenTelemetry metrics export
+	//
+	// +kubebuilder:validation:Optional
+	Metrics *MetricsSettings `json:"metrics,omitempty"`
+
 	// DeploymentRepositoryRef is a pointer to the deployment GIT repository to use
 	//
 	// +kubebuilder:validation:Optional
@@ -390,6 +395,38 @@ func (cost *CostSettings) Attributes() *console.CostSettingsAttributes {
 	return &console.CostSettingsAttributes{
 		RecommendationThreshold: cost.RecommendationThreshold,
 		RecommendationCushion:   cost.RecommendationCushion,
+	}
+}
+
+// MetricsSettings holds configuration for OpenTelemetry metrics export.
+type MetricsSettings struct {
+	// Enabled defines whether to enable the metrics export or not.
+	//
+	// +kubebuilder:default=false
+	// +kubebuilder:validation:Optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Endpoint is the OpenTelemetry collector endpoint to send metrics to.
+	//
+	// +kubebuilder:validation:Optional
+	Endpoint *string `json:"endpoint,omitempty"`
+
+	// Crontab is the cron expression for how often to export metrics.
+	// Example: "*/5 * * * *" for every 5 minutes.
+	//
+	// +kubebuilder:validation:Optional
+	Crontab *string `json:"crontab,omitempty"`
+}
+
+func (m *MetricsSettings) Attributes() *console.MetricsSettingsAttributes {
+	if m == nil {
+		return nil
+	}
+
+	return &console.MetricsSettingsAttributes{
+		Enabled:  m.Enabled,
+		Endpoint: m.Endpoint,
+		Crontab:  m.Crontab,
 	}
 }
 

@@ -3792,6 +3792,8 @@ export type DeploymentSettings = {
   logging?: Maybe<LoggingSettings>;
   /** the way we can connect to your loki instance */
   lokiConnection?: Maybe<HttpConnection>;
+  /** settings for OpenTelemetry metrics export */
+  metrics?: Maybe<MetricsSettings>;
   /** the root repo you used to run `plural up` */
   mgmtRepo?: Maybe<Scalars['String']['output']>;
   name: Scalars['String']['output'];
@@ -3826,6 +3828,8 @@ export type DeploymentSettingsAttributes = {
   logging?: InputMaybe<LoggingSettingsAttributes>;
   /** connection details for a loki instance to use */
   lokiConnection?: InputMaybe<HttpConnectionAttributes>;
+  /** settings for OpenTelemetry metrics export */
+  metrics?: InputMaybe<MetricsSettingsAttributes>;
   mgmtRepo?: InputMaybe<Scalars['String']['input']>;
   /** connection details for a prometheus instance to use */
   prometheusConnection?: InputMaybe<HttpConnectionAttributes>;
@@ -5725,6 +5729,27 @@ export type MetricResult = {
   __typename?: 'MetricResult';
   timestamp?: Maybe<Scalars['Long']['output']>;
   value?: Maybe<Scalars['String']['output']>;
+};
+
+/** Settings for OpenTelemetry metrics export */
+export type MetricsSettings = {
+  __typename?: 'MetricsSettings';
+  /** cron expression for export schedule */
+  crontab?: Maybe<Scalars['String']['output']>;
+  /** whether metrics export is enabled */
+  enabled?: Maybe<Scalars['Boolean']['output']>;
+  /** the OpenTelemetry collector endpoint */
+  endpoint?: Maybe<Scalars['String']['output']>;
+};
+
+/** Settings for OpenTelemetry metrics export */
+export type MetricsSettingsAttributes = {
+  /** cron expression for how often to export metrics (e.g. '*\/5 * * * *') */
+  crontab?: InputMaybe<Scalars['String']['input']>;
+  /** whether to enable metrics export */
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the OpenTelemetry collector endpoint to send metrics to */
+  endpoint?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** A monitor defines a recurring check over observability data that can raise alerts */

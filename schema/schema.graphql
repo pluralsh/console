@@ -4091,6 +4091,9 @@ input DeploymentSettingsAttributes {
   "settings for cost management functionality"
   cost: CostSettingsAttributes
 
+  "settings for OpenTelemetry metrics export"
+  metrics: MetricsSettingsAttributes
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -4098,6 +4101,18 @@ input DeploymentSettingsAttributes {
   gitBindings: [PolicyBindingAttributes]
 
   createBindings: [PolicyBindingAttributes]
+}
+
+"Settings for OpenTelemetry metrics export"
+input MetricsSettingsAttributes {
+  "whether to enable metrics export"
+  enabled: Boolean
+
+  "the OpenTelemetry collector endpoint to send metrics to"
+  endpoint: String
+
+  "cron expression for how often to export metrics (e.g. '*\/5 * * * *')"
+  crontab: String
 }
 
 input HttpConnectionAttributes {
@@ -4461,6 +4476,9 @@ type DeploymentSettings {
   "settings for connections to log aggregation datastores"
   logging: LoggingSettings
 
+  "settings for OpenTelemetry metrics export"
+  metrics: MetricsSettings
+
   "the root repo you used to run `plural up`"
   mgmtRepo: String
 
@@ -4530,6 +4548,18 @@ type CostSettings {
 
   "the percentage cushion above baseline usage to give when generation recommendations, default 20%"
   recommendationCushion: Int
+}
+
+"Settings for OpenTelemetry metrics export"
+type MetricsSettings {
+  "whether metrics export is enabled"
+  enabled: Boolean
+
+  "the OpenTelemetry collector endpoint"
+  endpoint: String
+
+  "cron expression for export schedule"
+  crontab: String
 }
 
 "Settings for configuring access to common LLM providers"
