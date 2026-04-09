@@ -54,6 +54,7 @@ defmodule Console.Application do
       {Absinthe.Subscription, ConsoleWeb.Endpoint},
       Console.Cached.Supervisor,
       Console.Plural.Pinger,
+      Console.Otel.MetricsExporter,
       Console.AI.GothManager,
       Console.PromEx,
       Console.AI.Graph.Indexer.Supervisor,

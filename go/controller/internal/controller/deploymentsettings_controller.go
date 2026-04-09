@@ -142,6 +142,7 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	attr := &console.DeploymentSettingsAttributes{
 		MgmtRepo: settings.Spec.ManagementRepo,
 		Cost:     settings.Spec.Cost.Attributes(),
+		Metrics:  settings.Spec.Metrics.Attributes(),
 	}
 
 	if settings.Spec.AgentHelmValues != nil {

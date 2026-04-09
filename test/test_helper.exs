@@ -61,6 +61,7 @@ Mimic.copy(CloudQuery.Client)
 Mimic.copy(Toolquery.ToolQuery.Stub)
 Mimic.copy(Console.Cache)
 Mimic.copy(ReqLLM)
+Mimic.copy(Console.ClusterRing)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)

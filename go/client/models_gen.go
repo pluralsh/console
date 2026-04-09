@@ -3087,6 +3087,8 @@ type DeploymentSettings struct {
 	Cost *CostSettings `json:"cost,omitempty"`
 	// settings for connections to log aggregation datastores
 	Logging *LoggingSettings `json:"logging,omitempty"`
+	// settings for OpenTelemetry metrics export
+	Metrics *MetricsSettings `json:"metrics,omitempty"`
 	// the root repo you used to run `plural up`
 	MgmtRepo *string `json:"mgmtRepo,omitempty"`
 	// whether the console has been onboarded and getting started pages need to be shown
@@ -3131,7 +3133,9 @@ type DeploymentSettingsAttributes struct {
 	// configuration for LLM provider clients
 	Ai *AiSettingsAttributes `json:"ai,omitempty"`
 	// settings for cost management functionality
-	Cost           *CostSettingsAttributes    `json:"cost,omitempty"`
+	Cost *CostSettingsAttributes `json:"cost,omitempty"`
+	// settings for OpenTelemetry metrics export
+	Metrics        *MetricsSettingsAttributes `json:"metrics,omitempty"`
 	ReadBindings   []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	WriteBindings  []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	GitBindings    []*PolicyBindingAttributes `json:"gitBindings,omitempty"`
@@ -4684,6 +4688,26 @@ type MetricResponse struct {
 type MetricResult struct {
 	Timestamp *string `json:"timestamp,omitempty"`
 	Value     *string `json:"value,omitempty"`
+}
+
+// Settings for OpenTelemetry metrics export
+type MetricsSettings struct {
+	// whether metrics export is enabled
+	Enabled *bool `json:"enabled,omitempty"`
+	// the OpenTelemetry collector endpoint
+	Endpoint *string `json:"endpoint,omitempty"`
+	// cron expression for export schedule
+	Crontab *string `json:"crontab,omitempty"`
+}
+
+// Settings for OpenTelemetry metrics export
+type MetricsSettingsAttributes struct {
+	// whether to enable metrics export
+	Enabled *bool `json:"enabled,omitempty"`
+	// the OpenTelemetry collector endpoint to send metrics to
+	Endpoint *string `json:"endpoint,omitempty"`
+	// cron expression for how often to export metrics (e.g. '*/5 * * * *')
+	Crontab *string `json:"crontab,omitempty"`
 }
 
 // A monitor defines a recurring check over observability data that can raise alerts
