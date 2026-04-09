@@ -3,6 +3,7 @@ defmodule Console.AI.Workbench.Subagents.Base do
   alias Console.Repo
   alias Console.AI.Stream
   alias Console.Schema.{AgentRun, WorkbenchJobThought, WorkbenchJob, WorkbenchJobActivity}
+  require Logger
 
   defmacro __using__(_) do
     quote do
@@ -82,6 +83,12 @@ defmodule Console.AI.Workbench.Subagents.Base do
     |> Repo.insert()
   end
   def save_thought(_, _, _), do: :ok
+
+  def log_error({:error, error}, context) do
+    Logger.error("#{context}: #{inspect(error)}")
+    {:error, error}
+  end
+  def log_error(pass, _), do: pass
 
   defp jitter_sleep() do
     time = :timer.seconds(5)

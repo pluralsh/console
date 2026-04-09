@@ -313,6 +313,14 @@ defmodule Console do
     |> Base.encode16(case: :lower)
   end
 
+  def safely(fun, fallback) when is_function(fun, 0) and is_function(fallback, 1) do
+    try do
+      fun.()
+    catch
+      _, err -> fallback.(err)
+    end
+  end
+
   def async_retry(fun, tries \\ 0, res \\ :error)
   def async_retry(_, 3, res), do: res
   def async_retry(fun, tries, _) do

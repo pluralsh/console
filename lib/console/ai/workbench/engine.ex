@@ -9,7 +9,7 @@ defmodule Console.AI.Workbench.Engine do
      message history to the memory engine to inform the next iteration of the loop.
   3. A complete tool is used to mark the conclusion of the job.
   """
-  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, stream_callbacks: 1]
+  import Console.AI.Workbench.Subagents.Base, only: [drop_empty: 1, stream_callbacks: 1, log_error: 2]
   alias Console.Repo
   alias Console.AI.Chat.MemoryEngine
   alias Console.Deployments.Workbenches
@@ -125,8 +125,11 @@ defmodule Console.AI.Workbench.Engine do
     Console.AI.Tool.context(runtime: job.workbench.agent_runtime, user: job.user)
     with {:ok, activity} <- Workbenches.create_job_activity(%{type: type, prompt: prompt, tool_call: tool_attrs(call)}, job) do
       stream_callbacks(activity)
-      module.run(activity, job, %{environment | activities: activities})
+      Console.safely(fn ->
+        module.run(activity, job, %{environment | activities: activities})
+      end, &crash_fallback/1)
       |> Workbenches.update_job_activity(activity)
+      |> log_error("Failed to update job activity")
     end
   end
 
@@ -143,6 +146,10 @@ defmodule Console.AI.Workbench.Engine do
   end
 
   defp spawn_activity(_, _), do: :ignore
+
+  defp crash_fallback(err) do
+    %{status: :failed, result: %{error: "error running subagent: #{inspect(err)}, feel free to try again if it is still necessary"}}
+  end
 
   defp subagent_module(:infrastructure), do: SA.Infrastructure
   defp subagent_module(:integration), do: SA.Integration
