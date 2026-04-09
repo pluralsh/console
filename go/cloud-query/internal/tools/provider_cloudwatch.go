@@ -19,9 +19,7 @@ import (
 	cloudwatchlogstypes "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"k8s.io/klog/v2"
 
-	"github.com/pluralsh/console/go/cloud-query/internal/log"
 	"github.com/pluralsh/console/go/cloud-query/internal/proto/toolquery"
 )
 
@@ -45,7 +43,6 @@ func (in *CloudwatchProvider) Metrics(ctx context.Context, input *toolquery.Metr
 	if err != nil {
 		return nil, err
 	}
-	in.logAWSCaller(ctx, cfg, "metrics")
 
 	client := cloudwatch.NewFromConfig(cfg)
 	request := &cloudwatch.GetMetricDataInput{
@@ -116,7 +113,6 @@ func (in *CloudwatchProvider) MetricsSearch(ctx context.Context, searchInput *to
 	if err != nil {
 		return nil, err
 	}
-	in.logAWSCaller(ctx, cfg, "metrics_search")
 
 	client := cloudwatch.NewFromConfig(cfg)
 	listInput := &cloudwatch.ListMetricsInput{
@@ -178,7 +174,6 @@ func (in *CloudwatchProvider) Logs(ctx context.Context, input *toolquery.LogsQue
 	if err != nil {
 		return nil, err
 	}
-	in.logAWSCaller(ctx, cfg, "logs")
 
 	query := cloudwatchLogsQueryWithFacets(input.GetQuery(), input.GetFacets())
 	startQueryInput := &cloudwatchlogs.StartQueryInput{
@@ -252,26 +247,6 @@ func (in *CloudwatchProvider) newAWSConfig(ctx context.Context) (aws.Config, err
 	}
 
 	return cfg, nil
-}
-
-func (in *CloudwatchProvider) logAWSCaller(ctx context.Context, cfg aws.Config, operation string) {
-	resp, err := sts.NewFromConfig(cfg).GetCallerIdentity(ctx, &sts.GetCallerIdentityInput{})
-	if err != nil {
-		klog.V(log.LogLevelInfo).InfoS(
-			"cloudwatch aws caller lookup failed",
-			"operation", operation,
-			"error", err.Error(),
-		)
-		return
-	}
-
-	klog.V(log.LogLevelInfo).InfoS(
-		"cloudwatch aws caller",
-		"operation", operation,
-		"aws_account", aws.ToString(resp.Account),
-		"aws_arn", aws.ToString(resp.Arn),
-		"configured_role_arn", in.conn.GetRoleArn(),
-	)
 }
 
 func (in *CloudwatchProvider) waitForQueryResults(ctx context.Context, client *cloudwatchlogs.Client, queryID string) ([]map[string]string, error) {
