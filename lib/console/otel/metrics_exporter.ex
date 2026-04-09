@@ -5,7 +5,6 @@ defmodule Console.Otel.MetricsExporter do
   Only runs on the leader node determined by Console.ClusterRing.
   """
   use GenServer
-  alias Console.Repo
   alias Console.Deployments.Settings
   alias Console.Otel.{Exporter, MetricsBuilder}
   require Logger
