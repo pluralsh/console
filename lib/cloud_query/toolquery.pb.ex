@@ -84,10 +84,9 @@ defmodule Toolquery.CloudwatchConnection do
   field :log_group_names, 2, repeated: true, type: :string, json_name: "logGroupNames"
   field :access_key_id, 3, proto3_optional: true, type: :string, json_name: "accessKeyId"
   field :secret_access_key, 4, proto3_optional: true, type: :string, json_name: "secretAccessKey"
-  field :session_token, 5, proto3_optional: true, type: :string, json_name: "sessionToken"
-  field :role_arn, 6, proto3_optional: true, type: :string, json_name: "roleArn"
-  field :external_id, 7, proto3_optional: true, type: :string, json_name: "externalId"
-  field :role_session_name, 8, proto3_optional: true, type: :string, json_name: "roleSessionName"
+  field :role_arn, 5, proto3_optional: true, type: :string, json_name: "roleArn"
+  field :external_id, 6, proto3_optional: true, type: :string, json_name: "externalId"
+  field :role_session_name, 7, proto3_optional: true, type: :string, json_name: "roleSessionName"
 end
 
 defmodule Toolquery.ToolConnection do

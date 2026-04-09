@@ -9842,8 +9842,6 @@ type WorkbenchToolCloudwatchConnectionAttributes struct {
 	AccessKeyID *string `json:"accessKeyId,omitempty"`
 	// optional static AWS secret access key
 	SecretAccessKey *string `json:"secretAccessKey,omitempty"`
-	// optional AWS session token for temporary credentials
-	SessionToken *string `json:"sessionToken,omitempty"`
 	// optional IAM role ARN to assume
 	RoleArn *string `json:"roleArn,omitempty"`
 	// optional external id for assume role

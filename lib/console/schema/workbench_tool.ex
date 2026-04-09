@@ -85,7 +85,6 @@ defmodule Console.Schema.WorkbenchTool do
         field :log_group_names,   {:array, :string}
         field :access_key_id,     EncryptedString
         field :secret_access_key, EncryptedString
-        field :session_token,     EncryptedString
         field :role_arn,          :string
         field :external_id,       EncryptedString
         field :role_session_name, :string
@@ -255,7 +254,7 @@ defmodule Console.Schema.WorkbenchTool do
 
   defp cloudwatch_configuration_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(region log_group_names access_key_id secret_access_key session_token role_arn external_id role_session_name)a)
+    |> cast(attrs, ~w(region log_group_names access_key_id secret_access_key role_arn external_id role_session_name)a)
     |> then(fn cs ->
       case {get_field(cs, :access_key_id), get_field(cs, :secret_access_key)} do
         {"", _} -> add_error(cs, :access_key_id, "must be set with secret_access_key")

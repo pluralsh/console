@@ -60,10 +60,9 @@ message CloudwatchConnection {
   repeated string log_group_names = 2;
   optional string access_key_id = 3;
   optional string secret_access_key = 4;
-  optional string session_token = 5;
-  optional string role_arn = 6;
-  optional string external_id = 7;
-  optional string role_session_name = 8;
+  optional string role_arn = 5;
+  optional string external_id = 6;
+  optional string role_session_name = 7;
 }
 
 message ToolConnection {

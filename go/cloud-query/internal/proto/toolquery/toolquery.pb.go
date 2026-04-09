@@ -504,10 +504,9 @@ type CloudwatchConnection struct {
 	LogGroupNames   []string               `protobuf:"bytes,2,rep,name=log_group_names,json=logGroupNames,proto3" json:"log_group_names,omitempty"`
 	AccessKeyId     *string                `protobuf:"bytes,3,opt,name=access_key_id,json=accessKeyId,proto3,oneof" json:"access_key_id,omitempty"`
 	SecretAccessKey *string                `protobuf:"bytes,4,opt,name=secret_access_key,json=secretAccessKey,proto3,oneof" json:"secret_access_key,omitempty"`
-	SessionToken    *string                `protobuf:"bytes,5,opt,name=session_token,json=sessionToken,proto3,oneof" json:"session_token,omitempty"`
-	RoleArn         *string                `protobuf:"bytes,6,opt,name=role_arn,json=roleArn,proto3,oneof" json:"role_arn,omitempty"`
-	ExternalId      *string                `protobuf:"bytes,7,opt,name=external_id,json=externalId,proto3,oneof" json:"external_id,omitempty"`
-	RoleSessionName *string                `protobuf:"bytes,8,opt,name=role_session_name,json=roleSessionName,proto3,oneof" json:"role_session_name,omitempty"`
+	RoleArn         *string                `protobuf:"bytes,5,opt,name=role_arn,json=roleArn,proto3,oneof" json:"role_arn,omitempty"`
+	ExternalId      *string                `protobuf:"bytes,6,opt,name=external_id,json=externalId,proto3,oneof" json:"external_id,omitempty"`
+	RoleSessionName *string                `protobuf:"bytes,7,opt,name=role_session_name,json=roleSessionName,proto3,oneof" json:"role_session_name,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -566,13 +565,6 @@ func (x *CloudwatchConnection) GetAccessKeyId() string {
 func (x *CloudwatchConnection) GetSecretAccessKey() string {
 	if x != nil && x.SecretAccessKey != nil {
 		return *x.SecretAccessKey
-	}
-	return ""
-}
-
-func (x *CloudwatchConnection) GetSessionToken() string {
-	if x != nil && x.SessionToken != nil {
-		return *x.SessionToken
 	}
 	return ""
 }
@@ -1665,20 +1657,18 @@ const file_toolquery_proto_rawDesc = "" +
 	"\t_password\"M\n" +
 	"\x13DynatraceConnection\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12$\n" +
-	"\rplatformToken\x18\x02 \x01(\tR\rplatformToken\"\xbe\x03\n" +
+	"\rplatformToken\x18\x02 \x01(\tR\rplatformToken\"\x82\x03\n" +
 	"\x14CloudwatchConnection\x12\x16\n" +
 	"\x06region\x18\x01 \x01(\tR\x06region\x12&\n" +
 	"\x0flog_group_names\x18\x02 \x03(\tR\rlogGroupNames\x12'\n" +
 	"\raccess_key_id\x18\x03 \x01(\tH\x00R\vaccessKeyId\x88\x01\x01\x12/\n" +
-	"\x11secret_access_key\x18\x04 \x01(\tH\x01R\x0fsecretAccessKey\x88\x01\x01\x12(\n" +
-	"\rsession_token\x18\x05 \x01(\tH\x02R\fsessionToken\x88\x01\x01\x12\x1e\n" +
-	"\brole_arn\x18\x06 \x01(\tH\x03R\aroleArn\x88\x01\x01\x12$\n" +
-	"\vexternal_id\x18\a \x01(\tH\x04R\n" +
+	"\x11secret_access_key\x18\x04 \x01(\tH\x01R\x0fsecretAccessKey\x88\x01\x01\x12\x1e\n" +
+	"\brole_arn\x18\x05 \x01(\tH\x02R\aroleArn\x88\x01\x01\x12$\n" +
+	"\vexternal_id\x18\x06 \x01(\tH\x03R\n" +
 	"externalId\x88\x01\x01\x12/\n" +
-	"\x11role_session_name\x18\b \x01(\tH\x05R\x0froleSessionName\x88\x01\x01B\x10\n" +
+	"\x11role_session_name\x18\a \x01(\tH\x04R\x0froleSessionName\x88\x01\x01B\x10\n" +
 	"\x0e_access_key_idB\x14\n" +
-	"\x12_secret_access_keyB\x10\n" +
-	"\x0e_session_tokenB\v\n" +
+	"\x12_secret_access_keyB\v\n" +
 	"\t_role_arnB\x0e\n" +
 	"\f_external_idB\x14\n" +
 	"\x12_role_session_name\"\xf4\x03\n" +

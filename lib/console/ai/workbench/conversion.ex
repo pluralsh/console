@@ -97,7 +97,6 @@ defmodule Console.AI.Workbench.Conversion do
         log_group_names: cloudwatch.log_group_names || [],
         access_key_id: cloudwatch.access_key_id,
         secret_access_key: cloudwatch.secret_access_key,
-        session_token: cloudwatch.session_token,
         role_arn: cloudwatch.role_arn,
         external_id: cloudwatch.external_id,
         role_session_name: cloudwatch.role_session_name,

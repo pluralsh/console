@@ -2481,9 +2481,6 @@ input WorkbenchToolCloudwatchConnectionAttributes {
   "optional static AWS secret access key"
   secretAccessKey: String
 
-  "optional AWS session token for temporary credentials"
-  sessionToken: String
-
   "optional IAM role ARN to assume"
   roleArn: String
 

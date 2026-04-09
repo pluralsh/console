@@ -26,7 +26,6 @@ defmodule Console.AI.Workbench.ConversionTest do
             log_group_names: ["/aws/eks/prod/app"],
             access_key_id: "AKIA_TEST",
             secret_access_key: "SECRET",
-            session_token: "TOKEN",
             role_arn: "arn:aws:iam::123456789012:role/observability",
             external_id: "external-id",
             role_session_name: "plural-cloudwatch"

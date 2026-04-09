@@ -445,14 +445,6 @@ function CloudwatchFormFields({
         }
       />
       <InputField
-        label="Session token"
-        revealer
-        value={c.sessionToken ?? ''}
-        onChange={(e) =>
-          set({ ...c, sessionToken: e.target.value || undefined })
-        }
-      />
-      <InputField
         multiline
         label="Default log groups"
         hint="One log group name per line"

@@ -15175,8 +15175,6 @@ export type WorkbenchToolCloudwatchConnectionAttributes = {
   roleSessionName?: InputMaybe<Scalars['String']['input']>;
   /** optional static AWS secret access key */
   secretAccessKey?: InputMaybe<Scalars['String']['input']>;
-  /** optional AWS session token for temporary credentials */
-  sessionToken?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type WorkbenchToolConfiguration = {

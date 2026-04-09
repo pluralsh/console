@@ -154,7 +154,6 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :log_group_names,   list_of(:string), description: "optional default log groups for CloudWatch Logs Insights"
     field :access_key_id,     :string, description: "optional static AWS access key id"
     field :secret_access_key, :string, description: "optional static AWS secret access key"
-    field :session_token,     :string, description: "optional AWS session token for temporary credentials"
     field :role_arn,          :string, description: "optional IAM role ARN to assume"
     field :external_id,       :string, description: "optional external id for assume role"
     field :role_session_name, :string, description: "optional role session name for assume role"

@@ -195,7 +195,6 @@ export const INITIAL_TOOL_CONFIG_BY_TYPE: {
         roleSessionName: roleSessionName ?? undefined,
         accessKeyId: undefined,
         secretAccessKey: undefined,
-        sessionToken: undefined,
         externalId: undefined,
       },
     }
