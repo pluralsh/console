@@ -9,13 +9,11 @@ import { mapExistingNodes } from 'utils/graphql'
 
 export function WorkbenchIssues() {
   const workbenchId = useParams()[WORKBENCH_PARAM_ID] ?? ''
-
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       { queryHook: useWorkbenchIssuesQuery, keyPath: ['workbench', 'issues'] },
       { id: workbenchId }
     )
-
   const issues = useMemo(
     () => mapExistingNodes(data?.workbench?.issues),
     [data]
