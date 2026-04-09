@@ -148,13 +148,19 @@ export function WebhookTriggerForm({ mode }: { mode: 'create' | 'edit' }) {
     data: obsData,
     loading: obsLoading,
     error: obsError,
-  } = useObservabilityWebhooksQuery({ variables: { first: 100 } })
+  } = useObservabilityWebhooksQuery({
+    variables: { first: 100 },
+    fetchPolicy: 'cache-and-network',
+  })
 
   const {
     data: issueData,
     loading: issueLoading,
     error: issueWebhooksError,
-  } = useIssueWebhooksQuery({ variables: { first: 100 } })
+  } = useIssueWebhooksQuery({
+    variables: { first: 100 },
+    fetchPolicy: 'cache-and-network',
+  })
 
   const observabilityWebhooks = useMemo(
     () => mapExistingNodes(obsData?.observabilityWebhooks),

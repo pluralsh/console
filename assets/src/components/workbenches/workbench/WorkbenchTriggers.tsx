@@ -20,6 +20,7 @@ export function WorkbenchTriggers({ workbenchId }: { workbenchId: string }) {
   const { data } = useWorkbenchTriggersSummaryQuery({
     variables: { id: workbenchId },
     skip: !workbenchId,
+    fetchPolicy: 'cache-and-network',
   })
 
   const workbench = data?.workbench
