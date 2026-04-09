@@ -3,6 +3,7 @@ package tools
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	cloudwatchtypes "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
@@ -80,5 +81,27 @@ func TestCloudwatchMetricResultName(t *testing.T) {
 	}
 	if got := cloudwatchMetricResultName(metric); got != "AWS/Lambda/Errors" {
 		t.Fatalf("unexpected result name: %s", got)
+	}
+}
+
+func TestParseCloudwatchTimestampFractionalUnixSeconds(t *testing.T) {
+	got := parseCloudwatchTimestamp(map[string]string{
+		"@timestamp": "1725000000.5",
+	})
+	want := time.Unix(1725000000, 500000000).UTC()
+
+	if !got.Equal(want) {
+		t.Fatalf("unexpected parsed time: got %s want %s", got, want)
+	}
+}
+
+func TestParseCloudwatchTimestampUnixMilliseconds(t *testing.T) {
+	got := parseCloudwatchTimestamp(map[string]string{
+		"@timestamp": "1725000000123",
+	})
+	want := time.UnixMilli(1725000000123).UTC()
+
+	if !got.Equal(want) {
+		t.Fatalf("unexpected parsed time: got %s want %s", got, want)
 	}
 }

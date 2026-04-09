@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"slices"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -390,15 +389,6 @@ func parseCloudwatchTimestamp(fields map[string]string) time.Time {
 		if parsed, err := time.Parse(layout, raw); err == nil {
 			return parsed.UTC()
 		}
-	}
-
-	if asFloat, err := strconv.ParseFloat(raw, 64); err == nil {
-		seconds := int64(asFloat)
-		nanos := int64((asFloat - float64(seconds)) * float64(time.Second))
-		if len(raw) > 10 {
-			return time.UnixMilli(int64(asFloat)).UTC()
-		}
-		return time.Unix(seconds, nanos).UTC()
 	}
 
 	return time.Now().UTC()
