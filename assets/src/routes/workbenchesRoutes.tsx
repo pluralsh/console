@@ -5,6 +5,9 @@ import { WorkbenchesIssues } from 'components/workbenches/WorkbenchesIssues'
 import { WorkbenchToolCreateOrEdit } from 'components/workbenches/tools/WorkbenchToolCreateOrEdit'
 import { WorkbenchTools } from 'components/workbenches/tools/WorkbenchTools'
 import { Workbench } from 'components/workbenches/workbench/Workbench'
+import { WorkbenchAlerts } from 'components/workbenches/workbench/WorkbenchAlerts'
+import { WorkbenchIssues } from 'components/workbenches/workbench/WorkbenchIssues'
+import { WorkbenchJobs } from 'components/workbenches/workbench/WorkbenchJobs'
 import { WorkbenchCreateOrEdit } from 'components/workbenches/workbench/create-edit/WorkbenchCreateOrEdit'
 import { CronSchedules } from 'components/workbenches/workbench/crons/CronSchedules'
 import { WebhookTriggers } from 'components/workbenches/workbench/webhooks/WebhookTriggers'
@@ -60,7 +63,20 @@ export const workbenchesRoutes = [
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}`}
     element={<Workbench />}
-  />,
+  >
+    <Route
+      index
+      element={<WorkbenchJobs />}
+    />
+    <Route
+      path={WORKBENCHES_ISSUES_REL_PATH}
+      element={<WorkbenchIssues />}
+    />
+    <Route
+      path={WORKBENCHES_ALERTS_REL_PATH}
+      element={<WorkbenchAlerts />}
+    />
+  </Route>,
   <Route
     path={`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/${WORKBENCHES_EDIT_REL_PATH}`}
     element={<WorkbenchCreateOrEdit mode="edit" />}

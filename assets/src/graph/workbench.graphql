@@ -249,13 +249,9 @@ fragment WorkbenchIssue on Issue {
   updatedAt
   workbench {
     id
-    runs(first: 1) {
-      edges {
-        node {
-          id
-        }
-      }
-    }
+  }
+  workbenchJob {
+    id
   }
 }
 
@@ -359,6 +355,22 @@ query WorkbenchesIssues($first: Int = 100, $after: String) {
     edges {
       node {
         ...WorkbenchIssue
+      }
+    }
+  }
+}
+
+query WorkbenchIssues($id: ID!, $first: Int = 100, $after: String) {
+  workbench(id: $id) {
+    id
+    issues(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...WorkbenchIssue
+        }
       }
     }
   }

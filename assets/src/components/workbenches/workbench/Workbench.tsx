@@ -1,6 +1,5 @@
 import {
   Button,
-  Divider,
   EmptyState,
   Flex,
   ListBoxItem,
@@ -8,6 +7,7 @@ import {
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { SubTabs } from 'components/utils/SubTabs'
 import { GqlError } from 'components/utils/Alert'
 import { Confirm } from 'components/utils/Confirm'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -20,7 +20,13 @@ import {
   WorkbenchTinyFragment,
 } from 'generated/graphql'
 import { useMemo, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import {
+  Link,
+  Outlet,
+  useMatch,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 import {
   getWorkbenchAbsPath,
   WORKBENCH_PARAM_ID,
@@ -28,11 +34,16 @@ import {
   WORKBENCHES_EDIT_REL_PATH,
   WORKBENCHES_CRON_SCHEDULES_REL_PATH,
   WORKBENCHES_WEBHOOK_TRIGGERS_REL_PATH,
+  WORKBENCHES_ALERTS_REL_PATH,
+  WORKBENCHES_ISSUES_REL_PATH,
 } from 'routes/workbenchesRoutesConsts'
 import styled from 'styled-components'
-import { WorkbenchJobCreateInput } from './WorkbenchJobCreateInput'
-import { WorkbenchJobsTable } from './WorkbenchJobsTable'
-import { WorkbenchTriggers } from './WorkbenchTriggers'
+
+const directory = [
+  { label: 'Jobs', path: '' },
+  { label: 'Issues', path: WORKBENCHES_ISSUES_REL_PATH },
+  { label: 'Alerts', path: WORKBENCHES_ALERTS_REL_PATH },
+]
 
 export const getWorkbenchBreadcrumbs = (
   workbench: Nullable<WorkbenchTinyFragment>
@@ -43,8 +54,16 @@ export const getWorkbenchBreadcrumbs = (
     : []),
 ]
 
+export type WorkbenchOutletContext = {
+  workbenchId: string
+  isLoading: boolean
+}
+
 export function Workbench() {
   const id = useParams()[WORKBENCH_PARAM_ID]
+  const { tab = '' } =
+    useMatch(`${WORKBENCHES_ABS_PATH}/:${WORKBENCH_PARAM_ID}/:tab?/*`)
+      ?.params ?? {}
   const navigate = useNavigate()
   const { popToast } = useSimpleToast()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -94,6 +113,10 @@ export function Workbench() {
 
   return (
     <WrapperSC>
+      <SubTabs
+        directory={directory}
+        activeFn={(path) => path === tab}
+      />
       <StretchedFlex>
         <StackedText
           loading={isLoading}
@@ -144,21 +167,7 @@ export function Workbench() {
           </MoreMenu>
         </Flex>
       </StretchedFlex>
-      <WorkbenchJobCreateInput
-        workbenchId={id}
-        workbenchLoading={isLoading}
-      />
-      <Divider backgroundColor="border" />
-      <WorkbenchTriggers workbenchId={id} />
-      <StackedText
-        first="Workbench jobs"
-        firstPartialType="body2Bold"
-        firstColor="text"
-        second="Current and previous jobs"
-        secondPartialType="body2"
-        secondColor="text-light"
-      />
-      <WorkbenchJobsTable workbenchId={id} />
+      <Outlet context={{ workbenchId: id, isLoading }} />
       <Confirm
         open={deleteModalOpen}
         close={() => setDeleteModalOpen(false)}
