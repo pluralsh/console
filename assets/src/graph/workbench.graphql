@@ -102,6 +102,15 @@ fragment WorkbenchTool on WorkbenchTool {
       url
       username
     }
+    cloudwatch {
+      logGroupNames
+      region
+      roleArn
+      roleSessionName
+    }
+    dynatrace {
+      url
+    }
   }
 }
 
