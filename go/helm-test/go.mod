@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/helm-test
 
-go 1.26.1
+go 1.26.2
 
 require (
 	github.com/onsi/ginkgo/v2 v2.28.1

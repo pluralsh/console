@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/kubernetes-agent
 
-go 1.26.1
+go 1.26.2
 
 replace github.com/pluralsh/console/go/polly => ../../polly
 

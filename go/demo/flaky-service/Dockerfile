@@ -1,5 +1,5 @@
 # Step 1: Build the Go binary
-FROM golang:1.26.1 AS build
+FROM golang:1.26.2 AS build
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
