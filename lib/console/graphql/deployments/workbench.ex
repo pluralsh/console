@@ -211,6 +211,9 @@ defmodule Console.GraphQl.Deployments.Workbench do
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy of this service"
 
     connection field :runs, node_type: :workbench_job do
+      arg :alert, :boolean, description: "show runs spawned from alerts"
+      arg :issue, :boolean, description: "show runs spawned from issues"
+
       resolve &Deployments.list_workbench_runs/3
     end
 

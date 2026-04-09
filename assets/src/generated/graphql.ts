@@ -14767,8 +14767,10 @@ export type WorkbenchPromptsArgs = {
 
 export type WorkbenchRunsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
+  alert?: InputMaybe<Scalars['Boolean']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  issue?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
 };
 

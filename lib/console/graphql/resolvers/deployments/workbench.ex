@@ -41,6 +41,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
 
   def list_workbench_runs(workbench, args, _) do
     WorkbenchJob.for_workbench(workbench.id)
+    |> workbench_job_filters(args)
     |> WorkbenchJob.ordered()
     |> paginate(args)
   end
@@ -187,6 +188,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Workbench do
   defp workbench_tool_filters(query, args) do
     Enum.reduce(args, query, fn
       {:project_id, project_id}, q when is_binary(project_id) -> WorkbenchTool.for_project(q, project_id)
+      _, q -> q
+    end)
+  end
+
+  defp workbench_job_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:alert, true}, q -> WorkbenchJob.with_alert(q)
+      {:issue, true}, q -> WorkbenchJob.with_issue(q)
       _, q -> q
     end)
   end

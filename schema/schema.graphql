@@ -2625,7 +2625,21 @@ type Workbench {
   "write policy of this service"
   writeBindings: [PolicyBinding]
 
-  runs(after: String, first: Int, before: String, last: Int): WorkbenchJobConnection
+  runs(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    "show runs spawned from alerts"
+    alert: Boolean
+
+    "show runs spawned from issues"
+    issue: Boolean
+  ): WorkbenchJobConnection
 
   crons(after: String, first: Int, before: String, last: Int): WorkbenchCronConnection
 

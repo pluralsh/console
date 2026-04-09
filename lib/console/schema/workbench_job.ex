@@ -50,6 +50,14 @@ defmodule Console.Schema.WorkbenchJob do
     )
   end
 
+  def with_alert(query \\ __MODULE__) do
+    from(j in query, where: not is_nil(j.alert_id))
+  end
+
+  def with_issue(query \\ __MODULE__) do
+    from(j in query, where: not is_nil(j.issue_id))
+  end
+
   def for_workbench(query \\ __MODULE__, workbench_id) do
     from(j in query, where: j.workbench_id == ^workbench_id)
   end
