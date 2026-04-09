@@ -1,6 +1,6 @@
 module github.com/pluralsh/console/go/controller
 
-go 1.26.1
+go 1.26.2
 
 replace (
 	github.com/pluralsh/console/go/client => ../client
