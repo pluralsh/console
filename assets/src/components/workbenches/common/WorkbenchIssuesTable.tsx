@@ -1,23 +1,56 @@
 import {
   ArrowTopRightIcon,
+  CheckOutlineIcon,
   Chip,
+  FailedFilledIcon,
   Flex,
+  SpinnerAlt,
   Table,
   Tooltip,
+  UnknownIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { IssueStatusChip } from 'components/workbenches/common/IssueStatusChip'
 import { StackedText } from 'components/utils/table/StackedText'
 import { VirtualSlice } from 'components/utils/table/useFetchPaginatedData'
 import { InlineA } from 'components/utils/typography/Text'
-import { WorkbenchIssueFragment } from 'generated/graphql'
+import { WorkbenchIssueFragment, WorkbenchJobStatus } from 'generated/graphql'
 import { truncate } from 'lodash'
-import { useMemo } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { formatDateTime } from 'utils/datetime'
 import { getWorkbenchJobAbsPath } from 'routes/workbenchesRoutesConsts'
 
 const columnHelper = createColumnHelper<WorkbenchIssueFragment>()
+
+function jobStatusIcon(status?: Nullable<WorkbenchJobStatus>): ReactNode {
+  switch (status) {
+    case WorkbenchJobStatus.Pending:
+    case WorkbenchJobStatus.Running:
+      return <SpinnerAlt size={12} />
+    case WorkbenchJobStatus.Successful:
+      return (
+        <CheckOutlineIcon
+          size={12}
+          color="icon-success"
+        />
+      )
+    case WorkbenchJobStatus.Failed:
+      return (
+        <FailedFilledIcon
+          size={12}
+          color="icon-danger"
+        />
+      )
+    default:
+      return (
+        <UnknownIcon
+          size={12}
+          color="icon-xlight"
+        />
+      )
+  }
+}
 
 function getColumns(fallbackWorkbenchId?: string) {
   return [
@@ -100,9 +133,14 @@ function getColumns(fallbackWorkbenchId?: string) {
                 getWorkbenchJobAbsPath({ workbenchId, jobId: workbenchJobId })
               )
             }
-            size="large"
           >
-            View job
+            <Flex
+              gap="xsmall"
+              align="center"
+            >
+              {jobStatusIcon(issue.workbenchJob?.status)}
+              <span>View job</span>
+            </Flex>
           </Chip>
         )
       },
