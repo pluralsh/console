@@ -383,7 +383,9 @@ defmodule Console.Deployments.Workbenches do
     end)
     |> add_operation(:idle, fn _ ->
       case WorkbenchJob.idle?(job) do
-        true -> {:ok, job}
+        true ->
+          WorkbenchJob.changeset(job, %{status: :pending})
+          |> Repo.update()
         false -> {:error, "job is currently active, please wait for it to complete before prompting"}
       end
     end)
@@ -395,6 +397,7 @@ defmodule Console.Deployments.Workbenches do
     |> execute(extract: :activity)
     |> notify(:create, user)
   end
+
   def create_message(attrs, id, %User{} = user) when is_binary(id) do
     get_workbench_job!(id)
     |> then(&create_message(attrs, &1, user))

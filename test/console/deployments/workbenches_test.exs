@@ -432,6 +432,8 @@ defmodule Console.Deployments.WorkbenchesTest do
       assert activity.type == :user
       assert activity.status == :successful
       assert_receive {:event, %PubSub.WorkbenchJobActivityCreated{item: ^activity}}
+
+      assert refetch(job).status == :pending
     end
 
     test "job owner can create a message when passing the job struct" do
