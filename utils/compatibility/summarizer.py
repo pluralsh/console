@@ -3,11 +3,33 @@ import yaml
 import json
 import requests
 from functools import lru_cache
-from openai import OpenAI
-from exa_py import Exa
 
-exa = Exa(api_key=os.environ.get("EXA_API_KEY"))
-oai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+_exa = None
+_oai_client = None
+
+
+def summarization_enabled():
+    """Check if both API keys are available for summarization."""
+    return bool(os.environ.get("EXA_API_KEY") and os.environ.get("OPENAI_API_KEY"))
+
+
+def _get_exa():
+    """Lazily initialize and return the Exa client."""
+    global _exa
+    if _exa is None:
+        from exa_py import Exa
+        _exa = Exa(api_key=os.environ.get("EXA_API_KEY"))
+    return _exa
+
+
+def _get_oai_client():
+    """Lazily initialize and return the OpenAI client."""
+    global _oai_client
+    if _oai_client is None:
+        from openai import OpenAI
+        _oai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    return _oai_client
+
 
 @lru_cache(maxsize=None)
 def fetch_page(url):
@@ -40,7 +62,7 @@ def helm_summary(name, compatibility, from_vsn, to_vsn):
                 pages.append(content)
 
     release_urls = set(release_url.replace('{vsn}', vsn) for vsn in [from_vsn['version'], to_vsn['version']])
-    response = exa.get_contents(list(release_urls), text=True)
+    response = _get_exa().get_contents(list(release_urls), text=True)
     release_pages = [result.text for result in response.results if result.text]
 
     if not pages and not release_pages:
@@ -52,7 +74,7 @@ def helm_summary(name, compatibility, from_vsn, to_vsn):
     if release_pages:
         prompt += f"\n\nHere are the application release notes for the update:\n\n" + "\n\n".join(release_pages)
 
-    response = oai_client.responses.create(
+    response = _get_oai_client().responses.create(
         model="gpt-5.2",
         instructions="You are an experienced devops engineer planning a helm upgrade.  You're given a changelog of a kubernetes component and asked to summarize it for a junior engineer to guide the upgrade process.",
         input=prompt,
@@ -77,7 +99,7 @@ def helm_summary(name, compatibility, from_vsn, to_vsn):
     
 
 def kube_summary(contents, version, schema):
-    response = oai_client.responses.create(
+    response = _get_oai_client().responses.create(
         model="gpt-5.2",
         instructions="You are an experienced devops engineer planning a kubernetes upgrade.  You're given a changelog and asked to summarize it for use in an architecture review of the upgrade",
         input="Here is the current kubernetes changelog for version {version}:\n\n" + contents,

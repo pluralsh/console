@@ -1,0 +1,127 @@
+icon: https://avatars.githubusercontent.com/u/30269780?s=200&v=4
+git_url: https://github.com/argoproj/argo-workflows
+release_url: https://github.com/argoproj/argo-workflows/releases/tag/v{vsn}
+helm_repository_url: https://argoproj.github.io/argo-helm
+chart_name: argo-workflows
+versions:
+- version: 4.0.4
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.7
+  images: ['quay.io/argoproj/argocli:v4.0.4', 'quay.io/argoproj/workflow-controller:v4.0.4',
+    'registry.k8s.io/kubectl:v1.35.3']
+- version: 4.0.2
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 1.0.4
+  images: ['quay.io/argoproj/argocli:v4.0.2', 'quay.io/argoproj/workflow-controller:v4.0.2',
+    'registry.k8s.io/kubectl:v1.35.3']
+- version: 3.7.0
+  kube: ['1.33', '1.32', '1.31']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.45.21
+  images: ['quay.io/argoproj/argocli:v3.7.0', 'quay.io/argoproj/workflow-controller:v3.7.0']
+- version: 3.6.5
+  kube: ['1.31', '1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.45.12
+  images: ['quay.io/argoproj/argocli:v3.6.5', 'quay.io/argoproj/workflow-controller:v3.6.5']
+- version: 3.6.3
+  kube: ['1.32', '1.31', '1.30']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.45.5
+  images: ['quay.io/argoproj/argocli:v3.6.3', 'quay.io/argoproj/workflow-controller:v3.6.3']
+- version: 3.6.0
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.45.0
+  images: ['quay.io/argoproj/argocli:v3.6.0', 'quay.io/argoproj/workflow-controller:v3.6.0']
+- version: 3.5.11
+  kube: ['1.31', '1.30', '1.29']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.42.5
+  images: ['quay.io/argoproj/argocli:v3.5.11', 'quay.io/argoproj/workflow-controller:v3.5.11']
+- version: 3.5.6
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.41.6
+  images: ['quay.io/argoproj/argocli:v3.5.6', 'quay.io/argoproj/workflow-controller:v3.5.6']
+- version: 3.5.3
+  kube: ['1.29', '1.28', '1.27']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.40.5
+  images: ['quay.io/argoproj/argocli:v3.5.3', 'quay.io/argoproj/workflow-controller:v3.5.3']
+- version: 3.5.0
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.37.1
+  images: ['quay.io/argoproj/argocli:v3.5.0', 'quay.io/argoproj/workflow-controller:v3.5.0']
+- version: 3.4.10
+  kube: ['1.28', '1.27', '1.26']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.33.1
+  images: ['quay.io/argoproj/argocli:v3.4.10', 'quay.io/argoproj/workflow-controller:v3.4.10']
+- version: 3.4.8
+  kube: ['1.27', '1.26', '1.25']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.31.0
+  images: ['quay.io/argoproj/argocli:v3.4.8', 'quay.io/argoproj/workflow-controller:v3.4.8']
+- version: 3.4.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.20.0
+  images: ['quay.io/argoproj/argocli:v3.4.0', 'quay.io/argoproj/workflow-controller:v3.4.0']
+- version: 3.3.2
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.15.1
+  images: ['quay.io/argoproj/argocli:v3.3.2', 'quay.io/argoproj/workflow-controller:v3.3.2']
+- version: 3.2.0
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.8.2
+  images: ['quay.io/argoproj/argocli:v3.2.0', 'quay.io/argoproj/workflow-controller:v3.2.0']
+- version: 3.1.5
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.4.1
+  images: ['quay.io/argoproj/argocli:v3.1.5', 'quay.io/argoproj/workflow-controller:v3.1.5']
+- version: 3.0.7
+  kube: ['1.26', '1.25', '1.24']
+  requirements: []
+  incompatibilities: []
+  summary: null
+  chart_version: 0.3.0
+  images: ['quay.io/argoproj/argocli:v3.0.7', 'quay.io/argoproj/workflow-controller:v3.0.7']

@@ -31,6 +31,7 @@ names:
 - gatekeeper
 - tigera-operator
 - argo-cd
+- argo-workflows
 - vector
 - victoria-metrics-operator
 - gpu-operator

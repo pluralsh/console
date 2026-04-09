@@ -78,6 +78,7 @@ versions:
     breaking_changes: []
   chart_version: 3.20.1
   images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.20.1', 'openpolicyagent/gatekeeper:v3.20.1']
+  eolAt: '2026-03-09'
 - version: 3.20.0
   kube: ['1.33', '1.32', '1.31']
   requirements: []
@@ -125,6 +126,7 @@ versions:
         \ VAP."]
   chart_version: 3.20.0
   images: ['curlimages/curl:8.12.0', 'openpolicyagent/gatekeeper-crds:v3.20.0', 'openpolicyagent/gatekeeper:v3.20.0']
+  eolAt: '2026-03-09'
 - version: 3.19.1
   kube: ['1.33', '1.32', '1.31']
   requirements: []

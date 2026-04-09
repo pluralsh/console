@@ -20,4 +20,5 @@ versions:
   requirements: []
   incompatibilities: []
   summary: null
+  eolAt: '2026-02-24'
 name: flux
