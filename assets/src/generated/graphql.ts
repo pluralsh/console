@@ -15123,10 +15123,43 @@ export enum WorkbenchToolCategory {
   Traces = 'TRACES'
 }
 
+export type WorkbenchToolCloudwatchConnection = {
+  __typename?: 'WorkbenchToolCloudwatchConnection';
+  /** default log groups for logs insights queries */
+  logGroupNames?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** aws region */
+  region?: Maybe<Scalars['String']['output']>;
+  /** assumed role ARN when configured */
+  roleArn?: Maybe<Scalars['String']['output']>;
+  /** assume-role session name */
+  roleSessionName?: Maybe<Scalars['String']['output']>;
+};
+
+export type WorkbenchToolCloudwatchConnectionAttributes = {
+  /** optional static AWS access key id */
+  accessKeyId?: InputMaybe<Scalars['String']['input']>;
+  /** optional external id for assume role */
+  externalId?: InputMaybe<Scalars['String']['input']>;
+  /** optional default log groups for CloudWatch Logs Insights */
+  logGroupNames?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** aws region (e.g. us-east-1) */
+  region: Scalars['String']['input'];
+  /** optional IAM role ARN to assume */
+  roleArn?: InputMaybe<Scalars['String']['input']>;
+  /** optional role session name for assume role */
+  roleSessionName?: InputMaybe<Scalars['String']['input']>;
+  /** optional static AWS secret access key */
+  secretAccessKey?: InputMaybe<Scalars['String']['input']>;
+  /** optional AWS session token for temporary credentials */
+  sessionToken?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type WorkbenchToolConfiguration = {
   __typename?: 'WorkbenchToolConfiguration';
   /** atlassian connection (no secrets) */
   atlassian?: Maybe<WorkbenchToolAtlassianConnection>;
+  /** cloudwatch connection (no secrets) */
+  cloudwatch?: Maybe<WorkbenchToolCloudwatchConnection>;
   /** datadog connection (no secrets) */
   datadog?: Maybe<WorkbenchToolDatadogConnection>;
   /** dynatrace connection (no secrets) */
@@ -15150,6 +15183,8 @@ export type WorkbenchToolConfiguration = {
 export type WorkbenchToolConfigurationAttributes = {
   /** atlassian/jira connection (ticketing) */
   atlassian?: InputMaybe<WorkbenchToolAtlassianConnectionAttributes>;
+  /** cloudwatch connection (metrics, logs) */
+  cloudwatch?: InputMaybe<WorkbenchToolCloudwatchConnectionAttributes>;
   /** datadog connection (metrics, logs) */
   datadog?: InputMaybe<WorkbenchToolDatadogConnectionAttributes>;
   /** dynatrace connection (metrics, logs, traces) */
@@ -15378,6 +15413,7 @@ export type WorkbenchToolTempoConnectionAttributes = {
 
 export enum WorkbenchToolType {
   Atlassian = 'ATLASSIAN',
+  Cloudwatch = 'CLOUDWATCH',
   Datadog = 'DATADOG',
   Dynatrace = 'DYNATRACE',
   Elastic = 'ELASTIC',

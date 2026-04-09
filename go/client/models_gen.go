@@ -9798,6 +9798,36 @@ type WorkbenchToolAttributes struct {
 	Configuration *WorkbenchToolConfigurationAttributes `json:"configuration,omitempty"`
 }
 
+type WorkbenchToolCloudwatchConnection struct {
+	// aws region
+	Region *string `json:"region,omitempty"`
+	// default log groups for logs insights queries
+	LogGroupNames []*string `json:"logGroupNames,omitempty"`
+	// assumed role ARN when configured
+	RoleArn *string `json:"roleArn,omitempty"`
+	// assume-role session name
+	RoleSessionName *string `json:"roleSessionName,omitempty"`
+}
+
+type WorkbenchToolCloudwatchConnectionAttributes struct {
+	// aws region (e.g. us-east-1)
+	Region string `json:"region"`
+	// optional default log groups for CloudWatch Logs Insights
+	LogGroupNames []*string `json:"logGroupNames,omitempty"`
+	// optional static AWS access key id
+	AccessKeyID *string `json:"accessKeyId,omitempty"`
+	// optional static AWS secret access key
+	SecretAccessKey *string `json:"secretAccessKey,omitempty"`
+	// optional AWS session token for temporary credentials
+	SessionToken *string `json:"sessionToken,omitempty"`
+	// optional IAM role ARN to assume
+	RoleArn *string `json:"roleArn,omitempty"`
+	// optional external id for assume role
+	ExternalID *string `json:"externalId,omitempty"`
+	// optional role session name for assume role
+	RoleSessionName *string `json:"roleSessionName,omitempty"`
+}
+
 type WorkbenchToolConfiguration struct {
 	// http tool configuration
 	HTTP *WorkbenchToolHTTPConfiguration `json:"http,omitempty"`
@@ -9815,6 +9845,8 @@ type WorkbenchToolConfiguration struct {
 	Datadog *WorkbenchToolDatadogConnection `json:"datadog,omitempty"`
 	// dynatrace connection (no secrets)
 	Dynatrace *WorkbenchToolDynatraceConnection `json:"dynatrace,omitempty"`
+	// cloudwatch connection (no secrets)
+	Cloudwatch *WorkbenchToolCloudwatchConnection `json:"cloudwatch,omitempty"`
 	// linear connection (no secrets)
 	Linear *WorkbenchToolLinearConnection `json:"linear,omitempty"`
 	// atlassian connection (no secrets)
@@ -9838,6 +9870,8 @@ type WorkbenchToolConfigurationAttributes struct {
 	Datadog *WorkbenchToolDatadogConnectionAttributes `json:"datadog,omitempty"`
 	// dynatrace connection (metrics, logs, traces)
 	Dynatrace *WorkbenchToolDynatraceConnectionAttributes `json:"dynatrace,omitempty"`
+	// cloudwatch connection (metrics, logs)
+	Cloudwatch *WorkbenchToolCloudwatchConnectionAttributes `json:"cloudwatch,omitempty"`
 	// linear connection (ticketing)
 	Linear *WorkbenchToolLinearConnectionAttributes `json:"linear,omitempty"`
 	// atlassian/jira connection (ticketing)
@@ -16132,6 +16166,7 @@ const (
 	WorkbenchToolTypeAtlassian  WorkbenchToolType = "ATLASSIAN"
 	WorkbenchToolTypeSplunk     WorkbenchToolType = "SPLUNK"
 	WorkbenchToolTypeDynatrace  WorkbenchToolType = "DYNATRACE"
+	WorkbenchToolTypeCloudwatch WorkbenchToolType = "CLOUDWATCH"
 )
 
 var AllWorkbenchToolType = []WorkbenchToolType{
@@ -16147,11 +16182,12 @@ var AllWorkbenchToolType = []WorkbenchToolType{
 	WorkbenchToolTypeAtlassian,
 	WorkbenchToolTypeSplunk,
 	WorkbenchToolTypeDynatrace,
+	WorkbenchToolTypeCloudwatch,
 }
 
 func (e WorkbenchToolType) IsValid() bool {
 	switch e {
-	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace:
+	case WorkbenchToolTypeHTTP, WorkbenchToolTypeElastic, WorkbenchToolTypeDatadog, WorkbenchToolTypePrometheus, WorkbenchToolTypeLoki, WorkbenchToolTypeTempo, WorkbenchToolTypeSentry, WorkbenchToolTypeMcp, WorkbenchToolTypeLinear, WorkbenchToolTypeAtlassian, WorkbenchToolTypeSplunk, WorkbenchToolTypeDynatrace, WorkbenchToolTypeCloudwatch:
 		return true
 	}
 	return false
