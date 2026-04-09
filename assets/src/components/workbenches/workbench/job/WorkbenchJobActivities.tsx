@@ -145,8 +145,8 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
         onSubmit={() => createMessage()}
         allowSubmit={
           !!newMessage &&
-          job?.status !== WorkbenchJobStatus.Successful &&
-          job?.status !== WorkbenchJobStatus.Failed
+          (job?.status === WorkbenchJobStatus.Successful ||
+            job?.status === WorkbenchJobStatus.Failed)
         }
         wrapperStyles={{ minHeight: 90 }}
       />
