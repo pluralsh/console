@@ -137,19 +137,18 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
           />
         </ActivitiesAccordionSC>
       </ActivitiesPanelSC>
-      <ChatInputSimple
-        ref={chatInputRef}
-        placeholder="Send an additional message to this job"
-        loading={createMessageLoading}
-        setValue={setNewMessage}
-        onSubmit={() => createMessage()}
-        allowSubmit={
-          !!newMessage &&
-          job?.status !== WorkbenchJobStatus.Successful &&
-          job?.status !== WorkbenchJobStatus.Failed
-        }
-        wrapperStyles={{ minHeight: 90 }}
-      />
+      {job?.status !== WorkbenchJobStatus.Successful &&
+        job?.status !== WorkbenchJobStatus.Failed && (
+          <ChatInputSimple
+            ref={chatInputRef}
+            placeholder="Send an additional message to this job"
+            loading={createMessageLoading}
+            setValue={setNewMessage}
+            onSubmit={() => createMessage()}
+            allowSubmit={!!newMessage}
+            wrapperStyles={{ minHeight: 90 }}
+          />
+        )}
     </Flex>
   )
 }
