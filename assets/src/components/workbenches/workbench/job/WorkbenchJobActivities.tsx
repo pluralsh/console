@@ -86,6 +86,7 @@ export function WorkbenchJobActivities({ jobId }: { jobId: string }) {
       setNewMessage('')
       chatInputRef.current?.resetInput?.()
     },
+    refetchQueries: ['WorkbenchJob'],
   })
 
   if (!data && loading)
