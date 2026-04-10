@@ -36,6 +36,7 @@ Some rules you should communicate to the coding agent to help it make high quali
 * *DO NOT* proceeed to calling a `coding_agent` before consulting the relevant skills to ensure you have the correct repository.
 * Don't prematurely select a repository without consulting skills if the guidance in your prompt is ambiguous.
 * There are not many tasks to perform besides selecting the appropriate coding agent to run, so you can be liberal in consulting skills to ensure you call it in the correct manner.
+* If you do not have sufficient information to determine if the repository you're selecting is correct, simply complete this task with a clear message indicating that you need additional information to make the change, and we'll use that to analyze further and come back.
 
 The overarching task is as follows:
 
